@@ -8,14 +8,14 @@ import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.gener
 import type { Chapter } from 'types/chapter'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
-import CardDetailsContributions from 'components/CardDetailsPage/CardDetailsContributions'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsLeaders from 'components/CardDetailsPage/CardDetailsLeaders'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
-import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
+import Contributions from 'components/cards/Contributions'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import Leaders from 'components/cards/Leaders'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
 
@@ -85,12 +85,12 @@ export default function ChapterDetailsPage() {
   )
 
   return (
-    <CardDetailsPageWrapper>
-      <CardDetailsHeader title={chapter.name} isActive={chapter.isActive} isArchived={false} />
+    <PageWrapper>
+      <Header title={chapter.name} isActive={chapter.isActive} isArchived={false} />
 
-      <CardDetailsSummary summary={chapter.summary} />
+      <Summary summary={chapter.summary} />
 
-      <CardDetailsMetadata
+      <Metadata
         details={details}
         showGeolocation={true}
         geolocationData={[chapter as unknown as Chapter]}
@@ -99,11 +99,11 @@ export default function ChapterDetailsPage() {
         detailsTitle="Chapter Details"
       />
 
-      <CardDetailsTags entityKey={chapter.key} />
+      <Tags entityKey={chapter.key} />
 
-      <CardDetailsLeaders entityLeaders={chapter.entityLeaders} />
+      <Leaders entityLeaders={chapter.entityLeaders} />
 
-      <CardDetailsContributions
+      <Contributions
         hasContributions={
           !!(
             (contributionStats && contributionStats.total > 0) ||
@@ -117,11 +117,11 @@ export default function ChapterDetailsPage() {
         title="Chapter Contribution Activity"
       />
 
-      <CardDetailsContributors entityKey={chapter.key} topContributors={topContributors} />
+      <Contributors entityKey={chapter.key} topContributors={topContributors} />
 
       {chapter.key && chapter.name && (
         <SponsorCard target={chapter.key} title={chapter.name} type="chapter" />
       )}
-    </CardDetailsPageWrapper>
+    </PageWrapper>
   )
 }

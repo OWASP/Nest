@@ -15,13 +15,13 @@ import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsRepositoriesModules from 'components/CardDetailsPage/CardDetailsRepositoriesModules'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
 import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams<{ organizationKey: string }>()
@@ -120,20 +120,20 @@ const OrganizationDetailsPage = () => {
   ]
 
   return (
-    <CardDetailsPageWrapper>
-      <CardDetailsHeader title={organization.name} isActive={true} isArchived={false} />
+    <PageWrapper>
+      <Header title={organization.name} isActive={true} isArchived={false} />
 
-      <CardDetailsSummary summary={organization.description} />
+      <Summary summary={organization.description} />
 
-      <CardDetailsMetadata
+      <Metadata
         details={organizationDetails}
         stats={organizationStats}
         detailsTitle="Organization Details"
       />
 
-      <CardDetailsContributors topContributors={topContributors} />
+      <Contributors topContributors={topContributors} />
 
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentIssues={recentIssues as Issue[]}
         recentMilestones={recentMilestones as Milestone[]}
         pullRequests={recentPullRequests as PullRequest[]}
@@ -146,7 +146,7 @@ const OrganizationDetailsPage = () => {
         showAvatar={true}
       />
 
-      <CardDetailsRepositoriesModules
+      <RepositoriesModules
         repositories={
           repositories?.map((repo) => ({
             ...repo,
@@ -154,7 +154,7 @@ const OrganizationDetailsPage = () => {
           })) as RepositoryCardProps[]
         }
       />
-    </CardDetailsPageWrapper>
+    </PageWrapper>
   )
 }
 

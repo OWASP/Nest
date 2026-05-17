@@ -3,7 +3,7 @@ import type { Contributor } from 'types/contributor'
 import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
 import ContributorsList from 'components/ContributorsList'
 
-interface CardDetailsContributorsProps {
+interface ContributorsProps {
   entityKey?: string
   programKey?: string
   topContributors?: Contributor[]
@@ -12,14 +12,14 @@ interface CardDetailsContributorsProps {
   mentees?: Contributor[]
 }
 
-const CardDetailsContributors = ({
+const Contributors = ({
   entityKey,
   programKey,
   topContributors,
   admins,
   mentors,
   mentees,
-}: CardDetailsContributorsProps) => {
+}: ContributorsProps) => {
   return (
     <>
       {topContributors && (
@@ -62,4 +62,4 @@ const CardDetailsContributors = ({
   )
 }
 
-export default CardDetailsContributors
+export default Contributors

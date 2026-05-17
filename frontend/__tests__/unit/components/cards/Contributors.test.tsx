@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { Contributor } from 'types/contributor'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
+import Contributors from 'components/cards/Contributors'
 
 jest.mock('components/ContributorsList', () => ({
   __esModule: true,
@@ -38,7 +38,7 @@ jest.mock('utils/urlFormatter', () => ({
     `/programs/${programKey}/mentees/${login}`,
 }))
 
-describe('CardDetailsContributors', () => {
+describe('Contributors', () => {
   const mockContributor: Contributor = {
     id: '1',
     name: 'John Doe',
@@ -56,39 +56,39 @@ describe('CardDetailsContributors', () => {
   }
 
   it('renders nothing when no contributors provided', () => {
-    const { container } = render(<CardDetailsContributors />)
+    const { container } = render(<Contributors />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders top contributors when provided', () => {
-    render(<CardDetailsContributors topContributors={[mockContributor, mockContributor2]} />)
+    render(<Contributors topContributors={[mockContributor, mockContributor2]} />)
 
     expect(screen.getByText('John Doe')).toBeInTheDocument()
     expect(screen.getByText('Jane Smith')).toBeInTheDocument()
   })
 
   it('renders admins list when provided', () => {
-    render(<CardDetailsContributors admins={[mockContributor]} />)
+    render(<Contributors admins={[mockContributor]} />)
 
     expect(screen.getByText('Admins')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
   })
 
   it('does not render admins list when empty', () => {
-    render(<CardDetailsContributors admins={[]} />)
+    render(<Contributors admins={[]} />)
 
     expect(screen.queryByText('Admins')).not.toBeInTheDocument()
   })
 
   it('renders mentors list when provided', () => {
-    render(<CardDetailsContributors mentors={[mockContributor]} />)
+    render(<Contributors mentors={[mockContributor]} />)
 
     expect(screen.getByText('Mentors')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
   })
 
   it('renders mentees list when provided', () => {
-    render(<CardDetailsContributors mentees={[mockContributor]} />)
+    render(<Contributors mentees={[mockContributor]} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -96,7 +96,7 @@ describe('CardDetailsContributors', () => {
 
   it('renders multiple contributor sections simultaneously', () => {
     render(
-      <CardDetailsContributors
+      <Contributors
         topContributors={[mockContributor]}
         mentors={[mockContributor2]}
         mentees={[
@@ -116,7 +116,7 @@ describe('CardDetailsContributors', () => {
 
   it('renders program admins and top contributors', () => {
     render(
-      <CardDetailsContributors
+      <Contributors
         admins={[mockContributor, mockContributor2]}
         topContributors={[mockContributor]}
       />
@@ -127,46 +127,42 @@ describe('CardDetailsContributors', () => {
   })
 
   it('handles multiple contributor types correctly', () => {
-    render(<CardDetailsContributors topContributors={[mockContributor]} />)
+    render(<Contributors topContributors={[mockContributor]} />)
 
     expect(screen.getByText('Top Contributors')).toBeInTheDocument()
   })
 
   it('renders empty when all arrays are empty', () => {
     const { container } = render(
-      <CardDetailsContributors
-        topContributors={undefined}
-        mentors={undefined}
-        mentees={undefined}
-      />
+      <Contributors topContributors={undefined} mentors={undefined} mentees={undefined} />
     )
     expect(container.firstChild).toBeNull()
   })
 
   it('handles all contributor types', () => {
-    render(<CardDetailsContributors topContributors={[mockContributor]} />)
+    render(<Contributors topContributors={[mockContributor]} />)
 
     expect(screen.getByText('Top Contributors')).toBeInTheDocument()
   })
 
   it('does not render mentors when array is empty', () => {
-    render(<CardDetailsContributors mentors={[]} />)
+    render(<Contributors mentors={[]} />)
     expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
   })
 
   it('does not render mentees when array is empty', () => {
-    render(<CardDetailsContributors mentees={[]} />)
+    render(<Contributors mentees={[]} />)
     expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
   })
 
   it('does not render admins when array is empty', () => {
-    render(<CardDetailsContributors admins={[]} />)
+    render(<Contributors admins={[]} />)
     expect(screen.queryByText('Admins')).not.toBeInTheDocument()
   })
 
   it('renders all contributor types together', () => {
     render(
-      <CardDetailsContributors
+      <Contributors
         topContributors={[mockContributor]}
         admins={[mockContributor2]}
         mentors={[
@@ -193,28 +189,28 @@ describe('CardDetailsContributors', () => {
   })
 
   it('does not render topContributors when undefined', () => {
-    render(<CardDetailsContributors topContributors={undefined} />)
+    render(<Contributors topContributors={undefined} />)
     expect(screen.queryByText('Top Contributors')).not.toBeInTheDocument()
   })
 
   it('does not render mentors when undefined', () => {
-    render(<CardDetailsContributors mentors={undefined} />)
+    render(<Contributors mentors={undefined} />)
     expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
   })
 
   it('does not render mentees when undefined', () => {
-    render(<CardDetailsContributors mentees={undefined} />)
+    render(<Contributors mentees={undefined} />)
     expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
   })
 
   it('does not render admins with empty array', () => {
-    render(<CardDetailsContributors admins={[]} />)
+    render(<Contributors admins={[]} />)
     expect(screen.queryByText('Admins')).not.toBeInTheDocument()
   })
 
   it('renders only topContributors when other arrays are undefined', () => {
     render(
-      <CardDetailsContributors
+      <Contributors
         topContributors={[mockContributor]}
         admins={undefined}
         mentors={undefined}
@@ -229,18 +225,14 @@ describe('CardDetailsContributors', () => {
   })
 
   it('handles different entity types with topContributors', () => {
-    render(<CardDetailsContributors topContributors={[mockContributor]} />)
+    render(<Contributors topContributors={[mockContributor]} />)
 
     expect(screen.getByText('Top Contributors')).toBeInTheDocument()
   })
 
   it('renders mentees with programKey and entityKey', () => {
     render(
-      <CardDetailsContributors
-        programKey="test-program"
-        entityKey="test-entity"
-        mentees={[mockContributor]}
-      />
+      <Contributors programKey="test-program" entityKey="test-entity" mentees={[mockContributor]} />
     )
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
@@ -249,7 +241,7 @@ describe('CardDetailsContributors', () => {
   })
 
   it('renders mentees with empty programKey and entityKey', () => {
-    render(<CardDetailsContributors programKey="" entityKey="" mentees={[mockContributor]} />)
+    render(<Contributors programKey="" entityKey="" mentees={[mockContributor]} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     const menteeLink = screen.getByText('John Doe').closest('li')?.querySelector('a')
@@ -257,7 +249,7 @@ describe('CardDetailsContributors', () => {
   })
 
   it('renders mentees without programKey and entityKey props', () => {
-    render(<CardDetailsContributors mentees={[mockContributor]} />)
+    render(<Contributors mentees={[mockContributor]} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     const menteeLink = screen.getByText('John Doe').closest('li')?.querySelector('a')
@@ -266,7 +258,7 @@ describe('CardDetailsContributors', () => {
 
   it('renders multiple admins', () => {
     const mockAdmins = [mockContributor, mockContributor2]
-    render(<CardDetailsContributors admins={mockAdmins} />)
+    render(<Contributors admins={mockAdmins} />)
 
     expect(screen.getByText('Admins')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -275,7 +267,7 @@ describe('CardDetailsContributors', () => {
 
   it('renders multiple mentors', () => {
     const mockMentors = [mockContributor, mockContributor2]
-    render(<CardDetailsContributors mentors={mockMentors} />)
+    render(<Contributors mentors={mockMentors} />)
 
     expect(screen.getByText('Mentors')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -284,7 +276,7 @@ describe('CardDetailsContributors', () => {
 
   it('renders multiple mentees', () => {
     const mockMentees = [mockContributor, mockContributor2]
-    render(<CardDetailsContributors mentees={mockMentees} />)
+    render(<Contributors mentees={mockMentees} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()

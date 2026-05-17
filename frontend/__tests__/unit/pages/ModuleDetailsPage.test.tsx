@@ -23,43 +23,43 @@ jest.mock('app/global-error', () => ({
 
 jest.mock('components/LoadingSpinner', () => () => <div>LoadingSpinner</div>)
 
-jest.mock('components/CardDetailsPage/CardDetailsHeader', () => {
+jest.mock('components/cards/Header', () => {
   return function MockHeader(props: { title: string }) {
     return <div data-testid="header">{props.title}</div>
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsSummary', () => {
+jest.mock('components/cards/Summary', () => {
   return function MockSummary(props: { summary: string }) {
     return <div data-testid="summary">{props.summary}</div>
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsPageWrapper', () => {
+jest.mock('components/cards/PageWrapper', () => {
   return function MockWrapper({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsMetadata', () => {
+jest.mock('components/cards/Metadata', () => {
   return function MockMetadata() {
     return <div />
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsTags', () => {
+jest.mock('components/cards/Tags', () => {
   return function MockTags() {
     return <div />
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsContributors', () => {
+jest.mock('components/cards/Contributors', () => {
   return function MockContributors() {
     return <div />
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsIssuesMilestones', () => {
+jest.mock('components/cards/IssuesMilestones', () => {
   return function MockIssuesMilestones(props: { onLoadMorePullRequests?: () => void }) {
     return (
       <div>

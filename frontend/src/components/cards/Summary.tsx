@@ -4,12 +4,12 @@ import AnchorTitle from 'components/AnchorTitle'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 
-interface CardDetailsSummaryProps {
+interface SummaryProps {
   summary?: string
   userSummary?: ReactNode
 }
 
-const CardDetailsSummary = ({ summary, userSummary }: CardDetailsSummaryProps) => {
+const Summary = ({ summary, userSummary }: SummaryProps) => {
   return (
     <>
       {summary && (
@@ -23,4 +23,4 @@ const CardDetailsSummary = ({ summary, userSummary }: CardDetailsSummaryProps) =
   )
 }
 
-export default CardDetailsSummary
+export default Summary

@@ -6,7 +6,7 @@ import ModuleCard from 'components/ModuleCard'
 import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
 
-interface CardDetailsRepositoriesModulesProps {
+interface RepositoriesModulesProps {
   programKey?: string
   accessLevel?: string
   repositories?: RepositoryCardProps[]
@@ -14,13 +14,13 @@ interface CardDetailsRepositoriesModulesProps {
   admins?: Array<{ login: string }>
 }
 
-const CardDetailsRepositoriesModules = ({
+const RepositoriesModules = ({
   programKey,
   accessLevel,
   repositories = [],
   modules,
   admins,
-}: CardDetailsRepositoriesModulesProps) => {
+}: RepositoriesModulesProps) => {
   return (
     <>
       {repositories.length > 0 && (
@@ -60,4 +60,4 @@ const CardDetailsRepositoriesModules = ({
   )
 }
 
-export default CardDetailsRepositoriesModules
+export default RepositoriesModules

@@ -1,10 +1,10 @@
 import React from 'react'
 
-interface CardDetailsPageWrapperProps {
+interface PageWrapperProps {
   children: React.ReactNode
 }
 
-const CardDetailsPageWrapper: React.FC<CardDetailsPageWrapperProps> = ({ children }) => {
+const PageWrapper: React.FC<PageWrapperProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">{children}</div>
@@ -12,4 +12,4 @@ const CardDetailsPageWrapper: React.FC<CardDetailsPageWrapperProps> = ({ childre
   )
 }
 
-export default CardDetailsPageWrapper
+export default PageWrapper

@@ -18,16 +18,16 @@ import type { Release } from 'types/release'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
-import CardDetailsContributions from 'components/CardDetailsPage/CardDetailsContributions'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
-import CardDetailsLeaders from 'components/CardDetailsPage/CardDetailsLeaders'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsRepositoriesModules from 'components/CardDetailsPage/CardDetailsRepositoriesModules'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
-import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
+import Contributions from 'components/cards/Contributions'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Leaders from 'components/cards/Leaders'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import HealthMetrics from 'components/HealthMetrics'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
@@ -120,27 +120,23 @@ const ProjectDetailsPage = () => {
   )
 
   return (
-    <CardDetailsPageWrapper>
-      <CardDetailsHeader
+    <PageWrapper>
+      <Header
         title={project.name}
         isActive={project.isActive}
         isArchived={false}
         showHealthMetrics={true}
       />
 
-      <CardDetailsSummary summary={project.summary} />
+      <Summary summary={project.summary} />
 
-      <CardDetailsMetadata
-        details={projectDetails}
-        stats={projectStats}
-        detailsTitle="Project Details"
-      />
+      <Metadata details={projectDetails} stats={projectStats} detailsTitle="Project Details" />
 
-      <CardDetailsTags languages={project.languages} topics={project.topics} />
+      <Tags languages={project.languages} topics={project.topics} />
 
-      <CardDetailsLeaders entityLeaders={project.entityLeaders} />
+      <Leaders entityLeaders={project.entityLeaders} />
 
-      <CardDetailsContributions
+      <Contributions
         hasContributions={
           !!(
             (contributionStats && contributionStats.total > 0) ||
@@ -154,9 +150,9 @@ const ProjectDetailsPage = () => {
         title="Project Contribution Activity"
       />
 
-      <CardDetailsContributors topContributors={topContributors} />
+      <Contributors topContributors={topContributors} />
 
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentIssues={project.recentIssues as unknown as Issue[]}
         recentMilestones={project.recentMilestones as unknown as Milestone[]}
         pullRequests={project.recentPullRequests as unknown as PullRequest[]}
@@ -164,7 +160,7 @@ const ProjectDetailsPage = () => {
         showAvatar={true}
       />
 
-      <CardDetailsRepositoriesModules
+      <RepositoriesModules
         repositories={project.repositories as unknown as RepositoryCardProps[]}
       />
 
@@ -177,7 +173,7 @@ const ProjectDetailsPage = () => {
       {project.key && project.name && (
         <SponsorCard target={project.key} title={project.name} type="project" />
       )}
-    </CardDetailsPageWrapper>
+    </PageWrapper>
   )
 }
 

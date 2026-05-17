@@ -12,14 +12,14 @@ import { Badge } from 'types/badge'
 import { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import Badges from 'components/Badges'
-import CardDetailsContributions from 'components/CardDetailsPage/CardDetailsContributions'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsRepositoriesModules from 'components/CardDetailsPage/CardDetailsRepositoriesModules'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import Contributions from 'components/cards/Contributions'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
@@ -201,10 +201,10 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   return (
-    <CardDetailsPageWrapper>
-      <CardDetailsHeader title={user?.name || user?.login} isActive={true} isArchived={false} />
+    <PageWrapper>
+      <Header title={user?.name || user?.login} isActive={true} isArchived={false} />
 
-      <CardDetailsSummary
+      <Summary
         userSummary={
           <UserSummary
             user={user}
@@ -216,13 +216,13 @@ const UserDetailsPage: React.FC = () => {
         }
       />
 
-      <CardDetailsMetadata details={userDetails} stats={userStats} detailsTitle="User Details" />
+      <Metadata details={userDetails} stats={userStats} detailsTitle="User Details" />
 
-      <CardDetailsContributions hasContributions={false} />
+      <Contributions hasContributions={false} />
 
-      <CardDetailsContributors />
+      <Contributors />
 
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentIssues={issues}
         recentMilestones={milestones}
         pullRequests={pullRequests}
@@ -230,8 +230,8 @@ const UserDetailsPage: React.FC = () => {
         showAvatar={false}
       />
 
-      <CardDetailsRepositoriesModules repositories={topRepositories} />
-    </CardDetailsPageWrapper>
+      <RepositoriesModules repositories={topRepositories} />
+    </PageWrapper>
   )
 }
 

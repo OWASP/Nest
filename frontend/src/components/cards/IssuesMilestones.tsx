@@ -27,7 +27,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import ShowMoreButton from 'components/ShowMoreButton'
 import { TruncatedText } from 'components/TruncatedText'
 
-interface CardDetailsIssuesMilestonesProps {
+interface IssuesMilestonesProps {
   recentIssues?: Issue[]
   recentMilestones?: Milestone[]
   pullRequests?: PullRequest[]
@@ -42,7 +42,7 @@ interface CardDetailsIssuesMilestonesProps {
 
 const MILESTONE_LIMIT = 4
 
-const CardDetailsIssuesMilestones = ({
+const IssuesMilestones = ({
   recentIssues,
   recentMilestones,
   pullRequests,
@@ -53,7 +53,7 @@ const CardDetailsIssuesMilestones = ({
   isFetchingMore = false,
   isMilestoneOnly = false,
   isPullRequestOnly = false,
-}: CardDetailsIssuesMilestonesProps) => {
+}: IssuesMilestonesProps) => {
   const [showAllMilestones, setShowAllMilestones] = useState(false)
   const [showAllPRs, setShowAllPRs] = useState(false)
 
@@ -205,4 +205,4 @@ const CardDetailsIssuesMilestones = ({
   )
 }
 
-export default CardDetailsIssuesMilestones
+export default IssuesMilestones

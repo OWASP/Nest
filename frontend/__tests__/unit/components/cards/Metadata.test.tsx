@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
+import { FaCode, FaUsers } from 'react-icons/fa6'
 import type { Stats } from 'types/card'
 import type { Chapter } from 'types/chapter'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
+import Metadata from 'components/cards/Metadata'
 
 jest.mock('react-icons/fa6', () => ({
   FaChartPie: () => <span data-testid="chart-pie-icon">ChartIcon</span>,
@@ -82,32 +83,32 @@ jest.mock('utils/urlIconMappings', () => ({
   },
 }))
 
-describe('CardDetailsMetadata', () => {
+describe('Metadata', () => {
   const mockStats: Stats[] = [
     {
       value: 100,
       unit: 'repositories',
       pluralizedName: 'Repositories',
-      icon: 'FaGit',
+      icon: FaCode,
     },
     {
       value: 50,
       unit: 'members',
       pluralizedName: 'Members',
-      icon: 'FaUsers',
+      icon: FaUsers,
     },
   ]
 
   const mockGeoData: Chapter[] = [
     {
-      id: '1',
+      key: 'chapter-1',
       name: 'Chapter 1',
-      location: 'City 1',
+      suggestedLocation: 'City 1',
     },
     {
-      id: '2',
+      key: 'chapter-2',
       name: 'Chapter 2',
-      location: 'City 2',
+      suggestedLocation: 'City 2',
     },
   ]
 
@@ -117,7 +118,7 @@ describe('CardDetailsMetadata', () => {
       { label: 'Email', value: 'test@example.com' },
     ]
 
-    render(<CardDetailsMetadata details={details} />)
+    render(<Metadata details={details} />)
     const secondaryCard = screen.getByTestId('secondary-card')
     expect(secondaryCard).toBeInTheDocument()
     expect(secondaryCard).toHaveTextContent('Name')
@@ -130,7 +131,7 @@ describe('CardDetailsMetadata', () => {
       { label: 'Empty Field', value: undefined as string | undefined },
     ]
 
-    render(<CardDetailsMetadata details={details} />)
+    render(<Metadata details={details} />)
     const secondaryCard = screen.getByTestId('secondary-card')
     expect(secondaryCard).toHaveTextContent('Unknown')
   })
@@ -138,20 +139,20 @@ describe('CardDetailsMetadata', () => {
   it('renders LeadersList component for Leaders detail', () => {
     const details = [{ label: 'Leaders', value: 'leader1, leader2' }]
 
-    render(<CardDetailsMetadata details={details} entityKey="test-entity" />)
+    render(<Metadata details={details} entityKey="test-entity" />)
     expect(screen.getByTestId('leaders-list')).toBeInTheDocument()
     expect(screen.getByText(/leader1, leader2/)).toBeInTheDocument()
   })
 
   it('renders Statistics card when showStatistics is true and stats provided', () => {
-    render(<CardDetailsMetadata stats={mockStats} showStatistics={true} />)
+    render(<Metadata stats={mockStats} showStatistics={true} />)
     expect(screen.getAllByTestId('secondary-card').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getAllByTestId('info-block').length).toBe(2)
   })
 
   it('renders geolocation map when showGeolocation is true and geolocationData provided', () => {
-    render(<CardDetailsMetadata geolocationData={mockGeoData} showGeolocation={true} />)
+    render(<Metadata geolocationData={mockGeoData} showGeolocation={true} />)
     expect(screen.getByTestId('chapter-map')).toBeInTheDocument()
     expect(screen.getByText('2 locations')).toBeInTheDocument()
   })
@@ -160,9 +161,7 @@ describe('CardDetailsMetadata', () => {
     const details = [{ label: 'Organization', value: 'Org Name' }]
     const socialLinks = ['https://github.com/test', 'https://twitter.com/test']
 
-    render(
-      <CardDetailsMetadata details={details} socialLinks={socialLinks} showSocialLinks={true} />
-    )
+    render(<Metadata details={details} socialLinks={socialLinks} showSocialLinks={true} />)
 
     expect(screen.getByText('Social Links')).toBeInTheDocument()
     expect(screen.getByTestId('social-icon-https://github.com/test')).toBeInTheDocument()
@@ -172,7 +171,7 @@ describe('CardDetailsMetadata', () => {
   it('does not render social links when socialLinks is empty array', () => {
     const details = [{ label: 'Organization', value: 'Org Name' }]
 
-    render(<CardDetailsMetadata details={details} socialLinks={[]} showSocialLinks={true} />)
+    render(<Metadata details={details} socialLinks={[]} showSocialLinks={true} />)
 
     expect(screen.queryByText('Social Links')).not.toBeInTheDocument()
   })

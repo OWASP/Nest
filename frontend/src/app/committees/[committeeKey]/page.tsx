@@ -9,11 +9,11 @@ import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetCommitteeDataDocument } from 'types/__generated__/committeeQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function CommitteeDetailsPage() {
@@ -87,12 +87,12 @@ export default function CommitteeDetailsPage() {
   ]
 
   return (
-    <CardDetailsPageWrapper>
-      <CardDetailsHeader title={committee.name} />
+    <PageWrapper>
+      <Header title={committee.name} />
 
-      <CardDetailsSummary summary={committee.summary} />
+      <Summary summary={committee.summary} />
 
-      <CardDetailsMetadata
+      <Metadata
         details={details}
         stats={committeeStats}
         socialLinks={committee.relatedUrls}
@@ -100,7 +100,7 @@ export default function CommitteeDetailsPage() {
         detailsTitle="Committee Details"
       />
 
-      <CardDetailsContributors topContributors={topContributors} />
-    </CardDetailsPageWrapper>
+      <Contributors topContributors={topContributors} />
+    </PageWrapper>
   )
 }

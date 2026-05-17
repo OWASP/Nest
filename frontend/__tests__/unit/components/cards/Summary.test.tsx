@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import Summary from 'components/cards/Summary'
 
 jest.mock('components/MarkdownWrapper', () => ({
   __esModule: true,
@@ -29,14 +29,14 @@ jest.mock('react-icons/fa6', () => ({
   FaCircleInfo: () => <span data-testid="icon-info" />,
 }))
 
-describe('CardDetailsSummary', () => {
+describe('Summary', () => {
   it('renders nothing when no summary or userSummary provided', () => {
-    const { container } = render(<CardDetailsSummary />)
+    const { container } = render(<Summary />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders summary section when summary prop is provided', () => {
-    render(<CardDetailsSummary summary="This is a project summary" />)
+    render(<Summary summary="This is a project summary" />)
 
     expect(screen.getByText('Summary')).toBeInTheDocument()
     expect(screen.getByText('This is a project summary')).toBeInTheDocument()
@@ -44,14 +44,14 @@ describe('CardDetailsSummary', () => {
 
   it('renders userSummary section when userSummary prop is provided', () => {
     const userSummary = <div>Custom user summary content</div>
-    render(<CardDetailsSummary userSummary={userSummary} />)
+    render(<Summary userSummary={userSummary} />)
 
     expect(screen.getByText('Custom user summary content')).toBeInTheDocument()
   })
 
   it('renders both summary and userSummary when both provided', () => {
     const userSummary = <div>User custom content</div>
-    render(<CardDetailsSummary summary="Project summary text" userSummary={userSummary} />)
+    render(<Summary summary="Project summary text" userSummary={userSummary} />)
 
     expect(screen.getByText('Summary')).toBeInTheDocument()
     expect(screen.getByText('Project summary text')).toBeInTheDocument()
@@ -59,13 +59,13 @@ describe('CardDetailsSummary', () => {
   })
 
   it('renders nothing when summary is empty string', () => {
-    const { container } = render(<CardDetailsSummary summary="" />)
+    const { container } = render(<Summary summary="" />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders markdown wrapper with correct content', () => {
     const summaryText = 'This is **bold** text'
-    render(<CardDetailsSummary summary={summaryText} />)
+    render(<Summary summary={summaryText} />)
 
     expect(screen.getByTestId('markdown-wrapper')).toHaveTextContent(summaryText)
   })

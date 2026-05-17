@@ -3,11 +3,11 @@ import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
 import React from 'react'
 import { FaCode, FaTags } from 'react-icons/fa6'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
-import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 
 jest.mock('next/link', () => {
   return function MockLink({
@@ -99,7 +99,7 @@ const mockDetails = [
 describe.each([
   { theme: 'light', name: 'light' },
   { theme: 'dark', name: 'dark' },
-])('CardDetailsPage a11y ($name theme)', ({ theme }) => {
+])('cards a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -107,9 +107,9 @@ describe.each([
 
   it('should have no accessibility violations in header', async () => {
     const { container } = render(
-      <CardDetailsPageWrapper>
-        <CardDetailsHeader title="Test Project" isActive={true} isArchived={false} />
-      </CardDetailsPageWrapper>
+      <PageWrapper>
+        <Header title="Test Project" isActive={true} isArchived={false} />
+      </PageWrapper>
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()
@@ -117,9 +117,9 @@ describe.each([
 
   it('should have no violations in summary', async () => {
     const { container } = render(
-      <CardDetailsPageWrapper>
-        <CardDetailsSummary summary="A test project for demonstration" />
-      </CardDetailsPageWrapper>
+      <PageWrapper>
+        <Summary summary="A test project for demonstration" />
+      </PageWrapper>
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()
@@ -127,9 +127,9 @@ describe.each([
 
   it('should have no violations in metadata', async () => {
     const { container } = render(
-      <CardDetailsPageWrapper>
-        <CardDetailsMetadata details={mockDetails} stats={mockStats} detailsTitle="Details" />
-      </CardDetailsPageWrapper>
+      <PageWrapper>
+        <Metadata details={mockDetails} stats={mockStats} detailsTitle="Details" />
+      </PageWrapper>
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()
@@ -137,9 +137,9 @@ describe.each([
 
   it('should have no violations in tags', async () => {
     const { container } = render(
-      <CardDetailsPageWrapper>
-        <CardDetailsTags languages={['JavaScript', 'TypeScript']} topics={['web', 'frontend']} />
-      </CardDetailsPageWrapper>
+      <PageWrapper>
+        <Tags languages={['JavaScript', 'TypeScript']} topics={['web', 'frontend']} />
+      </PageWrapper>
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()
@@ -147,12 +147,12 @@ describe.each([
 
   it('should have no violations for complete page layout', async () => {
     const { container } = render(
-      <CardDetailsPageWrapper>
-        <CardDetailsHeader title="Test Project" isActive={true} isArchived={false} />
-        <CardDetailsSummary summary="A test project for demonstration" />
-        <CardDetailsMetadata details={mockDetails} stats={mockStats} detailsTitle="Details" />
-        <CardDetailsTags languages={['JavaScript']} topics={['web']} />
-      </CardDetailsPageWrapper>
+      <PageWrapper>
+        <Header title="Test Project" isActive={true} isArchived={false} />
+        <Summary summary="A test project for demonstration" />
+        <Metadata details={mockDetails} stats={mockStats} detailsTitle="Details" />
+        <Tags languages={['JavaScript']} topics={['web']} />
+      </PageWrapper>
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()

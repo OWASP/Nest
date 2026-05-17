@@ -8,12 +8,12 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
-import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
@@ -68,8 +68,8 @@ const ModuleDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <CardDetailsPageWrapper>
-        <CardDetailsHeader
+      <PageWrapper>
+        <Header
           title={mentorshipModule.name}
           programKey={programKey}
           moduleKey={moduleKey}
@@ -82,25 +82,25 @@ const ModuleDetailsPage = () => {
           showModuleActions={true}
         />
 
-        <CardDetailsSummary summary={mentorshipModule.description} />
+        <Summary summary={mentorshipModule.description} />
 
-        <CardDetailsMetadata details={moduleDetails} detailsTitle="Module Details" />
+        <Metadata details={moduleDetails} detailsTitle="Module Details" />
 
-        <CardDetailsTags
+        <Tags
           entityKey={moduleKey}
           tags={mentorshipModule.tags ?? undefined}
           domains={mentorshipModule.domains ?? undefined}
           labels={mentorshipModule.labels ?? undefined}
         />
 
-        <CardDetailsContributors
+        <Contributors
           entityKey={moduleKey}
           programKey={programKey}
           admins={admins ?? undefined}
           mentors={mentorshipModule.mentors ?? undefined}
           mentees={mentorshipModule.mentees ?? undefined}
         />
-      </CardDetailsPageWrapper>
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

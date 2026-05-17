@@ -13,12 +13,12 @@ import { GetProgramAndModulesDocument } from 'types/__generated__/programsQuerie
 import type { ExtendedSession } from 'types/auth'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsRepositoriesModules from 'components/CardDetailsPage/CardDetailsRepositoriesModules'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
-import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
@@ -123,8 +123,8 @@ const ProgramDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <CardDetailsPageWrapper>
-        <CardDetailsHeader
+      <PageWrapper>
+        <Header
           title={program?.name ?? ''}
           status={program?.status ?? ''}
           setStatus={updateStatus}
@@ -137,21 +137,18 @@ const ProgramDetailsPage = () => {
           showProgramActions={true}
         />
 
-        <CardDetailsSummary summary={program?.description ?? ''} />
+        <Summary summary={program?.description ?? ''} />
 
-        <CardDetailsMetadata details={programDetails} detailsTitle="Program Details" />
+        <Metadata details={programDetails} detailsTitle="Program Details" />
 
-        <CardDetailsTags
-          tags={program?.tags ?? undefined}
-          domains={program?.domains ?? undefined}
-        />
+        <Tags tags={program?.tags ?? undefined} domains={program?.domains ?? undefined} />
 
-        <CardDetailsRepositoriesModules
+        <RepositoriesModules
           programKey={program?.key ?? ''}
           accessLevel={isAdmin ? 'admin' : 'user'}
           modules={modules}
         />
-      </CardDetailsPageWrapper>
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

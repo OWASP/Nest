@@ -1,6 +1,17 @@
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import CardDetailsContributions from 'components/CardDetailsPage/CardDetailsContributions'
+import type { ContributionStats } from 'utils/contributionDataUtils'
+import Contributions from 'components/cards/Contributions'
+
+const createContributionStats = (
+  overrides: Partial<ContributionStats> = {}
+): ContributionStats => ({
+  commits: 0,
+  pullRequests: 0,
+  issues: 0,
+  total: 100,
+  ...overrides,
+})
 
 jest.mock('components/ContributionHeatmap', () => ({
   __esModule: true,
@@ -16,30 +27,27 @@ jest.mock('components/ContributionStats', () => ({
   ),
 }))
 
-describe('CardDetailsContributions', () => {
+describe('Contributions', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
 
   it('renders nothing when hasContributions is false', () => {
-    const { container } = render(<CardDetailsContributions hasContributions={false} />)
+    const { container } = render(<Contributions hasContributions={false} />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders contribution stats when stats provided and hasContributions is true', () => {
-    const stats = {
-      total: 150,
-      average: 10,
-    }
+    const stats = createContributionStats({ total: 150 })
 
-    render(<CardDetailsContributions hasContributions={true} contributionStats={stats} />)
+    render(<Contributions hasContributions={true} contributionStats={stats} />)
 
     expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
   })
 
   it('renders contribution heatmap with required props', () => {
     render(
-      <CardDetailsContributions
+      <Contributions
         hasContributions={true}
         contributionData={{ '2024-01-01': 5 }}
         startDate="2024-01-01"
@@ -51,13 +59,10 @@ describe('CardDetailsContributions', () => {
   })
 
   it('renders both stats and heatmap components together', () => {
-    const stats = {
-      total: 100,
-      average: 50,
-    }
+    const stats = createContributionStats({ total: 100 })
 
     render(
-      <CardDetailsContributions
+      <Contributions
         hasContributions={true}
         contributionStats={stats}
         contributionData={{ '2024-01-01': 5 }}
@@ -71,16 +76,10 @@ describe('CardDetailsContributions', () => {
   })
 
   it('does not render heatmap when contributionData is empty', () => {
-    const stats = {
-      total: 100,
-    }
+    const stats = createContributionStats({ total: 100 })
 
     const { queryByTestId } = render(
-      <CardDetailsContributions
-        hasContributions={true}
-        contributionStats={stats}
-        contributionData={{}}
-      />
+      <Contributions hasContributions={true} contributionStats={stats} contributionData={{}} />
     )
 
     expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
@@ -88,12 +87,10 @@ describe('CardDetailsContributions', () => {
   })
 
   it('does not render heatmap without startDate and endDate', () => {
-    const stats = {
-      total: 100,
-    }
+    const stats = createContributionStats({ total: 100 })
 
     const { queryByTestId } = render(
-      <CardDetailsContributions
+      <Contributions
         hasContributions={true}
         contributionStats={stats}
         contributionData={{ '2024-01-01': 5 }}
@@ -105,12 +102,10 @@ describe('CardDetailsContributions', () => {
   })
 
   it('renders with custom title', () => {
-    const stats = {
-      total: 50,
-    }
+    const stats = createContributionStats({ total: 50 })
 
     render(
-      <CardDetailsContributions
+      <Contributions
         hasContributions={true}
         contributionStats={stats}
         title="Custom Activity Title"
@@ -122,7 +117,10 @@ describe('CardDetailsContributions', () => {
 
   it('renders nothing when hasContributions is false even with stats', () => {
     const { container } = render(
-      <CardDetailsContributions hasContributions={false} contributionStats={{ total: 100 }} />
+      <Contributions
+        hasContributions={false}
+        contributionStats={createContributionStats({ total: 100 })}
+      />
     )
     expect(container.firstChild).toBeNull()
   })

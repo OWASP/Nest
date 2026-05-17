@@ -1,8 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
-import { Issue, Milestone, PullRequest, Release } from 'types'
-import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
 
 jest.mock('components/RecentIssues', () => ({
   __esModule: true,
@@ -92,9 +95,8 @@ jest.mock('@heroui/tooltip', () => ({
   ),
 }))
 
-describe('CardDetailsIssuesMilestones', () => {
+describe('IssuesMilestones', () => {
   const mockIssue: Issue = {
-    id: '1',
     title: 'Fix bug in parser',
     url: 'https://github.com/issue/1',
     state: 'open',
@@ -102,10 +104,9 @@ describe('CardDetailsIssuesMilestones', () => {
   }
 
   const mockMilestone: Milestone = {
-    id: '1',
     title: 'v1.0.0',
     url: 'https://github.com/milestone/1',
-    dueOn: '2024-02-01',
+    createdAt: '2024-02-01',
   }
 
   const mockPR: PullRequest = {
@@ -119,13 +120,14 @@ describe('CardDetailsIssuesMilestones', () => {
   const mockRelease: Release = {
     id: '1',
     name: 'v1.0.0',
+    tagName: 'v1.0.0',
     url: 'https://github.com/releases/v1.0.0',
     publishedAt: '2024-01-15',
   }
 
   it('renders all sections together when provided', () => {
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentIssues={[mockIssue]}
         recentMilestones={[mockMilestone]}
         pullRequests={[mockPR]}
@@ -140,32 +142,32 @@ describe('CardDetailsIssuesMilestones', () => {
   })
 
   it('renders nothing when no data provided', () => {
-    const { container } = render(<CardDetailsIssuesMilestones />)
+    const { container } = render(<IssuesMilestones />)
     expect(container.querySelector('div')).toBeEmptyDOMElement()
   })
 
   it('renders milestones in secondary card', () => {
-    render(<CardDetailsIssuesMilestones recentMilestones={[mockMilestone]} />)
+    render(<IssuesMilestones recentMilestones={[mockMilestone]} />)
 
     expect(screen.getByTestId('milestones')).toBeInTheDocument()
   })
 
   it('renders pull requests when provided', () => {
-    render(<CardDetailsIssuesMilestones pullRequests={[mockPR]} />)
+    render(<IssuesMilestones pullRequests={[mockPR]} />)
 
     expect(screen.getByTestId('recent-pull-requests')).toBeInTheDocument()
   })
 
   it('renders milestones with show more button when 5+ items', () => {
     const milestones = [
-      { id: '1', title: 'v1.0', createdAt: '2024-01-01', closedIssuesCount: 5, openIssuesCount: 1 },
-      { id: '2', title: 'v1.1', createdAt: '2024-01-02', closedIssuesCount: 3, openIssuesCount: 2 },
-      { id: '3', title: 'v1.2', createdAt: '2024-01-03', closedIssuesCount: 4, openIssuesCount: 1 },
-      { id: '4', title: 'v1.3', createdAt: '2024-01-04', closedIssuesCount: 2, openIssuesCount: 3 },
-      { id: '5', title: 'v1.4', createdAt: '2024-01-05', closedIssuesCount: 1, openIssuesCount: 1 },
+      { title: 'v1.0', createdAt: '2024-01-01', closedIssuesCount: 5, openIssuesCount: 1 },
+      { title: 'v1.1', createdAt: '2024-01-02', closedIssuesCount: 3, openIssuesCount: 2 },
+      { title: 'v1.2', createdAt: '2024-01-03', closedIssuesCount: 4, openIssuesCount: 1 },
+      { title: 'v1.3', createdAt: '2024-01-04', closedIssuesCount: 2, openIssuesCount: 3 },
+      { title: 'v1.4', createdAt: '2024-01-05', closedIssuesCount: 1, openIssuesCount: 1 },
     ]
 
-    render(<CardDetailsIssuesMilestones recentMilestones={milestones} />)
+    render(<IssuesMilestones recentMilestones={milestones} />)
 
     expect(screen.getByTestId('milestones')).toBeInTheDocument()
     expect(screen.getByText(/v1\./)).toBeInTheDocument()
@@ -173,14 +175,14 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('toggles milestones visibility when show more button clicked', () => {
     const milestones = [
-      { id: '1', title: 'm1', createdAt: '2024-01-01', closedIssuesCount: 1, openIssuesCount: 1 },
-      { id: '2', title: 'm2', createdAt: '2024-01-02', closedIssuesCount: 2, openIssuesCount: 1 },
-      { id: '3', title: 'm3', createdAt: '2024-01-03', closedIssuesCount: 3, openIssuesCount: 1 },
-      { id: '4', title: 'm4', createdAt: '2024-01-04', closedIssuesCount: 4, openIssuesCount: 1 },
-      { id: '5', title: 'm5', createdAt: '2024-01-05', closedIssuesCount: 5, openIssuesCount: 1 },
+      { title: 'm1', createdAt: '2024-01-01', closedIssuesCount: 1, openIssuesCount: 1 },
+      { title: 'm2', createdAt: '2024-01-02', closedIssuesCount: 2, openIssuesCount: 1 },
+      { title: 'm3', createdAt: '2024-01-03', closedIssuesCount: 3, openIssuesCount: 1 },
+      { title: 'm4', createdAt: '2024-01-04', closedIssuesCount: 4, openIssuesCount: 1 },
+      { title: 'm5', createdAt: '2024-01-05', closedIssuesCount: 5, openIssuesCount: 1 },
     ]
 
-    render(<CardDetailsIssuesMilestones recentMilestones={milestones} isMilestoneOnly={true} />)
+    render(<IssuesMilestones recentMilestones={milestones} isMilestoneOnly={true} />)
 
     expect(screen.getByText('m1')).toBeInTheDocument()
     expect(screen.getByText('m4')).toBeInTheDocument()
@@ -194,13 +196,11 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestones with all optional properties', () => {
     const milestoneWithAllProps: Milestone = {
-      id: '1',
       title: 'Full Milestone',
       url: 'https://github.com/milestone/1',
       createdAt: '2024-01-01',
       closedIssuesCount: 10,
       openIssuesCount: 5,
-      dueOn: '2024-02-01',
       author: {
         login: 'dev_user',
         name: 'Dev User',
@@ -211,7 +211,7 @@ describe('CardDetailsIssuesMilestones', () => {
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneWithAllProps]}
         isMilestoneOnly={true}
         showAvatar={true}
@@ -237,7 +237,7 @@ describe('CardDetailsIssuesMilestones', () => {
     const onLoadMore = jest.fn()
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -262,7 +262,7 @@ describe('CardDetailsIssuesMilestones', () => {
       createdAt: `2024-01-0${i + 1}`,
     }))
 
-    render(<CardDetailsIssuesMilestones pullRequests={prs} isPullRequestOnly={true} />)
+    render(<IssuesMilestones pullRequests={prs} isPullRequestOnly={true} />)
 
     expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
     const showMoreButton = screen.getByTestId('show-more-button')
@@ -273,16 +273,14 @@ describe('CardDetailsIssuesMilestones', () => {
   })
 
   it('renders issues and milestones in grid layout', () => {
-    render(
-      <CardDetailsIssuesMilestones recentIssues={[mockIssue]} recentMilestones={[mockMilestone]} />
-    )
+    render(<IssuesMilestones recentIssues={[mockIssue]} recentMilestones={[mockMilestone]} />)
 
     expect(screen.getByTestId('recent-issues')).toBeInTheDocument()
     expect(screen.getByTestId('milestones')).toBeInTheDocument()
   })
 
   it('renders releases in secondary grid', () => {
-    render(<CardDetailsIssuesMilestones pullRequests={[mockPR]} recentReleases={[mockRelease]} />)
+    render(<IssuesMilestones pullRequests={[mockPR]} recentReleases={[mockRelease]} />)
 
     expect(screen.getByTestId('recent-pull-requests')).toBeInTheDocument()
     expect(screen.getByTestId('recent-releases')).toBeInTheDocument()
@@ -290,7 +288,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders empty milestone card without author', () => {
     const milestoneNoAuthor: Milestone = {
-      id: '1',
       title: 'No Author Milestone',
       createdAt: '2024-01-01',
       closedIssuesCount: 0,
@@ -298,7 +295,7 @@ describe('CardDetailsIssuesMilestones', () => {
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneNoAuthor]}
         isMilestoneOnly={true}
         showAvatar={true}
@@ -310,7 +307,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestone without repository info', () => {
     const milestoneNoRepo: Milestone = {
-      id: '1',
       title: 'No Repo Milestone',
       createdAt: '2024-01-01',
       closedIssuesCount: 1,
@@ -323,7 +319,7 @@ describe('CardDetailsIssuesMilestones', () => {
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneNoRepo]}
         isMilestoneOnly={true}
         showAvatar={true}
@@ -345,7 +341,7 @@ describe('CardDetailsIssuesMilestones', () => {
     }))
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={milestones}
         recentIssues={[mockIssue]}
         isMilestoneOnly={true}
@@ -368,7 +364,7 @@ describe('CardDetailsIssuesMilestones', () => {
     ]
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         recentMilestones={[mockMilestone]}
         isPullRequestOnly={true}
@@ -391,7 +387,7 @@ describe('CardDetailsIssuesMilestones', () => {
     const onLoadMore = jest.fn()
 
     const { rerender } = render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -400,7 +396,7 @@ describe('CardDetailsIssuesMilestones', () => {
     )
 
     rerender(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -412,13 +408,13 @@ describe('CardDetailsIssuesMilestones', () => {
   })
 
   it('renders nothing when isPullRequestOnly but no pull requests', () => {
-    render(<CardDetailsIssuesMilestones pullRequests={[]} isPullRequestOnly={true} />)
+    render(<IssuesMilestones pullRequests={[]} isPullRequestOnly={true} />)
 
     expect(screen.queryByTestId('secondary-card')).not.toBeInTheDocument()
   })
 
   it('renders nothing when isMilestoneOnly but no milestones', () => {
-    render(<CardDetailsIssuesMilestones recentMilestones={[]} isMilestoneOnly={true} />)
+    render(<IssuesMilestones recentMilestones={[]} isMilestoneOnly={true} />)
 
     expect(screen.queryByTestId('secondary-card')).not.toBeInTheDocument()
   })
@@ -436,7 +432,7 @@ describe('CardDetailsIssuesMilestones', () => {
     const onReset = jest.fn()
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -460,7 +456,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestone with url as clickable link', () => {
     const milestoneWithUrl: Milestone = {
-      id: '1',
       title: 'v2.0.0',
       url: 'https://github.com/milestone/2',
       createdAt: '2024-02-01',
@@ -468,9 +463,7 @@ describe('CardDetailsIssuesMilestones', () => {
       openIssuesCount: 2,
     }
 
-    render(
-      <CardDetailsIssuesMilestones recentMilestones={[milestoneWithUrl]} isMilestoneOnly={true} />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneWithUrl]} isMilestoneOnly={true} />)
 
     const link = screen.getByRole('link', { hidden: true })
     expect(link).toHaveAttribute('href', 'https://github.com/milestone/2')
@@ -478,23 +471,19 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestone without url as plain text', () => {
     const milestoneNoUrl: Milestone = {
-      id: '1',
       title: 'v3.0.0',
       createdAt: '2024-03-01',
       closedIssuesCount: 12,
       openIssuesCount: 0,
     }
 
-    render(
-      <CardDetailsIssuesMilestones recentMilestones={[milestoneNoUrl]} isMilestoneOnly={true} />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneNoUrl]} isMilestoneOnly={true} />)
 
     expect(screen.getByText('v3.0.0')).toBeInTheDocument()
   })
 
   it('renders milestone with repository link', () => {
     const milestoneWithRepo: Milestone = {
-      id: '1',
       title: 'v1.5.0',
       createdAt: '2024-01-15',
       closedIssuesCount: 3,
@@ -503,9 +492,7 @@ describe('CardDetailsIssuesMilestones', () => {
       organizationName: 'awesome-org',
     }
 
-    render(
-      <CardDetailsIssuesMilestones recentMilestones={[milestoneWithRepo]} isMilestoneOnly={true} />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneWithRepo]} isMilestoneOnly={true} />)
 
     const repoText = screen.getByText('awesome-repo')
     const repoLink = repoText.closest('a')
@@ -515,7 +502,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestone with author avatar and clickable author link', () => {
     const milestoneWithAuthorAndAvatar: Milestone = {
-      id: '1',
       title: 'Release v1.0',
       createdAt: '2024-01-10',
       closedIssuesCount: 5,
@@ -528,7 +514,7 @@ describe('CardDetailsIssuesMilestones', () => {
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneWithAuthorAndAvatar]}
         isMilestoneOnly={true}
         showAvatar={true}
@@ -544,55 +530,38 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestone dueOn date when available', () => {
     const milestoneWithDueDate: Milestone = {
-      id: '1',
       title: 'Sprint End',
       createdAt: '2024-01-01',
-      dueOn: '2024-03-31',
       closedIssuesCount: 10,
       openIssuesCount: 5,
     }
 
-    render(
-      <CardDetailsIssuesMilestones
-        recentMilestones={[milestoneWithDueDate]}
-        isMilestoneOnly={true}
-      />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneWithDueDate]} isMilestoneOnly={true} />)
 
     expect(screen.getByText('Sprint End')).toBeInTheDocument()
   })
 
   it('renders milestone without createdAt', () => {
     const milestoneNoCreatedAt: Milestone = {
-      id: '1',
       title: 'Future Release',
-      dueOn: '2024-12-31',
       closedIssuesCount: 0,
       openIssuesCount: 0,
     }
 
-    render(
-      <CardDetailsIssuesMilestones
-        recentMilestones={[milestoneNoCreatedAt]}
-        isMilestoneOnly={true}
-      />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneNoCreatedAt]} isMilestoneOnly={true} />)
 
     expect(screen.getByText('Future Release')).toBeInTheDocument()
   })
 
   it('renders milestone without both repository and organization', () => {
     const milestoneOnlyTitle: Milestone = {
-      id: '1',
       title: 'Standalone Milestone',
       createdAt: '2024-01-01',
       closedIssuesCount: 1,
       openIssuesCount: 1,
     }
 
-    render(
-      <CardDetailsIssuesMilestones recentMilestones={[milestoneOnlyTitle]} isMilestoneOnly={true} />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneOnlyTitle]} isMilestoneOnly={true} />)
 
     expect(screen.getByText('Standalone Milestone')).toBeInTheDocument()
     expect(screen.getByText(/1 closed/)).toBeInTheDocument()
@@ -616,7 +585,7 @@ describe('CardDetailsIssuesMilestones', () => {
       },
     ]
 
-    render(<CardDetailsIssuesMilestones pullRequests={prs} isPullRequestOnly={true} />)
+    render(<IssuesMilestones pullRequests={prs} isPullRequestOnly={true} />)
 
     expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
@@ -630,7 +599,7 @@ describe('CardDetailsIssuesMilestones', () => {
       createdAt: `2024-01-0${i + 1}`,
     }))
 
-    render(<CardDetailsIssuesMilestones pullRequests={prs} isPullRequestOnly={true} />)
+    render(<IssuesMilestones pullRequests={prs} isPullRequestOnly={true} />)
 
     const showMoreButton = screen.getByTestId('show-more-button')
     expect(showMoreButton).toBeInTheDocument()
@@ -649,11 +618,7 @@ describe('CardDetailsIssuesMilestones', () => {
     const onReset = jest.fn()
 
     render(
-      <CardDetailsIssuesMilestones
-        pullRequests={prs}
-        isPullRequestOnly={true}
-        onResetPullRequests={onReset}
-      />
+      <IssuesMilestones pullRequests={prs} isPullRequestOnly={true} onResetPullRequests={onReset} />
     )
 
     expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
@@ -672,7 +637,7 @@ describe('CardDetailsIssuesMilestones', () => {
       openIssuesCount: i + 1,
     }))
 
-    render(<CardDetailsIssuesMilestones recentMilestones={milestones} isMilestoneOnly={true} />)
+    render(<IssuesMilestones recentMilestones={milestones} isMilestoneOnly={true} />)
 
     const showMoreButton = screen.getByTestId('show-more-button')
     expect(showMoreButton).toBeInTheDocument()
@@ -693,7 +658,7 @@ describe('CardDetailsIssuesMilestones', () => {
     const onLoadMore = jest.fn()
 
     const { rerender } = render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -705,7 +670,7 @@ describe('CardDetailsIssuesMilestones', () => {
     expect(loadMoreBtn).not.toBeDisabled()
 
     rerender(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -728,7 +693,7 @@ describe('CardDetailsIssuesMilestones', () => {
     const onReset = jest.fn()
 
     const { rerender } = render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onResetPullRequests={onReset}
@@ -740,7 +705,7 @@ describe('CardDetailsIssuesMilestones', () => {
     expect(resetBtn).not.toBeDisabled()
 
     rerender(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onResetPullRequests={onReset}
@@ -764,7 +729,7 @@ describe('CardDetailsIssuesMilestones', () => {
     const onLoadMore = jest.fn()
 
     const { rerender } = render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -776,7 +741,7 @@ describe('CardDetailsIssuesMilestones', () => {
     expect(loadMoreBtn.className).not.toContain('cursor-not-allowed')
 
     rerender(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         pullRequests={prs}
         isPullRequestOnly={true}
         onLoadMorePullRequests={onLoadMore}
@@ -790,7 +755,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestone title as link when url provided', () => {
     const milestoneWithExtUrl: Milestone = {
-      id: '1',
       title: 'External Release',
       url: 'https://external-release.com',
       createdAt: '2024-01-01',
@@ -798,12 +762,7 @@ describe('CardDetailsIssuesMilestones', () => {
       openIssuesCount: 1,
     }
 
-    render(
-      <CardDetailsIssuesMilestones
-        recentMilestones={[milestoneWithExtUrl]}
-        isMilestoneOnly={true}
-      />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneWithExtUrl]} isMilestoneOnly={true} />)
 
     const links = screen.getAllByRole('link', { hidden: true })
     const externalLink = links.find(
@@ -815,7 +774,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders milestone with author using only login when name not provided', () => {
     const milestoneAuthorNoName: Milestone = {
-      id: '1',
       title: 'Release v1.2',
       createdAt: '2024-01-20',
       closedIssuesCount: 3,
@@ -827,7 +785,7 @@ describe('CardDetailsIssuesMilestones', () => {
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneAuthorNoName]}
         isMilestoneOnly={true}
         showAvatar={true}
@@ -839,7 +797,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('does not render milestone author avatar when showAvatar is false', () => {
     const milestoneWithAuthor: Milestone = {
-      id: '1',
       title: 'Release v2.0',
       createdAt: '2024-02-01',
       closedIssuesCount: 10,
@@ -852,7 +809,7 @@ describe('CardDetailsIssuesMilestones', () => {
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneWithAuthor]}
         isMilestoneOnly={true}
         showAvatar={false}
@@ -865,19 +822,19 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('does not render author avatar when author login is missing', () => {
     const milestoneNoAuthorLogin: Milestone = {
-      id: '1',
       title: 'Release v1.5',
       createdAt: '2024-01-30',
       closedIssuesCount: 7,
       openIssuesCount: 1,
       author: {
+        login: 'some-developer',
         name: 'Some Developer',
         avatarUrl: 'https://example.com/dev.jpg',
       },
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneNoAuthorLogin]}
         isMilestoneOnly={true}
         showAvatar={true}
@@ -889,7 +846,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('does not render author avatar when avatar url is missing', () => {
     const milestoneNoAvatarUrl: Milestone = {
-      id: '1',
       title: 'Release v1.8',
       createdAt: '2024-01-25',
       closedIssuesCount: 4,
@@ -897,11 +853,12 @@ describe('CardDetailsIssuesMilestones', () => {
       author: {
         login: 'author_name',
         name: 'Author Full Name',
+        avatarUrl: 'https://example.com/author.png',
       },
     }
 
     render(
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentMilestones={[milestoneNoAvatarUrl]}
         isMilestoneOnly={true}
         showAvatar={true}
@@ -913,7 +870,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders repository link with correct href structure', () => {
     const milestoneRepo: Milestone = {
-      id: '1',
       title: 'Release v2.0.0',
       createdAt: '2024-02-15',
       closedIssuesCount: 20,
@@ -922,9 +878,7 @@ describe('CardDetailsIssuesMilestones', () => {
       organizationName: 'prod-org',
     }
 
-    render(
-      <CardDetailsIssuesMilestones recentMilestones={[milestoneRepo]} isMilestoneOnly={true} />
-    )
+    render(<IssuesMilestones recentMilestones={[milestoneRepo]} isMilestoneOnly={true} />)
 
     const repoLink = screen.getByText('production-repo').closest('a')
     expect(repoLink).toHaveAttribute('href', '/organizations/prod-org/repositories/production-repo')
@@ -932,7 +886,6 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('only renders repository section when both name and org present', () => {
     const milestonePartialRepo2: Milestone = {
-      id: '1',
       title: 'Release v1.9',
       createdAt: '2024-02-10',
       closedIssuesCount: 8,
@@ -940,12 +893,7 @@ describe('CardDetailsIssuesMilestones', () => {
       organizationName: 'only-org',
     }
 
-    render(
-      <CardDetailsIssuesMilestones
-        recentMilestones={[milestonePartialRepo2]}
-        isMilestoneOnly={true}
-      />
-    )
+    render(<IssuesMilestones recentMilestones={[milestonePartialRepo2]} isMilestoneOnly={true} />)
 
     expect(screen.getByText('Release v1.9')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /only-org/ })).not.toBeInTheDocument()

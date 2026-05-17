@@ -12,7 +12,7 @@ import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 let capturedSetStatus: ((status: string) => void) | null = null
 
-jest.mock('components/CardDetailsPage/CardDetailsHeader', () => {
+jest.mock('components/cards/Header', () => {
   return function MockHeader(props: {
     title: string
     canUpdateStatus?: boolean
@@ -35,13 +35,13 @@ jest.mock('components/CardDetailsPage/CardDetailsHeader', () => {
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsSummary', () => {
+jest.mock('components/cards/Summary', () => {
   return function MockSummary(props: { summary: string }) {
     return <p>{props.summary}</p>
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsMetadata', () => {
+jest.mock('components/cards/Metadata', () => {
   return function MockMetadata(props: { details?: Array<{ label: string; value: string }> }) {
     return (
       <div data-testid="details-content">
@@ -56,19 +56,19 @@ jest.mock('components/CardDetailsPage/CardDetailsMetadata', () => {
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsPageWrapper', () => {
+jest.mock('components/cards/PageWrapper', () => {
   return function MockWrapper({ children }: { children: React.ReactNode }) {
     return <div>{children}</div>
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsRepositoriesModules', () => {
+jest.mock('components/cards/RepositoriesModules', () => {
   return function MockReposModules() {
     return <div />
   }
 })
 
-jest.mock('components/CardDetailsPage/CardDetailsTags', () => {
+jest.mock('components/cards/Tags', () => {
   return function MockTags() {
     return <div />
   }

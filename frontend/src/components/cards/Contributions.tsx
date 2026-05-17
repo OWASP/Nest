@@ -2,7 +2,7 @@ import type { ContributionStats as ContributionStatsType } from 'utils/contribut
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import ContributionStats from 'components/ContributionStats'
 
-interface CardDetailsContributionsProps {
+interface ContributionsProps {
   hasContributions: boolean
   contributionStats?: ContributionStatsType
   contributionData?: Record<string, number>
@@ -11,14 +11,14 @@ interface CardDetailsContributionsProps {
   title?: string
 }
 
-const CardDetailsContributions = ({
+const Contributions = ({
   hasContributions,
   contributionStats,
   contributionData,
   startDate,
   endDate,
   title = 'Contribution Activity',
-}: CardDetailsContributionsProps) => {
+}: ContributionsProps) => {
   if (!hasContributions) {
     return null
   }
@@ -44,4 +44,4 @@ const CardDetailsContributions = ({
   )
 }
 
-export default CardDetailsContributions
+export default Contributions

@@ -7,7 +7,7 @@ import EntityActions from 'components/EntityActions'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import StatusBadge from 'components/StatusBadge'
 
-export interface CardDetailsHeaderProps {
+export interface HeaderProps {
   title?: string
   description?: string
   status?: string
@@ -28,7 +28,7 @@ export interface CardDetailsHeaderProps {
   showHealthMetrics?: boolean
 }
 
-const CardDetailsHeader = ({
+const Header = ({
   title,
   description,
   status,
@@ -47,7 +47,7 @@ const CardDetailsHeader = ({
   showModuleActions,
   showArchivedBadge,
   showHealthMetrics,
-}: CardDetailsHeaderProps) => {
+}: HeaderProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
 
   return (
@@ -103,4 +103,4 @@ const CardDetailsHeader = ({
   )
 }
 
-export default CardDetailsHeader
+export default Header

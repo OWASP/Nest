@@ -9,13 +9,13 @@ import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
-import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
 
@@ -111,27 +111,27 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <CardDetailsPageWrapper>
-      <CardDetailsHeader
+    <PageWrapper>
+      <Header
         title={repository.name}
         isActive={!repository.isArchived}
         isArchived={repository.isArchived}
         showArchivedBadge={true}
       />
 
-      <CardDetailsSummary summary={repository.description} />
+      <Summary summary={repository.description} />
 
-      <CardDetailsMetadata
+      <Metadata
         details={repositoryDetails}
         stats={RepositoryStats}
         detailsTitle="Repository Details"
       />
 
-      <CardDetailsTags languages={repository.languages} topics={repository.topics} />
+      <Tags languages={repository.languages} topics={repository.topics} />
 
-      <CardDetailsContributors topContributors={topContributors} />
+      <Contributors topContributors={topContributors} />
 
-      <CardDetailsIssuesMilestones
+      <IssuesMilestones
         recentIssues={recentIssues ?? []}
         recentMilestones={repository.recentMilestones ?? []}
         pullRequests={recentPullRequests ?? []}
@@ -146,7 +146,7 @@ const RepositoryDetailsPage = () => {
           type="project"
         />
       )}
-    </CardDetailsPageWrapper>
+    </PageWrapper>
   )
 }
 export default RepositoryDetailsPage

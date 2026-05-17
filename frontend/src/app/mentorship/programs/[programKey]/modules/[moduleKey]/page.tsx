@@ -10,13 +10,13 @@ import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQu
 import { Module } from 'types/mentorship'
 import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
-import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
-import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
-import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
-import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
-import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
-import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
-import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
@@ -93,8 +93,8 @@ const ModuleDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <CardDetailsPageWrapper>
-        <CardDetailsHeader
+      <PageWrapper>
+        <Header
           title={programModule.name}
           admins={admins ?? undefined}
           mentors={programModule.mentors ?? undefined}
@@ -103,22 +103,19 @@ const ModuleDetailsPage = () => {
           showModuleActions={true}
         />
 
-        <CardDetailsSummary summary={programModule.description} />
+        <Summary summary={programModule.description} />
 
-        <CardDetailsMetadata details={moduleDetails} detailsTitle="Module Details" />
+        <Metadata details={moduleDetails} detailsTitle="Module Details" />
 
-        <CardDetailsTags
-          tags={programModule.tags ?? undefined}
-          domains={programModule.domains ?? undefined}
-        />
+        <Tags tags={programModule.tags ?? undefined} domains={programModule.domains ?? undefined} />
 
-        <CardDetailsContributors
+        <Contributors
           admins={admins ?? undefined}
           mentors={programModule.mentors ?? undefined}
           mentees={programModule.mentees ?? undefined}
         />
 
-        <CardDetailsIssuesMilestones
+        <IssuesMilestones
           pullRequests={(
             (programModule.recentPullRequests as unknown as PullRequest[]) || []
           ).slice(0, visibleCount)}
@@ -169,7 +166,7 @@ const ModuleDetailsPage = () => {
           }
           isFetchingMore={isFetchingMore}
         />
-      </CardDetailsPageWrapper>
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

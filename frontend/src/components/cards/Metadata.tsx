@@ -9,7 +9,7 @@ import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
 import SecondaryCard from 'components/SecondaryCard'
 
-interface CardDetailsMetadataProps {
+interface MetadataProps {
   details?: Array<{ label: string; value: string | JSX.Element }>
   entityKey?: string
   stats?: Stats[]
@@ -21,7 +21,7 @@ interface CardDetailsMetadataProps {
   detailsTitle?: string
 }
 
-const CardDetailsMetadata = ({
+const Metadata = ({
   details,
   entityKey,
   stats,
@@ -31,7 +31,7 @@ const CardDetailsMetadata = ({
   showGeolocation = false,
   showSocialLinks = false,
   detailsTitle = 'Details',
-}: CardDetailsMetadataProps) => {
+}: MetadataProps) => {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
       <SecondaryCard
@@ -121,4 +121,4 @@ const SocialLinks = ({ urls }: { urls: string[] }) => {
   )
 }
 
-export default CardDetailsMetadata
+export default Metadata

@@ -2,7 +2,7 @@ import { FaCode, FaTags, FaChartPie } from 'react-icons/fa6'
 import AnchorTitle from 'components/AnchorTitle'
 import ToggleableList from 'components/ToggleableList'
 
-interface CardDetailsTagsProps {
+interface TagsProps {
   entityKey?: string
   languages?: string[]
   topics?: string[]
@@ -11,14 +11,7 @@ interface CardDetailsTagsProps {
   labels?: string[]
 }
 
-const CardDetailsTags = ({
-  entityKey,
-  languages,
-  topics,
-  tags,
-  domains,
-  labels,
-}: CardDetailsTagsProps) => {
+const Tags = ({ entityKey, languages, topics, tags, domains, labels }: TagsProps) => {
   const hasLanguagesOrTopics = (languages?.length || 0) > 0 || (topics?.length || 0) > 0
   const hasTagsDomainsOrLabels =
     (tags?.length || 0) > 0 || (domains?.length || 0) > 0 || (labels?.length || 0) > 0
@@ -95,4 +88,4 @@ const CardDetailsTags = ({
   return null
 }
 
-export default CardDetailsTags
+export default Tags
