@@ -60,8 +60,7 @@ jobs:
       - name: Cache Next.js build
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml', 'frontend/package.json', 'frontend/next.config.ts', 'frontend/src/**',
-            'frontend/public/**') }}
+          key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml', 'frontend/package.json', 'frontend/next.config.ts' }}
           path: frontend/.next/cache
 
       - name: Build frontend
@@ -109,7 +108,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json', 'e2e/pnpm-lock.yaml') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/pnpm-lock.yaml') }}
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
