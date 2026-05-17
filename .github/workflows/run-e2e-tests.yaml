@@ -99,18 +99,30 @@ jobs:
           '
           echo "Frontend is up!"
 
-      - name: Install e2e dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: e2e
+      - name: Cache apt archives for Playwright dependencies
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: apt-playwright-${{ runner.os }}-${{ hashFiles('e2e/package.json') }}
+          path: /var/cache/apt/archives
+          restore-keys: |
+            apt-playwright-${{ runner.os }}-
 
       - name: Cache Playwright browsers
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/pnpm-lock.yaml') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
           path: ~/.cache/ms-playwright
+          restore-keys: |
+            playwright-${{ runner.os }}-
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Install e2e dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: e2e
+
+      - name: Install Playwright browsers and dependencies
+        run: |
+          npx playwright install-deps
+          npx playwright install
         working-directory: e2e
 
       - name: Run frontend end-to-end tests
