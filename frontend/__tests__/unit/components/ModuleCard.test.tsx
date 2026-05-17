@@ -6,6 +6,7 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Module } from 'types/mentorship'
 import ModuleCard, { getSimpleDuration } from 'components/ModuleCard'
@@ -829,6 +830,30 @@ describe('ModuleCard', () => {
               moduleKeys: ['mod2', 'mod1'],
             },
           },
+        })
+      )
+    })
+
+    it('refetches management program query after reorder when accessLevel is admin', async () => {
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod1' }, over: { id: 'mod2' } })
+      })
+
+      expect(mockReorderModules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          refetchQueries: [
+            {
+              query: GetManagementProgramAndModulesDocument,
+              variables: { programKey: 'test-program' },
+            },
+          ],
         })
       )
     })
