@@ -14,6 +14,7 @@ import type { ExtendedSession } from 'types/auth'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
+import Contributors from 'components/cards/Contributors'
 import Header from 'components/cards/Header'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
@@ -163,6 +164,12 @@ const ProgramDetailsPage = () => {
         <Metadata details={programDetails} detailsTitle="Program Details" />
 
         <Tags tags={program?.tags ?? undefined} domains={program?.domains ?? undefined} />
+
+        <Contributors
+          entityKey={program?.key ?? ''}
+          programKey={programKey}
+          admins={program?.admins ?? undefined}
+        />
 
         <RepositoriesModules
           programKey={program?.key ?? ''}

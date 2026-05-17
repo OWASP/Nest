@@ -107,7 +107,6 @@ const ModuleDetailsPage = () => {
         <Contributors
           entityKey={moduleKey}
           programKey={programKey}
-          admins={admins ?? undefined}
           mentors={mentorshipModule.mentors ?? undefined}
           mentees={mentorshipModule.mentees ?? undefined}
         />
