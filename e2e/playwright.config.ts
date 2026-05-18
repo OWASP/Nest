@@ -33,5 +33,5 @@ export default defineConfig({
     headless: true,
     trace: 'off',
   },
-  workers: Math.max(1, os.cpus().length - 1),
+  workers: os.cpus().length,
 })
