@@ -19,6 +19,7 @@ from apps.mentorship.api.internal.nodes.program import (
 from apps.mentorship.models import Admin, Program
 from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.owasp.utils.entity_leader import user_is_project_leader
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +86,15 @@ class ProgramMutation:
     def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
         user = info.context.request.user
+
+        if not user.github_user or not user_is_project_leader(user.github_user):
+            msg = "You must be a project leader to create a program."
+            logger.warning(
+                "Permission denied for user '%s' to create program '%s'.",
+                user.username,
+                input_data.name,
+            )
+            raise PermissionDenied(msg)
 
         if input_data.ended_at <= input_data.started_at:
             msg = "End date must be after start date."
