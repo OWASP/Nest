@@ -11,9 +11,6 @@ permissions: {}
 jobs:
   run-e2e-tests:
     name: Run e2e tests
-    container:
-      image: mcr.microsoft.com/playwright:v1.59.1-noble
-      options: --init --ipc=host
     env:
       NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
       NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/
@@ -48,12 +45,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Setup Backend environment
+      - name: Set up backend environment
         uses: ./.github/actions/setup-backend-environment
         with:
           backend_port: 9000
-          cache_host: cache
-          db_host: db
           db_name: nest_db_e2e
           db_password: nest_user_e2e_password
           db_username: nest_user_e2e
@@ -101,15 +96,26 @@ jobs:
           '
           echo "Frontend is up!"
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+
       - name: Install e2e dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: e2e
+
+      - name: Install Playwright browsers and dependencies
+        run: |
+          npx playwright install-deps
+          npx playwright install
         working-directory: e2e
 
       - name: Run frontend end-to-end tests
         env:
           CI: true
           FRONTEND_URL: http://localhost:3000
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
         run: pnpm run test:e2e
         working-directory: e2e
 
