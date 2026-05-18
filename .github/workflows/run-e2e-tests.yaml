@@ -118,6 +118,8 @@ jobs:
       - name: Verify backend proxy routes
         run: |
           set -euo pipefail
+          cookie_jar=/tmp/e2e-cookies.txt
+          rm -f "$cookie_jar"
           check_csrf() {
             local label=$1 url=$2
             local status
@@ -130,11 +132,20 @@ jobs:
             fi
           }
           check_csrf "backend" http://localhost:9000/csrf/
-          check_csrf "frontend" http://localhost:3000/csrf/
+          frontend_csrf_status=$(curl -sS -c "$cookie_jar" -o /tmp/csrf.json -w '%{http_code}' \
+            http://localhost:3000/csrf/)
+          echo "frontend HTTP $frontend_csrf_status"
+          if [ "$frontend_csrf_status" != "200" ] || ! grep -q csrftoken /tmp/csrf.json; then
+            echo "frontend CSRF response:"
+            head -c 500 /tmp/csrf.json
+            exit 1
+          fi
           csrf_token=$(python3 -c "import json; print(json.load(open('/tmp/csrf.json'))['csrftoken'])")
-          graphql_status=$(curl -sS -o /tmp/graphql-response -w '%{http_code}' \
+          graphql_status=$(curl -sS -b "$cookie_jar" -o /tmp/graphql-response -w '%{http_code}' \
             -X POST http://localhost:3000/graphql/ \
             -H 'Content-Type: application/json' \
+            -H "Origin: http://localhost:3000" \
+            -H "Referer: http://localhost:3000/" \
             -H "X-CSRFToken: ${csrf_token}" \
             -d '{"query":"{ __typename }"}')
           echo "frontend /graphql/ HTTP $graphql_status"
