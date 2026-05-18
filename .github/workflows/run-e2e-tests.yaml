@@ -61,14 +61,6 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: e2e
 
-      - name: Cache apt archives for Playwright dependencies
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          key: e2e-playwright-apt-${{ runner.os }}-${{ hashFiles('e2e/package.json') }}
-          path: /var/cache/apt/archives
-          restore-keys: |
-            e2e-playwright-apt-${{ runner.os }}-
-
       - name: Cache Playwright Chromium
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
