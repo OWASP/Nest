@@ -96,8 +96,8 @@ importers:
         specifier: ^16.13.2
         version: 16.13.2
       ics:
-        specifier: ^3.11.0
-        version: 3.11.0
+        specifier: ^3.12.0
+        version: 3.12.0
       isomorphic-dompurify:
         specifier: ^3.9.0
         version: 3.9.0
@@ -5228,8 +5228,8 @@ packages:
     resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
     engines: {node: '>=0.10.0'}
 
-  ics@3.11.0:
-    resolution: {integrity: sha512-uDB3GEOYRSZL2BgxLZkHUDwcHqjC36gGuKBrFatl7BtMNQKzO2rXkCj0zTl/QyP9lfyAEp2WZU2XBZciaLJZZw==}
+  ics@3.12.0:
+    resolution: {integrity: sha512-BBPiZ/TbUyZrxui7SHKGOa/n2HUxaW9ucn7cw47NW9OSKe5tItYxIdN7Uczti5nKURmfwVvYi2aLigCJGH1+cA==}
 
   identity-obj-proxy@3.0.0:
     resolution: {integrity: sha512-00n6YnVHKrinT9t0d9+5yZC6UBNJANpYEQvL2LlX6Ab9lnmxzIRcEmTPuyGScvl1+jKuCICX1Z0Ab1pPKKdikA==}
@@ -13961,9 +13961,9 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  ics@3.11.0:
+  ics@3.12.0:
     dependencies:
-      nanoid: 3.3.11
+      nanoid: 3.3.12
       runes2: 1.1.4
       yup: 1.7.1
 
