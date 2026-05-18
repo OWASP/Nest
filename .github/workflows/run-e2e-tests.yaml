@@ -12,9 +12,9 @@ jobs:
   run-e2e-tests:
     name: Run e2e tests
     env:
-      NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://127.0.0.1:9000
-      NEXT_SERVER_CSRF_URL: http://127.0.0.1:9000/csrf/
-      NEXT_SERVER_GRAPHQL_URL: http://127.0.0.1:9000/graphql/
+      NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
+      NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/
+      NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -79,7 +79,7 @@ jobs:
             echo "Missing $manifest"
             exit 1
           fi
-          if ! grep -q '127.0.0.1:9000' "$manifest"; then
+          if ! grep -q 'localhost:9000' "$manifest"; then
             echo "E2E backend rewrites were not applied during the build."
             echo "Ensure NEXT_PUBLIC_E2E_BACKEND_BASE_URL is set when running pnpm run build."
             head -c 2000 "$manifest"
@@ -94,18 +94,21 @@ jobs:
         working-directory: frontend
 
       - name: Run frontend in the background
-        env:
-          HOSTNAME: 0.0.0.0
-          NEXT_TELEMETRY_DISABLED: 1
-          NODE_ENV: production
-          PORT: '3000'
-        run: node server.js &
-        working-directory: frontend/.next/standalone
+        run: |
+          HOSTNAME=0.0.0.0 \
+          NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
+          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
+          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
+          NEXT_TELEMETRY_DISABLED=1 \
+          NODE_ENV=production \
+          PORT=3000 \
+          node .next/standalone/server.js &
+        working-directory: frontend
 
       - name: Wait for frontend to be ready
         run: |
           timeout 5m bash -c '
-            until wget --spider http://127.0.0.1:3000/; do
+            until wget --spider http://localhost:3000/; do
               echo "Waiting for the frontend..."
               sleep 5
             done
@@ -118,7 +121,7 @@ jobs:
           check_csrf() {
             local label=$1 url=$2
             local status
-            status=$(curl -sSL -o /tmp/csrf.json -w '%{http_code}' "$url")
+            status=$(curl -sS -o /tmp/csrf.json -w '%{http_code}' "$url")
             echo "$label HTTP $status"
             if [ "$status" != "200" ] || ! grep -q csrftoken /tmp/csrf.json; then
               echo "$label response:"
@@ -126,15 +129,17 @@ jobs:
               exit 1
             fi
           }
-          check_csrf "backend" http://127.0.0.1:9000/csrf/
-          check_csrf "frontend" http://127.0.0.1:3000/csrf/
+          check_csrf "backend" http://localhost:9000/csrf/
+          check_csrf "frontend" http://localhost:3000/csrf/
+          csrf_token=$(python3 -c "import json; print(json.load(open('/tmp/csrf.json'))['csrftoken'])")
           graphql_status=$(curl -sS -o /tmp/graphql-response -w '%{http_code}' \
-            -X POST http://127.0.0.1:3000/graphql/ \
+            -X POST http://localhost:3000/graphql/ \
             -H 'Content-Type: application/json' \
+            -H "X-CSRFToken: ${csrf_token}" \
             -d '{"query":"{ __typename }"}')
           echo "frontend /graphql/ HTTP $graphql_status"
-          if [ "$graphql_status" = "404" ]; then
-            echo "Frontend did not proxy /graphql/ to the backend:"
+          if [ "$graphql_status" != "200" ] || ! grep -q '"data"' /tmp/graphql-response; then
+            echo "Frontend did not proxy /graphql/ to the backend (CSRF-protected query failed):"
             head -c 500 /tmp/graphql-response
             exit 1
           fi
@@ -156,9 +161,19 @@ jobs:
       - name: Run frontend end-to-end tests
         run: |
           CI=true \
-          FRONTEND_URL=http://127.0.0.1:3000 \
+          FRONTEND_URL=http://localhost:3000 \
           pnpm run test:e2e
         working-directory: e2e
+
+      - name: Dump backend logs on failure
+        if: failure()
+        run: |
+          if [ -f /tmp/gunicorn.log ]; then
+            echo '--- gunicorn (last 200 lines) ---'
+            tail -n 200 /tmp/gunicorn.log
+          else
+            echo 'No /tmp/gunicorn.log found'
+          fi
 
       - name: Upload Playwright test results
         if: failure()

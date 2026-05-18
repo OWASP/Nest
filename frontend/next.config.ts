@@ -2,6 +2,7 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const forceStandalone = process.env.FORCE_STANDALONE === 'yes'
+const isEnd2End = Boolean(process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL)
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
 const headers = [
@@ -54,6 +55,7 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   transpilePackages: ['@react-leaflet/core', 'leaflet', 'react-leaflet', 'react-leaflet-cluster'],
+  ...(isEnd2End ? { skipTrailingSlashRedirect: true } : {}),
   rewrites: process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL
     ? async () => {
         const backendBase = process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL
