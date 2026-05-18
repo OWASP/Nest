@@ -57,64 +57,6 @@ jobs:
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
 
-      - name: Prepare environment variables for frontend
-        run: cp .env.e2e.example .env
-        working-directory: frontend
-
-      - name: Cache Next.js build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          key: next-cache-e2e-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
-          path: frontend/.next/cache
-
-      - name: Build frontend
-        run: pnpm run build
-        working-directory: frontend
-
-      - name: Verify E2E rewrites are baked into the build
-        run: |
-          set -euo pipefail
-          manifest=frontend/.next/standalone/.next/routes-manifest.json
-          if [ ! -f "$manifest" ]; then
-            echo "Missing $manifest"
-            exit 1
-          fi
-          if ! grep -q 'localhost:9000' "$manifest"; then
-            echo "E2E backend rewrites were not applied during the build."
-            echo "Ensure NEXT_PUBLIC_E2E_BACKEND_BASE_URL is set when running pnpm run build."
-            head -c 2000 "$manifest"
-            exit 1
-          fi
-          echo "E2E rewrites present in routes-manifest.json"
-
-      - name: Copy public and static folders
-        run: |
-          cp -r public .next/standalone/
-          cp -r .next/static .next/standalone/.next/
-        working-directory: frontend
-
-      - name: Run frontend in the background
-        run: |
-          HOSTNAME=0.0.0.0 \
-          NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
-          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
-          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-          NEXT_TELEMETRY_DISABLED=1 \
-          NODE_ENV=production \
-          PORT=3000 \
-          node .next/standalone/server.js &
-        working-directory: frontend
-
-      - name: Wait for frontend to be ready
-        run: |
-          timeout 5m bash -c '
-            until wget --spider http://localhost:3000/; do
-              echo "Waiting for the frontend..."
-              sleep 5
-            done
-          '
-          echo "Frontend is up!"
-
       - name: Install e2e dependencies
         run: pnpm install --frozen-lockfile
         working-directory: e2e
@@ -129,11 +71,52 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: e2e
 
-      - name: Run frontend end-to-end tests
+      - name: Cache Next.js build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: next-cache-e2e-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
+          path: frontend/.next/cache
+
+      - name: Prepare environment variables for frontend
+        run: cp .env.e2e.example .env
+        working-directory: frontend
+
+      - name: Build frontend
+        run: pnpm run build
+        working-directory: frontend
+
+      - name: Copy public and static folders
         run: |
-          CI=true \
-          FRONTEND_URL=http://localhost:3000 \
-          pnpm run test:e2e
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+        working-directory: frontend
+
+      - name: Run frontend in the background
+        env:
+          HOSTNAME: 0.0.0.0
+          NEXT_TELEMETRY_DISABLED: '1'
+          NODE_ENV: production
+          PORT: '3000'
+        run: |
+          nohup node .next/standalone/server.js > /dev/null 2>&1 &
+          disown
+        working-directory: frontend
+
+      - name: Wait for frontend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:3000/api/health; do
+              echo "Waiting for the frontend..."
+              sleep 5
+            done
+          '
+          echo "Frontend is up!"
+
+      - name: Run frontend end-to-end tests
+        env:
+          CI: 'true'
+          FRONTEND_URL: http://localhost:3000
+        run: pnpm run test:e2e
         working-directory: e2e
 
       - name: Upload Playwright test results

@@ -2,8 +2,8 @@ name: Set up Backend environment
 
 description: >-
   Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
-  the Postgres service container, restores the database dump, starts the backend, and waits for
-  it to be ready.
+  the Postgres service container, runs migrations, restores the database dump, starts the backend,
+  and waits for it to be ready.
 
 inputs:
   backend_port:
@@ -99,9 +99,11 @@ runs:
         export DJANGO_DB_HOST=localhost
         export DJANGO_REDIS_AUTH_ENABLED=False
         export DJANGO_REDIS_HOST=localhost
-        poetry run gunicorn wsgi:application \
+        nohup poetry run gunicorn wsgi:application \
           --bind 0.0.0.0:$BACKEND_PORT \
-          --workers 2 &
+          --workers 2 \
+          > /dev/null 2>&1 &
+        disown
       shell: bash
       working-directory: backend
 

@@ -4,6 +4,8 @@ import type { NextConfig } from 'next'
 const forceStandalone = process.env.FORCE_STANDALONE === 'yes'
 const isEnd2End = Boolean(process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL)
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
+const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
+const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
 
 const headers = [
   { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
@@ -52,7 +54,7 @@ const nextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader
   poweredByHeader: false,
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
-  productionBrowserSourceMaps: true,
+  productionBrowserSourceMaps: (isStaging || isProduction) && !isEnd2End,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   transpilePackages: ['@react-leaflet/core', 'leaflet', 'react-leaflet', 'react-leaflet-cluster'],
   ...(isEnd2End ? { skipTrailingSlashRedirect: true } : {}),
@@ -60,10 +62,8 @@ const nextConfig: NextConfig = {
     ? async () => {
         const backendBase = process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL
         return [
-          { destination: `${backendBase}/csrf/`, source: '/csrf' },
-          { destination: `${backendBase}/csrf/`, source: '/csrf/' },
-          { destination: `${backendBase}/graphql/`, source: '/graphql' },
-          { destination: `${backendBase}/graphql/`, source: '/graphql/' },
+          { source: '/csrf/', destination: `${backendBase}/csrf/` },
+          { source: '/graphql/', destination: `${backendBase}/graphql/` },
         ]
       }
     : undefined,

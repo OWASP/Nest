@@ -56,14 +56,12 @@ jobs:
 
       - name: Run fuzz tests
         env:
-          TEST_FILE: ${{ inputs.test-file }}
+          BASE_URL: http://localhost:9500
+          CI: 'true'
+          PYTEST_ADDOPTS: --no-cov
           REST_URL: ${{ inputs.rest-url }}
+          TEST_FILE: fuzz/${{ inputs.test-file }}
         run: |
           set -a && source ./.env.fuzz.example && set +a
-          export BASE_URL=http://localhost:9500
-          export CI=true
-          export PYTEST_ADDOPTS="--no-cov"
-          export REST_URL="$REST_URL"
-          export TEST_FILE="fuzz/$TEST_FILE"
           poetry run sh ./entrypoint.fuzz.sh
         working-directory: backend
