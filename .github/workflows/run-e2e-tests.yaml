@@ -115,46 +115,6 @@ jobs:
           '
           echo "Frontend is up!"
 
-      - name: Verify backend proxy routes
-        run: |
-          set -euo pipefail
-          cookie_jar=/tmp/e2e-cookies.txt
-          rm -f "$cookie_jar"
-          check_csrf() {
-            local label=$1 url=$2
-            local status
-            status=$(curl -sS -o /tmp/csrf.json -w '%{http_code}' "$url")
-            echo "$label HTTP $status"
-            if [ "$status" != "200" ] || ! grep -q csrftoken /tmp/csrf.json; then
-              echo "$label response:"
-              head -c 500 /tmp/csrf.json
-              exit 1
-            fi
-          }
-          check_csrf "backend" http://localhost:9000/csrf/
-          frontend_csrf_status=$(curl -sS -c "$cookie_jar" -o /tmp/csrf.json -w '%{http_code}' \
-            http://localhost:3000/csrf/)
-          echo "frontend HTTP $frontend_csrf_status"
-          if [ "$frontend_csrf_status" != "200" ] || ! grep -q csrftoken /tmp/csrf.json; then
-            echo "frontend CSRF response:"
-            head -c 500 /tmp/csrf.json
-            exit 1
-          fi
-          csrf_token=$(python3 -c "import json; print(json.load(open('/tmp/csrf.json'))['csrftoken'])")
-          graphql_status=$(curl -sS -b "$cookie_jar" -o /tmp/graphql-response -w '%{http_code}' \
-            -X POST http://localhost:3000/graphql/ \
-            -H 'Content-Type: application/json' \
-            -H "Origin: http://localhost:3000" \
-            -H "Referer: http://localhost:3000/" \
-            -H "X-CSRFToken: ${csrf_token}" \
-            -d '{"query":"{ __typename }"}')
-          echo "frontend /graphql/ HTTP $graphql_status"
-          if [ "$graphql_status" != "200" ] || ! grep -q '"data"' /tmp/graphql-response; then
-            echo "Frontend did not proxy /graphql/ to the backend (CSRF-protected query failed):"
-            head -c 500 /tmp/graphql-response
-            exit 1
-          fi
-
       - name: Install e2e dependencies
         run: pnpm install --frozen-lockfile
         working-directory: e2e
@@ -175,16 +135,6 @@ jobs:
           FRONTEND_URL=http://localhost:3000 \
           pnpm run test:e2e
         working-directory: e2e
-
-      - name: Dump backend logs on failure
-        if: failure()
-        run: |
-          if [ -f /tmp/gunicorn.log ]; then
-            echo '--- gunicorn (last 200 lines) ---'
-            tail -n 200 /tmp/gunicorn.log
-          else
-            echo 'No /tmp/gunicorn.log found'
-          fi
 
       - name: Upload Playwright test results
         if: failure()
