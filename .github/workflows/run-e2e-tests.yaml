@@ -106,6 +106,9 @@ jobs:
       - name: Run frontend in the background
         env:
           HOSTNAME: 0.0.0.0
+          NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
+          NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/
+          NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
           NEXT_TELEMETRY_DISABLED: '1'
           NODE_ENV: production
           PORT: '3000'
