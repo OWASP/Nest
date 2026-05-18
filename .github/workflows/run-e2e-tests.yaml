@@ -118,7 +118,7 @@ jobs:
           check_csrf() {
             local label=$1 url=$2
             local status
-            status=$(curl -sS -o /tmp/csrf.json -w '%{http_code}' "$url")
+            status=$(curl -sSL -o /tmp/csrf.json -w '%{http_code}' "$url")
             echo "$label HTTP $status"
             if [ "$status" != "200" ] || ! grep -q csrftoken /tmp/csrf.json; then
               echo "$label response:"
