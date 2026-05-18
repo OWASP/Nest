@@ -282,28 +282,21 @@ describe('ModuleCard', () => {
       expect(screen.getByText('Module 2')).toBeInTheDocument()
     })
 
-    it('shows only first 4 modules initially when more than 4 modules', () => {
-      const modules = [
-        createMockModule({ key: 'mod1', name: 'Module 1' }),
-        createMockModule({ key: 'mod2', name: 'Module 2' }),
-        createMockModule({ key: 'mod3', name: 'Module 3' }),
-        createMockModule({ key: 'mod4', name: 'Module 4' }),
-        createMockModule({ key: 'mod5', name: 'Module 5' }),
-        createMockModule({ key: 'mod6', name: 'Module 6' }),
-      ]
+    it('shows only first 6 modules initially when more than 6 modules', () => {
+      const modules = Array.from({ length: 8 }, (_, i) =>
+        createMockModule({ key: `mod${i + 1}`, name: `Module ${i + 1}` })
+      )
 
       render(<ModuleCard modules={modules} />)
 
       expect(screen.getByText('Module 1')).toBeInTheDocument()
-      expect(screen.getByText('Module 2')).toBeInTheDocument()
-      expect(screen.getByText('Module 3')).toBeInTheDocument()
-      expect(screen.getByText('Module 4')).toBeInTheDocument()
-      expect(screen.queryByText('Module 5')).not.toBeInTheDocument()
-      expect(screen.queryByText('Module 6')).not.toBeInTheDocument()
+      expect(screen.getByText('Module 6')).toBeInTheDocument()
+      expect(screen.queryByText('Module 7')).not.toBeInTheDocument()
+      expect(screen.queryByText('Module 8')).not.toBeInTheDocument()
     })
 
-    it('shows "Show more" button when more than 4 modules', () => {
-      const modules = Array.from({ length: 6 }, (_, i) =>
+    it('shows "Show more" button when more than 6 modules', () => {
+      const modules = Array.from({ length: 7 }, (_, i) =>
         createMockModule({ key: `mod${i + 1}`, name: `Module ${i + 1}` })
       )
 
@@ -313,8 +306,8 @@ describe('ModuleCard', () => {
       expect(screen.getByTestId('chevron-down')).toBeInTheDocument()
     })
 
-    it('does not show "Show more" button when 4 or fewer modules', () => {
-      const modules = Array.from({ length: 4 }, (_, i) =>
+    it('does not show "Show more" button when 6 or fewer modules', () => {
+      const modules = Array.from({ length: 6 }, (_, i) =>
         createMockModule({ key: `mod${i + 1}`, name: `Module ${i + 1}` })
       )
 
@@ -324,22 +317,22 @@ describe('ModuleCard', () => {
     })
 
     it('toggles between showing all and showing limited modules on click', () => {
-      const modules = Array.from({ length: 6 }, (_, i) =>
+      const modules = Array.from({ length: 8 }, (_, i) =>
         createMockModule({ key: `mod${i + 1}`, name: `Module ${i + 1}` })
       )
 
       render(<ModuleCard modules={modules} />)
 
       // Verify initial state
-      expect(screen.queryByText('Module 5')).not.toBeInTheDocument()
+      expect(screen.queryByText('Module 7')).not.toBeInTheDocument()
 
       // Click to show more
       const showMoreButton = screen.getByText('Show more')
       fireEvent.click(showMoreButton)
 
       // All modules should be visible
-      expect(screen.getByText('Module 5')).toBeInTheDocument()
-      expect(screen.getByText('Module 6')).toBeInTheDocument()
+      expect(screen.getByText('Module 7')).toBeInTheDocument()
+      expect(screen.getByText('Module 8')).toBeInTheDocument()
       expect(screen.getByText('Show less')).toBeInTheDocument()
       expect(screen.getByTestId('chevron-up')).toBeInTheDocument()
 
@@ -348,12 +341,12 @@ describe('ModuleCard', () => {
       fireEvent.click(showLessButton)
 
       // Should be back to initial state
-      expect(screen.queryByText('Module 5')).not.toBeInTheDocument()
+      expect(screen.queryByText('Module 7')).not.toBeInTheDocument()
       expect(screen.getByText('Show more')).toBeInTheDocument()
     })
 
     it('handles keyboard navigation with Enter key', () => {
-      const modules = Array.from({ length: 6 }, (_, i) =>
+      const modules = Array.from({ length: 8 }, (_, i) =>
         createMockModule({ key: `mod${i + 1}`, name: `Module ${i + 1}` })
       )
 
@@ -362,12 +355,12 @@ describe('ModuleCard', () => {
       const showMoreButton = screen.getByRole('button')
       fireEvent.keyDown(showMoreButton, { key: 'Enter', preventDefault: jest.fn() })
 
-      expect(screen.getByText('Module 5')).toBeInTheDocument()
+      expect(screen.getByText('Module 7')).toBeInTheDocument()
       expect(screen.getByText('Show less')).toBeInTheDocument()
     })
 
     it('handles keyboard navigation with Space key', () => {
-      const modules = Array.from({ length: 6 }, (_, i) =>
+      const modules = Array.from({ length: 8 }, (_, i) =>
         createMockModule({ key: `mod${i + 1}`, name: `Module ${i + 1}` })
       )
 
@@ -376,12 +369,12 @@ describe('ModuleCard', () => {
       const showMoreButton = screen.getByRole('button')
       fireEvent.keyDown(showMoreButton, { key: ' ', preventDefault: jest.fn() })
 
-      expect(screen.getByText('Module 5')).toBeInTheDocument()
+      expect(screen.getByText('Module 7')).toBeInTheDocument()
       expect(screen.getByText('Show less')).toBeInTheDocument()
     })
 
     it('ignores other keyboard keys', () => {
-      const modules = Array.from({ length: 6 }, (_, i) =>
+      const modules = Array.from({ length: 8 }, (_, i) =>
         createMockModule({ key: `mod${i + 1}`, name: `Module ${i + 1}` })
       )
 
@@ -391,7 +384,7 @@ describe('ModuleCard', () => {
       fireEvent.keyDown(showMoreButton, { key: 'Tab' })
 
       // Should still show initial state
-      expect(screen.queryByText('Module 5')).not.toBeInTheDocument()
+      expect(screen.queryByText('Module 7')).not.toBeInTheDocument()
       expect(screen.getByText('Show more')).toBeInTheDocument()
     })
 
