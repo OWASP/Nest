@@ -13,7 +13,7 @@ test.describe('Committees Page', () => {
         }),
       })
     })
-    await page.goto('/committees', { timeout: 25000 })
+    await page.goto('/committees')
   })
 
   test('renders committee data correctly', async ({ page }) => {
