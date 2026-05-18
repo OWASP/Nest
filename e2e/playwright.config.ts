@@ -1,4 +1,3 @@
-import { iphone13Chromium } from '@e2e/helpers/devices'
 import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
@@ -9,14 +8,16 @@ export default defineConfig({
   fullyParallel: true,
   projects: [
     {
-      name: 'chromium',
+      name: 'Desktop Chrome',
       use: {
         ...devices['Desktop Chrome'],
       },
     },
     {
       name: 'Mobile Chrome - iPhone 13',
-      use: iphone13Chromium,
+      use: {
+        ...devices['iPhone 13'],
+      },
     },
   ],
   reporter: process.env.CI
@@ -33,5 +34,5 @@ export default defineConfig({
     headless: true,
     trace: 'off',
   },
-  workers: process.env.CI ? 2 : os.cpus().length,
+  workers: os.cpus().length,
 })

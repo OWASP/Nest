@@ -1,5 +1,4 @@
-import { iphone13Chromium } from '@e2e/helpers/devices'
-import { test, expect } from '@playwright/test'
+import { test, expect, devices } from '@playwright/test'
 
 // Desktop tests
 test.describe('Footer - Desktop (Chrome)', () => {
@@ -23,9 +22,9 @@ test.describe('Footer - Desktop (Chrome)', () => {
   })
 })
 
-// Mobile tests (iPhone 13, Chromium)
+// Mobile tests (iPhone 13)
 test.use({
-  ...iphone13Chromium,
+  ...devices['iPhone 13'],
   isMobile: true,
 })
 
