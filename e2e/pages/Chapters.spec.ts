@@ -13,7 +13,7 @@ test.describe('Chapters Page', () => {
         }),
       })
     })
-    await page.goto('/chapters', { timeout: 25000 })
+    await page.goto('/chapters')
   })
 
   test('renders chapter data correctly', async ({ page }) => {

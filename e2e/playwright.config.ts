@@ -33,5 +33,5 @@ export default defineConfig({
     headless: true,
     trace: 'off',
   },
-  workers: os.cpus().length,
+  workers: process.env.CI ? 2 : os.cpus().length,
 })

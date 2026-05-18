@@ -99,15 +99,33 @@ jobs:
           '
           echo "Frontend is up!"
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
-          path: ~/.cache/ms-playwright
+      - name: Verify backend proxy routes
+        run: |
+          set -euo pipefail
+          echo "Checking backend CSRF..."
+          curl -fsS http://localhost:9000/csrf/ | grep -q csrftoken
+          echo "Checking frontend CSRF and GraphQL rewrites (paths use trailing slashes in e2e)..."
+          curl -fsS http://localhost:3000/csrf/ | grep -q csrftoken
+          frontend_graphql_status=$(curl -s -o /tmp/graphql-response -w '%{http_code}' \
+            -X POST http://localhost:3000/graphql/ \
+            -H 'Content-Type: application/json' \
+            -d '{"query":"{ __typename }"}')
+          echo "frontend /graphql/ status: $frontend_graphql_status"
+          if [ "$frontend_graphql_status" = "404" ]; then
+            echo "Frontend did not proxy /graphql/ to the backend (rewrite mismatch?)"
+            cat /tmp/graphql-response
+            exit 1
+          fi
 
       - name: Install e2e dependencies
         run: pnpm install --frozen-lockfile
         working-directory: e2e
+
+      - name: Cache Playwright Chromium
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
@@ -127,4 +145,4 @@ jobs:
           name: playwright-test-results
           path: e2e/test-results/
           retention-days: 7
-    timeout-minutes: 20
+    timeout-minutes: 30
