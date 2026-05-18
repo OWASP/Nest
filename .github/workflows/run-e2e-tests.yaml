@@ -109,10 +109,8 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: e2e
 
-      - name: Install Playwright browsers and dependencies
-        run: |
-          npx playwright install-deps
-          npx playwright install
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
         working-directory: e2e
 
       - name: Run frontend end-to-end tests

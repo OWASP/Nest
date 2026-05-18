@@ -1,3 +1,4 @@
+import { iphone13Chromium } from '@e2e/helpers/devices'
 import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
@@ -15,9 +16,7 @@ export default defineConfig({
     },
     {
       name: 'Mobile Chrome - iPhone 13',
-      use: {
-        ...devices['iPhone 13'],
-      },
+      use: iphone13Chromium,
     },
   ],
   reporter: process.env.CI
