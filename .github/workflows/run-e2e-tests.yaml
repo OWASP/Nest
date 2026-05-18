@@ -11,6 +11,10 @@ permissions: {}
 jobs:
   run-e2e-tests:
     name: Run e2e tests
+    env:
+      NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://127.0.0.1:9000
+      NEXT_SERVER_CSRF_URL: http://127.0.0.1:9000/csrf/
+      NEXT_SERVER_GRAPHQL_URL: http://127.0.0.1:9000/graphql/
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -60,16 +64,28 @@ jobs:
       - name: Cache Next.js build
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
+          key: next-cache-e2e-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
           path: frontend/.next/cache
 
       - name: Build frontend
-        run: |
-          NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
-          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
-          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-          pnpm run build
+        run: pnpm run build
         working-directory: frontend
+
+      - name: Verify E2E rewrites are baked into the build
+        run: |
+          set -euo pipefail
+          manifest=frontend/.next/standalone/.next/routes-manifest.json
+          if [ ! -f "$manifest" ]; then
+            echo "Missing $manifest"
+            exit 1
+          fi
+          if ! grep -q '127.0.0.1:9000' "$manifest"; then
+            echo "E2E backend rewrites were not applied during the build."
+            echo "Ensure NEXT_PUBLIC_E2E_BACKEND_BASE_URL is set when running pnpm run build."
+            head -c 2000 "$manifest"
+            exit 1
+          fi
+          echo "E2E rewrites present in routes-manifest.json"
 
       - name: Copy public and static folders
         run: |
@@ -78,21 +94,18 @@ jobs:
         working-directory: frontend
 
       - name: Run frontend in the background
-        run: |
-          HOSTNAME=0.0.0.0 \
-          NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
-          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
-          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-          NEXT_TELEMETRY_DISABLED=1 \
-          NODE_ENV=production \
-          PORT=3000 \
-          node .next/standalone/server.js &
-        working-directory: frontend
+        env:
+          HOSTNAME: 0.0.0.0
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_ENV: production
+          PORT: '3000'
+        run: node server.js &
+        working-directory: frontend/.next/standalone
 
       - name: Wait for frontend to be ready
         run: |
           timeout 5m bash -c '
-            until wget --spider http://localhost:3000/; do
+            until wget --spider http://127.0.0.1:3000/; do
               echo "Waiting for the frontend..."
               sleep 5
             done
@@ -102,18 +115,27 @@ jobs:
       - name: Verify backend proxy routes
         run: |
           set -euo pipefail
-          echo "Checking backend CSRF..."
-          curl -fsS http://localhost:9000/csrf/ | grep -q csrftoken
-          echo "Checking frontend CSRF and GraphQL rewrites (paths use trailing slashes in e2e)..."
-          curl -fsS http://localhost:3000/csrf/ | grep -q csrftoken
-          frontend_graphql_status=$(curl -s -o /tmp/graphql-response -w '%{http_code}' \
-            -X POST http://localhost:3000/graphql/ \
+          check_csrf() {
+            local label=$1 url=$2
+            local status
+            status=$(curl -sS -o /tmp/csrf.json -w '%{http_code}' "$url")
+            echo "$label HTTP $status"
+            if [ "$status" != "200" ] || ! grep -q csrftoken /tmp/csrf.json; then
+              echo "$label response:"
+              head -c 500 /tmp/csrf.json
+              exit 1
+            fi
+          }
+          check_csrf "backend" http://127.0.0.1:9000/csrf/
+          check_csrf "frontend" http://127.0.0.1:3000/csrf/
+          graphql_status=$(curl -sS -o /tmp/graphql-response -w '%{http_code}' \
+            -X POST http://127.0.0.1:3000/graphql/ \
             -H 'Content-Type: application/json' \
             -d '{"query":"{ __typename }"}')
-          echo "frontend /graphql/ status: $frontend_graphql_status"
-          if [ "$frontend_graphql_status" = "404" ]; then
-            echo "Frontend did not proxy /graphql/ to the backend (rewrite mismatch?)"
-            cat /tmp/graphql-response
+          echo "frontend /graphql/ HTTP $graphql_status"
+          if [ "$graphql_status" = "404" ]; then
+            echo "Frontend did not proxy /graphql/ to the backend:"
+            head -c 500 /tmp/graphql-response
             exit 1
           fi
 
@@ -134,7 +156,7 @@ jobs:
       - name: Run frontend end-to-end tests
         run: |
           CI=true \
-          FRONTEND_URL=http://localhost:3000 \
+          FRONTEND_URL=http://127.0.0.1:3000 \
           pnpm run test:e2e
         working-directory: e2e
 
