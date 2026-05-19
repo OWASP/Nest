@@ -13,7 +13,7 @@ test.describe('Organization Page', () => {
         }),
       })
     })
-    await page.goto('/organizations', { timeout: 25000 })
+    await page.goto('/organizations')
   })
 
   test('renders organization data correctly', async ({ page }) => {

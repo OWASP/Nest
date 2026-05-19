@@ -2,8 +2,8 @@ name: Set up Backend environment
 
 description: >-
   Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
-  Postgres, installs the PostgreSQL client, starts the backend, waits for it to be ready,
-  and restores the database dump.
+  the Postgres service container, runs migrations, restores the database dump, starts the backend,
+  and waits for it to be ready.
 
 inputs:
   backend_port:
@@ -25,16 +25,13 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install Poetry
-      run: pipx install poetry
-      shell: bash
-
     - name: Set up Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
       with:
-        cache: poetry
-        cache-dependency-path: backend/poetry.lock
         python-version: '3.13'
+
+    - name: Install Poetry
+      uses: ./.github/actions/install-poetry
 
     - name: Cache Poetry virtual environment
       id: cache-poetry-venv
@@ -59,15 +56,11 @@ runs:
         DB_USERNAME: ${{ inputs.db_username }}
       run: |
         timeout 5m bash -c '
-          until docker exec ${{ job.services.db.id }} pg_isready -U $DB_USERNAME -d $DB_NAME; do
+          until docker exec ${{ job.services.db.id }} pg_isready -U "$DB_USERNAME" -d "$DB_NAME"; do
             echo "Waiting for database..."
             sleep 5
           done
         '
-      shell: bash
-
-    - name: Install PostgreSQL client
-      run: sudo apt-get install -y postgresql-client
       shell: bash
 
     - name: Migrate Database
@@ -89,7 +82,8 @@ runs:
         PGPASSWORD: ${{ inputs.db_password }}  # The env name required by PostgreSQL clients.
       run: |
         set -euo pipefail
-        if ! pg_restore -h localhost -U $DB_USERNAME -d $DB_NAME < backend/data/nest.dump; then
+        if ! docker exec -i -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
+          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" < backend/data/nest.dump; then
           echo "Data loading failed"
           exit 1
         fi
@@ -105,7 +99,11 @@ runs:
         export DJANGO_DB_HOST=localhost
         export DJANGO_REDIS_AUTH_ENABLED=False
         export DJANGO_REDIS_HOST=localhost
-        poetry run gunicorn wsgi:application --bind 0.0.0.0:$BACKEND_PORT &
+        nohup poetry run gunicorn wsgi:application \
+          --bind 0.0.0.0:$BACKEND_PORT \
+          --workers 2 \
+          > /dev/null 2>&1 &
+        disown
       shell: bash
       working-directory: backend
 
