@@ -200,7 +200,7 @@ jobs:
       - run-infrastructure-tests
       - run-rest-fuzz-tests
     permissions: {}
-    uses: ./.github/workflows/run-set-release-version.yaml
+    uses: ./.github/workflows/set-release-version.yaml
 
   build-staging-images:
     name: Build Staging Images
