@@ -19,6 +19,7 @@ on:
 
 env:
   FORCE_COLOR: 1
+  TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
 
 permissions: {}
 
@@ -47,6 +48,15 @@ jobs:
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85  # v4.0.0
         with:
           terraform_version: 1.14
+
+      - name: Create plugin cache directory
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: ${{ runner.os }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Prepare terraform backend
         env:
