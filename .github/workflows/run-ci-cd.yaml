@@ -559,7 +559,7 @@ jobs:
       - set-release-version
     permissions:
       contents: read
-    uses: ./.github/workflows/run-build-images.yaml
+    uses: ./.github/workflows/build-images.yaml
     with:
       aws_role_session_name: GitHubActions-BuildProductionImages
       aws_role_name: nest-production-terraform
