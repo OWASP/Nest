@@ -1,0 +1,100 @@
+name: Run scan images
+
+on:
+  workflow_call:
+    inputs:
+      backend_image_name:
+        description: Backend image name to scan
+        required: true
+        type: string
+      environment:
+        description: The workflow environment to use for scanning (e.g., staging, production)
+        required: true
+        type: string
+      frontend_image_name:
+        description: Frontend image name to scan
+        required: true
+        type: string
+      release_tag:
+        description: Release tag for uploading SBOMs
+        required: false
+        type: string
+        default: ''
+      release_version:
+        description: The release version to set
+        required: true
+        type: string
+      sbom_artifact_name:
+        description: Artifact name for SBOMs
+        required: false
+        type: string
+        default: ''
+    secrets:
+      GH_TOKEN:
+        required: true
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  scan-images:
+    name: Scan Images
+    environment: ${{ inputs.environment }}
+    env:
+      RELEASE_VERSION: ${{ inputs.release_version }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Cache Trivy DB
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
+
+      - name: Run Trivy security scan via Makefile
+        env:
+          BACKEND_IMAGE_NAME: ${{ inputs.backend_image_name }}
+          FRONTEND_IMAGE_NAME: ${{ inputs.frontend_image_name }}
+        run: |
+          make security-scan-backend-image BACKEND_IMAGE_NAME=$BACKEND_IMAGE_NAME
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=$FRONTEND_IMAGE_NAME
+
+      - name: Generate SBOM for backend image
+        env:
+          BACKEND_IMAGE_NAME: ${{ inputs.backend_image_name }}
+        run: |
+          make sbom-backend-image BACKEND_IMAGE_NAME=$BACKEND_IMAGE_NAME
+
+      - name: Generate SBOM for frontend image
+        env:
+          FRONTEND_IMAGE_NAME: ${{ inputs.frontend_image_name }}
+        run: |
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=$FRONTEND_IMAGE_NAME
+
+      - name: Upload SBOMs to release
+        if: ${{ inputs.release_tag != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release upload ${{ env.RELEASE_TAG }} \
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json \
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+
+      - name: Upload SBOMs as artifact
+        if: ${{ inputs.sbom_artifact_name != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: ${{ inputs.sbom_artifact_name }}
+          path: |
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+    timeout-minutes: 10
