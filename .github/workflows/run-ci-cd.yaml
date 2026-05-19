@@ -765,43 +765,17 @@ jobs:
     needs:
       - build-production-images
       - set-release-version
-    env:
-      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
       contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Cache Trivy DB
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          path: .trivy-cache
-          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
-          restore-keys: trivy-${{ runner.os }}-
-
-      - name: Run Trivy security scan via Makefile
-        run: |
-          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
-
-      - name: Generate SBOM for backend image
-        run: |
-          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
-
-      - name: Generate SBOM for frontend image
-        run: |
-          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
-
-      - name: Upload SBOMs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${{ github.event.release.tag_name }}" \
-            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json \
-            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
-    timeout-minutes: 5
+    uses: ./.github/workflows/scan-images.yaml
+    with:
+      backend_image_name: owasp/nest:backend-production
+      environment: production
+      frontend_image_name: owasp/nest:frontend-production
+      release_tag: ${{ github.event.release.tag_name }}
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   bootstrap-nest-production-infrastructure:
     name: Bootstrap Nest Production Infrastructure
