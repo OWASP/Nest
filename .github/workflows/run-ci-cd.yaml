@@ -132,20 +132,8 @@ jobs:
       - run-frontend-tests
       - run-infrastructure-tests
       - run-rest-fuzz-tests
-    outputs:
-      release_version: ${{ steps.set.outputs.release_version }}
     permissions: {}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set release version
-        id: set
-        run: |
-          if [ -n "${{ github.event.release.tag_name }}" ]; then
-            echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-          fi
-    timeout-minutes: 5
+    uses: ./.github/workflows/set-release-version.yaml
 
   build-staging-images:
     name: Build Staging Images

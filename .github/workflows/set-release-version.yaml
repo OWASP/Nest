@@ -1,0 +1,29 @@
+name: Set release version
+
+on:
+  workflow_call:
+    outputs:
+      release_version:
+        description: The release version to set
+        value: ${{ jobs.set-release-version.outputs.release_version }}
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  set-release-version:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.set-release-version.outputs.release_version }}
+    steps:
+      - name: Set release version
+        id: set-release-version
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          fi
+    timeout-minutes: 5
