@@ -105,9 +105,6 @@ jobs:
 
   build-staging-images:
     name: Build Staging Images
-    env:
-      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
-    environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
@@ -115,132 +112,38 @@ jobs:
       - set-release-version
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a  # v4.0.0
-
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121  # v4.1.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-BuildStagingImages
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7  # v2.1.4
-
-      - name: Build backend image
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
-        with:
-          build-args: |
-            OWASP_GID=1001
-            OWASP_UID=1001
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:backend-staging-cache
-          cache-to: |
-            type=registry,ref=owasp/nest:backend-staging-cache
-          context: backend
-          file: docker/backend/Dockerfile
-          load: true
-          platforms: linux/amd64
-          push: true
-          tags: |
-            owasp/nest:backend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:${{ env.RELEASE_VERSION }}
-
-      - name: Prepare frontend public environment
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.VITE_API_URL }}
-          NEXT_PUBLIC_CSRF_URL: ${{ secrets.VITE_CSRF_URL }}
-          NEXT_PUBLIC_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
-          NEXT_PUBLIC_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
-          NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
-          NEXT_PUBLIC_IDX_URL: ${{ secrets.VITE_IDX_URL }}
-          NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
-          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
-          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-          NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
-          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-        run: |
-          umask 377
-          cat > frontend/.env <<EOF
-          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-          NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL
-          NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT
-          NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL
-          NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
-          NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
-          NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
-          NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-          NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
-          NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
-          NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
-          EOF
-
-      - name: Get backend image size
-        id: backend-size
-        run: |
-          IMAGE_NAME="owasp/nest:backend-staging"
-          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
-          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
-          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
-
-      - name: Build frontend image
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
-        with:
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:frontend-staging-cache
-          cache-to: |
-            type=registry,ref=owasp/nest:frontend-staging-cache
-          context: frontend
-          file: docker/frontend/Dockerfile
-          load: true
-          platforms: linux/amd64
-          push: true
-          secrets: |
-            RELEASE_VERSION=${{ env.RELEASE_VERSION }}
-            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          tags: |
-            owasp/nest:frontend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:${{ env.RELEASE_VERSION }}
-
-      - name: Get frontend image size
-        id: frontend-size
-        run: |
-          IMAGE_NAME="owasp/nest:frontend-staging"
-          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
-          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
-          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
-
-      - name: Create Docker image size report
-        run: |
-          {
-            echo "## Docker Image Size Report"
-            echo ""
-            echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
-            echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
-          } >> $GITHUB_STEP_SUMMARY
-    timeout-minutes: 10
+    uses: ./.github/workflows/build-images.yaml
+    with:
+      aws_role_session_name: GitHubActions-BuildStagingImages
+      aws_role_name: nest-staging-terraform
+      backend_tag: owasp/nest:backend-staging
+      backend_cache_ref: owasp/nest:backend-staging-cache
+      backend_uid: '1001'
+      backend_gid: '1001'
+      backend_ecr_repo: nest-staging-backend
+      environment: staging
+      frontend_tag: owasp/nest:frontend-staging
+      frontend_cache_ref: owasp/nest:frontend-staging-cache
+      frontend_ecr_repo: nest-staging-frontend
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
+      NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
+      NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      VITE_API_URL: ${{ secrets.VITE_API_URL }}
+      VITE_CSRF_URL: ${{ secrets.VITE_CSRF_URL }}
+      VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
+      VITE_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
+      VITE_IDX_URL: ${{ secrets.VITE_IDX_URL }}
+      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
   scan-staging-images:
     name: Scan Staging Images
