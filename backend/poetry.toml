@@ -1,5 +1,10 @@
 cache-dir = ".cache/pypoetry"
 
+[solver]
+# 21 days.
+min-release-age = 21
+min-release-age-exclude = ["django"]
+
 [virtualenvs]
 create = true
 in-project = true
