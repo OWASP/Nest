@@ -10,6 +10,9 @@ minimumReleaseAgeExclude:
   - '@next/swc-linux-x64-musl@16.2.6'
   - '@next/swc-win32-arm64-msvc@16.2.6'
   - '@next/swc-win32-x64-msvc@16.2.6'
+  - brace-expansion@5.0.6
   - fast-uri@3.1.2
   - next@16.2.6
   - postcss@8.5.10
+  - protobufjs@7.5.8
+  - ws@8.20.1
