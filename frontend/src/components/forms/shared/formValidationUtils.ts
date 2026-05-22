@@ -1,3 +1,4 @@
+import validator from 'validator'
 import type { ValidationRule } from 'components/forms/shared/useFormValidation'
 
 export const validateRequired = (value: string, fieldName: string): string | undefined => {
@@ -30,6 +31,39 @@ export const validateEndDate = (value: string, startDate?: string): string | und
     return 'End date must be after start date'
   }
   return undefined
+}
+
+export const validateWebsite = (value: string): string | undefined => {
+  const requiredError = validateRequired(value, 'Website')
+  if (requiredError) return requiredError
+
+  const trimValue = value.trim()
+
+  const normalizedValue = trimValue.toLowerCase()
+  if (!normalizedValue.startsWith('http://') && !normalizedValue.startsWith('https://')) {
+    return 'Website must start with http:// or https://'
+  }
+
+  try {
+    new URL(trimValue)
+  } catch {
+    return 'Enter a valid website URL'
+  }
+
+  return undefined
+}
+
+export const validateContactEmail = (value: string): string | undefined => {
+  const requiredError = validateRequired(value, 'Contact email')
+  if (requiredError) return requiredError
+  if (!validator.isEmail(value.trim())) {
+    return 'Enter a valid email'
+  }
+  return undefined
+}
+
+export const validateMessage = (value: string): string | undefined => {
+  return validateRequired(value, 'Message')
 }
 
 type CommonFormData = {

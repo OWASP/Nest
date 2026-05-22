@@ -37,11 +37,21 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         GOLD = "Gold"
         SILVER = "Silver"
 
+    class StatusType(models.TextChoices):
+        """Status type choices."""
+
+        DRAFT = "Draft"
+        ACTIVE = "Active"
+        ARCHIVED = "Archived"
+
     # Basic information
     description = models.TextField(verbose_name="Description", blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     name = models.CharField(verbose_name="Name", max_length=255)
     sort_name = models.CharField(verbose_name="Sort Name", max_length=255)
+    created_at = models.DateTimeField(verbose_name="Created At", null=True, blank=True)
+    contact_email = models.EmailField(blank=True)
+    message = models.TextField(verbose_name="Message", blank=True)
 
     # URLs and images
     url = models.URLField(verbose_name="Website URL", blank=True)
@@ -63,6 +73,12 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         choices=SponsorType.choices,
         default=SponsorType.NOT_SPONSOR,
     )
+    status = models.CharField(max_length=20, choices=StatusType.choices, default=StatusType.DRAFT)
+
+    # FKs
+    chapter = models.ForeignKey("owasp.Chapter", on_delete=models.SET_NULL, null=True, blank=True)
+
+    project = models.ForeignKey("owasp.Project", on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self) -> str:
         """Sponsor human readable representation."""

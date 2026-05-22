@@ -25,3 +25,18 @@ class SponsorQuery:
                 Sponsor.SponsorType.NOT_SPONSOR: 6,
             }[x.sponsor_type],
         )
+
+    @strawberry_django.field
+    def active_sponsors(self) -> list[SponsorNode]:
+        """Resolve active sponsors ordered by Sponsor level."""
+        return sorted(
+            Sponsor.objects.filter(status=Sponsor.StatusType.ACTIVE),
+            key=lambda x: {
+                Sponsor.SponsorType.DIAMOND: 1,
+                Sponsor.SponsorType.PLATINUM: 2,
+                Sponsor.SponsorType.GOLD: 3,
+                Sponsor.SponsorType.SILVER: 4,
+                Sponsor.SponsorType.SUPPORTER: 5,
+                Sponsor.SponsorType.NOT_SPONSOR: 6,
+            }[x.sponsor_type],
+        )
