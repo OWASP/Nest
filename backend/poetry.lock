@@ -171,14 +171,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.39.0"
+version = "4.40.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.39.0-py3-none-any.whl", hash = "sha256:b355e1074d6dd3b94872529fe77bb5601f1b117155baf1e0c7019bca1d9d22b4"},
-    {file = "algoliasearch-4.39.0.tar.gz", hash = "sha256:7023203dc709200686f6f5c324fe8c342ea449e5459ab72de58ab0595d181cbf"},
+    {file = "algoliasearch-4.40.0-py3-none-any.whl", hash = "sha256:e8d402e172fd9f0b59a10ac0c80d11eeee2c3ab304b9fb72cfc74f7f84fc18d3"},
+    {file = "algoliasearch-4.40.0.tar.gz", hash = "sha256:7bc812620210e8b498673e932ec34e0af6ecfda6d493269190ca1ffc6befdf22"},
 ]
 
 [package.dependencies]
@@ -5203,4 +5203,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "e00cad1c9012c94210a2cb069eda07c72874caa85f8b768031728830de239ab7"
+content-hash = "c39dbd83b031d9edded85f3aa98cd5d2f3c7c1d6cf2308d8f6128680708ad05f"

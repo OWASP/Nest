@@ -9,7 +9,7 @@ description = "Your gateway to OWASP"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
 packages = [ { include = "apps" } ]
-dependencies.algoliasearch = "4.39.0"
+dependencies.algoliasearch = "4.40.0"
 dependencies.algoliasearch-django = "^4.0.0"
 dependencies.django = "6.0.5"
 dependencies.django-configurations = "^2.5.1"
