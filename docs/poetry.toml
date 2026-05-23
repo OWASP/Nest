@@ -4,7 +4,7 @@ cache-dir = ".cache/pypoetry"
 [solver]
 min-release-age = 21
 min-release-age-exclude = [
-    "click", # 8.3.1
+    "click", # 8.3.3
 ]
 
 [virtualenvs]
