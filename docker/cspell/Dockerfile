@@ -1,4 +1,4 @@
-FROM node:24.14-alpine3.23
+FROM node:24.15-alpine3.23
 
 WORKDIR /opt/node
 
@@ -9,7 +9,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NPM_CONFIG_TIMEOUT=30000 \
     PATH="$PNPM_HOME:$PATH"
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts

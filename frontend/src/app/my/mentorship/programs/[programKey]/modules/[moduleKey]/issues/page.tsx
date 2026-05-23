@@ -9,11 +9,12 @@ import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
-  GetModuleIssuesDocument,
-  GetProgramAdminsAndModulesDocument,
+  GetManagementModuleIssuesDocument,
+  GetManagementProgramAdminsAndModulesDocument,
 } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import IssuesTable from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -45,7 +46,7 @@ const IssuesPage = () => {
     data: accessData,
     loading: accessLoading,
     error: accessError,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
@@ -54,10 +55,12 @@ const IssuesPage = () => {
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 
   useEffect(() => {
-    if (accessError) handleAppError(accessError)
+    if (accessError && !isForbiddenGraphQLError(accessError)) {
+      handleAppError(accessError)
+    }
   }, [accessError])
 
-  const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
+  const { data, loading, error } = useQuery(GetManagementModuleIssuesDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -70,10 +73,12 @@ const IssuesPage = () => {
   })
 
   useEffect(() => {
-    if (error) handleAppError(error)
+    if (error && !isForbiddenGraphQLError(error)) {
+      handleAppError(error)
+    }
   }, [error])
 
-  const moduleData = data?.getModule
+  const moduleData = data?.managementModule
 
   const { moduleIssues, filteredCount } = useMemo(() => {
     const allIssues = (moduleData?.issues || []).map((i) => ({
@@ -159,6 +164,16 @@ const IssuesPage = () => {
     return <LoadingSpinner />
   }
 
+  if (accessError && isForbiddenGraphQLError(accessError)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to manage issues for this module."
+      />
+    )
+  }
+
   if (accessError) {
     return (
       <ErrorDisplay
@@ -180,6 +195,26 @@ const IssuesPage = () => {
 
   if (loading) {
     return <LoadingSpinner />
+  }
+
+  if (error && isForbiddenGraphQLError(error)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to view issues for this module."
+      />
+    )
+  }
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Server Error"
+        message="Failed to load issues for this module. Please try again later."
+      />
+    )
   }
 
   if (!moduleData)

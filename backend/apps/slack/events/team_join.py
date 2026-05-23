@@ -1,7 +1,5 @@
 """Slack bot user joined team handler using templates."""
 
-import logging
-
 from apps.slack.constants import (
     OWASP_APPSEC_CHANNEL_ID,
     OWASP_ASKOWASP_CHANNEL_ID,
@@ -20,8 +18,6 @@ from apps.slack.constants import (
     OWASP_THREAT_MODELING_CHANNEL_ID,
 )
 from apps.slack.events.event import EventBase
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 
 class TeamJoin(EventBase):
