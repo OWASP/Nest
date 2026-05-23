@@ -154,7 +154,8 @@ jobs:
         }}
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
-      contents: write
+      actions: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -627,6 +628,7 @@ jobs:
         }}
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
+      # Broader than typical scan jobs: required for "Upload SBOMs" (gh release upload).
       contents: write
     runs-on: ubuntu-latest
     steps:
