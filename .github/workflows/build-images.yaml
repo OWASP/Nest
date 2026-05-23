@@ -1,4 +1,4 @@
-name: Run build images
+name: Build images
 
 on:
   workflow_call:
@@ -11,8 +11,8 @@ on:
         description: AWS role session name
         required: true
         type: string
-      backend_cache_ref:
-        description: Backend cache reference configuration
+      backend_ecr_cache_repo:
+        description: Backend ECR repository name for build cache
         required: true
         type: string
       backend_ecr_repo:
@@ -23,10 +23,6 @@ on:
         description: Backend OWASP GID
         required: true
         type: string
-      backend_tag:
-        description: Docker tag for backend image
-        required: true
-        type: string
       backend_uid:
         description: Backend OWASP UID
         required: true
@@ -35,16 +31,12 @@ on:
         description: GitHub environment name
         required: true
         type: string
-      frontend_cache_ref:
-        description: Frontend cache reference configuration
+      frontend_ecr_cache_repo:
+        description: Frontend ECR repository name for build cache
         required: true
         type: string
       frontend_ecr_repo:
         description: Frontend ECR repository name
-        required: true
-        type: string
-      frontend_tag:
-        description: Docker tag for frontend image
         required: true
         type: string
       release_version:
@@ -59,10 +51,6 @@ on:
       AWS_ROLE_EXTERNAL_ID:
         required: true
       AWS_SECRET_ACCESS_KEY:
-        required: true
-      DOCKERHUB_TOKEN:
-        required: true
-      DOCKERHUB_USERNAME:
         required: true
       NEXT_PUBLIC_GTM_ID:
         required: true
@@ -94,9 +82,15 @@ permissions: {}
 
 jobs:
   build-images:
-    name: Build Images
+    name: Build images
     environment: ${{ inputs.environment }}
     env:
+      BACKEND_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_cache_repo }}:cache
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
+        }}
+      FRONTEND_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_cache_repo }}:cache
+      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
+        }}
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
       contents: read
@@ -105,17 +99,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a  # v4.0.0
-
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121  # v4.1.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
@@ -140,18 +125,16 @@ jobs:
             OWASP_UID=${{ inputs.backend_uid }}
           cache-from: |
             type=gha
-            type=registry,ref=${{ inputs.backend_cache_ref }}
+            type=registry,ref=${{ env.BACKEND_CACHE_REF }}
           cache-to: |
             type=gha,mode=max
-            type=registry,ref=${{ inputs.backend_cache_ref }}
+            type=registry,ref=${{ env.BACKEND_CACHE_REF }},mode=max
           context: backend
           file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
-          tags: |
-            ${{ inputs.backend_tag }}
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ env.RELEASE_VERSION }}
+          tags: ${{ env.BACKEND_IMAGE }}
 
       - name: Prepare frontend public environment
         env:
@@ -184,11 +167,8 @@ jobs:
 
       - name: Get backend image size
         id: backend-size
-        env:
-          BACKEND_TAG: ${{ inputs.backend_tag }}
         run: |
-          IMAGE_NAME="$BACKEND_TAG"
-          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          RAW_SIZE=$(docker image inspect "$BACKEND_IMAGE" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
 
@@ -197,10 +177,10 @@ jobs:
         with:
           cache-from: |
             type=gha
-            type=registry,ref=${{ inputs.frontend_cache_ref }}
+            type=registry,ref=${{ env.FRONTEND_CACHE_REF }}
           cache-to: |
             type=gha,mode=max
-            type=registry,ref=${{ inputs.frontend_cache_ref }}
+            type=registry,ref=${{ env.FRONTEND_CACHE_REF }},mode=max
           context: frontend
           file: docker/frontend/Dockerfile
           load: true
@@ -209,17 +189,12 @@ jobs:
           secrets: |
             RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          tags: |
-            ${{ inputs.frontend_tag }}
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ env.RELEASE_VERSION }}
+          tags: ${{ env.FRONTEND_IMAGE }}
 
       - name: Get frontend image size
         id: frontend-size
-        env:
-          FRONTEND_TAG: ${{ inputs.frontend_tag }}
         run: |
-          IMAGE_NAME="$FRONTEND_TAG"
-          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          RAW_SIZE=$(docker image inspect "$FRONTEND_IMAGE" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
 
