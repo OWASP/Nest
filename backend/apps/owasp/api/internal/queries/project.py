@@ -7,7 +7,6 @@ from apps.common.utils import normalize_limit
 from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
-from apps.owasp.utils.entity_leader import user_is_project_leader
 
 MAX_RECENT_PROJECTS_LIMIT = 1000
 MAX_SEARCH_QUERY_LENGTH = 100
@@ -74,4 +73,4 @@ class ProjectQuery:
         except GithubUser.DoesNotExist:
             return False
 
-        return user_is_project_leader(github_user)
+        return github_user.is_project_leader

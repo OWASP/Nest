@@ -118,14 +118,6 @@ class TestResolveAdminsFromLogins:
 class TestCreateProgram:
     """Tests for ProgramMutation.create_program."""
 
-    @pytest.fixture(autouse=True)
-    def _mock_user_is_project_leader(self):
-        with patch(
-            "apps.mentorship.api.internal.mutations.program.user_is_project_leader",
-            return_value=True,
-        ):
-            yield
-
     @patch("apps.mentorship.api.internal.mutations.program.ProgramAdmin")
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     @patch("apps.mentorship.api.internal.mutations.program.Admin")
@@ -221,6 +213,7 @@ class TestCreateProgram:
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
+        user.github_user.is_project_leader = False
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -228,15 +221,9 @@ class TestCreateProgram:
         input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
 
-        with (
-            patch(
-                "apps.mentorship.api.internal.mutations.program.user_is_project_leader",
-                return_value=False,
-            ),
-            pytest.raises(
-                PermissionDenied,
-                match=r"You must be a project leader to create a program\.",
-            ),
+        with pytest.raises(
+            PermissionDenied,
+            match=r"You must be a project leader to create a program\.",
         ):
             mutation.create_program(info, input_data)
 

@@ -19,7 +19,6 @@ from apps.mentorship.api.internal.nodes.program import (
 from apps.mentorship.models import Admin, Program
 from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
-from apps.owasp.utils.entity_leader import user_is_project_leader
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +86,7 @@ class ProgramMutation:
         """Create a new mentorship program."""
         user = info.context.request.user
 
-        if not user.github_user or not user_is_project_leader(user.github_user):
+        if not user.github_user or not user.github_user.is_project_leader:
             msg = "You must be a project leader to create a program."
             logger.warning(
                 "Permission denied for user '%s' to create program '%s'.",
