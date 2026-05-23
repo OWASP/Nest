@@ -158,6 +158,7 @@ ini_options.addopts = [
 ini_options.filterwarnings = [
   "ignore::DeprecationWarning:pytest_cov",
   "ignore::DeprecationWarning:xdist",
+  "ignore::langchain_core._api.deprecation.LangChainPendingDeprecationWarning",
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
 ini_options.log_level = "INFO"
