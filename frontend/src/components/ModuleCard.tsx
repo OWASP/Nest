@@ -39,6 +39,8 @@ import { TextInfoItem } from 'components/InfoItem'
 import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
 
+const MAX_INITIAL_MODULES_DISPLAY = 6
+
 interface ModuleCardProps {
   modules: Module[]
   accessLevel?: string
@@ -125,7 +127,9 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
     return <SingleModuleCard module={modules[0]} accessLevel={accessLevel} admins={admins} />
   }
 
-  const displayedModules = showAllModule ? orderedModules : orderedModules.slice(0, 4)
+  const displayedModules = showAllModule
+    ? orderedModules
+    : orderedModules.slice(0, MAX_INITIAL_MODULES_DISPLAY)
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -160,7 +164,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
       ) : (
         moduleGrid
       )}
-      {orderedModules.length > 4 && (
+      {orderedModules.length > MAX_INITIAL_MODULES_DISPLAY && (
         <div className="mt-6 flex items-center justify-center text-center">
           <button
             type="button"

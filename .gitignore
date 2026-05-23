@@ -9,7 +9,6 @@ __pycache__
 !.env.example
 !.env.e2e.example
 !.env.fuzz.example
-.github/ansible/.ansible/.lock
 .github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/

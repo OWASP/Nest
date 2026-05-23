@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
 
 WORKDIR /app
 
-COPY --chmod=444 package.json pnpm-lock.yaml ./
+COPY --chmod=444 package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts
