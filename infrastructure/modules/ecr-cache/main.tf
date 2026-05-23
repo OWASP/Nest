@@ -9,6 +9,9 @@ terraform {
   }
 }
 
+# BuildKit registry cache reuses a single tag (e.g. :cache) and overwrites it each build.
+# App release images use IMMUTABLE repos with scan-on-push in modules/service; this repo is cache-only.
+# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags, terraform.lang.security.ecr-image-scan-on-push.ecr-image-scan-on-push
 resource "aws_ecr_repository" "main" {
   image_tag_mutability = "MUTABLE"
   name                 = var.name

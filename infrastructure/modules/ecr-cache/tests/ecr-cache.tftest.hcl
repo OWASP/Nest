@@ -26,6 +26,15 @@ run "test_repository_tag_mutability" {
   }
 }
 
+run "test_ecr_repository_scan_on_push_disabled" {
+  command = plan
+
+  assert {
+    condition     = aws_ecr_repository.main.image_scanning_configuration[0].scan_on_push == false
+    error_message = "ECR cache repository must not scan cache manifests on push."
+  }
+}
+
 run "test_lifecycle_policy_retains_three_images" {
   command = plan
 
