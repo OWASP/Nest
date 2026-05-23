@@ -1,0 +1,178 @@
+name: Build images
+
+on:
+  workflow_call:
+    inputs:
+      aws_role_name:
+        description: AWS role name to assume
+        required: true
+        type: string
+      aws_role_session_name:
+        description: AWS role session name
+        required: true
+        type: string
+      backend_ecr_cache_repo:
+        description: Backend ECR repository name for build cache
+        required: true
+        type: string
+      backend_ecr_repo:
+        description: Backend ECR repository name
+        required: true
+        type: string
+      backend_gid:
+        description: Backend OWASP GID
+        required: true
+        type: string
+      backend_uid:
+        description: Backend OWASP UID
+        required: true
+        type: string
+      environment:
+        description: GitHub environment name
+        required: true
+        type: string
+      frontend_ecr_cache_repo:
+        description: Frontend ECR repository name for build cache
+        required: true
+        type: string
+      frontend_ecr_repo:
+        description: Frontend ECR repository name
+        required: true
+        type: string
+      release_version:
+        description: The release version to set
+        required: true
+        type: string
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  build-images:
+    name: Build images
+    environment: ${{ inputs.environment }}
+    env:
+      BACKEND_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_cache_repo }}:cache
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
+        }}
+      FRONTEND_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_cache_repo }}:cache
+      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
+        }}
+      RELEASE_VERSION: ${{ inputs.release_version }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: ${{ inputs.aws_role_session_name }}
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7  # v2.1.4
+
+      - name: Build backend image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
+        with:
+          build-args: |
+            OWASP_GID=${{ inputs.backend_gid }}
+            OWASP_UID=${{ inputs.backend_uid }}
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.BACKEND_CACHE_REF }}
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.BACKEND_CACHE_REF }},mode=max
+          context: backend
+          file: docker/backend/Dockerfile
+          load: true
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.BACKEND_IMAGE }}
+
+      - name: Prepare frontend public environment
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.VITE_API_URL }}
+          NEXT_PUBLIC_CSRF_URL: ${{ secrets.VITE_CSRF_URL }}
+          NEXT_PUBLIC_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
+          NEXT_PUBLIC_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
+          NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
+          NEXT_PUBLIC_IDX_URL: ${{ secrets.VITE_IDX_URL }}
+          NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+        run: |
+          umask 377
+          cat > frontend/.env <<EOF
+          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+          NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL
+          NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT
+          NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL
+          NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
+          NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
+          NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
+          NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+          NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
+          NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
+          NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
+          EOF
+
+      - name: Get backend image size
+        id: backend-size
+        run: |
+          RAW_SIZE=$(docker image inspect "$BACKEND_IMAGE" --format='{{.Size}}')
+          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Build frontend image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
+        with:
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ env.FRONTEND_CACHE_REF }}
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=${{ env.FRONTEND_CACHE_REF }},mode=max
+          context: frontend
+          file: docker/frontend/Dockerfile
+          load: true
+          platforms: linux/amd64
+          push: true
+          secrets: |
+            RELEASE_VERSION=${{ env.RELEASE_VERSION }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+          tags: ${{ env.FRONTEND_IMAGE }}
+
+      - name: Get frontend image size
+        id: frontend-size
+        run: |
+          RAW_SIZE=$(docker image inspect "$FRONTEND_IMAGE" --format='{{.Size}}')
+          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Create Docker image size report
+        run: |
+          {
+            echo "## Docker Image Size Report"
+            echo ""
+            echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
+            echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
+          } >> $GITHUB_STEP_SUMMARY
+    timeout-minutes: 10
