@@ -126,6 +126,7 @@ class TestCreateProgram:
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -159,6 +160,7 @@ class TestCreateProgram:
         user = MagicMock()
         user.username = "newuser"
         user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -187,6 +189,7 @@ class TestCreateProgram:
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -250,6 +253,7 @@ class TestCreateProgram:
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -265,6 +269,7 @@ class TestCreateProgram:
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
