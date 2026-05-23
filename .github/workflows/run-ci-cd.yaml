@@ -124,22 +124,6 @@ jobs:
       frontend_ecr_cache_repo: nest-staging-frontend-cache
       frontend_ecr_repo: nest-staging-frontend
       release_version: ${{ needs.set-release-version.outputs.release_version }}
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
-      NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
-      NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
-      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      VITE_API_URL: ${{ secrets.VITE_API_URL }}
-      VITE_CSRF_URL: ${{ secrets.VITE_CSRF_URL }}
-      VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
-      VITE_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
-      VITE_IDX_URL: ${{ secrets.VITE_IDX_URL }}
-      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
   scan-staging-images:
     name: Scan Staging Images
@@ -594,22 +578,6 @@ jobs:
       frontend_ecr_cache_repo: nest-production-frontend-cache
       frontend_ecr_repo: nest-production-frontend
       release_version: ${{ needs.set-release-version.outputs.release_version }}
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
-      NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
-      NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
-      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      VITE_API_URL: ${{ secrets.VITE_API_URL }}
-      VITE_CSRF_URL: ${{ secrets.VITE_CSRF_URL }}
-      VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
-      VITE_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
-      VITE_IDX_URL: ${{ secrets.VITE_IDX_URL }}
-      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
   scan-production-images:
     name: Scan Production Images

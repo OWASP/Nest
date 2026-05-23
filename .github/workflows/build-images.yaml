@@ -43,37 +43,6 @@ on:
         description: The release version to set
         required: true
         type: string
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_ACCOUNT_ID:
-        required: true
-      AWS_ROLE_EXTERNAL_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      NEXT_PUBLIC_GTM_ID:
-        required: true
-      NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED:
-        required: true
-      NEXT_PUBLIC_POSTHOG_HOST:
-        required: true
-      NEXT_PUBLIC_POSTHOG_KEY:
-        required: true
-      SENTRY_AUTH_TOKEN:
-        required: true
-      VITE_API_URL:
-        required: true
-      VITE_CSRF_URL:
-        required: true
-      VITE_ENVIRONMENT:
-        required: true
-      VITE_GRAPHQL_URL:
-        required: true
-      VITE_IDX_URL:
-        required: true
-      VITE_SENTRY_DSN:
-        required: true
 
 env:
   FORCE_COLOR: 1
