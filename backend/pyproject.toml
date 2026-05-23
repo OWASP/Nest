@@ -139,6 +139,13 @@ module = [ "apps.*.migrations.*" ]
 disable_error_code = [ "return-value", "attr-defined", "misc" ]
 module = [ "apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*" ]
 
+[tool.pyright]
+extraPaths = [ "." ]
+include = [ "apps", "tests" ]
+pythonVersion = "3.13"
+venv = ".venv"
+venvPath = "."
+
 [tool.pytest]
 ini_options.DJANGO_CONFIGURATION = "Test"
 ini_options.DJANGO_SETTINGS_MODULE = "settings.test"

@@ -2,7 +2,6 @@ import importlib
 from unittest.mock import MagicMock, patch
 
 import pytest
-from slack_sdk.errors import SlackApiError
 
 import apps.slack.actions.home as home_module
 from apps.slack.actions.home import handle_home_actions
@@ -70,7 +69,9 @@ class TestHomeActions:
         assert view["type"] == "home"
 
     def test_handle_home_actions_api_error(self, mock_client, mock_body):
-        mock_client.views_publish.side_effect = SlackApiError("Error", {"error": "test_error"})
+        mock_client.views_publish.side_effect = home_module.SlackApiError(
+            "Error", {"error": "test_error"}
+        )
         mock_body["actions"][0]["action_id"] = VIEW_PROJECTS_ACTION
 
         handle_home_actions(MagicMock(), mock_body, mock_client)
@@ -80,7 +81,9 @@ class TestHomeActions:
         self, mock_logger, mock_client, mock_body
     ):
         """Test that SlackApiError is logged with exception details."""
-        mock_client.views_publish.side_effect = SlackApiError("Error", {"error": "test_error"})
+        mock_client.views_publish.side_effect = home_module.SlackApiError(
+            "Error", {"error": "test_error"}
+        )
         mock_body["actions"][0]["action_id"] = VIEW_PROJECTS_ACTION
 
         handle_home_actions(MagicMock(), mock_body, mock_client)
