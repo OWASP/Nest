@@ -1,13 +1,9 @@
 """A command to update OWASP entities related repositories data."""
 
-import logging
-
 from django.core.management.base import BaseCommand
 
 from apps.common.open_ai import OpenAi
 from apps.github.models.issue import Issue
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
