@@ -236,7 +236,8 @@ const IssuesPage = () => {
                   classNames={{
                     label:
                       'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                    trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap rounded-none w-full sm:w-40',
+                    trigger: 'bg-transparent pl-0 text-nowrap rounded-none w-full sm:w-40',
+                    selectorIcon: 'right-3',
                     popoverContent: 'text-md min-w-40 dark:bg-[#323232] rounded-none p-0',
                   }}
                   selectedKeys={new Set([selectedLabel])}
@@ -266,7 +267,8 @@ const IssuesPage = () => {
                   classNames={{
                     label:
                       'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                    trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap rounded-none w-full sm:w-36',
+                    trigger: 'bg-transparent pl-0 text-nowrap rounded-none w-full sm:w-36',
+                    selectorIcon: 'right-3',
                     popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
                   }}
                   selectedKeys={new Set([selectedDeadline])}
