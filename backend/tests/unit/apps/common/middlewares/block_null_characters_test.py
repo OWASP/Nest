@@ -67,3 +67,12 @@ class TestBlockNullCharactersMiddleware:
         )
         response = middleware(request)
         assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_multipart_form_data_skips_body_check(self, middleware, factory):
+        request = factory.post(
+            "/clean/path",
+            data={"file": "content"},
+            content_type="multipart/form-data; boundary=----WebKitFormBoundary",
+        )
+        response = middleware(request)
+        assert response.status_code == HTTPStatus.OK
