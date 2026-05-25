@@ -24,8 +24,8 @@ class Local(Base):
     DEBUG = True
     IS_LOCAL_ENVIRONMENT = True
     LOGGING = {}
-    MEDIA = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "/media/"
     PUBLIC_IP_ADDRESS = values.Value()
 
     # "Lax" is required locally because the frontend (port 3000) and backend (port 8000)

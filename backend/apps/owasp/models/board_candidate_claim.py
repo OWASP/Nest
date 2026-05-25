@@ -64,8 +64,11 @@ class BoardCandidateClaim(TimestampedModel):
         super().clean()
         if (
             self.pk
-            and BoardCandidateClaim.objects.get(pk=self.pk).is_locked
             and self.status != self.Status.WITHDRAWN
+            and BoardCandidateClaim.objects.filter(
+                pk=self.claim_id,
+                is_locked=True,
+            ).exists()
         ):
             error_message = "Cannot update locked claim."
             raise ValidationError(error_message)

@@ -1,6 +1,6 @@
 """Tests for BoardCandidateClaimEvidence model."""
 
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -96,61 +96,50 @@ class TestBoardCandidateClaimEvidenceModel:
 
     def test_clean_locked_claim_raises_validation_error(self):
         """Test that clean raises ValidationError when claim is locked."""
-        mock_claim = Mock()
-        mock_claim.is_locked = True
-
         evidence = BoardCandidateClaimEvidence(
             title="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
-        with (
-            patch.object(
-                type(evidence), "claim", new_callable=PropertyMock, return_value=mock_claim
-            ),
-            pytest.raises(
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = True
+
+            with pytest.raises(
                 ValidationError, match=r"Cannot add or modify evidence on a locked claim."
-            ),
-        ):
-            evidence.clean()
+            ):
+                evidence.clean()
 
     def test_clean_unlocked_claim_with_source_url_passes(self):
         """Test that clean passes for unlocked claim with source_url."""
-        mock_claim = Mock()
-        mock_claim.is_locked = False
-
         evidence = BoardCandidateClaimEvidence(
             title="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
-        with patch.object(
-            type(evidence), "claim", new_callable=PropertyMock, return_value=mock_claim
-        ):
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = False
             evidence.clean()
 
     def test_clean_no_file_and_no_source_url_raises_validation_error(self):
         """Test that clean raises ValidationError when neither file nor source_url."""
-        mock_claim = Mock()
-        mock_claim.is_locked = False
-
         evidence = BoardCandidateClaimEvidence(title="Test Evidence", source_url="")
         evidence.claim_id = 1
         evidence.file = None
 
-        with (
-            patch.object(
-                type(evidence), "claim", new_callable=PropertyMock, return_value=mock_claim
-            ),
-            pytest.raises(ValidationError, match=r"Either file or source_url is required."),
-        ):
-            evidence.clean()
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = False
+
+            with pytest.raises(ValidationError, match=r"Either file or source_url is required."):
+                evidence.clean()
 
     def test_clean_with_file_sets_file_name(self):
         """Test that clean auto-sets file_name from file when not provided."""
-        mock_claim = Mock()
-        mock_claim.is_locked = False
-
         mock_file = MagicMock()
         mock_file.name = "document.pdf"
         mock_file.size = 12345
@@ -162,9 +151,10 @@ class TestBoardCandidateClaimEvidenceModel:
         evidence.file_name = ""
         evidence.file_size = None
 
-        with patch.object(
-            type(evidence), "claim", new_callable=PropertyMock, return_value=mock_claim
-        ):
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = False
             evidence.clean()
 
         assert evidence.file_name == "document.pdf"
@@ -172,9 +162,6 @@ class TestBoardCandidateClaimEvidenceModel:
 
     def test_clean_with_file_preserves_existing_file_name(self):
         """Test that clean preserves existing file_name when already set."""
-        mock_claim = Mock()
-        mock_claim.is_locked = False
-
         mock_file = MagicMock()
         mock_file.name = "document.pdf"
         mock_file.size = 12345
@@ -186,9 +173,10 @@ class TestBoardCandidateClaimEvidenceModel:
         evidence.file_name = "custom_name.pdf"
         evidence.file_size = 99999
 
-        with patch.object(
-            type(evidence), "claim", new_callable=PropertyMock, return_value=mock_claim
-        ):
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = False
             evidence.clean()
 
         assert evidence.file_name == "custom_name.pdf"

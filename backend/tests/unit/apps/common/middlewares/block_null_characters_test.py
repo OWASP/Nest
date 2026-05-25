@@ -76,3 +76,12 @@ class TestBlockNullCharactersMiddleware:
         )
         response = middleware(request)
         assert response.status_code == HTTPStatus.OK
+
+    def test_fake_multipart_content_type_does_not_skip_body_check(self, middleware, factory):
+        request = factory.post(
+            "/clean/path",
+            data=b'{"key": "bad\x00value"}',
+            content_type="multipart/form-datax",
+        )
+        response = middleware(request)
+        assert response.status_code == HTTPStatus.BAD_REQUEST

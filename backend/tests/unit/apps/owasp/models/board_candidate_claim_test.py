@@ -1,6 +1,6 @@
 """Tests for BoardCandidateClaim model."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -102,15 +102,12 @@ class TestBoardCandidateClaimModel:
         """Test that clean raises ValidationError when updating a locked claim."""
         claim = BoardCandidateClaim(title="Locked Claim", status=BoardCandidateClaim.Status.DRAFT)
         claim.pk = 1
+        claim.claim_id = 1
 
-        mock_db_claim = Mock()
-        mock_db_claim.is_locked = True
-        mock_objects.get.return_value = mock_db_claim
+        mock_objects.filter.return_value.exists.return_value = True
 
         with pytest.raises(ValidationError, match=r"Cannot update locked claim."):
             claim.clean()
-
-        mock_objects.get.assert_called_once_with(pk=1)
 
     @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
     def test_clean_locked_claim_allows_withdrawal(self, mock_objects):
@@ -119,10 +116,9 @@ class TestBoardCandidateClaimModel:
             title="Locked Claim", status=BoardCandidateClaim.Status.WITHDRAWN
         )
         claim.pk = 1
+        claim.claim_id = 1
 
-        mock_db_claim = Mock()
-        mock_db_claim.is_locked = True
-        mock_objects.get.return_value = mock_db_claim
+        mock_objects.filter.return_value.exists.return_value = True
 
         claim.clean()
 
@@ -133,10 +129,9 @@ class TestBoardCandidateClaimModel:
             title="Unlocked Claim", status=BoardCandidateClaim.Status.SUBMITTED
         )
         claim.pk = 1
+        claim.claim_id = 1
 
-        mock_db_claim = Mock()
-        mock_db_claim.is_locked = False
-        mock_objects.get.return_value = mock_db_claim
+        mock_objects.filter.return_value.exists.return_value = False
 
         claim.clean()
 

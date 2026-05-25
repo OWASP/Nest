@@ -52,7 +52,13 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         """Validate evidence."""
         super().clean()
 
-        if self.claim_id and self.claim.is_locked:
+        if (
+            self.claim_id
+            and BoardCandidateClaim.objects.filter(
+                pk=self.claim_id,
+                is_locked=True,
+            ).exists()
+        ):
             err = "Cannot add or modify evidence on a locked claim."
             raise ValidationError(err)
 

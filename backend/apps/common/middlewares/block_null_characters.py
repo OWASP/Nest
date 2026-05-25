@@ -36,9 +36,8 @@ class BlockNullCharactersMiddleware:
             return JsonResponse({"message": message, "errors": {}}, status=HTTPStatus.BAD_REQUEST)
 
         content_length = int(request.META.get("CONTENT_LENGTH", 0) or 0)
-        is_multipart = request.content_type and request.content_type.startswith(
-            "multipart/form-data"
-        )
+        content_type = (request.META.get("CONTENT_TYPE") or "").split(";", 1)[0].strip().lower()
+        is_multipart = content_type == "multipart/form-data"
         if (
             content_length
             and not is_multipart
