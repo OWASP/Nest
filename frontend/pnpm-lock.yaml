@@ -158,8 +158,8 @@ importers:
         version: 3.5.0
     devDependencies:
       '@axe-core/react':
-        specifier: ^4.11.2
-        version: 4.11.2
+        specifier: ^4.11.3
+        version: 4.11.3
       '@eslint/eslintrc':
         specifier: ^3.3.5
         version: 3.3.5
@@ -389,8 +389,8 @@ packages:
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
 
-  '@axe-core/react@4.11.2':
-    resolution: {integrity: sha512-+bQ5yO9FAU4hfZRJXi81Eiv5bd53BrsjAEFoE6QlMkqKOoIq4wC15a9d8kRHs4i5dgLqD8S9NW5qWkiFVsV3/g==}
+  '@axe-core/react@4.11.3':
+    resolution: {integrity: sha512-G7TrxptKNFfrQZ+Iygb8nGx5w8Su0jIjwmtVN/9Jc4G6RumCh1rD3pZRT2NzZKjT70q4BReuWVwEazS3HxFfjg==}
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -8192,7 +8192,7 @@ snapshots:
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
-  '@axe-core/react@4.11.2':
+  '@axe-core/react@4.11.3':
     dependencies:
       axe-core: 4.11.4
       requestidlecallback: 0.3.0
