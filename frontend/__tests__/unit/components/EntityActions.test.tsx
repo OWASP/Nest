@@ -878,7 +878,7 @@ describe('EntityActions', () => {
     it('calls update cache function when delete is successful', async () => {
       const mockCache = {
         readQuery: jest.fn().mockReturnValue({
-          getProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
+          managementProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
         }),
         writeQuery: jest.fn(),
       }
@@ -907,7 +907,7 @@ describe('EntityActions', () => {
         expect(mockCache.writeQuery).toHaveBeenCalledWith(
           expect.objectContaining({
             data: {
-              getProgramModules: [{ key: 'other-module' }],
+              managementProgramModules: [{ key: 'other-module' }],
             },
           })
         )
@@ -1025,7 +1025,7 @@ describe('EntityActions', () => {
       })
     })
 
-    it('skips cache update when getProgramModules is not in cache', async () => {
+    it('skips cache update when managementProgramModules is not in cache', async () => {
       const mockCache = {
         readQuery: jest.fn().mockReturnValue(null),
         writeQuery: jest.fn(),

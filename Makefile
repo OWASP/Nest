@@ -1,6 +1,7 @@
 include backend/Makefile
 include cspell/Makefile
 include docs/Makefile
+include e2e/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
@@ -65,6 +66,7 @@ test: \
 test-nest-app:
 	$(MAKE) test-backend
 	$(MAKE) test-frontend
+	$(MAKE) test-e2e
 	$(MAKE) test-infrastructure
 
 ##@ Security

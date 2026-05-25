@@ -729,6 +729,9 @@ export type Query = {
   getProjectModules: Array<ModuleNode>;
   isMentor: Scalars['Boolean']['output'];
   isProjectLeader: Scalars['Boolean']['output'];
+  managementModule?: Maybe<ModuleNode>;
+  managementProgram?: Maybe<ProgramNode>;
+  managementProgramModules: Array<ModuleNode>;
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
   myPrograms: PaginatedPrograms;
@@ -823,6 +826,22 @@ export type QueryIsMentorArgs = {
 
 export type QueryIsProjectLeaderArgs = {
   login: Scalars['String']['input'];
+};
+
+
+export type QueryManagementModuleArgs = {
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
+};
+
+
+export type QueryManagementProgramArgs = {
+  programKey: Scalars['String']['input'];
+};
+
+
+export type QueryManagementProgramModulesArgs = {
+  programKey: Scalars['String']['input'];
 };
 
 

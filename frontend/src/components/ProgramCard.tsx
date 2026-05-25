@@ -2,7 +2,10 @@ import { Tooltip } from '@heroui/tooltip'
 import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
 import Link from 'next/link'
 import type React from 'react'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import {
+  GetManagementProgramAndModulesDocument,
+  GetProgramAndModulesDocument,
+} from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import EntityActions from 'components/EntityActions'
@@ -22,7 +25,10 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
     isAdmin,
     refetchQueries: [
       {
-        query: GetProgramAndModulesDocument,
+        query:
+          accessLevel === 'admin'
+            ? GetManagementProgramAndModulesDocument
+            : GetProgramAndModulesDocument,
         variables: { programKey: program.key },
       },
     ],

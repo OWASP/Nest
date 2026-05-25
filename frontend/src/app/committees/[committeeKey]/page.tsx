@@ -9,7 +9,11 @@ import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetCommitteeDataDocument } from 'types/__generated__/committeeQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function CommitteeDetailsPage() {
@@ -83,14 +87,20 @@ export default function CommitteeDetailsPage() {
   ]
 
   return (
-    <DetailsCard
-      details={details}
-      socialLinks={committee.relatedUrls}
-      stats={committeeStats}
-      summary={committee.summary}
-      title={committee.name}
-      topContributors={topContributors}
-      type="committee"
-    />
+    <PageWrapper>
+      <Header title={committee.name} />
+
+      <Summary summary={committee.summary} />
+
+      <Metadata
+        details={details}
+        stats={committeeStats}
+        socialLinks={committee.relatedUrls}
+        showSocialLinks={true}
+        detailsTitle="Committee Details"
+      />
+
+      <Contributors topContributors={topContributors} />
+    </PageWrapper>
   )
 }
