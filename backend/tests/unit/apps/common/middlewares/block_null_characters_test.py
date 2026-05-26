@@ -2,6 +2,7 @@ import json
 from http import HTTPStatus
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse
 from django.test import RequestFactory
 
@@ -71,8 +72,13 @@ class TestBlockNullCharactersMiddleware:
     def test_multipart_form_data_skips_body_check(self, middleware, factory):
         request = factory.post(
             "/clean/path",
-            data={"file": "content"},
-            content_type="multipart/form-data; boundary=----WebKitFormBoundary",
+            data={
+                "file": SimpleUploadedFile(
+                    "payload.bin",
+                    b"abc\x00def",
+                    content_type="application/octet-stream",
+                )
+            },
         )
         response = middleware(request)
         assert response.status_code == HTTPStatus.OK
@@ -81,7 +87,7 @@ class TestBlockNullCharactersMiddleware:
         request = factory.post(
             "/clean/path",
             data=b'{"key": "bad\x00value"}',
-            content_type="multipart/form-datax",
+            content_type="multipart/form-data-bad",
         )
         response = middleware(request)
         assert response.status_code == HTTPStatus.BAD_REQUEST

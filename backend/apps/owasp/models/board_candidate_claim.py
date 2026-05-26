@@ -66,7 +66,7 @@ class BoardCandidateClaim(TimestampedModel):
             self.pk
             and self.status != self.Status.WITHDRAWN
             and BoardCandidateClaim.objects.filter(
-                pk=self.claim_id,
+                pk=self.pk,
                 is_locked=True,
             ).exists()
         ):
