@@ -7,6 +7,18 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def seed_default_scoring_weights(apps):
+    """Seed default ScoringWeight rows."""
+    ScoringWeight = apps.get_model("recognition", "ScoringWeight")
+    defaults = [
+        {"event_type": "pr_merged", "score": 10, "daily_cap": None, "is_active": True},
+        {"event_type": "pr_opened", "score": 5, "daily_cap": None, "is_active": True},
+        {"event_type": "issue_opened", "score": 3, "daily_cap": None, "is_active": True},
+    ]
+    for row in defaults:
+        ScoringWeight.objects.update_or_create(event_type=row["event_type"], defaults=row)
+
+
 class Migration(migrations.Migration):
     initial = True
 
@@ -304,5 +316,9 @@ class Migration(migrations.Migration):
                 ],
                 "unique_together": {("github_user", "project", "snapshot_date")},
             },
+        ),
+        migrations.RunPython(
+            seed_default_scoring_weights,
+            migrations.RunPython.noop,
         ),
     ]
