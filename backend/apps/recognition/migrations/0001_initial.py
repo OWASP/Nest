@@ -7,7 +7,7 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def seed_default_scoring_weights(apps):
+def seed_default_scoring_weights(apps, _schema_editor):
     """Seed default ScoringWeight rows."""
     ScoringWeight = apps.get_model("recognition", "ScoringWeight")
     defaults = [
