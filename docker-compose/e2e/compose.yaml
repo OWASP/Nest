@@ -78,7 +78,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
       '
     container_name: e2e-nest-cache
-    image: redis:8.6-alpine3.23
+    image: redis:8.6.3-alpine3.23
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-e2e-password}
     healthcheck:
@@ -121,8 +121,8 @@ services:
 
   e2e-tests:
     build:
-      context: ../../frontend
-      dockerfile: ../docker/frontend/Dockerfile.e2e.test
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile
     container_name: e2e-nest-tests
     command: ${E2E_TEST_COMMAND:-sh -c "pnpm run test:e2e"}
     depends_on:
