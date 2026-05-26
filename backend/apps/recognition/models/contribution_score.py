@@ -46,7 +46,8 @@ class ContributionScore(TimestampedModel):
     )
     last_computed = models.DateTimeField(
         verbose_name="Last Computed",
-        auto_now=True,
+        null=True,
+        blank=True,
         help_text="Timestamp when the score was last computed",
     )
 
