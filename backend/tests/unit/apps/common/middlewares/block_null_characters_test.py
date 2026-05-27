@@ -99,6 +99,19 @@ class TestBlockNullCharactersMiddleware:
         response = middleware(request)
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
+    def test_null_in_file_content_type_extra_blocks_key(self, middleware, factory):
+        upload = SimpleUploadedFile(
+            "payload.bin",
+            b"abc",
+            content_type="application/octet-stream",
+        )
+        upload.content_type_extra = {"utf\x00-8": "test"}
+        request = factory.post("/clean/path", data={})
+        request._post = QueryDict("")
+        request._files = MultiValueDict({"file": [upload]})
+        response = middleware(request)
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
     def test_null_in_body_blocks(self, middleware, factory):
         request = factory.post(
             "/clean/path",

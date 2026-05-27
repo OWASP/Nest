@@ -34,7 +34,8 @@ class BlockNullCharactersMiddleware:
                     NULL_CHARACTER in (file.name or "")
                     or NULL_CHARACTER in (file.content_type or "")
                     or any(
-                        NULL_CHARACTER in str(v) for v in (file.content_type_extra or {}).values()
+                        NULL_CHARACTER in str(k) or NULL_CHARACTER in str(v)
+                        for k, v in (file.content_type_extra or {}).items()
                     )
                     for file in file_list
                 )
