@@ -72,7 +72,7 @@
     "@graphql-codegen/near-operation-file-preset": "^5.2.0",
     "@graphql-codegen/typed-document-node": "^7.0.0",
     "@graphql-codegen/typescript": "^6.0.0",
-    "@graphql-codegen/typescript-operations": "^5.1.0",
+    "@graphql-codegen/typescript-operations": "^6.0.0",
     "@lhci/cli": "^0.15.1",
     "@next/eslint-plugin-next": "^16.2.4",
     "@swc/core": "^1.15.32",
