@@ -35,4 +35,5 @@ class CoreConfig(AppConfig):
                 "Algolia is not configured. "
                 "Please set ALGOLIA_APPLICATION_ID and "
                 "ALGOLIA_WRITE_API_KEY in environment variables."
+                
             )
