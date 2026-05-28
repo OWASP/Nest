@@ -56,7 +56,7 @@
     "next-auth": "^4.24.14",
     "next-themes": "^0.4.6",
     "posthog-js": "^1.372.9",
-    "react": "^19.2.5",
+    "react": "^19.2.6",
     "react-apexcharts": "^2.1.0",
     "react-dom": "^19.2.5",
     "react-icons": "^5.6.0",
