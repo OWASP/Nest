@@ -123,19 +123,7 @@
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@10.33.3",
-  "pnpm": {
-    "overrides": {
-      "brace-expansion@5": "5.0.6",
-      "fast-uri": "3.1.2",
-      "glob": "^11.1.0",
-      "postcss": "8.5.10",
-      "protobufjs": "7.5.8",
-      "serialize-javascript": "^7.0.3",
-      "test-exclude": "^7.0.1",
-      "ws@8": "8.20.1"
-    }
-  },
+  "packageManager": "pnpm@11.4.0",
   "prettier": {
     "arrowParens": "always",
     "endOfLine": "lf",

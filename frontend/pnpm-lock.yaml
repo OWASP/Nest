@@ -4,16 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  brace-expansion@5: 5.0.6
-  fast-uri: 3.1.2
-  postcss: 8.5.10
-  protobufjs: 7.5.8
-  ws@8: 8.20.1
-  glob: ^11.1.0
-  serialize-javascript: ^7.0.3
-  test-exclude: ^7.0.1
-
 importers:
 
   .:
@@ -65,13 +55,13 @@ importers:
         version: 2.2.29(@heroui/system@2.4.28(@heroui/theme@2.4.26(tailwindcss@4.2.4))(@react-spectrum/provider@3.11.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(framer-motion@12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@heroui/theme@2.4.26(tailwindcss@4.2.4))(@react-spectrum/provider@3.11.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(framer-motion@12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@next/third-parties':
         specifier: ^16.2.4
-        version: 16.2.4(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
+        version: 16.2.4(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
       '@react-leaflet/core':
         specifier: ^3.0.0
         version: 3.0.0(leaflet@1.9.4)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@sentry/nextjs':
         specifier: ^10.51.0
-        version: 10.51.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21)))
+        version: 10.51.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21)))
       apexcharts:
         specifier: ^5.10.6
         version: 5.10.6
@@ -125,10 +115,10 @@ importers:
         version: 6.1.0
       next:
         specifier: ^16.2.6
-        version: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        version: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       next-auth:
         specifier: ^4.24.14
-        version: 4.24.14(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        version: 4.24.14(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -822,12 +812,6 @@ packages:
 
   '@graphql-codegen/schema-ast@6.0.0':
     resolution: {integrity: sha512-ww6lfCZYBZk8SbnOKp76FLvBrMD6oqFhAGj8Ov8f+bsrNh0SG1M6mxLWh4nl9hWIu/iwsZgrJcuIrTfyBeF6jQ==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-
-  '@graphql-codegen/typed-document-node@6.1.8':
-    resolution: {integrity: sha512-+qDdiJSQ7Ol+vpLMAH8ZJok50CvlYxA6seQ7cwEa3emXt8MmH5hh3zdc9unQlPc7bynoJHRCgoKk7E0B7hry0w==}
     engines: {node: '>=16'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
@@ -1910,9 +1894,9 @@ packages:
   '@internationalized/string@3.2.8':
     resolution: {integrity: sha512-NdbMQUSfXLYIQol5VyMtinm9pZDciiMfN7RtmSuSB78io1hqwJ0naYfxyW6vgxWBkzWymQa/3uLDlbfmshtCaA==}
 
-  '@isaacs/cliui@9.0.0':
-    resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
-    engines: {node: '>=18'}
+  '@isaacs/cliui@8.0.2':
+    resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
+    engines: {node: '>=12'}
 
   '@istanbuljs/load-nyc-config@1.1.0':
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -2384,14 +2368,13 @@ packages:
   '@paulirish/trace_engine@0.0.53':
     resolution: {integrity: sha512-PUl/vlfo08Oj804VI5nDPeSk9vyslnBlVzDDwFt8SUVxY8+KdGMkra/vrXjEEHe8gb7+RqVTfOIlGw0nyrEelA==}
 
+  '@pkgjs/parseargs@0.11.0':
+    resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
+    engines: {node: '>=14'}
+
   '@pkgr/core@0.2.9':
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
-
-  '@playwright/test@1.59.0':
-    resolution: {integrity: sha512-TOA5sTLd49rTDaZpYpvCQ9hGefHQq/OYOyCVnGqS2mjMfX+lGZv2iddIJd0I48cfxqSPttS9S3OuLKyylHcO1w==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   '@posthog/core@1.28.2':
     resolution: {integrity: sha512-Dii3pxDheG1WioztvV/MqHQMnb16jSFrl2HkDR1T5yf5/R7lPqJCFYt+eXkEdp/oAv/PD+1joyG6Ap/2quFmtQ==}
@@ -4486,6 +4469,9 @@ packages:
   brace-expansion@1.1.14:
     resolution: {integrity: sha512-MWPGfDxnyzKU7rNOW9SP/c50vi3xrmrua/+6hfPbCS2ABNWfx24vPidzvC7krjU/RTo235sV776ymlsMtGKj8g==}
 
+  brace-expansion@2.1.0:
+    resolution: {integrity: sha512-TN1kCZAgdgweJhWWpgKYrQaMNHcDULHkWwQIspdtjV4Y5aurRdZpjAqn6yX3FPqTA9ngHCc4hJxMAMgGfve85w==}
+
   brace-expansion@5.0.6:
     resolution: {integrity: sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==}
     engines: {node: 18 || 20 || >=22}
@@ -4959,6 +4945,9 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
+  eastasianwidth@0.2.0:
+    resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
+
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
@@ -5420,10 +5409,8 @@ packages:
     resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
     engines: {node: '>= 0.6'}
 
-  fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
+  fs.realpath@1.0.0:
+    resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -5498,11 +5485,18 @@ packages:
   glob-to-regexp@0.4.1:
     resolution: {integrity: sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==}
 
-  glob@11.1.0:
-    resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
-    engines: {node: 20 || >=22}
+  glob@10.5.0:
+    resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
     deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
+
+  glob@13.0.6:
+    resolution: {integrity: sha512-Wjlyrolmm8uDpm/ogGyXZXb1Z+Ca2B8NbJwqBVg0axK9GbBeoS7yGV6vjXnYdGm6X53iehEuxxbyiKp8QmN4Vw==}
+    engines: {node: 18 || 20 || >=22}
+
+  glob@7.2.3:
+    resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
@@ -5554,7 +5548,7 @@ packages:
       '@fastify/websocket': ^10 || ^11
       crossws: ~0.3
       graphql: ^15.10.1 || ^16
-      ws: 8.20.1
+      ws: ^8
     peerDependenciesMeta:
       '@fastify/websocket':
         optional: true
@@ -5708,6 +5702,10 @@ packages:
   indent-string@4.0.0:
     resolution: {integrity: sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==}
     engines: {node: '>=8'}
+
+  inflight@1.0.6:
+    resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -5937,12 +5935,12 @@ packages:
   isomorphic-ws@5.0.0:
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
     peerDependencies:
-      ws: 8.20.1
+      ws: '*'
 
   isows@1.0.7:
     resolution: {integrity: sha512-I1fSfDCZL5P0v33sVqeTDSpcstAg/N+wF5HS033mogOVIp4B+oHC7oOCsA3axAbBSGTJ8QubbNmnIRN/h8U7hg==}
     peerDependencies:
-      ws: 8.20.1
+      ws: '*'
 
   istanbul-lib-coverage@3.2.2:
     resolution: {integrity: sha512-O8dpsF+r0WV/8MNRKfnmrtCWhuKjxrq2w+jpzBL5UZKTi2LeVWnWOmWRxFlesJONmc+wLAGvKQZEOanko0LFTg==}
@@ -5968,9 +5966,8 @@ packages:
     resolution: {integrity: sha512-H0dkQoCa3b2VEeKQBOxFph+JAbcrQdE7KC0UkqwpLmv2EC4P41QXP+rqo9wYodACiG5/WM5s9oDApTU8utwj9g==}
     engines: {node: '>= 0.4'}
 
-  jackspeak@4.2.3:
-    resolution: {integrity: sha512-ykkVRwrYvFm1nb2AJfKKYPr0emF6IiXDYUaFx4Zn9ZuIH7MrzEZ3sD5RlqGXNRpHtvUHJyOnCEFxOlNDtGo7wg==}
-    engines: {node: 20 || >=22}
+  jackspeak@3.4.3:
+    resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
 
   jest-axe@10.0.0:
     resolution: {integrity: sha512-9QR0M7//o5UVRnEUUm68IsGapHrcKGakYy9dKWWMX79LmeUKguDI6DREyljC5I13j78OUmtKLF5My6ccffLFBg==}
@@ -6534,6 +6531,10 @@ packages:
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
+  minimatch@9.0.9:
+    resolution: {integrity: sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg==}
+    engines: {node: '>=16 || 14 >=14.17'}
+
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
@@ -6846,6 +6847,10 @@ packages:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
 
+  path-is-absolute@1.0.1:
+    resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
+    engines: {node: '>=0.10.0'}
+
   path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
     engines: {node: '>=8'}
@@ -6860,6 +6865,10 @@ packages:
   path-root@0.1.1:
     resolution: {integrity: sha512-QLcPegTHF11axjfojBIoDygmS2E3Lf+8+jI6wOVmNVenrKSo3mFdSGiIgdSHenczw3wPtlVMQaFVwGmM7BJdtg==}
     engines: {node: '>=0.10.0'}
+
+  path-scurry@1.11.1:
+    resolution: {integrity: sha512-Xa4Nw17FS9ApQFJ9umLiJS4orGjm7ZzwUrwamcGQuHSzDyth9boKDaycYdDcZDuqYATXw4HFXgaqWTctW/v1HA==}
+    engines: {node: '>=16 || 14 >=14.18'}
 
   path-scurry@2.0.2:
     resolution: {integrity: sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg==}
@@ -6905,19 +6914,13 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  playwright-core@1.59.0:
-    resolution: {integrity: sha512-PW/X/IoZ6BMUUy8rpwHEZ8Kc0IiLIkgKYGNFaMs5KmQhcfLILNx9yCQD0rnWeWfz1PNeqcFP1BsihQhDOBCwZw==}
-    engines: {node: '>=18'}
-    hasBin: true
-
-  playwright@1.59.0:
-    resolution: {integrity: sha512-wihGScriusvATUxmhfENxg0tj1vHEFeIwxlnPFKQTOQVd7aG08mUfvvniRP/PtQOC+2Bs52kBOC/Up1jTXeIbw==}
-    engines: {node: '>=18'}
-    hasBin: true
-
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
+
+  postcss@8.4.31:
+    resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
+    engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.10:
     resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
@@ -7492,6 +7495,10 @@ packages:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
 
+  string-width@5.1.2:
+    resolution: {integrity: sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA==}
+    engines: {node: '>=12'}
+
   string-width@7.2.0:
     resolution: {integrity: sha512-tsaTIkKW9b4N+AEj+SVA+WhJzV7/zMhcSu78mLKWSk7cXMOSHsBKFWUs0fWwq8QyK3MgJBQRX6Gbi4kYbdvGkQ==}
     engines: {node: '>=18'}
@@ -7663,9 +7670,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  test-exclude@7.0.2:
-    resolution: {integrity: sha512-u9E6A+ZDYdp7a4WnarkXPZOx8Ilz46+kby6p1yZ8zsGTz9gYa6FIS7lj2oezzNKmtdyyJNNmmXDppga5GB7kSw==}
-    engines: {node: '>=18'}
+  test-exclude@6.0.0:
+    resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
+    engines: {node: '>=8'}
 
   text-decoder@1.2.7:
     resolution: {integrity: sha512-vlLytXkeP4xvEq2otHeJfSQIRyWxo/oZGEbXrtEEF9Hnmrdly59sUbzZ/QgyWuLYHctCHxFF4tRQZNQ9k60ExQ==}
@@ -8070,6 +8077,10 @@ packages:
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
+
+  wrap-ansi@8.1.0:
+    resolution: {integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==}
+    engines: {node: '>=12'}
 
   wrap-ansi@9.0.2:
     resolution: {integrity: sha512-42AtmgqjV+X1VpdOfyTGOYRi0/zsoLqtXQckTmqTeybT+BDIbM/Guxo7x3pE2vtpr1ok6xRqM9OpBe+Jyoqyww==}
@@ -8812,15 +8823,6 @@ snapshots:
     dependencies:
       '@graphql-codegen/plugin-helpers': 7.0.0(graphql@16.13.2)
       '@graphql-tools/utils': 11.1.0(graphql@16.13.2)
-      graphql: 16.13.2
-      tslib: 2.8.1
-
-  '@graphql-codegen/typed-document-node@6.1.8(graphql@16.13.2)':
-    dependencies:
-      '@graphql-codegen/plugin-helpers': 6.3.0(graphql@16.13.2)
-      '@graphql-codegen/visitor-plugin-common': 6.3.0(graphql@16.13.2)
-      auto-bind: 4.0.0
-      change-case-all: 1.0.15
       graphql: 16.13.2
       tslib: 2.8.1
 
@@ -10466,7 +10468,14 @@ snapshots:
     dependencies:
       '@swc/helpers': 0.5.21
 
-  '@isaacs/cliui@9.0.0': {}
+  '@isaacs/cliui@8.0.2':
+    dependencies:
+      string-width: 5.1.2
+      string-width-cjs: string-width@4.2.3
+      strip-ansi: 7.2.0
+      strip-ansi-cjs: strip-ansi@6.0.1
+      wrap-ansi: 8.1.0
+      wrap-ansi-cjs: wrap-ansi@7.0.0
 
   '@istanbuljs/load-nyc-config@1.1.0':
     dependencies:
@@ -10594,7 +10603,7 @@ snapshots:
       chalk: 4.1.2
       collect-v8-coverage: 1.0.3
       exit-x: 0.2.2
-      glob: 11.1.0
+      glob: 10.5.0
       graceful-fs: 4.2.11
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-instrument: 6.0.3
@@ -10782,9 +10791,9 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.2.6':
     optional: true
 
-  '@next/third-parties@16.2.4(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)':
+  '@next/third-parties@16.2.4(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)':
     dependencies:
-      next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react: 19.2.5
       third-party-capital: 1.0.20
 
@@ -11116,12 +11125,10 @@ snapshots:
       legacy-javascript: 0.0.1
       third-party-web: 0.29.0
 
-  '@pkgr/core@0.2.9': {}
-
-  '@playwright/test@1.59.0':
-    dependencies:
-      playwright: 1.59.0
+  '@pkgjs/parseargs@0.11.0':
     optional: true
+
+  '@pkgr/core@0.2.9': {}
 
   '@posthog/core@1.28.2':
     dependencies:
@@ -12515,7 +12522,7 @@ snapshots:
       '@sentry/cli': 2.58.5
       dotenv: 16.6.1
       find-up: 5.0.0
-      glob: 11.1.0
+      glob: 13.0.6
       magic-string: 0.30.21
     transitivePeerDependencies:
       - encoding
@@ -12579,7 +12586,7 @@ snapshots:
       '@sentry/utils': 7.120.4
       localforage: 1.10.0
 
-  '@sentry/nextjs@10.51.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21)))':
+  '@sentry/nextjs@10.51.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21)))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.40.0
@@ -12592,7 +12599,7 @@ snapshots:
       '@sentry/react': 10.51.0(react@19.2.5)
       '@sentry/vercel-edge': 10.51.0
       '@sentry/webpack-plugin': 5.2.1(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21)))
-      next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       rollup: 4.60.2
       stacktrace-parser: 0.1.11
     transitivePeerDependencies:
@@ -13564,7 +13571,7 @@ snapshots:
       '@istanbuljs/load-nyc-config': 1.1.0
       '@istanbuljs/schema': 0.1.6
       istanbul-lib-instrument: 6.0.3
-      test-exclude: 7.0.2
+      test-exclude: 6.0.0
     transitivePeerDependencies:
       - supports-color
 
@@ -13662,6 +13669,10 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
+
+  brace-expansion@2.1.0:
+    dependencies:
+      balanced-match: 1.0.2
 
   brace-expansion@5.0.6:
     dependencies:
@@ -14132,6 +14143,8 @@ snapshots:
       call-bind-apply-helpers: 1.0.2
       es-errors: 1.3.0
       gopd: 1.2.0
+
+  eastasianwidth@0.2.0: {}
 
   ee-first@1.1.1: {}
 
@@ -14758,8 +14771,7 @@ snapshots:
 
   fresh@0.5.2: {}
 
-  fsevents@2.3.2:
-    optional: true
+  fs.realpath@1.0.0: {}
 
   fsevents@2.3.3:
     optional: true
@@ -14839,14 +14851,29 @@ snapshots:
 
   glob-to-regexp@0.4.1: {}
 
-  glob@11.1.0:
+  glob@10.5.0:
     dependencies:
       foreground-child: 3.3.1
-      jackspeak: 4.2.3
-      minimatch: 10.2.5
+      jackspeak: 3.4.3
+      minimatch: 9.0.9
       minipass: 7.1.3
       package-json-from-dist: 1.0.1
+      path-scurry: 1.11.1
+
+  glob@13.0.6:
+    dependencies:
+      minimatch: 10.2.5
+      minipass: 7.1.3
       path-scurry: 2.0.2
+
+  glob@7.2.3:
+    dependencies:
+      fs.realpath: 1.0.0
+      inflight: 1.0.6
+      inherits: 2.0.4
+      minimatch: 3.1.5
+      once: 1.4.0
+      path-is-absolute: 1.0.1
 
   globals@14.0.0: {}
 
@@ -15050,6 +15077,11 @@ snapshots:
   imurmurhash@0.1.4: {}
 
   indent-string@4.0.0: {}
+
+  inflight@1.0.6:
+    dependencies:
+      once: 1.4.0
+      wrappy: 1.0.2
 
   inherits@2.0.4: {}
 
@@ -15336,9 +15368,11 @@ snapshots:
       has-symbols: 1.1.0
       set-function-name: 2.0.2
 
-  jackspeak@4.2.3:
+  jackspeak@3.4.3:
     dependencies:
-      '@isaacs/cliui': 9.0.0
+      '@isaacs/cliui': 8.0.2
+    optionalDependencies:
+      '@pkgjs/parseargs': 0.11.0
 
   jest-axe@10.0.0:
     dependencies:
@@ -15409,7 +15443,7 @@ snapshots:
       chalk: 4.1.2
       ci-info: 4.4.0
       deepmerge: 4.3.1
-      glob: 11.1.0
+      glob: 10.5.0
       graceful-fs: 4.2.11
       jest-circus: 30.3.0
       jest-docblock: 30.2.0
@@ -15594,7 +15628,7 @@ snapshots:
       chalk: 4.1.2
       cjs-module-lexer: 2.2.0
       collect-v8-coverage: 1.0.3
-      glob: 11.1.0
+      glob: 10.5.0
       graceful-fs: 4.2.11
       jest-haste-map: 30.3.0
       jest-message-util: 30.3.0
@@ -16097,6 +16131,10 @@ snapshots:
     dependencies:
       brace-expansion: 1.1.14
 
+  minimatch@9.0.9:
+    dependencies:
+      brace-expansion: 2.1.0
+
   minimist@1.2.8: {}
 
   minipass@7.1.3: {}
@@ -16137,13 +16175,13 @@ snapshots:
 
   netmask@2.1.1: {}
 
-  next-auth@4.24.14(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+  next-auth@4.24.14(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
       '@babel/runtime': 7.29.2
       '@panva/hkdf': 1.2.1
       cookie: 0.7.2
       jose: 4.15.9
-      next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       oauth: 0.9.15
       openid-client: 5.7.1
       preact: 10.29.1
@@ -16157,13 +16195,13 @@ snapshots:
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
 
-  next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+  next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
       '@next/env': 16.2.6
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.10.24
       caniuse-lite: 1.0.30001791
-      postcss: 8.5.10
+      postcss: 8.4.31
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
       styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.5)
@@ -16177,7 +16215,6 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 16.2.6
       '@next/swc-win32-x64-msvc': 16.2.6
       '@opentelemetry/api': 1.9.1
-      '@playwright/test': 1.59.0
       sharp: 0.34.5
     transitivePeerDependencies:
       - '@babel/core'
@@ -16419,6 +16456,8 @@ snapshots:
 
   path-exists@4.0.0: {}
 
+  path-is-absolute@1.0.1: {}
+
   path-key@3.1.1: {}
 
   path-parse@1.0.7: {}
@@ -16428,6 +16467,11 @@ snapshots:
   path-root@0.1.1:
     dependencies:
       path-root-regex: 0.1.2
+
+  path-scurry@1.11.1:
+    dependencies:
+      lru-cache: 10.4.3
+      minipass: 7.1.3
 
   path-scurry@2.0.2:
     dependencies:
@@ -16464,17 +16508,13 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  playwright-core@1.59.0:
-    optional: true
-
-  playwright@1.59.0:
-    dependencies:
-      playwright-core: 1.59.0
-    optionalDependencies:
-      fsevents: 2.3.2
-    optional: true
-
   possible-typed-array-names@1.1.0: {}
+
+  postcss@8.4.31:
+    dependencies:
+      nanoid: 3.3.11
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
 
   postcss@8.5.10:
     dependencies:
@@ -16814,11 +16854,11 @@ snapshots:
 
   rimraf@2.7.1:
     dependencies:
-      glob: 11.1.0
+      glob: 7.2.3
 
   rimraf@3.0.2:
     dependencies:
-      glob: 11.1.0
+      glob: 7.2.3
 
   robots-parser@3.0.1: {}
 
@@ -17156,6 +17196,12 @@ snapshots:
       is-fullwidth-code-point: 3.0.0
       strip-ansi: 6.0.1
 
+  string-width@5.1.2:
+    dependencies:
+      eastasianwidth: 0.2.0
+      emoji-regex: 9.2.2
+      strip-ansi: 7.2.0
+
   string-width@7.2.0:
     dependencies:
       emoji-regex: 10.6.0
@@ -17349,11 +17395,11 @@ snapshots:
       commander: 2.20.3
       source-map-support: 0.5.21
 
-  test-exclude@7.0.2:
+  test-exclude@6.0.0:
     dependencies:
       '@istanbuljs/schema': 0.1.6
-      glob: 11.1.0
-      minimatch: 10.2.5
+      glob: 7.2.3
+      minimatch: 3.1.5
 
   text-decoder@1.2.7:
     dependencies:
@@ -17811,6 +17857,12 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+
+  wrap-ansi@8.1.0:
+    dependencies:
+      ansi-styles: 6.2.3
+      string-width: 5.1.2
+      strip-ansi: 7.2.0
 
   wrap-ansi@9.0.2:
     dependencies:
