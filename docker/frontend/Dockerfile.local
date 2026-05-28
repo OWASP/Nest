@@ -8,9 +8,9 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-builder" \
     NPM_CONFIG_CACHE="/home/owasp/.npm" \
     PNPM_HOME="/pnpm"
 
-ENV NPM_CONFIG_RETRY=5 \
-    NPM_CONFIG_TIMEOUT=30000 \
-    PATH="$PNPM_HOME:$PATH"
+ENV PATH="$PNPM_HOME:$PATH" \
+    PNPM_CONFIG_NETWORK_RETRY_COUNT=5 \
+    PNPM_CONFIG_NETWORK_TIMEOUT=30000
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
