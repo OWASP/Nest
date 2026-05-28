@@ -14,7 +14,7 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../../backend/.env.e2e.example
+    env_file: ../../backend/.env.e2e-tests
     healthcheck:
       interval: 10s
       retries: 10
@@ -96,7 +96,7 @@ services:
       context: ../../frontend
       dockerfile: ../docker/frontend/Dockerfile
       args:
-        ENV_FILE: .env.e2e.example
+        ENV_FILE: .env.e2e
         NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://backend:9000
         NEXT_SERVER_CSRF_URL: http://backend:9000/csrf/
         NEXT_SERVER_GRAPHQL_URL: http://backend:9000/graphql/
@@ -104,7 +104,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    env_file: ../../frontend/.env.e2e.example
+    env_file: ../../frontend/.env.e2e
     healthcheck:
       interval: 5s
       retries: 10
