@@ -36,7 +36,6 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --without fuzz
 
 # Less likely to cause cache invalidation items go first.
-COPY .env.unit .env.unit
 COPY manage.py wsgi.py ./
 COPY tests/__init__.py tests/__init__.py
 COPY scripts scripts

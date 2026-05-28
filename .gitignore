@@ -7,9 +7,10 @@ __pycache__
 .DS_Store
 .env*
 !.env.example
-!.env.e2e.example
-!.env.fuzz.example
-!.env.unit
+!.env.e2e
+!.env.e2e-tests
+!.env.fuzz-tests
+!.env.unit-tests
 .github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/

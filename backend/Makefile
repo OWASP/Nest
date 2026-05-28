@@ -235,11 +235,11 @@ test-backend: ## Run backend tests
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f docker/backend/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.unit-tests backend \
 		-t nest-test-backend
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
-		--env-file backend/.env.unit \
+		--env-file backend/.env.unit-tests \
 		--rm nest-test-backend pytest
 
 test-fuzz: ## Run fuzz tests (REST API and GraphQL)

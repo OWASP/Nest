@@ -14,7 +14,7 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../../backend/.env.fuzz.example
+    env_file: ../../backend/.env.fuzz-tests
     networks:
       - fuzz-nest-network
     ports:
@@ -93,7 +93,7 @@ services:
     container_name: fuzz-nest-graphql
     build:
       context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile.fuzz
+      dockerfile: ../docker/backend/Dockerfile.fuzz-tests
     environment:
       BASE_URL: http://backend:9500
       TEST_FILE: graphql_test.py
@@ -107,7 +107,7 @@ services:
     container_name: fuzz-nest-rest
     build:
       context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile.fuzz
+      dockerfile: ../docker/backend/Dockerfile.fuzz-tests
     environment:
       BASE_URL: http://backend:9500
       REST_URL: http://backend:9500/api/v0
