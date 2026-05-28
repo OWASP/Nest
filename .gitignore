@@ -9,6 +9,7 @@ __pycache__
 !.env.example
 !.env.e2e.example
 !.env.fuzz.example
+!.env.unit
 .github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/

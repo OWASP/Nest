@@ -193,7 +193,7 @@ jobs:
         run: |
           CONTAINER_ID=$(docker create \
             -e DJANGO_SETTINGS_MODULE=settings.test \
-            --env-file backend/.env.example \
+            --env-file backend/.env.unit \
             owasp/nest:test-backend-latest pytest)
           docker start -a $CONTAINER_ID
           EXIT_CODE=$?

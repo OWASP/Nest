@@ -119,6 +119,6 @@ def get_search_results(
     search_result = response.results[0].to_dict()
 
     return {
-            "hits": deep_camelize(search_result["hits"]),
-            "nbPages": search_result.get("nbPages", 0),
-        }
+        "hits": deep_camelize(search_result["hits"]),
+        "nbPages": search_result.get("nbPages", 0),
+    }
