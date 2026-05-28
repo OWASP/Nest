@@ -9,6 +9,7 @@ from apps.owasp.models.sponsor import Sponsor
 @strawberry_django.type(
     Sponsor,
     fields=[
+        "description",
         "image_url",
         "name",
         "sponsor_type",

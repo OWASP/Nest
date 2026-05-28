@@ -78,6 +78,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     sponsors {
+      description
       id
       imageUrl
       name

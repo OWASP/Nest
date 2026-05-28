@@ -61,8 +61,8 @@ export const footerSections: Section[] = [
         href: 'https://owasp.org/www-community/initiatives/gsoc/gsoc2026ideas#owasp-nest',
       },
       {
-        text: 'Sponsor',
-        href: 'https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest',
+        text: 'Sponsors',
+        href: '/sponsors',
       },
     ],
   },
