@@ -52,9 +52,7 @@ WORKDIR /home/owasp
 COPY --chmod=444 --chown=root:root package.json ./
 RUN corepack install && corepack enable pnpm
 
-COPY --from=builder --chmod=755 --chown=root:root /home/owasp/node_modules /home/owasp/node_modules
-
-RUN chown -R node:node /home/owasp/node_modules
+COPY --from=builder --chmod=755 --chown=node:node /home/owasp/node_modules /home/owasp/node_modules
 
 EXPOSE 3000
 

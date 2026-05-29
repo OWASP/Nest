@@ -17,6 +17,8 @@ overrides:
   test-exclude: "^7.0.1"
   ws@8: "8.20.1"
 
+confirmModulesPurge: false
+
 # 21 days (in minutes)
 minimumReleaseAge: 30240
 minimumReleaseAgeExclude:
