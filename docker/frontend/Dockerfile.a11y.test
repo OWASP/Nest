@@ -6,8 +6,8 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     PNPM_HOME="/pnpm"
 
 ENV PATH="$PNPM_HOME:$PATH" \
-    PNPM_CONFIG_NETWORK_RETRY_COUNT=5 \
-    PNPM_CONFIG_NETWORK_TIMEOUT=30000
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 COPY __tests__/a11y __tests__/a11y
 COPY __tests__/mockData __tests__/mockData
 COPY __tests__/jest.setup.ts __tests__/jest.setup.ts
-COPY .pnpmrc jest.config.ts tsconfig.json ./
+COPY jest.config.ts tsconfig.json ./
 COPY public public
 COPY src src
 

@@ -31,7 +31,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --chmod=444 .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
 COPY --chmod=444 ${ENV_FILE} ./.env
 COPY --chmod=555 public public
 COPY --chmod=555 src src
