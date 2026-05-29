@@ -48,7 +48,7 @@ class Prompt(TimestampedModel):
         try:
             return Prompt.objects.get(key=key).text
         except Prompt.DoesNotExist:
-            if settings.OPEN_AI_SECRET_KEY != "None":  # noqa: S105
+            if settings.OPEN_AI_SECRET_KEY:
                 logger.warning("Prompt with key '%s' does not exist.", key)
             return ""
 
