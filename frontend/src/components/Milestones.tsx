@@ -44,10 +44,6 @@ const Milestones: React.FC<ProjectMilestonesProps> = ({
             <span>{item.createdAt ? formatDate(item.createdAt) : 'N/A'}</span>
           </div>
           <div className="mr-4 flex items-center">
-            <FaCircleCheck className="mr-2 h-4 w-4" />
-            <span>{item.closedIssuesCount} closed</span>
-          </div>
-          <div className="mr-4 flex items-center">
             <FaCircleExclamation className="mr-2 h-4 w-4" />
             <span>{item.openIssuesCount} open</span>
           </div>
