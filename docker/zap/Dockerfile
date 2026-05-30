@@ -1,1 +1,1 @@
-FROM zaproxy/zap-stable:2.17.0
+FROM zaproxy/zap-stable:2.17.0@sha256:8770b23f9e8b49038f413cb2b10c58c901e5b6717be221a22b1bcab5c9771b8a
