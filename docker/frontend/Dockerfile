@@ -31,7 +31,7 @@ WORKDIR /app
 COPY --chmod=444 package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile
 
 COPY --chmod=444 next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
 COPY --chmod=444 ${ENV_FILE} ./.env
@@ -44,8 +44,6 @@ ENV FORCE_STANDALONE=$FORCE_STANDALONE
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
-# Dependencies are installed via --frozen-lockfile, so skip pnpm's pre-run check.
-ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 RUN --mount=type=secret,id=RELEASE_VERSION \
     --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" && \

@@ -1,13 +1,8 @@
-allowBuilds:
-  '@heroui/shared-utils': true
-  '@sentry/cli': true
-  '@swc/core': true
-  core-js: true
-  protobufjs: true
-  sharp: true
-  unrs-resolver: true
+ignoreScripts: true
+
 # 21 days (in minutes)
 minimumReleaseAge: 30240
+
 minimumReleaseAgeExclude:
   - '@next/env@16.2.6'
   - '@next/swc-darwin-arm64@16.2.6'
@@ -39,3 +34,5 @@ publicHoistPattern:
   - '*import-in-the-middle*'
 
 saveExact: true
+
+strictDepBuilds: true

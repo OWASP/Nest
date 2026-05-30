@@ -12,7 +12,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile
 
 WORKDIR /nest
 

@@ -5,18 +5,16 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
-# Dependencies are installed via --frozen-lockfile, so skip pnpm's pre-run check.
 ENV PATH="$PNPM_HOME:$PATH" \
     PNPM_CONFIG_FETCH_RETRIES=5 \
-    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
-    PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
+    PNPM_CONFIG_FETCH_TIMEOUT=30000
 
 WORKDIR /app
 
 COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
-    pnpm install --frozen-lockfile --ignore-scripts && \
+    pnpm install --frozen-lockfile && \
     chown node:node /app
 
 COPY __tests__/a11y __tests__/a11y
