@@ -5,10 +5,12 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
+# Dependencies are installed via --frozen-lockfile, so skip pnpm's pre-run check.
 ENV NODE_PATH=/app/e2e/node_modules \
-    NPM_CONFIG_RETRY=5 \
-    NPM_CONFIG_TIMEOUT=30000 \
-    PATH="$PNPM_HOME:$PATH"
+    PATH="$PNPM_HOME:$PATH" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
+    PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 
 WORKDIR /app/e2e
 

@@ -38,10 +38,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-stage" \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/home/owasp/.npm"
 
-# Deps are installed at build time with `pnpm install --frozen-lockfile` (which
-# enforces lockfile integrity), so skip pnpm v11's pre-run re-verification --
-# otherwise `pnpm run dev` purges/reinstalls the image's root-owned node_modules
-# as the non-root user (no TTY -> EACCES).
+# Dependencies are installed via --frozen-lockfile, so skip pnpm's pre-run check.
 ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 
 RUN mkdir -p ${APK_CACHE_DIR} && \

@@ -4,10 +4,10 @@ WORKDIR /opt/node
 
 ENV PNPM_HOME="/pnpm"
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-    NPM_CONFIG_RETRY=5 \
     NPM_CONFIG_CACHE="/nest/.npm" \
-    NPM_CONFIG_TIMEOUT=30000 \
-    PATH="$PNPM_HOME:$PATH"
+    PATH="$PNPM_HOME:$PATH" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \

@@ -5,10 +5,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
-# Deps are installed at build time with `pnpm install --frozen-lockfile` (which
-# enforces lockfile integrity), so skip pnpm v11's pre-run re-verification --
-# otherwise `pnpm run` purges/reinstalls the image's node_modules as the
-# non-root user (no TTY -> EACCES).
+# Dependencies are installed via --frozen-lockfile, so skip pnpm's pre-run check.
 ENV PATH="$PNPM_HOME:$PATH" \
     PNPM_CONFIG_FETCH_RETRIES=5 \
     PNPM_CONFIG_FETCH_TIMEOUT=30000 \

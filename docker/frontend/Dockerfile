@@ -9,6 +9,8 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
     COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
     PNPM_HOME="/pnpm"
 
 ARG ENV_FILE=.env
@@ -42,6 +44,8 @@ ENV FORCE_STANDALONE=$FORCE_STANDALONE
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
+# Dependencies are installed via --frozen-lockfile, so skip pnpm's pre-run check.
+ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 RUN --mount=type=secret,id=RELEASE_VERSION \
     --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" && \

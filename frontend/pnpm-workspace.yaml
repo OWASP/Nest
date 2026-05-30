@@ -5,10 +5,6 @@ allowBuilds:
   core-js: true
   protobufjs: true
   sharp: true
-  # "unrs" (from "unrs-resolver", a native build dependency allow-listed above
-  # for pnpm v11) is not a dictionary word; accept it here instead of adding it
-  # to the shared cSpell dictionary.
-  # cspell:ignore unrs
   unrs-resolver: true
 # 21 days (in minutes)
 minimumReleaseAge: 30240
