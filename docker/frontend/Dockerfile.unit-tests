@@ -5,9 +5,12 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
+# Use the deps installed in the image; don't let pnpm v11 re-verify and try to
+# purge node_modules before `pnpm run` (non-root user, no TTY -> EACCES).
 ENV PATH="$PNPM_HOME:$PATH" \
     PNPM_CONFIG_FETCH_RETRIES=5 \
-    PNPM_CONFIG_FETCH_TIMEOUT=30000
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
+    PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 
 WORKDIR /app
 

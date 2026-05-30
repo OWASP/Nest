@@ -38,6 +38,10 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-stage" \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/home/owasp/.npm"
 
+# Use the deps installed in the image; don't let pnpm v11 re-verify and try to
+# purge node_modules before `pnpm run dev` (non-root user, no TTY -> EACCES).
+ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
+
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 

@@ -10,11 +10,6 @@ allowBuilds:
   # to the shared cSpell dictionary.
   # cspell:ignore unrs
   unrs-resolver: true
-# The Docker image already installs dependencies with --frozen-lockfile, so the
-# dev container's `pnpm run dev` must not re-verify/reinstall them on startup.
-# Without this, pnpm v11 tries to purge the (root-owned) node_modules volume and
-# fails (no TTY for the confirmation prompt / EACCES as the non-root user).
-verifyDepsBeforeRun: false
 # 21 days (in minutes)
 minimumReleaseAge: 30240
 minimumReleaseAgeExclude:
