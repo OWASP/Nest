@@ -15,9 +15,9 @@ const MemberDetailsPageSkeleton: React.FC = () => {
           {/* Sidebar */}
           <aside className="w-full shrink-0 xl:w-[18rem]">
             <div className="h-fit space-y-6 md:space-y-8">
-              <div className="flex flex-col items-start gap-0 md:gap-6 text-left">
-                <Skeleton className="aspect-square size-32 sm:size-40 xl:h-auto xl:w-full shrink-0 rounded-full border-2 border-white bg-white dark:border-gray-800 dark:bg-gray-600/60" />
-                <div className="mt-6 mb-2 w-full overflow-x-auto text-left gap-2 flex flex-col">
+              <div className="flex flex-col items-start gap-0 text-left md:gap-6">
+                <Skeleton className="aspect-square size-32 shrink-0 rounded-full border-2 border-white bg-white sm:size-40 xl:h-auto xl:w-full dark:border-gray-800 dark:bg-gray-600/60" />
+                <div className="mt-6 mb-2 flex w-full flex-col gap-2 overflow-x-auto text-left">
                   <Skeleton className="h-8 w-3/4 rounded-lg" />
                   <Skeleton className="h-5 w-1/2 rounded-lg" />
                   <div className="mt-4 space-y-2">
@@ -44,7 +44,7 @@ const MemberDetailsPageSkeleton: React.FC = () => {
                   {[1, 2, 3, 4].map((i) => (
                     <div key={`stat-${i}`} className="flex items-center gap-3">
                       <Skeleton className="h-8 w-8 rounded-full" />
-                      <div className="flex flex-col gap-1 w-full">
+                      <div className="flex w-full flex-col gap-1">
                         <Skeleton className="h-4 w-12 rounded-lg" />
                         <Skeleton className="h-3 w-20 rounded-lg" />
                       </div>
@@ -70,10 +70,10 @@ const MemberDetailsPageSkeleton: React.FC = () => {
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div
                       key={`repo-${i}`}
-                      className="flex h-48 w-full flex-col gap-3 rounded-lg border flex-1 border-gray-200 p-4 shadow-xs dark:border-gray-700 dark:bg-gray-800"
+                      className="flex h-48 w-full flex-1 flex-col gap-3 rounded-lg border border-gray-200 p-4 shadow-xs dark:border-gray-700 dark:bg-gray-800"
                     >
                       <Skeleton className="h-5 w-3/4 rounded-lg" aria-hidden="true" />
-                      <div className="flex flex-col gap-2 text-sm mt-2">
+                      <div className="mt-2 flex flex-col gap-2 text-sm">
                         <div className="flex items-center gap-2">
                           <Skeleton className="h-4 w-4 rounded-full" aria-hidden="true" />
                           <Skeleton className="h-4 w-10 rounded-lg" aria-hidden="true" />

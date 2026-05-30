@@ -7,7 +7,6 @@ import { pluralize } from 'utils/pluralize'
 const InfoBlock = ({
   className = '',
   icon,
-  label = '',
   pluralizedName,
   precision = 1,
   unit = '',

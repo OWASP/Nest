@@ -1,12 +1,6 @@
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import {
-  FaCalendar,
-  FaFolderOpen,
-  FaSignsPost,
-  FaCircleCheck,
-  FaCircleExclamation,
-} from 'react-icons/fa6'
+import { FaCalendar, FaFolderOpen, FaSignsPost, FaCircleExclamation } from 'react-icons/fa6'
 import type { Milestone } from 'types/milestone'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'

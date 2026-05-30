@@ -46,11 +46,11 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
 
   return (
     <div className="h-fit space-y-6 md:space-y-8">
-      <div className="flex flex-col items-start gap-0 md:gap-6 text-left">
+      <div className="flex flex-col items-start gap-0 text-left md:gap-6">
         <Image
           width={200}
           height={200}
-          className="aspect-square size-32 sm:size-40 xl:h-auto xl:w-full shrink-0 rounded-full border-2 border-white bg-white object-cover dark:border-gray-800 dark:bg-gray-600/60"
+          className="aspect-square size-32 shrink-0 rounded-full border-2 border-white bg-white object-cover sm:size-40 xl:h-auto xl:w-full dark:border-gray-800 dark:bg-gray-600/60"
           src={user.avatarUrl || '/placeholder.svg'}
           alt={user.name || user.login || 'User Avatar'}
         />
@@ -64,7 +64,7 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
           >
             @{user.login}
           </Link>
-          <div className="mt-4 text-base leading-relaxed text-gray-600 dark:text-gray-400 wrap-break-word whitespace-pre-wrap">
+          <div className="mt-4 text-base leading-relaxed wrap-break-word whitespace-pre-wrap text-gray-600 dark:text-gray-400">
             {formattedBio}
           </div>
         </div>
