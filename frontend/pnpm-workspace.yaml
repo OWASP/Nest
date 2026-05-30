@@ -5,7 +5,16 @@ allowBuilds:
   core-js: true
   protobufjs: true
   sharp: true
+  # "unrs" (from "unrs-resolver", a native build dependency allow-listed above
+  # for pnpm v11) is not a dictionary word; accept it here instead of adding it
+  # to the shared cSpell dictionary.
+  # cspell:ignore unrs
   unrs-resolver: true
+# The Docker image already installs dependencies with --frozen-lockfile, so the
+# dev container's `pnpm run dev` must not re-verify/reinstall them on startup.
+# Without this, pnpm v11 tries to purge the (root-owned) node_modules volume and
+# fails (no TTY for the confirmation prompt / EACCES as the non-root user).
+verifyDepsBeforeRun: false
 # 21 days (in minutes)
 minimumReleaseAge: 30240
 minimumReleaseAgeExclude:
