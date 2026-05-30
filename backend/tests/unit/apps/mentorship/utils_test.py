@@ -55,12 +55,13 @@ class TestUserHasAccess:
         assert Program.user_has_access(program, mock_user) is False
 
     def test_authenticated_user_without_github_user(self) -> None:
-        """Test that a user without a github_user who is not admin has no access."""
+        """User without github_user who is not admin or nest_user mentor has no access."""
         mock_user = MagicMock()
         mock_user.is_authenticated = True
         mock_user.github_user = None
 
         program = MagicMock(spec=Program)
         program.admins.filter.return_value.exists.return_value = False
+        program.modules.filter.return_value.exists.return_value = False
 
         assert Program.user_has_access(program, mock_user) is False

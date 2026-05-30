@@ -25,13 +25,13 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
 
       - name: Login to Docker Hub
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121  # v4.1.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Update backend test image
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294  # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
         with:
           cache-from: |
             type=gha
@@ -40,13 +40,13 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-backend-cache
           context: backend
-          file: docker/backend/Dockerfile.test
+          file: docker/backend/Dockerfile.unit-tests
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-backend-latest
 
       - name: Update frontend unit test image
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294  # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
         with:
           cache-from: |
             type=gha
@@ -55,13 +55,13 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-frontend-unit-cache
           context: frontend
-          file: docker/frontend/Dockerfile.unit.test
+          file: docker/frontend/Dockerfile.unit-tests
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-unit-latest
 
       - name: Update frontend end-to-end test image
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294  # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
         with:
           cache-from: |
             type=gha
@@ -69,21 +69,21 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-frontend-e2e-cache
-          context: frontend
-          file: docker/frontend/Dockerfile.e2e.test
+          context: .
+          file: docker/e2e/Dockerfile
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-e2e-latest
 
       - name: Build and push fuzz-test-backend image
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294  # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
         with:
           cache-from: type=registry,ref=owasp/nest:test-fuzz-backend-cache
           cache-to: |
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-fuzz-backend-cache
           context: backend
-          file: docker/backend/Dockerfile.fuzz
+          file: docker/backend/Dockerfile.fuzz-tests
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-fuzz-backend-latest
