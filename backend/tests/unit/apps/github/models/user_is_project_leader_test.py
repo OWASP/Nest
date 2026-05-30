@@ -21,11 +21,11 @@ class TestUserIsProjectLeader:
 
         mock_get_for_model.assert_called_once_with(Project)
         mock_filter.assert_called_once_with(
-            member=user,
             entity_type=mock_get_for_model.return_value,
-            role=EntityMember.Role.LEADER,
             is_active=True,
             is_reviewed=True,
+            member=user,
+            role=EntityMember.Role.LEADER,
         )
 
     @patch("django.contrib.contenttypes.models.ContentType.objects.get_for_model")

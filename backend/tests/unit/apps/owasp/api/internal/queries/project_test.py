@@ -207,7 +207,7 @@ class TestIsProjectLeaderResolution:
         ):
             query = ProjectQuery()
             result = query.__class__.__dict__["is_project_leader"](
-                query, info=mock_info, login="ghostuser"
+                query, info=mock_info, login="blankuser"
             )
 
             assert not result

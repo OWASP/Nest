@@ -105,11 +105,11 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         from apps.owasp.models.entity_member import EntityMember  # noqa: PLC0415
 
         return EntityMember.objects.filter(
-            member=self,
             entity_type=ContentType.objects.get_for_model(entity_model),
-            role=EntityMember.Role.LEADER,
             is_active=True,
             is_reviewed=True,
+            member=self,
+            role=EntityMember.Role.LEADER,
         )
 
     @property
@@ -129,13 +129,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             QuerySet: Entities where this user is an active, reviewed leader.
 
         """
-        leader_memberships = self._get_leader_memberships(entity_model).values_list(
-            "entity_id", flat=True
-        )
-
-        return entity_model.objects.filter(id__in=leader_memberships, is_active=True).order_by(
-            "name"
-        )
+        return entity_model.objects.filter(
+            id__in=self._get_leader_memberships(entity_model).values_list("entity_id", flat=True),
+            is_active=True,
+        ).order_by("name")
 
     @property
     def chapters(self) -> QuerySet[Chapter]:
