@@ -8,8 +8,8 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-builder" \
     NPM_CONFIG_CACHE="/home/owasp/.npm" \
     PNPM_HOME="/pnpm"
 
-ENV NPM_CONFIG_RETRY=5 \
-    NPM_CONFIG_TIMEOUT=30000 \
+ENV PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
     PATH="$PNPM_HOME:$PATH"
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
@@ -26,7 +26,7 @@ WORKDIR /home/owasp
 COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile
 
 FROM node:24.16-alpine3.23@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14
 

@@ -1,3 +1,27 @@
+allowBuilds:
+  '@heroui/shared-utils': true
+  '@sentry/cli': true
+  '@swc/core': true
+  core-js: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
+
+overrides:
+  brace-expansion@5: 5.0.6
+  fast-uri: 3.1.2
+  glob: 11.1.0
+  postcss: 8.5.10
+  protobufjs: 7.5.8
+  serialize-javascript: 7.0.5
+  test-exclude: 7.0.2
+  ws@8: 8.20.1
+
+publicHoistPattern:
+  - '*import-in-the-middle*'
+
+saveExact: true
+
 # 21 days (in minutes)
 minimumReleaseAge: 30240
 minimumReleaseAgeExclude:

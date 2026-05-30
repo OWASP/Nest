@@ -123,19 +123,7 @@
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@10.33.3",
-  "pnpm": {
-    "overrides": {
-      "brace-expansion@5": "5.0.6",
-      "fast-uri": "3.1.2",
-      "glob": "^11.1.0",
-      "postcss": "8.5.10",
-      "protobufjs": "7.5.8",
-      "serialize-javascript": "^7.0.3",
-      "test-exclude": "^7.0.1",
-      "ws@8": "8.20.1"
-    }
-  },
+  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1",
   "prettier": {
     "arrowParens": "always",
     "endOfLine": "lf",
