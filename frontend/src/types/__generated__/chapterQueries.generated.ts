@@ -1,21 +1,25 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetChapterDataQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetChapterDataQueryVariables = Exact<{
+  key: string;
 }>;
 
 
-export type GetChapterDataQuery = { chapter: { __typename: 'ChapterNode', contributionData: any, contributionStats: any | null, id: string, isActive: boolean, key: string, name: string, region: string, relatedUrls: Array<string>, suggestedLocation: string | null, summary: string, updatedAt: string, url: string, entityLeaders: Array<{ __typename: 'EntityMemberNode', id: string, description: string, memberName: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }>, geoLocation: { __typename: 'GeoLocationType', lat: number, lng: number } | null } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
+export type GetChapterDataQuery = { chapter: { __typename: 'ChapterNode', contributionData: any, contributionStats: any, id: string, isActive: boolean, key: string, name: string, region: string, relatedUrls: Array<string>, suggestedLocation: string | null, summary: string, updatedAt: string, url: string, entityLeaders: Array<{ __typename: 'EntityMemberNode', id: string, description: string, memberName: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }>, geoLocation: { __typename: 'GeoLocationType', lat: number, lng: number } | null } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
 
-export type GetChapterMetadataQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetChapterMetadataQueryVariables = Exact<{
+  key: string;
 }>;
 
 
 export type GetChapterMetadataQuery = { chapter: { __typename: 'ChapterNode', id: string, name: string, summary: string } | null };
 
-export type GetChapterCountriesQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type GetChapterCountriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetChapterCountriesQuery = { chapterCountries: Array<string> };
