@@ -316,7 +316,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       )}
 
       {/* scroll wrapper for small screens */}
-      <div className="scrollbar-default w-full overflow-x-auto overflow-y-hidden">
+      <div className="scrollbar-hidden w-full overflow-x-auto overflow-y-hidden">
         <style>
           {`
             .apexcharts-tooltip {
@@ -327,10 +327,13 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             .apexcharts-tooltip * {
               border: none !important;
             }
-            .scrollbar-default {
-              scrollbar-width: thin;
+            .scrollbar-hidden {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
             }
-
+            .scrollbar-hidden::-webkit-scrollbar {
+              display: none;
+            }
           `}
         </style>
 
