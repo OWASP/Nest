@@ -52,7 +52,7 @@ jobs:
           db_name: nest_db_e2e
           db_password: nest_user_e2e_password
           db_username: nest_user_e2e
-          env_file: .env.e2e.example
+          env_file: .env.e2e-tests
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
