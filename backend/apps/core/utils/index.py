@@ -51,7 +51,7 @@ class DisableIndexing:
                     unregister(model)
 
 
-def deep_camelize(obj) -> dict | list:
+def deep_camelize(obj) -> dict | list | None:
     """Deep camelize.
 
     Args:
@@ -61,13 +61,18 @@ def deep_camelize(obj) -> dict | list:
         The camelized object.
 
     """
+    if not obj:
+        return obj
+
     if isinstance(obj, dict):
         return {
             convert_to_camel_case(key.removeprefix("idx_")): deep_camelize(value)
             for key, value in obj.items()
         }
+
     if isinstance(obj, list):
         return [deep_camelize(item) for item in obj]
+
     return obj
 
 
@@ -129,12 +134,12 @@ def get_params_for_index(index_name: str) -> dict:
         case "chapters":
             params["attributesToRetrieve"] = [
                 "_geoloc",
+                "idx_country",
                 "idx_created_at",
                 "idx_is_active",
                 "idx_key",
                 "idx_leaders",
                 "idx_name",
-                "idx_country",
                 "idx_region",
                 "idx_related_urls",
                 "idx_suggested_location",

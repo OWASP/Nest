@@ -35,12 +35,12 @@ class TestParamsMapping:
             "typoTolerance": "min",
             "attributesToRetrieve": [
                 "_geoloc",
+                "idx_country",
                 "idx_created_at",
                 "idx_is_active",
                 "idx_key",
                 "idx_leaders",
                 "idx_name",
-                "idx_country",
                 "idx_region",
                 "idx_related_urls",
                 "idx_suggested_location",
