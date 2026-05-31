@@ -34,14 +34,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Install Poetry
-        run: pipx install poetry
-
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
-          cache: poetry
-          cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
       - name: Set up pre-commit cache
@@ -84,10 +79,10 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Install pnpm
-        uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e  # v6.0.3
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v6.0.5
         with:
           run_install: false
-          version: 10.33.3
+          version: 11.5.0
 
       - name: Set up Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
@@ -189,7 +184,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: backend
-          file: docker/backend/Dockerfile.test
+          file: docker/backend/Dockerfile.unit-tests
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-backend-latest
@@ -198,7 +193,7 @@ jobs:
         run: |
           CONTAINER_ID=$(docker create \
             -e DJANGO_SETTINGS_MODULE=settings.test \
-            --env-file backend/.env.example \
+            --env-file backend/.env.unit-tests \
             owasp/nest:test-backend-latest pytest)
           docker start -a $CONTAINER_ID
           EXIT_CODE=$?
@@ -242,7 +237,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: frontend
-          file: docker/frontend/Dockerfile.unit.test
+          file: docker/frontend/Dockerfile.unit-tests
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-frontend-unit-latest
@@ -316,7 +311,7 @@ jobs:
       - name: Start Backend in the background
         run: |
           docker run -d --rm --name e2e-nest-backend \
-            --env-file backend/.env.e2e.example \
+            --env-file backend/.env.e2e-tests \
             --network host \
             -e DJANGO_DB_HOST=localhost \
             -e DJANGO_REDIS_AUTH_ENABLED=False \
@@ -348,7 +343,7 @@ jobs:
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
         with:
           build-args: |
-            ENV_FILE=.env.e2e.example
+            ENV_FILE=.env.e2e
             NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
           cache-from: |
             type=gha
@@ -364,7 +359,7 @@ jobs:
       - name: Run frontend in the background
         run: |
           docker run \
-            --env-file frontend/.env.e2e.example \
+            --env-file frontend/.env.e2e \
             --name e2e-nest-frontend \
             --network host \
             -d \
@@ -431,7 +426,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: frontend
-          file: docker/frontend/Dockerfile.a11y.test
+          file: docker/frontend/Dockerfile.a11y-tests
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-frontend-a11y-latest
@@ -548,7 +543,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -560,7 +555,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7  # v2.1.4
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
 
       - name: Build backend image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
@@ -720,7 +715,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
         with:
           aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -800,7 +795,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -1009,10 +1004,10 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Install pnpm
-        uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e  # v6.0.3
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v6.0.5
         with:
           run_install: false
-          version: 10.33.3
+          version: 11.5.0
 
       - name: Set up Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
@@ -1092,7 +1087,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -1104,7 +1099,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7  # v2.1.4
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
 
       - name: Build backend image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
@@ -1265,7 +1260,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
         with:
           aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -1346,7 +1341,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -1560,10 +1555,10 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Install pnpm
-        uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e  # v6.0.3
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v6.0.5
         with:
           run_install: false
-          version: 10.33.3
+          version: 11.5.0
 
       - name: Set up Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0

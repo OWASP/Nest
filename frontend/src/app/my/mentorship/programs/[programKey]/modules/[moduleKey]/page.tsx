@@ -5,10 +5,16 @@ import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
@@ -19,7 +25,7 @@ const ModuleDetailsPage = () => {
     data,
     error,
     loading: isLoading,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
@@ -28,13 +34,23 @@ const ModuleDetailsPage = () => {
   })
 
   useEffect(() => {
-    if (error) {
+    if (error && !isForbiddenGraphQLError(error)) {
       handleAppError(error)
     }
   }, [error])
 
-  const mentorshipModule: Module | null | undefined = data?.getModule
-  const admins = data?.getProgram?.admins
+  const mentorshipModule: Module | null | undefined = data?.managementModule
+  const admins = data?.managementProgram?.admins
+
+  if (error && isForbiddenGraphQLError(error)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to manage this module."
+      />
+    )
+  }
 
   if (isLoading && !mentorshipModule) return <LoadingSpinner />
 
@@ -63,21 +79,38 @@ const ModuleDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <DetailsCard
-        accessLevel="admin"
-        admins={admins ?? undefined}
-        details={moduleDetails}
-        domains={mentorshipModule.domains ?? undefined}
-        entityKey={moduleKey}
-        labels={mentorshipModule.labels ?? undefined}
-        mentees={mentorshipModule.mentees}
-        mentors={mentorshipModule.mentors}
-        programKey={programKey}
-        summary={mentorshipModule.description}
-        tags={mentorshipModule.tags ?? undefined}
-        title={mentorshipModule.name}
-        type="module"
-      />
+      <PageWrapper>
+        <Header
+          title={mentorshipModule.name}
+          programKey={programKey}
+          moduleKey={moduleKey}
+          entityKey={moduleKey}
+          accessLevel="admin"
+          admins={admins ?? undefined}
+          mentors={mentorshipModule.mentors ?? undefined}
+          isActive={true}
+          isArchived={false}
+          showModuleActions={true}
+        />
+
+        <Summary summary={mentorshipModule.description} />
+
+        <Metadata details={moduleDetails} detailsTitle="Module Details" />
+
+        <Tags
+          entityKey={moduleKey}
+          tags={mentorshipModule.tags ?? undefined}
+          domains={mentorshipModule.domains ?? undefined}
+          labels={mentorshipModule.labels ?? undefined}
+        />
+
+        <Contributors
+          entityKey={moduleKey}
+          programKey={programKey}
+          mentors={mentorshipModule.mentors ?? undefined}
+          mentees={mentorshipModule.mentees ?? undefined}
+        />
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

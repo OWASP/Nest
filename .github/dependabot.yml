@@ -5,6 +5,14 @@ updates:
       default-days: 21
     directories:
       - docker/*
+    ignore:
+      - dependency-name: node
+        update-types:
+          - version-update:semver-major
+      - dependency-name: python
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
     groups:
       version-updates:
         applies-to: version-updates

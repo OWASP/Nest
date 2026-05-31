@@ -76,15 +76,7 @@ Follow these steps to set up the OWASP Nest application:
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
 
-**Please note you need to restart the application in order to apply any `.env` file changes.**
-
-1. **Configure Environment Variables**:
-
-   - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
-
-     ```plaintext
-     DJANGO_CONFIGURATION=Local
-     ```
+**Please note you might need to restart the application in order to apply any `.env` file changes.**
 
 1. **Set Up Algolia**:
 
