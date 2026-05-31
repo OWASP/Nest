@@ -76,12 +76,16 @@ class LeaderboardSnapshot(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="leaderboard_snapshots",
         help_text="The project to which this ranking applies",
+        null=True,
+        blank=True,
     )
     chapter = models.ForeignKey(
         Chapter,
         on_delete=models.CASCADE,
         related_name="leaderboard_snapshots",
         help_text="The chapter to which this ranking applies",
+        null=True,
+        blank=True,
     )
 
     def __str__(self) -> str:
