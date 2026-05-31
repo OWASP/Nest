@@ -157,9 +157,42 @@ jobs:
         run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
     timeout-minutes: 15
 
+  audit-dependencies:
+    name: Audit dependencies
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v6.0.5
+        with:
+          run_install: false
+          version: 11.5.0
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry and pip-audit
+        run: python -m pip install -r backend/requirements.build.txt pip-audit
+
+      - name: Audit dependencies
+        run: make audit-dependencies
+    timeout-minutes: 5
+
   run-backend-tests:
     name: Run backend tests
     needs:
+      - audit-dependencies
       - check-frontend
       - pre-commit
       - run-security-scan-code
@@ -213,6 +246,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
+      - audit-dependencies
       - check-frontend
       - pre-commit
       - run-security-scan-code
@@ -265,6 +299,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
+      - audit-dependencies
       - check-frontend
       - pre-commit
       - run-security-scan-code
@@ -274,7 +309,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       db:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
         env:
           POSTGRES_DB: nest_db_e2e
           POSTGRES_PASSWORD: nest_user_e2e_password
@@ -287,7 +322,7 @@ jobs:
         ports:
           - 5432:5432
       cache:
-        image: redis:8.0.5-alpine3.21
+        image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
         options: >-
           --health-cmd="redis-cli ping"
           --health-interval=5s
@@ -403,6 +438,7 @@ jobs:
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
+      - audit-dependencies
       - check-frontend
       - pre-commit
       - run-security-scan-code
@@ -440,6 +476,7 @@ jobs:
     name: Run GraphQL fuzz tests
     if: false
     needs:
+      - audit-dependencies
       - check-frontend
       - pre-commit
       - run-security-scan-code
@@ -451,6 +488,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
+      - audit-dependencies
       - check-frontend
       - pre-commit
       - run-security-scan-code
@@ -463,6 +501,7 @@ jobs:
   run-infrastructure-tests:
     name: Run Infrastructure tests
     needs:
+      - audit-dependencies
       - check-frontend
       - pre-commit
       - run-security-scan-code

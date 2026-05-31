@@ -9,37 +9,37 @@ importers:
   .:
     devDependencies:
       '@cspell/dict-aws':
-        specifier: ^4.0.17
+        specifier: 4.0.17
         version: 4.0.17
       '@cspell/dict-data-science':
-        specifier: ^2.0.13
+        specifier: 2.0.13
         version: 2.0.13
       '@cspell/dict-en_us':
-        specifier: ^4.4.33
+        specifier: 4.4.33
         version: 4.4.33
       '@cspell/dict-fullstack':
-        specifier: ^3.2.9
+        specifier: 3.2.9
         version: 3.2.9
       '@cspell/dict-golang':
-        specifier: ^6.0.26
+        specifier: 6.0.26
         version: 6.0.26
       '@cspell/dict-k8s':
-        specifier: ^1.0.12
+        specifier: 1.0.12
         version: 1.0.12
       '@cspell/dict-people-names':
-        specifier: ^1.1.16
+        specifier: 1.1.16
         version: 1.1.16
       '@cspell/dict-software-terms':
-        specifier: ^5.2.2
+        specifier: 5.2.2
         version: 5.2.2
       '@cspell/dict-terraform':
-        specifier: ^1.1.3
+        specifier: 1.1.3
         version: 1.1.3
       '@cspell/dict-win32':
-        specifier: ^2.0.10
+        specifier: 2.0.10
         version: 2.0.10
       cspell:
-        specifier: ^10.0.0
+        specifier: 10.0.0
         version: 10.0.0
 
 packages:
