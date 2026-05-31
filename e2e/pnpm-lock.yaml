@@ -5,8 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  glob: ^11.1.0
-  test-exclude: ^7.0.1
+  glob: 11.1.0
+  test-exclude: 7.0.2
 
 importers:
 
@@ -16,10 +16,10 @@ importers:
         specifier: 1.60.0
         version: 1.60.0
       dayjs:
-        specifier: ^1.11.20
+        specifier: 1.11.20
         version: 1.11.20
       millify:
-        specifier: ^6.1.0
+        specifier: 6.1.0
         version: 6.1.0
 
 packages:

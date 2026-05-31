@@ -9,7 +9,9 @@ minimumReleaseAgeExclude:
   - playwright@1.60.0
 
 overrides:
-  glob: ^11.1.0
-  test-exclude: ^7.0.1
+  glob: 11.1.0
+  test-exclude: 7.0.2
+
+saveExact: true
 
 strictDepBuilds: true
