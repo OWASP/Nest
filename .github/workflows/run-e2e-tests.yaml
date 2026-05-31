@@ -82,7 +82,7 @@ jobs:
           path: frontend/.next/cache
 
       - name: Prepare environment variables for frontend
-        run: cp .env.e2e.example .env
+        run: cp .env.e2e .env
         working-directory: frontend
 
       - name: Build frontend
