@@ -257,7 +257,7 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 audit-backend-dependencies: ## Audit backend Python dependencies
 	@echo "Auditing backend Python dependencies..."
 	@command -v pip-audit >/dev/null 2>&1 || python -m pip install -q pip-audit
-	@cd backend && poetry export -f requirements.txt --without-hashes --only main | \
+	@cd backend && poetry export -f requirements.txt --without-hashes --all-groups | \
 		pip-audit -r /dev/stdin
 
 update-backend-dependencies:
