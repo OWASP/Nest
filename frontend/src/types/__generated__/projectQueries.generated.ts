@@ -1,32 +1,36 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetProjectQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetProjectQueryVariables = Exact<{
+  key: string;
 }>;
 
 
-export type GetProjectQuery = { project: { __typename: 'ProjectNode', contributionData: any | null, contributionStats: any | null, contributorsCount: number, forksCount: number, id: string, isActive: boolean, issuesCount: number, key: string, languages: Array<string>, leaders: Array<string>, level: string, name: string, repositoriesCount: number, starsCount: number, summary: string, topics: Array<string>, type: string, updatedAt: string, url: string, entityLeaders: Array<{ __typename: 'EntityMemberNode', description: string, id: string, memberName: string, member: { __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string } | null }>, healthMetricsList: Array<{ __typename: 'ProjectHealthMetricsNode', id: string, createdAt: any, forksCount: number, lastCommitDays: number, lastCommitDaysRequirement: number, lastReleaseDays: number, lastReleaseDaysRequirement: number, openIssuesCount: number, openPullRequestsCount: number, score: number | null, starsCount: number, unassignedIssuesCount: number, unansweredIssuesCount: number }>, recentIssues: Array<{ __typename: 'IssueNode', createdAt: any, organizationName: string | null, repositoryName: string | null, title: string, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string, url: string } | null }>, recentReleases: Array<{ __typename: 'ReleaseNode', id: string, name: string, organizationName: string | null, publishedAt: any | null, repositoryName: string | null, tagName: string, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string } | null }>, repositories: Array<{ __typename: 'RepositoryNode', id: string, contributorsCount: number, forksCount: number, isArchived: boolean, key: string, name: string, openIssuesCount: number, starsCount: number, subscribersCount: number, url: string, organization: { __typename: 'OrganizationNode', login: string } | null }>, recentMilestones: Array<{ __typename: 'MilestoneNode', title: string, openIssuesCount: number, closedIssuesCount: number, repositoryName: string | null, organizationName: string | null, createdAt: any, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string } | null }>, recentPullRequests: Array<{ __typename: 'PullRequestNode', createdAt: any, organizationName: string | null, repositoryName: string | null, title: string, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string } | null }> } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
+export type GetProjectQuery = { project: { __typename: 'ProjectNode', contributionData: any, contributionStats: any, contributorsCount: number, forksCount: number, id: string, isActive: boolean, issuesCount: number, key: string, languages: Array<string>, leaders: Array<string>, level: string, name: string, repositoriesCount: number, starsCount: number, summary: string, topics: Array<string>, type: string, updatedAt: string, url: string, entityLeaders: Array<{ __typename: 'EntityMemberNode', description: string, id: string, memberName: string, member: { __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string } | null }>, healthMetricsList: Array<{ __typename: 'ProjectHealthMetricsNode', id: string, createdAt: any, forksCount: number, lastCommitDays: number, lastCommitDaysRequirement: number, lastReleaseDays: number, lastReleaseDaysRequirement: number, openIssuesCount: number, openPullRequestsCount: number, score: number | null, starsCount: number, unassignedIssuesCount: number, unansweredIssuesCount: number }>, recentIssues: Array<{ __typename: 'IssueNode', createdAt: any, organizationName: string | null, repositoryName: string | null, title: string, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string, url: string } | null }>, recentReleases: Array<{ __typename: 'ReleaseNode', id: string, name: string, organizationName: string | null, publishedAt: any, repositoryName: string | null, tagName: string, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string } | null }>, repositories: Array<{ __typename: 'RepositoryNode', id: string, contributorsCount: number, forksCount: number, isArchived: boolean, key: string, name: string, openIssuesCount: number, starsCount: number, subscribersCount: number, url: string, organization: { __typename: 'OrganizationNode', login: string } | null }>, recentMilestones: Array<{ __typename: 'MilestoneNode', title: string, openIssuesCount: number, closedIssuesCount: number, repositoryName: string | null, organizationName: string | null, createdAt: any, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string } | null }>, recentPullRequests: Array<{ __typename: 'PullRequestNode', createdAt: any, organizationName: string | null, repositoryName: string | null, title: string, url: string, author: { __typename: 'UserNode', id: string, avatarUrl: string, login: string, name: string } | null }> } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
 
-export type GetProjectMetadataQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetProjectMetadataQueryVariables = Exact<{
+  key: string;
 }>;
 
 
 export type GetProjectMetadataQuery = { project: { __typename: 'ProjectNode', id: string, contributorsCount: number, forksCount: number, issuesCount: number, name: string, starsCount: number, summary: string, recentMilestones: Array<{ __typename: 'MilestoneNode', id: string, title: string, url: string, body: string, progress: number, state: string }> } | null };
 
-export type GetTopContributorsQueryVariables = Types.Exact<{
-  excludedUsernames?: Types.InputMaybe<Array<Types.Scalars['String']['input']> | Types.Scalars['String']['input']>;
-  hasFullName?: Types.InputMaybe<Types.Scalars['Boolean']['input']>;
-  key: Types.Scalars['String']['input'];
-  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+export type GetTopContributorsQueryVariables = Exact<{
+  excludedUsernames?: Array<string> | string | null | undefined;
+  hasFullName?: boolean | null | undefined;
+  key: string;
+  limit?: number | null | undefined;
 }>;
 
 
 export type GetTopContributorsQuery = { topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
 
-export type SearchProjectNamesQueryVariables = Types.Exact<{
-  query: Types.Scalars['String']['input'];
+export type SearchProjectNamesQueryVariables = Exact<{
+  query: string;
 }>;
 
 

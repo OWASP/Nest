@@ -38,7 +38,7 @@ jobs:
         working-directory: backend
 
       - name: Run backend tests
-        run: set -a && source .env.example && set +a && poetry run pytest tests/unit
+        run: set -a && source .env.unit-tests && set +a && poetry run pytest tests/unit
         working-directory: backend
 
       - name: Upload coverage artifact
