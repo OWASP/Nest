@@ -56,12 +56,12 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
         if (
             self.claim_id
-            and BoardCandidateClaim.objects.filter(
+            and not BoardCandidateClaim.objects.filter(
                 pk=self.claim_id,
-                is_locked=True,
+                status=BoardCandidateClaim.Status.DRAFT,
             ).exists()
         ):
-            err = "Cannot add or modify evidence on a locked claim."
+            err = "Cannot add or modify evidence on a non-draft claim."
             raise ValidationError(err)
 
         if not (self.file or self.source_url):

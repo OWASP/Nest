@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from django.core.exceptions import ValidationError
 
+from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
 
 
@@ -94,8 +95,41 @@ class TestBoardCandidateClaimEvidenceModel:
 
         assert field.blank
 
-    def test_clean_locked_claim_raises_validation_error(self):
-        """Test that clean raises ValidationError when claim is locked."""
+    @pytest.mark.parametrize(
+        "status",
+        [
+            BoardCandidateClaim.Status.APPROVED,
+            BoardCandidateClaim.Status.DISCARDED,
+            BoardCandidateClaim.Status.REJECTED,
+            BoardCandidateClaim.Status.SUBMITTED,
+            BoardCandidateClaim.Status.WITHDRAWN,
+        ],
+    )
+    def test_clean_non_draft_statuses_raise_validation_error(self, status):
+        """Test that clean raises ValidationError for all non-draft statuses."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test Evidence", source_url="https://example.com"
+        )
+        evidence.claim_id = 1
+
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = False
+
+            with pytest.raises(
+                ValidationError, match=r"Cannot add or modify evidence on a non-draft claim."
+            ):
+                evidence.clean()
+
+            assert status != BoardCandidateClaim.Status.DRAFT
+            mock_objects.filter.assert_called_with(
+                pk=1,
+                status=BoardCandidateClaim.Status.DRAFT,
+            )
+
+    def test_clean_draft_status_passes(self):
+        """Test that clean passes for draft status."""
         evidence = BoardCandidateClaimEvidence(
             title="Test Evidence", source_url="https://example.com"
         )
@@ -106,13 +140,15 @@ class TestBoardCandidateClaimEvidenceModel:
         ) as mock_objects:
             mock_objects.filter.return_value.exists.return_value = True
 
-            with pytest.raises(
-                ValidationError, match=r"Cannot add or modify evidence on a locked claim."
-            ):
-                evidence.clean()
+            evidence.clean()
 
-    def test_clean_unlocked_claim_with_source_url_passes(self):
-        """Test that clean passes for unlocked claim with source_url."""
+            mock_objects.filter.assert_called_with(
+                pk=1,
+                status=BoardCandidateClaim.Status.DRAFT,
+            )
+
+    def test_clean_non_draft_claim_raises_validation_error(self):
+        """Test that clean raises ValidationError when claim is non-draft."""
         evidence = BoardCandidateClaimEvidence(
             title="Test Evidence", source_url="https://example.com"
         )
@@ -122,6 +158,23 @@ class TestBoardCandidateClaimEvidenceModel:
             "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
         ) as mock_objects:
             mock_objects.filter.return_value.exists.return_value = False
+
+            with pytest.raises(
+                ValidationError, match=r"Cannot add or modify evidence on a non-draft claim."
+            ):
+                evidence.clean()
+
+    def test_clean_draft_claim_with_source_url_passes(self):
+        """Test that clean passes for draft claim with source_url."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test Evidence", source_url="https://example.com"
+        )
+        evidence.claim_id = 1
+
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = True
             evidence.clean()
 
     def test_clean_no_file_and_no_source_url_raises_validation_error(self):
@@ -133,7 +186,7 @@ class TestBoardCandidateClaimEvidenceModel:
         with patch(
             "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
         ) as mock_objects:
-            mock_objects.filter.return_value.exists.return_value = False
+            mock_objects.filter.return_value.exists.return_value = True
 
             with pytest.raises(ValidationError, match=r"Either file or source_url is required."):
                 evidence.clean()
@@ -154,7 +207,7 @@ class TestBoardCandidateClaimEvidenceModel:
         with patch(
             "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
         ) as mock_objects:
-            mock_objects.filter.return_value.exists.return_value = False
+            mock_objects.filter.return_value.exists.return_value = True
             evidence.clean()
 
         assert evidence.file_name == "document.pdf"
@@ -176,7 +229,7 @@ class TestBoardCandidateClaimEvidenceModel:
         with patch(
             "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
         ) as mock_objects:
-            mock_objects.filter.return_value.exists.return_value = False
+            mock_objects.filter.return_value.exists.return_value = True
             evidence.clean()
 
         assert evidence.file_name == "custom_name.pdf"
