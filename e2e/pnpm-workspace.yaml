@@ -1,2 +1,10 @@
+ignoreScripts: true
+
 # 21 days (in minutes)
 minimumReleaseAge: 30240
+
+overrides:
+  glob: ^11.1.0
+  test-exclude: ^7.0.1
+
+strictDepBuilds: true

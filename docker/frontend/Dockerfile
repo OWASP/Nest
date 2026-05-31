@@ -9,6 +9,8 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
     COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
     PNPM_HOME="/pnpm"
 
 ARG ENV_FILE=.env
@@ -29,9 +31,9 @@ WORKDIR /app
 COPY --chmod=444 package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile
 
-COPY --chmod=444 .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
 COPY --chmod=444 ${ENV_FILE} ./.env
 COPY --chmod=555 public public
 COPY --chmod=555 src src
