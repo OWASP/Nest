@@ -227,9 +227,9 @@ export const technologies = [
   {
     section: 'Tools',
     tools: {
-      ansible: {
-        icon: '/images/icons/ansible.svg',
-        url: 'https://www.ansible.com/',
+      terraform: {
+        icon: '/images/icons/terraform.svg',
+        url: 'https://www.terraform.io/',
       },
       gitHub: {
         icon: '/images/icons/github.svg',
