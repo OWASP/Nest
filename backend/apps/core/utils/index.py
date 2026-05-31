@@ -58,7 +58,7 @@ def deep_camelize(obj) -> dict | list | None:
         obj: The object to camelize.
 
     Returns:
-        The camelized object.
+        The camelize object or None.
 
     """
     if not obj:
