@@ -182,8 +182,8 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install Poetry and pip-audit
-        run: python -m pip install -r backend/requirements.build.txt pip-audit
+      - name: Install build dependencies
+        run: python -m pip install -r backend/requirements.build.txt
 
       - name: Audit dependencies
         run: make audit-dependencies
