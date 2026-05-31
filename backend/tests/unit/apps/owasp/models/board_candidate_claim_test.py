@@ -260,6 +260,53 @@ class TestBoardCandidateClaimModel:
 
         assert str(exc_info.value.messages[0]) == "Cannot update fields while withdrawing a claim."
 
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_clean_non_draft_claim_disallows_field_updates(self, mock_objects):
+        """Test that non-draft claims cannot update non-status fields."""
+        existing = BoardCandidateClaim(
+            title="Original Title",
+            description="Original Description",
+            status=BoardCandidateClaim.Status.SUBMITTED,
+            is_locked=False,
+        )
+        existing.pk = 1
+        mock_objects.filter.return_value.first.return_value = existing
+
+        claim = BoardCandidateClaim(
+            title="Updated Title",
+            description=existing.description,
+            status=BoardCandidateClaim.Status.SUBMITTED,
+        )
+        claim.is_locked = existing.is_locked
+        claim.pk = 1
+
+        with pytest.raises(ValidationError) as exc_info:
+            claim.clean()
+
+        assert str(exc_info.value.messages[0]) == "Can only update status on a non-draft claim"
+
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_clean_non_draft_claim_allows_status_update_only(self, mock_objects):
+        """Test that non-draft claims can change status when fields are unchanged."""
+        existing = BoardCandidateClaim(
+            title="Original Title",
+            description="Original Description",
+            status=BoardCandidateClaim.Status.SUBMITTED,
+            is_locked=False,
+        )
+        existing.pk = 1
+        mock_objects.filter.return_value.first.return_value = existing
+
+        claim = BoardCandidateClaim(
+            title=existing.title,
+            description=existing.description,
+            status=BoardCandidateClaim.Status.APPROVED,
+        )
+        claim.is_locked = existing.is_locked
+        claim.pk = 1
+
+        claim.clean()
+
     @patch.object(BoardCandidateClaim, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim.TimestampedModel.save")
     def test_save_calls_full_clean(self, mock_super_save, mock_full_clean):

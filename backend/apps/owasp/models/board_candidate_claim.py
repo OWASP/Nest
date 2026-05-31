@@ -101,6 +101,18 @@ class BoardCandidateClaim(TimestampedModel):
             error_message = "Cannot update fields while withdrawing a claim."
             raise ValidationError(error_message)
 
+        if (
+            self.status != self.Status.WITHDRAWN
+            and existing_claim.status != self.Status.DRAFT
+            and any(
+                f.attname != "status"
+                for f in self._meta.fields
+                if getattr(self, f.attname) != getattr(existing_claim, f.attname)
+            )
+        ):
+            error_message = "Can only update status on a non-draft claim"
+            raise ValidationError(error_message)
+
     def save(self, *args, **kwargs) -> None:
         """Save claim."""
         self.full_clean()
