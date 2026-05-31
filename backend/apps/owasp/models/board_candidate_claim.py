@@ -26,14 +26,23 @@ class BoardCandidateClaim(TimestampedModel):
     class Status(models.TextChoices):
         """Status choices."""
 
-        DRAFT = "DRAFT", "Draft"
-        DISCARDED = "DISCARDED", "Discarded"
-        SUBMITTED = "SUBMITTED", "Submitted"
         APPROVED = "APPROVED", "Approved"
+        DISCARDED = "DISCARDED", "Discarded"
+        DRAFT = "DRAFT", "Draft"
         REJECTED = "REJECTED", "Rejected"
+        SUBMITTED = "SUBMITTED", "Submitted"
         WITHDRAWN = "WITHDRAWN", "Withdrawn"
 
-    FINALIZED_STATUSES = {Status.APPROVED, Status.REJECTED, Status.WITHDRAWN}
+    FINALIZED_STATUSES = {Status.APPROVED, Status.DISCARDED, Status.REJECTED, Status.WITHDRAWN}
+    VALID_TRANSITIONS = {
+        Status.DRAFT: {Status.SUBMITTED, Status.DISCARDED},
+        Status.SUBMITTED: {Status.APPROVED, Status.REJECTED, Status.WITHDRAWN},
+        Status.APPROVED: {Status.WITHDRAWN},
+        Status.REJECTED: set(),
+        Status.DISCARDED: set(),
+        Status.WITHDRAWN: set(),
+    }
+    WITHDRAWAL_ALLOWED_FIELDS = frozenset({"status", "withdrawn_reason", "withdrawn_at"})
 
     board = models.ForeignKey(
         BoardOfDirectors, blank=True, null=True, on_delete=models.SET_NULL, related_name="claims"
@@ -62,15 +71,34 @@ class BoardCandidateClaim(TimestampedModel):
     def clean(self) -> None:
         """Validate claim."""
         super().clean()
-        if (
-            self.pk
-            and self.status != self.Status.WITHDRAWN
-            and BoardCandidateClaim.objects.filter(
-                pk=self.pk,
-                is_locked=True,
-            ).exists()
+        if not self.pk:
+            if self.status != self.Status.DRAFT:
+                error_message = "New claims must be created as draft."
+                raise ValidationError(error_message)
+            return
+
+        existing_claim = BoardCandidateClaim.objects.filter(
+            pk=self.pk,
+        ).first()
+
+        if not existing_claim:
+            error_message = "Claim does not exist."
+            raise ValidationError(error_message)
+
+        if self.status != existing_claim.status and self.status not in self.VALID_TRANSITIONS.get(
+            existing_claim.status, set()
         ):
-            error_message = "Cannot update locked claim."
+            error_message = (
+                f"Invalid status transition from {existing_claim.status} to {self.status}."
+            )
+            raise ValidationError(error_message)
+
+        if self.status == self.Status.WITHDRAWN and any(
+            f.attname not in self.WITHDRAWAL_ALLOWED_FIELDS
+            for f in self._meta.fields
+            if getattr(self, f.attname) != getattr(existing_claim, f.attname)
+        ):
+            error_message = "Cannot update fields while withdrawing a claim."
             raise ValidationError(error_message)
 
     def save(self, *args, **kwargs) -> None:

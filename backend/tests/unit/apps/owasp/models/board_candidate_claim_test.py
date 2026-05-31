@@ -36,17 +36,18 @@ class TestBoardCandidateClaimModel:
 
     def test_status_choices(self):
         """Test status choices are correctly defined."""
-        assert BoardCandidateClaim.Status.DRAFT == "DRAFT"
-        assert BoardCandidateClaim.Status.DISCARDED == "DISCARDED"
-        assert BoardCandidateClaim.Status.SUBMITTED == "SUBMITTED"
         assert BoardCandidateClaim.Status.APPROVED == "APPROVED"
+        assert BoardCandidateClaim.Status.DISCARDED == "DISCARDED"
+        assert BoardCandidateClaim.Status.DRAFT == "DRAFT"
         assert BoardCandidateClaim.Status.REJECTED == "REJECTED"
+        assert BoardCandidateClaim.Status.SUBMITTED == "SUBMITTED"
         assert BoardCandidateClaim.Status.WITHDRAWN == "WITHDRAWN"
 
     def test_finalized_statuses(self):
         """Test FINALIZED_STATUSES contains the correct statuses."""
         expected = {
             BoardCandidateClaim.Status.APPROVED,
+            BoardCandidateClaim.Status.DISCARDED,
             BoardCandidateClaim.Status.REJECTED,
             BoardCandidateClaim.Status.WITHDRAWN,
         }
@@ -97,50 +98,167 @@ class TestBoardCandidateClaimModel:
 
         assert field.default == ""
 
-    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
-    def test_clean_locked_claim_raises_validation_error(self, mock_objects):
-        """Test that clean raises ValidationError when updating a locked claim."""
-        claim = BoardCandidateClaim(title="Locked Claim", status=BoardCandidateClaim.Status.DRAFT)
-        claim.pk = 1
-        claim.claim_id = 1
-
-        mock_objects.filter.return_value.exists.return_value = True
-
-        with pytest.raises(ValidationError, match=r"Cannot update locked claim."):
-            claim.clean()
-
-    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
-    def test_clean_locked_claim_allows_withdrawal(self, mock_objects):
-        """Test that clean allows withdrawing a locked claim."""
-        claim = BoardCandidateClaim(
-            title="Locked Claim", status=BoardCandidateClaim.Status.WITHDRAWN
-        )
-        claim.pk = 1
-        claim.claim_id = 1
-
-        mock_objects.filter.return_value.exists.return_value = True
-
-        claim.clean()
-
-    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
-    def test_clean_unlocked_claim_passes(self, mock_objects):
-        """Test that clean passes for unlocked claims."""
-        claim = BoardCandidateClaim(
-            title="Unlocked Claim", status=BoardCandidateClaim.Status.SUBMITTED
-        )
-        claim.pk = 1
-        claim.claim_id = 1
-
-        mock_objects.filter.return_value.exists.return_value = False
-
-        claim.clean()
-
     def test_clean_new_claim_passes(self):
-        """Test that clean passes for new claims without pk."""
+        """Test that clean passes for new draft claims without pk."""
         claim = BoardCandidateClaim(title="New Claim", status=BoardCandidateClaim.Status.DRAFT)
         claim.pk = None
 
         claim.clean()
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            BoardCandidateClaim.Status.APPROVED,
+            BoardCandidateClaim.Status.DISCARDED,
+            BoardCandidateClaim.Status.REJECTED,
+            BoardCandidateClaim.Status.SUBMITTED,
+            BoardCandidateClaim.Status.WITHDRAWN,
+        ],
+    )
+    def test_clean_new_claim_non_draft_raises(self, status):
+        """Test that clean raises ValidationError when creating a non-draft claim."""
+        claim = BoardCandidateClaim(title="New Claim", status=status)
+        claim.pk = None
+
+        with pytest.raises(ValidationError) as exc_info:
+            claim.clean()
+
+        assert str(exc_info.value.messages[0]) == "New claims must be created as draft."
+
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_clean_nonexistent_pk_raises(self, mock_objects):
+        """Test that clean raises ValidationError when claim with pk does not exist in DB."""
+        mock_objects.filter.return_value.first.return_value = None
+
+        claim = BoardCandidateClaim(title="Ghost Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim.pk = 999
+
+        with pytest.raises(ValidationError) as exc_info:
+            claim.clean()
+
+        assert str(exc_info.value.messages[0]) == "Claim does not exist."
+
+    @pytest.mark.parametrize(
+        ("from_status", "to_status"),
+        [
+            (BoardCandidateClaim.Status.DRAFT, BoardCandidateClaim.Status.SUBMITTED),
+            (BoardCandidateClaim.Status.DRAFT, BoardCandidateClaim.Status.DISCARDED),
+            (BoardCandidateClaim.Status.SUBMITTED, BoardCandidateClaim.Status.APPROVED),
+            (BoardCandidateClaim.Status.SUBMITTED, BoardCandidateClaim.Status.REJECTED),
+            (BoardCandidateClaim.Status.SUBMITTED, BoardCandidateClaim.Status.WITHDRAWN),
+            (BoardCandidateClaim.Status.APPROVED, BoardCandidateClaim.Status.WITHDRAWN),
+        ],
+    )
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_clean_valid_transition_passes(self, mock_objects, from_status, to_status):
+        """Test that clean passes for valid status transitions."""
+        existing = BoardCandidateClaim(
+            title="Original Title",
+            description="Original Description",
+            status=from_status,
+            is_locked=from_status in BoardCandidateClaim.FINALIZED_STATUSES,
+        )
+        existing.pk = 1
+        mock_objects.filter.return_value.first.return_value = existing
+
+        claim = BoardCandidateClaim(
+            title=existing.title,
+            description=existing.description,
+            status=to_status,
+        )
+        claim.is_locked = existing.is_locked
+        claim.pk = 1
+
+        if to_status == BoardCandidateClaim.Status.WITHDRAWN:
+            for field in claim._meta.fields:
+                if field.attname not in BoardCandidateClaim.WITHDRAWAL_ALLOWED_FIELDS:
+                    setattr(claim, field.attname, getattr(existing, field.attname))
+
+        claim.clean()
+
+    @pytest.mark.parametrize(
+        ("from_status", "to_status"),
+        [
+            (BoardCandidateClaim.Status.DRAFT, BoardCandidateClaim.Status.APPROVED),
+            (BoardCandidateClaim.Status.DRAFT, BoardCandidateClaim.Status.REJECTED),
+            (BoardCandidateClaim.Status.DRAFT, BoardCandidateClaim.Status.WITHDRAWN),
+            (BoardCandidateClaim.Status.SUBMITTED, BoardCandidateClaim.Status.DRAFT),
+            (BoardCandidateClaim.Status.SUBMITTED, BoardCandidateClaim.Status.DISCARDED),
+            (BoardCandidateClaim.Status.APPROVED, BoardCandidateClaim.Status.DRAFT),
+            (BoardCandidateClaim.Status.APPROVED, BoardCandidateClaim.Status.SUBMITTED),
+            (BoardCandidateClaim.Status.APPROVED, BoardCandidateClaim.Status.REJECTED),
+            (BoardCandidateClaim.Status.APPROVED, BoardCandidateClaim.Status.DISCARDED),
+            (BoardCandidateClaim.Status.REJECTED, BoardCandidateClaim.Status.DRAFT),
+            (BoardCandidateClaim.Status.REJECTED, BoardCandidateClaim.Status.SUBMITTED),
+            (BoardCandidateClaim.Status.REJECTED, BoardCandidateClaim.Status.APPROVED),
+            (BoardCandidateClaim.Status.REJECTED, BoardCandidateClaim.Status.DISCARDED),
+            (BoardCandidateClaim.Status.REJECTED, BoardCandidateClaim.Status.WITHDRAWN),
+            (BoardCandidateClaim.Status.DISCARDED, BoardCandidateClaim.Status.DRAFT),
+            (BoardCandidateClaim.Status.DISCARDED, BoardCandidateClaim.Status.SUBMITTED),
+            (BoardCandidateClaim.Status.DISCARDED, BoardCandidateClaim.Status.APPROVED),
+            (BoardCandidateClaim.Status.DISCARDED, BoardCandidateClaim.Status.REJECTED),
+            (BoardCandidateClaim.Status.DISCARDED, BoardCandidateClaim.Status.WITHDRAWN),
+            (BoardCandidateClaim.Status.WITHDRAWN, BoardCandidateClaim.Status.DRAFT),
+            (BoardCandidateClaim.Status.WITHDRAWN, BoardCandidateClaim.Status.SUBMITTED),
+            (BoardCandidateClaim.Status.WITHDRAWN, BoardCandidateClaim.Status.APPROVED),
+            (BoardCandidateClaim.Status.WITHDRAWN, BoardCandidateClaim.Status.REJECTED),
+            (BoardCandidateClaim.Status.WITHDRAWN, BoardCandidateClaim.Status.DISCARDED),
+        ],
+    )
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_clean_invalid_transition_raises(self, mock_objects, from_status, to_status):
+        """Test that clean raises for invalid status transitions."""
+        existing = BoardCandidateClaim(
+            title="Original Title",
+            description="Original Description",
+            status=from_status,
+            is_locked=from_status in BoardCandidateClaim.FINALIZED_STATUSES,
+        )
+        existing.pk = 1
+        mock_objects.filter.return_value.first.return_value = existing
+
+        claim = BoardCandidateClaim(
+            title=existing.title,
+            description=existing.description,
+            status=to_status,
+        )
+        claim.is_locked = existing.is_locked
+        claim.pk = 1
+
+        with pytest.raises(ValidationError) as exc_info:
+            claim.clean()
+
+        assert (
+            str(exc_info.value.messages[0])
+            == f"Invalid status transition from {from_status} to {to_status}."
+        )
+
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_clean_withdrawal_from_submitted_with_disallowed_field_change_raises(
+        self, mock_objects
+    ):
+        """Test that clean raises when changing disallowed fields during withdrawal."""
+        existing = BoardCandidateClaim(
+            title="Original Title",
+            description="Original Description",
+            status=BoardCandidateClaim.Status.SUBMITTED,
+            is_locked=False,
+        )
+        existing.pk = 1
+        mock_objects.filter.return_value.first.return_value = existing
+
+        claim = BoardCandidateClaim(
+            title="Updated Title",
+            description=existing.description,
+            status=BoardCandidateClaim.Status.WITHDRAWN,
+        )
+        claim.is_locked = existing.is_locked
+        claim.pk = 1
+
+        with pytest.raises(ValidationError) as exc_info:
+            claim.clean()
+
+        assert str(exc_info.value.messages[0]) == "Cannot update fields while withdrawing a claim."
 
     @patch.object(BoardCandidateClaim, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim.TimestampedModel.save")
@@ -157,6 +275,7 @@ class TestBoardCandidateClaimModel:
         "status",
         [
             BoardCandidateClaim.Status.APPROVED,
+            BoardCandidateClaim.Status.DISCARDED,
             BoardCandidateClaim.Status.REJECTED,
             BoardCandidateClaim.Status.WITHDRAWN,
         ],
@@ -176,7 +295,6 @@ class TestBoardCandidateClaimModel:
         "status",
         [
             BoardCandidateClaim.Status.DRAFT,
-            BoardCandidateClaim.Status.DISCARDED,
             BoardCandidateClaim.Status.SUBMITTED,
         ],
     )
