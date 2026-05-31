@@ -1,4 +1,4 @@
-"""Recognition app contribution score model."""
+"""Contribution score model for tracking aggregated contributor scores."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
-from apps.recognition.models.enums import TierChoices
+from apps.owasp.models.recognition_enums import TierChoices
 
 
 class ContributionScore(TimestampedModel):
@@ -21,7 +21,7 @@ class ContributionScore(TimestampedModel):
         db_table = "recognition_contribution_scores"
         verbose_name_plural = "Contribution Scores"
         indexes = [
-            models.Index(fields=["-total_score"], name="score_total_desc_idx"),
+            models.Index(fields=["-value"], name="score_total_desc_idx"),
             models.Index(fields=["tier"], name="score_tier_idx"),
             models.Index(fields=["-nest_updated_at"], name="score_updated_desc_idx"),
         ]
@@ -32,8 +32,8 @@ class ContributionScore(TimestampedModel):
         related_name="contribution_score",
         help_text="Associated GitHub user",
     )
-    total_score = models.PositiveIntegerField(
-        verbose_name="Total Score",
+    value = models.PositiveIntegerField(
+        verbose_name="Value",
         default=0,
         help_text="Aggregated contribution score",
     )
@@ -44,13 +44,7 @@ class ContributionScore(TimestampedModel):
         default=TierChoices.BRONZE,
         help_text="Current contributor tier",
     )
-    last_computed = models.DateTimeField(
-        verbose_name="Last Computed",
-        null=True,
-        blank=True,
-        help_text="Timestamp when the score was last computed",
-    )
 
     def __str__(self) -> str:
         """Return human-readable representation."""
-        return f"{self.github_user.login} - {self.tier.upper()} ({self.total_score} points)"
+        return f"{self.github_user.login} - {self.tier.upper()} ({self.value} points)"

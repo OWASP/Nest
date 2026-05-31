@@ -67,7 +67,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data-4736:/var/lib/postgresql/data
+      - db-data-issue-4702:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -149,7 +149,7 @@ networks:
 volumes:
   backend-venv:
   cache-data:
-  db-data-4736:
+  db-data-issue-4702:
   docs-venv:
   frontend-next:
   frontend-node-modules:

@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from apps.recognition.models.certificate import Certificate
+from apps.owasp.models.certificate import Certificate
 
 
 @admin.register(Certificate)
@@ -10,7 +10,7 @@ class CertificateAdmin(admin.ModelAdmin):
     """Admin for Certificate model."""
 
     autocomplete_fields = ("github_user",)
-    list_display = ("id", "github_user", "tier", "score_at_issue", "issued_at", "is_revoked")
+    list_display = ("id", "github_user", "tier", "score", "issued_at", "is_revoked")
     list_filter = ("tier", "is_revoked", "issued_at")
     search_fields = ("github_user__login", "github_user__name", "id")
     readonly_fields = ("id", "issued_at", "nest_created_at", "nest_updated_at")
@@ -19,7 +19,7 @@ class CertificateAdmin(admin.ModelAdmin):
         (
             "Certificate Information",
             {
-                "fields": ("id", "github_user", "tier", "score_at_issue", "issued_at"),
+                "fields": ("id", "github_user", "tier", "score", "issued_at"),
             },
         ),
         (

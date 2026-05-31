@@ -1,4 +1,4 @@
-"""Recognition app certificate model."""
+"""Certificate model for tracking contributor achievements."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from django.db.models import Q
 
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
-from apps.recognition.models.enums import TierChoices
+from apps.owasp.models.recognition_enums import TierChoices
 
 
 class Certificate(TimestampedModel):
@@ -56,8 +56,8 @@ class Certificate(TimestampedModel):
         choices=TierChoices.choices,
         help_text="The tier at which the certificate was issued",
     )
-    score_at_issue = models.PositiveIntegerField(
-        verbose_name="Score at Issue",
+    score = models.PositiveIntegerField(
+        verbose_name="Score",
         help_text="The contributor's score when the certificate was issued",
     )
     issued_at = models.DateTimeField(

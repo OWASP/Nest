@@ -1,4 +1,4 @@
-"""Recognition app scoring weight model."""
+"""Scoring weight model for OWASP contributor recognition."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.recognition.models.enums import EventTypeChoices
+from apps.owasp.models.recognition_enums import EventTypeChoices
 
 
 class ScoringWeight(TimestampedModel):
