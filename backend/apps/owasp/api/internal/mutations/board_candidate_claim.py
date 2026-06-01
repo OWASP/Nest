@@ -382,7 +382,9 @@ class BoardCandidateClaimMutations:
                 message="One or more claims were not found.",
             )
 
-        claims = list(claims_query.select_for_update())
+        claims = list(
+            claims_query.select_for_update(of=("self",)).select_related("candidate__member")
+        )
         if any(claim.candidate.member.login != str(user) for claim in claims):
             return ReorderClaimsResult(
                 ok=False,
