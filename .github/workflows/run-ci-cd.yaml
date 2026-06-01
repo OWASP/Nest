@@ -114,8 +114,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-images.yaml
     with:
-      aws_role_session_name: GitHubActions-BuildStagingImages
       aws_role_name: nest-staging-terraform
+      aws_role_session_name: GitHubActions-BuildStagingImages
       backend_ecr_cache_repo: nest-staging-backend-cache
       backend_ecr_repo: nest-staging-backend
       backend_uid: '1001'
@@ -135,8 +135,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/scan-images.yaml
     with:
-      aws_role_session_name: GitHubActions-ScanStagingImages
       aws_role_name: nest-staging-terraform
+      aws_role_session_name: GitHubActions-ScanStagingImages
       backend_ecr_repo: nest-staging-backend
       environment: staging
       frontend_ecr_repo: nest-staging-frontend
@@ -517,8 +517,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-images.yaml
     with:
-      aws_role_session_name: GitHubActions-BuildProductionImages
       aws_role_name: nest-production-terraform
+      aws_role_session_name: GitHubActions-BuildProductionImages
       backend_ecr_cache_repo: nest-production-backend-cache
       backend_ecr_repo: nest-production-backend
       backend_uid: '1002'
@@ -543,8 +543,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/scan-images.yaml
     with:
-      aws_role_session_name: nest-production-terraform
-      aws_session_name: GitHubActions-ScanProductionImages
+      aws_role_name: nest-production-terraform
+      aws_role_session_name: GitHubActions-ScanProductionImages
       backend_ecr_repo: nest-production-backend
       environment: production
       frontend_ecr_repo: nest-production-backend
