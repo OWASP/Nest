@@ -17,6 +17,10 @@ from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 logger = logging.getLogger(__name__)
 
+ACCESS_DENIED_MSG = "Access denied."
+CLAIM_NOT_FOUND_MSG = "Claim not found."
+GENERIC_ERROR_MSG = "Something went wrong."
+
 
 @strawberry.input
 class CreateClaimInput:
@@ -127,7 +131,7 @@ class BoardCandidateClaimMutations:
             return ClaimResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             return ClaimResult(
@@ -151,10 +155,10 @@ class BoardCandidateClaimMutations:
                 pk=int(input_data.claim_id.node_id)
             )
         except (BoardCandidateClaim.DoesNotExist, ValueError):
-            return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
+            return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
         if claim.candidate.member.login != str(user):
-            return ClaimResult(ok=False, code="FORBIDDEN", message="Access denied.")
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.is_locked:
             return ClaimResult(ok=False, code="LOCKED", message="Cannot update a locked claim.")
@@ -178,7 +182,7 @@ class BoardCandidateClaimMutations:
             return ClaimResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             return ClaimResult(
@@ -202,10 +206,10 @@ class BoardCandidateClaimMutations:
                 pk=int(input_data.claim_id.node_id)
             )
         except (BoardCandidateClaim.DoesNotExist, ValueError):
-            return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
+            return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
         if claim.candidate.member.login != str(user):
-            return ClaimResult(ok=False, code="FORBIDDEN", message="Access denied.")
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
             return ClaimResult(
@@ -226,7 +230,7 @@ class BoardCandidateClaimMutations:
             return ClaimResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             return ClaimResult(
@@ -250,10 +254,10 @@ class BoardCandidateClaimMutations:
                 pk=int(input_data.claim_id.node_id)
             )
         except (BoardCandidateClaim.DoesNotExist, ValueError):
-            return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
+            return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
         if claim.candidate.member.login != str(user):
-            return ClaimResult(ok=False, code="FORBIDDEN", message="Access denied.")
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
             return ClaimResult(
@@ -282,7 +286,7 @@ class BoardCandidateClaimMutations:
             result = ClaimResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             result = ClaimResult(
@@ -312,10 +316,10 @@ class BoardCandidateClaimMutations:
                 pk=int(input_data.claim_id.node_id)
             )
         except (BoardCandidateClaim.DoesNotExist, ValueError):
-            return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
+            return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
         if claim.candidate.member.login != str(user):
-            return ClaimResult(ok=False, code="FORBIDDEN", message="Access denied.")
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status not in {
             BoardCandidateClaim.Status.SUBMITTED,
@@ -341,7 +345,7 @@ class BoardCandidateClaimMutations:
             return ClaimResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             return ClaimResult(
@@ -389,7 +393,7 @@ class BoardCandidateClaimMutations:
             return ReorderClaimsResult(
                 ok=False,
                 code="FORBIDDEN",
-                message="Access denied.",
+                message=ACCESS_DENIED_MSG,
             )
 
         candidate_ids = {claim.candidate_id for claim in claims}
