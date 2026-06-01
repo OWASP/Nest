@@ -5,12 +5,12 @@ from __future__ import annotations
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
 
-class BoardCandidateClaim(TimestampedModel):
+class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
     """Model representing a Board Candidate Claim."""
 
     class Meta:
@@ -53,6 +53,11 @@ class BoardCandidateClaim(TimestampedModel):
         default=False,
         help_text="Indicates if the claim is locked",
         verbose_name="Is locked",
+    )
+    order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name="Order",
+        help_text="Display order of the claim within the candidate profile.",
     )
     status = models.CharField(
         choices=Status.choices,
@@ -117,7 +122,29 @@ class BoardCandidateClaim(TimestampedModel):
         """Save claim."""
         self.full_clean()
 
+        if not self.pk and self.candidate_id and self.board_id:
+            max_order = (
+                BoardCandidateClaim.objects.filter(
+                    candidate_id=self.candidate_id,
+                    board_id=self.board_id,
+                )
+                .aggregate(max_order=models.Max("order"))
+                .get("max_order")
+            )
+            self.order = (max_order or 0) + 1
+
         if self.status in self.FINALIZED_STATUSES:
             self.is_locked = True
 
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def bulk_save(claims: list, fields: list | None = None) -> None:  # type: ignore[override]
+        """Bulk save claims.
+
+        Args:
+            claims (list[BoardCandidateClaim]): List of BoardCandidateClaim instances to save.
+            fields (list[str], optional): List of fields to update.
+
+        """
+        BulkSaveModel.bulk_save(BoardCandidateClaim, claims, fields=fields)
