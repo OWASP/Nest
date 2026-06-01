@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   FaRegHeart,
   FaRegStar,
@@ -24,6 +24,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const previousActiveElement = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -50,6 +51,30 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       if (event.key === 'Escape' && mobileMenuOpen) {
         setMobileMenuOpen(false)
       }
+    }
+
+    // Focus management: when opening mobile nav, move focus to first focusable inside it.
+    if (mobileMenuOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement | null
+      // Defer to next tick so the panel is in the DOM
+      setTimeout(() => {
+        const mobileNav = document.getElementById('mobile-navigation')
+        if (mobileNav) {
+          const first = mobileNav.querySelector<HTMLElement>('a, button, [tabindex]:not([tabindex="-1"])')
+          first?.focus()
+        }
+      }, 0)
+    } else {
+      // restore focus to previous element or to the toggle button
+      setTimeout(() => {
+        const prev = previousActiveElement.current
+        if (prev) {
+          prev.focus()
+        } else {
+          const toggle = document.getElementById('mobile-menu-toggle') as HTMLElement | null
+          toggle?.focus()
+        }
+      }, 0)
     }
 
     globalThis.addEventListener('resize', handleResize)
