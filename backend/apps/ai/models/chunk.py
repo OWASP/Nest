@@ -1,10 +1,10 @@
 """AI app chunk model."""
 
 from django.db import models
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
 from apps.ai.models.context import Context
+from apps.ai.text_splitting import split_recursive_character_text
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
 
@@ -36,12 +36,13 @@ class Chunk(TimestampedModel):
     @staticmethod
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
-        return RecursiveCharacterTextSplitter(
+        return split_recursive_character_text(
+            text,
             chunk_size=200,
             chunk_overlap=20,
             length_function=len,
             separators=["\n\n", "\n", " ", ""],
-        ).split_text(text)
+        )
 
     @staticmethod
     def update_data(

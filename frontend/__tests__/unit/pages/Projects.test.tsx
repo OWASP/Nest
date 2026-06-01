@@ -75,7 +75,14 @@ describe('ProjectPage Component', () => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for projects...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for projects...')
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
       expect(screen.getByText('Project 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

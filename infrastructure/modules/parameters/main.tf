@@ -113,6 +113,40 @@ resource "aws_ssm_parameter" "django_db_user" {
   value       = var.django_db_user
 }
 
+resource "aws_ssm_parameter" "django_github_app_id" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "Django GitHub App ID."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_GITHUB_APP_ID"
+  tags        = var.common_tags
+  type        = "String"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "django_github_app_installation_id" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "Django GitHub App installation ID."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_GITHUB_APP_INSTALLATION_ID"
+  tags        = var.common_tags
+  type        = "String"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "django_release_version" {
+  description = "Django Release version."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_RELEASE_VERSION"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.django_release_version
+}
+
 resource "aws_ssm_parameter" "django_open_ai_secret_key" {
   description = "OpenAI Secret Key."
   name        = "/${var.project_name}/${var.environment}/DJANGO_OPEN_AI_SECRET_KEY"
@@ -210,6 +244,19 @@ resource "aws_ssm_parameter" "github_token" {
   }
 }
 
+resource "aws_ssm_parameter" "nest_github_app_private_key" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "GitHub App private key."
+  name        = "/${var.project_name}/${var.environment}/NEST_GITHUB_APP_PRIVATE_KEY"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "next_server_csrf_url" {
   description = "The server-side CSRF URL for Next.js SSR."
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_CSRF_URL"
@@ -281,6 +328,20 @@ resource "aws_ssm_parameter" "nextauth_url" {
     ignore_changes = [value]
   }
 }
+
+resource "aws_ssm_parameter" "slack_bot_token" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "Slack bot token."
+  name        = "/${var.project_name}/${var.environment}/SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 
 resource "random_string" "django_secret_key" {
   length  = 50

@@ -8,8 +8,16 @@ import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.gener
 import type { Chapter } from 'types/chapter'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import Contributions from 'components/cards/Contributions'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import Leaders from 'components/cards/Leaders'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
+import SponsorCard from 'components/SponsorCard'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
@@ -77,21 +85,43 @@ export default function ChapterDetailsPage() {
   )
 
   return (
-    <DetailsCard
-      contributionData={chapter.contributionData}
-      contributionStats={contributionStats}
-      details={details}
-      endDate={endDate}
-      entityKey={chapter.key}
-      entityLeaders={chapter.entityLeaders}
-      geolocationData={[chapter as unknown as Chapter]}
-      isActive={chapter.isActive}
-      socialLinks={chapter.relatedUrls}
-      startDate={startDate}
-      summary={chapter.summary}
-      title={chapter.name}
-      topContributors={topContributors}
-      type="chapter"
-    />
+    <PageWrapper>
+      <Header title={chapter.name} isActive={chapter.isActive} isArchived={false} />
+
+      <Summary summary={chapter.summary} />
+
+      <Metadata
+        details={details}
+        showGeolocation={true}
+        geolocationData={[chapter as unknown as Chapter]}
+        showSocialLinks={true}
+        socialLinks={chapter.relatedUrls}
+        detailsTitle="Chapter Details"
+      />
+
+      <Tags entityKey={chapter.key} />
+
+      <Leaders entityLeaders={chapter.entityLeaders} />
+
+      <Contributions
+        hasContributions={
+          !!(
+            (contributionStats && contributionStats.total > 0) ||
+            (chapter.contributionData && Object.keys(chapter.contributionData).length > 0)
+          )
+        }
+        contributionStats={contributionStats}
+        contributionData={chapter.contributionData}
+        startDate={startDate}
+        endDate={endDate}
+        title="Chapter Contribution Activity"
+      />
+
+      <Contributors entityKey={chapter.key} topContributors={topContributors} />
+
+      {chapter.key && chapter.name && (
+        <SponsorCard target={chapter.key} title={chapter.name} type="chapter" />
+      )}
+    </PageWrapper>
   )
 }

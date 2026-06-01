@@ -94,10 +94,13 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
         """
         if not user.is_authenticated:
             return False
-
-        return self.admins.filter(nest_user=user).exists() or bool(
-            user.github_user
-            and self.modules.filter(mentors__github_user=user.github_user).exists()
+        return (
+            self.admins.filter(nest_user=user).exists()
+            or self.modules.filter(mentors__nest_user=user).exists()
+            or (
+                user.github_user is not None
+                and self.modules.filter(mentors__github_user=user.github_user).exists()
+            )
         )
 
     def save(self, *args, **kwargs) -> None:

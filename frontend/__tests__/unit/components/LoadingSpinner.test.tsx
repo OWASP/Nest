@@ -61,6 +61,18 @@ describe('<LoadingSpinner />', () => {
     expect(fadeContainer?.className).toContain('animate-fade-in-out')
   })
 
+  it('keeps logo static while spinner ring rotates', () => {
+    render(<LoadingSpinner />)
+
+    const rotatingRing = document.querySelector('.animate-custom-spin')
+    expect(rotatingRing).toBeInTheDocument()
+
+    const images = screen.getAllByAltText('Loading indicator')
+    images.forEach((image) => {
+      expect(image.closest('.animate-custom-spin')).toBeNull()
+    })
+  })
+
   it('has appropriate alt text and accessibility image role', () => {
     render(<LoadingSpinner />)
     const images = screen.getAllByAltText('Loading indicator')

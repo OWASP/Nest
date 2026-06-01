@@ -76,15 +76,7 @@ Follow these steps to set up the OWASP Nest application:
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
 
-**Please note you need to restart the application in order to apply any `.env` file changes.**
-
-1. **Configure Environment Variables**:
-
-   - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
-
-     ```plaintext
-     DJANGO_CONFIGURATION=Local
-     ```
+**Please note you might need to restart the application in order to apply any `.env` file changes.**
 
 1. **Set Up Algolia**:
 
@@ -220,7 +212,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 ❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
 ❗ **Always use a different workspace (create your own if needed).**
 
-To setup NestBot development environment, follow these steps:
+To set up the NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
 
@@ -262,8 +254,20 @@ To setup NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+
+##### Testing NestBot Locally
+
+With `make run` and `ngrok start NestBot` running, smoke-test the integration — for example:
+
+- Direct message: send a direct message to the bot in your Slack workspace.
+- Channel mention: Add the bot to a channel and `@`-mention it.
+- Or post a normal channel message when your app subscribes to the `message.channels` bot event.
+
+To confirm Slack is reaching your machine, check the backend container logs.
+
+> **Note:** Keep ngrok running while you test. Slack must use a publicly accessible URL to reach your local server.
 
 #### Local Access to Internal Dashboards
 
@@ -387,10 +391,10 @@ make security-scan-images
 
 ### Running e2e Tests
 
-Run the frontend e2e tests with the following command:
+Playwright specs and their package live in the repository `e2e/` directory at the project root. Make targets for the stack are defined in `e2e/Makefile` (included from the repository root). Run the e2e suite with:
 
 ```bash
-make test-frontend-e2e
+make test-e2e
 ```
 
 This command automatically:
@@ -400,10 +404,10 @@ This command automatically:
 - Executes the e2e tests
 - Cleans up containers when done
 
-To run e2e tests without initializing the database, use the following command:
+To run e2e tests without initializing the database, use:
 
 ```bash
-make test-frontend-e2e-no-init
+make test-e2e-no-db-init
 ```
 
 For debugging, you can run the e2e backend separately:
@@ -418,16 +422,16 @@ Then load data manually in another terminal:
 make load-data-e2e
 ```
 
-For debugging the frontend e2e tests UI mode, run:
+For Playwright UI mode:
 
 ```bash
-make test-frontend-e2e-ui
+make test-e2e-ui
 ```
 
-To run the frontend e2e tests UI mode without the database initialized, use the following command:
+To run UI mode without the database initialized:
 
 ```bash
-make test-frontend-e2e-ui-no-db-init
+make test-e2e-ui-no-db-init
 ```
 
 You can access the UI at [http://localhost:3800](http://localhost:3800).

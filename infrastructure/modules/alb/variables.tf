@@ -3,6 +3,23 @@ variable "alb_sg_id" {
   type        = string
 }
 
+variable "backend_health_check_path" {
+  description = "The health check path for the backend target group."
+  type        = string
+  default     = "/status/"
+}
+
+variable "backend_port" {
+  description = "The port for the backend target group."
+  type        = number
+  default     = 8000
+
+  validation {
+    condition     = var.backend_port > 0 && var.backend_port < 65536
+    error_message = "Port must be between 1 and 65535."
+  }
+}
+
 variable "common_tags" {
   description = "A map of common tags to apply to all resources."
   type        = map(string)
@@ -22,7 +39,7 @@ variable "environment" {
 variable "frontend_health_check_path" {
   description = "The health check path for the frontend target group."
   type        = string
-  default     = "/"
+  default     = "/api/health"
 }
 
 variable "frontend_port" {
@@ -32,23 +49,6 @@ variable "frontend_port" {
 
   validation {
     condition     = var.frontend_port > 0 && var.frontend_port < 65536
-    error_message = "Port must be between 1 and 65535."
-  }
-}
-
-variable "backend_health_check_path" {
-  description = "The health check path for the backend target group."
-  type        = string
-  default     = "/status/"
-}
-
-variable "backend_port" {
-  description = "The port for the backend target group."
-  type        = number
-  default     = 8000
-
-  validation {
-    condition     = var.backend_port > 0 && var.backend_port < 65536
     error_message = "Port must be between 1 and 65535."
   }
 }
@@ -71,6 +71,16 @@ variable "public_subnet_ids" {
   validation {
     condition     = length(var.public_subnet_ids) > 0
     error_message = "public_subnet_ids must contain at least one subnet."
+  }
+}
+
+variable "static_s3_bucket_name" {
+  description = "S3 static assets bucket name."
+  type        = string
+
+  validation {
+    condition     = var.static_s3_bucket_name != ""
+    error_message = "static_s3_bucket_name must be non-empty."
   }
 }
 

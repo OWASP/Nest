@@ -2,7 +2,6 @@ import { fireEvent, screen } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
-import type { Organization } from 'types/organization'
 import type { RepositoryCardProps } from 'types/project'
 import RepositoryCard from 'components/RepositoryCard'
 
@@ -65,9 +64,9 @@ describe('RepositoryCard', () => {
       collaboratorsCount: 10,
       followersCount: 50,
       publicRepositoriesCount: 20,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    } as Organization,
+      createdAt: new Date(Date.now()).toISOString(),
+      updatedAt: new Date(Date.now()).toISOString(),
+    },
     starsCount: 100 + index,
     subscribersCount: 20 + index,
     url: `https://github.com/org-${index}/repo-${index}`,
@@ -79,9 +78,7 @@ describe('RepositoryCard', () => {
   })
 
   it('returns null when repositories prop is missing', () => {
-    const { container } = render(
-      <RepositoryCard repositories={null as unknown as RepositoryCardProps[]} />
-    )
+    const { container } = render(<RepositoryCard />)
     expect(container.querySelector('.grid')).toBeNull()
   })
 
@@ -354,7 +351,7 @@ describe('RepositoryCard', () => {
       render(<RepositoryCard repositories={repositories} />)
 
       const repositoryButton = screen.getByText('Repository 0').closest('button')
-      fireEvent.keyDown(repositoryButton!, { key: 'Enter' })
+      fireEvent.keyDown(repositoryButton, { key: 'Enter' })
 
       expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
     })
@@ -365,7 +362,7 @@ describe('RepositoryCard', () => {
       render(<RepositoryCard repositories={repositories} />)
 
       const repositoryButton = screen.getByText('Repository 0').closest('button')
-      fireEvent.keyDown(repositoryButton!, { key: ' ' })
+      fireEvent.keyDown(repositoryButton, { key: ' ' })
 
       expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
     })
@@ -376,9 +373,9 @@ describe('RepositoryCard', () => {
       render(<RepositoryCard repositories={repositories} />)
 
       const repositoryButton = screen.getByText('Repository 0').closest('button')
-      fireEvent.keyDown(repositoryButton!, { key: 'Tab' })
-      fireEvent.keyDown(repositoryButton!, { key: 'Escape' })
-      fireEvent.keyDown(repositoryButton!, { key: 'a' })
+      fireEvent.keyDown(repositoryButton, { key: 'Tab' })
+      fireEvent.keyDown(repositoryButton, { key: 'Escape' })
+      fireEvent.keyDown(repositoryButton, { key: 'a' })
 
       expect(mockPush).not.toHaveBeenCalled()
     })

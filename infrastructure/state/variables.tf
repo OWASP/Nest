@@ -31,12 +31,12 @@ variable "project_name" {
 variable "state_environments" {
   description = "A list of environments to create separate state buckets for."
   type        = list(string)
-  default     = ["bootstrap", "staging"]
+  default     = ["bootstrap", "staging", "production"]
 
   validation {
     condition = alltrue([
-      for env in var.state_environments : contains(["bootstrap", "staging"], env)
+      for env in var.state_environments : contains(["bootstrap", "staging", "production"], env)
     ])
-    error_message = "Each environment must be 'bootstrap' or 'staging'."
+    error_message = "Each environment must be 'bootstrap', 'staging' or 'production'."
   }
 }

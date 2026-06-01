@@ -4,31 +4,52 @@ import { useQuery } from '@apollo/client/react'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import capitalize from 'lodash/capitalize'
 import { useParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
-import type { PullRequest } from 'types/pullRequest'
+import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
+  const [hasMorePRs, setHasMorePRs] = useState(true)
+  const [visibleCount, setVisibleCount] = useState(4)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const limit = 4
 
   const {
     data,
     error,
     loading: isLoading,
+    fetchMore,
   } = useQuery(GetProgramAdminsAndModulesDocument, {
     fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
       moduleKey,
+      limit,
+      offset: 0,
     },
   })
 
-  const programModule = data?.getModule
+  useEffect(() => {
+    const prCount = data?.getModule?.recentPullRequests?.length
+    if (prCount == null) return
+    if (prCount <= limit) {
+      setHasMorePRs(prCount >= limit)
+    }
+  }, [data, limit])
+
+  const programModule = data?.getModule as Module
   const admins = data?.getProgram?.admins
 
   useEffect(() => {
@@ -61,8 +82,8 @@ const ModuleDetailsPage = () => {
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(programModule.experienceLevel) },
-    { label: 'Start Date', value: formatDate(programModule.startedAt) },
-    { label: 'End Date', value: formatDate(programModule.endedAt) },
+    { label: 'Start Date', value: formatDate(String(programModule.startedAt)) },
+    { label: 'End Date', value: formatDate(String(programModule.endedAt)) },
     {
       label: 'Duration',
       value: getSimpleDuration(programModule.startedAt, programModule.endedAt),
@@ -71,17 +92,78 @@ const ModuleDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <DetailsCard
-        admins={admins ?? undefined}
-        details={moduleDetails}
-        domains={programModule.domains ?? undefined}
-        mentors={programModule.mentors}
-        pullRequests={(programModule.recentPullRequests as unknown as PullRequest[]) ?? []}
-        summary={programModule.description}
-        tags={programModule.tags ?? undefined}
-        title={programModule.name}
-        type="module"
-      />
+      <PageWrapper>
+        <Header
+          title={programModule.name}
+          admins={admins ?? undefined}
+          mentors={programModule.mentors ?? undefined}
+          isActive={true}
+          isArchived={false}
+          showModuleActions={true}
+        />
+
+        <Summary summary={programModule.description} />
+
+        <Metadata details={moduleDetails} detailsTitle="Module Details" />
+
+        <Tags tags={programModule.tags ?? undefined} domains={programModule.domains ?? undefined} />
+
+        <Contributors
+          admins={admins ?? undefined}
+          mentors={programModule.mentors ?? undefined}
+          mentees={programModule.mentees ?? undefined}
+        />
+
+        <IssuesMilestones
+          pullRequests={(programModule.recentPullRequests ?? []).slice(0, visibleCount)}
+          showAvatar={true}
+          isPullRequestOnly={true}
+          onLoadMorePullRequests={
+            hasMorePRs || (programModule.recentPullRequests || []).length > visibleCount
+              ? () => {
+                  if (isFetchingMore) return
+                  const currentLength = programModule.recentPullRequests?.length || 0
+                  if (hasMorePRs && currentLength < visibleCount + limit) {
+                    setIsFetchingMore(true)
+                    fetchMore({
+                      variables: {
+                        programKey,
+                        moduleKey,
+                        offset: currentLength,
+                        limit,
+                      },
+                      updateQuery: (prevResult, { fetchMoreResult }) => {
+                        if (!fetchMoreResult) return prevResult
+                        const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
+                        if (newPRs.length < limit) setHasMorePRs(false)
+                        if (newPRs.length === 0) return prevResult
+                        return {
+                          ...prevResult,
+                          getModule: {
+                            ...prevResult.getModule!,
+                            recentPullRequests: [
+                              ...(prevResult.getModule?.recentPullRequests || []),
+                              ...newPRs,
+                            ],
+                          },
+                        }
+                      },
+                    })
+                      .catch((error) => handleAppError(error))
+                      .finally(() => setIsFetchingMore(false))
+                  }
+                  setVisibleCount((prev) => prev + limit)
+                }
+              : undefined
+          }
+          onResetPullRequests={
+            visibleCount > limit && (programModule.recentPullRequests || []).length > limit
+              ? () => setVisibleCount(limit)
+              : undefined
+          }
+          isFetchingMore={isFetchingMore}
+        />
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

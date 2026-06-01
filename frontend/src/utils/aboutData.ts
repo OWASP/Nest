@@ -106,13 +106,13 @@ export const projectTimeline: ProjectTimeline[] = [
     year: 'May 2025',
   },
   {
-    title: 'OWASP Nest Sponsorship Program Launch',
+    title: 'Sponsorship Program Launch',
     description:
       'We started sponsoring some interesting projects that have not made it to the GSoC 2025.',
     year: 'June 2025',
   },
   {
-    title: 'OWASP Nest Sponsorship Program Expansion',
+    title: 'Sponsorship Program Expansion',
     description:
       'OWASP Nest expanded its Sponsorship Program to support ongoing project maintenance and new initiatives.',
     year: 'October 2025',
@@ -130,7 +130,7 @@ export const projectTimeline: ProjectTimeline[] = [
     year: 'November 2025',
   },
   {
-    title: 'OWASP Nest Logo Introduction',
+    title: 'Logo Introduction',
     description:
       "Introduced the official OWASP Nest logo as part of the project's branding and visual identity.",
     year: 'December 2025',
@@ -140,6 +140,35 @@ export const projectTimeline: ProjectTimeline[] = [
     description:
       'OWASP Nest promoted to Production level, marking its recognition as a mature and fully supported platform within the OWASP ecosystem.',
     year: 'February 2026',
+  },
+  {
+    title: 'Cloud-Native Architecture and IaC',
+    description:
+      'OWASP Nest migrated to a cloud-native architecture with infrastructure as code, enabling consistent and scalable deployments.',
+    year: 'March 2026',
+  },
+  {
+    title: 'OWASP Impact Report',
+    description:
+      "OWASP Nest was highlighted in the OWASP Impact Report 2025, recognizing its role in the foundation's community and project ecosystem.",
+    year: 'March 2026',
+  },
+  {
+    title: 'Sponsorship Program First Batch Graduation',
+    description:
+      'The first cohort of OWASP Nest Sponsorship Program contributors completed their program, marking a milestone for sustained project support.',
+    year: 'March 2026',
+  },
+  {
+    title: 'OWASP Nest Leaders at SnowFROC 2026',
+    description:
+      'OWASP Nest leaders presented at SnowFROC 2026, sharing lessons from building the project.',
+    year: 'April 2026',
+  },
+  {
+    title: 'GSoC 2026 Participation',
+    description: 'OWASP Nest accepted for Google Summer of Code 2026 as part of OWASP.',
+    year: 'May 2026',
   },
 ]
 
@@ -198,9 +227,9 @@ export const technologies = [
   {
     section: 'Tools',
     tools: {
-      ansible: {
-        icon: '/images/icons/ansible.svg',
-        url: 'https://www.ansible.com/',
+      terraform: {
+        icon: '/images/icons/terraform.svg',
+        url: 'https://www.terraform.io/',
       },
       gitHub: {
         icon: '/images/icons/github.svg',
