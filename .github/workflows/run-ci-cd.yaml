@@ -132,7 +132,7 @@ jobs:
       - set-release-version
     permissions:
       actions: write
-      contents: read
+      contents: write
     uses: ./.github/workflows/scan-images.yaml
     with:
       aws_role_name: nest-staging-terraform
