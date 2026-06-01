@@ -14,7 +14,7 @@ class EventTypeChoices(models.TextChoices):
 class TierChoices(models.TextChoices):
     """Enum for contributor tiers."""
 
-    BRONZE = "bronze", "Bronze"
-    SILVER = "silver", "Silver"
-    GOLD = "gold", "Gold"
-    PLATINUM = "platinum", "Platinum"
+    LEVEL_1 = "level_1", "Level 1"
+    LEVEL_2 = "level_2", "Level 2"
+    LEVEL_3 = "level_3", "Level 3"
+    LEVEL_4 = "level_4", "Level 4"

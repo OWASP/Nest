@@ -41,7 +41,7 @@ class ContributionScore(TimestampedModel):
         verbose_name="Tier",
         max_length=20,
         choices=TierChoices.choices,
-        default=TierChoices.BRONZE,
+        default=TierChoices.LEVEL_1,
         help_text="Current contributor tier",
     )
 
