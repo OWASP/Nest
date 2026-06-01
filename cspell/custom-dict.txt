@@ -107,7 +107,6 @@ defectdojo
 demojize
 dismissable
 dkr
-dockerhub
 dsn
 dvo
 elevenlabs
@@ -228,6 +227,7 @@ trivyignores
 tsc
 unassigning
 unhover
+unrs
 usefixtures
 vcodec
 webgoat

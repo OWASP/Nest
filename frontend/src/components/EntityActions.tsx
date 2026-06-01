@@ -10,7 +10,7 @@ import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 
 const DELETE_MODULE_MUTATION = gql`
   mutation DeleteModule($programKey: String!, $moduleKey: String!) {
@@ -97,17 +97,17 @@ const EntityActions: React.FC<EntityActionsProps> = ({
 
         update(cache) {
           const existing = cache.readQuery({
-            query: GetProgramAndModulesDocument,
+            query: GetManagementProgramAndModulesDocument,
             variables: { programKey },
           })
 
-          if (existing?.getProgramModules) {
+          if (existing?.managementProgramModules) {
             cache.writeQuery({
-              query: GetProgramAndModulesDocument,
+              query: GetManagementProgramAndModulesDocument,
               variables: { programKey },
               data: {
                 ...existing,
-                getProgramModules: existing.getProgramModules.filter(
+                managementProgramModules: existing.managementProgramModules.filter(
                   (module) => module.key !== moduleKey
                 ),
               },

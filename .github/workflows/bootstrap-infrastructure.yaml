@@ -7,15 +7,6 @@ on:
         description: GitHub environment name
         required: true
         type: string
-    secrets:
-      AWS_ROLE_EXTERNAL_ID:
-        required: true
-      BOOTSTRAP_AWS_ACCESS_KEY_ID:
-        required: true
-      BOOTSTRAP_AWS_SECRET_ACCESS_KEY:
-        required: true
-      BOOTSTRAP_TF_STATE_BUCKET_NAME:
-        required: true
 
 env:
   FORCE_COLOR: 1
@@ -38,7 +29,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
         with:
           aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}

@@ -1,6 +1,5 @@
 """Slack member joined #gsoc channel handler using templates."""
 
-import logging
 from pathlib import Path
 
 from apps.common.utils import convert_to_snake_case
@@ -9,8 +8,6 @@ from apps.slack.constants import (
     OWASP_GSOC_CHANNEL_ID,
 )
 from apps.slack.events.event import EventBase
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Gsoc(EventBase):

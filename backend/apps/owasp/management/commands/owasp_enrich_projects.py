@@ -1,14 +1,10 @@
 """A command to update OWASP projects related repositories data."""
 
-import logging
-
 from django.core.management.base import BaseCommand
 
 from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.project import Project
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
