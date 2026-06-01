@@ -1,3 +1,21 @@
+import React from 'react'
+import { render, screen } from '@testing-library/react'
+import { axe } from 'jest-axe'
+import 'jest-axe/extend-expect'
+import '@testing-library/jest-dom'
+import Header from 'components/Header'
+
+describe('Header accessibility', () => {
+  test('has no basic a11y violations and exposes mobile toggle attributes', async () => {
+    const { container } = render(<Header isGitHubAuthEnabled={false} />)
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
+
+    const toggle = screen.getByRole('button', { name: /open main menu|close main menu/i })
+    expect(toggle).toHaveAttribute('aria-controls', 'mobile-navigation')
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  })
+})
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'

@@ -399,6 +399,30 @@ select:disabled,
     color: black;
   }
 
+  /* Skip link for keyboard users */
+  .skip-link {
+    position: absolute;
+    left: -999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    z-index: 9999;
+  }
+
+  .skip-link:focus,
+  .skip-link:active {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.5rem 0.75rem;
+    background-color: #111827; /* gray-900 */
+    color: #ffffff;
+    border-radius: 0.375rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
   .dark .popup-content {
     color: white;
   }
