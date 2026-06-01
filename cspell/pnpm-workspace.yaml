@@ -1,0 +1,6 @@
+ignoreScripts: true
+
+# 21 days (in minutes)
+minimumReleaseAge: 30240
+
+strictDepBuilds: true

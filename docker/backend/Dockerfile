@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.13-alpine3.23 AS builder
+FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -47,7 +47,7 @@ COPY apps apps
 # Required to run make targets.
 RUN ln -s . backend
 
-FROM python:3.13.13-alpine3.23
+FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc
 
 ARG OWASP_GID
 ARG OWASP_UID

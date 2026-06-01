@@ -3,16 +3,24 @@ name: Run scan images
 on:
   workflow_call:
     inputs:
-      backend_image_name:
-        description: Backend image name to scan
+      aws_role_name:
+        description: AWS role name to assume
+        required: true
+        type: string
+      aws_role_session_name:
+        description: AWS role session name
+        required: true
+        type: string
+      backend_ecr_repo:
+        description: Backend ECR repository name
         required: true
         type: string
       environment:
         description: The workflow environment to use for scanning (e.g., staging, production)
         required: true
         type: string
-      frontend_image_name:
-        description: Frontend image name to scan
+      frontend_ecr_repo:
+        description: Frontend ECR repository name
         required: true
         type: string
       release_tag:
@@ -29,9 +37,6 @@ on:
         required: false
         type: string
         default: ''
-    secrets:
-      GH_TOKEN:
-        required: true
 
 env:
   FORCE_COLOR: 1
@@ -43,13 +48,38 @@ jobs:
     name: Scan Images
     environment: ${{ inputs.environment }}
     env:
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
+        }}
+      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
+        }}
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
-      contents: write
+      actions: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: ${{ inputs.aws_role_session_name }}
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
+
+      - name: Pull container images
+        run: |
+          docker pull "$BACKEND_IMAGE"
+          docker pull "$FRONTEND_IMAGE"
 
       - name: Set Trivy cache key
         run: echo "TRIVY_DB_CACHE_KEY=trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
@@ -62,29 +92,22 @@ jobs:
           restore-keys: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-
 
       - name: Run Trivy security scan via Makefile
-        env:
-          BACKEND_IMAGE_NAME: ${{ inputs.backend_image_name }}
-          FRONTEND_IMAGE_NAME: ${{ inputs.frontend_image_name }}
         run: |
-          make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE_NAME"
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE_NAME"
+          make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
 
       - name: Generate SBOM for backend image
-        env:
-          BACKEND_IMAGE_NAME: ${{ inputs.backend_image_name }}
         run: |
-          make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE_NAME"
+          make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
 
       - name: Generate SBOM for frontend image
-        env:
-          FRONTEND_IMAGE_NAME: ${{ inputs.frontend_image_name }}
         run: |
-          make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE_NAME"
+          make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
 
       - name: Upload SBOMs to release
         if: ${{ inputs.release_tag != '' }}
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ inputs.release_version }}
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: |

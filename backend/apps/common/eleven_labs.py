@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import os
 from typing import TYPE_CHECKING
 
@@ -11,8 +10,6 @@ from elevenlabs.types.voice_settings import VoiceSettings
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 
 class ElevenLabs:
