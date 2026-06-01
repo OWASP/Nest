@@ -540,7 +540,7 @@ jobs:
     permissions:
       # Broader than typical scan jobs: required for "Upload SBOMs" (gh release upload).
       actions: write
-      contents: read
+      contents: write
     uses: ./.github/workflows/scan-images.yaml
     with:
       aws_role_name: nest-production-terraform

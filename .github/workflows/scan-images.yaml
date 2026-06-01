@@ -48,14 +48,14 @@ jobs:
     name: Scan Images
     environment: ${{ inputs.environment }}
     env:
-      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
       actions: write
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
