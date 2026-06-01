@@ -13,6 +13,7 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
         "is_locked",
         "nest_created_at",
         "nest_updated_at",
+        "order",
         "status",
         "title",
         "withdrawn_at",

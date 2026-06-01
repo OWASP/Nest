@@ -4,13 +4,14 @@ import json
 import logging
 
 import strawberry
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models.base import ValidationError
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 
@@ -57,7 +58,21 @@ class WithdrawClaimInput:
     withdrawn_reason: str
 
 
-# TODO(rudransh-shrivastava): add reordering mutation.
+@strawberry.input
+class ReorderClaimsInput:
+    """Input for reordering claims."""
+
+    claim_ids: list[strawberry.relay.GlobalID]
+
+
+@strawberry.type
+class ReorderClaimsResult:
+    """Result for reorder claims mutation."""
+
+    ok: bool
+    code: str | None = None
+    message: str | None = None
+    claims: list[BoardCandidateClaimNode] | None = None
 
 
 @strawberry.type
@@ -106,7 +121,7 @@ class BoardCandidateClaimMutations:
         except IntegrityError:
             logger.warning(
                 "Error creating Board Candidate Claim for candidate %s, year %s",
-                candidate.login,
+                candidate.member.login,
                 input_data.year,
             )
             return ClaimResult(
@@ -135,7 +150,7 @@ class BoardCandidateClaimMutations:
             claim = BoardCandidateClaim.objects.select_for_update().get(
                 pk=int(input_data.claim_id.node_id)
             )
-        except BoardCandidateClaim.DoesNotExist:
+        except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
 
         if claim.candidate.member.login != str(user):
@@ -186,7 +201,7 @@ class BoardCandidateClaimMutations:
             claim = BoardCandidateClaim.objects.select_for_update().get(
                 pk=int(input_data.claim_id.node_id)
             )
-        except BoardCandidateClaim.DoesNotExist:
+        except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
 
         if claim.candidate.member.login != str(user):
@@ -234,7 +249,7 @@ class BoardCandidateClaimMutations:
             claim = BoardCandidateClaim.objects.select_for_update().get(
                 pk=int(input_data.claim_id.node_id)
             )
-        except BoardCandidateClaim.DoesNotExist:
+        except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
 
         if claim.candidate.member.login != str(user):
@@ -296,7 +311,7 @@ class BoardCandidateClaimMutations:
             claim = BoardCandidateClaim.objects.select_for_update().get(
                 pk=int(input_data.claim_id.node_id)
             )
-        except BoardCandidateClaim.DoesNotExist:
+        except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message="Claim not found.")
 
         if claim.candidate.member.login != str(user):
@@ -336,3 +351,69 @@ class BoardCandidateClaimMutations:
             )
 
         return ClaimResult(ok=True, code="SUCCESS", message="Claim withdrawn successfully.")
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def reorder_board_candidate_claims(
+        self, info: Info, input_data: ReorderClaimsInput
+    ) -> ReorderClaimsResult:
+        """Reorder claims for a candidate in a board year."""
+        user = info.context.request.user
+
+        claim_ids = [int(claim_id.node_id) for claim_id in input_data.claim_ids]
+        if not claim_ids:
+            return ReorderClaimsResult(
+                ok=False,
+                code="VALIDATION_ERROR",
+                message="At least one claim is required for reordering.",
+            )
+        if len(set(claim_ids)) != len(claim_ids):
+            return ReorderClaimsResult(
+                ok=False,
+                code="VALIDATION_ERROR",
+                message="Duplicate claim ids are not allowed.",
+            )
+
+        claims_query = BoardCandidateClaim.objects.filter(pk__in=claim_ids)
+        if claims_query.count() != len(claim_ids):
+            return ReorderClaimsResult(
+                ok=False,
+                code="NOT_FOUND",
+                message="One or more claims were not found.",
+            )
+
+        claims = list(claims_query.select_for_update())
+        if any(claim.candidate.member.login != str(user) for claim in claims):
+            return ReorderClaimsResult(
+                ok=False,
+                code="FORBIDDEN",
+                message="Access denied.",
+            )
+
+        candidate_ids = {claim.candidate_id for claim in claims}
+        board_ids = {claim.board_id for claim in claims}
+        if len(candidate_ids) != 1 or len(board_ids) != 1:
+            return ReorderClaimsResult(
+                ok=False,
+                code="VALIDATION_ERROR",
+                message="All claims must belong to the same candidate and board year.",
+            )
+
+        id_to_order = {claim_id: idx for idx, claim_id in enumerate(claim_ids)}
+        for claim in claims:
+            claim.order = id_to_order[claim.id]
+
+        BoardCandidateClaim.objects.bulk_update(claims, ["order"])
+
+        ordered_claims = (
+            BoardCandidateClaim.objects.filter(pk__in=claim_ids)
+            .select_related("candidate__member", "board")
+            .order_by("order", "nest_created_at")
+        )
+
+        return ReorderClaimsResult(
+            ok=True,
+            code="SUCCESS",
+            message="Claims reordered successfully.",
+            claims=list(ordered_claims),
+        )
