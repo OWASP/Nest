@@ -8,7 +8,7 @@ from .mixins import GenericEntityAdminMixin
 
 
 class BoardCandidateClaimEvidenceAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
-    """Admin for BoardCandidateClaim model."""
+    """Admin for BoardCandidateClaimEvidence model."""
 
     list_filter = ("is_removed",)
     search_fields = ("title",)

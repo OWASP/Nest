@@ -33,7 +33,10 @@ class TestBlockNullCharactersMiddleware:
         response = middleware(request)
         assert response.status_code == HTTPStatus.BAD_REQUEST
         assert json.loads(response.content) == {
-            "message": "Request contains null characters in URL, parameters, or form data",
+            "message": (
+                "Request contains null characters in URL, parameters, or form data "
+                "which are not allowed."
+            ),
             "errors": {},
         }
 

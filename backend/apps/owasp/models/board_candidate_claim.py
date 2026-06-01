@@ -26,11 +26,11 @@ class BoardCandidateClaim(TimestampedModel):
     class Status(models.TextChoices):
         """Status choices."""
 
-        APPROVED = "APPROVED", "Approved"
-        DISCARDED = "DISCARDED", "Discarded"
         DRAFT = "DRAFT", "Draft"
-        REJECTED = "REJECTED", "Rejected"
+        DISCARDED = "DISCARDED", "Discarded"
         SUBMITTED = "SUBMITTED", "Submitted"
+        APPROVED = "APPROVED", "Approved"
+        REJECTED = "REJECTED", "Rejected"
         WITHDRAWN = "WITHDRAWN", "Withdrawn"
 
     FINALIZED_STATUSES = {Status.APPROVED, Status.DISCARDED, Status.REJECTED, Status.WITHDRAWN}

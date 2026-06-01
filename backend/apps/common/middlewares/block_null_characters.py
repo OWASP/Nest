@@ -42,8 +42,10 @@ class BlockNullCharactersMiddleware:
                 for field_name, file_list in request.FILES.lists()
             )
         ):
-            message = "Request contains null characters in URL, parameters, or form data"
-            " which are not allowed."
+            message = (
+                "Request contains null characters in URL, parameters, or form data"
+                " which are not allowed."
+            )
             logger.warning(message)
             return JsonResponse({"message": message, "errors": {}}, status=HTTPStatus.BAD_REQUEST)
 
