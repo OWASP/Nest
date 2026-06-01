@@ -28,8 +28,10 @@ class BoardCandidateClaimEvidenceQuery:
 
         """
         user = info.context.request.user
-        claim = BoardCandidateClaim.objects.filter(pk=claim_id.node_id).first()
-
+        try:
+            claim = BoardCandidateClaim.objects.filter(pk=claim_id.node_id).first()
+        except (ValueError, TypeError):
+            return []
         if claim is None:
             return []
 
