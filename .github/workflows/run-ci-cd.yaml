@@ -498,35 +498,9 @@ jobs:
       - deploy-staging-nest
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v6.0.5
-        with:
-          run_install: false
-          version: 11.5.0
-
-      - name: Set up Node
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
-        with:
-          cache-dependency-path: frontend/pnpm-lock.yaml
-          cache: pnpm
-          node-version: 24
-
-      - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: frontend
-
-      - name: Run lighthouse-ci
-        env:
-          LHCI_BASE_URL: https://nest.owasp.dev
-        run: |
-          pnpm run lighthouse-ci
-        working-directory: frontend
-    timeout-minutes: 5
+    uses: ./.github/workflows/run-lighthouse-ci.yaml
+    with:
+      base_url: https://nest.owasp.dev
 
   run-staging-zap-baseline-scan:
     name: Run staging ZAP baseline scan
@@ -963,35 +937,9 @@ jobs:
       - deploy-production-nest
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v6.0.5
-        with:
-          run_install: false
-          version: 11.5.0
-
-      - name: Set up Node
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
-        with:
-          cache-dependency-path: frontend/pnpm-lock.yaml
-          cache: pnpm
-          node-version: 24
-
-      - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: frontend
-
-      - name: Run lighthouse-ci
-        env:
-          LHCI_BASE_URL: https://nest.owasp.org
-        run: |
-          pnpm run lighthouse-ci
-        working-directory: frontend
-    timeout-minutes: 5
+    uses: ./.github/workflows/run-lighthouse-ci.yaml
+    with:
+      base_url: https://nest.owasp.org
 
   run-production-zap-baseline-scan:
     name: Run production ZAP baseline scan
