@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 20
     services:
       db:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
         env:
           POSTGRES_DB: nest_db_fuzz
           POSTGRES_PASSWORD: nest_user_fuzz_password
@@ -33,7 +33,7 @@ jobs:
         ports:
           - 5432:5432
       cache:
-        image: redis:8.0.5-alpine3.21
+        image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
         options: >-
           --health-cmd="redis-cli ping"
           --health-interval=5s
@@ -57,7 +57,7 @@ jobs:
       - name: Run backend with fuzz environment variables
         run: |
           docker run -d --rm --name fuzz-nest-backend \
-            --env-file backend/.env.fuzz.example \
+            --env-file backend/.env.fuzz-tests \
             --network host \
             -e DJANGO_DB_HOST=localhost \
             -e DJANGO_REDIS_AUTH_ENABLED=False \
@@ -99,7 +99,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: backend
-          file: docker/backend/Dockerfile.fuzz
+          file: docker/backend/Dockerfile.fuzz-tests
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-fuzz-backend-latest

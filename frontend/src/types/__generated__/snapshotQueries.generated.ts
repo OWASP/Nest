@@ -1,21 +1,25 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetSnapshotDetailsQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetSnapshotDetailsQueryVariables = Exact<{
+  key: string;
 }>;
 
 
-export type GetSnapshotDetailsQuery = { snapshot: { __typename: 'SnapshotNode', id: string, endAt: any, key: string, startAt: any, title: string, newReleases: Array<{ __typename: 'ReleaseNode', id: string, name: string, organizationName: string | null, projectName: string | null, publishedAt: any | null, repositoryName: string | null, tagName: string, author: { __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string } | null }>, newProjects: Array<{ __typename: 'ProjectNode', id: string, key: string, name: string, summary: string, starsCount: number, forksCount: number, contributorsCount: number, level: string, isActive: boolean, repositoriesCount: number, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> }>, newChapters: Array<{ __typename: 'ChapterNode', id: string, key: string, name: string, createdAt: string, suggestedLocation: string | null, region: string, summary: string, updatedAt: string, url: string, relatedUrls: Array<string>, isActive: boolean, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }>, geoLocation: { __typename: 'GeoLocationType', lat: number, lng: number } | null }> } | null };
+export type GetSnapshotDetailsQuery = { snapshot: { __typename: 'SnapshotNode', id: string, endAt: any, key: string, startAt: any, title: string, newReleases: Array<{ __typename: 'ReleaseNode', id: string, name: string, organizationName: string | null, projectName: string | null, publishedAt: any, repositoryName: string | null, tagName: string, author: { __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string } | null }>, newProjects: Array<{ __typename: 'ProjectNode', id: string, key: string, name: string, summary: string, starsCount: number, forksCount: number, contributorsCount: number, level: string, isActive: boolean, repositoriesCount: number, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> }>, newChapters: Array<{ __typename: 'ChapterNode', id: string, key: string, name: string, createdAt: string, suggestedLocation: string | null, region: string, summary: string, updatedAt: string, url: string, relatedUrls: Array<string>, isActive: boolean, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }>, geoLocation: { __typename: 'GeoLocationType', lat: number, lng: number } | null }> } | null };
 
-export type GetSnapshotDetailsMetadataQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetSnapshotDetailsMetadataQueryVariables = Exact<{
+  key: string;
 }>;
 
 
 export type GetSnapshotDetailsMetadataQuery = { snapshot: { __typename: 'SnapshotNode', id: string, title: string } | null };
 
-export type GetCommunitySnapshotsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type GetCommunitySnapshotsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetCommunitySnapshotsQuery = { snapshots: Array<{ __typename: 'SnapshotNode', id: string, key: string, title: string, startAt: any, endAt: any }> };

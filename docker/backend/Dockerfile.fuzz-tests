@@ -1,12 +1,14 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.13-alpine3.23 AS builder
+FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
 
-ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-test" \
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-fuzz" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     OWASP_GID=${OWASP_GID} \
     OWASP_UID=${OWASP_UID} \
@@ -15,12 +17,9 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-test" \
     PYTHONUNBUFFERED=1
 
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
-    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk --no-cache update && \
-    apk --no-cache upgrade && \
-    addgroup -S -g ${OWASP_GID} owasp && \
+RUN addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
 
@@ -28,39 +27,33 @@ COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install --requirement /tmp/requirements.build.txt
 
-WORKDIR /home/owasp
 USER owasp
+WORKDIR /home/owasp
 
 COPY --chmod=444 --chown=root:root poetry.lock poetry.toml pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry install --no-root --verbose --without fuzz
+    poetry install --only fuzz --no-root
 
-# Less likely to cause cache invalidation items go first.
-COPY .env.example .env.example
-COPY manage.py wsgi.py ./
-COPY tests/__init__.py tests/__init__.py
-COPY scripts scripts
-COPY settings settings
-COPY static static
-COPY templates templates
-COPY apps apps
-COPY tests/unit tests/unit
-
-FROM python:3.13.13-alpine3.23
+FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc
 
 ARG OWASP_GID
 ARG OWASP_UID
 
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
 RUN addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
-    mkdir -p /home/owasp && \
-    chown owasp:owasp /home/owasp
+    apk --no-cache add curl jq
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
-USER owasp
 
-COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
+COPY --from=builder --chmod=555 --chown=root:root /home/owasp/.venv .venv
+COPY --chown=root:root --chmod=755 entrypoint.fuzz.sh entrypoint.sh
+COPY --chown=root:root --chmod=555 tests/fuzz tests
+
+USER owasp
+ENTRYPOINT ["./entrypoint.sh"]
