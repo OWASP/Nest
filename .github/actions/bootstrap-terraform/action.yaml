@@ -1,0 +1,96 @@
+name: Bootstrap Terraform
+description: Run Terraform bootstrap steps for infrastructure
+
+inputs:
+  plugin-cache-dir:
+    description: Directory to store Terraform plugin cache
+    required: false
+    default: /home/runner/.terraform.d/plugin-cache
+  summary-title:
+    description: Title used for the plan output summary
+    required: false
+    default: Terraform Plan Output
+  tfbackend-path:
+    description: Path to write terraform backend config
+    required: true
+  tfbackend-content:
+    description: Content for terraform backend config
+    required: true
+  tfvars-path:
+    description: Path to write terraform variables
+    required: true
+  tfvars-content:
+    description: Content for terraform variables
+    required: true
+  working-directory:
+    description: Terraform working directory
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85  # v4.0.0
+      with:
+        terraform_version: 1.14
+
+    - name: Create plugin cache directory
+      env:
+        TF_PLUGIN_CACHE_DIR: ${{ inputs.plugin-cache-dir }}
+      run: mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+      shell: bash
+
+    - name: Cache Terraform plugins
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+      with:
+        key: ${{ runner.os }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+        path: ${{ inputs.plugin-cache-dir }}
+
+    - name: Prepare terraform backend
+      env:
+        TF_BACKEND_CONTENT: ${{ inputs.tfbackend-content }}
+        TF_BACKEND_PATH: ${{ inputs.tfbackend-path }}
+      run: |
+        umask 377
+        printf '%s\n' "$TF_BACKEND_CONTENT" > "$TF_BACKEND_PATH"
+      shell: bash
+
+    - name: Prepare terraform variables
+      env:
+        TF_VARS_CONTENT: ${{ inputs.tfvars-content }}
+        TF_VARS_PATH: ${{ inputs.tfvars-path }}
+      run: |
+        umask 377
+        printf '%s\n' "$TF_VARS_CONTENT" > "$TF_VARS_PATH"
+      shell: bash
+
+    - name: Terraform Init
+      run: terraform init -backend-config=terraform.tfbackend
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Terraform Validate
+      run: terraform validate
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Show plan in summary
+      env:
+        SUMMARY_TITLE: ${{ inputs.summary-title }}
+      run: |
+        echo "## $SUMMARY_TITLE" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
