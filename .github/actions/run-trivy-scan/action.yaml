@@ -24,5 +24,7 @@ runs:
         restore-keys: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-
 
     - name: Run Trivy security scan
-      run: ${{ inputs.run-command }}
+      env:
+        TRIVY_RUN_COMMAND: ${{ inputs.run-command }}
+      run: $TRIVY_RUN_COMMAND
       shell: bash
