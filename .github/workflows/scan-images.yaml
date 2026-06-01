@@ -121,6 +121,6 @@ jobs:
         with:
           name: ${{ inputs.sbom_artifact_name }}
           path: |
-            "backend-sbom-$RELEASE_VERSION.cdx.json"
-            "frontend-sbom-$RELEASE_VERSION.cdx.json"
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 10
