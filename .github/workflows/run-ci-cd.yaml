@@ -547,7 +547,7 @@ jobs:
       aws_role_session_name: GitHubActions-ScanProductionImages
       backend_ecr_repo: nest-production-backend
       environment: production
-      frontend_ecr_repo: nest-production-backend
+      frontend_ecr_repo: nest-production-frontend
       release_tag: ${{ github.event.release.tag_name }}
       release_version: ${{ needs.set-release-version.outputs.release_version }}
 

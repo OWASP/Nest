@@ -93,18 +93,10 @@ jobs:
       - name: Run Semgrep security scan
         run: make security-scan-code-semgrep
 
-      - name: Set Trivy cache key
-        run: echo "TRIVY_DB_CACHE_KEY=trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
-
-      - name: Cache Trivy DB
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+      - name: Run trivy scan
+        uses: ./.github/actions/run-trivy-scan
         with:
-          key: ${{ env.TRIVY_DB_CACHE_KEY }}
-          path: .trivy-cache
-          restore-keys: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-
-
-      - name: Run Trivy security scan
-        run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
+          run-command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
     timeout-minutes: 15
 
   run-spelling-checks:

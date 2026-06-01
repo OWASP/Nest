@@ -81,20 +81,12 @@ jobs:
           docker pull "$BACKEND_IMAGE"
           docker pull "$FRONTEND_IMAGE"
 
-      - name: Set Trivy cache key
-        run: echo "TRIVY_DB_CACHE_KEY=trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
-
-      - name: Cache Trivy DB
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+      - name: Run trivy scan
+        uses: ./.github/actions/run-trivy-scan
         with:
-          path: .trivy-cache
-          key: ${{ env.TRIVY_DB_CACHE_KEY }}
-          restore-keys: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-
-
-      - name: Run Trivy security scan via Makefile
-        run: |
-          make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+          run-command: |
+            make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
+            make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
 
       - name: Generate SBOM for backend image
         run: |
