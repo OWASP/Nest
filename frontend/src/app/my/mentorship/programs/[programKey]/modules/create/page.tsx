@@ -4,15 +4,16 @@ import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import {
-  GetProgramAdminDetailsDocument,
-  GetProgramAndModulesDocument,
+  GetManagementProgramAdminDetailsDocument,
+  GetManagementProgramAndModulesDocument,
 } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -28,7 +29,7 @@ const CreateModulePage = () => {
     data: programData,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GetProgramAdminDetailsDocument, {
+  } = useQuery(GetManagementProgramAdminDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
@@ -61,19 +62,20 @@ const CreateModulePage = () => {
   })
 
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
       return
     }
 
-    if (queryError || !programData?.getProgram || sessionStatus === 'unauthenticated') {
+    if (queryError || !programData?.managementProgram || sessionStatus === 'unauthenticated') {
       setAccessStatus('denied')
       return
     }
 
     const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
-    const isAdmin = programData.getProgram.admins?.some(
+    const isAdmin = programData.managementProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
@@ -94,6 +96,7 @@ const CreateModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setValidationErrors({})
 
     try {
       const input = {
@@ -113,7 +116,9 @@ const CreateModulePage = () => {
 
       await createModule({
         awaitRefetchQueries: true,
-        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        refetchQueries: [
+          { query: GetManagementProgramAndModulesDocument, variables: { programKey } },
+        ],
         variables: { input },
       })
 
@@ -127,16 +132,18 @@ const CreateModulePage = () => {
 
       router.push(`/my/mentorship/programs/${programKey}`)
     } catch (error) {
-      addToast({
-        title: 'Creation Failed',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Something went wrong while creating the module.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 4000,
-      })
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(error)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
+      } else if (unmappedErrors.length > 0) {
+        setValidationErrors({ name: unmappedErrors[0] })
+      } else {
+        handleAppError(error)
+      }
     }
   }
 
@@ -163,14 +170,15 @@ const CreateModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       isEdit={false}
+      validationErrors={validationErrors}
       minDate={
-        programData?.getProgram?.startedAt
-          ? formatDateForInput(programData.getProgram.startedAt)
+        programData?.managementProgram?.startedAt
+          ? formatDateForInput(programData.managementProgram.startedAt)
           : undefined
       }
       maxDate={
-        programData?.getProgram?.endedAt
-          ? formatDateForInput(programData.getProgram.endedAt)
+        programData?.managementProgram?.endedAt
+          ? formatDateForInput(programData.managementProgram.endedAt)
           : undefined
       }
     />

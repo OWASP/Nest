@@ -1,29 +1,33 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetBoardCandidatesQueryVariables = Types.Exact<{
-  year: Types.Scalars['Int']['input'];
+export type GetBoardCandidatesQueryVariables = Exact<{
+  year: number;
 }>;
 
 
-export type GetBoardCandidatesQuery = { boardOfDirectors: { __typename: 'BoardOfDirectorsNode', id: string, owaspUrl: string, year: number, candidates: Array<{ __typename: 'EntityMemberNode', id: string, memberName: string, memberEmail: string, description: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string, bio: string, createdAt: number, firstOwaspContributionAt: number | null, isOwaspBoardMember: boolean, isFormerOwaspStaff: boolean, isGsocMentor: boolean, linkedinPageId: string } | null }> } | null };
+export type GetBoardCandidatesQuery = { boardOfDirectors: { __typename: 'BoardOfDirectorsNode', id: string, owaspUrl: string, year: number, candidates: Array<{ __typename: 'EntityMemberNode', id: string, memberName: string, memberEmail: string, description: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string, bio: string, createdAt: string, firstOwaspContributionAt: string | null, isOwaspBoardMember: boolean, isFormerOwaspStaff: boolean, isGsocMentor: boolean, linkedinPageId: string } | null }> } | null };
 
-export type GetMemberSnapshotQueryVariables = Types.Exact<{
-  userLogin: Types.Scalars['String']['input'];
+export type GetMemberSnapshotQueryVariables = Exact<{
+  userLogin: string;
 }>;
 
 
 export type GetMemberSnapshotQuery = { memberSnapshot: { __typename: 'MemberSnapshotNode', channelCommunications: any, chapterContributions: any, commitsCount: number, communicationHeatmapData: any, contributionHeatmapData: any, endAt: any, id: string, issuesCount: number, messagesCount: number, projectContributions: any, pullRequestsCount: number, repositoryContributions: any, startAt: any, totalContributions: number, githubUser: { __typename: 'UserNode', login: string } } | null };
 
-export type GetChapterByKeyQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetChapterByKeyQueryVariables = Exact<{
+  key: string;
 }>;
 
 
 export type GetChapterByKeyQuery = { chapter: { __typename: 'ChapterNode', id: string, key: string, name: string, url: string } | null };
 
-export type GetProjectByKeyQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetProjectByKeyQueryVariables = Exact<{
+  key: string;
 }>;
 
 

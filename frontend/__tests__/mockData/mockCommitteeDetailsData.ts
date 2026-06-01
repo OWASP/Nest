@@ -10,7 +10,7 @@ export const mockCommitteeDetailsData = {
     repositoriesCount: 12,
     starsCount: 20,
     summary: 'This is a test committee summary.',
-    updatedAt: 1734103212,
+    updatedAt: '2024-12-13T15:20:12.000Z',
     url: 'https://owasp.org/test-committee',
   },
   topContributors: [

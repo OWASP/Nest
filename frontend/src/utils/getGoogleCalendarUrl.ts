@@ -3,10 +3,10 @@ import type { CalendarEvent } from 'types/calendar'
 
 const pad = (n: number, width = 2) => String(n).padStart(width, '0')
 
-function formatLocalDate(date: Date) {
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
+function formatUTCDate(date: Date) {
+  const year = date.getUTCFullYear()
+  const month = pad(date.getUTCMonth() + 1)
+  const day = pad(date.getUTCDate())
   return `${year}${month}${day}`
 }
 
@@ -20,9 +20,13 @@ function formatUTCDateTime(date: Date) {
   return `${year}${month}${day}T${hours}${minutes}${seconds}Z`
 }
 
-function detectIsAllDay(dateInput: string | Date): boolean {
-  if (dateInput instanceof Date) return false
-  return !dateInput.includes('T') && !dateInput.includes(':')
+const isAllDayEvent = (dateStr: string) => {
+  // if no time is provided, new Date() parses it as midnight UTC.
+  // '2025-12-01' -> 2025-12-01T00:00:00Z
+  const dateObj = new Date(dateStr)
+  return (
+    dateObj.getUTCHours() === 0 && dateObj.getUTCMinutes() === 0 && dateObj.getUTCSeconds() === 0
+  )
 }
 
 export default function getGoogleCalendarUrl(event: CalendarEvent): string {
@@ -38,13 +42,13 @@ export default function getGoogleCalendarUrl(event: CalendarEvent): string {
   const end = event.endDate ? new Date(event.endDate) : new Date(start.getTime() + 60 * 60 * 1000)
   if (Number.isNaN(end.getTime())) throw new Error('Invalid endDate')
 
-  const isAllDay = detectIsAllDay(event.startDate)
+  const isAllDay = isAllDayEvent(event.startDate)
 
   let datesParam: string
   if (isAllDay) {
-    const s = formatLocalDate(start)
+    const s = formatUTCDate(start)
     const endExclusive = new Date(end.getTime() + 24 * 60 * 60 * 1000)
-    const e = formatLocalDate(endExclusive)
+    const e = formatUTCDate(endExclusive)
     datesParam = `${s}/${e}`
   } else {
     const s = formatUTCDateTime(start)

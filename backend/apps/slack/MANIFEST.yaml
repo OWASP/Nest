@@ -28,7 +28,7 @@ features:
       should_escape: false
     - command: /gsoc
       url: https://nest.owasp.org/integrations/slack/commands/
-      description: get started with GSoC 2025
+      description: get started with GSoC
       usage_hint: --start
       should_escape: false
     - command: /owasp

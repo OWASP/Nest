@@ -5,8 +5,9 @@ import type { Release as ReleaseType } from 'types/release'
 import Release from 'components/Release'
 
 const release: ReleaseType = {
+  id: 'release-a11y-single',
   name: 'v1.0 The First Release',
-  publishedAt: Date.now(),
+  publishedAt: new Date(Date.now()).toISOString(),
   repositoryName: 'our-awesome-project',
   organizationName: 'our-org',
   tagName: 'v1.0',
@@ -17,7 +18,7 @@ const release: ReleaseType = {
     avatarUrl: 'https://example.com/avatar.png',
     key: 'testuser',
     contributionsCount: 0,
-    createdAt: 0,
+    createdAt: '1970-01-01T00:00:00.000Z',
     followersCount: 0,
     followingCount: 0,
     publicRepositoriesCount: 0,

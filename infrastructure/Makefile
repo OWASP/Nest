@@ -1,10 +1,11 @@
-test-infrastructure:
+##@ Infrastructure
+
+test-infrastructure: ## Run infrastructure tests
 	@find infrastructure/modules \
 		-name "tests" \
 		-type d \
-		-not -path "*/.terraform/*" \
-		-print0 | \
-	while IFS= read -r -d '' test_dir; do \
+		-not -path "*/.terraform/*" | \
+	while IFS= read -r test_dir; do \
 		module_dir=$$(dirname "$$test_dir"); \
 		echo "Testing $$module_dir..."; \
 		terraform -chdir="$$module_dir" init -backend=false -input=false && \

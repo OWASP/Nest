@@ -1,5 +1,9 @@
-.PHONY: check-spelling cspell-install cspell-check cspell-run update-cspell-dependencies
+.PHONY: audit-cspell-dependencies check-spelling cspell-check cspell-install cspell-run \
+	update-cspell-dependencies
 
+##@ Spelling
+
+check-spelling: ## Run spell checker
 check-spelling: cspell-check
 
 cspell-install:
@@ -16,6 +20,10 @@ cspell-run:
 		--mount type=bind,src="$(CURDIR)",dst=/nest \
 		--rm \
 		cspell -c cspell/cspell.json "$(CMD)"
+
+audit-cspell-dependencies: ## Audit cspell npm dependencies
+	@echo "Auditing cspell npm dependencies..."
+	@cd cspell && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 update-cspell-dependencies: cspell-install
 	@-docker run \

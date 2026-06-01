@@ -2,13 +2,13 @@ mock_provider "aws" {}
 
 variables {
   common_tags          = { Environment = "test", Project = "nest" }
-  create_rds_proxy     = false
   db_allocated_storage = 20
   db_engine_version    = "16.4"
   db_instance_class    = "db.t3.micro"
   db_name              = "nest_db"
   db_subnet_ids        = ["subnet-12345678"]
   db_user              = "nest_user"
+  enable_rds_proxy     = false
   environment          = "test"
   kms_key_arn          = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name         = "nest"
@@ -77,13 +77,13 @@ run "test_proxy_created_when_enabled" {
   command = plan
 
   variables {
-    create_rds_proxy         = true
+    enable_rds_proxy         = true
     proxy_security_group_ids = ["sg-proxy12345"]
   }
 
   assert {
     condition     = length(aws_db_proxy.main) == 1
-    error_message = "RDS proxy must be created when create_rds_proxy is true."
+    error_message = "RDS proxy must be created when enable_rds_proxy is true."
   }
 }
 
@@ -91,7 +91,7 @@ run "test_proxy_engine_family" {
   command = plan
 
   variables {
-    create_rds_proxy         = true
+    enable_rds_proxy         = true
     proxy_security_group_ids = ["sg-proxy12345"]
   }
 
@@ -106,7 +106,7 @@ run "test_proxy_not_created_when_disabled" {
 
   assert {
     condition     = length(aws_db_proxy.main) == 0
-    error_message = "RDS proxy must not be created when create_rds_proxy is false."
+    error_message = "RDS proxy must not be created when enable_rds_proxy is false."
   }
 }
 
@@ -114,7 +114,7 @@ run "test_proxy_requires_tls" {
   command = plan
 
   variables {
-    create_rds_proxy         = true
+    enable_rds_proxy         = true
     proxy_security_group_ids = ["sg-proxy12345"]
   }
 

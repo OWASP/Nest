@@ -59,3 +59,14 @@ export const CREATE_MODULE = gql`
     }
   }
 `
+
+export const REORDER_MODULES = gql`
+  mutation ReorderModules($input: ReorderModulesInput!) {
+    reorderModules(inputData: $input) {
+      id
+      key
+      name
+      order
+    }
+  }
+`

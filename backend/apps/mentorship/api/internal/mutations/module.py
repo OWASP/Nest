@@ -6,12 +6,15 @@ from datetime import datetime
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.utils import IntegrityError
 from django.utils import timezone
+from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
     ModuleNode,
+    ReorderModulesInput,
     UpdateModuleInput,
 )
 from apps.mentorship.models import Mentor, Module, Program
@@ -87,6 +90,18 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
     return started_at, ended_at
 
 
+def _handle_module_save_integrity_error(exc: IntegrityError) -> None:
+    """Translate module save IntegrityError to GraphQLError for known constraints."""
+    error_message = str(exc)
+    if "unique_module_key_in_program" in error_message:
+        msg = "This module name already exists in this program."
+        raise GraphQLError(
+            msg,
+            extensions={"code": "VALIDATION_ERROR", "field": "name"},
+        ) from exc
+    raise exc
+
+
 @strawberry.type
 class ModuleMutation:
     """GraphQL mutations related to the mentorship Module model."""
@@ -114,18 +129,22 @@ class ModuleMutation:
             program.ended_at,
         )
 
-        module = Module.objects.create(
-            name=input_data.name,
-            description=input_data.description,
-            experience_level=input_data.experience_level.value,
-            started_at=started_at,
-            ended_at=ended_at,
-            domains=input_data.domains,
-            labels=input_data.labels,
-            tags=input_data.tags,
-            program=program,
-            project=project,
-        )
+        try:
+            with transaction.atomic():
+                module = Module.objects.create(
+                    name=input_data.name,
+                    description=input_data.description,
+                    experience_level=input_data.experience_level.value,
+                    started_at=started_at,
+                    ended_at=ended_at,
+                    domains=input_data.domains,
+                    labels=input_data.labels,
+                    tags=input_data.tags,
+                    program=program,
+                    project=project,
+                )
+        except IntegrityError as e:
+            _handle_module_save_integrity_error(e)
 
         if module.experience_level not in program.experience_levels:
             program.experience_levels.append(module.experience_level)
@@ -392,7 +411,11 @@ class ModuleMutation:
             mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
             module.mentors.set(mentors_to_set)
 
-        module.save()
+        try:
+            with transaction.atomic():
+                module.save()
+        except IntegrityError as e:
+            _handle_module_save_integrity_error(e)
 
         if module.experience_level not in module.program.experience_levels:
             module.program.experience_levels.append(module.experience_level)
@@ -453,3 +476,46 @@ class ModuleMutation:
         module.delete()
 
         return f"Module '{module_name}' has been deleted successfully."
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def reorder_modules(
+        self, info: strawberry.Info, input_data: ReorderModulesInput
+    ) -> list[ModuleNode]:
+        """Reorder modules within a program. User must be a program admin."""
+        user = info.context.request.user
+
+        try:
+            program = Program.objects.get(key=input_data.program_key)
+        except Program.DoesNotExist as e:
+            msg = f"Program with key '{input_data.program_key}' not found."
+            raise ObjectDoesNotExist(msg) from e
+
+        if not program.admins.filter(nest_user=user).exists():
+            raise PermissionDenied
+
+        if len(set(input_data.module_keys)) != len(input_data.module_keys):
+            msg = "Duplicate module keys are not allowed."
+            raise ValidationError(msg)
+
+        modules_query = Module.objects.filter(program=program, key__in=input_data.module_keys)
+
+        if modules_query.count() != len(input_data.module_keys):
+            msg = "Provided module keys do not match the program's modules."
+            raise ValidationError(msg)
+
+        modules = modules_query.select_for_update()
+
+        key_to_order = {key: idx for idx, key in enumerate(input_data.module_keys)}
+
+        for module in modules:
+            module.order = key_to_order[module.key]
+
+        Module.objects.bulk_update(modules, ["order"])
+
+        return (
+            Module.objects.filter(program=program)
+            .select_related("program", "project")
+            .prefetch_related("mentors__github_user")
+            .order_by("order", "started_at")
+        )

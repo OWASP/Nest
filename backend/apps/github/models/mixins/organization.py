@@ -39,9 +39,9 @@ class OrganizationIndexMixin:
         return self.collaborators_count
 
     @property
-    def idx_created_at(self) -> float | None:
+    def idx_created_at(self) -> str | None:
         """Return created at for indexing."""
-        return self.created_at.timestamp() if self.created_at else None
+        return self.created_at.isoformat() if self.created_at else None
 
     @property
     def idx_description(self) -> str:

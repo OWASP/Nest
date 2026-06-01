@@ -1,15 +1,19 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetCommitteeDataQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetCommitteeDataQueryVariables = Exact<{
+  key: string;
 }>;
 
 
-export type GetCommitteeDataQuery = { committee: { __typename: 'CommitteeNode', id: string, contributorsCount: number, createdAt: number | null, forksCount: number, issuesCount: number, leaders: Array<string>, name: string, relatedUrls: Array<string>, repositoriesCount: number, starsCount: number, summary: string, updatedAt: number, url: string } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
+export type GetCommitteeDataQuery = { committee: { __typename: 'CommitteeNode', id: string, contributorsCount: number, createdAt: string | null, forksCount: number, issuesCount: number, leaders: Array<string>, name: string, relatedUrls: Array<string>, repositoriesCount: number, starsCount: number, summary: string, updatedAt: string, url: string } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
 
-export type GetCommitteeMetadataQueryVariables = Types.Exact<{
-  key: Types.Scalars['String']['input'];
+export type GetCommitteeMetadataQueryVariables = Exact<{
+  key: string;
 }>;
 
 

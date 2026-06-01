@@ -1,3 +1,13 @@
+variable "alias_name" {
+  description = "The name of the KMS alias."
+  type        = string
+
+  validation {
+    condition     = can(regex("^alias/", var.alias_name))
+    error_message = "alias_name must start with 'alias/' (e.g., alias/nest-staging, alias/nest-production)."
+  }
+}
+
 variable "common_tags" {
   description = "A map of common tags to apply to all resources."
   type        = map(string)

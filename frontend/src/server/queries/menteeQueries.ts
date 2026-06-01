@@ -31,6 +31,7 @@ export const GET_MODULE_MENTEE_DETAILS = gql`
       }
       createdAt
       url
+      taskDeadline
     }
   }
 `

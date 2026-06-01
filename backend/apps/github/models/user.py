@@ -35,6 +35,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         indexes = [
             models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
             models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
+            models.Index(fields=["name"], name="github_user_name_asc"),
+            models.Index(fields=["-name"], name="github_user_name_desc"),
         ]
         verbose_name_plural = "Users"
 
@@ -98,6 +100,25 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         """
         return self.created_releases.all()
 
+    def _get_leader_memberships(self, entity_model):
+        """Get active, reviewed leader memberships for the given entity type."""
+        from apps.owasp.models.entity_member import EntityMember  # noqa: PLC0415
+
+        return EntityMember.objects.filter(
+            entity_type=ContentType.objects.get_for_model(entity_model),
+            is_active=True,
+            is_reviewed=True,
+            member=self,
+            role=EntityMember.Role.LEADER,
+        )
+
+    @property
+    def is_project_leader(self) -> bool:
+        """Return True if the user is an active, reviewed OWASP project leader."""
+        from apps.owasp.models.project import Project  # noqa: PLC0415
+
+        return self._get_leader_memberships(Project).exists()
+
     def _get_led_entities(self, entity_model):
         """Get entities where user is listed as a leader.
 
@@ -108,19 +129,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             QuerySet: Entities where this user is an active, reviewed leader.
 
         """
-        from apps.owasp.models.entity_member import EntityMember  # noqa: PLC0415
-
-        leader_memberships = EntityMember.objects.filter(
-            member=self,
-            entity_type=ContentType.objects.get_for_model(entity_model),
-            role=EntityMember.Role.LEADER,
+        return entity_model.objects.filter(
+            id__in=self._get_leader_memberships(entity_model).values_list("entity_id", flat=True),
             is_active=True,
-            is_reviewed=True,
-        ).values_list("entity_id", flat=True)
-
-        return entity_model.objects.filter(id__in=leader_memberships, is_active=True).order_by(
-            "name"
-        )
+        ).order_by("name")
 
     @property
     def chapters(self) -> QuerySet[Chapter]:

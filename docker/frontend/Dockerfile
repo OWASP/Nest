@@ -1,4 +1,4 @@
-FROM node:24.14-alpine3.23 AS base
+FROM node:24.16-alpine3.23@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -9,25 +9,32 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
     COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
     PNPM_HOME="/pnpm"
 
-ENV PATH="$PNPM_HOME:$PATH"
+ARG ENV_FILE=.env
+ARG NEXT_PUBLIC_E2E_BACKEND_BASE_URL
+
+ENV PATH="$PNPM_HOME:$PATH" \
+    NEXT_PUBLIC_E2E_BACKEND_BASE_URL=${NEXT_PUBLIC_E2E_BACKEND_BASE_URL}
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && \
-    apk add --no-cache libc6-compat
+    apk --no-cache update && \
+    apk --no-cache add libc6-compat
 
 WORKDIR /app
 
-COPY --chmod=444 package.json pnpm-lock.yaml ./
+COPY --chmod=444 package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    corepack enable && corepack install && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    corepack install && corepack enable pnpm && \
+    pnpm install --frozen-lockfile
 
-COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 ${ENV_FILE} ./.env
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 
@@ -51,20 +58,23 @@ FROM base AS runner
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+RUN apk --no-cache update && apk --no-cache upgrade
+
 WORKDIR /tmp
 
-# Fix CVE-2026-23745, CVE-2026-26960: Update npm's bundled tar to 7.5.8 in runner stage
+# Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786, CVE-2026-31802: Update npm's bundled tar to 7.5.11
 # Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Fix CVE-2026-27903, CVE-2026-27904: Update npm's bundled minimatch to 10.2.3
+# Fix CVE-2026-33671: Update npm's bundled picomatch (under tinyglobby) to 4.0.4
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
-RUN npm pack tar@7.5.8 && \
-    tar -xzf tar-7.5.8.tgz && \
+RUN npm pack tar@7.5.11 && \
+    tar -xzf tar-7.5.11.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.8.tgz && \
-    grep -q 'version.*7.5.8' "${TAR_DIR}/package.json" && \
+    rm -rf package tar-7.5.11.tgz && \
+    grep -q 'version.*7.5.11' "${TAR_DIR}/package.json" && \
     npm pack @isaacs/brace-expansion@5.0.1 && \
     tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
     BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
@@ -82,6 +92,15 @@ RUN npm pack tar@7.5.8 && \
     chmod -R 755 "${MINIMATCH_DIR}" && \
     rm -rf package minimatch-10.2.3.tgz && \
     grep -q '"version": "10.2.3"' "${MINIMATCH_DIR}/package.json" && \
+    npm pack picomatch@4.0.4 && \
+    tar -xzf picomatch-4.0.4.tgz && \
+    PICOMATCH_DIR="/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch" && \
+    rm -rf "${PICOMATCH_DIR}" && \
+    mkdir -p "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules" && \
+    cp -r package "${PICOMATCH_DIR}" && \
+    chmod -R 755 "${PICOMATCH_DIR}" && \
+    rm -rf package picomatch-4.0.4.tgz && \
+    grep -q '"version": "4.0.4"' "${PICOMATCH_DIR}/package.json" && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
 

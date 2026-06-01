@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.owasp.index import ProjectIndex
+from apps.owasp.index import ChapterIndex, ProjectIndex
 
 
 class Command(BaseCommand):
@@ -11,5 +11,6 @@ class Command(BaseCommand):
     def handle(self, *_args, **_options) -> None:
         """Update replicas for Algolia indices."""
         self.stdout.write("\n Starting replica configuration...\n")
+        ChapterIndex.configure_replicas()
         ProjectIndex.configure_replicas()
         self.stdout.write(self.style.SUCCESS("\n Replicas have been successfully created.\n"))

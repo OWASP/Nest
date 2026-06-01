@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import React from 'react'
 import CommunityPage from 'app/community/page'
 
@@ -62,6 +62,7 @@ jest.mock('utils/communityData', () => ({
     {
       title: 'Test Engagement',
       description: 'Test Engagement Description',
+      href: '/test-engagement',
     },
   ],
   journeySteps: [
@@ -97,12 +98,13 @@ describe('CommunityPage', () => {
   test('renders Explore Resources section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByTestId('anchor-title')).toHaveTextContent('Explore Resources')
+    const anchorTitles = screen.getAllByTestId('anchor-title')
+    expect(anchorTitles[0]).toHaveTextContent('Explore Resources')
     expect(screen.getByText('Test Chapter')).toBeInTheDocument()
     expect(screen.getByText('Test Description')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Test Chapter/i })
     expect(link).toHaveAttribute('href', '/test-chapter')
-    expect(screen.getByTestId('icon-chevron-right')).toBeInTheDocument()
+    expect(within(link).getByTestId('icon-chevron-right')).toBeInTheDocument()
   })
 
   test('renders Ways to Engage section correctly', () => {
@@ -116,8 +118,6 @@ describe('CommunityPage', () => {
   test('renders Community Journey section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByText('Your Community Journey')).toBeInTheDocument()
-
     expect(screen.getAllByText('Test Step 1')).toHaveLength(2)
     expect(screen.getAllByText('Test Step 1 Description')).toHaveLength(2)
     expect(screen.getAllByText('Test Step 2')).toHaveLength(2)
@@ -129,7 +129,6 @@ describe('CommunityPage', () => {
   test('renders Join the Community section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByText('Join the Community')).toBeInTheDocument()
     expect(screen.getByTestId('icon-slack')).toBeInTheDocument()
     expect(screen.getByText(/Connect with fellow security professionals/i)).toBeInTheDocument()
 

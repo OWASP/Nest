@@ -7,7 +7,7 @@ export const mockContributeData = {
   issues: [
     {
       commentsCount: 1,
-      createdAt: dayjs().subtract(4, 'months').unix(),
+      createdAt: dayjs().subtract(4, 'months').toISOString(),
       hint: 'Hint',
       labels: [],
       objectID: '9180',
@@ -16,7 +16,7 @@ export const mockContributeData = {
       repositoryLanguages: ['Python', 'TypeScript'],
       summary: 'This is a summary of Contribution 1',
       title: 'Contribution 1',
-      updatedAt: 1734727031,
+      updatedAt: '2024-12-20T20:37:11.000Z',
       url: 'https://github.com/OWASP/Nest/issues/225',
     },
   ],

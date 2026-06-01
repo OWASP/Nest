@@ -59,7 +59,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
         },
       },
@@ -167,7 +167,7 @@ describe('CreateModulePage', () => {
       status: 'unauthenticated',
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { getProgram: { admins: [] } },
+      data: { managementProgram: { admins: [] } },
       loading: false,
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -185,7 +185,7 @@ describe('CreateModulePage', () => {
       status: 'authenticated',
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { getProgram: null },
+      data: { managementProgram: null },
       loading: false,
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -206,7 +206,7 @@ describe('CreateModulePage', () => {
       })
       ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: {
-          getProgram: {
+          managementProgram: {
             admins: [{ login: 'admin-user' }],
           },
         },
@@ -238,7 +238,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',
@@ -255,7 +255,7 @@ describe('CreateModulePage', () => {
       expect(moduleForm).toBeInTheDocument()
     })
   })
-  it('handles form submission error gracefully', async () => {
+  it('handles form submission error by displaying inline error', async () => {
     const user = userEvent.setup({ delay: null })
 
     ;(useSession as jest.Mock).mockReturnValue({
@@ -264,7 +264,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',
@@ -300,16 +300,14 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModuleError).toHaveBeenCalled()
-      expect(addToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Creation Failed',
-          description: 'Network error',
-          color: 'danger',
-        })
+      // Error is displayed inline via validationErrors, not via addToast
+      expect(addToast).not.toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Creation Failed' })
       )
     })
   })
-  it('handles non-Error submission failure', async () => {
+  it('handles non-Error submission failure via handleAppError', async () => {
+    const { handleAppError } = jest.requireMock('app/global-error')
     const user = userEvent.setup({ delay: null })
 
     ;(useSession as jest.Mock).mockReturnValue({
@@ -318,7 +316,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',
@@ -353,11 +351,8 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModuleError).toHaveBeenCalled()
-      expect(addToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description: 'Something went wrong while creating the module.',
-        })
-      )
+      // Non-Error values fall through to handleAppError
+      expect(handleAppError).toHaveBeenCalledWith('String error')
     })
   }, 10000)
 })

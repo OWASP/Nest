@@ -47,7 +47,7 @@ export type Project = {
   topics?: string[]
   topContributors?: Contributor[]
   type?: string
-  updatedAt?: number
+  updatedAt?: string
   url?: string
   recentIssues?: Issue[]
   recentPullRequests?: PullRequest[]

@@ -64,13 +64,13 @@ jest.mock('utils/aboutData', () => ({
   },
   projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
   projectTimeline: [
-    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
-    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
-    { title: 'Timeline Event 3', description: 'Timeline description 3', year: '2025' },
-    { title: 'Timeline Event 4', description: 'Timeline description 4', year: '2026' },
-    { title: 'Timeline Event 5', description: 'Timeline description 5', year: '2027' },
-    { title: 'Timeline Event 6', description: 'Timeline description 6', year: '2028' },
-    { title: 'Timeline Event 7', description: 'Timeline description 7', year: '2029' },
+    { title: 'Timeline Event 1', description: 'Timeline description 1', year: 'March 2023' },
+    { title: 'Timeline Event 2', description: 'Timeline description 2', year: 'June 2024' },
+    { title: 'Timeline Event 3', description: 'Timeline description 3', year: 'January 2025' },
+    { title: 'Timeline Event 4', description: 'Timeline description 4', year: 'April 2026' },
+    { title: 'Timeline Event 5', description: 'Timeline description 5', year: 'September 2027' },
+    { title: 'Timeline Event 6', description: 'Timeline description 6', year: 'October 2028' },
+    { title: 'Timeline Event 7', description: 'Timeline description 7', year: 'February 2029' },
   ],
   technologies: [
     {
@@ -107,9 +107,9 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tools',
       tools: {
-        ansible: {
-          icon: '/images/icons/ansible.svg',
-          url: 'https://www.ansible.com/',
+        terraform: {
+          icon: '/images/icons/terraform.svg',
+          url: 'https://www.terraform.io/',
         },
         gitHub: {
           icon: '/images/icons/github.svg',
@@ -288,15 +288,16 @@ describe('About Component', () => {
     })
 
     expect(screen.getByText('Project Timeline')).toBeInTheDocument()
-    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
-    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
-    expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
-    expect(screen.getByText('2029')).toBeInTheDocument()
-    expect(screen.queryByText('2023')).not.toBeInTheDocument()
-    expect(screen.getByText('2024')).toBeInTheDocument()
 
+    expect(screen.getByText('2029')).toBeInTheDocument()
+    expect(screen.getByText('2028')).toBeInTheDocument()
     expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 6')).toBeInTheDocument()
+
+    expect(screen.queryByText('2024')).not.toBeInTheDocument()
+    expect(screen.queryByText('2023')).not.toBeInTheDocument()
     expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
+    expect(screen.queryByText('Timeline Event 2')).not.toBeInTheDocument()
 
     const timelineSection = screen.getByText('Project Timeline').closest('h2')?.parentElement
     if (!timelineSection) throw new Error('Could not find Timeline section')
@@ -306,6 +307,8 @@ describe('About Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+      expect(screen.getByText('2023')).toBeInTheDocument()
+      expect(screen.getByText('2024')).toBeInTheDocument()
     })
 
     const showLessButton = within(timelineSection).getByRole('button', { name: /Show less/i })
@@ -313,6 +316,7 @@ describe('About Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
+      expect(screen.queryByText('2023')).not.toBeInTheDocument()
     })
   })
 
@@ -390,12 +394,12 @@ describe('About Component', () => {
     expect(screen.getByText('Tests')).toBeInTheDocument()
     expect(screen.getByText('Tools')).toBeInTheDocument()
 
-    expect(screen.getByText('Ansible')).toBeInTheDocument()
+    expect(screen.getByText('Terraform')).toBeInTheDocument()
     expect(screen.getByText('GitHub')).toBeInTheDocument()
     expect(screen.getByText('Next.js')).toBeInTheDocument()
 
-    const ansibleLink = screen.getByText('Ansible').closest('a')
-    expect(ansibleLink).toHaveAttribute('href', 'https://www.ansible.com/')
+    const terraformLink = screen.getByText('Terraform').closest('a')
+    expect(terraformLink).toHaveAttribute('href', 'https://www.terraform.io/')
 
     const githubLink = screen.getByText('GitHub').closest('a')
     expect(githubLink).toHaveAttribute('href', 'https://www.github.com/')
@@ -403,8 +407,8 @@ describe('About Component', () => {
     const reactLink = screen.getByText('Next.js').closest('a')
     expect(reactLink).toHaveAttribute('href', 'https://nextjs.org/')
 
-    const ansibleIconContainer = screen.getByText('Ansible').previousSibling
-    expect(ansibleIconContainer).toBeInTheDocument()
+    const terraformIconContainer = screen.getByText('Terraform').previousSibling
+    expect(terraformIconContainer).toBeInTheDocument()
 
     const githubIconContainer = screen.getByText('GitHub').previousSibling
     expect(githubIconContainer).toBeInTheDocument()

@@ -47,15 +47,15 @@ class UserNode:
         return [user_badge.badge for user_badge in getattr(root, "user_badges_list", [])]
 
     @strawberry_django.field
-    def created_at(self, root: User) -> float:
+    def created_at(self, root: User) -> str:
         """Resolve created at."""
         return root.idx_created_at
 
     @strawberry_django.field(select_related=["owasp_profile"])
-    def first_owasp_contribution_at(self, root: User) -> float | None:
+    def first_owasp_contribution_at(self, root: User) -> str | None:
         """Resolve first OWASP contribution date."""
         return (
-            root.owasp_profile.first_contribution_at.timestamp()
+            root.owasp_profile.first_contribution_at.isoformat()
             if hasattr(root, "owasp_profile") and root.owasp_profile.first_contribution_at
             else None
         )
@@ -99,7 +99,7 @@ class UserNode:
         return root.idx_releases_count
 
     @strawberry_django.field
-    def updated_at(self, root: User) -> float:
+    def updated_at(self, root: User) -> str:
         """Resolve updated at."""
         return root.idx_updated_at
 

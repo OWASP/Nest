@@ -1,6 +1,6 @@
-SHELL := /bin/bash
+.PHONY: audit-frontend-dependencies sbom-frontend-image
 
-.PHONY: sbom-frontend-image
+##@ Frontend
 
 build-frontend-local-image:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
@@ -10,6 +10,7 @@ build-frontend-local-image:
 	    -t nest-frontend-local \
 	    frontend
 
+check-frontend: ## Run frontend code quality checks
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code \
@@ -71,11 +72,11 @@ security-scan-frontend-image:
 		--rm \
 		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
-		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		image --config /trivy.yaml $(FRONTEND_IMAGE_NAME)
+		image --config /.trivy.yaml $(FRONTEND_IMAGE_NAME)
 
 SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
 
@@ -98,32 +99,28 @@ sbom-frontend-image:
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
+test-frontend: ## Run all frontend tests
 test-frontend: \
 	test-frontend-unit \
-	test-frontend-a11y \
-	test-frontend-e2e
+	test-frontend-a11y
 
 test-frontend-a11y:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-a11y \
-		-f docker/frontend/Dockerfile.a11y.test frontend \
+		-f docker/frontend/Dockerfile.a11y-tests frontend \
 		-t nest-test-frontend-a11y
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
-
-test-frontend-e2e:
-	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
-	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
-	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend e2e-tests
 
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-unit \
-		-f docker/frontend/Dockerfile.unit.test frontend \
+		-f docker/frontend/Dockerfile.unit-tests frontend \
 		-t nest-test-frontend-unit
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
+
+audit-frontend-dependencies: ## Audit frontend npm dependencies
+	@echo "Auditing frontend npm dependencies..."
+	@cd frontend && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 update-frontend-dependencies:
 	cd frontend && pnpm update

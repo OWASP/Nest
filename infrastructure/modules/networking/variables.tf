@@ -14,37 +14,43 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "create_vpc_cloudwatch_logs_endpoint" {
+variable "enable_nat_gateway" {
+  description = "Whether to enable a NAT Gateway."
+  type        = bool
+  default     = true
+}
+
+variable "enable_vpc_cloudwatch_logs_endpoint" {
   description = "Whether to create CloudWatch Logs VPC endpoint."
   type        = bool
   default     = false
 }
 
-variable "create_vpc_ecr_api_endpoint" {
+variable "enable_vpc_ecr_api_endpoint" {
   description = "Whether to create ECR API VPC endpoint."
   type        = bool
   default     = false
 }
 
-variable "create_vpc_ecr_dkr_endpoint" {
+variable "enable_vpc_ecr_dkr_endpoint" {
   description = "Whether to create ECR DKR VPC endpoint."
   type        = bool
   default     = false
 }
 
-variable "create_vpc_s3_endpoint" {
+variable "enable_vpc_s3_endpoint" {
   description = "Whether to create S3 VPC endpoint (Gateway, free)."
   type        = bool
   default     = false
 }
 
-variable "create_vpc_secretsmanager_endpoint" {
+variable "enable_vpc_secretsmanager_endpoint" {
   description = "Whether to create Secrets Manager VPC endpoint."
   type        = bool
   default     = false
 }
 
-variable "create_vpc_ssm_endpoint" {
+variable "enable_vpc_ssm_endpoint" {
   description = "Whether to create SSM VPC endpoint."
   type        = bool
   default     = false

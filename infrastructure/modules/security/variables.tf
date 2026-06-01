@@ -4,18 +4,6 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "create_rds_proxy" {
-  description = "Whether to create an RDS proxy."
-  type        = bool
-  default     = false
-}
-
-variable "create_vpc_endpoint_rules" {
-  description = "Whether to create security group rules for VPC endpoints."
-  type        = bool
-  default     = false
-}
-
 variable "db_port" {
   description = "The port for the RDS database."
   type        = number
@@ -26,17 +14,16 @@ variable "db_port" {
   }
 }
 
-variable "default_egress_cidr_blocks" {
-  description = "A list of CIDR blocks to allow for default egress traffic."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
+variable "enable_rds_proxy" {
+  description = "Whether to create an RDS proxy."
+  type        = bool
+  default     = false
+}
 
-  validation {
-    condition = alltrue([
-      for cidr in var.default_egress_cidr_blocks : can(cidrhost(cidr, 0))
-    ])
-    error_message = "One or more CIDR blocks are invalid."
-  }
+variable "enable_vpc_endpoint_rules" {
+  description = "Whether to create security group rules for VPC endpoints."
+  type        = bool
+  default     = false
 }
 
 variable "environment" {

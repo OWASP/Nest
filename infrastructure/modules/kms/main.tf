@@ -1,10 +1,10 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
@@ -66,6 +66,6 @@ resource "aws_kms_key" "main" {
 }
 
 resource "aws_kms_alias" "main" {
-  name          = "alias/${var.project_name}-${var.environment}"
+  name          = var.alias_name
   target_key_id = aws_kms_key.main.key_id
 }

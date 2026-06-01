@@ -28,6 +28,12 @@ output "alb_zone_id" {
   value       = aws_lb.main.zone_id
 }
 
+output "backend_target_group_arn" {
+  depends_on  = [aws_lb_listener.https]
+  description = "The ARN of the backend target group."
+  value       = aws_lb_target_group.backend.arn
+}
+
 output "frontend_target_group_arn" {
   depends_on  = [aws_lb_listener.https]
   description = "The ARN of the frontend target group."

@@ -1,7 +1,7 @@
 export const mockCommitteeData = {
   committees: [
     {
-      createdAt: 1596744799,
+      createdAt: '2020-08-06T20:13:19.000Z',
       leaders: ['Edmond Momartin', 'Garth Boyd', 'Kyle Smith'],
       name: 'Committee 1',
       relatedUrls: [
@@ -16,7 +16,7 @@ export const mockCommitteeData = {
         },
       ],
       summary: 'This is a summary of Committee 1.',
-      updatedAt: 1727390473,
+      updatedAt: '2024-09-26T22:41:13.000Z',
       key: 'committee_1',
       url: 'https://owasp.org/www-committee-chapter',
       objectID: '4',

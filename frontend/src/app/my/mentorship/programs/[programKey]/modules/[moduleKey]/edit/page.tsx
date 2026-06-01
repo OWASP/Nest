@@ -4,16 +4,17 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import React, { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
+import React, { useEffect, useMemo, useState } from 'react'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -28,6 +29,7 @@ const EditModulePage = () => {
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
@@ -35,11 +37,29 @@ const EditModulePage = () => {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
   })
+
+  const currentUserLogin = sessionData?.user?.login
+
+  const isAdmin = useMemo(
+    () =>
+      data?.managementProgram?.admins?.some(
+        (admin: { login: string }) => admin.login === currentUserLogin
+      ),
+    [data?.managementProgram?.admins, currentUserLogin]
+  )
+
+  const isMentor = useMemo(
+    () =>
+      data?.managementModule?.mentors?.some(
+        (mentor: { login: string }) => mentor.login === currentUserLogin
+      ),
+    [data?.managementModule?.mentors, currentUserLogin]
+  )
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
@@ -48,22 +68,13 @@ const EditModulePage = () => {
 
     if (
       queryError ||
-      !data?.getProgram ||
-      !data?.getModule ||
+      !data?.managementProgram ||
+      !data?.managementModule ||
       sessionStatus === 'unauthenticated'
     ) {
       setAccessStatus('denied')
       return
     }
-
-    const currentUserLogin = sessionData?.user?.login
-    const isAdmin = data.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === currentUserLogin
-    )
-
-    const isMentor = data.getModule.mentors?.some(
-      (mentor: { login: string }) => mentor.login === currentUserLogin
-    )
 
     if (isAdmin || isMentor) {
       setAccessStatus('allowed')
@@ -78,11 +89,11 @@ const EditModulePage = () => {
       })
       setTimeout(() => router.replace(`/my/mentorship/programs/${programKey}`), 1500)
     }
-  }, [sessionStatus, sessionData, queryLoading, data, programKey, queryError, router])
+  }, [sessionStatus, queryLoading, queryError, data, programKey, router, isAdmin, isMentor])
 
   useEffect(() => {
-    if (accessStatus === 'allowed' && data?.getModule) {
-      const m = data.getModule
+    if (accessStatus === 'allowed' && data?.managementModule) {
+      const m = data.managementModule
       setFormData({
         description: m.description || '',
         domains: (m.domains || []).join(', '),
@@ -101,13 +112,10 @@ const EditModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData) return
+    setValidationErrors({})
 
     try {
-      const currentUserLogin = sessionData?.user?.login
-      const isAdmin = data?.getProgram?.admins?.some(
-        (admin: { login: string }) => admin.login === currentUserLogin
-      )
-
       const input: UpdateModuleInput = {
         description: formData!.description,
         domains: parseCommaSeparated(formData!.domains),
@@ -129,7 +137,9 @@ const EditModulePage = () => {
 
       const result = await updateModule({
         awaitRefetchQueries: true,
-        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        refetchQueries: [
+          { query: GetManagementProgramAndModulesDocument, variables: { programKey } },
+        ],
         variables: { input },
       })
       const updatedModuleKey = result.data?.updateModule?.key || moduleKey
@@ -143,22 +153,18 @@ const EditModulePage = () => {
       })
       router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
-      let errorMessage = 'Failed to update module. Please try again.'
-
-      if (err instanceof Error) {
-        if (err.message.includes('Permission') || err.message.includes('not have permission')) {
-          errorMessage =
-            'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.'
-        }
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(err)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
+      } else if (unmappedErrors.length > 0) {
+        setValidationErrors({ name: unmappedErrors[0] })
+      } else {
+        handleAppError(err)
       }
-
-      addToast({
-        title: 'Error',
-        description: errorMessage,
-        color: 'danger',
-        variant: 'solid',
-        timeout: 4000,
-      })
     }
   }
 
@@ -185,10 +191,17 @@ const EditModulePage = () => {
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      validationErrors={validationErrors}
       minDate={
-        data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
+        data?.managementProgram?.startedAt
+          ? formatDateForInput(data.managementProgram.startedAt)
+          : undefined
       }
-      maxDate={data?.getProgram?.endedAt ? formatDateForInput(data.getProgram.endedAt) : undefined}
+      maxDate={
+        data?.managementProgram?.endedAt
+          ? formatDateForInput(data.managementProgram.endedAt)
+          : undefined
+      }
     />
   )
 }

@@ -1,17 +1,13 @@
 """Slack member joined #gsoc channel handler using templates."""
 
-import logging
 from pathlib import Path
 
-from django.utils import timezone
-
 from apps.common.utils import convert_to_snake_case
+from apps.slack.common.gsoc import get_gsoc_year
 from apps.slack.constants import (
     OWASP_GSOC_CHANNEL_ID,
 )
 from apps.slack.events.event import EventBase
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Gsoc(EventBase):
@@ -60,5 +56,5 @@ class Gsoc(EventBase):
         """
         return {
             **super().get_context(event),
-            "PREVIOUS_YEAR": timezone.now().year - 1,
+            "GSOC_YEAR": get_gsoc_year(),
         }

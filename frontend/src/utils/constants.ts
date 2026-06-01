@@ -7,12 +7,7 @@ import type { Section } from 'types/section'
 export const headerLinks: Link[] = [
   {
     text: 'Community',
-    submenu: [
-      { text: 'Chapters', href: '/chapters' },
-      { text: 'Members', href: '/members' },
-      { text: 'Organizations', href: '/organizations' },
-      { text: 'Snapshots', href: '/community/snapshots' },
-    ],
+    href: '/community',
   },
   {
     text: 'Projects',
@@ -123,6 +118,8 @@ export const themeToggleTooltip = {
 }
 
 export const desktopViewMinWidth = 768
+
+export const MAX_RELEASES_TO_SHOW = 9
 
 export const userAuthStatus = {
   AUTHENTICATED: 'authenticated',

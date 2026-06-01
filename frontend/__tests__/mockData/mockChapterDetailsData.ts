@@ -4,7 +4,7 @@ export const mockChapterDetailsData = {
     suggestedLocation: 'Test City, Test Country',
     region: 'Test Region',
     isActive: true,
-    updatedAt: 1652129718,
+    updatedAt: '2022-05-09T20:55:18.000Z',
     url: 'https://owasp.org/test-chapter',
     relatedUrls: [
       'https://discord.com/test',

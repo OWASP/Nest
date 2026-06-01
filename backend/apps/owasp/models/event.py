@@ -79,7 +79,7 @@ class Event(BulkSaveModel, TimestampedModel):
         """
         return (
             Event.objects.filter(
-                start_date__gt=timezone.now(),
+                start_date__gte=timezone.now().date(),
             )
             .exclude(
                 Q(name__exact="") | Q(url__exact=""),

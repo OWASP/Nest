@@ -2,79 +2,44 @@ import getGoogleCalendarUrl from 'utils/getGoogleCalendarUrl'
 
 describe('getGoogleCalendarUrl', () => {
   describe('date format detection', () => {
-    it('detects all-day event from date-only string (YYYY-MM-DD)', () => {
+    it('detects all-day event from midnight timestamp', () => {
       const url = getGoogleCalendarUrl({
         title: 'Conference',
-        startDate: '2025-12-01',
-        endDate: '2025-12-03',
+        startDate: '2025-12-01T00:00:00Z',
+        endDate: '2025-12-03T00:00:00Z',
       })
       expect(url).toContain('dates=20251201/20251204')
       expect(url).not.toMatch(/dates=\d{8}T/)
     })
 
-    it('detects timed event from ISO string with T', () => {
+    it('detects timed event from non-midnight timestamp', () => {
       const url = getGoogleCalendarUrl({
         title: 'Meeting',
-        startDate: '2025-12-01T10:00:00',
-        endDate: '2025-12-01T11:00:00',
-      })
-      expect(url).toContain('T')
-      expect(url).toContain('Z')
-    })
-
-    it('detects timed event from string with colon', () => {
-      const url = getGoogleCalendarUrl({
-        title: 'Meeting',
-        startDate: '2025-12-01 10:00:00',
-        endDate: '2025-12-01 11:00:00',
-      })
-      expect(url).toContain('T')
-      expect(url).toContain('Z')
-    })
-
-    it('treats Date object as timed event', () => {
-      const url = getGoogleCalendarUrl({
-        title: 'Meeting',
-        startDate: new Date('2025-12-01T10:00:00'),
-        endDate: new Date('2025-12-01T11:00:00'),
+        startDate: '2025-12-01T10:00:00Z',
+        endDate: '2025-12-01T11:00:00Z',
       })
       expect(url).toContain('T')
       expect(url).toContain('Z')
     })
   })
 
-  describe('diverse date formats', () => {
-    it('handles ISO 8601 format', () => {
-      const url = getGoogleCalendarUrl({
-        title: 'Event',
-        startDate: '2025-12-01T14:30:00.000Z',
-      })
-      expect(url).toContain('text=Event')
-      expect(url).toContain('dates=')
-    })
-
-    it('handles date-only format', () => {
-      const url = getGoogleCalendarUrl({
-        title: 'All Day Event',
-        startDate: '2025-12-25',
-      })
-      expect(url).toContain('dates=20251225/20251226')
-    })
-
-    it('handles Date object', () => {
-      const url = getGoogleCalendarUrl({
-        title: 'Event',
-        startDate: new Date(2025, 11, 1, 10, 0, 0),
-      })
-      expect(url).toContain('text=Event')
-    })
-
-    it('handles timestamp-like ISO string', () => {
+  describe('timestamp handling', () => {
+    it('handles ISO date timestamps correctly', () => {
       const url = getGoogleCalendarUrl({
         title: 'Event',
         startDate: '2025-12-01T00:00:00Z',
       })
+      expect(url).toContain('text=Event')
       expect(url).toContain('dates=')
+    })
+
+    it('handles midnight timestamp as all-day', () => {
+      const url = getGoogleCalendarUrl({
+        title: 'All Day Event',
+        startDate: '2025-12-28',
+      })
+      // All-day events get +1 day for end
+      expect(url).toContain('dates=20251228/20251229')
     })
   })
 
@@ -101,7 +66,7 @@ describe('getGoogleCalendarUrl', () => {
     it('encodes title with special characters', () => {
       const url = getGoogleCalendarUrl({
         title: 'Meeting & Discussion: Q4 Review',
-        startDate: '2025-12-01',
+        startDate: '2025-12-01T00:00:00Z',
       })
       expect(url).toContain('text=Meeting')
       expect(url).toContain('%26')
@@ -111,7 +76,7 @@ describe('getGoogleCalendarUrl', () => {
     it('encodes description', () => {
       const url = getGoogleCalendarUrl({
         title: 'Event',
-        startDate: '2025-12-01',
+        startDate: '2025-12-01T00:00:00Z',
         description: 'Join us at https://example.com?id=123',
       })
       expect(url).toContain('details=')
@@ -121,7 +86,7 @@ describe('getGoogleCalendarUrl', () => {
     it('encodes location with special characters', () => {
       const url = getGoogleCalendarUrl({
         title: 'Event',
-        startDate: '2025-12-01',
+        startDate: '2025-12-01T00:00:00Z',
         location: '123 Main St, New York, NY 10001',
       })
       expect(url).toContain('location=')
@@ -132,7 +97,7 @@ describe('getGoogleCalendarUrl', () => {
     it('generates correct base URL', () => {
       const url = getGoogleCalendarUrl({
         title: 'Event',
-        startDate: '2025-12-01',
+        startDate: '2025-12-01T00:00:00Z',
       })
       expect(url.startsWith('https://calendar.google.com/calendar/render?action=TEMPLATE')).toBe(
         true
@@ -144,8 +109,8 @@ describe('getGoogleCalendarUrl', () => {
         title: 'OWASP Conference',
         description: 'Annual security conference',
         location: 'Belgium',
-        startDate: '2025-12-02',
-        endDate: '2025-12-03',
+        startDate: '2025-12-02T00:00:00Z',
+        endDate: '2025-12-03T00:00:00Z',
       })
       expect(url).toContain('text=OWASP')
       expect(url).toContain('details=')
@@ -156,7 +121,7 @@ describe('getGoogleCalendarUrl', () => {
     it('omits empty optional parameters', () => {
       const url = getGoogleCalendarUrl({
         title: 'Simple Event',
-        startDate: '2025-12-01',
+        startDate: '2025-12-01T00:00:00Z',
       })
       expect(url).not.toContain('details=')
       expect(url).not.toContain('location=')
@@ -168,7 +133,7 @@ describe('getGoogleCalendarUrl', () => {
       expect(() =>
         getGoogleCalendarUrl({
           title: '',
-          startDate: '2025-12-01',
+          startDate: '2025-12-01T00:00:00Z',
         })
       ).toThrow()
     })
@@ -181,25 +146,6 @@ describe('getGoogleCalendarUrl', () => {
         })
       ).toThrow()
     })
-
-    it('throws error for invalid startDate', () => {
-      expect(() =>
-        getGoogleCalendarUrl({
-          title: 'Event',
-          startDate: 'invalid-date',
-        })
-      ).toThrow('Invalid startDate')
-    })
-
-    it('throws error for invalid endDate', () => {
-      expect(() =>
-        getGoogleCalendarUrl({
-          title: 'Event',
-          startDate: '2025-12-01',
-          endDate: 'invalid-date',
-        })
-      ).toThrow('Invalid endDate')
-    })
   })
 
   describe('real-world scenarios', () => {
@@ -208,8 +154,8 @@ describe('getGoogleCalendarUrl', () => {
         title: 'Security Conference 2025',
         description: 'Annual security conference',
         location: 'Belgium',
-        startDate: '2025-12-02',
-        endDate: '2025-12-03',
+        startDate: '2025-12-02T00:00:00Z',
+        endDate: '2025-12-03T00:00:00Z',
       })
       expect(url).toContain('text=Security')
       expect(url).toContain('dates=20251202/20251204')
@@ -220,8 +166,8 @@ describe('getGoogleCalendarUrl', () => {
         title: 'Security Workshop',
         description: 'Hands-on security training',
         location: 'Virtual - Zoom',
-        startDate: '2025-12-15T09:00:00',
-        endDate: '2025-12-15T17:00:00',
+        startDate: '2025-12-15T09:00:00Z',
+        endDate: '2025-12-15T17:00:00Z',
       })
       expect(url).toContain('text=Security')
       expect(url).toContain('T')
@@ -231,8 +177,8 @@ describe('getGoogleCalendarUrl', () => {
       const url = getGoogleCalendarUrl({
         title: 'Tech Conference 2026',
         location: 'Austin, USA',
-        startDate: '2026-10-27',
-        endDate: '2026-10-30',
+        startDate: '2026-10-27T00:00:00Z',
+        endDate: '2026-10-30T00:00:00Z',
       })
       expect(url).toContain('dates=20261027/20261031')
     })

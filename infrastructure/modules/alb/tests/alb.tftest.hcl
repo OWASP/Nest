@@ -7,10 +7,10 @@ variables {
   environment                = "test"
   frontend_health_check_path = "/"
   frontend_port              = 3000
-  lambda_function_name       = null
   log_retention_days         = 90
   project_name               = "nest"
   public_subnet_ids          = ["subnet-public-1", "subnet-public-2"]
+  static_s3_bucket_name      = "nest-test-static-bucket"
   vpc_id                     = "vpc-12345678"
 }
 
@@ -38,84 +38,6 @@ run "test_acm_certificate_name_format" {
   assert {
     condition     = aws_acm_certificate.main.tags.Name == "${var.project_name}-${var.environment}-alb-cert"
     error_message = "ACM certificate name must follow format: {project}-{environment}-alb-cert."
-  }
-}
-
-run "test_lambda_alias_not_created_when_null" {
-  command = plan
-
-  variables {
-    lambda_function_name = null
-  }
-  assert {
-    condition     = length(aws_lambda_alias.live) == 0
-    error_message = "Lambda alias should not be created when lambda_function_name is null."
-  }
-}
-
-run "test_lambda_alias_name" {
-  command = plan
-
-  override_data {
-    target = data.aws_lambda_function.backend[0]
-    values = {
-      version = "1"
-    }
-  }
-  variables {
-    lambda_function_name = "test-function"
-  }
-  assert {
-    condition     = aws_lambda_alias.live[0].name == "live"
-    error_message = "Lambda alias name must be 'live'."
-  }
-}
-
-run "test_lambda_permission_not_created_when_null" {
-  command = plan
-
-  variables {
-    lambda_function_name = null
-  }
-  assert {
-    condition     = length(aws_lambda_permission.alb) == 0
-    error_message = "Lambda permission should not be created when lambda_function_name is null."
-  }
-}
-
-run "test_lambda_permission_action" {
-  command = plan
-
-  override_data {
-    target = data.aws_lambda_function.backend[0]
-    values = {
-      version = "1"
-    }
-  }
-  variables {
-    lambda_function_name = "test-function"
-  }
-  assert {
-    condition     = aws_lambda_permission.alb[0].action == "lambda:InvokeFunction"
-    error_message = "Lambda permission action must be 'lambda:InvokeFunction'."
-  }
-}
-
-run "test_lambda_permission_principal" {
-  command = plan
-
-  override_data {
-    target = data.aws_lambda_function.backend[0]
-    values = {
-      version = "1"
-    }
-  }
-  variables {
-    lambda_function_name = "test-function"
-  }
-  assert {
-    condition     = aws_lambda_permission.alb[0].principal == "elasticloadbalancing.amazonaws.com"
-    error_message = "Lambda permission principal must be 'elasticloadbalancing.amazonaws.com'."
   }
 }
 
@@ -290,14 +212,109 @@ run "test_csp_directive_count" {
   }
 }
 
-run "test_backend_listener_rules_not_created_when_null" {
+run "test_csp_max_length" {
   command = plan
-  variables {
-    lambda_function_name = null
-  }
+
   assert {
-    condition     = length(aws_lb_listener_rule.backend_https) == 0
-    error_message = "Backend listener rules should not be created when lambda_function_name is null."
+    condition     = length(local.content_security_policy) <= 1000
+    error_message = "Content-Security-Policy header value must be 1000 characters or fewer."
+  }
+}
+
+run "test_backend_listener_rules_created" {
+  command = plan
+
+  assert {
+    condition     = length(aws_lb_listener_rule.backend_https) > 0
+    error_message = "Backend listener rules must be created."
+  }
+}
+
+run "test_backend_target_group_name_format" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.name == "${var.project_name}-${var.environment}-backend-tg"
+    error_message = "Backend target group name must follow format: {project}-{environment}-backend-tg."
+  }
+}
+
+run "test_backend_target_group_port" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.port == var.backend_port
+    error_message = "Backend target group port must match the backend_port variable."
+  }
+}
+
+run "test_backend_target_group_protocol" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.protocol == "HTTP"
+    error_message = "Backend target group protocol must be 'HTTP'."
+  }
+}
+
+run "test_backend_target_group_type" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.target_type == "ip"
+    error_message = "Backend target group target type must be 'ip'."
+  }
+}
+
+run "test_backend_target_group_deregistration_delay" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.deregistration_delay == "30"
+    error_message = "Backend target group deregistration delay must be 30 seconds."
+  }
+}
+
+run "test_backend_health_check_enabled" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].enabled == true
+    error_message = "Backend health check must be enabled."
+  }
+}
+
+run "test_backend_health_check_path" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].path == var.backend_health_check_path
+    error_message = "Backend health check path must match the variable."
+  }
+}
+
+run "test_backend_health_check_healthy_threshold" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].healthy_threshold == 2
+    error_message = "Backend health check healthy threshold must be 2."
+  }
+}
+
+run "test_backend_health_check_unhealthy_threshold" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].unhealthy_threshold == 10
+    error_message = "Backend health check unhealthy threshold must be 10."
+  }
+}
+
+run "test_backend_health_check_timeout" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].timeout == 5
+    error_message = "Backend health check timeout must be 5 seconds."
+  }
+}
+
+run "test_backend_health_check_matcher" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].matcher == "200-299"
+    error_message = "Backend health check matcher must be '200-299'."
   }
 }
 
@@ -368,8 +385,8 @@ run "test_frontend_health_check_healthy_threshold" {
 run "test_frontend_health_check_unhealthy_threshold" {
   command = plan
   assert {
-    condition     = aws_lb_target_group.frontend.health_check[0].unhealthy_threshold == 3
-    error_message = "Frontend health check unhealthy threshold must be 3."
+    condition     = aws_lb_target_group.frontend.health_check[0].unhealthy_threshold == 10
+    error_message = "Frontend health check unhealthy threshold must be 10."
   }
 }
 
@@ -386,64 +403,6 @@ run "test_frontend_health_check_matcher" {
   assert {
     condition     = aws_lb_target_group.frontend.health_check[0].matcher == "200-299"
     error_message = "Frontend health check matcher must be '200-299'."
-  }
-}
-
-run "test_lambda_target_group_not_created_when_null" {
-  command = plan
-  variables {
-    lambda_function_name = null
-  }
-  assert {
-    condition     = length(aws_lb_target_group.lambda) == 0
-    error_message = "Lambda target group should not be created when lambda_function_name is null."
-  }
-}
-
-run "test_lambda_target_group_name_format" {
-  command = plan
-
-  override_data {
-    target = data.aws_lambda_function.backend[0]
-    values = {
-      version = "1"
-    }
-  }
-  variables {
-    lambda_function_name = "test-function"
-  }
-  assert {
-    condition     = aws_lb_target_group.lambda[0].name == "${var.project_name}-${var.environment}-lambda-tg"
-    error_message = "Lambda target group name must follow format: {project}-{environment}-lambda-tg."
-  }
-}
-
-run "test_lambda_target_group_type" {
-  command = plan
-
-  override_data {
-    target = data.aws_lambda_function.backend[0]
-    values = {
-      version = "1"
-    }
-  }
-  variables {
-    lambda_function_name = "test-function"
-  }
-  assert {
-    condition     = aws_lb_target_group.lambda[0].target_type == "lambda"
-    error_message = "Lambda target group target type must be 'lambda'."
-  }
-}
-
-run "test_lambda_target_group_attachment_not_created_when_null" {
-  command = plan
-  variables {
-    lambda_function_name = null
-  }
-  assert {
-    condition     = length(aws_lb_target_group_attachment.lambda) == 0
-    error_message = "Lambda target group attachment should not be created when lambda_function_name is null."
   }
 }
 

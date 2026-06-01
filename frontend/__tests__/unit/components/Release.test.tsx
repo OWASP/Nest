@@ -68,7 +68,7 @@ jest.mock('next/image', () => ({
   },
 }))
 
-const now = Date.now()
+const now = new Date(Date.now()).toISOString()
 const mockReleases: ReleaseType[] = [
   {
     id: 'release-test-1',
@@ -84,7 +84,7 @@ const mockReleases: ReleaseType[] = [
       avatarUrl: 'https://example.com/avatar.png',
       key: 'testuser',
       contributionsCount: 0,
-      createdAt: 0,
+      createdAt: '1970-01-01T00:00:00.000Z',
       followersCount: 0,
       followingCount: 0,
       publicRepositoriesCount: 0,
@@ -105,7 +105,7 @@ const mockReleases: ReleaseType[] = [
       avatarUrl: 'https://example.com/avatar2.png',
       key: 'jane-doe',
       contributionsCount: 0,
-      createdAt: 0,
+      createdAt: '1970-01-01T00:00:00.000Z',
       followersCount: 0,
       followingCount: 0,
       publicRepositoriesCount: 0,

@@ -10,31 +10,34 @@ coverage:
   status:
     project:
       default:
-        target: auto
-        threshold: 1%
+        target: 95%
+        threshold: 0%
         base: auto
       backend:
         flags:
           - backend
         target: 95%
-        threshold: 1%
+        threshold: 0%
         base: auto
       frontend:
         flags:
           - frontend
         target: 95%
-        threshold: 1%
+        threshold: 0%
         base: auto
     patch:
       default:
+        informational: true
         target: auto
         threshold: 0%
       backend:
+        informational: true
         flags:
           - backend
         target: auto
         threshold: 0%
       frontend:
+        informational: true
         flags:
           - frontend
         target: auto

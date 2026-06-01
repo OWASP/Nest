@@ -1,14 +1,14 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.7.2"
+      version = "~> 3.8.0"
     }
   }
 }
@@ -42,7 +42,7 @@ resource "aws_ssm_parameter" "django_allowed_hosts" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_HOSTS"
   tags        = var.common_tags
   type        = "String"
-  value       = var.allowed_hosts
+  value       = var.django_allowed_hosts
 
   lifecycle {
     ignore_changes = [value]
@@ -54,11 +54,19 @@ resource "aws_ssm_parameter" "django_allowed_origins" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_ORIGINS"
   tags        = var.common_tags
   type        = "String"
-  value       = var.allowed_origins
+  value       = var.django_allowed_origins
 
   lifecycle {
     ignore_changes = [value]
   }
+}
+
+resource "aws_ssm_parameter" "django_aws_storage_bucket_name" {
+  description = "The S3 bucket name for Django static files."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_AWS_STORAGE_BUCKET_NAME"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.django_aws_static_bucket_name
 }
 
 resource "aws_ssm_parameter" "django_configuration" {
@@ -66,20 +74,19 @@ resource "aws_ssm_parameter" "django_configuration" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_CONFIGURATION"
   tags        = var.common_tags
   type        = "String"
-  value       = var.configuration
+  value       = var.django_configuration
 
   lifecycle {
     ignore_changes = [value]
   }
 }
 
-
 resource "aws_ssm_parameter" "django_db_host" {
   description = "The hostname of the database."
   name        = "/${var.project_name}/${var.environment}/DJANGO_DB_HOST"
   tags        = var.common_tags
   type        = "String"
-  value       = var.db_host
+  value       = var.django_db_host
 }
 
 resource "aws_ssm_parameter" "django_db_name" {
@@ -87,7 +94,7 @@ resource "aws_ssm_parameter" "django_db_name" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_DB_NAME"
   tags        = var.common_tags
   type        = "String"
-  value       = var.db_name
+  value       = var.django_db_name
 }
 
 resource "aws_ssm_parameter" "django_db_port" {
@@ -95,7 +102,7 @@ resource "aws_ssm_parameter" "django_db_port" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_DB_PORT"
   tags        = var.common_tags
   type        = "String"
-  value       = var.db_port
+  value       = var.django_db_port
 }
 
 resource "aws_ssm_parameter" "django_db_user" {
@@ -103,7 +110,41 @@ resource "aws_ssm_parameter" "django_db_user" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_DB_USER"
   tags        = var.common_tags
   type        = "String"
-  value       = var.db_user
+  value       = var.django_db_user
+}
+
+resource "aws_ssm_parameter" "django_github_app_id" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "Django GitHub App ID."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_GITHUB_APP_ID"
+  tags        = var.common_tags
+  type        = "String"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "django_github_app_installation_id" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "Django GitHub App installation ID."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_GITHUB_APP_INSTALLATION_ID"
+  tags        = var.common_tags
+  type        = "String"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "django_release_version" {
+  description = "Django Release version."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_RELEASE_VERSION"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.django_release_version
 }
 
 resource "aws_ssm_parameter" "django_open_ai_secret_key" {
@@ -123,7 +164,7 @@ resource "aws_ssm_parameter" "django_redis_host" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_HOST"
   tags        = var.common_tags
   type        = "String"
-  value       = var.redis_host
+  value       = var.django_redis_host
 }
 
 resource "aws_ssm_parameter" "django_redis_use_tls" {
@@ -131,7 +172,7 @@ resource "aws_ssm_parameter" "django_redis_use_tls" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_USE_TLS"
   tags        = var.common_tags
   type        = "String"
-  value       = tostring(var.redis_use_tls)
+  value       = tostring(var.django_redis_use_tls)
 }
 
 resource "aws_ssm_parameter" "django_secret_key" {
@@ -147,7 +188,7 @@ resource "aws_ssm_parameter" "django_settings_module" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_SETTINGS_MODULE"
   tags        = var.common_tags
   type        = "String"
-  value       = var.settings_module
+  value       = var.django_settings_module
 
   lifecycle {
     ignore_changes = [value]
@@ -191,12 +232,37 @@ resource "aws_ssm_parameter" "django_slack_signing_secret" {
   }
 }
 
+resource "aws_ssm_parameter" "github_token" {
+  description = "GitHub Personal Access Token for GitHub API authentication."
+  name        = "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "nest_github_app_private_key" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "GitHub App private key."
+  name        = "/${var.project_name}/${var.environment}/NEST_GITHUB_APP_PRIVATE_KEY"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "next_server_csrf_url" {
   description = "The server-side CSRF URL for Next.js SSR."
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_CSRF_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = var.server_csrf_url
+  value       = var.next_server_csrf_url
 }
 
 resource "aws_ssm_parameter" "next_server_disable_ssr" {
@@ -240,7 +306,7 @@ resource "aws_ssm_parameter" "next_server_graphql_url" {
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_GRAPHQL_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = var.server_graphql_url
+  value       = var.next_server_graphql_url
 }
 
 resource "aws_ssm_parameter" "nextauth_secret" {
@@ -262,6 +328,20 @@ resource "aws_ssm_parameter" "nextauth_url" {
     ignore_changes = [value]
   }
 }
+
+resource "aws_ssm_parameter" "slack_bot_token" {
+  count       = var.enable_additional_parameters ? 1 : 0
+  description = "Slack bot token."
+  name        = "/${var.project_name}/${var.environment}/SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 
 resource "random_string" "django_secret_key" {
   length  = 50

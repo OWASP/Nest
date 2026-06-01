@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import type { ContributionStats as ContributionStatsData } from 'utils/contributionDataUtils'
 import ContributionStats from 'components/ContributionStats'
 
 describe('ContributionStats', () => {
@@ -91,15 +92,8 @@ describe('ContributionStats', () => {
       expect(screen.getAllByText('0')).toHaveLength(4) // All stats should show 0
     })
 
-    it('handles null stats gracefully', () => {
-      render(<ContributionStats title="Null Stats" stats={null as unknown as typeof mockStats} />)
-
-      expect(screen.getByText('Null Stats')).toBeInTheDocument()
-      expect(screen.getAllByText('0')).toHaveLength(4) // All stats should show 0
-    })
-
     it('handles empty object stats', () => {
-      render(<ContributionStats title="Empty Stats" stats={{} as typeof mockStats} />)
+      render(<ContributionStats title="Empty Stats" stats={{} as ContributionStatsData} />)
 
       expect(screen.getByText('Empty Stats')).toBeInTheDocument()
       expect(screen.getAllByText('0')).toHaveLength(4) // All stats should show 0
@@ -112,7 +106,9 @@ describe('ContributionStats', () => {
         commits: 100,
       }
 
-      render(<ContributionStats title="Partial Stats" stats={partialStats as typeof mockStats} />)
+      render(
+        <ContributionStats title="Partial Stats" stats={partialStats as ContributionStatsData} />
+      )
 
       // Verify commits value
       expect(screen.getByText('100')).toBeInTheDocument()
@@ -128,7 +124,9 @@ describe('ContributionStats', () => {
         total: 75,
       }
 
-      render(<ContributionStats title="Mixed Stats" stats={partialStats as typeof mockStats} />)
+      render(
+        <ContributionStats title="Mixed Stats" stats={partialStats as ContributionStatsData} />
+      )
 
       expect(screen.getByText('50')).toBeInTheDocument() // commits
       expect(screen.getByText('25')).toBeInTheDocument() // issues

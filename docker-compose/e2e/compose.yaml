@@ -1,37 +1,39 @@
 services:
   backend:
-    container_name: e2e-nest-backend
+    build:
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile
     command: >
       sh -c '
         python manage.py migrate &&
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
-    build:
-      context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile
+    container_name: e2e-nest-backend
     depends_on:
       db:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../../backend/.env.e2e.example
-    networks:
-      - e2e-nest-network
-    ports:
-      - 9000:9000
+    env_file: ../../backend/.env.e2e-tests
     healthcheck:
       interval: 10s
       retries: 10
       test: >
         sh -c '
-          wget --spider http://backend:9000/a/
+          wget --spider http://backend:9000/status/
         '
       timeout: 10s
       start_period: 5s
+    networks:
+      - e2e-nest-network
+    ports:
+      - 9000:9000
+    volumes:
+      - ../../backend/data:/home/owasp/data
 
   data-loader:
     container_name: e2e-nest-data-loader
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
     depends_on:
       db:
         condition: service_healthy
@@ -53,7 +55,7 @@ services:
       '
   db:
     container_name: e2e-nest-db
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
     environment:
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
       POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
@@ -76,7 +78,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
       '
     container_name: e2e-nest-cache
-    image: redis:8.6-alpine3.23
+    image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-e2e-password}
     healthcheck:
@@ -89,21 +91,49 @@ services:
     volumes:
       - e2e-cache-data:/data
 
-  e2e-tests:
-    container_name: e2e-nest-tests
+  frontend:
     build:
       context: ../../frontend
-      dockerfile: ../docker/frontend/Dockerfile.e2e.test
-    command: >
-      sh -c '
-        pnpm run test:e2e
-      '
+      dockerfile: ../docker/frontend/Dockerfile
+      args:
+        ENV_FILE: .env.e2e
+        NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://backend:9000
+        NEXT_SERVER_CSRF_URL: http://backend:9000/csrf/
+        NEXT_SERVER_GRAPHQL_URL: http://backend:9000/graphql/
+    container_name: e2e-nest-frontend
     depends_on:
       backend:
         condition: service_healthy
-    env_file: ../../frontend/.env.e2e.example
+    env_file: ../../frontend/.env.e2e
+    healthcheck:
+      interval: 5s
+      retries: 10
+      start_period: 20s
+      test: >
+        sh -c '
+          wget --spider http://0.0.0.0:3000/api/health
+        '
+      timeout: 5s
     networks:
       - e2e-nest-network
+    ports:
+      - 3500:3000
+
+  e2e-tests:
+    build:
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile
+    container_name: e2e-nest-tests
+    command: ${E2E_TEST_COMMAND:-sh -c "pnpm run test:e2e"}
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      - FRONTEND_URL=http://frontend:3000
+    networks:
+      - e2e-nest-network
+    ports:
+      - 3800:3800
 
 networks:
   e2e-nest-network:

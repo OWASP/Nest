@@ -70,18 +70,25 @@ export default function CommunityPage() {
         <SecondaryCard title="Ways to Engage">
           <div className="grid gap-6 md:grid-cols-2">
             {engagementWays.map((way) => (
-              <div key={way.title} className="rounded-lg bg-gray-200 p-5 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <Link
+                className="group rounded-lg bg-gray-200 p-5 transition-all duration-300 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-gray-600"
+                href={way.href}
+                key={way.title}
+                rel={way.href.startsWith('https') ? 'noopener noreferrer' : undefined}
+                target={way.href.startsWith('https') ? '_blank' : undefined}
+              >
+                <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {way.title}
+                  <FaChevronRight className="h-3 w-3 transform transition-transform group-hover:translate-x-1" />
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{way.description}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </SecondaryCard>
 
         {/* Community Journey Section */}
-        <SecondaryCard title="Your Community Journey">
+        <SecondaryCard>
           <div className="relative">
             {/* Desktop view - horizontal */}
             <div className="hidden items-center justify-between md:flex">
@@ -119,7 +126,7 @@ export default function CommunityPage() {
         </SecondaryCard>
 
         {/* Join the Community Section */}
-        <SecondaryCard title="Join the Community">
+        <SecondaryCard>
           <div className="mx-auto max-w-2xl text-center">
             <div className="mb-6 inline-flex rounded-full bg-blue-50 p-4 dark:bg-blue-900/20">
               <FaSlack className="h-8 w-8 text-blue-500" aria-hidden="true" />

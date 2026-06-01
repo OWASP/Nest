@@ -1,0 +1,91 @@
+export type ValidationErrors = Record<string, string>
+
+interface GraphQLErrorLike {
+  message: string
+  extensions?: Record<string, unknown>
+}
+
+function getGraphQLErrors(error: unknown): GraphQLErrorLike[] | null {
+  if (typeof error !== 'object' || error === null) return null
+
+  let candidates: unknown[] | null = null
+  if ('errors' in error && Array.isArray((error as { errors: unknown }).errors)) {
+    candidates = (error as { errors: unknown[] }).errors
+  } else if (
+    'graphQLErrors' in error &&
+    Array.isArray((error as { graphQLErrors: unknown }).graphQLErrors)
+  ) {
+    candidates = (error as { graphQLErrors: unknown[] }).graphQLErrors
+  }
+
+  if (!candidates || candidates.length === 0) return null
+
+  const gqlErrors = candidates.filter(
+    (item): item is GraphQLErrorLike =>
+      typeof item === 'object' &&
+      item !== null &&
+      typeof (item as GraphQLErrorLike).message === 'string'
+  )
+
+  return gqlErrors.length > 0 ? gqlErrors : null
+}
+
+export function extractGraphQLErrors(error: unknown): {
+  validationErrors: ValidationErrors
+  hasValidationErrors: boolean
+  unmappedErrors: string[]
+} {
+  const validationErrors: ValidationErrors = {}
+  const unmappedErrors: string[] = []
+
+  const gqlErrors = getGraphQLErrors(error)
+  if (gqlErrors) {
+    for (const gqlError of gqlErrors) {
+      const extensions = gqlError.extensions as { code?: string; field?: unknown } | undefined
+      if (extensions?.code === 'VALIDATION_ERROR' && typeof extensions.field === 'string') {
+        validationErrors[extensions.field] = gqlError.message
+      } else {
+        unmappedErrors.push(gqlError.message)
+      }
+    }
+  } else if (error instanceof Error && error.message) {
+    unmappedErrors.push(error.message)
+  }
+
+  const hasValidationErrors = Object.keys(validationErrors).length > 0
+  return { validationErrors, hasValidationErrors, unmappedErrors }
+}
+
+/** True when GraphQL errors include extensions.code FORBIDDEN (e.g. mentorship management ACL). */
+export function isForbiddenGraphQLError(error: unknown): boolean {
+  const gqlErrors = getGraphQLErrors(error)
+  return (
+    gqlErrors?.some((e) => (e.extensions as { code?: string } | undefined)?.code === 'FORBIDDEN') ??
+    false
+  )
+}
+
+const ACCESS_DENIED_GQL_CODES = new Set(['UNAUTHENTICATED', 'AUTHENTICATION_REQUIRED'])
+
+/** True for auth/forbidden signals (GraphQL ACL, auth codes, or HTTP 401/403 on networkError). */
+export function isAccessDeniedGraphQLError(error: unknown): boolean {
+  if (isForbiddenGraphQLError(error)) return true
+
+  const gqlErrors = getGraphQLErrors(error)
+  if (
+    gqlErrors?.some((e) =>
+      ACCESS_DENIED_GQL_CODES.has(
+        String((e.extensions as { code?: string } | undefined)?.code ?? '')
+      )
+    )
+  ) {
+    return true
+  }
+
+  if (typeof error === 'object' && error !== null && 'networkError' in error) {
+    const status = (error as { networkError?: { statusCode?: number } }).networkError?.statusCode
+    if (status === 401 || status === 403) return true
+  }
+
+  return false
+}

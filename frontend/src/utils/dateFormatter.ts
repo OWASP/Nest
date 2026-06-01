@@ -1,16 +1,10 @@
-export const formatDate = (input: number | string) => {
-  if (!input) {
+export const formatDate = (input: string | null) => {
+  if (input === null || input === '') {
     return ''
   }
 
-  const date =
-    typeof input === 'number'
-      ? new Date(input * 1000) // Unix timestamp in seconds
-      : new Date(input) // ISO date string
-
-  if (Number.isNaN(date.getTime())) {
-    throw new TypeError('Invalid date')
-  }
+  const date = new Date(input)
+  if (Number.isNaN(date.getTime())) return ''
 
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -20,12 +14,12 @@ export const formatDate = (input: number | string) => {
   })
 }
 
-export const formatDateRange = (startDate: number | string, endDate: number | string) => {
-  const start = typeof startDate === 'number' ? new Date(startDate * 1000) : new Date(startDate)
-  const end = typeof endDate === 'number' ? new Date(endDate * 1000) : new Date(endDate)
+export const formatDateRange = (startDate: string, endDate: string) => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new TypeError('Invalid date')
+    return ''
   }
 
   if (
@@ -62,12 +56,12 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   }
 }
 
-export const formatDateForInput = (dateStr: string | number) => {
-  if (!dateStr) return ''
-  const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr)
-  if (Number.isNaN(date.getTime())) {
-    throw new TypeError('Invalid date')
-  }
+export const formatDateForInput = (input: string | null) => {
+  if (!input) return ''
+
+  const date = new Date(input)
+  if (Number.isNaN(date.getTime())) return ''
+
   return date.toISOString().slice(0, 10)
 }
 

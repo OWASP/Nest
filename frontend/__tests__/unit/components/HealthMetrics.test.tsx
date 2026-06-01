@@ -150,7 +150,6 @@ describe('HealthMetrics', () => {
           projectKey: 'null-project',
         },
       ]
-      // @ts-expect-error - testing specific edge case with mocked data
       render(<HealthMetrics data={nullData} />)
 
       const lineCharts = screen.getAllByTestId('LineChart')

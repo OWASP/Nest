@@ -551,4 +551,138 @@ describe('<IssuesTable />', () => {
       expect(screen.getByText('+1 more')).toBeInTheDocument()
     })
   })
+
+  describe('Deadline Column', () => {
+    it('shows deadline column when showDeadline is true', () => {
+      render(<IssuesTable {...defaultProps} showDeadline={true} />)
+      expect(screen.getByText('Deadline')).toBeInTheDocument()
+    })
+
+    it('hides deadline column when showDeadline is false', () => {
+      render(<IssuesTable {...defaultProps} showDeadline={false} />)
+      expect(screen.queryByText('Deadline')).not.toBeInTheDocument()
+    })
+
+    it('shows "No Deadline" when deadline is null', () => {
+      const issueWithoutDeadline: IssueRow = {
+        objectID: '11',
+        number: 134,
+        title: 'No Deadline Issue',
+        state: 'open',
+        labels: [],
+        deadline: null,
+      }
+      render(<IssuesTable issues={[issueWithoutDeadline]} showDeadline={true} />)
+      const noDeadlineElements = screen.getAllByText('No Deadline')
+      expect(noDeadlineElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "No Deadline" when deadline is undefined', () => {
+      const issueWithoutDeadline: IssueRow = {
+        objectID: '12',
+        number: 135,
+        title: 'Undefined Deadline Issue',
+        state: 'open',
+        labels: [],
+        deadline: undefined,
+      }
+      render(<IssuesTable issues={[issueWithoutDeadline]} showDeadline={true} />)
+      const noDeadlineElements = screen.getAllByText('No Deadline')
+      expect(noDeadlineElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Overdue" when deadline is in the past', () => {
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 5)
+      const issueWithPastDeadline: IssueRow = {
+        objectID: '13',
+        number: 136,
+        title: 'Overdue Issue',
+        state: 'open',
+        labels: [],
+        deadline: pastDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithPastDeadline]} showDeadline={true} />)
+      const overdueElements = screen.getAllByText('Overdue')
+      expect(overdueElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Due Soon" when deadline is within 7 days', () => {
+      const soonDate = new Date()
+      soonDate.setDate(soonDate.getDate() + 3)
+      const issueWithSoonDeadline: IssueRow = {
+        objectID: '14',
+        number: 137,
+        title: 'Due Soon Issue',
+        state: 'open',
+        labels: [],
+        deadline: soonDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithSoonDeadline]} showDeadline={true} />)
+      const dueSoonElements = screen.getAllByText('Due Soon')
+      expect(dueSoonElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Due Soon" when deadline is exactly 7 days away', () => {
+      const sevenDaysDate = new Date()
+      sevenDaysDate.setDate(sevenDaysDate.getDate() + 7)
+      const issueWith7DaysDeadline: IssueRow = {
+        objectID: '15',
+        number: 138,
+        title: 'Seven Days Issue',
+        state: 'open',
+        labels: [],
+        deadline: sevenDaysDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWith7DaysDeadline]} showDeadline={true} />)
+      const dueSoonElements = screen.getAllByText('Due Soon')
+      expect(dueSoonElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Upcoming" when deadline is more than 7 days away', () => {
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 10)
+      const issueWithFutureDeadline: IssueRow = {
+        objectID: '16',
+        number: 139,
+        title: 'Upcoming Issue',
+        state: 'open',
+        labels: [],
+        deadline: futureDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithFutureDeadline]} showDeadline={true} />)
+      const upcomingElements = screen.getAllByText('Upcoming')
+      expect(upcomingElements.length).toBeGreaterThan(0)
+    })
+
+    it('renders deadline status in mobile view', () => {
+      const soonDate = new Date()
+      soonDate.setDate(soonDate.getDate() + 2)
+      const issueWithDeadline: IssueRow = {
+        objectID: '17',
+        number: 140,
+        title: 'Deadline Mobile Issue',
+        state: 'open',
+        labels: [],
+        deadline: soonDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithDeadline]} showDeadline={true} />)
+      const dueSoonElements = screen.getAllByText('Due Soon')
+      expect(dueSoonElements.length).toBeGreaterThan(0)
+    })
+
+    it('calculates correct column count with deadline column', () => {
+      render(<IssuesTable issues={[]} showAssignee={true} showDeadline={true} />)
+      const table = screen.getByRole('table')
+      const headers = within(table).getAllByRole('columnheader')
+      expect(headers).toHaveLength(5)
+    })
+
+    it('calculates correct column count without assignee but with deadline', () => {
+      render(<IssuesTable issues={[]} showAssignee={false} showDeadline={true} />)
+      const table = screen.getByRole('table')
+      const headers = within(table).getAllByRole('columnheader')
+      expect(headers).toHaveLength(4)
+    })
+  })
 })

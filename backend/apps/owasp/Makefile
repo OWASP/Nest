@@ -1,3 +1,7 @@
+owasp-add-project-custom-tags:
+	@echo "Adding project custom tags from $(FILE)"
+	@CMD="python manage.py add_project_custom_tags $(FILE)" $(MAKE) exec-backend-command
+
 owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command

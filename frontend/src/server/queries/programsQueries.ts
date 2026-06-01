@@ -42,6 +42,96 @@ export const GET_PROGRAM_DETAILS = gql`
     }
   }
 `
+
+export const GET_MANAGEMENT_PROGRAM_DETAILS = gql`
+  query GetManagementProgramDetails($programKey: String!) {
+    managementProgram(programKey: $programKey) {
+      id
+      key
+      name
+      description
+      status
+      menteesLimit
+      experienceLevels
+      startedAt
+      endedAt
+      domains
+      tags
+      admins {
+        id
+        login
+        name
+        avatarUrl
+      }
+    }
+  }
+`
+export const GET_MANAGEMENT_PROGRAM_AND_MODULES = gql`
+  query GetManagementProgramAndModules($programKey: String!) {
+    managementProgram(programKey: $programKey) {
+      id
+      key
+      name
+      description
+      status
+      menteesLimit
+      experienceLevels
+      startedAt
+      endedAt
+      domains
+      tags
+      admins {
+        id
+        login
+        name
+        avatarUrl
+      }
+      recentMilestones {
+        id
+        title
+        state
+        openIssuesCount
+        closedIssuesCount
+        createdAt
+        repositoryName
+        organizationName
+        url
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
+    }
+    managementProgramModules(programKey: $programKey) {
+      id
+      key
+      name
+      description
+      experienceLevel
+      order
+      startedAt
+      endedAt
+      domains
+      tags
+      labels
+      mentors {
+        id
+        login
+        name
+        avatarUrl
+      }
+      mentees {
+        id
+        login
+        name
+        avatarUrl
+      }
+    }
+  }
+`
+
 export const GET_PROGRAM_AND_MODULES = gql`
   query GetProgramAndModules($programKey: String!) {
     getProgram(programKey: $programKey) {
@@ -86,6 +176,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
       name
       description
       experienceLevel
+      order
       startedAt
       endedAt
       domains
@@ -107,9 +198,9 @@ export const GET_PROGRAM_AND_MODULES = gql`
   }
 `
 
-export const GET_PROGRAM_ADMIN_DETAILS = gql`
-  query GetProgramAdminDetails($programKey: String!) {
-    getProgram(programKey: $programKey) {
+export const GET_MANAGEMENT_PROGRAM_ADMIN_DETAILS = gql`
+  query GetManagementProgramAdminDetails($programKey: String!) {
+    managementProgram(programKey: $programKey) {
       id
       key
       name

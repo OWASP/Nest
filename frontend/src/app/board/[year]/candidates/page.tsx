@@ -24,12 +24,6 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 dayjs.extend(relativeTime)
 
-const sortByName = <T extends { name: string }>(items: T[]): T[] =>
-  [...items].sort((a, b) => a.name.localeCompare(b.name))
-
-const sortByCount = (entries: Array<[string, number]>): Array<[string, number]> =>
-  [...entries].sort(([, a], [, b]) => b - a)
-
 type Candidate = {
   id: string
   memberName: string
@@ -39,8 +33,8 @@ type Candidate = {
     __typename?: string
     avatarUrl: string
     bio: string
-    createdAt: number
-    firstOwaspContributionAt: number | null
+    createdAt: string
+    firstOwaspContributionAt: string | null
     id: string
     isFormerOwaspStaff: boolean
     isGsocMentor: boolean
@@ -98,10 +92,25 @@ interface CandidateCardProps {
 
 const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
   const client = useApolloClient()
+  const [snapshot, setSnapshot] = useState<MemberSnapshot | null>(null)
   const [ledChapters, setLedChapters] = useState<Chapter[]>([])
   const [ledProjects, setLedProjects] = useState<Project[]>([])
 
-  // Render a single channel link item
+  const sortByName = <T extends { name: string }>(items: T[]): T[] => {
+    return [...items].sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  const sortByContributionCount = (entries: Array<[string, number]>): Array<[string, number]> => {
+    return [...entries].sort(([, a], [, b]) => b - a)
+  }
+
+  const sortChannelsByMessageCount = (
+    entries: Array<[string, number]>
+  ): Array<[string, number]> => {
+    return [...entries].sort(([, a], [, b]) => b - a)
+  }
+
+  // Render a single repository link item
   const renderChannelLink = (channelName: string, messageCount: string | number) => (
     <a
       key={channelName}
@@ -157,7 +166,9 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
       )
     }
 
-    const sortedChannels = sortByCount(Object.entries(snapshot.channelCommunications))
+    const sortedChannels = sortChannelsByMessageCount(
+      Object.entries(snapshot.channelCommunications)
+    )
 
     if (sortedChannels.length === 0) return null
 
@@ -187,7 +198,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
           <div>
             <div className="flex flex-wrap gap-2">
               {sortedChannels
-                .slice(1)
+                .slice(1, 5)
                 .map(([channelName, messageCount]) => renderChannelLink(channelName, messageCount))}
             </div>
           </div>
@@ -202,8 +213,12 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
     },
     skip: !candidate.member?.login,
   })
-  // Derive snapshot directly from the query result to avoid an extra render
-  const snapshot: MemberSnapshot | null = snapshotData?.memberSnapshot ?? null
+
+  useEffect(() => {
+    if (snapshotData?.memberSnapshot) {
+      setSnapshot(snapshotData.memberSnapshot)
+    }
+  }, [snapshotData])
 
   // Fetch chapters based on chapterContributions keys
   useEffect(() => {
@@ -276,7 +291,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
   return (
     <Button
       onPress={handleCardClick}
-      className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-102 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+      className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full items-start gap-4">
         {candidate.member?.avatarUrl && (
@@ -330,11 +345,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
               GitHub account created{' '}
               <span className="font-semibold text-gray-800 dark:text-gray-300">
-                {dayjs(
-                  typeof candidate.member.createdAt === 'number'
-                    ? candidate.member.createdAt * 1000
-                    : candidate.member.createdAt
-                ).fromNow()}
+                {dayjs(candidate.member.createdAt).fromNow()}
               </span>{' '}
               - {formatDate(candidate.member.createdAt)}
             </p>
@@ -343,7 +354,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             <p className="truncate text-sm text-gray-600 dark:text-gray-400">
               First OWASP contribution made nearly{' '}
               <span className="font-semibold text-gray-800 dark:text-gray-300">
-                {dayjs(candidate.member.firstOwaspContributionAt * 1000).fromNow()}
+                {dayjs(candidate.member.firstOwaspContributionAt).fromNow()}
               </span>{' '}
               - {formatDate(candidate.member.firstOwaspContributionAt)}
             </p>
@@ -462,7 +473,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             </h4>
             {ledChapters.length === 0 && ledProjects.length === 0 ? (
               <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
-                No chapters or projects are led by this candidate
+                No chapters or projects are lead by this candidate
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -547,7 +558,9 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
           {snapshot.repositoryContributions &&
             Object.keys(snapshot.repositoryContributions).length > 0 &&
             (() => {
-              const sortedRepos = sortByCount(Object.entries(snapshot.repositoryContributions))
+              const sortedRepos = sortByContributionCount(
+                Object.entries(snapshot.repositoryContributions)
+              )
               const topRepo = sortedRepos[0]
               const [topRepoName, topRepoCount] = topRepo
 
@@ -574,7 +587,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                     <div>
                       <div className="flex flex-wrap gap-2">
                         {sortedRepos
-                          .slice(1, 5)
+                          .slice(1)
                           .map(([repoName, count]) => renderRepositoryLink(repoName, count))}
                       </div>
                     </div>
@@ -657,7 +670,7 @@ const BoardCandidatesPage = () => {
     variables: { year: Number.parseInt(year) },
   })
 
-  // Derive candidates directly from GraphQL data to avoid an extra render
+  // Derive candidates directly from GraphQL data to avoid an extra renders
   const candidates: CandidateWithSnapshot[] = graphQLData?.boardOfDirectors?.candidates ?? []
 
   // Keep reporting errors as a side-effect only

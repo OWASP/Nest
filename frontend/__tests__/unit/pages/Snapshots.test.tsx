@@ -27,14 +27,14 @@ const mockSnapshots = [
   {
     key: '2024-12',
     title: 'Snapshot 1',
-    startAt: '2023-01-01T00:00:00Z',
-    endAt: '2023-01-02T00:00:00Z',
+    startAt: '2023-01-01T00:00:00.000Z',
+    endAt: '2023-01-02T00:00:00.000Z',
   },
   {
     key: '2024-11',
     title: 'Snapshot 2',
-    startAt: '2022-12-01T00:00:00Z',
-    endAt: '2022-12-31T23:59:59Z',
+    startAt: '2022-12-01T00:00:00.000Z',
+    endAt: '2022-12-31T23:59:59.000Z',
   },
 ]
 
