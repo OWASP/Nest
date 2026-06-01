@@ -65,6 +65,8 @@ runs:
       shell: bash
 
     - name: Terraform Init
+      env:
+        TF_PLUGIN_CACHE_DIR: ${{ inputs.plugin-cache-dir }}
       run: terraform init -backend-config=terraform.tfbackend
       shell: bash
       working-directory: ${{ inputs.working-directory }}
