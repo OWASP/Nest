@@ -534,27 +534,9 @@ jobs:
       - deploy-staging-nest
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Run baseline scan
-        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25  # v0.15.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: https://nest.owasp.dev
-          allow_issue_writing: false
-          fail_action: true
-          cmd_options: -a -c .zapconfig -r report_html.html
-
-      - name: Upload report
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: zap-baseline-scan-report-${{ github.run_id }}
-          path: report_html.html
-    timeout-minutes: 5
+    uses: ./.github/workflows/run-zap-baseline-scan.yaml
+    with:
+      target_url: https://nest.owasp.dev
 
   build-production-images:
     name: Build Production Images
@@ -1003,24 +985,6 @@ jobs:
       - deploy-production-nest
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Run baseline scan
-        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25  # v0.15.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: https://nest.owasp.org
-          allow_issue_writing: false
-          fail_action: true
-          cmd_options: -a -c .zapconfig -r report_html.html
-
-      - name: Upload report
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: zap-baseline-scan-report-${{ github.run_id }}
-          path: report_html.html
-    timeout-minutes: 5
+    uses: ./.github/workflows/run-zap-baseline-scan.yaml
+    with:
+      target_url: https://nest.owasp.org
