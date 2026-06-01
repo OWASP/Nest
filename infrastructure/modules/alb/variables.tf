@@ -39,7 +39,7 @@ variable "environment" {
 variable "frontend_health_check_path" {
   description = "The health check path for the frontend target group."
   type        = string
-  default     = "/"
+  default     = "/api/health"
 }
 
 variable "frontend_port" {

@@ -20,11 +20,6 @@ ci:
       - any-glob-to-any-file:
           - .github/workflows/**
 
-deploy:
-  - changed-files:
-      - any-glob-to-any-file:
-          - .github/ansible/**
-
 docker:
   - changed-files:
       - any-glob-to-any-file:
@@ -46,6 +41,11 @@ frontend-tests:
       - any-glob-to-any-file:
           - frontend/__tests__/**
 
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - infrastructure/**
+
 makefile:
   - changed-files:
       - any-glob-to-any-file:
@@ -60,8 +60,3 @@ nestbot-tests:
   - changed-files:
       - any-glob-to-any-file:
           - backend/tests/unit/apps/slack/**
-
-nginx:
-  - changed-files:
-      - any-glob-to-any-file:
-          - nginx/**

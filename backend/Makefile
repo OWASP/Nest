@@ -5,15 +5,9 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
+.PHONY: audit-backend-dependencies fetch-nest-dump sbom-backend-image upload-nest-dump
+
 ##@ Backend
-
-ifeq ($(EXEC_MODE),direct)
-SHELL := /bin/sh
-else
-SHELL := /bin/bash
-endif
-
-.PHONY: sbom-backend-image
 
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
@@ -96,9 +90,12 @@ collect-static:
 django-shell: ## Open Django interactive shell
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
-dump-data: ## Dump database data
+dump-data: ## Write masked database dump to backend/data/nest.dump (no S3 upload)
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
+
+upload-nest-dump: ## Upload backend/data/nest.dump to shared S3 (host AWS creds; poetry run)
+	@cd backend && poetry run python -m scripts.upload_nest_dump
 
 enrich-data: ## Enrich data from external sources
 enrich-data: \
@@ -117,19 +114,27 @@ index-data: ## Index data for Algolia search
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data: ## Load initial data from fixtures
+fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
+	@DOCKER_BUILDKIT=1 docker compose \
+		-f docker-compose/e2e/compose.yaml \
+		run \
+		--no-deps \
+		--rm \
+		backend python -m scripts.fetch_nest_dump
+
+load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
 
-load-data-e2e:
+load-data-e2e: fetch-nest-dump
 	@echo "Loading Nest e2e data"
 	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) exec-db-command-e2e
 
-load-data-fuzz:
+load-data-fuzz: fetch-nest-dump
 	@echo "Loading Nest fuzz data"
 	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
-load-data-staging:
+load-data-staging: fetch-nest-dump
 	@echo "Loading Nest staging data"
 	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
@@ -230,11 +235,11 @@ test-backend: ## Run backend tests
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f docker/backend/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.unit-tests backend \
 		-t nest-test-backend
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
-		--env-file backend/.env.example \
+		--env-file backend/.env.unit-tests \
 		--rm nest-test-backend pytest
 
 test-fuzz: ## Run fuzz tests (REST API and GraphQL)
@@ -248,6 +253,12 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
+
+audit-backend-dependencies: ## Audit backend Python dependencies
+	@echo "Auditing backend Python dependencies..."
+	@command -v pip-audit >/dev/null 2>&1 || python -m pip install -q pip-audit
+	@cd backend && poetry export -f requirements.txt --without-hashes --all-groups | \
+		pip-audit -r /dev/stdin
 
 update-backend-dependencies:
 	@cd backend && poetry update

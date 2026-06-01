@@ -13,7 +13,9 @@ describe.each([
   })
   it('should not have any accessibility violations', async () => {
     const mockItems = Array.from({ length: 15 }, (_, i) => `Item ${i + 1}`)
-    const { container } = render(<ToggleableList items={mockItems} label="test-label" />)
+    const { container } = render(
+      <ToggleableList entityKey="toggle-a11y" items={mockItems} label="test-label" />
+    )
 
     const results = await axe(container)
 

@@ -15,7 +15,6 @@ import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import type { ContributionStats } from 'utils/contributionDataUtils'
-import type { CardType } from 'components/CardDetailsPage'
 
 export type CardProps = {
   button: Button
@@ -38,7 +37,7 @@ export type CardProps = {
   url: string
 }
 
-type Stats = {
+export type Stats = {
   icon: IconType
   pluralizedName?: string
   unit?: string
@@ -76,6 +75,9 @@ export interface DetailsCardProps {
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
   modules?: Module[]
+  onLoadMorePullRequests?: () => void
+  onResetPullRequests?: () => void
+  isFetchingMore?: boolean
   showAvatar?: boolean
   socialLinks?: string[]
   stats?: Stats[]
@@ -84,7 +86,6 @@ export interface DetailsCardProps {
   topContributors?: Contributor[]
   topics?: string[]
   tags?: string[]
-  type: CardType
   userSummary?: JSX.Element
 }
 

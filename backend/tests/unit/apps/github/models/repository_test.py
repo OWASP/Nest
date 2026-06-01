@@ -166,6 +166,26 @@ class TestRepositoryFromGithub:
 
         assert repository.languages == {"Python": 30.0, "JavaScript": 60.0, "HTML": 10.0}
 
+    def test_from_github_calculates_languages_skips_non_int_values(self, gh_repository_setup):
+        """Ignore non-integer entries (e.g. API ``url``) when computing percentages."""
+        languages = {
+            "Python": 300,
+            "Shell": 100,
+            "url": "https://api.github.com/repos/OWASP/nest-sdk-python/languages",
+        }
+        repository = Repository()
+        repository.from_github(gh_repository_setup, languages=languages)
+
+        assert repository.languages == {"Python": 75.0, "Shell": 25.0}
+
+    def test_from_github_languages_empty_when_no_int_byte_counts(self, gh_repository_setup):
+        """If nothing is an int byte count, store an empty map (no division by zero)."""
+        languages = {"Python": "300", "Go": None, "url": "https://example.com"}
+        repository = Repository()
+        repository.from_github(gh_repository_setup, languages=languages)
+
+        assert repository.languages == {}
+
     def test_from_github_with_compliant_funding_yml(self, gh_repository_setup):
         """Test that from_github correctly identifies a compliant FUNDING.yml file."""
         funding_yml_content = (

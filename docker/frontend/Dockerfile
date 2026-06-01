@@ -1,4 +1,4 @@
-FROM node:24.14-alpine3.23 AS base
+FROM node:24.16-alpine3.23@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -9,6 +9,8 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
     COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
     PNPM_HOME="/pnpm"
 
 ARG ENV_FILE=.env
@@ -21,17 +23,17 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && \
-    apk add --no-cache libc6-compat
+    apk --no-cache update && \
+    apk --no-cache add libc6-compat
 
 WORKDIR /app
 
-COPY --chmod=444 package.json pnpm-lock.yaml ./
+COPY --chmod=444 package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile
 
-COPY --chmod=444 .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
 COPY --chmod=444 ${ENV_FILE} ./.env
 COPY --chmod=555 public public
 COPY --chmod=555 src src
@@ -56,7 +58,7 @@ FROM base AS runner
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-RUN apk update && apk upgrade --no-cache
+RUN apk --no-cache update && apk --no-cache upgrade
 
 WORKDIR /tmp
 

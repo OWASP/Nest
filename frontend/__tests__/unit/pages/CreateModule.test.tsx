@@ -59,7 +59,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
         },
       },
@@ -167,7 +167,7 @@ describe('CreateModulePage', () => {
       status: 'unauthenticated',
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { getProgram: { admins: [] } },
+      data: { managementProgram: { admins: [] } },
       loading: false,
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -185,7 +185,7 @@ describe('CreateModulePage', () => {
       status: 'authenticated',
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { getProgram: null },
+      data: { managementProgram: null },
       loading: false,
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -206,7 +206,7 @@ describe('CreateModulePage', () => {
       })
       ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: {
-          getProgram: {
+          managementProgram: {
             admins: [{ login: 'admin-user' }],
           },
         },
@@ -238,7 +238,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',
@@ -264,7 +264,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',
@@ -316,7 +316,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',

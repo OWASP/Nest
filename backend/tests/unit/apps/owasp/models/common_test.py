@@ -599,7 +599,7 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
 * [Other](https://other.com)"""
 
         def side_effect_urlparse(url):
-            if "other.com" in url:
+            if original_urlparse(url).netloc == "other.com":
                 msg = "forced error"
                 raise ValueError(msg)
             return original_urlparse(url)
@@ -610,7 +610,7 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         ):
             urls = model.get_urls(domain="example.com")
 
-        assert "https://example.com" in urls
+        assert urls == ["https://example.com"]
 
     def test_github_file_urls_no_repository(self):
         """Test file URLs return None when no repository is linked."""

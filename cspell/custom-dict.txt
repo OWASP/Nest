@@ -58,6 +58,7 @@ SEO
 SLF
 SRE
 Sivagangai
+SnowFROC
 Sonarqube
 Stegen
 T04T40NHX
@@ -201,6 +202,7 @@ repositorycontributor
 requirepass
 rqworker
 rsc
+rudransh
 saft
 sakanashi
 samm
@@ -208,6 +210,7 @@ sbom
 schemathesis
 semgrep
 seo
+shrivastava
 skillstruck
 slackbot
 slideshare
@@ -224,6 +227,7 @@ trivyignores
 tsc
 unassigning
 unhover
+unrs
 usefixtures
 vcodec
 webgoat
