@@ -1,5 +1,5 @@
-name: Apply Infrastructure as Code
-description: Run Terraform bootstrap steps for infrastructure
+name: Apply infrastructure changes
+description: Run IaC plan and apply steps
 
 inputs:
   plugin-cache-dir:
@@ -11,16 +11,16 @@ inputs:
     required: false
     default: Terraform Plan Output
   tfbackend-path:
-    description: Path to write terraform backend config
+    description: Path to write Terraform backend config
     required: true
   tfbackend-content:
-    description: Content for terraform backend config
+    description: Content for Terraform backend config
     required: true
   tfvars-path:
-    description: Path to write terraform variables
+    description: Path to write Terraform variables
     required: true
   tfvars-content:
-    description: Content for terraform variables
+    description: Content for Terraform variables
     required: true
   working-directory:
     description: Terraform working directory
@@ -43,10 +43,10 @@ runs:
     - name: Cache Terraform plugins
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
-        key: ${{ runner.os }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+        key: ${{ runner.os }}-infrastructure-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
         path: ${{ inputs.plugin-cache-dir }}
 
-    - name: Prepare terraform backend
+    - name: Prepare Terraform backend
       env:
         TF_BACKEND_CONTENT: ${{ inputs.tfbackend-content }}
         TF_BACKEND_PATH: ${{ inputs.tfbackend-path }}
@@ -55,7 +55,7 @@ runs:
         printf '%s\n' "$TF_BACKEND_CONTENT" > "$TF_BACKEND_PATH"
       shell: bash
 
-    - name: Prepare terraform variables
+    - name: Prepare Terraform variables
       env:
         TF_VARS_CONTENT: ${{ inputs.tfvars-content }}
         TF_VARS_PATH: ${{ inputs.tfvars-path }}
@@ -81,7 +81,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Show plan in summary
+    - name: Show plan summary
       env:
         SUMMARY_TITLE: ${{ inputs.summary-title }}
       run: |

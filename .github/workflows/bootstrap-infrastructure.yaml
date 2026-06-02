@@ -35,8 +35,8 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
 
-      - name: Apply infrastructure as code
-        uses: ./.github/actions/apply-infrastructure-as-code
+      - name: Apply infrastructure changes
+        uses: ./.github/actions/apply-infrastructure-changes
         with:
           plugin-cache-dir: ${{ env.TF_PLUGIN_CACHE_DIR }}
           summary-title: Bootstrap Terraform Plan Output

@@ -239,8 +239,8 @@ jobs:
           role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
-      - name: Apply infrastructure as code
-        uses: ./.github/actions/apply-infrastructure-as-code
+      - name: Apply infrastructure changes
+        uses: ./.github/actions/apply-infrastructure-changes
         with:
           summary-title: Terraform Plan Output
           tfbackend-path: infrastructure/live/terraform.tfbackend
@@ -556,8 +556,8 @@ jobs:
           role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
 
-      - name: Apply infrastructure as code
-        uses: ./.github/actions/apply-infrastructure-as-code
+      - name: Apply infrastructure changes
+        uses: ./.github/actions/apply-infrastructure-changes
         with:
           summary-title: Terraform Plan Output
           tfbackend-path: infrastructure/live/terraform.tfbackend
