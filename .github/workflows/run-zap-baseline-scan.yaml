@@ -3,8 +3,8 @@ name: Run ZAP baseline scan
 on:
   workflow_call:
     inputs:
-      target_url:
-        description: Target URL for ZAP baseline scan
+      base_url:
+        description: Base URL for ZAP baseline scan
         required: true
         type: string
 
@@ -28,11 +28,11 @@ jobs:
       - name: Run baseline scan
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25  # v0.15.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: ${{ inputs.target_url }}
           allow_issue_writing: false
-          fail_action: true
           cmd_options: -a -c .zapconfig -r report_html.html
+          fail_action: true
+          target: ${{ inputs.base_url }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload report
         if: always()

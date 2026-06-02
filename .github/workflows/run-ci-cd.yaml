@@ -510,7 +510,7 @@ jobs:
       contents: read
     uses: ./.github/workflows/run-zap-baseline-scan.yaml
     with:
-      target_url: https://nest.owasp.dev
+      base_url: https://nest.owasp.dev
 
   build-production-images:
     name: Build Production Images
@@ -935,4 +935,4 @@ jobs:
       contents: read
     uses: ./.github/workflows/run-zap-baseline-scan.yaml
     with:
-      target_url: https://nest.owasp.org
+      base_url: https://nest.owasp.org
