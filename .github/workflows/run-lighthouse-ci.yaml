@@ -1,0 +1,36 @@
+name: Run Lighthouse CI
+
+on:
+  workflow_call:
+    inputs:
+      base_url:
+        description: Base URL for Lighthouse CI
+        required: true
+        type: string
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-lighthouse-ci:
+    name: Run Lighthouse CI
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend-environment
+
+      - name: Run lighthouse-ci
+        env:
+          LHCI_BASE_URL: ${{ inputs.base_url }}
+        run: pnpm run lighthouse-ci
+        working-directory: frontend
+    timeout-minutes: 5
