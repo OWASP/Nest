@@ -66,7 +66,7 @@ variable "db_deletion_protection" {
 variable "db_engine_version" {
   description = "The version of the PostgreSQL engine."
   type        = string
-  default     = "16.10"
+  default     = "16.13"
 }
 
 variable "db_instance_class" {

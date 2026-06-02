@@ -224,10 +224,10 @@ const IssuesPage = () => {
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
       <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold">{moduleData.name} Issues</h1>
-            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-bold sm:text-3xl">{moduleData.name} Issues</h1>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="flex h-12 w-full items-center overflow-hidden rounded-lg bg-gray-200 sm:w-auto dark:bg-[#323232]">
                 <Select
                   labelPlacement="outside-left"
                   size="md"
@@ -236,7 +236,9 @@ const IssuesPage = () => {
                   classNames={{
                     label:
                       'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                    trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-40',
+                    trigger:
+                      'bg-transparent shadow-none pl-0 text-nowrap rounded-none w-full sm:w-40',
+                    selectorIcon: 'right-3',
                     popoverContent: 'text-md min-w-40 dark:bg-[#323232] rounded-none p-0',
                   }}
                   selectedKeys={new Set([selectedLabel])}
@@ -257,7 +259,7 @@ const IssuesPage = () => {
                   ))}
                 </Select>
               </div>
-              <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+              <div className="flex h-12 w-full items-center overflow-hidden rounded-lg bg-gray-200 sm:w-auto dark:bg-[#323232]">
                 <Select
                   labelPlacement="outside-left"
                   size="md"
@@ -266,7 +268,9 @@ const IssuesPage = () => {
                   classNames={{
                     label:
                       'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                    trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-36',
+                    trigger:
+                      'bg-transparent pl-0 shadow-none text-nowrap rounded-none w-full sm:w-36',
+                    selectorIcon: 'right-3',
                     popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
                   }}
                   selectedKeys={new Set([selectedDeadline])}
