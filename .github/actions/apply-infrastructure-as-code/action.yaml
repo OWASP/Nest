@@ -1,4 +1,4 @@
-name: Bootstrap Terraform
+name: Apply Infrastructure as Code
 description: Run Terraform bootstrap steps for infrastructure
 
 inputs:
@@ -64,19 +64,19 @@ runs:
         printf '%s\n' "$TF_VARS_CONTENT" > "$TF_VARS_PATH"
       shell: bash
 
-    - name: Terraform Init
+    - name: Initialize Terraform
       env:
         TF_PLUGIN_CACHE_DIR: ${{ inputs.plugin-cache-dir }}
       run: terraform init -backend-config=terraform.tfbackend
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Terraform Validate
+    - name: Validate Terraform configuration
       run: terraform validate
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Terraform Plan
+    - name: Plan Terraform changes
       run: terraform plan -out=tfplan
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -92,7 +92,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Terraform Apply
+    - name: Apply Terraform changes
       run: terraform apply -auto-approve tfplan
       shell: bash
       working-directory: ${{ inputs.working-directory }}

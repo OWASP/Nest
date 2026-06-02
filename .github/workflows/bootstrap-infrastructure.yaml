@@ -16,7 +16,7 @@ permissions: {}
 
 jobs:
   bootstrap-infrastructure:
-    name: Bootstrap Infrastructure
+    name: Bootstrap infrastructure
     environment: ${{ inputs.environment }}
     env:
       TF_IN_AUTOMATION: true
@@ -35,8 +35,8 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
 
-      - name: Bootstrap Terraform
-        uses: ./.github/actions/bootstrap-terraform
+      - name: Apply infrastructure as code
+        uses: ./.github/actions/apply-infrastructure-as-code
         with:
           plugin-cache-dir: ${{ env.TF_PLUGIN_CACHE_DIR }}
           summary-title: Bootstrap Terraform Plan Output
