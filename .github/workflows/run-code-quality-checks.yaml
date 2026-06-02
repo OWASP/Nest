@@ -96,7 +96,7 @@ jobs:
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          run-command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
+          command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
     timeout-minutes: 15
 
   run-spelling-checks:

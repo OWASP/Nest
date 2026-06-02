@@ -39,6 +39,7 @@ runs:
     - name: Upload SBOMs to release
       if: ${{ inputs.environment == 'production' }}
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         RELEASE_VERSION: ${{ inputs.release_version }}
         RELEASE_TAG: ${{ inputs.release_tag }}
       run: |
