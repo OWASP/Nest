@@ -36,6 +36,7 @@ dependencies.psycopg2-binary = "2.9.12"
 dependencies.pydantic = "2.12.5"
 dependencies.pydantic-core = "2.41.5"
 dependencies.pygithub = "2.9.1"
+dependencies.pyjwt = { extras = [ "crypto" ], version = "2.13.0" }
 dependencies.python = "^3.13"
 dependencies.python-dateutil = "2.9.0.post0"
 dependencies.pyyaml = "6.0.3"
