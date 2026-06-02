@@ -6,6 +6,7 @@ from apps.slack.common.handlers.ai import (
     get_blocks,
     get_default_response,
     get_error_blocks,
+    get_response_blocks,
     process_ai_query,
 )
 
@@ -198,3 +199,30 @@ class TestAiHandler:
 
         mock_markdown.assert_called_once_with(expected_error_message)
         assert result == [expected_block]
+
+    @patch("apps.slack.common.handlers.ai.format_ai_response_for_slack")
+    @patch("apps.slack.common.handlers.ai.markdown")
+    def test_get_response_blocks_success(self, mock_markdown, mock_format_ai_response):
+        """Test get_response_blocks with successful response."""
+        response = "Successful response"
+        formatted = "Formatted response"
+        expected_block = {"type": "section", "text": {"type": "mrkdwn", "text": formatted}}
+
+        mock_format_ai_response.return_value = formatted
+        mock_markdown.return_value = expected_block
+
+        result = get_response_blocks(response)
+
+        mock_format_ai_response.assert_called_once_with(response)
+        mock_markdown.assert_called_once_with(formatted)
+        assert result == [expected_block]
+
+    @patch("apps.slack.common.handlers.ai.get_error_blocks")
+    def test_get_response_blocks_empty(self, mock_get_error_blocks):
+        """Test get_response_blocks with empty response returns error blocks."""
+        error_blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "Error"}}]
+        mock_get_error_blocks.return_value = error_blocks
+
+        assert get_response_blocks("") == error_blocks
+        assert get_response_blocks(None) == error_blocks
+        assert mock_get_error_blocks.call_count == 2
