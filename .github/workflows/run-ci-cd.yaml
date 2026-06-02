@@ -141,7 +141,6 @@ jobs:
       environment: staging
       frontend_ecr_repo: nest-staging-frontend
       release_version: ${{ needs.set-release-version.outputs.release_version }}
-      sbom_artifact_name: staging-sbom-${{ needs.set-release-version.outputs.release_version }}
 
   bootstrap-nest-staging-infrastructure:
     name: Bootstrap Nest Staging Infrastructure

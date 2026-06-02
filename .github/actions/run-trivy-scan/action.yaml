@@ -2,7 +2,7 @@ name: Run Trivy Scan
 description: Configure Trivy cache and run Trivy scan
 
 inputs:
-  run-command:
+  command:
     description: Command to run the Trivy scan
     required: true
 
@@ -19,12 +19,12 @@ runs:
     - name: Cache Trivy DB
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
-        path: .trivy-cache
         key: ${{ env.TRIVY_DB_CACHE_KEY }}
+        path: .trivy-cache
         restore-keys: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-
 
     - name: Run Trivy security scan
       env:
-        TRIVY_RUN_COMMAND: ${{ inputs.run-command }}
-      run: bash -lc "$TRIVY_RUN_COMMAND"
+        TRIVY_RUN_COMMAND: ${{ inputs.command }}
+      run: bash -c "$TRIVY_RUN_COMMAND"
       shell: bash
