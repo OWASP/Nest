@@ -83,31 +83,12 @@ jobs:
             make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
             make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
 
-      - name: Generate SBOM for backend image
-        run: |
-          make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-
-      - name: Generate SBOM for frontend image
-        run: |
-          make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
-
-      - name: Upload SBOMs to release
-        if: ${{ inputs.environment == 'production' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
-          RELEASE_TAG: ${{ inputs.release_tag }}
-        run: |
-          gh release upload "$RELEASE_TAG" \
-            "backend-sbom-$RELEASE_VERSION.cdx.json" \
-            "frontend-sbom-$RELEASE_VERSION.cdx.json"
-
-      - name: Upload SBOMs as artifact
-        if: ${{ inputs.environment == 'staging' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - name: Upload SBOMs
+        uses: ./.github/actions/upload-sbom
         with:
-          name: staging-sbom-${{ env.RELEASE_VERSION }}
-          path: |
-            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
-            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+          backend_image: ${{ env.BACKEND_IMAGE }}
+          environment: ${{ inputs.environment }}
+          frontend_image: ${{ env.FRONTEND_IMAGE }}
+          release_tag: ${{ inputs.release_tag }}
+          release_version: ${{ inputs.release_version }}
     timeout-minutes: 10
