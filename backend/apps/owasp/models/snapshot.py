@@ -109,7 +109,10 @@ class Snapshot(models.Model):
             if self.frequency == self.Frequency.WEEKLY:
                 iso_year, iso_week, _ = reference_dt.isocalendar()
                 self.key = f"{iso_year}-W{iso_week:02d}"
-            else:
+            elif self.frequency == self.Frequency.MONTHLY:
                 self.key = reference_dt.strftime("%Y-%m")
+            else:
+                msg = f"Unsupported snapshot frequency: {self.frequency}"
+                raise ValueError(msg)
 
         super().save(*args, **kwargs)
