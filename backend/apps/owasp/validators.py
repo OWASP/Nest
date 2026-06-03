@@ -47,7 +47,7 @@ def validate_evidence_content_type(file):
 
     """
     content_type = getattr(file, "content_type", None)
-    if content_type and content_type not in EVIDENCE_ALLOWED_CONTENT_TYPES:
+    if not content_type or content_type not in EVIDENCE_ALLOWED_CONTENT_TYPES:
         msg = f"File content type '{content_type}' is not supported."
         raise ValidationError(msg)
 

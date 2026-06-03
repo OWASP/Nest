@@ -101,14 +101,16 @@ class TestValidateEvidenceContentType:
         with pytest.raises(ValidationError):
             validate_evidence_content_type(mock_file)
 
-    def test_missing_content_type_passes(self):
-        """Test that a file without content_type (e.g. FieldFile) passes validation."""
+    def test_missing_content_type_raises_error(self):
+        """Test that a file without content_type raises ValidationError."""
         mock_file = MagicMock(spec=[])
         del mock_file.content_type
-        validate_evidence_content_type(mock_file)
+        with pytest.raises(ValidationError):
+            validate_evidence_content_type(mock_file)
 
-    def test_none_content_type_passes(self):
-        """Test that a file with None content_type passes validation."""
+    def test_none_content_type_raises_error(self):
+        """Test that a file with None content_type raises ValidationError."""
         mock_file = MagicMock()
         mock_file.content_type = None
-        validate_evidence_content_type(mock_file)
+        with pytest.raises(ValidationError):
+            validate_evidence_content_type(mock_file)
