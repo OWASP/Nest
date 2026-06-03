@@ -166,6 +166,7 @@ misconfig
 mkdocstrings
 mkv
 mpim
+msdownload
 navlink
 nestbot
 ngx
@@ -216,6 +217,7 @@ slackbot
 slideshare
 someid
 speakerdeck
+spreadsheetml
 subgrp
 superfences
 tfbackend
@@ -231,6 +233,7 @@ usefixtures
 vcodec
 webgoat
 winsrdf
+wordprocessingml
 wrk
 wsgi
 xapp
