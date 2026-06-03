@@ -7,6 +7,11 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.validators import (
+    validate_evidence_content_type,
+    validate_evidence_extension,
+    validate_evidence_file_size,
+)
 
 
 class BoardCandidateClaimEvidence(TimestampedModel):
@@ -26,7 +31,15 @@ class BoardCandidateClaimEvidence(TimestampedModel):
     )
     description = models.TextField(default="", verbose_name="Description")
     file = models.FileField(
-        blank=True, null=True, upload_to="bod/claim/evidence/", verbose_name="File"
+        blank=True,
+        null=True,
+        upload_to="bod/claim/evidence/",
+        validators=[
+            validate_evidence_extension,
+            validate_evidence_file_size,
+            validate_evidence_content_type,
+        ],
+        verbose_name="File",
     )
     file_name = models.CharField(
         blank=True,

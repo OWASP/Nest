@@ -1,5 +1,6 @@
 """Tests for BoardCandidateClaimEvidence model."""
 
+from contextlib import contextmanager
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -7,6 +8,17 @@ from django.core.exceptions import ValidationError
 
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
+
+
+@contextmanager
+def _mock_evidence_full_clean(*, claim_filter_exists=True):
+    """Mock claim objects filter and FK validate to avoid DB access during full_clean."""
+    with patch(
+        "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+    ) as mock_objects:
+        mock_objects.filter.return_value.exists.return_value = claim_filter_exists
+        with patch.object(BoardCandidateClaimEvidence._meta.get_field("claim"), "validate"):
+            yield
 
 
 class TestBoardCandidateClaimEvidenceModel:
@@ -94,6 +106,110 @@ class TestBoardCandidateClaimEvidenceModel:
         field = BoardCandidateClaimEvidence._meta.get_field("source_url")
 
         assert field.blank
+
+    def test_file_field_has_validators(self):
+        """Test file field has extension, size, and content type validators."""
+        field = BoardCandidateClaimEvidence._meta.get_field("file")
+
+        assert len(field.validators) == 3
+
+    def _evidence_with_file(self, **mock_kwargs):
+        """Build evidence with a mock file, ready for full_clean."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test Evidence", description="Test description."
+        )
+        evidence.claim_id = 1
+        mock_file = MagicMock()
+        mock_file.name = "document.pdf"
+        mock_file.content_type = "application/pdf"
+        mock_file.size = 1000
+        for key, value in mock_kwargs.items():
+            setattr(mock_file, key, value)
+        evidence.file = mock_file
+        return evidence
+
+    def test_full_clean_passes_with_valid_file(self):
+        """Test that full_clean passes for a valid file."""
+        evidence = self._evidence_with_file()
+
+        with _mock_evidence_full_clean():
+            evidence.full_clean()
+
+    @pytest.mark.parametrize("name", ["evidence.pdf", "evidence.png", "evidence.docx"])
+    def test_full_clean_allowed_extension_passes(self, name):
+        """Test that full_clean passes for representative allowed extensions."""
+        evidence = self._evidence_with_file(name=name)
+
+        with _mock_evidence_full_clean():
+            evidence.full_clean()
+
+    @pytest.mark.parametrize("name", ["evidence.exe", "evidence.gif", "evidence"])
+    def test_full_clean_disallowed_extension_raises_error(self, name):
+        """Test that full_clean rejects disallowed extensions."""
+        evidence = self._evidence_with_file(name=name)
+
+        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
+            evidence.full_clean()
+
+    def test_full_clean_file_within_size_limit_passes(self):
+        """Test that full_clean passes for a file at the size limit."""
+        evidence = self._evidence_with_file(size=10 * 1024 * 1024)
+
+        with _mock_evidence_full_clean():
+            evidence.full_clean()
+
+    def test_full_clean_file_exceeds_size_limit_raises_error(self):
+        """Test that full_clean rejects a file exceeding the maximum size."""
+        evidence = self._evidence_with_file(size=999999999)
+
+        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
+            evidence.full_clean()
+
+    @pytest.mark.parametrize(
+        "content_type",
+        ["application/pdf", "image/png", "image/webp", "text/csv"],
+    )
+    def test_full_clean_allowed_content_type_passes(self, content_type):
+        """Test that full_clean passes for representative allowed content types."""
+        evidence = self._evidence_with_file(content_type=content_type)
+
+        with _mock_evidence_full_clean():
+            evidence.full_clean()
+
+    @pytest.mark.parametrize(
+        "content_type",
+        ["image/gif", "application/octet-stream"],
+    )
+    def test_full_clean_disallowed_content_type_raises_error(self, content_type):
+        """Test that full_clean rejects disallowed content types."""
+        evidence = self._evidence_with_file(content_type=content_type)
+
+        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
+            evidence.full_clean()
+
+    def test_full_clean_missing_content_type_passes(self):
+        """Test that full_clean passes when content_type is absent (e.g. FieldFile)."""
+        mock_file = MagicMock()
+        mock_file.name = "document.pdf"
+        mock_file.size = 1000
+        mock_file.content_type = "application/pdf"
+        del mock_file.content_type
+
+        evidence = BoardCandidateClaimEvidence(
+            title="Test Evidence", description="Test description."
+        )
+        evidence.claim_id = 1
+        evidence.file = mock_file
+
+        with _mock_evidence_full_clean():
+            evidence.full_clean()
+
+    def test_full_clean_none_content_type_passes(self):
+        """Test that full_clean passes when content_type is None."""
+        evidence = self._evidence_with_file(content_type=None)
+
+        with _mock_evidence_full_clean():
+            evidence.full_clean()
 
     @pytest.mark.parametrize(
         "status",
