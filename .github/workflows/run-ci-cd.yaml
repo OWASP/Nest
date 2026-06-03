@@ -146,8 +146,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-images.yaml
     with:
-      aws_role_session_name: GitHubActions-BuildStagingImages
       aws_role_name: nest-staging-terraform
+      aws_role_session_name: GitHubActions-BuildStagingImages
       backend_ecr_cache_repo: nest-staging-backend-cache
       backend_ecr_repo: nest-staging-backend
       backend_uid: '1001'
@@ -162,71 +162,17 @@ jobs:
     needs:
       - build-staging-images
       - set-release-version
-    environment: staging
-    env:
-      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:${{ needs.set-release-version.outputs.release_version
-        }}
-      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:${{ needs.set-release-version.outputs.release_version
-        }}
-      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
       actions: write
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-ScanStagingImages
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
-
-      - name: Pull container images
-        run: |
-          docker pull "$BACKEND_IMAGE"
-          docker pull "$FRONTEND_IMAGE"
-
-      - name: Cache Trivy DB
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          path: .trivy-cache
-          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
-          restore-keys: trivy-${{ runner.os }}-
-
-      - name: Run Trivy security scan via Makefile
-        run: |
-          make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
-
-      - name: Generate SBOM for backend image
-        run: |
-          make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-
-      - name: Generate SBOM for frontend image
-        run: |
-          make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
-
-      - name: Upload SBOMs
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: staging-sbom-${{ env.RELEASE_VERSION }}
-          path: |
-            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
-            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
-    timeout-minutes: 10
+      contents: write
+    uses: ./.github/workflows/scan-images.yaml
+    with:
+      aws_role_name: nest-staging-terraform
+      aws_role_session_name: GitHubActions-ScanStagingImages
+      backend_ecr_repo: nest-staging-backend
+      environment: staging
+      frontend_ecr_repo: nest-staging-frontend
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
 
   bootstrap-nest-staging-infrastructure:
     name: Bootstrap Nest Staging Infrastructure
@@ -443,8 +389,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-images.yaml
     with:
-      aws_role_session_name: GitHubActions-BuildProductionImages
       aws_role_name: nest-production-terraform
+      aws_role_session_name: GitHubActions-BuildProductionImages
       backend_ecr_cache_repo: nest-production-backend-cache
       backend_ecr_repo: nest-production-backend
       backend_uid: '1002'
@@ -463,71 +409,19 @@ jobs:
     needs:
       - build-production-images
       - set-release-version
-    environment: production
-    env:
-      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-backend:${{ needs.set-release-version.outputs.release_version
-        }}
-      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-frontend:${{ needs.set-release-version.outputs.release_version
-        }}
-      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
       # Broader than typical scan jobs: required for "Upload SBOMs" (gh release upload).
+      actions: write
       contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37  # v6.1.0
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-ScanProductionImages
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7  # v2.1.4
-
-      - name: Pull container images
-        run: |
-          docker pull "$BACKEND_IMAGE"
-          docker pull "$FRONTEND_IMAGE"
-
-      - name: Cache Trivy DB
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          path: .trivy-cache
-          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
-          restore-keys: trivy-${{ runner.os }}-
-
-      - name: Run Trivy security scan via Makefile
-        run: |
-          make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
-
-      - name: Generate SBOM for backend image
-        run: |
-          make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-
-      - name: Generate SBOM for frontend image
-        run: |
-          make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
-
-      - name: Upload SBOMs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${{ github.event.release.tag_name }}" \
-            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json \
-            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
-    timeout-minutes: 10
+    uses: ./.github/workflows/scan-images.yaml
+    with:
+      aws_role_name: nest-production-terraform
+      aws_role_session_name: GitHubActions-ScanProductionImages
+      backend_ecr_repo: nest-production-backend
+      environment: production
+      frontend_ecr_repo: nest-production-frontend
+      release_tag: ${{ github.event.release.tag_name }}
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
 
   bootstrap-nest-production-infrastructure:
     name: Bootstrap Nest Production Infrastructure
