@@ -76,7 +76,7 @@ permissions: {}
 
 jobs:
   deploy-nest:
-    name: Plan and Deploy Nest
+    name: Deploy Nest
     environment: ${{ inputs.environment }}
     env:
       TF_IN_AUTOMATION: true
@@ -134,7 +134,6 @@ jobs:
 
       - name: Capture terraform outputs
         id: tf-outputs
-        working-directory: infrastructure/live
         run: |
           echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
           echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
@@ -144,6 +143,7 @@ jobs:
           echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
           echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
           echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+        working-directory: infrastructure/live
 
       - name: Run ECS migrate task
         id: migrate-task

@@ -208,7 +208,7 @@ jobs:
       environment: staging
 
   deploy-staging-nest:
-    name: Plan and Deploy Nest Staging
+    name: Deploy Nest to Staging
     if: |
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
@@ -366,7 +366,7 @@ jobs:
       environment: production
 
   deploy-production-nest:
-    name: Plan and Deploy Nest Production
+    name: Deploy Nest to Production
     if: |
       github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
