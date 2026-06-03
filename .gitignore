@@ -48,6 +48,7 @@ backend/data/nest.dump
 backend/data/nest.dump.*
 backend/fuzzing_results/
 backend/generated_videos/
+backend/media/
 backend/staticfiles
 design/
 frontend-sbom-local.cdx.json
