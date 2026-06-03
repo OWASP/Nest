@@ -88,6 +88,52 @@ class ClaimResult:
     message: str | None = None
 
 
+def _validate_reorder_claims(
+    input_data: ReorderClaimsInput,
+) -> tuple[list[int], ReorderClaimsResult | None]:
+    """Validate reorder claims input and resolve GlobalIDs to integers.
+
+    Args:
+        input_data (ReorderClaimsInput): Input containing claim GlobalIDs to reorder.
+
+    Returns:
+        tuple of (list[int], ReorderClaimsResult | None)
+
+    """
+    try:
+        claim_ids = [int(claim_id.node_id) for claim_id in input_data.claim_ids]
+    except ValueError:
+        return [], ReorderClaimsResult(
+            ok=False,
+            code="NOT_FOUND",
+            message="One or more claims were not found.",
+        )
+
+    if not claim_ids:
+        return claim_ids, ReorderClaimsResult(
+            ok=False,
+            code="VALIDATION_ERROR",
+            message="At least one claim is required for reordering.",
+        )
+
+    if len(set(claim_ids)) != len(claim_ids):
+        return claim_ids, ReorderClaimsResult(
+            ok=False,
+            code="VALIDATION_ERROR",
+            message="Duplicate claim ids are not allowed.",
+        )
+
+    claims_query = BoardCandidateClaim.objects.filter(pk__in=claim_ids)
+    if claims_query.count() != len(claim_ids):
+        return claim_ids, ReorderClaimsResult(
+            ok=False,
+            code="NOT_FOUND",
+            message="One or more claims were not found.",
+        )
+
+    return claim_ids, None
+
+
 @strawberry.type
 class BoardCandidateClaimMutations:
     """Board Candidate Claim mutations."""
@@ -364,30 +410,14 @@ class BoardCandidateClaimMutations:
         """Reorder claims for a candidate in a board year."""
         user = info.context.request.user
 
-        claim_ids = [int(claim_id.node_id) for claim_id in input_data.claim_ids]
-        if not claim_ids:
-            return ReorderClaimsResult(
-                ok=False,
-                code="VALIDATION_ERROR",
-                message="At least one claim is required for reordering.",
-            )
-        if len(set(claim_ids)) != len(claim_ids):
-            return ReorderClaimsResult(
-                ok=False,
-                code="VALIDATION_ERROR",
-                message="Duplicate claim ids are not allowed.",
-            )
-
-        claims_query = BoardCandidateClaim.objects.filter(pk__in=claim_ids)
-        if claims_query.count() != len(claim_ids):
-            return ReorderClaimsResult(
-                ok=False,
-                code="NOT_FOUND",
-                message="One or more claims were not found.",
-            )
+        claim_ids, error = _validate_reorder_claims(input_data)
+        if error:
+            return error
 
         claims = list(
-            claims_query.select_for_update(of=("self",)).select_related("candidate__member")
+            BoardCandidateClaim.objects.filter(pk__in=claim_ids)
+            .select_for_update(of=("self",))
+            .select_related("candidate__member")
         )
         if any(claim.candidate.member.login != str(user) for claim in claims):
             return ReorderClaimsResult(
@@ -408,6 +438,13 @@ class BoardCandidateClaimMutations:
         id_to_order = {claim_id: idx for idx, claim_id in enumerate(claim_ids)}
         for claim in claims:
             claim.order = id_to_order[claim.id]
+
+        if any(claim.is_locked for claim in claims):
+            return ReorderClaimsResult(
+                ok=False,
+                code="VALIDATION_ERROR",
+                message="Cannot reorder locked claims.",
+            )
 
         BoardCandidateClaim.objects.bulk_update(claims, ["order"])
 
