@@ -1,4 +1,4 @@
-name: Run Trivy Scan
+name: Run Trivy scan
 description: Configure Trivy cache and run Trivy scan
 
 inputs:
@@ -13,17 +13,17 @@ runs:
       env:
         DOCKERFILE_HASH: ${{ hashFiles('docker/trivy/Dockerfile') }}
         RUNNER_OS: ${{ runner.os }}
-      run: echo "TRIVY_DB_CACHE_KEY=trivy-${RUNNER_OS}-${DOCKERFILE_HASH}" >> "$GITHUB_ENV"
+      run: echo "TRIVY_CACHE_KEY=trivy-${RUNNER_OS}-${DOCKERFILE_HASH}" >> "$GITHUB_ENV"
       shell: bash
 
-    - name: Cache Trivy DB
+    - name: Cache Trivy
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
-        key: ${{ env.TRIVY_DB_CACHE_KEY }}
+        key: ${{ env.TRIVY_CACHE_KEY }}
         path: .trivy-cache
         restore-keys: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-
 
-    - name: Run Trivy security scan
+    - name: Run Trivy scan
       env:
         TRIVY_RUN_COMMAND: ${{ inputs.command }}
       run: bash -c "$TRIVY_RUN_COMMAND"
