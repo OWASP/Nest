@@ -26,7 +26,7 @@ test.describe('About Page', () => {
 
   test('displays technologies & Tools', async ({ page }) => {
     const technologies = [
-      'Ansible',
+      'Terraform',
       'Docker',
       'Jest',
       'Next.js',
