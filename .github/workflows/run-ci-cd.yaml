@@ -188,174 +188,32 @@ jobs:
       environment: staging
 
   deploy-staging-nest:
-    name: Plan and Deploy Nest Staging
-    env:
-      TF_IN_AUTOMATION: true
-      TF_INPUT: false
-    environment: staging
+    name: Deploy Nest to Staging
     if: |
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - bootstrap-nest-staging-infrastructure
-      - build-staging-images
       - set-release-version
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-StagingDeploy
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
-
-      - name: Apply infrastructure changes
-        uses: ./.github/actions/apply-infrastructure-changes
-        with:
-          summary-title: Terraform Plan Output
-          tfbackend-path: infrastructure/live/terraform.tfbackend
-          tfbackend-content: |
-            bucket="${{ secrets.TF_STATE_BUCKET_NAME }}"
-            key="staging/terraform.tfstate"
-            region="${{ vars.AWS_REGION }}"
-          tfvars-path: infrastructure/live/terraform.tfvars
-          tfvars-content: |
-            availability_zones=${{ vars.AWS_AVAILABILITY_ZONES }}
-            aws_region="${{ vars.AWS_REGION }}"
-            backend_image_tag="${{ needs.set-release-version.outputs.release_version }}"
-            backend_use_fargate_spot=true
-            domain_name="${{ vars.DOMAIN_NAME }}"
-            django_configuration="Staging"
-            django_release_version="${{ needs.set-release-version.outputs.release_version }}"
-            django_settings_module="settings.staging"
-            enable_cron_tasks=false
-            enable_nat_gateway=false
-            enable_rds_proxy=false
-            environment="staging"
-            frontend_use_fargate_spot=true
-            frontend_image_tag="${{ needs.set-release-version.outputs.release_version }}"
-            project_name="nest"
-            tasks_use_fargate_spot=true
-          working-directory: infrastructure/live
-
-      - name: Capture terraform outputs
-        id: tf-outputs
-        working-directory: infrastructure/live
-        run: |
-          echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
-          echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
-          echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
-          echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
-          echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
-          echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
-          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-      - name: Run ECS migrate task
-        id: migrate-task
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
-          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
-          TASK_DEFINITION: nest-staging-migrate
-          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
-        run: |
-          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
-          TASK_ARN=$(aws ecs run-task \
-            --cluster "$CLUSTER_NAME" \
-            --task-definition "$TASK_DEFINITION" \
-            --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
-            --query 'tasks[0].taskArn' \
-            --output text)
-          echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
-
-      - name: Wait for migrate task
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-        run: |
-          aws ecs wait tasks-stopped \
-            --cluster "$CLUSTER_NAME" \
-            --tasks "${{ steps.migrate-task.outputs.task_arn }}"
-
-      - name: Check migrate task exit code
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-        run: |
-          EXIT_CODE=$(aws ecs describe-tasks \
-            --cluster "$CLUSTER_NAME" \
-            --tasks "${{ steps.migrate-task.outputs.task_arn }}" \
-            --query 'tasks[0].containers[0].exitCode' \
-            --output text)
-
-          if [ "$EXIT_CODE" != "0" ]; then
-            echo "::error::Migrate task failed with exit code $EXIT_CODE"
-            exit 1
-          fi
-          echo "Migrate task completed successfully"
-
-      - name: Run ECS index-data task
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
-          TASK_DEFINITION: nest-staging-index-data
-          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
-          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
-        run: |
-          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
-          RESPONSE=$(aws ecs run-task \
-            --cluster "$CLUSTER_NAME" \
-            --task-definition "$TASK_DEFINITION" \
-            --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
-
-          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
-          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
-
-          if [ "$FAILURE_COUNT" -gt 0 ]; then
-            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
-            echo "$RESPONSE" | jq '.failures'
-            exit 1
-          fi
-
-          if [ "$TASK_COUNT" -eq 0 ]; then
-            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
-            echo "$RESPONSE"
-            exit 1
-          fi
-
-          echo "Index-data task started successfully (runs async, ~30 min)"
-
-      - name: Wait for backend service stability
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
-        run: |
-          aws ecs wait services-stable \
-            --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
-
-      - name: Wait for frontend service stability
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs wait services-stable \
-            --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
-    timeout-minutes: 60
+    uses: ./.github/workflows/deploy-nest.yaml
+    with:
+      aws_role_name: nest-staging-terraform
+      aws_role_session_name: GitHubActions-StagingDeploy
+      backend_use_fargate_spot: true
+      django_configuration: Staging
+      django_settings_module: settings.staging
+      enable_cron_tasks: false
+      enable_nat_gateway: false
+      enable_rds_proxy: false
+      environment: staging
+      frontend_use_fargate_spot: true
+      index_task_definition: nest-staging-index-data
+      migrate_task_definition: nest-staging-migrate
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
+      tasks_use_fargate_spot: true
+      tf_state_key: staging/terraform.tfstate
 
   run-staging-lighthouse-ci:
     name: Run staging Lighthouse CI
@@ -438,175 +296,34 @@ jobs:
       environment: production
 
   deploy-production-nest:
-    name: Plan and Deploy Nest Production
-    env:
-      TF_IN_AUTOMATION: true
-      TF_INPUT: false
-    environment: production
+    name: Deploy Nest to Production
     if: |
       github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
       - bootstrap-nest-production-infrastructure
-      - build-production-images
       - set-release-version
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-ProductionDeploy
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
-
-      - name: Apply infrastructure changes
-        uses: ./.github/actions/apply-infrastructure-changes
-        with:
-          summary-title: Terraform Plan Output
-          tfbackend-path: infrastructure/live/terraform.tfbackend
-          tfbackend-content: |
-            bucket="${{ secrets.TF_STATE_BUCKET_NAME }}"
-            key="production/terraform.tfstate"
-            region="${{ vars.AWS_REGION }}"
-          tfvars-path: infrastructure/live/terraform.tfvars
-          tfvars-content: |
-            availability_zones=${{ vars.AWS_AVAILABILITY_ZONES }}
-            aws_region="${{ vars.AWS_REGION }}"
-            backend_image_tag="${{ needs.set-release-version.outputs.release_version }}"
-            backend_use_fargate_spot=false
-            domain_name="${{ vars.DOMAIN_NAME }}"
-            django_configuration="Production"
-            django_release_version="${{ needs.set-release-version.outputs.release_version }}"
-            django_settings_module="settings.production"
-            enable_additional_parameters=true
-            enable_cron_tasks=true
-            enable_nat_gateway=true
-            enable_rds_proxy=true
-            environment="production"
-            frontend_use_fargate_spot=false
-            frontend_image_tag="${{ needs.set-release-version.outputs.release_version }}"
-            project_name="nest"
-            tasks_use_fargate_spot=false
-          working-directory: infrastructure/live
-
-      - name: Capture terraform outputs
-        id: tf-outputs
-        working-directory: infrastructure/live
-        run: |
-          echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
-          echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
-          echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
-          echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
-          echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
-          echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
-          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-
-      - name: Run ECS migrate task
-        id: migrate-task
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
-          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
-          TASK_DEFINITION: nest-production-migrate
-          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
-        run: |
-          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
-          TASK_ARN=$(aws ecs run-task \
-            --cluster "$CLUSTER_NAME" \
-            --task-definition "$TASK_DEFINITION" \
-            --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
-            --query 'tasks[0].taskArn' \
-            --output text)
-          echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
-
-      - name: Wait for migrate task
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-        run: |
-          aws ecs wait tasks-stopped \
-            --cluster "$CLUSTER_NAME" \
-            --tasks "${{ steps.migrate-task.outputs.task_arn }}"
-
-      - name: Check migrate task exit code
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-        run: |
-          EXIT_CODE=$(aws ecs describe-tasks \
-            --cluster "$CLUSTER_NAME" \
-            --tasks "${{ steps.migrate-task.outputs.task_arn }}" \
-            --query 'tasks[0].containers[0].exitCode' \
-            --output text)
-
-          if [ "$EXIT_CODE" != "0" ]; then
-            echo "::error::Migrate task failed with exit code $EXIT_CODE"
-            exit 1
-          fi
-          echo "Migrate task completed successfully"
-
-      - name: Run ECS index-data task
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
-          TASK_DEFINITION: nest-production-index-data
-          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
-          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
-        run: |
-          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
-          RESPONSE=$(aws ecs run-task \
-            --cluster "$CLUSTER_NAME" \
-            --task-definition "$TASK_DEFINITION" \
-            --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
-
-          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
-          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
-
-          if [ "$FAILURE_COUNT" -gt 0 ]; then
-            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
-            echo "$RESPONSE" | jq '.failures'
-            exit 1
-          fi
-
-          if [ "$TASK_COUNT" -eq 0 ]; then
-            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
-            echo "$RESPONSE"
-            exit 1
-          fi
-
-          echo "Index-data task started successfully (runs async, ~30 min)"
-
-      - name: Wait for backend service stability
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
-        run: |
-          aws ecs wait services-stable \
-            --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
-
-      - name: Wait for frontend service stability
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs wait services-stable \
-            --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
+    uses: ./.github/workflows/deploy-nest.yaml
+    with:
+      aws_role_name: nest-production-terraform
+      aws_role_session_name: GitHubActions-ProductionDeploy
+      backend_use_fargate_spot: false
+      django_configuration: Production
+      django_settings_module: settings.production
+      enable_additional_parameters: true
+      enable_cron_tasks: true
+      enable_nat_gateway: true
+      enable_rds_proxy: true
+      environment: production
+      frontend_use_fargate_spot: false
+      index_task_definition: nest-production-index-data
+      migrate_task_definition: nest-production-migrate
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
+      tasks_use_fargate_spot: false
+      tf_state_key: production/terraform.tfstate
 
   run-production-lighthouse-ci:
     name: Run production Lighthouse CI
