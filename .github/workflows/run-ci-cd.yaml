@@ -214,6 +214,7 @@ jobs:
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - bootstrap-nest-staging-infrastructure
+      - set-release-version
     permissions:
       contents: read
     uses: ./.github/workflows/deploy-nest.yaml
@@ -372,6 +373,7 @@ jobs:
       github.event.action == 'published'
     needs:
       - bootstrap-nest-production-infrastructure
+      - set-release-version
     permissions:
       contents: read
     uses: ./.github/workflows/deploy-nest.yaml
