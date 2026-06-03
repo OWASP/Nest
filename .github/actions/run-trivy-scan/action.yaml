@@ -11,9 +11,9 @@ runs:
   steps:
     - name: Set Trivy cache key
       env:
-        RUNNER_OS: ${{ runner.os }}
         DOCKERFILE_HASH: ${{ hashFiles('docker/trivy/Dockerfile') }}
-      run: echo "TRIVY_DB_CACHE_KEY=trivy-${RUNNER_OS}-${DOCKERFILE_HASH}-$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
+        RUNNER_OS: ${{ runner.os }}
+      run: echo "TRIVY_DB_CACHE_KEY=trivy-${RUNNER_OS}-${DOCKERFILE_HASH}" >> "$GITHUB_ENV"
       shell: bash
 
     - name: Cache Trivy DB
