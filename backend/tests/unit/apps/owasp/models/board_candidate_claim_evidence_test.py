@@ -187,8 +187,8 @@ class TestBoardCandidateClaimEvidenceModel:
         with _mock_evidence_full_clean(), pytest.raises(ValidationError):
             evidence.full_clean()
 
-    def test_full_clean_missing_content_type_passes(self):
-        """Test that full_clean passes when content_type is absent (e.g. FieldFile)."""
+    def test_full_clean_missing_content_type_raises_error(self):
+        """Test that full_clean raises ValidationError when content_type is absent."""
         mock_file = MagicMock()
         mock_file.name = "document.pdf"
         mock_file.size = 1000
@@ -201,14 +201,14 @@ class TestBoardCandidateClaimEvidenceModel:
         evidence.claim_id = 1
         evidence.file = mock_file
 
-        with _mock_evidence_full_clean():
+        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
             evidence.full_clean()
 
-    def test_full_clean_none_content_type_passes(self):
-        """Test that full_clean passes when content_type is None."""
+    def test_full_clean_none_content_type_raises_error(self):
+        """Test that full_clean raises ValidationError when content_type is None."""
         evidence = self._evidence_with_file(content_type=None)
 
-        with _mock_evidence_full_clean():
+        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
             evidence.full_clean()
 
     @pytest.mark.parametrize(
