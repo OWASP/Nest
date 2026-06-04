@@ -23,7 +23,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-community-snapshots:/home/owasp/.venv
 
   cache:
     command: >
@@ -41,7 +41,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - cache-data-community-snapshots:/data
 
   db:
     container_name: nest-db
@@ -55,7 +55,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data-community-snapshots:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -96,8 +96,8 @@ services:
       - 3000:3000
     volumes:
       - ../../frontend:/home/owasp
-      - frontend-next:/home/owasp/.next
-      - frontend-node-modules:/home/owasp/node_modules
+      - frontend-next-community-snapshots:/home/owasp/.next
+      - frontend-node-modules-community-snapshots:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -118,7 +118,7 @@ services:
       - nest-network
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-community-snapshots:/home/owasp/.venv
 
 networks:
   nest-network:

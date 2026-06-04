@@ -20,7 +20,16 @@ class SnapshotModelMockTest(SimpleTestCase):
         self.snapshot.status = Snapshot.Status.PROCESSING
 
         # Mock ManyToMany relations
-        for field in ["new_chapters", "new_projects", "new_issues", "new_releases", "new_users"]:
+        for field in [
+            "new_chapters",
+            "new_events",
+            "new_issues",
+            "new_posts",
+            "new_projects",
+            "new_pull_requests",
+            "new_releases",
+            "new_users",
+        ]:
             m2m_mock = MagicMock()
             m2m_mock.all.return_value = []  # Simulate empty queryset
             m2m_mock.set = MagicMock()
@@ -53,6 +62,13 @@ class SnapshotModelPropertyTest(SimpleTestCase):
         result = Snapshot.new_chapters_count.fget(mock_snapshot)
         assert result == 5
 
+    def test_new_events_count(self):
+        """Test new_events_count property."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_snapshot.new_events.count.return_value = 4
+        result = Snapshot.new_events_count.fget(mock_snapshot)
+        assert result == 4
+
     def test_new_issues_count(self):
         """Test new_issues_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
@@ -60,12 +76,26 @@ class SnapshotModelPropertyTest(SimpleTestCase):
         result = Snapshot.new_issues_count.fget(mock_snapshot)
         assert result == 10
 
+    def test_new_posts_count(self):
+        """Test new_posts_count property."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_snapshot.new_posts.count.return_value = 6
+        result = Snapshot.new_posts_count.fget(mock_snapshot)
+        assert result == 6
+
     def test_new_projects_count(self):
         """Test new_projects_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
         mock_snapshot.new_projects.count.return_value = 3
         result = Snapshot.new_projects_count.fget(mock_snapshot)
         assert result == 3
+
+    def test_new_pull_requests_count(self):
+        """Test new_pull_requests_count property."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_snapshot.new_pull_requests.count.return_value = 8
+        result = Snapshot.new_pull_requests_count.fget(mock_snapshot)
+        assert result == 8
 
     def test_new_releases_count(self):
         """Test new_releases_count property."""
@@ -81,16 +111,28 @@ class SnapshotModelPropertyTest(SimpleTestCase):
         result = Snapshot.new_users_count.fget(mock_snapshot)
         assert result == 15
 
-    def test_save_generates_key_when_empty(self):
-        """Test save method auto-generates key from current date."""
+    def test_save_generates_weekly_key_when_empty(self):
+        """Test save method auto-generates weekly key from start_at date."""
         snapshot = Snapshot.__new__(Snapshot)
         snapshot.key = ""
+        snapshot.frequency = Snapshot.Frequency.WEEKLY
+        snapshot.start_at = MagicMock()
+        snapshot.start_at.isocalendar.return_value = (2025, 8, 1)
 
-        with (
-            patch("apps.owasp.models.snapshot.now") as mock_now,
-            patch.object(models.Model, "save"),
-        ):
-            mock_now.return_value.strftime.return_value = "2025-02"
+        with patch.object(models.Model, "save"):
+            snapshot.save()
+
+        assert snapshot.key == "2025-W08"
+
+    def test_save_generates_monthly_key_when_empty(self):
+        """Test save method auto-generates monthly key from start_at date."""
+        snapshot = Snapshot.__new__(Snapshot)
+        snapshot.key = ""
+        snapshot.frequency = Snapshot.Frequency.MONTHLY
+        snapshot.start_at = MagicMock()
+        snapshot.start_at.strftime.return_value = "2025-02"
+
+        with patch.object(models.Model, "save"):
             snapshot.save()
 
         assert snapshot.key == "2025-02"
