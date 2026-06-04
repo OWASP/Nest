@@ -28,7 +28,7 @@ RECENT_ISSUES_LIMIT = 100
 class SnapshotNode(strawberry.relay.Node):
     """Snapshot node."""
 
-    chapters: list[ChapterNode] = strawberry_django.field()
+    chapters: list[ChapterNode] = strawberry_django.field(prefetch_related=["chapters"])
 
     @strawberry_django.field
     def key(self, root: Snapshot) -> str:

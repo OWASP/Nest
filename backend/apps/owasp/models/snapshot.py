@@ -35,7 +35,10 @@ class Snapshot(models.Model):
     title = models.CharField(max_length=255, default="")
     key = models.CharField(max_length=10, unique=True, blank=True)
     frequency = models.CharField(
-        max_length=10, choices=Frequency.choices, default=Frequency.WEEKLY
+        max_length=10,
+        choices=Frequency.choices,
+        db_default=Frequency.WEEKLY,
+        default=Frequency.WEEKLY,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

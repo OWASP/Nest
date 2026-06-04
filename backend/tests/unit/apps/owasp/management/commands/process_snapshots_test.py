@@ -148,6 +148,9 @@ class TestProcessSnapshots:
 
             command.process_snapshot(mock_snapshot)
 
+            assert mock_get_new_items.call_count == 8
+            assert mock_get_new_items.call_args_list[1].kwargs == {"date_field": "start_date"}
+            assert mock_get_new_items.call_args_list[3].kwargs == {"date_field": "published_at"}
             assert mock_snapshot.status == Snapshot.Status.COMPLETED
             mock_snapshot.save.assert_called()
 
