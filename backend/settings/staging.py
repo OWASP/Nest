@@ -44,5 +44,9 @@ class Staging(Base):
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 
     IS_STAGING_ENVIRONMENT = True
-    SLACK_COMMANDS_ENABLED = True
-    SLACK_EVENTS_ENABLED = True
+
+    # NestBot is not provisioned on staging yet; ignore SSM Slack credentials.
+    SLACK_BOT_TOKEN = ""
+    SLACK_COMMANDS_ENABLED = False
+    SLACK_EVENTS_ENABLED = False
+    SLACK_SIGNING_SECRET = ""

@@ -19,8 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
+      cache:
+        image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-retries=5
+          --health-timeout=5s
+        ports:
+          - 6379:6379
       db:
-        image: pgvector/pgvector:pg16@sha256:b7777bdf891c085d63413b4d000eacf43ccef926b2f014163aa49dbcb4acd4c6
+        image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
         env:
           POSTGRES_DB: nest_db_fuzz
           POSTGRES_PASSWORD: nest_user_fuzz_password
@@ -32,18 +41,11 @@ jobs:
           --health-timeout=5s
         ports:
           - 5432:5432
-      cache:
-        image: redis:8.6-alpine3.23@sha256:d146f83b1e0f02fc27c26a50cee39338c736674c5959db84363e6ae3cd9e02d2
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=5s
-          --health-retries=5
-          --health-timeout=5s
-        ports:
-          - 6379:6379
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Set up backend environment
         uses: ./.github/actions/setup-backend-environment
