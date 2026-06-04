@@ -21,17 +21,17 @@ jobs:
       contents: write
     uses: ./.github/workflows/run-environment.yaml
     with:
-      environment: staging
-      env_display: Staging
-      release_version: ${{ inputs.release_version }}
-      base_url: https://nest.owasp.dev
-      backend_uid: '1001'
       backend_gid: '1001'
+      backend_uid: '1001'
       backend_use_fargate_spot: true
+      base_url: https://nest.owasp.dev
       django_configuration: Staging
       django_settings_module: settings.staging
       enable_cron_tasks: false
       enable_nat_gateway: false
       enable_rds_proxy: false
+      env_display: Staging
+      environment: staging
       frontend_use_fargate_spot: true
+      release_version: ${{ inputs.release_version }}
       tasks_use_fargate_spot: true

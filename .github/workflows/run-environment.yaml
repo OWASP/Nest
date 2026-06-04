@@ -3,39 +3,22 @@ name: Run environment workflow
 on:
   workflow_call:
     inputs:
-      environment:
-        description: The environment name (e.g., staging, production)
-        required: true
-        type: string
-      env_display:
-        description: The display name of the environment (e.g., Staging, Production)
-        required: true
-        type: string
-      release_version:
-        description: The release version to set
-        required: true
-        type: string
-      release_tag:
-        description: The release tag for SBOM uploads (production only)
-        required: false
-        type: string
-        default: ''
-      base_url:
-        description: The base URL for Lighthouse and ZAP scans
+      backend_gid:
+        description: Backend GID for Docker build
         required: true
         type: string
       backend_uid:
         description: Backend UID for Docker build
         required: true
         type: string
-      backend_gid:
-        description: Backend GID for Docker build
-        required: true
-        type: string
       backend_use_fargate_spot:
         description: Use Fargate spot for backend
         required: true
         type: boolean
+      base_url:
+        description: The base URL for Lighthouse and ZAP scans
+        required: true
+        type: string
       django_configuration:
         description: Django configuration string
         required: true
@@ -61,10 +44,27 @@ on:
         description: Enable RDS proxy
         required: true
         type: boolean
+      env_display:
+        description: The display name of the environment (e.g., Staging, Production)
+        required: true
+        type: string
+      environment:
+        description: The environment name (e.g., staging, production)
+        required: true
+        type: string
       frontend_use_fargate_spot:
         description: Use Fargate spot for frontend
         required: true
         type: boolean
+      release_tag:
+        description: The release tag for SBOM uploads (production only)
+        required: false
+        type: string
+        default: ''
+      release_version:
+        description: The release version to set
+        required: true
+        type: string
       tasks_use_fargate_spot:
         description: Use Fargate spot for tasks
         required: true
