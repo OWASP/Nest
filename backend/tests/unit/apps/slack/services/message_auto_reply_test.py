@@ -45,10 +45,8 @@ class TestMessageAutoReply:
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
-    @patch("apps.slack.services.message_auto_reply.get_blocks")
     def test_generate_ai_reply_success(
         self,
-        mock_get_blocks,
         mock_process_ai_query,
         mock_message_get,
         mock_app,
@@ -57,15 +55,6 @@ class TestMessageAutoReply:
         """Test successful AI reply generation."""
         mock_message_get.return_value = mock_message
         mock_process_ai_query.return_value = "OWASP is a security organization..."
-        mock_get_blocks.return_value = [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "OWASP is a security organization...",
-                },
-            }
-        ]
         mock_client = Mock()
         mock_app.client = mock_client
         mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
@@ -78,7 +67,6 @@ class TestMessageAutoReply:
             limit=1,
         )
         mock_process_ai_query.assert_called_once_with(query=mock_message.text)
-        mock_get_blocks.assert_called_once_with("OWASP is a security organization...")
         mock_client.chat_postMessage.assert_called_once_with(
             channel=mock_message.conversation.slack_channel_id,
             blocks=[
@@ -146,12 +134,10 @@ class TestMessageAutoReply:
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
-    @patch("apps.slack.services.message_auto_reply.get_blocks")
     @patch("apps.slack.services.message_auto_reply.logger")
     def test_generate_ai_reply_slack_api_error(
         self,
         mock_logger,
-        mock_get_blocks,
         mock_process_ai_query,
         mock_message_get,
         mock_app,
@@ -163,15 +149,6 @@ class TestMessageAutoReply:
         mock_app.client = mock_client
         mock_client.conversations_replies.side_effect = SlackApiError("API Error", response=Mock())
         mock_process_ai_query.return_value = "OWASP is a security organization..."
-        mock_get_blocks.return_value = [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "OWASP is a security organization...",
-                },
-            }
-        ]
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
@@ -220,3 +197,4 @@ class TestMessageAutoReply:
         generate_ai_reply_if_unanswered(mock_message.id)
 
         mock_client.chat_postMessage.assert_not_called()
+     

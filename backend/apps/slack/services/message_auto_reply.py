@@ -6,8 +6,9 @@ from django_rq import job
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
-from apps.slack.common.handlers.ai import get_blocks, process_ai_query
+from apps.slack.common.handlers.ai import process_ai_query
 from apps.slack.models import Message
+from apps.slack.blocks import markdown
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
 
     client.chat_postMessage(
         channel=message.conversation.slack_channel_id,
-        blocks=get_blocks(ai_response_text),
+        blocks=[markdown(ai_response_text)],
         text=ai_response_text,
         thread_ts=message.slack_message_id,
     )
