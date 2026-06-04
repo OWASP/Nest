@@ -18,6 +18,7 @@ jobs:
       # NOSEMGREP: yaml.github-actions.security.pull-request-target-code-checkout.pull-request-target-code-checkout
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
+          persist-credentials: false
           # Explicitly checking out base branch (target repository), not PR code.
           ref: ${{ github.event.pull_request.base.sha }}
 
