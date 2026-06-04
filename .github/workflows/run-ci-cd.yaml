@@ -103,105 +103,19 @@ jobs:
     permissions: {}
     uses: ./.github/workflows/set-release-version.yaml
 
-  build-staging-images:
-    name: Build Staging Images
+  run-staging:
+    name: Run staging jobs
     if: |
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - set-release-version
     permissions:
-      contents: read
-    uses: ./.github/workflows/build-images.yaml
-    with:
-      aws_role_name: nest-staging-terraform
-      aws_role_session_name: GitHubActions-BuildStagingImages
-      backend_ecr_cache_repo: nest-staging-backend-cache
-      backend_ecr_repo: nest-staging-backend
-      backend_uid: '1001'
-      backend_gid: '1001'
-      environment: staging
-      frontend_ecr_cache_repo: nest-staging-frontend-cache
-      frontend_ecr_repo: nest-staging-frontend
-      release_version: ${{ needs.set-release-version.outputs.release_version }}
-
-  scan-staging-images:
-    name: Scan Staging Images
-    needs:
-      - build-staging-images
-      - set-release-version
-    permissions:
-      actions: write
       contents: write
-    uses: ./.github/workflows/scan-images.yaml
+      actions: write
+    uses: ./.github/workflows/run-staging.yaml
     with:
-      aws_role_name: nest-staging-terraform
-      aws_role_session_name: GitHubActions-ScanStagingImages
-      backend_ecr_repo: nest-staging-backend
-      environment: staging
-      frontend_ecr_repo: nest-staging-frontend
       release_version: ${{ needs.set-release-version.outputs.release_version }}
-
-  bootstrap-nest-staging-infrastructure:
-    name: Bootstrap Nest Staging Infrastructure
-    if: |
-      (github.repository == 'OWASP/Nest' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'))
-    needs:
-      - scan-staging-images
-    permissions:
-      contents: read
-    uses: ./.github/workflows/bootstrap-infrastructure.yaml
-    with:
-      environment: staging
-
-  deploy-staging-nest:
-    name: Deploy Nest to Staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    needs:
-      - bootstrap-nest-staging-infrastructure
-      - set-release-version
-    permissions:
-      contents: read
-    uses: ./.github/workflows/deploy-nest.yaml
-    with:
-      aws_role_name: nest-staging-terraform
-      aws_role_session_name: GitHubActions-StagingDeploy
-      backend_use_fargate_spot: true
-      django_configuration: Staging
-      django_settings_module: settings.staging
-      enable_cron_tasks: false
-      enable_nat_gateway: false
-      enable_rds_proxy: false
-      environment: staging
-      frontend_use_fargate_spot: true
-      index_task_definition: nest-staging-index-data
-      migrate_task_definition: nest-staging-migrate
-      release_version: ${{ needs.set-release-version.outputs.release_version }}
-      tasks_use_fargate_spot: true
-      tf_state_key: staging/terraform.tfstate
-
-  run-staging-lighthouse-ci:
-    name: Run staging Lighthouse CI
-    needs:
-      - deploy-staging-nest
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-lighthouse-ci.yaml
-    with:
-      base_url: https://nest.owasp.dev
-
-  run-staging-zap-baseline-scan:
-    name: Run staging ZAP baseline scan
-    needs:
-      - deploy-staging-nest
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-zap-baseline-scan.yaml
-    with:
-      base_url: https://nest.owasp.dev
 
   build-production-images:
     name: Build Production Images
