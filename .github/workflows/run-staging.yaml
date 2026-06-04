@@ -14,89 +14,24 @@ env:
 permissions: {}
 
 jobs:
-  build-images:
-    name: Build images
-    permissions:
-      contents: read
-    uses: ./.github/workflows/build-images.yaml
-    with:
-      aws_role_name: nest-staging-terraform
-      aws_role_session_name: GitHubActions-BuildStagingImages
-      backend_ecr_cache_repo: nest-staging-backend-cache
-      backend_ecr_repo: nest-staging-backend
-      backend_uid: '1001'
-      backend_gid: '1001'
-      environment: staging
-      frontend_ecr_cache_repo: nest-staging-frontend-cache
-      frontend_ecr_repo: nest-staging-frontend
-      release_version: ${{ inputs.release_version }}
-
-  scan-images:
-    name: Scan images
-    needs:
-      - build-images
+  run-environment:
+    name: Run staging environment
     permissions:
       actions: write
       contents: write
-    uses: ./.github/workflows/scan-images.yaml
+    uses: ./.github/workflows/run-environment.yaml
     with:
-      aws_role_name: nest-staging-terraform
-      aws_role_session_name: GitHubActions-ScanStagingImages
-      backend_ecr_repo: nest-staging-backend
       environment: staging
-      frontend_ecr_repo: nest-staging-frontend
+      env_display: Staging
       release_version: ${{ inputs.release_version }}
-
-  bootstrap-nest-infrastructure:
-    name: Bootstrap Nest infrastructure
-    needs:
-      - scan-images
-    permissions:
-      contents: read
-    uses: ./.github/workflows/bootstrap-infrastructure.yaml
-    with:
-      environment: staging
-
-  deploy-nest:
-    name: Deploy Nest
-    needs:
-      - bootstrap-nest-infrastructure
-    permissions:
-      contents: read
-    uses: ./.github/workflows/deploy-nest.yaml
-    with:
-      aws_role_name: nest-staging-terraform
-      aws_role_session_name: GitHubActions-StagingDeploy
+      base_url: https://nest.owasp.dev
+      backend_uid: '1001'
+      backend_gid: '1001'
       backend_use_fargate_spot: true
       django_configuration: Staging
       django_settings_module: settings.staging
       enable_cron_tasks: false
       enable_nat_gateway: false
       enable_rds_proxy: false
-      environment: staging
       frontend_use_fargate_spot: true
-      index_task_definition: nest-staging-index-data
-      migrate_task_definition: nest-staging-migrate
-      release_version: ${{ inputs.release_version }}
       tasks_use_fargate_spot: true
-      tf_state_key: staging/terraform.tfstate
-
-  run-lighthouse-ci:
-    name: Run Lighthouse CI
-    needs:
-      - deploy-nest
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-lighthouse-ci.yaml
-    with:
-      base_url: https://nest.owasp.dev
-
-  run-zap-baseline-scan:
-    name: Run ZAP baseline scan
-    needs:
-      - deploy-nest
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-zap-baseline-scan.yaml
-    with:
-      base_url: https://nest.owasp.dev
