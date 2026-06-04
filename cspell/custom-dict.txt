@@ -207,6 +207,7 @@ saft
 sakanashi
 samm
 sbom
+sboms
 schemathesis
 semgrep
 seo
