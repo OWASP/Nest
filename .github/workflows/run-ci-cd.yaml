@@ -216,5 +216,5 @@ jobs:
       contents: write
     uses: ./.github/workflows/run-production.yaml
     with:
-      release_version: ${{ needs.set-release-version.outputs.release_version }}
       release_tag: ${{ github.event.release.tag_name }}
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
