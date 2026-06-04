@@ -47,60 +47,60 @@ class Snapshot(models.Model):
     error_message = models.TextField(blank=True, default="")
 
     # Many-to-Many relationships
-    new_chapters = models.ManyToManyField("owasp.Chapter", related_name="snapshots", blank=True)
-    new_events = models.ManyToManyField("owasp.Event", related_name="snapshots", blank=True)
-    new_issues = models.ManyToManyField("github.Issue", related_name="snapshots", blank=True)
-    new_posts = models.ManyToManyField("owasp.Post", related_name="snapshots", blank=True)
-    new_projects = models.ManyToManyField("owasp.Project", related_name="snapshots", blank=True)
-    new_pull_requests = models.ManyToManyField(
+    chapters = models.ManyToManyField("owasp.Chapter", related_name="snapshots", blank=True)
+    events = models.ManyToManyField("owasp.Event", related_name="snapshots", blank=True)
+    issues = models.ManyToManyField("github.Issue", related_name="snapshots", blank=True)
+    posts = models.ManyToManyField("owasp.Post", related_name="snapshots", blank=True)
+    projects = models.ManyToManyField("owasp.Project", related_name="snapshots", blank=True)
+    pull_requests = models.ManyToManyField(
         "github.PullRequest", related_name="snapshots", blank=True
     )
-    new_releases = models.ManyToManyField("github.Release", related_name="snapshots", blank=True)
-    new_users = models.ManyToManyField("github.User", related_name="snapshots", blank=True)
+    releases = models.ManyToManyField("github.Release", related_name="snapshots", blank=True)
+    users = models.ManyToManyField("github.User", related_name="snapshots", blank=True)
 
     def __str__(self):
         """Return a string representation of the snapshot."""
         return self.title
 
     @property
-    def new_chapters_count(self) -> int:
-        """Return the count of new chapters."""
-        return self.new_chapters.count()
+    def chapters_count(self) -> int:
+        """Return the count of chapters."""
+        return self.chapters.count()
 
     @property
-    def new_events_count(self) -> int:
-        """Return the count of new events."""
-        return self.new_events.count()
+    def events_count(self) -> int:
+        """Return the count of events."""
+        return self.events.count()
 
     @property
-    def new_issues_count(self) -> int:
-        """Return the count of new issues."""
-        return self.new_issues.count()
+    def issues_count(self) -> int:
+        """Return the count of issues."""
+        return self.issues.count()
 
     @property
-    def new_posts_count(self) -> int:
-        """Return the count of new posts."""
-        return self.new_posts.count()
+    def posts_count(self) -> int:
+        """Return the count of posts."""
+        return self.posts.count()
 
     @property
-    def new_projects_count(self) -> int:
-        """Return the count of new projects."""
-        return self.new_projects.count()
+    def projects_count(self) -> int:
+        """Return the count of projects."""
+        return self.projects.count()
 
     @property
-    def new_pull_requests_count(self) -> int:
-        """Return the count of new pull requests."""
-        return self.new_pull_requests.count()
+    def pull_requests_count(self) -> int:
+        """Return the count of pull requests."""
+        return self.pull_requests.count()
 
     @property
-    def new_releases_count(self) -> int:
-        """Return the count of new releases."""
-        return self.new_releases.count()
+    def releases_count(self) -> int:
+        """Return the count of releases."""
+        return self.releases.count()
 
     @property
-    def new_users_count(self) -> int:
-        """Return the count of new users."""
-        return self.new_users.count()
+    def users_count(self) -> int:
+        """Return the count of users."""
+        return self.users.count()
 
     def save(self, *args, **kwargs) -> None:
         """Save the snapshot instance."""

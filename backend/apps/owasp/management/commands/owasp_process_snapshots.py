@@ -6,10 +6,13 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.github.models.user import User
 from apps.owasp.exceptions import SnapshotProcessingError
 from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.event import Event
+from apps.owasp.models.post import Post
 from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot import Snapshot
 
@@ -66,26 +69,43 @@ class Command(BaseCommand):
 
         try:
             # Fetch new data for each model type
-            new_chapters = self.get_new_items(
+            chapters = self.get_new_items(
                 Chapter,
                 snapshot.start_at,
                 snapshot.end_at,
             ).filter(
                 is_active=True,
             )
-            new_issues = self.get_new_items(
+            events = self.get_new_items(
+                Event,
+                snapshot.start_at,
+                snapshot.end_at,
+                date_field="start_date",
+            )
+            issues = self.get_new_items(
                 Issue,
                 snapshot.start_at,
                 snapshot.end_at,
             )
-            new_projects = self.get_new_items(
+            posts = self.get_new_items(
+                Post,
+                snapshot.start_at,
+                snapshot.end_at,
+                date_field="published_at",
+            )
+            projects = self.get_new_items(
                 Project,
                 snapshot.start_at,
                 snapshot.end_at,
             ).filter(
                 is_active=True,
             )
-            new_releases = self.get_new_items(
+            pull_requests = self.get_new_items(
+                PullRequest,
+                snapshot.start_at,
+                snapshot.end_at,
+            )
+            releases = self.get_new_items(
                 Release,
                 snapshot.start_at,
                 snapshot.end_at,
@@ -93,18 +113,21 @@ class Command(BaseCommand):
                 is_draft=False,
                 is_pre_release=False,
             )
-            new_users = self.get_new_items(
+            users = self.get_new_items(
                 User,
                 snapshot.start_at,
                 snapshot.end_at,
             )
 
             # Add items to snapshot
-            snapshot.new_chapters.add(*new_chapters)
-            snapshot.new_issues.add(*new_issues)
-            snapshot.new_projects.add(*new_projects)
-            snapshot.new_releases.add(*new_releases)
-            snapshot.new_users.add(*new_users)
+            snapshot.chapters.add(*chapters)
+            snapshot.events.add(*events)
+            snapshot.issues.add(*issues)
+            snapshot.posts.add(*posts)
+            snapshot.projects.add(*projects)
+            snapshot.pull_requests.add(*pull_requests)
+            snapshot.releases.add(*releases)
+            snapshot.users.add(*users)
 
             # Update status to completed
             snapshot.status = Snapshot.Status.COMPLETED
@@ -112,18 +135,27 @@ class Command(BaseCommand):
 
             logger.info("Successfully processed snapshot %s", snapshot.id)
             logger.info(
-                "Added: %s chapters, %s projects, %s issues, %s releases, %s users",
-                new_chapters.count(),
-                new_projects.count(),
-                new_issues.count(),
-                new_releases.count(),
-                new_users.count(),
+                "Added: %s chapters, %s events, %s issues, %s posts, "
+                "%s projects, %s pull requests, %s releases, %s users",
+                chapters.count(),
+                events.count(),
+                issues.count(),
+                posts.count(),
+                projects.count(),
+                pull_requests.count(),
+                releases.count(),
+                users.count(),
             )
 
         except Exception as e:
             error_msg = f"Failed to process snapshot: {e}"
             raise SnapshotProcessingError(error_msg) from e
 
-    def get_new_items(self, model, start_at, end_at):
+    def get_new_items(self, model, start_at, end_at, date_field="created_at"):
         """Get only newly created items within the given timeframe."""
-        return model.objects.filter(created_at__gte=start_at, created_at__lte=end_at)
+        return model.objects.filter(
+            **{
+                f"{date_field}__gte": start_at,
+                f"{date_field}__lte": end_at,
+            }
+        )

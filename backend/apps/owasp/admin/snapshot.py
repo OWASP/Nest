@@ -11,14 +11,18 @@ class SnapshotAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
     """Admin for Snapshot model."""
 
     autocomplete_fields = (
-        "new_chapters",
-        "new_issues",
-        "new_projects",
-        "new_releases",
-        "new_users",
+        "chapters",
+        "events",
+        "issues",
+        "posts",
+        "projects",
+        "pull_requests",
+        "releases",
+        "users",
     )
     list_display = (
         "title",
+        "frequency",
         "start_at",
         "end_at",
         "status",
@@ -27,6 +31,7 @@ class SnapshotAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
     )
     list_filter = (
         "status",
+        "frequency",
         "start_at",
         "end_at",
     )
