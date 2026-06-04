@@ -1,4 +1,4 @@
-name: Run scan images
+name: Upload SBOMs
 
 on:
   workflow_call:
@@ -16,15 +16,20 @@ on:
         required: true
         type: string
       environment:
-        description: The workflow environment to use for scanning (e.g., staging, production)
+        description: The workflow environment (e.g., staging, production)
         required: true
         type: string
       frontend_ecr_repo:
         description: Frontend ECR repository name
         required: true
         type: string
+      release_tag:
+        description: Release tag for uploading SBOMs
+        required: false
+        type: string
+        default: ''
       release_version:
-        description: The release version to set
+        description: The release version to use
         required: true
         type: string
 
@@ -34,16 +39,18 @@ env:
 permissions: {}
 
 jobs:
-  scan-images:
-    name: Scan Images
+  upload-sboms:
+    name: Upload SBOMs
     environment: ${{ inputs.environment }}
     env:
       BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
+      RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
-      contents: read
+      actions: write
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -71,10 +78,31 @@ jobs:
           docker pull "$BACKEND_IMAGE"
           docker pull "$FRONTEND_IMAGE"
 
-      - name: Run trivy scan
-        uses: ./.github/actions/run-trivy-scan
+      - name: Generate SBOM for backend image
+        run: |
+          make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
+
+      - name: Generate SBOM for frontend image
+        run: |
+          make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+
+      - name: Upload SBOMs to release
+        if: ${{ inputs.environment == 'production' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            "backend-sbom-$RELEASE_VERSION.cdx.json" \
+            "frontend-sbom-$RELEASE_VERSION.cdx.json"
+
+      - name: Upload SBOMs as artifact
+        if: ${{ inputs.environment == 'staging' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          command: |
-            make security-scan-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-            make security-scan-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+          name: staging-sbom-${{ env.RELEASE_VERSION }}
+          path: |
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 10

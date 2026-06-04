@@ -131,12 +131,28 @@ jobs:
       - build-staging-images
       - set-release-version
     permissions:
-      actions: write
-      contents: write
+      contents: read
     uses: ./.github/workflows/scan-images.yaml
     with:
       aws_role_name: nest-staging-terraform
       aws_role_session_name: GitHubActions-ScanStagingImages
+      backend_ecr_repo: nest-staging-backend
+      environment: staging
+      frontend_ecr_repo: nest-staging-frontend
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
+
+  upload-staging-sboms:
+    name: Upload Staging SBOMs
+    needs:
+      - scan-staging-images
+      - set-release-version
+    permissions:
+      actions: write
+      contents: write
+    uses: ./.github/workflows/upload-sboms.yaml
+    with:
+      aws_role_name: nest-staging-terraform
+      aws_role_session_name: GitHubActions-UploadStagingSBOMs
       backend_ecr_repo: nest-staging-backend
       environment: staging
       frontend_ecr_repo: nest-staging-frontend
@@ -236,13 +252,32 @@ jobs:
       - build-production-images
       - set-release-version
     permissions:
-      # Broader than typical scan jobs: required for "Upload SBOMs" (gh release upload).
-      actions: write
-      contents: write
+      contents: read
     uses: ./.github/workflows/scan-images.yaml
     with:
       aws_role_name: nest-production-terraform
       aws_role_session_name: GitHubActions-ScanProductionImages
+      backend_ecr_repo: nest-production-backend
+      environment: production
+      frontend_ecr_repo: nest-production-frontend
+      release_version: ${{ needs.set-release-version.outputs.release_version }}
+
+  upload-production-sboms:
+    name: Upload Production SBOMs
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.event_name == 'release' &&
+      github.event.action == 'published'
+    needs:
+      - scan-production-images
+      - set-release-version
+    permissions:
+      actions: write
+      contents: write
+    uses: ./.github/workflows/upload-sboms.yaml
+    with:
+      aws_role_name: nest-production-terraform
+      aws_role_session_name: GitHubActions-UploadProductionSBOMs
       backend_ecr_repo: nest-production-backend
       environment: production
       frontend_ecr_repo: nest-production-frontend
