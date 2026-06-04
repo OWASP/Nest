@@ -149,8 +149,8 @@ jobs:
     with:
       release_version: ${{ needs.set-release-version.outputs.release_version }}
 
-  build-production-images:
-    name: Build Production Images
+  run-production:
+    name: Run production jobs
     if: |
       github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
@@ -158,111 +158,9 @@ jobs:
     needs:
       - set-release-version
     permissions:
-      contents: read
-    uses: ./.github/workflows/build-images.yaml
-    with:
-      aws_role_name: nest-production-terraform
-      aws_role_session_name: GitHubActions-BuildProductionImages
-      backend_ecr_cache_repo: nest-production-backend-cache
-      backend_ecr_repo: nest-production-backend
-      backend_uid: '1002'
-      backend_gid: '1002'
-      environment: production
-      frontend_ecr_cache_repo: nest-production-frontend-cache
-      frontend_ecr_repo: nest-production-frontend
-      release_version: ${{ needs.set-release-version.outputs.release_version }}
-
-  scan-production-images:
-    name: Scan Production Images
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.event_name == 'release' &&
-      github.event.action == 'published'
-    needs:
-      - build-production-images
-      - set-release-version
-    permissions:
-      # Broader than typical scan jobs: required for "Upload SBOMs" (gh release upload).
       actions: write
       contents: write
-    uses: ./.github/workflows/scan-images.yaml
+    uses: ./.github/workflows/run-production.yaml
     with:
-      aws_role_name: nest-production-terraform
-      aws_role_session_name: GitHubActions-ScanProductionImages
-      backend_ecr_repo: nest-production-backend
-      environment: production
-      frontend_ecr_repo: nest-production-frontend
       release_tag: ${{ github.event.release.tag_name }}
       release_version: ${{ needs.set-release-version.outputs.release_version }}
-
-  bootstrap-nest-production-infrastructure:
-    name: Bootstrap Nest Production Infrastructure
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.event_name == 'release' &&
-      github.event.action == 'published'
-    needs:
-      - scan-production-images
-    permissions:
-      contents: read
-    uses: ./.github/workflows/bootstrap-infrastructure.yaml
-    with:
-      environment: production
-
-  deploy-production-nest:
-    name: Deploy Nest to Production
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.event_name == 'release' &&
-      github.event.action == 'published'
-    needs:
-      - bootstrap-nest-production-infrastructure
-      - set-release-version
-    permissions:
-      contents: read
-    uses: ./.github/workflows/deploy-nest.yaml
-    with:
-      aws_role_name: nest-production-terraform
-      aws_role_session_name: GitHubActions-ProductionDeploy
-      backend_use_fargate_spot: false
-      django_configuration: Production
-      django_settings_module: settings.production
-      enable_additional_parameters: true
-      enable_cron_tasks: true
-      enable_nat_gateway: true
-      enable_rds_proxy: true
-      environment: production
-      frontend_use_fargate_spot: false
-      index_task_definition: nest-production-index-data
-      migrate_task_definition: nest-production-migrate
-      release_version: ${{ needs.set-release-version.outputs.release_version }}
-      tasks_use_fargate_spot: false
-      tf_state_key: production/terraform.tfstate
-
-  run-production-lighthouse-ci:
-    name: Run production Lighthouse CI
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.event_name == 'release' &&
-      github.event.action == 'published'
-    needs:
-      - deploy-production-nest
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-lighthouse-ci.yaml
-    with:
-      base_url: https://nest.owasp.org
-
-  run-production-zap-baseline-scan:
-    name: Run production ZAP baseline scan
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.event_name == 'release' &&
-      github.event.action == 'published'
-    needs:
-      - deploy-production-nest
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-zap-baseline-scan.yaml
-    with:
-      base_url: https://nest.owasp.org
