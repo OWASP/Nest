@@ -26,8 +26,17 @@ class Snapshot(models.Model):
         COMPLETED = "completed", "Completed"
         ERROR = "error", "Error"
 
+    class Frequency(models.TextChoices):
+        """Snapshot frequency choices."""
+
+        WEEKLY = "weekly", "Weekly"
+        MONTHLY = "monthly", "Monthly"
+
     title = models.CharField(max_length=255, default="")
     key = models.CharField(max_length=10, unique=True, blank=True)
+    frequency = models.CharField(
+        max_length=10, choices=Frequency.choices, default=Frequency.WEEKLY
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -39,8 +48,13 @@ class Snapshot(models.Model):
 
     # Many-to-Many relationships
     new_chapters = models.ManyToManyField("owasp.Chapter", related_name="snapshots", blank=True)
+    new_events = models.ManyToManyField("owasp.Event", related_name="snapshots", blank=True)
     new_issues = models.ManyToManyField("github.Issue", related_name="snapshots", blank=True)
+    new_posts = models.ManyToManyField("owasp.Post", related_name="snapshots", blank=True)
     new_projects = models.ManyToManyField("owasp.Project", related_name="snapshots", blank=True)
+    new_pull_requests = models.ManyToManyField(
+        "github.PullRequest", related_name="snapshots", blank=True
+    )
     new_releases = models.ManyToManyField("github.Release", related_name="snapshots", blank=True)
     new_users = models.ManyToManyField("github.User", related_name="snapshots", blank=True)
 
@@ -54,14 +68,29 @@ class Snapshot(models.Model):
         return self.new_chapters.count()
 
     @property
+    def new_events_count(self) -> int:
+        """Return the count of new events."""
+        return self.new_events.count()
+
+    @property
     def new_issues_count(self) -> int:
         """Return the count of new issues."""
         return self.new_issues.count()
 
     @property
+    def new_posts_count(self) -> int:
+        """Return the count of new posts."""
+        return self.new_posts.count()
+
+    @property
     def new_projects_count(self) -> int:
         """Return the count of new projects."""
         return self.new_projects.count()
+
+    @property
+    def new_pull_requests_count(self) -> int:
+        """Return the count of new pull requests."""
+        return self.new_pull_requests.count()
 
     @property
     def new_releases_count(self) -> int:
@@ -76,6 +105,14 @@ class Snapshot(models.Model):
     def save(self, *args, **kwargs) -> None:
         """Save the snapshot instance."""
         if not self.key:  # automatically set the key
-            self.key = now().strftime("%Y-%m")
+            reference_dt = self.start_at or now()
+            if self.frequency == self.Frequency.WEEKLY:
+                iso_year, iso_week, _ = reference_dt.isocalendar()
+                self.key = f"{iso_year}-W{iso_week:02d}"
+            elif self.frequency == self.Frequency.MONTHLY:
+                self.key = reference_dt.strftime("%Y-%m")
+            else:
+                msg = f"Unsupported snapshot frequency: {self.frequency}"
+                raise ValueError(msg)
 
         super().save(*args, **kwargs)
