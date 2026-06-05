@@ -13,11 +13,15 @@ on:
         type: string
         default: http://localhost:9500/api/v0
 
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
 jobs:
   run-fuzz-tests:
     name: Run Fuzz Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     services:
       cache:
         image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
@@ -67,3 +71,4 @@ jobs:
           set -a && source ./.env.fuzz-tests && set +a
           poetry run sh ./entrypoint.fuzz.sh
         working-directory: backend
+    timeout-minutes: 20
