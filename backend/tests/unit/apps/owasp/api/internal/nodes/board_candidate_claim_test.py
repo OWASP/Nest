@@ -13,13 +13,13 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         }
         expected_field_names = {
             "_id",
+            "created_at",
             "description",
             "is_locked",
-            "created_at",
-            "updated_at",
             "order",
             "status",
             "title",
+            "updated_at",
             "withdrawn_at",
             "withdrawn_reason",
         }

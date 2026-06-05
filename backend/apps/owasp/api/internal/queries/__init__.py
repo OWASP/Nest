@@ -19,9 +19,9 @@ from .stats import StatsQuery
 
 
 class OwaspQuery(
-    BoardOfDirectorsQuery,
-    BoardCandidateClaimQuery,
     BoardCandidateClaimEvidenceQuery,
+    BoardCandidateClaimQuery,
+    BoardOfDirectorsQuery,
     ChapterQuery,
     CommitteeQuery,
     EventQuery,

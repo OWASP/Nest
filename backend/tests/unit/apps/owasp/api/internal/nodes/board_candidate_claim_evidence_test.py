@@ -18,17 +18,17 @@ class TestBoardCandidateClaimEvidenceNode(GraphQLNodeBaseTest):
         }
         expected_field_names = {
             "_id",
+            "created_at",
             "description",
             "file_name",
             "file_size",
             "file_url",
             "is_removed",
-            "created_at",
-            "updated_at",
             "removed_at",
             "removed_reason",
             "source_url",
             "title",
+            "updated_at",
         }
         assert field_names == expected_field_names
 
