@@ -35,7 +35,11 @@ class BoardCandidateClaimEvidenceQuery:
         if claim is None:
             return []
 
-        is_self = user.is_authenticated and str(user) == claim.candidate.member.login
+        is_self = (
+            user.is_authenticated
+            and claim.candidate.member is not None
+            and str(user) == claim.candidate.member.login
+        )
 
         if not is_self and claim.status != BoardCandidateClaim.Status.APPROVED:
             return []

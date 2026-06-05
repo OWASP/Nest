@@ -39,6 +39,35 @@ class TestBoardOfDirectorsModel:
 
         assert board.owasp_url == "https://board.owasp.org/elections/2025_elections"
 
+    def test_has_candidate_method(self):
+        board = BoardOfDirectors(year=2025)
+
+        assert hasattr(board, "get_candidate")
+        assert callable(board.get_candidate)
+
+    def test_get_candidate_returns_matching_member(self):
+        board = BoardOfDirectors(year=2025)
+        mock_qs = Mock()
+        mock_member = Mock()
+        mock_qs.filter.return_value.first.return_value = mock_member
+        board.get_candidates = Mock(return_value=mock_qs)
+
+        result = board.get_candidate("test-login")
+
+        assert result == mock_member
+        mock_qs.filter.assert_called_once_with(member__login="test-login")
+        mock_qs.filter.return_value.first.assert_called_once()
+
+    def test_get_candidate_returns_none_when_not_found(self):
+        board = BoardOfDirectors(year=2025)
+        mock_qs = Mock()
+        mock_qs.filter.return_value.first.return_value = None
+        board.get_candidates = Mock(return_value=mock_qs)
+
+        result = board.get_candidate("non-existent-login")
+
+        assert result is None
+
     @patch("apps.owasp.models.board_of_directors.ContentType")
     @patch("apps.owasp.models.board_of_directors.EntityMember")
     def test_get_candidates_returns_filtered_queryset(self, mock_entity_member, mock_content_type):
