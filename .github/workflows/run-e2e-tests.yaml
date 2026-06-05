@@ -1,4 +1,4 @@
-name: Run e2e tests
+name: E2E tests
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   run-e2e-tests:
-    name: Run e2e tests
+    name: E2E tests
     env:
       NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
       NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/

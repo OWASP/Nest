@@ -1,4 +1,4 @@
-name: Run Lighthouse CI
+name: Lighthouse CI
 
 on:
   workflow_call:
@@ -15,7 +15,7 @@ permissions: {}
 
 jobs:
   run-lighthouse-ci:
-    name: Run Lighthouse CI
+    name: Lighthouse CI
     permissions:
       contents: read
     runs-on: ubuntu-latest

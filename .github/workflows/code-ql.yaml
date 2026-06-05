@@ -1,4 +1,4 @@
-name: Run CodeQL
+name: CodeQL
 
 on:
   merge_group:

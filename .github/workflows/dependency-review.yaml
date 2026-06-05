@@ -1,4 +1,4 @@
-name: Run dependency review
+name: Dependency review
 
 on:
   pull_request:

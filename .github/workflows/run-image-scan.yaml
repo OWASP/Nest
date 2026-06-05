@@ -1,4 +1,4 @@
-name: Run scan images
+name: Image scan
 
 on:
   workflow_call:
@@ -39,8 +39,8 @@ env:
 permissions: {}
 
 jobs:
-  scan-images:
-    name: Scan Images
+  run-image-scan:
+    name: Image scan
     environment: ${{ inputs.environment }}
     env:
       BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version

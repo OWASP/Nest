@@ -1,4 +1,4 @@
-name: Run ZAP baseline scan
+name: ZAP baseline scan
 
 on:
   workflow_call:
@@ -15,7 +15,7 @@ permissions: {}
 
 jobs:
   run-zap-baseline-scan:
-    name: Run ZAP baseline scan
+    name: ZAP baseline scan
     permissions:
       contents: read
     runs-on: ubuntu-latest

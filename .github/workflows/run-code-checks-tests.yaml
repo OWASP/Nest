@@ -1,4 +1,4 @@
-name: Run checks and tests
+name: Code checks tests
 
 on:
   workflow_call:
@@ -9,16 +9,16 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-code-quality-checks:
-    name: Run code quality checks
+  run-code-checks:
+    name: Code checks
     permissions:
       contents: read
-    uses: ./.github/workflows/run-code-quality-checks.yaml
+    uses: ./.github/workflows/run-code-checks.yaml
 
   run-backend-tests:
-    name: Run backend tests
+    name: Backend tests
     needs:
-      - run-code-quality-checks
+      - run-code-checks
     permissions:
       actions: write
       contents: read
@@ -26,9 +26,9 @@ jobs:
     uses: ./.github/workflows/run-backend-tests.yaml
 
   run-frontend-tests:
-    name: Run frontend tests
+    name: Frontend tests
     needs:
-      - run-code-quality-checks
+      - run-code-checks
     permissions:
       actions: read
       contents: read
@@ -36,35 +36,35 @@ jobs:
     uses: ./.github/workflows/run-frontend-tests.yaml
 
   run-e2e-tests:
-    name: Run e2e tests
+    name: E2E tests
     needs:
-      - run-code-quality-checks
+      - run-code-checks
     permissions:
       contents: read
     uses: ./.github/workflows/run-e2e-tests.yaml
 
-  run-graphql-fuzz-tests:
-    name: Run GraphQL fuzz tests
+  run-fuzz-graphql-tests:
+    name: GraphQL fuzz tests
     if: false
     needs:
-      - run-code-quality-checks
+      - run-code-checks
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
 
-  run-rest-fuzz-tests:
-    name: Run REST fuzz tests
+  run-fuzz-rest-tests:
+    name: REST fuzz tests
     needs:
-      - run-code-quality-checks
+      - run-code-checks
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
-      test-file: rest_test.py
       rest-url: http://localhost:9500/api/v0
+      test-file: rest_test.py
 
   run-infrastructure-tests:
-    name: Run Infrastructure tests
+    name: Infrastructure tests
     needs:
-      - run-code-quality-checks
+      - run-code-checks
     permissions:
       contents: read
     uses: ./.github/workflows/run-infrastructure-tests.yaml

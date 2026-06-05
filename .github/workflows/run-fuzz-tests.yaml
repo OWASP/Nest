@@ -1,4 +1,4 @@
-name: Run fuzz tests
+name: Fuzz tests
 
 on:
   workflow_call:
@@ -20,7 +20,7 @@ permissions: {}
 
 jobs:
   run-fuzz-tests:
-    name: Run Fuzz Tests
+    name: Fuzz tests
     runs-on: ubuntu-latest
     services:
       cache:

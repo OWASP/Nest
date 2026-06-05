@@ -1,4 +1,4 @@
-name: Run staging workflow
+name: CI/CD Staging
 
 on:
   schedule:
@@ -11,13 +11,13 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-environment:
-    name: Run staging environment
+  run-ci-cd:
+    name: Run staging CI/CD
     permissions:
       actions: write
       contents: write
       id-token: write
-    uses: ./.github/workflows/run-environment.yaml
+    uses: ./.github/workflows/run-ci-cd.yaml
     with:
       backend_gid: '1001'
       backend_uid: '1001'

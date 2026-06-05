@@ -1,4 +1,4 @@
-name: Upload coverage to Codecov
+name: Coverage upload
 
 on:
   workflow_call:
@@ -25,8 +25,8 @@ on:
 permissions: {}
 
 jobs:
-  upload-coverage-to-codecov:
-    name: Upload coverage to Codecov
+  run-coverage-upload:
+    name: Coverage upload
     permissions:
       actions: read
       contents: read

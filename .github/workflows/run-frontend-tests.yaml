@@ -1,4 +1,4 @@
-name: Run frontend tests
+name: Frontend tests
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   run-a11y-tests:
-    name: Run a11y tests
+    name: A11y tests
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 5
 
   run-unit-tests:
-    name: Run unit tests
+    name: Unit tests
     permissions:
       contents: read
       id-token: write
@@ -51,14 +51,14 @@ jobs:
           path: frontend/coverage/lcov.info
     timeout-minutes: 10
 
-  upload-coverage-to-codecov:
-    name: Upload coverage to Codecov
+  run-coverage-upload:
+    name: Coverage upload
     needs: run-unit-tests
     permissions:
       actions: read
       contents: read
       id-token: write
-    uses: ./.github/workflows/upload-coverage-to-codecov.yaml
+    uses: ./.github/workflows/run-coverage-upload.yaml
     with:
       artifact_name: coverage-lcov
       artifact_path: frontend/coverage/lcov.info

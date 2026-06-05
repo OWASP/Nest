@@ -1,4 +1,4 @@
-name: Run production jobs
+name: CI/CD Production
 
 on:
   release:
@@ -11,13 +11,13 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-environment:
-    name: Run production environment
+  run-ci-cd:
+    name: Run production CI/CD
     permissions:
       actions: write
       contents: write
       id-token: write
-    uses: ./.github/workflows/run-environment.yaml
+    uses: ./.github/workflows/run-ci-cd.yaml
     with:
       backend_gid: '1002'
       backend_uid: '1002'

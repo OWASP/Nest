@@ -1,4 +1,4 @@
-name: Deploy Nest
+name: Deploy
 
 on:
   workflow_call:
@@ -75,8 +75,8 @@ env:
 permissions: {}
 
 jobs:
-  deploy-nest:
-    name: Deploy Nest
+  run-deploy:
+    name: Deploy
     environment: ${{ inputs.environment }}
     env:
       TF_IN_AUTOMATION: true
