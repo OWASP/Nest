@@ -48,7 +48,7 @@ dependencies.sentry-sdk = { extras = [ "django" ], version = "2.58.0" }
 dependencies.slack-bolt = "1.28.0"
 dependencies.slack-sdk = "3.41.0"
 dependencies.starlette = "1.0.1"
-dependencies.strawberry-graphql = { extras = [ "django" ], version = "0.315.4" }
+dependencies.strawberry-graphql = { extras = [ "django" ], version = "0.315.7" }
 dependencies.strawberry-graphql-django = "0.75.3"
 dependencies.thefuzz = "0.22.1"
 dependencies.pyparsing = "3.3.2"
