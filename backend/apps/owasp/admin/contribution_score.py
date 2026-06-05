@@ -3,6 +3,7 @@
 from django.contrib import admin
 
 from apps.owasp.models.contribution_score import ContributionScore
+from apps.owasp.score_calculator import ContributionScoreCalculator
 
 
 @admin.register(ContributionScore)
@@ -14,6 +15,7 @@ class ContributionScoreAdmin(admin.ModelAdmin):
     list_filter = ("tier", "nest_created_at")
     search_fields = ("github_user__login", "github_user__name")
     readonly_fields = ("nest_created_at", "nest_updated_at")
+    actions = ("recalculate_score",)
 
     fieldsets = (
         (
@@ -36,3 +38,19 @@ class ContributionScoreAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+    def recalculate_score(self, request, queryset):
+        """Admin action to recalculate scores for selected users."""
+        calculator = ContributionScoreCalculator()
+        updated_count = 0
+
+        for score_obj in queryset:
+            calculator.recalculate_user_score(score_obj.github_user)
+            updated_count += 1
+
+        self.message_user(
+            request,
+            f"Recalculated scores for {updated_count} contributor(s).",
+        )
+
+    recalculate_score.short_description = "Recalculate selected contributors' scores"
