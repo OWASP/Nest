@@ -14,6 +14,7 @@ from apps.ai.common.utils import get_fallback_response, get_intent_to_agent_map
 from apps.ai.flows.collaborative import handle_collaborative_query
 from apps.ai.query_analyzer import analyze_query
 from apps.ai.router import route
+from apps.ai.semantic_cache import get_cached_response, store_cached_response
 from apps.common.open_ai import OpenAi
 from apps.slack.constants import (
     OWASP_COMMUNITY_CHANNEL_ID,
@@ -265,6 +266,13 @@ def process_query(  # noqa: PLR0911
                     is_channel_suggestion=True,
                 )
 
+        # Check semantic cache
+        try:
+            if (cached := get_cached_response(query)) is not None:
+                return cached
+        except Exception:
+            logger.exception("Semantic cache lookup failed, proceeding without cache")
+
         # Step 2: Analyze query complexity before routing
         try:
             query_analysis = analyze_query(query)
@@ -283,7 +291,15 @@ def process_query(  # noqa: PLR0911
         # Step 3: Use collaborative flow for complex query
         if not query_analysis["is_simple"] and len(query_analysis["sub_queries"]) > 1:
             try:
-                return handle_collaborative_query(query, query_analysis["sub_queries"])
+                if response := handle_collaborative_query(query, query_analysis["sub_queries"]):
+                    try:
+                        store_cached_response(
+                            query=query,
+                            response=response,
+                        )
+                    except Exception:
+                        logger.exception("Failed to store semantic cache entry")
+                    return response
             except Exception:
                 logger.exception(
                     "Collaborative flow failed, falling back to single agent: %s", query
@@ -383,11 +399,22 @@ def process_query(  # noqa: PLR0911
         agent = agent_factory()
 
         # Step 8: Execute task with agent
-        return execute_task(agent, query)
+        if response := execute_task(agent, query):
+            try:
+                store_cached_response(
+                    query=query,
+                    response=response,
+                    intent=intent,
+                    confidence=confidence,
+                )
+            except Exception:
+                logger.exception("Failed to store semantic cache entry")
 
     except Exception:
         logger.exception("Failed to process query: %s", query)
         return get_fallback_response()
+    else:
+        return response
 
 
 def execute_task(
