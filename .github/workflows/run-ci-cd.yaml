@@ -12,12 +12,6 @@ on:
       - dev
       - feature/**
       - main
-  release:
-    types:
-      - published
-  schedule:
-    - cron: 0 2 * * *  # Run staging deploy daily at 2am UTC.
-  workflow_dispatch:
 
 permissions: {}
 
@@ -25,110 +19,10 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-code-quality-checks:
-    name: Run code quality checks
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-code-quality-checks.yaml
-
-  run-backend-tests:
-    name: Run backend tests
-    needs:
-      - run-code-quality-checks
+  run-checks-and-tests:
+    name: Run checks and tests
     permissions:
       actions: write
       contents: read
       id-token: write
-    uses: ./.github/workflows/run-backend-tests.yaml
-
-  run-frontend-tests:
-    name: Run frontend tests
-    needs:
-      - run-code-quality-checks
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
-    uses: ./.github/workflows/run-frontend-tests.yaml
-
-  run-e2e-tests:
-    name: Run e2e tests
-    needs:
-      - run-code-quality-checks
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-e2e-tests.yaml
-
-  run-graphql-fuzz-tests:
-    name: Run GraphQL fuzz tests
-    if: false
-    needs:
-      - run-code-quality-checks
-    uses: ./.github/workflows/run-fuzz-tests.yaml
-    with:
-      test-file: graphql_test.py
-
-  run-rest-fuzz-tests:
-    name: Run REST fuzz tests
-    needs:
-      - run-code-quality-checks
-    uses: ./.github/workflows/run-fuzz-tests.yaml
-    with:
-      test-file: rest_test.py
-      rest-url: http://localhost:9500/api/v0
-
-  run-infrastructure-tests:
-    name: Run Infrastructure tests
-    needs:
-      - run-code-quality-checks
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-infrastructure-tests.yaml
-
-  set-release-version:
-    name: Set release version
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      (
-        github.event_name == 'schedule' ||
-        github.event_name == 'workflow_dispatch' ||
-        (github.event_name == 'release' && github.event.action == 'published')
-      )
-    needs:
-      - run-backend-tests
-      - run-e2e-tests
-      - run-frontend-tests
-      - run-infrastructure-tests
-      - run-rest-fuzz-tests
-    permissions: {}
-    uses: ./.github/workflows/set-release-version.yaml
-
-  run-staging:
-    name: Run staging jobs
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    needs:
-      - set-release-version
-    permissions:
-      contents: write
-      actions: write
-    uses: ./.github/workflows/run-staging.yaml
-    with:
-      release_version: ${{ needs.set-release-version.outputs.release_version }}
-
-  run-production:
-    name: Run production jobs
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.event_name == 'release' &&
-      github.event.action == 'published'
-    needs:
-      - set-release-version
-    permissions:
-      actions: write
-      contents: write
-    uses: ./.github/workflows/run-production.yaml
-    with:
-      release_tag: ${{ github.event.release.tag_name }}
-      release_version: ${{ needs.set-release-version.outputs.release_version }}
+    uses: ./.github/workflows/run-checks-and-tests.yaml

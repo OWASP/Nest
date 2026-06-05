@@ -1,17 +1,14 @@
 name: Run staging workflow
 
 on:
-  workflow_call:
-    inputs:
-      release_version:
-        description: The release version to set
-        required: true
-        type: string
+  schedule:
+    - cron: 0 2 * * *
+  workflow_dispatch:
+
+permissions: {}
 
 env:
   FORCE_COLOR: 1
-
-permissions: {}
 
 jobs:
   run-environment:
@@ -33,5 +30,4 @@ jobs:
       env_display: Staging
       environment: staging
       frontend_use_fargate_spot: true
-      release_version: ${{ inputs.release_version }}
       tasks_use_fargate_spot: true
