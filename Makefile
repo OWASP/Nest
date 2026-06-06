@@ -61,7 +61,7 @@ check-test-frontend: \
 	test-frontend
 
 pre-commit: ## Run pre-commit hooks
-	@pre-commit run -a
+	@pre-commit run --all-files --color=always --show-diff-on-failure
 
 test: ## Run all tests
 test: \

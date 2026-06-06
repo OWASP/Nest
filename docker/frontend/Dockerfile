@@ -102,7 +102,8 @@ RUN npm pack tar@7.5.11 && \
     rm -rf package picomatch-4.0.4.tgz && \
     grep -q '"version": "4.0.4"' "${PICOMATCH_DIR}/package.json" && \
     addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 -G nodejs nextjs
+    adduser --system --uid 1001 -G nodejs nextjs && \
+    rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
 
 WORKDIR /app
 
