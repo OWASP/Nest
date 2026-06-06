@@ -1,0 +1,84 @@
+name: Code tests
+
+on:
+  workflow_call:
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  run-backend-tests:
+    name: Backend tests
+    permissions:
+      actions: write
+      contents: read
+    uses: ./.github/workflows/run-backend-tests.yaml
+
+  run-backend-coverage-upload:
+    name: Backend coverage upload
+    needs:
+      - run-backend-tests
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/run-coverage-upload.yaml
+    with:
+      artifact_name: coverage-xml
+      artifact_path: backend
+      coverage_flags: backend
+      coverage_path: backend/coverage.xml
+
+  run-frontend-tests:
+    name: Frontend tests
+    permissions:
+      actions: write
+      contents: read
+    uses: ./.github/workflows/run-frontend-tests.yaml
+
+  run-frontend-coverage-upload:
+    name: Frontend coverage upload
+    needs:
+      - run-frontend-tests
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/run-coverage-upload.yaml
+    with:
+      artifact_name: coverage-lcov
+      artifact_path: frontend/coverage
+      coverage_flags: frontend
+      coverage_path: frontend/coverage/lcov.info
+
+  run-e2e-tests:
+    name: E2E tests
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-e2e-tests.yaml
+
+  run-fuzz-graphql-tests:
+    name: GraphQL fuzz tests
+    if: false
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-fuzz-tests.yaml
+    with:
+      test-file: graphql_test.py
+
+  run-fuzz-rest-tests:
+    name: REST fuzz tests
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-fuzz-tests.yaml
+    with:
+      rest-url: http://localhost:9500/api/v0
+      test-file: rest_test.py
+
+  run-infrastructure-tests:
+    name: Infrastructure tests
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-infrastructure-tests.yaml

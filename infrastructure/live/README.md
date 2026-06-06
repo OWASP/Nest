@@ -51,9 +51,11 @@ No providers.
 | ---- | ------ | ------- |
 | <a name="module_alb"></a> [alb](#module\_alb) | ../modules/alb | n/a |
 | <a name="module_backend"></a> [backend](#module\_backend) | ../modules/service | n/a |
+| <a name="module_backend_build_cache"></a> [backend\_build\_cache](#module\_backend\_build\_cache) | ../modules/ecr-cache | n/a |
 | <a name="module_cache"></a> [cache](#module\_cache) | ../modules/cache | n/a |
 | <a name="module_database"></a> [database](#module\_database) | ../modules/database | n/a |
 | <a name="module_frontend"></a> [frontend](#module\_frontend) | ../modules/service | n/a |
+| <a name="module_frontend_build_cache"></a> [frontend\_build\_cache](#module\_frontend\_build\_cache) | ../modules/ecr-cache | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |

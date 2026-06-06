@@ -1,4 +1,10 @@
 misconfigurations:
+  - id: AVD-AWS-0030  # BuildKit cache-only ECR; release images use scan-on-push.
+    paths:
+      - infrastructure/modules/ecr-cache/main.tf
+  - id: AVD-AWS-0031  # Mutable :cache tag required for BuildKit registry cache overwrite.
+    paths:
+      - infrastructure/modules/ecr-cache/main.tf
   - id: DS-0002  # Specify at least 1 USER command in Dockerfile with non-root user as argument.
     paths:
       - docker/e2e/Dockerfile
