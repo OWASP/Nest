@@ -489,6 +489,9 @@ class TestRemoveBoardCandidateClaimEvidence:
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.timezone")
     def test_remove_success(self, mock_timezone, mock_evidence_model, mock_claim_model, status):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
+            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+        )
         user = MagicMock()
         user.__str__.return_value = "alice"
         info = _make_info(user)
@@ -520,6 +523,9 @@ class TestRemoveBoardCandidateClaimEvidence:
     )
     def test_remove_evidence_not_found(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
+            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+        )
         user = MagicMock()
         user.__str__.return_value = "alice"
         info = _make_info(user)
@@ -543,6 +549,9 @@ class TestRemoveBoardCandidateClaimEvidence:
     )
     def test_remove_forbidden(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
+            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+        )
         user = MagicMock()
         user.__str__.return_value = "bob"
         info = _make_info(user)
@@ -574,6 +583,9 @@ class TestRemoveBoardCandidateClaimEvidence:
     )
     def test_remove_invalid_status(self, mock_evidence_model, mock_claim_model, status):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
+            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+        )
         user = MagicMock()
         user.__str__.return_value = "alice"
         info = _make_info(user)
@@ -597,6 +609,9 @@ class TestRemoveBoardCandidateClaimEvidence:
     )
     def test_remove_integrity_error(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
+            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+        )
         user = MagicMock()
         user.__str__.return_value = "alice"
         info = _make_info(user)
@@ -621,6 +636,9 @@ class TestRemoveBoardCandidateClaimEvidence:
     )
     def test_remove_validation_error(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
+            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+        )
         user = MagicMock()
         user.__str__.return_value = "alice"
         info = _make_info(user)

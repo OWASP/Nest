@@ -209,11 +209,7 @@ class BoardCandidateClaimEvidenceMutations:
         if evidence.claim.candidate.member.login != str(user):
             return EvidenceResult(ok=False, code="FORBIDDEN", message="Access denied.")
 
-        if evidence.claim.status not in {
-            BoardCandidateClaim.Status.DISCARDED,
-            BoardCandidateClaim.Status.DRAFT,
-            BoardCandidateClaim.Status.WITHDRAWN,
-        }:
+        if evidence.claim.status not in BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES:
             return EvidenceResult(
                 ok=False,
                 code="INVALID_STATUS",
