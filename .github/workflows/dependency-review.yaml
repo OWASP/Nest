@@ -12,6 +12,10 @@ on:
       - '**/pyproject.toml'
       - backend/requirements.build.txt
 
+concurrency:
+  cancel-in-progress: true
+  group: dependency-review-${{ github.workflow }}-${{ github.ref }}
+
 permissions: {}
 
 jobs:

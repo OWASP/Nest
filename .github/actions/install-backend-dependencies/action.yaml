@@ -19,6 +19,8 @@ runs:
       with:
         key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
         path: backend/.venv
+        restore-keys: |
+          poetry-venv-${{ runner.os }}-
 
     - name: Install backend dependencies
       run: poetry install --no-interaction --no-root

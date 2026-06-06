@@ -21,7 +21,7 @@ runs:
       with:
         key: ${{ env.TRIVY_CACHE_KEY }}
         path: .trivy-cache
-        restore-keys: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}-
+        restore-keys: trivy-${{ runner.os }}-
 
     - name: Run Trivy scan
       env:

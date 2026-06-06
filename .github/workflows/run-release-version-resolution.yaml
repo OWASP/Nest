@@ -21,10 +21,12 @@ jobs:
     steps:
       - name: Resolve release version
         id: release-version-resolution
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          if [ -n "${{ github.event.release.tag_name }}" ]; then
-            echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          if [ -n "$RELEASE_TAG" ]; then
+            echo "release_version=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
           else
-            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           fi
     timeout-minutes: 5

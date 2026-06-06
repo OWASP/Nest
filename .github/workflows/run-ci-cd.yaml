@@ -97,6 +97,7 @@ jobs:
       - run-release-version-resolution
     permissions:
       contents: read
+    secrets: inherit
     uses: ./.github/workflows/run-image-build.yaml
     with:
       aws_role_name: nest-${{ inputs.environment }}-terraform
@@ -118,6 +119,7 @@ jobs:
     permissions:
       actions: write
       contents: write
+    secrets: inherit
     uses: ./.github/workflows/run-image-scan.yaml
     with:
       aws_role_name: nest-${{ inputs.environment }}-terraform
@@ -134,6 +136,7 @@ jobs:
       - run-image-scan
     permissions:
       contents: read
+    secrets: inherit
     uses: ./.github/workflows/run-infrastructure-bootstrap.yaml
     with:
       environment: ${{ inputs.environment }}
@@ -145,6 +148,7 @@ jobs:
       - run-release-version-resolution
     permissions:
       contents: read
+    secrets: inherit
     uses: ./.github/workflows/run-deploy.yaml
     with:
       aws_role_name: nest-${{ inputs.environment }}-terraform

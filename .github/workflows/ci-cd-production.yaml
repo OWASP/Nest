@@ -21,6 +21,7 @@ jobs:
       actions: write
       contents: write
       id-token: write
+    secrets: inherit
     uses: ./.github/workflows/run-ci-cd.yaml
     with:
       backend_gid: '1002'
