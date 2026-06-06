@@ -49,7 +49,7 @@ jobs:
     uses: ./.github/workflows/run-coverage-upload.yaml
     with:
       artifact_name: coverage-lcov
-      artifact_path: frontend/coverage/lcov.info
+      artifact_path: frontend/coverage
       coverage_flags: frontend
       coverage_path: frontend/coverage/lcov.info
 

@@ -1,13 +1,6 @@
 name: Dependency review
 
 on:
-  merge_group:
-    paths:
-      - '**/package.json'
-      - '**/pnpm-lock.yaml'
-      - '**/poetry.lock'
-      - '**/pyproject.toml'
-      - backend/requirements.build.txt
   pull_request:
     branches:
       - feature/**
