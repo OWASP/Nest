@@ -7,7 +7,10 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
-from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
+from apps.owasp.models.board_candidate_claim_evidence import (
+    BoardCandidateClaimEvidence,
+    uuid_upload_to,
+)
 
 
 @contextmanager
@@ -112,6 +115,45 @@ class TestBoardCandidateClaimEvidenceModel:
         field = BoardCandidateClaimEvidence._meta.get_field("file")
 
         assert len(field.validators) == 2
+
+    def test_uuid_upload_to_uses_correct_prefix(self):
+        result = uuid_upload_to(None, "file.pdf")
+
+        assert result.startswith("bod/claim/evidence/")
+
+    def test_uuid_upload_to_preserves_extension(self):
+        result = uuid_upload_to(None, "file.pdf")
+
+        assert result.endswith(".pdf")
+
+    @pytest.mark.parametrize(
+        ("filename", "expected_ext"),
+        [
+            ("doc.docx", ".docx"),
+            ("image.png", ".png"),
+            ("photo.jpeg", ".jpeg"),
+            ("photo.jpg", ".jpg"),
+            ("data.xlsx", ".xlsx"),
+            ("data.xls", ".xls"),
+            ("webpage", ""),
+            ("archive.tar.gz", ".gz"),
+        ],
+    )
+    def test_uuid_upload_to_various_extensions(self, filename, expected_ext):
+        result = uuid_upload_to(None, filename)
+
+        assert result.endswith(expected_ext)
+
+    def test_uuid_upload_to_generates_unique_paths(self):
+        results = {uuid_upload_to(None, "file.pdf") for _ in range(100)}
+
+        assert len(results) == 100
+
+    def test_uuid_upload_to_contains_uuid(self):
+        result = uuid_upload_to(None, "file.pdf")
+        parts = result.removeprefix("bod/claim/evidence/").removesuffix(".pdf")
+
+        assert len(parts) in (32, 36)
 
     def _evidence_with_file(self, **mock_kwargs):
         """Build evidence with a mock file, ready for full_clean."""
@@ -283,8 +325,8 @@ class TestBoardCandidateClaimEvidenceModel:
         assert evidence.file_name == "document.pdf"
         assert evidence.file_size == 12345
 
-    def test_clean_with_file_sets_new_file_name(self):
-        """Test that clean sets new file_name when already set."""
+    def test_clean_with_file_overwrites_existing_file_name(self):
+        """Test that clean overwrites file_name when already set."""
         mock_file = MagicMock()
         mock_file.name = "document.pdf"
         mock_file.size = 12345
