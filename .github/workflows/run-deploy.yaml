@@ -1,0 +1,251 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      aws_role_name:
+        description: AWS role name to assume
+        required: true
+        type: string
+      aws_role_session_name:
+        description: AWS role session name
+        required: true
+        type: string
+      backend_use_fargate_spot:
+        description: Use Fargate spot for backend
+        required: true
+        type: boolean
+      django_configuration:
+        description: Django configuration string
+        required: true
+        type: string
+      django_settings_module:
+        description: Django settings module
+        required: true
+        type: string
+      enable_additional_parameters:
+        description: Enable additional SSM parameters
+        required: false
+        default: false
+        type: boolean
+      enable_cron_tasks:
+        description: Enable cron tasks
+        required: true
+        type: boolean
+      enable_nat_gateway:
+        description: Enable NAT gateway
+        required: true
+        type: boolean
+      enable_rds_proxy:
+        description: Enable RDS proxy
+        required: true
+        type: boolean
+      environment:
+        description: GitHub environment name
+        required: true
+        type: string
+      frontend_use_fargate_spot:
+        description: Use Fargate spot for frontend
+        required: true
+        type: boolean
+      index_task_definition:
+        description: ECS task definition for index task
+        required: true
+        type: string
+      migrate_task_definition:
+        description: ECS task definition for migrate task
+        required: true
+        type: string
+      release_version:
+        description: Release version to deploy
+        required: true
+        type: string
+      tasks_use_fargate_spot:
+        description: Use Fargate spot for tasks
+        required: true
+        type: boolean
+      tf_state_key:
+        description: Terraform state key
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      AWS_ROLE_EXTERNAL_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      TF_STATE_BUCKET_NAME:
+        required: true
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-deploy:
+    name: Deploy
+    environment: ${{ inputs.environment }}
+    env:
+      TF_IN_AUTOMATION: true
+      TF_INPUT: false
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: ${{ inputs.aws_role_session_name }}
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Apply infrastructure changes
+        uses: ./.github/actions/apply-infrastructure-changes
+        with:
+          summary-title: Terraform Plan Output
+          tfbackend-path: infrastructure/live/terraform.tfbackend
+          tfbackend-content: |
+            bucket="${{ secrets.TF_STATE_BUCKET_NAME }}"
+            key="${{ inputs.tf_state_key }}"
+            region="${{ vars.AWS_REGION }}"
+          tfvars-path: infrastructure/live/terraform.tfvars
+          tfvars-content: |
+            availability_zones=${{ vars.AWS_AVAILABILITY_ZONES }}
+            aws_region="${{ vars.AWS_REGION }}"
+            backend_image_tag="${{ inputs.release_version }}"
+            backend_use_fargate_spot=${{ inputs.backend_use_fargate_spot }}
+            domain_name="${{ vars.DOMAIN_NAME }}"
+            django_configuration="${{ inputs.django_configuration }}"
+            django_release_version="${{ inputs.release_version }}"
+            django_settings_module="${{ inputs.django_settings_module }}"
+            enable_additional_parameters=${{ inputs.enable_additional_parameters }}
+            enable_cron_tasks=${{ inputs.enable_cron_tasks }}
+            enable_nat_gateway=${{ inputs.enable_nat_gateway }}
+            enable_rds_proxy=${{ inputs.enable_rds_proxy }}
+            environment="${{ inputs.environment }}"
+            frontend_use_fargate_spot=${{ inputs.frontend_use_fargate_spot }}
+            frontend_image_tag="${{ inputs.release_version }}"
+            project_name="nest"
+            tasks_use_fargate_spot=${{ inputs.tasks_use_fargate_spot }}
+          working-directory: infrastructure/live
+
+      - name: Capture terraform outputs
+        id: tf-outputs
+        run: |
+          echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
+          echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
+          echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
+          echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
+          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
+          echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
+          echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
+          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+        working-directory: infrastructure/live
+
+      - name: Run ECS migrate task
+        id: migrate-task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASK_DEFINITION: ${{ inputs.migrate_task_definition }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
+        run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+          echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
+
+      - name: Wait for migrate task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+        run: |
+          aws ecs wait tasks-stopped \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}"
+
+      - name: Check migrate task exit code
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+        run: |
+          EXIT_CODE=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}" \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "::error::Migrate task failed with exit code $EXIT_CODE"
+            exit 1
+          fi
+          echo "Migrate task completed successfully"
+
+      - name: Run ECS index-data task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
+          TASK_DEFINITION: ${{ inputs.index_task_definition }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
+        run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          RESPONSE=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
+
+          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
+          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
+
+          if [ "$FAILURE_COUNT" -gt 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
+            echo "$RESPONSE" | jq '.failures'
+            exit 1
+          fi
+
+          if [ "$TASK_COUNT" -eq 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Index-data task started successfully (runs async, ~30 min)"
+
+      - name: Wait for backend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+
+      - name: Wait for frontend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+    timeout-minutes: 60

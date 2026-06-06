@@ -1,0 +1,64 @@
+name: Infrastructure bootstrap
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub environment name
+        required: true
+        type: string
+    secrets:
+      AWS_ROLE_EXTERNAL_ID:
+        required: true
+      BOOTSTRAP_AWS_ACCESS_KEY_ID:
+        required: true
+      BOOTSTRAP_AWS_SECRET_ACCESS_KEY:
+        required: true
+      BOOTSTRAP_TF_STATE_BUCKET_NAME:
+        required: true
+
+env:
+  FORCE_COLOR: 1
+  TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
+
+permissions: {}
+
+jobs:
+  run-infrastructure-bootstrap:
+    name: Infrastructure bootstrap
+    environment: ${{ inputs.environment }}
+    env:
+      TF_IN_AUTOMATION: true
+      TF_INPUT: false
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
+        with:
+          aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Apply infrastructure changes
+        uses: ./.github/actions/apply-infrastructure-changes
+        with:
+          plugin-cache-dir: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          summary-title: Bootstrap Terraform Plan Output
+          tfbackend-path: infrastructure/bootstrap/terraform.tfbackend
+          tfbackend-content: |
+            bucket="${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}"
+            region="${{ vars.AWS_REGION }}"
+          tfvars-path: infrastructure/bootstrap/terraform.tfvars
+          tfvars-content: |
+            aws_region="${{ vars.AWS_REGION }}"
+            project_name="nest"
+            aws_role_external_id="${{ secrets.AWS_ROLE_EXTERNAL_ID }}"
+          working-directory: infrastructure/bootstrap
+    timeout-minutes: 10

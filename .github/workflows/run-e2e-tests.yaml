@@ -1,0 +1,138 @@
+name: E2E tests
+
+on:
+  workflow_call:
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-e2e-tests:
+    name: E2E tests
+    env:
+      NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
+      NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/
+      NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    services:
+      cache:
+        image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-retries=5
+          --health-timeout=5s
+        ports:
+          - 6379:6379
+      db:
+        env:
+          POSTGRES_DB: nest_db_e2e
+          POSTGRES_PASSWORD: nest_user_e2e_password
+          POSTGRES_USER: nest_user_e2e
+        image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
+        options: >-
+          --health-cmd="pg_isready -U nest_user_e2e -d nest_db_e2e -h localhost -p 5432"
+          --health-interval=5s
+          --health-retries=5
+          --health-timeout=5s
+        ports:
+          - 5432:5432
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up backend environment
+        uses: ./.github/actions/setup-backend-environment
+        with:
+          backend_port: 9000
+          db_name: nest_db_e2e
+          db_password: nest_user_e2e_password
+          db_username: nest_user_e2e
+          env_file: .env.e2e-tests
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Install e2e dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: e2e
+
+      - name: Cache Playwright Chromium
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: e2e-playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+          restore-keys: |
+            e2e-playwright-chromium-${{ runner.os }}-
+
+      - name: Install Playwright Chromium
+        run: |
+          npx playwright install-deps chromium
+          npx playwright install chromium
+        working-directory: e2e
+
+      - name: Cache Next.js build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: next-cache-e2e-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
+          path: frontend/.next/cache
+
+      - name: Prepare environment variables for frontend
+        run: cp .env.e2e .env
+        working-directory: frontend
+
+      - name: Build frontend
+        run: pnpm run build
+        working-directory: frontend
+
+      - name: Copy public and static folders
+        run: |
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+        working-directory: frontend
+
+      - name: Run frontend in the background
+        env:
+          HOSTNAME: 0.0.0.0
+          NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
+          NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/
+          NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
+          NEXT_TELEMETRY_DISABLED: '1'
+          NODE_ENV: production
+          PORT: '3000'
+        run: |
+          nohup node .next/standalone/server.js > /dev/null 2>&1 &
+          disown
+        working-directory: frontend
+
+      - name: Wait for frontend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:3000/api/health; do
+              echo "Waiting for the frontend..."
+              sleep 5
+            done
+          '
+          echo "Frontend is up!"
+
+      - name: Run frontend end-to-end tests
+        env:
+          CI: 'true'
+          FRONTEND_URL: http://localhost:3000
+        run: pnpm run test:e2e
+        working-directory: e2e
+
+      - name: Upload Playwright test results
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: playwright-test-results
+          path: e2e/test-results/
+          retention-days: 7
+    timeout-minutes: 30

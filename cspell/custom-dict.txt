@@ -23,6 +23,7 @@ Emay
 FOSS
 GBP
 GFKs
+GPG
 GRC
 GSOC
 GTM
@@ -107,7 +108,6 @@ defectdojo
 demojize
 dismissable
 dkr
-dockerhub
 dsn
 dvo
 elevenlabs
@@ -169,6 +169,7 @@ mpim
 navlink
 nestbot
 ngx
+nohup
 noinput
 nosniff
 notab
