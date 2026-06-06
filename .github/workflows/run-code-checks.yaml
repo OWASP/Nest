@@ -96,6 +96,7 @@ jobs:
         with:
           cache: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          tflint_config_path: infrastructure/.tflint.hcl
           tflint_version: v0.60.0
 
       - name: Run pre-commit

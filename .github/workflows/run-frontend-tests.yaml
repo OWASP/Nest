@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   run-a11y-tests:
-    name: A11y tests
+    name: Frontend a11y tests
     permissions:
       contents: read
     runs-on: ubuntu-latest
