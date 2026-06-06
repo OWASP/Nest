@@ -33,6 +33,14 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         ]
         verbose_name_plural = "Board Candidate Claim Evidences"
 
+    REMOVAL_ALLOWED_STATUSES = frozenset(
+        {
+            BoardCandidateClaim.Status.DISCARDED,
+            BoardCandidateClaim.Status.DRAFT,
+            BoardCandidateClaim.Status.WITHDRAWN,
+        }
+    )
+
     claim = models.ForeignKey(
         BoardCandidateClaim, on_delete=models.CASCADE, related_name="evidences"
     )
@@ -75,6 +83,18 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
         if (
             self.claim_id
+            and self.is_removed
+            and not BoardCandidateClaim.objects.filter(
+                pk=self.claim_id,
+                status__in=self.REMOVAL_ALLOWED_STATUSES,
+            ).exists()
+        ):
+            err = "Can only remove evidence from discarded, draft or withdrawn claim."
+            raise ValidationError(err)
+
+        if (
+            self.claim_id
+            and not self.is_removed
             and not BoardCandidateClaim.objects.filter(
                 pk=self.claim_id,
                 status=BoardCandidateClaim.Status.DRAFT,

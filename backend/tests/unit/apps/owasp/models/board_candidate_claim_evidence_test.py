@@ -347,6 +347,75 @@ class TestBoardCandidateClaimEvidenceModel:
         assert evidence.file_name == "document.pdf"
         assert evidence.file_size == 12345
 
+    def test_removal_allowed_statuses_constant(self):
+        """Test REMOVAL_ALLOWED_STATUSES contains the correct statuses."""
+        expected = frozenset(
+            {
+                BoardCandidateClaim.Status.DISCARDED,
+                BoardCandidateClaim.Status.DRAFT,
+                BoardCandidateClaim.Status.WITHDRAWN,
+            }
+        )
+
+        assert expected == BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            BoardCandidateClaim.Status.DRAFT,
+            BoardCandidateClaim.Status.DISCARDED,
+            BoardCandidateClaim.Status.WITHDRAWN,
+        ],
+    )
+    def test_clean_is_removed_with_removable_status_passes(self, status):
+        """Test that clean passes for is_removed evidence with removable claim statuses."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test Evidence", source_url="https://example.com"
+        )
+        evidence.claim_id = 1
+        evidence.is_removed = True
+
+        def filter_side_effect(**kwargs):
+            mock_qs = MagicMock()
+            if "status__in" in kwargs:
+                mock_qs.exists.return_value = True
+            else:
+                mock_qs.exists.return_value = status == BoardCandidateClaim.Status.DRAFT
+            return mock_qs
+
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.side_effect = filter_side_effect
+            evidence.clean()
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            BoardCandidateClaim.Status.APPROVED,
+            BoardCandidateClaim.Status.REJECTED,
+            BoardCandidateClaim.Status.SUBMITTED,
+        ],
+    )
+    def test_clean_is_removed_with_non_removable_status_raises(self, status):
+        """Test that clean raises for is_removed evidence with non-removable claim statuses."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test Evidence", source_url="https://example.com"
+        )
+        evidence.claim_id = 1
+        evidence.is_removed = True
+
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.filter.return_value.exists.return_value = False
+
+            with pytest.raises(
+                ValidationError,
+                match=r"Can only remove evidence from discarded, draft or withdrawn claim.",
+            ):
+                evidence.clean()
+
     def test_clean_without_claim_id_skips_locked_check(self):
         """Test that clean skips locked check when claim_id is not set."""
         evidence = BoardCandidateClaimEvidence(
