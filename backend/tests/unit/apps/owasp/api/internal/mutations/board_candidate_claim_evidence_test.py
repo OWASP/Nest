@@ -319,7 +319,6 @@ class TestUpdateBoardCandidateClaimEvidence:
         assert "file" in call_kwargs.get("update_fields", [])
         assert "file_name" in call_kwargs.get("update_fields", [])
         assert "file_size" in call_kwargs.get("update_fields", [])
-        old_file.delete.assert_called_once_with(save=False)
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     @patch(

@@ -147,7 +147,6 @@ class BoardCandidateClaimEvidenceMutations:
                 message="Evidence can only be updated on draft claims.",
             )
 
-        old_file = evidence.file if input_data.file else None
         update_fields = []
         if input_data.title is not None:
             evidence.title = input_data.title
@@ -180,9 +179,6 @@ class BoardCandidateClaimEvidenceMutations:
                 code="VALIDATION_ERROR",
                 message=json.dumps(e.message_dict),
             )
-
-        if old_file and old_file.name and evidence.file and old_file.name != evidence.file.name:
-            old_file.delete(save=False)
 
         return EvidenceResult(
             ok=True,

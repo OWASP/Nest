@@ -81,31 +81,28 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         """Validate evidence."""
         super().clean()
 
-        if (
-            self.claim_id
-            and self.is_removed
-            and not BoardCandidateClaim.objects.filter(
-                pk=self.claim_id,
-                status__in=self.REMOVAL_ALLOWED_STATUSES,
-            ).exists()
-        ):
-            err = "Can only remove evidence from discarded, draft or withdrawn claim."
-            raise ValidationError(err)
-
-        if (
-            self.claim_id
-            and not self.is_removed
-            and not BoardCandidateClaim.objects.filter(
-                pk=self.claim_id,
-                status=BoardCandidateClaim.Status.DRAFT,
-            ).exists()
-        ):
-            err = "Cannot add or modify evidence on a non-draft claim."
-            raise ValidationError(err)
-
         if not (self.file or self.source_url):
             err = "Either file or source_url is required."
             raise ValidationError(err)
+
+        if self.claim_id:
+            claim_status = (
+                BoardCandidateClaim.objects.values_list("status", flat=True)
+                .filter(pk=self.claim_id)
+                .first()
+            )
+
+            if claim_status is None:
+                err = "Claim does not exist."
+                raise ValidationError(err)
+
+            if self.is_removed and claim_status not in self.REMOVAL_ALLOWED_STATUSES:
+                err = "Can only remove evidence from discarded, draft or withdrawn claim."
+                raise ValidationError(err)
+
+            if not self.is_removed and claim_status != BoardCandidateClaim.Status.DRAFT:
+                err = "Cannot add or modify evidence on a non-draft claim."
+                raise ValidationError(err)
 
         if self.file:
             self.file_name = self.file.name
