@@ -2,8 +2,11 @@ import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { test, expect } from '@playwright/test'
 
 test.describe('About Page', () => {
+  test.describe.configure({ mode: 'serial' })
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/about')
+    await page.goto('/about', { waitUntil: 'domcontentloaded' })
+    await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
   })
 
   test('renders main sections correctly', async ({ page }) => {
