@@ -1,0 +1,39 @@
+name: CI/CD Production
+
+on:
+  release:
+    types:
+      - published
+
+concurrency:
+  cancel-in-progress: false
+  group: ci-cd-production
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  run-ci-cd:
+    name: Run production CI/CD
+    permissions:
+      actions: write
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/run-ci-cd.yaml
+    with:
+      backend_gid: '1002'
+      backend_uid: '1002'
+      backend_use_fargate_spot: false
+      base_url: https://nest.owasp.org
+      django_configuration: Production
+      django_settings_module: settings.production
+      enable_additional_parameters: true
+      enable_cron_tasks: true
+      enable_nat_gateway: true
+      enable_rds_proxy: true
+      environment: production
+      frontend_use_fargate_spot: false
+      release_tag: ${{ github.event.release.tag_name }}
+      tasks_use_fargate_spot: false

@@ -1,11 +1,11 @@
-name: Set release version
+name: Resolve release version
 
 on:
   workflow_call:
     outputs:
       release_version:
-        description: The release version to set
-        value: ${{ jobs.set-release-version.outputs.release_version }}
+        description: The resolved release version
+        value: ${{ jobs.run-release-version-resolution.outputs.release_version }}
 
 env:
   FORCE_COLOR: 1
@@ -13,13 +13,14 @@ env:
 permissions: {}
 
 jobs:
-  set-release-version:
+  run-release-version-resolution:
+    name: Resolve release version
     runs-on: ubuntu-latest
     outputs:
-      release_version: ${{ steps.set-release-version.outputs.release_version }}
+      release_version: ${{ steps.release-version-resolution.outputs.release_version }}
     steps:
-      - name: Set release version
-        id: set-release-version
+      - name: Resolve release version
+        id: release-version-resolution
         run: |
           if [ -n "${{ github.event.release.tag_name }}" ]; then
             echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT

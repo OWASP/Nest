@@ -1,0 +1,37 @@
+name: CI/CD Staging
+
+on:
+  schedule:
+    - cron: 0 2 * * *
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: false
+  group: ci-cd-staging
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  run-ci-cd:
+    name: Run staging CI/CD
+    permissions:
+      actions: write
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/run-ci-cd.yaml
+    with:
+      backend_gid: '1001'
+      backend_uid: '1001'
+      backend_use_fargate_spot: true
+      base_url: https://nest.owasp.dev
+      django_configuration: Staging
+      django_settings_module: settings.staging
+      enable_cron_tasks: false
+      enable_nat_gateway: false
+      enable_rds_proxy: false
+      environment: staging
+      frontend_use_fargate_spot: true
+      tasks_use_fargate_spot: true

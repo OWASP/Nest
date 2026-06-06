@@ -1,4 +1,4 @@
-name: Run bootstrap infrastructure
+name: Infrastructure bootstrap
 
 on:
   workflow_call:
@@ -15,8 +15,8 @@ env:
 permissions: {}
 
 jobs:
-  bootstrap-infrastructure:
-    name: Bootstrap infrastructure
+  run-infrastructure-bootstrap:
+    name: Infrastructure bootstrap
     environment: ${{ inputs.environment }}
     env:
       TF_IN_AUTOMATION: true

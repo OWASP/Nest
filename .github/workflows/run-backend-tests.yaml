@@ -1,4 +1,4 @@
-name: Run backend tests
+name: Backend tests
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   run-unit-tests:
-    name: Run unit tests
+    name: Backend unit tests
     permissions:
       actions: write
       contents: read
@@ -19,23 +19,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
-        with:
-          python-version: '3.13'
-
-      - name: Install Poetry
-        uses: ./.github/actions/install-poetry
-
-      - name: Set up backend dependencies cache
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
-          path: backend/.venv
-
       - name: Install backend dependencies
-        run: poetry install --no-interaction --no-root
-        working-directory: backend
+        uses: ./.github/actions/install-backend-dependencies
 
       - name: Run backend tests
         run: set -a && source .env.example && set +a && poetry run pytest tests/unit
@@ -48,17 +33,3 @@ jobs:
           name: coverage-xml
           path: backend/coverage.xml
     timeout-minutes: 5
-
-  upload-coverage-to-codecov:
-    name: Upload coverage to Codecov
-    needs: run-unit-tests
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
-    uses: ./.github/workflows/upload-coverage-to-codecov.yaml
-    with:
-      artifact_name: coverage-xml
-      artifact_path: backend
-      coverage_path: backend/coverage.xml
-      coverage_flags: backend

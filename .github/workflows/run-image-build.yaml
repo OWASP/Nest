@@ -1,4 +1,4 @@
-name: Build images
+name: Image build
 
 on:
   workflow_call:
@@ -50,8 +50,8 @@ env:
 permissions: {}
 
 jobs:
-  build-images:
-    name: Build images
+  run-image-build:
+    name: Image build
     environment: ${{ inputs.environment }}
     env:
       BACKEND_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_cache_repo }}:cache

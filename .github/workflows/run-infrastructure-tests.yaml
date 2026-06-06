@@ -1,4 +1,4 @@
-name: Run Infrastructure tests
+name: Infrastructure tests
 
 on:
   workflow_call:
@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   run-infrastructure-tests:
-    name: Run Infrastructure tests
+    name: Infrastructure tests
     permissions:
       contents: read
     runs-on: ubuntu-latest

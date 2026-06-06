@@ -1,4 +1,4 @@
-name: Run Lighthouse CI
+name: Lighthouse CI
 
 on:
   workflow_call:
@@ -15,7 +15,7 @@ permissions: {}
 
 jobs:
   run-lighthouse-ci:
-    name: Run Lighthouse CI
+    name: Lighthouse CI
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -25,8 +25,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend-environment
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
 
       - name: Run lighthouse-ci
         env:

@@ -1,4 +1,4 @@
-name: Run fuzz tests
+name: Fuzz tests
 
 on:
   workflow_call:
@@ -13,11 +13,17 @@ on:
         type: string
         default: http://localhost:9500/api/v0
 
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
 jobs:
   run-fuzz-tests:
-    name: Run Fuzz Tests
+    name: Fuzz tests
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     services:
       db:
         image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
@@ -67,3 +73,4 @@ jobs:
           set -a && source ./.env.fuzz.example && set +a
           poetry run sh ./entrypoint.fuzz.sh
         working-directory: backend
+    timeout-minutes: 20
