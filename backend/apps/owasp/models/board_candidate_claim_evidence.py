@@ -113,11 +113,10 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         """Save evidence."""
         self.full_clean()
 
+        super().save(*args, **kwargs)
         if self.pk and self.file:
             old_file = (
                 self.__class__.objects.filter(pk=self.pk).values_list("file", flat=True).first()
             )
             if old_file and old_file != self.file.name:
                 storage.default_storage.delete(old_file)
-
-        super().save(*args, **kwargs)
