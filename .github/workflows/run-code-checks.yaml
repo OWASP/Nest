@@ -111,7 +111,7 @@ jobs:
       - name: Run pre-commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pre-commit run --all-files --color=always --show-diff-on-failure
+        run: make pre-commit
 
       - name: Check for uncommitted changes
         run: |
