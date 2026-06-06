@@ -10,9 +10,12 @@ overrides:
   glob: 11.1.0
   postcss: 8.5.10
   protobufjs: 7.5.8
+  qs: 6.15.2
   serialize-javascript: 7.0.5
   test-exclude: 7.0.2
   tmp: 0.2.6
+  uuid: 11.1.1
+  webpack@5: 5.104.1
   ws@8: 8.20.1
 
 importers:
@@ -72,10 +75,10 @@ importers:
         version: 3.0.0(leaflet@1.9.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@sentry/nextjs':
         specifier: 10.53.1
-        version: 10.53.1(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))
+        version: 10.53.1(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))
       apexcharts:
-        specifier: 5.10.6
-        version: 5.10.6
+        specifier: 5.12.0
+        version: 5.12.0
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -141,7 +144,7 @@ importers:
         version: 19.2.6
       react-apexcharts:
         specifier: 2.1.0
-        version: 2.1.0(apexcharts@5.10.6)(react@19.2.6)
+        version: 2.1.0(apexcharts@5.12.0)(react@19.2.6)
       react-dom:
         specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
@@ -3466,7 +3469,7 @@ packages:
     resolution: {integrity: sha512-i3OQUrS0FZlXLgq57RIKDp+vHHzuvYKPCKewAPXULWKMsBXFGhP6veGRQ+6To/pmZkkXjEX5ofVNDy9C3jEPKQ==}
     engines: {node: '>= 18'}
     peerDependencies:
-      webpack: '>=5.0.0'
+      webpack: 5.104.1
 
   '@sinclair/typebox@0.27.10':
     resolution: {integrity: sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA==}
@@ -4223,8 +4226,8 @@ packages:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
 
-  apexcharts@5.10.6:
-    resolution: {integrity: sha512-FJQGbso3iRuOwUYnj0yUhkWeKeJE6aboVol+ae09lsc+lbLMWZqSRbrAWVa/qishLiaeG2icxdvmVkm+9n6kOQ==}
+  apexcharts@5.12.0:
+    resolution: {integrity: sha512-vNCw62M5rhVg09FHFCL/ztpH7VlTOF8/+lWLUVjBdQffIAgQaxtyDGfojCyYoZHM3Hh17srWwz6rrD/XzblRSw==}
 
   arg@4.1.3:
     resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
@@ -4955,8 +4958,8 @@ packages:
     resolution: {integrity: sha512-HVLACW1TppGYjJ8H6/jqH/pqOtKRw6wMlrB23xfExmFWxFquAIWCmwoLsOyN96K4a5KbmOf5At9ZUO3GZbetAw==}
     engines: {node: '>= 0.4'}
 
-  es-module-lexer@1.7.0:
-    resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
+  es-module-lexer@2.1.0:
+    resolution: {integrity: sha512-n27zTYMjYu1aj4MjCWzSP7G9r75utsaoc8m61weK+W8JMBGGQybd43GstCXZ3WNmSFtGT9wi59qQTW6mhTR5LQ==}
 
   es-object-atoms@1.1.1:
     resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
@@ -6953,12 +6956,8 @@ packages:
   pure-rand@7.0.1:
     resolution: {integrity: sha512-oTUZM/NAZS8p7ANR3SHh30kXB+zK2r2BPcEn/awJIbOvq82WoMN4p62AWWp3Hhw50G0xMsw1mhIBLqHw64EcNQ==}
 
-  qs@6.14.2:
-    resolution: {integrity: sha512-V/yCWTTF7VJ9hIh18Ugr2zhJMP01MY7c5kh4J870L7imm6/DIzBsNLTXzMwUA3yZ5b/KBqLx8Kp3uRvd7xSe3Q==}
-    engines: {node: '>=0.6'}
-
-  qs@6.15.1:
-    resolution: {integrity: sha512-6YHEFRL9mfgcAvql/XhwTvf5jKcOiiupt2FiJxHkiX1z4j7WL8J/jRHYLluORvc1XxB5rV20KoeK00gVJamspg==}
+  qs@6.15.2:
+    resolution: {integrity: sha512-Rzq0KEyX/w/tEybncDgdkZrJgVUsUMk3xjh3t5bv3S1HTAtg+uOYt72+ZfwiQwKdysThkTBdL/rTi6HDmX9Ddw==}
     engines: {node: '>=0.6'}
 
   query-selector-shadow-dom@1.0.1:
@@ -7518,7 +7517,7 @@ packages:
       lightningcss: '*'
       postcss: '*'
       uglify-js: '*'
-      webpack: ^5.1.0
+      webpack: 5.104.1
     peerDependenciesMeta:
       '@minify-html/node':
         optional: true
@@ -7819,9 +7818,8 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
-  uuid@8.3.2:
-    resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+  uuid@11.1.1:
+    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
     hasBin: true
 
   v8-compile-cache-lib@3.0.1:
@@ -7871,8 +7869,8 @@ packages:
     resolution: {integrity: sha512-eACpxRN02yaawnt+uUNIF7Qje6A9zArxBbcAJjK1PK3S9Ycg5jIuJ8pW4q8EMnwNZCEGltcjkRx1QzOxOkKD8A==}
     engines: {node: '>=10.13.0'}
 
-  webpack@5.103.0:
-    resolution: {integrity: sha512-HU1JOuV1OavsZ+mfigY0j8d1TgQgbZ6M+J75zDkpEAwYeXjWSqrGJtgnPblJjd/mAyTNQ7ygw0MiKOn6etz8yw==}
+  webpack@5.104.1:
+    resolution: {integrity: sha512-Qphch25abbMNtekmEGJmeRUhLDbe+QfiWTiqpKYkpCOWY64v9eyl+KRRLmqOFA2AvKPpc9DC6+u2n76tQLBoaA==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     peerDependencies:
@@ -10533,7 +10531,7 @@ snapshots:
       open: 7.4.2
       proxy-agent: 6.5.0
       tmp: 0.2.6
-      uuid: 8.3.2
+      uuid: 11.1.1
       yargs: 15.4.1
       yargs-parser: 13.1.2
     transitivePeerDependencies:
@@ -12384,7 +12382,7 @@ snapshots:
       '@sentry/utils': 7.120.4
       localforage: 1.10.0
 
-  '@sentry/nextjs@10.53.1(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))':
+  '@sentry/nextjs@10.53.1(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.41.1
@@ -12396,7 +12394,7 @@ snapshots:
       '@sentry/opentelemetry': 10.53.1(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.41.1)
       '@sentry/react': 10.53.1(react@19.2.6)
       '@sentry/vercel-edge': 10.53.1
-      '@sentry/webpack-plugin': 5.3.0(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))
+      '@sentry/webpack-plugin': 5.3.0(webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))
       next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       rollup: 4.60.3
       stacktrace-parser: 0.1.11
@@ -12490,10 +12488,10 @@ snapshots:
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.1)
       '@sentry/core': 10.53.1
 
-  '@sentry/webpack-plugin@5.3.0(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))':
+  '@sentry/webpack-plugin@5.3.0(webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))':
     dependencies:
       '@sentry/bundler-plugin-core': 5.3.0
-      webpack: 5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)
+      webpack: 5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -13233,7 +13231,7 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.2
 
-  apexcharts@5.10.6: {}
+  apexcharts@5.12.0: {}
 
   arg@4.1.3: {}
 
@@ -13454,7 +13452,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       on-finished: 2.4.1
-      qs: 6.15.1
+      qs: 6.15.2
       raw-body: 2.5.3
       type-is: 1.6.18
       unpipe: 1.0.0
@@ -14017,7 +14015,7 @@ snapshots:
       iterator.prototype: 1.1.5
       math-intrinsics: 1.1.0
 
-  es-module-lexer@1.7.0: {}
+  es-module-lexer@2.1.0: {}
 
   es-object-atoms@1.1.1:
     dependencies:
@@ -14361,7 +14359,7 @@ snapshots:
       parseurl: 1.3.3
       path-to-regexp: 0.1.13
       proxy-addr: 2.0.7
-      qs: 6.14.2
+      qs: 6.15.2
       range-parser: 1.2.1
       safe-buffer: 5.2.1
       send: 0.19.2
@@ -15888,7 +15886,7 @@ snapshots:
       preact-render-to-string: 5.2.6(preact@10.29.1)
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
-      uuid: 8.3.2
+      uuid: 11.1.1
 
   next-themes@0.4.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
     dependencies:
@@ -16325,11 +16323,7 @@ snapshots:
 
   pure-rand@7.0.1: {}
 
-  qs@6.14.2:
-    dependencies:
-      side-channel: 1.1.0
-
-  qs@6.15.1:
+  qs@6.15.2:
     dependencies:
       side-channel: 1.1.0
 
@@ -16346,9 +16340,9 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  react-apexcharts@2.1.0(apexcharts@5.10.6)(react@19.2.6):
+  react-apexcharts@2.1.0(apexcharts@5.12.0)(react@19.2.6):
     dependencies:
-      apexcharts: 5.10.6
+      apexcharts: 5.12.0
       prop-types: 15.8.1
       react: 19.2.6
 
@@ -17014,13 +17008,13 @@ snapshots:
       - bare-abort-controller
       - react-native-b4a
 
-  terser-webpack-plugin@5.6.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)):
+  terser-webpack-plugin@5.6.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)(webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.47.1
-      webpack: 5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)
+      webpack: 5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)
     optionalDependencies:
       '@swc/core': 1.15.32(@swc/helpers@0.5.21)
       postcss: 8.5.10
@@ -17315,7 +17309,7 @@ snapshots:
 
   utils-merge@1.0.1: {}
 
-  uuid@8.3.2: {}
+  uuid@11.1.1: {}
 
   v8-compile-cache-lib@3.0.1: {}
 
@@ -17354,7 +17348,7 @@ snapshots:
 
   webpack-sources@3.4.1: {}
 
-  webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10):
+  webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.9
@@ -17367,7 +17361,7 @@ snapshots:
       browserslist: 4.28.2
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.21.3
-      es-module-lexer: 1.7.0
+      es-module-lexer: 2.1.0
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
@@ -17378,7 +17372,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)(webpack@5.103.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))
+      terser-webpack-plugin: 5.6.0(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)(webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))
       watchpack: 2.5.1
       webpack-sources: 3.4.1
     transitivePeerDependencies:

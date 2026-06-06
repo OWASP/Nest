@@ -1,24 +1,34 @@
-name: Run dependency review
+name: Dependency review
 
 on:
   pull_request:
     branches:
-      - dev
       - feature/**
       - main
+    paths:
+      - '**/package.json'
+      - '**/pnpm-lock.yaml'
+      - '**/poetry.lock'
+      - '**/pyproject.toml'
+      - backend/requirements/**
+
+concurrency:
+  cancel-in-progress: true
+  group: dependency-review-${{ github.workflow }}-${{ github.ref }}
 
 permissions: {}
 
 jobs:
   dependency-review:
-    name: Review dependencies
+    name: Dependency review
     permissions:
       contents: read
-      pull-requests: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Dependency review
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0

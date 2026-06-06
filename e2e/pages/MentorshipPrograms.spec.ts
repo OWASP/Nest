@@ -21,7 +21,7 @@ test.describe('Mentorship Programs Page', () => {
         body: JSON.stringify({ hits: mockPrograms, nbPages: 1 }),
       })
     })
-    await page.goto('/mentorship/programs', { timeout: 25000 })
+    await page.goto('/mentorship/programs')
   })
 
   test('renders program card from mock data', async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('Mentorship Programs Page', () => {
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/mentorship/programs', { timeout: 25000 })
+    await page.goto('/mentorship/programs')
     await expect(page.getByText('No programs found')).toBeVisible()
   })
 

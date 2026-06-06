@@ -19,9 +19,9 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-video" \
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
+COPY --chmod=444 --chown=root:root requirements/build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install --requirement /tmp/requirements.build.txt
+    python -m pip install --requirement /tmp/build.txt
 
 WORKDIR /home/owasp
 
