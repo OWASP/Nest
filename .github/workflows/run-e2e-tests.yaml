@@ -54,8 +54,8 @@ jobs:
           db_username: nest_user_e2e
           env_file: .env.e2e-tests
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend-environment
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
 
       - name: Install e2e dependencies
         run: pnpm install --frozen-lockfile

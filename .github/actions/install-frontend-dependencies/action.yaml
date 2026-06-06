@@ -1,7 +1,7 @@
-name: Set up frontend environment
+name: Install frontend dependencies
 
 description: >-
-  Adds pnpm, sets up Node, and installs frontend dependencies.
+  Installs pnpm and Node, and installs frontend dependencies.
 
 runs:
   using: composite

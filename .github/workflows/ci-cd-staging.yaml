@@ -21,7 +21,6 @@ jobs:
       actions: write
       contents: read
       id-token: write
-      security-events: write
     uses: ./.github/workflows/run-ci-cd.yaml
     with:
       backend_gid: '1001'

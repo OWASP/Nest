@@ -72,7 +72,6 @@ jobs:
     name: Code checks
     permissions:
       contents: read
-      security-events: write
     uses: ./.github/workflows/run-code-checks.yaml
 
   run-code-tests:

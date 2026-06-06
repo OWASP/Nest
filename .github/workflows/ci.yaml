@@ -11,6 +11,10 @@ on:
       - feature/**
       - main
 
+concurrency:
+  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+
 permissions: {}
 
 env:
@@ -21,7 +25,6 @@ jobs:
     name: Code checks
     permissions:
       contents: read
-      security-events: write
     uses: ./.github/workflows/run-code-checks.yaml
 
   run-code-tests:

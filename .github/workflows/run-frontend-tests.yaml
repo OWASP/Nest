@@ -18,8 +18,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Setup environment
-        uses: ./.github/actions/setup-frontend-environment
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
 
       - name: Run tests
         run: pnpm run test:a11y
@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 5
 
   run-unit-tests:
-    name: Unit tests
+    name: Frontend unit tests
     permissions:
       actions: write
       contents: read
@@ -36,8 +36,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Setup environment
-        uses: ./.github/actions/setup-frontend-environment
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
 
       - name: Run tests
         run: pnpm run test:unit
@@ -50,17 +50,3 @@ jobs:
           name: coverage-lcov
           path: frontend/coverage/lcov.info
     timeout-minutes: 10
-
-  run-coverage-upload:
-    name: Coverage upload
-    needs: run-unit-tests
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
-    uses: ./.github/workflows/run-coverage-upload.yaml
-    with:
-      artifact_name: coverage-lcov
-      artifact_path: frontend/coverage/lcov.info
-      coverage_flags: frontend
-      coverage_path: frontend/coverage/lcov.info
