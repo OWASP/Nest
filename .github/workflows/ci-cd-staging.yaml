@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-cd-staging
   cancel-in-progress: false
+  group: ci-cd-staging
 
 permissions: {}
 

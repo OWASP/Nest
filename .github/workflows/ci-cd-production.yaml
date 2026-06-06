@@ -6,8 +6,8 @@ on:
       - published
 
 concurrency:
-  group: ci-cd-production
   cancel-in-progress: false
+  group: ci-cd-production
 
 permissions: {}
 
