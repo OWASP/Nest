@@ -50,20 +50,6 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     return mentors
 
 
-def _is_mentor_of_module(user, module) -> bool:
-    """Check if the given user is a mentor for the module.
-
-    Runs a fallback check against github_user if the mentor hasn't linked
-    their nest_user profile yet.
-    """
-    if Mentor.objects.filter(nest_user=user, modules=module).exists():
-        return True
-    return (
-        hasattr(user, "github_user")
-        and Mentor.objects.filter(github_user=user.github_user, modules=module).exists()
-    )
-
-
 def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
     """Validate and normalize module start/end dates against program constraints."""
     if started_at is None or ended_at is None:
@@ -177,7 +163,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -216,7 +202,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_UNASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -257,7 +243,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
@@ -319,7 +305,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
 
         issue = (
@@ -372,7 +358,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
         is_admin = module.program.admins.filter(nest_user=user).exists()
-        is_mentor = _is_mentor_of_module(user, module)
+        is_mentor = module.has_mentor(user)
         if not (is_admin or is_mentor):
             msg = "Only admins of the program or mentors of this module can edit modules."
             raise PermissionDenied(msg)
