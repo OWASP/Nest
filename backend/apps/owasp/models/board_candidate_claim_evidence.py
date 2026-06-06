@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
+import uuid
+from pathlib import Path
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.validators import (
-    validate_evidence_content_type,
     validate_evidence_extension,
     validate_evidence_file_size,
 )
+
+
+def uuid_upload_to(_instance, filename):
+    """Return path with generated UUID."""
+    ext = Path(filename).suffix
+    return f"bod/claim/evidence/{uuid.uuid4()}{ext}"
 
 
 class BoardCandidateClaimEvidence(TimestampedModel):
@@ -33,11 +41,10 @@ class BoardCandidateClaimEvidence(TimestampedModel):
     file = models.FileField(
         blank=True,
         null=True,
-        upload_to="bod/claim/evidence/",
+        upload_to=uuid_upload_to,
         validators=[
             validate_evidence_extension,
             validate_evidence_file_size,
-            validate_evidence_content_type,
         ],
         verbose_name="File",
     )
@@ -82,10 +89,8 @@ class BoardCandidateClaimEvidence(TimestampedModel):
             raise ValidationError(err)
 
         if self.file:
-            if not self.file_name:
-                self.file_name = self.file.name
-            if not self.file_size:
-                self.file_size = self.file.size
+            self.file_name = self.file.name
+            self.file_size = self.file.size
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""

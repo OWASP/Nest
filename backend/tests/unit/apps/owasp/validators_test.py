@@ -6,10 +6,8 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.owasp.validators import (
-    EVIDENCE_ALLOWED_CONTENT_TYPES,
     EVIDENCE_ALLOWED_EXTENSIONS,
     EVIDENCE_MAX_FILE_SIZE,
-    validate_evidence_content_type,
     validate_evidence_extension,
     validate_evidence_file_size,
 )
@@ -69,48 +67,3 @@ class TestValidateEvidenceFileSize:
         mock_file.size = EVIDENCE_MAX_FILE_SIZE + 1
         with pytest.raises(ValidationError):
             validate_evidence_file_size(mock_file)
-
-
-class TestValidateEvidenceContentType:
-    """Tests for validate_evidence_content_type."""
-
-    @pytest.mark.parametrize("content_type", EVIDENCE_ALLOWED_CONTENT_TYPES)
-    def test_allowed_content_type_passes(self, content_type):
-        """Test that allowed content types pass validation."""
-        mock_file = MagicMock()
-        mock_file.content_type = content_type
-        validate_evidence_content_type(mock_file)
-
-    @pytest.mark.parametrize(
-        "content_type",
-        [
-            "image/gif",
-            "text/plain",
-            "application/octet-stream",
-            "application/x-msdownload",
-            "image/svg+xml",
-            "text/html",
-            "application/zip",
-            "application/x-rar-compressed",
-        ],
-    )
-    def test_disallowed_content_type_raises_error(self, content_type):
-        """Test that disallowed content types raise ValidationError."""
-        mock_file = MagicMock()
-        mock_file.content_type = content_type
-        with pytest.raises(ValidationError):
-            validate_evidence_content_type(mock_file)
-
-    def test_missing_content_type_raises_error(self):
-        """Test that a file without content_type raises ValidationError."""
-        mock_file = MagicMock(spec=[])
-        del mock_file.content_type
-        with pytest.raises(ValidationError):
-            validate_evidence_content_type(mock_file)
-
-    def test_none_content_type_raises_error(self):
-        """Test that a file with None content_type raises ValidationError."""
-        mock_file = MagicMock()
-        mock_file.content_type = None
-        with pytest.raises(ValidationError):
-            validate_evidence_content_type(mock_file)

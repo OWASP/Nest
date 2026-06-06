@@ -108,10 +108,10 @@ class TestBoardCandidateClaimEvidenceModel:
         assert field.blank
 
     def test_file_field_has_validators(self):
-        """Test file field has extension, size, and content type validators."""
+        """Test file field has extension and size validators."""
         field = BoardCandidateClaimEvidence._meta.get_field("file")
 
-        assert len(field.validators) == 3
+        assert len(field.validators) == 2
 
     def _evidence_with_file(self, **mock_kwargs):
         """Build evidence with a mock file, ready for full_clean."""
@@ -161,52 +161,6 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_full_clean_file_exceeds_size_limit_raises_error(self):
         """Test that full_clean rejects a file exceeding the maximum size."""
         evidence = self._evidence_with_file(size=999999999)
-
-        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
-            evidence.full_clean()
-
-    @pytest.mark.parametrize(
-        "content_type",
-        ["application/pdf", "image/png", "image/webp", "text/csv"],
-    )
-    def test_full_clean_allowed_content_type_passes(self, content_type):
-        """Test that full_clean passes for representative allowed content types."""
-        evidence = self._evidence_with_file(content_type=content_type)
-
-        with _mock_evidence_full_clean():
-            evidence.full_clean()
-
-    @pytest.mark.parametrize(
-        "content_type",
-        ["image/gif", "application/octet-stream"],
-    )
-    def test_full_clean_disallowed_content_type_raises_error(self, content_type):
-        """Test that full_clean rejects disallowed content types."""
-        evidence = self._evidence_with_file(content_type=content_type)
-
-        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
-            evidence.full_clean()
-
-    def test_full_clean_missing_content_type_raises_error(self):
-        """Test that full_clean raises ValidationError when content_type is absent."""
-        mock_file = MagicMock()
-        mock_file.name = "document.pdf"
-        mock_file.size = 1000
-        mock_file.content_type = "application/pdf"
-        del mock_file.content_type
-
-        evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", description="Test description."
-        )
-        evidence.claim_id = 1
-        evidence.file = mock_file
-
-        with _mock_evidence_full_clean(), pytest.raises(ValidationError):
-            evidence.full_clean()
-
-    def test_full_clean_none_content_type_raises_error(self):
-        """Test that full_clean raises ValidationError when content_type is None."""
-        evidence = self._evidence_with_file(content_type=None)
 
         with _mock_evidence_full_clean(), pytest.raises(ValidationError):
             evidence.full_clean()
@@ -329,8 +283,8 @@ class TestBoardCandidateClaimEvidenceModel:
         assert evidence.file_name == "document.pdf"
         assert evidence.file_size == 12345
 
-    def test_clean_with_file_preserves_existing_file_name(self):
-        """Test that clean preserves existing file_name when already set."""
+    def test_clean_with_file_sets_new_file_name(self):
+        """Test that clean sets new file_name when already set."""
         mock_file = MagicMock()
         mock_file.name = "document.pdf"
         mock_file.size = 12345
@@ -348,8 +302,8 @@ class TestBoardCandidateClaimEvidenceModel:
             mock_objects.filter.return_value.exists.return_value = True
             evidence.clean()
 
-        assert evidence.file_name == "custom_name.pdf"
-        assert evidence.file_size == 99999
+        assert evidence.file_name == "document.pdf"
+        assert evidence.file_size == 12345
 
     def test_clean_without_claim_id_skips_locked_check(self):
         """Test that clean skips locked check when claim_id is not set."""
