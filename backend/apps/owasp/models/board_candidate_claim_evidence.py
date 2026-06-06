@@ -6,6 +6,7 @@ import uuid
 from pathlib import Path
 
 from django.core.exceptions import ValidationError
+from django.core.files import storage
 from django.db import models
 
 from apps.common.models import TimestampedModel
@@ -117,6 +118,6 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 self.__class__.objects.filter(pk=self.pk).values_list("file", flat=True).first()
             )
             if old_file and old_file != self.file.name:
-                self.file.storage.delete(old_file)
+                storage.default_storage.delete(old_file)
 
         super().save(*args, **kwargs)
