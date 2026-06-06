@@ -243,7 +243,8 @@ class TestWithdrawBoardCandidateClaim:
         user.__str__.return_value = "alice"
         info = _make_info(user)
         input_data = self._make_input_data(1)
-        mock_timezone.now.return_value = datetime(2024, 1, 1, tzinfo=UTC)
+        now = datetime(2024, 1, 1, tzinfo=UTC)
+        mock_timezone.now.return_value = now
 
         claim = MagicMock()
         claim.candidate.member.login = "alice"
@@ -256,6 +257,8 @@ class TestWithdrawBoardCandidateClaim:
         assert result.ok
         assert result.code == "SUCCESS"
         assert claim.status == BoardCandidateClaim.Status.WITHDRAWN
+        assert claim.withdrawn_reason == "No longer relevant"
+        assert claim.withdrawn_at == now
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_withdraw_claim_invalid_status(self, mock_claim_model):
@@ -399,10 +402,13 @@ class TestReorderBoardCandidateClaims:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claims == [claim_b, claim_a, claim_c]
         assert claim_b.order == 0
         assert claim_a.order == 1
         assert claim_c.order == 2
-        mock_claim_model.objects.bulk_update.assert_called_once()
+        mock_claim_model.objects.bulk_update.assert_called_once_with(
+            [claim_a, claim_b, claim_c], ["order"]
+        )
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_reorder_claims_empty_input(self, mock_claim_model):
