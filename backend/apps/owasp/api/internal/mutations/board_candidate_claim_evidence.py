@@ -20,6 +20,11 @@ from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaim
 
 logger = logging.getLogger(__name__)
 
+ACCESS_DENIED_MSG = "Access denied."
+CLAIM_NOT_FOUND_MSG = "Claim not found."
+EVIDENCE_NOT_FOUND_MSG = "Evidence not found."
+GENERIC_ERROR_MSG = "Something went wrong."
+
 
 @strawberry.input
 class CreateEvidenceInput:
@@ -78,10 +83,10 @@ class BoardCandidateClaimEvidenceMutations:
                 pk=int(input_data.claim_id.node_id)
             )
         except (BoardCandidateClaim.DoesNotExist, ValueError):
-            return EvidenceResult(ok=False, code="NOT_FOUND", message="Claim not found.")
+            return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
         if claim.candidate.member.login != str(user):
-            return EvidenceResult(ok=False, code="FORBIDDEN", message="Access denied.")
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
             return EvidenceResult(
@@ -106,7 +111,7 @@ class BoardCandidateClaimEvidenceMutations:
             return EvidenceResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             return EvidenceResult(
@@ -135,10 +140,10 @@ class BoardCandidateClaimEvidenceMutations:
                 pk=int(input_data.evidence_id.node_id)
             )
         except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
-            return EvidenceResult(ok=False, code="NOT_FOUND", message="Evidence not found.")
+            return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
 
         if evidence.claim.candidate.member.login != str(user):
-            return EvidenceResult(ok=False, code="FORBIDDEN", message="Access denied.")
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status != BoardCandidateClaim.Status.DRAFT:
             return EvidenceResult(
@@ -171,7 +176,7 @@ class BoardCandidateClaimEvidenceMutations:
             return EvidenceResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             return EvidenceResult(
@@ -200,10 +205,10 @@ class BoardCandidateClaimEvidenceMutations:
                 pk=int(input_data.evidence_id.node_id)
             )
         except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
-            return EvidenceResult(ok=False, code="NOT_FOUND", message="Evidence not found.")
+            return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
 
         if evidence.claim.candidate.member.login != str(user):
-            return EvidenceResult(ok=False, code="FORBIDDEN", message="Access denied.")
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status not in BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES:
             return EvidenceResult(
@@ -225,7 +230,7 @@ class BoardCandidateClaimEvidenceMutations:
             return EvidenceResult(
                 ok=False,
                 code="ERROR",
-                message="Something went wrong.",
+                message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
             return EvidenceResult(
