@@ -1173,7 +1173,7 @@ class TestModuleMutationUpdateModule:
         info = self._make_info(user)
         input_data = self._make_input_data()
         mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = False
+        mock_mod.program.has_admin.return_value = False
         mod_qs = mock_module.objects.select_related.return_value
         mod_qs.select_for_update.return_value.get.return_value = mock_mod
         mock_mod.has_mentor.return_value = False
