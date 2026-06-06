@@ -23,6 +23,7 @@ Emay
 FOSS
 GBP
 GFKs
+GPG
 GRC
 GSOC
 GTM

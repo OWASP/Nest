@@ -25,8 +25,15 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           if [ -n "$RELEASE_TAG" ]; then
-            echo "release_version=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+            release_version="$RELEASE_TAG"
           else
-            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            release_version="$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}"
           fi
+
+          if [[ ! "$release_version" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "::error::Invalid Docker tag: $release_version"
+            exit 1
+          fi
+
+          echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
     timeout-minutes: 5
