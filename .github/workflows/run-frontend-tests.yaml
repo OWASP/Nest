@@ -29,8 +29,8 @@ jobs:
   run-unit-tests:
     name: Unit tests
     permissions:
+      actions: write
       contents: read
-      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

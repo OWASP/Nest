@@ -44,10 +44,6 @@ on:
         description: Enable RDS proxy
         required: true
         type: boolean
-      env_display:
-        description: The display name of the environment (e.g., Staging, Production)
-        required: true
-        type: string
       environment:
         description: The environment name (e.g., staging, production)
         required: true
@@ -57,7 +53,7 @@ on:
         required: true
         type: boolean
       release_tag:
-        description: The release tag for SBOM uploads (production only)
+        description: Release tag for uploading SBOM (Production only)
         required: false
         type: string
         default: ''
@@ -72,18 +68,27 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-code-checks-tests:
-    name: Code checks tests
+  run-code-checks:
+    name: Code checks
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/run-code-checks.yaml
+
+  run-code-tests:
+    name: Code tests
+    needs:
+      - run-code-checks
     permissions:
       actions: write
       contents: read
       id-token: write
-    uses: ./.github/workflows/run-code-checks-tests.yaml
+    uses: ./.github/workflows/run-code-tests.yaml
 
   run-release-version-resolution:
     name: Resolve release version
     needs:
-      - run-code-checks-tests
+      - run-code-tests
     permissions: {}
     uses: ./.github/workflows/run-release-version-resolution.yaml
 
@@ -96,7 +101,7 @@ jobs:
     uses: ./.github/workflows/run-image-build.yaml
     with:
       aws_role_name: nest-${{ inputs.environment }}-terraform
-      aws_role_session_name: GitHubActions-Build${{ inputs.env_display }}Images
+      aws_role_session_name: github-actions-${{ inputs.environment }}-image-build
       backend_ecr_cache_repo: nest-${{ inputs.environment }}-backend-cache
       backend_ecr_repo: nest-${{ inputs.environment }}-backend
       backend_uid: ${{ inputs.backend_uid }}
@@ -117,34 +122,34 @@ jobs:
     uses: ./.github/workflows/run-image-scan.yaml
     with:
       aws_role_name: nest-${{ inputs.environment }}-terraform
-      aws_role_session_name: GitHubActions-Scan${{ inputs.env_display }}Images
+      aws_role_session_name: github-actions-${{ inputs.environment }}-image-scan
       backend_ecr_repo: nest-${{ inputs.environment }}-backend
       environment: ${{ inputs.environment }}
       frontend_ecr_repo: nest-${{ inputs.environment }}-frontend
       release_tag: ${{ inputs.release_tag }}
       release_version: ${{ needs.run-release-version-resolution.outputs.release_version }}
 
-  bootstrap-nest-infrastructure:
-    name: Bootstrap Nest infrastructure
+  run-infrastructure-bootstrap:
+    name: Infrastructure bootstrap
     needs:
       - run-image-scan
     permissions:
       contents: read
-    uses: ./.github/workflows/bootstrap-infrastructure.yaml
+    uses: ./.github/workflows/run-infrastructure-bootstrap.yaml
     with:
       environment: ${{ inputs.environment }}
 
   run-deploy:
     name: Deploy
     needs:
-      - bootstrap-nest-infrastructure
+      - run-infrastructure-bootstrap
       - run-release-version-resolution
     permissions:
       contents: read
     uses: ./.github/workflows/run-deploy.yaml
     with:
       aws_role_name: nest-${{ inputs.environment }}-terraform
-      aws_role_session_name: GitHubActions-${{ inputs.env_display }}Deploy
+      aws_role_session_name: github-actions-${{ inputs.environment }}-deploy
       backend_use_fargate_spot: ${{ inputs.backend_use_fargate_spot }}
       django_configuration: ${{ inputs.django_configuration }}
       django_settings_module: ${{ inputs.django_settings_module }}

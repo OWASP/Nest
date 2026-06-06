@@ -4,12 +4,10 @@ on:
   merge_group:
   pull_request:
     branches:
-      - dev
       - feature/**
       - main
   push:
     branches:
-      - dev
       - feature/**
       - main
 
@@ -19,10 +17,19 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-code-checks-tests:
-    name: Code checks tests
+  run-code-checks:
+    name: Code checks
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/run-code-checks.yaml
+
+  run-code-tests:
+    name: Code tests
+    needs:
+      - run-code-checks
     permissions:
       actions: write
       contents: read
       id-token: write
-    uses: ./.github/workflows/run-code-checks-tests.yaml
+    uses: ./.github/workflows/run-code-tests.yaml

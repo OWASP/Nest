@@ -5,6 +5,10 @@ on:
     types:
       - published
 
+concurrency:
+  group: ci-cd-production
+  cancel-in-progress: false
+
 permissions: {}
 
 env:
@@ -17,6 +21,7 @@ jobs:
       actions: write
       contents: write
       id-token: write
+      security-events: write
     uses: ./.github/workflows/run-ci-cd.yaml
     with:
       backend_gid: '1002'
@@ -29,7 +34,6 @@ jobs:
       enable_cron_tasks: true
       enable_nat_gateway: true
       enable_rds_proxy: true
-      env_display: Production
       environment: production
       frontend_use_fargate_spot: false
       release_tag: ${{ github.event.release.tag_name }}

@@ -21,6 +21,8 @@ permissions: {}
 jobs:
   run-fuzz-tests:
     name: Fuzz tests
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     services:
       cache:

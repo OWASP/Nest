@@ -1,4 +1,4 @@
-name: Code checks tests
+name: Code tests
 
 on:
   workflow_call:
@@ -9,16 +9,8 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-code-checks:
-    name: Code checks
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-code-checks.yaml
-
   run-backend-tests:
     name: Backend tests
-    needs:
-      - run-code-checks
     permissions:
       actions: write
       contents: read
@@ -27,18 +19,14 @@ jobs:
 
   run-frontend-tests:
     name: Frontend tests
-    needs:
-      - run-code-checks
     permissions:
-      actions: read
+      actions: write
       contents: read
       id-token: write
     uses: ./.github/workflows/run-frontend-tests.yaml
 
   run-e2e-tests:
     name: E2E tests
-    needs:
-      - run-code-checks
     permissions:
       contents: read
     uses: ./.github/workflows/run-e2e-tests.yaml
@@ -46,16 +34,16 @@ jobs:
   run-fuzz-graphql-tests:
     name: GraphQL fuzz tests
     if: false
-    needs:
-      - run-code-checks
+    permissions:
+      contents: read
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
 
   run-fuzz-rest-tests:
     name: REST fuzz tests
-    needs:
-      - run-code-checks
+    permissions:
+      contents: read
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       rest-url: http://localhost:9500/api/v0
@@ -63,8 +51,6 @@ jobs:
 
   run-infrastructure-tests:
     name: Infrastructure tests
-    needs:
-      - run-code-checks
     permissions:
       contents: read
     uses: ./.github/workflows/run-infrastructure-tests.yaml

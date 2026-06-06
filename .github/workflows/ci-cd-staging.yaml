@@ -5,6 +5,10 @@ on:
     - cron: 0 2 * * *
   workflow_dispatch:
 
+concurrency:
+  group: ci-cd-staging
+  cancel-in-progress: false
+
 permissions: {}
 
 env:
@@ -15,8 +19,9 @@ jobs:
     name: Run staging CI/CD
     permissions:
       actions: write
-      contents: write
+      contents: read
       id-token: write
+      security-events: write
     uses: ./.github/workflows/run-ci-cd.yaml
     with:
       backend_gid: '1001'
@@ -28,7 +33,6 @@ jobs:
       enable_cron_tasks: false
       enable_nat_gateway: false
       enable_rds_proxy: false
-      env_display: Staging
       environment: staging
       frontend_use_fargate_spot: true
       tasks_use_fargate_spot: true
