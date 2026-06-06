@@ -47,6 +47,10 @@ COPY apps apps
 # Required to run make targets.
 RUN ln -s . backend
 
+RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + && \
+    find /home/owasp/.venv -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete && \
+    (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
+
 FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc
 
 ARG OWASP_GID
@@ -55,6 +59,7 @@ ARG OWASP_UID
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
     apk --no-cache add make postgresql16-client=16.14-r0 && \
+    rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
@@ -67,6 +72,7 @@ WORKDIR /home/owasp
 COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
 RUN rm -rf /home/owasp/.cache && \
     rm -rf /home/owasp/.local && \
+    rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
     chmod +x /home/owasp/entrypoint.sh
 
 USER owasp
