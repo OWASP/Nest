@@ -18,8 +18,7 @@ from apps.owasp.validators import (
 
 def uuid_upload_to(_instance, filename):
     """Return path with generated UUID."""
-    ext = Path(filename).suffix
-    return f"bod/claim/evidence/{uuid.uuid4()}{ext}"
+    return f"bod/claim/evidence/{uuid.uuid4()}{Path(filename).suffix}"
 
 
 class BoardCandidateClaimEvidence(TimestampedModel):
