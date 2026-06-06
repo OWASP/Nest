@@ -437,3 +437,89 @@ class TestBoardCandidateClaimEvidenceModel:
 
         mock_full_clean.assert_called_once()
         mock_super_save.assert_called_once()
+
+    @patch.object(BoardCandidateClaimEvidence, "full_clean")
+    @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
+    def test_save_new_evidence_skips_file_cleanup(self, mock_super_save, mock_full_clean):
+        """Test that save on new evidence does not attempt file cleanup."""
+        evidence = BoardCandidateClaimEvidence(title="Test", source_url="https://example.com")
+        evidence.file = MagicMock()
+        evidence.file.name = "new.pdf"
+        evidence.file.size = 1000
+
+        with patch("django.core.files.storage.default_storage") as mock_storage:
+            evidence.save()
+
+        mock_storage.delete.assert_not_called()
+
+    @patch.object(BoardCandidateClaimEvidence, "full_clean")
+    @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
+    def test_save_without_file_skips_cleanup(self, mock_super_save, mock_full_clean):
+        """Test that save on evidence without file does not attempt cleanup."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test", source_url="https://example.com", pk=1
+        )
+
+        with patch("django.core.files.storage.default_storage") as mock_storage:
+            evidence.save()
+
+        mock_storage.delete.assert_not_called()
+
+    @patch.object(BoardCandidateClaimEvidence, "full_clean")
+    @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
+    def test_save_with_replaced_file_deletes_old_file(self, mock_super_save, mock_full_clean):
+        """Test that save deletes old file from storage when replaced."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test", source_url="https://example.com", pk=1
+        )
+        evidence.file = MagicMock()
+        evidence.file.name = "new_file.pdf"
+        evidence.file.size = 1000
+
+        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
+            mock_objects.filter.return_value.values_list.return_value.first.return_value = (
+                "bod/claim/evidence/uuid-old.pdf"
+            )
+            with patch("django.core.files.storage.default_storage") as mock_storage:
+                evidence.save()
+
+                mock_objects.filter.assert_called_once_with(pk=1)
+                mock_storage.delete.assert_called_once_with("bod/claim/evidence/uuid-old.pdf")
+
+    @patch.object(BoardCandidateClaimEvidence, "full_clean")
+    @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
+    def test_save_when_db_has_no_old_file_skips_cleanup(self, mock_super_save, mock_full_clean):
+        """Test that save skips cleanup when DB has no old file."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test", source_url="https://example.com", pk=1
+        )
+        evidence.file = MagicMock()
+        evidence.file.name = "new_file.pdf"
+        evidence.file.size = 1000
+
+        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
+            mock_objects.filter.return_value.values_list.return_value.first.return_value = None
+            with patch("django.core.files.storage.default_storage") as mock_storage:
+                evidence.save()
+
+                mock_storage.delete.assert_not_called()
+
+    @patch.object(BoardCandidateClaimEvidence, "full_clean")
+    @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
+    def test_save_with_unchanged_file_skips_cleanup(self, mock_super_save, mock_full_clean):
+        """Test that save skips cleanup when file name hasn't changed."""
+        evidence = BoardCandidateClaimEvidence(
+            title="Test", source_url="https://example.com", pk=1
+        )
+        evidence.file = MagicMock()
+        evidence.file.name = "bod/claim/evidence/uuid-old.pdf"
+        evidence.file.size = 1000
+
+        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
+            mock_objects.filter.return_value.values_list.return_value.first.return_value = (
+                "bod/claim/evidence/uuid-old.pdf"
+            )
+            with patch("django.core.files.storage.default_storage") as mock_storage:
+                evidence.save()
+
+                mock_storage.delete.assert_not_called()
