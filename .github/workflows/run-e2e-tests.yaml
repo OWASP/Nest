@@ -16,11 +16,13 @@ jobs:
       matrix:
         include:
           - shard: 1
-            total: 3
+            total: 4
           - shard: 2
-            total: 3
+            total: 4
           - shard: 3
-            total: 3
+            total: 4
+          - shard: 4
+            total: 4
     env:
       NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
       NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/
@@ -135,7 +137,7 @@ jobs:
         env:
           CI: 'true'
           FRONTEND_URL: http://localhost:3000
-        run: pnpm run test:e2e --shard=${{ matrix.shard }}/${{ matrix.total }} --workers=2
+        run: pnpm run test:e2e --shard=${{ matrix.shard }}/${{ matrix.total }} --workers=3
         working-directory: e2e
 
       - name: Upload Playwright test results

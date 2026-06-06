@@ -188,9 +188,11 @@ pil
 pnpmrc
 psql
 psycopg
+pyc
 pygithub
 pygoat
 pymdownx
+pyo
 pypa
 pypoetry
 pyyaml
