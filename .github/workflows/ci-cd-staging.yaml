@@ -19,7 +19,7 @@ jobs:
     name: Run staging CI/CD
     permissions:
       actions: write
-      contents: read
+      contents: write
       id-token: write
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
