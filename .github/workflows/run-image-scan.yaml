@@ -32,6 +32,15 @@ on:
         description: The release version to set
         required: true
         type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      AWS_ROLE_EXTERNAL_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
 
 env:
   FORCE_COLOR: 1

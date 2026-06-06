@@ -7,6 +7,15 @@ on:
         description: GitHub environment name
         required: true
         type: string
+    secrets:
+      AWS_ROLE_EXTERNAL_ID:
+        required: true
+      BOOTSTRAP_AWS_ACCESS_KEY_ID:
+        required: true
+      BOOTSTRAP_AWS_SECRET_ACCESS_KEY:
+        required: true
+      BOOTSTRAP_TF_STATE_BUCKET_NAME:
+        required: true
 
 env:
   FORCE_COLOR: 1
