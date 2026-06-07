@@ -10,6 +10,7 @@ on:
     branches:
       - feature/**
       - main
+  workflow_dispatch:
 
 concurrency:
   cancel-in-progress: true
