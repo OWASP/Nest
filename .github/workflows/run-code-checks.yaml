@@ -118,8 +118,8 @@ jobs:
           git diff --exit-code || (echo 'Unstaged changes detected. \
           Run `make check` and use `git add` to address it.' && exit 1)
 
-  run-security-checks:
-    name: Security
+  run-semgrep-checks:
+    name: Semgrep
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -131,12 +131,24 @@ jobs:
 
       - name: Run Semgrep security scan
         run: make security-scan-code-semgrep
+    timeout-minutes: 5
+
+  run-trivy-checks:
+    name: Trivy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
           command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
-    timeout-minutes: 15
+    timeout-minutes: 5
 
   run-spelling-checks:
     name: Spelling checks
