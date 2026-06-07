@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
+
+from django.db.models import Q
 
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
@@ -14,19 +16,29 @@ from apps.owasp.models.scoring_weight import ScoringWeight
 if TYPE_CHECKING:
     from datetime import date
 
-logger = logging.getLogger(__name__)
+
+class ScoreData(TypedDict):
+    """Score calculation result."""
+
+    total_score: int
+    breakdown: dict[str, int]
+
+
+class RecalculateResult(TypedDict):
+    """Result of recalculating a user's score."""
+
+    total_score: int
+    tier: str
+    created: bool
+
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class ContributionScoreCalculator:
     """Service for calculating contributor scores and assigning tiers."""
 
-    # Tier thresholds (in points)
-    TIER_THRESHOLDS = {
-        "level_1": 0,
-        "level_2": 100,
-        "level_3": 250,
-        "level_4": 500,
-    }
+    BATCH_SIZE = 100
 
     def __init__(self):
         """Initialize the calculator and load scoring weights."""
@@ -49,7 +61,7 @@ class ContributionScoreCalculator:
         user: User,
         start_date: date | None = None,
         end_date: date | None = None,
-    ) -> dict[str, int | dict[str, int]]:
+    ) -> ScoreData:
         """Calculate contribution score for a user.
 
         Args:
@@ -58,9 +70,7 @@ class ContributionScoreCalculator:
             end_date (date, optional): End date for filtering contributions.
 
         Returns:
-            dict: Dictionary containing:
-                - total_score (int): Total calculated score
-                - breakdown (dict): Score breakdown by event type
+            ScoreData: Dictionary containing total_score and breakdown.
 
         """
         breakdown = self._get_contribution_breakdown(user, start_date, end_date)
@@ -92,20 +102,16 @@ class ContributionScoreCalculator:
 
         # Count merged PRs
         pr_merged_count = self._count_merged_pull_requests(user, start_date, end_date)
-        breakdown["pr_merged"] = (
-            pr_merged_count * self._scoring_weights.get("pr_merged", 0)
-        )
+        breakdown["pr_merged"] = pr_merged_count * self._scoring_weights.get("pr_merged", 0)
 
         # Count opened PRs
         pr_opened_count = self._count_opened_pull_requests(user, start_date, end_date)
-        breakdown["pr_opened"] = (
-            pr_opened_count * self._scoring_weights.get("pr_opened", 0)
-        )
+        breakdown["pr_opened"] = pr_opened_count * self._scoring_weights.get("pr_opened", 0)
 
         # Count opened issues
         issue_opened_count = self._count_opened_issues(user, start_date, end_date)
-        breakdown["issue_opened"] = (
-            issue_opened_count * self._scoring_weights.get("issue_opened", 0)
+        breakdown["issue_opened"] = issue_opened_count * self._scoring_weights.get(
+            "issue_opened", 0
         )
 
         return breakdown
@@ -234,21 +240,28 @@ class ContributionScoreCalculator:
 
         """
         # Get all indexed users with contributions
+        pr_authors = PullRequest.objects.filter(
+            repository__is_fork=False,
+            repository__organization__is_owasp_related_organization=True,
+        ).values("author_id")
+        issue_authors = Issue.objects.filter(
+            repository__is_fork=False,
+            repository__organization__is_owasp_related_organization=True,
+        ).values("author_id")
         users_with_contributions = User.objects.filter(
-            created_pull_requests__isnull=False,
+            Q(id__in=pr_authors) | Q(id__in=issue_authors),
         ).distinct()
 
         total_users = users_with_contributions.count()
         updated_count = 0
         created_count = 0
 
-        logger.info(f"Starting score recalculation for {total_users} users")
+        logger.info("Starting score recalculation for %s users", total_users)
 
         contribution_scores = []
         for user in users_with_contributions:
             score_data = self.calculate_score(user)
             total_score = score_data["total_score"]
-            assert isinstance(total_score, int)
             tier = self.get_tier(total_score)
 
             try:
@@ -266,16 +279,16 @@ class ContributionScoreCalculator:
                 contribution_scores.append(score_obj)
                 created_count += 1
 
-            if len(contribution_scores) >= 100:
+            if len(contribution_scores) >= self.BATCH_SIZE:
                 ContributionScore.objects.bulk_create(
                     [s for s in contribution_scores if not s.id],
-                    batch_size=100,
-                    ignore_conflicts=False,
+                    batch_size=self.BATCH_SIZE,
+                    ignore_conflicts=True,
                 )
                 ContributionScore.objects.bulk_update(
                     [s for s in contribution_scores if s.id],
                     fields=("value", "tier"),
-                    batch_size=100,
+                    batch_size=self.BATCH_SIZE,
                 )
                 contribution_scores.clear()
 
@@ -283,17 +296,19 @@ class ContributionScoreCalculator:
         if contribution_scores:
             ContributionScore.objects.bulk_create(
                 [s for s in contribution_scores if not s.id],
-                batch_size=100,
-                ignore_conflicts=False,
+                batch_size=self.BATCH_SIZE,
+                ignore_conflicts=True,
             )
             ContributionScore.objects.bulk_update(
                 [s for s in contribution_scores if s.id],
                 fields=("value", "tier"),
-                batch_size=100,
+                batch_size=self.BATCH_SIZE,
             )
 
         logger.info(
-            f"Score recalculation complete. Created: {created_count}, Updated: {updated_count}"
+            "Score recalculation complete. Created: %s, Updated: %s",
+            created_count,
+            updated_count,
         )
 
         return {
@@ -302,22 +317,21 @@ class ContributionScoreCalculator:
             "updated": updated_count,
         }
 
-    def recalculate_user_score(self, user: User) -> dict[str, int | str]:
+    def recalculate_user_score(self, user: User) -> RecalculateResult:
         """Recalculate score for a single user.
 
         Args:
             user (User): The user to recalculate.
 
         Returns:
-            dict: The updated score and tier.
+            RecalculateResult: The updated score, tier, and creation flag.
 
         """
         score_data = self.calculate_score(user)
         total_score = score_data["total_score"]
-        assert isinstance(total_score, int)
         tier = self.get_tier(total_score)
 
-        score_obj, created = ContributionScore.objects.update_or_create(
+        _, created = ContributionScore.objects.update_or_create(
             github_user=user,
             defaults={
                 "value": score_data["total_score"],
@@ -326,7 +340,10 @@ class ContributionScoreCalculator:
         )
 
         logger.info(
-            f"Recalculated score for {user.login}: {score_data['total_score']} points ({tier})"
+            "Recalculated score for %s: %s points (%s)",
+            user.login,
+            score_data["total_score"],
+            tier,
         )
 
         return {

@@ -1,12 +1,8 @@
-cl"""Command to recalculate contributor scores."""
-
-import logging
+"""Command to recalculate contributor scores."""
 
 from django.core.management.base import BaseCommand
 
 from apps.owasp.score_calculator import ContributionScoreCalculator
-
-logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):

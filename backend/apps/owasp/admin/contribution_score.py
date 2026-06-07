@@ -43,14 +43,19 @@ class ContributionScoreAdmin(admin.ModelAdmin):
         """Admin action to recalculate scores for selected users."""
         calculator = ContributionScoreCalculator()
         updated_count = 0
+        failed_count = 0
 
         for score_obj in queryset:
-            calculator.recalculate_user_score(score_obj.github_user)
-            updated_count += 1
+            try:
+                calculator.recalculate_user_score(score_obj.github_user)
+                updated_count += 1
+            except (ValueError, TypeError):
+                failed_count += 1
 
         self.message_user(
             request,
-            f"Recalculated scores for {updated_count} contributor(s).",
+            f"Recalculated scores for {updated_count} contributor(s). "
+            f"Failed for {failed_count} contributor(s).",
         )
 
     recalculate_score.short_description = "Recalculate selected contributors' scores"
