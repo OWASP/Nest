@@ -1,9 +1,13 @@
 """Django admin configuration for ContributionScore model."""
 
+import logging
+
 from django.contrib import admin
 
 from apps.owasp.models.contribution_score import ContributionScore
 from apps.owasp.score_calculator import ContributionScoreCalculator
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 @admin.register(ContributionScore)
@@ -50,6 +54,10 @@ class ContributionScoreAdmin(admin.ModelAdmin):
                 calculator.recalculate_user_score(score_obj.github_user)
                 updated_count += 1
             except (ValueError, TypeError):
+                logger.exception(
+                    "Failed to recalculate score for user %s",
+                    score_obj.github_user.login,
+                )
                 failed_count += 1
 
         self.message_user(

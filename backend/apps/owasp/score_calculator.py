@@ -245,6 +245,7 @@ class ContributionScoreCalculator:
             repository__organization__is_owasp_related_organization=True,
         ).values("author_id")
         issue_authors = Issue.objects.filter(
+            state_reason="completed",
             repository__is_fork=False,
             repository__organization__is_owasp_related_organization=True,
         ).values("author_id")
