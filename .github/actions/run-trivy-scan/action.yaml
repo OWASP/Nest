@@ -1,0 +1,30 @@
+name: Run Trivy scan
+description: Configure Trivy cache and run Trivy scan
+
+inputs:
+  command:
+    description: Command to run the Trivy scan
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set Trivy cache key
+      env:
+        DOCKERFILE_HASH: ${{ hashFiles('docker/trivy/Dockerfile') }}
+        RUNNER_OS: ${{ runner.os }}
+      run: echo "TRIVY_CACHE_KEY=trivy-${RUNNER_OS}-${DOCKERFILE_HASH}" >> "$GITHUB_ENV"
+      shell: bash
+
+    - name: Cache Trivy
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+      with:
+        key: ${{ env.TRIVY_CACHE_KEY }}
+        path: .trivy-cache
+        restore-keys: trivy-${{ runner.os }}-
+
+    - name: Run Trivy scan
+      env:
+        TRIVY_RUN_COMMAND: ${{ inputs.command }}
+      run: bash -c "$TRIVY_RUN_COMMAND"
+      shell: bash

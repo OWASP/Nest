@@ -1,22 +1,88 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetProjectHealthStatsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type FloatComparisonFilterLookup = {
+  /** Exact match. Filter will be skipped on `null` value */
+  exact?: number | null | undefined;
+  /** Greater than. Filter will be skipped on `null` value */
+  gt?: number | null | undefined;
+  /** Greater than or equal to. Filter will be skipped on `null` value */
+  gte?: number | null | undefined;
+  /** Exact match of items in a given list. Filter will be skipped on `null` value */
+  inList?: Array<number> | null | undefined;
+  /** Assignment test. Filter will be skipped on `null` value */
+  isNull?: boolean | null | undefined;
+  /** Less than. Filter will be skipped on `null` value */
+  lt?: number | null | undefined;
+  /** Less than or equal to. Filter will be skipped on `null` value */
+  lte?: number | null | undefined;
+  /** Inclusive range test (between) */
+  range?: FloatRangeLookup | null | undefined;
+};
+
+export type FloatRangeLookup = {
+  end?: number | null | undefined;
+  start?: number | null | undefined;
+};
+
+export type OffsetPaginationInput = {
+  limit?: number | null | undefined;
+  offset?: number;
+};
+
+export type Ordering =
+  | 'ASC'
+  | 'ASC_NULLS_FIRST'
+  | 'ASC_NULLS_LAST'
+  | 'DESC'
+  | 'DESC_NULLS_FIRST'
+  | 'DESC_NULLS_LAST';
+
+export type ProjectHealthMetricsFilter = {
+  AND?: ProjectHealthMetricsFilter | null | undefined;
+  DISTINCT?: boolean | null | undefined;
+  NOT?: ProjectHealthMetricsFilter | null | undefined;
+  OR?: ProjectHealthMetricsFilter | null | undefined;
+  level?: ProjectLevel | null | undefined;
+  score?: FloatComparisonFilterLookup | null | undefined;
+};
+
+export type ProjectHealthMetricsOrder = {
+  contributorsCount?: Ordering | null | undefined;
+  createdAt?: Ordering | null | undefined;
+  forksCount?: Ordering | null | undefined;
+  project_Name?: Ordering | null | undefined;
+  score?: Ordering | null | undefined;
+  starsCount?: Ordering | null | undefined;
+};
+
+export type ProjectLevel =
+  | 'FLAGSHIP'
+  | 'INCUBATOR'
+  | 'LAB'
+  | 'OTHER'
+  | 'PRODUCTION';
+
+export type GetProjectHealthStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetProjectHealthStatsQuery = { projectHealthStats: { __typename: 'ProjectHealthStatsNode', averageScore: number | null, monthlyOverallScores: Array<number>, monthlyOverallScoresMonths: Array<number>, projectsCountHealthy: number, projectsCountNeedAttention: number, projectsCountUnhealthy: number, projectsPercentageHealthy: number, projectsPercentageNeedAttention: number, projectsPercentageUnhealthy: number, totalContributors: number, totalForks: number, totalStars: number } };
 
-export type GetProjectHealthMetricsQueryVariables = Types.Exact<{
+export type GetProjectHealthMetricsQueryVariables = Exact<{
   filters: Types.ProjectHealthMetricsFilter;
   pagination: Types.OffsetPaginationInput;
-  ordering?: Types.InputMaybe<Array<Types.ProjectHealthMetricsOrder> | Types.ProjectHealthMetricsOrder>;
+  ordering?: Array<Types.ProjectHealthMetricsOrder> | Types.ProjectHealthMetricsOrder | null | undefined;
 }>;
 
 
 export type GetProjectHealthMetricsQuery = { projectHealthMetricsDistinctLength: number, projectHealthMetrics: Array<{ __typename: 'ProjectHealthMetricsNode', id: string, createdAt: any, contributorsCount: number, forksCount: number, projectKey: string, projectName: string, score: number | null, starsCount: number }> };
 
-export type GetProjectHealthMetricsDetailsQueryVariables = Types.Exact<{
-  projectKey: Types.Scalars['String']['input'];
+export type GetProjectHealthMetricsDetailsQueryVariables = Exact<{
+  projectKey: string;
 }>;
 
 

@@ -1,6 +1,5 @@
 """Sync comments for issues relevant to published mentorship modules."""
 
-import logging
 import re
 from typing import Any
 
@@ -11,8 +10,6 @@ from apps.github.auth import get_github_client
 from apps.github.common import sync_issue_comments
 from apps.github.models.issue import Issue
 from apps.mentorship.models import IssueUserInterest, Module
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 INTEREST_PATTERNS = [
     re.compile(r"/interested", re.IGNORECASE),

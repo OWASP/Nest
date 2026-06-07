@@ -4,7 +4,7 @@ import { useState } from 'react'
 import {
   AssignIssueToUserDocument,
   ClearTaskDeadlineDocument,
-  GetModuleIssueViewDocument,
+  GetManagementModuleIssueViewDocument,
   SetTaskDeadlineDocument,
   UnassignIssueFromUserDocument,
 } from 'types/__generated__/issueQueries.generated'
@@ -22,7 +22,7 @@ export const useIssueMutations = ({ programKey, moduleKey, issueId }: UseIssueMu
   const commonMutationConfig = {
     refetchQueries: [
       {
-        query: GetModuleIssueViewDocument,
+        query: GetManagementModuleIssueViewDocument,
         variables: { programKey, moduleKey, number: Number(issueId) },
       },
     ],

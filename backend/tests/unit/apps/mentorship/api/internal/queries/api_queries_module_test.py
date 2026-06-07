@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import strawberry
+from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.queries.module import ModuleQuery
@@ -179,3 +180,129 @@ class TestModuleQuery:
         )
 
         assert result is None
+
+    @patch("apps.mentorship.api.internal.queries.module.Module.objects.filter")
+    @patch("apps.mentorship.api.internal.queries.module.Program.objects.get")
+    def test_management_program_modules_success(
+        self,
+        mock_program_get: MagicMock,
+        mock_module_filter: MagicMock,
+        mock_info: MagicMock,
+        api_module_queries,
+    ) -> None:
+        """Staff users receive modules list."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.user_has_access.return_value = True
+        mock_program_get.return_value = mock_program
+
+        mock_module = MagicMock(spec=Module)
+        mock_module_filter_related = mock_module_filter.return_value.select_related.return_value
+        mock_module_filter_related.prefetch_related.return_value.order_by.return_value = [
+            mock_module
+        ]
+
+        result = api_module_queries.get_management_program_modules(
+            info=mock_info, program_key="program1"
+        )
+
+        assert result == [mock_module]
+
+    @patch("apps.mentorship.api.internal.queries.module.Program.objects.get")
+    def test_management_program_modules_forbidden(
+        self,
+        mock_program_get: MagicMock,
+        mock_info: MagicMock,
+        api_module_queries,
+    ) -> None:
+        """Non-staff users cannot list modules via management query."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.user_has_access.return_value = False
+        mock_program_get.return_value = mock_program
+
+        with pytest.raises(GraphQLError) as exc_info:
+            api_module_queries.get_management_program_modules(
+                info=mock_info, program_key="program1"
+            )
+
+        assert exc_info.value.extensions["code"] == "FORBIDDEN"
+
+    def test_management_program_modules_unauthenticated(
+        self, mock_anonymous_info: MagicMock, api_module_queries
+    ) -> None:
+        """Anonymous users cannot call get_management_program_modules."""
+        with pytest.raises(GraphQLError) as exc_info:
+            api_module_queries.get_management_program_modules(
+                info=mock_anonymous_info, program_key="program1"
+            )
+
+        assert exc_info.value.extensions["code"] == "UNAUTHORIZED"
+
+    @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
+    def test_management_module_success(
+        self, mock_module_select_related: MagicMock, mock_info: MagicMock, api_module_queries
+    ) -> None:
+        """Staff receives module via get_management_module."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.user_has_access.return_value = True
+        mock_module = MagicMock(spec=Module)
+        mock_module.program = mock_program
+        mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = (
+            mock_module
+        )
+
+        result = api_module_queries.get_management_module(
+            info=mock_info, module_key="module1", program_key="program1"
+        )
+
+        assert result == mock_module
+
+    @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
+    def test_management_module_forbidden(
+        self, mock_module_select_related: MagicMock, mock_info: MagicMock, api_module_queries
+    ) -> None:
+        """Non-staff cannot load module via get_management_module even when published."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.status = Program.ProgramStatus.PUBLISHED
+        mock_program.user_has_access.return_value = False
+        mock_module = MagicMock(spec=Module)
+        mock_module.program = mock_program
+        mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = (
+            mock_module
+        )
+
+        with pytest.raises(GraphQLError) as exc_info:
+            api_module_queries.get_management_module(
+                info=mock_info, module_key="module1", program_key="program1"
+            )
+
+        assert exc_info.value.extensions["code"] == "FORBIDDEN"
+
+    @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
+    def test_management_module_not_found(
+        self, mock_module_select_related: MagicMock, mock_info: MagicMock, api_module_queries
+    ) -> None:
+        """Missing module returns None for get_management_module."""
+        mock_module_select_related.return_value.prefetch_related.return_value.get.side_effect = (
+            Module.DoesNotExist
+        )
+
+        result = api_module_queries.get_management_module(
+            info=mock_info, module_key="nonexistent", program_key="program1"
+        )
+
+        assert result is None
+        mock_module_select_related.assert_called_once_with("program", "project")
+        mock_module_select_related.return_value.prefetch_related.return_value.get.assert_called_once_with(
+            key="nonexistent", program__key="program1"
+        )
+
+    def test_management_module_unauthenticated(
+        self, mock_anonymous_info: MagicMock, api_module_queries
+    ) -> None:
+        """Anonymous users cannot call get_management_module."""
+        with pytest.raises(GraphQLError) as exc_info:
+            api_module_queries.get_management_module(
+                info=mock_anonymous_info, module_key="module1", program_key="program1"
+            )
+
+        assert exc_info.value.extensions["code"] == "UNAUTHORIZED"

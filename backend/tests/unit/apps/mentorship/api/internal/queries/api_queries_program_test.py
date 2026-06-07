@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import strawberry
+from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms
@@ -120,6 +121,65 @@ class TestGetProgram:
         assert result == mock_program
 
 
+class TestManagementProgram:
+    """Tests for the get_management_program query (staff-only management UI)."""
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_management_program_success(
+        self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
+    ) -> None:
+        """Authenticated admin or mentor receives the program (including when published)."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.status = Program.ProgramStatus.PUBLISHED
+        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_program.user_has_access.return_value = True
+
+        result = api_program_queries.get_management_program(info=mock_info, program_key="program1")
+
+        assert result == mock_program
+        mock_program.user_has_access.assert_called_once_with(mock_info.context.request.user)
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_management_program_forbidden_when_not_staff_on_published(
+        self,
+        mock_program_prefetch_related: MagicMock,
+        mock_info: MagicMock,
+        api_program_queries,
+    ) -> None:
+        """Published programs still require admin or mentor for get_management_program."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.status = Program.ProgramStatus.PUBLISHED
+        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_program.user_has_access.return_value = False
+
+        with pytest.raises(GraphQLError) as exc_info:
+            api_program_queries.get_management_program(info=mock_info, program_key="program1")
+
+        assert exc_info.value.extensions["code"] == "FORBIDDEN"
+
+    def test_management_program_unauthenticated(
+        self, mock_anonymous_info: MagicMock, api_program_queries
+    ) -> None:
+        """Anonymous users cannot call get_management_program."""
+        with pytest.raises(GraphQLError) as exc_info:
+            api_program_queries.get_management_program(
+                info=mock_anonymous_info, program_key="program1"
+            )
+
+        assert exc_info.value.extensions["code"] == "UNAUTHORIZED"
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_management_program_not_found(
+        self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
+    ) -> None:
+        """Missing program returns None."""
+        mock_program_prefetch_related.return_value.get.side_effect = Program.DoesNotExist
+
+        result = api_program_queries.get_management_program(info=mock_info, program_key="missing")
+
+        assert result is None
+
+
 class TestMyPrograms:
     """Tests for the my_programs query."""
 
@@ -172,6 +232,7 @@ class TestMyPrograms:
             "admins__github_user",
             "admins__nest_user",
             "modules__mentors__github_user",
+            "modules__mentors__nest_user",
         )
         mock_program_prefetch.return_value.filter.assert_called_once()
         mock_queryset.order_by.assert_called_once_with("-nest_created_at")
@@ -346,9 +407,10 @@ class TestMyPrograms:
         mock_program_admin_filter: MagicMock,
         api_program_queries,
     ) -> None:
-        """Test my_programs when user has no github_user (only admin query)."""
+        """Nest user without GitHub FK still sees admin programs; mentor OR uses nest_user too."""
         mock_user = MagicMock(id=1)
         mock_user.github_user = None
+        mock_user.github_user_id = None
         mock_info_obj = MagicMock(spec=strawberry.Info)
         mock_info_obj.context.request.user = mock_user
 

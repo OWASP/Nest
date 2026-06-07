@@ -1,4 +1,4 @@
-.PHONY: sbom-frontend-image
+.PHONY: audit-frontend-dependencies sbom-frontend-image
 
 ##@ Frontend
 
@@ -41,16 +41,6 @@ format-frontend-code:
 
 graphql-codegen:
 	@cd frontend && pnpm run graphql-codegen
-
-init-e2e-db: fetch-nest-dump
-	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
-	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit backend cache db data-loader \
-		--build \
-		--remove-orphans
 
 lighthouse-ci:
 	@cd frontend && pnpm run lighthouse-ci
@@ -112,46 +102,25 @@ shell-frontend:
 test-frontend: ## Run all frontend tests
 test-frontend: \
 	test-frontend-unit \
-	test-frontend-a11y \
-	test-frontend-e2e
+	test-frontend-a11y
 
 test-frontend-a11y:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-a11y \
-		-f docker/frontend/Dockerfile.a11y.test frontend \
+		-f docker/frontend/Dockerfile.a11y-tests frontend \
 		-t nest-test-frontend-a11y
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
-
-test-frontend-e2e-no-db-init:
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit backend cache db frontend e2e-tests \
-		--build \
-		--remove-orphans
-
-test-frontend-e2e: ## Run frontend e2e tests
-	@$(MAKE) init-e2e-db
-	@$(MAKE) test-frontend-e2e-no-db-init
-
-test-frontend-e2e-ui-no-db-init:
-	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit backend cache db frontend e2e-tests \
-		--build \
-		--remove-orphans
-
-test-frontend-e2e-ui:
-	@$(MAKE) init-e2e-db
-	@$(MAKE) test-frontend-e2e-ui-no-db-init
 
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-unit \
-		-f docker/frontend/Dockerfile.unit.test frontend \
+		-f docker/frontend/Dockerfile.unit-tests frontend \
 		-t nest-test-frontend-unit
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
+
+audit-frontend-dependencies: ## Audit frontend npm dependencies
+	@echo "Auditing frontend npm dependencies..."
+	@cd frontend && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 update-frontend-dependencies:
 	cd frontend && pnpm update

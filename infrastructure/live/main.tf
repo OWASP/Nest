@@ -124,6 +124,20 @@ module "frontend" {
   use_fargate_spot    = var.frontend_use_fargate_spot
 }
 
+module "backend_build_cache" {
+  source = "../modules/ecr-cache"
+
+  common_tags = local.common_tags
+  name        = "${var.project_name}-${var.environment}-backend-cache"
+}
+
+module "frontend_build_cache" {
+  source = "../modules/ecr-cache"
+
+  common_tags = local.common_tags
+  name        = "${var.project_name}-${var.environment}-frontend-cache"
+}
+
 module "kms" {
   source = "../modules/kms"
 
