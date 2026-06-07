@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '30 1 * * 6'
+    - cron: 30 1 * * 6
   workflow_dispatch:
 
 concurrency:
@@ -19,6 +19,7 @@ jobs:
     name: OSSF Scorecard
     permissions:
       contents: read
+      id-token: write
       security-events: write
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +31,7 @@ jobs:
       - name: Run Scorecard analysis
         uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a  # v2.4.3
         with:
-          publish_results: false
+          publish_results: true
           results_file: results.sarif
           results_format: sarif
 
