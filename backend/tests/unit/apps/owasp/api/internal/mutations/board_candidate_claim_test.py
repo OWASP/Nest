@@ -372,15 +372,15 @@ class TestReorderBoardCandidateClaims:
         info = _make_info(user)
         input_data = self._make_input_data([2, 1, 3])
 
-        claim_a = MagicMock(id=1, is_locked=False)
+        claim_a = MagicMock(id=1, status=BoardCandidateClaim.Status.DRAFT)
         claim_a.candidate.member.login = "alice"
         claim_a.candidate_id = 10
         claim_a.board_id = 20
-        claim_b = MagicMock(id=2, is_locked=False)
+        claim_b = MagicMock(id=2, status=BoardCandidateClaim.Status.DRAFT)
         claim_b.candidate.member.login = "alice"
         claim_b.candidate_id = 10
         claim_b.board_id = 20
-        claim_c = MagicMock(id=3, is_locked=False)
+        claim_c = MagicMock(id=3, status=BoardCandidateClaim.Status.DRAFT)
         claim_c.candidate.member.login = "alice"
         claim_c.candidate_id = 10
         claim_c.board_id = 20
@@ -511,18 +511,18 @@ class TestReorderBoardCandidateClaims:
         assert result.code == "VALIDATION_ERROR"
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_reorder_claims_locked(self, mock_claim_model):
+    def test_reorder_claims_invalid_status(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.__str__.return_value = "alice"
         info = _make_info(user)
         input_data = self._make_input_data([1, 2])
 
-        claim_a = MagicMock(id=1, is_locked=True)
+        claim_a = MagicMock(id=1, status=BoardCandidateClaim.Status.SUBMITTED)
         claim_a.candidate.member.login = "alice"
         claim_a.candidate_id = 10
         claim_a.board_id = 20
-        claim_b = MagicMock(id=2, is_locked=False)
+        claim_b = MagicMock(id=2, status=BoardCandidateClaim.Status.SUBMITTED)
         claim_b.candidate.member.login = "alice"
         claim_b.candidate_id = 10
         claim_b.board_id = 20
