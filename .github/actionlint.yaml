@@ -1,0 +1,4 @@
+paths:
+  .github/workflows/run-code-tests.yaml:
+    ignore:
+      - constant expression "false" in condition
