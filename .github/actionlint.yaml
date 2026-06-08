@@ -1,0 +1,4 @@
+config-variables:
+  - AWS_AVAILABILITY_ZONES
+  - AWS_REGION
+  - DOMAIN_NAME
