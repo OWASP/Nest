@@ -61,7 +61,7 @@ jobs:
 
   run-fuzz-graphql-tests:
     name: GraphQL fuzz tests
-    if: false
+    if: ${{ vars.ENABLE_GRAPHQL_FUZZ_TESTS == 'true' }}
     permissions:
       contents: read
     uses: ./.github/workflows/run-fuzz-tests.yaml
