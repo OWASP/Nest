@@ -17,6 +17,7 @@ permissions: {}
 jobs:
   run-ossf-scorecard:
     name: OSSF Scorecard
+    if: github.event.repository.fork == false
     permissions:
       contents: read
       id-token: write

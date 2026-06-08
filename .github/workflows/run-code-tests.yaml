@@ -18,6 +18,7 @@ jobs:
 
   run-backend-coverage-upload:
     name: Backend coverage upload
+    if: github.event.repository.fork == false
     needs:
       - run-backend-tests
     permissions:
@@ -40,6 +41,7 @@ jobs:
 
   run-frontend-coverage-upload:
     name: Frontend coverage upload
+    if: github.event.repository.fork == false
     needs:
       - run-frontend-tests
     permissions:
