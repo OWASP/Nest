@@ -509,7 +509,7 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace.invite_link_created_at = old_time
         fake_workspace.invite_link_commit_sha = old_sha
         fake_workspace.invite_link_member_count = 100
-        fake_workspace.invite_link_last_alert_sent_at = None
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
         fake_workspace.invite_link_alert_message_ts = "1234567890.000100"
         fake_workspace.total_members_count = 200
         fake_workspace.invite_link_alert_channel_id = "C01234567"
@@ -524,6 +524,10 @@ class TestSlackCheckInviteLinkCommand:
         assert thread_call is not None
         assert "no further action is required" in thread_call[1]["text"].lower()
         assert fake_workspace.invite_link_alert_message_ts is None
+        assert fake_workspace.invite_link_last_alert_sent_at is None
+        assert fake_workspace.invite_link_created_at == new_time
+        assert fake_workspace.invite_link_commit_sha == new_sha
+        assert fake_workspace.invite_link_member_count == 200
         assert "Resolution reply posted" in out.getvalue()
 
     @patch.object(Workspace, "get_default_workspace")
@@ -550,7 +554,7 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace.invite_link_created_at = old_time
         fake_workspace.invite_link_commit_sha = old_sha
         fake_workspace.invite_link_member_count = 100
-        fake_workspace.invite_link_last_alert_sent_at = None
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
         fake_workspace.invite_link_alert_message_ts = None
         fake_workspace.total_members_count = 200
         fake_workspace.invite_link_alert_channel_id = "C01234567"
