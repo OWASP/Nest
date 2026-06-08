@@ -2,3 +2,9 @@ config-variables:
   - AWS_AVAILABILITY_ZONES
   - AWS_REGION
   - DOMAIN_NAME
+
+paths:
+  .github/workflows/run-code-tests.yaml:
+    ignore:
+      # GraphQL fuzz tests are intentionally disabled.
+      - constant expression "false" in condition
