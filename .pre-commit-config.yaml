@@ -81,12 +81,12 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.315.5
-          - strawberry-graphql-django
-          - types-lxml
-          - types-python-dateutil
-          - types-PyYAML
-          - types-requests
+          - strawberry-graphql==0.315.7
+          - strawberry-graphql-django==0.75.3
+          - types-lxml==2026.2.16
+          - types-python-dateutil==2.9.0.20260518
+          - types-PyYAML==6.0.12.20260518
+          - types-requests==2.33.0.20260518
         args:
           - --config-file
           - backend/pyproject.toml

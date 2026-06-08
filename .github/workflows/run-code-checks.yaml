@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   run-dependency-audit:
-    name: Dependency audit
+    name: Dependencies
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -67,6 +67,9 @@ jobs:
 
   run-pre-commit-checks:
     name: Pre-commit
+    env:
+      MYPY_CACHE_DIR: /home/runner/.cache/mypy
+      TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -83,14 +86,27 @@ jobs:
           cache-dependency-path: backend/requirements/pre-commit.txt
           python-version: '3.13'
 
-      - name: Install Poetry
-        uses: ./.github/actions/install-poetry
-
       - name: Cache pre-commit environments
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
           path: ~/.cache/pre-commit
+
+      - name: Cache mypy
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: mypy-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml', 'backend/pyproject.toml', 'backend/poetry.lock') }}
+          path: ${{ env.MYPY_CACHE_DIR }}
+          restore-keys: |
+            mypy-${{ runner.os }}-
+
+      - name: Cache TFLint plugins
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: tflint-plugins-${{ runner.os }}-${{ hashFiles('infrastructure/.tflint.hcl') }}
+          path: ~/.tflint.d/plugins
+          restore-keys: |
+            tflint-plugins-${{ runner.os }}-
 
       - name: Install pre-commit
         run: python -m pip install --requirement backend/requirements/pre-commit.txt
@@ -107,6 +123,18 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_config_path: infrastructure/.tflint.hcl
           tflint_version: v0.60.0
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: ${{ runner.os }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Ensure Terraform plugin cache directory exists
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
+      - name: Ensure mypy cache directory exists
+        run: mkdir -p "$MYPY_CACHE_DIR"
 
       - name: Run pre-commit
         env:
@@ -133,25 +161,8 @@ jobs:
         run: make security-scan-code-semgrep
     timeout-minutes: 5
 
-  run-trivy-checks:
-    name: Trivy
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Run trivy scan
-        uses: ./.github/actions/run-trivy-scan
-        with:
-          command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
-    timeout-minutes: 5
-
   run-spelling-checks:
-    name: Spelling checks
+    name: Spelling
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -181,3 +192,20 @@ jobs:
       - name: Run cspell
         run: pnpm exec cspell --config cspell.json --no-progress -r ..
         working-directory: cspell
+
+  run-trivy-checks:
+    name: Trivy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run trivy scan
+        uses: ./.github/actions/run-trivy-scan
+        with:
+          command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
+    timeout-minutes: 5
