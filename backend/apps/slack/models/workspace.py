@@ -53,6 +53,17 @@ class Workspace(TimestampedModel):
             "those use 350 in application logic."
         ),
     )
+    invite_link_alert_message_ts = models.CharField(
+        verbose_name="Invite link alert message timestamp",
+        max_length=32,
+        blank=True,
+        null=True,
+        default=None,
+        help_text=(
+            "Slack message timestamp (ts) of the last invite-limit alert. "
+            "Used to post a threaded resolution reply when the invite link is updated."
+        ),
+    )
     invite_link_created_at = models.DateTimeField(
         verbose_name="Public invite link updated at",
         blank=True,

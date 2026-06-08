@@ -78,7 +78,7 @@ class Command(BaseCommand):
 
         try:
             client = WebClient(token=workspace.bot_token)
-            client.chat_postMessage(
+            response = client.chat_postMessage(
                 channel=self.get_normalized_invite_link_alert_channel_id(workspace),
                 text=text,
             )
@@ -89,7 +89,10 @@ class Command(BaseCommand):
             raise CommandError(msg) from e
 
         workspace.invite_link_last_alert_sent_at = timezone.now()
-        workspace.save(update_fields=["invite_link_last_alert_sent_at"])
+        workspace.invite_link_alert_message_ts = response.get("ts") or None
+        workspace.save(
+            update_fields=["invite_link_last_alert_sent_at", "invite_link_alert_message_ts"]
+        )
         self.stdout.write(self.style.SUCCESS("Alert posted to Slack."))
 
     def handle(self, *args, **_options):
@@ -205,4 +208,32 @@ class Command(BaseCommand):
                 f"invite_link_created_at set to {commit_date.isoformat()}{sha_note}"
             )
         )
+        self.post_resolution_reply(workspace)
         return True
+
+    def post_resolution_reply(self, workspace: Workspace) -> None:
+        """Post a threaded reply to the original alert if one was recorded."""
+        alert_ts = (workspace.invite_link_alert_message_ts or "").strip()
+        if not alert_ts:
+            return
+
+        text = (
+            "✅ The OWASP website has been updated with a new Slack invite link. "
+            "No further action is required until the next expiration is detected."
+        )
+        try:
+            client = WebClient(token=workspace.bot_token)
+            client.chat_postMessage(
+                channel=self.get_normalized_invite_link_alert_channel_id(workspace),
+                text=text,
+                thread_ts=alert_ts,
+            )
+        except SlackApiError as e:
+            logger.exception("Threaded resolution reply failed")
+            detail = e.response.get("error", e)
+            self.stdout.write(self.style.WARNING(f"Could not post resolution reply: {detail}"))
+            return
+
+        workspace.invite_link_alert_message_ts = None
+        workspace.save(update_fields=["invite_link_alert_message_ts"])
+        self.stdout.write(self.style.SUCCESS("Resolution reply posted to Slack thread."))
