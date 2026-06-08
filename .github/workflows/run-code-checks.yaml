@@ -62,8 +62,11 @@ jobs:
 
       - name: Check for uncommitted changes
         run: |
-          git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check` and use `git add` to address it.' && exit 1)
+          git diff --exit-code || {
+            echo "Unstaged changes detected."
+            echo "Run make check and use git add to address it."
+            exit 1
+          }
 
   run-pre-commit-checks:
     name: Pre-commit
@@ -143,8 +146,11 @@ jobs:
 
       - name: Check for uncommitted changes
         run: |
-          git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check` and use `git add` to address it.' && exit 1)
+          git diff --exit-code || {
+            echo "Unstaged changes detected."
+            echo "Run make check and use git add to address it."
+            exit 1
+          }
 
   run-semgrep-checks:
     name: Semgrep

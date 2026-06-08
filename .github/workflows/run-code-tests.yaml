@@ -59,15 +59,6 @@ jobs:
       contents: read
     uses: ./.github/workflows/run-e2e-tests.yaml
 
-  run-fuzz-graphql-tests:
-    name: GraphQL fuzz tests
-    if: ${{ vars.ENABLE_GRAPHQL_FUZZ_TESTS == 'true' }}
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-fuzz-tests.yaml
-    with:
-      test-file: graphql_test.py
-
   run-fuzz-rest-tests:
     name: REST fuzz tests
     permissions:

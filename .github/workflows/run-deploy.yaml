@@ -146,14 +146,16 @@ jobs:
       - name: Capture terraform outputs
         id: tf-outputs
         run: |
-          echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
-          echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
-          echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
-          echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
-          echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
-          echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
-          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          {
+            echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)"
+            echo "backend_service_name=$(terraform output -raw backend_service_name)"
+            echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)"
+            echo "frontend_service_name=$(terraform output -raw frontend_service_name)"
+            echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)"
+            echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)"
+            echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)"
+            echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')"
+          } >> "$GITHUB_OUTPUT"
         working-directory: infrastructure/live
 
       - name: Run ECS migrate task
@@ -173,7 +175,7 @@ jobs:
             --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
             --query 'tasks[0].taskArn' \
             --output text)
-          echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
+          echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
 
       - name: Wait for migrate task
         env:
