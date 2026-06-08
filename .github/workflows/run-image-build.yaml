@@ -172,7 +172,7 @@ jobs:
         run: |
           RAW_SIZE=$(docker image inspect "$BACKEND_IMAGE" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
-          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
+          echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
 
       - name: Build frontend image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
@@ -198,7 +198,7 @@ jobs:
         run: |
           RAW_SIZE=$(docker image inspect "$FRONTEND_IMAGE" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
-          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
+          echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
 
       - name: Create Docker image size report
         run: |
@@ -207,5 +207,5 @@ jobs:
             echo ""
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
-          } >> $GITHUB_STEP_SUMMARY
+          } >> "$GITHUB_STEP_SUMMARY"
     timeout-minutes: 10

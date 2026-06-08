@@ -127,6 +127,11 @@ repos:
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
 
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # v1.7.12
+    hooks:
+      - id: actionlint-docker
+
   - repo: https://github.com/terraform-docs/terraform-docs
     rev: 9d4455198941806aa02ec14369de030cda2c2b59  # v0.24.0
     hooks:
@@ -141,3 +146,10 @@ repos:
       - id: pyproject-fmt
         additional_dependencies:
           - toml-fmt-common<1.3.3
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # v1.25.2
+    hooks:
+      - id: zizmor
+        args:
+          - --min-severity=low
