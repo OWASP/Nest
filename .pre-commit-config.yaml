@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: d0e12caebb2ab0ee8bf98181c8bfe9702bca103d  # v1.105.0
+    rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015  # v1.106.0
     hooks:
       - id: terraform_fmt
         files: ^infrastructure/.*\.(tf|tftest\.hcl)$
@@ -77,7 +77,7 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 8e5c80792e2ec0c87804d8ef915bf35e2caea6da  # v1.20.0
+    rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # v2.1.0
     hooks:
       - id: mypy
         additional_dependencies:
