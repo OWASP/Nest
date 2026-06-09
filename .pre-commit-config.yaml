@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: d0e12caebb2ab0ee8bf98181c8bfe9702bca103d  # v1.105.0
+    rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015  # v1.106.0
     hooks:
       - id: terraform_fmt
         files: ^infrastructure/.*\.(tf|tftest\.hcl)$
@@ -41,7 +41,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: aca6d4c8045a504e2812ea4bedff1d0a09e437bc  # v0.15.8
+    rev: 5e2fb545eba1ea9dc051f6f962d52fe8f76a9794  # v0.15.13
     hooks:
       - id: ruff-check
         args:
@@ -49,7 +49,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: 9112cb64851c95a7802358af285d21ad8b7f6437  # v1.36.4
+    rev: cc4a3107b4d568ad1a69348f6b442ba5e866be1b  # v1.39.0
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -77,12 +77,12 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 8e5c80792e2ec0c87804d8ef915bf35e2caea6da  # v1.20.0
+    rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # v2.1.0
     hooks:
       - id: mypy
         additional_dependencies:
           - strawberry-graphql==0.315.7
-          - strawberry-graphql-django==0.75.3
+          - strawberry-graphql-django==0.84.0
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
           - types-PyYAML==6.0.12.20260518
@@ -127,6 +127,11 @@ repos:
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
 
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # v1.7.12
+    hooks:
+      - id: actionlint-docker
+
   - repo: https://github.com/terraform-docs/terraform-docs
     rev: 9d4455198941806aa02ec14369de030cda2c2b59  # v0.24.0
     hooks:
@@ -141,3 +146,10 @@ repos:
       - id: pyproject-fmt
         additional_dependencies:
           - toml-fmt-common<1.3.3
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # v1.25.2
+    hooks:
+      - id: zizmor
+        args:
+          - --min-severity=low
