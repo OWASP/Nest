@@ -18,6 +18,7 @@ jobs:
 
   run-backend-coverage-upload:
     name: Backend coverage upload
+    if: github.event.repository.fork == false
     needs:
       - run-backend-tests
     permissions:
@@ -40,6 +41,7 @@ jobs:
 
   run-frontend-coverage-upload:
     name: Frontend coverage upload
+    if: github.event.repository.fork == false
     needs:
       - run-frontend-tests
     permissions:
@@ -58,15 +60,6 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/run-e2e-tests.yaml
-
-  run-fuzz-graphql-tests:
-    name: GraphQL fuzz tests
-    if: false
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-fuzz-tests.yaml
-    with:
-      test-file: graphql_test.py
 
   run-fuzz-rest-tests:
     name: REST fuzz tests
