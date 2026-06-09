@@ -41,7 +41,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 5e2fb545eba1ea9dc051f6f962d52fe8f76a9794  # v0.15.13
+    rev: 22f0422809455ec89ffdcf5a00170ba816e42ddb  # v0.15.16
     hooks:
       - id: ruff-check
         args:
