@@ -6,7 +6,7 @@ import Release from 'components/Release'
 
 const release: ReleaseType = {
   name: 'v1.0 The First Release',
-  publishedAt: Date.now(),
+  publishedAt: new Date().toISOString(),
   repositoryName: 'our-awesome-project',
   organizationName: 'our-org',
   tagName: 'v1.0',

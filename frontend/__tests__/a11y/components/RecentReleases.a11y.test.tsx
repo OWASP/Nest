@@ -9,7 +9,7 @@ const mockReleases: ReleaseType[] = [
     id: '1',
     name: 'v1.0.0',
     tagName: 'v1.0.0',
-    publishedAt: Date.now(),
+    publishedAt: new Date().toISOString(),
     repositoryName: 'test-repo',
     organizationName: 'test-org',
     isPreRelease: false,

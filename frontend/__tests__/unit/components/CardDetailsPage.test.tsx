@@ -759,7 +759,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
-      publishedAt: Date.now() - 604800000,
+      publishedAt: new Date(Date.now() - 604800000).toISOString(),
       repositoryName: 'test-repo',
       tagName: 'v1.0.0',
       url: 'https://github.com/test/repo/releases/tag/v1.0.0',

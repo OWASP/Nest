@@ -6,7 +6,7 @@ import RecentReleases from 'components/RecentReleases'
 const mockReleases: Release[] = [
   {
     name: 'v1.0 The First Release',
-    publishedAt: Date.now(),
+    publishedAt: new Date().toISOString(),
     repositoryName: 'our-awesome-project',
     organizationName: 'our-org',
     tagName: 'v1.0',
@@ -26,7 +26,7 @@ const mockReleases: Release[] = [
   },
   {
     name: 'v2.0 The Second Release',
-    publishedAt: Date.now(),
+    publishedAt: new Date().toISOString(),
     repositoryName: 'another-cool-project',
     organizationName: 'our-org',
     tagName: 'v2.0',
