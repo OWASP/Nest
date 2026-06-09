@@ -14,6 +14,7 @@ from slack_sdk.errors import SlackApiError
 from apps.github.constants import OWASP_GITHUB_IO, OWASP_LOGIN
 from apps.slack.constants import OWASP_WORKSPACE_ID
 from apps.slack.management.commands.slack_check_invite_link import (
+    ERR_INVITE_ALERT_POST_FAILED,
     ERR_INVITE_BASELINE_UNSET,
     MSG_SKIP_NO_ALERT_CHANNEL,
 )
@@ -38,7 +39,7 @@ class FakeWorkspace:
         self.invite_link_alert_channel_id = ""
         self.invite_link_alert_user_ids = []
         self.invite_link_alert_member_offset = 350
-        self.invite_link_alert_message_ts = None
+        self.invite_link_last_alert_message_ts = ""
         self._bot_token = TEST_TOKEN
 
     @property
@@ -398,7 +399,7 @@ class TestSlackCheckInviteLinkCommand:
 
         with pytest.raises(
             CommandError,
-            match=r"Slack chat\.postMessage error: channel_not_found",
+            match=ERR_INVITE_ALERT_POST_FAILED,
         ):
             call_command("slack_check_invite_link")
 
@@ -424,20 +425,15 @@ class TestSlackCheckInviteLinkCommand:
             call_command("slack_check_invite_link")
         mock_commit_at.assert_not_called()
 
-    def test_get_normalized_strips_whitespace_and_leading_hash(self, fake_workspace):
-        fake_workspace.invite_link_alert_channel_id = "  #C01234567  "
+    def test_get_normalized_removes_leading_hash(self, fake_workspace):
+        fake_workspace.invite_link_alert_channel_id = "#C01234567"
         assert (
             SlackCheckInviteLinkCommand.get_normalized_invite_link_alert_channel_id(fake_workspace)
             == "C01234567"
         )
 
-    def test_get_normalized_empty_when_none_or_blank(self, fake_workspace):
-        fake_workspace.invite_link_alert_channel_id = None
-        assert (
-            SlackCheckInviteLinkCommand.get_normalized_invite_link_alert_channel_id(fake_workspace)
-            == ""
-        )
-        fake_workspace.invite_link_alert_channel_id = "   "
+    def test_get_normalized_empty_when_blank(self, fake_workspace):
+        fake_workspace.invite_link_alert_channel_id = ""
         assert (
             SlackCheckInviteLinkCommand.get_normalized_invite_link_alert_channel_id(fake_workspace)
             == ""
@@ -482,7 +478,7 @@ class TestSlackCheckInviteLinkCommand:
 
         call_command("slack_check_invite_link")
 
-        assert fake_workspace.invite_link_alert_message_ts == "1234567890.000100"
+        assert fake_workspace.invite_link_last_alert_message_ts == "1234567890.000100"
 
     @patch.object(Workspace, "get_default_workspace")
     @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
@@ -510,7 +506,7 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace.invite_link_commit_sha = old_sha
         fake_workspace.invite_link_member_count = 100
         fake_workspace.invite_link_last_alert_sent_at = timezone.now()
-        fake_workspace.invite_link_alert_message_ts = "1234567890.000100"
+        fake_workspace.invite_link_last_alert_message_ts = "1234567890.000100"
         fake_workspace.total_members_count = 200
         fake_workspace.invite_link_alert_channel_id = "C01234567"
 
@@ -522,8 +518,13 @@ class TestSlackCheckInviteLinkCommand:
             (c for c in calls if c[1].get("thread_ts") == "1234567890.000100"), None
         )
         assert thread_call is not None
-        assert "no further action is required" in thread_call[1]["text"].lower()
-        assert fake_workspace.invite_link_alert_message_ts is None
+        assert "no further action is needed" in thread_call[1]["text"].lower()
+        mock_client.reactions_add.assert_called_once_with(
+            channel="C01234567",
+            timestamp="1234567890.000100",
+            name="white_check_mark",
+        )
+        assert fake_workspace.invite_link_last_alert_message_ts == ""
         assert fake_workspace.invite_link_last_alert_sent_at is None
         assert fake_workspace.invite_link_created_at == new_time
         assert fake_workspace.invite_link_commit_sha == new_sha
@@ -534,7 +535,221 @@ class TestSlackCheckInviteLinkCommand:
     @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
     @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
     @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
-    def test_skips_resolution_reply_when_no_alert_ts_stored(
+    def test_keeps_last_alert_message_ts_when_resolution_reply_fails(
+        self,
+        mock_gh_client,
+        mock_commit_at,
+        mock_web_client_class,
+        mock_get_workspace,
+        fake_workspace,
+    ):
+        old_time = datetime(2025, 1, 1, tzinfo=UTC)
+        old_sha = "b" * 40
+        new_time = datetime(2025, 6, 1, tzinfo=UTC)
+        new_sha = "c" * 40
+        stored_ts = "1234567890.000100"
+        mock_get_workspace.return_value = fake_workspace
+        mock_commit_at.return_value = (new_time, new_sha)
+        mock_client = MagicMock()
+
+        def post_side_effect(*_args, **kwargs):
+            if kwargs.get("thread_ts"):
+                raise SlackApiError(
+                    message="thread reply failed",
+                    response={"error": "thread_not_found"},
+                )
+            return {"ok": True, "ts": "9999999999.000100"}
+
+        mock_client.chat_postMessage.side_effect = post_side_effect
+        mock_web_client_class.return_value = mock_client
+
+        fake_workspace.invite_link_created_at = old_time
+        fake_workspace.invite_link_commit_sha = old_sha
+        fake_workspace.invite_link_member_count = 100
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
+        fake_workspace.invite_link_last_alert_message_ts = stored_ts
+        fake_workspace.total_members_count = 200
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+
+        out = StringIO()
+        call_command("slack_check_invite_link", stdout=out)
+
+        assert fake_workspace.invite_link_last_alert_message_ts == stored_ts
+        mock_client.reactions_add.assert_not_called()
+        assert "Could not post resolution reply to Slack" in out.getvalue()
+
+    @patch.object(Workspace, "get_default_workspace")
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
+    def test_skips_resolution_while_alert_still_open(
+        self,
+        mock_gh_client,
+        mock_commit_at,
+        mock_web_client_class,
+        mock_get_workspace,
+        fake_workspace,
+    ):
+        commit_time = datetime(2025, 1, 1, tzinfo=UTC)
+        commit_sha = "a" * 40
+        mock_get_workspace.return_value = fake_workspace
+        mock_commit_at.return_value = (commit_time, commit_sha)
+        mock_client = MagicMock()
+        mock_web_client_class.return_value = mock_client
+
+        fake_workspace.invite_link_created_at = commit_time
+        fake_workspace.invite_link_commit_sha = commit_sha
+        fake_workspace.invite_link_member_count = 100
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
+        fake_workspace.invite_link_last_alert_message_ts = "1234567890.000100"
+        fake_workspace.total_members_count = 200
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+
+        call_command("slack_check_invite_link")
+
+        thread_call = next(
+            (c for c in mock_client.chat_postMessage.call_args_list if c[1].get("thread_ts")),
+            None,
+        )
+        assert thread_call is None
+        assert fake_workspace.invite_link_last_alert_message_ts == "1234567890.000100"
+        mock_client.reactions_add.assert_not_called()
+
+    @patch.object(Workspace, "get_default_workspace")
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
+    def test_retries_resolution_when_message_ts_stored_and_github_unchanged(
+        self,
+        mock_gh_client,
+        mock_commit_at,
+        mock_web_client_class,
+        mock_get_workspace,
+        fake_workspace,
+    ):
+        commit_time = datetime(2025, 6, 1, tzinfo=UTC)
+        commit_sha = "c" * 40
+        stored_ts = "1234567890.000100"
+        mock_get_workspace.return_value = fake_workspace
+        mock_commit_at.return_value = (commit_time, commit_sha)
+        mock_client = MagicMock()
+        mock_web_client_class.return_value = mock_client
+
+        fake_workspace.invite_link_created_at = commit_time
+        fake_workspace.invite_link_commit_sha = commit_sha
+        fake_workspace.invite_link_member_count = 250
+        fake_workspace.invite_link_last_alert_sent_at = None
+        fake_workspace.invite_link_last_alert_message_ts = stored_ts
+        fake_workspace.total_members_count = 250
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+
+        out = StringIO()
+        call_command("slack_check_invite_link", stdout=out)
+
+        thread_call = next(
+            (
+                c
+                for c in mock_client.chat_postMessage.call_args_list
+                if c[1].get("thread_ts") == stored_ts
+            ),
+            None,
+        )
+        assert thread_call is not None
+        assert fake_workspace.invite_link_last_alert_message_ts == ""
+        mock_client.reactions_add.assert_called_once_with(
+            channel="C01234567",
+            timestamp=stored_ts,
+            name="white_check_mark",
+        )
+        assert "Resolution reply posted" in out.getvalue()
+
+    @patch.object(Workspace, "get_default_workspace")
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
+    def test_keeps_last_alert_message_ts_when_resolution_reaction_fails(
+        self,
+        mock_gh_client,
+        mock_commit_at,
+        mock_web_client_class,
+        mock_get_workspace,
+        fake_workspace,
+    ):
+        old_time = datetime(2025, 1, 1, tzinfo=UTC)
+        old_sha = "b" * 40
+        new_time = datetime(2025, 6, 1, tzinfo=UTC)
+        new_sha = "c" * 40
+        stored_ts = "1234567890.000100"
+        mock_get_workspace.return_value = fake_workspace
+        mock_commit_at.return_value = (new_time, new_sha)
+        mock_client = MagicMock()
+        mock_client.reactions_add.side_effect = SlackApiError(
+            message="reaction failed",
+            response={"error": "missing_scope"},
+        )
+        mock_web_client_class.return_value = mock_client
+
+        fake_workspace.invite_link_created_at = old_time
+        fake_workspace.invite_link_commit_sha = old_sha
+        fake_workspace.invite_link_member_count = 100
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
+        fake_workspace.invite_link_last_alert_message_ts = stored_ts
+        fake_workspace.total_members_count = 200
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+
+        out = StringIO()
+        call_command("slack_check_invite_link", stdout=out)
+
+        assert fake_workspace.invite_link_last_alert_message_ts == ""
+        assert "Resolution reply posted" in out.getvalue()
+        assert "alert reaction could not be added" in out.getvalue()
+
+    @patch.object(Workspace, "get_default_workspace")
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
+    def test_clears_last_alert_message_ts_when_resolution_reaction_already_reacted(
+        self,
+        mock_gh_client,
+        mock_commit_at,
+        mock_web_client_class,
+        mock_get_workspace,
+        fake_workspace,
+    ):
+        old_time = datetime(2025, 1, 1, tzinfo=UTC)
+        old_sha = "b" * 40
+        new_time = datetime(2025, 6, 1, tzinfo=UTC)
+        new_sha = "c" * 40
+        stored_ts = "1234567890.000100"
+        mock_get_workspace.return_value = fake_workspace
+        mock_commit_at.return_value = (new_time, new_sha)
+        mock_client = MagicMock()
+        mock_client.reactions_add.side_effect = SlackApiError(
+            message="reaction failed",
+            response={"error": "already_reacted"},
+        )
+        mock_web_client_class.return_value = mock_client
+
+        fake_workspace.invite_link_created_at = old_time
+        fake_workspace.invite_link_commit_sha = old_sha
+        fake_workspace.invite_link_member_count = 100
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
+        fake_workspace.invite_link_last_alert_message_ts = stored_ts
+        fake_workspace.total_members_count = 200
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+
+        out = StringIO()
+        call_command("slack_check_invite_link", stdout=out)
+
+        assert fake_workspace.invite_link_last_alert_message_ts == ""
+        assert "Resolution reply posted" in out.getvalue()
+        assert "alert reaction could not be added" not in out.getvalue()
+
+    @patch.object(Workspace, "get_default_workspace")
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
+    def test_skips_resolution_reply_when_no_last_alert_message_ts_stored(
         self,
         mock_gh_client,
         mock_commit_at,
@@ -555,7 +770,7 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace.invite_link_commit_sha = old_sha
         fake_workspace.invite_link_member_count = 100
         fake_workspace.invite_link_last_alert_sent_at = timezone.now()
-        fake_workspace.invite_link_alert_message_ts = None
+        fake_workspace.invite_link_last_alert_message_ts = ""
         fake_workspace.total_members_count = 200
         fake_workspace.invite_link_alert_channel_id = "C01234567"
 
@@ -564,3 +779,76 @@ class TestSlackCheckInviteLinkCommand:
         calls = mock_client.chat_postMessage.call_args_list
         thread_call = next((c for c in calls if c[1].get("thread_ts") is not None), None)
         assert thread_call is None
+        mock_client.reactions_add.assert_not_called()
+
+
+class TestPostResolutionReply:
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    def test_post_resolution_reply_noop_when_alert_still_open(self, fake_workspace):
+        fake_workspace.invite_link_last_alert_message_ts = "1234567890.000100"
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
+        cmd = SlackCheckInviteLinkCommand()
+
+        assert cmd.post_resolution_reply(fake_workspace) is None
+
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    def test_post_resolution_reply_noop_when_ts_empty(self, mock_web_client_class, fake_workspace):
+        fake_workspace.invite_link_last_alert_message_ts = ""
+        cmd = SlackCheckInviteLinkCommand()
+
+        assert cmd.post_resolution_reply(fake_workspace) is None
+        mock_web_client_class.assert_not_called()
+
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    def test_post_resolution_reply_clears_ts_after_successful_reply(
+        self, mock_web_client_class, fake_workspace
+    ):
+        fake_workspace.invite_link_last_alert_message_ts = "1234567890.000100"
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+        mock_client = MagicMock()
+        mock_web_client_class.return_value = mock_client
+        cmd = SlackCheckInviteLinkCommand()
+        out = StringIO()
+        cmd.stdout = out
+
+        resolved_message_ts = cmd.post_resolution_reply(fake_workspace)
+
+        assert resolved_message_ts == "1234567890.000100"
+        assert fake_workspace.invite_link_last_alert_message_ts == ""
+        mock_client.chat_postMessage.assert_called_once()
+        mock_client.reactions_add.assert_not_called()
+        assert "Resolution reply posted" in out.getvalue()
+
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    def test_add_resolution_reaction_adds_checkmark(self, mock_web_client_class, fake_workspace):
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+        mock_client = MagicMock()
+        mock_web_client_class.return_value = mock_client
+        cmd = SlackCheckInviteLinkCommand()
+
+        cmd.add_resolution_reaction(fake_workspace, "1234567890.000100")
+
+        mock_client.reactions_add.assert_called_once_with(
+            channel="C01234567",
+            timestamp="1234567890.000100",
+            name="white_check_mark",
+        )
+
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    def test_add_resolution_reaction_ignores_already_reacted(
+        self, mock_web_client_class, fake_workspace
+    ):
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+        mock_client = MagicMock()
+        mock_client.reactions_add.side_effect = SlackApiError(
+            message="reaction failed",
+            response={"error": "already_reacted"},
+        )
+        mock_web_client_class.return_value = mock_client
+        cmd = SlackCheckInviteLinkCommand()
+        out = StringIO()
+        cmd.stdout = out
+
+        cmd.add_resolution_reaction(fake_workspace, "1234567890.000100")
+
+        assert "alert reaction could not be added" not in out.getvalue()

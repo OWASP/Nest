@@ -94,8 +94,10 @@ lint.per-file-ignores."apps/**/management/commands/*.py" = [
   "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
 lint.per-file-ignores."apps/**/migrations/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D103",   # https://docs.astral.sh/ruff/rules/undocumented-public-function/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
