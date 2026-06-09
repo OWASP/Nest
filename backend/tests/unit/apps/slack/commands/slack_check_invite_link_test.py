@@ -783,7 +783,6 @@ class TestSlackCheckInviteLinkCommand:
 
 
 class TestPostResolutionReply:
-    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
     def test_post_resolution_reply_noop_when_alert_still_open(self, fake_workspace):
         fake_workspace.invite_link_last_alert_message_ts = "1234567890.000100"
         fake_workspace.invite_link_last_alert_sent_at = timezone.now()
