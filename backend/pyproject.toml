@@ -9,9 +9,10 @@ description = "Your gateway to OWASP"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
 packages = [ { include = "apps" } ]
+dependencies.aiohttp = "3.14.0"
 dependencies.algoliasearch = "4.40.0"
 dependencies.algoliasearch-django = "4.0.0"
-dependencies.django = "6.0.5"
+dependencies.django = "6.0.6"
 dependencies.django-configurations = "2.5.1"
 dependencies.django-cors-headers = "4.9.0"
 dependencies.django-ninja = "1.6.2"
@@ -36,6 +37,7 @@ dependencies.psycopg2-binary = "2.9.12"
 dependencies.pydantic = "2.12.5"
 dependencies.pydantic-core = "2.41.5"
 dependencies.pygithub = "2.9.1"
+dependencies.pyjwt = { extras = [ "crypto" ], version = "2.13.0" }
 dependencies.python = "^3.13"
 dependencies.python-dateutil = "2.9.0.post0"
 dependencies.pyyaml = "6.0.3"
@@ -46,7 +48,7 @@ dependencies.sentry-sdk = { extras = [ "django" ], version = "2.58.0" }
 dependencies.slack-bolt = "1.28.0"
 dependencies.slack-sdk = "3.41.0"
 dependencies.starlette = "1.0.1"
-dependencies.strawberry-graphql = { extras = [ "django" ], version = "0.315.4" }
+dependencies.strawberry-graphql = { extras = [ "django" ], version = "0.315.7" }
 dependencies.strawberry-graphql-django = "0.75.3"
 dependencies.thefuzz = "0.22.1"
 dependencies.pyparsing = "3.3.2"

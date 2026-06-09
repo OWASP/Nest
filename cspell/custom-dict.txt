@@ -23,6 +23,7 @@ Emay
 FOSS
 GBP
 GFKs
+GPG
 GRC
 GSOC
 GTM
@@ -46,6 +47,7 @@ NOSONAR
 Nadu
 Nagori
 Nominatim
+OSSF
 OWHF
 Obmondo
 Oleksiuk
@@ -54,6 +56,7 @@ PLR
 PYTHONPATH
 PYTHONUNBUFFERED
 RUF
+SARIF
 SEO
 SLF
 SRE
@@ -107,7 +110,6 @@ defectdojo
 demojize
 dismissable
 dkr
-dockerhub
 dsn
 dvo
 elevenlabs
@@ -169,6 +171,7 @@ mpim
 navlink
 nestbot
 ngx
+nohup
 noinput
 nosniff
 notab
@@ -187,9 +190,11 @@ pil
 pnpmrc
 psql
 psycopg
+pyc
 pygithub
 pygoat
 pymdownx
+pyo
 pypa
 pypoetry
 pyyaml

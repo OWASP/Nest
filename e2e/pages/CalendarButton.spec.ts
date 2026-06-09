@@ -4,7 +4,7 @@ import slugify from 'utils/slugify'
 
 test.describe('Calendar Export Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { timeout: 25000 })
+    await page.goto('/')
   })
 
   test('should download a valid ICS file when clicked', async ({ page }) => {
