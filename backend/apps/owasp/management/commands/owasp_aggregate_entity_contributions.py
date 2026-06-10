@@ -223,9 +223,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Done!"))
 
-    def _process_chapters(
-        self, start_date: datetime, key: str | None, offset: int
-    ) -> None:
+    def _process_chapters(self, start_date: datetime, key: str | None, offset: int) -> None:
         """Process chapters for contribution aggregation."""
         queryset = Chapter.objects.filter(is_active=True).order_by("id")
 
@@ -239,9 +237,7 @@ class Command(BaseCommand):
 
         self._process_entities(queryset, start_date, Chapter)
 
-    def _process_projects(
-        self, start_date: datetime, key: str | None, offset: int
-    ) -> None:
+    def _process_projects(self, start_date: datetime, key: str | None, offset: int) -> None:
         """Process projects for contribution aggregation."""
         queryset = (
             Project.objects.filter(is_active=True)

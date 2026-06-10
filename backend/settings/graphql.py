@@ -49,6 +49,7 @@ class NestQueryDepthLimiter(QueryDepthLimiter):
     """Query depth limiter configured for the Nest schema."""
 
     def __init__(self) -> None:
+        """Initialize with the Nest schema max query depth."""
         super().__init__(max_depth=5)
 
 
