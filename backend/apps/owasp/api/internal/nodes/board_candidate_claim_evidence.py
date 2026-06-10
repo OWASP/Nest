@@ -32,9 +32,7 @@ class BoardCandidateClaimEvidenceNode(strawberry.relay.Node):
     @strawberry_django.field
     def file_url(self) -> str | None:
         """Return a URL to access the evidence file."""
-        if not self.file:
-            return None
-        return self.file.url
+        return self.file.url if self.file else None
 
     @strawberry_django.field
     def updated_at(self, root: BoardCandidateClaimEvidence) -> datetime:
