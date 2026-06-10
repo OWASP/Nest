@@ -17,10 +17,10 @@ runs:
     - name: Cache backend dependencies
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
-        key: poetry-venv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('backend/poetry.lock') }}
+        key: poetry-venv-${{ runner.os }}-${{ runner.arch }}-python-3.13-${{ hashFiles('backend/poetry.lock') }}
         path: backend/.venv
         restore-keys: |
-          poetry-venv-${{ runner.os }}-${{ runner.arch }}-
+          poetry-venv-${{ runner.os }}-${{ runner.arch }}-python-3.13-
 
     - name: Install backend dependencies
       run: poetry install --no-interaction --no-root
