@@ -1,15 +1,20 @@
 include backend/Makefile
 include cspell/Makefile
 include docs/Makefile
+include e2e/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
 .DEFAULT_GOAL := help
 
-.PHONY: build clean check help pre-commit prune run scan-images security-scan security-scan-code \
-	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
-	security-scan-backend-image security-scan-frontend-image security-scan-zap \
-	test test-nest-app test-infrastructure update clean-trivy-cache
+.PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
+	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies build check \
+	clean clean-trivy-cache help pre-commit prune run scan-images security-scan \
+	security-scan-backend-image security-scan-code security-scan-code-semgrep \
+	security-scan-code-trivy security-scan-frontend-image security-scan-images \
+	security-scan-zap test test-infrastructure test-nest-app update
+
+AUDIT_LEVEL ?= high
 
 MAKEFLAGS += --no-print-directory
 
@@ -56,7 +61,7 @@ check-test-frontend: \
 	test-frontend
 
 pre-commit: ## Run pre-commit hooks
-	@pre-commit run -a
+	@pre-commit run --all-files --color=always --show-diff-on-failure
 
 test: ## Run all tests
 test: \
@@ -65,9 +70,18 @@ test: \
 test-nest-app:
 	$(MAKE) test-backend
 	$(MAKE) test-frontend
+	$(MAKE) test-e2e
 	$(MAKE) test-infrastructure
 
 ##@ Security
+
+audit-dependencies: ## Audit all project dependencies for known vulnerabilities
+audit-dependencies: \
+	audit-backend-dependencies \
+	audit-cspell-dependencies \
+	audit-docs-dependencies \
+	audit-e2e-dependencies \
+	audit-frontend-dependencies
 
 security-scan: ## Run all security scans
 security-scan: \

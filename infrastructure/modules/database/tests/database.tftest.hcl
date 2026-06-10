@@ -3,7 +3,7 @@ mock_provider "aws" {}
 variables {
   common_tags          = { Environment = "test", Project = "nest" }
   db_allocated_storage = 20
-  db_engine_version    = "16.4"
+  db_engine_version    = "16.13"
   db_instance_class    = "db.t3.micro"
   db_name              = "nest_db"
   db_subnet_ids        = ["subnet-12345678"]
@@ -48,6 +48,15 @@ run "test_engine_is_postgres" {
   assert {
     condition     = aws_db_instance.main.engine == "postgres"
     error_message = "Database engine must be postgres."
+  }
+}
+
+run "test_engine_version" {
+  command = plan
+
+  assert {
+    condition     = aws_db_instance.main.engine_version == var.db_engine_version
+    error_message = "Database engine version must match configured version."
   }
 }
 

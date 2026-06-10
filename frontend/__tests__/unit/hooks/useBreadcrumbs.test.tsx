@@ -92,28 +92,27 @@ describe('useBreadcrumbs', () => {
   })
 
   describe('HIDDEN_SEGMENTS', () => {
-    test('does not show "community" in breadcrumbs when present in path', () => {
+    test('shows Community in breadcrumbs for paths under /community', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/community/forum')
 
       const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
 
-      const titles = result.current.map((item) => item.title)
-      expect(titles).not.toContain('Community')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Forum', path: '/community/forum' },
       ])
     })
-    test('hides multiple HIDDEN_SEGMENTS in the same path', () => {
+    test('hides mentees and other HIDDEN_SEGMENTS but keeps Community visible', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/community/mentees/profile')
 
       const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
 
       const titles = result.current.map((item) => item.title)
-      expect(titles).not.toContain('Community')
       expect(titles).not.toContain('Mentees')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Profile', path: '/community/mentees/profile' },
       ])
     })

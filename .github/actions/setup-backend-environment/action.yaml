@@ -1,0 +1,111 @@
+name: Set up Backend environment
+
+description: >-
+  Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
+  the Postgres service container, runs migrations, restores the database dump, starts the backend,
+  and waits for it to be ready.
+
+inputs:
+  backend_port:
+    description: Backend port to bind
+    required: true
+  db_name:
+    description: Database name
+    required: true
+  db_password:
+    description: Database password
+    required: true
+  db_username:
+    description: Database username
+    required: true
+  env_file:
+    description: Backend environment file
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install backend dependencies
+      uses: ./.github/actions/install-backend-dependencies
+
+    - name: Fetch nest.dump from S3
+      run: poetry run python -m scripts.fetch_nest_dump
+      shell: bash
+      working-directory: backend
+
+    - name: Wait for database to be ready
+      env:
+        DB_NAME: ${{ inputs.db_name }}
+        DB_USERNAME: ${{ inputs.db_username }}
+      run: |
+        timeout 5m bash -c '
+          until docker exec ${{ job.services.db.id }} pg_isready -U "$DB_USERNAME" -d "$DB_NAME"; do
+            echo "Waiting for database..."
+            sleep 5
+          done
+        '
+      shell: bash
+
+    - name: Migrate Database
+      env:
+        ENV_FILE: ${{ inputs.env_file }}
+      run: |
+        set -euo pipefail && set -a && source $ENV_FILE && set +a
+        export DJANGO_DB_HOST=localhost
+        export DJANGO_REDIS_AUTH_ENABLED=False
+        export DJANGO_REDIS_HOST=localhost
+        poetry run python manage.py migrate
+      shell: bash
+      working-directory: backend
+
+    - name: Load Postgres data
+      env:
+        DB_NAME: ${{ inputs.db_name }}
+        DB_USERNAME: ${{ inputs.db_username }}
+        PGPASSWORD: ${{ inputs.db_password }}  # The env name required by PostgreSQL clients.
+      run: |
+        set -euo pipefail
+        echo "Truncating content_type table"
+        if ! docker exec -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
+          psql -U "$DB_USERNAME" -d "$DB_NAME" -c "TRUNCATE django_content_type CASCADE;"; then
+          echo "Truncating content_type table failed"
+          exit 1
+        fi
+        echo "Loading data from dump..."
+        if ! docker exec -i -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
+          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" < backend/data/nest.dump; then
+          echo "Data loading failed"
+          exit 1
+        fi
+        echo "Data loading completed."
+      shell: bash
+
+    - name: Start Backend in the background
+      env:
+        BACKEND_PORT: ${{ inputs.backend_port }}
+        ENV_FILE: ${{ inputs.env_file }}
+      run: |
+        set -euo pipefail && set -a && source $ENV_FILE && set +a
+        export DJANGO_DB_HOST=localhost
+        export DJANGO_REDIS_AUTH_ENABLED=False
+        export DJANGO_REDIS_HOST=localhost
+        nohup poetry run gunicorn wsgi:application \
+          --bind 0.0.0.0:$BACKEND_PORT \
+          --workers 4 \
+          > /dev/null 2>&1 &
+        disown
+      shell: bash
+      working-directory: backend
+
+    - name: Waiting for the backend to be ready
+      env:
+        BACKEND_PORT: ${{ inputs.backend_port }}
+      run: |
+        timeout 5m bash -c '
+          until wget --spider http://localhost:$BACKEND_PORT/a; do
+            echo "Waiting for backend..."
+            sleep 5
+          done
+        '
+        echo "Backend is up!"
+      shell: bash

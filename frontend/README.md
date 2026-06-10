@@ -77,6 +77,20 @@ Dependencies are managed with [pnpm](https://pnpm.io/). The main configuration i
 cd frontend && pnpm update
 ```
 
+## Key Features
+
+The OWASP Nest frontend provides an interface for exploring the OWASP ecosystem: chapters,
+projects, members, organizations, contribution opportunities, and community snapshots.
+
+Key capabilities include:
+
+- **Project Discovery** – Browse OWASP projects and learn what each project does.
+- **Contribution Opportunities** – Find ways to contribute that match your interests and skills.
+- **Interactive Chapter Map** – Visualize OWASP chapters and community presence.
+- **Community Members** – Explore OWASP community members and their activity across projects.
+- **Organizations** – See organizations linked to OWASP projects and chapters and how they connect across the ecosystem.
+- **Community Snapshots** – Recent ecosystem-wide highlights and community activity at a glance.
+
 ## External Documentation
 
 - [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest/3-frontend-system)

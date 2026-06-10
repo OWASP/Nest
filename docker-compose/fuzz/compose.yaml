@@ -14,7 +14,7 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../../backend/.env.fuzz.example
+    env_file: ../../backend/.env.fuzz-tests
     networks:
       - fuzz-nest-network
     ports:
@@ -31,7 +31,7 @@ services:
 
   data-loader:
     container_name: fuzz-nest-data-loader
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
     depends_on:
       db:
         condition: service_healthy
@@ -55,7 +55,7 @@ services:
       '
   db:
     container_name: fuzz-nest-db
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
     environment:
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_fuzz}
       POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_fuzz_password}
@@ -78,7 +78,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
       '
     container_name: fuzz-nest-cache
-    image: redis:8.6-alpine3.23
+    image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-fuzz-cache-password}
     healthcheck:
@@ -95,7 +95,7 @@ services:
     container_name: fuzz-nest-graphql
     build:
       context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile.fuzz
+      dockerfile: ../docker/backend/Dockerfile.fuzz-tests
     environment:
       BASE_URL: http://backend:9500
       TEST_FILE: graphql_test.py
@@ -109,7 +109,7 @@ services:
     container_name: fuzz-nest-rest
     build:
       context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile.fuzz
+      dockerfile: ../docker/backend/Dockerfile.fuzz-tests
     environment:
       BASE_URL: http://backend:9500
       REST_URL: http://backend:9500/api/v0

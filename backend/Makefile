@@ -5,15 +5,9 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
+.PHONY: audit-backend-dependencies fetch-nest-dump sbom-backend-image upload-nest-dump
+
 ##@ Backend
-
-ifeq ($(EXEC_MODE),direct)
-SHELL := /bin/sh
-else
-SHELL := /bin/bash
-endif
-
-.PHONY: sbom-backend-image fetch-nest-dump upload-nest-dump
 
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
@@ -133,7 +127,12 @@ index-data: ## Index data for Algolia search
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
-	@cd backend && poetry run python -m scripts.fetch_nest_dump
+	@DOCKER_BUILDKIT=1 docker compose \
+		-f docker-compose/e2e/compose.yaml \
+		run \
+		--no-deps \
+		--rm \
+		backend python -m scripts.fetch_nest_dump
 
 load-data: purge-data fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
@@ -251,11 +250,11 @@ test-backend: ## Run backend tests
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f docker/backend/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.unit-tests backend \
 		-t nest-test-backend
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
-		--env-file backend/.env.example \
+		--env-file backend/.env.unit-tests \
 		--rm nest-test-backend pytest
 
 test-fuzz: ## Run fuzz tests (REST API and GraphQL)
@@ -269,6 +268,12 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
+
+audit-backend-dependencies: ## Audit backend Python dependencies
+	@echo "Auditing backend Python dependencies..."
+	@command -v pip-audit >/dev/null 2>&1 || python -m pip install -q pip-audit
+	@cd backend && poetry export -f requirements.txt --without-hashes --all-groups | \
+		pip-audit -r /dev/stdin
 
 update-backend-dependencies:
 	@cd backend && poetry update
