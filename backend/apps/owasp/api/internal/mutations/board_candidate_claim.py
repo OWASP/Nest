@@ -123,8 +123,7 @@ def _validate_reorder_claims(
             message="Duplicate claim ids are not allowed.",
         )
 
-    claims_query = BoardCandidateClaim.objects.filter(pk__in=claim_ids)
-    if claims_query.count() != len(claim_ids):
+    if BoardCandidateClaim.objects.filter(pk__in=claim_ids).count() != len(claim_ids):
         return claim_ids, ReorderClaimsResult(
             ok=False,
             code="NOT_FOUND",
