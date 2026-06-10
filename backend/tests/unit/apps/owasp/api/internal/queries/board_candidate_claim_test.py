@@ -20,11 +20,14 @@ class TestBoardCandidateClaimQuery:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
-        user.__str__.return_value = "alice"
+        user.github_user = MagicMock()
+        user.github_user.login = "alice"
         info = _make_info(user)
 
         claims = [MagicMock(), MagicMock()]
-        mock_claim_model.objects.filter.return_value = claims
+        mock_qs = MagicMock()
+        mock_qs.order_by.return_value = claims
+        mock_claim_model.objects.filter.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claims(info, login="alice", year=2025)
@@ -40,18 +43,21 @@ class TestBoardCandidateClaimQuery:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
-        user.__str__.return_value = "bob"
+        user.github_user = MagicMock()
+        user.github_user.login = "bob"
         info = _make_info(user)
 
         base_qs = MagicMock()
+        ordered_qs = MagicMock()
         filtered_qs = MagicMock()
-        base_qs.filter.return_value = filtered_qs
+        ordered_qs.filter.return_value = filtered_qs
+        base_qs.order_by.return_value = ordered_qs
         mock_claim_model.objects.filter.return_value = base_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
-        base_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
+        ordered_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
         assert result == filtered_qs
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
@@ -59,16 +65,17 @@ class TestBoardCandidateClaimQuery:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = False
-        user.__str__.return_value = "anonymous"
         info = _make_info(user)
 
         base_qs = MagicMock()
+        ordered_qs = MagicMock()
         filtered_qs = MagicMock()
-        base_qs.filter.return_value = filtered_qs
+        ordered_qs.filter.return_value = filtered_qs
+        base_qs.order_by.return_value = ordered_qs
         mock_claim_model.objects.filter.return_value = base_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
-        base_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
+        ordered_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
         assert result == filtered_qs

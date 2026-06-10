@@ -22,7 +22,8 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
-        user.__str__.return_value = "alice"
+        user.github_user = MagicMock()
+        user.github_user.login = "alice"
         info = _make_info(user)
         claim_id = MagicMock(node_id=1)
 
@@ -38,12 +39,13 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
-        user.__str__.return_value = "alice"
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         claim_id = MagicMock(node_id=1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         evidences_qs = MagicMock()
         claim.evidences.filter.return_value = evidences_qs
         mock_claim_model.objects.filter.return_value.first.return_value = claim
@@ -59,12 +61,12 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
-        user.__str__.return_value = "bob"
+        user.github_user = MagicMock()
         info = _make_info(user)
         claim_id = MagicMock(node_id=1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
@@ -78,12 +80,12 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
-        user.__str__.return_value = "bob"
+        user.github_user = MagicMock()
         info = _make_info(user)
         claim_id = MagicMock(node_id=1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = MagicMock()
         claim.status = mock_claim_model.Status.APPROVED
         evidences_qs = MagicMock()
         claim.evidences.filter.return_value = evidences_qs

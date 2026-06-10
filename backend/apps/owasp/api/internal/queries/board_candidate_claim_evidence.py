@@ -38,7 +38,7 @@ class BoardCandidateClaimEvidenceQuery:
         is_self = (
             user.is_authenticated
             and claim.candidate.member is not None
-            and str(user) == claim.candidate.member.login
+            and user.github_user == claim.candidate.member
         )
 
         if not is_self and claim.status != BoardCandidateClaim.Status.APPROVED:

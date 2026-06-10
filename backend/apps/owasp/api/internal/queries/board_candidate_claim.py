@@ -27,11 +27,15 @@ class BoardCandidateClaimQuery:
 
         """
         user = info.context.request.user
-        is_self = user.is_authenticated and str(user) == login
+        is_self = (
+            user.is_authenticated
+            and user.github_user is not None
+            and user.github_user.login == login
+        )
         claims = BoardCandidateClaim.objects.filter(
             candidate__member__login=login,
             board__year=year,
-        )
+        ).order_by("order", "created_at")
 
         if not is_self:
             claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
