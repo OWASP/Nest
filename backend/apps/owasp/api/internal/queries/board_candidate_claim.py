@@ -35,7 +35,7 @@ class BoardCandidateClaimQuery:
         claims = BoardCandidateClaim.objects.filter(
             candidate__member__login=login,
             board__year=year,
-        ).order_by("order", "created_at")
+        ).order_by("order", "nest_created_at")
 
         if not is_self:
             claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
