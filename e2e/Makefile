@@ -4,11 +4,16 @@
 # `make -C e2e <target>` works the same as `make <target>` from the repo root.
 REPO_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 
-.PHONY: init-e2e-db \
+.PHONY: audit-e2e-dependencies \
+	init-e2e-db \
 	test-e2e-no-db-init \
 	test-e2e \
 	test-e2e-ui-no-db-init \
 	test-e2e-ui
+
+audit-e2e-dependencies: ## Audit e2e npm dependencies
+	@echo "Auditing e2e npm dependencies..."
+	@cd $(REPO_ROOT)/e2e && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 init-e2e-db:
 	@$(MAKE) -C $(REPO_ROOT) fetch-nest-dump

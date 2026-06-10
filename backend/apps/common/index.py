@@ -81,7 +81,7 @@ class IndexRegistry:
                 for excluded_name in excluded_names.strip().split(",")
                 if excluded_name.strip()
             )
-            if excluded_names and excluded_names != "None"
+            if excluded_names
             else EXCLUDED_LOCAL_INDEX_NAMES
         )
 
