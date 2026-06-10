@@ -60,7 +60,7 @@ jobs:
         }}
     permissions:
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -97,7 +97,7 @@ jobs:
     permissions:
       actions: write
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     env:
       RELEASE_VERSION: ${{ inputs.release_version }}
     steps:
@@ -155,7 +155,7 @@ jobs:
     permissions:
       actions: read
       contents: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     env:
       RELEASE_VERSION: ${{ inputs.release_version }}
     steps:

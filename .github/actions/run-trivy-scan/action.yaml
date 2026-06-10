@@ -13,8 +13,9 @@ runs:
       id: trivy-cache-key
       env:
         DOCKERFILE_HASH: ${{ hashFiles('docker/trivy/Dockerfile') }}
+        RUNNER_ARCH: ${{ runner.arch }}
         RUNNER_OS: ${{ runner.os }}
-      run: echo "value=trivy-${RUNNER_OS}-${DOCKERFILE_HASH}" >> "$GITHUB_OUTPUT"
+      run: echo "value=trivy-${RUNNER_OS}-${RUNNER_ARCH}-${DOCKERFILE_HASH}" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Cache Trivy
@@ -22,7 +23,7 @@ runs:
       with:
         key: ${{ steps.trivy-cache-key.outputs.value }}
         path: .trivy-cache
-        restore-keys: trivy-${{ runner.os }}-
+        restore-keys: trivy-${{ runner.os }}-${{ runner.arch }}-
 
     - name: Run Trivy scan
       env:

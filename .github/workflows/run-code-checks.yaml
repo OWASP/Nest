@@ -13,7 +13,7 @@ jobs:
     name: Frontend
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -46,7 +46,7 @@ jobs:
       TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -63,24 +63,24 @@ jobs:
       - name: Cache pre-commit environments
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          key: pre-commit-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.pre-commit-config.yaml') }}
           path: ~/.cache/pre-commit
 
       - name: Cache mypy
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: mypy-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml', 'backend/pyproject.toml', 'backend/poetry.lock') }}
+          key: mypy-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.pre-commit-config.yaml', 'backend/pyproject.toml', 'backend/poetry.lock') }}
           path: ${{ env.MYPY_CACHE_DIR }}
           restore-keys: |
-            mypy-${{ runner.os }}-
+            mypy-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Cache TFLint plugins
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: tflint-plugins-${{ runner.os }}-${{ hashFiles('infrastructure/.tflint.hcl') }}
+          key: tflint-plugins-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('infrastructure/.tflint.hcl') }}
           path: ~/.tflint.d/plugins
           restore-keys: |
-            tflint-plugins-${{ runner.os }}-
+            tflint-plugins-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install pre-commit
         run: python -m pip install --requirement backend/requirements/pre-commit.txt
@@ -93,7 +93,7 @@ jobs:
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93  # v6.2.2
         with:
-          cache: true
+          cache: false
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_config_path: infrastructure/.tflint.hcl
           tflint_version: v0.60.0
@@ -101,7 +101,7 @@ jobs:
       - name: Cache Terraform plugins
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: ${{ runner.os }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Ensure Terraform plugin cache directory exists
@@ -127,7 +127,7 @@ jobs:
     name: Semgrep
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -142,7 +142,7 @@ jobs:
     name: Spelling
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -174,7 +174,7 @@ jobs:
     name: Trivy
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
