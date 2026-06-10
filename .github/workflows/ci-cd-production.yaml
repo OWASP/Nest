@@ -1,4 +1,4 @@
-name: CI/CD Production
+name: Deploy to Production
 
 on:
   release:

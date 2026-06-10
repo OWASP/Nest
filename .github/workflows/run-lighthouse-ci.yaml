@@ -33,4 +33,4 @@ jobs:
           LHCI_BASE_URL: ${{ inputs.base_url }}
         run: pnpm run lighthouse-ci
         working-directory: frontend
-    timeout-minutes: 5
+    timeout-minutes: 10

@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Chapter Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/chapters/rosario')
+    await page.goto('/chapters/rosario', { waitUntil: 'domcontentloaded' })
+    await expect(page.getByRole('heading', { name: 'OWASP Rosario', exact: true })).toBeVisible()
   })
 
   test('should have a heading and summary', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'OWASP Rosario', exact: true })).toBeVisible()
     await expect(
       page.getByText(/The OWASP Rosario chapter is located in Argentina, South America/i)
     ).toBeVisible()
