@@ -170,6 +170,7 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           gh release upload "$RELEASE_TAG" \
+            --repo "${{ github.repository }}" \
             "backend-sbom-$RELEASE_VERSION.cdx.json" \
             "backend-sbom-$RELEASE_VERSION.cdx.json.sigstore.json" \
             "frontend-sbom-$RELEASE_VERSION.cdx.json" \
