@@ -11,7 +11,7 @@ min-release-age-exclude = [
     "langsmith",           # 0.8.0
     "pyjwt",               # 2.13.0
     "starlette",           # 1.0.1
-    "strawberry-graphql",  # 0.315.4
+    "strawberry-graphql",  # 0.316.0
     "urllib3",             # 2.7.0
 ]
 
