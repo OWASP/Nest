@@ -10,7 +10,7 @@ on:
       - '**/pnpm-lock.yaml'
       - '**/poetry.lock'
       - '**/pyproject.toml'
-      - backend/requirements.build.txt
+      - backend/requirements/**
 
 concurrency:
   cancel-in-progress: true
