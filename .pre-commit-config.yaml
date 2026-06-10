@@ -81,7 +81,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.315.7
+          - strawberry-graphql==0.316.0
           - strawberry-graphql-django==0.84.0
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518

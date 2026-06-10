@@ -1,8 +1,11 @@
 """Management command to aggregate contributions for chapters and projects."""
 
+from argparse import ArgumentParser
 from datetime import datetime, timedelta
+from typing import Any
 
 from django.core.management.base import BaseCommand
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from apps.github.models.commit import Commit
@@ -18,7 +21,7 @@ class Command(BaseCommand):
 
     help = "Aggregate contributions (commits, issues, PRs, releases) for chapters and projects"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: ArgumentParser) -> None:
         """Add command arguments."""
         parser.add_argument(
             "--entity-type",
@@ -47,7 +50,7 @@ class Command(BaseCommand):
 
     def _aggregate_contribution_dates(
         self,
-        queryset,
+        queryset: QuerySet[Any],
         date_field: str,
         contribution_map: dict[str, int],
     ) -> None:
@@ -66,7 +69,7 @@ class Command(BaseCommand):
             date_key = date_value.date().isoformat()
             contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
 
-    def _get_repository_ids(self, entity):
+    def _get_repository_ids(self, entity: Chapter | Project) -> list[int]:
         """Extract repository IDs from chapter or project."""
         repository_ids: set[int] = set()
 
@@ -80,7 +83,9 @@ class Command(BaseCommand):
 
         return list(repository_ids)
 
-    def aggregate_contributions(self, entity, start_date: datetime) -> dict[str, int]:
+    def aggregate_contributions(
+        self, entity: Chapter | Project, start_date: datetime
+    ) -> dict[str, int]:
         """Aggregate contributions for a chapter or project.
 
         Args:
@@ -140,7 +145,9 @@ class Command(BaseCommand):
 
         return contribution_map
 
-    def calculate_contribution_stats(self, entity, start_date: datetime) -> dict[str, int]:
+    def calculate_contribution_stats(
+        self, entity: Chapter | Project, start_date: datetime
+    ) -> dict[str, int]:
         """Calculate contribution statistics for a chapter or project.
 
         Args:
@@ -194,7 +201,7 @@ class Command(BaseCommand):
 
         return stats
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         """Execute the command."""
         entity_type = options["entity_type"]
         days = options["days"]
@@ -216,7 +223,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Done!"))
 
-    def _process_chapters(self, start_date, key, offset):
+    def _process_chapters(self, start_date: datetime, key: str | None, offset: int) -> None:
         """Process chapters for contribution aggregation."""
         queryset = Chapter.objects.filter(is_active=True).order_by("id")
 
@@ -230,7 +237,7 @@ class Command(BaseCommand):
 
         self._process_entities(queryset, start_date, Chapter)
 
-    def _process_projects(self, start_date, key, offset):
+    def _process_projects(self, start_date: datetime, key: str | None, offset: int) -> None:
         """Process projects for contribution aggregation."""
         queryset = (
             Project.objects.filter(is_active=True)
@@ -247,7 +254,12 @@ class Command(BaseCommand):
 
         self._process_entities(queryset, start_date, Project)
 
-    def _process_entities(self, queryset, start_date, model_class):
+    def _process_entities(
+        self,
+        queryset: QuerySet[Chapter] | QuerySet[Project],
+        start_date: datetime,
+        model_class: type[Chapter] | type[Project],
+    ) -> None:
         """Process entities (chapters or projects) for contribution aggregation."""
         entities = list(queryset)
         label = model_class._meta.verbose_name_plural
@@ -260,5 +272,9 @@ class Command(BaseCommand):
             entity.contribution_stats = self.calculate_contribution_stats(entity, start_date)
 
         if entities:
-            model_class.bulk_save(entities, fields=("contribution_data", "contribution_stats"))
+            fields = ("contribution_data", "contribution_stats")
+            if model_class is Chapter:
+                Chapter.bulk_save(entities, fields=fields)
+            else:
+                Project.bulk_save(entities, fields=list(fields))
             self.stdout.write(self.style.SUCCESS(f"Updated {total_count} {label}"))
