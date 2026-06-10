@@ -144,6 +144,7 @@ class BoardCandidateClaimMutations:
         self, info: Info, input_data: CreateClaimInput
     ) -> ClaimResult:
         """Create a new draft claim for a candidate."""
+        user = info.context.request.user
         try:
             board = BoardOfDirectors.objects.get(year=input_data.year)
         except BoardOfDirectors.DoesNotExist:
@@ -153,7 +154,10 @@ class BoardCandidateClaimMutations:
                 message=f"No board election found for the year {input_data.year}.",
             )
 
-        candidate = board.get_candidate(login=info.context.request.user)
+        if user.github_user is None:
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
+
+        candidate = board.get_candidate(login=user.github_user.login)
         if not candidate:
             return ClaimResult(
                 ok=False,
@@ -203,7 +207,7 @@ class BoardCandidateClaimMutations:
         except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
-        if claim.candidate.member.login != str(user):
+        if user.github_user != claim.candidate.member:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.is_locked:
@@ -254,7 +258,7 @@ class BoardCandidateClaimMutations:
         except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
-        if claim.candidate.member.login != str(user):
+        if user.github_user != claim.candidate.member:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
@@ -302,7 +306,7 @@ class BoardCandidateClaimMutations:
         except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
-        if claim.candidate.member.login != str(user):
+        if user.github_user != claim.candidate.member:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
@@ -364,7 +368,7 @@ class BoardCandidateClaimMutations:
         except (BoardCandidateClaim.DoesNotExist, ValueError):
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
-        if claim.candidate.member.login != str(user):
+        if user.github_user != claim.candidate.member:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status not in {
@@ -419,7 +423,7 @@ class BoardCandidateClaimMutations:
             .select_for_update(of=("self",))
             .select_related("candidate__member")
         )
-        if any(claim.candidate.member.login != str(user) for claim in claims):
+        if any(user.github_user != claim.candidate.member for claim in claims):
             return ReorderClaimsResult(
                 ok=False,
                 code="FORBIDDEN",

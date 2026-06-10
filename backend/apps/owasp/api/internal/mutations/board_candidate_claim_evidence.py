@@ -85,7 +85,7 @@ class BoardCandidateClaimEvidenceMutations:
         except (BoardCandidateClaim.DoesNotExist, ValueError):
             return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
-        if claim.candidate.member.login != str(user):
+        if user.github_user != claim.candidate.member:
             return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
@@ -142,7 +142,7 @@ class BoardCandidateClaimEvidenceMutations:
         except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
 
-        if evidence.claim.candidate.member.login != str(user):
+        if user.github_user != evidence.claim.candidate.member:
             return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status != BoardCandidateClaim.Status.DRAFT:
@@ -207,7 +207,7 @@ class BoardCandidateClaimEvidenceMutations:
         except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
 
-        if evidence.claim.candidate.member.login != str(user):
+        if user.github_user != evidence.claim.candidate.member:
             return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status not in BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES:

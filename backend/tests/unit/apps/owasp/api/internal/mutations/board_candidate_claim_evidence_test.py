@@ -52,12 +52,14 @@ class TestCreateBoardCandidateClaimEvidence:
     def test_create_success(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.id = 1
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
@@ -83,7 +85,7 @@ class TestCreateBoardCandidateClaimEvidence:
     def test_create_claim_not_found(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data(claim_id=99)
 
@@ -103,7 +105,7 @@ class TestCreateBoardCandidateClaimEvidence:
         mock_claim_model.Status = BoardCandidateClaim.Status
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data(claim_id="not_an_int")
 
@@ -119,12 +121,13 @@ class TestCreateBoardCandidateClaimEvidence:
     def test_create_forbidden(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "bob"
+        user.is_authenticated = True
+        user.github_user = MagicMock()
         info = _make_info(user)
         input_data = self._make_input_data()
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -138,12 +141,14 @@ class TestCreateBoardCandidateClaimEvidence:
     def test_create_invalid_status(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -161,12 +166,14 @@ class TestCreateBoardCandidateClaimEvidence:
     def test_create_integrity_error(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.id = 1
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
@@ -187,12 +194,14 @@ class TestCreateBoardCandidateClaimEvidence:
     def test_create_validation_error(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.id = 1
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
@@ -230,12 +239,14 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_success(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.file = None
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
@@ -258,7 +269,9 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_partial_success(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = MagicMock(
             evidence_id=MagicMock(node_id="1"),
@@ -269,7 +282,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         )
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.file = None
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
@@ -290,7 +303,9 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_with_file_replacement(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         old_file = MagicMock()
         old_file.name = "old.pdf"
@@ -303,7 +318,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         )
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.file = old_file
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
@@ -328,7 +343,7 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_evidence_not_found(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data(evidence_id=99)
 
@@ -354,7 +369,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         mock_claim_model.Status = BoardCandidateClaim.Status
         mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data(evidence_id="not_an_int")
 
@@ -374,12 +389,13 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_forbidden(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "bob"
+        user.is_authenticated = True
+        user.github_user = MagicMock()
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = MagicMock()
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
 
@@ -397,12 +413,14 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_invalid_status(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
 
@@ -420,12 +438,14 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_integrity_error(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.file = None
         evidence.save.side_effect = IntegrityError
@@ -445,12 +465,14 @@ class TestUpdateBoardCandidateClaimEvidence:
     def test_update_validation_error(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.file = None
         evidence.save.side_effect = ValidationError({"title": ["Invalid."]})
@@ -492,14 +514,16 @@ class TestRemoveBoardCandidateClaimEvidence:
             BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
         )
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
         now = datetime(2024, 1, 1, tzinfo=UTC)
         mock_timezone.now.return_value = now
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = status
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
 
@@ -526,7 +550,7 @@ class TestRemoveBoardCandidateClaimEvidence:
             BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
         )
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data(evidence_id=99)
 
@@ -552,12 +576,13 @@ class TestRemoveBoardCandidateClaimEvidence:
             BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
         )
         user = MagicMock()
-        user.__str__.return_value = "bob"
+        user.is_authenticated = True
+        user.github_user = MagicMock()
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = MagicMock()
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
 
@@ -586,12 +611,14 @@ class TestRemoveBoardCandidateClaimEvidence:
             BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
         )
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = status
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
 
@@ -612,12 +639,14 @@ class TestRemoveBoardCandidateClaimEvidence:
             BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
         )
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.save.side_effect = IntegrityError
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
@@ -639,12 +668,14 @@ class TestRemoveBoardCandidateClaimEvidence:
             BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
         )
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data()
 
         evidence = MagicMock()
-        evidence.claim.candidate.member.login = "alice"
+        evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.save.side_effect = ValidationError({"removed_reason": ["Required."]})
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence

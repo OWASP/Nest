@@ -38,12 +38,14 @@ class TestDiscardBoardCandidateClaim:
     def test_discard_claim_success(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -59,7 +61,7 @@ class TestDiscardBoardCandidateClaim:
     def test_discard_claim_not_found(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data(99)
 
@@ -78,12 +80,13 @@ class TestDiscardBoardCandidateClaim:
     def test_discard_claim_forbidden(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "bob"
+        user.is_authenticated = True
+        user.github_user = MagicMock()
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -97,12 +100,14 @@ class TestDiscardBoardCandidateClaim:
     def test_discard_claim_invalid_status(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -123,12 +128,14 @@ class TestSubmitBoardCandidateClaim:
     def test_submit_claim_success(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.DRAFT
         claim.evidences.filter.return_value.exists.return_value = True
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
@@ -145,12 +152,14 @@ class TestSubmitBoardCandidateClaim:
     def test_submit_claim_missing_evidence(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.DRAFT
         claim.evidences.filter.return_value.exists.return_value = False
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
@@ -165,12 +174,14 @@ class TestSubmitBoardCandidateClaim:
     def test_submit_claim_invalid_status(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -184,12 +195,13 @@ class TestSubmitBoardCandidateClaim:
     def test_submit_claim_forbidden(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "bob"
+        user.is_authenticated = True
+        user.github_user = MagicMock()
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -214,14 +226,16 @@ class TestWithdrawBoardCandidateClaim:
     def test_withdraw_claim_success_submitted(self, mock_timezone, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
         now = datetime(2024, 1, 1, tzinfo=UTC)
         mock_timezone.now.return_value = now
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -240,14 +254,16 @@ class TestWithdrawBoardCandidateClaim:
     def test_withdraw_claim_success_approved(self, mock_timezone, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
         now = datetime(2024, 1, 1, tzinfo=UTC)
         mock_timezone.now.return_value = now
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.APPROVED
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -264,12 +280,14 @@ class TestWithdrawBoardCandidateClaim:
     def test_withdraw_claim_invalid_status(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = mock_github_user
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -283,12 +301,13 @@ class TestWithdrawBoardCandidateClaim:
     def test_withdraw_claim_forbidden(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "bob"
+        user.is_authenticated = True
+        user.github_user = MagicMock()
         info = _make_info(user)
         input_data = self._make_input_data(1)
 
         claim = MagicMock()
-        claim.candidate.member.login = "alice"
+        claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
 
@@ -368,20 +387,22 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_success(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data([2, 1, 3])
 
         claim_a = MagicMock(id=1, status=BoardCandidateClaim.Status.DRAFT)
-        claim_a.candidate.member.login = "alice"
+        claim_a.candidate.member = mock_github_user
         claim_a.candidate_id = 10
         claim_a.board_id = 20
         claim_b = MagicMock(id=2, status=BoardCandidateClaim.Status.DRAFT)
-        claim_b.candidate.member.login = "alice"
+        claim_b.candidate.member = mock_github_user
         claim_b.candidate_id = 10
         claim_b.board_id = 20
         claim_c = MagicMock(id=3, status=BoardCandidateClaim.Status.DRAFT)
-        claim_c.candidate.member.login = "alice"
+        claim_c.candidate.member = mock_github_user
         claim_c.candidate_id = 10
         claim_c.board_id = 20
 
@@ -414,7 +435,7 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_empty_input(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data([])
 
@@ -428,7 +449,7 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_duplicate_ids(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data([1, 1, 2])
 
@@ -442,7 +463,7 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_missing_ids(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
         info = _make_info(user)
         input_data = self._make_input_data([1, 2])
 
@@ -458,16 +479,17 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_forbidden(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "bob"
+        user.is_authenticated = True
+        user.github_user = MagicMock()
         info = _make_info(user)
         input_data = self._make_input_data([1, 2])
 
         claim_a = MagicMock(id=1, is_locked=False)
-        claim_a.candidate.member.login = "alice"
+        claim_a.candidate.member = MagicMock()
         claim_a.candidate_id = 10
         claim_a.board_id = 20
         claim_b = MagicMock(id=2, is_locked=False)
-        claim_b.candidate.member.login = "alice"
+        claim_b.candidate.member = MagicMock()
         claim_b.candidate_id = 10
         claim_b.board_id = 20
 
@@ -486,16 +508,18 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_mixed_candidates(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data([1, 2])
 
         claim_a = MagicMock(id=1, is_locked=False)
-        claim_a.candidate.member.login = "alice"
+        claim_a.candidate.member = mock_github_user
         claim_a.candidate_id = 10
         claim_a.board_id = 20
         claim_b = MagicMock(id=2, is_locked=False)
-        claim_b.candidate.member.login = "alice"
+        claim_b.candidate.member = mock_github_user
         claim_b.candidate_id = 11
         claim_b.board_id = 20
 
@@ -514,16 +538,18 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_invalid_status(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data([1, 2])
 
         claim_a = MagicMock(id=1, status=BoardCandidateClaim.Status.SUBMITTED)
-        claim_a.candidate.member.login = "alice"
+        claim_a.candidate.member = mock_github_user
         claim_a.candidate_id = 10
         claim_a.board_id = 20
         claim_b = MagicMock(id=2, status=BoardCandidateClaim.Status.SUBMITTED)
-        claim_b.candidate.member.login = "alice"
+        claim_b.candidate.member = mock_github_user
         claim_b.candidate_id = 10
         claim_b.board_id = 20
 
@@ -542,16 +568,18 @@ class TestReorderBoardCandidateClaims:
     def test_reorder_claims_mixed_boards(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
-        user.__str__.return_value = "alice"
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data([1, 2])
 
         claim_a = MagicMock(id=1, is_locked=False)
-        claim_a.candidate.member.login = "alice"
+        claim_a.candidate.member = mock_github_user
         claim_a.candidate_id = 10
         claim_a.board_id = 20
         claim_b = MagicMock(id=2, is_locked=False)
-        claim_b.candidate.member.login = "alice"
+        claim_b.candidate.member = mock_github_user
         claim_b.candidate_id = 10
         claim_b.board_id = 21
 
