@@ -359,7 +359,7 @@ class ModuleMutation:
 
         is_admin = module.program.has_admin(user)
         is_mentor = module.has_mentor(user)
-        if not (is_admin or is_mentor):
+        if not is_admin and not is_mentor:
             msg = "Only admins of the program or mentors of this module can edit modules."
             raise PermissionDenied(msg)
 
