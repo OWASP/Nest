@@ -21,6 +21,7 @@ def _mock_evidence_full_clean(*, claim_status=BoardCandidateClaim.Status.DRAFT):
             "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
         ) as mock_objects,
         patch.object(BoardCandidateClaimEvidence, "validate_unique"),
+        patch.object(BoardCandidateClaimEvidence, "validate_constraints"),
         patch.object(BoardCandidateClaimEvidence._meta.get_field("claim"), "validate"),
     ):
         mock_objects.values_list.return_value.filter.return_value.first.return_value = claim_status
@@ -43,6 +44,13 @@ class TestBoardCandidateClaimEvidenceModel:
             BoardCandidateClaimEvidence._meta.verbose_name_plural
             == "Board Candidate Claim Evidences"
         )
+
+    def test_meta_constraints(self):
+        """Test model constraints are defined."""
+        constraint_names = {c.name for c in BoardCandidateClaimEvidence._meta.constraints}
+
+        assert "owasp_evidence_claim_key_unique" in constraint_names
+        assert "owasp_evidence_claim_name_unique" in constraint_names
 
     def test_meta_indexes(self):
         """Test model indexes are defined."""
@@ -97,7 +105,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_key_field_defined(self):
         field = BoardCandidateClaimEvidence._meta.get_field("key")
         assert field.max_length == 100
-        assert field.unique
+        assert not field.unique
 
     def test_key_generated_from_name_on_save(self):
         evidence = BoardCandidateClaimEvidence(

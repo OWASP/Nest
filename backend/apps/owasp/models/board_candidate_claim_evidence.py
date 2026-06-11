@@ -30,6 +30,14 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         """Model options."""
 
         db_table = "owasp_board_candidate_claim_evidence"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["claim", "key"], name="owasp_evidence_claim_key_unique"
+            ),
+            models.UniqueConstraint(
+                fields=["claim", "name"], name="owasp_evidence_claim_name_unique"
+            ),
+        ]
         indexes = [
             models.Index(fields=["claim", "is_removed"], name="owasp_evidence_claim_active"),
         ]
@@ -72,10 +80,9 @@ class BoardCandidateClaimEvidence(TimestampedModel):
     )
     name = models.CharField(
         max_length=200,
-        unique=True,
         verbose_name="Name",
     )
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    key = models.CharField(verbose_name="Key", max_length=100)
     removed_at = models.DateTimeField(blank=True, null=True)
     removed_reason = models.TextField(blank=True)
     source_url = models.TextField(blank=True, verbose_name="Source URL")

@@ -22,6 +22,13 @@ class TestBoardCandidateClaimModel:
         assert BoardCandidateClaim._meta.db_table == "owasp_board_candidate_claim"
         assert BoardCandidateClaim._meta.verbose_name_plural == "Board Candidate Claims"
 
+    def test_meta_constraints(self):
+        """Test model constraints are defined."""
+        constraint_names = {c.name for c in BoardCandidateClaim._meta.constraints}
+
+        assert "owasp_claim_candidate_key_unique" in constraint_names
+        assert "owasp_claim_candidate_name_unique" in constraint_names
+
     def test_meta_indexes(self):
         """Test model indexes are defined."""
         index_names = {index.name for index in BoardCandidateClaim._meta.indexes}

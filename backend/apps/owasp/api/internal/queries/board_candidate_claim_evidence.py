@@ -15,23 +15,21 @@ class BoardCandidateClaimEvidenceQuery:
 
     @strawberry_django.field
     def board_candidate_claim_evidences(
-        self, info: strawberry.Info, claim_id: strawberry.relay.GlobalID
+        self, info: strawberry.Info, login: str, key: str
     ) -> list[BoardCandidateClaimEvidenceNode]:
         """Resolve Board Candidate Claim Evidences for a given claim.
 
         Args:
             info (Info): Strawberry Info.
-            claim_id (GlobalID): The id of the claim.
+            login (str): The login of the candidate.
+            key (str): The key of the claim.
 
         Returns:
             List of BoardCandidateClaimEvidenceNode objects
 
         """
         user = info.context.request.user
-        try:
-            claim = BoardCandidateClaim.objects.filter(pk=claim_id.node_id).first()
-        except (ValueError, TypeError):
-            return []
+        claim = BoardCandidateClaim.objects.filter(cancidate__member__login=login, key=key).first()
         if claim is None:
             return []
 
@@ -41,7 +39,8 @@ class BoardCandidateClaimEvidenceQuery:
             and user.github_user == claim.candidate.member
         )
 
-        if not is_self and claim.status != BoardCandidateClaim.Status.APPROVED:
-            return []
-
-        return claim.evidences.filter(is_removed=False)
+        return (
+            claim.evidences.filter(is_removed=False)
+            if is_self or claim.status == BoardCandidateClaim.Status.APPROVED
+            else []
+        )

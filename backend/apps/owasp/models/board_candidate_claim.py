@@ -18,6 +18,14 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         """Model options."""
 
         db_table = "owasp_board_candidate_claim"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["candidate", "key"], name="owasp_claim_candidate_key_unique"
+            ),
+            models.UniqueConstraint(
+                fields=["candidate", "name"], name="owasp_claim_candidate_name_unique"
+            ),
+        ]
         indexes = [
             models.Index(fields=["candidate", "status"], name="owasp_claim_candidate_status"),
             models.Index(fields=["board", "status"], name="owasp_claim_board_status"),
@@ -59,10 +67,9 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
     )
     name = models.CharField(
         max_length=200,
-        unique=True,
         verbose_name="Name",
     )
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    key = models.CharField(verbose_name="Key", max_length=100)
     order = models.PositiveSmallIntegerField(
         default=0,
         verbose_name="Order",
