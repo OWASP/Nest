@@ -94,7 +94,7 @@ jobs:
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -133,10 +133,16 @@ jobs:
             type=registry,ref=${{ env.BACKEND_CACHE_REF }},mode=max
           context: backend
           file: docker/backend/Dockerfile
-          load: true
-          platforms: linux/amd64
           push: true
           tags: ${{ env.BACKEND_IMAGE }}
+
+      - name: Get backend image size
+        id: backend-size
+        run: |
+          docker pull "$BACKEND_IMAGE"
+          RAW_SIZE=$(docker image inspect "$BACKEND_IMAGE" --format='{{.Size}}')
+          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
 
       - name: Prepare frontend public environment
         env:
@@ -167,13 +173,6 @@ jobs:
           NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
           EOF
 
-      - name: Get backend image size
-        id: backend-size
-        run: |
-          RAW_SIZE=$(docker image inspect "$BACKEND_IMAGE" --format='{{.Size}}')
-          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
-          echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
-
       - name: Build frontend image
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf  # v7.2.0
         with:
@@ -185,8 +184,6 @@ jobs:
             type=registry,ref=${{ env.FRONTEND_CACHE_REF }},mode=max
           context: frontend
           file: docker/frontend/Dockerfile
-          load: true
-          platforms: linux/amd64
           push: true
           secrets: |
             RELEASE_VERSION=${{ env.RELEASE_VERSION }}
@@ -196,6 +193,7 @@ jobs:
       - name: Get frontend image size
         id: frontend-size
         run: |
+          docker pull "$FRONTEND_IMAGE"
           RAW_SIZE=$(docker image inspect "$FRONTEND_IMAGE" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
@@ -208,4 +206,4 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> "$GITHUB_STEP_SUMMARY"
-    timeout-minutes: 10
+    timeout-minutes: 30
