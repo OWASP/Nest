@@ -47,6 +47,7 @@ NOSONAR
 Nadu
 Nagori
 Nominatim
+OSSF
 OWHF
 Obmondo
 Oleksiuk
@@ -55,6 +56,7 @@ PLR
 PYTHONPATH
 PYTHONUNBUFFERED
 RUF
+SARIF
 SEO
 SLF
 SRE
