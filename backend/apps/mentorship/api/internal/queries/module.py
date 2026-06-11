@@ -61,7 +61,7 @@ class ModuleQuery:
             mentor_q = Q(mentors__nest_user=user)
             github_user = getattr(user, "github_user", None)
             if github_user is not None:
-                mentor_q |= Q(github_user=github_user)
+                mentor_q |= Q(mentors__github_user=github_user)
             modules = modules.filter(mentor_q)
 
         return (
