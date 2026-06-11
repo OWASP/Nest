@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.13-alpine3.23 AS builder
+FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -26,9 +26,9 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
 
-COPY --chmod=444 --chown=root:root backend/requirements.build.txt /tmp/
+COPY --chmod=444 --chown=root:root backend/requirements/build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install --requirement /tmp/requirements.build.txt
+    python -m pip install --requirement /tmp/build.txt
 
 WORKDIR /home/owasp
 USER owasp
@@ -38,7 +38,7 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose && \
     rm -rf poetry.lock poetry.toml pyproject.toml
 
-FROM python:3.13.13-alpine3.23
+FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc
 
 ARG OWASP_GID
 ARG OWASP_UID
