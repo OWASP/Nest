@@ -30,7 +30,7 @@ GENERIC_ERROR_MSG = "Something went wrong."
 class CreateEvidenceInput:
     """Input for creating claim evidence."""
 
-    claim_id: strawberry.relay.GlobalID
+    claim_key: str
     description: str | None = None
     file: Upload | None = None
     name: str
@@ -42,8 +42,8 @@ class UpdateEvidenceInput:
     """Input for updating claim evidence."""
 
     description: str | None = None
-    evidence_id: strawberry.relay.GlobalID
     file: Upload | None = None
+    key: str
     name: str | None = None
     source_url: str | None = None
 
@@ -52,7 +52,7 @@ class UpdateEvidenceInput:
 class RemoveEvidenceInput:
     """Input for removing claim evidence."""
 
-    evidence_id: strawberry.relay.GlobalID
+    key: str
     removed_reason: str
 
 
@@ -80,13 +80,10 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                pk=int(input_data.claim_id.node_id)
+                claim__candidate__member__login=user.github_user.login, key=input_data.claim_key
             )
-        except (BoardCandidateClaim.DoesNotExist, ValueError):
+        except BoardCandidateClaim.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
-
-        if user.github_user != claim.candidate.member:
-            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
             return EvidenceResult(
@@ -137,13 +134,10 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                pk=int(input_data.evidence_id.node_id)
+                claim__candidate__member__login=user.github_user.login, key=input_data.key
             )
-        except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
+        except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
-
-        if user.github_user != evidence.claim.candidate.member:
-            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status != BoardCandidateClaim.Status.DRAFT:
             return EvidenceResult(
@@ -202,13 +196,10 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                pk=int(input_data.evidence_id.node_id)
+                candidate__member__login=user.github_user.login, key=input_data.key
             )
-        except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
+        except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
-
-        if user.github_user != evidence.claim.candidate.member:
-            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status not in BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES:
             return EvidenceResult(

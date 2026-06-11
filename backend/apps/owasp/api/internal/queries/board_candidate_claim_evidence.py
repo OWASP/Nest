@@ -33,7 +33,7 @@ class BoardCandidateClaimEvidenceQuery:
         """
         user = info.context.request.user
         claim = BoardCandidateClaim.objects.filter(
-            cancidate__member__login=login, key=claim_key
+            candidate__member__login=login, key=claim_key
         ).first()
         if claim is None:
             return []

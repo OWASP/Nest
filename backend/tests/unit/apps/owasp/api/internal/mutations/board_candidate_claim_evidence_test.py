@@ -33,9 +33,11 @@ def _make_info(user):
 class TestCreateBoardCandidateClaimEvidence:
     """Tests for create_board_candidate_claim_evidence mutation."""
 
-    def _make_input_data(self, claim_id=1, name="Test Evidence", source_url="https://example.com"):
+    def _make_input_data(
+        self, claim_key="test-key", name="Test Evidence", source_url="https://example.com"
+    ):
         input_data = MagicMock(
-            claim_id=MagicMock(node_id=str(claim_id)),
+            claim_key=claim_key,
             description="Test description.",
             file=None,
             source_url=source_url,
@@ -85,8 +87,10 @@ class TestCreateBoardCandidateClaimEvidence:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
-        input_data = self._make_input_data(claim_id=99)
+        input_data = self._make_input_data(claim_key="non-existent")
 
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         mock_claim_model.objects.select_for_update.return_value.get.side_effect = (
@@ -98,43 +102,6 @@ class TestCreateBoardCandidateClaimEvidence:
 
         assert not result.ok
         assert result.code == "NOT_FOUND"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
-    def test_create_invalid_claim_id_returns_not_found(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
-        user = MagicMock()
-        user.is_authenticated = True
-        info = _make_info(user)
-        input_data = self._make_input_data(claim_id="not_an_int")
-
-        mock_claim_model.objects.select_for_update.return_value.get.side_effect = ValueError
-
-        mutation = BoardCandidateClaimEvidenceMutations()
-        result = mutation.create_board_candidate_claim_evidence(info, input_data)
-
-        assert not result.ok
-        assert result.code == "NOT_FOUND"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
-    def test_create_forbidden(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-        input_data = self._make_input_data()
-
-        claim = MagicMock()
-        claim.candidate.member = MagicMock()
-        claim.status = BoardCandidateClaim.Status.DRAFT
-        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
-
-        mutation = BoardCandidateClaimEvidenceMutations()
-        result = mutation.create_board_candidate_claim_evidence(info, input_data)
-
-        assert not result.ok
-        assert result.code == "FORBIDDEN"
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     def test_create_invalid_status(self, mock_claim_model):
@@ -220,10 +187,13 @@ class TestUpdateBoardCandidateClaimEvidence:
     """Tests for update_board_candidate_claim_evidence mutation."""
 
     def _make_input_data(
-        self, evidence_id=1, name="Updated Evidence", source_url="https://updated.com"
+        self,
+        evidence_key="test-evidence-key",
+        name="Updated Evidence",
+        source_url="https://updated.com",
     ):
         input_data = MagicMock(
-            evidence_id=MagicMock(node_id=str(evidence_id)),
+            key=evidence_key,
             description="Updated description.",
             file=None,
             source_url=source_url,
@@ -274,7 +244,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         user.github_user = mock_github_user
         info = _make_info(user)
         input_data = MagicMock(
-            evidence_id=MagicMock(node_id="1"),
+            key="test-evidence-key",
             description=None,
             file=None,
             source_url=None,
@@ -310,7 +280,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         old_file = MagicMock()
         old_file.name = "old.pdf"
         input_data = MagicMock(
-            evidence_id=MagicMock(node_id="1"),
+            key="test-evidence-key",
             name=None,
             description=None,
             file=MagicMock(),
@@ -344,8 +314,10 @@ class TestUpdateBoardCandidateClaimEvidence:
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
-        input_data = self._make_input_data(evidence_id=99)
+        input_data = self._make_input_data(evidence_key="non-existent")
 
         mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
         mock_evidence_model.objects.select_for_update.return_value.get.side_effect = (
@@ -357,53 +329,6 @@ class TestUpdateBoardCandidateClaimEvidence:
 
         assert not result.ok
         assert result.code == "NOT_FOUND"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
-    @patch(
-        "apps.owasp.api.internal.mutations.board_candidate_claim_evidence"
-        ".BoardCandidateClaimEvidence"
-    )
-    def test_update_invalid_evidence_id_returns_not_found(
-        self, mock_evidence_model, mock_claim_model
-    ):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
-        user = MagicMock()
-        user.is_authenticated = True
-        info = _make_info(user)
-        input_data = self._make_input_data(evidence_id="not_an_int")
-
-        mock_evidence_model.objects.select_for_update.return_value.get.side_effect = ValueError
-
-        mutation = BoardCandidateClaimEvidenceMutations()
-        result = mutation.update_board_candidate_claim_evidence(info, input_data)
-
-        assert not result.ok
-        assert result.code == "NOT_FOUND"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
-    @patch(
-        "apps.owasp.api.internal.mutations.board_candidate_claim_evidence"
-        ".BoardCandidateClaimEvidence"
-    )
-    def test_update_forbidden(self, mock_evidence_model, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-        input_data = self._make_input_data()
-
-        evidence = MagicMock()
-        evidence.claim.candidate.member = MagicMock()
-        evidence.claim.status = BoardCandidateClaim.Status.DRAFT
-        mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
-
-        mutation = BoardCandidateClaimEvidenceMutations()
-        result = mutation.update_board_candidate_claim_evidence(info, input_data)
-
-        assert not result.ok
-        assert result.code == "FORBIDDEN"
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     @patch(
@@ -488,9 +413,11 @@ class TestUpdateBoardCandidateClaimEvidence:
 class TestRemoveBoardCandidateClaimEvidence:
     """Tests for remove_board_candidate_claim_evidence mutation."""
 
-    def _make_input_data(self, evidence_id=1, removed_reason="No longer relevant"):
+    def _make_input_data(
+        self, evidence_key="test-evidence-key", removed_reason="No longer relevant"
+    ):
         return MagicMock(
-            evidence_id=MagicMock(node_id=str(evidence_id)),
+            key=evidence_key,
             removed_reason=removed_reason,
         )
 
@@ -551,8 +478,10 @@ class TestRemoveBoardCandidateClaimEvidence:
         )
         user = MagicMock()
         user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
-        input_data = self._make_input_data(evidence_id=99)
+        input_data = self._make_input_data(evidence_key="non-existent")
 
         mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
         mock_evidence_model.objects.select_for_update.return_value.get.side_effect = (
@@ -564,33 +493,6 @@ class TestRemoveBoardCandidateClaimEvidence:
 
         assert not result.ok
         assert result.code == "NOT_FOUND"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
-    @patch(
-        "apps.owasp.api.internal.mutations.board_candidate_claim_evidence"
-        ".BoardCandidateClaimEvidence"
-    )
-    def test_remove_forbidden(self, mock_evidence_model, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
-            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
-        )
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-        input_data = self._make_input_data()
-
-        evidence = MagicMock()
-        evidence.claim.candidate.member = MagicMock()
-        evidence.claim.status = BoardCandidateClaim.Status.DRAFT
-        mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
-
-        mutation = BoardCandidateClaimEvidenceMutations()
-        result = mutation.remove_board_candidate_claim_evidence(info, input_data)
-
-        assert not result.ok
-        assert result.code == "FORBIDDEN"
 
     @pytest.mark.parametrize(
         "status",
