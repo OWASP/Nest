@@ -351,9 +351,11 @@ def process_query(  # noqa: PLR0911
                 )
                 return None
 
-            # Invoke Clarification Agent
+            # Invoke Clarification Agent (no tools needed - uses training knowledge)
             try:
-                clarification_result = execute_task(create_clarification_agent(), query)
+                clarification_result = execute_task(
+                    create_clarification_agent(), query, requires_tools=False
+                )
             except Exception:
                 logger.exception("Clarification agent failed, falling back to generic message")
                 return (
@@ -362,6 +364,15 @@ def process_query(  # noqa: PLR0911
                     "or wait for a response from one of the community members."
                 )
             else:
+                if not clarification_result:
+                    logger.warning(
+                        "Clarification agent returned empty result, using fallback"
+                    )
+                    return (
+                        "I'm unable to provide a confident answer to your question based on my "
+                        "current knowledge and available tools. Please try rephrasing your question "
+                        "or wait for a response from one of the community members."
+                    )
                 logger.info(
                     "Clarification agent returned",
                     extra={"clarification_preview": (clarification_result or "")[:200]},
@@ -397,6 +408,7 @@ def execute_task(
     task_description: str | None = None,
     *,
     is_channel_suggestion: bool = False,
+    requires_tools: bool = True,
 ) -> str:
     """Execute a task with an agent.
 
@@ -407,6 +419,8 @@ def execute_task(
         task_description: Optional task description to execute the task
         is_channel_suggestion: Whether this is a channel suggestion scenario
             from owasp-community channel
+        requires_tools: Whether tool-focused instructions should be injected.
+            Set to False for agents with no tools (e.g., clarification agent).
 
     Returns:
         Response string
@@ -417,22 +431,29 @@ def execute_task(
         raise ValueError(err_msg)
 
     if not task_description:
-        task_description = (
-            f"Answer this query: {query}\n\n"
-            "CRITICAL INSTRUCTIONS:\n"
-            "- You MUST use the provided tools to answer this question\n"
-            "- Do NOT rely on your training data or general knowledge\n"
-            "- If tools don't provide sufficient information, state that clearly\n"
-            "- Tool results are authoritative - use them exclusively\n"
-            "- Never guess or make assumptions based on general knowledge\n"
-            "- For RAG agent: ALWAYS call semantic_search tool first to retrieve relevant "
-            "context\n"
-            "- IMPORTANT: Do NOT retry the same tool call with the same input if it fails\n"
-            "- If a tool call fails or doesn't provide useful results, try a different "
-            "approach or tool\n"
-            "- If you've already tried a tool and it didn't work, do NOT call it again "
-            "with the same parameters"
-        )
+        if not requires_tools:
+            task_description = (
+                f"Answer this query concisely: {query}\n\n"
+                "Use your training knowledge to respond. "
+                "If you don't know the answer, state that clearly."
+            )
+        else:
+            task_description = (
+                f"Answer this query: {query}\n\n"
+                "CRITICAL INSTRUCTIONS:\n"
+                "- You MUST use the provided tools to answer this question\n"
+                "- Do NOT rely on your training data or general knowledge\n"
+                "- If tools don't provide sufficient information, state that clearly\n"
+                "- Tool results are authoritative - use them exclusively\n"
+                "- Never guess or make assumptions based on general knowledge\n"
+                "- For RAG agent: ALWAYS call semantic_search tool first to retrieve relevant "
+                "context\n"
+                "- IMPORTANT: Do NOT retry the same tool call with the same input if it fails\n"
+                "- If a tool call fails or doesn't provide useful results, try a different "
+                "approach or tool\n"
+                "- If you've already tried a tool and it didn't work, do NOT call it again "
+                "with the same parameters"
+            )
 
     if is_channel_suggestion:
         task_description += (

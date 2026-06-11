@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from apps.ai.flows.assistant import process_query
+from apps.ai.flows.assistant import CONFIDENCE_THRESHOLD, process_query
 
 
 class TestProcessQueryImageEnrichment:
@@ -107,7 +107,7 @@ def test_low_confidence_non_rag_triggers_clarification(
 ):
     """Low-confidence non-RAG routing should call Clarification Agent."""
     mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
-    mock_route.return_value = {"intent": "project", "confidence": 0.5}
+    mock_route.return_value = {"intent": "project", "confidence": CONFIDENCE_THRESHOLD - 0.2}
     clarification_agent = MagicMock(name="clarification_agent")
     mock_create_clarify.return_value = clarification_agent
     mock_execute_task.return_value = "Clarify: which project?"
@@ -115,7 +115,9 @@ def test_low_confidence_non_rag_triggers_clarification(
     res = process_query("Ambiguous query", is_app_mention=True)
 
     mock_create_clarify.assert_called_once()
-    mock_execute_task.assert_called_once_with(clarification_agent, "Ambiguous query")
+    mock_execute_task.assert_called_once_with(
+        clarification_agent, "Ambiguous query", requires_tools=False
+    )
     assert res == "Clarify: which project?"
 
 
@@ -128,7 +130,7 @@ def test_low_confidence_rag_triggers_clarification_when_policy_removed(
 ):
     """Low-confidence RAG routing should also call Clarification Agent."""
     mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
-    mock_route.return_value = {"intent": "rag", "confidence": 0.4}
+    mock_route.return_value = {"intent": "rag", "confidence": CONFIDENCE_THRESHOLD - 0.3}
     clarification_agent = MagicMock(name="clarification_agent")
     mock_create_clarify.return_value = clarification_agent
     mock_execute_task.return_value = "Clarify: please specify 'this'"
@@ -136,5 +138,7 @@ def test_low_confidence_rag_triggers_clarification_when_policy_removed(
     res = process_query("Is this covered by OWASP?", is_app_mention=True)
 
     mock_create_clarify.assert_called_once()
-    mock_execute_task.assert_called_once_with(clarification_agent, "Is this covered by OWASP?")
+    mock_execute_task.assert_called_once_with(
+        clarification_agent, "Is this covered by OWASP?", requires_tools=False
+    )
     assert res == "Clarify: please specify 'this'"
