@@ -120,7 +120,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
 
       - name: Build backend image
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf  # v7.2.0
         with:
           build-args: |
             OWASP_GID=${{ inputs.backend_gid }}
@@ -175,7 +175,7 @@ jobs:
           echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
 
       - name: Build frontend image
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf  # v7.2.0
         with:
           cache-from: |
             type=gha
