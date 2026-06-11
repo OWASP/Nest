@@ -7,11 +7,11 @@ from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaim
 from .mixins import GenericEntityAdminMixin
 
 
-class BoardCandidateClaimEvidenceAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
+class BoardCandidateClaimEvidenceAdmin(GenericEntityAdminMixin, admin.ModelAdmin):
     """Admin for BoardCandidateClaimEvidence model."""
 
     list_filter = ("is_removed",)
-    search_fields = ("title",)
+    search_fields = ("name",)
 
 
 admin.site.register(BoardCandidateClaimEvidence, BoardCandidateClaimEvidenceAdmin)

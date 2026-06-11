@@ -7,11 +7,11 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from .mixins import GenericEntityAdminMixin
 
 
-class BoardCandidateClaimAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
+class BoardCandidateClaimAdmin(GenericEntityAdminMixin, admin.ModelAdmin):
     """Admin for BoardCandidateClaim model."""
 
     list_filter = ("status",)
-    search_fields = ("title",)
+    search_fields = ("name",)
 
 
 admin.site.register(BoardCandidateClaim, BoardCandidateClaimAdmin)

@@ -41,14 +41,15 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         help_text="Indicates if the file is removed",
         verbose_name="Is removed",
     )
+    key = models.CharField(max_length=100, unique=True, verbose_name="Key")
+    name = models.CharField(max_length=1000, verbose_name="Name")
     removed_at = models.DateTimeField(blank=True, null=True)
     removed_reason = models.TextField(blank=True)
-    title = models.CharField(max_length=1000, verbose_name="Title")
     source_url = models.TextField(blank=True, verbose_name="Source URL")
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Evidence."""
-        return f"{self.title}"
+        return f"{self.name}"
 
     def clean(self) -> None:
         """Validate evidence."""

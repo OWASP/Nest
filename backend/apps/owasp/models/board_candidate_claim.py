@@ -37,7 +37,7 @@ class BoardCandidateClaim(TimestampedModel):
     VALID_TRANSITIONS = {
         Status.DRAFT: {Status.SUBMITTED, Status.DISCARDED},
         Status.SUBMITTED: {Status.APPROVED, Status.REJECTED, Status.WITHDRAWN},
-        Status.APPROVED: {Status.WITHDRAWN},
+        Status.APPROVED: set(),
         Status.REJECTED: set(),
         Status.DISCARDED: set(),
         Status.WITHDRAWN: set(),
@@ -54,19 +54,20 @@ class BoardCandidateClaim(TimestampedModel):
         help_text="Indicates if the claim is locked",
         verbose_name="Is locked",
     )
+    key = models.CharField(max_length=100, unique=True, verbose_name="Key")
+    name = models.CharField(max_length=1000, verbose_name="Name")
     status = models.CharField(
         choices=Status.choices,
         default=Status.DRAFT,
         max_length=20,
         verbose_name="Claim status",
     )
-    title = models.CharField(max_length=1000, verbose_name="Title")
     withdrawn_at = models.DateTimeField(blank=True, null=True)
     withdrawn_reason = models.TextField(blank=True)
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim."""
-        return f"{self.title}"
+        return f"{self.name}"
 
     def clean(self) -> None:
         """Validate claim."""
@@ -83,6 +84,10 @@ class BoardCandidateClaim(TimestampedModel):
 
         if not existing_claim:
             error_message = "Claim does not exist."
+            raise ValidationError(error_message)
+
+        if existing_claim.is_locked:
+            error_message = "Cannot update a locked claim."
             raise ValidationError(error_message)
 
         if self.status != existing_claim.status and self.status not in self.VALID_TRANSITIONS.get(
@@ -102,8 +107,7 @@ class BoardCandidateClaim(TimestampedModel):
             raise ValidationError(error_message)
 
         if (
-            self.status != self.Status.WITHDRAWN
-            and existing_claim.status != self.Status.DRAFT
+            existing_claim.status != self.Status.DRAFT
             and any(
                 f.attname != "status"
                 for f in self._meta.fields

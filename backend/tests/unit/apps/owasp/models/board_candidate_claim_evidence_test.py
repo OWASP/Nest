@@ -12,10 +12,10 @@ class TestBoardCandidateClaimEvidenceModel:
     """Tests for BoardCandidateClaimEvidence model."""
 
     def test_str_representation(self):
-        """Test __str__ returns the evidence title."""
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence Title")
+        """Test __str__ returns the evidence name."""
+        evidence = BoardCandidateClaimEvidence(key="test-evidence", name="Test Evidence Name")
 
-        assert str(evidence) == "Test Evidence Title"
+        assert str(evidence) == "Test Evidence Name"
 
     def test_meta_options(self):
         """Test model meta options."""
@@ -82,11 +82,18 @@ class TestBoardCandidateClaimEvidenceModel:
 
         assert field.blank
 
-    def test_title_max_length(self):
-        """Test title field max_length."""
-        field = BoardCandidateClaimEvidence._meta.get_field("title")
+    def test_name_max_length(self):
+        """Test name field max_length."""
+        field = BoardCandidateClaimEvidence._meta.get_field("name")
 
         assert field.max_length == 1000
+
+    def test_key_field_unique(self):
+        """Test key field is unique."""
+        field = BoardCandidateClaimEvidence._meta.get_field("key")
+
+        assert field.unique
+        assert field.max_length == 100
 
     def test_source_url_field_blank(self):
         """Test source_url field allows blank."""
@@ -97,7 +104,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_locked_claim_raises_validation_error(self):
         """Test that clean raises ValidationError when claim is locked."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            key="test-evidence", name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
@@ -114,7 +121,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_unlocked_claim_with_source_url_passes(self):
         """Test that clean passes for unlocked claim with source_url."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            key="test-evidence", name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
@@ -126,7 +133,9 @@ class TestBoardCandidateClaimEvidenceModel:
 
     def test_clean_no_file_and_no_source_url_raises_validation_error(self):
         """Test that clean raises ValidationError when neither file nor source_url."""
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence", source_url="")
+        evidence = BoardCandidateClaimEvidence(
+            key="test-evidence", name="Test Evidence", source_url=""
+        )
         evidence.claim_id = 1
         evidence.file = None
 
@@ -145,7 +154,7 @@ class TestBoardCandidateClaimEvidenceModel:
         mock_file.size = 12345
         mock_file.__bool__ = Mock(return_value=True)
 
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence")
+        evidence = BoardCandidateClaimEvidence(key="test-evidence", name="Test Evidence")
         evidence.claim_id = 1
         evidence.file = mock_file
         evidence.file_name = ""
@@ -167,7 +176,7 @@ class TestBoardCandidateClaimEvidenceModel:
         mock_file.size = 12345
         mock_file.__bool__ = Mock(return_value=True)
 
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence")
+        evidence = BoardCandidateClaimEvidence(key="test-evidence", name="Test Evidence")
         evidence.claim_id = 1
         evidence.file = mock_file
         evidence.file_name = "custom_name.pdf"
@@ -185,7 +194,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_without_claim_id_skips_locked_check(self):
         """Test that clean skips locked check when claim_id is not set."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            key="test-evidence", name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = None
 
@@ -195,7 +204,7 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_calls_full_clean(self, mock_super_save, mock_full_clean):
         """Test that save calls full_clean before saving."""
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence")
+        evidence = BoardCandidateClaimEvidence(key="test-evidence", name="Test Evidence")
 
         evidence.save()
 
