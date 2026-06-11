@@ -34,7 +34,9 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         REJECTED = "REJECTED", "Rejected"
         WITHDRAWN = "WITHDRAWN", "Withdrawn"
 
-    FINALIZED_STATUSES = {Status.APPROVED, Status.DISCARDED, Status.REJECTED, Status.WITHDRAWN}
+    FINALIZED_STATUSES = frozenset(
+        {Status.APPROVED, Status.DISCARDED, Status.REJECTED, Status.WITHDRAWN}
+    )
     VALID_TRANSITIONS = {
         Status.DRAFT: {Status.SUBMITTED, Status.DISCARDED},
         Status.SUBMITTED: {Status.APPROVED, Status.REJECTED, Status.WITHDRAWN},
