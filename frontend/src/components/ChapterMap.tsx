@@ -196,7 +196,7 @@ const ChapterMap = ({
   return (
     <section
       aria-label="Chapter Map"
-      className="relative isolate z-0 cursor-default overflow-hidden rounded-lg bg-slate-200 dark:bg-[#1a1a1a]"
+      className="chapter-map relative isolate z-0 cursor-default overflow-hidden rounded-lg bg-slate-200 dark:bg-[#1a1a1a]"
       style={style}
       onPointerLeave={handlePointerLeave}
     >
