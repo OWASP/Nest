@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.db import models
+from django.db.models import Q
 
 from apps.common.models import TimestampedModel
 from apps.common.utils import slugify
@@ -96,6 +97,22 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
 
         """
         return self.name
+
+    def has_mentor(self, user) -> bool:
+        """Check if the given user is a mentor of this module.
+
+        Falls back to a github_user lookup for mentors who have not linked
+        their nest_user profile yet.
+        """
+        if not user.is_authenticated:
+            return False
+
+        query = Q(nest_user=user)
+        github_user = getattr(user, "github_user", None)
+        if github_user is not None:
+            query |= Q(github_user=github_user)
+
+        return self.mentors.filter(query).exists()
 
     def save(self, *args, **kwargs):
         """Save module."""
