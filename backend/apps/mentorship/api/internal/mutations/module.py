@@ -357,9 +357,7 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
-        is_admin = module.program.has_admin(user)
-        is_mentor = module.has_mentor(user)
-        if not is_admin and not is_mentor:
+        if not module.program.has_admin(user) and not module.has_mentor(user):
             msg = "Only admins of the program or mentors of this module can edit modules."
             raise PermissionDenied(msg)
 
