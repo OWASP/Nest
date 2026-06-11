@@ -150,6 +150,7 @@ class BoardCandidateClaimEvidenceMutations:
         if input_data.name is not None:
             evidence.name = input_data.name
             update_fields.append("name")
+            update_fields.append("key")
         if input_data.description is not None:
             evidence.description = input_data.description
             update_fields.append("description")

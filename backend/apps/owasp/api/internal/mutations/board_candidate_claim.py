@@ -209,6 +209,7 @@ class BoardCandidateClaimMutations:
         if input_data.name:
             claim.name = input_data.name
             update_fields.append("name")
+            update_fields.append("key")
         if input_data.description:
             claim.description = input_data.description
             update_fields.append("description")
