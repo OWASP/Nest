@@ -10,6 +10,7 @@ from django.core.files import storage
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.common.utils import slugify
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.validators import (
     validate_evidence_extension,
@@ -69,14 +70,19 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         help_text="Indicates if the file is removed",
         verbose_name="Is removed",
     )
+    name = models.CharField(
+        max_length=200,
+        unique=True,
+        verbose_name="Name",
+    )
+    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     removed_at = models.DateTimeField(blank=True, null=True)
     removed_reason = models.TextField(blank=True)
-    title = models.CharField(max_length=1000, verbose_name="Title")
     source_url = models.TextField(blank=True, verbose_name="Source URL")
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Evidence."""
-        return f"{self.title}"
+        return f"{self.name}"
 
     def clean(self) -> None:
         """Validate evidence."""
@@ -111,6 +117,8 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
+        self.key = slugify(self.name)
+
         self.full_clean()
 
         super().save(*args, **kwargs)

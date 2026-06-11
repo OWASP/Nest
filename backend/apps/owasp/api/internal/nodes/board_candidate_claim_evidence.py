@@ -14,11 +14,12 @@ from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaim
         "description",
         "file_name",
         "file_size",
+        "key",
         "is_removed",
+        "name",
         "removed_at",
         "removed_reason",
         "source_url",
-        "title",
     ],
 )
 class BoardCandidateClaimEvidenceNode(strawberry.relay.Node):

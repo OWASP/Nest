@@ -27,7 +27,7 @@ class CreateClaimInput:
     """Input for creating a claim."""
 
     description: str
-    title: str
+    name: str
     year: int
 
 
@@ -37,7 +37,7 @@ class UpdateClaimInput:
 
     claim_id: strawberry.relay.GlobalID
     description: str | None = None
-    title: str | None = None
+    name: str | None = None
 
 
 @strawberry.input
@@ -169,7 +169,7 @@ class BoardCandidateClaimMutations:
                 board=board,
                 candidate=candidate,
                 description=input_data.description,
-                title=input_data.title,
+                name=input_data.name,
             )
         except IntegrityError:
             logger.warning(
@@ -213,9 +213,9 @@ class BoardCandidateClaimMutations:
             return ClaimResult(ok=False, code="LOCKED", message="Cannot update a locked claim.")
 
         update_fields = []
-        if input_data.title:
-            claim.title = input_data.title
-            update_fields.append("title")
+        if input_data.name:
+            claim.name = input_data.name
+            update_fields.append("name")
         if input_data.description:
             claim.description = input_data.description
             update_fields.append("description")
@@ -224,9 +224,9 @@ class BoardCandidateClaimMutations:
             claim.save(update_fields=update_fields)
         except IntegrityError:
             logger.warning(
-                "Error updating Board Candidate Claim for candidate %s, title %s",
+                "Error updating Board Candidate Claim for candidate %s, name %s",
                 claim.candidate.member.login,
-                input_data.title,
+                input_data.name,
             )
             return ClaimResult(
                 ok=False,

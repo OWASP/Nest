@@ -24,10 +24,11 @@ class TestBoardCandidateClaimEvidenceNode(GraphQLNodeBaseTest):
             "file_size",
             "file_url",
             "is_removed",
+            "key",
+            "name",
             "removed_at",
             "removed_reason",
             "source_url",
-            "title",
             "updated_at",
         }
         assert field_names == expected_field_names

@@ -16,22 +16,25 @@ from apps.owasp.models.board_candidate_claim_evidence import (
 @contextmanager
 def _mock_evidence_full_clean(*, claim_status=BoardCandidateClaim.Status.DRAFT):
     """Mock claim objects."""
-    with patch(
-        "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
-    ) as mock_objects:
+    with (
+        patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects,
+        patch.object(BoardCandidateClaimEvidence, "validate_unique"),
+        patch.object(BoardCandidateClaimEvidence._meta.get_field("claim"), "validate"),
+    ):
         mock_objects.values_list.return_value.filter.return_value.first.return_value = claim_status
-        with patch.object(BoardCandidateClaimEvidence._meta.get_field("claim"), "validate"):
-            yield
+        yield
 
 
 class TestBoardCandidateClaimEvidenceModel:
     """Tests for BoardCandidateClaimEvidence model."""
 
     def test_str_representation(self):
-        """Test __str__ returns the evidence title."""
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence Title")
+        """Test __str__ returns the evidence name."""
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence Name")
 
-        assert str(evidence) == "Test Evidence Title"
+        assert str(evidence) == "Test Evidence Name"
 
     def test_meta_options(self):
         """Test model meta options."""
@@ -85,6 +88,31 @@ class TestBoardCandidateClaimEvidenceModel:
 
         assert field.default is False
 
+    def test_name_max_length(self):
+        """Test name field max_length."""
+        field = BoardCandidateClaimEvidence._meta.get_field("name")
+
+        assert field.max_length == 200
+
+    def test_key_field_defined(self):
+        field = BoardCandidateClaimEvidence._meta.get_field("key")
+        assert field.max_length == 100
+        assert field.unique
+
+    def test_key_generated_from_name_on_save(self):
+        evidence = BoardCandidateClaimEvidence(
+            name="My Test Evidence", source_url="https://example.com"
+        )
+        evidence.claim_id = 1
+
+        with (
+            patch.object(BoardCandidateClaimEvidence, "full_clean"),
+            patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save"),
+        ):
+            evidence.save()
+
+        assert evidence.key == "my-test-evidence"
+
     def test_removed_at_field_nullable(self):
         """Test removed_at field is nullable."""
         field = BoardCandidateClaimEvidence._meta.get_field("removed_at")
@@ -97,12 +125,6 @@ class TestBoardCandidateClaimEvidenceModel:
         field = BoardCandidateClaimEvidence._meta.get_field("removed_reason")
 
         assert field.blank
-
-    def test_title_max_length(self):
-        """Test title field max_length."""
-        field = BoardCandidateClaimEvidence._meta.get_field("title")
-
-        assert field.max_length == 1000
 
     def test_source_url_field_blank(self):
         """Test source_url field allows blank."""
@@ -158,8 +180,10 @@ class TestBoardCandidateClaimEvidenceModel:
     def _evidence_with_file(self, **mock_kwargs):
         """Build evidence with a mock file, ready for full_clean."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", description="Test description."
+            name="Test Evidence",
+            description="Test description.",
         )
+        evidence.key = "test-evidence"
         evidence.claim_id = 1
         mock_file = MagicMock()
         mock_file.name = "document.pdf"
@@ -220,7 +244,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_non_draft_statuses_raise_validation_error(self, status):
         """Test that clean raises ValidationError for all non-draft statuses."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
@@ -243,7 +267,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_draft_status_passes(self):
         """Test that clean passes for draft status."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
@@ -262,7 +286,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_non_draft_claim_raises_validation_error(self):
         """Test that clean raises ValidationError when claim is non-draft."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
@@ -281,7 +305,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_draft_claim_with_source_url_passes(self):
         """Test that clean passes for draft claim with source_url."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
 
@@ -295,7 +319,7 @@ class TestBoardCandidateClaimEvidenceModel:
 
     def test_clean_no_file_and_no_source_url_raises_validation_error(self):
         """Test that clean raises ValidationError when neither file nor source_url."""
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence", source_url="")
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence", source_url="")
         evidence.claim_id = 1
         evidence.file = None
 
@@ -316,7 +340,7 @@ class TestBoardCandidateClaimEvidenceModel:
         mock_file.size = 12345
         mock_file.__bool__ = Mock(return_value=True)
 
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence")
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
         evidence.claim_id = 1
         evidence.file = mock_file
         evidence.file_name = ""
@@ -340,7 +364,7 @@ class TestBoardCandidateClaimEvidenceModel:
         mock_file.size = 12345
         mock_file.__bool__ = Mock(return_value=True)
 
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence")
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
         evidence.claim_id = 1
         evidence.file = mock_file
         evidence.file_name = "custom_name.pdf"
@@ -380,7 +404,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_is_removed_with_removable_status_passes(self, status):
         """Test that clean passes for is_removed evidence with removable claim statuses."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
         evidence.is_removed = True
@@ -402,7 +426,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_is_removed_with_non_removable_status_raises(self, status):
         """Test that clean raises for is_removed evidence with non-removable claim statuses."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = 1
         evidence.is_removed = True
@@ -421,7 +445,7 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_clean_without_claim_id_skips_locked_check(self):
         """Test that clean skips locked check when claim_id is not set."""
         evidence = BoardCandidateClaimEvidence(
-            title="Test Evidence", source_url="https://example.com"
+            name="Test Evidence", source_url="https://example.com"
         )
         evidence.claim_id = None
 
@@ -431,7 +455,7 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_calls_full_clean(self, mock_super_save, mock_full_clean):
         """Test that save calls full_clean before saving."""
-        evidence = BoardCandidateClaimEvidence(title="Test Evidence")
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
 
         evidence.save()
 
@@ -442,7 +466,7 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_new_evidence_skips_file_cleanup(self, mock_super_save, mock_full_clean):
         """Test that save on new evidence does not attempt file cleanup."""
-        evidence = BoardCandidateClaimEvidence(title="Test", source_url="https://example.com")
+        evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com")
         evidence.file = MagicMock()
         evidence.file.name = "new.pdf"
         evidence.file.size = 1000
@@ -456,9 +480,7 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_without_file_skips_cleanup(self, mock_super_save, mock_full_clean):
         """Test that save on evidence without file does not attempt cleanup."""
-        evidence = BoardCandidateClaimEvidence(
-            title="Test", source_url="https://example.com", pk=1
-        )
+        evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
 
         with patch("django.core.files.storage.default_storage") as mock_storage:
             evidence.save()
@@ -469,9 +491,7 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_with_replaced_file_deletes_old_file(self, mock_super_save, mock_full_clean):
         """Test that save deletes old file from storage when replaced."""
-        evidence = BoardCandidateClaimEvidence(
-            title="Test", source_url="https://example.com", pk=1
-        )
+        evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
         evidence.file = MagicMock()
         evidence.file.name = "new_file.pdf"
         evidence.file.size = 1000
@@ -490,9 +510,7 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_when_db_has_no_old_file_skips_cleanup(self, mock_super_save, mock_full_clean):
         """Test that save skips cleanup when DB has no old file."""
-        evidence = BoardCandidateClaimEvidence(
-            title="Test", source_url="https://example.com", pk=1
-        )
+        evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
         evidence.file = MagicMock()
         evidence.file.name = "new_file.pdf"
         evidence.file.size = 1000
@@ -508,9 +526,7 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_with_unchanged_file_skips_cleanup(self, mock_super_save, mock_full_clean):
         """Test that save skips cleanup when file name hasn't changed."""
-        evidence = BoardCandidateClaimEvidence(
-            title="Test", source_url="https://example.com", pk=1
-        )
+        evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
         evidence.file = MagicMock()
         evidence.file.name = "bod/claim/evidence/uuid-old.pdf"
         evidence.file.size = 1000

@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import slugify
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
@@ -54,6 +55,12 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         help_text="Indicates if the claim is locked",
         verbose_name="Is locked",
     )
+    name = models.CharField(
+        max_length=200,
+        unique=True,
+        verbose_name="Name",
+    )
+    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     order = models.PositiveSmallIntegerField(
         default=0,
         verbose_name="Order",
@@ -65,13 +72,12 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         max_length=20,
         verbose_name="Claim status",
     )
-    title = models.CharField(max_length=1000, verbose_name="Title")
     withdrawn_at = models.DateTimeField(blank=True, null=True)
     withdrawn_reason = models.TextField(blank=True)
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim."""
-        return f"{self.title}"
+        return f"{self.name}"
 
     def clean(self) -> None:
         """Validate claim."""
@@ -120,6 +126,8 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
     def save(self, *args, **kwargs) -> None:
         """Save claim."""
+        self.key = slugify(self.name)
+
         self.full_clean()
 
         if not self.pk and self.candidate_id and self.board_id:

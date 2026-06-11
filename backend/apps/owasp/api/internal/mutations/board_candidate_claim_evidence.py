@@ -33,19 +33,19 @@ class CreateEvidenceInput:
     claim_id: strawberry.relay.GlobalID
     description: str | None = None
     file: Upload | None = None
+    name: str
     source_url: str | None = None
-    title: str
 
 
 @strawberry.input
 class UpdateEvidenceInput:
     """Input for updating claim evidence."""
 
-    evidence_id: strawberry.relay.GlobalID
     description: str | None = None
+    evidence_id: strawberry.relay.GlobalID
     file: Upload | None = None
+    name: str | None = None
     source_url: str | None = None
-    title: str | None = None
 
 
 @strawberry.input
@@ -98,7 +98,7 @@ class BoardCandidateClaimEvidenceMutations:
         try:
             evidence = BoardCandidateClaimEvidence.objects.create(
                 claim=claim,
-                title=input_data.title,
+                name=input_data.name,
                 description=input_data.description or "",
                 file=input_data.file,
                 source_url=input_data.source_url or "",
@@ -153,9 +153,9 @@ class BoardCandidateClaimEvidenceMutations:
             )
 
         update_fields = []
-        if input_data.title is not None:
-            evidence.title = input_data.title
-            update_fields.append("title")
+        if input_data.name is not None:
+            evidence.name = input_data.name
+            update_fields.append("name")
         if input_data.description is not None:
             evidence.description = input_data.description
             update_fields.append("description")

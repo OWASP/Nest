@@ -12,10 +12,10 @@ class TestBoardCandidateClaimModel:
     """Tests for BoardCandidateClaim model."""
 
     def test_str_representation(self):
-        """Test __str__ returns the claim title."""
-        claim = BoardCandidateClaim(title="Test Claim Title")
+        """Test __str__ returns the claim name."""
+        claim = BoardCandidateClaim(name="Test Claim Name")
 
-        assert str(claim) == "Test Claim Title"
+        assert str(claim) == "Test Claim Name"
 
     def test_meta_options(self):
         """Test model meta options."""
@@ -92,11 +92,11 @@ class TestBoardCandidateClaimModel:
 
         assert field.blank
 
-    def test_title_max_length(self):
-        """Test title field max_length."""
-        field = BoardCandidateClaim._meta.get_field("title")
+    def test_name_max_length(self):
+        """Test name field max_length."""
+        field = BoardCandidateClaim._meta.get_field("name")
 
-        assert field.max_length == 1000
+        assert field.max_length == 200
 
     def test_description_default_empty(self):
         """Test description field defaults to empty string."""
@@ -106,7 +106,7 @@ class TestBoardCandidateClaimModel:
 
     def test_clean_new_claim_passes(self):
         """Test that clean passes for new draft claims without pk."""
-        claim = BoardCandidateClaim(title="New Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim = BoardCandidateClaim(name="New Claim", status=BoardCandidateClaim.Status.DRAFT)
         claim.pk = None
 
         claim.clean()
@@ -123,7 +123,7 @@ class TestBoardCandidateClaimModel:
     )
     def test_clean_new_claim_non_draft_raises(self, status):
         """Test that clean raises ValidationError when creating a non-draft claim."""
-        claim = BoardCandidateClaim(title="New Claim", status=status)
+        claim = BoardCandidateClaim(name="New Claim", status=status)
         claim.pk = None
 
         with pytest.raises(ValidationError) as exc_info:
@@ -136,7 +136,7 @@ class TestBoardCandidateClaimModel:
         """Test that clean raises ValidationError when claim with pk does not exist in DB."""
         mock_objects.filter.return_value.first.return_value = None
 
-        claim = BoardCandidateClaim(title="Ghost Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim = BoardCandidateClaim(name="Ghost Claim", status=BoardCandidateClaim.Status.DRAFT)
         claim.pk = 999
 
         with pytest.raises(ValidationError) as exc_info:
@@ -159,7 +159,7 @@ class TestBoardCandidateClaimModel:
     def test_clean_valid_transition_passes(self, mock_objects, from_status, to_status):
         """Test that clean passes for valid status transitions."""
         existing = BoardCandidateClaim(
-            title="Original Title",
+            name="Original Name",
             description="Original Description",
             status=from_status,
             is_locked=from_status in BoardCandidateClaim.FINALIZED_STATUSES,
@@ -168,7 +168,7 @@ class TestBoardCandidateClaimModel:
         mock_objects.filter.return_value.first.return_value = existing
 
         claim = BoardCandidateClaim(
-            title=existing.title,
+            name=existing.name,
             description=existing.description,
             status=to_status,
         )
@@ -215,7 +215,7 @@ class TestBoardCandidateClaimModel:
     def test_clean_invalid_transition_raises(self, mock_objects, from_status, to_status):
         """Test that clean raises for invalid status transitions."""
         existing = BoardCandidateClaim(
-            title="Original Title",
+            name="Original Name",
             description="Original Description",
             status=from_status,
             is_locked=from_status in BoardCandidateClaim.FINALIZED_STATUSES,
@@ -224,7 +224,7 @@ class TestBoardCandidateClaimModel:
         mock_objects.filter.return_value.first.return_value = existing
 
         claim = BoardCandidateClaim(
-            title=existing.title,
+            name=existing.name,
             description=existing.description,
             status=to_status,
         )
@@ -245,7 +245,7 @@ class TestBoardCandidateClaimModel:
     ):
         """Test that clean raises when changing disallowed fields during withdrawal."""
         existing = BoardCandidateClaim(
-            title="Original Title",
+            name="Original Name",
             description="Original Description",
             status=BoardCandidateClaim.Status.SUBMITTED,
             is_locked=False,
@@ -254,7 +254,7 @@ class TestBoardCandidateClaimModel:
         mock_objects.filter.return_value.first.return_value = existing
 
         claim = BoardCandidateClaim(
-            title="Updated Title",
+            name="Updated Name",
             description=existing.description,
             status=BoardCandidateClaim.Status.WITHDRAWN,
         )
@@ -270,7 +270,7 @@ class TestBoardCandidateClaimModel:
     def test_clean_non_draft_claim_disallows_field_updates(self, mock_objects):
         """Test that non-draft claims cannot update non-status fields."""
         existing = BoardCandidateClaim(
-            title="Original Title",
+            name="Original Name",
             description="Original Description",
             status=BoardCandidateClaim.Status.SUBMITTED,
             is_locked=False,
@@ -279,7 +279,7 @@ class TestBoardCandidateClaimModel:
         mock_objects.filter.return_value.first.return_value = existing
 
         claim = BoardCandidateClaim(
-            title="Updated Title",
+            name="Updated Name",
             description=existing.description,
             status=BoardCandidateClaim.Status.SUBMITTED,
         )
@@ -295,7 +295,7 @@ class TestBoardCandidateClaimModel:
     def test_clean_non_draft_claim_allows_status_update_only(self, mock_objects):
         """Test that non-draft claims can change status when fields are unchanged."""
         existing = BoardCandidateClaim(
-            title="Original Title",
+            name="Original Name",
             description="Original Description",
             status=BoardCandidateClaim.Status.SUBMITTED,
             is_locked=False,
@@ -304,7 +304,7 @@ class TestBoardCandidateClaimModel:
         mock_objects.filter.return_value.first.return_value = existing
 
         claim = BoardCandidateClaim(
-            title=existing.title,
+            name=existing.name,
             description=existing.description,
             status=BoardCandidateClaim.Status.APPROVED,
         )
@@ -317,7 +317,7 @@ class TestBoardCandidateClaimModel:
     @patch("apps.owasp.models.board_candidate_claim.TimestampedModel.save")
     def test_save_calls_full_clean(self, mock_super_save, mock_full_clean):
         """Test that save calls full_clean before saving."""
-        claim = BoardCandidateClaim(title="Test Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim = BoardCandidateClaim(name="Test Claim", status=BoardCandidateClaim.Status.DRAFT)
 
         claim.save()
 
@@ -337,7 +337,7 @@ class TestBoardCandidateClaimModel:
     @patch("apps.owasp.models.board_candidate_claim.TimestampedModel.save")
     def test_save_locks_claim_on_finalized_status(self, mock_super_save, mock_full_clean, status):
         """Test that save sets is_locked=True for finalized statuses."""
-        claim = BoardCandidateClaim(title="Test Claim", status=status)
+        claim = BoardCandidateClaim(name="Test Claim", status=status)
         claim.is_locked = False
 
         claim.save()
@@ -357,7 +357,7 @@ class TestBoardCandidateClaimModel:
         self, mock_super_save, mock_full_clean, status
     ):
         """Test that save does not set is_locked=True for non-finalized statuses."""
-        claim = BoardCandidateClaim(title="Test Claim", status=status)
+        claim = BoardCandidateClaim(name="Test Claim", status=status)
         claim.is_locked = False
 
         claim.save()
@@ -382,7 +382,7 @@ class TestBoardCandidateClaimModel:
         mock_queryset.aggregate.return_value = {"max_order": 4}
         mock_objects.filter.return_value = mock_queryset
 
-        claim = BoardCandidateClaim(title="Test Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim = BoardCandidateClaim(name="Test Claim", status=BoardCandidateClaim.Status.DRAFT)
         claim.candidate_id = 10
         claim.board_id = 20
         claim.pk = None

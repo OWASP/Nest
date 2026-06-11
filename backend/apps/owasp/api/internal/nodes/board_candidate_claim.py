@@ -13,9 +13,10 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
     fields=[
         "description",
         "is_locked",
+        "key",
+        "name",
         "order",
         "status",
-        "title",
         "withdrawn_at",
         "withdrawn_reason",
     ],

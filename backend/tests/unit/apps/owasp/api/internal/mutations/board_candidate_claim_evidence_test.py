@@ -33,16 +33,15 @@ def _make_info(user):
 class TestCreateBoardCandidateClaimEvidence:
     """Tests for create_board_candidate_claim_evidence mutation."""
 
-    def _make_input_data(
-        self, claim_id=1, title="Test Evidence", source_url="https://example.com"
-    ):
-        return MagicMock(
+    def _make_input_data(self, claim_id=1, name="Test Evidence", source_url="https://example.com"):
+        input_data = MagicMock(
             claim_id=MagicMock(node_id=str(claim_id)),
-            title=title,
             description="Test description.",
             file=None,
             source_url=source_url,
         )
+        input_data.name = name
+        return input_data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     @patch(
@@ -75,7 +74,7 @@ class TestCreateBoardCandidateClaimEvidence:
         assert result.evidence == evidence
         mock_evidence_model.objects.create.assert_called_once_with(
             claim=claim,
-            title=input_data.title,
+            name=input_data.name,
             description=input_data.description,
             file=None,
             source_url=input_data.source_url,
@@ -221,15 +220,16 @@ class TestUpdateBoardCandidateClaimEvidence:
     """Tests for update_board_candidate_claim_evidence mutation."""
 
     def _make_input_data(
-        self, evidence_id=1, title="Updated Evidence", source_url="https://updated.com"
+        self, evidence_id=1, name="Updated Evidence", source_url="https://updated.com"
     ):
-        return MagicMock(
+        input_data = MagicMock(
             evidence_id=MagicMock(node_id=str(evidence_id)),
-            title=title,
             description="Updated description.",
             file=None,
             source_url=source_url,
         )
+        input_data.name = name
+        return input_data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     @patch(
@@ -256,7 +256,7 @@ class TestUpdateBoardCandidateClaimEvidence:
 
         assert result.ok
         assert result.code == "SUCCESS"
-        assert evidence.title == input_data.title
+        assert evidence.name == input_data.name
         assert evidence.description == input_data.description
         assert evidence.source_url == input_data.source_url
         evidence.save.assert_called_once()
@@ -275,11 +275,11 @@ class TestUpdateBoardCandidateClaimEvidence:
         info = _make_info(user)
         input_data = MagicMock(
             evidence_id=MagicMock(node_id="1"),
-            title="Updated Title",
             description=None,
             file=None,
             source_url=None,
         )
+        input_data.name = "Updated Name"
 
         evidence = MagicMock()
         evidence.claim.candidate.member = mock_github_user
@@ -292,8 +292,8 @@ class TestUpdateBoardCandidateClaimEvidence:
 
         assert result.ok
         assert result.code == "SUCCESS"
-        assert evidence.title == "Updated Title"
-        evidence.save.assert_called_once_with(update_fields=["title"])
+        assert evidence.name == "Updated Name"
+        evidence.save.assert_called_once_with(update_fields=["name"])
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     @patch(
@@ -311,7 +311,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         old_file.name = "old.pdf"
         input_data = MagicMock(
             evidence_id=MagicMock(node_id="1"),
-            title=None,
+            name=None,
             description=None,
             file=MagicMock(),
             source_url=None,
@@ -475,7 +475,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         evidence.claim.candidate.member = mock_github_user
         evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.file = None
-        evidence.save.side_effect = ValidationError({"title": ["Invalid."]})
+        evidence.save.side_effect = ValidationError({"name": ["Invalid."]})
         mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
 
         mutation = BoardCandidateClaimEvidenceMutations()
