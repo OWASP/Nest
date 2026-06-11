@@ -25,13 +25,13 @@ class TestBoardCandidateClaimEvidenceQuery:
         user.github_user = MagicMock()
         user.github_user.login = "alice"
         info = _make_info(user)
+        claim_key = "my-key"
         login = "alice"
-        key = "my-key"
 
         mock_claim_model.objects.filter.return_value.first.return_value = None
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, login=login, key=key)
+        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
 
         assert result == []
 
@@ -43,8 +43,8 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_github_user = MagicMock()
         user.github_user = mock_github_user
         info = _make_info(user)
+        claim_key = "my-key"
         login = "alice"
-        key = "my-key"
 
         claim = MagicMock()
         claim.candidate.member = mock_github_user
@@ -53,7 +53,7 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, login=login, key=key)
+        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
 
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs
@@ -65,8 +65,8 @@ class TestBoardCandidateClaimEvidenceQuery:
         user.is_authenticated = True
         user.github_user = MagicMock()
         info = _make_info(user)
+        claim_key = "my-key"
         login = "alice"
-        key = "my-key"
 
         claim = MagicMock()
         claim.candidate.member = MagicMock()
@@ -74,7 +74,7 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, login=login, key=key)
+        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
 
         assert result == []
 
@@ -85,8 +85,8 @@ class TestBoardCandidateClaimEvidenceQuery:
         user.is_authenticated = True
         user.github_user = MagicMock()
         info = _make_info(user)
+        claim_key = "my-key"
         login = "alice"
-        key = "my-key"
 
         claim = MagicMock()
         claim.candidate.member = MagicMock()
@@ -96,7 +96,7 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, login=login, key=key)
+        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
 
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs

@@ -15,21 +15,26 @@ class BoardCandidateClaimEvidenceQuery:
 
     @strawberry_django.field
     def board_candidate_claim_evidences(
-        self, info: strawberry.Info, login: str, key: str
+        self,
+        info: strawberry.Info,
+        claim_key: str,
+        login: str,
     ) -> list[BoardCandidateClaimEvidenceNode]:
         """Resolve Board Candidate Claim Evidences for a given claim.
 
         Args:
             info (Info): Strawberry Info.
+            claim_key (str): The key of the claim.
             login (str): The login of the candidate.
-            key (str): The key of the claim.
 
         Returns:
             List of BoardCandidateClaimEvidenceNode objects
 
         """
         user = info.context.request.user
-        claim = BoardCandidateClaim.objects.filter(cancidate__member__login=login, key=key).first()
+        claim = BoardCandidateClaim.objects.filter(
+            cancidate__member__login=login, key=claim_key
+        ).first()
         if claim is None:
             return []
 
