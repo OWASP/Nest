@@ -35,8 +35,8 @@ class CreateClaimInput:
 class UpdateClaimInput:
     """Input for updating a claim."""
 
-    claim_id: strawberry.relay.GlobalID
     description: str | None = None
+    key: str
     name: str | None = None
 
 
@@ -44,21 +44,21 @@ class UpdateClaimInput:
 class DiscardClaimInput:
     """Input for discarding a claim."""
 
-    claim_id: strawberry.relay.GlobalID
+    key: str
 
 
 @strawberry.input
 class SubmitClaimInput:
     """Input for submitting a claim."""
 
-    claim_id: strawberry.relay.GlobalID
+    key: str
 
 
 @strawberry.input
 class WithdrawClaimInput:
     """Input for withdrawing a claim."""
 
-    claim_id: strawberry.relay.GlobalID
+    key: str
     withdrawn_reason: str
 
 
@@ -66,7 +66,7 @@ class WithdrawClaimInput:
 class ReorderClaimsInput:
     """Input for reordering claims."""
 
-    claim_ids: list[strawberry.relay.GlobalID]
+    keys: list[str]
 
 
 @strawberry.type
@@ -89,48 +89,44 @@ class ClaimResult:
 
 
 def _validate_reorder_claims(
+    login: str,
     input_data: ReorderClaimsInput,
-) -> tuple[list[int], ReorderClaimsResult | None]:
-    """Validate reorder claims input and resolve GlobalIDs to integers.
+) -> tuple[list[str], ReorderClaimsResult | None]:
+    """Validate reorder claims input.
 
     Args:
-        input_data (ReorderClaimsInput): Input containing claim GlobalIDs to reorder.
+        login (str): The login of the candidate.
+        input_data (ReorderClaimsInput): Input containing claim keys to reorder.
 
     Returns:
-        tuple of (list[int], ReorderClaimsResult | None)
+        tuple of (list[str], ReorderClaimsResult | None)
 
     """
-    try:
-        claim_ids = [int(claim_id.node_id) for claim_id in input_data.claim_ids]
-    except ValueError:
-        return [], ReorderClaimsResult(
-            ok=False,
-            code="NOT_FOUND",
-            message="One or more claims were not found.",
-        )
-
-    if not claim_ids:
-        return claim_ids, ReorderClaimsResult(
+    keys = input_data.keys
+    if not keys:
+        return keys, ReorderClaimsResult(
             ok=False,
             code="VALIDATION_ERROR",
             message="At least one claim is required for reordering.",
         )
 
-    if len(set(claim_ids)) != len(claim_ids):
-        return claim_ids, ReorderClaimsResult(
+    if len(set(keys)) != len(keys):
+        return keys, ReorderClaimsResult(
             ok=False,
             code="VALIDATION_ERROR",
-            message="Duplicate claim ids are not allowed.",
+            message="Duplicate claim keys are not allowed.",
         )
 
-    if BoardCandidateClaim.objects.filter(pk__in=claim_ids).count() != len(claim_ids):
-        return claim_ids, ReorderClaimsResult(
+    if BoardCandidateClaim.objects.filter(
+        candidate__member__login=login, key__in=keys
+    ).count() != len(keys):
+        return keys, ReorderClaimsResult(
             ok=False,
             code="NOT_FOUND",
             message="One or more claims were not found.",
         )
 
-    return claim_ids, None
+    return keys, None
 
 
 @strawberry.type
@@ -201,13 +197,10 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                pk=int(input_data.claim_id.node_id)
+                candidate__member__login=user.github_user.login, key=input_data.key
             )
-        except (BoardCandidateClaim.DoesNotExist, ValueError):
+        except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
-
-        if user.github_user != claim.candidate.member:
-            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.is_locked:
             return ClaimResult(ok=False, code="LOCKED", message="Cannot update a locked claim.")
@@ -224,9 +217,9 @@ class BoardCandidateClaimMutations:
             claim.save(update_fields=update_fields)
         except IntegrityError:
             logger.warning(
-                "Error updating Board Candidate Claim for candidate %s, name %s",
+                "Error updating Board Candidate Claim for candidate %s, key %s",
                 claim.candidate.member.login,
-                input_data.name,
+                input_data.key,
             )
             return ClaimResult(
                 ok=False,
@@ -252,13 +245,10 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                pk=int(input_data.claim_id.node_id)
+                candidate__member__login=user.github_user.login, key=input_data.key
             )
-        except (BoardCandidateClaim.DoesNotExist, ValueError):
+        except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
-
-        if user.github_user != claim.candidate.member:
-            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
             return ClaimResult(
@@ -272,9 +262,9 @@ class BoardCandidateClaimMutations:
             claim.save()
         except IntegrityError:
             logger.warning(
-                "Error discarding Board Candidate Claim for candidate %s, id %s",
+                "Error discarding Board Candidate Claim for candidate %s, key %s",
                 claim.candidate.member.login,
-                claim.id,
+                claim.key,
             )
             return ClaimResult(
                 ok=False,
@@ -300,13 +290,10 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                pk=int(input_data.claim_id.node_id)
+                candidate__member__login=user.github_user.login, key=input_data.key
             )
-        except (BoardCandidateClaim.DoesNotExist, ValueError):
+        except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
-
-        if user.github_user != claim.candidate.member:
-            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
             return ClaimResult(
@@ -328,9 +315,9 @@ class BoardCandidateClaimMutations:
             claim.save()
         except IntegrityError:
             logger.warning(
-                "Error submitting Board Candidate Claim for candidate %s, id %s",
+                "Error submitting Board Candidate Claim for candidate %s, key %s",
                 claim.candidate.member.login,
-                claim.id,
+                claim.key,
             )
             result = ClaimResult(
                 ok=False,
@@ -362,13 +349,10 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                pk=int(input_data.claim_id.node_id)
+                candidate__member__login=user.github_user.login, key=input_data.key
             )
-        except (BoardCandidateClaim.DoesNotExist, ValueError):
+        except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
-
-        if user.github_user != claim.candidate.member:
-            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status not in {
             BoardCandidateClaim.Status.SUBMITTED,
@@ -387,9 +371,9 @@ class BoardCandidateClaimMutations:
             claim.save()
         except IntegrityError:
             logger.warning(
-                "Error withdrawing Board Candidate Claim for candidate %s, id %s",
+                "Error withdrawing Board Candidate Claim for candidate %s, key %s",
                 claim.candidate.member.login,
-                claim.id,
+                claim.key,
             )
             return ClaimResult(
                 ok=False,
@@ -412,22 +396,17 @@ class BoardCandidateClaimMutations:
     ) -> ReorderClaimsResult:
         """Reorder claims for a candidate in a board year."""
         user = info.context.request.user
+        login = user.github_user.login
 
-        claim_ids, error = _validate_reorder_claims(input_data)
+        keys, error = _validate_reorder_claims(login, input_data)
         if error:
             return error
 
         claims = list(
-            BoardCandidateClaim.objects.filter(pk__in=claim_ids)
+            BoardCandidateClaim.objects.filter(candidate__member__login=login, key__in=keys)
             .select_for_update(of=("self",))
             .select_related("candidate__member")
         )
-        if any(user.github_user != claim.candidate.member for claim in claims):
-            return ReorderClaimsResult(
-                ok=False,
-                code="FORBIDDEN",
-                message=ACCESS_DENIED_MSG,
-            )
 
         candidate_ids = {claim.candidate_id for claim in claims}
         board_ids = {claim.board_id for claim in claims}
@@ -438,9 +417,9 @@ class BoardCandidateClaimMutations:
                 message="All claims must belong to the same candidate and board year.",
             )
 
-        id_to_order = {claim_id: idx for idx, claim_id in enumerate(claim_ids)}
+        keys_to_order = {key: idx for idx, key in enumerate(keys)}
         for claim in claims:
-            claim.order = id_to_order[claim.id]
+            claim.order = keys_to_order[claim.key]
 
         if any(
             claim.status
@@ -459,7 +438,7 @@ class BoardCandidateClaimMutations:
         BoardCandidateClaim.objects.bulk_update(claims, ["order"])
 
         ordered_claims = (
-            BoardCandidateClaim.objects.filter(pk__in=claim_ids)
+            BoardCandidateClaim.objects.filter(candidate__member__login=login, key__in=keys)
             .select_related("candidate__member", "board")
             .order_by("order", "nest_created_at")
         )
