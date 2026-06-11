@@ -172,8 +172,7 @@ jobs:
       - run-release-version-resolution
     permissions:
       actions: write
-      contents: write
-      id-token: write
+      contents: read
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -186,13 +185,36 @@ jobs:
       backend_ecr_repo: nest-${{ inputs.environment }}-backend
       environment: ${{ inputs.environment }}
       frontend_ecr_repo: nest-${{ inputs.environment }}-frontend
+      release_version: ${{ needs.run-release-version-resolution.outputs.release_version }}
+
+  run-image-sign:
+    name: Image sign
+    needs:
+      - run-image-scan
+      - run-release-version-resolution
+    permissions:
+      actions: write
+      contents: write
+      id-token: write
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    uses: ./.github/workflows/run-image-sign.yaml
+    with:
+      aws_role_name: nest-${{ inputs.environment }}-terraform
+      aws_role_session_name: github-actions-${{ inputs.environment }}-image-sign
+      backend_ecr_repo: nest-${{ inputs.environment }}-backend
+      environment: ${{ inputs.environment }}
+      frontend_ecr_repo: nest-${{ inputs.environment }}-frontend
       release_tag: ${{ inputs.release_tag }}
       release_version: ${{ needs.run-release-version-resolution.outputs.release_version }}
 
   run-infrastructure-bootstrap:
     name: Infrastructure bootstrap
     needs:
-      - run-image-scan
+      - run-image-sign
     permissions:
       contents: read
     secrets:

@@ -31,6 +31,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
     headless: true,
+    navigationTimeout: 60_000,
     trace: 'off',
   },
   workers: Math.max(1, os.cpus().length - 1),

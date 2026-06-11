@@ -82,6 +82,8 @@ on:
 
 env:
   FORCE_COLOR: 1
+  COSIGN_CERTIFICATE_IDENTITY_REGEXP: ^https://github.com/${{ github.repository }}/
+  COSIGN_CERTIFICATE_OIDC_ISSUER: https://token.actions.githubusercontent.com
 
 permissions: {}
 
@@ -90,11 +92,15 @@ jobs:
     name: Deploy
     environment: ${{ inputs.environment }}
     env:
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-backend:${{ inputs.release_version
+        }}
+      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
+        }}
       TF_IN_AUTOMATION: true
       TF_INPUT: false
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -112,6 +118,17 @@ jobs:
           role-session-name: ${{ inputs.aws_role_session_name }}
           role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+
+      - name: Verify release image signatures
+        run: |
+          bash .github/scripts/cosign-image-by-digest.sh verify "$BACKEND_IMAGE"
+          bash .github/scripts/cosign-image-by-digest.sh verify "$FRONTEND_IMAGE"
 
       - name: Apply infrastructure changes
         uses: ./.github/actions/apply-infrastructure-changes
