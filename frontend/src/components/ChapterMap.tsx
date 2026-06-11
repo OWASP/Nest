@@ -204,7 +204,13 @@ const ChapterMap = ({
         center={[20, 0]}
         zoom={2}
         scrollWheelZoom={isMapActive}
-        style={{ height: '100%', width: '100%', outline: 'none', background: 'transparent', cursor: 'default' }}
+        style={{
+          height: '100%',
+          width: '100%',
+          outline: 'none',
+          background: 'transparent',
+          cursor: 'default',
+        }}
         zoomControl={false}
         minZoom={1}
         maxZoom={18}
