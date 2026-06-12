@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.14-alpine3.23@sha256:2d1b4027968d24a18840889779a83430988c5bed9b823b60ff72c59199044cf3 AS builder
+FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -51,7 +51,7 @@ RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + &&
     find /home/owasp/.venv -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete && \
     (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
 
-FROM python:3.13.14-alpine3.23@sha256:2d1b4027968d24a18840889779a83430988c5bed9b823b60ff72c59199044cf3
+FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04
 
 ARG OWASP_GID
 ARG OWASP_UID
