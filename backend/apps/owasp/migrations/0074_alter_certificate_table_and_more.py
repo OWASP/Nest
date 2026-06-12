@@ -4,26 +4,25 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0073_scoringweight_certificate_contributionscore_and_more'),
+        ("owasp", "0073_scoringweight_certificate_contributionscore_and_more"),
     ]
 
     operations = [
         migrations.AlterModelTable(
-            name='certificate',
-            table='owasp_crp_recognition_certificates',
+            name="certificate",
+            table="owasp_crp_recognition_certificates",
         ),
         migrations.AlterModelTable(
-            name='contributionscore',
-            table='owasp_crp_recognition_contribution_scores',
+            name="contributionscore",
+            table="owasp_crp_recognition_contribution_scores",
         ),
         migrations.AlterModelTable(
-            name='leaderboardsnapshot',
-            table='owasp_crp_recognition_leaderboard_snapshots',
+            name="leaderboardsnapshot",
+            table="owasp_crp_recognition_leaderboard_snapshots",
         ),
         migrations.AlterModelTable(
-            name='scoringweight',
-            table='owasp_crp_recognition_scoring_weights',
+            name="scoringweight",
+            table="owasp_crp_recognition_scoring_weights",
         ),
     ]
