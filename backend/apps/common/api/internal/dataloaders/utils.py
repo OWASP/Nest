@@ -5,7 +5,7 @@ from collections import defaultdict
 from django.db.models import QuerySet
 
 
-async def results_by_keys[K, V](
+async def get_results_by_keys[K, V](
     queryset: QuerySet, keys: list[K], key_field: str, value_field: str
 ) -> list[list[V]]:
     """Map a grouped-results dict back to an ordered list matching ``keys``.

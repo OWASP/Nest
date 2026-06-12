@@ -6,7 +6,7 @@ from typing import cast
 import pytest
 from django.db.models import QuerySet
 
-from apps.common.api.internal.dataloaders.utils import results_by_keys
+from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 
 
 async def _async_gen(items):
@@ -26,7 +26,7 @@ def make_item(**kwargs):
 
 
 class TestResultsByKeys:
-    """Tests for results_by_keys."""
+    """Tests for get_results_by_keys."""
 
     @pytest.mark.asyncio
     async def test_basic_mapping(self):
@@ -35,27 +35,27 @@ class TestResultsByKeys:
             make_item(org_id=1, repo="repo-a"),
             make_item(org_id=2, repo="repo-b"),
         ]
-        result = await results_by_keys(make_qs(items), [1, 2], "org_id", "repo")
+        result = await get_results_by_keys(make_qs(items), [1, 2], "org_id", "repo")
         assert result == [["repo-a"], ["repo-b"]]
 
     @pytest.mark.asyncio
     async def test_empty_queryset(self):
         """Empty queryset returns an empty list for every key."""
-        result = await results_by_keys(make_qs([]), [1, 2, 3], "org_id", "repo")
+        result = await get_results_by_keys(make_qs([]), [1, 2, 3], "org_id", "repo")
         assert result == [[], [], []]
 
     @pytest.mark.asyncio
     async def test_empty_keys(self):
         """Empty keys list returns an empty list regardless of queryset content."""
         items = [make_item(org_id=1, repo="repo-a")]
-        result = await results_by_keys(make_qs(items), [], "org_id", "repo")
+        result = await get_results_by_keys(make_qs(items), [], "org_id", "repo")
         assert result == []
 
     @pytest.mark.asyncio
     async def test_key_absent_from_results(self):
         """A key with no matching queryset items gets an empty list."""
         items = [make_item(org_id=1, repo="repo-a")]
-        result = await results_by_keys(make_qs(items), [1, 2], "org_id", "repo")
+        result = await get_results_by_keys(make_qs(items), [1, 2], "org_id", "repo")
         assert result == [["repo-a"], []]
 
     @pytest.mark.asyncio
@@ -66,7 +66,7 @@ class TestResultsByKeys:
             make_item(org_id=1, repo="repo-b"),
             make_item(org_id=2, repo="repo-c"),
         ]
-        result = await results_by_keys(make_qs(items), [1, 2], "org_id", "repo")
+        result = await get_results_by_keys(make_qs(items), [1, 2], "org_id", "repo")
         assert result == [["repo-a", "repo-b"], ["repo-c"]]
 
     @pytest.mark.asyncio
@@ -77,7 +77,7 @@ class TestResultsByKeys:
             make_item(org_id=1, repo="repo-a"),
             make_item(org_id=2, repo="repo-b"),
         ]
-        result = await results_by_keys(make_qs(items), [1, 2, 3], "org_id", "repo")
+        result = await get_results_by_keys(make_qs(items), [1, 2, 3], "org_id", "repo")
         assert result == [["repo-a"], ["repo-b"], ["repo-c"]]
 
     @pytest.mark.asyncio
@@ -87,7 +87,7 @@ class TestResultsByKeys:
             make_item(org_id=1, repo="repo-a"),
             make_item(org_id=99, repo="orphan"),  # key 99 is not requested
         ]
-        result = await results_by_keys(make_qs(items), [1], "org_id", "repo")
+        result = await get_results_by_keys(make_qs(items), [1], "org_id", "repo")
         assert result == [["repo-a"]]
 
     @pytest.mark.asyncio
@@ -98,14 +98,14 @@ class TestResultsByKeys:
             make_item(chapter_id="us", city="San Francisco"),
             make_item(chapter_id="uk", city="London"),
         ]
-        result = await results_by_keys(make_qs(items), ["uk", "us"], "chapter_id", "city")
+        result = await get_results_by_keys(make_qs(items), ["uk", "us"], "chapter_id", "city")
         assert result == [["London"], ["New York", "San Francisco"]]
 
     @pytest.mark.asyncio
     async def test_duplicate_keys_in_keys_list(self):
         """A key appearing multiple times in ``keys`` produces one entry per occurrence."""
         items = [make_item(org_id=1, repo="repo-a")]
-        result = await results_by_keys(make_qs(items), [1, 1], "org_id", "repo")
+        result = await get_results_by_keys(make_qs(items), [1, 1], "org_id", "repo")
         assert result == [["repo-a"], ["repo-a"]]
 
     @pytest.mark.parametrize(
@@ -137,5 +137,5 @@ class TestResultsByKeys:
     @pytest.mark.asyncio
     async def test_parametrized_scenarios(self, items, keys, key_field, value_field, expected):
         """Parametrized spot-checks covering single value, empty, and multi-value cases."""
-        result = await results_by_keys(make_qs(items), keys, key_field, value_field)
+        result = await get_results_by_keys(make_qs(items), keys, key_field, value_field)
         assert result == expected

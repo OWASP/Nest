@@ -2,7 +2,7 @@
 
 from strawberry.django.context import StrawberryDjangoContext
 
-from apps.github.api.internal.dataloaders import make_github_dataloaders
+from apps.github.api.internal.dataloaders import get_github_dataloaders
 
 
 class NestGraphQLContext(StrawberryDjangoContext):
@@ -11,4 +11,4 @@ class NestGraphQLContext(StrawberryDjangoContext):
     def __init__(self, *args, **kwargs) -> None:
         """Initialize the context with fresh dataloader instances."""
         super().__init__(*args, **kwargs)
-        self.github_dataloaders = make_github_dataloaders()
+        self.github_dataloaders = get_github_dataloaders()
