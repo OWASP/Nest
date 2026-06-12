@@ -19,12 +19,14 @@ logger = logging.getLogger(__name__)
 
 ERR_NO_DEFAULT_WORKSPACE = "Default OWASP Slack workspace is not configured in the database."
 ERR_INVITE_BASELINE_UNSET = "invite_link_member_count is unset; cannot evaluate alerts."
+ERR_INVITE_ALERT_POST_FAILED = "Failed to post invite link alert to Slack."
 
 MSG_SKIP_NO_ALERT_CHANNEL = (
     "invite_link_alert_channel_id is not set; skipping invite link checks "
     "(GitHub sync and threshold alerts). Set it on the Slack Workspace row when you want "
     "this job enabled."
 )
+RESOLUTION_REACTION_NAME = "white_check_mark"
 
 
 class Command(BaseCommand):
@@ -37,7 +39,7 @@ class Command(BaseCommand):
     @staticmethod
     def get_normalized_invite_link_alert_channel_id(workspace: Workspace) -> str:
         """Return normalized alert channel id."""
-        return (workspace.invite_link_alert_channel_id or "").strip().removeprefix("#")
+        return workspace.invite_link_alert_channel_id.removeprefix("#")
 
     def alert(self, workspace: Workspace, current_members: int) -> None:
         alert_threshold = workspace.invite_link_alert_threshold
@@ -59,7 +61,7 @@ class Command(BaseCommand):
 
         baseline = workspace.invite_link_member_count
         created = workspace.invite_link_created_at
-        sha = (workspace.invite_link_commit_sha or "").strip()
+        sha = workspace.invite_link_commit_sha
         commit_url = f"https://github.com/{OWASP_LOGIN}/{OWASP_GITHUB_IO}/commit/{sha}"
         link_label = created.date().isoformat() if created else sha[:7]
         last_updated = f"<{commit_url}|{link_label}>"
@@ -78,18 +80,22 @@ class Command(BaseCommand):
 
         try:
             client = WebClient(token=workspace.bot_token)
-            client.chat_postMessage(
+            response = client.chat_postMessage(
                 channel=self.get_normalized_invite_link_alert_channel_id(workspace),
                 text=text,
             )
+            workspace.invite_link_last_alert_sent_at = timezone.now()
+            workspace.invite_link_last_alert_message_ts = response["ts"]
+            workspace.save(
+                update_fields=(
+                    "invite_link_last_alert_sent_at",
+                    "invite_link_last_alert_message_ts",
+                )
+            )
         except SlackApiError as e:
-            logger.exception("chat.postMessage failed")
-            detail = e.response.get("error", e)
-            msg = f"Slack chat.postMessage error: {detail}"
-            raise CommandError(msg) from e
+            logger.exception("chat.postMessage failed: %s", e.response["error"])
+            raise CommandError(ERR_INVITE_ALERT_POST_FAILED) from e
 
-        workspace.invite_link_last_alert_sent_at = timezone.now()
-        workspace.save(update_fields=["invite_link_last_alert_sent_at"])
         self.stdout.write(self.style.SUCCESS("Alert posted to Slack."))
 
     def handle(self, *args, **_options):
@@ -118,6 +124,17 @@ class Command(BaseCommand):
             and workspace.invite_link_created_at is not None
         ):
             self.set_baseline(workspace, current_members)
+            workspace.refresh_from_db()
+
+        # invite_link_last_alert_message_ts is set when the alert is posted and kept until
+        # resolution succeeds, so it alone cannot mean "ready to resolve".
+        # After an alert, invite_link_member_count is set, so set_baseline only runs again
+        # when invite_link_updated clears invite_link_last_alert_sent_at. Retry runs when
+        # that already happened on a prior cron. While invite_link_last_alert_sent_at is
+        # still set, the alert is open.
+        if workspace.invite_link_last_alert_message_ts:
+            if resolved_message_ts := self.post_resolution_reply(workspace):
+                self.add_resolution_reaction(workspace, resolved_message_ts)
             workspace.refresh_from_db()
 
         if workspace.invite_link_member_count is None:
@@ -154,10 +171,10 @@ class Command(BaseCommand):
         workspace.invite_link_member_count = current_members
         workspace.invite_link_last_alert_sent_at = None
         workspace.save(
-            update_fields=[
+            update_fields=(
                 "invite_link_member_count",
                 "invite_link_last_alert_sent_at",
-            ]
+            )
         )
         self.stdout.write(
             self.style.SUCCESS(
@@ -190,19 +207,88 @@ class Command(BaseCommand):
             )
             return False
 
-        commit_sha = (commit_sha or "").strip()
-        stored_sha = (workspace.invite_link_commit_sha or "").strip()
+        stored_sha = workspace.invite_link_commit_sha
         if workspace.invite_link_created_at == commit_date and stored_sha == commit_sha:
             self.stdout.write("Invite commit date and SHA already match GitHub.")
             return False
 
         workspace.invite_link_created_at = commit_date
         workspace.invite_link_commit_sha = commit_sha
-        workspace.save(update_fields=["invite_link_created_at", "invite_link_commit_sha"])
+        workspace.save(
+            update_fields=(
+                "invite_link_created_at",
+                "invite_link_commit_sha",
+            )
+        )
         sha_note = f", sha={commit_sha[:7]}…" if commit_sha else ""
         self.stdout.write(
             self.style.SUCCESS(
                 f"invite_link_created_at set to {commit_date.isoformat()}{sha_note}"
             )
         )
+
         return True
+
+    def add_resolution_reaction(self, workspace: Workspace, message_ts: str) -> None:
+        """Add a checkmark reaction to the resolved alert message."""
+        channel = self.get_normalized_invite_link_alert_channel_id(workspace)
+        try:
+            client = WebClient(token=workspace.bot_token)
+            client.reactions_add(
+                channel=channel,
+                timestamp=message_ts,
+                name=RESOLUTION_REACTION_NAME,
+            )
+        except SlackApiError as e:
+            if e.response["error"] == "already_reacted":
+                return
+            logger.exception("Invite link resolution reaction failed: %s", e.response["error"])
+            self.stdout.write(
+                self.style.WARNING(
+                    "Resolution reply posted, but the alert reaction could not be added; "
+                    "see logs for details."
+                )
+            )
+
+    def post_resolution_reply(self, workspace: Workspace) -> str | None:
+        """Post a threaded reply to the original alert.
+
+        Resolution is pending when ``invite_link_last_alert_message_ts`` is set and
+        ``invite_link_last_alert_sent_at`` is empty.
+
+        Returns:
+            The parent alert message ts when the reply was posted, otherwise ``None``.
+
+        """
+        if workspace.invite_link_last_alert_sent_at:
+            return None
+
+        if not (last_alert_message_ts := workspace.invite_link_last_alert_message_ts):
+            return None
+
+        channel = self.get_normalized_invite_link_alert_channel_id(workspace)
+        try:
+            client = WebClient(token=workspace.bot_token)
+            client.chat_postMessage(
+                channel=channel,
+                text=(
+                    "The Slack invitation link has been updated. "
+                    "No further action is needed at this moment."
+                ),
+                thread_ts=last_alert_message_ts,
+            )
+        except SlackApiError as e:
+            logger.exception("Invite link resolution reply failed: %s", e.response["error"])
+            self.stdout.write(
+                self.style.WARNING(
+                    "Could not post resolution reply to Slack; see logs for details."
+                )
+            )
+            return None
+
+        workspace.invite_link_last_alert_message_ts = ""
+        workspace.save(update_fields=("invite_link_last_alert_message_ts",))
+
+        self.stdout.write(self.style.SUCCESS("Resolution reply posted to Slack thread."))
+
+        return last_alert_message_ts

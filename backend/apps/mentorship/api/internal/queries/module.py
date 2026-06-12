@@ -5,6 +5,7 @@ import logging
 import strawberry
 import strawberry_django
 from asgiref.sync import sync_to_async
+from django.db.models import Q
 
 from apps.mentorship.api.internal.graphql_errors import (
     AuthenticationRequiredError,
@@ -58,10 +59,19 @@ class ModuleQuery:
         if not program.user_has_access(user):
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
+        modules = Module.objects.filter(program=program)
+
+        if not program.has_admin(user):
+            mentor_q = Q(mentors__nest_user=user)
+            github_user = getattr(user, "github_user", None)
+            if github_user is not None:
+                mentor_q |= Q(mentors__github_user=github_user)
+            modules = modules.filter(mentor_q)
+
         return (
-            Module.objects.filter(program=program)
-            .select_related("program", "project")
+            modules.select_related("program", "project")
             .prefetch_related("mentors__github_user")
+            .distinct()
             .order_by("order", "started_at")
         )
 
@@ -118,7 +128,7 @@ class ModuleQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if not module.program.user_has_access(user):
+        if not module.program.has_admin(user) and not module.has_mentor(user):
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         return module

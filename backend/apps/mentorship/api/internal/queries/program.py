@@ -83,9 +83,9 @@ class ProgramQuery:
 
         query = Q(id__in=admin_program_ids)
         mentor_q = Q(modules__mentors__nest_user=user)
-        github_user_id = getattr(user, "github_user_id", None)
-        if isinstance(github_user_id, int):
-            mentor_q |= Q(modules__mentors__github_user_id=github_user_id)
+        github_user = getattr(user, "github_user", None)
+        if github_user is not None:
+            mentor_q |= Q(modules__mentors__github_user=github_user)
         query |= mentor_q
 
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
