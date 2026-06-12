@@ -1,19 +1,19 @@
 from .board_of_directors import BoardOfDirectors
-from .certificate import Certificate
 from .chapter import Chapter
 from .committee import Committee
-from .contribution_score import ContributionScore
+from .crp.certificate import Certificate
+from .crp.contribution_score import ContributionScore
+from .crp.leaderboard_snapshot import LeaderboardSnapshot
+from .crp.recognition_enums import EventTypeChoices, TierChoices
+from .crp.scoring_weight import ScoringWeight
 from .entity_channel import EntityChannel
 from .entity_member import EntityMember
 from .event import Event
-from .leaderboard_snapshot import LeaderboardSnapshot
 from .member_profile import MemberProfile
 from .member_snapshot import MemberSnapshot
 from .post import Post
 from .project import Project
 from .project_health_metrics import ProjectHealthMetrics
 from .project_health_requirements import ProjectHealthRequirements
-from .recognition_enums import EventTypeChoices, TierChoices
-from .scoring_weight import ScoringWeight
 from .snapshot import Snapshot
 from .sponsor import Sponsor
