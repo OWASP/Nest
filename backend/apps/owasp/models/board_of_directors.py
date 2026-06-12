@@ -40,6 +40,18 @@ class BoardOfDirectors(models.Model):
         """
         return f"https://board.owasp.org/elections/{self.year}_elections"
 
+    def get_candidate(self, login: str) -> EntityMember | None:
+        """Return the candidate for this board election.
+
+        Args:
+            login (str): the login of the user.
+
+        Returns:
+            EntityMember | None: The candidate if found, None otherwise.
+
+        """
+        return self.get_candidates().filter(member__login=login).first()
+
     def get_candidates(self) -> QuerySet[EntityMember]:
         """Return all candidates for this board election."""
         return EntityMember.objects.filter(

@@ -1,6 +1,6 @@
 """Tests for BoardCandidateClaim model."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -65,6 +65,12 @@ class TestBoardCandidateClaimModel:
         field = BoardCandidateClaim._meta.get_field("is_locked")
 
         assert field.default is False
+
+    def test_default_order_zero(self):
+        """Test default order is 0."""
+        field = BoardCandidateClaim._meta.get_field("order")
+
+        assert field.default == 0
 
     def test_board_field_nullable(self):
         """Test board field is nullable."""
@@ -357,3 +363,30 @@ class TestBoardCandidateClaimModel:
         claim.save()
 
         assert claim.is_locked is False
+
+    @patch("apps.owasp.models.board_candidate_claim.BulkSaveModel.bulk_save")
+    def test_bulk_save_delegates(self, mock_bulk_save):
+        """Test bulk_save delegates to BulkSaveModel.bulk_save."""
+        claims = [MagicMock()]
+
+        BoardCandidateClaim.bulk_save(claims, fields=["order"])
+
+        mock_bulk_save.assert_called_once_with(BoardCandidateClaim, claims, fields=["order"])
+
+    @patch.object(BoardCandidateClaim, "full_clean")
+    @patch("apps.owasp.models.board_candidate_claim.TimestampedModel.save")
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_save_sets_order_on_create(self, mock_objects, mock_super_save, mock_full_clean):
+        """Test save auto-assigns order on create."""
+        mock_queryset = MagicMock()
+        mock_queryset.aggregate.return_value = {"max_order": 4}
+        mock_objects.filter.return_value = mock_queryset
+
+        claim = BoardCandidateClaim(title="Test Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim.candidate_id = 10
+        claim.board_id = 20
+        claim.pk = None
+
+        claim.save()
+
+        assert claim.order == 5
