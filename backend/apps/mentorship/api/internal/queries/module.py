@@ -3,6 +3,8 @@
 import logging
 
 import strawberry
+import strawberry_django
+from asgiref.sync import sync_to_async
 from django.db.models import Q
 
 from apps.mentorship.api.internal.graphql_errors import (
@@ -19,17 +21,19 @@ logger = logging.getLogger(__name__)
 class ModuleQuery:
     """Module queries."""
 
-    @strawberry.field
-    def get_program_modules(self, info: strawberry.Info, program_key: str) -> list[ModuleNode]:
+    @strawberry_django.field
+    async def get_program_modules(
+        self, info: strawberry.Info, program_key: str
+    ) -> list[ModuleNode]:
         """Get all modules by program Key. Returns an empty list if program is not found."""
         try:
-            program = Program.objects.get(key=program_key)
+            program = await Program.objects.aget(key=program_key)
         except Program.DoesNotExist:
             return []
 
-        if program.status != Program.ProgramStatus.PUBLISHED and not program.user_has_access(
-            info.context.request.user
-        ):
+        if program.status != Program.ProgramStatus.PUBLISHED and not await sync_to_async(
+            program.user_has_access
+        )(info.context.request.user):
             return []
 
         return (
