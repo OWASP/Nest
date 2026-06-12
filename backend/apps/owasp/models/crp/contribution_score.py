@@ -6,7 +6,7 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
-from apps.owasp.models.recognition_enums import TierChoices
+from apps.owasp.models.crp.recognition_enums import TierChoices
 
 
 class ContributionScore(TimestampedModel):
@@ -18,7 +18,7 @@ class ContributionScore(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "recognition_contribution_scores"
+        db_table = "owasp_crp_recognition_contribution_scores"
         verbose_name_plural = "Contribution Scores"
         indexes = [
             models.Index(fields=["-value"], name="score_total_desc_idx"),

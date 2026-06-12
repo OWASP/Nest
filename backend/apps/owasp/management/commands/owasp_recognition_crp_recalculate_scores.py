@@ -10,20 +10,16 @@ class Command(BaseCommand):
 
     help = "Recalculate contributor scores and tier assignments."
 
-    def handle(self, *_args, **options) -> None:
+    def handle(self, *args, **options) -> None:
         """Handle the command execution."""
-        calculator = ContributionScoreCalculator()
-        self._recalculate_all_users(calculator)
-
-    def _recalculate_all_users(self, calculator: ContributionScoreCalculator) -> None:
-        """Recalculate scores for all users."""
         self.stdout.write("Starting score recalculation for all users...")
 
+        calculator = ContributionScoreCalculator()
         result = calculator.recalculate_all_scores()
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"✓ Score recalculation complete:\n"
+                f"Score recalculation complete:\n"
                 f"  - Total users: {result['total']}\n"
                 f"  - Created: {result['created']}\n"
                 f"  - Updated: {result['updated']}"
