@@ -79,6 +79,16 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         return self.name or " ".join(self.key.replace("www-project-", "").capitalize().split("-"))
 
     @property
+    def idx_open_issues_count(self) -> int:
+        """Return open issues count for indexing."""
+        return self.open_issues_count
+
+    @property
+    def idx_open_pull_requests_count(self) -> int:
+        """Return open pull requests count for indexing."""
+        return self.open_pull_requests_count
+
+    @property
     def idx_organizations(self) -> str:
         """Return organizations for indexing."""
         return join_values(fields=[o.name for o in self.organizations.all()])

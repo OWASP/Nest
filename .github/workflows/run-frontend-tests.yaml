@@ -1,0 +1,56 @@
+name: Frontend tests
+
+on:
+  workflow_call:
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-a11y-tests:
+    name: Frontend a11y tests
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Run tests
+        run: pnpm run test:a11y
+        working-directory: frontend
+    timeout-minutes: 5
+
+  run-unit-tests:
+    name: Frontend unit tests
+    permissions:
+      actions: write
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Run tests
+        run: pnpm run test:unit
+        working-directory: frontend
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          if-no-files-found: error
+          name: coverage-lcov
+          path: frontend/coverage/lcov.info
+    timeout-minutes: 10
