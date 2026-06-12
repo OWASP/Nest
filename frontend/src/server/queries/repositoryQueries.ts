@@ -11,7 +11,7 @@ export const GET_REPOSITORY_DATA = gql`
       forksCount
       isArchived
       key
-      issues {
+      recentIssues {
         id
         author {
           id
@@ -39,7 +39,7 @@ export const GET_REPOSITORY_DATA = gql`
         key
         name
       }
-      releases {
+      recentReleases {
         id
         author {
           id

@@ -35,7 +35,7 @@ const RepositoryDetailsPage = () => {
   const repository = data?.repository
   const topContributors = data?.topContributors ?? []
   const recentPullRequests = data?.recentPullRequests
-  const recentIssues = repository?.issues?.map((issue) => ({
+  const recentIssues = repository?.recentIssues?.map((issue) => ({
     ...issue,
     author: issue.author ?? undefined,
   }))
@@ -135,7 +135,7 @@ const RepositoryDetailsPage = () => {
         recentIssues={recentIssues ?? []}
         recentMilestones={repository.recentMilestones ?? []}
         pullRequests={recentPullRequests ?? []}
-        recentReleases={repository.releases ?? []}
+        recentReleases={repository.recentReleases ?? []}
         showAvatar={true}
       />
 
