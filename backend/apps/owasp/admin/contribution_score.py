@@ -51,7 +51,7 @@ class ContributionScoreAdmin(admin.ModelAdmin):
 
         for score in queryset:
             try:
-                calculator.recalculate_user_score(score.github_user)
+                calculator.recalculate_user(score.github_user)
                 updated_count += 1
             except (ValueError, TypeError):
                 logger.exception(

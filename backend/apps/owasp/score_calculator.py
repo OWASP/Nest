@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from django.db.models import Q
 
+from apps.common.models import BulkSaveModel
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
@@ -41,7 +42,7 @@ class ContributionScoreCalculator:
             for weight in ScoringWeight.objects.filter(is_active=True)
         }
 
-    def calculate_score(
+    def calculate(
         self,
         user: User,
         start_date: date | None = None,
@@ -204,7 +205,7 @@ class ContributionScoreCalculator:
 
         return "level_1"
 
-    def recalculate_all_scores(self) -> dict[str, int]:
+    def recalculate_all(self) -> dict[str, int]:
         """Recalculate scores for all users.
 
         Returns:
@@ -236,7 +237,7 @@ class ContributionScoreCalculator:
         contribution_scores = []
 
         for user in users_with_contributions:
-            total_score, _ = self.calculate_score(user)
+            total_score, _ = self.calculate(user)
             tier = self.get_tier(total_score)
 
             try:
@@ -256,13 +257,13 @@ class ContributionScoreCalculator:
                 created_count += 1
 
             if len(contribution_scores) >= self.BATCH_SIZE:
-                ContributionScore.bulk_save(
-                    ContributionScore, contribution_scores, fields=("value", "tier")
+                BulkSaveModel.bulk_save(
+                    ContributionScore, contribution_scores, fields=["value", "tier"]
                 )
 
         if contribution_scores:
-            ContributionScore.bulk_save(
-                ContributionScore, contribution_scores, fields=("value", "tier")
+            BulkSaveModel.bulk_save(
+                ContributionScore, contribution_scores, fields=["value", "tier"]
             )
 
         logger.info(
@@ -277,7 +278,7 @@ class ContributionScoreCalculator:
             "updated": updated_count,
         }
 
-    def recalculate_user_score(self, user: User) -> dict[str, str | int | bool]:
+    def recalculate_user(self, user: User) -> dict[str, str | int | bool]:
         """Recalculate score for a single user.
 
         Args:
@@ -287,7 +288,7 @@ class ContributionScoreCalculator:
             dict[str, str | int | bool]: The updated score, tier, and creation flag.
 
         """
-        total_score, _ = self.calculate_score(user)
+        total_score, _ = self.calculate(user)
         tier = self.get_tier(total_score)
 
         _, created = ContributionScore.objects.update_or_create(

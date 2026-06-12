@@ -15,7 +15,7 @@ class Command(BaseCommand):
         self.stdout.write("Starting score recalculation for all users...")
 
         calculator = ContributionScoreCalculator()
-        result = calculator.recalculate_all_scores()
+        result = calculator.recalculate_all()
 
         self.stdout.write(
             self.style.SUCCESS(
