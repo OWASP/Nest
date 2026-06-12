@@ -8,8 +8,8 @@ from django.db import models
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
 from apps.owasp.models.chapter import Chapter
-from apps.owasp.models.project import Project
 from apps.owasp.models.crp.recognition_enums import TierChoices
+from apps.owasp.models.project import Project
 
 
 class LeaderboardSnapshot(TimestampedModel):
