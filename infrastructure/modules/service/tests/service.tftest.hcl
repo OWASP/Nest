@@ -176,6 +176,20 @@ run "test_task_definition_requires_fargate" {
   }
 }
 
+run "test_task_definition_runtime_platform" {
+  command = plan
+
+  assert {
+    condition     = aws_ecs_task_definition.main.runtime_platform[0].cpu_architecture == "ARM64"
+    error_message = "Task definition must use ARM64 CPU architecture."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.main.runtime_platform[0].operating_system_family == "LINUX"
+    error_message = "Task definition must use LINUX operating system family."
+  }
+}
+
 run "test_ecs_service_name_format" {
   command = plan
 

@@ -1,0 +1,39 @@
+name: Resolve release version
+
+on:
+  workflow_call:
+    outputs:
+      release_version:
+        description: The resolved release version
+        value: ${{ jobs.run-release-version-resolution.outputs.release_version }}
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-release-version-resolution:
+    name: Resolve release version
+    runs-on: ubuntu-24.04-arm
+    outputs:
+      release_version: ${{ steps.release-version-resolution.outputs.release_version }}
+    steps:
+      - name: Resolve release version
+        id: release-version-resolution
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ -n "$RELEASE_TAG" ]; then
+            release_version="$RELEASE_TAG"
+          else
+            release_version="$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}"
+          fi
+
+          if [[ ! "$release_version" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "::error::Invalid Docker tag: $release_version"
+            exit 1
+          fi
+
+          echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
+    timeout-minutes: 5

@@ -122,6 +122,10 @@ resource "aws_ecs_task_definition" "main" {
   memory                   = var.container_memory
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
+  runtime_platform {
+    cpu_architecture        = "ARM64"
+    operating_system_family = "LINUX"
+  }
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-task-def"
   })

@@ -18,6 +18,7 @@
 | ---- | ------ | ------- |
 | <a name="module_index_data_task"></a> [index\_data\_task](#module\_index\_data\_task) | ./modules/task | n/a |
 | <a name="module_load_data_task"></a> [load\_data\_task](#module\_load\_data\_task) | ./modules/task | n/a |
+| <a name="module_mentorship_sync_modules_data"></a> [mentorship\_sync\_modules\_data](#module\_mentorship\_sync\_modules\_data) | ./modules/task | n/a |
 | <a name="module_migrate_task"></a> [migrate\_task](#module\_migrate\_task) | ./modules/task | n/a |
 | <a name="module_owasp_update_project_health_metrics_task"></a> [owasp\_update\_project\_health\_metrics\_task](#module\_owasp\_update\_project\_health\_metrics\_task) | ./modules/task | n/a |
 | <a name="module_owasp_update_project_health_scores_task"></a> [owasp\_update\_project\_health\_scores\_task](#module\_owasp\_update\_project\_health\_scores\_task) | ./modules/task | n/a |
@@ -65,6 +66,8 @@
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key. | `string` | n/a | yes |
 | <a name="input_load_data_task_cpu"></a> [load\_data\_task\_cpu](#input\_load\_data\_task\_cpu) | The CPU for the load-data task. | `string` | `"512"` | no |
 | <a name="input_load_data_task_memory"></a> [load\_data\_task\_memory](#input\_load\_data\_task\_memory) | The memory for the load-data task. | `string` | `"4096"` | no |
+| <a name="input_mentorship_sync_modules_data_task_cpu"></a> [mentorship\_sync\_modules\_data\_task\_cpu](#input\_mentorship\_sync\_modules\_data\_task\_cpu) | The CPU for the mentorship-sync-modules-data task. | `string` | `"256"` | no |
+| <a name="input_mentorship_sync_modules_data_task_memory"></a> [mentorship\_sync\_modules\_data\_task\_memory](#input\_mentorship\_sync\_modules\_data\_task\_memory) | The memory for the mentorship-sync-modules-data task. | `string` | `"1024"` | no |
 | <a name="input_migrate_task_cpu"></a> [migrate\_task\_cpu](#input\_migrate\_task\_cpu) | The CPU for the migrate task. | `string` | `"256"` | no |
 | <a name="input_migrate_task_memory"></a> [migrate\_task\_memory](#input\_migrate\_task\_memory) | The memory for the migrate task. | `string` | `"1024"` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
