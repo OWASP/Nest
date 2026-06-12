@@ -41,7 +41,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 5e2fb545eba1ea9dc051f6f962d52fe8f76a9794  # v0.15.13
+    rev: 22f0422809455ec89ffdcf5a00170ba816e42ddb  # v0.15.16
     hooks:
       - id: ruff-check
         args:
@@ -81,7 +81,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.315.7
+          - strawberry-graphql==0.316.0
           - strawberry-graphql-django==0.84.0
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
@@ -141,7 +141,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: a007bb7dd9043d022292401abc3061cb1906b4bc  # v2.21.2
+    rev: 3a8ef795727fa946dfcb21c5d07b1442c2362c09  # v2.23.0
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
