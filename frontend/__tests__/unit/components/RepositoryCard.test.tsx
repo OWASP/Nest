@@ -48,6 +48,7 @@ describe('RepositoryCard', () => {
   })
 
   const createMockRepository = (index: number): RepositoryCardProps => ({
+    updatedAt: '2025-01-01T00:00:00.000Z',
     contributorsCount: 10 + index,
     forksCount: 5 + index,
     key: `repo-${index}`,
@@ -70,6 +71,12 @@ describe('RepositoryCard', () => {
     starsCount: 100 + index,
     subscribersCount: 20 + index,
     url: `https://github.com/org-${index}/repo-${index}`,
+  })
+
+  it('displays repository updated date when available', () => {
+    const repositories = [createMockRepository(0)]
+    render(<RepositoryCard repositories={repositories} />)
+    expect(screen.getByText(/Updated/i)).toBeInTheDocument()
   })
 
   it('renders without crashing with empty repositories', () => {
