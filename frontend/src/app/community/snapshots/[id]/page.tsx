@@ -143,21 +143,21 @@ const SnapshotDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      {snapshot.newChapters && snapshot.newChapters.length > 0 && (
+      {snapshot.chapters && snapshot.chapters.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
             New Chapters
           </h2>
           <div className="mb-4">
             <ChapterMapWrapper
-              geoLocData={snapshot.newChapters as unknown as Chapter[]}
+              geoLocData={snapshot.chapters as unknown as Chapter[]}
               showLocal={false}
               showLocationSharing={true}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>
           <div className="flex flex-col gap-6">
-            {snapshot.newChapters
+            {snapshot.chapters
               .filter((chapter) => chapter.isActive)
               .map((chapter) => (
                 <React.Fragment key={chapter.key}>
@@ -168,13 +168,13 @@ const SnapshotDetailsPage: React.FC = () => {
         </div>
       )}
 
-      {snapshot.newProjects && snapshot.newProjects.length > 0 && (
+      {snapshot.projects && snapshot.projects.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
             New Projects
           </h2>
           <div className="flex flex-col gap-6">
-            {snapshot.newProjects
+            {snapshot.projects
               .filter((project) => project.isActive)
               .map((project) => (
                 <React.Fragment key={project.key}>{renderProjectCard(project)}</React.Fragment>
@@ -183,14 +183,14 @@ const SnapshotDetailsPage: React.FC = () => {
         </div>
       )}
 
-      {snapshot.newReleases && snapshot.newReleases.length > 0 && (
+      {snapshot.releases && snapshot.releases.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
             New Releases
           </h2>
           {
             <ReleasesSection
-              releases={snapshot.newReleases as ReleaseType[]}
+              releases={snapshot.releases as ReleaseType[]}
               showAll={showAllReleases}
               onToggle={() => setShowAllReleases((p) => !p)}
             />

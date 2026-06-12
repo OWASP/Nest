@@ -1,26 +1,16 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type ExperienceLevelEnum =
-  | 'ADVANCED'
-  | 'BEGINNER'
-  | 'EXPERT'
-  | 'INTERMEDIATE';
-
-export type GetModulesByProgramQueryVariables = Exact<{
-  programKey: string;
+export type GetModulesByProgramQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
 }>;
 
 
 export type GetModulesByProgramQuery = { getProgramModules: Array<{ __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: Types.ExperienceLevelEnum, order: number, startedAt: any, endedAt: any, projectId: string | null, projectName: string | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> }> };
 
-export type GetModuleByIdQueryVariables = Exact<{
-  moduleKey: string;
-  programKey: string;
+export type GetModuleByIdQueryVariables = Types.Exact<{
+  moduleKey: Types.Scalars['String']['input'];
+  programKey: Types.Scalars['String']['input'];
 }>;
 
 
@@ -30,21 +20,21 @@ export type ProgramAdminsAndScheduleFragment = { __typename: 'ProgramNode', id: 
 
 export type ModuleDetailWithRecentPrsFragment = { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, labels: Array<string> | null, projectId: string | null, projectName: string | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, userRole: string | null, menteeCanManageDeadlines: boolean, startedAt: any, endedAt: any, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, recentPullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any, organizationName: string | null, repositoryName: string | null, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> };
 
-export type GetManagementProgramAdminsAndModulesQueryVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+export type GetManagementProgramAdminsAndModulesQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
 }>;
 
 
 export type GetManagementProgramAdminsAndModulesQuery = { managementProgram: { __typename: 'ProgramNode', id: string, startedAt: any, endedAt: any, admins: Array<{ __typename: 'AdminNode', id: string, login: string, name: string, avatarUrl: string }> | null } | null, managementModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, labels: Array<string> | null, projectId: string | null, projectName: string | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, userRole: string | null, menteeCanManageDeadlines: boolean, startedAt: any, endedAt: any, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, recentPullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any, organizationName: string | null, repositoryName: string | null, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null };
 
-export type GetProgramAdminsAndModulesQueryVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+export type GetProgramAdminsAndModulesQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
 }>;
 
 
@@ -52,23 +42,23 @@ export type GetProgramAdminsAndModulesQuery = { getProgram: { __typename: 'Progr
 
 export type ModuleIssuesListFragment = { __typename: 'ModuleNode', name: string, userRole: string | null, issuesCount: number, availableLabels: Array<string>, issues: Array<{ __typename: 'IssueNode', id: string, number: number, title: string, state: string, isMerged: boolean, labels: Array<string>, taskDeadline: any, assignees: Array<{ __typename: 'UserNode', avatarUrl: string, login: string, name: string }> }> };
 
-export type GetManagementModuleIssuesQueryVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
-  label?: string | null | undefined;
+export type GetManagementModuleIssuesQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  label?: Types.InputMaybe<Types.Scalars['String']['input']>;
 }>;
 
 
 export type GetManagementModuleIssuesQuery = { managementModule: { __typename: 'ModuleNode', name: string, userRole: string | null, issuesCount: number, availableLabels: Array<string>, issues: Array<{ __typename: 'IssueNode', id: string, number: number, title: string, state: string, isMerged: boolean, labels: Array<string>, taskDeadline: any, assignees: Array<{ __typename: 'UserNode', avatarUrl: string, login: string, name: string }> }> } | null };
 
-export type GetModuleIssuesQueryVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
-  label?: string | null | undefined;
+export type GetModuleIssuesQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  label?: Types.InputMaybe<Types.Scalars['String']['input']>;
 }>;
 
 

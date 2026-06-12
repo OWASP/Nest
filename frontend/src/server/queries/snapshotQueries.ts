@@ -8,7 +8,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
       key
       startAt
       title
-      newReleases {
+      releases {
         id
         name
         organizationName
@@ -23,7 +23,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
           name
         }
       }
-      newProjects {
+      projects {
         id
         key
         name
@@ -41,7 +41,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
           name
         }
       }
-      newChapters {
+      chapters {
         id
         key
         name

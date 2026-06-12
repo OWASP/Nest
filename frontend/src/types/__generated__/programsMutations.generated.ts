@@ -1,65 +1,21 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type CreateProgramInput = {
-  description: string;
-  domains?: Array<string>;
-  endedAt: any;
-  menteesLimit: number;
-  name: string;
-  startedAt: any;
-  tags?: Array<string>;
-};
-
-export type ExperienceLevelEnum =
-  | 'ADVANCED'
-  | 'BEGINNER'
-  | 'EXPERT'
-  | 'INTERMEDIATE';
-
-export type ProgramStatusEnum =
-  | 'COMPLETED'
-  | 'DRAFT'
-  | 'PUBLISHED';
-
-export type UpdateProgramInput = {
-  adminLogins?: Array<string> | null | undefined;
-  description: string;
-  domains?: Array<string> | null | undefined;
-  endedAt: any;
-  key: string;
-  menteesLimit: number;
-  name: string;
-  startedAt: any;
-  status: ProgramStatusEnum;
-  tags?: Array<string> | null | undefined;
-};
-
-export type UpdateProgramStatusInput = {
-  key: string;
-  name: string;
-  status: ProgramStatusEnum;
-};
-
-export type UpdateProgramMutationVariables = Exact<{
+export type UpdateProgramMutationVariables = Types.Exact<{
   input: Types.UpdateProgramInput;
 }>;
 
 
 export type UpdateProgramMutation = { updateProgram: { __typename: 'ProgramNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevels: Array<Types.ExperienceLevelEnum> | null, id: string, key: string, menteesLimit: number | null, name: string, startedAt: any, status: Types.ProgramStatusEnum, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', avatarUrl: string, id: string, login: string, name: string }> | null } };
 
-export type CreateProgramMutationVariables = Exact<{
+export type CreateProgramMutationVariables = Types.Exact<{
   input: Types.CreateProgramInput;
 }>;
 
 
 export type CreateProgramMutation = { createProgram: { __typename: 'ProgramNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevels: Array<Types.ExperienceLevelEnum> | null, id: string, key: string, menteesLimit: number | null, name: string, startedAt: any, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', avatarUrl: string, login: string, name: string }> | null } };
 
-export type UpdateProgramStatusMutationVariables = Exact<{
+export type UpdateProgramStatusMutationVariables = Types.Exact<{
   inputData: Types.UpdateProgramStatusInput;
 }>;
 

@@ -4,15 +4,15 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetUserDataQueryVariables = Exact<{
-  key: string;
+export type GetUserDataQueryVariables = Types.Exact<{
+  key: Types.Scalars['String']['input'];
 }>;
 
 
 export type GetUserDataQuery = { recentIssues: Array<{ __typename: 'IssueNode', id: string, createdAt: any, organizationName: string | null, repositoryName: string | null, title: string, url: string }>, recentMilestones: Array<{ __typename: 'MilestoneNode', id: string, title: string, openIssuesCount: number, closedIssuesCount: number, repositoryName: string | null, organizationName: string | null, createdAt: any, url: string }>, recentPullRequests: Array<{ __typename: 'PullRequestNode', id: string, createdAt: any, organizationName: string | null, repositoryName: string | null, title: string, url: string }>, recentReleases: Array<{ __typename: 'ReleaseNode', id: string, isPreRelease: boolean, name: string, publishedAt: any, organizationName: string | null, repositoryName: string | null, tagName: string, url: string }>, topContributedRepositories: Array<{ __typename: 'RepositoryNode', id: string, contributorsCount: number, forksCount: number, isArchived: boolean, key: string, name: string, openIssuesCount: number, starsCount: number, subscribersCount: number, url: string, organization: { __typename: 'OrganizationNode', id: string, login: string } | null }>, user: { __typename: 'UserNode', avatarUrl: string, bio: string, company: string, contributionData: any, contributionsCount: number, createdAt: string, contributionScore: number | null, tier: string | null, email: string, followersCount: number, followingCount: number, id: string, issuesCount: number, location: string, login: string, name: string, publicRepositoriesCount: number, releasesCount: number, updatedAt: string, url: string, badges: Array<{ __typename: 'BadgeNode', cssClass: string, description: string, id: string, name: string, weight: number }> } | null };
 
-export type GetUserMetadataQueryVariables = Exact<{
-  key: string;
+export type GetUserMetadataQueryVariables = Types.Exact<{
+  key: Types.Scalars['String']['input'];
 }>;
 
 
