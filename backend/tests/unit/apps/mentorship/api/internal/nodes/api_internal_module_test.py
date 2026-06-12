@@ -47,6 +47,7 @@ class FakeModuleNode:
         self.issues = MagicMock()
         self.project = MagicMock()
         self.project.name = "Test Project"
+        self.has_mentor = MagicMock(return_value=True)
 
     def mock_mentors(self):
         return _call_module_resolver(self, "mentors")
@@ -475,13 +476,15 @@ class TestModuleNodeResolvers:
         info.context.task_assigned_at_by_issue = None
         info.context.request.user = MagicMock()
 
-        mock_module_node.program.user_has_access.return_value = False
+        mock_module_node.program.has_admin.return_value = False
+        mock_module_node.has_mentor.return_value = False
 
         result = _call_module_resolver(
             mock_module_node, "issues", info, limit=20, offset=0, label=None
         )
         assert result == []
-        mock_module_node.program.user_has_access.assert_called_once_with(info.context.request.user)
+        mock_module_node.program.has_admin.assert_called_once_with(info.context.request.user)
+        mock_module_node.has_mentor.assert_called_once_with(info.context.request.user)
 
     def test_module_node_issue_by_number_unauthorized(self, mock_module_node):
         """Test issue_by_number resolver returns None for unauthorized user."""
@@ -490,11 +493,13 @@ class TestModuleNodeResolvers:
         info.context.task_assigned_at_by_issue = None
         info.context.request.user = MagicMock()
 
-        mock_module_node.program.user_has_access.return_value = False
+        mock_module_node.program.has_admin.return_value = False
+        mock_module_node.has_mentor.return_value = False
 
         result = _call_module_resolver(mock_module_node, "issue_by_number", info, number=456)
         assert result is None
-        mock_module_node.program.user_has_access.assert_called_once_with(info.context.request.user)
+        mock_module_node.program.has_admin.assert_called_once_with(info.context.request.user)
+        mock_module_node.has_mentor.assert_called_once_with(info.context.request.user)
 
 
 class TestModuleNodeInput:

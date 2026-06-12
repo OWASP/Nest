@@ -17,7 +17,7 @@
     "test:unit": "tsc --noEmit && tsc --noEmit -p __tests__/tsconfig.json && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
-    "@apollo/client": "4.1.9",
+    "@apollo/client": "4.2.0",
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
@@ -39,13 +39,13 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "core-js": "3.49.0",
-    "date-fns": "4.1.0",
+    "date-fns": "4.2.1",
     "dayjs": "1.11.20",
-    "dompurify": "3.4.3",
-    "framer-motion": "12.38.0",
+    "dompurify": "3.4.5",
+    "framer-motion": "12.39.0",
     "graphql": "16.14.0",
     "ics": "3.12.0",
-    "isomorphic-dompurify": "3.13.0",
+    "isomorphic-dompurify": "3.14.0",
     "leaflet": "1.9.4",
     "leaflet.markercluster": "1.5.3",
     "lodash": "4.18.1",
@@ -55,7 +55,7 @@
     "next": "16.2.6",
     "next-auth": "4.24.14",
     "next-themes": "0.4.6",
-    "posthog-js": "1.374.0",
+    "posthog-js": "1.374.3",
     "react": "19.2.6",
     "react-apexcharts": "2.1.0",
     "react-dom": "19.2.6",
@@ -123,7 +123,7 @@
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
+  "packageManager": "pnpm@11.5.3",
   "prettier": {
     "arrowParens": "always",
     "endOfLine": "lf",

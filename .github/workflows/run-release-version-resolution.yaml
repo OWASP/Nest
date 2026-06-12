@@ -15,7 +15,7 @@ permissions: {}
 jobs:
   run-release-version-resolution:
     name: Resolve release version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       release_version: ${{ steps.release-version-resolution.outputs.release_version }}
     steps:

@@ -1,4 +1,4 @@
-name: CI/CD Staging
+name: Deploy to Staging
 
 on:
   schedule:

@@ -19,6 +19,7 @@ minimumReleaseAgeExclude:
   - postcss@8.5.10
   - protobufjs@7.5.8
   - qs@6.15.2
+  - shell-quote@1.8.4
   - tmp@0.2.6
   - uuid@11.1.1
   - webpack@5.104.1
@@ -32,6 +33,7 @@ overrides:
   protobufjs: 7.5.8
   qs: 6.15.2
   serialize-javascript: 7.0.5
+  shell-quote: 1.8.4
   test-exclude: 7.0.2
   tmp: 0.2.6
   uuid: 11.1.1
