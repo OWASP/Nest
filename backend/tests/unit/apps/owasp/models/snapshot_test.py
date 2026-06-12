@@ -20,16 +20,16 @@ class SnapshotModelMockTest(SimpleTestCase):
         self.snapshot.status = Snapshot.Status.PROCESSING
 
         # Mock ManyToMany relations
-        for field in [
-            "new_chapters",
-            "new_events",
-            "new_issues",
-            "new_posts",
-            "new_projects",
-            "new_pull_requests",
-            "new_releases",
-            "new_users",
-        ]:
+        for field in (
+            "chapters",
+            "events",
+            "issues",
+            "posts",
+            "projects",
+            "pull_requests",
+            "releases",
+            "users",
+        ):
             m2m_mock = MagicMock()
             m2m_mock.all.return_value = []  # Simulate empty queryset
             m2m_mock.set = MagicMock()
@@ -37,8 +37,8 @@ class SnapshotModelMockTest(SimpleTestCase):
 
     def test_mocked_many_to_many_relations(self):
         """Test ManyToMany relationships using mocks."""
-        self.snapshot.new_chapters.set(["Mock Chapter"])
-        self.snapshot.new_chapters.set.assert_called_once_with(["Mock Chapter"])
+        self.snapshot.chapters.set(["Mock Chapter"])
+        self.snapshot.chapters.set.assert_called_once_with(["Mock Chapter"])
 
     def test_snapshot_attributes(self):
         """Test that title and key are correctly assigned."""
@@ -55,60 +55,60 @@ class SnapshotModelPropertyTest(SimpleTestCase):
         snapshot.title = "January 2025 Snapshot"
         assert str(snapshot) == "January 2025 Snapshot"
 
-    def test_new_chapters_count(self):
-        """Test new_chapters_count property."""
+    def test_chapters_count(self):
+        """Test chapters_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_chapters.count.return_value = 5
-        result = Snapshot.new_chapters_count.fget(mock_snapshot)
+        mock_snapshot.chapters.count.return_value = 5
+        result = Snapshot.chapters_count.fget(mock_snapshot)
         assert result == 5
 
-    def test_new_events_count(self):
-        """Test new_events_count property."""
+    def test_events_count(self):
+        """Test events_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_events.count.return_value = 4
-        result = Snapshot.new_events_count.fget(mock_snapshot)
+        mock_snapshot.events.count.return_value = 4
+        result = Snapshot.events_count.fget(mock_snapshot)
         assert result == 4
 
-    def test_new_issues_count(self):
-        """Test new_issues_count property."""
+    def test_issues_count(self):
+        """Test issues_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_issues.count.return_value = 10
-        result = Snapshot.new_issues_count.fget(mock_snapshot)
+        mock_snapshot.issues.count.return_value = 10
+        result = Snapshot.issues_count.fget(mock_snapshot)
         assert result == 10
 
-    def test_new_posts_count(self):
-        """Test new_posts_count property."""
+    def test_posts_count(self):
+        """Test posts_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_posts.count.return_value = 6
-        result = Snapshot.new_posts_count.fget(mock_snapshot)
+        mock_snapshot.posts.count.return_value = 6
+        result = Snapshot.posts_count.fget(mock_snapshot)
         assert result == 6
 
-    def test_new_projects_count(self):
-        """Test new_projects_count property."""
+    def test_projects_count(self):
+        """Test projects_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_projects.count.return_value = 3
-        result = Snapshot.new_projects_count.fget(mock_snapshot)
+        mock_snapshot.projects.count.return_value = 3
+        result = Snapshot.projects_count.fget(mock_snapshot)
         assert result == 3
 
-    def test_new_pull_requests_count(self):
-        """Test new_pull_requests_count property."""
+    def test_pull_requests_count(self):
+        """Test pull_requests_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_pull_requests.count.return_value = 8
-        result = Snapshot.new_pull_requests_count.fget(mock_snapshot)
+        mock_snapshot.pull_requests.count.return_value = 8
+        result = Snapshot.pull_requests_count.fget(mock_snapshot)
         assert result == 8
 
-    def test_new_releases_count(self):
-        """Test new_releases_count property."""
+    def test_releases_count(self):
+        """Test releases_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_releases.count.return_value = 7
-        result = Snapshot.new_releases_count.fget(mock_snapshot)
+        mock_snapshot.releases.count.return_value = 7
+        result = Snapshot.releases_count.fget(mock_snapshot)
         assert result == 7
 
-    def test_new_users_count(self):
-        """Test new_users_count property."""
+    def test_users_count(self):
+        """Test users_count property."""
         mock_snapshot = MagicMock(spec=Snapshot)
-        mock_snapshot.new_users.count.return_value = 15
-        result = Snapshot.new_users_count.fget(mock_snapshot)
+        mock_snapshot.users.count.return_value = 15
+        result = Snapshot.users_count.fget(mock_snapshot)
         assert result == 15
 
     def test_save_generates_weekly_key_when_empty(self):

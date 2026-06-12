@@ -8,7 +8,7 @@ export const mockSnapshotDetailsData = {
     endAt: '2025-01-01T00:00:30.000Z',
     status: 'completed',
     errorMessage: '',
-    newReleases: [
+    releases: [
       {
         id: 'release-1',
         name: 'v0.9.2',
@@ -40,7 +40,7 @@ export const mockSnapshotDetailsData = {
         },
       },
     ],
-    newProjects: [
+    projects: [
       {
         key: 'nest',
         name: 'OWASP Nest',
@@ -66,7 +66,7 @@ export const mockSnapshotDetailsData = {
         ],
       },
     ],
-    newChapters: [
+    chapters: [
       {
         key: 'sivagangai',
         name: 'OWASP Sivagangai',

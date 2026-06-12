@@ -1,68 +1,64 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type ModuleIssueViewFieldsFragment = { __typename: 'ModuleNode', id: string, taskDeadline: any, taskAssignedAt: any, issueByNumber: { __typename: 'IssueNode', id: string, number: number, title: string, body: string, url: string, state: string, isMerged: boolean, organizationName: string | null, repositoryName: string | null, labels: Array<string>, assignees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, pullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, interestedUsers: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, issueMentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> };
+export type ModuleIssueViewFieldsFragment = { __typename: 'ModuleNode', id: string, taskDeadline: any | null, taskAssignedAt: any | null, issueByNumber: { __typename: 'IssueNode', id: string, number: number, title: string, body: string, url: string, state: string, isMerged: boolean, organizationName: string | null, repositoryName: string | null, labels: Array<string>, assignees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, pullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any | null, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, interestedUsers: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, issueMentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> };
 
-export type GetManagementModuleIssueViewQueryVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  number: number;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+export type GetManagementModuleIssueViewQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  number: Types.Scalars['Int']['input'];
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
 }>;
 
 
-export type GetManagementModuleIssueViewQuery = { managementModule: { __typename: 'ModuleNode', id: string, taskDeadline: any, taskAssignedAt: any, issueByNumber: { __typename: 'IssueNode', id: string, number: number, title: string, body: string, url: string, state: string, isMerged: boolean, organizationName: string | null, repositoryName: string | null, labels: Array<string>, assignees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, pullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, interestedUsers: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, issueMentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } | null };
+export type GetManagementModuleIssueViewQuery = { managementModule: { __typename: 'ModuleNode', id: string, taskDeadline: any | null, taskAssignedAt: any | null, issueByNumber: { __typename: 'IssueNode', id: string, number: number, title: string, body: string, url: string, state: string, isMerged: boolean, organizationName: string | null, repositoryName: string | null, labels: Array<string>, assignees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, pullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any | null, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, interestedUsers: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, issueMentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } | null };
 
-export type GetModuleIssueViewQueryVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  number: number;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+export type GetModuleIssueViewQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  number: Types.Scalars['Int']['input'];
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
 }>;
 
 
-export type GetModuleIssueViewQuery = { getModule: { __typename: 'ModuleNode', id: string, taskDeadline: any, taskAssignedAt: any, issueByNumber: { __typename: 'IssueNode', id: string, number: number, title: string, body: string, url: string, state: string, isMerged: boolean, organizationName: string | null, repositoryName: string | null, labels: Array<string>, assignees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, pullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, interestedUsers: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, issueMentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } | null };
+export type GetModuleIssueViewQuery = { getModule: { __typename: 'ModuleNode', id: string, taskDeadline: any | null, taskAssignedAt: any | null, issueByNumber: { __typename: 'IssueNode', id: string, number: number, title: string, body: string, url: string, state: string, isMerged: boolean, organizationName: string | null, repositoryName: string | null, labels: Array<string>, assignees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, pullRequests: Array<{ __typename: 'PullRequestNode', id: string, title: string, url: string, state: string, createdAt: any, mergedAt: any | null, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, interestedUsers: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }>, issueMentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } | null };
 
-export type AssignIssueToUserMutationVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  issueNumber: number;
-  userLogin: string;
+export type AssignIssueToUserMutationVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  issueNumber: Types.Scalars['Int']['input'];
+  userLogin: Types.Scalars['String']['input'];
 }>;
 
 
 export type AssignIssueToUserMutation = { assignIssueToUser: { __typename: 'ModuleNode', id: string } };
 
-export type UnassignIssueFromUserMutationVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  issueNumber: number;
-  userLogin: string;
+export type UnassignIssueFromUserMutationVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  issueNumber: Types.Scalars['Int']['input'];
+  userLogin: Types.Scalars['String']['input'];
 }>;
 
 
 export type UnassignIssueFromUserMutation = { unassignIssueFromUser: { __typename: 'ModuleNode', id: string } };
 
-export type SetTaskDeadlineMutationVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  issueNumber: number;
-  deadlineAt: any;
+export type SetTaskDeadlineMutationVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  issueNumber: Types.Scalars['Int']['input'];
+  deadlineAt: Types.Scalars['DateTime']['input'];
 }>;
 
 
 export type SetTaskDeadlineMutation = { setTaskDeadline: { __typename: 'ModuleNode', id: string } };
 
-export type ClearTaskDeadlineMutationVariables = Exact<{
-  programKey: string;
-  moduleKey: string;
-  issueNumber: number;
+export type ClearTaskDeadlineMutationVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
+  moduleKey: Types.Scalars['String']['input'];
+  issueNumber: Types.Scalars['Int']['input'];
 }>;
 
 

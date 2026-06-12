@@ -1,5 +1,10 @@
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -10,7 +15,7 @@ export type Scalars = {
   Date: { input: string | number; output: string | number; }
   DateTime: { input: string | number; output: string | number; }
   JSON: { input: Record<string, unknown>; output: Record<string, unknown>; }
-  UUID: { input: unknown; output: unknown; }
+  UUID: { input: any; output: any; }
 };
 
 export type AdminNode = {
@@ -1059,18 +1064,21 @@ export type RevokeApiKeyResult = {
 
 export type SnapshotNode = Node & {
   __typename?: 'SnapshotNode';
+  chapters: Array<ChapterNode>;
   createdAt: Scalars['DateTime']['output'];
   endAt: Scalars['DateTime']['output'];
+  events: Array<EventNode>;
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
+  issues: Array<IssueNode>;
   key: Scalars['String']['output'];
-  newChapters: Array<ChapterNode>;
-  newIssues: Array<IssueNode>;
-  newProjects: Array<ProjectNode>;
-  newReleases: Array<ReleaseNode>;
-  newUsers: Array<UserNode>;
+  posts: Array<PostNode>;
+  projects: Array<ProjectNode>;
+  pullRequests: Array<PullRequestNode>;
+  releases: Array<ReleaseNode>;
   startAt: Scalars['DateTime']['output'];
   title: Scalars['String']['output'];
+  users: Array<UserNode>;
 };
 
 export type SponsorNode = Node & {

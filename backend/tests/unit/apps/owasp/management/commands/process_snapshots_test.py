@@ -108,12 +108,21 @@ class TestProcessSnapshots:
         mock_chapters.filter.return_value = mock_chapters
         mock_chapters.count.return_value = 2
 
+        mock_events = mock.MagicMock()
+        mock_events.count.return_value = 1
+
+        mock_issues = mock.MagicMock()
+        mock_issues.count.return_value = 5
+
+        mock_posts = mock.MagicMock()
+        mock_posts.count.return_value = 3
+
         mock_projects = mock.MagicMock()
         mock_projects.filter.return_value = mock_projects
         mock_projects.count.return_value = 3
 
-        mock_issues = mock.MagicMock()
-        mock_issues.count.return_value = 5
+        mock_pull_requests = mock.MagicMock()
+        mock_pull_requests.count.return_value = 4
 
         mock_releases = mock.MagicMock()
         mock_releases.filter.return_value = mock_releases
@@ -128,14 +137,20 @@ class TestProcessSnapshots:
         ):
             mock_get_new_items.side_effect = [
                 mock_chapters,
+                mock_events,
                 mock_issues,
+                mock_posts,
                 mock_projects,
+                mock_pull_requests,
                 mock_releases,
                 mock_users,
             ]
 
             command.process_snapshot(mock_snapshot)
 
+            assert mock_get_new_items.call_count == 8
+            assert mock_get_new_items.call_args_list[1].kwargs == {"date_field": "start_date"}
+            assert mock_get_new_items.call_args_list[3].kwargs == {"date_field": "published_at"}
             assert mock_snapshot.status == Snapshot.Status.COMPLETED
             mock_snapshot.save.assert_called()
 
@@ -172,4 +187,21 @@ class TestProcessSnapshots:
         assert result == mock_queryset
         mock_model.objects.filter.assert_called_once_with(
             created_at__gte=start_at, created_at__lte=end_at
+        )
+
+    def test_get_new_items_custom_date_field(self):
+        """Test get_new_items with custom date field."""
+        command = Command()
+        start_at = timezone.now()
+        end_at = timezone.now()
+
+        mock_model = mock.MagicMock()
+        mock_queryset = mock.MagicMock()
+        mock_model.objects.filter.return_value = mock_queryset
+
+        result = command.get_new_items(mock_model, start_at, end_at, date_field="start_date")
+
+        assert result == mock_queryset
+        mock_model.objects.filter.assert_called_once_with(
+            start_date__gte=start_at, start_date__lte=end_at
         )

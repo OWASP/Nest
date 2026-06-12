@@ -172,9 +172,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [],
-          newProjects: [],
-          newReleases: [],
+          chapters: [],
+          projects: [],
+          releases: [],
         },
       },
       error: null,
@@ -191,7 +191,7 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders project card with null key (uses name fallback)', async () => {
     const projectWithNullKey = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       key: null,
       name: 'Test Project',
     }
@@ -199,9 +199,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [projectWithNullKey],
-          newChapters: [],
-          newReleases: [],
+          projects: [projectWithNullKey],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -217,16 +217,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders project card without level', async () => {
     const projectWithoutLevel = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       level: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [projectWithoutLevel],
-          newChapters: [],
-          newReleases: [],
+          projects: [projectWithoutLevel],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -241,16 +241,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders project card without summary', async () => {
     const projectWithoutSummary = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       summary: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [projectWithoutSummary],
-          newChapters: [],
-          newReleases: [],
+          projects: [projectWithoutSummary],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -265,16 +265,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders chapter card without relatedUrls', async () => {
     const chapterWithoutUrls = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       relatedUrls: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [chapterWithoutUrls],
-          newProjects: [],
-          newReleases: [],
+          chapters: [chapterWithoutUrls],
+          projects: [],
+          releases: [],
         },
       },
       error: null,
@@ -289,16 +289,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders chapter card without summary', async () => {
     const chapterWithoutSummary = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       summary: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [chapterWithoutSummary],
-          newProjects: [],
-          newReleases: [],
+          chapters: [chapterWithoutSummary],
+          projects: [],
+          releases: [],
         },
       },
       error: null,
@@ -313,13 +313,13 @@ describe('SnapshotDetailsPage', () => {
 
   test('filters out inactive chapters', async () => {
     const activeChapter = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       name: 'Active Chapter',
       key: 'active-chapter',
       isActive: true,
     }
     const inactiveChapter = {
-      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      ...mockSnapshotDetailsData.snapshot.chapters[0],
       name: 'Inactive Chapter',
       key: 'inactive-chapter',
       isActive: false,
@@ -328,9 +328,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newChapters: [activeChapter, inactiveChapter],
-          newProjects: [],
-          newReleases: [],
+          chapters: [activeChapter, inactiveChapter],
+          projects: [],
+          releases: [],
         },
       },
       error: null,
@@ -346,13 +346,13 @@ describe('SnapshotDetailsPage', () => {
 
   test('filters out inactive projects', async () => {
     const activeProject = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       name: 'Active Project',
       key: 'active-project',
       isActive: true,
     }
     const inactiveProject = {
-      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      ...mockSnapshotDetailsData.snapshot.projects[0],
       name: 'Inactive Project',
       key: 'inactive-project',
       isActive: false,
@@ -361,9 +361,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newProjects: [activeProject, inactiveProject],
-          newChapters: [],
-          newReleases: [],
+          projects: [activeProject, inactiveProject],
+          chapters: [],
+          releases: [],
         },
       },
       error: null,
@@ -379,16 +379,16 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders release without id (uses fallback key)', async () => {
     const releaseWithoutId = {
-      ...mockSnapshotDetailsData.snapshot.newReleases[0],
+      ...mockSnapshotDetailsData.snapshot.releases[0],
       id: undefined,
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newReleases: [releaseWithoutId],
-          newChapters: [],
-          newProjects: [],
+          releases: [releaseWithoutId],
+          chapters: [],
+          projects: [],
         },
       },
       error: null,
@@ -404,7 +404,7 @@ describe('SnapshotDetailsPage', () => {
 
   test('renders release without id and repositoryName (uses unknown fallback)', async () => {
     const releaseWithoutIdAndRepo = {
-      ...mockSnapshotDetailsData.snapshot.newReleases[0],
+      ...mockSnapshotDetailsData.snapshot.releases[0],
       id: undefined,
       repositoryName: undefined,
     }
@@ -412,9 +412,9 @@ describe('SnapshotDetailsPage', () => {
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
-          newReleases: [releaseWithoutIdAndRepo],
-          newChapters: [],
-          newProjects: [],
+          releases: [releaseWithoutIdAndRepo],
+          chapters: [],
+          projects: [],
         },
       },
       error: null,

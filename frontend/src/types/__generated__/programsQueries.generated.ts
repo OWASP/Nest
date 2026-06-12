@@ -1,60 +1,45 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type ExperienceLevelEnum =
-  | 'ADVANCED'
-  | 'BEGINNER'
-  | 'EXPERT'
-  | 'INTERMEDIATE';
-
-export type ProgramStatusEnum =
-  | 'COMPLETED'
-  | 'DRAFT'
-  | 'PUBLISHED';
-
-export type GetMyProgramsQueryVariables = Exact<{
-  search?: string | null | undefined;
-  page?: number | null | undefined;
-  limit?: number | null | undefined;
+export type GetMyProgramsQueryVariables = Types.Exact<{
+  search?: Types.InputMaybe<Types.Scalars['String']['input']>;
+  page?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
 }>;
 
 
 export type GetMyProgramsQuery = { myPrograms: { __typename: 'PaginatedPrograms', currentPage: number, totalPages: number, programs: Array<{ __typename: 'ProgramNode', id: string, key: string, name: string, status: Types.ProgramStatusEnum, description: string, startedAt: any, endedAt: any, userRole: string | null }> } };
 
-export type GetProgramDetailsQueryVariables = Exact<{
-  programKey: string;
+export type GetProgramDetailsQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
 }>;
 
 
 export type GetProgramDetailsQuery = { getProgram: { __typename: 'ProgramNode', id: string, key: string, name: string, description: string, status: Types.ProgramStatusEnum, menteesLimit: number | null, experienceLevels: Array<Types.ExperienceLevelEnum> | null, startedAt: any, endedAt: any, domains: Array<string> | null, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', id: string, login: string, name: string, avatarUrl: string }> | null } | null };
 
-export type GetManagementProgramDetailsQueryVariables = Exact<{
-  programKey: string;
+export type GetManagementProgramDetailsQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
 }>;
 
 
 export type GetManagementProgramDetailsQuery = { managementProgram: { __typename: 'ProgramNode', id: string, key: string, name: string, description: string, status: Types.ProgramStatusEnum, menteesLimit: number | null, experienceLevels: Array<Types.ExperienceLevelEnum> | null, startedAt: any, endedAt: any, domains: Array<string> | null, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', id: string, login: string, name: string, avatarUrl: string }> | null } | null };
 
-export type GetManagementProgramAndModulesQueryVariables = Exact<{
-  programKey: string;
+export type GetManagementProgramAndModulesQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
 }>;
 
 
 export type GetManagementProgramAndModulesQuery = { managementProgram: { __typename: 'ProgramNode', id: string, key: string, name: string, description: string, status: Types.ProgramStatusEnum, menteesLimit: number | null, experienceLevels: Array<Types.ExperienceLevelEnum> | null, startedAt: any, endedAt: any, domains: Array<string> | null, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', id: string, login: string, name: string, avatarUrl: string }> | null, recentMilestones: Array<{ __typename: 'MilestoneNode', id: string, title: string, state: string, openIssuesCount: number, closedIssuesCount: number, createdAt: any, repositoryName: string | null, organizationName: string | null, url: string, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, managementProgramModules: Array<{ __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: Types.ExperienceLevelEnum, order: number, startedAt: any, endedAt: any, domains: Array<string> | null, tags: Array<string> | null, labels: Array<string> | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> }> };
 
-export type GetProgramAndModulesQueryVariables = Exact<{
-  programKey: string;
+export type GetProgramAndModulesQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
 }>;
 
 
 export type GetProgramAndModulesQuery = { getProgram: { __typename: 'ProgramNode', id: string, key: string, name: string, description: string, status: Types.ProgramStatusEnum, menteesLimit: number | null, experienceLevels: Array<Types.ExperienceLevelEnum> | null, startedAt: any, endedAt: any, domains: Array<string> | null, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', id: string, login: string, name: string, avatarUrl: string }> | null, recentMilestones: Array<{ __typename: 'MilestoneNode', id: string, title: string, state: string, openIssuesCount: number, closedIssuesCount: number, createdAt: any, repositoryName: string | null, organizationName: string | null, url: string, author: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }> } | null, getProgramModules: Array<{ __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: Types.ExperienceLevelEnum, order: number, startedAt: any, endedAt: any, domains: Array<string> | null, tags: Array<string> | null, labels: Array<string> | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> }> };
 
-export type GetManagementProgramAdminDetailsQueryVariables = Exact<{
-  programKey: string;
+export type GetManagementProgramAdminDetailsQueryVariables = Types.Exact<{
+  programKey: Types.Scalars['String']['input'];
 }>;
 
 

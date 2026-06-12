@@ -7,9 +7,9 @@ export type SnapshotDetails = {
   key: string
   startAt: string
   title: string
-  newReleases: Release[]
-  newProjects: Project[]
-  newChapters: Chapter[]
+  releases: Release[]
+  projects: Project[]
+  chapters: Chapter[]
 }
 
 export type Snapshot = {

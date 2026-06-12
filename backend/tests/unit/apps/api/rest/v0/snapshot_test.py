@@ -35,11 +35,11 @@ class TestSnapshotSchema:
                 "start_at": "2025-02-01T00:00:00Z",
                 "title": "February 2025 Snapshot",
                 "updated_at": "2025-03-01T00:00:00Z",
-                "new_chapters_count": 1,
-                "new_issues_count": 2,
-                "new_projects_count": 3,
-                "new_releases_count": 4,
-                "new_users_count": 5,
+                "chapters_count": 1,
+                "issues_count": 2,
+                "projects_count": 3,
+                "releases_count": 4,
+                "users_count": 5,
             },
             {
                 "created_at": "2024-01-01T00:00:00Z",
@@ -48,11 +48,11 @@ class TestSnapshotSchema:
                 "start_at": "2024-01-01T00:00:00Z",
                 "title": "January 2024 Snapshot",
                 "updated_at": "2024-02-01T00:00:00Z",
-                "new_chapters_count": 0,
-                "new_issues_count": 0,
-                "new_projects_count": 0,
-                "new_releases_count": 0,
-                "new_users_count": 0,
+                "chapters_count": 0,
+                "issues_count": 0,
+                "projects_count": 0,
+                "releases_count": 0,
+                "users_count": 0,
             },
         ],
     )
@@ -65,11 +65,11 @@ class TestSnapshotSchema:
         assert snapshot.start_at == datetime.fromisoformat(snapshot_data["start_at"])
         assert snapshot.title == snapshot_data["title"]
         assert snapshot.updated_at == datetime.fromisoformat(snapshot_data["updated_at"])
-        assert snapshot.new_chapters_count == snapshot_data["new_chapters_count"]
-        assert snapshot.new_issues_count == snapshot_data["new_issues_count"]
-        assert snapshot.new_projects_count == snapshot_data["new_projects_count"]
-        assert snapshot.new_releases_count == snapshot_data["new_releases_count"]
-        assert snapshot.new_users_count == snapshot_data["new_users_count"]
+        assert snapshot.chapters_count == snapshot_data["chapters_count"]
+        assert snapshot.issues_count == snapshot_data["issues_count"]
+        assert snapshot.projects_count == snapshot_data["projects_count"]
+        assert snapshot.releases_count == snapshot_data["releases_count"]
+        assert snapshot.users_count == snapshot_data["users_count"]
 
 
 class TestSnapshotAPI:
@@ -92,13 +92,11 @@ class TestSnapshotAPI:
         self.release.tag_name = "v1.0.0"
         self.user = MagicMock(spec=User)
         self.user.username = "testuser"
-        self.snapshot.new_chapters.order_by.return_value = [self.chapter]
-        self.snapshot.new_issues.select_related.return_value.order_by.return_value = [self.issue]
-        self.snapshot.new_projects.order_by.return_value = [self.project]
-        self.snapshot.new_releases.select_related.return_value.order_by.return_value = [
-            self.release
-        ]
-        self.snapshot.new_users.order_by.return_value = [self.user]
+        self.snapshot.chapters.order_by.return_value = [self.chapter]
+        self.snapshot.issues.select_related.return_value.order_by.return_value = [self.issue]
+        self.snapshot.projects.order_by.return_value = [self.project]
+        self.snapshot.releases.select_related.return_value.order_by.return_value = [self.release]
+        self.snapshot.users.order_by.return_value = [self.user]
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_get_snapshot_not_found(self, mock_filter):
