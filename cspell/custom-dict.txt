@@ -101,6 +101,7 @@ collectstatic
 coraza
 corsheaders
 credentialless
+crp
 csrfguard
 csrfprotector
 csrftoken

@@ -4,7 +4,7 @@ import logging
 
 from django.contrib import admin
 
-from apps.owasp.models.contribution_score import ContributionScore
+from apps.owasp.models.crp.contribution_score import ContributionScore
 from apps.owasp.score_calculator import ContributionScoreCalculator
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class ContributionScoreAdmin(admin.ModelAdmin):
     list_filter = ("tier", "nest_created_at")
     search_fields = ("github_user__login", "github_user__name")
     readonly_fields = ("nest_created_at", "nest_updated_at")
-    actions = ("recalculate_score",)
+    actions = ("recalculate",)
 
     fieldsets = (
         (
@@ -43,20 +43,20 @@ class ContributionScoreAdmin(admin.ModelAdmin):
         ),
     )
 
-    def recalculate_score(self, request, queryset):
+    def recalculate(self, request, queryset):
         """Admin action to recalculate scores for selected users."""
         calculator = ContributionScoreCalculator()
         updated_count = 0
         failed_count = 0
 
-        for score_obj in queryset:
+        for score in queryset:
             try:
-                calculator.recalculate_user_score(score_obj.github_user)
+                calculator.recalculate_user_score(score.github_user)
                 updated_count += 1
             except (ValueError, TypeError):
                 logger.exception(
                     "Failed to recalculate score for user %s",
-                    score_obj.github_user.login,
+                    score.github_user.login,
                 )
                 failed_count += 1
 
@@ -66,4 +66,4 @@ class ContributionScoreAdmin(admin.ModelAdmin):
             f"Failed for {failed_count} contributor(s).",
         )
 
-    recalculate_score.short_description = "Recalculate selected contributors' scores"
+    recalculate.short_description = "Recalculate selected contributors' scores"

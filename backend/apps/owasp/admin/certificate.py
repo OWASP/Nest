@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from apps.owasp.models.certificate import Certificate
+from apps.owasp.models.crp.certificate import Certificate
 
 
 @admin.register(Certificate)

@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from apps.owasp.models.leaderboard_snapshot import LeaderboardSnapshot
+from apps.owasp.models.crp.leaderboard_snapshot import LeaderboardSnapshot
 
 
 @admin.register(LeaderboardSnapshot)
