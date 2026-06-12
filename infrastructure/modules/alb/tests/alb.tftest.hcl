@@ -442,3 +442,12 @@ run "test_s3_versioning_enabled" {
     error_message = "S3 bucket versioning must be enabled."
   }
 }
+
+run "test_alb_deletion_protection_disabled" {
+  command = plan
+
+  assert {
+    condition     = aws_lb.main.enable_deletion_protection == false
+    error_message = "ALB deletion protection must be disabled."
+  }
+}

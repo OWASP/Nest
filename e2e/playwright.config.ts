@@ -1,3 +1,4 @@
+import { iphone13Chromium } from '@e2e/helpers/devices'
 import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
@@ -8,26 +9,30 @@ export default defineConfig({
   fullyParallel: true,
   projects: [
     {
-      name: 'chromium',
+      name: 'Desktop Chrome',
       use: {
         ...devices['Desktop Chrome'],
       },
     },
     {
-      name: 'Mobile Safari - iPhone 13',
-      use: {
-        ...devices['iPhone 13'],
-      },
+      name: 'Mobile Chrome - iPhone 13',
+      use: iphone13Chromium,
     },
   ],
-  reporter: [['list', { printSteps: true }]],
+  reporter: process.env.CI
+    ? [
+        ['list', { printSteps: true }],
+        ['github'],
+      ]
+    : [['list', { printSteps: true }]],
   retries: 2,
   testDir: '.',
   timeout: 120_000,
   use: {
     baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
     headless: true,
+    navigationTimeout: 60_000,
     trace: 'off',
   },
-  workers: os.cpus().length,
+  workers: Math.max(1, os.cpus().length - 1),
 })

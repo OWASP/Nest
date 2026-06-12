@@ -25,6 +25,11 @@ run "test_cron_tasks_disabled_removes_schedules" {
   }
 
   assert {
+    condition     = local.mentorship_sync_modules_data_schedule_expression == null
+    error_message = "mentorship_sync_modules_data_schedule_expression must be null when enable_cron_tasks is false."
+  }
+
+  assert {
     condition     = local.sync_data_schedule_expression == null
     error_message = "sync_data_schedule_expression must be null when enable_cron_tasks is false."
   }
@@ -45,6 +50,11 @@ run "test_cron_tasks_enabled_creates_schedules" {
 
   variables {
     enable_cron_tasks = true
+  }
+
+  assert {
+    condition     = local.mentorship_sync_modules_data_schedule_expression == "cron(30 06 * * ? *)"
+    error_message = "mentorship_sync_modules_data_schedule_expression must be set when enable_cron_tasks is true."
   }
 
   assert {
