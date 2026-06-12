@@ -78,8 +78,8 @@ importers:
         specifier: 10.53.1
         version: 10.53.1(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(webpack@5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10))
       apexcharts:
-        specifier: 5.12.0
-        version: 5.12.0
+        specifier: 5.13.0
+        version: 5.13.0
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -145,7 +145,7 @@ importers:
         version: 19.2.6
       react-apexcharts:
         specifier: 2.1.0
-        version: 2.1.0(apexcharts@5.12.0)(react@19.2.6)
+        version: 2.1.0(apexcharts@5.13.0)(react@19.2.6)
       react-dom:
         specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
@@ -4239,8 +4239,8 @@ packages:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
 
-  apexcharts@5.12.0:
-    resolution: {integrity: sha512-vNCw62M5rhVg09FHFCL/ztpH7VlTOF8/+lWLUVjBdQffIAgQaxtyDGfojCyYoZHM3Hh17srWwz6rrD/XzblRSw==}
+  apexcharts@5.13.0:
+    resolution: {integrity: sha512-PJuXT6zdiCbv0IkX5cqkKFVIIh+9v3kqP9zsOHEGpIWi7DfTgzvfOKc8icw6G3/ulR3V1alDDUtOVH0zWCWGEQ==}
 
   arg@4.1.3:
     resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
@@ -7557,8 +7557,8 @@ packages:
       uglify-js:
         optional: true
 
-  terser@5.47.1:
-    resolution: {integrity: sha512-tPbLXTI6ohPASb/1YViL428oEHu6/qv1OxqYnfaonVCFHqx4+wCd95pHrQWsL5X4pl90CTyW9piSAsS2L0VoMw==}
+  terser@5.48.0:
+    resolution: {integrity: sha512-J/9An6vs9Us6wKRriSFXBWdRZapREHqFzdNUKk0pmu804EMR6dr6winwo7e5JDxN4xahxQsuysyYFwlwj4XN/Q==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -13266,7 +13266,7 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.2
 
-  apexcharts@5.12.0: {}
+  apexcharts@5.13.0: {}
 
   arg@4.1.3: {}
 
@@ -16373,9 +16373,9 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  react-apexcharts@2.1.0(apexcharts@5.12.0)(react@19.2.6):
+  react-apexcharts@2.1.0(apexcharts@5.13.0)(react@19.2.6):
     dependencies:
-      apexcharts: 5.12.0
+      apexcharts: 5.13.0
       prop-types: 15.8.1
       react: 19.2.6
 
@@ -17046,13 +17046,13 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
-      terser: 5.47.1
+      terser: 5.48.0
       webpack: 5.104.1(@swc/core@1.15.32(@swc/helpers@0.5.21))(postcss@8.5.10)
     optionalDependencies:
       '@swc/core': 1.15.32(@swc/helpers@0.5.21)
       postcss: 8.5.10
 
-  terser@5.47.1:
+  terser@5.48.0:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.16.0
