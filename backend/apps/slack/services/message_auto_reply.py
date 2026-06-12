@@ -6,7 +6,8 @@ from django_rq import job
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
-from apps.slack.common.handlers.ai import get_blocks, process_ai_query
+from apps.slack.blocks import markdown
+from apps.slack.common.handlers.ai import process_ai_query
 from apps.slack.models import Message
 
 logger = logging.getLogger(__name__)
@@ -41,13 +42,15 @@ def generate_ai_reply_if_unanswered(message_id: int):
     except SlackApiError:
         logger.exception("Error checking for replies for message")
 
-    ai_response_text = process_ai_query(query=message.text)
+    # The message was already validated as an OWASP question in MessagePosted.handle_event
+    # before the job was enqueued, so skip the QuestionDetector re-check here.
+    ai_response_text = process_ai_query(query=message.text, skip_question_check=True)
     if not ai_response_text:
         return
 
     client.chat_postMessage(
         channel=message.conversation.slack_channel_id,
-        blocks=get_blocks(ai_response_text),
+        blocks=[markdown(ai_response_text)],
         text=ai_response_text,
         thread_ts=message.slack_message_id,
     )

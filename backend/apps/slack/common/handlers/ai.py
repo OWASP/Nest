@@ -29,19 +29,22 @@ def get_blocks(query: str) -> list[dict]:
     return get_error_blocks()
 
 
-def process_ai_query(query: str) -> str | None:
+def process_ai_query(query: str, skip_question_check: bool = False) -> str | None:
     """Process the AI query using the agentic RAG agent.
 
     Args:
         query (str): The user's question.
+        skip_question_check (bool): Skip QuestionDetector classification when the
+            caller has already validated the question is OWASP-related.
 
     Returns:
         str | None: The AI response or None if error occurred.
 
     """
-    question_detector = QuestionDetector()
-    if not question_detector.is_owasp_question(text=query):
-        return get_default_response()
+    if not skip_question_check:
+        question_detector = QuestionDetector()
+        if not question_detector.is_owasp_question(text=query):
+            return get_default_response()
 
     agent = AgenticRAGAgent()
     result = agent.run(query=query)

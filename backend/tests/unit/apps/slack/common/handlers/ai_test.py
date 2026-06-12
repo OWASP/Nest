@@ -149,6 +149,26 @@ class TestAiHandler:
         mock_question_detector.is_owasp_question.assert_called_once_with(text=query)
         assert result == get_default_response()
 
+    @patch("apps.slack.common.handlers.ai.AgenticRAGAgent")
+    @patch("apps.slack.common.handlers.ai.QuestionDetector")
+    def test_process_ai_query_skips_question_check_when_flagged(
+        self, mock_question_detector_class, mock_agent_class
+    ):
+        """Test that QuestionDetector is not instantiated when skip_question_check=True."""
+        query = "What is OWASP?"
+        expected_response = "OWASP is a security organization..."
+
+        mock_agent = Mock()
+        mock_agent.run.return_value = {"answer": expected_response}
+        mock_agent_class.return_value = mock_agent
+
+        result = process_ai_query(query, skip_question_check=True)
+
+        mock_question_detector_class.assert_not_called()
+        mock_agent_class.assert_called_once()
+        mock_agent.run.assert_called_once_with(query=query)
+        assert result == expected_response
+
     @patch("apps.slack.common.handlers.ai.markdown")
     def test_get_error_blocks(self, mock_markdown):
         """Test error blocks generation."""
