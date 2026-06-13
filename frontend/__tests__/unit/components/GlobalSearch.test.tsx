@@ -524,9 +524,10 @@ describe('GlobalSearch', () => {
     expect(document.activeElement).toBe(input)
 
     fireEvent.keyDown(document, { key: 'Tab' })
+    expect(document.activeElement).toBeTruthy()
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
 
-    expect(document.activeElement).toBeTruthy()
+    expect(document.activeElement).toBe(input)
   })
 
   test('focus trap handles multiple tab events to loop focus', async () => {
@@ -545,7 +546,7 @@ describe('GlobalSearch', () => {
     expect(focusable.length).toBeGreaterThan(0)
 
     const first = focusable[0]
-    const last = focusable[focusable.length - 1]
+    const last = focusable.at(-1)!
 
     first.focus()
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })

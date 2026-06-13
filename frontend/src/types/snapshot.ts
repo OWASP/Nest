@@ -12,6 +12,7 @@ export type SnapshotPullRequest = {
     name: string
   } | null
   createdAt: string
+  mergedAt?: string | null
   organizationName?: string | null
   repositoryName?: string | null
   state: string

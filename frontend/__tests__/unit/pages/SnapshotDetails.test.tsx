@@ -37,7 +37,15 @@ jest.mock('@/components/MarkdownWrapper', () => {
 
 const findButtonInSection = (buttonText: string, sectionTitle: string) => {
   const heading = screen.getByText(sectionTitle)
-  const container = heading.closest('div.rounded-lg')
+  let container: Element | null = null
+  if (heading.id) {
+    container = document.querySelector(`[aria-labelledby="${heading.id}"]`)
+  }
+  if (!container) {
+    container = heading.closest(
+      '[role="region"], [role="group"], [role="article"], [role="toolbar"], section, article, div.shadow-md'
+    )
+  }
   if (!container) return undefined
   const buttons = container.querySelectorAll('button')
   for (const btn of Array.from(buttons)) {
@@ -473,16 +481,16 @@ describe('SnapshotDetailsPage', () => {
     })
 
     const allH3s = screen.getAllByRole('heading', { level: 3 })
-    const knownEventNames = [
+    const knownEventNames = new Set([
       'Global AppSec 2024',
       'Global Summit',
       'AppSec Days Pacific',
       'Partner Security Summit',
       'Local Meetup',
-    ]
+    ])
     const eventNames = allH3s
       .map((el) => el.textContent)
-      .filter((name) => knownEventNames.includes(name || ''))
+      .filter((name) => knownEventNames.has(name || ''))
 
     const globalIdx = eventNames.indexOf('Global AppSec 2024')
     const appsecIdx = eventNames.indexOf('AppSec Days Pacific')
@@ -655,7 +663,30 @@ describe('SnapshotDetailsPage', () => {
 
   test('clicks Show less on pull requests to collapse', async () => {
     ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
-      jest.fn().mockResolvedValue({ data: {} }),
+      jest.fn().mockResolvedValue({
+        data: {
+          snapshot: {
+            pullRequests: [
+              {
+                id: 'pr-7',
+                author: {
+                  avatarUrl: 'https://avatars.githubusercontent.com/u/7?v=4',
+                  id: '7',
+                  login: 'user7',
+                  name: 'User Seven',
+                },
+                createdAt: '2024-12-18T09:00:00.000Z',
+                mergedAt: null,
+                organizationName: 'owasp',
+                repositoryName: 'nest',
+                state: 'open',
+                title: 'PR Seven',
+                url: 'https://github.com/owasp/nest/pull/106',
+              },
+            ],
+          },
+        },
+      }),
     ])
 
     render(<SnapshotDetailsPage />)
@@ -684,7 +715,31 @@ describe('SnapshotDetailsPage', () => {
   test('clicks Show less on issues to collapse', async () => {
     ;(useLazyQuery as unknown as jest.Mock)
       .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
-      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([
+        jest.fn().mockResolvedValue({
+          data: {
+            snapshot: {
+              issues: [
+                {
+                  id: 'issue-7',
+                  author: {
+                    avatarUrl: 'https://avatars.githubusercontent.com/u/7?v=4',
+                    id: '7',
+                    login: 'user7',
+                    name: 'User Seven',
+                  },
+                  createdAt: '2024-12-17T08:00:00.000Z',
+                  organizationName: 'owasp',
+                  repositoryName: 'nest',
+                  state: 'open',
+                  title: 'Issue Seven',
+                  url: 'https://github.com/owasp/nest/issues/56',
+                },
+              ],
+            },
+          },
+        }),
+      ])
 
     render(<SnapshotDetailsPage />)
 
@@ -885,6 +940,9 @@ describe('SnapshotDetailsPage', () => {
     await waitFor(() => {
       expect(mockFetchMorePRs).toHaveBeenCalled()
     })
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalled()
+    })
   })
 
   test('Issue fetchMore error triggers handleAppError', async () => {
@@ -905,6 +963,9 @@ describe('SnapshotDetailsPage', () => {
 
     await waitFor(() => {
       expect(mockFetchMoreIssues).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalled()
     })
   })
 })

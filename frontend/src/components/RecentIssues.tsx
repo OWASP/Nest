@@ -38,7 +38,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({
                   {issue.title}
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  {issue.author && (
+                  {showAvatar && issue.author && (
                     <span className="flex items-center gap-1">
                       <Image
                         src={issue.author.avatarUrl}
@@ -52,7 +52,9 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({
                   )}
                   {issue.repositoryName && (
                     <span>
-                      {issue.organizationName}/{issue.repositoryName}
+                      {issue.organizationName
+                        ? `${issue.organizationName}/${issue.repositoryName}`
+                        : issue.repositoryName}
                     </span>
                   )}
                   <span>{formatDate(issue.createdAt)}</span>
@@ -65,7 +67,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({
                     : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                 }`}
               >
-                {issue.state}
+                {issue.state ?? 'unknown'}
               </span>
             </div>
           </a>

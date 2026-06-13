@@ -14,6 +14,16 @@ interface RecentPullRequestsProps {
   variant?: 'sidebar' | 'full'
 }
 
+const getBadgeClass = (pr: PullRequest) => {
+  if (pr.mergedAt) {
+    return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+  }
+  if (pr.state === 'open') {
+    return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+  }
+  return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+}
+
 const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
   data,
   showAvatar = true,
@@ -39,7 +49,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
                   {pr.title}
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  {pr.author && (
+                  {showAvatar && pr.author && (
                     <span className="flex items-center gap-1">
                       <Image
                         src={pr.author.avatarUrl}
@@ -53,22 +63,18 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
                   )}
                   {pr.repositoryName && (
                     <span>
-                      {pr.organizationName}/{pr.repositoryName}
+                      {pr.organizationName
+                        ? `${pr.organizationName}/${pr.repositoryName}`
+                        : pr.repositoryName}
                     </span>
                   )}
                   <span>{formatDate(pr.createdAt)}</span>
                 </div>
               </div>
               <span
-                className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
-                  pr.mergedAt
-                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-                    : pr.state === 'open'
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                }`}
+                className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${getBadgeClass(pr)}`}
               >
-                {pr.mergedAt ? 'merged' : pr.state}
+                {pr.mergedAt ? 'merged' : (pr.state ?? 'unknown')}
               </span>
             </div>
           </a>
