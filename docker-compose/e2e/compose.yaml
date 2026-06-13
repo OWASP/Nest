@@ -14,6 +14,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      data-loader:
+        condition: service_completed_successfully
     env_file: ../../backend/.env.e2e-tests
     healthcheck:
       interval: 10s
@@ -36,8 +38,6 @@ services:
     image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
     depends_on:
       db:
-        condition: service_healthy
-      backend:
         condition: service_healthy
     environment:
       PGPASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
