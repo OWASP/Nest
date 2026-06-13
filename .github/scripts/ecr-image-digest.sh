@@ -28,11 +28,6 @@ if [[ "$repo" == "$image" || -z "$tag" ]]; then
   exit 1
 fi
 
-if [[ "$repo" != "${registry_prefix}"* ]]; then
-  echo "::error::Invalid ECR image reference: ${image}" >&2
-  exit 1
-fi
-
 repo_name="${repo#"$registry_prefix"}"
 
 if [[ -z "$repo_name" ]]; then
