@@ -1,0 +1,3 @@
+pip-audit==2.10.0
+poetry==2.4.1
+poetry-plugin-export==1.10.0

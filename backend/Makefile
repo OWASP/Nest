@@ -5,7 +5,7 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
-.PHONY: audit-backend-dependencies fetch-nest-dump sbom-backend-image upload-nest-dump
+.PHONY: audit-backend-dependencies compile-backend-requirements fetch-nest-dump sbom-backend-image upload-nest-dump
 
 ##@ Backend
 
@@ -253,6 +253,11 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
+
+compile-backend-requirements: ## Regenerate hashed pip requirements from backend/requirements/*.in
+	@python -m pip install --quiet pip-tools
+	@pip-compile --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in
+	@pip-compile --generate-hashes --output-file=backend/requirements/pre-commit.txt backend/requirements/pre-commit.in
 
 audit-backend-dependencies: ## Audit backend Python dependencies
 	@echo "Auditing backend Python dependencies..."
