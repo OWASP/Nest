@@ -86,6 +86,15 @@ class ProgramMutation:
         """Create a new mentorship program."""
         user = info.context.request.user
 
+        if not user.github_user or not user.github_user.is_project_leader:
+            msg = "You must be a project leader to create a program."
+            logger.warning(
+                "Permission denied for user '%s' to create program '%s'.",
+                user.username,
+                input_data.name,
+            )
+            raise PermissionDenied(msg)
+
         if input_data.ended_at <= input_data.started_at:
             msg = "End date must be after start date."
             logger.warning(

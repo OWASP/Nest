@@ -274,3 +274,69 @@ class TestModulePureMocks:
 
         assert mock_module.order == 5
         mock_super_save.assert_called_once()
+
+
+class TestModuleHasMentor:
+    """Tests for Module.has_mentor method."""
+
+    def test_anonymous_user_is_not_mentor(self):
+        """Anonymous users are never mentors."""
+        mock_user = MagicMock()
+        mock_user.is_authenticated = False
+
+        module = MagicMock(spec=Module)
+
+        assert Module.has_mentor(module, mock_user) is False
+        module.mentors.filter.assert_not_called()
+
+    def test_mentor_match_returns_true(self):
+        """A matching mentor (via nest_user or github_user) makes the user a mentor."""
+        mock_user = MagicMock()
+        mock_user.is_authenticated = True
+        mock_user.github_user = MagicMock()
+
+        module = MagicMock(spec=Module)
+        module.mentors.filter.return_value.exists.return_value = True
+
+        assert Module.has_mentor(module, mock_user) is True
+
+    def test_github_user_fallback_included_in_query(self):
+        """The lookup includes a github_user fallback clause when one is available."""
+        mock_user = MagicMock()
+        mock_user.is_authenticated = True
+        mock_user.github_user = MagicMock()
+
+        module = MagicMock(spec=Module)
+        module.mentors.filter.return_value.exists.return_value = True
+
+        assert Module.has_mentor(module, mock_user) is True
+        # A single combined query is issued, including the github_user fallback.
+        module.mentors.filter.assert_called_once()
+        query = module.mentors.filter.call_args.args[0]
+        assert ("nest_user", mock_user) in query.children
+        assert ("github_user", mock_user.github_user) in query.children
+
+    def test_not_a_mentor(self):
+        """An authenticated user with no mentor link is not a mentor."""
+        mock_user = MagicMock()
+        mock_user.is_authenticated = True
+        mock_user.github_user = MagicMock()
+
+        module = MagicMock(spec=Module)
+        module.mentors.filter.return_value.exists.return_value = False
+
+        assert Module.has_mentor(module, mock_user) is False
+
+    def test_user_without_github_user_omits_github_clause(self):
+        """A user without a github_user is matched on nest_user only."""
+        mock_user = MagicMock()
+        mock_user.is_authenticated = True
+        mock_user.github_user = None
+
+        module = MagicMock(spec=Module)
+        module.mentors.filter.return_value.exists.return_value = False
+
+        assert Module.has_mentor(module, mock_user) is False
+        query = module.mentors.filter.call_args.args[0]
+        assert ("nest_user", mock_user) in query.children
+        assert all(child[0] != "github_user" for child in query.children)

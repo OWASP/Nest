@@ -51,9 +51,11 @@ No providers.
 | ---- | ------ | ------- |
 | <a name="module_alb"></a> [alb](#module\_alb) | ../modules/alb | n/a |
 | <a name="module_backend"></a> [backend](#module\_backend) | ../modules/service | n/a |
+| <a name="module_backend_build_cache"></a> [backend\_build\_cache](#module\_backend\_build\_cache) | ../modules/ecr-cache | n/a |
 | <a name="module_cache"></a> [cache](#module\_cache) | ../modules/cache | n/a |
 | <a name="module_database"></a> [database](#module\_database) | ../modules/database | n/a |
 | <a name="module_frontend"></a> [frontend](#module\_frontend) | ../modules/service | n/a |
+| <a name="module_frontend_build_cache"></a> [frontend\_build\_cache](#module\_frontend\_build\_cache) | ../modules/ecr-cache | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |
@@ -80,7 +82,7 @@ No resources.
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | The allocated storage for the RDS database in GB. | `number` | `20` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The number of days to retain backups for. | `number` | `7` | no |
 | <a name="input_db_deletion_protection"></a> [db\_deletion\_protection](#input\_db\_deletion\_protection) | Specifies whether to prevent database deletion. | `bool` | `true` | no |
-| <a name="input_db_engine_version"></a> [db\_engine\_version](#input\_db\_engine\_version) | The version of the PostgreSQL engine. | `string` | `"16.10"` | no |
+| <a name="input_db_engine_version"></a> [db\_engine\_version](#input\_db\_engine\_version) | The version of the PostgreSQL engine. | `string` | `"16.13"` | no |
 | <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | The instance class for the RDS database. | `string` | `"db.t3.micro"` | no |
 | <a name="input_db_name"></a> [db\_name](#input\_db\_name) | The name of the RDS database. | `string` | `"nest_db"` | no |
 | <a name="input_db_password"></a> [db\_password](#input\_db\_password) | The password for the RDS database. | `string` | `null` | no |

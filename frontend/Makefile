@@ -1,4 +1,4 @@
-.PHONY: sbom-frontend-image
+.PHONY: audit-frontend-dependencies sbom-frontend-image
 
 ##@ Frontend
 
@@ -117,6 +117,10 @@ test-frontend-unit:
 		-f docker/frontend/Dockerfile.unit-tests frontend \
 		-t nest-test-frontend-unit
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
+
+audit-frontend-dependencies: ## Audit frontend npm dependencies
+	@echo "Auditing frontend npm dependencies..."
+	@cd frontend && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 update-frontend-dependencies:
 	cd frontend && pnpm update

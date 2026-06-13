@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc AS builder
+FROM python:3.13.14-alpine3.23@sha256:2d1b4027968d24a18840889779a83430988c5bed9b823b60ff72c59199044cf3 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -24,9 +24,9 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
 
-COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
+COPY --chmod=444 --chown=root:root requirements/build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install --requirement /tmp/requirements.build.txt
+    python -m pip install --requirement /tmp/build.txt
 
 WORKDIR /home/owasp
 
@@ -47,7 +47,11 @@ COPY apps apps
 # Required to run make targets.
 RUN ln -s . backend
 
-FROM python:3.13.13-alpine3.23@sha256:420cd0bf0f3998275875e02ecd5808168cf0843cbb4d3c536432f729247b2acc
+RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + && \
+    find /home/owasp/.venv -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete && \
+    (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
+
+FROM python:3.13.14-alpine3.23@sha256:2d1b4027968d24a18840889779a83430988c5bed9b823b60ff72c59199044cf3
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -55,6 +59,7 @@ ARG OWASP_UID
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
     apk --no-cache add make postgresql16-client=16.14-r0 && \
+    rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
@@ -67,6 +72,7 @@ WORKDIR /home/owasp
 COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
 RUN rm -rf /home/owasp/.cache && \
     rm -rf /home/owasp/.local && \
+    rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
     chmod +x /home/owasp/entrypoint.sh
 
 USER owasp
