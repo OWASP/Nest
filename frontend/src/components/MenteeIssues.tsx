@@ -1,6 +1,7 @@
 import type React from 'react'
 import { useState } from 'react'
 import { FaBug, FaCheckCircle, FaClock } from 'react-icons/fa'
+import { FaCodePullRequest } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import type { Issue } from 'types/issue'
 import { formatDate } from 'utils/dateFormatter'
@@ -81,10 +82,17 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
                   </div>
                 )}
 
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
                   <span>#{issue.number}</span>
                   <span>Created: {formatDate(issue.createdAt)}</span>
                   {issue.updatedAt && <span>Updated: {formatDate(issue.updatedAt)}</span>}
+                  {!!issue.pullRequests?.length && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      <FaCodePullRequest className="h-3 w-3" />
+                      {issue.pullRequests.length} open PR
+                      {issue.pullRequests.length === 1 ? '' : 's'}
+                    </span>
+                  )}
                 </div>
               </div>
 
