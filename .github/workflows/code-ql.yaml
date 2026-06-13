@@ -1,0 +1,58 @@
+name: CodeQL
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - feature/**
+      - main
+  push:
+    branches:
+      - feature/**
+      - main
+
+concurrency:
+  cancel-in-progress: true
+  group: code-ql-${{ github.workflow }}-${{ github.ref }}
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  run-code-ql:
+    name: CodeQL
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language:
+          - javascript-typescript
+          - python
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4.36.0
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Install backend dependencies
+        if: matrix.language == 'python'
+        uses: ./.github/actions/install-backend-dependencies
+
+      - name: Install frontend dependencies
+        if: matrix.language == 'javascript-typescript'
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4.36.0
+        with:
+          category: /language:${{ matrix.language }}
+    timeout-minutes: 15
