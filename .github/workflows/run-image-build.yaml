@@ -141,11 +141,7 @@ jobs:
       - name: Get backend image size
         id: backend-size
         run: |
-          RAW_SIZE=$(
-            docker buildx imagetools inspect "$BACKEND_IMAGE" --format '{{range .Layers}}{{.Size}} {{end}}' \
-              | tr ' ' '\n' \
-              | awk '{sum += $1} END {print sum + 0}'
-          )
+          RAW_SIZE=$(bash .github/scripts/ecr-image-size.sh "$BACKEND_IMAGE")
           if [[ "$RAW_SIZE" -eq 0 ]]; then
             echo "::warning::Could not determine backend image size from registry manifest: $BACKEND_IMAGE"
           fi
@@ -203,11 +199,7 @@ jobs:
       - name: Get frontend image size
         id: frontend-size
         run: |
-          RAW_SIZE=$(
-            docker buildx imagetools inspect "$FRONTEND_IMAGE" --format '{{range .Layers}}{{.Size}} {{end}}' \
-              | tr ' ' '\n' \
-              | awk '{sum += $1} END {print sum + 0}'
-          )
+          RAW_SIZE=$(bash .github/scripts/ecr-image-size.sh "$FRONTEND_IMAGE")
           if [[ "$RAW_SIZE" -eq 0 ]]; then
             echo "::warning::Could not determine frontend image size from registry manifest: $FRONTEND_IMAGE"
           fi

@@ -26,7 +26,7 @@ image_by_digest="${repo}@${digest}"
 echo "Verifying SBOM attestation for: ${image_by_digest}"
 
 sbom_spdx=$(
-  docker buildx imagetools inspect "$image_by_digest" --format '{{ json .SBOM.SPDX }}' 2>/dev/null || true
+  docker buildx imagetools inspect "$image_by_digest" --format '{{ json .SBOM.SPDX }}'
 )
 
 if [[ -z "$sbom_spdx" || "$sbom_spdx" == "null" ]]; then
@@ -37,7 +37,7 @@ if [[ -z "$sbom_spdx" || "$sbom_spdx" == "null" ]]; then
       else
         empty
       end
-    ' 2>/dev/null || true
+    '
   )
 fi
 

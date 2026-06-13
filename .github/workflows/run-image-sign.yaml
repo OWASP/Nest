@@ -159,6 +159,7 @@ jobs:
       - name: Verify SBOM attestations
         env:
           CYCLONEDX_PREDICATE_TYPE: https://cyclonedx.org/bom
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh attestation verify "backend-sbom-$RELEASE_VERSION.cdx.json" \
             --predicate-type "$CYCLONEDX_PREDICATE_TYPE" \
