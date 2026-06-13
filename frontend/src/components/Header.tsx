@@ -19,11 +19,20 @@ import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
+import { useTheme } from 'next-themes'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  const logoSrc = mounted && resolvedTheme === 'light' ? '/img/logo_light.png' : '/img/logo_dark.png'
 
   useEffect(() => {
     const handleResize = () => {
@@ -70,7 +79,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 width={64}
                 height={64}
                 priority={true}
-                src={'/img/logo_dark.png'}
+                src={logoSrc}
                 className="h-full w-auto object-contain"
                 alt="OWASP Logo"
               />
@@ -167,7 +176,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     width={64}
                     height={64}
                     priority={true}
-                    src={'/img/logo_dark.png'}
+                    src={logoSrc}
                     className="h-full w-auto object-contain"
                     alt="OWASP Logo"
                   />
