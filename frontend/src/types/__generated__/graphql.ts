@@ -1081,6 +1081,18 @@ export type SnapshotNode = Node & {
   users: Array<UserNode>;
 };
 
+
+export type SnapshotNodeIssuesArgs = {
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
+
+export type SnapshotNodePullRequestsArgs = {
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
 export type SponsorNode = Node & {
   __typename?: 'SponsorNode';
   /** The Globally Unique ID of this object */

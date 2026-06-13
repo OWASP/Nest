@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
@@ -13,7 +14,7 @@ from apps.owasp.api.internal.nodes.post import PostNode
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.snapshot import Snapshot
 
-RECENT_ISSUES_LIMIT = 100
+MAX_LIMIT = 1000
 
 
 @strawberry_django.type(
@@ -41,9 +42,12 @@ class SnapshotNode(strawberry.relay.Node):
         return root.events.order_by("-start_date")
 
     @strawberry_django.field(prefetch_related=["issues"])
-    def issues(self, root: Snapshot) -> list[IssueNode]:
+    def issues(self, root: Snapshot, limit: int = 6, offset: int = 0) -> list[IssueNode]:
         """Resolve issues."""
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+        offset = max(0, offset)
+        return list(root.issues.order_by("-created_at")[offset : offset + normalized_limit])
 
     @strawberry_django.field(prefetch_related=["posts"])
     def posts(self, root: Snapshot) -> list[PostNode]:
@@ -56,9 +60,14 @@ class SnapshotNode(strawberry.relay.Node):
         return root.projects.order_by("-created_at")
 
     @strawberry_django.field(prefetch_related=["pull_requests"])
-    def pull_requests(self, root: Snapshot) -> list[PullRequestNode]:
+    def pull_requests(
+        self, root: Snapshot, limit: int = 6, offset: int = 0
+    ) -> list[PullRequestNode]:
         """Resolve pull requests."""
-        return root.pull_requests.order_by("-created_at")
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+        offset = max(0, offset)
+        return list(root.pull_requests.order_by("-created_at")[offset : offset + normalized_limit])
 
     @strawberry_django.field(prefetch_related=["releases"])
     def releases(self, root: Snapshot) -> list[ReleaseNode]:

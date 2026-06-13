@@ -15,7 +15,6 @@ class Migration(migrations.Migration):
             name="frequency",
             field=models.CharField(
                 choices=[("weekly", "Weekly"), ("monthly", "Monthly")],
-                db_default="weekly",
                 default="weekly",
                 max_length=10,
             ),
