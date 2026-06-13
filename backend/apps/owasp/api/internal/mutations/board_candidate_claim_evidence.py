@@ -80,7 +80,7 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                claim__candidate__member__login=user.github_user.login, key=input_data.claim_key
+                candidate__member__login=user.github_user.login, key=input_data.claim_key
             )
         except BoardCandidateClaim.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -197,7 +197,7 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login, key=input_data.key
+                claim__candidate__member__login=user.github_user.login, key=input_data.key
             )
         except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)

@@ -124,7 +124,7 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
-        self.key = slugify(self.name)
+        self.key = slugify(self.name)[: self._meta.get_field("key").max_length]
 
         self.full_clean()
 
