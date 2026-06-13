@@ -104,9 +104,10 @@ const SnapshotDetailsPage: React.FC = () => {
     setShowAllProjects(false)
     setShowAllPosts(false)
     setPrVisibleCount(PR_LIMIT)
-    setHasMorePRs(true)
+    setHasMorePRs((snapshot?.pullRequests?.length ?? 0) >= PR_LIMIT)
     setIssueVisibleCount(ISSUE_LIMIT)
-    setHasMoreIssues(true)
+    setHasMoreIssues((snapshot?.issues?.length ?? 0) >= ISSUE_LIMIT)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot?.key])
 
   useEffect(() => {
@@ -260,7 +261,7 @@ const SnapshotDetailsPage: React.FC = () => {
                   partner: 2,
                   other: 3,
                 }
-                const normalize = (cat: string) => cat.toLowerCase().replace(/_/g, '')
+                const normalize = (cat: string) => cat.toLowerCase().replaceAll('_', '')
                 return (
                   (priority[normalize(a.category ?? '')] ?? 4) -
                   (priority[normalize(b.category ?? '')] ?? 4)
@@ -363,25 +364,29 @@ const SnapshotDetailsPage: React.FC = () => {
                                 },
                               },
                               (prev: GetSnapshotDetailsQuery | null) =>
-                                prev
+                                prev && prev.snapshot
                                   ? {
                                       ...prev,
                                       snapshot: {
-                                        ...prev.snapshot!,
+                                        ...prev.snapshot,
                                         pullRequests: [
-                                          ...(prev.snapshot?.pullRequests || []),
+                                          ...(prev.snapshot.pullRequests || []),
                                           ...newPRs,
                                         ],
                                       },
                                     }
                                   : prev
                             )
+                            setPrVisibleCount((prev) => prev + newPRs.length)
                           }
                         })
                         .catch((err) => handleAppError(err))
                         .finally(() => setIsFetchingMorePRs(false))
+                      return
                     }
-                    setPrVisibleCount((prev) => prev + PR_LIMIT)
+                    setPrVisibleCount((prev) =>
+                      Math.min(snapshot.pullRequests.length, prev + PR_LIMIT)
+                    )
                   }}
                   type="button"
                   className={`flex items-center bg-transparent px-2 py-1 text-sm text-blue-400 ${isFetchingMorePRs ? 'cursor-not-allowed opacity-50' : 'hover:underline'}`}
@@ -448,22 +453,26 @@ const SnapshotDetailsPage: React.FC = () => {
                                 },
                               },
                               (prev: GetSnapshotDetailsQuery | null) =>
-                                prev
+                                prev && prev.snapshot
                                   ? {
                                       ...prev,
                                       snapshot: {
-                                        ...prev.snapshot!,
-                                        issues: [...(prev.snapshot?.issues || []), ...newIssues],
+                                        ...prev.snapshot,
+                                        issues: [...(prev.snapshot.issues || []), ...newIssues],
                                       },
                                     }
                                   : prev
                             )
+                            setIssueVisibleCount((prev) => prev + newIssues.length)
                           }
                         })
                         .catch((err) => handleAppError(err))
                         .finally(() => setIsFetchingMoreIssues(false))
+                      return
                     }
-                    setIssueVisibleCount((prev) => prev + ISSUE_LIMIT)
+                    setIssueVisibleCount((prev) =>
+                      Math.min(snapshot.issues.length, prev + ISSUE_LIMIT)
+                    )
                   }}
                   type="button"
                   className={`flex items-center bg-transparent px-2 py-1 text-sm text-blue-400 ${isFetchingMoreIssues ? 'cursor-not-allowed opacity-50' : 'hover:underline'}`}

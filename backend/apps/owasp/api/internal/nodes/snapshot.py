@@ -29,6 +29,14 @@ MAX_LIMIT = 1000
 class SnapshotNode(strawberry.relay.Node):
     """Snapshot node."""
 
+    @staticmethod
+    def _slice_related(queryset, limit: int, offset: int):
+        """Paginate related items."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+        normalized_offset = max(0, offset)
+        return list(queryset[normalized_offset : normalized_offset + normalized_limit])
+
     chapters: list[ChapterNode] = strawberry_django.field(prefetch_related=["chapters"])
 
     @strawberry_django.field
@@ -37,22 +45,19 @@ class SnapshotNode(strawberry.relay.Node):
         return root.key
 
     @strawberry_django.field(prefetch_related=["events"])
-    def events(self, root: Snapshot) -> list[EventNode]:
+    def events(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[EventNode]:
         """Resolve events."""
-        return root.events.order_by("-start_date")
+        return SnapshotNode._slice_related(root.events.order_by("-start_date"), limit, offset)
 
     @strawberry_django.field(prefetch_related=["issues"])
     def issues(self, root: Snapshot, limit: int = 6, offset: int = 0) -> list[IssueNode]:
         """Resolve issues."""
-        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
-            return []
-        offset = max(0, offset)
-        return list(root.issues.order_by("-created_at")[offset : offset + normalized_limit])
+        return SnapshotNode._slice_related(root.issues.order_by("-created_at"), limit, offset)
 
     @strawberry_django.field(prefetch_related=["posts"])
-    def posts(self, root: Snapshot) -> list[PostNode]:
+    def posts(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[PostNode]:
         """Resolve posts."""
-        return root.posts.order_by("-published_at")
+        return SnapshotNode._slice_related(root.posts.order_by("-published_at"), limit, offset)
 
     @strawberry_django.field(prefetch_related=["projects"])
     def projects(self, root: Snapshot) -> list[ProjectNode]:
@@ -64,10 +69,9 @@ class SnapshotNode(strawberry.relay.Node):
         self, root: Snapshot, limit: int = 6, offset: int = 0
     ) -> list[PullRequestNode]:
         """Resolve pull requests."""
-        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
-            return []
-        offset = max(0, offset)
-        return list(root.pull_requests.order_by("-created_at")[offset : offset + normalized_limit])
+        return SnapshotNode._slice_related(
+            root.pull_requests.order_by("-created_at"), limit, offset
+        )
 
     @strawberry_django.field(prefetch_related=["releases"])
     def releases(self, root: Snapshot) -> list[ReleaseNode]:
@@ -75,6 +79,6 @@ class SnapshotNode(strawberry.relay.Node):
         return root.releases.order_by("-published_at")
 
     @strawberry_django.field(prefetch_related=["users"])
-    def users(self, root: Snapshot) -> list[UserNode]:
+    def users(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[UserNode]:
         """Resolve users."""
-        return root.users.order_by("-created_at")
+        return SnapshotNode._slice_related(root.users.order_by("-created_at"), limit, offset)
