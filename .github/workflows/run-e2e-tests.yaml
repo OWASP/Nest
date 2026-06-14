@@ -72,11 +72,16 @@ jobs:
           mkdir -p e2e-artifacts/ms-playwright
           cp -r ~/.cache/ms-playwright/. e2e-artifacts/ms-playwright/
 
+      - name: Archive frontend standalone build
+        run: |
+          mkdir -p e2e-artifacts
+          tar -C frontend/.next -czf e2e-artifacts/frontend-standalone.tar.gz standalone
+
       - name: Upload frontend standalone build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: e2e-frontend-standalone
-          path: frontend/.next/standalone
+          path: e2e-artifacts/frontend-standalone.tar.gz
           retention-days: 1
 
       - name: Upload Playwright Chromium
@@ -139,14 +144,19 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
       - name: Download frontend standalone build
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           name: e2e-frontend-standalone
-          path: frontend/.next/standalone
+          path: e2e-artifacts
 
-      - name: Install frontend dependencies
-        uses: ./.github/actions/install-frontend-dependencies
+      - name: Extract frontend standalone build
+        run: |
+          mkdir -p frontend/.next
+          tar -xzf e2e-artifacts/frontend-standalone.tar.gz -C frontend/.next
 
       - name: Download Playwright Chromium
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1

@@ -106,6 +106,7 @@ csrfprotector
 csrftoken
 cva
 cyclonedx
+czf
 defectdojo
 demojize
 dismissable
