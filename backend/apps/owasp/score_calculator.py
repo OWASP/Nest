@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from django.db.models import Q
+from django.db.models import Count, Q
 
 from apps.common.models import BulkSaveModel
 from apps.github.models.issue import Issue
@@ -226,9 +226,13 @@ class ContributionScoreCalculator:
             repository__organization__is_owasp_related_organization=True,
         ).values("author_id")
 
-        users_with_contributions = User.objects.filter(
-            Q(id__in=pr_authors) | Q(id__in=issue_authors),
-        ).distinct()
+        users_with_contributions = (
+            User.objects.filter(
+                Q(id__in=pr_authors) | Q(id__in=issue_authors),
+            )
+            .distinct()
+            .prefetch_related("contribution_score")
+        )
 
         total_users = users_with_contributions.count()
         updated_count = 0
@@ -236,11 +240,47 @@ class ContributionScoreCalculator:
 
         logger.info("Starting score recalculation for %s users", total_users)
 
+        pr_merged_counts: dict[int, int] = dict(
+            PullRequest.objects.filter(
+                merged_at__isnull=False,
+                repository__is_fork=False,
+                repository__organization__is_owasp_related_organization=True,
+            )
+            .values("author_id")
+            .annotate(count=Count("id"))
+            .values_list("author_id", "count")
+        )
+
+        pr_opened_counts: dict[int, int] = dict(
+            PullRequest.objects.filter(
+                repository__is_fork=False,
+                repository__organization__is_owasp_related_organization=True,
+            )
+            .values("author_id")
+            .annotate(count=Count("id"))
+            .values_list("author_id", "count")
+        )
+
+        issue_opened_counts: dict[int, int] = dict(
+            Issue.objects.filter(
+                state_reason=Issue.StateReason.COMPLETED,
+                repository__is_fork=False,
+                repository__organization__is_owasp_related_organization=True,
+            )
+            .values("author_id")
+            .annotate(count=Count("id"))
+            .values_list("author_id", "count")
+        )
+
         contribution_scores = []
         pending_certificates = []
 
         for user in users_with_contributions:
-            total_score, _ = self.calculate(user)
+            total_score = (
+                pr_merged_counts.get(user.id, 0) * self.scoring_weights.get("pr_merged", 0)
+                + pr_opened_counts.get(user.id, 0) * self.scoring_weights.get("pr_opened", 0)
+                + issue_opened_counts.get(user.id, 0) * self.scoring_weights.get("issue_opened", 0)
+            )
             tier = self.get_tier(total_score)
 
             try:
@@ -266,11 +306,17 @@ class ContributionScoreCalculator:
                     ContributionScore, contribution_scores, fields=["value", "tier"]
                 )
                 for pending_score in pending_certificates:
-                    CertificateService.issue_certificate(
-                        pending_score.github_user,
-                        pending_score.value,
-                        TierChoices(pending_score.tier),
-                    )
+                    try:
+                        CertificateService.issue_certificate(
+                            pending_score.github_user,
+                            pending_score.value,
+                            TierChoices(pending_score.tier),
+                        )
+                    except Exception:
+                        logger.exception(
+                            "Failed to issue certificate for user %s",
+                            pending_score.github_user.login,
+                        )
                 pending_certificates.clear()
                 contribution_scores.clear()
 
@@ -279,11 +325,17 @@ class ContributionScoreCalculator:
                 ContributionScore, contribution_scores, fields=["value", "tier"]
             )
             for pending_score in pending_certificates:
-                CertificateService.issue_certificate(
-                    pending_score.github_user,
-                    pending_score.value,
-                    TierChoices(pending_score.tier),
-                )
+                try:
+                    CertificateService.issue_certificate(
+                        pending_score.github_user,
+                        pending_score.value,
+                        TierChoices(pending_score.tier),
+                    )
+                except Exception:
+                    logger.exception(
+                        "Failed to issue certificate for user %s",
+                        pending_score.github_user.login,
+                    )
             pending_certificates.clear()
             contribution_scores.clear()
 
