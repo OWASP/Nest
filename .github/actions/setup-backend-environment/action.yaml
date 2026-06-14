@@ -69,9 +69,11 @@ runs:
         if [ -f "backend/data/nest.snapshots.dump" ]; then
           DUMP_FILE="backend/data/nest.snapshots.dump"
           echo "Using custom dump file: $DUMP_FILE"
+        else
+          echo "Using default dump file: $DUMP_FILE"
         fi
         if ! docker exec -i -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
-          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" < "$DUMP_FILE"; then
+          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" --clean --if-exists < "$DUMP_FILE"; then
           echo "Data loading failed"
           exit 1
         fi

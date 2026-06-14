@@ -1,7 +1,7 @@
 'use client'
 import { useQuery, useLazyQuery, useApolloClient } from '@apollo/client/react'
 import { useRouter, useParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa'
 import {
   FaCalendar,
@@ -117,6 +117,22 @@ const SnapshotDetailsPage: React.FC = () => {
     }
   }, [graphQLRequestError, snapshotKey])
 
+  const sortedEvents = useMemo(() => {
+    if (!snapshot?.events) return []
+    return [...snapshot.events].sort((a, b) => {
+      const priority: Record<string, number> = {
+        global: 0,
+        appsecdays: 1,
+        partner: 2,
+        other: 3,
+      }
+      const normalize = (cat: string) => cat.toLowerCase().replaceAll('_', '')
+      return (
+        (priority[normalize(a.category ?? '')] ?? 4) - (priority[normalize(b.category ?? '')] ?? 4)
+      )
+    })
+  }, [snapshot?.events])
+
   const renderProjectCard = (project: Project) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
     const filteredIcons = getFilteredIcons(project, params)
@@ -135,7 +151,7 @@ const SnapshotDetailsPage: React.FC = () => {
       <Card
         button={submitButton}
         cardKey={project.key ?? project.name}
-        className="!border-0 !bg-gray-200 dark:!bg-gray-700"
+        className="border-0! bg-gray-200! dark:bg-gray-700!"
         icons={filteredIcons}
         level={
           project.level ? level[`${project.level.toLowerCase() as keyof typeof level}`] : undefined
@@ -167,7 +183,7 @@ const SnapshotDetailsPage: React.FC = () => {
       <Card
         button={submitButton}
         cardKey={chapter.key}
-        className="!border-0 !bg-gray-200 dark:!bg-gray-700"
+        className="border-0! bg-gray-200! dark:bg-gray-700!"
         icons={filteredIcons}
         social={formattedUrls}
         summary={chapter.summary ?? ''}
@@ -254,24 +270,9 @@ const SnapshotDetailsPage: React.FC = () => {
       {snapshot.events && snapshot.events.length > 0 && (
         <SecondaryCard icon={FaCalendarAlt} title="New Events">
           <div className="flex flex-col gap-4">
-            {[...snapshot.events]
-              .sort((a, b) => {
-                const priority: Record<string, number> = {
-                  global: 0,
-                  appsecdays: 1,
-                  partner: 2,
-                  other: 3,
-                }
-                const normalize = (cat: string) => cat.toLowerCase().replaceAll('_', '')
-                return (
-                  (priority[normalize(a.category ?? '')] ?? 4) -
-                  (priority[normalize(b.category ?? '')] ?? 4)
-                )
-              })
-              .slice(0, showAllEvents ? undefined : EVENTS_INITIAL)
-              .map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
+            {sortedEvents.slice(0, showAllEvents ? undefined : EVENTS_INITIAL).map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
           </div>
           {snapshot.events.length > EVENTS_INITIAL && (
             <ShowMoreButton

@@ -1,6 +1,6 @@
 import upperFirst from 'lodash/upperFirst'
 import Image from 'next/image'
-import Link from 'next/link'
+
 import { useState } from 'react'
 import type { IconType } from 'react-icons'
 import type { Contributor } from 'types/contributor'
@@ -63,7 +63,7 @@ const ContributorsList = ({
               className="flex flex-col items-center rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
             >
               <Image
-                src={item.avatarUrl}
+                src={`${item.avatarUrl}${item.avatarUrl.includes('?') ? '&' : '?'}s=128`}
                 alt={item.login}
                 width={64}
                 height={64}
@@ -75,9 +75,14 @@ const ContributorsList = ({
               <span className="text-xs text-gray-500 dark:text-gray-400">@{item.login}</span>
             </a>
           ) : (
-            <div
+            <a
               key={item.login}
-              className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+              href={getUrl(item.login)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="overflow-hidden rounded-lg bg-gray-200 p-4 transition-opacity hover:opacity-80 dark:bg-gray-700"
+              data-testid="contributor-link"
+              title={item?.name || item?.login}
             >
               <div className="flex w-full items-center gap-2">
                 <Image
@@ -88,15 +93,14 @@ const ContributorsList = ({
                   title={item?.name || item?.login}
                   width={24}
                 />
-                <Link
-                  className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
-                  href={getUrl(item?.login)}
-                  title={item?.name || item?.login}
+                <span
+                  className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 group-hover:underline"
+                  data-testid="contributor-name"
                 >
                   {upperFirst(item.name) || upperFirst(item.login)}
-                </Link>
+                </span>
               </div>
-            </div>
+            </a>
           )
         )}
       </div>
