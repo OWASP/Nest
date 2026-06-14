@@ -63,12 +63,6 @@ class TestBoardCandidateClaimEvidenceModel:
         assert hasattr(BoardCandidateClaimEvidence, "nest_created_at")
         assert hasattr(BoardCandidateClaimEvidence, "nest_updated_at")
 
-    def test_description_default_empty(self):
-        """Test description field defaults to empty string."""
-        field = BoardCandidateClaimEvidence._meta.get_field("description")
-
-        assert field.default == ""
-
     def test_file_field_nullable(self):
         """Test file field is nullable."""
         field = BoardCandidateClaimEvidence._meta.get_field("file")

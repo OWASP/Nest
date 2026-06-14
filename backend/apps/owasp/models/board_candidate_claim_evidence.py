@@ -54,7 +54,7 @@ class BoardCandidateClaimEvidence(TimestampedModel):
     claim = models.ForeignKey(
         BoardCandidateClaim, on_delete=models.CASCADE, related_name="evidences"
     )
-    description = models.TextField(default="", verbose_name="Description")
+    description = models.TextField(verbose_name="Description")
     file = models.FileField(
         blank=True,
         null=True,

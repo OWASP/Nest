@@ -31,7 +31,7 @@ class CreateEvidenceInput:
     """Input for creating claim evidence."""
 
     claim_key: str
-    description: str | None = None
+    description: str
     file: Upload | None = None
     name: str
     source_url: str | None = None
@@ -103,7 +103,7 @@ class BoardCandidateClaimEvidenceMutations:
             evidence = BoardCandidateClaimEvidence.objects.create(
                 claim=claim,
                 name=input_data.name,
-                description=input_data.description or "",
+                description=input_data.description,
                 file=input_data.file,
                 source_url=input_data.source_url or "",
             )
