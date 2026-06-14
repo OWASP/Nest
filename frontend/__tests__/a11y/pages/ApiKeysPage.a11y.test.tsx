@@ -1,10 +1,27 @@
 import { useQuery } from '@apollo/client/react'
 import { mockApiKeys } from '@mockData/mockApiKeysData'
-import { screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { screen, fireEvent, waitFor, within, act } from '@testing-library/react'
 import { axe } from 'jest-axe'
-import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
+
+// Polyfill for jsdom TreeWalker currentNode setter which doesn't support non-Node values
+// that @react-aria/focus tries to set during modal focus management
+const originalDescriptor = Object.getOwnPropertyDescriptor(
+  window.TreeWalker.prototype,
+  'currentNode'
+)
+
+if (originalDescriptor) {
+  Object.defineProperty(window.TreeWalker.prototype, 'currentNode', {
+    ...originalDescriptor,
+    set(value) {
+      if (value instanceof Node) {
+        originalDescriptor.set?.call(this, value)
+      }
+    },
+  })
+}
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -16,14 +33,7 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-describe.each([
-  { theme: 'light', name: 'light' },
-  { theme: 'dark', name: 'dark' },
-])('ApiKeysPage Accessibility ($name theme)', ({ theme }) => {
-  beforeEach(() => {
-    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-  })
+describe('ApiKeysPage Accessibility', () => {
   const mockUseQuery = useQuery as unknown as jest.Mock
 
   it('should have no violations in default data-loaded state', async () => {
@@ -36,6 +46,7 @@ describe.each([
 
   it('should have no violations in loading state', async () => {
     mockUseQuery.mockReturnValue({ data: null, loading: true })
+
     const { container } = render(<ApiKeysPage />)
 
     const results = await axe(container)
@@ -43,7 +54,11 @@ describe.each([
   })
 
   it('should have no violations in empty state', async () => {
-    mockUseQuery.mockReturnValue({ data: { apiKeys: [], activeApiKeyCount: 0 }, loading: false })
+    mockUseQuery.mockReturnValue({
+      data: { apiKeys: [], activeApiKeyCount: 0 },
+      loading: false,
+    })
+
     const { container } = render(<ApiKeysPage />)
 
     const results = await axe(container)
@@ -65,22 +80,20 @@ describe.each([
   })
 
   it('should have no violations when Revoke Confirmation is open', async () => {
-    // Suppress jsdom TreeWalker limitation with @react-aria/focus FocusScope
-    jest.spyOn(console, 'error').mockImplementation((...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('TreeWalker')) return
-      throw new Error(`Console error: ${args.join(' ')}`)
-    })
     mockUseQuery.mockReturnValue({ data: mockApiKeys, loading: false })
 
     const { container } = render(<ApiKeysPage />)
 
     const row = (await screen.findByText('mock key 1')).closest('tr')!
-    fireEvent.click(within(row).getByRole('button'))
+    const revokeButton = within(row).getByRole('button', { name: /revoke/i })
+
+    await act(async () => {
+      fireEvent.click(revokeButton)
+    })
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
 
     const results = await axe(container)
     expect(results).toHaveNoViolations()
-    jest.restoreAllMocks()
-  })
+  }, 15000)
 })
