@@ -18,6 +18,7 @@ class TestBoardCandidateClaimEvidenceNode(GraphQLNodeBaseTest):
             "_id",
             "created_at",
             "description",
+            "has_file",
             "key",
             "name",
             "source_url",

@@ -26,6 +26,11 @@ class BoardCandidateClaimEvidenceNode(strawberry.relay.Node):
         return root.nest_created_at
 
     @strawberry_django.field
+    def has_file(self, root: BoardCandidateClaimEvidence) -> bool:
+        """Resolve whether evidence has a file."""
+        return bool(root.file)
+
+    @strawberry_django.field
     def updated_at(self, root: BoardCandidateClaimEvidence) -> datetime:
         """Resolve evidence last update date."""
         return root.nest_updated_at

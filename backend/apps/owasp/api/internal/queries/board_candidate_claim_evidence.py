@@ -126,7 +126,7 @@ class BoardCandidateClaimEvidenceQuery:
         )
 
         return (
-            evidence.file.url
+            info.context.request.build_absolute_uri(evidence.file.url)
             if (is_self or evidence.claim.status == BoardCandidateClaim.Status.APPROVED)
             and evidence.file
             else None
