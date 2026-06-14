@@ -28,6 +28,7 @@ urlpatterns = [
             GraphQLView.as_view(
                 schema=schema,
                 graphql_ide="graphiql" if settings.DEBUG else None,
+                multipart_uploads_enabled=True,
             )
         ),
     ),
