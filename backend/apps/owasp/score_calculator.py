@@ -12,7 +12,9 @@ from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
 from apps.owasp.models.crp.contribution_score import ContributionScore
+from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.models.crp.scoring_weight import ScoringWeight
+from apps.owasp.services.certificate_service import CertificateService
 
 if TYPE_CHECKING:
     from datetime import date
@@ -181,14 +183,14 @@ class ContributionScoreCalculator:
 
         return query.count()
 
-    def get_tier(self, score: int) -> str:
+    def get_tier(self, score: int) -> TierChoices:
         """Determine contributor tier based on score.
 
         Args:
             score (int): The contributor's total score.
 
         Returns:
-            str: The tier level.
+            TierChoices: The tier level choice.
 
         """
         # Tier thresholds mapped to tier values
@@ -201,9 +203,9 @@ class ContributionScoreCalculator:
 
         for tier_value, threshold in tiers_by_score:
             if score >= threshold:
-                return tier_value
+                return TierChoices(tier_value)
 
-        return "level_1"
+        return TierChoices("level_1")
 
     def recalculate_all(self) -> dict[str, int]:
         """Recalculate scores for all users.
@@ -235,6 +237,7 @@ class ContributionScoreCalculator:
         logger.info("Starting score recalculation for %s users", total_users)
 
         contribution_scores = []
+        pending_certificates = []
 
         for user in users_with_contributions:
             total_score, _ = self.calculate(user)
@@ -256,15 +259,33 @@ class ContributionScoreCalculator:
                 contribution_scores.append(score)
                 created_count += 1
 
+            pending_certificates.append(score)
+
             if len(contribution_scores) >= self.BATCH_SIZE:
                 BulkSaveModel.bulk_save(
                     ContributionScore, contribution_scores, fields=["value", "tier"]
                 )
+                for pending_score in pending_certificates:
+                    CertificateService.issue_certificate(
+                        pending_score.github_user,
+                        pending_score.value,
+                        TierChoices(pending_score.tier),
+                    )
+                pending_certificates.clear()
+                contribution_scores.clear()
 
         if contribution_scores:
             BulkSaveModel.bulk_save(
                 ContributionScore, contribution_scores, fields=["value", "tier"]
             )
+            for pending_score in pending_certificates:
+                CertificateService.issue_certificate(
+                    pending_score.github_user,
+                    pending_score.value,
+                    TierChoices(pending_score.tier),
+                )
+            pending_certificates.clear()
+            contribution_scores.clear()
 
         logger.info(
             "Score recalculation complete. Created: %s, Updated: %s",
@@ -298,6 +319,8 @@ class ContributionScoreCalculator:
                 "tier": tier,
             },
         )
+
+        CertificateService.issue_certificate(user, total_score, tier)
 
         logger.info(
             "Recalculated score for %s: %s points (%s)",
