@@ -66,6 +66,14 @@ class ContributionScoreCalculator:
 
         return total_score, breakdown
 
+    def calculate_score(self, counts: dict[str, int]) -> tuple[int, dict[str, int]]:
+        """Calculate total score and breakdown from contribution counts."""
+        breakdown = {
+            event_type: count * self.scoring_weights.get(event_type, 0)
+            for event_type, count in counts.items()
+        }
+        return sum(breakdown.values()), breakdown
+
     def get_contribution_breakdown(
         self,
         user: User,
@@ -83,22 +91,12 @@ class ContributionScoreCalculator:
             dict[str, int]: Score breakdown by event type.
 
         """
-        breakdown: dict[str, int] = {}
-
-        # Count merged PRs
-        pr_merged_count = self.count_merged_pull_requests(user, start_date, end_date)
-        breakdown["pr_merged"] = pr_merged_count * self.scoring_weights.get("pr_merged", 0)
-
-        # Count opened PRs
-        pr_opened_count = self.count_opened_pull_requests(user, start_date, end_date)
-        breakdown["pr_opened"] = pr_opened_count * self.scoring_weights.get("pr_opened", 0)
-
-        # Count opened issues
-        issue_opened_count = self.count_opened_issues(user, start_date, end_date)
-        breakdown["issue_opened"] = issue_opened_count * self.scoring_weights.get(
-            "issue_opened", 0
-        )
-
+        counts = {
+            "pr_merged": self.count_merged_pull_requests(user, start_date, end_date),
+            "pr_opened": self.count_opened_pull_requests(user, start_date, end_date),
+            "issue_opened": self.count_opened_issues(user, start_date, end_date),
+        }
+        _, breakdown = self.calculate_score(counts)
         return breakdown
 
     def count_merged_pull_requests(
@@ -276,11 +274,12 @@ class ContributionScoreCalculator:
         pending_certificates = []
 
         for user in users_with_contributions:
-            total_score = (
-                pr_merged_counts.get(user.id, 0) * self.scoring_weights.get("pr_merged", 0)
-                + pr_opened_counts.get(user.id, 0) * self.scoring_weights.get("pr_opened", 0)
-                + issue_opened_counts.get(user.id, 0) * self.scoring_weights.get("issue_opened", 0)
-            )
+            counts = {
+                "pr_merged": pr_merged_counts.get(user.id, 0),
+                "pr_opened": pr_opened_counts.get(user.id, 0),
+                "issue_opened": issue_opened_counts.get(user.id, 0),
+            }
+            total_score, _ = self.calculate_score(counts)
             tier = self.get_tier(total_score)
 
             try:
