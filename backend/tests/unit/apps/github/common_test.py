@@ -230,14 +230,14 @@ class TestSyncRepository:
         )
         mock_common_deps["Release"].bulk_save.assert_called_once_with([mock_updated_release])
 
-    def test_initial_sync_uses_30_day_fallback(
+    def test_initial_sync_uses_365_day_fallback(
         self, mock_common_deps, mock_gh_repository, mock_repo, gh_item_factory
     ):
-        """Tests that the 30-day fallback is used for initial sync."""
+        """Tests that the 365-day fallback is used for initial sync."""
         now = timezone.now()
         mock_repo.latest_updated_issue = None
-        gh_issue_recent = gh_item_factory(updated_at=now - td(days=25))
-        gh_issue_ancient = gh_item_factory(updated_at=now - td(days=35))
+        gh_issue_recent = gh_item_factory(updated_at=now - td(days=200))
+        gh_issue_ancient = gh_item_factory(updated_at=now - td(days=400))
         mock_gh_repository.get_issues.return_value = [gh_issue_recent, gh_issue_ancient]
 
         sync_repository(mock_gh_repository)
@@ -305,6 +305,8 @@ class TestSyncRepository:
         recent_time = timezone.now()
         old_time = timezone.now() - td(days=60)
 
+        mock_repo.latest_updated_milestone = MagicMock(updated_at=timezone.now() - td(days=30))
+
         gh_milestone_recent = gh_item_factory(updated_at=recent_time)
         gh_milestone_old = gh_item_factory(updated_at=old_time)
         mock_gh_repository.get_milestones.return_value = [gh_milestone_recent, gh_milestone_old]
@@ -319,6 +321,10 @@ class TestSyncRepository:
         """Tests that pull request syncing stops when an older PR is reached."""
         recent_time = timezone.now()
         old_time = timezone.now() - td(days=60)
+
+        mock_repo.latest_updated_pull_request = MagicMock(
+            updated_at=timezone.now() - td(days=30)
+        )
 
         gh_pr_recent = gh_item_factory(updated_at=recent_time)
         gh_pr_old = gh_item_factory(updated_at=old_time)
