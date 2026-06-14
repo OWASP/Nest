@@ -53,7 +53,7 @@ class ContributionScoreAdmin(admin.ModelAdmin):
             try:
                 calculator.recalculate_user(score.github_user)
                 updated_count += 1
-            except (ValueError, TypeError):
+            except Exception:
                 logger.exception(
                     "Failed to recalculate score for user %s",
                     score.github_user.login,
