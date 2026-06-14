@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 
 from apps.owasp.models.crp.certificate import Certificate
-from apps.owasp.models.crp.recognition_enums import TierChoices
 
 if TYPE_CHECKING:
     from apps.github.models.user import User
+    from apps.owasp.models.crp.recognition_enums import TierChoices
 
 
 class BaseCertificateProvider(ABC):
@@ -69,6 +69,7 @@ class CertificateProviderFactory:
         provider_type = getattr(settings, "CERTIFICATE_PROVIDER", "local")
         provider_class = cls.PROVIDERS.get(provider_type)
         if not provider_class:
-            raise ValueError(f"Unknown certificate provider: {provider_type}")
+            error_msg = f"Unknown certificate provider: {provider_type}"
+            raise ValueError(error_msg)
 
         return provider_class()
