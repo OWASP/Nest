@@ -65,6 +65,13 @@ runs:
         PGPASSWORD: ${{ inputs.db_password }}  # The env name required by PostgreSQL clients.
       run: |
         set -euo pipefail
+        echo "Truncating content_type table"
+        if ! docker exec -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
+          psql -U "$DB_USERNAME" -d "$DB_NAME" -c "TRUNCATE django_content_type CASCADE;"; then
+          echo "Truncating content_type table failed"
+          exit 1
+        fi
+        echo "Loading data from dump..."
         if ! docker exec -i -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
           pg_restore -U "$DB_USERNAME" -d "$DB_NAME" < backend/data/nest.dump; then
           echo "Data loading failed"
