@@ -107,6 +107,7 @@ const SnapshotDetailsPage: React.FC = () => {
     setHasMorePRs((snapshot?.pullRequests?.length ?? 0) >= PR_LIMIT)
     setIssueVisibleCount(ISSUE_LIMIT)
     setHasMoreIssues((snapshot?.issues?.length ?? 0) >= ISSUE_LIMIT)
+    // Reset pagination when snapshot key changes (not on array updates)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot?.key])
 
@@ -364,7 +365,7 @@ const SnapshotDetailsPage: React.FC = () => {
                                 },
                               },
                               (prev: GetSnapshotDetailsQuery | null) =>
-                                prev && prev.snapshot
+                                prev?.snapshot
                                   ? {
                                       ...prev,
                                       snapshot: {
@@ -453,7 +454,7 @@ const SnapshotDetailsPage: React.FC = () => {
                                 },
                               },
                               (prev: GetSnapshotDetailsQuery | null) =>
-                                prev && prev.snapshot
+                                prev?.snapshot
                                   ? {
                                       ...prev,
                                       snapshot: {

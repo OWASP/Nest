@@ -65,8 +65,13 @@ runs:
         PGPASSWORD: ${{ inputs.db_password }}  # The env name required by PostgreSQL clients.
       run: |
         set -euo pipefail
+        DUMP_FILE="backend/data/nest.dump"
+        if [ -f "backend/data/nest.snapshots.dump" ]; then
+          DUMP_FILE="backend/data/nest.snapshots.dump"
+          echo "Using custom dump file: $DUMP_FILE"
+        fi
         if ! docker exec -i -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
-          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" < backend/data/nest.dump; then
+          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" < "$DUMP_FILE"; then
           echo "Data loading failed"
           exit 1
         fi

@@ -159,7 +159,7 @@ describe('SnapshotDetailsPage', () => {
 
     const projectButton = findButtonInSection('View Details', 'OWASP Nest')
     expect(projectButton).toBeDefined()
-    fireEvent.click(projectButton!)
+    if (projectButton) fireEvent.click(projectButton)
 
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/projects/nest')
@@ -518,7 +518,7 @@ describe('SnapshotDetailsPage', () => {
 
     const eventsShowMore = findButtonInSection('Show more', 'New Events')
     expect(eventsShowMore).toBeDefined()
-    fireEvent.click(eventsShowMore!)
+    if (eventsShowMore) fireEvent.click(eventsShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('Security Workshop')).toBeInTheDocument()
@@ -547,7 +547,7 @@ describe('SnapshotDetailsPage', () => {
 
     const contribShowMore = findButtonInSection('Show more', 'New Contributors')
     expect(contribShowMore).toBeDefined()
-    fireEvent.click(contribShowMore!)
+    if (contribShowMore) fireEvent.click(contribShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('User Thirteen')).toBeInTheDocument()
@@ -591,7 +591,7 @@ describe('SnapshotDetailsPage', () => {
 
     const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
     expect(prShowMore).toBeDefined()
-    fireEvent.click(prShowMore!)
+    if (prShowMore) fireEvent.click(prShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('PR Seven')).toBeInTheDocument()
@@ -636,7 +636,7 @@ describe('SnapshotDetailsPage', () => {
 
     const issueShowMore = findButtonInSection('Show more', 'New Issues')
     expect(issueShowMore).toBeDefined()
-    fireEvent.click(issueShowMore!)
+    if (issueShowMore) fireEvent.click(issueShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('Issue Seven')).toBeInTheDocument()
@@ -654,7 +654,7 @@ describe('SnapshotDetailsPage', () => {
 
     const postsShowMore = findButtonInSection('Show more', 'New Posts')
     expect(postsShowMore).toBeDefined()
-    fireEvent.click(postsShowMore!)
+    if (postsShowMore) fireEvent.click(postsShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('Post Six')).toBeInTheDocument()
@@ -697,7 +697,7 @@ describe('SnapshotDetailsPage', () => {
 
     const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
     expect(prShowMore).toBeDefined()
-    fireEvent.click(prShowMore!)
+    if (prShowMore) fireEvent.click(prShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('PR Seven')).toBeInTheDocument()
@@ -705,7 +705,7 @@ describe('SnapshotDetailsPage', () => {
 
     const prShowLess = findButtonInSection('Show less', 'New Pull Requests')
     expect(prShowLess).toBeDefined()
-    fireEvent.click(prShowLess!)
+    if (prShowLess) fireEvent.click(prShowLess)
 
     await waitFor(() => {
       expect(screen.queryByText('PR Seven')).not.toBeInTheDocument()
@@ -749,7 +749,7 @@ describe('SnapshotDetailsPage', () => {
 
     const issueShowMore = findButtonInSection('Show more', 'New Issues')
     expect(issueShowMore).toBeDefined()
-    fireEvent.click(issueShowMore!)
+    if (issueShowMore) fireEvent.click(issueShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('Issue Seven')).toBeInTheDocument()
@@ -757,7 +757,7 @@ describe('SnapshotDetailsPage', () => {
 
     const issueShowLess = findButtonInSection('Show less', 'New Issues')
     expect(issueShowLess).toBeDefined()
-    fireEvent.click(issueShowLess!)
+    if (issueShowLess) fireEvent.click(issueShowLess)
 
     await waitFor(() => {
       expect(screen.queryByText('Issue Seven')).not.toBeInTheDocument()
@@ -801,7 +801,7 @@ describe('SnapshotDetailsPage', () => {
 
     const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
     expect(prShowMore).toBeDefined()
-    fireEvent.click(prShowMore!)
+    if (prShowMore) fireEvent.click(prShowMore)
 
     await waitFor(() => {
       expect(mockFetchMorePRs).toHaveBeenCalled()
@@ -862,7 +862,7 @@ describe('SnapshotDetailsPage', () => {
 
     const issueShowMore = findButtonInSection('Show more', 'New Issues')
     expect(issueShowMore).toBeDefined()
-    fireEvent.click(issueShowMore!)
+    if (issueShowMore) fireEvent.click(issueShowMore)
 
     await waitFor(() => {
       expect(mockFetchMoreIssues).toHaveBeenCalled()
@@ -897,7 +897,7 @@ describe('SnapshotDetailsPage', () => {
 
     const chaptersShowMore = findButtonInSection('Show more', 'New Chapters')
     expect(chaptersShowMore).toBeDefined()
-    fireEvent.click(chaptersShowMore!)
+    if (chaptersShowMore) fireEvent.click(chaptersShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('OWASP London')).toBeInTheDocument()
@@ -916,7 +916,7 @@ describe('SnapshotDetailsPage', () => {
 
     const projectsShowMore = findButtonInSection('Show more', 'New Projects')
     expect(projectsShowMore).toBeDefined()
-    fireEvent.click(projectsShowMore!)
+    if (projectsShowMore) fireEvent.click(projectsShowMore)
 
     await waitFor(() => {
       expect(screen.getByText('OWASP SAMM')).toBeInTheDocument()
@@ -935,7 +935,7 @@ describe('SnapshotDetailsPage', () => {
 
     const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
     expect(prShowMore).toBeDefined()
-    fireEvent.click(prShowMore!)
+    if (prShowMore) fireEvent.click(prShowMore)
 
     await waitFor(() => {
       expect(mockFetchMorePRs).toHaveBeenCalled()
@@ -959,7 +959,7 @@ describe('SnapshotDetailsPage', () => {
 
     const issueShowMore = findButtonInSection('Show more', 'New Issues')
     expect(issueShowMore).toBeDefined()
-    fireEvent.click(issueShowMore!)
+    if (issueShowMore) fireEvent.click(issueShowMore)
 
     await waitFor(() => {
       expect(mockFetchMoreIssues).toHaveBeenCalled()
