@@ -1,12 +1,6 @@
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import {
-  FaCalendar,
-  FaFolderOpen,
-  FaSignsPost,
-  FaCircleCheck,
-  FaCircleExclamation,
-} from 'react-icons/fa6'
+import { FaCalendar, FaFolderOpen, FaSignsPost, FaCircleExclamation } from 'react-icons/fa6'
 import type { Milestone } from 'types/milestone'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
@@ -42,10 +36,6 @@ const Milestones: React.FC<ProjectMilestonesProps> = ({
           <div className="mr-4 flex items-center">
             <FaCalendar className="mr-2 h-4 w-4" />
             <span>{item.createdAt ? formatDate(item.createdAt) : 'N/A'}</span>
-          </div>
-          <div className="mr-4 flex items-center">
-            <FaCircleCheck className="mr-2 h-4 w-4" />
-            <span>{item.closedIssuesCount} closed</span>
           </div>
           <div className="mr-4 flex items-center">
             <FaCircleExclamation className="mr-2 h-4 w-4" />
