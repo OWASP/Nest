@@ -49,6 +49,13 @@ jobs:
           cp -r .next/static .next/standalone/.next/
         working-directory: frontend
 
+      - name: Stage frontend standalone for upload
+        run: |
+          rm -rf ../e2e-artifacts/frontend-standalone
+          mkdir -p ../e2e-artifacts/frontend-standalone
+          cp -rL .next/standalone/. ../e2e-artifacts/frontend-standalone/
+        working-directory: frontend
+
       - name: Install e2e dependencies
         run: pnpm install --frozen-lockfile
         working-directory: e2e
@@ -76,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: e2e-frontend-standalone
-          path: frontend/.next/standalone
+          path: e2e-artifacts/frontend-standalone
           retention-days: 1
 
       - name: Upload Playwright Chromium
@@ -165,6 +172,10 @@ jobs:
           db_username: nest_user_e2e
           env_file: .env.e2e-tests
 
+      - name: Verify frontend standalone build
+        run: test -f server.js
+        working-directory: frontend/.next/standalone
+
       - name: Install pnpm
         uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093  # v6.0.8
         with:
@@ -193,18 +204,28 @@ jobs:
           NODE_ENV: production
           PORT: '3000'
         run: |
-          nohup node .next/standalone/server.js > /dev/null 2>&1 &
+          nohup node server.js > /tmp/frontend.log 2>&1 &
+          echo $! > /tmp/frontend.pid
           disown
-        working-directory: frontend
+        working-directory: frontend/.next/standalone
 
       - name: Wait for frontend to be ready
         run: |
-          timeout 5m bash -c '
-            until wget --spider http://localhost:3000/api/health; do
-              echo "Waiting for the frontend..."
-              sleep 5
-            done
-          '
+          end=$((SECONDS + 300))
+          until wget --spider http://localhost:3000/api/health; do
+            if [ -f /tmp/frontend.pid ] && ! kill -0 "$(cat /tmp/frontend.pid)" 2>/dev/null; then
+              echo "Frontend process exited unexpectedly:"
+              cat /tmp/frontend.log
+              exit 1
+            fi
+            if [ "$SECONDS" -ge "$end" ]; then
+              echo "Timed out waiting for the frontend:"
+              cat /tmp/frontend.log
+              exit 1
+            fi
+            echo "Waiting for the frontend..."
+            sleep 5
+          done
           echo "Frontend is up!"
 
       - name: Run frontend end-to-end tests
