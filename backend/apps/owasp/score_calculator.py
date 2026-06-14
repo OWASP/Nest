@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Count, Q
 
@@ -11,7 +11,6 @@ from apps.common.models import BulkSaveModel
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
-from apps.owasp.exceptions import CertificateBatchIssuanceError
 from apps.owasp.models.crp.contribution_score import ContributionScore
 from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.models.crp.scoring_weight import ScoringWeight
@@ -206,7 +205,7 @@ class ContributionScoreCalculator:
 
         return TierChoices("level_1")
 
-    def recalculate_all(self) -> dict[str, int]:
+    def recalculate_all(self) -> dict[str, Any]:
         """Recalculate scores for all users.
 
         Returns:
@@ -342,14 +341,6 @@ class ContributionScoreCalculator:
             pending_certificates.clear()
             contribution_scores.clear()
 
-        if failed_certificates:
-            failed_usernames = [username for username, _ in failed_certificates]
-            error_msg = (
-                f"Failed to issue certificates for {len(failed_certificates)} user(s): "
-                f"{', '.join(failed_usernames)}"
-            )
-            raise CertificateBatchIssuanceError(error_msg)
-
         logger.info(
             "Score recalculation complete. Created: %s, Updated: %s",
             created_count,
@@ -360,6 +351,8 @@ class ContributionScoreCalculator:
             "total": total_users,
             "created": created_count,
             "updated": updated_count,
+            "failed_count": len(failed_certificates),
+            "failures": failed_certificates,
         }
 
     def recalculate_user(self, user: User) -> dict[str, str | int | bool]:
