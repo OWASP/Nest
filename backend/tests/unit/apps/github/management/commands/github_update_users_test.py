@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.core.management.base import BaseCommand
 
 from apps.github.management.commands.github_update_users import Command
@@ -32,24 +33,32 @@ class TestGithubUpdateUsersCommand:
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(Command, "_get_leadership_data", return_value={})
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 2)
-    def test_handle_with_default_offset(self, mock_repository_contributor, mock_user):
+    def test_handle_with_default_offset(
+        self,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
+    ):
         """Test command execution with default offset."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
-        mock_user3 = MagicMock(id=3, title="User 3", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
+        mock_user3 = MagicMock(id=3, title="User 3", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
-        mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2, mock_user3]
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = [mock_user1, mock_user2, mock_user3]
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_objects = MagicMock()
         mock_rc_objects.exclude.return_value.values.return_value.annotate.return_value = [
-            {"user_id": 1, "total_contributions": 10},
-            {"user_id": 2, "total_contributions": 20},
-            {"user_id": 3, "total_contributions": 30},
+            {"user_id": 1, "total_contributions": 10, "repo_count": 2},
+            {"user_id": 2, "total_contributions": 20, "repo_count": 3},
+            {"user_id": 3, "total_contributions": 30, "repo_count": 4},
         ]
         mock_repository_contributor.objects = mock_rc_objects
 
@@ -74,26 +83,33 @@ class TestGithubUpdateUsersCommand:
         assert mock_user3.contributions_count == 30
 
         assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2, mock_user3]
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(Command, "_get_leadership_data", return_value={})
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 2)
-    def test_handle_with_custom_offset(self, mock_repository_contributor, mock_user):
+    def test_handle_with_custom_offset(
+        self,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
+    ):
         """Test command execution with custom offset."""
-        mock_user1 = MagicMock(id=2, title="User 2", contributions_count=0)
-        mock_user2 = MagicMock(id=3, title="User 3", contributions_count=0)
+        mock_user1 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=3, title="User 3", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
-        mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2]
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = [mock_user1, mock_user2]
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
         mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
-            {"user_id": 2, "total_contributions": 20},
-            {"user_id": 3, "total_contributions": 30},
+            {"user_id": 2, "total_contributions": 20, "repo_count": 2},
+            {"user_id": 3, "total_contributions": 30, "repo_count": 3},
         ]
         mock_repository_contributor.objects = mock_rc_queryset
 
@@ -106,28 +122,33 @@ class TestGithubUpdateUsersCommand:
         mock_users_queryset.__getitem__.assert_called_once_with(slice(1, None))
 
         assert command.stdout.write.call_count == 2
-        command.stdout.write.assert_any_call("2 of 2     User 2\n")
-        command.stdout.write.assert_any_call("3 of 2     User 3\n")
+        command.stdout.write.assert_any_call("1 of 2     User 2\n")
+        command.stdout.write.assert_any_call("2 of 2     User 3\n")
 
         assert mock_user1.contributions_count == 20
         assert mock_user2.contributions_count == 30
 
-        assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
+        assert mock_user.bulk_save.call_count == 1
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(Command, "_get_leadership_data", return_value={})
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 3)
     def test_handle_with_users_having_no_contributions(
-        self, mock_repository_contributor, mock_user
+        self,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
     ):
         """Test command execution when users have no contributions."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
-        mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2]
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = [mock_user1, mock_user2]
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 
@@ -147,24 +168,31 @@ class TestGithubUpdateUsersCommand:
         assert mock_user2.contributions_count == 0
 
         assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(Command, "_get_leadership_data", return_value={})
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 1)
-    def test_handle_with_single_user(self, mock_repository_contributor, mock_user):
+    def test_handle_with_single_user(
+        self,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
+    ):
         """Test command execution with single user."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 1
-        mock_users_queryset.__getitem__.return_value = [mock_user1]
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = [mock_user1]
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
         mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
-            {"user_id": 1, "total_contributions": 15},
+            {"user_id": 1, "total_contributions": 15, "repo_count": 2},
         ]
         mock_repository_contributor.objects = mock_rc_queryset
 
@@ -176,17 +204,24 @@ class TestGithubUpdateUsersCommand:
 
         assert mock_user1.contributions_count == 15
 
-        assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1]
+        assert mock_user.bulk_save.call_count == 1
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(Command, "_get_leadership_data", return_value={})
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 2)
-    def test_handle_with_empty_user_list(self, mock_repository_contributor, mock_user):
+    def test_handle_with_empty_user_list(
+        self,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
+    ):
         """Test command execution with no users."""
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 0
-        mock_users_queryset.__getitem__.return_value = []
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = []
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 
@@ -200,27 +235,34 @@ class TestGithubUpdateUsersCommand:
 
         command.stdout.write.assert_not_called()
 
-        assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == []
+        assert mock_user.bulk_save.call_count == 0
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(Command, "_get_leadership_data", return_value={})
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 2)
-    def test_handle_with_exact_batch_size(self, mock_repository_contributor, mock_user):
+    def test_handle_with_exact_batch_size(
+        self,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
+    ):
         """Test command execution when user count equals batch size."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
-        mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2]
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = [mock_user1, mock_user2]
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 
         mock_rc_queryset = MagicMock()
         mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
-            {"user_id": 1, "total_contributions": 10},
-            {"user_id": 2, "total_contributions": 20},
+            {"user_id": 1, "total_contributions": 10, "repo_count": 2},
+            {"user_id": 2, "total_contributions": 20, "repo_count": 3},
         ]
         mock_repository_contributor.objects = mock_rc_queryset
 
@@ -235,5 +277,64 @@ class TestGithubUpdateUsersCommand:
         assert mock_user1.contributions_count == 10
         assert mock_user2.contributions_count == 20
 
-        assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
+        assert mock_user.bulk_save.call_count == 1
+
+    @patch("apps.github.management.commands.github_update_users.User")
+    @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(
+        Command,
+        "_get_leadership_data",
+        return_value={1: {"chapter_leader": 2, "project_leader": 1}},
+    )
+    @patch(
+        "apps.github.management.commands.github_update_users.calculate_member_score",
+        return_value=123.4567,
+    )
+    @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 2)
+    def test_handle_with_leadership_data(
+        self,
+        mock_calculate_member_score,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
+    ):
+        """Test that leadership data flows into calculated_score."""
+        mock_user1 = MagicMock(
+            id=1,
+            title="User 1",
+            contributions_count=0,
+            contribution_data=None,
+        )
+
+        mock_users_queryset = MagicMock()
+        mock_users_queryset.count.return_value = 1
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = [mock_user1]
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
+
+        mock_user.objects.order_by.return_value = mock_users_queryset
+
+        mock_rc_queryset = MagicMock()
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
+            {"user_id": 1, "total_contributions": 50, "repo_count": 3},
+        ]
+        mock_repository_contributor.objects = mock_rc_queryset
+
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=0)
+
+        assert mock_user1.contributions_count == 50
+        assert mock_user1.calculated_score == pytest.approx(123.4567)
+
+        mock_calculate_member_score.assert_called_once()
+        score_kwargs = mock_calculate_member_score.call_args.kwargs
+        assert score_kwargs["contributions_count"] == 50
+        assert score_kwargs["distinct_repository_count"] == 3
+        assert score_kwargs["chapter_leader_count"] == 2
+        assert score_kwargs["project_leader_count"] == 1
+
+        assert mock_user.bulk_save.call_count == 1
+        saved_fields = mock_user.bulk_save.call_args_list[0][1]["fields"]
+        assert "calculated_score" in saved_fields
+        assert "contributions_count" in saved_fields

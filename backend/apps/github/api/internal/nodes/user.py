@@ -24,6 +24,7 @@ USER_BADGES_PREFETCH = Prefetch(
     fields=[
         "avatar_url",
         "bio",
+        "calculated_score",
         "company",
         "contribution_data",
         "contributions_count",

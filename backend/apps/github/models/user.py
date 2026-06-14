@@ -33,6 +33,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         db_table = "github_users"
         indexes = [
+            models.Index(fields=["-calculated_score"], name="github_user_calc_score_desc"),
             models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
             models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
             models.Index(fields=["name"], name="github_user_name_asc"),
@@ -52,6 +53,13 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         default=False,
         verbose_name="Is OWASP Staff",
         help_text="Indicates if the user is OWASP Foundation staff.",
+    )
+
+    calculated_score = models.FloatField(
+        verbose_name="Calculated score",
+        default=0.0,
+        help_text="Composite ranking score based on contributions, leadership, "
+        "recency, and breadth.",
     )
 
     contributions_count = models.PositiveIntegerField(
