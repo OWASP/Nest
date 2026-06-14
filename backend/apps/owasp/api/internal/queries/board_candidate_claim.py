@@ -44,7 +44,7 @@ class BoardCandidateClaimQuery:
 
     @strawberry_django.field
     def board_candidate_claim(
-        self, info: strawberry.Info, login: str, key: str
+        self, info: strawberry.Info, login: str, key: str, year: int
     ) -> BoardCandidateClaimNode | None:
         """Resolve Board Candidate Claim for a given claim ID.
 
@@ -52,13 +52,16 @@ class BoardCandidateClaimQuery:
             info (Info): Strawberry Info.
             login (str): The login of the candidate.
             key (str): The key of the claim.
+            year (int): The year of the election.
 
         Returns:
             BoardCandidateClaimNode object if found, None otherwise.
 
         """
         try:
-            claim = BoardCandidateClaim.objects.get(candidate__member__login=login, key=key)
+            claim = BoardCandidateClaim.objects.get(
+                candidate__member__login=login, key=key, board__year=year
+            )
         except BoardCandidateClaim.DoesNotExist:
             return None
 

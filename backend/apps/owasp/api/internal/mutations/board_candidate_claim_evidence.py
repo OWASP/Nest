@@ -35,25 +35,30 @@ class CreateEvidenceInput:
     file: Upload | None = None
     name: str
     source_url: str | None = None
+    year: int
 
 
 @strawberry.input
 class UpdateEvidenceInput:
     """Input for updating claim evidence."""
 
+    claim_key: str
     description: str | None = None
     file: Upload | None = None
     key: str
     name: str | None = None
     source_url: str | None = None
+    year: int
 
 
 @strawberry.input
 class RemoveEvidenceInput:
     """Input for removing claim evidence."""
 
+    claim_key: str
     key: str
     removed_reason: str
+    year: int
 
 
 @strawberry.type
@@ -80,7 +85,9 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login, key=input_data.claim_key
+                candidate__member__login=user.github_user.login,
+                key=input_data.claim_key,
+                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -134,7 +141,10 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                claim__candidate__member__login=user.github_user.login, key=input_data.key
+                claim__key=input_data.claim_key,
+                claim__candidate__member__login=user.github_user.login,
+                key=input_data.key,
+                claim__board__year=input_data.year,
             )
         except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
@@ -197,7 +207,10 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                claim__candidate__member__login=user.github_user.login, key=input_data.key
+                claim__key=input_data.claim_key,
+                claim__candidate__member__login=user.github_user.login,
+                key=input_data.key,
+                claim__board__year=input_data.year,
             )
         except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)

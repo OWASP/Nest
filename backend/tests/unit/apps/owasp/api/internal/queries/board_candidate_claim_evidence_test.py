@@ -31,7 +31,9 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.objects.filter.return_value.first.return_value = None
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
+        result = query.board_candidate_claim_evidences(
+            info, claim_key=claim_key, login=login, year=2025
+        )
 
         assert result == []
 
@@ -53,7 +55,9 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
+        result = query.board_candidate_claim_evidences(
+            info, claim_key=claim_key, login=login, year=2025
+        )
 
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs
@@ -74,7 +78,9 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
+        result = query.board_candidate_claim_evidences(
+            info, claim_key=claim_key, login=login, year=2025
+        )
 
         assert result == []
 
@@ -96,7 +102,9 @@ class TestBoardCandidateClaimEvidenceQuery:
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
-        result = query.board_candidate_claim_evidences(info, claim_key=claim_key, login=login)
+        result = query.board_candidate_claim_evidences(
+            info, claim_key=claim_key, login=login, year=2025
+        )
 
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs

@@ -275,7 +275,7 @@ class TestValidateReorderClaims:
         keys, error = _validate_reorder_claims(login, input_data)
 
         mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login=login, key__in=["k1", "k2", "k3"]
+            candidate__member__login=login, key__in=["k1", "k2", "k3"], board__year=input_data.year
         )
         assert keys == ["k1", "k2", "k3"]
         assert error is None

@@ -38,6 +38,7 @@ class UpdateClaimInput:
     description: str | None = None
     key: str
     name: str | None = None
+    year: int
 
 
 @strawberry.input
@@ -45,6 +46,7 @@ class DiscardClaimInput:
     """Input for discarding a claim."""
 
     key: str
+    year: int
 
 
 @strawberry.input
@@ -52,6 +54,7 @@ class SubmitClaimInput:
     """Input for submitting a claim."""
 
     key: str
+    year: int
 
 
 @strawberry.input
@@ -60,6 +63,7 @@ class WithdrawClaimInput:
 
     key: str
     withdrawn_reason: str
+    year: int
 
 
 @strawberry.input
@@ -67,6 +71,7 @@ class ReorderClaimsInput:
     """Input for reordering claims."""
 
     keys: list[str]
+    year: int
 
 
 @strawberry.type
@@ -118,7 +123,7 @@ def _validate_reorder_claims(
         )
 
     if BoardCandidateClaim.objects.filter(
-        candidate__member__login=login, key__in=keys
+        candidate__member__login=login, key__in=keys, board__year=input_data.year
     ).count() != len(keys):
         return keys, ReorderClaimsResult(
             ok=False,
@@ -197,7 +202,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login, key=input_data.key
+                candidate__member__login=user.github_user.login,
+                key=input_data.key,
+                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -246,7 +253,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login, key=input_data.key
+                candidate__member__login=user.github_user.login,
+                key=input_data.key,
+                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -291,7 +300,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login, key=input_data.key
+                candidate__member__login=user.github_user.login,
+                key=input_data.key,
+                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -350,7 +361,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login, key=input_data.key
+                candidate__member__login=user.github_user.login,
+                key=input_data.key,
+                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -404,19 +417,12 @@ class BoardCandidateClaimMutations:
             return error
 
         claims = list(
-            BoardCandidateClaim.objects.filter(candidate__member__login=login, key__in=keys)
+            BoardCandidateClaim.objects.filter(
+                candidate__member__login=login, key__in=keys, board__year=input_data.year
+            )
             .select_for_update(of=("self",))
             .select_related("candidate__member")
         )
-
-        candidate_ids = {claim.candidate_id for claim in claims}
-        board_ids = {claim.board_id for claim in claims}
-        if len(candidate_ids) != 1 or len(board_ids) != 1:
-            return ReorderClaimsResult(
-                ok=False,
-                code="VALIDATION_ERROR",
-                message="All claims must belong to the same candidate and board year.",
-            )
 
         keys_to_order = {key: idx for idx, key in enumerate(keys)}
         for claim in claims:
