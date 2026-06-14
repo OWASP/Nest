@@ -21,7 +21,7 @@ RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
 
 COPY --chmod=444 --chown=root:root requirements/build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install --requirement /tmp/build.txt
+    python -m pip install --require-hashes --requirement /tmp/build.txt
 
 WORKDIR /home/owasp
 

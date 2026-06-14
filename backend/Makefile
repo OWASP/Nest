@@ -5,7 +5,7 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
-.PHONY: audit-backend-dependencies fetch-nest-dump sbom-backend-image upload-nest-dump
+.PHONY: audit-backend-dependencies compile-backend-requirements fetch-nest-dump sbom-backend-image upload-nest-dump
 
 ##@ Backend
 
@@ -253,6 +253,19 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
+
+compile-backend-requirements: ## Regenerate hashed pip requirements from backend/requirements/*.in
+	@docker run \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		-e HOME=/tmp \
+		-e PIP_ROOT_USER_ACTION=ignore \
+		-v "$(CURDIR):/work" \
+		-w /work \
+		$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
+		sh -c 'python -m pip install --no-warn-script-location --quiet pip-tools && \
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in && \
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/pre-commit.txt backend/requirements/pre-commit.in'
 
 audit-backend-dependencies: ## Audit backend Python dependencies
 	@echo "Auditing backend Python dependencies..."
