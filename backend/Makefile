@@ -255,9 +255,15 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
 
 compile-backend-requirements: ## Regenerate hashed pip requirements from backend/requirements/*.in
-	@python -m pip install --quiet pip-tools
-	@pip-compile --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in
-	@pip-compile --generate-hashes --output-file=backend/requirements/pre-commit.txt backend/requirements/pre-commit.in
+	@docker run \
+		--rm \
+		-e PIP_ROOT_USER_ACTION=ignore \
+		-v "$(CURDIR):/work" \
+		-w /work \
+		$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
+		sh -c 'python -m pip install --quiet pip-tools && \
+		pip-compile --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in && \
+		pip-compile --generate-hashes --output-file=backend/requirements/pre-commit.txt backend/requirements/pre-commit.in'
 
 audit-backend-dependencies: ## Audit backend Python dependencies
 	@echo "Auditing backend Python dependencies..."
