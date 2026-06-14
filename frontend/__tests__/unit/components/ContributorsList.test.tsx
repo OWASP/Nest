@@ -715,7 +715,7 @@ describe('ContributorsList Component', () => {
       }
     })
 
-    it('renders contributor links with proper styling', () => {
+    it('renders contributor names with proper styling', () => {
       render(<ContributorsList {...defaultProps} />)
 
       const names = screen.getAllByTestId('contributor-name')
@@ -728,7 +728,7 @@ describe('ContributorsList Component', () => {
           'whitespace-nowrap',
           'font-semibold',
           'text-blue-400',
-          'group-hover:underline'
+          'hover:underline'
         )
       }
     })

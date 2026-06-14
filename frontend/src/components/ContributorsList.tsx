@@ -94,7 +94,7 @@ const ContributorsList = ({
                   width={24}
                 />
                 <span
-                  className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 group-hover:underline"
+                  className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
                   data-testid="contributor-name"
                 >
                   {upperFirst(item.name) || upperFirst(item.login)}
