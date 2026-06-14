@@ -6,11 +6,11 @@ import logging
 from typing import TYPE_CHECKING
 
 from apps.owasp.models.crp.certificate import Certificate
-from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.services.certificate_providers import CertificateProviderFactory
 
 if TYPE_CHECKING:
     from apps.github.models.user import User
+    from apps.owasp.models.crp.recognition_enums import TierChoices
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,6 @@ class CertificateService:
             tier (TierChoices): The current tier the user qualifies for.
 
         """
-
         # Check if user already has an active certificate for this specific tier
         has_active_cert = Certificate.objects.filter(
             github_user=user,
@@ -41,8 +40,8 @@ class CertificateService:
 
         try:
             provider = CertificateProviderFactory.get_provider()
-        except ValueError as e:
-            logger.exception("Failed to resolve certificate provider: %s", str(e))
+        except ValueError:
+            logger.exception("Failed to resolve certificate provider")
             return
 
         logger.info(
