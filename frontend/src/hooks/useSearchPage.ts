@@ -10,7 +10,7 @@ interface UseSearchPageOptions {
   defaultSortBy?: string
   defaultOrder?: string
   hitsPerPage?: number
-  facetFilters?: string[]
+  facetFilters?: (string | string[])[]
 }
 
 interface UseSearchPageReturn<T> {
@@ -66,10 +66,9 @@ export function useSearchPage<T>({
       const searchQueryChanged = searchQuery !== searchQueryParam
       const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
 
-      // Reset page if search query changes (all indices) or if sort/order changes (projects/chapters)
       if (
         searchQueryChanged ||
-        (['projects', 'chapters'].includes(indexName) && sortOrOrderChanged)
+        (['projects', 'chapters', 'users'].includes(indexName) && sortOrOrderChanged)
       ) {
         setCurrentPage(1)
       }
