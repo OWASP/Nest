@@ -58,6 +58,7 @@ jobs:
   run-e2e-tests:
     name: E2E tests
     permissions:
+      actions: write
       contents: read
     uses: ./.github/workflows/run-e2e-tests.yaml
 
