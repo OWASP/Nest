@@ -45,7 +45,7 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
   ]
 
   return (
-    <div className="h-fit flex flex-col sm:flex-row xl:flex-col gap-6 sm:gap-8">
+    <div className="h-fit flex flex-col sm:flex-row xl:flex-col gap-6 sm:gap-8 xl:gap-5">
       <div className="flex min-w-0 flex-col items-start gap-0 text-left sm:flex-1 xl:flex-col xl:items-start">
         <Image
           width={200}
@@ -54,7 +54,7 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
           src={user.avatarUrl || '/placeholder.svg'}
           alt={user.name || user.login || 'User Avatar'}
         />
-        <div className="mt-6 mb-2 w-full overflow-x-auto text-left">
+        <div className="mt-6 w-full overflow-x-auto text-left">
           <h2 className="text-3xl font-semibold text-gray-900 dark:text-gray-100">
             {user.name || user.login}
           </h2>
@@ -64,9 +64,11 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
           >
             @{user.login}
           </Link>
-          <div className="mt-4 text-base leading-relaxed wrap-break-word whitespace-pre-wrap text-gray-600 dark:text-gray-400">
-            {formattedBio}
-          </div>
+          {user.bio && (
+            <div className="mt-4 text-base leading-relaxed wrap-break-word whitespace-pre-wrap text-gray-600 dark:text-gray-400">
+              {formattedBio}
+            </div>
+          )}
         </div>
       </div>
 

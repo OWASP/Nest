@@ -144,26 +144,33 @@ const UserDetailsPage: React.FC = () => {
               </div>
             )}
 
-            <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
-              <RepositoriesModules repositories={topRepositories} />
-            </div>
+            {topRepositories.length > 0 && (
+              <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                <RepositoriesModules repositories={topRepositories} />
+              </div>
+            )}
 
             <div className="grid grow grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
-                <RecentIssues data={issues} showAvatar={false} />
-              </div>
-              <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
-                <RecentPullRequests data={pullRequests} showAvatar={false} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
-                <Milestones data={milestones} showAvatar={false} />
-              </div>
-              <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
-                <RecentReleases data={releases} showAvatar={false} showSingleColumn={true} />
-              </div>
+              {issues.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <RecentIssues data={issues} showAvatar={false} />
+                </div>
+              )}
+              {pullRequests.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <RecentPullRequests data={pullRequests} showAvatar={false} />
+                </div>
+              )}
+              {milestones.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <Milestones data={milestones} showAvatar={false} />
+                </div>
+              )}
+              {releases.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <RecentReleases data={releases} showAvatar={false} showSingleColumn={true} />
+                </div>
+              )}
             </div>
           </div>
         </div>
