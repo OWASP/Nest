@@ -9,6 +9,7 @@ services:
     build:
       context: ../../backend
       dockerfile: ../docker/backend/Dockerfile
+      target: backend
     depends_on:
       db:
         condition: service_healthy

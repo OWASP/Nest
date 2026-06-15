@@ -133,14 +133,16 @@ jobs:
             type=registry,ref=${{ env.BACKEND_CACHE_REF }},mode=max
           context: backend
           file: docker/backend/Dockerfile
+          target: backend
+          provenance: mode=min
           push: true
+          sbom: true
           tags: ${{ env.BACKEND_IMAGE }}
 
       - name: Get backend image size
         id: backend-size
         run: |
-          docker pull "$BACKEND_IMAGE"
-          RAW_SIZE=$(docker image inspect "$BACKEND_IMAGE" --format='{{.Size}}')
+          RAW_SIZE=$(bash .github/scripts/ecr-image-size.sh "$BACKEND_IMAGE")
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
 
@@ -184,7 +186,9 @@ jobs:
             type=registry,ref=${{ env.FRONTEND_CACHE_REF }},mode=max
           context: frontend
           file: docker/frontend/Dockerfile
+          provenance: mode=min
           push: true
+          sbom: true
           secrets: |
             RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -193,8 +197,7 @@ jobs:
       - name: Get frontend image size
         id: frontend-size
         run: |
-          docker pull "$FRONTEND_IMAGE"
-          RAW_SIZE=$(docker image inspect "$FRONTEND_IMAGE" --format='{{.Size}}')
+          RAW_SIZE=$(bash .github/scripts/ecr-image-size.sh "$FRONTEND_IMAGE")
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> "$GITHUB_OUTPUT"
 
