@@ -19,6 +19,11 @@ class BoardOfDirectorsNode(strawberry.relay.Node):
     """Board of Directors node."""
 
     @strawberry_django.field
+    def candidate(self, root: BoardOfDirectors, login: str) -> EntityMemberNode | None:
+        """Resolve board election candidate."""
+        return root.get_candidate(login)  # type: ignore[call-arg]
+
+    @strawberry_django.field
     def candidates(self, root: BoardOfDirectors) -> list[EntityMemberNode]:
         """Resolve board election candidates."""
         return root.get_candidates()  # type: ignore[call-arg]

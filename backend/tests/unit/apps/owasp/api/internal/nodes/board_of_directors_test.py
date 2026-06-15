@@ -15,6 +15,7 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
         }
         expected_field_names = {
             "_id",
+            "candidate",
             "candidates",
             "created_at",
             "members",
