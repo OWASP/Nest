@@ -5,13 +5,14 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
-.PHONY: fetch-nest-dump sbom-backend-image upload-nest-dump
+.PHONY: audit-backend-dependencies compile-backend-requirements fetch-nest-dump sbom-backend-image upload-nest-dump
 
 ##@ Backend
 
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
 		--no-cache \
+		--target backend \
 		-f docker/backend/Dockerfile \
 		-t nest-backend-local \
 		backend
@@ -28,7 +29,6 @@ clean-backend-docker:
 	@docker container rm -f nest-cache >/dev/null 2>&1 || true
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
 	@docker container rm -f nest-worker >/dev/null 2>&1 || true
-	@docker image rm -f nest-backend:base >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker image rm -f nest-snapshot-video >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
@@ -253,6 +253,25 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
+
+compile-backend-requirements: ## Regenerate hashed pip requirements from backend/requirements/*.in
+	@docker run \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		-e HOME=/tmp \
+		-e PIP_ROOT_USER_ACTION=ignore \
+		-v "$(CURDIR):/work" \
+		-w /work \
+		$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
+		sh -c 'python -m pip install --no-warn-script-location --quiet pip-tools && \
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in && \
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/pre-commit.txt backend/requirements/pre-commit.in'
+
+audit-backend-dependencies: ## Audit backend Python dependencies
+	@echo "Auditing backend Python dependencies..."
+	@command -v pip-audit >/dev/null 2>&1 || python -m pip install -q pip-audit
+	@cd backend && poetry export -f requirements.txt --without-hashes --all-groups | \
+		pip-audit -r /dev/stdin
 
 update-backend-dependencies:
 	@cd backend && poetry update
