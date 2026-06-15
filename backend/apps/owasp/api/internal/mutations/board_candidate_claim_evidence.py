@@ -1,6 +1,5 @@
 """OWASP Board Candidate Claim Evidence GraphQL mutations."""
 
-import json
 import logging
 
 import strawberry
@@ -118,10 +117,13 @@ class BoardCandidateClaimEvidenceMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return EvidenceResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return EvidenceResult(
@@ -184,10 +186,13 @@ class BoardCandidateClaimEvidenceMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return EvidenceResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return EvidenceResult(
@@ -240,10 +245,13 @@ class BoardCandidateClaimEvidenceMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return EvidenceResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return EvidenceResult(

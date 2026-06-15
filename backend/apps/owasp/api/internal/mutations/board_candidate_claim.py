@@ -1,6 +1,5 @@
 """OWASP Board Candidate Claim GraphQL mutations."""
 
-import json
 import logging
 
 import strawberry
@@ -184,10 +183,13 @@ class BoardCandidateClaimMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return ClaimResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return ClaimResult(ok=True, code="SUCCESS", message="Claim created successfully.")
@@ -235,10 +237,13 @@ class BoardCandidateClaimMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return ClaimResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return ClaimResult(ok=True, code="SUCCESS", message="Claim updated successfully.")
@@ -282,10 +287,13 @@ class BoardCandidateClaimMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return ClaimResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return ClaimResult(ok=True, code="SUCCESS", message="Claim discarded successfully.")
@@ -337,10 +345,13 @@ class BoardCandidateClaimMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
-            result = ClaimResult(
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
+            return ClaimResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
         else:
             result = ClaimResult(
@@ -395,10 +406,13 @@ class BoardCandidateClaimMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return ClaimResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return ClaimResult(ok=True, code="SUCCESS", message="Claim withdrawn successfully.")
