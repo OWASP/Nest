@@ -15,7 +15,7 @@ import Milestones from 'components/Milestones'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
-import SecondaryCard from 'components/SecondaryCard'
+
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
 interface UserSummaryProps {
@@ -132,8 +132,8 @@ const UserDetailsPage: React.FC = () => {
 
           <div className="flex min-w-0 flex-1 flex-col gap-6">
             {hasContributionData && dateRange.startDate && dateRange.endDate && (
-              <SecondaryCard className="mb-0!">
-                <div className="overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800">
+              <div className='rounded-lg bg-gray-100 pl-1 pr-4 pt-0 pb-1 shadow-md dark:bg-gray-800'>
+                <div className="overflow-x-auto">
                   <ContributionHeatmap
                     contributionData={contributionData}
                     startDate={dateRange.startDate}
@@ -141,7 +141,7 @@ const UserDetailsPage: React.FC = () => {
                     variant="medium"
                   />
                 </div>
-              </SecondaryCard>
+              </div>
             )}
 
             <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
