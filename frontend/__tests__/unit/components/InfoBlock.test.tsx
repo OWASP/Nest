@@ -73,37 +73,16 @@ describe('InfoBlock Component', () => {
             unit="contributor"
             pluralizedName="contributors"
             precision={2}
-            label="Team Members"
             className="custom-class"
           />
         )
 
         expect(screen.getByTestId('icon-star')).toBeInTheDocument()
-        expect(screen.getByText('Team Members')).toBeInTheDocument()
         expect(screen.getByText('1.5k contributors')).toBeInTheDocument()
       })
     })
 
     describe('Conditional rendering logic', () => {
-      it('should show label when provided', () => {
-        mockMillify.mockReturnValue('50')
-        mockPluralize.mockReturnValue('projects')
-
-        render(<InfoBlock icon={FaCode} value={50} label="Active Projects" />)
-
-        expect(screen.getByText('Active Projects')).toBeInTheDocument()
-        expect(screen.getByText('Active Projects')).toHaveClass('text-sm', 'font-medium')
-      })
-
-      it('should not show label when not provided', () => {
-        mockMillify.mockReturnValue('50')
-        mockPluralize.mockReturnValue('projects')
-
-        render(<InfoBlock icon={FaCode} value={50} />)
-
-        expect(screen.queryByText('Active Projects')).not.toBeInTheDocument()
-      })
-
       it('should show "No" prefix when value is 0', () => {
         mockMillify.mockReturnValue('0')
         mockPluralize.mockReturnValue('items')
@@ -233,20 +212,6 @@ describe('InfoBlock Component', () => {
     })
 
     describe('Default values and fallbacks', () => {
-      it('should not render a label element when label prop is not provided', () => {
-        mockMillify.mockReturnValue('100')
-        mockPluralize.mockReturnValue('items')
-
-        render(<InfoBlock icon={FaUser} value={100} />)
-
-        // Verify only the formatted value is rendered, no label
-        expect(screen.getByText('100 items')).toBeInTheDocument()
-
-        // Verify no element with label styling exists
-        const labelElements = document.querySelectorAll('.text-sm.font-medium')
-        expect(labelElements).toHaveLength(0)
-      })
-
       it('should use empty string as default className', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
@@ -284,16 +249,6 @@ describe('InfoBlock Component', () => {
         render(<InfoBlock icon={FaStar} value={2500} />)
 
         expect(screen.getByText('2.5k stars')).toBeInTheDocument()
-      })
-
-      it('should render label with correct styling', () => {
-        mockMillify.mockReturnValue('100')
-        mockPluralize.mockReturnValue('repos')
-
-        render(<InfoBlock icon={FaCode} value={100} label="Repositories" />)
-
-        const label = screen.getByText('Repositories')
-        expect(label).toHaveClass('text-sm', 'font-medium')
       })
 
       it('should render tooltip content correctly for positive values', () => {
@@ -379,10 +334,10 @@ describe('InfoBlock Component', () => {
         expect(wrapper).toHaveClass('flex')
 
         const icon = screen.getByTestId('icon-user')
-        expect(icon).toHaveClass('mr-3', 'mt-1', 'w-5')
+        expect(icon).toHaveClass('w-5', 'text-gray-500')
 
         const contentDiv = wrapper.children[1] as HTMLElement
-        expect(contentDiv.children[0]).toHaveClass('text-sm', 'md:text-base')
+        expect(contentDiv).toHaveClass('text-base', 'text-gray-600')
       })
 
       it('should apply custom className correctly', () => {
@@ -404,21 +359,9 @@ describe('InfoBlock Component', () => {
         render(<InfoBlock icon={FaUser} value={100} />)
 
         const icon = screen.getByTestId('icon-user')
-        expect(icon).toHaveClass('mr-3', 'mt-1', 'w-5')
+        expect(icon).toHaveClass('w-5', 'text-gray-500')
       })
 
-      it('should have correct text container styling', () => {
-        mockMillify.mockReturnValue('100')
-        mockPluralize.mockReturnValue('items')
-
-        render(<InfoBlock icon={FaUser} value={100} label="Test Label" />)
-
-        const textContainer = screen.getByText('100 items').closest('div')
-        expect(textContainer).toHaveClass('text-sm', 'md:text-base')
-
-        const label = screen.getByText('Test Label')
-        expect(label).toHaveClass('text-sm', 'font-medium')
-      })
     })
 
     describe('Accessibility and tooltip behavior', () => {

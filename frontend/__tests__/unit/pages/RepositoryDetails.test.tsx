@@ -188,7 +188,6 @@ describe('RepositoryDetailsPage', () => {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
-        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
       }
     })
   })

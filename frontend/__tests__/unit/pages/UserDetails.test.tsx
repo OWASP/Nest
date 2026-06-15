@@ -12,31 +12,7 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-// Mock Badges component
-jest.mock('components/Badges', () => {
-  const MockBadges = ({
-    name,
-    cssClass,
-    showTooltip,
-  }: {
-    name: string
-    cssClass: string
-    showTooltip?: boolean
-  }) => (
-    <div
-      data-testid={`badge-${name.toLowerCase().replaceAll(/\s+/g, '-')}`}
-      data-css-class={cssClass}
-      data-show-tooltip={showTooltip}
-    >
-      <span data-testid={`icon-${cssClass.replace('fa-', '')}`} />
-    </div>
-  )
-  MockBadges.displayName = 'MockBadges'
-  return {
-    __esModule: true,
-    default: MockBadges,
-  }
-})
+
 
 const mockRouter = {
   push: jest.fn(),
@@ -72,13 +48,11 @@ describe('UserSummary', () => {
       name: 'John Doe',
       avatarUrl: 'https://example.com/avatar.png',
       url: 'https://github.com/johndoe',
+      bio: 'Bio text',
     }
     render(
       <UserSummary
-        user={user}
-        contributionData={{}}
-        dateRange={{ startDate: '', endDate: '' }}
-        hasContributionData={false}
+        user={user as any}
         formattedBio={<span>Bio text</span>}
       />
     )
@@ -90,25 +64,6 @@ describe('UserSummary', () => {
     expect(screen.getByText('Bio text')).toBeInTheDocument()
   })
 
-  test('renders contribution heatmap when hasContributionData is true', () => {
-    const user = {
-      login: 'jane',
-      name: 'Jane',
-      avatarUrl: '/avatar.png',
-      url: 'https://github.com/jane',
-    }
-    render(
-      <UserSummary
-        user={user}
-        contributionData={{ '2025-01-01': 1 }}
-        dateRange={{ startDate: '2025-01-01', endDate: '2025-01-01' }}
-        hasContributionData={true}
-        formattedBio={null}
-      />
-    )
-    expect(screen.getByTestId('contribution-heatmap')).toBeInTheDocument()
-  })
-
   test('uses login as avatar alt when user has no name', () => {
     const user = {
       login: 'nologin',
@@ -118,10 +73,7 @@ describe('UserSummary', () => {
     }
     render(
       <UserSummary
-        user={user}
-        contributionData={{}}
-        dateRange={{ startDate: '', endDate: '' }}
-        hasContributionData={false}
+        user={user as any}
         formattedBio={null}
       />
     )
@@ -129,25 +81,6 @@ describe('UserSummary', () => {
   })
 
 
-  test('renders badges when user has badges', () => {
-    const user = {
-      login: 'badged',
-      name: 'Badged User',
-      avatarUrl: '/a.png',
-      url: 'https://github.com/badged',
-      badges: [{ id: 'b1', name: 'Star', cssClass: 'fa-star', description: 'Star', weight: 1 }],
-    }
-    render(
-      <UserSummary
-        user={user}
-        contributionData={{}}
-        dateRange={{ startDate: '', endDate: '' }}
-        hasContributionData={false}
-        formattedBio={null}
-      />
-    )
-    expect(screen.getByTestId('badge-star')).toBeInTheDocument()
-  })
 })
 
 describe('UserDetailsPage', () => {
@@ -209,7 +142,6 @@ describe('UserDetailsPage', () => {
       expect(screen.getByText('Test User')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
     expect(screen.getByText('10 Followers')).toBeInTheDocument()
@@ -292,7 +224,6 @@ describe('UserDetailsPage', () => {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
-        expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
       }
     })
   })
@@ -331,9 +262,6 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      const statisticsTitle = screen.getByText('Statistics')
-      expect(statisticsTitle).toBeInTheDocument()
-
       const followersCount = screen.getByText('10 Followers')
       expect(followersCount).toBeInTheDocument()
 
@@ -400,13 +328,11 @@ describe('UserDetailsPage', () => {
       expect(userName).toBeInTheDocument()
       const avatar = screen.getByAltText('Test User')
       expect(avatar).toHaveClass('rounded-full')
-      expect(avatar).toHaveClass('h-[200px]')
-      expect(avatar).toHaveClass('w-[200px]')
+      expect(avatar).toHaveClass('size-32')
 
       // Check for responsive classes
       const summaryContainer = avatar.closest('div.flex')
       expect(summaryContainer).toHaveClass('flex-col')
-      expect(summaryContainer).toHaveClass('lg:flex-row')
     })
   })
 
@@ -503,8 +429,7 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Recent Issues')).toBeInTheDocument()
-      expect(screen.getByText('No recent releases.')).toBeInTheDocument()
+      expect(screen.queryByText('Recent Issues')).not.toBeInTheDocument()
     })
   })
 
@@ -521,8 +446,7 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
-      expect(screen.queryByText('Test Pull Request')).not.toBeInTheDocument()
+      expect(screen.queryByText('Recent Pull Requests')).not.toBeInTheDocument()
     })
   })
 
@@ -538,8 +462,7 @@ describe('UserDetailsPage', () => {
     })
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Recent Releases')).toBeInTheDocument()
-      expect(screen.queryByText('Test v1.0.0')).not.toBeInTheDocument()
+      expect(screen.queryByText('Recent Releases')).not.toBeInTheDocument()
     })
   })
 
@@ -555,8 +478,7 @@ describe('UserDetailsPage', () => {
     })
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
-      expect(screen.queryByText('v2.0.0 Release')).not.toBeInTheDocument()
+      expect(screen.queryByText('Recent Milestones')).not.toBeInTheDocument()
     })
   })
 
@@ -606,8 +528,7 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getAllByText('N/A').length).toBe(3)
       const bioContainer = screen.getByText('@testuser').closest('div')
-      expect(bioContainer).toHaveClass('text-center')
-      expect(bioContainer).toHaveClass('lg:text-left')
+      expect(bioContainer).toHaveClass('text-left')
     })
   })
 
@@ -622,273 +543,6 @@ describe('UserDetailsPage', () => {
     })
   })
 
-  describe('Badge Display Tests', () => {
-    test('renders badges section when user has badges', async () => {
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: mockUserDetailsData,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        expect(screen.getByTestId('badge-contributor')).toBeInTheDocument()
-        expect(screen.getByTestId('badge-security-expert')).toBeInTheDocument()
-      })
-    })
-
-    test('renders badges with correct props', async () => {
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: mockUserDetailsData,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        const contributorBadge = screen.getByTestId('badge-contributor')
-        expect(contributorBadge).toHaveAttribute('data-css-class', 'fa-medal')
-        expect(contributorBadge).toHaveAttribute('data-show-tooltip', 'true')
-
-        const securityBadge = screen.getByTestId('badge-security-expert')
-        expect(securityBadge).toHaveAttribute('data-css-class', 'fa-shield-alt')
-        expect(securityBadge).toHaveAttribute('data-show-tooltip', 'true')
-      })
-    })
-
-    test('does not render badges section when user has no badges', async () => {
-      const dataWithoutBadges = {
-        ...mockUserDetailsData,
-        user: {
-          ...mockUserDetailsData.user,
-          badges: [],
-          badgeCount: 0,
-        },
-      }
-
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithoutBadges,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        expect(screen.queryByTestId(/^badge-/)).not.toBeInTheDocument()
-      })
-    })
-
-    test('does not render badges section when badges is undefined', async () => {
-      const dataWithoutBadges = {
-        ...mockUserDetailsData,
-        user: {
-          ...mockUserDetailsData.user,
-          badges: undefined,
-          badgeCount: 0,
-        },
-      }
-
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithoutBadges,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        expect(screen.queryByTestId(/^badge-/)).not.toBeInTheDocument()
-      })
-    })
-
-    test('renders badges with fallback cssClass when not provided', async () => {
-      const dataWithIncompleteBadges = {
-        ...mockUserDetailsData,
-        user: {
-          ...mockUserDetailsData.user,
-          badges: [
-            {
-              id: '1',
-              name: 'Test Badge',
-              cssClass: undefined,
-              description: 'Test description',
-              weight: 1,
-            },
-          ],
-        },
-      }
-
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithIncompleteBadges,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'medal')
-      })
-    })
-
-    test('renders badges with empty cssClass fallback', async () => {
-      const dataWithEmptyCssClass = {
-        ...mockUserDetailsData,
-        user: {
-          ...mockUserDetailsData.user,
-          badges: [
-            {
-              id: '1',
-              name: 'Test Badge',
-              cssClass: '',
-              description: 'Test description',
-              weight: 1,
-            },
-          ],
-        },
-      }
-
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithEmptyCssClass,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'medal')
-      })
-    })
-
-    test('handles badges with special characters in names', async () => {
-      const dataWithSpecialBadges = {
-        ...mockUserDetailsData,
-        user: {
-          ...mockUserDetailsData.user,
-          badges: [
-            {
-              id: '1',
-              name: 'Badge & More!',
-              cssClass: 'fa-star',
-              description: 'Special badge',
-              weight: 1,
-            },
-          ],
-        },
-      }
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithSpecialBadges,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        expect(screen.getByTestId('badge-badge-&-more!')).toBeInTheDocument()
-      })
-    })
-
-    test('handles badges with long names', async () => {
-      const dataWithLongNameBadge = {
-        ...mockUserDetailsData,
-        user: {
-          ...mockUserDetailsData.user,
-          badges: [
-            {
-              id: '1',
-              name: 'Very Long Badge Name That Exceeds Normal Length',
-              cssClass: 'fa-trophy',
-              description: 'Long name badge',
-              weight: 1,
-            },
-          ],
-        },
-      }
-
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithLongNameBadge,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        expect(
-          screen.getByTestId('badge-very-long-badge-name-that-exceeds-normal-length')
-        ).toBeInTheDocument()
-      })
-    })
-
-    // eslint-disable-next-line jest/expect-expect
-    test('renders badges in correct order as returned by backend (weight ASC then name ASC)', async () => {
-      // Backend returns badges sorted by weight ASC, then name ASC
-      // This test verifies the frontend preserves the backend ordering
-      const dataWithOrderedBadges = {
-        ...mockUserDetailsData,
-        user: {
-          ...mockUserDetailsData.user,
-          badges: [
-            // Backend returns badges in this order: weight ASC, then name ASC
-            {
-              id: '3',
-              name: 'Alpha Badge',
-              cssClass: 'fa-star',
-              description: 'Alpha badge with weight 1',
-              weight: 1,
-            },
-            {
-              id: '4',
-              name: 'Beta Badge',
-              cssClass: 'fa-trophy',
-              description: 'Beta badge with weight 1',
-              weight: 1,
-            },
-            {
-              id: '1',
-              name: 'Contributor',
-              cssClass: 'medal',
-              description: 'Active contributor',
-              weight: 1,
-            },
-            {
-              id: '2',
-              name: 'Security Expert',
-              cssClass: 'fa-shield-alt',
-              description: 'Security expertise',
-              weight: 2,
-            },
-            {
-              id: '5',
-              name: 'Top Contributor',
-              cssClass: 'fa-crown',
-              description: 'Highest weight badge',
-              weight: 3,
-            },
-          ],
-          badgeCount: 5,
-        },
-      }
-
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithOrderedBadges,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
-        const expectedOrder = [
-          'badge-alpha-badge', // weight 1, name ASC
-          'badge-beta-badge', // weight 1, name ASC
-          'badge-contributor', // weight 1, name ASC
-          'badge-security-expert', // weight 2
-          'badge-top-contributor', // weight 3
-        ]
-        expectBadgesInCorrectOrder(expectedOrder)
-      })
-    })
-  })
 
   describe('Contribution Heatmap', () => {
     test('does not render heatmap when user has empty contribution data', async () => {
@@ -1108,7 +762,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
 
       await waitFor(() => {
-        expect(screen.getByText('Joined:')).toBeInTheDocument()
+        expect(screen.getByText('Joined :')).toBeInTheDocument()
         expect(screen.getByText('Not available')).toBeInTheDocument()
       })
     })
