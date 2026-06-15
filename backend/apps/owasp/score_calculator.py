@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from django.db.models import Q
+from django.db.models import Count, Q
 
 from apps.common.models import BulkSaveModel
 from apps.github.models.issue import Issue
@@ -64,6 +64,14 @@ class ContributionScoreCalculator:
 
         return total_score, breakdown
 
+    def calculate_score(self, counts: dict[str, int]) -> tuple[int, dict[str, int]]:
+        """Calculate total score and breakdown from contribution counts."""
+        breakdown = {
+            event_type: count * self.scoring_weights.get(event_type, 0)
+            for event_type, count in counts.items()
+        }
+        return sum(breakdown.values()), breakdown
+
     def get_contribution_breakdown(
         self,
         user: User,
@@ -81,22 +89,12 @@ class ContributionScoreCalculator:
             dict[str, int]: Score breakdown by event type.
 
         """
-        breakdown: dict[str, int] = {}
-
-        # Count merged PRs
-        pr_merged_count = self.count_merged_pull_requests(user, start_date, end_date)
-        breakdown["pr_merged"] = pr_merged_count * self.scoring_weights.get("pr_merged", 0)
-
-        # Count opened PRs
-        pr_opened_count = self.count_opened_pull_requests(user, start_date, end_date)
-        breakdown["pr_opened"] = pr_opened_count * self.scoring_weights.get("pr_opened", 0)
-
-        # Count opened issues
-        issue_opened_count = self.count_opened_issues(user, start_date, end_date)
-        breakdown["issue_opened"] = issue_opened_count * self.scoring_weights.get(
-            "issue_opened", 0
-        )
-
+        counts = {
+            "pr_merged": self.count_merged_pull_requests(user, start_date, end_date),
+            "pr_opened": self.count_opened_pull_requests(user, start_date, end_date),
+            "issue_completed": self.count_completed_issues(user, start_date, end_date),
+        }
+        _, breakdown = self.calculate_score(counts)
         return breakdown
 
     def count_merged_pull_requests(
@@ -160,13 +158,13 @@ class ContributionScoreCalculator:
 
         return query.count()
 
-    def count_opened_issues(
+    def count_completed_issues(
         self,
         user: User,
         start_date: date | None = None,
         end_date: date | None = None,
     ) -> int:
-        """Count opened issues created by user."""
+        """Count completed issues created by user."""
         query = Issue.objects.filter(
             author=user,
             state_reason=Issue.StateReason.COMPLETED,
@@ -224,9 +222,13 @@ class ContributionScoreCalculator:
             repository__organization__is_owasp_related_organization=True,
         ).values("author_id")
 
-        users_with_contributions = User.objects.filter(
-            Q(id__in=pr_authors) | Q(id__in=issue_authors),
-        ).distinct()
+        users_with_contributions = (
+            User.objects.filter(
+                Q(id__in=pr_authors) | Q(id__in=issue_authors),
+            )
+            .distinct()
+            .prefetch_related("contribution_score")
+        )
 
         total_users = users_with_contributions.count()
         updated_count = 0
@@ -234,10 +236,47 @@ class ContributionScoreCalculator:
 
         logger.info("Starting score recalculation for %s users", total_users)
 
+        pr_merged_counts: dict[int, int] = dict(
+            PullRequest.objects.filter(
+                merged_at__isnull=False,
+                repository__is_fork=False,
+                repository__organization__is_owasp_related_organization=True,
+            )
+            .values("author_id")
+            .annotate(count=Count("id"))
+            .values_list("author_id", "count")
+        )
+
+        pr_opened_counts: dict[int, int] = dict(
+            PullRequest.objects.filter(
+                repository__is_fork=False,
+                repository__organization__is_owasp_related_organization=True,
+            )
+            .values("author_id")
+            .annotate(count=Count("id"))
+            .values_list("author_id", "count")
+        )
+
+        issue_completed_counts: dict[int, int] = dict(
+            Issue.objects.filter(
+                state_reason=Issue.StateReason.COMPLETED,
+                repository__is_fork=False,
+                repository__organization__is_owasp_related_organization=True,
+            )
+            .values("author_id")
+            .annotate(count=Count("id"))
+            .values_list("author_id", "count")
+        )
+
         contribution_scores = []
 
         for user in users_with_contributions:
-            total_score, _ = self.calculate(user)
+            counts = {
+                "pr_merged": pr_merged_counts.get(user.id, 0),
+                "pr_opened": pr_opened_counts.get(user.id, 0),
+                "issue_completed": issue_completed_counts.get(user.id, 0),
+            }
+            total_score, _ = self.calculate_score(counts)
             tier = self.get_tier(total_score)
 
             try:
@@ -260,11 +299,13 @@ class ContributionScoreCalculator:
                 BulkSaveModel.bulk_save(
                     ContributionScore, contribution_scores, fields=["value", "tier"]
                 )
+                contribution_scores.clear()
 
         if contribution_scores:
             BulkSaveModel.bulk_save(
                 ContributionScore, contribution_scores, fields=["value", "tier"]
             )
+            contribution_scores.clear()
 
         logger.info(
             "Score recalculation complete. Created: %s, Updated: %s",

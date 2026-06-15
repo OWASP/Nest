@@ -11,18 +11,18 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelTable(
             name="certificate",
-            table="owasp_crp_recognition_certificates",
+            table="owasp_crp_certificates",
         ),
         migrations.AlterModelTable(
             name="contributionscore",
-            table="owasp_crp_recognition_contribution_scores",
+            table="owasp_crp_contribution_scores",
         ),
         migrations.AlterModelTable(
             name="leaderboardsnapshot",
-            table="owasp_crp_recognition_leaderboard_snapshots",
+            table="owasp_crp_leaderboard_snapshots",
         ),
         migrations.AlterModelTable(
             name="scoringweight",
-            table="owasp_crp_recognition_scoring_weights",
+            table="owasp_crp_scoring_weights",
         ),
     ]
