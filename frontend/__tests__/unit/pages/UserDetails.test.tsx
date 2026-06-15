@@ -128,19 +128,6 @@ describe('UserSummary', () => {
     expect(screen.getByRole('img', { name: 'nologin' })).toBeInTheDocument()
   })
 
-  test('uses placeholder avatar and fallback alt when user is null', () => {
-    render(
-      <UserSummary
-        user={null}
-        contributionData={{}}
-        dateRange={{ startDate: '', endDate: '' }}
-        hasContributionData={false}
-        formattedBio={null}
-      />
-    )
-    const img = screen.getByRole('img', { name: 'User Avatar' })
-    expect(img).toHaveAttribute('src', expect.stringContaining('placeholder.svg'))
-  })
 
   test('renders badges when user has badges', () => {
     const user = {

@@ -19,12 +19,12 @@ import SecondaryCard from 'components/SecondaryCard'
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
 interface UserSummaryProps {
-  user: User | null
+  user: User
   formattedBio: React.ReactNode
 }
 
 export const UserSummary: React.FC<UserSummaryProps> = ({ user, formattedBio }) => (
-  <MemberDetailSidebar user={user as User} formattedBio={formattedBio} />
+  <MemberDetailSidebar user={user} formattedBio={formattedBio} />
 )
 
 const UserDetailsPage: React.FC = () => {
