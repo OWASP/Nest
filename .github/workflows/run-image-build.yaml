@@ -133,6 +133,7 @@ jobs:
             type=registry,ref=${{ env.BACKEND_CACHE_REF }},mode=max
           context: backend
           file: docker/backend/Dockerfile
+          target: backend
           provenance: mode=min
           push: true
           sbom: true
