@@ -12,8 +12,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-
-
 const mockRouter = {
   push: jest.fn(),
 }
@@ -52,7 +50,7 @@ describe('UserSummary', () => {
     }
     render(
       <UserSummary
-        user={user as any}
+        user={user as Parameters<typeof UserSummary>[0]['user']}
         formattedBio={<span>Bio text</span>}
       />
     )
@@ -72,15 +70,10 @@ describe('UserSummary', () => {
       url: 'https://github.com/nologin',
     }
     render(
-      <UserSummary
-        user={user as any}
-        formattedBio={null}
-      />
+      <UserSummary user={user as Parameters<typeof UserSummary>[0]['user']} formattedBio={null} />
     )
     expect(screen.getByRole('img', { name: 'nologin' })).toBeInTheDocument()
   })
-
-
 })
 
 describe('UserDetailsPage', () => {
@@ -95,21 +88,6 @@ describe('UserDetailsPage', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
-
-  // Helper functions to reduce nesting depth
-  const getBadgeElements = () => {
-    return screen.getAllByTestId(/^badge-/)
-  }
-
-  const getBadgeTestIds = () => {
-    const badgeElements = getBadgeElements()
-    return badgeElements.map((element) => element.dataset.testid)
-  }
-
-  const expectBadgesInCorrectOrder = (expectedOrder: string[]) => {
-    const badgeTestIds = getBadgeTestIds()
-    expect(badgeTestIds).toEqual(expectedOrder)
-  }
 
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -542,7 +520,6 @@ describe('UserDetailsPage', () => {
       expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
-
 
   describe('Contribution Heatmap', () => {
     test('does not render heatmap when user has empty contribution data', async () => {

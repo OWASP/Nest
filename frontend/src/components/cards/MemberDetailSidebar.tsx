@@ -45,7 +45,7 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
   ]
 
   return (
-    <div className="h-fit flex flex-col sm:flex-row xl:flex-col gap-6 sm:gap-8 xl:gap-5">
+    <div className="flex h-fit flex-col gap-6 sm:flex-row sm:gap-8 xl:flex-col xl:gap-5">
       <div className="flex min-w-0 flex-col items-start gap-0 text-left sm:flex-1 xl:flex-col xl:items-start">
         <Image
           width={200}
@@ -73,7 +73,7 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
       </div>
 
       <div className="flex flex-col gap-0 sm:w-72 sm:shrink-0 sm:gap-6 xl:w-full xl:gap-0">
-        <div className="space-y-4 border-t border-gray-200 py-5 text-base text-gray-600 dark:border-gray-700 dark:text-gray-300 sm:rounded-lg sm:border-t-0 sm:bg-gray-100 sm:p-6 sm:shadow-md sm:dark:bg-gray-800 xl:rounded-none xl:border-t xl:bg-transparent xl:px-0 xl:py-5 xl:shadow-none xl:dark:bg-transparent">
+        <div className="space-y-4 border-t border-gray-200 py-5 text-base text-gray-600 sm:rounded-lg sm:border-t-0 sm:bg-gray-100 sm:p-6 sm:shadow-md xl:rounded-none xl:border-t xl:bg-transparent xl:px-0 xl:py-5 xl:shadow-none dark:border-gray-700 dark:text-gray-300 sm:dark:bg-gray-800 xl:dark:bg-transparent">
           {details.map((detail) => (
             <div key={detail.label} className="flex items-start gap-1">
               <strong className="text-gray-800 dark:text-gray-100">{detail.label} : </strong>
@@ -82,7 +82,7 @@ const MemberDetailSidebar = ({ user, formattedBio }: MemberDetailSidebarProps) =
           ))}
         </div>
 
-        <div className="space-y-4 border-t border-gray-200 py-5 text-base text-gray-600 dark:border-gray-700 dark:text-gray-300 sm:rounded-lg sm:border-t-0 sm:bg-gray-100 sm:p-6 sm:shadow-md sm:dark:bg-gray-800 xl:rounded-none xl:border-t xl:bg-transparent xl:px-0 xl:py-5 xl:shadow-none xl:dark:bg-transparent">
+        <div className="space-y-4 border-t border-gray-200 py-5 text-base text-gray-600 sm:rounded-lg sm:border-t-0 sm:bg-gray-100 sm:p-6 sm:shadow-md xl:rounded-none xl:border-t xl:bg-transparent xl:px-0 xl:py-5 xl:shadow-none dark:border-gray-700 dark:text-gray-300 sm:dark:bg-gray-800 xl:dark:bg-transparent">
           {stats.map((stat) => (
             <InfoBlock
               key={`${stat.unit}-${stat.value}`}

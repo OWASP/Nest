@@ -132,7 +132,7 @@ const UserDetailsPage: React.FC = () => {
 
           <div className="flex min-w-0 flex-1 flex-col gap-6">
             {hasContributionData && dateRange.startDate && dateRange.endDate && (
-              <div className='rounded-lg bg-gray-100 pl-1 pr-4 pt-0 pb-1 shadow-md dark:bg-gray-800'>
+              <div className="rounded-lg bg-gray-100 pt-0 pr-4 pb-1 pl-1 shadow-md dark:bg-gray-800">
                 <div className="overflow-x-auto">
                   <ContributionHeatmap
                     contributionData={contributionData}

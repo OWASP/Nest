@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import millify from 'millify'
 import React from 'react'
-import { FaUser, FaStar, FaCode } from 'react-icons/fa6'
+import { FaUser, FaStar } from 'react-icons/fa6'
 import { pluralize } from 'utils/pluralize'
 import InfoBlock from 'components/InfoBlock'
 
@@ -361,7 +361,6 @@ describe('InfoBlock Component', () => {
         const icon = screen.getByTestId('icon-user')
         expect(icon).toHaveClass('w-5', 'text-gray-500')
       })
-
     })
 
     describe('Accessibility and tooltip behavior', () => {

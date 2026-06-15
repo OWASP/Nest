@@ -85,7 +85,9 @@ describe('ContributionHeatmap', () => {
   describe('Rendering & Props', () => {
     it('renders with minimal and all optional props', async () => {
       const { rerender } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
-      await waitFor(() => expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toBeInTheDocument())
+      await waitFor(() =>
+        expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toBeInTheDocument()
+      )
       expect(screen.queryByRole('heading')).not.toBeInTheDocument()
 
       rerender(
@@ -177,7 +179,10 @@ describe('ContributionHeatmap', () => {
       )
       expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toBeInTheDocument()
       // Should render with default date range (1 year)
-      expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toHaveAttribute('data-series-length', '7')
+      expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toHaveAttribute(
+        'data-series-length',
+        '7'
+      )
     })
 
     it('handles missing endDate by using default dates', () => {
@@ -185,7 +190,10 @@ describe('ContributionHeatmap', () => {
         <ContributionHeatmap contributionData={mockData} startDate="2024-01-01" endDate="" />
       )
       expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toBeInTheDocument()
-      expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toHaveAttribute('data-series-length', '7')
+      expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toHaveAttribute(
+        'data-series-length',
+        '7'
+      )
     })
 
     it('handles both missing startDate and endDate', () => {
@@ -235,7 +243,10 @@ describe('ContributionHeatmap', () => {
         />
       )
       expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toBeInTheDocument()
-      expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toHaveAttribute('data-series-length', '7')
+      expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toHaveAttribute(
+        'data-series-length',
+        '7'
+      )
     })
 
     it('handles startDate after endDate and swaps them correctly', () => {
@@ -321,7 +332,9 @@ describe('ContributionHeatmap', () => {
 
     it('handles dynamic import with SSR disabled', async () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
-      await waitFor(() => expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toBeInTheDocument())
+      await waitFor(() =>
+        expect(screen.getAllByTestId('mock-heatmap-chart')[0]).toBeInTheDocument()
+      )
     })
   })
 
@@ -717,8 +730,6 @@ describe('ContributionHeatmap', () => {
       // Verify compact dimensions (150px height for compact variant)
       expect(chart).toHaveAttribute('data-height', '150')
     })
-
-
 
     it('defaults to default variant when no variant is specified', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)

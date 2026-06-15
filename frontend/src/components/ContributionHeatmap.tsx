@@ -276,8 +276,6 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
     [contributionData, startDate, endDate]
   )
 
-
-
   const options = useMemo(() => getChartOptions(isDarkMode, unit), [isDarkMode, unit])
 
   const calculateChartWidth = useMemo(() => {
