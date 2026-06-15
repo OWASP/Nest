@@ -463,7 +463,7 @@ class TestRemoveBoardCandidateClaimEvidence:
         assert evidence.removed_reason == "No longer relevant"
         assert evidence.removed_at == now
         evidence.save.assert_called_once_with(
-            update_fields=["is_removed", "removed_reason", "removed_at"]
+            update_fields=["file", "is_removed", "removed_reason", "removed_at"]
         )
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")

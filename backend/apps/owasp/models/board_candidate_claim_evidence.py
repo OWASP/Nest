@@ -95,7 +95,7 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         """Validate evidence."""
         super().clean()
 
-        if not (self.file or self.source_url):
+        if not self.is_removed and not (self.file or self.source_url):
             err = "Either file or source_url is required."
             raise ValidationError(err)
 

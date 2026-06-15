@@ -57,7 +57,7 @@ class RemoveEvidenceInput:
 
     claim_key: str
     key: str
-    removed_reason: str
+    removed_reason: str | None = None
     year: int
 
 
@@ -223,10 +223,12 @@ class BoardCandidateClaimEvidenceMutations:
             )
 
         try:
+            evidence.file.delete(save=False)
+            evidence.file = None
             evidence.is_removed = True
-            evidence.removed_reason = input_data.removed_reason
+            evidence.removed_reason = input_data.removed_reason or ""
             evidence.removed_at = timezone.now()
-            evidence.save(update_fields=["is_removed", "removed_reason", "removed_at"])
+            evidence.save(update_fields=["file", "is_removed", "removed_reason", "removed_at"])
         except IntegrityError:
             logger.warning(
                 "Error removing Board Candidate Claim Evidence %s",
