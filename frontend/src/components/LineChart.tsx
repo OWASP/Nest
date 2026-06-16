@@ -32,7 +32,7 @@ const LineChart: React.FC<{
             foreColor: color,
           },
           tooltip: {
-            theme: theme as 'light' | 'dark' | undefined,
+            theme: theme === 'light' || theme === 'dark' ? theme : undefined,
           },
           xaxis: {
             categories: labels,

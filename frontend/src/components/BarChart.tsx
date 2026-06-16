@@ -67,7 +67,7 @@ const BarChart: React.FC<{
             },
           },
           tooltip: {
-            theme: theme as 'light' | 'dark' | undefined,
+            theme: theme === 'light' || theme === 'dark' ? theme : undefined,
           },
           dataLabels: {
             formatter: (
