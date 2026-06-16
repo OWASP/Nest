@@ -147,12 +147,12 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   states: {
     hover: {
       filter: {
-        type: 'none' as 'none',
+        type: 'none' as const,
       },
     },
     active: {
       filter: {
-        type: 'none' as 'none',
+        type: 'none' as const,
       },
     },
   },
