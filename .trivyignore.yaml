@@ -11,6 +11,7 @@ misconfigurations:
       - docker/semgrep/Dockerfile
       - docker/trivy/Dockerfile
       - docker/zap/Dockerfile
+      - .clusterfuzzlite/Dockerfile
   - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
     paths:
       - infrastructure/modules/alb/main.tf

@@ -1,0 +1,51 @@
+name: ClusterFuzzLite
+
+on:
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: 0 2 * * *
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: clusterfuzzlite-${{ github.ref }}
+
+permissions: {}
+
+jobs:
+  fuzzing:
+    name: ClusterFuzzLite
+    if: github.event.repository.fork == false
+    permissions:
+      contents: read  # to check out the repository
+      security-events: write  # to upload SARIF to Code Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Build fuzzers
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          language: python
+          keep-unaffected-fuzz-targets: true
+
+      - name: Run fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          fuzz-seconds: 60
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          mode: ${{ github.event_name == 'pull_request' && 'code-change' || 'batch' }}
+          output-sarif: true
+
+      - name: Upload SARIF to code scanning
+        if: always() && hashFiles('artifacts/fuzz-latest/fuzzing-report.sarif') != ''
+        uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4.36.0
+        with:
+          category: clusterfuzzlite
+          sarif_file: artifacts/fuzz-latest/fuzzing-report.sarif
+    timeout-minutes: 30

@@ -90,6 +90,7 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+atheris
 attisdropped
 bangbang
 boardofdirectors
@@ -118,6 +119,7 @@ envsubst
 ephemerals
 euo
 facebookexternalhit
+fdp
 gamesec
 geocoders
 geoloc
