@@ -67,7 +67,7 @@ const BarChart: React.FC<{
             },
           },
           tooltip: {
-            theme: theme,
+            theme: theme as 'light' | 'dark' | undefined,
           },
           dataLabels: {
             formatter: (
@@ -91,11 +91,9 @@ const BarChart: React.FC<{
             function ({
               value,
               dataPointIndex,
-              _,
             }: {
               value: number
               dataPointIndex: number
-              _: unknown
             }) {
               const requirement = requirements[dataPointIndex]
               if (reverseColors?.[dataPointIndex]) {

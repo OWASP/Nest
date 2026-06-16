@@ -147,12 +147,12 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   states: {
     hover: {
       filter: {
-        type: 'none',
+        type: 'none' as 'none',
       },
     },
     active: {
       filter: {
-        type: 'none',
+        type: 'none' as 'none',
       },
     },
   },
@@ -183,12 +183,10 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
       seriesIndex,
       dataPointIndex,
       w,
-    }: {
-      seriesIndex: number
-      dataPointIndex: number
-      w: { config: { series: Array<{ data: Array<{ y: number; date: string }> }> } }
-    }) => {
-      const data = w.config.series[seriesIndex].data[dataPointIndex]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }: any) => {
+      const series = w.config.series as Array<{ data: Array<{ y: number; date: string }> }>
+      const data = series[seriesIndex].data[dataPointIndex]
       if (!data) return ''
 
       const count = data.y
