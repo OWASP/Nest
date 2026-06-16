@@ -5,24 +5,38 @@ on:
     - cron: 0 */6 * * *
   workflow_dispatch:
 
+concurrency:
+  group: update-readme-badges
+  cancel-in-progress: false
+
 jobs:
   update-badges:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Fetch latest badge values
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "STARS=$(gh api repos/OWASP/Nest --jq .stargazers_count)" >> $GITHUB_ENV
+
+          contributors_json="$(gh api repos/OWASP/Nest/stats/contributors)"
+          if echo "$contributors_json" | jq -e 'type == "array"' >/dev/null; then
+            contributors_count="$(echo "$contributors_json" | jq '[.[] | select(.total > 0)] | length')"
+          else
+            contributors_count=0
+          fi
+          echo "CONTRIBUTORS=$contributors_count" >> $GITHUB_ENV
+
           echo "FORKS=$(gh api repos/OWASP/Nest --jq .forks_count)" >> $GITHUB_ENV
           echo "ISSUES=$(gh api 'search/issues?q=repo:OWASP/Nest+type:issue+state:open' --jq .total_count)" >> $GITHUB_ENV
           echo "PRS=$(gh api 'search/issues?q=repo:OWASP/Nest+type:pr+state:open' --jq .total_count)" >> $GITHUB_ENV
           echo "CONTRIBUTORS=$(gh api repos/OWASP/Nest/stats/contributors --jq '[.[] | select(.total > 0)] | length')" >> $GITHUB_ENV
-          echo "LAST_COMMIT=$(gh api repos/OWASP/Nest/commits/main --jq '.commit.committer.date[:10]')" >> $GITHUB_ENV
+          raw_last_commit="$(gh api repos/OWASP/Nest/commits/main --jq '.commit.committer.date[:10]')"
+          echo "LAST_COMMIT=${raw_last_commit//-/--}" >> $GITHUB_ENV
 
       - name: Update README.md with new values
         run: |
