@@ -30,7 +30,7 @@ class Local(Base):
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
 
-    SLACK_BOT_TOKEN = ""
+    SLACK_BOT_TOKEN = values.SecretValue()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-    SLACK_SIGNING_SECRET = ""
+    SLACK_SIGNING_SECRET = values.SecretValue()
