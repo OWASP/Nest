@@ -86,6 +86,11 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
           unit="Issue"
           value={details.openIssuesCount}
         />
+        {details.updatedAt && (
+  <div className="text-xs text-gray-500 dark:text-gray-400">
+    Last updated: {new Date(details.updatedAt).toLocaleDateString()}
+  </div>
+)}
       </div>
     </div>
   )
