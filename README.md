@@ -2,11 +2,11 @@
 
 [![OWASP](https://img.shields.io/badge/production-blue?&label=level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![License](https://img.shields.io/badge/license-%20MIT-blue?style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/archives/project-nest)
 
-[![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)](https://github.com/OWASP/Nest/network/members) [![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)](https://github.com/OWASP/Nest/stargazers) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/)
+[![Forks](https://img.shields.io/badge/Forks-644-blue?style=for-the-badge)](https://github.com/OWASP/Nest/network/members) [![Stars](https://img.shields.io/badge/Stars-409-blue?style=for-the-badge)](https://github.com/OWASP/Nest/stargazers) [![Contributors](https://img.shields.io/badge/Contributors-100-blue?style=for-the-badge)](https://github.com/OWASP/Nest/graphs/contributors) [![Last Commit](https://img.shields.io/badge/Last%20commit-2026--06--15-blue?style=for-the-badge)](https://github.com/OWASP/Nest/commits/main/)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/owasp/nest/ci.yaml?branch=main&color=blue&label=CI&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/ci.yaml?query=branch%3Amain) [![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/ci-cd-staging.yaml?branch=main&color=blue&label=CI%2FCD&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/ci-cd-staging.yaml?query=branch%3Amain) [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/code-ql.yaml?branch=main&color=blue&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/code-ql.yaml?query=branch%3Amain)
 
-[![Issues](https://img.shields.io/github/issues/owasp/nest?color=blue&style=for-the-badge&label=Issues)](https://github.com/OWASP/Nest/issues) [![Pull Requests](https://img.shields.io/github/issues-pr/owasp/nest?color=blue&style=for-the-badge&label=Pull%20Requests)](https://github.com/OWASP/Nest/pulls)
+[![Issues](https://img.shields.io/badge/Issues-320-blue?style=for-the-badge)](https://github.com/OWASP/Nest/issues) [![Pull Requests](https://img.shields.io/badge/Pull%20Requests-75-blue?style=for-the-badge)](https://github.com/OWASP/Nest/pulls)
 
 [![DeepWiki](https://img.shields.io/badge/docs-deep%20wiki-blue?style=for-the-badge)](https://deepwiki.com/OWASP/Nest) [![ReadTheDocs](https://img.shields.io/badge/docs-read%20the%20docs-blue?style=for-the-badge)](https://owasp-nest.readthedocs.io/latest/)
 
@@ -26,6 +26,7 @@
 </div>
 
 <!-- --8<-- [start:docs] -->
+
 **OWASP Nest** is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
 Key features of the platform include:
@@ -42,7 +43,7 @@ OWASP Nest promotes collaboration, making it easier for both new and experienced
 OWASP Nest is led by a dedicated team committed to fostering collaboration and supporting contributors. The leadership team ensures the platform aligns with OWASP's mission, continually improving its features to serve the community better.
 Current Leaders:
 
-- [Arkadii Yakovets](https://github.com/arkid15r/)  -- CCSP, CISSP, CSSLP
+- [Arkadii Yakovets](https://github.com/arkid15r/) -- CCSP, CISSP, CSSLP
 - [Kate Golovanova](https://github.com/kasya/) -- CC
 - [Starr Brown](https://github.com/mamicidal/) -- CISSP
 

@@ -1,0 +1,44 @@
+name: Update README badges
+
+on:
+  schedule:
+    - cron: 0 */6 * * *
+  workflow_dispatch:
+
+jobs:
+  update-badges:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest badge values
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "STARS=$(gh api repos/OWASP/Nest --jq .stargazers_count)" >> $GITHUB_ENV
+          echo "FORKS=$(gh api repos/OWASP/Nest --jq .forks_count)" >> $GITHUB_ENV
+          echo "ISSUES=$(gh api 'search/issues?q=repo:OWASP/Nest+type:issue+state:open' --jq .total_count)" >> $GITHUB_ENV
+          echo "PRS=$(gh api 'search/issues?q=repo:OWASP/Nest+type:pr+state:open' --jq .total_count)" >> $GITHUB_ENV
+          echo "CONTRIBUTORS=$(gh api repos/OWASP/Nest/stats/contributors --jq '[.[] | select(.total > 0)] | length')" >> $GITHUB_ENV
+          echo "LAST_COMMIT=$(gh api repos/OWASP/Nest/commits/main --jq '.commit.committer.date[:10]')" >> $GITHUB_ENV
+
+      - name: Update README.md with new values
+        run: |
+          sed -i 's|https://img.shields.io/badge/Stars-[0-9]*-blue|https://img.shields.io/badge/Stars-'"$STARS"'-blue|g' README.md
+          sed -i 's|https://img.shields.io/badge/Forks-[0-9]*-blue|https://img.shields.io/badge/Forks-'"$FORKS"'-blue|g' README.md
+          sed -i 's|https://img.shields.io/badge/Contributors-[0-9]*-blue|https://img.shields.io/badge/Contributors-'"$CONTRIBUTORS"'-blue|g' README.md
+          sed -i 's|https://img.shields.io/badge/Last%20commit-[^"< ]*-blue|https://img.shields.io/badge/Last%20commit-'"$LAST_COMMIT"'-blue|g' README.md
+          sed -i 's|https://img.shields.io/badge/Issues-[0-9]*-blue|https://img.shields.io/badge/Issues-'"$ISSUES"'-blue|g' README.md
+          sed -i 's|https://img.shields.io/badge/Pull%20Requests-[0-9]*-blue|https://img.shields.io/badge/Pull%20Requests-'"$PRS"'-blue|g' README.md
+
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet README.md; then
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add README.md
+            git commit -m 'Update README badges'
+            git push
+          fi
