@@ -4,6 +4,8 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Chapters Page', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('https://*.tile.openstreetmap.org/**', (route) => route.abort())
+
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
