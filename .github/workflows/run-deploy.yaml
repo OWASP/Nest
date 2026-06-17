@@ -108,7 +108,7 @@ jobs:
           persist-credentials: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
+        uses: aws-actions/configure-aws-credentials@acca2b1b2070338fb9fd1ca27ecee81d687e58e5  # v6.1.2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -122,6 +122,9 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5  # v4.1.0
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
 
@@ -129,6 +132,11 @@ jobs:
         run: |
           bash .github/scripts/cosign-image-by-digest.sh verify "$BACKEND_IMAGE"
           bash .github/scripts/cosign-image-by-digest.sh verify "$FRONTEND_IMAGE"
+
+      - name: Verify release image SBOM attestations
+        run: |
+          bash .github/scripts/verify-ecr-image-sbom.sh verify "$BACKEND_IMAGE"
+          bash .github/scripts/verify-ecr-image-sbom.sh verify "$FRONTEND_IMAGE"
 
       - name: Apply infrastructure changes
         uses: ./.github/actions/apply-infrastructure-changes

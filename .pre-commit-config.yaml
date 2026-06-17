@@ -82,7 +82,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - strawberry-graphql==0.316.0
-          - strawberry-graphql-django==0.84.0
+          - strawberry-graphql-django==0.86.0
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
           - types-PyYAML==6.0.12.20260518
@@ -141,7 +141,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: dba2db263ee43a6480cee30f8edc8752a13b06b3  # v2.24.0
+    rev: ca620e0df5ae9a02b7b81a6e4c954894f043ce42  # v2.24.1
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
