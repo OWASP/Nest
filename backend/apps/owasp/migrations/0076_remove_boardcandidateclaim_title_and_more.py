@@ -35,17 +35,6 @@ class Migration(migrations.Migration):
         ),
         # Copy title to name
         migrations.RunPython(_copy_title_to_name, migrations.RunPython.noop),
-        # Alter name to to be non-nullable and unique
-        migrations.AlterField(
-            model_name="boardcandidateclaim",
-            name="name",
-            field=models.CharField(max_length=200, unique=True, verbose_name="Name"),
-        ),
-        migrations.AlterField(
-            model_name="boardcandidateclaimevidence",
-            name="name",
-            field=models.CharField(max_length=200, unique=True, verbose_name="Name"),
-        ),
         # Remove title
         migrations.RemoveField(
             model_name="boardcandidateclaim",

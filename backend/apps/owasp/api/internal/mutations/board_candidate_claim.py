@@ -144,6 +144,9 @@ class BoardCandidateClaimMutations:
     ) -> ClaimResult:
         """Create a new draft claim for a candidate."""
         user = info.context.request.user
+        if user.github_user is None:
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
+
         try:
             board = BoardOfDirectors.objects.get(year=input_data.year)
         except BoardOfDirectors.DoesNotExist:
@@ -152,9 +155,6 @@ class BoardCandidateClaimMutations:
                 code="NOT_FOUND",
                 message=f"No board election found for the year {input_data.year}.",
             )
-
-        if user.github_user is None:
-            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         candidate = board.get_candidate(login=user.github_user.login)
         if not candidate:
@@ -201,6 +201,8 @@ class BoardCandidateClaimMutations:
     ) -> ClaimResult:
         """Update a draft claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
@@ -255,6 +257,8 @@ class BoardCandidateClaimMutations:
     ) -> ClaimResult:
         """Discard a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
@@ -305,6 +309,8 @@ class BoardCandidateClaimMutations:
     ) -> ClaimResult:
         """Submit a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
@@ -369,6 +375,8 @@ class BoardCandidateClaimMutations:
     ) -> ClaimResult:
         """Withdraw a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
@@ -424,6 +432,9 @@ class BoardCandidateClaimMutations:
     ) -> ReorderClaimsResult:
         """Reorder claims for a candidate in a board year."""
         user = info.context.request.user
+        if user.github_user is None:
+            return ReorderClaimsResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
+
         login = user.github_user.login
 
         keys, error = _validate_reorder_claims(login, input_data)

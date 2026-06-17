@@ -34,8 +34,8 @@ def _make_info(user):
 class TestDiscardBoardCandidateClaim:
     """Tests for discard_board_candidate_claim mutation."""
 
-    def _make_input_data(self, key):
-        return MagicMock(key=key)
+    def _make_input_data(self, key, year=2025):
+        return MagicMock(key=key, year=year)
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_discard_claim_success(self, mock_claim_model):
@@ -106,8 +106,8 @@ class TestDiscardBoardCandidateClaim:
 class TestSubmitBoardCandidateClaim:
     """Tests for submit_board_candidate_claim mutation."""
 
-    def _make_input_data(self, key):
-        return MagicMock(key=key)
+    def _make_input_data(self, key, year=2025):
+        return MagicMock(key=key, year=year)
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_submit_claim_success(self, mock_claim_model):
@@ -180,10 +180,11 @@ class TestSubmitBoardCandidateClaim:
 class TestWithdrawBoardCandidateClaim:
     """Tests for withdraw_board_candidate_claim mutation."""
 
-    def _make_input_data(self, key, withdrawn_reason="No longer relevant"):
+    def _make_input_data(self, key, withdrawn_reason="No longer relevant", year=2025):
         return MagicMock(
             key=key,
             withdrawn_reason=withdrawn_reason,
+            year=year,
         )
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")

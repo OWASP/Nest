@@ -35,7 +35,11 @@ class TestCreateBoardCandidateClaimEvidence:
     """Tests for create_board_candidate_claim_evidence mutation."""
 
     def _make_input_data(
-        self, claim_key="test-key", name="Test Evidence", source_url="https://example.com"
+        self,
+        claim_key="test-key",
+        name="Test Evidence",
+        source_url="https://example.com",
+        year=2025,
     ):
         input_data = MagicMock(
             claim_key=claim_key,
@@ -44,6 +48,7 @@ class TestCreateBoardCandidateClaimEvidence:
             source_url=source_url,
         )
         input_data.name = name
+        input_data.year = year
         return input_data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
@@ -192,6 +197,8 @@ class TestUpdateBoardCandidateClaimEvidence:
         evidence_key="test-evidence-key",
         name="Updated Evidence",
         source_url="https://updated.com",
+        claim_key="test-claim-key",
+        year=2025,
     ):
         input_data = MagicMock(
             key=evidence_key,
@@ -200,6 +207,8 @@ class TestUpdateBoardCandidateClaimEvidence:
             source_url=source_url,
         )
         input_data.name = name
+        input_data.claim_key = claim_key
+        input_data.year = year
         return input_data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
@@ -251,6 +260,8 @@ class TestUpdateBoardCandidateClaimEvidence:
             source_url=None,
         )
         input_data.name = "Updated Name"
+        input_data.claim_key = "test-claim-key"
+        input_data.year = 2025
 
         evidence = MagicMock()
         evidence.claim.candidate.member = mock_github_user
@@ -287,6 +298,8 @@ class TestUpdateBoardCandidateClaimEvidence:
             file=MagicMock(),
             source_url=None,
         )
+        input_data.claim_key = "test-claim-key"
+        input_data.year = 2025
 
         evidence = MagicMock()
         evidence.claim.candidate.member = mock_github_user
@@ -415,11 +428,17 @@ class TestRemoveBoardCandidateClaimEvidence:
     """Tests for remove_board_candidate_claim_evidence mutation."""
 
     def _make_input_data(
-        self, evidence_key="test-evidence-key", removed_reason="No longer relevant"
+        self,
+        evidence_key="test-evidence-key",
+        removed_reason="No longer relevant",
+        claim_key="test-claim-key",
+        year=2025,
     ):
         return MagicMock(
             key=evidence_key,
             removed_reason=removed_reason,
+            claim_key=claim_key,
+            year=year,
         )
 
     @pytest.mark.parametrize(

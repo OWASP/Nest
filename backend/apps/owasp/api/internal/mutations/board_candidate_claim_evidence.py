@@ -81,10 +81,12 @@ class BoardCandidateClaimEvidenceMutations:
     ) -> EvidenceResult:
         """Create evidence for a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login if user.github_user else None,
+                candidate__member__login=user.github_user.login,
                 key=input_data.claim_key,
                 board__year=input_data.year,
             )
@@ -140,13 +142,13 @@ class BoardCandidateClaimEvidenceMutations:
     ) -> EvidenceResult:
         """Update evidence for a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
                 claim__key=input_data.claim_key,
-                claim__candidate__member__login=user.github_user.login
-                if user.github_user
-                else None,
+                claim__candidate__member__login=user.github_user.login,
                 key=input_data.key,
                 claim__board__year=input_data.year,
             )
@@ -211,13 +213,13 @@ class BoardCandidateClaimEvidenceMutations:
     ) -> EvidenceResult:
         """Remove evidence for a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
                 claim__key=input_data.claim_key,
-                claim__candidate__member__login=user.github_user.login
-                if user.github_user
-                else None,
+                claim__candidate__member__login=user.github_user.login,
                 key=input_data.key,
                 claim__board__year=input_data.year,
             )

@@ -34,15 +34,4 @@ class Migration(migrations.Migration):
         ),
         # Backfill key from name
         migrations.RunPython(_backfill_key, migrations.RunPython.noop),
-        # Alter key to be non-nullable and unique
-        migrations.AlterField(
-            model_name="boardcandidateclaim",
-            name="key",
-            field=models.CharField(max_length=100, unique=True, verbose_name="Key"),
-        ),
-        migrations.AlterField(
-            model_name="boardcandidateclaimevidence",
-            name="key",
-            field=models.CharField(max_length=100, unique=True, verbose_name="Key"),
-        ),
     ]

@@ -250,7 +250,7 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
             mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
             mock_evidence_model.objects.get.return_value = evidence
             info.context.request.build_absolute_uri.return_value = (
-                "http://example.com/media/test.pdf"
+                "https://example.com/media/test.pdf"
             )
 
             query = BoardCandidateClaimEvidenceQuery()
@@ -258,7 +258,7 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
                 info, claim_key="test-key", key="ev-key", login="alice", year=2025
             )
 
-        assert result == "http://example.com/media/test.pdf"
+        assert result == "https://example.com/media/test.pdf"
 
     def test_file_url_accessible_no_file(self):
         user = MagicMock()
@@ -349,7 +349,7 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
             mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
             mock_evidence_model.objects.get.return_value = evidence
             info.context.request.build_absolute_uri.return_value = (
-                "http://example.com/media/test.pdf"
+                "https://example.com/media/test.pdf"
             )
 
             query = BoardCandidateClaimEvidenceQuery()
@@ -357,4 +357,4 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
                 info, claim_key="test-key", key="ev-key", login="alice", year=2025
             )
 
-        assert result == "http://example.com/media/test.pdf"
+        assert result == "https://example.com/media/test.pdf"
