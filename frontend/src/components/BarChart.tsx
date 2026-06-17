@@ -3,6 +3,7 @@ import { useTheme } from 'next-themes'
 import React from 'react'
 import type { IconType } from 'react-icons'
 import { ApexBarChartDataSeries } from 'types/healthMetrics'
+import { toApexTooltipTheme } from 'utils/toApexTooltipTheme'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
@@ -19,7 +20,7 @@ const BarChart: React.FC<{
   requirements: number[]
   reverseColors?: boolean[]
 }> = ({ title, days, icon, requirements, labels, reverseColors }) => {
-  const { theme } = useTheme()
+  const { theme, resolvedTheme } = useTheme()
   let themeColor = '#1E1E2C'
   let redColor = '#FF7875'
   let greenColor = '#73D13D'
@@ -67,7 +68,7 @@ const BarChart: React.FC<{
             },
           },
           tooltip: {
-            theme: theme === 'light' || theme === 'dark' ? theme : undefined,
+            theme: toApexTooltipTheme(resolvedTheme),
           },
           dataLabels: {
             formatter: (

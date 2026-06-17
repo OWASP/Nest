@@ -3,6 +3,7 @@ import { useTheme } from 'next-themes'
 import React from 'react'
 import type { IconType } from 'react-icons'
 import type { ApexLineChartSeries } from 'types/healthMetrics'
+import { toApexTooltipTheme } from 'utils/toApexTooltipTheme'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
@@ -17,7 +18,7 @@ const LineChart: React.FC<{
   icon?: IconType
   round?: boolean
 }> = ({ title, series, labels, icon, round }) => {
-  const { theme } = useTheme()
+  const { theme, resolvedTheme } = useTheme()
   const color = theme === 'dark' ? '#ECECEC' : '#1E1E2C'
 
   return (
@@ -32,7 +33,7 @@ const LineChart: React.FC<{
             foreColor: color,
           },
           tooltip: {
-            theme: theme === 'light' || theme === 'dark' ? theme : undefined,
+            theme: toApexTooltipTheme(resolvedTheme),
           },
           xaxis: {
             categories: labels,
