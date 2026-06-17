@@ -46,7 +46,7 @@ class BoardCandidateClaimQuery:
     def board_candidate_claim(
         self, info: strawberry.Info, login: str, key: str, year: int
     ) -> BoardCandidateClaimNode | None:
-        """Resolve Board Candidate Claim for a given claim ID.
+        """Resolve Board Candidate Claim.
 
         Args:
             info (Info): Strawberry Info.

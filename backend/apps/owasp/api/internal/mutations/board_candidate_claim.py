@@ -459,7 +459,9 @@ class BoardCandidateClaimMutations:
         BoardCandidateClaim.objects.bulk_update(claims, ["order"])
 
         ordered_claims = (
-            BoardCandidateClaim.objects.filter(candidate__member__login=login, key__in=keys)
+            BoardCandidateClaim.objects.filter(
+                candidate__member__login=login, key__in=keys, board__year=input_data.year
+            )
             .select_related("candidate__member", "board")
             .order_by("order", "nest_created_at")
         )

@@ -35,6 +35,9 @@ class TestBoardCandidateClaimEvidenceQuery:
             info, claim_key=claim_key, login=login, year=2025
         )
 
+        mock_claim_model.objects.filter.assert_called_once_with(
+            candidate__member__login=login, key=claim_key, board__year=2025
+        )
         assert result == []
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim_evidence.BoardCandidateClaim")
@@ -59,6 +62,9 @@ class TestBoardCandidateClaimEvidenceQuery:
             info, claim_key=claim_key, login=login, year=2025
         )
 
+        mock_claim_model.objects.filter.assert_called_once_with(
+            candidate__member__login=login, key=claim_key, board__year=2025
+        )
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs
 
@@ -82,6 +88,9 @@ class TestBoardCandidateClaimEvidenceQuery:
             info, claim_key=claim_key, login=login, year=2025
         )
 
+        mock_claim_model.objects.filter.assert_called_once_with(
+            candidate__member__login=login, key=claim_key, board__year=2025
+        )
         assert result == []
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim_evidence.BoardCandidateClaim")
@@ -106,5 +115,8 @@ class TestBoardCandidateClaimEvidenceQuery:
             info, claim_key=claim_key, login=login, year=2025
         )
 
+        mock_claim_model.objects.filter.assert_called_once_with(
+            candidate__member__login=login, key=claim_key, board__year=2025
+        )
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs

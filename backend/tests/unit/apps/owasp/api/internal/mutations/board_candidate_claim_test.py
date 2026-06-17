@@ -263,8 +263,8 @@ class TestWithdrawBoardCandidateClaim:
 class TestValidateReorderClaims:
     """Tests for _validate_reorder_claims helper."""
 
-    def _make_input_data(self, keys):
-        return MagicMock(keys=list(keys))
+    def _make_input_data(self, keys, year=2025):
+        return MagicMock(keys=list(keys), year=year)
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_validate_success(self, mock_claim_model):
@@ -319,8 +319,8 @@ class TestValidateReorderClaims:
 class TestReorderBoardCandidateClaims:
     """Tests for reorder_board_candidate_claims mutation."""
 
-    def _make_input_data(self, keys):
-        return MagicMock(keys=list(keys))
+    def _make_input_data(self, keys, year=2025):
+        return MagicMock(keys=list(keys), year=year)
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_reorder_claims_success(self, mock_claim_model):

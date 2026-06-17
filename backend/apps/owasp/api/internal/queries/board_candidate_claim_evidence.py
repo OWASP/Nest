@@ -10,6 +10,47 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
 
 
+def get_claim_evidence(
+    info: strawberry.Info, claim_key: str, key: str, login: str, year: int
+) -> BoardCandidateClaimEvidenceNode | None:
+    """Resolve Board Candidate Claim Evidence.
+
+    Args:
+        info (Info): Strawberry Info.
+        claim_key (str): The key of the claim.
+        key (str): The key of the evidence.
+        login (str): The login of the candidate.
+        year (int): The year of the election.
+
+    Returns:
+        BoardCandidateClaimEvidenceNode if found, None otherwise
+
+    """
+    user = info.context.request.user
+    try:
+        evidence = BoardCandidateClaimEvidence.objects.get(
+            claim__key=claim_key,
+            key=key,
+            claim__candidate__member__login=login,
+            claim__board__year=year,
+            is_removed=False,
+        )
+    except BoardCandidateClaimEvidence.DoesNotExist:
+        return None
+
+    is_self = (
+        user.is_authenticated
+        and evidence.claim.candidate.member is not None
+        and user.github_user == evidence.claim.candidate.member
+    )
+
+    return (
+        evidence
+        if is_self or evidence.claim.status == BoardCandidateClaim.Status.APPROVED
+        else None
+    )
+
+
 @strawberry.type
 class BoardCandidateClaimEvidenceQuery:
     """GraphQL queries for Board Candidate Claim Evidence model."""
@@ -66,29 +107,7 @@ class BoardCandidateClaimEvidenceQuery:
             BoardCandidateClaimEvidenceNode if found, None otherwise
 
         """
-        user = info.context.request.user
-        try:
-            evidence = BoardCandidateClaimEvidence.objects.get(
-                claim__key=claim_key,
-                key=key,
-                claim__candidate__member__login=login,
-                claim__board__year=year,
-                is_removed=False,
-            )
-        except BoardCandidateClaimEvidence.DoesNotExist:
-            return None
-
-        is_self = (
-            user.is_authenticated
-            and evidence.claim.candidate.member is not None
-            and user.github_user == evidence.claim.candidate.member
-        )
-
-        return (
-            evidence
-            if is_self or evidence.claim.status == BoardCandidateClaim.Status.APPROVED
-            else None
-        )
+        return get_claim_evidence(info, claim_key, key, login, year)
 
     @strawberry_django.field
     def board_candidate_claim_evidence_file_url(
@@ -107,27 +126,10 @@ class BoardCandidateClaimEvidenceQuery:
             str: Evidence file URL if found, None otherwise
 
         """
-        user = info.context.request.user
-        try:
-            evidence = BoardCandidateClaimEvidence.objects.get(
-                claim__key=claim_key,
-                key=key,
-                claim__candidate__member__login=login,
-                claim__board__year=year,
-                is_removed=False,
-            )
-        except BoardCandidateClaimEvidence.DoesNotExist:
-            return None
-
-        is_self = (
-            user.is_authenticated
-            and evidence.claim.candidate.member is not None
-            and user.github_user == evidence.claim.candidate.member
-        )
+        evidence = get_claim_evidence(info, claim_key, key, login, year)
 
         return (
             info.context.request.build_absolute_uri(evidence.file.url)
-            if (is_self or evidence.claim.status == BoardCandidateClaim.Status.APPROVED)
-            and evidence.file
+            if evidence and evidence.file
             else None
         )

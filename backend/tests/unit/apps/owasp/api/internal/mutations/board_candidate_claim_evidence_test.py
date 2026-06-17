@@ -20,6 +20,7 @@ def _mock_transaction_atomic():
     with (
         patch("django.db.transaction.Atomic.__enter__", return_value=None),
         patch("django.db.transaction.Atomic.__exit__", return_value=False),
+        patch("django.db.transaction.on_commit", side_effect=lambda f, **_: f()),
     ):
         yield
 

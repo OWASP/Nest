@@ -84,7 +84,7 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                candidate__member__login=user.github_user.login,
+                candidate__member__login=user.github_user.login if user.github_user else None,
                 key=input_data.claim_key,
                 board__year=input_data.year,
             )
@@ -144,7 +144,9 @@ class BoardCandidateClaimEvidenceMutations:
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
                 claim__key=input_data.claim_key,
-                claim__candidate__member__login=user.github_user.login,
+                claim__candidate__member__login=user.github_user.login
+                if user.github_user
+                else None,
                 key=input_data.key,
                 claim__board__year=input_data.year,
             )
@@ -213,7 +215,9 @@ class BoardCandidateClaimEvidenceMutations:
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
                 claim__key=input_data.claim_key,
-                claim__candidate__member__login=user.github_user.login,
+                claim__candidate__member__login=user.github_user.login
+                if user.github_user
+                else None,
                 key=input_data.key,
                 claim__board__year=input_data.year,
             )
@@ -228,12 +232,14 @@ class BoardCandidateClaimEvidenceMutations:
             )
 
         try:
-            evidence.file.delete(save=False)
+            old_file = evidence.file
             evidence.file = None
             evidence.is_removed = True
             evidence.removed_reason = input_data.removed_reason or ""
             evidence.removed_at = timezone.now()
             evidence.save(update_fields=["file", "is_removed", "removed_reason", "removed_at"])
+            if old_file:
+                transaction.on_commit(lambda f=old_file: f.delete(save=False))
         except IntegrityError:
             logger.warning(
                 "Error removing Board Candidate Claim Evidence %s",
