@@ -472,6 +472,38 @@ class TestRemoveBoardCandidateClaimEvidence:
         "apps.owasp.api.internal.mutations.board_candidate_claim_evidence"
         ".BoardCandidateClaimEvidence"
     )
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.timezone")
+    def test_remove_without_reason(self, mock_timezone, mock_evidence_model, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (
+            BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES
+        )
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data(removed_reason=None)
+        now = datetime(2024, 1, 1, tzinfo=UTC)
+        mock_timezone.now.return_value = now
+
+        evidence = MagicMock()
+        evidence.claim.candidate.member = mock_github_user
+        evidence.claim.status = BoardCandidateClaim.Status.DRAFT
+        mock_evidence_model.objects.select_for_update.return_value.get.return_value = evidence
+
+        mutation = BoardCandidateClaimEvidenceMutations()
+        result = mutation.remove_board_candidate_claim_evidence(info, input_data)
+
+        assert result.ok
+        assert result.code == "SUCCESS"
+        assert evidence.removed_reason == ""
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
+    @patch(
+        "apps.owasp.api.internal.mutations.board_candidate_claim_evidence"
+        ".BoardCandidateClaimEvidence"
+    )
     def test_remove_evidence_not_found(self, mock_evidence_model, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         mock_evidence_model.REMOVAL_ALLOWED_STATUSES = (

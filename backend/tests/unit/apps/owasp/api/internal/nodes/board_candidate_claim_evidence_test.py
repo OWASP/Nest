@@ -1,5 +1,7 @@
 """Tests for BoardCandidateClaimEvidence GraphQL node."""
 
+from unittest.mock import Mock
+
 from apps.owasp.api.internal.nodes.board_candidate_claim_evidence import (
     BoardCandidateClaimEvidenceNode,
 )
@@ -25,3 +27,21 @@ class TestBoardCandidateClaimEvidenceNode(GraphQLNodeBaseTest):
             "updated_at",
         }
         assert field_names == expected_field_names
+
+    def test_has_file_returns_true_when_file_exists(self):
+        mock_evidence = Mock()
+        mock_evidence.file = Mock()
+
+        field = self._get_field_by_name("has_file", BoardCandidateClaimEvidenceNode)
+        result = field.base_resolver.wrapped_func(None, mock_evidence)
+
+        assert result is True
+
+    def test_has_file_returns_false_when_file_is_none(self):
+        mock_evidence = Mock()
+        mock_evidence.file = None
+
+        field = self._get_field_by_name("has_file", BoardCandidateClaimEvidenceNode)
+        result = field.base_resolver.wrapped_func(None, mock_evidence)
+
+        assert result is False

@@ -4,12 +4,15 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 
 from apps.owasp.api.internal.mutations.board_candidate_claim import (
     BoardCandidateClaimMutations,
     _validate_reorder_claims,
 )
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 
 @pytest.fixture(autouse=True)
@@ -500,6 +503,300 @@ class TestReorderBoardCandidateClaims:
 
         mutation = BoardCandidateClaimMutations()
         result = mutation.reorder_board_candidate_claims(info, input_data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+
+
+class TestCreateBoardCandidateClaim:
+    """Tests for create_board_candidate_claim mutation."""
+
+    def _make_input_data(self, name="Test Claim", description="Test description", year=2025):
+        data = MagicMock()
+        data.name = name
+        data.description = description
+        data.year = year
+        return data
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_create_claim_success(self, mock_claim_model, mock_board_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        mock_board = MagicMock()
+        mock_candidate = MagicMock()
+        mock_board.get_candidate.return_value = mock_candidate
+        mock_board_model.objects.get.return_value = mock_board
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.create_board_candidate_claim(info, input_data)
+
+        mock_board_model.objects.get.assert_called_once_with(year=2025)
+        mock_board.get_candidate.assert_called_once_with(login=mock_github_user.login)
+        mock_claim_model.objects.create.assert_called_once_with(
+            board=mock_board,
+            candidate=mock_candidate,
+            description=input_data.description,
+            name=input_data.name,
+        )
+        assert result.ok
+        assert result.code == "SUCCESS"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
+    def test_create_claim_board_not_found(self, mock_board_model):
+        mock_board_model.DoesNotExist = BoardOfDirectors.DoesNotExist
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data(year=2099)
+
+        mock_board_model.objects.get.side_effect = BoardOfDirectors.DoesNotExist
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.create_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "NOT_FOUND"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
+    def test_create_claim_no_github_user(self, mock_board_model):
+        user = MagicMock()
+        user.is_authenticated = True
+        user.github_user = None
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        mock_board = MagicMock()
+        mock_board_model.objects.get.return_value = mock_board
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.create_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "FORBIDDEN"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
+    def test_create_claim_not_a_candidate(self, mock_board_model):
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        mock_board = MagicMock()
+        mock_board.get_candidate.return_value = None
+        mock_board_model.objects.get.return_value = mock_board
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.create_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "FORBIDDEN"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_create_claim_integrity_error(self, mock_claim_model, mock_board_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        mock_board = MagicMock()
+        mock_candidate = MagicMock()
+        mock_board.get_candidate.return_value = mock_candidate
+        mock_board_model.objects.get.return_value = mock_board
+
+        mock_claim_model.objects.create.side_effect = IntegrityError
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.create_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "ERROR"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_create_claim_validation_error(self, mock_claim_model, mock_board_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        mock_board = MagicMock()
+        mock_candidate = MagicMock()
+        mock_board.get_candidate.return_value = mock_candidate
+        mock_board_model.objects.get.return_value = mock_board
+
+        mock_claim_model.objects.create.side_effect = ValidationError(
+            {"description": ["This field is required."]}
+        )
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.create_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert "required" in result.message
+
+
+class TestUpdateBoardCandidateClaim:
+    """Tests for update_board_candidate_claim mutation."""
+
+    def _make_input_data(
+        self, key="test-key", name="Updated Claim", description="Updated description", year=2025
+    ):
+        data = MagicMock()
+        data.key = key
+        data.name = name
+        data.description = description
+        data.year = year
+        return data
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_success(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        claim = MagicMock()
+        claim.candidate.member = mock_github_user
+        claim.is_locked = False
+        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
+
+        assert result.ok
+        assert result.code == "SUCCESS"
+        assert claim.name == input_data.name
+        assert claim.description == input_data.description
+        claim.save.assert_called_once()
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_partial(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = MagicMock(key="test-key", description=None, year=2025)
+        input_data.name = "Updated Name"
+
+        claim = MagicMock()
+        claim.candidate.member = mock_github_user
+        claim.is_locked = False
+        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
+
+        assert result.ok
+        assert result.code == "SUCCESS"
+        assert claim.name == "Updated Name"
+        claim.save.assert_called_once_with(update_fields=["name", "key"])
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_not_found(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data(key="non-existent")
+
+        mock_claim_model.objects.select_for_update.return_value.get.side_effect = (
+            BoardCandidateClaim.DoesNotExist
+        )
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "NOT_FOUND"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_locked(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        claim = MagicMock()
+        claim.candidate.member = mock_github_user
+        claim.is_locked = True
+        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "LOCKED"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_integrity_error(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        claim = MagicMock()
+        claim.candidate.member = mock_github_user
+        claim.is_locked = False
+        claim.save.side_effect = IntegrityError
+        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
+
+        assert not result.ok
+        assert result.code == "ERROR"
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_validation_error(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = self._make_input_data()
+
+        claim = MagicMock()
+        claim.candidate.member = mock_github_user
+        claim.is_locked = False
+        claim.save.side_effect = ValidationError({"name": ["Invalid."]})
+        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
 
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
