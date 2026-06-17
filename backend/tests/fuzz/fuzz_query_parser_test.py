@@ -19,7 +19,7 @@ FIELD_SCHEMA = {
 FIELDS = list(FIELD_SCHEMA.keys())
 
 
-def test_one_input(data: bytes) -> None:
+def TestOneInput(data: bytes) -> None:
     """Fuzz QueryParser with arbitrary and structured Unicode input."""
     fdp = atheris.FuzzedDataProvider(data)
 
@@ -45,7 +45,7 @@ def test_one_input(data: bytes) -> None:
 
 def main() -> None:
     """Run the Atheris fuzz target."""
-    atheris.Setup(sys.argv, test_one_input)
+    atheris.Setup(sys.argv, TestOneInput)
     atheris.Fuzz()
 
 
