@@ -1,11 +1,19 @@
 """GitHub user GraphQL node."""
 
+from typing import TYPE_CHECKING, Annotated
+
+import strawberry
 import strawberry_django
 from django.db.models.query import Prefetch
 
 from apps.github.models.user import User
 from apps.nest.api.internal.nodes.badge import BadgeNode
 from apps.nest.models.user_badge import UserBadge
+from apps.owasp.models.crp.certificate import Certificate
+
+if TYPE_CHECKING:
+    from apps.owasp.api.internal.nodes.certificate import CertificateNode
+    from apps.owasp.api.internal.nodes.contribution_score import ContributionScoreNode
 
 USER_BADGES_PREFETCH = Prefetch(
     "user_badges",
@@ -16,6 +24,12 @@ USER_BADGES_PREFETCH = Prefetch(
         "badge__name",
     ),
     to_attr="user_badges_list",
+)
+
+USER_CERTIFICATE_PREFETCH = Prefetch(
+    "certificates",
+    queryset=Certificate.objects.filter(is_revoked=False).order_by("-issued_at"),
+    to_attr="user_certificates",
 )
 
 
@@ -40,6 +54,33 @@ USER_BADGES_PREFETCH = Prefetch(
 )
 class UserNode:
     """GitHub user node."""
+
+    @strawberry_django.field(select_related=["contribution_score"])
+    def contribution_score(
+        self, root: User
+    ) -> (
+        Annotated[
+            "ContributionScoreNode",
+            strawberry.lazy("apps.owasp.api.internal.nodes.contribution_score"),
+        ]
+        | None
+    ):
+        """Resolve current contribution score."""
+        return getattr(root, "contribution_score", None)
+
+    @strawberry_django.field(prefetch_related=[USER_CERTIFICATE_PREFETCH])
+    def current_certificate(
+        self, root: User
+    ) -> (
+        Annotated[
+            "CertificateNode",
+            strawberry.lazy("apps.owasp.api.internal.nodes.certificate"),
+        ]
+        | None
+    ):
+        """Resolve the latest active certificate for the user."""
+        certs = getattr(root, "user_certificates", [])
+        return certs[0] if certs else None
 
     @strawberry_django.field(prefetch_related=[USER_BADGES_PREFETCH])
     def badges(self, root: User) -> list[BadgeNode]:

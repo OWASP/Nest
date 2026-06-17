@@ -21,7 +21,7 @@ class LeaderboardSnapshot(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "owasp_crp_recognition_leaderboard_snapshots"
+        db_table = "owasp_crp_leaderboard_snapshots"
         verbose_name_plural = "Leaderboard Snapshots"
         unique_together = ("github_user", "project", "chapter", "snapshot_date")
         indexes = [
