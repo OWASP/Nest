@@ -1,6 +1,7 @@
 """OWASP certificate GraphQL queries."""
 
 import uuid
+
 import strawberry
 import strawberry_django
 from django.core.exceptions import ValidationError
@@ -15,13 +16,13 @@ class CertificateQuery:
     """Certificate queries."""
 
     @strawberry_django.field
-    def certificate(self, id: uuid.UUID) -> CertificateNode | None:
+    def certificate(self, certificate_id: uuid.UUID) -> CertificateNode | None:
         """Resolve certificate by raw UUID."""
         try:
             return Certificate.objects.select_related(
                 "github_user",
                 "github_user__contribution_score",
-            ).get(id=id)
+            ).get(id=certificate_id)
         except (Certificate.DoesNotExist, ValidationError, ValueError):
             return None
 
