@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import { test, expect } from '@playwright/test'
+import formatIcsText from 'utils/formatIcsText'
 import slugify from 'utils/slugify'
 
 test.describe('Calendar Export Functionality', () => {
@@ -33,7 +34,7 @@ test.describe('Calendar Export Functionality', () => {
       expect(content).toContain('BEGIN:VCALENDAR')
       expect(content).toContain('VERSION:2.0')
       expect(content).toContain('BEGIN:VEVENT')
-      expect(content).toContain(`SUMMARY:${eventName}`)
+      expect(content).toContain(`SUMMARY:${formatIcsText(eventName)}`)
       expect(content).toContain('END:VCALENDAR')
     }
   })

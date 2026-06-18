@@ -24,18 +24,7 @@ if [[ "$repo" == "$image" || -z "$tag" || -z "$repo_name" ]]; then
   exit 1
 fi
 
-digest=$(
-  aws ecr batch-get-image \
-    --repository-name "$repo_name" \
-    --image-ids "imageTag=${tag}" \
-    --query 'images[0].imageId.imageDigest' \
-    --output text
-)
-
-if [[ -z "$digest" || "$digest" == "None" ]]; then
-  echo "::error::Image not found in ECR: ${image} (repository: ${repo_name}, tag: ${tag})" >&2
-  exit 1
-fi
+digest=$(bash "$(dirname "${BASH_SOURCE[0]}")/ecr-image-digest.sh" "$image")
 
 image_by_digest="${repo}@${digest}"
 echo "Using image digest reference: ${image_by_digest}"

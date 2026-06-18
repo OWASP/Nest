@@ -43,7 +43,7 @@ runs:
     - name: Cache Terraform plugins
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
-        key: ${{ runner.os }}-infrastructure-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-infrastructure-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
         path: ${{ inputs.plugin-cache-dir }}
 
     - name: Prepare Terraform backend

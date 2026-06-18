@@ -9,7 +9,6 @@ from typing import Any
 import ffmpeg
 import pypdfium2 as pdfium
 from django.db.models import QuerySet
-from weasyprint import HTML
 
 from apps.common.eleven_labs import ElevenLabs
 from apps.common.template_loader import video_env
@@ -43,6 +42,13 @@ class Slide:
     template_name: str
     transcript: str
 
+    @staticmethod
+    def create_weasyprint_html(**kwargs: Any):
+        """Create a WeasyPrint HTML document (lazy import avoids native deps at module load)."""
+        from weasyprint import HTML  # noqa: PLC0415
+
+        return HTML(**kwargs)
+
     @property
     def audio_path(self) -> Path:
         """Return audio file path."""
@@ -63,7 +69,9 @@ class Slide:
         page = None
         pdf = None
         try:
-            html = HTML(string=video_env.get_template(self.template_name).render(self.context))
+            html = Slide.create_weasyprint_html(
+                string=video_env.get_template(self.template_name).render(self.context)
+            )
 
             pdf = pdfium.PdfDocument(html.write_pdf())
             page = pdf[0]
