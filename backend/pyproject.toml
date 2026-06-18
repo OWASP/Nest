@@ -13,6 +13,7 @@ dependencies.python = "^3.13"
 dependencies.aiohttp = "3.14.0"
 dependencies.algoliasearch = "4.40.0"
 dependencies.algoliasearch-django = "4.0.0"
+dependencies.cryptography = "48.0.1"
 dependencies.django = "6.0.6"
 dependencies.django-configurations = "2.5.1"
 dependencies.django-cors-headers = "4.9.0"
@@ -47,7 +48,7 @@ dependencies.requests = "2.33.1"
 dependencies.sentry-sdk = { extras = [ "django" ], version = "2.58.0" }
 dependencies.slack-bolt = "1.28.0"
 dependencies.slack-sdk = "3.41.0"
-dependencies.starlette = "1.0.1"
+dependencies.starlette = "1.3.1"
 dependencies.strawberry-graphql = { extras = [ "django" ], version = "0.316.0" }
 dependencies.strawberry-graphql-django = "0.75.3"
 dependencies.thefuzz = "0.22.1"
@@ -100,8 +101,10 @@ lint.per-file-ignores."apps/**/management/commands/*.py" = [
   "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
 lint.per-file-ignores."apps/**/migrations/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D103",   # https://docs.astral.sh/ruff/rules/undocumented-public-function/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/

@@ -4,9 +4,9 @@ ignoreScripts: true
 minimumReleaseAge: 30240
 
 minimumReleaseAgeExclude:
-  - '@playwright/test@1.60.0'
-  - playwright-core@1.60.0
-  - playwright@1.60.0
+  - '@playwright/test@1.61.0'
+  - playwright-core@1.61.0
+  - playwright@1.61.0
 
 overrides:
   glob: 11.1.0

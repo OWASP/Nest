@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import Q
 
 from apps.common.models import TimestampedModel
 from apps.common.utils import slugify
@@ -85,6 +86,22 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
 
         """
         return self.name
+
+    def has_admin(self, user) -> bool:
+        """Check if the given user is an admin of this program.
+
+        Falls back to a github_user lookup for admins who have not linked
+        their nest_user profile yet.
+        """
+        if not user.is_authenticated:
+            return False
+
+        query = Q(nest_user=user)
+        github_user = getattr(user, "github_user", None)
+        if github_user is not None:
+            query |= Q(github_user=github_user)
+
+        return self.admins.filter(query).exists()
 
     def user_has_access(self, user) -> bool:
         """Check if the given user has admin or mentor access to this program.
