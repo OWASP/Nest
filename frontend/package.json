@@ -1,21 +1,4 @@
 {
-  "name": "owasp-nest-frontend",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev --port 3000 --turbo",
-    "format": "prettier --log-level warn --write .",
-    "format:check": "prettier --check .",
-    "graphql-codegen": "graphql-codegen --config graphql-codegen.ts",
-    "lighthouse-ci": "lhci autorun",
-    "lighthouse-ci:desktop": "lhci autorun --collect.settings.preset=desktop",
-    "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
-    "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
-    "start": "next start",
-    "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/a11y/ --coverage=false",
-    "test:unit": "tsc --noEmit && tsc --noEmit -p __tests__/tsconfig.json && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
-  },
   "dependencies": {
     "@apollo/client": "4.2.0",
     "@dnd-kit/core": "6.3.1",
@@ -34,13 +17,13 @@
     "@heroui/tooltip": "2.2.29",
     "@next/third-parties": "16.2.6",
     "@react-leaflet/core": "3.0.0",
-    "@sentry/nextjs": "10.53.1",
-    "apexcharts": "5.12.0",
+    "@sentry/nextjs": "10.54.0",
+    "apexcharts": "5.13.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "core-js": "3.49.0",
-    "date-fns": "4.2.1",
-    "dayjs": "1.11.20",
+    "date-fns": "4.3.0",
+    "dayjs": "1.11.21",
     "dompurify": "3.4.9",
     "framer-motion": "12.40.0",
     "graphql": "16.14.0",
@@ -124,7 +107,8 @@
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@11.5.3",
+  "name": "owasp-nest-frontend",
+  "packageManager": "pnpm@11.7.0",
   "prettier": {
     "arrowParens": "always",
     "endOfLine": "lf",
@@ -136,5 +120,21 @@
     "singleQuote": true,
     "tabWidth": 2,
     "trailingComma": "es5"
-  }
+  },
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000 --turbo",
+    "format": "prettier --log-level warn --write .",
+    "format:check": "prettier --check .",
+    "graphql-codegen": "graphql-codegen --config graphql-codegen.ts",
+    "lighthouse-ci": "lhci autorun",
+    "lighthouse-ci:desktop": "lhci autorun --collect.settings.preset=desktop",
+    "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
+    "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
+    "start": "next start",
+    "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/a11y/ --coverage=false",
+    "test:unit": "tsc --noEmit && tsc --noEmit -p __tests__/tsconfig.json && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
+  },
+  "version": "0.0.0"
 }
