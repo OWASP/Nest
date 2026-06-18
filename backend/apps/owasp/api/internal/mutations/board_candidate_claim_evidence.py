@@ -86,9 +86,9 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
+                board__year=input_data.year,
                 candidate__member__login=user.github_user.login,
                 key=input_data.claim_key,
-                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -103,9 +103,9 @@ class BoardCandidateClaimEvidenceMutations:
         try:
             evidence = BoardCandidateClaimEvidence.objects.create(
                 claim=claim,
-                name=input_data.name,
                 description=input_data.description,
                 file=input_data.file,
+                name=input_data.name,
                 source_url=input_data.source_url or "",
             )
         except IntegrityError:
@@ -147,10 +147,10 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                claim__key=input_data.claim_key,
-                claim__candidate__member__login=user.github_user.login,
-                key=input_data.key,
                 claim__board__year=input_data.year,
+                claim__candidate__member__login=user.github_user.login,
+                claim__key=input_data.claim_key,
+                key=input_data.key,
             )
         except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
@@ -218,10 +218,10 @@ class BoardCandidateClaimEvidenceMutations:
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                claim__key=input_data.claim_key,
-                claim__candidate__member__login=user.github_user.login,
-                key=input_data.key,
                 claim__board__year=input_data.year,
+                claim__candidate__member__login=user.github_user.login,
+                claim__key=input_data.claim_key,
+                key=input_data.key,
             )
         except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
@@ -237,8 +237,8 @@ class BoardCandidateClaimEvidenceMutations:
             old_file = evidence.file
             evidence.file = None
             evidence.is_removed = True
-            evidence.removed_reason = input_data.removed_reason or ""
             evidence.removed_at = timezone.now()
+            evidence.removed_reason = input_data.removed_reason or ""
             evidence.save(update_fields=["file", "is_removed", "removed_reason", "removed_at"])
             if old_file:
                 transaction.on_commit(lambda f=old_file: f.delete(save=False))

@@ -122,7 +122,9 @@ def _validate_reorder_claims(
         )
 
     if BoardCandidateClaim.objects.filter(
-        candidate__member__login=login, key__in=keys, board__year=input_data.year
+        board__year=input_data.year,
+        candidate__member__login=login,
+        key__in=keys,
     ).count() != len(keys):
         return keys, ReorderClaimsResult(
             ok=False,
@@ -206,9 +208,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
+                board__year=input_data.year,
                 candidate__member__login=user.github_user.login,
                 key=input_data.key,
-                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -262,9 +264,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
+                board__year=input_data.year,
                 candidate__member__login=user.github_user.login,
                 key=input_data.key,
-                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -314,9 +316,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
+                board__year=input_data.year,
                 candidate__member__login=user.github_user.login,
                 key=input_data.key,
-                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -380,9 +382,9 @@ class BoardCandidateClaimMutations:
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
+                board__year=input_data.year,
                 candidate__member__login=user.github_user.login,
                 key=input_data.key,
-                board__year=input_data.year,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -443,7 +445,9 @@ class BoardCandidateClaimMutations:
 
         claims = list(
             BoardCandidateClaim.objects.filter(
-                candidate__member__login=login, key__in=keys, board__year=input_data.year
+                board__year=input_data.year,
+                candidate__member__login=login,
+                key__in=keys,
             )
             .select_for_update(of=("self",))
             .select_related("candidate__member")
@@ -471,7 +475,9 @@ class BoardCandidateClaimMutations:
 
         ordered_claims = (
             BoardCandidateClaim.objects.filter(
-                candidate__member__login=login, key__in=keys, board__year=input_data.year
+                board__year=input_data.year,
+                candidate__member__login=login,
+                key__in=keys,
             )
             .select_related("candidate__member", "board")
             .order_by("order", "nest_created_at")

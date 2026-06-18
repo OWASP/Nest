@@ -29,11 +29,11 @@ def get_claim_evidence(
     user = info.context.request.user
     try:
         evidence = BoardCandidateClaimEvidence.objects.get(
-            claim__key=claim_key,
-            key=key,
-            claim__candidate__member__login=login,
             claim__board__year=year,
+            claim__candidate__member__login=login,
+            claim__key=claim_key,
             is_removed=False,
+            key=key,
         )
     except BoardCandidateClaimEvidence.DoesNotExist:
         return None
@@ -73,7 +73,9 @@ class BoardCandidateClaimEvidenceQuery:
         """
         user = info.context.request.user
         claim = BoardCandidateClaim.objects.filter(
-            candidate__member__login=login, key=claim_key, board__year=year
+            board__year=year,
+            candidate__member__login=login,
+            key=claim_key,
         ).first()
         if claim is None:
             return []
