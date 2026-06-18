@@ -35,7 +35,7 @@ class TestBoardCandidateClaimEvidenceNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("has_file", BoardCandidateClaimEvidenceNode)
         result = field.base_resolver.wrapped_func(None, mock_evidence)
 
-        assert result is True
+        assert result
 
     def test_has_file_returns_false_when_file_is_none(self):
         mock_evidence = Mock()
@@ -44,4 +44,4 @@ class TestBoardCandidateClaimEvidenceNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("has_file", BoardCandidateClaimEvidenceNode)
         result = field.base_resolver.wrapped_func(None, mock_evidence)
 
-        assert result is False
+        assert not result
