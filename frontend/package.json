@@ -22,7 +22,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "core-js": "3.49.0",
-    "date-fns": "4.2.1",
+    "date-fns": "4.3.0",
     "dayjs": "1.11.21",
     "dompurify": "3.4.5",
     "framer-motion": "12.40.0",
