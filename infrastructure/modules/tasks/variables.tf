@@ -90,6 +90,18 @@ variable "load_data_task_memory" {
   default     = "4096"
 }
 
+variable "mentorship_sync_modules_data_task_cpu" {
+  description = "The CPU for the mentorship-sync-modules-data task."
+  type        = string
+  default     = "256"
+}
+
+variable "mentorship_sync_modules_data_task_memory" {
+  description = "The memory for the mentorship-sync-modules-data task."
+  type        = string
+  default     = "1024"
+}
+
 variable "migrate_task_cpu" {
   description = "The CPU for the migrate task."
   type        = string
