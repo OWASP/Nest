@@ -3,6 +3,7 @@ services:
     build:
       context: ../../backend
       dockerfile: ../docker/backend/Dockerfile
+      target: backend
     command: >
       sh -c '
         python manage.py migrate &&

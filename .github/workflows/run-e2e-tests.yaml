@@ -29,7 +29,7 @@ jobs:
       NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     services:
       cache:
         image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
@@ -78,10 +78,10 @@ jobs:
       - name: Cache Playwright Chromium
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: e2e-playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
+          key: e2e-playwright-chromium-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
           path: ~/.cache/ms-playwright
           restore-keys: |
-            e2e-playwright-chromium-${{ runner.os }}-
+            e2e-playwright-chromium-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install Playwright Chromium
         run: |
@@ -92,7 +92,8 @@ jobs:
       - name: Cache Next.js build
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: next-cache-e2e-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
+          key: next-cache-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml')
+            }}
           path: frontend/.next/cache
 
       - name: Prepare environment variables for frontend
@@ -147,4 +148,4 @@ jobs:
           name: playwright-test-results-shard-${{ matrix.shard }}
           path: e2e/test-results/
           retention-days: 7
-    timeout-minutes: 5
+    timeout-minutes: 10
