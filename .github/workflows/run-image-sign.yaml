@@ -68,7 +68,7 @@ jobs:
           persist-credentials: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885  # v6.1.1
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59  # v6.1.3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -96,11 +96,18 @@ jobs:
     environment: ${{ inputs.environment }}
     permissions:
       actions: write
+      attestations: write
+      contents: read
       id-token: write
     runs-on: ubuntu-24.04-arm
     env:
       RELEASE_VERSION: ${{ inputs.release_version }}
     steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
       - name: Download unsigned SBOM
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
@@ -135,16 +142,51 @@ jobs:
             --bundle "${frontend_sbom}.sigstore.json" \
             "$frontend_sbom"
 
+      - name: Attest backend SBOM
+        id: attest-backend-sbom
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26  # v4.1.0
+        with:
+          sbom-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+          subject-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+
+      - name: Attest frontend SBOM
+        id: attest-frontend-sbom
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26  # v4.1.0
+        with:
+          sbom-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+          subject-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+
+      - name: Verify SBOM attestations
+        env:
+          CYCLONEDX_PREDICATE_TYPE: https://cyclonedx.org/bom
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh attestation verify "backend-sbom-$RELEASE_VERSION.cdx.json" \
+            --predicate-type "$CYCLONEDX_PREDICATE_TYPE" \
+            --repo "${{ github.repository }}"
+          gh attestation verify "frontend-sbom-$RELEASE_VERSION.cdx.json" \
+            --predicate-type "$CYCLONEDX_PREDICATE_TYPE" \
+            --repo "${{ github.repository }}"
+
+      - name: Prepare SBOM provenance for release upload
+        run: |
+          cp "${{ steps.attest-backend-sbom.outputs.bundle-path }}" \
+            "backend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl"
+          cp "${{ steps.attest-frontend-sbom.outputs.bundle-path }}" \
+            "frontend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl"
+
       - name: Upload signed SBOM as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: sbom-${{ env.RELEASE_VERSION }}
           path: |
             backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
             backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
-    timeout-minutes: 5
+    timeout-minutes: 10
 
   upload-release-sbom:
     name: Upload release SBOM
@@ -172,7 +214,9 @@ jobs:
           gh release upload "$RELEASE_TAG" \
             --repo "${{ github.repository }}" \
             "backend-sbom-$RELEASE_VERSION.cdx.json" \
+            "backend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl" \
             "backend-sbom-$RELEASE_VERSION.cdx.json.sigstore.json" \
             "frontend-sbom-$RELEASE_VERSION.cdx.json" \
+            "frontend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl" \
             "frontend-sbom-$RELEASE_VERSION.cdx.json.sigstore.json"
     timeout-minutes: 5
