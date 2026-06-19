@@ -6,7 +6,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.owasp.models.recognition_enums import EventTypeChoices
+from apps.owasp.models.crp.recognition_enums import EventTypeChoices
 
 
 class ScoringWeight(TimestampedModel):
@@ -18,7 +18,7 @@ class ScoringWeight(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "recognition_scoring_weights"
+        db_table = "owasp_crp_scoring_weights"
         verbose_name_plural = "Scoring Weights"
 
     event_type = models.CharField(

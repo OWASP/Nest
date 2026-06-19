@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from apps.owasp.models.scoring_weight import ScoringWeight
+from apps.owasp.models.crp.scoring_weight import ScoringWeight
 
 
 @admin.register(ScoringWeight)
