@@ -194,6 +194,7 @@ jobs:
       - run-release-version-resolution
     permissions:
       actions: write
+      attestations: write
       contents: write
       id-token: write
     secrets:

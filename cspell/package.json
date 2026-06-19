@@ -1,5 +1,4 @@
 {
-  "packageManager": "pnpm@11.5.3",
   "devDependencies": {
     "@cspell/dict-aws": "4.0.17",
     "@cspell/dict-data-science": "2.0.13",
@@ -12,5 +11,6 @@
     "@cspell/dict-terraform": "1.1.3",
     "@cspell/dict-win32": "2.0.10",
     "cspell": "10.0.0"
-  }
+  },
+  "packageManager": "pnpm@11.7.0"
 }
