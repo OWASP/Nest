@@ -100,6 +100,10 @@ class TestAlgoliaValidators:
     def test_valid_query(self, query):
         validate_query(query)
 
+    @pytest.mark.parametrize(("query"), ["@", "@@@ ### %%%%", "% & * + ? / \\ \" ' ( ) [ ] ="])
+    def test_non_searchable_query(self, query):
+        validate_query(query)
+
     # Facet filters tests
     @pytest.mark.parametrize(
         ("facet_filters", "error_message"),

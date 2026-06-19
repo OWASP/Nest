@@ -271,6 +271,24 @@ class TestAlgoliaSearch:
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert response_data["error"] == "An internal error occurred. Please try again later."
 
+    def test_algolia_search_returns_empty_results_for_non_searchable_query(self):
+        """Test that non-searchable queries return empty results without calling Algolia."""
+        with patch("apps.core.api.internal.algolia.get_search_results") as mock_get_search_results:
+            mock_request = self._build_request(
+                index_name="users",
+                query="% & * + ? / \\ \" ' ( ) [ ] =",
+                page=1,
+                hits_per_page=10,
+                facet_filters=[],
+            )
+
+            response = algolia_search(mock_request)
+            response_data = json.loads(response.content)
+
+            assert response.status_code == HTTPStatus.OK
+            assert response_data == {"hits": [], "nbPages": 0}
+            mock_get_search_results.assert_not_called()
+
     def test_algolia_search_handles_json_decode_error(self):
         """Test that JSONDecodeError is caught and proper error returned."""
         mock_request = Mock()

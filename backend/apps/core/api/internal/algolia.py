@@ -16,9 +16,10 @@ from apps.common.index import IndexBase
 from apps.common.utils import get_user_ip_address
 from apps.core.constants import CACHE_PREFIX
 from apps.core.utils.index import deep_camelize, get_params_for_index
-from apps.core.validators import validate_search_params
+from apps.core.validators import has_searchable_query, validate_search_params
 
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
+EMPTY_SEARCH_RESULTS = {"hits": [], "nbPages": 0}
 
 
 def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowed:
@@ -51,6 +52,9 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
         limit = data.get("hitsPerPage", 25)
         page = data.get("page", 1)
         query = data.get("query", "")
+
+        if query.strip() and not has_searchable_query(query):
+            return JsonResponse(EMPTY_SEARCH_RESULTS)
 
         cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
         if facet_filters:

@@ -5,6 +5,14 @@ import re
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 
+QUERY_PATTERN = re.compile(r"^[\w .-]*$")
+SEARCHABLE_QUERY_PATTERN = re.compile(r"\w")
+
+
+def has_searchable_query(query: str) -> bool:
+    """Return whether the query contains a searchable character."""
+    return bool(SEARCHABLE_QUERY_PATTERN.search(query))
+
 
 def validate_index_name(index_name: str) -> None:
     """Validate index name.
@@ -87,7 +95,7 @@ def validate_query(query: str) -> None:
         message = "query must be a string."
         raise ValidationError(message)
 
-    if not re.match(r"^[\w .-]*$", query):
+    if has_searchable_query(query) and not QUERY_PATTERN.match(query):
         message = (
             "Invalid query value provided. "
             "Only alphanumeric characters, hyphens, spaces, and underscores are allowed."
