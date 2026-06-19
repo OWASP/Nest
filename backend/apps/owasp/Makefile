@@ -91,3 +91,7 @@ owasp-update-events:
 owasp-update-sponsors:
 	@echo "Getting OWASP sponsors data"
 	@CMD="python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
+
+owasp-crp-recalculate-scores:
+	@echo "Recalculating contributor scores"
+	@CMD="python manage.py owasp_crp_recalculate_scores" $(MAKE) exec-backend-command

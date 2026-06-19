@@ -8,8 +8,8 @@ from django.db import models
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
 from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.models.project import Project
-from apps.owasp.models.recognition_enums import TierChoices
 
 
 class LeaderboardSnapshot(TimestampedModel):
@@ -21,7 +21,7 @@ class LeaderboardSnapshot(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "recognition_leaderboard_snapshots"
+        db_table = "owasp_crp_leaderboard_snapshots"
         verbose_name_plural = "Leaderboard Snapshots"
         unique_together = ("github_user", "project", "chapter", "snapshot_date")
         indexes = [

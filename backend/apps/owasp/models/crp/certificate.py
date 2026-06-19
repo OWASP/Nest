@@ -9,7 +9,7 @@ from django.db.models import Q
 
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
-from apps.owasp.models.recognition_enums import TierChoices
+from apps.owasp.models.crp.recognition_enums import TierChoices
 
 
 class Certificate(TimestampedModel):
@@ -22,7 +22,7 @@ class Certificate(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "recognition_certificates"
+        db_table = "owasp_crp_certificates"
         verbose_name_plural = "Certificates"
         indexes = [
             models.Index(fields=["-issued_at"], name="cert_issued_at_desc"),
