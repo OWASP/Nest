@@ -11,7 +11,7 @@ class BoardCandidateClaimAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for BoardCandidateClaim model."""
 
     list_filter = ("status",)
-    search_fields = ("title",)
+    search_fields = ("name",)
 
 
 admin.site.register(BoardCandidateClaim, BoardCandidateClaimAdmin)

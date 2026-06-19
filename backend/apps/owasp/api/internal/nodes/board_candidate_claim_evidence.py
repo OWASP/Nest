@@ -12,13 +12,9 @@ from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaim
     BoardCandidateClaimEvidence,
     fields=[
         "description",
-        "file_name",
-        "file_size",
-        "is_removed",
-        "removed_at",
-        "removed_reason",
+        "key",
+        "name",
         "source_url",
-        "title",
     ],
 )
 class BoardCandidateClaimEvidenceNode(strawberry.relay.Node):
@@ -30,9 +26,9 @@ class BoardCandidateClaimEvidenceNode(strawberry.relay.Node):
         return root.nest_created_at
 
     @strawberry_django.field
-    def file_url(self) -> str | None:
-        """Return a URL to access the evidence file."""
-        return self.file.url if self.file else None
+    def has_file(self, root: BoardCandidateClaimEvidence) -> bool:
+        """Resolve whether evidence has a file."""
+        return bool(root.file)
 
     @strawberry_django.field
     def updated_at(self, root: BoardCandidateClaimEvidence) -> datetime:

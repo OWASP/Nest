@@ -1,6 +1,5 @@
 """OWASP Board Candidate Claim Evidence GraphQL mutations."""
 
-import json
 import logging
 
 import strawberry
@@ -30,30 +29,35 @@ GENERIC_ERROR_MSG = "Something went wrong."
 class CreateEvidenceInput:
     """Input for creating claim evidence."""
 
-    claim_id: strawberry.relay.GlobalID
-    description: str | None = None
+    claim_key: str
+    description: str
     file: Upload | None = None
+    name: str
     source_url: str | None = None
-    title: str
+    year: int
 
 
 @strawberry.input
 class UpdateEvidenceInput:
     """Input for updating claim evidence."""
 
-    evidence_id: strawberry.relay.GlobalID
+    claim_key: str
     description: str | None = None
     file: Upload | None = None
+    key: str
+    name: str | None = None
     source_url: str | None = None
-    title: str | None = None
+    year: int
 
 
 @strawberry.input
 class RemoveEvidenceInput:
     """Input for removing claim evidence."""
 
-    evidence_id: strawberry.relay.GlobalID
-    removed_reason: str
+    claim_key: str
+    key: str
+    removed_reason: str | None = None
+    year: int
 
 
 @strawberry.type
@@ -77,16 +81,17 @@ class BoardCandidateClaimEvidenceMutations:
     ) -> EvidenceResult:
         """Create evidence for a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                pk=int(input_data.claim_id.node_id)
+                board__year=input_data.year,
+                candidate__member__login=user.github_user.login,
+                key=input_data.claim_key,
             )
-        except (BoardCandidateClaim.DoesNotExist, ValueError):
+        except BoardCandidateClaim.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
-
-        if user.github_user != claim.candidate.member:
-            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if claim.status != BoardCandidateClaim.Status.DRAFT:
             return EvidenceResult(
@@ -98,9 +103,9 @@ class BoardCandidateClaimEvidenceMutations:
         try:
             evidence = BoardCandidateClaimEvidence.objects.create(
                 claim=claim,
-                title=input_data.title,
-                description=input_data.description or "",
+                description=input_data.description,
                 file=input_data.file,
+                name=input_data.name,
                 source_url=input_data.source_url or "",
             )
         except IntegrityError:
@@ -114,10 +119,13 @@ class BoardCandidateClaimEvidenceMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return EvidenceResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return EvidenceResult(
@@ -134,16 +142,18 @@ class BoardCandidateClaimEvidenceMutations:
     ) -> EvidenceResult:
         """Update evidence for a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                pk=int(input_data.evidence_id.node_id)
+                claim__board__year=input_data.year,
+                claim__candidate__member__login=user.github_user.login,
+                claim__key=input_data.claim_key,
+                key=input_data.key,
             )
-        except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
+        except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
-
-        if user.github_user != evidence.claim.candidate.member:
-            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status != BoardCandidateClaim.Status.DRAFT:
             return EvidenceResult(
@@ -153,9 +163,10 @@ class BoardCandidateClaimEvidenceMutations:
             )
 
         update_fields = []
-        if input_data.title is not None:
-            evidence.title = input_data.title
-            update_fields.append("title")
+        if input_data.name is not None:
+            evidence.name = input_data.name
+            update_fields.append("name")
+            update_fields.append("key")
         if input_data.description is not None:
             evidence.description = input_data.description
             update_fields.append("description")
@@ -179,10 +190,13 @@ class BoardCandidateClaimEvidenceMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return EvidenceResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return EvidenceResult(
@@ -199,16 +213,18 @@ class BoardCandidateClaimEvidenceMutations:
     ) -> EvidenceResult:
         """Remove evidence for a claim."""
         user = info.context.request.user
+        if user.github_user is None:
+            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                pk=int(input_data.evidence_id.node_id)
+                claim__board__year=input_data.year,
+                claim__candidate__member__login=user.github_user.login,
+                claim__key=input_data.claim_key,
+                key=input_data.key,
             )
-        except (BoardCandidateClaimEvidence.DoesNotExist, ValueError):
+        except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
-
-        if user.github_user != evidence.claim.candidate.member:
-            return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         if evidence.claim.status not in BoardCandidateClaimEvidence.REMOVAL_ALLOWED_STATUSES:
             return EvidenceResult(
@@ -218,10 +234,14 @@ class BoardCandidateClaimEvidenceMutations:
             )
 
         try:
+            old_file = evidence.file
+            evidence.file = None
             evidence.is_removed = True
-            evidence.removed_reason = input_data.removed_reason
             evidence.removed_at = timezone.now()
-            evidence.save(update_fields=["is_removed", "removed_reason", "removed_at"])
+            evidence.removed_reason = input_data.removed_reason or ""
+            evidence.save(update_fields=["file", "is_removed", "removed_reason", "removed_at"])
+            if old_file:
+                transaction.on_commit(lambda f=old_file: f.delete(save=False))
         except IntegrityError:
             logger.warning(
                 "Error removing Board Candidate Claim Evidence %s",
@@ -233,10 +253,13 @@ class BoardCandidateClaimEvidenceMutations:
                 message=GENERIC_ERROR_MSG,
             )
         except ValidationError as e:
+            messages = []
+            for msgs in e.message_dict.values():
+                messages.extend(msgs)
             return EvidenceResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message=json.dumps(e.message_dict),
+                message=" ".join(messages),
             )
 
         return EvidenceResult(

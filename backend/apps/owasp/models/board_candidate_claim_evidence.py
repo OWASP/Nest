@@ -10,6 +10,7 @@ from django.core.files import storage
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.common.utils import slugify
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.validators import (
     validate_evidence_extension,
@@ -29,6 +30,14 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         """Model options."""
 
         db_table = "owasp_board_candidate_claim_evidence"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["claim", "key"], name="owasp_evidence_claim_key_unique"
+            ),
+            models.UniqueConstraint(
+                fields=["claim", "name"], name="owasp_evidence_claim_name_unique"
+            ),
+        ]
         indexes = [
             models.Index(fields=["claim", "is_removed"], name="owasp_evidence_claim_active"),
         ]
@@ -45,7 +54,7 @@ class BoardCandidateClaimEvidence(TimestampedModel):
     claim = models.ForeignKey(
         BoardCandidateClaim, on_delete=models.CASCADE, related_name="evidences"
     )
-    description = models.TextField(default="", verbose_name="Description")
+    description = models.TextField(verbose_name="Description")
     file = models.FileField(
         blank=True,
         null=True,
@@ -69,20 +78,24 @@ class BoardCandidateClaimEvidence(TimestampedModel):
         help_text="Indicates if the file is removed",
         verbose_name="Is removed",
     )
+    name = models.CharField(
+        max_length=200,
+        verbose_name="Name",
+    )
+    key = models.CharField(verbose_name="Key", max_length=100)
     removed_at = models.DateTimeField(blank=True, null=True)
     removed_reason = models.TextField(blank=True)
-    title = models.CharField(max_length=1000, verbose_name="Title")
     source_url = models.TextField(blank=True, verbose_name="Source URL")
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Evidence."""
-        return f"{self.title}"
+        return f"{self.name}"
 
     def clean(self) -> None:
         """Validate evidence."""
         super().clean()
 
-        if not (self.file or self.source_url):
+        if not self.is_removed and not (self.file or self.source_url):
             err = "Either file or source_url is required."
             raise ValidationError(err)
 
@@ -111,6 +124,8 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
+        self.key = slugify(self.name)[: self._meta.get_field("key").max_length]
+
         self.full_clean()
 
         super().save(*args, **kwargs)

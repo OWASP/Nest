@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import slugify
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
@@ -17,6 +18,14 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         """Model options."""
 
         db_table = "owasp_board_candidate_claim"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["candidate", "key"], name="owasp_claim_candidate_key_unique"
+            ),
+            models.UniqueConstraint(
+                fields=["candidate", "name"], name="owasp_claim_candidate_name_unique"
+            ),
+        ]
         indexes = [
             models.Index(fields=["candidate", "status"], name="owasp_claim_candidate_status"),
             models.Index(fields=["board", "status"], name="owasp_claim_board_status"),
@@ -33,7 +42,9 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         REJECTED = "REJECTED", "Rejected"
         WITHDRAWN = "WITHDRAWN", "Withdrawn"
 
-    FINALIZED_STATUSES = {Status.APPROVED, Status.DISCARDED, Status.REJECTED, Status.WITHDRAWN}
+    FINALIZED_STATUSES = frozenset(
+        {Status.APPROVED, Status.DISCARDED, Status.REJECTED, Status.WITHDRAWN}
+    )
     VALID_TRANSITIONS = {
         Status.DRAFT: {Status.SUBMITTED, Status.DISCARDED},
         Status.SUBMITTED: {Status.APPROVED, Status.REJECTED, Status.WITHDRAWN},
@@ -54,6 +65,11 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         help_text="Indicates if the claim is locked",
         verbose_name="Is locked",
     )
+    name = models.CharField(
+        max_length=200,
+        verbose_name="Name",
+    )
+    key = models.CharField(verbose_name="Key", max_length=100)
     order = models.PositiveSmallIntegerField(
         default=0,
         verbose_name="Order",
@@ -65,13 +81,12 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         max_length=20,
         verbose_name="Claim status",
     )
-    title = models.CharField(max_length=1000, verbose_name="Title")
     withdrawn_at = models.DateTimeField(blank=True, null=True)
     withdrawn_reason = models.TextField(blank=True)
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim."""
-        return f"{self.title}"
+        return f"{self.name}"
 
     def clean(self) -> None:
         """Validate claim."""
@@ -120,6 +135,8 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
     def save(self, *args, **kwargs) -> None:
         """Save claim."""
+        self.key = slugify(self.name)[: self._meta.get_field("key").max_length]
+
         self.full_clean()
 
         if not self.pk and self.candidate_id and self.board_id:

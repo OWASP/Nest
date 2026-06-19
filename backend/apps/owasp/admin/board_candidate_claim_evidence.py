@@ -11,7 +11,7 @@ class BoardCandidateClaimEvidenceAdmin(admin.ModelAdmin, GenericEntityAdminMixin
     """Admin for BoardCandidateClaimEvidence model."""
 
     list_filter = ("is_removed",)
-    search_fields = ("title",)
+    search_fields = ("name",)
 
 
 admin.site.register(BoardCandidateClaimEvidence, BoardCandidateClaimEvidenceAdmin)

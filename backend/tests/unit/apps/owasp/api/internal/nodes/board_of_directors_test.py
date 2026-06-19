@@ -1,8 +1,9 @@
 """Tests for BoardOfDirectors GraphQL node."""
 
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 from apps.owasp.api.internal.nodes.board_of_directors import BoardOfDirectorsNode
+from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -15,6 +16,7 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
         }
         expected_field_names = {
             "_id",
+            "candidate",
             "candidates",
             "created_at",
             "members",
@@ -61,3 +63,26 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
 
         assert result == [mock_member1, mock_member2]
         mock_board.get_members.assert_called_once()
+
+    def test_candidate_resolver_found(self):
+        """Test candidate returns EntityMemberNode when found."""
+        mock_entity_member = MagicMock(spec=EntityMemberNode)
+        mock_board = Mock()
+        mock_board.get_candidate.return_value = mock_entity_member
+
+        field = self._get_field_by_name("candidate", BoardOfDirectorsNode)
+        result = field.base_resolver.wrapped_func(None, mock_board, login="alice")
+
+        mock_board.get_candidate.assert_called_once_with("alice")
+        assert result is mock_entity_member
+
+    def test_candidate_resolver_not_found(self):
+        """Test candidate returns None when candidate not found."""
+        mock_board = Mock()
+        mock_board.get_candidate.return_value = None
+
+        field = self._get_field_by_name("candidate", BoardOfDirectorsNode)
+        result = field.base_resolver.wrapped_func(None, mock_board, login="unknown")
+
+        mock_board.get_candidate.assert_called_once_with("unknown")
+        assert result is None

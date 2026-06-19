@@ -21,7 +21,7 @@ class TestBoardCandidateClaimEvidenceAdmin:
         """Test search_fields."""
         admin_instance = BoardCandidateClaimEvidenceAdmin(BoardCandidateClaimEvidence, AdminSite())
 
-        assert admin_instance.search_fields == ("title",)
+        assert admin_instance.search_fields == ("name",)
 
     def test_inherits_generic_entity_admin_mixin(self):
         """Test admin inherits from GenericEntityAdminMixin."""

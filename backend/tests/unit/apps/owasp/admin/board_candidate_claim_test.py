@@ -18,10 +18,10 @@ class TestBoardCandidateClaimAdmin:
         assert admin_instance.list_filter == ("status",)
 
     def test_search_fields(self):
-        """Test search_fields includes title."""
+        """Test search_fields includes name."""
         admin_instance = BoardCandidateClaimAdmin(BoardCandidateClaim, AdminSite())
 
-        assert admin_instance.search_fields == ("title",)
+        assert admin_instance.search_fields == ("name",)
 
     def test_inherits_generic_entity_admin_mixin(self):
         """Test admin inherits from GenericEntityAdminMixin."""

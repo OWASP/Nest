@@ -33,11 +33,45 @@ class BoardCandidateClaimQuery:
             and user.github_user.login == login
         )
         claims = BoardCandidateClaim.objects.filter(
-            candidate__member__login=login,
             board__year=year,
+            candidate__member__login=login,
         ).order_by("order", "nest_created_at")
 
         if not is_self:
             claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
 
         return claims
+
+    @strawberry_django.field
+    def board_candidate_claim(
+        self, info: strawberry.Info, key: str, login: str, year: int
+    ) -> BoardCandidateClaimNode | None:
+        """Resolve Board Candidate Claim.
+
+        Args:
+            info (Info): Strawberry Info.
+            key (str): The key of the claim.
+            login (str): The login of the candidate.
+            year (int): The year of the election.
+
+        Returns:
+            BoardCandidateClaimNode object if found, None otherwise.
+
+        """
+        try:
+            claim = BoardCandidateClaim.objects.get(
+                board__year=year,
+                candidate__member__login=login,
+                key=key,
+            )
+        except BoardCandidateClaim.DoesNotExist:
+            return None
+
+        user = info.context.request.user
+        is_self = (
+            user.is_authenticated
+            and user.github_user is not None
+            and user.github_user == claim.candidate.member
+        )
+
+        return claim if is_self or claim.status == BoardCandidateClaim.Status.APPROVED else None

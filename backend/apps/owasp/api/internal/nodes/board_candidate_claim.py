@@ -5,6 +5,7 @@ from datetime import datetime
 import strawberry
 import strawberry_django
 
+from apps.owasp.api.internal.nodes.enum import ClaimStatusEnum
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 
 
@@ -13,9 +14,9 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
     fields=[
         "description",
         "is_locked",
+        "key",
+        "name",
         "order",
-        "status",
-        "title",
         "withdrawn_at",
         "withdrawn_reason",
     ],
@@ -27,6 +28,11 @@ class BoardCandidateClaimNode(strawberry.relay.Node):
     def created_at(self, root: BoardCandidateClaim) -> datetime:
         """Resolve claim creation date."""
         return root.nest_created_at
+
+    @strawberry_django.field
+    def status(self, root: BoardCandidateClaim) -> ClaimStatusEnum:
+        """Resolve claim status as GraphQL enum."""
+        return ClaimStatusEnum(root.status)
 
     @strawberry_django.field
     def updated_at(self, root: BoardCandidateClaim) -> datetime:
