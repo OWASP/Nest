@@ -18,7 +18,7 @@ class ScoringWeight(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "owasp_crp_recognition_scoring_weights"
+        db_table = "owasp_crp_scoring_weights"
         verbose_name_plural = "Scoring Weights"
 
     event_type = models.CharField(

@@ -18,7 +18,7 @@ class ContributionScore(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "owasp_crp_recognition_contribution_scores"
+        db_table = "owasp_crp_contribution_scores"
         verbose_name_plural = "Contribution Scores"
         indexes = [
             models.Index(fields=["-value"], name="score_total_desc_idx"),
