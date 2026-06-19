@@ -173,7 +173,8 @@ The backend uses the following environment variables (configured in `backend/.en
 ### `DJANGO_SECRET_KEY`
 
 - **Description**: The secret key for Django (used for cryptographic signing).
-- **Usage**: Required for session management, tokens, etc.
+- **Example Value**: Generate with `openssl rand -base64 32`
+- **Usage**: Required for session management, tokens, etc. Must be set in `backend/.env` before starting the backend locally.
 
 ### `DJANGO_SENTRY_DSN`
 
