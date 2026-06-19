@@ -38,6 +38,7 @@ jobs:
             echo "Run make check and use git add to address it."
             exit 1
           }
+    timeout-minutes: 5
 
   run-pre-commit-checks:
     name: Pre-commit
@@ -116,6 +117,7 @@ jobs:
             echo "Run make check and use git add to address it."
             exit 1
           }
+    timeout-minutes: 5
 
   run-semgrep-checks:
     name: Semgrep
@@ -163,6 +165,7 @@ jobs:
       - name: Run cspell
         run: pnpm exec cspell --config cspell.json --no-progress -r ..
         working-directory: cspell
+    timeout-minutes: 5
 
   run-trivy-checks:
     name: Trivy
