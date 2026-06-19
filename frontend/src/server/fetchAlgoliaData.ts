@@ -35,10 +35,25 @@ export const fetchAlgoliaData = async <T>(
       }),
     })
 
+    if (response.status === 400) {
+      const errorData = await response.json()
+
+      if (
+        typeof errorData?.error === 'string' &&
+        errorData.error.includes('Invalid query value')
+      ) {
+        return {
+          hits: [],
+          totalPages: 0,
+        }
+      }
+
+      throw new AppError(400, errorData?.error || 'Search service error')
+    }
+
     if (!response.ok) {
       throw new AppError(response.status, 'Search service error')
     }
-
     const results = await response.json()
     if (results && results.hits.length > 0) {
       const { hits, nbPages } = results
