@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Count, Q
 
@@ -205,7 +205,7 @@ class ContributionScoreCalculator:
 
         return "level_1"
 
-    def recalculate_all(self) -> dict[str, int]:
+    def recalculate_all(self) -> dict[str, Any]:
         """Recalculate scores for all users.
 
         Returns:
