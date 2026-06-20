@@ -4,7 +4,7 @@ import strawberry
 import strawberry_django
 
 from apps.common.utils import normalize_limit
-from apps.github.api.internal.nodes.issue import IssueNode
+from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH, IssueNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.user import UserNode
@@ -52,7 +52,10 @@ class SnapshotNode(strawberry.relay.Node):
     @strawberry_django.field(prefetch_related=["issues"])
     def issues(self, root: Snapshot, limit: int = 6, offset: int = 0) -> list[IssueNode]:
         """Resolve issues."""
-        return SnapshotNode._slice_related(root.issues.order_by("-created_at"), limit, offset)
+        queryset = root.issues.prefetch_related(MERGED_PULL_REQUESTS_PREFETCH).order_by(
+            "-created_at"
+        )
+        return SnapshotNode._slice_related(queryset, limit, offset)
 
     @strawberry_django.field(prefetch_related=["posts"])
     def posts(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[PostNode]:

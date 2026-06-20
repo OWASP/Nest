@@ -329,7 +329,9 @@ const SnapshotDetailsPage: React.FC = () => {
         <SecondaryCard icon={FaCodePullRequest} title="New Pull Requests">
           <RecentPullRequests
             data={snapshot.pullRequests.slice(0, prVisibleCount) as PullRequest[]}
-            variant="full"
+            showBadge
+            showSingleColumn={false}
+            bare
           />
           {(hasMorePRs ||
             snapshot.pullRequests.length > prVisibleCount ||
@@ -418,7 +420,9 @@ const SnapshotDetailsPage: React.FC = () => {
         <SecondaryCard icon={FaCircleExclamation} title="New Issues">
           <RecentIssues
             data={snapshot.issues.slice(0, issueVisibleCount) as Issue[]}
-            variant="full"
+            showBadge
+            showSingleColumn={false}
+            bare
           />
           {(hasMoreIssues ||
             snapshot.issues.length > issueVisibleCount ||

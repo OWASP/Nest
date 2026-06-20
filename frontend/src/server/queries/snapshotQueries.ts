@@ -29,6 +29,7 @@ export const SNAPSHOT_ISSUE_FIELDS = gql`
       name
     }
     createdAt
+    isMerged
     organizationName
     repositoryName
     state
