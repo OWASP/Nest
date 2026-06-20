@@ -137,7 +137,7 @@ jest.mock('components/SecondaryCard', () => {
 import BarChart from 'components/BarChart'
 
 const renderWithTheme = (ui: React.ReactElement, theme: 'light' | 'dark' = 'light') => {
-  mockUseTheme.mockReturnValue({ theme })
+  mockUseTheme.mockReturnValue({ theme, resolvedTheme: theme })
 
   return render(ui)
 }
@@ -152,7 +152,7 @@ const mockProps = {
 
 describe('<BarChart />', () => {
   beforeEach(() => {
-    mockUseTheme.mockReturnValue({ theme: 'light' })
+    mockUseTheme.mockReturnValue({ theme: 'light', resolvedTheme: 'light' })
   })
 
   afterEach(() => {
@@ -287,7 +287,7 @@ describe('<BarChart />', () => {
   })
 
   it('handles theme changes and re-renders correctly', () => {
-    mockUseTheme.mockReturnValue({ theme: 'light' })
+    mockUseTheme.mockReturnValue({ theme: 'light', resolvedTheme: 'light' })
     const { rerender } = render(<BarChart {...mockProps} />)
 
     let chartElement = screen.getByTestId('mock-chart')
@@ -295,7 +295,7 @@ describe('<BarChart />', () => {
     expect(options.chart.foreColor).toBe('#1E1E2C')
     expect(options.tooltip.theme).toBe('light')
 
-    mockUseTheme.mockReturnValue({ theme: 'dark' })
+    mockUseTheme.mockReturnValue({ theme: 'dark', resolvedTheme: 'dark' })
     rerender(<BarChart {...mockProps} />)
 
     chartElement = screen.getByTestId('mock-chart')

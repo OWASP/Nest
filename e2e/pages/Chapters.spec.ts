@@ -4,6 +4,10 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Chapters Page', () => {
   test.beforeEach(async ({ page }) => {
+    // Block OpenStreetMap tile requests; the chapters page renders a map but these
+    // tests do not assert on it, and external tile loads add latency and flakiness.
+    await page.route('https://*.tile.openstreetmap.org/**', (route) => route.abort())
+
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
