@@ -4,6 +4,7 @@ import sentry_sdk
 from configurations import values
 
 from settings.base import Base
+from settings.values import OptionalSecretValue
 
 
 class Staging(Base):
@@ -46,7 +47,7 @@ class Staging(Base):
     IS_STAGING_ENVIRONMENT = True
 
     # NestBot is not provisioned on staging yet; ignore SSM Slack credentials.
-    SLACK_BOT_TOKEN = ""
+    SLACK_BOT_TOKEN = OptionalSecretValue(environ=False)
     SLACK_COMMANDS_ENABLED = False
     SLACK_EVENTS_ENABLED = False
-    SLACK_SIGNING_SECRET = ""
+    SLACK_SIGNING_SECRET = OptionalSecretValue(environ=False)

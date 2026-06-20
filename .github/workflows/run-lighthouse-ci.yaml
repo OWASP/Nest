@@ -18,8 +18,7 @@ jobs:
     name: Lighthouse CI
     permissions:
       contents: read
-    # Arm runners omit Chrome; Lighthouse CI needs a system Chromium binary.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -29,9 +28,33 @@ jobs:
       - name: Install frontend dependencies
         uses: ./.github/actions/install-frontend-dependencies
 
+      - name: Install e2e dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: e2e
+
+      - name: Cache Playwright Chromium
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: e2e-playwright-chromium-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+          restore-keys: |
+            e2e-playwright-chromium-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Install Playwright Chromium
+        run: |
+          npx playwright install-deps chromium
+          npx playwright install chromium
+        working-directory: e2e
+
+      - name: Resolve Chromium path
+        run: |
+          CHROME_PATH=$(node -e 'console.log(require("@playwright/test").chromium.executablePath())')
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+        working-directory: e2e
+
       - name: Run lighthouse-ci
         env:
           LHCI_BASE_URL: ${{ inputs.base_url }}
         run: pnpm run lighthouse-ci
         working-directory: frontend
-    timeout-minutes: 10
+    timeout-minutes: 15

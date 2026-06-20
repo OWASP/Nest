@@ -6,6 +6,8 @@ from pathlib import Path
 
 from configurations import Configuration, values
 
+from settings.values import OptionalSecretValue
+
 
 class Base(Configuration):
     """Base configuration."""
@@ -236,10 +238,10 @@ class Base(Configuration):
 
     OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
 
-    SLACK_BOT_TOKEN = values.SecretValue()
+    SLACK_BOT_TOKEN = OptionalSecretValue()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-    SLACK_SIGNING_SECRET = values.SecretValue()
+    SLACK_SIGNING_SECRET = OptionalSecretValue()
 
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
