@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from '@apollo/client/react'
 import { Button } from '@heroui/button'
+import { addToast } from '@heroui/toast'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -34,9 +35,12 @@ const CandidateClaimsPage = () => {
     variables: { login: login, year: Number.parseInt(year) },
   })
 
-  const { data: candidateGraphQLData } = useQuery(GetBoardCandidateDocument, {
-    variables: { login: login, year: Number.parseInt(year) },
-  })
+  const { data: candidateGraphQLData, loading: isCandidateLoading } = useQuery(
+    GetBoardCandidateDocument,
+    {
+      variables: { login: login, year: Number.parseInt(year) },
+    }
+  )
 
   const isCandidate = candidateGraphQLData?.boardOfDirectors?.candidate != null
   const claims = graphQLData?.boardCandidateClaims ?? []
@@ -53,7 +57,7 @@ const CandidateClaimsPage = () => {
     }
   }, [graphQLRequestError])
 
-  if (isSyncing || isLoading) {
+  if (isSyncing || isLoading || isCandidateLoading) {
     return <LoadingSpinner />
   }
 
@@ -83,15 +87,20 @@ const CandidateClaimsPage = () => {
 
   const handleSave = async (status: string) => {
     const keys = status === 'DRAFT' ? draftOrder : approvedOrder
-    await reorderClaims({
-      variables: { input: { keys, year: Number.parseInt(year) } },
-      refetchQueries: [
-        {
-          query: GetBoardCandidateClaimsDocument,
-          variables: { login, year: Number.parseInt(year) },
-        },
-      ],
-    })
+    try {
+      await reorderClaims({
+        variables: { input: { keys, year: Number.parseInt(year) } },
+        refetchQueries: [
+          {
+            query: GetBoardCandidateClaimsDocument,
+            variables: { login, year: Number.parseInt(year) },
+          },
+        ],
+      })
+      addToast({ title: 'Success', description: 'Claim order updated.', color: 'success' })
+    } catch {
+      addToast({ title: 'Error', description: 'Failed to update claim order.', color: 'danger' })
+    }
   }
 
   const handleCreate = () => router.push(`/board/${year}/candidates/${login}/claims/create`)

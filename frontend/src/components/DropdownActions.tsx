@@ -110,6 +110,7 @@ const DropdownActions: React.FC<DropdownActionsProps> = ({ options, label }) => 
                 e.stopPropagation()
                 option.onAction()
                 setFocusIndex(-1)
+                setDropdownOpen(false)
               }
 
               return (

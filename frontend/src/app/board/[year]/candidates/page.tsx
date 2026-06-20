@@ -290,7 +290,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
   // Check if candidate leads any flagship level projects
   const leadsFlagshipProject = ledProjects.some((project) => project.level === 'flagship')
 
-  const isOwnProfile = session?.user?.login === candidate.member?.login
+  const isOwnProfile = !!session?.user?.login && session.user.login === candidate.member?.login
 
   return (
     <Button
@@ -335,7 +335,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             )}
             {isOwnProfile && (
               <Link
-                href={`/board/${year}/candidates/${candidate.member!.login}/claims`}
+                href={`/board/${year}/candidates/${candidate.member?.login}/claims`}
                 onClick={(e) => e.stopPropagation()}
                 className="ml-auto rounded-md p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                 aria-label="Manage claims"
