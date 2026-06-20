@@ -43,11 +43,11 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({
   return (
     <ItemCardList
       title={
-        !bare ? (
+        bare ? undefined : (
           <div className="flex items-center gap-2">
             <AnchorTitle title="Recent Pull Requests" />
           </div>
-        ) : undefined
+        )
       }
       data={data}
       icon={FaCodePullRequest}

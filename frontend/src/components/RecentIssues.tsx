@@ -51,11 +51,11 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({
   return (
     <ItemCardList
       title={
-        !bare ? (
+        bare ? undefined : (
           <div className="flex items-center gap-2">
             <AnchorTitle title="Recent Issues" />
           </div>
-        ) : undefined
+        )
       }
       data={data}
       showAvatar={showAvatar}
