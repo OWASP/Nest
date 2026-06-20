@@ -50,9 +50,10 @@ class Query(
 class NestQueryDepthLimiter(QueryDepthLimiter):
     """Query depth limiter configured for the Nest schema."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """Initialize with the Nest schema max query depth."""
-        super().__init__(max_depth=5)
+        kwargs.pop("execution_context")
+        super().__init__(max_depth=5, **kwargs)
 
 
 extensions: list[type[SchemaExtension] | Callable[[], SchemaExtension]] = [
