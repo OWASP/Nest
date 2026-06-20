@@ -9,7 +9,7 @@ from django.db.models import QuerySet
 from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 
 
-async def _async_gen(items):
+async def async_gen(items):
     """Yield items one-by-one as an async generator."""
     for item in items:
         yield item
@@ -17,7 +17,7 @@ async def _async_gen(items):
 
 def make_qs(items) -> QuerySet:
     """Wrap a list in an async-iterable that satisfies the QuerySet type annotation."""
-    return cast("QuerySet", _async_gen(items))
+    return cast("QuerySet", async_gen(items))
 
 
 def make_item(**kwargs):
