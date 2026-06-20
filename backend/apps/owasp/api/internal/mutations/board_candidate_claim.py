@@ -90,6 +90,7 @@ class ClaimResult:
     ok: bool
     code: str | None = None
     message: str | None = None
+    claim: BoardCandidateClaimNode | None = None
 
 
 def _validate_reorder_claims(
@@ -167,7 +168,7 @@ class BoardCandidateClaimMutations:
             )
 
         try:
-            BoardCandidateClaim.objects.create(
+            claim = BoardCandidateClaim.objects.create(
                 board=board,
                 candidate=candidate,
                 description=input_data.description,
@@ -194,7 +195,12 @@ class BoardCandidateClaimMutations:
                 message=" ".join(messages),
             )
 
-        return ClaimResult(ok=True, code="SUCCESS", message="Claim created successfully.")
+        return ClaimResult(
+            ok=True,
+            code="SUCCESS",
+            message="Claim created successfully.",
+            claim=claim,
+        )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
@@ -250,7 +256,12 @@ class BoardCandidateClaimMutations:
                 message=" ".join(messages),
             )
 
-        return ClaimResult(ok=True, code="SUCCESS", message="Claim updated successfully.")
+        return ClaimResult(
+            ok=True,
+            code="SUCCESS",
+            message="Claim updated successfully.",
+            claim=claim,
+        )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
@@ -302,7 +313,12 @@ class BoardCandidateClaimMutations:
                 message=" ".join(messages),
             )
 
-        return ClaimResult(ok=True, code="SUCCESS", message="Claim discarded successfully.")
+        return ClaimResult(
+            ok=True,
+            code="SUCCESS",
+            message="Claim discarded successfully.",
+            claim=claim,
+        )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
@@ -366,6 +382,7 @@ class BoardCandidateClaimMutations:
                 ok=True,
                 code="SUCCESS",
                 message="Claim submitted successfully.",
+                claim=claim,
             )
 
         return result
@@ -425,7 +442,12 @@ class BoardCandidateClaimMutations:
                 message=" ".join(messages),
             )
 
-        return ClaimResult(ok=True, code="SUCCESS", message="Claim withdrawn successfully.")
+        return ClaimResult(
+            ok=True,
+            code="SUCCESS",
+            message="Claim withdrawn successfully.",
+            claim=claim,
+        )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
