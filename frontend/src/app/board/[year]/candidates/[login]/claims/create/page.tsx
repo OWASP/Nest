@@ -25,9 +25,16 @@ const CreateClaimPage = () => {
     name: '',
   })
 
-  const { data: candidateGraphQLData } = useQuery(GetBoardCandidateDocument, {
-    variables: { login: login, year: Number.parseInt(year) },
-  })
+  const { data: candidateGraphQLData, loading: isCandidateLoading } = useQuery(
+    GetBoardCandidateDocument,
+    {
+      variables: { login: login, year: Number.parseInt(year) },
+    }
+  )
+
+  if (isSyncing || isCandidateLoading) {
+    return <LoadingSpinner />
+  }
 
   const isCandidate = candidateGraphQLData?.boardOfDirectors?.candidate != null
 
@@ -87,10 +94,6 @@ const CreateClaimPage = () => {
       }
       throw err
     }
-  }
-
-  if (isSyncing) {
-    return <LoadingSpinner />
   }
 
   return (
