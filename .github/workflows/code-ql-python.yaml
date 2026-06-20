@@ -12,6 +12,15 @@ on:
       - .github/workflows/code-ql-python.yaml
       - '**/*.py'
       - backend/**
+  push:
+    branches:
+      - main
+    paths:
+      - .github/actions/install-backend-dependencies/**
+      - .github/actions/install-poetry/**
+      - .github/workflows/code-ql-python.yaml
+      - '**/*.py'
+      - backend/**
 
 concurrency:
   cancel-in-progress: true
