@@ -264,7 +264,7 @@ class ModuleMutation:
         if timezone.is_naive(normalized_deadline):
             normalized_deadline = timezone.make_aware(normalized_deadline)
 
-        if not (module.started_at.date() <= normalized_deadline.date() <= module.ended_at.date()):
+        if not module.started_at.date() <= normalized_deadline.date() <= module.ended_at.date():
             raise ValidationError(message=DEADLINE_OUT_OF_RANGE_MSG)
 
         now = timezone.now()
