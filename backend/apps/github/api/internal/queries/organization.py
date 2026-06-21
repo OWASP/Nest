@@ -1,6 +1,7 @@
 """GitHub organization GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.models.organization import Organization
@@ -10,8 +11,8 @@ from apps.github.models.organization import Organization
 class OrganizationQuery:
     """Organization queries."""
 
-    @strawberry.field
-    def organization(
+    @strawberry_django.field
+    async def organization(
         self,
         *,
         login: str,
@@ -26,6 +27,6 @@ class OrganizationQuery:
 
         """
         try:
-            return Organization.objects.get(is_owasp_related_organization=True, login=login)
+            return await Organization.objects.aget(is_owasp_related_organization=True, login=login)
         except Organization.DoesNotExist:
             return None

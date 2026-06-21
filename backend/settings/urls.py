@@ -9,7 +9,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_protect
-from strawberry.django.views import GraphQLView
 
 from apps.api.rest.v0 import api as api_v0
 from apps.core.api.internal.algolia import algolia_search
@@ -17,7 +16,7 @@ from apps.core.api.internal.csrf import get_csrf_token
 from apps.core.api.internal.status import get_status
 from apps.owasp.api.internal.views.urls import urlpatterns as owasp_urls
 from apps.slack.apps import SlackConfig
-from settings.graphql import schema
+from settings.graphql import NestGraphQLView, schema
 
 urlpatterns = [
     path("csrf/", get_csrf_token),
@@ -25,7 +24,7 @@ urlpatterns = [
     path(
         "graphql/",
         csrf_protect(
-            GraphQLView.as_view(
+            NestGraphQLView.as_view(
                 schema=schema,
                 graphql_ide="graphiql" if settings.DEBUG else None,
             )
