@@ -58,14 +58,22 @@ const CreateClaimPage = () => {
       }
 
       const result = await createClaim({
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
+        variables: { input },
+        update(cache, { data }) {
+          const newClaim = data?.createBoardCandidateClaim?.claim
+          if (!newClaim) return
+          const existing = cache.readQuery({
             query: GetBoardCandidateClaimsDocument,
             variables: { login, year: Number.parseInt(year) },
-          },
-        ],
-        variables: { input },
+          })
+          if (existing) {
+            cache.writeQuery({
+              query: GetBoardCandidateClaimsDocument,
+              variables: { login, year: Number.parseInt(year) },
+              data: { boardCandidateClaims: [...existing.boardCandidateClaims, newClaim] },
+            })
+          }
+        },
       })
 
       if (!result.data?.createBoardCandidateClaim?.ok) {

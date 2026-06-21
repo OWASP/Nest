@@ -1,5 +1,6 @@
 'use client'
 
+import { ApolloCache } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
@@ -51,13 +52,39 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
   const [discardClaim] = useMutation(DiscardBoardCandidateClaimDocument)
   const [withdrawClaim] = useMutation(WithdrawBoardCandidateClaimDocument)
 
-  const refetchConfig = {
-    refetchQueries: [
-      {
+  type ClaimNode = {
+    __typename: 'BoardCandidateClaimNode'
+    id: string
+    key: string
+    status: string
+    name: string
+    description: string
+    order: number
+    createdAt: string | number
+    updatedAt: string | number
+  }
+
+  const updateClaimsCache = (
+    cache: ApolloCache,
+    mutationData: { claim?: ClaimNode | null } | null | undefined
+  ) => {
+    const updatedClaim = mutationData?.claim
+    if (!updatedClaim) return
+    const existing = cache.readQuery({
+      query: GetBoardCandidateClaimsDocument,
+      variables: { login, year: Number.parseInt(year) },
+    })
+    if (existing) {
+      cache.writeQuery({
         query: GetBoardCandidateClaimsDocument,
         variables: { login, year: Number.parseInt(year) },
-      },
-    ],
+        data: {
+          boardCandidateClaims: existing.boardCandidateClaims.map(
+            (c) => (c.key === updatedClaim.key ? updatedClaim : c)
+          ),
+        },
+      })
+    }
   }
 
   const ACTION_HANDLERS: Record<ClaimAction, () => void> = {
@@ -87,7 +114,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
         case 'submit':
           result = await submitClaim({
             variables: { input: { key: claim.key, year: Number.parseInt(year) } },
-            ...refetchConfig,
+            update: (cache, { data }) =>
+              updateClaimsCache(cache, data?.submitBoardCandidateClaim),
           })
           if (!result.data?.submitBoardCandidateClaim?.ok) {
             throw new Error(result.data?.submitBoardCandidateClaim?.message ?? 'Submit failed.')
@@ -96,7 +124,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
         case 'discard':
           result = await discardClaim({
             variables: { input: { key: claim.key, year: Number.parseInt(year) } },
-            ...refetchConfig,
+            update: (cache, { data }) =>
+              updateClaimsCache(cache, data?.discardBoardCandidateClaim),
           })
           if (!result.data?.discardBoardCandidateClaim?.ok) {
             throw new Error(result.data?.discardBoardCandidateClaim?.message ?? 'Discard failed.')
@@ -107,7 +136,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
             variables: {
               input: { key: claim.key, withdrawnReason: reason ?? '', year: Number.parseInt(year) },
             },
-            ...refetchConfig,
+            update: (cache, { data }) =>
+              updateClaimsCache(cache, data?.withdrawBoardCandidateClaim),
           })
           if (!result.data?.withdrawBoardCandidateClaim?.ok) {
             throw new Error(result.data?.withdrawBoardCandidateClaim?.message ?? 'Withdraw failed.')
