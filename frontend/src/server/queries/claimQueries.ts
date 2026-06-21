@@ -20,6 +20,7 @@ export const GET_CANDIDATE_CLAIMS = gql`
       id
       createdAt
       description
+      hasEvidence
       key
       name
       order
@@ -35,6 +36,7 @@ export const GET_CANDIDATE_AND_CLAIMS = gql`
       id
       createdAt
       description
+      hasEvidence
       key
       name
       order

@@ -5,6 +5,7 @@ export type Claim = {
   id: string
   createdAt?: string
   description: string
+  hasEvidence?: boolean
   key: string
   name: string
   order?: number
