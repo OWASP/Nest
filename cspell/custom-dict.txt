@@ -97,6 +97,7 @@ bsky
 carryforward
 cdx
 certbot
+cjs
 collectstatic
 coraza
 corsheaders
@@ -135,6 +136,7 @@ ics
 igoat
 igw
 inlinehilite
+intoto
 isanori
 isready
 janedoe

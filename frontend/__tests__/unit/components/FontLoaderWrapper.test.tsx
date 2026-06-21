@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import FontLoaderWrapper from 'components/FontLoaderWrapper'
 
 jest.mock('components/LoadingSpinner', () => {
@@ -8,6 +8,7 @@ jest.mock('components/LoadingSpinner', () => {
 })
 
 describe('<FontLoaderWrapper />', () => {
+  const originalFonts = document.fonts
   let fontsReadyResolve: (() => void) | null = null
 
   beforeEach(() => {
@@ -24,9 +25,20 @@ describe('<FontLoaderWrapper />', () => {
   })
 
   afterEach(() => {
+    Object.defineProperty(document, 'fonts', {
+      value: originalFonts,
+      configurable: true,
+    })
     jest.clearAllMocks()
     fontsReadyResolve = null
   })
+
+  async function resolveFontsReady(): Promise<void> {
+    await act(async () => {
+      fontsReadyResolve?.()
+      await document.fonts.ready
+    })
+  }
 
   it('renders LoadingSpinner initially while fonts are loading', () => {
     render(
@@ -48,7 +60,7 @@ describe('<FontLoaderWrapper />', () => {
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.getByText('Dashboard Content')).toBeInTheDocument()
@@ -64,7 +76,7 @@ describe('<FontLoaderWrapper />', () => {
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument()
@@ -80,7 +92,7 @@ describe('<FontLoaderWrapper />', () => {
       </FontLoaderWrapper>
     )
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.getByText('Child 1')).toBeInTheDocument()
@@ -96,7 +108,7 @@ describe('<FontLoaderWrapper />', () => {
       </FontLoaderWrapper>
     )
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.getByText('Initial Content')).toBeInTheDocument()
@@ -119,7 +131,7 @@ describe('<FontLoaderWrapper />', () => {
       </FontLoaderWrapper>
     )
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.getByText('Content 1')).toBeInTheDocument()
@@ -143,7 +155,7 @@ describe('<FontLoaderWrapper />', () => {
     )
 
     // Component calls .then() on document.fonts.ready and renders content once resolved
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.getByText('Content')).toBeInTheDocument()
@@ -159,7 +171,7 @@ describe('<FontLoaderWrapper />', () => {
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument()
@@ -174,7 +186,7 @@ describe('<FontLoaderWrapper />', () => {
       </FontLoaderWrapper>
     )
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       expect(screen.getByText('Title')).toBeInTheDocument()
@@ -195,7 +207,7 @@ describe('<FontLoaderWrapper />', () => {
       </FontLoaderWrapper>
     )
 
-    if (fontsReadyResolve) fontsReadyResolve()
+    await resolveFontsReady()
 
     await waitFor(() => {
       const button = screen.getByRole('button')
