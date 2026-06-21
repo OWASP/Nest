@@ -5,8 +5,10 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from apps.github.api.internal.dataloaders import INTERESTED_USERS_LOADER
 from apps.github.api.internal.nodes.issue import IssueNode
+from apps.mentorship.api.internal.dataloaders.interested_users import (
+    INTERESTED_USERS_BY_ISSUE_ID_LOADER,
+)
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -168,7 +170,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
 
         mock_info = Mock()
         mock_info.context = Mock()
-        mock_info.context.github_dataloaders = {INTERESTED_USERS_LOADER: mock_loader}
+        mock_info.context.github_dataloaders = {INTERESTED_USERS_BY_ISSUE_ID_LOADER: mock_loader}
 
         field = self._get_field_by_name("interested_users", IssueNode)
         result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info)

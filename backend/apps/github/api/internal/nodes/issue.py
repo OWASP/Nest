@@ -8,11 +8,13 @@ from django.db.models import Prefetch
 from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
-from apps.github.api.internal.dataloaders import INTERESTED_USERS_LOADER
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
+from apps.mentorship.api.internal.dataloaders.interested_users import (
+    INTERESTED_USERS_BY_ISSUE_ID_LOADER,
+)
 from apps.mentorship.models.task import Task
 
 MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
@@ -82,7 +84,9 @@ class IssueNode(strawberry.relay.Node):
     @strawberry_django.field
     async def interested_users(self, root: Issue, info: Info) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
-        return await info.context.github_dataloaders[INTERESTED_USERS_LOADER].load(root.pk)
+        return await info.context.github_dataloaders[INTERESTED_USERS_BY_ISSUE_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry.field
     def task_deadline(self, root: Issue, info: Info) -> datetime | None:

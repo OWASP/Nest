@@ -4,8 +4,8 @@ from apps.github.models.user import User
 from apps.mentorship.api.internal.dataloaders.interested_users import get_interested_users_loader
 
 
-def get_github_dataloaders() -> dict[str, DataLoader[int, list[User]]]:
-    """Return a dict of dataloader instances for GitHub API resolvers."""
+def get_mentorship_dataloaders() -> dict[str, DataLoader[int, list[User]]]:
+    """Return a dict of dataloader instances for Mentorship API resolvers."""
     loaders: dict[str, DataLoader[int, list[User]]] = {}
     loaders.update(get_interested_users_loader())
     return loaders

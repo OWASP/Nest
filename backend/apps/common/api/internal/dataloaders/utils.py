@@ -1,12 +1,13 @@
 """Shared utilities for GraphQL dataloaders."""
 
 from collections import defaultdict
+from typing import cast
 
-from django.db.models import QuerySet
+from django.db.models import Model, QuerySet
 
 
 async def get_results_by_keys[K, V](
-    queryset: QuerySet, keys: list[K], key_field: str, value_field: str
+    queryset: QuerySet[Model], keys: list[K], key_field: str, value_field: str
 ) -> list[list[V]]:
     """Map a grouped-results dict back to an ordered list matching ``keys``.
 
@@ -22,8 +23,8 @@ async def get_results_by_keys[K, V](
     """
     mapping: dict[K, list[V]] = defaultdict(list)
     async for item in queryset:
-        key = getattr(item, key_field)
-        value = getattr(item, value_field)
+        key: K = cast("K", getattr(item, key_field))
+        value: V = cast("V", getattr(item, value_field))
         mapping[key].append(value)
 
     return [mapping.get(key, []) for key in keys]
