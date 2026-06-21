@@ -26,6 +26,7 @@ class TestBoardCandidateClaimQuery:
 
         claims = [MagicMock(), MagicMock()]
         mock_qs = MagicMock()
+        mock_qs.annotate.return_value = mock_qs
         mock_qs.order_by.return_value = claims
         mock_claim_model.objects.filter.return_value = mock_qs
 
@@ -48,6 +49,7 @@ class TestBoardCandidateClaimQuery:
         info = _make_info(user)
 
         base_qs = MagicMock()
+        base_qs.annotate.return_value = base_qs
         ordered_qs = MagicMock()
         filtered_qs = MagicMock()
         ordered_qs.filter.return_value = filtered_qs
@@ -68,6 +70,7 @@ class TestBoardCandidateClaimQuery:
         info = _make_info(user)
 
         base_qs = MagicMock()
+        base_qs.annotate.return_value = base_qs
         ordered_qs = MagicMock()
         filtered_qs = MagicMock()
         ordered_qs.filter.return_value = filtered_qs

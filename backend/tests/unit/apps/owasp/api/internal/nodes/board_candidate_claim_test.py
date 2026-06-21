@@ -31,20 +31,18 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
 
     def test_has_evidence_returns_true_when_evidence_exists(self):
         mock_claim = Mock()
-        mock_claim.evidences.filter.return_value.exists.return_value = True
+        mock_claim.evidence_exists = True
 
         field = self._get_field_by_name("has_evidence", BoardCandidateClaimNode)
         result = field.base_resolver.wrapped_func(None, mock_claim)
 
-        mock_claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result
 
     def test_has_evidence_returns_false_when_no_evidence(self):
         mock_claim = Mock()
-        mock_claim.evidences.filter.return_value.exists.return_value = False
+        mock_claim.evidence_exists = False
 
         field = self._get_field_by_name("has_evidence", BoardCandidateClaimNode)
         result = field.base_resolver.wrapped_func(None, mock_claim)
 
-        mock_claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert not result
