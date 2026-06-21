@@ -143,6 +143,7 @@ const EditClaimPage = () => {
       onSubmit={handleSubmit}
       loading={loading}
       title="Edit Claim"
+      submitText="Edit Claim"
     />
   )
 }
