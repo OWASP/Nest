@@ -28,5 +28,3 @@ class E2E(Base):
     SECURE_PROXY_SSL_HEADER = None  # type: ignore[assignment]  # Django accepts None to disable.
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
-    SLACK_BOT_TOKEN = ""
-    SLACK_SIGNING_SECRET = ""
