@@ -12,7 +12,7 @@ include infrastructure/Makefile
 	clean clean-trivy-cache help pre-commit prune run scan-images security-scan \
 	security-scan-backend-image security-scan-code security-scan-code-semgrep \
 	security-scan-code-trivy security-scan-frontend-image security-scan-images \
-	security-scan-zap test test-infrastructure test-nest-app update
+	security-scan-zap test test-infrastructure test-nest-app update check-test-e2e
 
 AUDIT_LEVEL ?= high
 
@@ -42,7 +42,8 @@ check: ## Run all code quality checks
 check: \
 	check-spelling \
 	check-backend \
-	check-frontend
+	check-frontend \
+	check-e2e
 
 check-backend: \
 	pre-commit
@@ -59,6 +60,10 @@ check-test-backend: \
 check-test-frontend: \
 	check-frontend \
 	test-frontend
+
+check-test-e2e: \
+	check-e2e \
+	test-e2e
 
 pre-commit: ## Run pre-commit hooks
 	@pre-commit run --all-files --color=always --show-diff-on-failure
