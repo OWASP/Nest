@@ -10,7 +10,8 @@ REPO_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 	test-e2e \
 	test-e2e-ui-no-db-init \
 	test-e2e-ui \
-	check-e2e 
+	check-e2e \
+	lint-e2e-code
 
 check-e2e: ## Run e2e code quality checks
 check-e2e: \
@@ -32,8 +33,7 @@ init-e2e-db:
 		--remove-orphans
 
 lint-e2e-code:
-	@(cd $(REPO_ROOT)/e2e && (pnpm list eslint --depth=0 | grep -q 'eslint' || pnpm add -D eslint >/dev/null 2>&1) \
-	  && pnpm run lint:check >/dev/null 2>&1 \
+	@(cd $(REPO_ROOT)/e2e && pnpm run lint:check >/dev/null 2>&1 \
 	  && (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
 	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
 
