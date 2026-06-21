@@ -8,7 +8,6 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimDocument } from 'types/__generated__/claimQueries.generated'
 import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
-import slugify from 'utils/slugify'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -90,14 +89,16 @@ const EditClaimPage = () => {
       }
 
       const result = await updateClaim({
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
+        variables: { input },
+        update(cache, { data }) {
+          const updatedClaim = data?.updateBoardCandidateClaim?.claim
+          if (!updatedClaim) return
+          cache.writeQuery({
             query: GetBoardCandidateClaimDocument,
             variables: { key: claimKey, login, year: Number.parseInt(year) },
-          },
-        ],
-        variables: { input },
+            data: { boardCandidateClaim: updatedClaim },
+          })
+        },
       })
 
       if (!result.data?.updateBoardCandidateClaim?.ok) {
@@ -112,7 +113,10 @@ const EditClaimPage = () => {
         color: 'success',
       })
 
-      router.push(`/board/${year}/candidates/${login}/claims/${slugify(formData.name)}`)
+      const updatedClaim = result.data?.updateBoardCandidateClaim?.claim
+      if (updatedClaim?.key) {
+        router.push(`/board/${year}/candidates/${login}/claims/${updatedClaim.key}`)
+      }
     } catch (err) {
       const { hasValidationErrors } = extractGraphQLErrors(err)
       if (!hasValidationErrors) {

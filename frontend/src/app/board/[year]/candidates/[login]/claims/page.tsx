@@ -90,12 +90,26 @@ const CandidateClaimsPage = () => {
     try {
       await reorderClaims({
         variables: { input: { keys, year: Number.parseInt(year) } },
-        refetchQueries: [
-          {
+        update(cache, { data }) {
+          const reorderedClaims = data?.reorderBoardCandidateClaims?.claims
+          if (!reorderedClaims) return
+          const existing = cache.readQuery({
             query: GetBoardCandidateClaimsDocument,
             variables: { login, year: Number.parseInt(year) },
-          },
-        ],
+          })
+          if (existing) {
+            cache.writeQuery({
+              query: GetBoardCandidateClaimsDocument,
+              variables: { login, year: Number.parseInt(year) },
+              data: {
+                boardCandidateClaims: [
+                  ...existing.boardCandidateClaims.filter((c) => c.status !== status),
+                  ...reorderedClaims,
+                ],
+              },
+            })
+          }
+        },
       })
       addToast({ title: 'Success', description: 'Claim order updated.', color: 'success' })
     } catch {
