@@ -13,14 +13,18 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "eslint": "10.4.1",
+    "eslint-config-prettier": "10.1.8",
     "eslint-plugin-playwright": "2.10.4",
     "globals": "17.6.0",
+    "prettier": "3.8.3",
     "typescript-eslint": "8.60.0"
   },
   "scripts": {
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui-host=0.0.0.0 --ui-port=3800",
     "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
-    "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0"
+    "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
+    "format": "prettier --log-level warn --write .",
+    "format:check": "prettier --check ."
   }
 }

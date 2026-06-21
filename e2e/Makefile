@@ -11,12 +11,19 @@ REPO_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 	test-e2e-ui-no-db-init \
 	test-e2e-ui \
 	check-e2e \
-	lint-e2e-code
+	lint-e2e-code \ 
+	format-e2e-code
 
 check-e2e: ## Run e2e code quality checks
 check-e2e: \
+	format-e2e-code \
 	lint-e2e-code 
 
+format-e2e-code:
+	@(cd $(REPO_ROOT)/e2e && (pnpm list prettier --depth=0 | grep -q 'prettier' || pnpm add -D prettier >/dev/null 2>&1) \
+	  && pnpm run format:check >/dev/null 2>&1 \
+	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
 audit-e2e-dependencies: ## Audit e2e npm dependencies
 	@echo "Auditing e2e npm dependencies..."
 	@cd $(REPO_ROOT)/e2e && pnpm audit --audit-level=$(AUDIT_LEVEL)

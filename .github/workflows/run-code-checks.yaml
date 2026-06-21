@@ -54,6 +54,10 @@ jobs:
       - name: Install e2e dependencies
         uses: ./.github/actions/install-e2e-dependencies
 
+      - name: Run pnpm format
+        run: pnpm run format
+        working-directory: e2e
+
       - name: Run pnpm lint check
         run: pnpm run lint:check
         working-directory: e2e

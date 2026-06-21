@@ -1,0 +1,7 @@
+# Ignore artifacts:
+.pnpm-store/
+pnpm-lock.yaml
+build
+coverage
+playwright-report
+test-results
