@@ -7,13 +7,14 @@ export const CREATE_CLAIM = gql`
       code
       message
       claim {
+        createdAt
+        description
+        hasEvidence
         id
         key
         name
-        description
-        status
         order
-        createdAt
+        status
         updatedAt
       }
     }
@@ -27,13 +28,14 @@ export const UPDATE_CLAIM = gql`
       code
       message
       claim {
+        createdAt
+        description
+        hasEvidence
         id
         key
         name
-        description
-        status
         order
-        createdAt
+        status
         updatedAt
       }
     }
@@ -47,13 +49,14 @@ export const DISCARD_CLAIM = gql`
       code
       message
       claim {
+        createdAt
+        description
+        hasEvidence
         id
         key
         name
-        description
-        status
         order
-        createdAt
+        status
         updatedAt
       }
     }
@@ -67,13 +70,14 @@ export const SUBMIT_CLAIM = gql`
       code
       message
       claim {
+        createdAt
+        description
+        hasEvidence
         id
         key
         name
-        description
-        status
         order
-        createdAt
+        status
         updatedAt
       }
     }
@@ -87,13 +91,14 @@ export const WITHDRAW_CLAIM = gql`
       code
       message
       claim {
+        createdAt
+        description
+        hasEvidence
         id
         key
         name
-        description
-        status
         order
-        createdAt
+        status
         updatedAt
       }
     }
@@ -107,13 +112,14 @@ export const REORDER_CLAIMS = gql`
       code
       message
       claims {
+        createdAt
+        description
+        hasEvidence
         id
         key
         name
-        description
-        status
         order
-        createdAt
+        status
         updatedAt
       }
     }
