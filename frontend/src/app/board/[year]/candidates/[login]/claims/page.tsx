@@ -9,8 +9,12 @@ import { useEffect, useState } from 'react'
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa'
 import { FaPlus } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
-import { GetBoardCandidateAndClaimsDocument, GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
 import { ReorderBoardCandidateClaimsDocument } from 'types/__generated__/claimMutations.generated'
+import {
+  GetBoardCandidateAndClaimsDocument,
+  GetBoardCandidateClaimsDocument,
+} from 'types/__generated__/claimQueries.generated'
+import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
@@ -39,8 +43,12 @@ const CandidateClaimsPage = () => {
 
   useEffect(() => {
     const c = graphQLData?.boardCandidateClaims ?? []
-    setDraftOrder(c.filter((claim) => claim.status === 'DRAFT').map((claim) => claim.key))
-    setApprovedOrder(c.filter((claim) => claim.status === 'APPROVED').map((claim) => claim.key))
+    setDraftOrder(
+      c.filter((claim) => claim.status === ClaimStatusEnum.Draft).map((claim) => claim.key)
+    )
+    setApprovedOrder(
+      c.filter((claim) => claim.status === ClaimStatusEnum.Approved).map((claim) => claim.key)
+    )
   }, [graphQLData])
 
   useEffect(() => {
@@ -59,14 +67,22 @@ const CandidateClaimsPage = () => {
     )
   }
 
-  const originalDraftOrder = claims.filter((c) => c.status === 'DRAFT').map((c) => c.key)
-  const originalApprovedOrder = claims.filter((c) => c.status === 'APPROVED').map((c) => c.key)
+  const originalDraftOrder = claims
+    .filter((c) => c.status === ClaimStatusEnum.Draft)
+    .map((c) => c.key)
+  const originalApprovedOrder = claims
+    .filter((c) => c.status === ClaimStatusEnum.Approved)
+    .map((c) => c.key)
 
   const draftChanged = draftOrder.join() !== originalDraftOrder.join()
   const approvedChanged = approvedOrder.join() !== originalApprovedOrder.join()
 
-  const handleReorder = (key: string, direction: 'up' | 'down', status: 'DRAFT' | 'APPROVED') => {
-    const setOrder = status === 'DRAFT' ? setDraftOrder : setApprovedOrder
+  const handleReorder = (
+    key: string,
+    direction: 'up' | 'down',
+    status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
+  ) => {
+    const setOrder = status === ClaimStatusEnum.Draft ? setDraftOrder : setApprovedOrder
     setOrder((prev) => {
       const idx = prev.indexOf(key)
       const swapIdx = direction === 'up' ? idx - 1 : idx + 1
@@ -77,8 +93,8 @@ const CandidateClaimsPage = () => {
     })
   }
 
-  const handleSave = async (status: string) => {
-    const keys = status === 'DRAFT' ? draftOrder : approvedOrder
+  const handleSave = async (status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved) => {
+    const keys = status === ClaimStatusEnum.Draft ? draftOrder : approvedOrder
     try {
       await reorderClaims({
         variables: { input: { keys, year: Number.parseInt(year) } },
@@ -127,36 +143,39 @@ const CandidateClaimsPage = () => {
 
   const sectionConfig = [
     {
-      type: 'DRAFT',
+      type: ClaimStatusEnum.Draft,
       title: 'Draft Claims',
-      items: [...claims.filter((c) => c.status === 'DRAFT')].sort(
+      items: [...claims.filter((c) => c.status === ClaimStatusEnum.Draft)].sort(
         (a, b) => draftOrder.indexOf(a.key) - draftOrder.indexOf(b.key)
       ),
     },
     {
-      type: 'SUBMITTED',
+      type: ClaimStatusEnum.Submitted,
       title: 'Submitted Claims',
-      items: claims.filter((c) => c.status === 'SUBMITTED'),
+      items: claims.filter((c) => c.status === ClaimStatusEnum.Submitted),
     },
     {
-      type: 'APPROVED',
+      type: ClaimStatusEnum.Approved,
       title: 'Approved Claims',
-      items: [...claims.filter((c) => c.status === 'APPROVED')].sort(
+      items: [...claims.filter((c) => c.status === ClaimStatusEnum.Approved)].sort(
         (a, b) => approvedOrder.indexOf(a.key) - approvedOrder.indexOf(b.key)
       ),
     },
     {
-      type: 'REJECTED',
+      type: ClaimStatusEnum.Rejected,
       title: 'Rejected Claims',
-      items: claims.filter((c) => c.status === 'REJECTED'),
+      items: claims.filter((c) => c.status === ClaimStatusEnum.Rejected),
     },
     {
-      type: 'WITHDRAWN',
+      type: ClaimStatusEnum.Withdrawn,
       title: 'Withdrawn Claims',
-      items: claims.filter((c) => c.status === 'WITHDRAWN'),
+      items: claims.filter((c) => c.status === ClaimStatusEnum.Withdrawn),
     },
   ]
-  const orderChanged: Record<string, boolean> = { DRAFT: draftChanged, APPROVED: approvedChanged }
+  const orderChanged: Partial<Record<ClaimStatusEnum, boolean>> = {
+    [ClaimStatusEnum.Draft]: draftChanged,
+    [ClaimStatusEnum.Approved]: approvedChanged,
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 dark:bg-[#212529]">
@@ -174,10 +193,17 @@ const CandidateClaimsPage = () => {
         <SecondaryCard
           key={title}
           title={
-            ['DRAFT', 'APPROVED'].includes(statusType) && orderChanged[statusType] ? (
+            [ClaimStatusEnum.Draft, ClaimStatusEnum.Approved].includes(statusType) &&
+            orderChanged[statusType] ? (
               <div className="flex w-full items-center justify-between">
                 <span>{title}</span>
-                <ActionButton onClick={() => handleSave(statusType)}>Save Order</ActionButton>
+                <ActionButton
+                  onClick={() =>
+                    handleSave(statusType as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved)
+                  }
+                >
+                  Save Order
+                </ActionButton>
               </div>
             ) : (
               title
@@ -206,7 +232,7 @@ const CandidateClaimsPage = () => {
                       {formatDate(claim.createdAt)}
                     </span>
                   </div>
-                  {['DRAFT', 'APPROVED'].includes(claim.status) && (
+                  {[ClaimStatusEnum.Draft, ClaimStatusEnum.Approved].includes(claim.status) && (
                     <div className="flex flex-row gap-2 p-1">
                       <div
                         className="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -214,12 +240,20 @@ const CandidateClaimsPage = () => {
                         tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleReorder(claim.key, 'up', claim.status as 'DRAFT' | 'APPROVED')
+                          handleReorder(
+                            claim.key,
+                            'up',
+                            claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
+                          )
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.stopPropagation()
-                            handleReorder(claim.key, 'up', claim.status as 'DRAFT' | 'APPROVED')
+                            handleReorder(
+                              claim.key,
+                              'up',
+                              claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
+                            )
                           }
                         }}
                       >
@@ -231,12 +265,20 @@ const CandidateClaimsPage = () => {
                         tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleReorder(claim.key, 'down', claim.status as 'DRAFT' | 'APPROVED')
+                          handleReorder(
+                            claim.key,
+                            'down',
+                            claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
+                          )
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.stopPropagation()
-                            handleReorder(claim.key, 'down', claim.status as 'DRAFT' | 'APPROVED')
+                            handleReorder(
+                              claim.key,
+                              'down',
+                              claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
+                            )
                           }
                         }}
                       >

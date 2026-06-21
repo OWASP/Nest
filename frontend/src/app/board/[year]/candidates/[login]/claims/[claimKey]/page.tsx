@@ -11,6 +11,7 @@ import { useEffect } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
+import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -93,7 +94,7 @@ const ClaimDetailsPage = () => {
             <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Claim</h1>
           </div>
           <div className="flex items-center">
-            {claim.status == 'DRAFT' && (
+            {claim.status == ClaimStatusEnum.Draft && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
                 {'Add Evidence'}
