@@ -24,6 +24,7 @@ from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
 ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
+DEADLINE_OUT_OF_RANGE_MSG = "Deadline must be within the module's start and end dates."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
 NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
@@ -263,8 +264,8 @@ class ModuleMutation:
         if timezone.is_naive(normalized_deadline):
             normalized_deadline = timezone.make_aware(normalized_deadline)
 
-        if normalized_deadline.date() < timezone.now().date():
-            raise ValidationError(message="Deadline cannot be in the past.")
+        if not module.started_at.date() <= normalized_deadline.date() <= module.ended_at.date():
+            raise ValidationError(message=DEADLINE_OUT_OF_RANGE_MSG)
 
         now = timezone.now()
         tasks_to_update: list[Task] = []
