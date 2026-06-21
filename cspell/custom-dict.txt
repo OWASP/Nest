@@ -12,6 +12,7 @@ Balbin
 Balbin's
 Birda
 CCSP
+CFL
 CISSP
 CSSLP
 Cañón
@@ -148,6 +149,7 @@ kasya
 langgraph
 lhci
 libexpat
+libfuzzer
 libgobject
 libharfbuzz
 libpango

@@ -1,4 +1,4 @@
-"""OWASP Nest QueryParser fuzz target for ClusterFuzzLite."""
+"""Fuzz target for apps.common.search.query_parser."""
 
 import contextlib
 import sys
@@ -20,6 +20,10 @@ FIELDS = list(FIELD_SCHEMA.keys())
 
 def test_one_input(data: bytes) -> None:
     """Fuzz QueryParser with arbitrary and structured input."""
+    parser = QueryParser(field_schema=FIELD_SCHEMA, case_sensitive=False, strict=False)
+    with contextlib.suppress(QueryParserError):
+        parser.parse(data.decode("utf-8", errors="surrogateescape"))
+
     fdp = atheris.FuzzedDataProvider(data)
     parser = QueryParser(
         field_schema=FIELD_SCHEMA,
