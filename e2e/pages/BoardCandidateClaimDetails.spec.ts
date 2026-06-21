@@ -11,17 +11,17 @@ const mockData = {
     ...e,
   })),
 }
-const baseUrl = '/board/2025/candidates/testuser/claims/experience-web-security'
+const baseUrl = '/board/2025/candidates/testuser/claims/experience-leadership'
 
 test.describe('Board Candidate Claim Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await mockClaimAuth(page, mockData)
+    await mockClaimAuth(page, mockData, 'testuser', ['GetClaimAndEvidences'])
     await page.goto(baseUrl)
   })
 
   test('renders claim heading and claim details block', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /^Claim$/ })).toBeVisible()
-    await expect(page.getByText('Web security experience')).toBeVisible()
+    await expect(page.getByText('Leadership Experience')).toBeVisible()
     await expect(page.getByText('Claim Details')).toBeVisible()
   })
 
@@ -40,7 +40,7 @@ test.describe('Board Candidate Claim Details Page', () => {
       boardCandidateClaim: mockSingleClaim,
       boardCandidateClaimEvidences: [],
     }
-    await mockClaimAuth(page, emptyData)
+    await mockClaimAuth(page, emptyData, 'testuser', ['GetClaimAndEvidences'])
     await page.goto(baseUrl)
     await expect(page.getByText('No evidences.')).toBeVisible()
   })
@@ -50,7 +50,7 @@ test.describe('Board Candidate Claim Details Page', () => {
       boardCandidateClaim: null,
       boardCandidateClaimEvidences: [],
     }
-    await mockClaimAuth(page, notFoundData)
+    await mockClaimAuth(page, notFoundData, 'testuser', ['GetClaimAndEvidences'])
     await page.goto(baseUrl)
     await expect(page.getByRole('heading', { level: 2, name: 'Claim Not Found' })).toBeVisible()
     await expect(
@@ -59,7 +59,7 @@ test.describe('Board Candidate Claim Details Page', () => {
   })
 
   test('shows access denied when viewing another user profile', async ({ page }) => {
-    await mockClaimAuth(page, mockData, 'otheruser')
+    await mockClaimAuth(page, mockData, 'otheruser', ['GetClaimAndEvidences'])
     await page.goto(baseUrl)
     await expect(page.getByText('Access Denied')).toBeVisible()
   })
@@ -72,7 +72,7 @@ test.describe('Board Candidate Claim Details Page', () => {
       'Candidates',
       'Testuser',
       'Claims',
-      'Experience Web Security',
+      'Experience Leadership',
     ])
   })
 })

@@ -11,7 +11,7 @@ const baseUrl = '/board/2025/candidates/testuser/claims'
 
 test.describe('Board Candidate Claims Page', () => {
   test.beforeEach(async ({ page }) => {
-    await mockClaimAuth(page, mockData)
+    await mockClaimAuth(page, mockData, 'testuser', ['GetBoardCandidateAndClaims'])
     await page.goto(baseUrl)
   })
 
@@ -29,7 +29,7 @@ test.describe('Board Candidate Claims Page', () => {
   })
 
   test('renders claim names and evidence badges', async ({ page }) => {
-    await expect(page.getByText('Web Security Experience')).toBeVisible()
+    await expect(page.getByText('Leadership Experience')).toBeVisible()
     await expect(page.getByText('Chapter Leadership')).toBeVisible()
     await expect(page.getByRole('heading', { name: /^Approved Claim$/ })).toBeVisible()
     await expect(page.getByText('Evidence').first()).toBeVisible()
@@ -37,13 +37,17 @@ test.describe('Board Candidate Claims Page', () => {
 
   test('displays empty state when no claims exist', async ({ page }) => {
     const emptyData = { boardCandidateClaims: [], ...mockCandidateData }
-    await mockClaimAuth(page, emptyData)
+    await mockClaimAuth(page, emptyData, 'testuser', ['GetBoardCandidateAndClaims'])
     await page.goto(baseUrl)
     await expect(page.getByText('No draft claims.')).toBeVisible()
+    await expect(page.getByText('No submitted claims.')).toBeVisible()
+    await expect(page.getByText('No approved claims.')).toBeVisible()
+    await expect(page.getByText('No rejected claims.')).toBeVisible()
+    await expect(page.getByText('No withdrawn claims.')).toBeVisible()
   })
 
   test('shows access denied when viewing another user profile', async ({ page }) => {
-    await mockClaimAuth(page, mockData, 'otheruser')
+    await mockClaimAuth(page, mockData, 'otheruser', ['GetBoardCandidateAndClaims'])
     await page.goto(baseUrl)
     await expect(page.getByText('Access Denied')).toBeVisible()
   })

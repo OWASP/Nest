@@ -107,7 +107,7 @@ const ClaimForm = ({
               handleInputChange('name', value)
               setTouched((prev) => ({ ...prev, name: true }))
             }}
-            error={errors.name}
+            error={errors.name ?? backendErrors.name}
             touched={touched.name}
             required
             className="w-full min-w-0 lg:col-span-2"
@@ -118,8 +118,11 @@ const ClaimForm = ({
             label="Description"
             placeholder="Enter claim description"
             value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            error={errors.description}
+            onChange={(e) => {
+              handleInputChange('description', e.target.value)
+              setTouched((prev) => ({ ...prev, description: true }))
+            }}
+            error={errors.description ?? backendErrors.description}
             touched={touched.description}
             required
           />

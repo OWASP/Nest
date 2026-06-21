@@ -185,6 +185,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
           {confirmAction == 'withdraw' && (
             <ModalBody>
               <textarea
+                aria-label="Reason for withdrawal"
                 className="mt-2 w-full rounded border p-2"
                 rows={3}
                 placeholder="Reason for withdrawal..."

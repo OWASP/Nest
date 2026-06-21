@@ -35,7 +35,7 @@ const CandidateClaimsPage = () => {
     loading: isLoading,
     error: graphQLRequestError,
   } = useQuery(GetBoardCandidateAndClaimsDocument, {
-    skip: !login || !year,
+    skip: !login || !year || (session && session?.user?.login !== login),
     variables: { login, year: Number.parseInt(year) },
   })
 
@@ -86,6 +86,7 @@ const CandidateClaimsPage = () => {
     const setOrder = status === ClaimStatusEnum.Draft ? setDraftOrder : setApprovedOrder
     setOrder((prev) => {
       const idx = prev.indexOf(key)
+      if (idx === -1) return prev
       const swapIdx = direction === 'up' ? idx - 1 : idx + 1
       if (swapIdx < 0 || swapIdx >= prev.length) return prev
       const next = [...prev]
@@ -97,7 +98,7 @@ const CandidateClaimsPage = () => {
   const handleSave = async (status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved) => {
     const keys = status === ClaimStatusEnum.Draft ? draftOrder : approvedOrder
     try {
-      await reorderClaims({
+      const { data } = await reorderClaims({
         variables: { input: { keys, year: Number.parseInt(year) } },
         update(cache, { data }) {
           const reorderedClaims = data?.reorderBoardCandidateClaims?.claims
@@ -120,13 +121,23 @@ const CandidateClaimsPage = () => {
           }
         },
       })
-      addToast({
-        title: 'Success',
-        description: 'Claim order updated.',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'success',
-      })
+      if (data?.reorderBoardCandidateClaims?.ok) {
+        addToast({
+          title: 'Success',
+          description: 'Claim order updated.',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        })
+      } else {
+        addToast({
+          title: 'Error',
+          description: 'Failed to update claim order.',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'danger',
+        })
+      }
     } catch {
       addToast({
         title: 'Error',

@@ -1,4 +1,4 @@
-export const mockClaimAuth = async (page, mockData, login = 'testuser') => {
+export const mockClaimAuth = async (page, mockData, login = 'testuser', operationNames?: string[]) => {
   await page.route('**/api/auth/session', async (route) => {
     await route.fulfill({
       status: 200,
@@ -27,6 +27,8 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser') => {
           },
         },
       })
+    } else if (operationNames && !operationNames.includes(postData.operationName)) {
+      await route.abort('blockedbyclient')
     } else {
       await route.fulfill({
         status: 200,

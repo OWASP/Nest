@@ -12,7 +12,7 @@ jest.mock('@apollo/client/react', () => ({
 
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(() => ({
-    claimKey: 'experience-web-security',
+    claimKey: 'experience-leadership',
     login: 'testuser',
     year: '2025',
   })),
@@ -103,7 +103,7 @@ describe('ClaimDetailsPage', () => {
     render(<ClaimDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Web security experience/i)).toBeInTheDocument()
+      expect(screen.getByText(/Leadership Experience/i)).toBeInTheDocument()
     })
     expect(screen.getByText('Claim Details')).toBeInTheDocument()
   })

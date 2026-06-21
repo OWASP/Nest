@@ -107,7 +107,7 @@ describe('CandidateClaimsPage', () => {
     render(<CandidateClaimsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Web Security Experience')).toBeInTheDocument()
+      expect(screen.getByText('Leadership Experience')).toBeInTheDocument()
     })
     expect(screen.getByText('Chapter Leadership')).toBeInTheDocument()
     expect(screen.getByText('Approved Claim')).toBeInTheDocument()

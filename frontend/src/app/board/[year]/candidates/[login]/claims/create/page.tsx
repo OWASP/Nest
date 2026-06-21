@@ -3,8 +3,9 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useParams, useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
+import { handleAppError } from 'app/global-error'
 import { GetBoardCandidateDocument } from 'types/__generated__/boardQueries.generated'
 import { CreateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
@@ -25,12 +26,20 @@ const CreateClaimPage = () => {
     name: '',
   })
 
-  const { data: candidateGraphQLData, loading: isCandidateLoading } = useQuery(
-    GetBoardCandidateDocument,
-    {
-      variables: { login: login, year: Number.parseInt(year) },
+  const {
+    data: candidateGraphQLData,
+    loading: isCandidateLoading,
+    error: candidateQueryError,
+  } = useQuery(GetBoardCandidateDocument, {
+    skip: !login || !year || (session && session?.user?.login !== login),
+    variables: { login: login, year: Number.parseInt(year) },
+  })
+
+  useEffect(() => {
+    if (candidateQueryError) {
+      handleAppError(candidateQueryError)
     }
-  )
+  }, [candidateQueryError])
 
   if (isSyncing || isCandidateLoading) {
     return <LoadingSpinner />
