@@ -15,6 +15,7 @@ import {
   WithdrawBoardCandidateClaimDocument,
 } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
+import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import DropdownActions from 'components/DropdownActions'
 
 interface ClaimProperties {
@@ -22,7 +23,7 @@ interface ClaimProperties {
   description: string
   key: string
   name: string
-  status: string
+  status: ClaimStatusEnum
   updatedAt: string
 }
 
@@ -34,7 +35,7 @@ interface ClaimActionsProps {
 
 type ClaimAction = 'submit' | 'discard' | 'withdraw'
 
-const ACTIONS_BY_STATUS: Record<string, ClaimAction[]> = {
+const ACTIONS_BY_STATUS: Record<ClaimStatusEnum, ClaimAction[]> = {
   DRAFT: ['submit', 'discard'],
   SUBMITTED: ['withdraw'],
   APPROVED: ['withdraw'],
@@ -56,7 +57,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
     __typename: 'BoardCandidateClaimNode'
     id: string
     key: string
-    status: string
+    status: ClaimStatusEnum
     name: string
     description: string
     order: number
@@ -166,7 +167,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
   }
 
   const options = [
-    ...(claim.status == 'DRAFT'
+    ...(claim.status == ClaimStatusEnum.Draft
       ? [
           {
             key: 'edit',
