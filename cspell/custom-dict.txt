@@ -98,6 +98,7 @@ bsky
 carryforward
 cdx
 certbot
+cjs
 collectstatic
 coraza
 corsheaders

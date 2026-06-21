@@ -78,6 +78,21 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 **Please note you might need to restart the application in order to apply any `.env` file changes.**
 
+1. **Configure Django Secret Key**:
+
+   - The backend requires `DJANGO_SECRET_KEY` before it can start. The example file leaves this empty — you must set it yourself.
+   - Generate a value by running:
+
+     ```bash
+     openssl rand -base64 32
+     ```
+
+   - Update your `backend/.env` file:
+
+     ```plaintext
+     DJANGO_SECRET_KEY=<output-from-openssl-command>
+     ```
+
 1. **Set Up Algolia**:
 
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
