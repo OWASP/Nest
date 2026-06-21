@@ -1,3 +1,5 @@
+import { authCookies } from './mockAuthCookies'
+
 export const mockClaimAuth = async (page, mockData, login = 'testuser', operationNames?: string[]) => {
   await page.route('**/api/auth/session', async (route) => {
     await route.fulfill({
@@ -36,36 +38,5 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser', operatio
       })
     }
   })
-  await page.context().addCookies([
-    {
-      name: 'csrftoken',
-      value: 'abc123',
-      domain: 'localhost',
-      path: '/',
-    },
-    {
-      name: 'nest.session-id',
-      value: 'test-session-id',
-      domain: 'localhost',
-      path: '/',
-    },
-    {
-      name: 'next-auth.csrf-token',
-      value: 'test-csrf-token',
-      domain: 'localhost',
-      path: '/',
-    },
-    {
-      name: 'next-auth.callback-url',
-      value: '/',
-      domain: 'localhost',
-      path: '/',
-    },
-    {
-      name: 'next-auth.session-token',
-      value: 'test-session-token',
-      domain: 'localhost',
-      path: '/',
-    },
-  ])
+  await page.context().addCookies(authCookies)
 }

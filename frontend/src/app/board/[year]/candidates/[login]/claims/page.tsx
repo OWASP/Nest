@@ -22,6 +22,45 @@ import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
+const ReorderButton = ({
+  direction,
+  claimKey,
+  status,
+  onReorder,
+}: {
+  direction: 'up' | 'down'
+  claimKey: string
+  status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
+  onReorder: (
+    key: string,
+    direction: 'up' | 'down',
+    status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
+  ) => void
+}) => {
+  const Icon = direction === 'up' ? FaChevronUp : FaChevronDown
+  const handleClick = (e: MouseEvent) => {
+    e.stopPropagation()
+    onReorder(claimKey, direction, status)
+  }
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.stopPropagation()
+      onReorder(claimKey, direction, status)
+    }
+  }
+  return (
+    <div
+      className="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      <Icon className="text-gray-400 dark:text-gray-500" size={24} />
+    </div>
+  )
+}
+
 const CandidateClaimsPage = () => {
   const router = useRouter()
   const { isSyncing, session } = useDjangoSession()
@@ -261,56 +300,18 @@ const CandidateClaimsPage = () => {
                   </div>
                   {[ClaimStatusEnum.Draft, ClaimStatusEnum.Approved].includes(claim.status) && (
                     <div className="flex flex-row gap-2 p-1">
-                      <div
-                        className="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleReorder(
-                            claim.key,
-                            'up',
-                            claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
-                          )
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.stopPropagation()
-                            handleReorder(
-                              claim.key,
-                              'up',
-                              claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
-                            )
-                          }
-                        }}
-                      >
-                        <FaChevronUp className="text-gray-400 dark:text-gray-500" size={24} />
-                      </div>
-                      <div
-                        className="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleReorder(
-                            claim.key,
-                            'down',
-                            claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
-                          )
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.stopPropagation()
-                            handleReorder(
-                              claim.key,
-                              'down',
-                              claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
-                            )
-                          }
-                        }}
-                      >
-                        <FaChevronDown className="text-gray-400 dark:text-gray-500" size={24} />
-                      </div>
+                      <ReorderButton
+                        direction="up"
+                        claimKey={claim.key}
+                        status={claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved}
+                        onReorder={handleReorder}
+                      />
+                      <ReorderButton
+                        direction="down"
+                        claimKey={claim.key}
+                        status={claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved}
+                        onReorder={handleReorder}
+                      />
                     </div>
                   )}
                 </Button>
