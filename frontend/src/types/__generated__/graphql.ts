@@ -125,6 +125,7 @@ export type ChapterNode = Node & {
 
 export type ClaimResult = {
   __typename?: 'ClaimResult';
+  claim?: Maybe<BoardCandidateClaimNode>;
   code?: Maybe<Scalars['String']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];

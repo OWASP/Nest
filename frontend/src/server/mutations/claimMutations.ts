@@ -6,6 +6,16 @@ export const CREATE_CLAIM = gql`
       ok
       code
       message
+      claim {
+        id
+        key
+        name
+        description
+        status
+        order
+        createdAt
+        updatedAt
+      }
     }
   }
 `
@@ -16,6 +26,16 @@ export const UPDATE_CLAIM = gql`
       ok
       code
       message
+      claim {
+        id
+        key
+        name
+        description
+        status
+        order
+        createdAt
+        updatedAt
+      }
     }
   }
 `
@@ -26,6 +46,16 @@ export const DISCARD_CLAIM = gql`
       ok
       code
       message
+      claim {
+        id
+        key
+        name
+        description
+        status
+        order
+        createdAt
+        updatedAt
+      }
     }
   }
 `
@@ -36,6 +66,16 @@ export const SUBMIT_CLAIM = gql`
       ok
       code
       message
+      claim {
+        id
+        key
+        name
+        description
+        status
+        order
+        createdAt
+        updatedAt
+      }
     }
   }
 `
@@ -46,6 +86,16 @@ export const WITHDRAW_CLAIM = gql`
       ok
       code
       message
+      claim {
+        id
+        key
+        name
+        description
+        status
+        order
+        createdAt
+        updatedAt
+      }
     }
   }
 `
@@ -56,6 +106,16 @@ export const REORDER_CLAIMS = gql`
       ok
       code
       message
+      claims {
+        id
+        key
+        name
+        description
+        status
+        order
+        createdAt
+        updatedAt
+      }
     }
   }
 `
