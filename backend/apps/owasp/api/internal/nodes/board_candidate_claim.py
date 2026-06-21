@@ -32,6 +32,8 @@ class BoardCandidateClaimNode(strawberry.relay.Node):
     @strawberry_django.field
     def has_evidence(self, root: BoardCandidateClaim) -> bool:
         """Resolve whether the claim has any evidence."""
+        if hasattr(root, "evidence_exists"):
+            return root.evidence_exists
         return root.evidences.filter(is_removed=False).exists()
 
     @strawberry_django.field
