@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from '@apollo/client/react'
 import { Button } from '@heroui/button'
+import { Chip, Tooltip } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useParams, useRouter } from 'next/navigation'
@@ -228,9 +229,24 @@ const CandidateClaimsPage = () => {
                     <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
                       {claim.description}
                     </p>
-                    <span className="mt-1 shrink-0 text-xs text-gray-600 dark:text-gray-400">
-                      {formatDate(claim.createdAt)}
-                    </span>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
+                        {formatDate(claim.createdAt)}
+                      </span>
+                      {claim.hasEvidence && (
+                        <Tooltip
+                          content="This claim has an evidence attached"
+                          delay={150}
+                          closeDelay={100}
+                          showArrow
+                          placement="right"
+                        >
+                          <Chip size="sm" variant="flat" color="success" className="text-tiny h-5">
+                            Evidence
+                          </Chip>
+                        </Tooltip>
+                      )}
+                    </div>
                   </div>
                   {[ClaimStatusEnum.Draft, ClaimStatusEnum.Approved].includes(claim.status) && (
                     <div className="flex flex-row gap-2 p-1">
