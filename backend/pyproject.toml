@@ -132,6 +132,9 @@ lint.per-file-ignores."tests/**/*.py" = [
   "S101",    # https://docs.astral.sh/ruff/rules/assert/
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
+lint.per-file-ignores."tests/cluster-fuzz-lite/**/*.py" = [
+  "INP001", # Atheris fuzz harnesses mirror production paths; not importable packages.
+]
 
 [tool.mypy]
 mypy_path = "backend"
