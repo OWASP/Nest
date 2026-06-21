@@ -38,6 +38,7 @@ jobs:
             echo "Run make check and use git add to address it."
             exit 1
           }
+    timeout-minutes: 5
 
   run-pre-commit-checks:
     name: Pre-commit
@@ -75,7 +76,7 @@ jobs:
             mypy-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install pre-commit
-        run: python -m pip install --requirement backend/requirements/pre-commit.txt
+        run: python -m pip install --require-hashes --requirement backend/requirements/pre-commit.txt
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
@@ -116,6 +117,7 @@ jobs:
             echo "Run make check and use git add to address it."
             exit 1
           }
+    timeout-minutes: 5
 
   run-semgrep-checks:
     name: Semgrep
@@ -163,6 +165,7 @@ jobs:
       - name: Run cspell
         run: pnpm exec cspell --config cspell.json --no-progress -r ..
         working-directory: cspell
+    timeout-minutes: 5
 
   run-trivy-checks:
     name: Trivy
