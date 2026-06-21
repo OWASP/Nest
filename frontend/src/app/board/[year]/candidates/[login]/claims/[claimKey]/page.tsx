@@ -10,8 +10,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetBoardCandidateClaimDocument } from 'types/__generated__/claimQueries.generated'
-import { GetBoardCandidateClaimEvidencesDocument } from 'types/__generated__/evidenceQueries.generated'
+import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -27,40 +26,27 @@ const ClaimDetailsPage = () => {
   const { claimKey, login, year } = useParams<{ claimKey: string; login: string; year: string }>()
   const { isSyncing, session } = useDjangoSession()
   const {
-    data: claimGraphQLData,
-    error: claimGraphQLRequestError,
-    loading: isClaimLoading,
-  } = useQuery(GetBoardCandidateClaimDocument, {
+    data: graphQLData,
+    loading: isLoading,
+    error: graphQLRequestError,
+  } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
     skip: !claimKey,
-    variables: { key: claimKey, login: login, year: Number.parseInt(year) },
+    variables: { key: claimKey, login, year: Number.parseInt(year) },
   })
 
-  const {
-    data: evidenceGraphQLData,
-    error: evidenceGraphQLRequestError,
-    loading: isEvidenceLoading,
-  } = useQuery(GetBoardCandidateClaimEvidencesDocument, {
-    fetchPolicy: 'cache-and-network',
-    skip: !claimKey,
-    variables: { claimKey: claimKey, login: login, year: Number.parseInt(year) },
-  })
-
-  const claim = claimGraphQLData?.boardCandidateClaim
-  const evidences = evidenceGraphQLData?.boardCandidateClaimEvidences ?? []
+  const claim = graphQLData?.boardCandidateClaim
+  const evidences = graphQLData?.boardCandidateClaimEvidences ?? []
 
   useEffect(() => {
-    if (claimGraphQLRequestError) {
-      handleAppError(claimGraphQLRequestError)
+    if (graphQLRequestError) {
+      handleAppError(graphQLRequestError)
     }
-    if (evidenceGraphQLRequestError) {
-      handleAppError(evidenceGraphQLRequestError)
-    }
-  }, [claimGraphQLRequestError, evidenceGraphQLRequestError])
+  }, [graphQLRequestError])
 
-  if (isClaimLoading || isEvidenceLoading || isSyncing) return <LoadingSpinner />
+  if (isLoading || isSyncing) return <LoadingSpinner />
 
-  if (claimGraphQLRequestError || evidenceGraphQLRequestError) {
+  if (graphQLRequestError) {
     return (
       <ErrorDisplay
         statusCode={500}
@@ -70,7 +56,7 @@ const ClaimDetailsPage = () => {
     )
   }
 
-  if (!claimGraphQLData || !claim) {
+  if (!graphQLData || !claim) {
     return (
       <ErrorDisplay
         statusCode={404}
