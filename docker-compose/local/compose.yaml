@@ -102,10 +102,10 @@ services:
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
 
-  victoriametrics:
-    container_name: nest-victoria-metrics
+  metrics:
+    container_name: nest-metrics
     command:
-      - -storageDataPath=/victoria-metrics-data
+      - -storageDataPath=/metrics-data
       - -retentionPeriod=7d
     image: victoriametrics/victoria-metrics:v1.145.0@sha256:e13495c6d25676fab115f5b0f32faa8b86b30ea7cfec2b8190b691ed2b6cbdc8
     healthcheck:
@@ -118,9 +118,9 @@ services:
     ports:
       - 8428:8428
     profiles:
-      - observability
+      - o11y
     volumes:
-      - victoria-metrics-data:/victoria-metrics-data
+      - metrics-data:/metrics-data
 
   worker:
     container_name: nest-worker
@@ -153,4 +153,4 @@ volumes:
   docs-venv:
   frontend-next:
   frontend-node-modules:
-  victoria-metrics-data:
+  metrics-data:

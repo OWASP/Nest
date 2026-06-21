@@ -9,7 +9,7 @@ include infrastructure/Makefile
 
 .PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
 	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies build check \
-	clean clean-trivy-cache help pre-commit prune run run-observability scan-images security-scan \
+	clean clean-trivy-cache help pre-commit prune run run-o11y scan-images security-scan \
 	security-scan-backend-image security-scan-code security-scan-code-semgrep \
 	security-scan-code-trivy security-scan-frontend-image security-scan-images \
 	security-scan-zap test test-infrastructure test-nest-app update
@@ -36,10 +36,10 @@ run: ## Run Nest application locally
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 
-run-observability: ## Run Nest application locally with the observability stack
+run-o11y: ## Run Nest application locally with the observability stack
 	@DOCKER_BUILDKIT=1 \
-	docker compose -f docker-compose/local/compose.yaml --project-name nest-local --profile observability build && \
-	docker compose -f docker-compose/local/compose.yaml --project-name nest-local --profile observability up --remove-orphans
+	docker compose -f docker-compose/local/compose.yaml --project-name nest-local --profile o11y build && \
+	docker compose -f docker-compose/local/compose.yaml --project-name nest-local --profile o11y up --remove-orphans
 
 ##@ Testing
 
