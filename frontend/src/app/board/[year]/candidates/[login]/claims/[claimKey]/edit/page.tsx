@@ -22,7 +22,7 @@ const EditClaimPage = () => {
     loading: isLoading,
   } = useQuery(GetBoardCandidateClaimDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey,
+    skip: !claimKey || session?.user?.login !== login,
     variables: { key: claimKey, login: login, year: Number.parseInt(year) },
   })
 

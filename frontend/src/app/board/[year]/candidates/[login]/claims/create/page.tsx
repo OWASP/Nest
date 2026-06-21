@@ -31,7 +31,7 @@ const CreateClaimPage = () => {
     loading: isCandidateLoading,
     error: candidateQueryError,
   } = useQuery(GetBoardCandidateDocument, {
-    skip: !login || !year || (session && session?.user?.login !== login),
+    skip: !login || !year || session?.user?.login !== login,
     variables: { login: login, year: Number.parseInt(year) },
   })
 
