@@ -74,7 +74,7 @@ const CandidateClaimsPage = () => {
     loading: isLoading,
     error: graphQLRequestError,
   } = useQuery(GetBoardCandidateAndClaimsDocument, {
-    skip: !login || !year || (session && session?.user?.login !== login),
+    skip: !login || !year || session?.user?.login !== login,
     variables: { login, year: Number.parseInt(year) },
   })
 
