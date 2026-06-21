@@ -79,8 +79,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
         query: GetBoardCandidateClaimsDocument,
         variables: { login, year: Number.parseInt(year) },
         data: {
-          boardCandidateClaims: existing.boardCandidateClaims.map(
-            (c) => (c.key === updatedClaim.key ? updatedClaim : c)
+          boardCandidateClaims: existing.boardCandidateClaims.map((c) =>
+            c.key === updatedClaim.key ? updatedClaim : c
           ),
         },
       })
@@ -114,8 +114,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
         case 'submit':
           result = await submitClaim({
             variables: { input: { key: claim.key, year: Number.parseInt(year) } },
-            update: (cache, { data }) =>
-              updateClaimsCache(cache, data?.submitBoardCandidateClaim),
+            update: (cache, { data }) => updateClaimsCache(cache, data?.submitBoardCandidateClaim),
           })
           if (!result.data?.submitBoardCandidateClaim?.ok) {
             throw new Error(result.data?.submitBoardCandidateClaim?.message ?? 'Submit failed.')
@@ -124,8 +123,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
         case 'discard':
           result = await discardClaim({
             variables: { input: { key: claim.key, year: Number.parseInt(year) } },
-            update: (cache, { data }) =>
-              updateClaimsCache(cache, data?.discardBoardCandidateClaim),
+            update: (cache, { data }) => updateClaimsCache(cache, data?.discardBoardCandidateClaim),
           })
           if (!result.data?.discardBoardCandidateClaim?.ok) {
             throw new Error(result.data?.discardBoardCandidateClaim?.message ?? 'Discard failed.')
@@ -147,6 +145,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
       addToast({
         title: 'Success',
         description: SUCCESS_MESSAGES[confirmAction!],
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
         color: 'success',
       })
 
@@ -156,6 +156,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
       addToast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Claim action failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
         color: 'danger',
       })
     } finally {

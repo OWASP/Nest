@@ -111,9 +111,21 @@ const CandidateClaimsPage = () => {
           }
         },
       })
-      addToast({ title: 'Success', description: 'Claim order updated.', color: 'success' })
+      addToast({
+        title: 'Success',
+        description: 'Claim order updated.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+      })
     } catch {
-      addToast({ title: 'Error', description: 'Failed to update claim order.', color: 'danger' })
+      addToast({
+        title: 'Error',
+        description: 'Failed to update claim order.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 
