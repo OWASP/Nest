@@ -170,7 +170,9 @@ class TestIssueNode(GraphQLNodeBaseTest):
 
         mock_info = Mock()
         mock_info.context = Mock()
-        mock_info.context.github_dataloaders = {INTERESTED_USERS_BY_ISSUE_ID_LOADER: mock_loader}
+        mock_info.context.mentorship_dataloaders = {
+            INTERESTED_USERS_BY_ISSUE_ID_LOADER: mock_loader
+        }
 
         field = self._get_field_by_name("interested_users", IssueNode)
         result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info)

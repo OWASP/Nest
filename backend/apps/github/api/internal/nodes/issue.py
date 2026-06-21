@@ -84,7 +84,7 @@ class IssueNode(strawberry.relay.Node):
     @strawberry_django.field
     async def interested_users(self, root: Issue, info: Info) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
-        return await info.context.github_dataloaders[INTERESTED_USERS_BY_ISSUE_ID_LOADER].load(
+        return await info.context.mentorship_dataloaders[INTERESTED_USERS_BY_ISSUE_ID_LOADER].load(
             root.pk
         )
 
