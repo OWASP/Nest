@@ -1,8 +1,8 @@
 export const mockClaims = [
   {
-    key: 'experience-web-security',
-    name: 'Web Security Experience',
-    description: 'Experience in web security.',
+    key: 'experience-leadership',
+    name: 'Leadership Experience',
+    description: 'Experience in leadership.',
     status: 'DRAFT',
     hasEvidence: true,
     order: 1,
@@ -70,9 +70,9 @@ export const mockCandidateData = {
 }
 
 export const mockSingleClaim = {
-  key: 'experience-web-security',
-  name: 'Web Security Experience',
-  description: 'Experience in web security.',
+  key: 'experience-leadership',
+  name: 'Leadership Experience',
+  description: 'Experience in leadership.',
   status: 'DRAFT',
   createdAt: '2025-01-15T10:00:00Z',
   updatedAt: '2025-01-15T10:00:00Z',

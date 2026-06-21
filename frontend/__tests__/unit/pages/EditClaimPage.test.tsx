@@ -14,7 +14,7 @@ jest.mock('@apollo/client/react', () => ({
 
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(() => ({
-    claimKey: 'experience-web-security',
+    claimKey: 'experience-leadership',
     login: 'testuser',
     year: '2025',
   })),
@@ -50,9 +50,9 @@ const stableClaim = {
     __typename: 'BoardCandidateClaimNode',
     id: 'claim-1',
     createdAt: '2025-01-15T10:00:00Z',
-    description: 'Experience in web security.',
-    key: 'experience-web-security',
-    name: 'Web Security Experience',
+    description: 'Experience in leadership.',
+    key: 'experience-leadership',
+    name: 'Leadership Experience',
     status: 'DRAFT',
     updatedAt: '2025-01-15T10:00:00Z',
   },
@@ -74,7 +74,7 @@ describe('EditClaimPage', () => {
           claim: {
             __typename: 'BoardCandidateClaimNode',
             id: 'claim-1',
-            key: 'experience-web-security',
+            key: 'experience-leadership',
             name: 'Updated Claim',
             description: 'Updated description',
             status: 'DRAFT',
@@ -133,16 +133,16 @@ describe('EditClaimPage', () => {
     render(<EditClaimPage />)
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('Web Security Experience')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Leadership Experience')).toBeInTheDocument()
     })
-    expect(screen.getByDisplayValue('Experience in web security.')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Experience in leadership.')).toBeInTheDocument()
   })
 
   test('submits form and redirects on success', async () => {
     render(<EditClaimPage />)
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('Web Security Experience')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Leadership Experience')).toBeInTheDocument()
     })
 
     await userEvent.clear(screen.getByPlaceholderText('Enter claim name'))
@@ -155,7 +155,7 @@ describe('EditClaimPage', () => {
       expect(mockUpdateFn).toHaveBeenCalled()
     })
     expect(mockRouter.push).toHaveBeenCalledWith(
-      '/board/2025/candidates/testuser/claims/experience-web-security'
+      '/board/2025/candidates/testuser/claims/experience-leadership'
     )
   })
 
@@ -165,7 +165,7 @@ describe('EditClaimPage', () => {
     render(<EditClaimPage />)
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('Web Security Experience')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Leadership Experience')).toBeInTheDocument()
     })
 
     await userEvent.click(screen.getByRole('button', { name: /edit claim/i }))

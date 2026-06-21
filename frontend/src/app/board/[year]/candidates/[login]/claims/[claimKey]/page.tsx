@@ -51,7 +51,7 @@ const ClaimDetailsPage = () => {
     return (
       <ErrorDisplay
         statusCode={500}
-        title="Error loading program"
+        title="Error loading claim"
         message="An error occurred while loading the claim data"
       />
     )
