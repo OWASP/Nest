@@ -5,18 +5,17 @@ import { defineConfig } from "eslint/config";
 import playwright from "eslint-plugin-playwright";
 
 export default defineConfig([
-  { ignores: ["node_modules"] },
+  { ignores: ["node_modules", "playwright-report", "test-results"] },
   tseslint.configs.recommended,
+  js.configs.recommended,
   {
     files: ["**/*.{js,ts}"],
-    plugins: { js },
-    extends: ["js/recommended"],
-    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+    languageOptions: { globals: { ...globals.node } },
     rules: {
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
-        { varsIgnorePattern: "^_" },
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
     },
   },
