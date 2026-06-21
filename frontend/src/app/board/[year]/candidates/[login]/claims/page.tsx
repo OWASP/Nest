@@ -9,9 +9,8 @@ import { useEffect, useState } from 'react'
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa'
 import { FaPlus } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
-import { GetBoardCandidateDocument } from 'types/__generated__/boardQueries.generated'
+import { GetBoardCandidateAndClaimsDocument, GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
 import { ReorderBoardCandidateClaimsDocument } from 'types/__generated__/claimMutations.generated'
-import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
@@ -28,21 +27,14 @@ const CandidateClaimsPage = () => {
 
   const {
     data: graphQLData,
-    error: graphQLRequestError,
     loading: isLoading,
-  } = useQuery(GetBoardCandidateClaimsDocument, {
+    error: graphQLRequestError,
+  } = useQuery(GetBoardCandidateAndClaimsDocument, {
     skip: !login || !year,
-    variables: { login: login, year: Number.parseInt(year) },
+    variables: { login, year: Number.parseInt(year) },
   })
 
-  const { data: candidateGraphQLData, loading: isCandidateLoading } = useQuery(
-    GetBoardCandidateDocument,
-    {
-      variables: { login: login, year: Number.parseInt(year) },
-    }
-  )
-
-  const isCandidate = candidateGraphQLData?.boardOfDirectors?.candidate != null
+  const isCandidate = graphQLData?.boardOfDirectors?.candidate != null
   const claims = graphQLData?.boardCandidateClaims ?? []
 
   useEffect(() => {
@@ -57,7 +49,7 @@ const CandidateClaimsPage = () => {
     }
   }, [graphQLRequestError])
 
-  if (isSyncing || isLoading || isCandidateLoading) {
+  if (isSyncing || isLoading) {
     return <LoadingSpinner />
   }
 
