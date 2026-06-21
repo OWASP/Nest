@@ -16,19 +16,11 @@ import {
 } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
+import type { Claim } from 'types/claim'
 import DropdownActions from 'components/DropdownActions'
 
-interface ClaimProperties {
-  id: string
-  description: string
-  key: string
-  name: string
-  status: ClaimStatusEnum
-  updatedAt: string
-}
-
 interface ClaimActionsProps {
-  claim: ClaimProperties
+  claim: Claim
   login: string
   year: string
 }
@@ -53,21 +45,9 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
   const [discardClaim] = useMutation(DiscardBoardCandidateClaimDocument)
   const [withdrawClaim] = useMutation(WithdrawBoardCandidateClaimDocument)
 
-  type ClaimNode = {
-    __typename: 'BoardCandidateClaimNode'
-    id: string
-    key: string
-    status: ClaimStatusEnum
-    name: string
-    description: string
-    order: number
-    createdAt: string | number
-    updatedAt: string | number
-  }
-
   const updateClaimsCache = (
     cache: ApolloCache,
-    mutationData: { claim?: ClaimNode | null } | null | undefined
+    mutationData: { claim?: Claim | null } | null | undefined
   ) => {
     const updatedClaim = mutationData?.claim
     if (!updatedClaim) return
