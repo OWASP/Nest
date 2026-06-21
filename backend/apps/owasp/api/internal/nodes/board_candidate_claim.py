@@ -30,6 +30,11 @@ class BoardCandidateClaimNode(strawberry.relay.Node):
         return root.nest_created_at
 
     @strawberry_django.field
+    def has_evidence(self, root: BoardCandidateClaim) -> bool:
+        """Resolve whether the claim has any evidence."""
+        return root.evidences.filter(is_removed=False).exists()
+
+    @strawberry_django.field
     def status(self, root: BoardCandidateClaim) -> ClaimStatusEnum:
         """Resolve claim status as GraphQL enum."""
         return ClaimStatusEnum(root.status)
