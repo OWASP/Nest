@@ -5,14 +5,18 @@
 REPO_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 
 .PHONY: audit-e2e-dependencies \
-	init-e2e-db \
-	test-e2e-no-db-init \
-	test-e2e \
-	test-e2e-ui-no-db-init \
-	test-e2e-ui \
 	check-e2e \
-	lint-e2e-code \ 
-	format-e2e-code
+	format-e2e-code \
+	init-e2e-db \
+	lint-e2e-code \
+	test-e2e \
+	test-e2e-no-db-init \
+	test-e2e-ui \
+	test-e2e-ui-no-db-init 
+
+audit-e2e-dependencies: ## Audit e2e npm dependencies
+	@echo "Auditing e2e npm dependencies..."
+	@cd $(REPO_ROOT)/e2e && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 check-e2e: ## Run e2e code quality checks
 check-e2e: \
@@ -24,9 +28,6 @@ format-e2e-code:
 	  && pnpm run format:check >/dev/null 2>&1 \
 	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
 	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
-audit-e2e-dependencies: ## Audit e2e npm dependencies
-	@echo "Auditing e2e npm dependencies..."
-	@cd $(REPO_ROOT)/e2e && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 init-e2e-db:
 	@$(MAKE) -C $(REPO_ROOT) fetch-nest-dump
@@ -44,20 +45,12 @@ lint-e2e-code:
 	  && (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
 	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
 
-test-e2e-no-db-init:
-	@cd $(REPO_ROOT) && DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit backend cache db frontend e2e-tests \
-		--build \
-		--remove-orphans
-
 test-e2e: ## Run e2e tests (DB init, then full stack + Playwright)
 	@$(MAKE) init-e2e-db
 	@$(MAKE) test-e2e-no-db-init
 
-test-e2e-ui-no-db-init:
-	@cd $(REPO_ROOT) && DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
+test-e2e-no-db-init:
+	@cd $(REPO_ROOT) && DOCKER_BUILDKIT=1 docker compose \
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml up \
 		--abort-on-container-exit backend cache db frontend e2e-tests \
@@ -67,3 +60,12 @@ test-e2e-ui-no-db-init:
 test-e2e-ui: ## Run e2e tests in Playwright UI mode
 	@$(MAKE) init-e2e-db
 	@$(MAKE) test-e2e-ui-no-db-init
+
+test-e2e-ui-no-db-init:
+	@cd $(REPO_ROOT) && DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml up \
+		--abort-on-container-exit backend cache db frontend e2e-tests \
+		--build \
+		--remove-orphans
+
