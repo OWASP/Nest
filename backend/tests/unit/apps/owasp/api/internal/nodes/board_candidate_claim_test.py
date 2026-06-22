@@ -46,3 +46,14 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_claim)
 
         assert not result
+
+    def test_has_evidence_falls_back_to_evidences_filter_when_annotation_missing(self):
+        mock_claim = Mock(spec=[])
+        mock_claim.evidences = Mock()
+        mock_claim.evidences.filter.return_value.exists.return_value = True
+
+        field = self._get_field_by_name("has_evidence", BoardCandidateClaimNode)
+        result = field.base_resolver.wrapped_func(None, mock_claim)
+
+        mock_claim.evidences.filter.assert_called_once_with(is_removed=False)
+        assert result
