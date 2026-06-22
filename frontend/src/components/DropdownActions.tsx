@@ -102,7 +102,7 @@ const DropdownActions: React.FC<DropdownActionsProps> = ({ options, label }) => 
             className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
             onKeyDown={handleKeyDown}
             role="menu"
-            tabIndex={0}
+            tabIndex={-1}
           >
             {options.map((option, index) => {
               const handleMenuItemClick = (e: React.MouseEvent) => {
