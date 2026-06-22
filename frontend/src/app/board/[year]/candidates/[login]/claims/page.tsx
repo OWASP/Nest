@@ -38,11 +38,11 @@ const ReorderButton = ({
   ) => void
 }) => {
   const Icon = direction === 'up' ? FaChevronUp : FaChevronDown
-  const handleClick = (e: MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     onReorder(claimKey, direction, status)
   }
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.stopPropagation()
       onReorder(claimKey, direction, status)
