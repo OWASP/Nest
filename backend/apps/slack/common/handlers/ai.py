@@ -32,12 +32,21 @@ def get_blocks(
     ai_response = process_ai_query(
         query.strip(), images=images, channel_id=channel_id, is_app_mention=is_app_mention
     )
+    return get_response_blocks(ai_response)
 
-    if ai_response:
-        # Format the AI response for Slack (remove code blocks, fix markdown)
-        formatted_response = format_ai_response_for_slack(ai_response)
-        return [markdown(formatted_response)]
-    return get_error_blocks()
+
+def get_response_blocks(response: str | None) -> list[dict]:
+    """Get Slack blocks for an already generated AI response.
+
+    Args:
+        response (str | None): The AI's generated response.
+
+    Returns:
+        list: A list of Slack blocks representing the AI response.
+
+    """
+    # Format the AI response for Slack (remove code blocks, fix markdown)
+    return [markdown(format_ai_response_for_slack(response))] if response else get_error_blocks()
 
 
 def process_ai_query(
