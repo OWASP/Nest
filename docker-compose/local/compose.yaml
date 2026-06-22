@@ -102,12 +102,12 @@ services:
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
 
-  metrics:
-    container_name: nest-metrics
+  o11y-metrics:
+    container_name: nest-o11y-metrics
     command:
-      - -storageDataPath=/metrics-data
       - -retentionPeriod=7d
-    image: victoriametrics/victoria-metrics:v1.145.0@sha256:e13495c6d25676fab115f5b0f32faa8b86b30ea7cfec2b8190b691ed2b6cbdc8
+      - -storageDataPath=/data
+    image: victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70
     healthcheck:
       interval: 5s
       retries: 5
@@ -120,7 +120,7 @@ services:
     profiles:
       - o11y
     volumes:
-      - metrics-data:/metrics-data
+      - o11y-metrics-data:/data
 
   worker:
     container_name: nest-worker
@@ -153,4 +153,4 @@ volumes:
   docs-venv:
   frontend-next:
   frontend-node-modules:
-  metrics-data:
+  o11y-metrics-data:
