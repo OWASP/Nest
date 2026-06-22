@@ -1,7 +1,13 @@
 """Test cases for ReleaseNode."""
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from apps.github.api.internal.dataloaders.repository import (
+    RELEASE_URL_BY_ID_LOADER,
+    REPOSITORY_BY_RELEASE_ID_LOADER,
+)
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.user import UserNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -35,37 +41,61 @@ class TestReleaseNode(GraphQLNodeBaseTest):
         assert author_field is not None
         assert author_field.type.of_type is UserNode
 
-    def test_organization_name_with_organization(self):
+    @pytest.mark.asyncio
+    async def test_organization_name_with_organization(self):
         """Test organization_name field when organization exists."""
+        mock_repo = Mock()
+        mock_org = Mock()
+        mock_org.login = "test-org"
+        mock_repo.organization = mock_org
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_repo)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {REPOSITORY_BY_RELEASE_ID_LOADER: mock_loader}
+
         mock_release = Mock()
-        mock_repository = Mock()
-        mock_organization = Mock()
-        mock_organization.login = "test-org"
-        mock_repository.organization = mock_organization
-        mock_release.repository = mock_repository
+        mock_release.pk = 1
 
         field = self._get_field_by_name("organization_name", ReleaseNode)
-        result = field.base_resolver.wrapped_func(None, mock_release)
+        result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
+
         assert result == "test-org"
+        mock_loader.load.assert_awaited_once_with(1)
 
-    def test_organization_name_without_organization(self):
+    @pytest.mark.asyncio
+    async def test_organization_name_without_organization(self):
         """Test organization_name field when organization doesn't exist."""
+        mock_repo = Mock()
+        mock_repo.organization = None
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_repo)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {REPOSITORY_BY_RELEASE_ID_LOADER: mock_loader}
+
         mock_release = Mock()
-        mock_repository = Mock()
-        mock_repository.organization = None
-        mock_release.repository = mock_repository
+        mock_release.pk = 1
 
         field = self._get_field_by_name("organization_name", ReleaseNode)
-        result = field.base_resolver.wrapped_func(None, mock_release)
+        result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
+
         assert result is None
 
-    def test_organization_name_without_repository(self):
+    @pytest.mark.asyncio
+    async def test_organization_name_without_repository(self):
         """Test organization_name field when repository doesn't exist."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=None)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {REPOSITORY_BY_RELEASE_ID_LOADER: mock_loader}
+
         mock_release = Mock()
-        mock_release.repository = None
+        mock_release.pk = 1
 
         field = self._get_field_by_name("organization_name", ReleaseNode)
-        result = field.base_resolver.wrapped_func(None, mock_release)
+        result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
+
         assert result is None
 
     def test_project_name_with_project(self):
@@ -79,7 +109,7 @@ class TestReleaseNode(GraphQLNodeBaseTest):
 
         field = self._get_field_by_name("project_name", ReleaseNode)
         result = field.base_resolver.wrapped_func(None, mock_release)
-        assert result == " Test Project"  # OWASP prefix stripped
+        assert result == " Test Project"
 
     def test_project_name_without_project(self):
         """Test project_name field when project doesn't exist."""
@@ -101,31 +131,57 @@ class TestReleaseNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_release)
         assert result is None
 
-    def test_repository_name_with_repository(self):
+    @pytest.mark.asyncio
+    async def test_repository_name_with_repository(self):
         """Test repository_name field when repository exists."""
+        mock_repo = Mock()
+        mock_repo.name = "test-repo"
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_repo)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {REPOSITORY_BY_RELEASE_ID_LOADER: mock_loader}
+
         mock_release = Mock()
-        mock_repository = Mock()
-        mock_repository.name = "test-repo"
-        mock_release.repository = mock_repository
+        mock_release.pk = 1
 
         field = self._get_field_by_name("repository_name", ReleaseNode)
-        result = field.base_resolver.wrapped_func(None, mock_release)
+        result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
+
         assert result == "test-repo"
+        mock_loader.load.assert_awaited_once_with(1)
 
-    def test_repository_name_without_repository(self):
+    @pytest.mark.asyncio
+    async def test_repository_name_without_repository(self):
         """Test repository_name field when repository doesn't exist."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=None)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {REPOSITORY_BY_RELEASE_ID_LOADER: mock_loader}
+
         mock_release = Mock()
-        mock_release.repository = None
+        mock_release.pk = 1
 
         field = self._get_field_by_name("repository_name", ReleaseNode)
-        result = field.base_resolver.wrapped_func(None, mock_release)
+        result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
+
         assert result is None
 
-    def test_url_field(self):
-        """Test url field resolution."""
+    @pytest.mark.asyncio
+    async def test_url_field(self):
+        """Test url field resolution via dataloader."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(
+            return_value="https://github.com/test-org/test-repo/releases/tag/v1.0.0"
+        )
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {RELEASE_URL_BY_ID_LOADER: mock_loader}
+
         mock_release = Mock()
-        mock_release.url = "https://github.com/test-org/test-repo/releases/tag/v1.0.0"
+        mock_release.pk = 1
 
         field = self._get_field_by_name("url", ReleaseNode)
-        result = field.base_resolver.wrapped_func(None, mock_release)
+        result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
+
         assert result == "https://github.com/test-org/test-repo/releases/tag/v1.0.0"
+        mock_loader.load.assert_awaited_once_with(1)
