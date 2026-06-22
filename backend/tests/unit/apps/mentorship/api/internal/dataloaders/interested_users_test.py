@@ -7,7 +7,7 @@ from strawberry.dataloader import DataLoader
 
 from apps.mentorship.api.internal.dataloaders.interested_users import (
     INTERESTED_USERS_BY_ISSUE_ID_LOADER,
-    get_interested_users_loader,
+    get_interested_users_loaders,
     load_interested_users_by_issue_id,
 )
 
@@ -138,18 +138,18 @@ class TestLoadInterestedUsers:
 
 
 class TestMakeInterestedUsersLoader:
-    """Tests for get_interested_users_loader."""
+    """Tests for get_interested_users_loaders."""
 
     def test_returns_mapping(self):
         """Factory always returns a Mapping."""
-        loaders = get_interested_users_loader()
+        loaders = get_interested_users_loaders()
         assert INTERESTED_USERS_BY_ISSUE_ID_LOADER in loaders
         assert isinstance(loaders[INTERESTED_USERS_BY_ISSUE_ID_LOADER], DataLoader)
 
     def test_returns_new_instances_on_each_call(self):
         """Each call produces distinct DataLoader instances for per-request isolation."""
-        loaders1 = get_interested_users_loader()
-        loaders2 = get_interested_users_loader()
+        loaders1 = get_interested_users_loaders()
+        loaders2 = get_interested_users_loaders()
         assert loaders1 is not loaders2
         assert (
             loaders1[INTERESTED_USERS_BY_ISSUE_ID_LOADER]
@@ -158,6 +158,6 @@ class TestMakeInterestedUsersLoader:
 
     def test_load_fn_is_load_interested_users_by_issue_id(self):
         """The by-issue-id DataLoader is wired to load_interested_users_by_issue_id."""
-        loaders = get_interested_users_loader()
+        loaders = get_interested_users_loaders()
         loader = loaders[INTERESTED_USERS_BY_ISSUE_ID_LOADER]
         assert loader.load_fn is load_interested_users_by_issue_id

@@ -108,6 +108,16 @@ class TestResultsByKeys:
         result = await get_results_by_keys(make_qs(items), [1, 1], "org_id", "repo")
         assert result == [["repo-a"], ["repo-a"]]
 
+    @pytest.mark.asyncio
+    async def test_value_field_none_returns_whole_item(self):
+        """When value_field is None, the queryset item itself is the value."""
+        items = [
+            make_item(pk=1, name="alpha"),
+            make_item(pk=2, name="beta"),
+        ]
+        result = await get_results_by_keys(make_qs(items), [1, 2], "pk")
+        assert result == [[items[0]], [items[1]]]
+
     @pytest.mark.parametrize(
         ("items", "keys", "key_field", "value_field", "expected"),
         [
