@@ -17,12 +17,12 @@ interface RecentPullRequestsProps {
 
 const getBadgeClass = (pr: PullRequest) => {
   if (pr.mergedAt) {
-    return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+    return 'bg-[#8657E5] text-white'
   }
   if (pr.state === 'open') {
-    return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+    return 'bg-[#238636] text-white'
   }
-  return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+  return 'bg-[#DA3633] text-white'
 }
 
 const getPullRequestBadge = (pr: PullRequest): JSX.Element => (
