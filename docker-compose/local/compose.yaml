@@ -186,7 +186,7 @@ networks:
 volumes:
   backend-venv-nestbot:
   cache-data-nestbot:
-  db-data-nestbot-test:
+  db-data-nestbot:
   docs-venv:
   frontend-next:
   frontend-node-modules:
