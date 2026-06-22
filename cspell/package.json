@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "@cspell/dict-aws": "4.0.17",
-    "@cspell/dict-data-science": "2.0.13",
+    "@cspell/dict-data-science": "2.0.14",
     "@cspell/dict-en_us": "4.4.33",
     "@cspell/dict-fullstack": "3.2.9",
     "@cspell/dict-golang": "6.0.26",
