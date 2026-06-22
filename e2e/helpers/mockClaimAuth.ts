@@ -29,7 +29,7 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser', operatio
           },
         },
       })
-    } else if (operationNames && !operationNames.includes(postData.operationName)) {
+    } else if (operationNames && postData.operationName && !operationNames.includes(postData.operationName)) {
       await route.abort('aborted')
     } else {
       await route.fulfill({
