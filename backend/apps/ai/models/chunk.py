@@ -7,6 +7,8 @@ from apps.ai.models.context import Context
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
 
+EMBEDDING_DIMENSIONS = 1536
+
 
 class Chunk(TimestampedModel):
     """AI Chunk model for storing text chunks with embeddings."""
@@ -19,7 +21,7 @@ class Chunk(TimestampedModel):
         unique_together = ("context", "text")
 
     context = models.ForeignKey(Context, on_delete=models.CASCADE, related_name="chunks")
-    embedding = VectorField(verbose_name="Embedding", dimensions=1536)
+    embedding = VectorField(verbose_name="Embedding", dimensions=EMBEDDING_DIMENSIONS)
     text = models.TextField(verbose_name="Text")
 
     def __str__(self):
