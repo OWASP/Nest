@@ -9,7 +9,7 @@ test.describe('Header - Desktop (Chrome)', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
 
   test('should have logo', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('Header - Desktop (Chrome)', () => {
   })
 
   test('all dropdown triggers should use pointer cursor', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
 
     const dropdownButtons = page.locator('#navbar-sticky button')
 
@@ -60,7 +60,7 @@ test.use({
 
 test.describe('Header - Mobile (iPhone 13)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
 
   test('should have logo', async ({ page }) => {
