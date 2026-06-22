@@ -72,7 +72,7 @@ test.describe('Board Candidate Claim Details Page', () => {
       'Candidates',
       'Testuser',
       'Claims',
-      'Experience Leadership',
+      'Leadership Experience',
     ])
   })
 })
