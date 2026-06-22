@@ -10,6 +10,10 @@ from django.db.utils import IntegrityError
 from django.utils import timezone
 from graphql import GraphQLError
 
+from apps.common.graphql.validators import (
+    validate_date_range,
+    validate_date_range_within_bounds,
+)
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -52,27 +56,15 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
 
 def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
     """Validate and normalize module start/end dates against program constraints."""
-    if started_at is None or ended_at is None:
-        msg = "Both start and end dates are required."
-        raise ValidationError(message=msg)
-
-    if timezone.is_naive(started_at):
-        started_at = timezone.make_aware(started_at)
-    if timezone.is_naive(ended_at):
-        ended_at = timezone.make_aware(ended_at)
-
-    if ended_at <= started_at:
-        msg = "End date must be after start date."
-        raise ValidationError(message=msg)
-
-    if started_at < program_started_at:
-        msg = "Module start date cannot be before program start date."
-        raise ValidationError(message=msg)
-
-    if ended_at > program_ended_at:
-        msg = "Module end date cannot be after program end date."
-        raise ValidationError(message=msg)
-
+    started_at, ended_at = validate_date_range(started_at, ended_at)
+    validate_date_range_within_bounds(
+        started_at,
+        ended_at,
+        bounds_started_at=program_started_at,
+        bounds_ended_at=program_ended_at,
+        subject_label="Module",
+        bounds_label="program",
+    )
     return started_at, ended_at
 
 

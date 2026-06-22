@@ -1,0 +1,1 @@
+"""Shared GraphQL validation utilities."""
