@@ -3,7 +3,7 @@
 import { useQuery } from '@apollo/client/react'
 
 import { Button } from '@heroui/button'
-import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { BreadcrumbStyleProvider, registerBreadcrumb } from 'contexts/BreadcrumbContext'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { toLower, upperFirst } from 'lodash'
 import { useParams, useRouter } from 'next/navigation'
@@ -44,6 +44,15 @@ const ClaimDetailsPage = () => {
       handleAppError(graphQLRequestError)
     }
   }, [graphQLRequestError])
+
+  useEffect(() => {
+    if (!claim) return
+    const unregister = registerBreadcrumb({
+      title: claim.name,
+      path: `/board/${year}/candidates/${login}/claims/${claimKey}`,
+    })
+    return unregister
+  }, [claim, claimKey, login, year])
 
   if (isLoading || isSyncing) return <LoadingSpinner />
 
