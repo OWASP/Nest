@@ -1,0 +1,62 @@
+name: ClusterFuzzLite
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .clusterfuzzlite/**
+      - .github/workflows/cluster-fuzz-lite.yaml
+      - backend/apps/common/search/**
+      - backend/apps/slack/apps.py
+      - backend/apps/slack/common/**
+      - backend/apps/slack/utils/format.py
+      - backend/requirements/cluster-fuzz-lite.in
+      - backend/requirements/cluster-fuzz-lite.txt
+      - backend/tests/cluster-fuzz-lite/**
+  schedule:
+    - cron: 0 2 * * *
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: cluster-fuzz-lite-${{ github.ref }}
+
+permissions: {}
+
+jobs:
+  cluster-fuzz-lite:
+    name: ClusterFuzzLite
+    if: github.event.repository.fork == false
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Build fuzzers
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          keep-unaffected-fuzz-targets: true
+          language: python
+
+      - name: Run fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          fuzz-seconds: ${{ github.event_name == 'pull_request' && 300 || 900 }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          mode: ${{ github.event_name == 'pull_request' && 'code-change' || 'batch' }}
+          output-sarif: true
+          parallel-fuzzing: true
+
+      - name: Upload SARIF to code scanning
+        if: always() && hashFiles('artifacts/fuzz-latest/fuzzing-report.sarif') != ''
+        uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa  # v4.36.0
+        with:
+          category: cluster-fuzz-lite
+          sarif_file: artifacts/fuzz-latest/fuzzing-report.sarif
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 45 }}

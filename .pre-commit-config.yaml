@@ -122,7 +122,7 @@ repos:
       - id: name-tests-test
         args:
           - --pytest
-        exclude: backend/tests/data
+        exclude: backend/tests/(cluster-fuzz-lite|data)
         files: backend/tests
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml

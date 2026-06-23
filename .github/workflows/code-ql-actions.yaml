@@ -9,6 +9,12 @@ on:
     paths:
       - .github/actions/**
       - .github/workflows/**
+  push:
+    branches:
+      - main
+    paths:
+      - .github/actions/**
+      - .github/workflows/**
 
 concurrency:
   cancel-in-progress: true

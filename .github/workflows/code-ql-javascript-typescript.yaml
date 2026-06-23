@@ -17,6 +17,20 @@ on:
       - '**/*.tsx'
       - e2e/**
       - frontend/**
+  push:
+    branches:
+      - main
+    paths:
+      - .github/actions/install-frontend-dependencies/**
+      - .github/workflows/code-ql-javascript-typescript.yaml
+      - '**/*.cjs'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.mjs'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - e2e/**
+      - frontend/**
 
 concurrency:
   cancel-in-progress: true

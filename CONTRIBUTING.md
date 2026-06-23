@@ -453,7 +453,12 @@ You can access the UI at [http://localhost:3800](http://localhost:3800).
 
 ### Running Fuzz Tests
 
-Run the fuzz tests with the following command:
+Nest uses two complementary fuzzing layers:
+
+- **API fuzz tests** (`make test-fuzz`) run [Schemathesis](https://schemathesis.readthedocs.io/) against the REST and GraphQL APIs with a live backend, database, and cache.
+- **ClusterFuzzLite** (`.github/workflows/cluster-fuzz-lite.yaml`) runs [Atheris](https://github.com/google/atheris) targets in CI from `backend/tests/cluster-fuzz-lite/apps/`, mirroring the production `apps/` layout (for example `slack/common/text.py` and `common/search/query_parser.py`). Seed inputs live in `.clusterfuzzlite/seed_corpora/` with the same layout.
+
+Run the API fuzz tests with the following command:
 
 ```bash
 make test-fuzz
@@ -476,6 +481,12 @@ Then load data manually in another terminal:
 
 ```bash
 make load-data-fuzz
+```
+
+ClusterFuzzLite runs on pull requests for 5 minutes and on a nightly schedule for 15 minutes; fuzz targets run in parallel during that window. Build integration lives in `.clusterfuzzlite/`; the workflow sets `language: python` (a `project.yaml` is not required for CI). ClusterFuzzLite dependencies are pinned in `backend/requirements/cluster-fuzz-lite.txt`, generated from `backend/requirements/cluster-fuzz-lite.in`. Regenerate the lockfile after changing them:
+
+```bash
+make compile-backend-requirements
 ```
 
 ### Test Coverage
