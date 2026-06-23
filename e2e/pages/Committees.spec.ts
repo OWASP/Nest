@@ -13,7 +13,7 @@ test.describe('Committees Page', () => {
         }),
       })
     })
-    await page.goto('/committees')
+    await page.goto('/committees', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders committee data correctly', async ({ page }) => {
@@ -30,7 +30,7 @@ test.describe('Committees Page', () => {
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/committees')
+    await page.goto('/committees', { waitUntil: 'domcontentloaded' })
     await expect(page.getByText('No committees found')).toBeVisible()
   })
 

@@ -13,7 +13,7 @@ test.describe('Contribute Page', () => {
         }),
       })
     })
-    await page.goto('/contribute')
+    await page.goto('/contribute', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders issue data correctly', async ({ page }) => {
@@ -31,7 +31,7 @@ test.describe('Contribute Page', () => {
         body: JSON.stringify({ hits: [], totalPages: 0 }),
       })
     })
-    await page.goto('/contribute')
+    await page.goto('/contribute', { waitUntil: 'domcontentloaded' })
     await expect(page.getByText('No issues found')).toBeVisible()
   })
 
