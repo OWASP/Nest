@@ -51,6 +51,12 @@ const EditClaimPage = () => {
 
   if (isLoading || isSyncing) return <LoadingSpinner />
 
+  if (session?.user?.login !== login) {
+    return (
+      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
+    )
+  }
+
   if (graphQLRequestError) {
     return (
       <ErrorDisplay
@@ -68,12 +74,6 @@ const EditClaimPage = () => {
         title="Claim Not Found"
         message="Sorry, the claim you're looking for doesn't exist."
       />
-    )
-  }
-
-  if (session?.user?.login !== login) {
-    return (
-      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
     )
   }
 
