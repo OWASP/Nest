@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04 AS builder
+FROM python:3.13.14-alpine3.23@sha256:a37ad3b3e8b3e8800789340442fdb99a5a63b85355cac52cc8e6daad7ff1f5fa AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -45,7 +45,7 @@ COPY templates templates
 COPY apps apps
 COPY tests/unit tests/unit
 
-FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04
+FROM python:3.13.14-alpine3.23@sha256:a37ad3b3e8b3e8800789340442fdb99a5a63b85355cac52cc8e6daad7ff1f5fa
 
 ARG OWASP_GID
 ARG OWASP_UID
