@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
+from apps.github.api.internal.dataloaders.release import RELEASE_URL_BY_ID_LOADER
 from apps.github.api.internal.dataloaders.repository import (
-    RELEASE_URL_BY_ID_LOADER,
     REPOSITORY_BY_RELEASE_ID_LOADER,
 )
 from apps.github.api.internal.nodes.release import ReleaseNode

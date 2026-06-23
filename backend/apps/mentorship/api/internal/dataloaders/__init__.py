@@ -1,3 +1,5 @@
+"""Mentorship app Dataloaders."""
+
 from strawberry.dataloader import DataLoader
 
 from apps.github.models.user import User

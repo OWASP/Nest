@@ -1,17 +1,12 @@
-from strawberry.dataloader import DataLoader
+"""GitHub app Dataloaders."""
 
+from apps.github.api.internal.dataloaders.release import get_release_loaders
 from apps.github.api.internal.dataloaders.repository import get_repository_loaders
-from apps.github.models.repository import Repository
 
 
-def get_github_dataloaders() -> dict[
-    str,
-    DataLoader[int, Repository | None] | DataLoader[int, str],
-]:
+def get_github_dataloaders() -> dict[str, object]:
     """Return a dict of dataloader instances for GitHub API resolvers."""
-    loaders: dict[
-        str,
-        DataLoader[int, Repository | None] | DataLoader[int, str],
-    ] = {}
+    loaders: dict[str, object] = {}
     loaders.update(get_repository_loaders())
+    loaders.update(get_release_loaders())
     return loaders

@@ -4,8 +4,8 @@ import strawberry
 import strawberry_django
 from strawberry.types import Info
 
+from apps.github.api.internal.dataloaders.release import RELEASE_URL_BY_ID_LOADER
 from apps.github.api.internal.dataloaders.repository import (
-    RELEASE_URL_BY_ID_LOADER,
     REPOSITORY_BY_RELEASE_ID_LOADER,
 )
 from apps.github.api.internal.nodes.user import UserNode
