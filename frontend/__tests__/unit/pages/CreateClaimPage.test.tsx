@@ -157,4 +157,66 @@ describe('CreateClaimPage', () => {
       )
     })
   })
+
+  test('does not submit when validation fails', async () => {
+    render(<CreateClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Enter claim name')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /create claim/i }))
+
+    expect(mockCreateFn).not.toHaveBeenCalled()
+  })
+
+  test('shows backend validation errors from GraphQL', async () => {
+    const gqlError = {
+      graphQLErrors: [
+        { message: 'Name is required', extensions: { code: 'VALIDATION_ERROR', field: 'name' } },
+      ],
+    }
+    mockCreateFn.mockRejectedValue(gqlError)
+
+    render(<CreateClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Enter claim name')).toBeInTheDocument()
+    })
+
+    await userEvent.type(screen.getByPlaceholderText('Enter claim name'), 'New Claim')
+    await userEvent.type(screen.getByPlaceholderText('Enter claim description'), 'New description')
+    await userEvent.click(screen.getByRole('button', { name: /create claim/i }))
+
+    await waitFor(() => {
+      expect(mockCreateFn).toHaveBeenCalled()
+    })
+  })
+
+  test('clears backend error when user types after validation error', async () => {
+    const gqlError = {
+      graphQLErrors: [
+        { message: 'Name is required', extensions: { code: 'VALIDATION_ERROR', field: 'name' } },
+      ],
+    }
+    mockCreateFn.mockRejectedValue(gqlError)
+
+    render(<CreateClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Enter claim name')).toBeInTheDocument()
+    })
+
+    await userEvent.type(screen.getByPlaceholderText('Enter claim name'), 'New Claim')
+    await userEvent.type(screen.getByPlaceholderText('Enter claim description'), 'New description')
+    await userEvent.click(screen.getByRole('button', { name: /create claim/i }))
+
+    await waitFor(() => {
+      expect(mockCreateFn).toHaveBeenCalled()
+    })
+
+    await userEvent.type(screen.getByPlaceholderText('Enter claim name'), ' Updated Name')
+
+    expect(screen.getByPlaceholderText('Enter claim name')).toHaveValue('New Claim Updated Name')
+  })
 })

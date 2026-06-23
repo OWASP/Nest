@@ -1,5 +1,5 @@
+import { fireEvent, render, screen, waitFor } from 'wrappers/testUtil'
 import userEvent from '@testing-library/user-event'
-import { render, screen, waitFor } from 'wrappers/testUtil'
 import ProgramForm from 'components/ProgramForm'
 
 describe('ProgramForm Component', () => {
@@ -699,8 +699,7 @@ describe('ProgramForm Component', () => {
       expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    test('handles start date changes and triggers touched state', async () => {
-      const user = userEvent.setup()
+    test('handles start date changes and triggers touched state', () => {
       render(
         <ProgramForm
           formData={defaultFormData}
@@ -711,19 +710,16 @@ describe('ProgramForm Component', () => {
         />
       )
 
-      // Find start date input by label
       const startDateLabel = screen.getByText('Start Date')
       expect(startDateLabel).toBeInTheDocument()
 
-      // Find the date input element using getByLabelText
-      const startDateInput = screen.getByLabelText('Start Date') as HTMLInputElement
-      await user.type(startDateInput, '2024-01-15')
+      const startDateInput = screen.getByLabelText('Start Date')
+      fireEvent.change(startDateInput, { target: { value: '2024-01-15' } })
 
       expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    test('handles end date changes', async () => {
-      const user = userEvent.setup()
+    test('handles end date changes', () => {
       render(
         <ProgramForm
           formData={defaultFormData}
@@ -734,13 +730,11 @@ describe('ProgramForm Component', () => {
         />
       )
 
-      // Find end date input by label
       const endDateLabel = screen.getByText('End Date')
       expect(endDateLabel).toBeInTheDocument()
 
-      // Find the date input element using getByLabelText
-      const endDateInput = screen.getByLabelText('End Date') as HTMLInputElement
-      await user.type(endDateInput, '2024-12-31')
+      const endDateInput = screen.getByLabelText('End Date')
+      fireEvent.change(endDateInput, { target: { value: '2024-12-31' } })
 
       expect(mockSetFormData).toHaveBeenCalled()
     })

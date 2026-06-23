@@ -179,4 +179,67 @@ describe('EditClaimPage', () => {
       )
     })
   })
+
+  test('does not submit when validation fails', async () => {
+    render(<EditClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Leadership Experience')).toBeInTheDocument()
+    })
+
+    await userEvent.clear(screen.getByPlaceholderText('Enter claim name'))
+    await userEvent.clear(screen.getByPlaceholderText('Enter claim description'))
+
+    await userEvent.click(screen.getByRole('button', { name: /edit claim/i }))
+
+    expect(mockUpdateFn).not.toHaveBeenCalled()
+  })
+
+  test('shows backend validation errors from GraphQL', async () => {
+    const gqlError = {
+      graphQLErrors: [
+        { message: 'Name is required', extensions: { code: 'VALIDATION_ERROR', field: 'name' } },
+      ],
+    }
+    mockUpdateFn.mockRejectedValue(gqlError)
+
+    render(<EditClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Leadership Experience')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /edit claim/i }))
+
+    await waitFor(() => {
+      expect(mockUpdateFn).toHaveBeenCalled()
+    })
+  })
+
+  test('clears backend error when user types after validation error', async () => {
+    const gqlError = {
+      graphQLErrors: [
+        { message: 'Name is required', extensions: { code: 'VALIDATION_ERROR', field: 'name' } },
+      ],
+    }
+    mockUpdateFn.mockRejectedValue(gqlError)
+
+    render(<EditClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Leadership Experience')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /edit claim/i }))
+
+    await waitFor(() => {
+      expect(mockUpdateFn).toHaveBeenCalled()
+    })
+
+    await userEvent.type(screen.getByPlaceholderText('Enter claim name'), ' Updated Name')
+
+    expect(screen.getByPlaceholderText('Enter claim name')).toHaveValue(
+      'Leadership Experience Updated Name'
+    )
+  })
 })
