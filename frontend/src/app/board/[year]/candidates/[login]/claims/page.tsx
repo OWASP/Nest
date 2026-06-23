@@ -43,12 +43,6 @@ const ReorderButton = ({
     e.stopPropagation()
     onReorder(claimKey, direction, status)
   }
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.stopPropagation()
-      onReorder(claimKey, direction, status)
-    }
-  }
   return (
     <div className="relative rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
       <input
@@ -56,7 +50,6 @@ const ReorderButton = ({
         aria-label={direction === 'up' ? 'Move claim up' : 'Move claim down'}
         className="absolute inset-0 cursor-pointer opacity-0"
         onClick={handleClick}
-        onKeyDown={handleKeyDown}
       />
       <Icon className="pointer-events-none text-gray-400 dark:text-gray-500" size={24} />
     </div>
