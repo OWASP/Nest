@@ -17,6 +17,11 @@ services:
       db:
         condition: service_healthy
     env_file: ../../backend/.env
+    environment:
+      - DJANGO_OTEL_METRICS_ENABLED=true
+      - OTEL_SERVICE_NAME=nest-backend
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://o11y-metrics:8428/opentelemetry
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     networks:
       - nest-network
     ports:
