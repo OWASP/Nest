@@ -21,7 +21,7 @@ test.describe('Board Candidate Claim Details Page', () => {
 
   test('renders claim heading and claim details block', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /^Claim$/ })).toBeVisible()
-    await expect(page.getByText('Leadership Experience')).toBeVisible()
+    await expect(page.getByText(/Name.*Leadership Experience/i)).toBeVisible()
     await expect(page.getByText('Claim Details')).toBeVisible()
   })
 
