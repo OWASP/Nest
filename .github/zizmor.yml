@@ -1,0 +1,5 @@
+rules:
+  dangerous-triggers:
+    ignore:
+      # Labels PRs from configuration; does not checkout PR code.
+      - pr-labeler.yaml
