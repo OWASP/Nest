@@ -10,6 +10,7 @@
   "name": "e2e",
   "packageManager": "pnpm@11.7.0",
   "private": true,
+  "type": "module",
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "eslint": "10.4.1",
