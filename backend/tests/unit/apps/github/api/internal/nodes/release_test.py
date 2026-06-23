@@ -103,7 +103,7 @@ class TestReleaseNode(GraphQLNodeBaseTest):
     async def test_project_name_with_project(self):
         """Test project_name field when project exists."""
         mock_loader = Mock()
-        mock_loader.load = AsyncMock(return_value=" Test Project")
+        mock_loader.load = AsyncMock(return_value="Test Project")
         mock_info = Mock()
         mock_info.context.github_dataloaders = {
             REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER: mock_loader
@@ -115,31 +115,12 @@ class TestReleaseNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("project_name", ReleaseNode)
         result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
 
-        assert result == " Test Project"
+        assert result == "Test Project"
         mock_loader.load.assert_awaited_once_with(1)
 
     @pytest.mark.asyncio
-    async def test_project_name_without_project(self):
-        """Test project_name field when project doesn't exist."""
-        mock_loader = Mock()
-        mock_loader.load = AsyncMock(return_value=None)
-        mock_info = Mock()
-        mock_info.context.github_dataloaders = {
-            REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER: mock_loader
-        }
-
-        mock_release = Mock()
-        mock_release.pk = 1
-
-        field = self._get_field_by_name("project_name", ReleaseNode)
-        result = await field.base_resolver.wrapped_func(None, mock_release, mock_info)
-
-        assert result is None
-        mock_loader.load.assert_awaited_once_with(1)
-
-    @pytest.mark.asyncio
-    async def test_project_name_without_repository(self):
-        """Test project_name field when repository doesn't exist."""
+    async def test_project_name_returns_none(self):
+        """Test project_name field returns None when dataloader returns None."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=None)
         mock_info = Mock()

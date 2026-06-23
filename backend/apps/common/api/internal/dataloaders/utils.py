@@ -28,7 +28,7 @@ async def get_first_by_m2m_keys[K, V](
             When ``None``, the source model instance is used.
 
     Returns:
-        A dict mapping each target ID to the first matching value or None.
+        A dict mapping each matched target ID to its first matching value.
 
     """
     mapping: dict[K, V | None] = {}

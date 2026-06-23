@@ -15,6 +15,32 @@ from apps.github.api.internal.dataloaders.repository import (
 from apps.owasp.models.project import Project
 
 
+class AsyncQuerySetMock:
+    """Mock that supports async iteration for Django queryset mocking."""
+
+    def __init__(self, items):
+        """Initialize with items to yield during async iteration."""
+        self.items = list(reversed(items))
+
+    def filter(self, *args, **kwargs):
+        """Passthrough for queryset filter chaining."""
+        return self
+
+    def only(self, *args, **kwargs):
+        """Passthrough for queryset only chaining."""
+        return self
+
+    def __aiter__(self):
+        """Return self as the async iterator."""
+        return self
+
+    async def __anext__(self):
+        """Return the next item or raise StopAsyncIteration."""
+        if not self.items:
+            raise StopAsyncIteration
+        return self.items.pop()
+
+
 class TestLoadRepositoriesByReleaseId:
     """Tests for load_repositories_by_release_id."""
 
@@ -110,32 +136,6 @@ class TestLoadRepositoriesByReleaseId:
 
         mock_release.objects.filter.assert_called_once_with(pk__in=[42])
         assert result == [mock_repo]
-
-
-class AsyncQuerySetMock:
-    """Mock that supports async iteration for Django queryset mocking."""
-
-    def __init__(self, items):
-        """Initialize with items to yield during async iteration."""
-        self.items = list(reversed(items))
-
-    def filter(self, *args, **kwargs):
-        """Passthrough for queryset filter chaining."""
-        return self
-
-    def only(self, *args, **kwargs):
-        """Passthrough for queryset only chaining."""
-        return self
-
-    def __aiter__(self):
-        """Return self as the async iterator."""
-        return self
-
-    async def __anext__(self):
-        """Return the next item or raise StopAsyncIteration."""
-        if not self.items:
-            raise StopAsyncIteration
-        return self.items.pop()
 
 
 class TestLoadRepositoryProjectNamesByReleaseId:
