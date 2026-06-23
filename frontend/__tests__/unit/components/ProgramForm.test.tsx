@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from 'wrappers/testUtil'
 import userEvent from '@testing-library/user-event'
+import { fireEvent, render, screen, waitFor } from 'wrappers/testUtil'
 import ProgramForm from 'components/ProgramForm'
 
 describe('ProgramForm Component', () => {

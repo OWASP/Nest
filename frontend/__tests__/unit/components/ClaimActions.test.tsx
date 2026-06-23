@@ -167,7 +167,12 @@ describe('ClaimActions', () => {
       mockMutate.mockImplementation(({ update }) => {
         if (update)
           update(mockCache, {
-            data: { discardBoardCandidateClaim: { ok: true, claim: { ...baseClaim, status: 'DISCARDED' } } },
+            data: {
+              discardBoardCandidateClaim: {
+                ok: true,
+                claim: { ...baseClaim, status: 'DISCARDED' },
+              },
+            },
           })
         return Promise.resolve({
           data: {
@@ -228,7 +233,12 @@ describe('ClaimActions', () => {
       mockMutate.mockImplementation(({ update }) => {
         if (update)
           update(mockCache, {
-            data: { withdrawBoardCandidateClaim: { ok: true, claim: { ...baseClaim, status: 'WITHDRAWN' } } },
+            data: {
+              withdrawBoardCandidateClaim: {
+                ok: true,
+                claim: { ...baseClaim, status: 'WITHDRAWN' },
+              },
+            },
           })
         return Promise.resolve({
           data: {
