@@ -6,7 +6,11 @@ from typing import cast
 import pytest
 from django.db.models import QuerySet
 
-from apps.common.api.internal.dataloaders.utils import get_result_by_keys, get_results_by_keys
+from apps.common.api.internal.dataloaders.utils import (
+    get_first_by_m2m_keys,
+    get_result_by_keys,
+    get_results_by_keys,
+)
 
 
 async def async_gen(items):
@@ -23,6 +27,192 @@ def make_qs(items) -> QuerySet:
 def make_item(**kwargs):
     """Return a simple namespace object with the given attributes."""
     return SimpleNamespace(**kwargs)
+
+
+class TestGetFirstByM2mKeys:
+    """Tests for get_first_by_m2m_keys."""
+
+    @pytest.mark.asyncio
+    async def test_basic_mapping(self):
+        """Each target ID maps to the first matching source value."""
+        project_1 = SimpleNamespace(name="Alpha")
+        project_2 = SimpleNamespace(name="Beta")
+        through_rows = [
+            SimpleNamespace(repository_id=100, project=project_1),
+            SimpleNamespace(repository_id=200, project=project_2),
+        ]
+
+        mock_model = SimpleNamespace(
+            repositories=SimpleNamespace(
+                through=SimpleNamespace(
+                    objects=SimpleNamespace(
+                        filter=lambda **_: SimpleNamespace(
+                            select_related=lambda _: make_qs(through_rows)
+                        )
+                    )
+                )
+            )
+        )
+
+        result = await get_first_by_m2m_keys(
+            mock_model,
+            "repositories",
+            {100, 200},
+            target_fk_field="repository_id",
+            source_select_related="project",
+            value_field="name",
+        )
+
+        assert result == {100: "Alpha", 200: "Beta"}
+
+    @pytest.mark.asyncio
+    async def test_empty_target_ids(self):
+        """An empty target_ids set returns an empty dict."""
+        result = await get_first_by_m2m_keys(
+            SimpleNamespace(
+                repositories=SimpleNamespace(
+                    through=SimpleNamespace(
+                        objects=SimpleNamespace(
+                            filter=lambda **_: SimpleNamespace(
+                                select_related=lambda _: make_qs([])
+                            )
+                        )
+                    )
+                )
+            ),
+            "repositories",
+            set(),
+            target_fk_field="repository_id",
+            source_select_related="project",
+            value_field="name",
+        )
+
+        assert result == {}
+
+    @pytest.mark.asyncio
+    async def test_no_matching_targets(self):
+        """Target IDs with no through-table rows get None."""
+        project_1 = SimpleNamespace(name="Alpha")
+        through_rows = [
+            SimpleNamespace(repository_id=100, project=project_1),
+        ]
+
+        mock_model = SimpleNamespace(
+            repositories=SimpleNamespace(
+                through=SimpleNamespace(
+                    objects=SimpleNamespace(
+                        filter=lambda **_: SimpleNamespace(
+                            select_related=lambda _: make_qs(through_rows)
+                        )
+                    )
+                )
+            )
+        )
+
+        result = await get_first_by_m2m_keys(
+            mock_model,
+            "repositories",
+            {100, 999},
+            target_fk_field="repository_id",
+            source_select_related="project",
+            value_field="name",
+        )
+
+        assert result == {100: "Alpha"}
+
+    @pytest.mark.asyncio
+    async def test_first_value_wins(self):
+        """When multiple through rows share the same target ID, the first one wins."""
+        project_1 = SimpleNamespace(name="First")
+        project_2 = SimpleNamespace(name="Second")
+        through_rows = [
+            SimpleNamespace(repository_id=100, project=project_1),
+            SimpleNamespace(repository_id=100, project=project_2),
+        ]
+
+        mock_model = SimpleNamespace(
+            repositories=SimpleNamespace(
+                through=SimpleNamespace(
+                    objects=SimpleNamespace(
+                        filter=lambda **_: SimpleNamespace(
+                            select_related=lambda _: make_qs(through_rows)
+                        )
+                    )
+                )
+            )
+        )
+
+        result = await get_first_by_m2m_keys(
+            mock_model,
+            "repositories",
+            {100},
+            target_fk_field="repository_id",
+            source_select_related="project",
+            value_field="name",
+        )
+
+        assert result == {100: "First"}
+
+    @pytest.mark.asyncio
+    async def test_value_field_none_returns_source_instance(self):
+        """When value_field is None, the source model instance is returned."""
+        project_1 = SimpleNamespace(name="Alpha")
+        through_rows = [
+            SimpleNamespace(repository_id=100, project=project_1),
+        ]
+
+        mock_model = SimpleNamespace(
+            repositories=SimpleNamespace(
+                through=SimpleNamespace(
+                    objects=SimpleNamespace(
+                        filter=lambda **_: SimpleNamespace(
+                            select_related=lambda _: make_qs(through_rows)
+                        )
+                    )
+                )
+            )
+        )
+
+        result = await get_first_by_m2m_keys(
+            mock_model,
+            "repositories",
+            {100},
+            target_fk_field="repository_id",
+            source_select_related="project",
+        )
+
+        assert result == {100: project_1}
+
+    @pytest.mark.asyncio
+    async def test_filter_receives_correct_kwargs(self):
+        """The through table filter receives the right target_fk_field__in argument."""
+        project_1 = SimpleNamespace(name="Alpha")
+        through_rows = [
+            SimpleNamespace(repository_id=42, project=project_1),
+        ]
+
+        captured_kwargs = {}
+
+        def capture_filter(**kwargs):
+            captured_kwargs.update(kwargs)
+            return SimpleNamespace(select_related=lambda _: make_qs(through_rows))
+
+        mock_model = SimpleNamespace(
+            repositories=SimpleNamespace(
+                through=SimpleNamespace(objects=SimpleNamespace(filter=capture_filter))
+            )
+        )
+
+        await get_first_by_m2m_keys(
+            mock_model,
+            "repositories",
+            {42},
+            target_fk_field="repository_id",
+            source_select_related="project",
+            value_field="name",
+        )
+
+        assert captured_kwargs == {"repository_id__in": {42}}
 
 
 class TestResultsByKeys:

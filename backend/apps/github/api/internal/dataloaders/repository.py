@@ -38,16 +38,20 @@ async def load_repository_project_names_by_release_id(
         if release.repository_id is not None:
             repo_ids.add(release.repository_id)
 
-    project_name_by_repo = await get_first_by_m2m_keys(
-        Project,
-        "repositories",
-        repo_ids,
-        target_fk_field="repository_id",
-        source_select_related="project",
-        value_field="name",
+    project_name_by_repo = (
+        await get_first_by_m2m_keys(
+            Project,
+            "repositories",
+            repo_ids,
+            target_fk_field="repository_id",
+            source_select_related="project",
+            value_field="name",
+        )
+        if repo_ids
+        else {}
     )
     project_name_by_repo = {
-        repo_id: name.lstrip(OWASP_ORGANIZATION_NAME) if name else None
+        repo_id: name.removeprefix(f"{OWASP_ORGANIZATION_NAME} ") if name else None
         for repo_id, name in project_name_by_repo.items()
     }
 
