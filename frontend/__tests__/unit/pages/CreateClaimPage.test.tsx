@@ -191,6 +191,10 @@ describe('CreateClaimPage', () => {
     await waitFor(() => {
       expect(mockCreateFn).toHaveBeenCalled()
     })
+
+    await waitFor(() => {
+      expect(screen.getByText('Name is required')).toBeInTheDocument()
+    })
   })
 
   test('clears backend error when user types after validation error', async () => {
@@ -215,8 +219,16 @@ describe('CreateClaimPage', () => {
       expect(mockCreateFn).toHaveBeenCalled()
     })
 
+    await waitFor(() => {
+      expect(screen.getByText('Name is required')).toBeInTheDocument()
+    })
+
     await userEvent.type(screen.getByPlaceholderText('Enter claim name'), ' Updated Name')
 
     expect(screen.getByPlaceholderText('Enter claim name')).toHaveValue('New Claim Updated Name')
+
+    await waitFor(() => {
+      expect(screen.queryByText('Name is required')).not.toBeInTheDocument()
+    })
   })
 })

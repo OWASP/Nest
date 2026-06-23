@@ -212,11 +212,4 @@ describe('DropdownActions', () => {
     fireEvent.keyDown(screen.getByRole('menu'), { key: 'a' })
     expect(screen.getByRole('menu')).toBeInTheDocument()
   })
-
-  it('prevents default on toggle click', () => {
-    render(<DropdownActions options={defaultOptions} />)
-    const button = screen.getByRole('button', { name: /actions menu/i })
-    fireEvent.click(button)
-    expect(screen.getByRole('menu')).toBeInTheDocument()
-  })
 })

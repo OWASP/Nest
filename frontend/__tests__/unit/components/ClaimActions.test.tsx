@@ -1,6 +1,12 @@
 import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { useRouter } from 'next/navigation'
+import {
+  DiscardBoardCandidateClaimDocument,
+  SubmitBoardCandidateClaimDocument,
+  WithdrawBoardCandidateClaimDocument,
+} from 'types/__generated__/claimMutations.generated'
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import type { Claim } from 'types/claim'
 import ClaimActions from 'components/ClaimActions'
@@ -14,7 +20,9 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-const mockMutate = jest.fn()
+const mockSubmit = jest.fn()
+const mockDiscard = jest.fn()
+const mockWithdraw = jest.fn()
 
 const baseClaim: Claim = {
   __typename: 'BoardCandidateClaimNode',
@@ -40,7 +48,12 @@ const openDropdown = (label: string) => {
 describe('ClaimActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockMutate, {}])
+    ;(useMutation as unknown as jest.Mock).mockImplementation((doc) => {
+      if (doc === SubmitBoardCandidateClaimDocument) return [mockSubmit, {}]
+      if (doc === DiscardBoardCandidateClaimDocument) return [mockDiscard, {}]
+      if (doc === WithdrawBoardCandidateClaimDocument) return [mockWithdraw, {}]
+      return [jest.fn(), {}]
+    })
   })
 
   describe('renders correct options per status', () => {
@@ -94,7 +107,8 @@ describe('ClaimActions', () => {
 
   describe('submit action', () => {
     it('submits claim and navigates on success', async () => {
-      mockMutate.mockResolvedValue({
+      const mockPush = (useRouter as jest.Mock)().push
+      mockSubmit.mockResolvedValue({
         data: {
           submitBoardCandidateClaim: { ok: true, claim: { ...baseClaim, status: 'SUBMITTED' } },
         },
@@ -106,16 +120,17 @@ describe('ClaimActions', () => {
 
       fireEvent.click(screen.getByText('Submit'))
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(
+        expect(mockSubmit).toHaveBeenCalledWith(
           expect.objectContaining({
             variables: { input: { key: 'test-claim', year: 2025 } },
           })
         )
       })
+      expect(mockPush).toHaveBeenCalledWith('/board/2025/candidates/testuser/claims')
     })
 
     it('shows error toast when submit returns ok: false', async () => {
-      mockMutate.mockResolvedValue({
+      mockSubmit.mockResolvedValue({
         data: { submitBoardCandidateClaim: { ok: false, message: 'Already submitted' } },
       })
 
@@ -131,7 +146,7 @@ describe('ClaimActions', () => {
     })
 
     it('shows error toast when submit returns ok: false with fallback message', async () => {
-      mockMutate.mockResolvedValue({
+      mockSubmit.mockResolvedValue({
         data: { submitBoardCandidateClaim: { ok: false } },
       })
 
@@ -147,7 +162,7 @@ describe('ClaimActions', () => {
     })
 
     it('shows error toast on mutation failure', async () => {
-      mockMutate.mockRejectedValue(new Error('Network error'))
+      mockSubmit.mockRejectedValue(new Error('Network error'))
 
       renderClaimActions(baseClaim)
       openDropdown('Submit Claim')
@@ -163,8 +178,9 @@ describe('ClaimActions', () => {
 
   describe('discard action', () => {
     it('discards claim and navigates on success', async () => {
+      const mockPush = (useRouter as jest.Mock)().push
       const mockCache = { readQuery: jest.fn(), writeQuery: jest.fn() }
-      mockMutate.mockImplementation(({ update }) => {
+      mockDiscard.mockImplementation(({ update }) => {
         if (update)
           update(mockCache, {
             data: {
@@ -186,16 +202,17 @@ describe('ClaimActions', () => {
       fireEvent.click(screen.getByText('Discard'))
 
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(
+        expect(mockDiscard).toHaveBeenCalledWith(
           expect.objectContaining({
             variables: { input: { key: 'test-claim', year: 2025 } },
           })
         )
       })
+      expect(mockPush).toHaveBeenCalledWith('/board/2025/candidates/testuser/claims')
     })
 
     it('shows error toast when discard returns ok: false', async () => {
-      mockMutate.mockResolvedValue({
+      mockDiscard.mockResolvedValue({
         data: { discardBoardCandidateClaim: { ok: false, message: 'Cannot discard' } },
       })
 
@@ -211,7 +228,7 @@ describe('ClaimActions', () => {
     })
 
     it('shows error toast when discard returns ok: false with fallback message', async () => {
-      mockMutate.mockResolvedValue({
+      mockDiscard.mockResolvedValue({
         data: { discardBoardCandidateClaim: { ok: false } },
       })
 
@@ -229,8 +246,9 @@ describe('ClaimActions', () => {
 
   describe('withdraw action', () => {
     it('withdraws claim with reason and navigates on success', async () => {
+      const mockPush = (useRouter as jest.Mock)().push
       const mockCache = { readQuery: jest.fn(), writeQuery: jest.fn() }
-      mockMutate.mockImplementation(({ update }) => {
+      mockWithdraw.mockImplementation(({ update }) => {
         if (update)
           update(mockCache, {
             data: {
@@ -255,7 +273,7 @@ describe('ClaimActions', () => {
       fireEvent.click(screen.getByText('Withdraw'))
 
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(
+        expect(mockWithdraw).toHaveBeenCalledWith(
           expect.objectContaining({
             variables: {
               input: { key: 'test-claim', withdrawnReason: 'Personal reasons', year: 2025 },
@@ -263,10 +281,11 @@ describe('ClaimActions', () => {
           })
         )
       })
+      expect(mockPush).toHaveBeenCalledWith('/board/2025/candidates/testuser/claims')
     })
 
     it('shows error toast when withdraw returns ok: false', async () => {
-      mockMutate.mockResolvedValue({
+      mockWithdraw.mockResolvedValue({
         data: { withdrawBoardCandidateClaim: { ok: false, message: 'Already withdrawn' } },
       })
 
@@ -282,7 +301,7 @@ describe('ClaimActions', () => {
     })
 
     it('shows error toast when withdraw returns ok: false with fallback message', async () => {
-      mockMutate.mockResolvedValue({
+      mockWithdraw.mockResolvedValue({
         data: { withdrawBoardCandidateClaim: { ok: false } },
       })
 
@@ -340,6 +359,7 @@ describe('ClaimActions', () => {
 
   describe('edit navigation', () => {
     it('navigates to edit page when Edit Claim is clicked', () => {
+      const mockPush = (useRouter as jest.Mock)().push
       renderClaimActions(baseClaim)
 
       const button = screen.getByRole('button', { name: /actions menu/i })
@@ -347,13 +367,15 @@ describe('ClaimActions', () => {
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
       fireEvent.click(screen.getByText('Edit Claim'))
-      expect(button).toHaveAttribute('aria-expanded', 'false')
+      expect(mockPush).toHaveBeenCalledWith(
+        '/board/2025/candidates/testuser/claims/test-claim/edit'
+      )
     })
   })
 
   describe('error handling - non-Error thrown values', () => {
     it('handles non-Error thrown values gracefully', async () => {
-      mockMutate.mockRejectedValue('string error')
+      mockSubmit.mockRejectedValue('string error')
 
       renderClaimActions(baseClaim)
       openDropdown('Submit Claim')
@@ -380,7 +402,7 @@ describe('ClaimActions', () => {
       }
 
       const updatedClaim = { key: 'test-claim', name: 'Updated Name' }
-      mockMutate.mockImplementation(({ update }) => {
+      mockSubmit.mockImplementation(({ update }) => {
         if (update)
           update(mockCache, {
             data: { submitBoardCandidateClaim: { ok: true, claim: updatedClaim } },
@@ -414,7 +436,7 @@ describe('ClaimActions', () => {
         writeQuery: jest.fn(),
       }
 
-      mockMutate.mockImplementation(({ update }) => {
+      mockSubmit.mockImplementation(({ update }) => {
         if (update)
           update(mockCache, { data: { submitBoardCandidateClaim: { ok: true, claim: {} } } })
         return Promise.resolve({
@@ -438,7 +460,7 @@ describe('ClaimActions', () => {
         writeQuery: jest.fn(),
       }
 
-      mockMutate.mockImplementation(({ update }) => {
+      mockSubmit.mockImplementation(({ update }) => {
         if (update) update(mockCache, { data: { submitBoardCandidateClaim: { ok: true } } })
         return Promise.resolve({
           data: { submitBoardCandidateClaim: { ok: true } },
