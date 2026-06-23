@@ -1,35 +1,36 @@
-name: Check PR linked issue and assignee
+name: Check contribution
 
 on:
-  pull_request_target:
+  pull_request:
     types:
+      - edited
       - opened
+      - reopened
+      - synchronize
 
 permissions: {}
 
 jobs:
-  check-pr-issue:
+  check-contribution:
+    if: github.event.pull_request.head.repo.fork == false
     permissions:
       contents: read
       issues: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      # NOSEMGREP: yaml.github-actions.security.pull-request-target-code-checkout.pull-request-target-code-checkout
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           persist-credentials: false
-          # Explicitly checking out base branch (target repository), not PR code.
-          ref: ${{ github.event.pull_request.base.sha }}
 
-      - name: Check PR linked issue and assignee
-        uses: arkid15r/check-pr-issue-action@09f681e4d30d66e3ba085dfbbf7e07e0b3e4e263  # 0.1.5
+      - name: Check contribution requirements
+        uses: arkid15r/check-contribution-action@054ada7a71ac5cea5c111dbd41ecb4f4e71c9872  # v0.1.0
         with:
           check_issue_reference: 'true'
-          close_pr_on_failure: 'true'
+          close_pr_on_assignee_mismatch: 'true'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           no_assignee_message: The linked issue must be assigned to the PR author.
           no_issue_message: The PR must be linked to an issue assigned to the PR author.
           require_assignee: 'true'
-          skip_users_file_path: .github/workflows/check-pr-issue-skip-usernames.txt
+          skip_users_file_path: .github/check-contribution-skip-usernames.txt
     timeout-minutes: 5
