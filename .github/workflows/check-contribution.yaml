@@ -26,7 +26,9 @@ jobs:
       - name: Check contribution requirements
         uses: arkid15r/check-contribution-action@054ada7a71ac5cea5c111dbd41ecb4f4e71c9872  # v0.1.0
         with:
+          check_commit_signature: 'true'
           check_issue_reference: 'true'
+          check_sign_off: 'true'
           close_pr_on_assignee_mismatch: 'true'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           no_assignee_message: The linked issue must be assigned to the PR author.
