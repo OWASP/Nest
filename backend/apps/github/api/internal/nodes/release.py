@@ -7,10 +7,10 @@ from strawberry.types import Info
 from apps.github.api.internal.dataloaders.release import RELEASE_URL_BY_ID_LOADER
 from apps.github.api.internal.dataloaders.repository import (
     REPOSITORY_BY_RELEASE_ID_LOADER,
+    REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER,
 )
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.release import Release
-from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 
 
 @strawberry_django.type(
@@ -35,16 +35,12 @@ class ReleaseNode(strawberry.relay.Node):
         )
         return repository.organization.login if repository and repository.organization else None
 
-    @strawberry_django.field(
-        select_related=["repository"], prefetch_related=["repository__project_set"]
-    )
-    def project_name(self, root: Release) -> str | None:
+    @strawberry_django.field
+    async def project_name(self, root: Release, info: Info) -> str | None:
         """Resolve project name."""
-        return (
-            root.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
-            if root.repository and root.repository.project
-            else None
-        )
+        return await info.context.github_dataloaders[
+            REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER
+        ].load(root.pk)
 
     @strawberry_django.field
     async def repository_name(self, root: Release, info: Info) -> str | None:
