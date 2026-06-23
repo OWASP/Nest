@@ -50,14 +50,15 @@ const ReorderButton = ({
     }
   }
   return (
-    <div
-      className="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-      role="button"
-      tabIndex={0}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-    >
-      <Icon className="text-gray-400 dark:text-gray-500" size={24} />
+    <div className="relative rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
+      <input
+        type="button"
+        aria-label={direction === 'up' ? 'Move claim up' : 'Move claim down'}
+        className="absolute inset-0 cursor-pointer opacity-0"
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+      />
+      <Icon className="pointer-events-none text-gray-400 dark:text-gray-500" size={24} />
     </div>
   )
 }
