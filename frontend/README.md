@@ -64,7 +64,7 @@ From the **repository root** (with the backend running on `PUBLIC_API_URL`, defa
 # Regenerate types after schema or operation changes
 make graphql-codegen
 
-# Verify committed types match the live schema (same check as CI)
+# Verify committed types match the live schema
 make check-graphql
 ```
 

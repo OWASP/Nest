@@ -360,7 +360,7 @@ We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and S
 
 ### GraphQL types
 
-Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. They are **not** part of `make check` or `make test` because codegen introspects a **running backend**.
+Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. They are **not** part of `make check`, `make test`, or CI because codegen introspects a **running backend** with GraphQL introspection enabled.
 
 #### When to run
 
@@ -368,13 +368,13 @@ Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. 
 | --------- | ------- |
 | You changed the backend GraphQL schema or frontend operations | `make graphql-codegen` then commit generated files |
 | You want to confirm committed types are current before opening a PR | `make check-graphql` |
-| CI (automatic) | The **GraphQL** job in Code tests |
 
 #### Requirements
 
 1. Start the stack (for example `docker compose -f docker-compose/local/compose.yaml up`) so the backend answers on port `8000`.
-2. Run commands from the repository root.
-3. Optional: set `PUBLIC_API_URL` if the backend is not at `http://localhost:8000` (for example `http://localhost:9000` for some e2e setups).
+2. Ensure GraphQL introspection is enabled on that backend.
+3. Run commands from the repository root.
+4. Optional: set `PUBLIC_API_URL` if the backend is not at `http://localhost:8000` (for example `http://localhost:9000` for some e2e setups).
 
 `make graphql-codegen` regenerates files. `make check-graphql` regenerates and fails if `frontend/src/types/__generated__/` would change — use this to verify before pushing GraphQL-related work.
 
