@@ -102,14 +102,14 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.getByText('New Snapshot')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('New Chapters')).toBeInTheDocument()
-    expect(screen.getByText('New Projects')).toBeInTheDocument()
-    expect(screen.getByText('New Releases')).toBeInTheDocument()
-    expect(screen.getByText('New Events')).toBeInTheDocument()
-    expect(screen.getByText('New Posts')).toBeInTheDocument()
-    expect(screen.getByText('New Pull Requests')).toBeInTheDocument()
-    expect(screen.getByText('New Issues')).toBeInTheDocument()
-    expect(screen.getByText('New Contributors')).toBeInTheDocument()
+    expect(screen.getByText('Chapters')).toBeInTheDocument()
+    expect(screen.getByText('Projects')).toBeInTheDocument()
+    expect(screen.getByText('Releases')).toBeInTheDocument()
+    expect(screen.getByText('Events')).toBeInTheDocument()
+    expect(screen.getByText('Posts')).toBeInTheDocument()
+    expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    expect(screen.getByText('Issues')).toBeInTheDocument()
+    expect(screen.getByText('Contributors')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {
@@ -222,14 +222,14 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.queryByText('New Chapters')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Events')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Issues')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Posts')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Projects')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Pull Requests')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Releases')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Contributors')).not.toBeInTheDocument()
+      expect(screen.queryByText('Chapters')).not.toBeInTheDocument()
+      expect(screen.queryByText('Events')).not.toBeInTheDocument()
+      expect(screen.queryByText('Issues')).not.toBeInTheDocument()
+      expect(screen.queryByText('Posts')).not.toBeInTheDocument()
+      expect(screen.queryByText('Projects')).not.toBeInTheDocument()
+      expect(screen.queryByText('Pull Requests')).not.toBeInTheDocument()
+      expect(screen.queryByText('Releases')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributors')).not.toBeInTheDocument()
     })
   })
 
@@ -477,7 +477,7 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Events')).toBeInTheDocument()
+      expect(screen.getByText('Events')).toBeInTheDocument()
     })
 
     const allH3s = screen.getAllByRole('heading', { level: 3 })
@@ -511,12 +511,12 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Events')).toBeInTheDocument()
+      expect(screen.getByText('Events')).toBeInTheDocument()
     })
 
     expect(screen.queryByText('Security Workshop')).not.toBeInTheDocument()
 
-    const eventsShowMore = findButtonInSection('Show more', 'New Events')
+    const eventsShowMore = findButtonInSection('Show more', 'Events')
     expect(eventsShowMore).toBeDefined()
     if (eventsShowMore) fireEvent.click(eventsShowMore)
 
@@ -529,7 +529,7 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Releases')).toBeInTheDocument()
+      expect(screen.getByText('Releases')).toBeInTheDocument()
       expect(screen.getByText('v0.9.2')).toBeInTheDocument()
       expect(screen.getByText('Latest pre-release')).toBeInTheDocument()
     })
@@ -539,13 +539,13 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Contributors')).toBeInTheDocument()
+      expect(screen.getByText('Contributors')).toBeInTheDocument()
     })
 
     expect(screen.queryByText('User Thirteen')).not.toBeInTheDocument()
     expect(screen.getAllByText('Arkadii Yakovets').length).toBeGreaterThanOrEqual(1)
 
-    const contribShowMore = findButtonInSection('Show more', 'New Contributors')
+    const contribShowMore = findButtonInSection('Show more', 'Contributors')
     expect(contribShowMore).toBeDefined()
     if (contribShowMore) fireEvent.click(contribShowMore)
 
@@ -584,12 +584,12 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Pull Requests')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
     })
 
     expect(screen.queryByText('PR Seven')).not.toBeInTheDocument()
 
-    const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
     expect(prShowMore).toBeDefined()
     if (prShowMore) fireEvent.click(prShowMore)
 
@@ -629,12 +629,12 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Issues')).toBeInTheDocument()
+      expect(screen.getByText('Issues')).toBeInTheDocument()
     })
 
     expect(screen.queryByText('Issue Seven')).not.toBeInTheDocument()
 
-    const issueShowMore = findButtonInSection('Show more', 'New Issues')
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
     expect(issueShowMore).toBeDefined()
     if (issueShowMore) fireEvent.click(issueShowMore)
 
@@ -647,12 +647,12 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Posts')).toBeInTheDocument()
+      expect(screen.getByText('Posts')).toBeInTheDocument()
     })
 
     expect(screen.queryByText('Post Six')).not.toBeInTheDocument()
 
-    const postsShowMore = findButtonInSection('Show more', 'New Posts')
+    const postsShowMore = findButtonInSection('Show more', 'Posts')
     expect(postsShowMore).toBeDefined()
     if (postsShowMore) fireEvent.click(postsShowMore)
 
@@ -692,10 +692,10 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Pull Requests')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
     })
 
-    const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
     expect(prShowMore).toBeDefined()
     if (prShowMore) fireEvent.click(prShowMore)
 
@@ -703,7 +703,7 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.getByText('PR Seven')).toBeInTheDocument()
     })
 
-    const prShowLess = findButtonInSection('Show less', 'New Pull Requests')
+    const prShowLess = findButtonInSection('Show less', 'Pull Requests')
     expect(prShowLess).toBeDefined()
     if (prShowLess) fireEvent.click(prShowLess)
 
@@ -744,10 +744,10 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Issues')).toBeInTheDocument()
+      expect(screen.getByText('Issues')).toBeInTheDocument()
     })
 
-    const issueShowMore = findButtonInSection('Show more', 'New Issues')
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
     expect(issueShowMore).toBeDefined()
     if (issueShowMore) fireEvent.click(issueShowMore)
 
@@ -755,7 +755,7 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.getByText('Issue Seven')).toBeInTheDocument()
     })
 
-    const issueShowLess = findButtonInSection('Show less', 'New Issues')
+    const issueShowLess = findButtonInSection('Show less', 'Issues')
     expect(issueShowLess).toBeDefined()
     if (issueShowLess) fireEvent.click(issueShowLess)
 
@@ -796,10 +796,10 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Pull Requests')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
     })
 
-    const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
     expect(prShowMore).toBeDefined()
     if (prShowMore) fireEvent.click(prShowMore)
 
@@ -857,10 +857,10 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Issues')).toBeInTheDocument()
+      expect(screen.getByText('Issues')).toBeInTheDocument()
     })
 
-    const issueShowMore = findButtonInSection('Show more', 'New Issues')
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
     expect(issueShowMore).toBeDefined()
     if (issueShowMore) fireEvent.click(issueShowMore)
 
@@ -889,13 +889,13 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Chapters')).toBeInTheDocument()
+      expect(screen.getByText('Chapters')).toBeInTheDocument()
     })
 
     expect(screen.queryByText('OWASP London')).not.toBeInTheDocument()
     expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
 
-    const chaptersShowMore = findButtonInSection('Show more', 'New Chapters')
+    const chaptersShowMore = findButtonInSection('Show more', 'Chapters')
     expect(chaptersShowMore).toBeDefined()
     if (chaptersShowMore) fireEvent.click(chaptersShowMore)
 
@@ -908,13 +908,13 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Projects')).toBeInTheDocument()
+      expect(screen.getByText('Projects')).toBeInTheDocument()
     })
 
     expect(screen.queryByText('OWASP SAMM')).not.toBeInTheDocument()
     expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
 
-    const projectsShowMore = findButtonInSection('Show more', 'New Projects')
+    const projectsShowMore = findButtonInSection('Show more', 'Projects')
     expect(projectsShowMore).toBeDefined()
     if (projectsShowMore) fireEvent.click(projectsShowMore)
 
@@ -930,10 +930,10 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Pull Requests')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
     })
 
-    const prShowMore = findButtonInSection('Show more', 'New Pull Requests')
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
     expect(prShowMore).toBeDefined()
     if (prShowMore) fireEvent.click(prShowMore)
 
@@ -954,10 +954,10 @@ describe('SnapshotDetailsPage', () => {
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('New Issues')).toBeInTheDocument()
+      expect(screen.getByText('Issues')).toBeInTheDocument()
     })
 
-    const issueShowMore = findButtonInSection('Show more', 'New Issues')
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
     expect(issueShowMore).toBeDefined()
     if (issueShowMore) fireEvent.click(issueShowMore)
 

@@ -239,7 +239,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
       {/* Community Impact */}
       {snapshot.chapters && snapshot.chapters.length > 0 && (
-        <SecondaryCard icon={FaMapMarkerAlt} title="New Chapters">
+        <SecondaryCard icon={FaMapMarkerAlt} title="Chapters">
           <div className="mb-4">
             <ChapterMapWrapper
               geoLocData={snapshot.chapters as unknown as Chapter[]}
@@ -268,7 +268,7 @@ const SnapshotDetailsPage: React.FC = () => {
       )}
 
       {snapshot.events && snapshot.events.length > 0 && (
-        <SecondaryCard icon={FaCalendarAlt} title="New Events">
+        <SecondaryCard icon={FaCalendarAlt} title="Events">
           <div className="flex flex-col gap-4">
             {sortedEvents.slice(0, showAllEvents ? undefined : EVENTS_INITIAL).map((event) => (
               <EventCard key={event.id} event={event} />
@@ -285,7 +285,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
       {/* Deliverables */}
       {snapshot.projects && snapshot.projects.length > 0 && (
-        <SecondaryCard icon={FaFolder} title="New Projects">
+        <SecondaryCard icon={FaFolder} title="Projects">
           <div className="flex flex-col gap-6">
             {snapshot.projects
               .filter((project) => project.isActive)
@@ -304,7 +304,7 @@ const SnapshotDetailsPage: React.FC = () => {
       )}
 
       {snapshot.releases && snapshot.releases.length > 0 && (
-        <SecondaryCard icon={FaTag} title="New Releases">
+        <SecondaryCard icon={FaTag} title="Releases">
           <ReleasesSection
             releases={snapshot.releases as ReleaseType[]}
             showAll={showAllReleases}
@@ -317,16 +317,16 @@ const SnapshotDetailsPage: React.FC = () => {
       {snapshot.users && snapshot.users.length > 0 && (
         <ContributorsList
           contributors={snapshot.users as Contributor[]}
-          title="New Contributors"
+          title="Contributors"
           icon={HiUserGroup}
           maxInitialDisplay={CONTRIBUTORS_INITIAL}
           variant="card"
-          getUrl={(login) => `https://github.com/${login}`}
+          getUrl={(login) => `/members/${login}`}
         />
       )}
 
       {snapshot.pullRequests && snapshot.pullRequests.length > 0 && (
-        <SecondaryCard icon={FaCodePullRequest} title="New Pull Requests">
+        <SecondaryCard icon={FaCodePullRequest} title="Pull Requests">
           <RecentPullRequests
             data={snapshot.pullRequests.slice(0, prVisibleCount) as PullRequest[]}
             showBadge
@@ -417,7 +417,7 @@ const SnapshotDetailsPage: React.FC = () => {
       )}
 
       {snapshot.issues && snapshot.issues.length > 0 && (
-        <SecondaryCard icon={FaCircleExclamation} title="New Issues">
+        <SecondaryCard icon={FaCircleExclamation} title="Issues">
           <RecentIssues
             data={snapshot.issues.slice(0, issueVisibleCount) as Issue[]}
             showBadge
@@ -505,7 +505,7 @@ const SnapshotDetailsPage: React.FC = () => {
       )}
 
       {snapshot.posts && snapshot.posts.length > 0 && (
-        <SecondaryCard icon={FaNewspaper} title="New Posts">
+        <SecondaryCard icon={FaNewspaper} title="Posts">
           <div className="flex flex-col gap-4">
             {snapshot.posts.slice(0, showAllPosts ? undefined : POSTS_INITIAL).map((post) => (
               <PostCard key={post.id} post={post} />
