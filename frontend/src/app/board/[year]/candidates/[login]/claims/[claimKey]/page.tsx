@@ -120,6 +120,7 @@ const ClaimDetailsPage = () => {
             <div className="grid gap-4">
               {evidences.map((evidence) => (
                 <Button
+                  disableAnimation
                   key={evidence.key}
                   onPress={() => handleEvidenceClick(evidence.key)}
                   className="h-28 flex-col items-start justify-start bg-transparent p-4 dark:hover:bg-gray-900"
