@@ -11,6 +11,34 @@ on:
         description: AWS role session name
         required: true
         type: string
+      auto_scaling_cpu_target:
+        description: Target average CPU utilization percentage for ECS service auto scaling
+        required: true
+        type: number
+      auto_scaling_scale_in_cooldown:
+        description: Cooldown period in seconds after an ECS service scale-in activity
+        required: true
+        type: number
+      auto_scaling_scale_out_cooldown:
+        description: Cooldown period in seconds after an ECS service scale-out activity
+        required: true
+        type: number
+      backend_desired_count:
+        description: Desired number of backend tasks
+        required: true
+        type: number
+      backend_enable_auto_scaling:
+        description: Enable auto scaling for backend
+        required: true
+        type: boolean
+      backend_max_count:
+        description: Maximum number of backend tasks for auto scaling
+        required: true
+        type: number
+      backend_min_count:
+        description: Minimum number of backend tasks for auto scaling
+        required: true
+        type: number
       backend_use_fargate_spot:
         description: Use Fargate spot for backend
         required: true
@@ -48,6 +76,22 @@ on:
         description: Use Fargate spot for frontend
         required: true
         type: boolean
+      frontend_desired_count:
+        description: Desired number of frontend tasks
+        required: true
+        type: number
+      frontend_enable_auto_scaling:
+        description: Enable auto scaling for frontend
+        required: true
+        type: boolean
+      frontend_max_count:
+        description: Maximum number of frontend tasks for auto scaling
+        required: true
+        type: number
+      frontend_min_count:
+        description: Minimum number of frontend tasks for auto scaling
+        required: true
+        type: number
       index_task_definition:
         description: ECS task definition for index task
         required: true
@@ -150,8 +194,15 @@ jobs:
           tfvars-path: infrastructure/live/terraform.tfvars
           tfvars-content: |
             availability_zones=${{ vars.AWS_AVAILABILITY_ZONES }}
+            auto_scaling_cpu_target=${{ inputs.auto_scaling_cpu_target }}
+            auto_scaling_scale_in_cooldown=${{ inputs.auto_scaling_scale_in_cooldown }}
+            auto_scaling_scale_out_cooldown=${{ inputs.auto_scaling_scale_out_cooldown }}
             aws_region="${{ vars.AWS_REGION }}"
+            backend_desired_count=${{ inputs.backend_desired_count }}
+            backend_enable_auto_scaling=${{ inputs.backend_enable_auto_scaling }}
             backend_image_tag="${{ inputs.release_version }}"
+            backend_max_count=${{ inputs.backend_max_count }}
+            backend_min_count=${{ inputs.backend_min_count }}
             backend_use_fargate_spot=${{ inputs.backend_use_fargate_spot }}
             domain_name="${{ vars.DOMAIN_NAME }}"
             django_configuration="${{ inputs.django_configuration }}"
@@ -162,6 +213,10 @@ jobs:
             enable_nat_gateway=${{ inputs.enable_nat_gateway }}
             enable_rds_proxy=${{ inputs.enable_rds_proxy }}
             environment="${{ inputs.environment }}"
+            frontend_desired_count=${{ inputs.frontend_desired_count }}
+            frontend_enable_auto_scaling=${{ inputs.frontend_enable_auto_scaling }}
+            frontend_max_count=${{ inputs.frontend_max_count }}
+            frontend_min_count=${{ inputs.frontend_min_count }}
             frontend_use_fargate_spot=${{ inputs.frontend_use_fargate_spot }}
             frontend_image_tag="${{ inputs.release_version }}"
             project_name="nest"
