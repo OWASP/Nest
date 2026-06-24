@@ -1,6 +1,5 @@
 # Generated migration for BotInteraction model
 
-import django.db.models.deletion
 from django.db import migrations, models
 
 
@@ -45,9 +44,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "confidence_score",
-                    models.FloatField(
-                        blank=True, null=True, verbose_name="Confidence score"
-                    ),
+                    models.FloatField(blank=True, null=True, verbose_name="Confidence score"),
                 ),
                 (
                     "thumbs_up",
@@ -60,14 +57,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "tokens_used",
-                    models.PositiveIntegerField(
-                        default=0, verbose_name="Tokens used"
-                    ),
+                    models.PositiveIntegerField(default=0, verbose_name="Tokens used"),
                 ),
                 (
                     "slack_reply_ts",
                     models.CharField(
                         blank=True,
+                        db_index=True,
                         default="",
                         help_text="Slack message ts of the bot reply. Used to match reaction_added events.",
                         max_length=32,

@@ -1,13 +1,13 @@
 """Bot interaction admin configuration."""
- 
+
 from django.contrib import admin
- 
+
 from apps.slack.models.bot_interaction import BotInteraction
- 
- 
+
+
 class BotInteractionAdmin(admin.ModelAdmin):
     """Admin for BotInteraction model."""
- 
+
     fieldsets = (
         (
             "Interaction",
@@ -69,12 +69,19 @@ class BotInteractionAdmin(admin.ModelAdmin):
         "user_message",
         "intent_category",
     )
- 
+
+    MESSAGE_TRUNCATE_LENGTH = 60
+
     @admin.display(description="Message")
     def short_message(self, obj):
-        """Truncated user message for list display."""
-        return obj.user_message[:60] + "…" if len(obj.user_message) > 60 else obj.user_message
- 
- 
+        """Return truncated user message for list display."""
+        if not obj.user_message:
+            return ""
+        return (
+            obj.user_message[: self.MESSAGE_TRUNCATE_LENGTH] + "…"
+            if len(obj.user_message) > self.MESSAGE_TRUNCATE_LENGTH
+            else obj.user_message
+        )
+
+
 admin.site.register(BotInteraction, BotInteractionAdmin)
- 

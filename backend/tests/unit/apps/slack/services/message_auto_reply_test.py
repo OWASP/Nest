@@ -39,6 +39,7 @@ class TestMessageAutoReply:
         message.id = 1
         message.slack_message_id = "1234567890.123456"
         message.text = "What is OWASP?"
+        message.raw_data = {"user": "U789"}
         message.conversation = mock_conversation
         return message
 
