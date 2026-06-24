@@ -28,7 +28,7 @@ const EditEvidencePage = () => {
     loading: isLoading,
   } = useQuery(GetBoardCandidateClaimEvidenceDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !evidenceKey,
+    skip: !evidenceKey || session?.user?.login !== login,
     variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
   })
 
