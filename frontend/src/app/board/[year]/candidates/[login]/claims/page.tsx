@@ -262,6 +262,7 @@ const CandidateClaimsPage = () => {
             <div className="grid gap-2">
               {items.map((claim) => (
                 <Button
+                  disableAnimation
                   key={claim.key}
                   onPress={() => handleClaimClick(claim.key)}
                   className="h-24 flex-row justify-between bg-transparent dark:hover:bg-gray-900"
