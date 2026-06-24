@@ -22,10 +22,30 @@ class Migration(migrations.Migration):
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
-                ("message_ts", models.CharField(max_length=32)),
-                ("report_type", models.CharField(max_length=64)),
+                (
+                    "message_ts",
+                    models.CharField(
+                        help_text="Slack timestamp of the message that triggered the alert.",
+                        max_length=32,
+                    ),
+                ),
+                (
+                    "report_type",
+                    models.CharField(
+                        help_text="Moderation report category for the emitted alert.",
+                        max_length=64,
+                    ),
+                ),
                 ("reaction_count", models.PositiveSmallIntegerField(default=0)),
-                ("alert_message_ts", models.CharField(blank=True, default="", max_length=32)),
+                (
+                    "alert_message_ts",
+                    models.CharField(
+                        blank=True,
+                        default="",
+                        help_text="Slack timestamp of the posted moderation alert message.",
+                        max_length=32,
+                    ),
+                ),
                 (
                     "conversation",
                     models.ForeignKey(
@@ -49,15 +69,33 @@ class Migration(migrations.Migration):
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
                 ("nest_updated_at", models.DateTimeField(auto_now=True)),
-                ("emoji_name", models.CharField(max_length=64)),
-                ("report_type", models.CharField(max_length=64)),
+                (
+                    "emoji_name",
+                    models.CharField(
+                        help_text="Slack emoji name that triggers this moderation rule.",
+                        max_length=64,
+                    ),
+                ),
+                (
+                    "report_type",
+                    models.CharField(
+                        help_text=("Moderation report category recorded when this rule triggers."),
+                        max_length=64,
+                    ),
+                ),
                 (
                     "threshold",
                     models.PositiveSmallIntegerField(
                         default=3, validators=[django.core.validators.MinValueValidator(1)]
                     ),
                 ),
-                ("alert_channel_id", models.CharField(max_length=50)),
+                (
+                    "alert_channel_id",
+                    models.CharField(
+                        help_text="Slack channel ID where moderation alerts are posted.",
+                        max_length=50,
+                    ),
+                ),
                 ("alert_user_ids", models.JSONField(blank=True, default=list)),
                 ("is_enabled", models.BooleanField(default=True)),
                 (
