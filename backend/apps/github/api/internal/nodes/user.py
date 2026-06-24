@@ -1,6 +1,7 @@
 """GitHub user GraphQL node."""
 
 import strawberry_django
+from django.db.models import Count
 from django.db.models.query import Prefetch
 
 from apps.github.models.user import User
@@ -79,10 +80,10 @@ class UserNode:
         """Resolve if member is a Google Summer of Code mentor."""
         return root.owasp_profile.is_gsoc_mentor if hasattr(root, "owasp_profile") else False
 
-    @strawberry_django.field
+    @strawberry_django.field(annotate={"issues_count": Count("created_issues")})
     def issues_count(self, root: User) -> int:
         """Resolve issues count."""
-        return root.idx_issues_count
+        return root.issues_count
 
     @strawberry_django.field(select_related=["owasp_profile"])
     def linkedin_page_id(self, root: User) -> str:
@@ -93,10 +94,10 @@ class UserNode:
             else ""
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(annotate={"releases_count": Count("created_releases")})
     def releases_count(self, root: User) -> int:
         """Resolve releases count."""
-        return root.idx_releases_count
+        return root.releases_count
 
     @strawberry_django.field
     def updated_at(self, root: User) -> str:
