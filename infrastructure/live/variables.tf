@@ -16,7 +16,7 @@ variable "auto_scaling_cpu_target" {
   default     = 70
 
   validation {
-    condition     = var.auto_scaling_cpu_target > 0 && var.auto_scaling_cpu_target <= 100
+    condition     = var.auto_scaling_cpu_target >= 1 && var.auto_scaling_cpu_target <= 100
     error_message = "auto_scaling_cpu_target must be between 1 and 100."
   }
 }
