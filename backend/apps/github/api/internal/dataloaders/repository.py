@@ -1,11 +1,11 @@
 """DataLoaders for repositories."""
 
+from django.db.models import Prefetch
 from strawberry.dataloader import DataLoader
 
-from apps.common.api.internal.dataloaders.utils import get_first_by_m2m_keys, get_result_by_keys
+from apps.common.api.internal.dataloaders.utils import get_result_by_keys
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
-from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.project import Project
 
 REPOSITORY_BY_RELEASE_ID_LOADER = "repository_by_release_id"
@@ -29,38 +29,26 @@ async def load_repository_project_names_by_release_id(
     release_ids: list[int],
 ) -> list[str | None]:
     """Batch-load repository project names for the given release IDs."""
-    releases = Release.objects.filter(pk__in=release_ids).only("pk", "repository_id")
-
-    release_repo_map: dict[int, int | None] = {}
-    repo_ids: set[int] = set()
-    async for release in releases:
-        release_repo_map[release.pk] = release.repository_id
-        if release.repository_id is not None:
-            repo_ids.add(release.repository_id)
-
-    project_name_by_repo = (
-        await get_first_by_m2m_keys(
-            Project,
-            "repositories",
-            repo_ids,
-            target_fk_field="repository_id",
-            source_select_related="project",
-            value_field="name",
+    releases = (
+        Release.objects.filter(pk__in=release_ids)
+        .select_related("repository")
+        .prefetch_related(
+            Prefetch(
+                "repository__project_set",
+                queryset=Project.objects.only("name"),
+                to_attr="prefetched_projects",
+            )
         )
-        if repo_ids
-        else {}
     )
-    project_name_by_repo = {
-        repo_id: name.removeprefix(f"{OWASP_ORGANIZATION_NAME} ") if name else None
-        for repo_id, name in project_name_by_repo.items()
-    }
+    mapping: dict[int, str | None] = {}
+    async for release in releases:
+        mapping[release.pk] = (
+            release.repository.prefetched_projects[0].name
+            if release.repository and release.repository.prefetched_projects
+            else None
+        )
 
-    result: list[str | None] = []
-    for release_id in release_ids:
-        repo_id = release_repo_map.get(release_id)
-        result.append(project_name_by_repo.get(repo_id) if repo_id is not None else None)
-
-    return result
+    return [mapping.get(release_id) for release_id in release_ids]
 
 
 def get_repository_loaders() -> dict[str, object]:

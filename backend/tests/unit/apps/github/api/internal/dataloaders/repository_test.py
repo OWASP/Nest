@@ -12,33 +12,6 @@ from apps.github.api.internal.dataloaders.repository import (
     load_repositories_by_release_id,
     load_repository_project_names_by_release_id,
 )
-from apps.owasp.models.project import Project
-
-
-class AsyncQuerySetMock:
-    """Mock that supports async iteration for Django queryset mocking."""
-
-    def __init__(self, items):
-        """Initialize with items to yield during async iteration."""
-        self.items = list(reversed(items))
-
-    def filter(self, *args, **kwargs):
-        """Passthrough for queryset filter chaining."""
-        return self
-
-    def only(self, *args, **kwargs):
-        """Passthrough for queryset only chaining."""
-        return self
-
-    def __aiter__(self):
-        """Return self as the async iterator."""
-        return self
-
-    async def __anext__(self):
-        """Return the next item or raise StopAsyncIteration."""
-        if not self.items:
-            raise StopAsyncIteration
-        return self.items.pop()
 
 
 class TestLoadRepositoriesByReleaseId:
@@ -141,117 +114,92 @@ class TestLoadRepositoriesByReleaseId:
 class TestLoadRepositoryProjectNamesByReleaseId:
     """Tests for load_repository_project_names_by_release_id."""
 
-    @patch(
-        "apps.github.api.internal.dataloaders.repository.get_first_by_m2m_keys",
-        new_callable=AsyncMock,
-    )
     @patch("apps.github.api.internal.dataloaders.repository.Release")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(
-        self, mock_release, mock_get_first_by_m2m_keys
-    ):
-        """Queryset is built with filter and only in the right order."""
+    async def test_builds_queryset_with_correct_chain(self, mock_release):
+        """Queryset uses filter, select_related, and prefetch_related."""
         release_ids = [1, 2, 3]
-        mock_release.objects.filter.return_value.only.return_value = AsyncQuerySetMock([])
-        mock_get_first_by_m2m_keys.return_value = {}
+        mock_qs = MagicMock()
+        mock_release.objects.filter.return_value = mock_qs
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = qs = MagicMock()
+        qs.__aiter__.return_value = iter([])
 
         await load_repository_project_names_by_release_id(release_ids)
 
         mock_release.objects.filter.assert_called_once_with(pk__in=release_ids)
-        mock_release.objects.filter.return_value.only.assert_called_once_with(
-            "pk", "repository_id"
-        )
+        mock_qs.select_related.assert_called_once_with("repository")
+        mock_qs.prefetch_related.assert_called_once()
 
-    @patch(
-        "apps.github.api.internal.dataloaders.repository.get_first_by_m2m_keys",
-        new_callable=AsyncMock,
-    )
     @patch("apps.github.api.internal.dataloaders.repository.Release")
     @pytest.mark.asyncio
-    async def test_delegates_to_get_first_by_m2m_keys_correct_args(
-        self, mock_release, mock_get_first_by_m2m_keys
-    ):
-        """get_first_by_m2m_keys receives the correct arguments."""
-        release_ids = [1, 2]
-        repo_1 = MagicMock(pk=10, repository_id=100)
-        repo_2 = MagicMock(pk=20, repository_id=200)
-        mock_release.objects.filter.return_value.only.return_value = AsyncQuerySetMock(
-            [repo_1, repo_2]
-        )
-        mock_get_first_by_m2m_keys.return_value = {}
-
-        await load_repository_project_names_by_release_id(release_ids)
-
-        mock_get_first_by_m2m_keys.assert_called_once_with(
-            Project,
-            "repositories",
-            {100, 200},
-            target_fk_field="repository_id",
-            source_select_related="project",
-            value_field="name",
-        )
-
-    @patch(
-        "apps.github.api.internal.dataloaders.repository.get_first_by_m2m_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.github.api.internal.dataloaders.repository.Release")
-    @pytest.mark.asyncio
-    async def test_returns_project_names_with_lstrip(
-        self, mock_release, mock_get_first_by_m2m_keys
-    ):
-        """Returns project names with OWASP prefix stripped."""
+    async def test_maps_release_ids_to_project_names(self, mock_release):
+        """Returns project names in order of release_ids."""
         release_ids = [1, 2, 3]
-        repo_1 = MagicMock(pk=1, repository_id=100)
-        repo_2 = MagicMock(pk=2, repository_id=200)
-        repo_3 = MagicMock(pk=3, repository_id=None)
-        mock_release.objects.filter.return_value.only.return_value = AsyncQuerySetMock(
-            [repo_1, repo_2, repo_3]
-        )
-        mock_get_first_by_m2m_keys.return_value = {
-            100: "OWASP Project Alpha",
-            200: "Project Beta",
-        }
+        project_1 = MagicMock()
+        project_1.name = "Project Alpha"
+        project_2 = MagicMock()
+        project_2.name = "Project Beta"
+        releases = [
+            MagicMock(pk=1, repository=MagicMock(prefetched_projects=[project_1])),
+            MagicMock(pk=2, repository=MagicMock(prefetched_projects=[project_2])),
+            MagicMock(pk=3, repository=None),
+        ]
+        mock_qs = MagicMock()
+        mock_release.objects.filter.return_value = mock_qs
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = qs = MagicMock()
+        qs.__aiter__.return_value = iter(releases)
 
         result = await load_repository_project_names_by_release_id(release_ids)
 
         assert result == ["Project Alpha", "Project Beta", None]
 
-    @patch(
-        "apps.github.api.internal.dataloaders.repository.get_first_by_m2m_keys",
-        new_callable=AsyncMock,
-    )
     @patch("apps.github.api.internal.dataloaders.repository.Release")
     @pytest.mark.asyncio
-    async def test_empty_release_ids(self, mock_release, mock_get_first_by_m2m_keys):
+    async def test_empty_release_ids(self, mock_release):
         """An empty release_ids list returns an empty list."""
-        mock_release.objects.filter.return_value.only.return_value = AsyncQuerySetMock([])
-        mock_get_first_by_m2m_keys.return_value = {}
+        mock_qs = MagicMock()
+        mock_release.objects.filter.return_value = mock_qs
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = qs = MagicMock()
+        qs.__aiter__.return_value = iter([])
 
         result = await load_repository_project_names_by_release_id([])
 
         assert result == []
 
-    @patch(
-        "apps.github.api.internal.dataloaders.repository.get_first_by_m2m_keys",
-        new_callable=AsyncMock,
-    )
     @patch("apps.github.api.internal.dataloaders.repository.Release")
     @pytest.mark.asyncio
-    async def test_no_repo_ids_skips_m2m_query(self, mock_release, mock_get_first_by_m2m_keys):
-        """When no releases have a repository, the M2M query is skipped."""
-        release_ids = [1, 2]
-        repo_1 = MagicMock(pk=1, repository_id=None)
-        repo_2 = MagicMock(pk=2, repository_id=None)
-        mock_release.objects.filter.return_value.only.return_value = AsyncQuerySetMock(
-            [repo_1, repo_2]
-        )
-        mock_get_first_by_m2m_keys.return_value = {}
+    async def test_release_without_repository_returns_none(self, mock_release):
+        """A release with no repository maps to None."""
+        release_ids = [1]
+        releases = [MagicMock(pk=1, repository=None)]
+        mock_qs = MagicMock()
+        mock_release.objects.filter.return_value = mock_qs
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = qs = MagicMock()
+        qs.__aiter__.return_value = iter(releases)
 
         result = await load_repository_project_names_by_release_id(release_ids)
 
-        mock_get_first_by_m2m_keys.assert_not_called()
-        assert result == [None, None]
+        assert result == [None]
+
+    @patch("apps.github.api.internal.dataloaders.repository.Release")
+    @pytest.mark.asyncio
+    async def test_release_without_projects_returns_none(self, mock_release):
+        """A release with a repository but no prefetched projects maps to None."""
+        release_ids = [1]
+        releases = [MagicMock(pk=1, repository=MagicMock(prefetched_projects=[]))]
+        mock_qs = MagicMock()
+        mock_release.objects.filter.return_value = mock_qs
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = qs = MagicMock()
+        qs.__aiter__.return_value = iter(releases)
+
+        result = await load_repository_project_names_by_release_id(release_ids)
+
+        assert result == [None]
 
 
 class TestGetRepositoryLoaders:
