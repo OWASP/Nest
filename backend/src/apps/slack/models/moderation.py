@@ -24,10 +24,19 @@ class ModerationRule(TimestampedModel):
         unique_together = ("conversation", "emoji_name")
 
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
-    emoji_name = models.CharField(max_length=64)
-    report_type = models.CharField(max_length=64)
+    emoji_name = models.CharField(
+        max_length=64,
+        help_text="Slack emoji name that triggers this moderation rule.",
+    )
+    report_type = models.CharField(
+        max_length=64,
+        help_text="Moderation report category recorded when this rule triggers.",
+    )
     threshold = models.PositiveSmallIntegerField(default=3, validators=[MinValueValidator(1)])
-    alert_channel_id = models.CharField(max_length=50)
+    alert_channel_id = models.CharField(
+        max_length=50,
+        help_text="Slack channel ID where moderation alerts are posted.",
+    )
     alert_user_ids = models.JSONField(blank=True, default=list)
     is_enabled = models.BooleanField(default=True)
 
@@ -46,7 +55,18 @@ class ModerationAlert(TimestampedModel):
         unique_together = ("conversation", "message_ts", "report_type")
 
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
-    message_ts = models.CharField(max_length=32)
-    report_type = models.CharField(max_length=64)
+    message_ts = models.CharField(
+        max_length=32,
+        help_text="Slack timestamp of the message that triggered the alert.",
+    )
+    report_type = models.CharField(
+        max_length=64,
+        help_text="Moderation report category for the emitted alert.",
+    )
     reaction_count = models.PositiveSmallIntegerField(default=0)
-    alert_message_ts = models.CharField(max_length=32, blank=True, default="")
+    alert_message_ts = models.CharField(
+        max_length=32,
+        blank=True,
+        default="",
+        help_text="Slack timestamp of the posted moderation alert message.",
+    )
