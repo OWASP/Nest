@@ -12,11 +12,11 @@ importers:
         specifier: 4.0.17
         version: 4.0.17
       '@cspell/dict-data-science':
-        specifier: 2.0.13
-        version: 2.0.13
+        specifier: 2.0.14
+        version: 2.0.14
       '@cspell/dict-en_us':
-        specifier: 4.4.33
-        version: 4.4.33
+        specifier: 4.4.35
+        version: 4.4.35
       '@cspell/dict-fullstack':
         specifier: 3.2.9
         version: 3.2.9
@@ -106,9 +106,6 @@ packages:
   '@cspell/dict-dart@2.3.2':
     resolution: {integrity: sha512-sUiLW56t9gfZcu8iR/5EUg+KYyRD83Cjl3yjDEA2ApVuJvK1HhX+vn4e4k4YfjpUQMag8XO2AaRhARE09+/rqw==}
 
-  '@cspell/dict-data-science@2.0.13':
-    resolution: {integrity: sha512-l1HMEhBJkPmw4I2YGVu2eBSKM89K9pVF+N6qIr5Uo5H3O979jVodtuwP8I7LyPrJnC6nz28oxeGRCLh9xC5CVA==}
-
   '@cspell/dict-data-science@2.0.14':
     resolution: {integrity: sha512-jl6Ds4u5u5JT+yY30pWQpAbdCHfy3lCcNkLbpL/AZKoUaLEoXbaYsps9xQtvD7DyaiXxiLZkdH2yHHXtoFtZyg==}
 
@@ -132,6 +129,9 @@ packages:
 
   '@cspell/dict-en_us@4.4.33':
     resolution: {integrity: sha512-zWftVqfUStDA37wO1ZNDN1qMJOfcxELa8ucHW8W8wBAZY3TK5Nb6deLogCK/IJi/Qljf30dwwuqqv84Qqle9Tw==}
+
+  '@cspell/dict-en_us@4.4.35':
+    resolution: {integrity: sha512-xWpxBCc/FzzMMo/A+0qwARVaIIhR0Ql8yhhv4rvsvg+GfQF+LG9yzg2GwTM5N2rjvzmM3nKuR9zxFZq2I6fJSg==}
 
   '@cspell/dict-filetypes@3.0.18':
     resolution: {integrity: sha512-yU7RKD/x1IWmDLzWeiItMwgV+6bUcU/af23uS0+uGiFUbsY1qWV/D4rxlAAO6Z7no3J2z8aZOkYIOvUrJq0Rcw==}
@@ -452,7 +452,7 @@ snapshots:
       '@cspell/dict-csharp': 4.0.8
       '@cspell/dict-css': 4.1.2
       '@cspell/dict-dart': 2.3.2
-      '@cspell/dict-data-science': 2.0.13
+      '@cspell/dict-data-science': 2.0.14
       '@cspell/dict-django': 4.1.6
       '@cspell/dict-docker': 1.1.17
       '@cspell/dict-dotnet': 5.0.13
@@ -544,8 +544,6 @@ snapshots:
 
   '@cspell/dict-dart@2.3.2': {}
 
-  '@cspell/dict-data-science@2.0.13': {}
-
   '@cspell/dict-data-science@2.0.14': {}
 
   '@cspell/dict-django@4.1.6': {}
@@ -561,6 +559,8 @@ snapshots:
   '@cspell/dict-en-gb-mit@3.1.24': {}
 
   '@cspell/dict-en_us@4.4.33': {}
+
+  '@cspell/dict-en_us@4.4.35': {}
 
   '@cspell/dict-filetypes@3.0.18': {}
 
