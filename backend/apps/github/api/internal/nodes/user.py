@@ -47,9 +47,7 @@ class UserNode:
     @strawberry_django.field
     async def badges(self, root: User, info: Info) -> list[BadgeNode]:
         """Return user badges."""
-        return await info.context.github_dataloaders[
-            USER_BADGES_BY_USER_ID_LOADER
-        ].load(root.pk)
+        return await info.context.github_dataloaders[USER_BADGES_BY_USER_ID_LOADER].load(root.pk)
 
     @strawberry_django.field
     def created_at(self, root: User) -> str:

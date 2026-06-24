@@ -2,8 +2,11 @@
 
 import math
 from datetime import UTC, datetime
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from apps.github.api.internal.dataloaders.user import USER_BADGES_BY_USER_ID_LOADER
 from apps.github.api.internal.nodes.user import UserNode
 from apps.nest.api.internal.nodes.badge import BadgeNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -61,7 +64,7 @@ class TestUserNode(GraphQLNodeBaseTest):
     def test_issues_count_field(self):
         """Test issues_count field resolution."""
         mock_user = Mock()
-        mock_user.idx_issues_count = 42
+        mock_user.issues_count = 42
 
         field = self._get_field_by_name("issues_count", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
@@ -70,7 +73,7 @@ class TestUserNode(GraphQLNodeBaseTest):
     def test_releases_count_field(self):
         """Test releases_count field resolution."""
         mock_user = Mock()
-        mock_user.idx_releases_count = 15
+        mock_user.releases_count = 15
 
         field = self._get_field_by_name("releases_count", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
@@ -94,30 +97,38 @@ class TestUserNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == "https://github.com/testuser"
 
-    def test_badges_field_empty(self):
+    @pytest.mark.asyncio
+    async def test_badges_field_empty(self):
         """Test badges field resolution with no badges."""
-        mock_user = Mock()
-        mock_user.user_badges_list = []
+        mock_user = Mock(pk=1)
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=[])
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {USER_BADGES_BY_USER_ID_LOADER: mock_loader}
 
         field = self._get_field_by_name("badges", UserNode)
-        result = field.base_resolver.wrapped_func(None, mock_user)
+        result = await field.base_resolver.wrapped_func(None, mock_user, mock_info)
         assert result == []
 
-    def test_badges_field_single_badge(self):
+    @pytest.mark.asyncio
+    async def test_badges_field_single_badge(self):
         """Test badges field resolution with single badge."""
-        mock_user = Mock()
+        mock_user = Mock(pk=1)
         mock_badge = Mock(spec=BadgeNode)
-        mock_user_badge = Mock()
-        mock_user_badge.badge = mock_badge
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=[mock_badge])
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {USER_BADGES_BY_USER_ID_LOADER: mock_loader}
 
-        mock_user.user_badges_list = [mock_user_badge]
         field = self._get_field_by_name("badges", UserNode)
-        result = field.base_resolver.wrapped_func(None, mock_user)
+        result = await field.base_resolver.wrapped_func(None, mock_user, mock_info)
         assert result == [mock_badge]
 
-    def test_badges_field_sorted_by_weight_and_name(self):
+    @pytest.mark.asyncio
+    async def test_badges_field_sorted_by_weight_and_name(self):
         """Test badges field resolution with multiple badges sorted by weight and name."""
-        # Create mock badges with different weights and names
+        mock_user = Mock(pk=1)
+
         mock_badge_high_weight = Mock(spec=BadgeNode)
         mock_badge_high_weight.weight = 100
         mock_badge_high_weight.name = "High Weight Badge"
@@ -134,39 +145,21 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_badge_low_weight.weight = 10
         mock_badge_low_weight.name = "Low Weight Badge"
 
-        # Create mock user badges
-        mock_user_badge_high = Mock()
-        mock_user_badge_high.badge = mock_badge_high_weight
-
-        mock_user_badge_medium_a = Mock()
-        mock_user_badge_medium_a.badge = mock_badge_medium_weight_a
-
-        mock_user_badge_medium_b = Mock()
-        mock_user_badge_medium_b.badge = mock_badge_medium_weight_b
-
-        mock_user_badge_low = Mock()
-        mock_user_badge_low.badge = mock_badge_low_weight
-
-        # Set up the mock queryset to return badges in the expected sorted order
-        # (lowest weight first, then by name for same weight)
-        mock_user = Mock()
-        mock_user.user_badges_list = [
-            mock_user_badge_low,  # weight 10
-            mock_user_badge_medium_a,  # weight 50, name "Medium Weight A"
-            mock_user_badge_medium_b,  # weight 50, name "Medium Weight B"
-            mock_user_badge_high,  # weight 100
-        ]
-
-        field = self._get_field_by_name("badges", UserNode)
-        result = field.base_resolver.wrapped_func(None, mock_user)
-
-        # Verify the badges are returned in the correct order
         expected_badges = [
             mock_badge_low_weight,
             mock_badge_medium_weight_a,
             mock_badge_medium_weight_b,
             mock_badge_high_weight,
         ]
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=expected_badges)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {USER_BADGES_BY_USER_ID_LOADER: mock_loader}
+
+        field = self._get_field_by_name("badges", UserNode)
+        result = await field.base_resolver.wrapped_func(None, mock_user, mock_info)
+
         assert result == expected_badges
 
     def test_first_owasp_contribution_at_with_profile(self):
