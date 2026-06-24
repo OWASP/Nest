@@ -5,29 +5,15 @@
 REPO_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 
 .PHONY: audit-e2e-dependencies \
-	check-e2e \
-	format-e2e-code \
 	init-e2e-db \
-	lint-e2e-code \
 	test-e2e \
 	test-e2e-no-db-init \
 	test-e2e-ui \
-	test-e2e-ui-no-db-init 
+	test-e2e-ui-no-db-init
 
 audit-e2e-dependencies: ## Audit e2e npm dependencies
 	@echo "Auditing e2e npm dependencies..."
 	@cd $(REPO_ROOT)/e2e && pnpm audit --audit-level=$(AUDIT_LEVEL)
-
-check-e2e: ## Run e2e code quality checks
-check-e2e: \
-	format-e2e-code \
-	lint-e2e-code 
-
-format-e2e-code:
-	@(cd $(REPO_ROOT)/e2e && (pnpm list prettier --depth=0 | grep -q 'prettier' || pnpm add -D prettier >/dev/null 2>&1) \
-	  && pnpm run format:check >/dev/null 2>&1 \
-	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
 
 init-e2e-db:
 	@$(MAKE) -C $(REPO_ROOT) fetch-nest-dump
@@ -39,11 +25,6 @@ init-e2e-db:
 		--abort-on-container-exit backend cache db data-loader \
 		--build \
 		--remove-orphans
-
-lint-e2e-code:
-	@(cd $(REPO_ROOT)/e2e && pnpm run lint:check >/dev/null 2>&1 \
-	  && (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
 
 test-e2e: ## Run e2e tests (DB init, then full stack + Playwright)
 	@$(MAKE) init-e2e-db
@@ -68,4 +49,3 @@ test-e2e-ui-no-db-init:
 		--abort-on-container-exit backend cache db frontend e2e-tests \
 		--build \
 		--remove-orphans
-

@@ -8,11 +8,12 @@ include infrastructure/Makefile
 .DEFAULT_GOAL := help
 
 .PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
-	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies build check \
-	clean clean-trivy-cache help pre-commit prune run scan-images security-scan \
-	security-scan-backend-image security-scan-code security-scan-code-semgrep \
-	security-scan-code-trivy security-scan-frontend-image security-scan-images \
-	security-scan-zap test test-infrastructure test-nest-app update 
+	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies audit-tooling-dependencies build check \
+	check-js clean clean-trivy-cache format-js-code help \
+	install-tooling-dependencies lint-js-code pre-commit prune run \
+	scan-images security-scan security-scan-backend-image security-scan-code security-scan-code-semgrep \
+	security-scan-code-trivy security-scan-frontend-image security-scan-images security-scan-zap test \
+	test-infrastructure test-nest-app update update-tooling-dependencies
 
 AUDIT_LEVEL ?= high
 
@@ -40,12 +41,9 @@ run: ## Run Nest application locally
 
 check: ## Run all code quality checks
 check: \
+	check-js \
 	check-spelling \
-	check-backend \
-	check-e2e \
-	check-frontend 
-
-check-backend: \
+	generate-graphql-types \
 	pre-commit
 
 check-test: ## Run all checks and tests
@@ -53,17 +51,33 @@ check-test: \
 	check \
 	test
 
-check-test-backend: \
-	pre-commit \
-	test-backend
+##@ JavaScript lint and format
 
-check-test-e2e: \
-	check-e2e \
-	test-e2e
+check-js: ## Run frontend and e2e lint/format checks
+check-js: \
+	format-js-code \
+	lint-js-code
 
-check-test-frontend: \
-	check-frontend \
-	test-frontend
+format-js-code: install-tooling-dependencies
+	@(pnpm run format:check >/dev/null 2>&1 \
+	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
+
+install-tooling-dependencies:
+	@pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 \
+	  || pnpm install --prefer-offline >/dev/null 2>&1
+
+lint-js-code: install-tooling-dependencies
+	@(pnpm run lint:check >/dev/null 2>&1 \
+	  && (printf "pnpm run lint:check"; for i in $$(seq 1 54); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
+
+audit-tooling-dependencies: ## Audit root lint/format npm dependencies
+	@echo "Auditing root tooling npm dependencies..."
+	@pnpm audit --audit-level=$(AUDIT_LEVEL)
+
+update-tooling-dependencies:
+	@pnpm update
 
 pre-commit: ## Run pre-commit hooks
 	@pre-commit run --all-files --color=always --show-diff-on-failure
@@ -86,7 +100,8 @@ audit-dependencies: \
 	audit-cspell-dependencies \
 	audit-docs-dependencies \
 	audit-e2e-dependencies \
-	audit-frontend-dependencies
+	audit-frontend-dependencies \
+	audit-tooling-dependencies
 
 security-scan: ## Run all security scans
 security-scan: \
@@ -206,7 +221,8 @@ update: \
 update-nest-app-dependencies: \
 	update-backend-dependencies \
 	update-cspell-dependencies \
-	update-frontend-dependencies
+	update-frontend-dependencies \
+	update-tooling-dependencies
 
 update-pre-commit:
 	@pre-commit autoupdate

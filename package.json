@@ -1,0 +1,46 @@
+{
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.2.4",
+    "eslint": "10.4.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-import-resolver-alias": "1.1.2",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-jest": "29.15.2",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-playwright": "2.10.4",
+    "eslint-plugin-prettier": "5.5.5",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.6.0",
+    "prettier": "3.8.3",
+    "prettier-plugin-tailwindcss": "0.7.4",
+    "typescript-eslint": "8.60.0"
+  },
+  "engines": {
+    "node": "^24.0.0"
+  },
+  "name": "owasp-nest",
+  "packageManager": "pnpm@11.7.0",
+  "prettier": {
+    "arrowParens": "always",
+    "endOfLine": "lf",
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ],
+    "printWidth": 100,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5"
+  },
+  "private": true,
+  "scripts": {
+    "format": "prettier --log-level warn --write frontend e2e",
+    "format:check": "prettier --check frontend e2e",
+    "lint": "eslint --fix --max-warnings=0 frontend e2e",
+    "lint:check": "eslint --max-warnings=0 frontend e2e"
+  },
+  "type": "module",
+  "version": "0.0.0"
+}

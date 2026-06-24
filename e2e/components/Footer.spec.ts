@@ -11,10 +11,12 @@ test.describe('Footer - Desktop (Chrome)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
+
   test('should have buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'OWASP Nest' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Resources' })).toBeVisible()
   })
+
   test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
@@ -33,6 +35,7 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
+
   test('should have buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'OWASP Nest' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Resources' })).toBeVisible()
@@ -43,6 +46,7 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
     // only check if the sub-menu is visible
     await expect(page.getByRole('link', { name: 'GSoC 2026' })).toBeVisible()
   })
+
   test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()

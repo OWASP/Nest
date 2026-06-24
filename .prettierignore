@@ -1,0 +1,21 @@
+# Frontend artifacts
+frontend/.pnpm-store/
+frontend/pnpm-lock.yaml
+frontend/node_modules
+frontend/.next
+frontend/build
+frontend/dist
+frontend/src/types/__generated__/**/*
+
+# E2E artifacts
+e2e/.pnpm-store/
+e2e/pnpm-lock.yaml
+e2e/node_modules
+e2e/build
+e2e/coverage
+e2e/playwright-report
+e2e/test-results
+
+# Root tooling
+node_modules
+pnpm-lock.yaml

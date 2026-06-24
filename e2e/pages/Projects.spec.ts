@@ -34,18 +34,19 @@ test.describe('Projects Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
+    const nextPageButton = page.getByRole('button', { name: '2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on View Details button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'View Details' })
+    const contributeButton = page.getByRole('button', { name: 'View Details' })
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
     await expect(page).toHaveURL('projects/project_1')
   })
+
   test('breadcrumb renders correct segments on /projects', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Projects'])
   })
