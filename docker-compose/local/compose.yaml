@@ -17,11 +17,6 @@ services:
       db:
         condition: service_healthy
     env_file: ../../backend/.env
-    environment:
-      - DJANGO_OTEL_METRICS_ENABLED=true
-      - OTEL_SERVICE_NAME=nest-backend
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://o11y-metrics:8428/opentelemetry
-      - OTEL_METRIC_EXPORT_INTERVAL=15000
     networks:
       - nest-network
     ports:
@@ -107,26 +102,6 @@ services:
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
 
-  o11y-metrics:
-    container_name: nest-o11y-metrics
-    command:
-      - -retentionPeriod=7d
-      - -storageDataPath=/data
-    image: victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70
-    healthcheck:
-      interval: 5s
-      retries: 5
-      test: [CMD, wget, --spider, -q, http://127.0.0.1:8428/health]
-      timeout: 5s
-    networks:
-      - nest-network
-    ports:
-      - 8428:8428
-    profiles:
-      - o11y
-    volumes:
-      - o11y-metrics-data:/data
-
   worker:
     container_name: nest-worker
     command: >
@@ -158,4 +133,3 @@ volumes:
   docs-venv:
   frontend-next:
   frontend-node-modules:
-  o11y-metrics-data:
