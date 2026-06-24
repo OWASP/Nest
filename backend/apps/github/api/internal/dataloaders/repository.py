@@ -6,6 +6,7 @@ from strawberry.dataloader import DataLoader
 from apps.common.api.internal.dataloaders.utils import get_result_by_keys
 from apps.github.models.release import Release
 from apps.github.models.repository import Repository
+from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.project import Project
 
 REPOSITORY_BY_RELEASE_ID_LOADER = "repository_by_release_id"
@@ -43,7 +44,9 @@ async def load_repository_project_names_by_release_id(
     mapping: dict[int, str | None] = {}
     async for release in releases:
         mapping[release.pk] = (
-            release.repository.prefetched_projects[0].name
+            release.repository.prefetched_projects[0].name.removeprefix(
+                f"{OWASP_ORGANIZATION_NAME} "
+            )
             if release.repository and release.repository.prefetched_projects
             else None
         )
