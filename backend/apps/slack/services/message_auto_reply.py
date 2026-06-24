@@ -2,6 +2,7 @@
 
 import logging
 
+from django.db import DatabaseError
 from django_rq import job
 from slack_sdk.errors import SlackApiError
 
@@ -55,10 +56,16 @@ def generate_ai_reply_if_unanswered(message_id: int):
 
     # Log the interaction so reaction_added can match 👍/👎 back to this reply.
     reply_ts = response.get("ts", "") if response else ""
-    BotInteraction.objects.create(
-        channel_id=message.conversation.slack_channel_id,
-        user_id=message.raw_data.get("user", ""),
-        user_message=message.text,
-        bot_response=ai_response_text,
-        slack_reply_ts=reply_ts,
-    )
+    try:
+        BotInteraction.objects.create(
+            channel_id=message.conversation.slack_channel_id,
+            user_id=message.raw_data.get("user", ""),
+            user_message=message.text,
+            bot_response=ai_response_text,
+            slack_reply_ts=reply_ts,
+        )
+    except DatabaseError:
+        logger.exception(
+            "Failed to persist BotInteraction after sending Slack reply",
+            extra={"channel_id": message.conversation.slack_channel_id, "reply_ts": reply_ts},
+        )

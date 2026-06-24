@@ -54,6 +54,7 @@ class BotInteraction(TimestampedModel):
         max_length=32,
         blank=True,
         default="",
+        db_index=True,
         help_text="Slack message ts of the bot reply. Used to match reaction_added events.",
     )
 
