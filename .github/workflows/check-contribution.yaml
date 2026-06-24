@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
 
       - name: Check contribution requirements
-        uses: arkid15r/check-contribution-action@054ada7a71ac5cea5c111dbd41ecb4f4e71c9872  # v0.1.0
+        uses: arkid15r/check-contribution-action@e30b8f992da76cc4ae9a157f1667dcff2787d1ad  # v0.1.2
         with:
           check_commit_signature: 'true'
           check_issue_reference: 'true'
