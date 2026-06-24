@@ -1,0 +1,9 @@
+moderation_rules:
+  - channel_id: <SOURCE_CHANNEL_ID>
+    emoji_name: <EMOJI_NAME>
+    report_type: <REPORT_TYPE>
+    threshold: <REACTION_THRESHOLD>
+    alert_channel_id: <MODERATION_CHANNEL_ID>
+    alert_user_ids:
+      - <MODERATOR_USER_ID>
+    is_enabled: true
