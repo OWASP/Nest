@@ -88,11 +88,11 @@ type CandidateWithSnapshot = Candidate & {
 
 interface CandidateCardProps {
   candidate: CandidateWithSnapshot
+  isOwnProfile: boolean
   year: string
 }
 
-const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
-  const { session } = useDjangoSession()
+const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) => {
   const client = useApolloClient()
   const [snapshot, setSnapshot] = useState<MemberSnapshot | null>(null)
   const [ledChapters, setLedChapters] = useState<Chapter[]>([])
@@ -289,8 +289,6 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
 
   // Check if candidate leads any flagship level projects
   const leadsFlagshipProject = ledProjects.some((project) => project.level === 'flagship')
-
-  const isOwnProfile = !!session?.user?.login && session.user.login === candidate.member?.login
 
   return (
     <Button
@@ -675,6 +673,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
 }
 
 const BoardCandidatesPage = () => {
+  const { session } = useDjangoSession()
   const { year } = useParams<{ year: string }>()
   const {
     data: graphQLData,
@@ -764,7 +763,14 @@ const BoardCandidatesPage = () => {
       ) : (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           {candidates.map((candidate) => (
-            <CandidateCard key={candidate.id} candidate={candidate} year={year} />
+            <CandidateCard
+              key={candidate.id}
+              candidate={candidate}
+              isOwnProfile={
+                !!session?.user?.login && session.user.login === candidate.member?.login
+              }
+              year={year}
+            />
           ))}
         </div>
       )}
