@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
   check-contribution:
-    if: github.event.pull_request.head.repo.fork == false
+    if: github.event.repository.fork == false
     permissions:
       contents: read
       issues: read
