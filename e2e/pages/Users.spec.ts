@@ -13,7 +13,7 @@ test.describe('Users Page', () => {
         }),
       })
     })
-    await page.goto('/members')
+    await page.goto('/members', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders user data correctly', async ({ page }) => {
@@ -28,7 +28,7 @@ test.describe('Users Page', () => {
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/members')
+    await page.goto('/members', { waitUntil: 'domcontentloaded' })
     await expect(page.getByText('No Users Found')).toBeVisible()
   })
 

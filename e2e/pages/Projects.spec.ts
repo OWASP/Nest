@@ -13,7 +13,7 @@ test.describe('Projects Page', () => {
         }),
       })
     })
-    await page.goto('/projects')
+    await page.goto('/projects', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders project data correctly', async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe('Projects Page', () => {
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/projects')
+    await page.goto('/projects', { waitUntil: 'domcontentloaded' })
     await expect(page.getByText('No projects found')).toBeVisible()
   })
 

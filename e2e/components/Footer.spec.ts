@@ -9,7 +9,7 @@ test.describe('Footer - Desktop (Chrome)', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
   test('should have buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'OWASP Nest' })).toBeVisible()
@@ -31,7 +31,7 @@ test.use({
 
 test.describe('Footer - Mobile (iPhone 13)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
   test('should have buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'OWASP Nest' })).toBeVisible()
