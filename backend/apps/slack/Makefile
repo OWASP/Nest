@@ -26,3 +26,7 @@ slack-sync-data:
 slack-sync-messages:
 	@echo "Syncing Slack messages"
 	@CMD="python manage.py slack_sync_messages" $(MAKE) exec-backend-command
+
+slack-sync-moderation-rules:
+	@echo "Syncing Slack moderation rules"
+	@CMD="python manage.py slack_sync_moderation_rules" $(MAKE) exec-backend-command
