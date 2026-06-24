@@ -9,8 +9,7 @@ include infrastructure/Makefile
 
 .PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
 	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies audit-tooling-dependencies build check \
-	check-js clean clean-trivy-cache format-js-code help \
-	install-tooling-dependencies lint-js-code pre-commit prune run \
+	check-graphql check-typescript clean clean-tooling-dependencies clean-trivy-cache format-typescript graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prune run \
 	scan-images security-scan security-scan-backend-image security-scan-code security-scan-code-semgrep \
 	security-scan-code-trivy security-scan-frontend-image security-scan-images security-scan-zap test \
 	test-infrastructure test-nest-app update update-tooling-dependencies
@@ -40,37 +39,59 @@ run: ## Run Nest application locally
 ##@ Testing
 
 check: ## Run all code quality checks
-check: \
-	check-js \
-	check-spelling \
-	generate-graphql-types \
-	pre-commit
+	@echo "=== Pre-commit ==="
+	@$(MAKE) pre-commit
+	@echo ""
+	@echo "=== Spelling ==="
+	@$(MAKE) check-spelling
+	@echo ""
+	@echo "=== TypeScript lint and format ==="
+	@$(MAKE) check-typescript
+	@echo ""
 
 check-test: ## Run all checks and tests
 check-test: \
 	check \
 	test
 
-##@ JavaScript lint and format
+##@ TypeScript lint and format
 
-check-js: ## Run frontend and e2e lint/format checks
-check-js: \
-	format-js-code \
-	lint-js-code
+check-typescript: install-tooling-dependencies install-frontend-dependencies ## Format, lint, and verify TypeScript locally (CI runs verify only)
+	@pnpm run format:check && echo "Prettier: all matched files use Prettier code style." \
+		|| (pnpm run format && pnpm run format:check && echo "Prettier: all matched files use Prettier code style.")
+	@pnpm run lint:check && echo "ESLint: no issues found." \
+		|| (pnpm run lint && pnpm run lint:check && echo "ESLint: no issues found.")
 
-format-js-code: install-tooling-dependencies
-	@(pnpm run format:check >/dev/null 2>&1 \
-	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
+format-typescript: install-tooling-dependencies install-frontend-dependencies ## Auto-fix TypeScript format and lint issues
+	@pnpm run format
+	@pnpm run lint
+
+##@ GraphQL
+
+graphql-codegen: install-frontend-dependencies ## Regenerate GraphQL types (requires backend on PUBLIC_API_URL)
+	@cd frontend && pnpm run graphql-codegen
+
+check-graphql: install-frontend-dependencies ## Verify committed GraphQL types match backend schema (requires backend on PUBLIC_API_URL)
+	@log=$$(mktemp); \
+	if cd frontend && node_modules/.bin/graphql-codegen --config graphql-codegen.ts >"$$log" 2>&1; then \
+		if git diff --quiet -- frontend/src/types/__generated__; then \
+			echo "GraphQL types: up to date."; \
+		else \
+			echo "GraphQL types: out of date."; \
+			git --no-pager diff -- frontend/src/types/__generated__; \
+			rm -f "$$log"; \
+			exit 1; \
+		fi; \
+	else \
+		cat "$$log"; \
+		rm -f "$$log"; \
+		exit 1; \
+	fi; \
+	rm -f "$$log"
 
 install-tooling-dependencies:
 	@pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 \
-	  || pnpm install --prefer-offline >/dev/null 2>&1
-
-lint-js-code: install-tooling-dependencies
-	@(pnpm run lint:check >/dev/null 2>&1 \
-	  && (printf "pnpm run lint:check"; for i in $$(seq 1 54); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
+	  || pnpm install --prefer-offline
 
 audit-tooling-dependencies: ## Audit root lint/format npm dependencies
 	@echo "Auditing root tooling npm dependencies..."
@@ -87,10 +108,10 @@ test: \
 	test-nest-app
 
 test-nest-app:
-	$(MAKE) test-backend
-	$(MAKE) test-frontend
-	$(MAKE) test-e2e
-	$(MAKE) test-infrastructure
+	@$(MAKE) test-backend
+	@$(MAKE) test-frontend
+	@$(MAKE) test-e2e
+	@$(MAKE) test-infrastructure
 
 ##@ Security
 
@@ -194,7 +215,11 @@ clean: \
 
 clean-dependencies: \
 	clean-backend-dependencies \
-	clean-frontend-dependencies
+	clean-frontend-dependencies \
+	clean-tooling-dependencies
+
+clean-tooling-dependencies:
+	@rm -rf node_modules
 
 clean-docker: \
 	clean-backend-docker \

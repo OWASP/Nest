@@ -352,11 +352,31 @@ Nest enforces code quality standards to ensure consistency and maintainability. 
 make check
 ```
 
-This command runs linters and other static analysis tools for both the frontend and backend.
+This command runs linters and other static analysis tools for both the frontend and backend. It does not require a running application.
 
 We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address (mark as resolved) all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project maintainer(s) you're working with for further guidance.
 
 **Please note that your pull request will not be reviewed until all code quality checks pass and all automated suggestions have been addressed or resolved.**
+
+### GraphQL types
+
+Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. They are **not** part of `make check` or `make test` because codegen introspects a **running backend**.
+
+#### When to run
+
+| Situation | Command |
+| --------- | ------- |
+| You changed the backend GraphQL schema or frontend operations | `make graphql-codegen` then commit generated files |
+| You want to confirm committed types are current before opening a PR | `make check-graphql` |
+| CI (automatic) | The **GraphQL** job in Code tests |
+
+#### Requirements
+
+1. Start the stack (for example `docker compose -f docker-compose/local/compose.yaml up`) so the backend answers on port `8000`.
+2. Run commands from the repository root.
+3. Optional: set `PUBLIC_API_URL` if the backend is not at `http://localhost:8000` (for example `http://localhost:9000` for some e2e setups).
+
+`make graphql-codegen` regenerates files. `make check-graphql` regenerates and fails if `frontend/src/types/__generated__/` would change — use this to verify before pushing GraphQL-related work.
 
 ## Testing
 
@@ -633,6 +653,8 @@ git checkout -b feature/my-feature-name
   ```bash
   make check-test
   ```
+
+  If you changed the GraphQL schema or frontend GraphQL operations, also run `make check-graphql` with the backend running (see [GraphQL types](#graphql-types)).
 
 - Write meaningful commit messages:
 

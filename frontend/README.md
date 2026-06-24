@@ -41,18 +41,15 @@ pnpm run dev
 
 ## Key Scripts
 
-Common `pnpm` scripts defined in `package.json`:
+Lint and format for `frontend/` and `e2e/` TypeScript run from the **repository root** (`pnpm run lint`, `pnpm run format`, or `make check-typescript`). Frontend-only scripts:
 
-| Task                   | Command                    |
-| ---------------------- | -------------------------- |
-| Start dev server       | `pnpm run dev`             |
-| Build for production   | `pnpm run build`           |
-| Lint code              | `pnpm run lint`            |
-| Format code            | `pnpm run format`          |
-| Generate GraphQL types | `pnpm run graphql-codegen` |
-| Run unit tests         | `pnpm run test:unit`       |
+| Task                 | Command              |
+| -------------------- | -------------------- |
+| Start dev server     | `pnpm run dev`       |
+| Build for production | `pnpm run build`     |
+| Run unit tests       | `pnpm run test:unit` |
 
-See the `Makefile` for Docker-based convenience targets.
+See the root and `frontend/` Makefiles for Docker-based convenience targets.
 
 ## GraphQL Codegen
 
@@ -61,12 +58,17 @@ TypeScript types for GraphQL operations are auto-generated from the backend sche
 - Configuration: `graphql-codegen.ts`
 - Output: `src/types/__generated__/`
 
-Run the codegen with:
+From the **repository root** (with the backend running on `PUBLIC_API_URL`, default `http://localhost:8000`):
 
 ```bash
-# Requires the backend to be running
-pnpm run graphql-codegen
+# Regenerate types after schema or operation changes
+make graphql-codegen
+
+# Verify committed types match the live schema (same check as CI)
+make check-graphql
 ```
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md#graphql-types) for when to run each command.
 
 ## Dependencies
 

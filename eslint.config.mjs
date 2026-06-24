@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import path, { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -8,7 +9,6 @@ import importPlugin from 'eslint-plugin-import'
 import jest from 'eslint-plugin-jest'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import playwright from 'eslint-plugin-playwright'
-import prettier from 'eslint-plugin-prettier'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
@@ -22,6 +22,8 @@ import noGlobalParseIntRule from './frontend/eslint-rules/no-global-parseint.mjs
 
 const rootDir = dirname(fileURLToPath(import.meta.url))
 const frontendDir = path.join(rootDir, 'frontend')
+const frontendPackageJson = JSON.parse(readFileSync(path.join(frontendDir, 'package.json'), 'utf8'))
+const jestMajorVersion = Number.parseInt(frontendPackageJson.devDependencies.jest.split('.')[0], 10)
 
 export default [
   {
@@ -67,7 +69,10 @@ export default [
       ],
     },
   },
-  react.configs.flat['jsx-runtime'],
+  {
+    files: ['frontend/**/*.{js,jsx,ts,tsx}'],
+    ...react.configs.flat['jsx-runtime'],
+  },
   {
     files: ['frontend/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
@@ -94,7 +99,6 @@ export default [
           'no-global-parseint': noGlobalParseIntRule,
         },
       },
-      prettier,
       react,
       'react-hooks': reactHooks,
     },
@@ -109,7 +113,7 @@ export default [
         },
       },
       jest: {
-        version: 30,
+        version: jestMajorVersion,
       },
       next: {
         rootDir: 'frontend/',
@@ -120,7 +124,6 @@ export default [
     },
     rules: {
       ...jest.configs.recommended.rules,
-      ...eslintConfigPrettier.rules,
       ...nextPlugin.configs.recommended.rules,
       ...jsxA11y.configs.recommended.rules,
       '@typescript-eslint/explicit-function-return-type': 'off',

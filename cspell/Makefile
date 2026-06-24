@@ -3,14 +3,17 @@
 
 ##@ Spelling
 
-check-spelling: ## Run spell checker
-check-spelling: cspell-check
+check-spelling: cspell-install ## Run spell checker
+	@docker run \
+		--mount type=bind,src="$(CURDIR)",dst=/nest \
+		--rm \
+		cspell -c cspell/cspell.json --no-progress -r /nest
 
 cspell-install:
-	@ # Check if cspell:ci image exists (from CI build step), tag it to 'cspell' if found,
-	@ # otherwise build the image from scratch for local development.
-	@docker image inspect cspell:ci >/dev/null 2>&1 && \
-	@docker tag cspell:ci cspell || docker build -t cspell -f docker/cspell/Dockerfile cspell
+	@docker image inspect cspell >/dev/null 2>&1 \
+		|| (docker image inspect cspell:ci >/dev/null 2>&1 \
+			&& docker tag cspell:ci cspell \
+			|| docker build -q -t cspell -f docker/cspell/Dockerfile cspell 1>/dev/null)
 
 cspell-check: CMD="--no-progress -r /nest"
 cspell-check: cspell-install cspell-run

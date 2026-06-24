@@ -55,8 +55,16 @@ jobs:
       coverage_flags: frontend
       coverage_path: frontend/coverage/lcov.info
 
+  run-graphql-checks:
+    name: GraphQL checks
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-graphql-checks.yaml
+
   run-e2e-tests:
     name: E2E tests
+    needs:
+      - run-graphql-checks
     permissions:
       contents: read
     uses: ./.github/workflows/run-e2e-tests.yaml
