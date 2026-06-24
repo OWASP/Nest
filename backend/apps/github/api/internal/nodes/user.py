@@ -3,7 +3,9 @@
 import strawberry_django
 from django.db.models import Count
 from django.db.models.query import Prefetch
+from strawberry.types.info import Info
 
+from apps.github.api.internal.dataloaders.user import USER_BADGES_BY_USER_ID_LOADER
 from apps.github.models.user import User
 from apps.nest.api.internal.nodes.badge import BadgeNode
 from apps.nest.models.user_badge import UserBadge
@@ -42,10 +44,12 @@ USER_BADGES_PREFETCH = Prefetch(
 class UserNode:
     """GitHub user node."""
 
-    @strawberry_django.field(prefetch_related=[USER_BADGES_PREFETCH])
-    def badges(self, root: User) -> list[BadgeNode]:
+    @strawberry_django.field
+    async def badges(self, root: User, info: Info) -> list[BadgeNode]:
         """Return user badges."""
-        return [user_badge.badge for user_badge in getattr(root, "user_badges_list", [])]
+        return await info.context.github_dataloaders[
+            USER_BADGES_BY_USER_ID_LOADER
+        ].load(root.pk)
 
     @strawberry_django.field
     def created_at(self, root: User) -> str:
