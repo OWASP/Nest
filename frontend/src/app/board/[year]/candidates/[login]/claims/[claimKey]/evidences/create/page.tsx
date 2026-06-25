@@ -26,6 +26,10 @@ const CreateEvidencePage = () => {
     sourceUrl: '',
   })
 
+  if (isSyncing) {
+    return <LoadingSpinner />
+  }
+
   if (session?.user?.login !== login) {
     return (
       <AccessDeniedDisplay
@@ -100,10 +104,6 @@ const CreateEvidencePage = () => {
       }
       throw err
     }
-  }
-
-  if (isSyncing) {
-    return <LoadingSpinner />
   }
 
   return (
