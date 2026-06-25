@@ -11,7 +11,7 @@ override_data {
   values = {
     account_id = "160885282306"
     arn        = "arn:aws:iam::160885282306:user/nest-bootstrap"
-    user_id    = "AIDACKCEVSQ6C2EXAMPLE"
+    user_id    = "EXAMPLE"
   }
 }
 
@@ -25,7 +25,7 @@ run "test_part_one_policy_size_staging" {
   command = plan
 
   assert {
-    condition = length(data.aws_iam_policy_document.part_one["staging"].minified_json) <= 6144
+    condition     = length(data.aws_iam_policy_document.part_one["staging"].minified_json) <= 6144
     error_message = "part_one staging policy exceeds the IAM managed policy size limit of 6144 characters."
   }
 }
@@ -34,7 +34,7 @@ run "test_part_one_policy_size_production" {
   command = plan
 
   assert {
-    condition = length(data.aws_iam_policy_document.part_one["production"].minified_json) <= 6144
+    condition     = length(data.aws_iam_policy_document.part_one["production"].minified_json) <= 6144
     error_message = "part_one production policy exceeds the IAM managed policy size limit of 6144 characters."
   }
 }
@@ -43,7 +43,7 @@ run "test_part_two_policy_size_staging" {
   command = plan
 
   assert {
-    condition = length(data.aws_iam_policy_document.part_two["staging"].minified_json) <= 6144
+    condition     = length(data.aws_iam_policy_document.part_two["staging"].minified_json) <= 6144
     error_message = "part_two staging policy exceeds the IAM managed policy size limit of 6144 characters."
   }
 }
@@ -52,7 +52,7 @@ run "test_part_two_policy_size_production" {
   command = plan
 
   assert {
-    condition = length(data.aws_iam_policy_document.part_two["production"].minified_json) <= 6144
+    condition     = length(data.aws_iam_policy_document.part_two["production"].minified_json) <= 6144
     error_message = "part_two production policy exceeds the IAM managed policy size limit of 6144 characters."
   }
 }
@@ -97,9 +97,10 @@ run "test_autoscaling_permissions_not_in_part_one" {
 
   assert {
     condition = alltrue([
+      can(regex("application-autoscaling:DescribeScalingActivities", data.aws_iam_policy_document.part_one["staging"].json)),
       !can(regex("application-autoscaling:PutScalingPolicy", data.aws_iam_policy_document.part_one["staging"].json)),
       !can(regex("cloudwatch:PutMetricAlarm", data.aws_iam_policy_document.part_one["staging"].json)),
     ])
-    error_message = "part_one must not include ECS auto-scaling management permissions."
+    error_message = "part_one must include DescribeScalingActivities discovery and exclude ECS auto-scaling management permissions."
   }
 }
