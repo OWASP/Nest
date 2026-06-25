@@ -27,7 +27,7 @@ const EditEvidencePage = () => {
     loading: isLoading,
   } = useQuery(GetBoardCandidateClaimEvidenceDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !evidenceKey || session?.user?.login !== login,
+    skip: !evidenceKey || !login || !year || session?.user?.login !== login,
     variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
   })
 
@@ -146,10 +146,6 @@ const EditEvidencePage = () => {
       }
       throw err
     }
-  }
-
-  if (isSyncing) {
-    return <LoadingSpinner />
   }
 
   return (

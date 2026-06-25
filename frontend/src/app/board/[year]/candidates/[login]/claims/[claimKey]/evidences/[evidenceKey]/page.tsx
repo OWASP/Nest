@@ -37,7 +37,7 @@ const EvidenceDetailsPage = () => {
     loading: isClaimLoading,
   } = useQuery(GetBoardCandidateClaimDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey || session?.user?.login !== login,
+    skip: !claimKey || !login || !year || session?.user?.login !== login,
     variables: { key: claimKey, login, year: Number.parseInt(year) },
   })
 
@@ -47,7 +47,7 @@ const EvidenceDetailsPage = () => {
     loading: isEvidenceLoading,
   } = useQuery(GetBoardCandidateClaimEvidenceDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !evidenceKey || session?.user?.login !== login,
+    skip: !evidenceKey || !login || !year || session?.user?.login !== login,
     variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
   })
 

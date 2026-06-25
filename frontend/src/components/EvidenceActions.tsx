@@ -147,6 +147,7 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
           </ModalBody>
           <ModalBody>
             <textarea
+              aria-label="Reason for removal"
               className="mt-2 w-full rounded border p-2"
               rows={3}
               placeholder="Reason for removal..."

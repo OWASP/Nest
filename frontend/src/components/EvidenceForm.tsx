@@ -147,7 +147,7 @@ const EvidenceForm = ({
               handleInputChange('name', value)
               setTouched((prev) => ({ ...prev, name: true }))
             }}
-            error={errors.name}
+            error={errors.name ?? backendErrors.name}
             touched={touched.name}
             required
             className="w-full min-w-0 lg:col-span-2"
@@ -157,7 +157,10 @@ const EvidenceForm = ({
             label="Description"
             placeholder="Enter evidence description"
             value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
+            onChange={(e) => {
+              handleInputChange('description', e.target.value)
+              setTouched((prev) => ({ ...prev, description: true }))
+            }}
             error={errors.description}
             touched={touched.description}
             required
@@ -171,7 +174,7 @@ const EvidenceForm = ({
               handleInputChange('sourceUrl', value)
               setTouched((prev) => ({ ...prev, sourceUrl: true }))
             }}
-            error={errors.sourceUrl || backendErrors.sourceUrl}
+            error={backendErrors.sourceUrl}
             touched={touched.sourceUrl}
             className="w-full min-w-0 lg:col-span-2"
           />
