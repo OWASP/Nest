@@ -8,11 +8,11 @@ include infrastructure/Makefile
 .DEFAULT_GOAL := help
 
 .PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
-	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies build check \
-	clean clean-trivy-cache help pre-commit prune run scan-images security-scan \
-	security-scan-backend-image security-scan-code security-scan-code-semgrep \
-	security-scan-code-trivy security-scan-frontend-image security-scan-images \
-	security-scan-zap test test-infrastructure test-nest-app update
+	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies audit-tooling-dependencies build check cspell \
+	check-graphql clean clean-tooling-dependencies clean-trivy-cache eslint fix-eslint fix-prettier graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prettier prune run \
+	scan-images security-scan security-scan-backend-image security-scan-code security-scan-code-semgrep \
+	security-scan-code-trivy security-scan-frontend-image security-scan-images security-scan-zap test \
+	test-infrastructure test-nest-app update update-tooling-dependencies
 
 AUDIT_LEVEL ?= high
 
@@ -39,26 +39,73 @@ run: ## Run Nest application locally
 ##@ Testing
 
 check: ## Run all code quality checks
-check: \
-	check-spelling \
-	check-backend \
-	check-frontend
-
-check-backend: \
-	pre-commit
+	@echo "================================== pre-commit =================================="
+	@$(MAKE) pre-commit
+	@echo ""
+	@echo "==================================== cspell ===================================="
+	@$(MAKE) cspell
+	@echo ""
+	@echo "=================================== prettier ==================================="
+	@$(MAKE) prettier
+	@echo ""
+	@echo "==================================== eslint ===================================="
+	@$(MAKE) eslint
+	@echo ""
 
 check-test: ## Run all checks and tests
 check-test: \
 	check \
 	test
 
-check-test-backend: \
-	pre-commit \
-	test-backend
+##@ Prettier
 
-check-test-frontend: \
-	check-frontend \
-	test-frontend
+prettier: install-tooling-dependencies install-frontend-dependencies ## Verify Prettier formatting
+	@pnpm run format:check && echo "Prettier: all matched files use Prettier code style."
+
+fix-prettier: install-tooling-dependencies install-frontend-dependencies ## Auto-fix Prettier formatting
+	@pnpm run format
+
+##@ ESLint
+
+eslint: install-tooling-dependencies install-frontend-dependencies ## Verify ESLint for e2e and frontend
+	@pnpm run lint:check && echo "ESLint: no issues found."
+
+fix-eslint: install-tooling-dependencies install-frontend-dependencies ## Auto-fix ESLint issues
+	@pnpm run lint
+
+##@ GraphQL
+
+graphql-codegen: install-frontend-dependencies ## Regenerate GraphQL types (requires backend on PUBLIC_API_URL)
+	@cd frontend && pnpm run graphql-codegen
+
+check-graphql: install-frontend-dependencies ## Verify committed GraphQL types match backend schema (requires backend on PUBLIC_API_URL)
+	@log=$$(mktemp); \
+	if cd frontend && node_modules/.bin/graphql-codegen --config graphql-codegen.ts >"$$log" 2>&1; then \
+		if git diff --quiet -- frontend/src/types/__generated__; then \
+			echo "GraphQL types: up to date."; \
+		else \
+			echo "GraphQL types: out of date."; \
+			git --no-pager diff -- frontend/src/types/__generated__; \
+			rm -f "$$log"; \
+			exit 1; \
+		fi; \
+	else \
+		cat "$$log"; \
+		rm -f "$$log"; \
+		exit 1; \
+	fi; \
+	rm -f "$$log"
+
+install-tooling-dependencies:
+	@pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 \
+	  || pnpm install --prefer-offline
+
+audit-tooling-dependencies: ## Audit root lint/format npm dependencies
+	@echo "Auditing root tooling npm dependencies..."
+	@pnpm audit --audit-level=$(AUDIT_LEVEL)
+
+update-tooling-dependencies:
+	@pnpm update
 
 pre-commit: ## Run pre-commit hooks
 	@pre-commit run --all-files --color=always --show-diff-on-failure
@@ -68,10 +115,10 @@ test: \
 	test-nest-app
 
 test-nest-app:
-	$(MAKE) test-backend
-	$(MAKE) test-frontend
-	$(MAKE) test-e2e
-	$(MAKE) test-infrastructure
+	@$(MAKE) test-backend
+	@$(MAKE) test-frontend
+	@$(MAKE) test-e2e
+	@$(MAKE) test-infrastructure
 
 ##@ Security
 
@@ -81,7 +128,8 @@ audit-dependencies: \
 	audit-cspell-dependencies \
 	audit-docs-dependencies \
 	audit-e2e-dependencies \
-	audit-frontend-dependencies
+	audit-frontend-dependencies \
+	audit-tooling-dependencies
 
 security-scan: ## Run all security scans
 security-scan: \
@@ -174,7 +222,11 @@ clean: \
 
 clean-dependencies: \
 	clean-backend-dependencies \
-	clean-frontend-dependencies
+	clean-frontend-dependencies \
+	clean-tooling-dependencies
+
+clean-tooling-dependencies:
+	@rm -rf node_modules
 
 clean-docker: \
 	clean-backend-docker \
@@ -201,7 +253,8 @@ update: \
 update-nest-app-dependencies: \
 	update-backend-dependencies \
 	update-cspell-dependencies \
-	update-frontend-dependencies
+	update-frontend-dependencies \
+	update-tooling-dependencies
 
 update-pre-commit:
 	@pre-commit autoupdate

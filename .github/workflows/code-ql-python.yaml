@@ -1,0 +1,59 @@
+name: CodeQL Python
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - feature/**
+      - main
+    paths:
+      - .github/actions/install-backend-dependencies/**
+      - .github/actions/install-poetry/**
+      - .github/workflows/code-ql-python.yaml
+      - '**/*.py'
+      - backend/**
+  push:
+    branches:
+      - main
+    paths:
+      - .github/actions/install-backend-dependencies/**
+      - .github/actions/install-poetry/**
+      - .github/workflows/code-ql-python.yaml
+      - '**/*.py'
+      - backend/**
+
+concurrency:
+  cancel-in-progress: true
+  group: code-ql-python-${{ github.ref }}
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  run-code-ql:
+    name: CodeQL Python
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e  # v4.36.2
+        with:
+          languages: python
+
+      - name: Install backend dependencies
+        uses: ./.github/actions/install-backend-dependencies
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e  # v4.36.2
+        with:
+          category: /language:python
+    timeout-minutes: 5
