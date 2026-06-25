@@ -4,6 +4,7 @@ import logging
 
 import strawberry
 import strawberry_django
+from asgiref.sync import sync_to_async
 from django.db.models import Q
 
 from apps.common.utils import normalize_limit
@@ -12,7 +13,7 @@ from apps.mentorship.api.internal.graphql_errors import (
     ManagementProgramAccessDeniedError,
 )
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
-from apps.mentorship.models import Program
+from apps.mentorship.models.program import Program
 from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
 
@@ -37,15 +38,15 @@ class ProgramQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if program.status != Program.ProgramStatus.PUBLISHED and not program.user_has_access(
-            info.context.request.user
-        ):
+        if program.status != Program.ProgramStatus.PUBLISHED and not await sync_to_async(
+            program.user_has_access
+        )(info.context.request.user):
             return None
 
         return program
 
     @strawberry.field(name="managementProgram")
-    def get_management_program(
+    async def get_management_program(
         self, info: strawberry.Info, program_key: str
     ) -> ProgramNode | None:
         """Return program details for admins or mentors."""
@@ -53,15 +54,15 @@ class ProgramQuery:
         if not user.is_authenticated:
             raise AuthenticationRequiredError()  # noqa: RSE102
         try:
-            program = Program.objects.prefetch_related(
+            program = await Program.objects.prefetch_related(
                 "admins__github_user", "admins__nest_user"
-            ).get(key=program_key)
+            ).aget(key=program_key)
         except Program.DoesNotExist:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
             return None
 
-        if not program.user_has_access(user):
+        if not await sync_to_async(program.user_has_access)(user):
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         return program

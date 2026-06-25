@@ -47,7 +47,7 @@ class ModuleNode:
         return self.mentors.all()
 
     @strawberry.field
-    def mentees(self) -> list[UserNode]:
+    async def mentees(self) -> list[UserNode]:
         """Get the list of mentees for this module."""
         mentee_users = (
             self.menteemodule_set.select_related("mentee__github_user")
@@ -55,7 +55,9 @@ class ModuleNode:
             .values_list("mentee__github_user", flat=True)
         )
 
-        return list(User.objects.filter(id__in=mentee_users).order_by("login"))
+        return list(
+            User.objects.filter(id__in=[user async for user in mentee_users]).order_by("login")
+        )
 
     @strawberry.field
     def issue_mentees(self, issue_number: int) -> list[UserNode]:
