@@ -8,11 +8,8 @@ import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { FaDownload } from 'react-icons/fa6'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetBoardCandidateClaimDocument } from 'types/__generated__/claimQueries.generated'
-import {
-  GetBoardCandidateClaimEvidenceDocument,
-  GetBoardCandidateClaimEvidenceFileUrlDocument,
-} from 'types/__generated__/evidenceQueries.generated'
+import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
+import { GetBoardCandidateClaimEvidenceFileUrlDocument } from 'types/__generated__/evidenceQueries.generated'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -31,41 +28,25 @@ const EvidenceDetailsPage = () => {
   }>()
   const { isSyncing, session } = useDjangoSession()
 
-  const {
-    data: claimGraphQLData,
-    error: claimGraphQLRequestError,
-    loading: isClaimLoading,
-  } = useQuery(GetBoardCandidateClaimDocument, {
+  const { data, loading, error } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
     skip: !claimKey || !login || !year || session?.user?.login !== login,
     variables: { key: claimKey, login, year: Number.parseInt(year) },
   })
 
-  const {
-    data: evidenceGraphQLData,
-    error: evidenceGraphQLRequestError,
-    loading: isEvidenceLoading,
-  } = useQuery(GetBoardCandidateClaimEvidenceDocument, {
-    fetchPolicy: 'cache-and-network',
-    skip: !evidenceKey || !login || !year || session?.user?.login !== login,
-    variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
-  })
-
   const [fetchFileUrl] = useLazyQuery(GetBoardCandidateClaimEvidenceFileUrlDocument)
 
-  const claim = claimGraphQLData?.boardCandidateClaim
-  const evidence = evidenceGraphQLData?.boardCandidateClaimEvidence
+  const claim = data?.boardCandidateClaim
+  const evidences = data?.boardCandidateClaimEvidences ?? []
+  const evidence = evidences.find((e) => e.key === evidenceKey)
 
   useEffect(() => {
-    if (claimGraphQLRequestError) {
-      handleAppError(claimGraphQLRequestError)
+    if (error) {
+      handleAppError(error)
     }
-    if (evidenceGraphQLRequestError) {
-      handleAppError(evidenceGraphQLRequestError)
-    }
-  }, [claimGraphQLRequestError, evidenceGraphQLRequestError])
+  }, [error])
 
-  if (isClaimLoading || isEvidenceLoading || isSyncing) return <LoadingSpinner />
+  if (loading || isSyncing) return <LoadingSpinner />
 
   if (session?.user?.login !== login) {
     return (
@@ -73,7 +54,7 @@ const EvidenceDetailsPage = () => {
     )
   }
 
-  if (claimGraphQLRequestError || evidenceGraphQLRequestError) {
+  if (error) {
     return (
       <ErrorDisplay
         statusCode={500}
@@ -83,7 +64,7 @@ const EvidenceDetailsPage = () => {
     )
   }
 
-  if (!claimGraphQLData || !evidenceGraphQLData || !claim || !evidence) {
+  if (!claim || !evidence) {
     return (
       <ErrorDisplay
         statusCode={404}
