@@ -97,7 +97,13 @@ class TestMessageAutoReply:
             text="OWASP is a security organization...",
             thread_ts=mock_message.slack_message_id,
         )
-        mock_bot_interaction_create.assert_called_once() 
+        mock_bot_interaction_create.assert_called_once_with(
+            channel_id=mock_message.conversation.slack_channel_id,
+            user_id=mock_message.raw_data.get("user", ""),
+            user_message=mock_message.text,
+            bot_response="OWASP is a security organization...",
+            slack_reply_ts="1234567890.999999",
+        )
 
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     def test_generate_ai_reply_message_not_found(self, mock_message_get):
