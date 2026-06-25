@@ -235,10 +235,10 @@ sync-data: \
 
 test-backend: ## Run backend tests
 test-backend:
-	@DOCKER_BUILDKIT=1 docker build \
+	@DOCKER_BUILDKIT=1 docker build -q \
 		--cache-from nest-test-backend \
 		-f docker/backend/Dockerfile.unit-tests backend \
-		-t nest-test-backend
+		-t nest-test-backend 1>/dev/null
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
 		--env-file backend/.env.unit-tests \
