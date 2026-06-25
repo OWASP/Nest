@@ -8,7 +8,6 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
 import { GetBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceQueries.generated'
 import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
-import slugify from 'utils/slugify'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -102,14 +101,16 @@ const EditEvidencePage = () => {
       }
 
       const result = await updateEvidence({
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
+        variables: { input },
+        update(cache, { data }) {
+          const updatedEvidence = data?.updateBoardCandidateClaimEvidence?.evidence
+          if (!updatedEvidence) return
+          cache.writeQuery({
             query: GetBoardCandidateClaimEvidenceDocument,
             variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
-          },
-        ],
-        variables: { input },
+            data: { boardCandidateClaimEvidence: updatedEvidence },
+          })
+        },
       })
 
       if (!result.data?.updateBoardCandidateClaimEvidence?.ok) {
@@ -126,9 +127,12 @@ const EditEvidencePage = () => {
         color: 'success',
       })
 
-      router.push(
-        `/board/${year}/candidates/${login}/claims/${claimKey}/evidences/${slugify(formData.name)}`
-      )
+      const updatedEvidence = result.data?.updateBoardCandidateClaimEvidence?.evidence
+      if (updatedEvidence?.key) {
+        router.push(
+          `/board/${year}/candidates/${login}/claims/${claimKey}/evidences/${updatedEvidence.key}`
+        )
+      }
     } catch (err) {
       const { hasValidationErrors } = extractGraphQLErrors(err)
       if (!hasValidationErrors) {

@@ -49,14 +49,27 @@ const CreateEvidencePage = () => {
       }
 
       const result = await createEvidence({
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
+        variables: { input },
+        update(cache, { data }) {
+          const newEvidence = data?.createBoardCandidateClaimEvidence?.evidence
+          if (!newEvidence) return
+          const existing = cache.readQuery({
             query: GetBoardCandidateClaimEvidencesDocument,
             variables: { claimKey, login, year: Number.parseInt(year) },
-          },
-        ],
-        variables: { input },
+          })
+          if (existing) {
+            cache.writeQuery({
+              query: GetBoardCandidateClaimEvidencesDocument,
+              variables: { claimKey, login, year: Number.parseInt(year) },
+              data: {
+                boardCandidateClaimEvidences: [
+                  ...existing.boardCandidateClaimEvidences,
+                  newEvidence,
+                ],
+              },
+            })
+          }
+        },
       })
 
       if (!result.data?.createBoardCandidateClaimEvidence?.ok) {

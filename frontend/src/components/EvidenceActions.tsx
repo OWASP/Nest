@@ -10,6 +10,7 @@ import type React from 'react'
 import { GetBoardCandidateClaimDocument } from 'types/__generated__/claimQueries.generated'
 import { RemoveBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
 import { GetBoardCandidateClaimEvidencesDocument } from 'types/__generated__/evidenceQueries.generated'
+import type { GetBoardCandidateClaimEvidencesQuery } from 'types/__generated__/evidenceQueries.generated'
 import DropdownActions from 'components/DropdownActions'
 
 interface ClaimProperties {
@@ -63,16 +64,23 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
             year: Number.parseInt(year),
           },
         },
-        refetchQueries: [
-          {
-            query: GetBoardCandidateClaimDocument,
-            variables: { key: claim.key, login, year: Number.parseInt(year) },
-          },
-          {
+        update(cache) {
+          const existing = cache.readQuery<GetBoardCandidateClaimEvidencesQuery>({
             query: GetBoardCandidateClaimEvidencesDocument,
             variables: { claimKey: claim.key, login, year: Number.parseInt(year) },
-          },
-        ],
+          })
+          if (existing) {
+            cache.writeQuery({
+              query: GetBoardCandidateClaimEvidencesDocument,
+              variables: { claimKey: claim.key, login, year: Number.parseInt(year) },
+              data: {
+                boardCandidateClaimEvidences: existing.boardCandidateClaimEvidences.filter(
+                  (e) => e.key !== evidence.key
+                ),
+              },
+            })
+          }
+        },
       })
 
       if (!result.data?.removeBoardCandidateClaimEvidence?.ok) {

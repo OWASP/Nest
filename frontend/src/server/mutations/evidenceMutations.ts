@@ -6,6 +6,16 @@ export const CREATE_CLAIM_EVIDENCE = gql`
       ok
       code
       message
+      evidence {
+        id
+        createdAt
+        description
+        hasFile
+        key
+        name
+        sourceUrl
+        updatedAt
+      }
     }
   }
 `
@@ -16,6 +26,16 @@ export const REMOVE_CLAIM_EVIDENCE = gql`
       ok
       code
       message
+      evidence {
+        id
+        createdAt
+        description
+        hasFile
+        key
+        name
+        sourceUrl
+        updatedAt
+      }
     }
   }
 `
@@ -26,6 +46,16 @@ export const UPDATE_CLAIM_EVIDENCE = gql`
       ok
       code
       message
+      evidence {
+        id
+        createdAt
+        description
+        hasFile
+        key
+        name
+        sourceUrl
+        updatedAt
+      }
     }
   }
 `
