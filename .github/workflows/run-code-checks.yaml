@@ -115,6 +115,9 @@ jobs:
       - name: Install tooling dependencies
         uses: ./.github/actions/install-tooling-dependencies
 
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
       - name: Run Prettier check
         run: make prettier
     timeout-minutes: 5

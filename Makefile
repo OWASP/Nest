@@ -59,10 +59,10 @@ check-test: \
 
 ##@ Prettier
 
-prettier: install-tooling-dependencies ## Verify Prettier formatting
+prettier: install-tooling-dependencies install-frontend-dependencies ## Verify Prettier formatting
 	@pnpm run format:check && echo "Prettier: all matched files use Prettier code style."
 
-fix-prettier: install-tooling-dependencies ## Auto-fix Prettier formatting
+fix-prettier: install-tooling-dependencies install-frontend-dependencies ## Auto-fix Prettier formatting
 	@pnpm run format
 
 ##@ ESLint
