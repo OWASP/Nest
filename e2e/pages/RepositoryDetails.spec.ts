@@ -67,6 +67,7 @@ test.describe('Repository Details Page', () => {
       page.locator('[data-anchor-title="true"]', { hasText: 'Recent Milestones' })
     ).toBeVisible()
   })
+
   test('toggle top contributors', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
     await page.getByRole('button', { name: 'Show more' }).last().click()

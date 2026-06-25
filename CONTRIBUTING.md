@@ -352,11 +352,66 @@ Nest enforces code quality standards to ensure consistency and maintainability. 
 make check
 ```
 
-This command runs linters and other static analysis tools for both the frontend and backend.
+This command runs static analysis only (no tests, no running application). It runs, in order:
+
+1. **Pre-commit** — repository hooks (formatting, linting, and other configured checks)
+2. **Spelling** — cspell over the repository
+3. **Prettier** — formatting for repository source files covered by `.prettierignore` (read-only; see [Prettier](#prettier))
+4. **ESLint** — lint for `e2e/` and `frontend/` (read-only; see [ESLint](#eslint))
 
 We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address (mark as resolved) all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project maintainer(s) you're working with for further guidance.
 
 **Please note that your pull request will not be reviewed until all code quality checks pass and all automated suggestions have been addressed or resolved.**
+
+### Prettier
+
+Prettier runs from the **repository root**. `make prettier` is read-only — it fails if formatting is wrong and does not modify your working tree.
+
+It formats JS/TS/JSON/CSS/HTML and similar files across the repository, excluding paths in `.prettierignore` (generated artifacts, caches, lockfiles, Markdown, YAML, `backend/static/`, `backend/templates/`, and other listed paths). Markdown and YAML are handled by pre-commit hooks instead.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify formatting before pushing (included in `make check`) | `make prettier` |
+| Auto-fix formatting issues | `make fix-prettier` |
+
+Equivalent `pnpm` commands (what CI runs): `pnpm run format:check` (verify) and `pnpm run format` (fix).
+
+If `make prettier` fails, run `make fix-prettier`, review the diff, then run `make check` again.
+
+### ESLint
+
+ESLint runs from the **repository root**. `make eslint` is read-only — it fails if lint issues are found and does not modify your working tree.
+
+It lints JavaScript and TypeScript in `frontend/` and `e2e/`. It loads `eslint.config.mjs` from the repository root automatically; that file is not linted.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify lint before pushing (included in `make check`) | `make eslint` |
+| Auto-fix lint issues | `make fix-eslint` |
+
+Equivalent `pnpm` commands (what CI runs): `pnpm run lint:check` (verify) and `pnpm run lint` (fix).
+
+If `make eslint` fails, run `make fix-eslint`, review the diff, then run `make check` again.
+
+### GraphQL types
+
+Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. They are **not** part of `make check`, `make test`, or CI because codegen introspects a **running backend** with GraphQL introspection enabled.
+
+#### When to run
+
+| Situation | Command |
+| --------- | ------- |
+| You changed the backend GraphQL schema or frontend operations | `make graphql-codegen` then commit generated files |
+| You want to confirm committed types are current before opening a PR | `make check-graphql` |
+
+#### Requirements
+
+1. Start the stack (for example `docker compose -f docker-compose/local/compose.yaml up`) so the backend answers on port `8000`.
+2. Ensure GraphQL introspection is enabled on that backend.
+3. Run commands from the repository root.
+4. Optional: set `PUBLIC_API_URL` if the backend is not at `http://localhost:8000` (for example `http://localhost:9000` for some e2e setups).
+
+`make graphql-codegen` regenerates files. `make check-graphql` regenerates and fails if `frontend/src/types/__generated__/` would change — use this to verify before pushing GraphQL-related work.
 
 ## Testing
 
@@ -633,6 +688,8 @@ git checkout -b feature/my-feature-name
   ```bash
   make check-test
   ```
+
+  If you changed the GraphQL schema or frontend GraphQL operations, also run `make check-graphql` with the backend running (see [GraphQL types](#graphql-types)).
 
 - Write meaningful commit messages:
 

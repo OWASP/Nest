@@ -24,5 +24,5 @@ Add the PR description here.
 
 - [ ] **Required:** I followed the [contributing workflow](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md#contributing-workflow)
 - [ ] **Required:** I verified that my code works as intended and resolves the issue as described
-- [ ] **Required:** I ran `make check-test` locally: all warnings addressed, tests passed
+- [ ] **Required:** I ran all required checks and tests locally; all warnings addressed and failures resolved
 - [ ] I used AI for code, documentation, tests, or communication related to this PR

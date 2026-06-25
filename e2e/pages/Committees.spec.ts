@@ -42,7 +42,7 @@ test.describe('Committees Page', () => {
   })
 
   test('opens window on View Details button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'Learn more about Committee' })
+    const contributeButton = page.getByRole('button', { name: 'Learn more about Committee' })
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
     await expect(page).toHaveURL('/committees/committee_1')
