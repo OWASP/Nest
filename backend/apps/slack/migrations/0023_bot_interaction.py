@@ -1,5 +1,3 @@
-# Generated migration for BotInteraction model
-
 from django.db import migrations, models
 
 
