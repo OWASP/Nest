@@ -38,7 +38,7 @@ export const validateFileExtension = (
 ): string | undefined => {
   const ext = file.name.split('.').pop()?.toLowerCase()
   if (!allowedExtensions.some((e) => e.toLowerCase() === ext)) {
-    return `File extension .${ext} is not supported. Allowed: ${allowedExtensions.join(', ')}`
+    return `File extension .${ext} is not supported. Allowed: ${allowedExtensions.map((e) => `.${e}`).join(', ')}`
   }
   return undefined
 }

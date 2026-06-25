@@ -16,7 +16,7 @@ import {
 } from 'components/forms/shared/formValidationUtils'
 import { useFormValidation } from 'components/forms/shared/useFormValidation'
 
-const EVIDENCE_ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.txt', '.png', '.jpg', '.jpeg']
+const EVIDENCE_ALLOWED_EXTENSIONS = ['pdf', 'docx', 'txt', 'png', 'jpg', 'jpeg']
 const EVIDENCE_MAX_FILE_SIZE_MB = 5
 
 interface EvidenceFormProps {
