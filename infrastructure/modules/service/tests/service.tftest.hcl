@@ -239,6 +239,26 @@ run "test_auto_scaling_enabled_when_configured" {
   }
 }
 
+run "test_auto_scaling_policy_uses_configured_values" {
+  command = plan
+
+  variables {
+    auto_scaling_cpu_target         = 80
+    auto_scaling_scale_in_cooldown  = 240
+    auto_scaling_scale_out_cooldown = 90
+    enable_auto_scaling             = true
+  }
+
+  assert {
+    condition = (
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].target_value == 80 &&
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].scale_in_cooldown == 240 &&
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].scale_out_cooldown == 90
+    )
+    error_message = "Auto scaling policy must use configured CPU target and cooldown values."
+  }
+}
+
 run "test_iam_task_role_name_format" {
   command = plan
 

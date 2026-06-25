@@ -71,6 +71,9 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_auto_scaling_cpu_target"></a> [auto\_scaling\_cpu\_target](#input\_auto\_scaling\_cpu\_target) | Target average CPU utilization percentage for ECS service auto scaling. | `number` | `70` | no |
+| <a name="input_auto_scaling_scale_in_cooldown"></a> [auto\_scaling\_scale\_in\_cooldown](#input\_auto\_scaling\_scale\_in\_cooldown) | Cooldown period in seconds after an ECS service scale-in activity. | `number` | `300` | no |
+| <a name="input_auto_scaling_scale_out_cooldown"></a> [auto\_scaling\_scale\_out\_cooldown](#input\_auto\_scaling\_scale\_out\_cooldown) | Cooldown period in seconds after an ECS service scale-out activity. | `number` | `60` | no |
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | A list of availability zones for the VPC. | `list(string)` | <pre>[<br/>  "us-east-2a",<br/>  "us-east-2b",<br/>  "us-east-2c"<br/>]</pre> | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | `"us-east-2"` | no |
 | <a name="input_backend_desired_count"></a> [backend\_desired\_count](#input\_backend\_desired\_count) | The desired number of backend tasks. | `number` | `1` | no |
