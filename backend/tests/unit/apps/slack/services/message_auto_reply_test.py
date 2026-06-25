@@ -44,7 +44,7 @@ class TestMessageAutoReply:
         return message
 
     @patch.object(SlackConfig, "app")
-    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")  
+    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
     @patch("apps.slack.services.message_auto_reply.get_blocks")
@@ -155,7 +155,7 @@ class TestMessageAutoReply:
         mock_process_ai_query.assert_not_called()
 
     @patch.object(SlackConfig, "app")
-    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")  
+    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
     @patch("apps.slack.services.message_auto_reply.get_blocks")
@@ -192,7 +192,7 @@ class TestMessageAutoReply:
         mock_logger.exception.assert_called_once_with("Error checking for replies for message")
         mock_process_ai_query.assert_called_once()
         mock_client.chat_postMessage.assert_called_once()
-        mock_bot_interaction_create.assert_called_once()  
+        mock_bot_interaction_create.assert_called_once()
 
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
