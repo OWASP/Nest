@@ -106,8 +106,8 @@ jobs:
 
       - name: Copy public and static folders
         run: |
-          cp -r public .next/standalone/
-          cp -r .next/static .next/standalone/.next/
+          cp -r public .next/standalone/frontend/
+          cp -r .next/static .next/standalone/frontend/.next/
         working-directory: frontend
 
       - name: Run frontend in the background
@@ -120,7 +120,7 @@ jobs:
           NODE_ENV: production
           PORT: '3000'
         run: |
-          nohup node .next/standalone/server.js > /dev/null 2>&1 &
+          nohup node .next/standalone/frontend/server.js > /dev/null 2>&1 &
           disown
         working-directory: frontend
 

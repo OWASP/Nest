@@ -20,10 +20,7 @@ export default defineConfig({
     },
   ],
   reporter: process.env.CI
-    ? [
-        ['list', { printSteps: true }],
-        ['github'],
-      ]
+    ? [['list', { printSteps: true }], ['github']]
     : [['list', { printSteps: true }]],
   retries: 2,
   testDir: '.',

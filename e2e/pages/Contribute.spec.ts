@@ -36,7 +36,7 @@ test.describe('Contribute Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
+    const nextPageButton = page.getByRole('button', { name: '2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
@@ -56,9 +56,9 @@ test.describe('Contribute Page', () => {
   })
 
   test('closes dialog on close button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'Read More' }).first()
+    const contributeButton = page.getByRole('button', { name: 'Read More' }).first()
     await contributeButton.click()
-    const closeButton = await page.getByRole('button', { name: 'close-modal' })
+    const closeButton = page.getByRole('button', { name: 'close-modal' })
     await expect(closeButton).toBeVisible()
     await closeButton.click()
   })

@@ -33,21 +33,21 @@ test.describe('Users Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: 'Go to page 2' })
+    const nextPageButton = page.getByRole('button', { name: 'Go to page 2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on button click', async ({ page }) => {
-    const userButton = await page.getByRole('button', { name: 'John Doe' })
+    const userButton = page.getByRole('button', { name: 'John Doe' })
     await userButton.waitFor({ state: 'visible' })
     await userButton.click()
     await expect(page).toHaveURL('/members/user_1')
   })
 
   test('displays followers and repositories counts correctly', async ({ page }) => {
-    const userButton = await page.getByRole('button', { name: 'John Doe' })
+    const userButton = page.getByRole('button', { name: 'John Doe' })
     await userButton.waitFor({ state: 'visible' })
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('2k')).toBeVisible()
