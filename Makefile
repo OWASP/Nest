@@ -8,8 +8,8 @@ include infrastructure/Makefile
 .DEFAULT_GOAL := help
 
 .PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
-	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies audit-tooling-dependencies build check \
-	check-graphql check-typescript clean clean-tooling-dependencies clean-trivy-cache format-typescript graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prune run \
+	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies audit-tooling-dependencies build check cspell \
+	check-graphql clean clean-tooling-dependencies clean-trivy-cache eslint fix-eslint fix-prettier graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prettier prune run \
 	scan-images security-scan security-scan-backend-image security-scan-code security-scan-code-semgrep \
 	security-scan-code-trivy security-scan-frontend-image security-scan-images security-scan-zap test \
 	test-infrastructure test-nest-app update update-tooling-dependencies
@@ -39,14 +39,17 @@ run: ## Run Nest application locally
 ##@ Testing
 
 check: ## Run all code quality checks
-	@echo "=== Pre-commit ==="
+	@echo "================================== pre-commit =================================="
 	@$(MAKE) pre-commit
 	@echo ""
-	@echo "=== Spelling ==="
-	@$(MAKE) check-spelling
+	@echo "==================================== cspell ===================================="
+	@$(MAKE) cspell
 	@echo ""
-	@echo "=== TypeScript lint and format ==="
-	@$(MAKE) check-typescript
+	@echo "=================================== prettier ==================================="
+	@$(MAKE) prettier
+	@echo ""
+	@echo "==================================== eslint ===================================="
+	@$(MAKE) eslint
 	@echo ""
 
 check-test: ## Run all checks and tests
@@ -54,16 +57,20 @@ check-test: \
 	check \
 	test
 
-##@ TypeScript lint and format
+##@ Prettier
 
-check-typescript: install-tooling-dependencies install-frontend-dependencies ## Format, lint, and verify TypeScript locally (CI runs verify only)
-	@pnpm run format:check && echo "Prettier: all matched files use Prettier code style." \
-		|| (pnpm run format && pnpm run format:check && echo "Prettier: all matched files use Prettier code style.")
-	@pnpm run lint:check && echo "ESLint: no issues found." \
-		|| (pnpm run lint && pnpm run lint:check && echo "ESLint: no issues found.")
+prettier: install-tooling-dependencies ## Verify Prettier formatting
+	@pnpm run format:check && echo "Prettier: all matched files use Prettier code style."
 
-format-typescript: install-tooling-dependencies install-frontend-dependencies ## Auto-fix TypeScript format and lint issues
+fix-prettier: install-tooling-dependencies ## Auto-fix Prettier formatting
 	@pnpm run format
+
+##@ ESLint
+
+eslint: install-tooling-dependencies install-frontend-dependencies ## Verify ESLint for e2e and frontend
+	@pnpm run lint:check && echo "ESLint: no issues found."
+
+fix-eslint: install-tooling-dependencies install-frontend-dependencies ## Auto-fix ESLint issues
 	@pnpm run lint
 
 ##@ GraphQL

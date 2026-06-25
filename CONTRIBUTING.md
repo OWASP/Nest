@@ -352,11 +352,46 @@ Nest enforces code quality standards to ensure consistency and maintainability. 
 make check
 ```
 
-This command runs linters and other static analysis tools for both the frontend and backend. It does not require a running application.
+This command runs static analysis only (no tests, no running application). It runs, in order:
+
+1. **Pre-commit** — repository hooks (formatting, linting, and other configured checks)
+2. **Spelling** — cspell over the repository
+3. **Prettier** — formatting for repository source files covered by `.prettierignore` (read-only; see [Prettier](#prettier))
+4. **ESLint** — lint for `e2e/` and `frontend/` (read-only; see [ESLint](#eslint))
 
 We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address (mark as resolved) all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project maintainer(s) you're working with for further guidance.
 
 **Please note that your pull request will not be reviewed until all code quality checks pass and all automated suggestions have been addressed or resolved.**
+
+### Prettier
+
+Prettier runs from the **repository root**. `make prettier` is read-only — it fails if formatting is wrong and does not modify your working tree.
+
+It formats JS/TS/JSON/CSS/HTML and similar files across the repository, excluding paths in `.prettierignore` (generated artifacts, caches, lockfiles, Markdown, YAML, `backend/static/`, `backend/templates/`, and other listed paths). Markdown and YAML are handled by pre-commit hooks instead.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify formatting before pushing (included in `make check`) | `make prettier` |
+| Auto-fix formatting issues | `make fix-prettier` |
+
+Equivalent `pnpm` commands (what CI runs): `pnpm run format:check` (verify) and `pnpm run format` (fix).
+
+If `make prettier` fails, run `make fix-prettier`, review the diff, then run `make check` again.
+
+### ESLint
+
+ESLint runs from the **repository root**. `make eslint` is read-only — it fails if lint issues are found and does not modify your working tree.
+
+It lints JavaScript and TypeScript in `frontend/` and `e2e/`. It loads `eslint.config.mjs` from the repository root automatically; that file is not linted.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify lint before pushing (included in `make check`) | `make eslint` |
+| Auto-fix lint issues | `make fix-eslint` |
+
+Equivalent `pnpm` commands (what CI runs): `pnpm run lint:check` (verify) and `pnpm run lint` (fix).
+
+If `make eslint` fails, run `make fix-eslint`, review the diff, then run `make check` again.
 
 ### GraphQL types
 

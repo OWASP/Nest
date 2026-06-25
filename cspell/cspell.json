@@ -47,10 +47,7 @@
     "design/**",
     "pnpm-lock.yaml"
   ],
-  "ignoreRegExpList": [
-    "#\\w+",
-    "<@\\w+>"
-  ],
+  "ignoreRegExpList": ["#\\w+", "<@\\w+>"],
   "import": [
     "@cspell/dict-aws/cspell-ext.json",
     "@cspell/dict-companies/cspell-ext.json",

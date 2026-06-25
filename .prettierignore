@@ -1,3 +1,14 @@
+# Markdown (markdownlint via pre-commit)
+**/*.md
+
+# YAML (yamlfmt via pre-commit)
+**/*.yaml
+**/*.yml
+
+# Backend (djlint for templates; vendored static assets)
+backend/static/**
+backend/templates/**
+
 # Frontend artifacts
 frontend/.pnpm-store/
 frontend/pnpm-lock.yaml

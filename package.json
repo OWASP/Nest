@@ -35,8 +35,8 @@
   },
   "private": true,
   "scripts": {
-    "format": "prettier --log-level warn --write e2e frontend",
-    "format:check": "prettier --check --log-level warn e2e frontend",
+    "format": "prettier --log-level warn --write .",
+    "format:check": "prettier --check --log-level warn .",
     "lint": "eslint --fix --max-warnings=0 e2e frontend",
     "lint:check": "eslint --max-warnings=0 e2e frontend"
   },

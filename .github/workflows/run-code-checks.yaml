@@ -9,6 +9,27 @@ env:
 permissions: {}
 
 jobs:
+  run-eslint-checks:
+    name: ESLint
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install tooling dependencies
+        uses: ./.github/actions/install-tooling-dependencies
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Run ESLint check
+        run: make eslint
+    timeout-minutes: 5
+
   run-pre-commit-checks:
     name: Pre-commit
     env:
@@ -80,6 +101,24 @@ jobs:
         run: make pre-commit
     timeout-minutes: 5
 
+  run-prettier-checks:
+    name: Prettier
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install tooling dependencies
+        uses: ./.github/actions/install-tooling-dependencies
+
+      - name: Run Prettier check
+        run: make prettier
+    timeout-minutes: 5
+
   run-semgrep-checks:
     name: Semgrep
     permissions:
@@ -143,28 +182,4 @@ jobs:
         uses: ./.github/actions/run-trivy-scan
         with:
           command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
-    timeout-minutes: 5
-
-  run-typescript-checks:
-    name: TypeScript
-    permissions:
-      contents: read
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
-        with:
-          persist-credentials: false
-
-      - name: Install tooling dependencies
-        uses: ./.github/actions/install-tooling-dependencies
-
-      - name: Install frontend dependencies
-        uses: ./.github/actions/install-frontend-dependencies
-
-      - name: Run pnpm format check
-        run: pnpm run format:check
-
-      - name: Run pnpm lint check
-        run: pnpm run lint:check
     timeout-minutes: 5

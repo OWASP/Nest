@@ -209,10 +209,7 @@ export default [
     },
   },
   {
-    files: [
-      'frontend/**/skeletons/**/*.{ts,tsx,js,jsx}',
-      'frontend/**/*.skeleton.{ts,tsx,js,jsx}',
-    ],
+    files: ['frontend/**/skeletons/**/*.{ts,tsx,js,jsx}', 'frontend/**/*.skeleton.{ts,tsx,js,jsx}'],
     rules: {
       'react/no-array-index-key': 'off',
     },

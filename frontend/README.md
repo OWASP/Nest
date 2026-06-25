@@ -41,7 +41,29 @@ pnpm run dev
 
 ## Key Scripts
 
-Lint and format for `frontend/` and `e2e/` TypeScript run from the **repository root** (`pnpm run lint`, `pnpm run format`, or `make check-typescript`). Frontend-only scripts:
+### Prettier
+
+Runs from the **repository root**. See [CONTRIBUTING.md — Prettier](../CONTRIBUTING.md#prettier) for scope.
+
+| Task | Command |
+| ---- | ------- |
+| Verify formatting (read-only; part of `make check`) | `make prettier` |
+| Auto-fix formatting issues | `make fix-prettier` |
+
+Equivalent `pnpm` commands: `pnpm run format:check` (verify) and `pnpm run format` (fix).
+
+### ESLint
+
+Runs from the **repository root**. See [CONTRIBUTING.md — ESLint](../CONTRIBUTING.md#eslint) for scope.
+
+| Task | Command |
+| ---- | ------- |
+| Verify lint (read-only; part of `make check`) | `make eslint` |
+| Auto-fix lint issues | `make fix-eslint` |
+
+Equivalent `pnpm` commands: `pnpm run lint:check` (verify) and `pnpm run lint` (fix).
+
+### Frontend scripts
 
 | Task                 | Command              |
 | -------------------- | -------------------- |
