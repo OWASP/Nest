@@ -70,7 +70,7 @@ const EditEvidencePage = () => {
     return (
       <ErrorDisplay
         statusCode={500}
-        title="Error loading program"
+        title="Error loading evidence"
         message="An error occurred while loading the evidence data"
       />
     )

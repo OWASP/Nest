@@ -77,7 +77,7 @@ const EvidenceDetailsPage = () => {
     return (
       <ErrorDisplay
         statusCode={500}
-        title="Error loading program"
+        title="Error loading evidence"
         message="An error occurred while loading the evidence data"
       />
     )
@@ -87,7 +87,7 @@ const EvidenceDetailsPage = () => {
     return (
       <ErrorDisplay
         statusCode={404}
-        title="Claim Not Found"
+        title="Evidence Not Found"
         message="Sorry, the evidence you're looking for doesn't exist."
       />
     )
