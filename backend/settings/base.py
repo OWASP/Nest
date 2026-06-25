@@ -66,6 +66,7 @@ class Base(Configuration):
         "apps.github",
         "apps.mentorship",
         "apps.nest",
+        "apps.observability",
         "apps.owasp",
         "apps.sitemap",
         "apps.slack",
