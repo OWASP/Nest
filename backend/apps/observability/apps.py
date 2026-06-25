@@ -18,7 +18,7 @@ class ObservabilityConfig(AppConfig):
         if not settings.OTEL_METRICS_ENABLED:
             return
 
-        from apps.observability.otel import configure_otel_metrics
+        from apps.observability.otel import configure_otel_metrics  # noqa: PLC0415
 
         try:
             configure_otel_metrics()
