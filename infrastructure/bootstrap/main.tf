@@ -29,6 +29,7 @@ data "aws_iam_policy_document" "part_one" {
     actions = [
       "acm:DescribeCertificate",
       "application-autoscaling:DescribeScalableTargets",
+      "application-autoscaling:DescribeScalingActivities",
       "application-autoscaling:DescribeScalingPolicies",
       "ec2:Describe*",
       "ec2:DescribeFlowLogs",
@@ -80,6 +81,34 @@ data "aws_iam_policy_document" "part_one" {
       "application-autoscaling:RegisterScalableTarget",
       "application-autoscaling:TagResource",
       "application-autoscaling:UntagResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "IAMCreateECSServiceLinkedRoleForAutoscaling"
+    effect = "Allow"
+    actions = [
+      "iam:CreateServiceLinkedRole",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:AWSServiceName"
+      values   = ["ecs.application-autoscaling.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid    = "CloudWatchAutoscalingAlarms"
+    effect = "Allow"
+    actions = [
+      "cloudwatch:DeleteAlarms",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:PutMetricAlarm",
     ]
     resources = ["*"]
   }
