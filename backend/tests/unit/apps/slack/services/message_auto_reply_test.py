@@ -44,7 +44,7 @@ class TestMessageAutoReply:
         return message
 
     @patch.object(SlackConfig, "app")
-    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")  # ← ADDED
+    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")  
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
     @patch("apps.slack.services.message_auto_reply.get_blocks")
