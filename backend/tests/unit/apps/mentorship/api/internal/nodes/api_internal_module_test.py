@@ -533,3 +533,95 @@ class TestModuleNodeInput:
         assert update_input.domains == []
         assert update_input.labels == []
         assert update_input.tags == []
+
+
+class TestModuleNodeMenteeAccess:
+    """Tests for mentee-specific access in ModuleNode resolvers."""
+
+    def test_issues_mentee_sees_only_assigned_issues(self):
+        """Mentee can only see issues assigned to them."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        github_user = MagicMock()
+        user = MagicMock()
+        user.github_user = github_user
+
+        info = MagicMock()
+        info.context.request.user = user
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+
+        mock_qs = m.issues.select_related.return_value.prefetch_related.return_value
+        mock_filtered = mock_qs.filter.return_value
+        mock_filtered.filter.return_value.order_by.return_value.__getitem__.return_value = [
+            MagicMock()
+        ]
+
+        with patch("apps.mentorship.models.task.Task.objects"):
+            result = _call_module_resolver(m, "issues", info, limit=20, offset=0, label=None)
+
+        mock_qs.filter.assert_called_once_with(assignees=github_user)
+        assert isinstance(result, list)
+
+    def test_issues_mentee_no_github_user_returns_empty(self):
+        """Mentee with no github_user gets empty list."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        user = MagicMock()
+        user.github_user = None
+
+        info = MagicMock()
+        info.context.request.user = user
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+
+        with patch("apps.mentorship.models.task.Task.objects"):
+            result = _call_module_resolver(m, "issues", info, limit=20, offset=0, label=None)
+
+        assert result == []
+
+    def test_issue_by_number_mentee_sees_only_assigned(self):
+        """Mentee can only see issue_by_number when assigned to that issue."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        github_user = MagicMock()
+        user = MagicMock()
+        user.github_user = github_user
+
+        info = MagicMock()
+        info.context.request.user = user
+
+        mock_qs = m.issues.select_related.return_value.prefetch_related.return_value
+        mock_qs.filter.return_value.filter.return_value.first.return_value = MagicMock()
+
+        result = _call_module_resolver(m, "issue_by_number", info, number=42)
+
+        mock_qs.filter.assert_called_once_with(number=42)
+        mock_qs.filter.return_value.filter.assert_called_once_with(assignees=github_user)
+        assert result is not None
+
+    def test_issue_by_number_mentee_no_github_user_returns_none(self):
+        """Mentee with no github_user gets None from issue_by_number."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        user = MagicMock()
+        user.github_user = None
+
+        info = MagicMock()
+        info.context.request.user = user
+
+        result = _call_module_resolver(m, "issue_by_number", info, number=42)
+
+        assert result is None
