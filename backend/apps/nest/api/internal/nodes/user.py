@@ -10,7 +10,7 @@ from apps.nest.models import User
 class AuthUserNode(strawberry.relay.Node):
     """GraphQL node for User model."""
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["github_user"])
     def is_owasp_staff(self) -> bool:
         """Check if the user is an OWASP staff member."""
         return self.github_user.is_owasp_staff if self.github_user else False
