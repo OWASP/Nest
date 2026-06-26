@@ -428,3 +428,90 @@ class TestMyPrograms:
         assert isinstance(result, PaginatedPrograms)
         assert len(result.programs) == 1
         assert result.programs[0].user_role == "admin"
+
+
+class TestMyMenteePrograms:
+    """Tests for the my_mentee_programs query."""
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_returns_enrolled_programs(
+        self, mock_prefetch: MagicMock, mock_info: MagicMock, api_program_queries
+    ) -> None:
+        """Enrolled mentee gets their programs back."""
+        mock_program = MagicMock(spec=Program)
+        mock_qs = MagicMock()
+        mock_qs.filter.return_value.distinct.return_value = mock_qs
+        mock_qs.count.return_value = 1
+        mock_qs.order_by.return_value.__getitem__.return_value = [mock_program]
+        mock_prefetch.return_value.filter.return_value.distinct.return_value = mock_qs
+
+        result = api_program_queries.my_mentee_programs(info=mock_info)
+
+        assert isinstance(result, PaginatedPrograms)
+        assert result.current_page == 1
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_returns_empty_when_not_enrolled(
+        self, mock_prefetch: MagicMock, mock_info: MagicMock, api_program_queries
+    ) -> None:
+        """User with no mentee enrollments gets empty result."""
+        mock_qs = MagicMock()
+        mock_qs.filter.return_value.distinct.return_value = mock_qs
+        mock_qs.count.return_value = 0
+        mock_qs.order_by.return_value.__getitem__.return_value = []
+        mock_prefetch.return_value.filter.return_value.distinct.return_value = mock_qs
+
+        result = api_program_queries.my_mentee_programs(info=mock_info)
+
+        assert isinstance(result, PaginatedPrograms)
+        assert result.programs == []
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_user_role_set_to_mentee(
+        self, mock_prefetch: MagicMock, mock_info: MagicMock, api_program_queries
+    ) -> None:
+        """Programs returned have user_role set to mentee."""
+        mock_program = MagicMock(spec=Program)
+        mock_qs = MagicMock()
+        mock_qs.filter.return_value.distinct.return_value = mock_qs
+        mock_qs.count.return_value = 1
+        mock_qs.order_by.return_value.__getitem__.return_value = [mock_program]
+        mock_prefetch.return_value.filter.return_value.distinct.return_value = mock_qs
+
+        result = api_program_queries.my_mentee_programs(info=mock_info)
+
+        assert result.programs[0].user_role == "mentee"
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_search_filters_by_name(
+        self, mock_prefetch: MagicMock, mock_info: MagicMock, api_program_queries
+    ) -> None:
+        """Search param filters programs by name."""
+        mock_qs = MagicMock()
+        mock_qs.filter.return_value.distinct.return_value = mock_qs
+        mock_qs.count.return_value = 0
+        mock_filtered = MagicMock()
+        mock_filtered.count.return_value = 0
+        mock_filtered.order_by.return_value.__getitem__.return_value = []
+        mock_qs.filter.return_value = mock_filtered
+        mock_prefetch.return_value.filter.return_value.distinct.return_value = mock_qs
+
+        result = api_program_queries.my_mentee_programs(info=mock_info, search="gsoc")
+
+        assert isinstance(result, PaginatedPrograms)
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_no_github_user_still_queries(
+        self, mock_prefetch: MagicMock, mock_anonymous_info: MagicMock, api_program_queries
+    ) -> None:
+        """User without github_user still gets a valid (empty) result."""
+        mock_qs = MagicMock()
+        mock_qs.filter.return_value.distinct.return_value = mock_qs
+        mock_qs.count.return_value = 0
+        mock_qs.order_by.return_value.__getitem__.return_value = []
+        mock_prefetch.return_value.filter.return_value.distinct.return_value = mock_qs
+
+        result = api_program_queries.my_mentee_programs(info=mock_anonymous_info)
+
+        assert isinstance(result, PaginatedPrograms)
+        assert result.programs == []
