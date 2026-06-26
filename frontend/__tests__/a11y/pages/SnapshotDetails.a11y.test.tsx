@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client/react'
+import { useQuery, useLazyQuery, useApolloClient } from '@apollo/client/react'
 import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
 import { waitFor, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
@@ -8,6 +8,8 @@ import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
 
 jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
+  useLazyQuery: jest.fn(),
+  useApolloClient: jest.fn(),
 }))
 
 jest.mock('next/navigation', () => ({
@@ -28,6 +30,14 @@ describe.each([
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
     document.documentElement.classList.toggle('dark', theme === 'dark')
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+      jest.fn().mockResolvedValue({ data: {} }),
+    ])
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      cache: {
+        updateQuery: jest.fn(),
+      },
+    })
   })
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({

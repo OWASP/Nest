@@ -19,6 +19,7 @@ import type { ContributionStats } from 'utils/contributionDataUtils'
 export type CardProps = {
   button: Button
   cardKey: string
+  className?: string
   icons?: Icon
   isActive?: boolean
   labels?: string[]

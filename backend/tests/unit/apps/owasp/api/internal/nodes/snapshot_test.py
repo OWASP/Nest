@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock
 
+from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -71,11 +72,15 @@ class TestSnapshotNodeResolvers:
         resolver = self._get_resolver("issues")
         mock_snapshot = MagicMock()
         mock_issues = [MagicMock(), MagicMock()]
-        mock_snapshot.issues.order_by.return_value.__getitem__.return_value = mock_issues
+        prefetch_mock = mock_snapshot.issues.prefetch_related.return_value
+        prefetch_mock.order_by.return_value.__getitem__.return_value = mock_issues
 
         result = resolver(None, mock_snapshot)
 
-        mock_snapshot.issues.order_by.assert_called_once_with("-created_at")
+        mock_snapshot.issues.prefetch_related.assert_called_once_with(
+            MERGED_PULL_REQUESTS_PREFETCH
+        )
+        prefetch_mock.order_by.assert_called_once_with("-created_at")
         assert result == mock_issues
 
     def test_posts_resolver(self):

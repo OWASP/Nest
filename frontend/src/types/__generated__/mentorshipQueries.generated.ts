@@ -1,15 +1,19 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type IsProjectLeaderQueryVariables = Types.Exact<{
-  login: Types.Scalars['String']['input'];
+export type IsProjectLeaderQueryVariables = Exact<{
+  login: string;
 }>;
 
 
 export type IsProjectLeaderQuery = { isProjectLeader: boolean };
 
-export type IsMentorQueryVariables = Types.Exact<{
-  login: Types.Scalars['String']['input'];
+export type IsMentorQueryVariables = Exact<{
+  login: string;
 }>;
 
 
