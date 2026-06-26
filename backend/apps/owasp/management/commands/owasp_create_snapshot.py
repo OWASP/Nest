@@ -61,6 +61,7 @@ class Command(BaseCommand):
 
         snapshot = Snapshot.objects.create(
             key=key,
+            frequency=frequency,
             start_at=start_at,
             end_at=end_at,
             title=self.generate_title(start_at, frequency),

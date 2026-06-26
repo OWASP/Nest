@@ -39,6 +39,7 @@ class TestCreateSnapshot:
 
             mock_objects.create.assert_called_once_with(
                 key="2026-W24",
+                frequency="weekly",
                 start_at=datetime(2026, 6, 8, tzinfo=UTC),
                 end_at=datetime(2026, 6, 14, 23, 59, 59, tzinfo=UTC),
                 title="Week 24 2026 OWASP Community Snapshot",
@@ -74,6 +75,7 @@ class TestCreateSnapshot:
 
             mock_objects.create.assert_called_once_with(
                 key="2026-05",
+                frequency="monthly",
                 start_at=datetime(2026, 5, 1, tzinfo=UTC),
                 end_at=datetime(2026, 5, 31, 23, 59, 59, tzinfo=UTC),
                 title="May 2026 OWASP Community Snapshot",
