@@ -91,6 +91,7 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+asvs
 atheris
 attisdropped
 bangbang

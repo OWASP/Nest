@@ -29,6 +29,7 @@ runs:
       uses: ./.github/actions/install-backend-dependencies
 
     - name: Fetch nest.dump from S3
+      if: ${{ hashFiles('backend/data/nest.dump') == '' }}
       run: poetry run python -m scripts.fetch_nest_dump
       shell: bash
       working-directory: backend
@@ -66,7 +67,7 @@ runs:
       run: |
         set -euo pipefail
         if ! docker exec -i -e PGPASSWORD="$PGPASSWORD" ${{ job.services.db.id }} \
-          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" < backend/data/nest.dump; then
+          pg_restore -U "$DB_USERNAME" -d "$DB_NAME" --clean --if-exists --no-owner < backend/data/nest.dump; then
           echo "Data loading failed"
           exit 1
         fi

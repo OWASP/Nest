@@ -715,13 +715,13 @@ describe('ContributorsList Component', () => {
       }
     })
 
-    it('renders contributor links with proper styling', () => {
+    it('renders contributor names with proper styling', () => {
       render(<ContributorsList {...defaultProps} />)
 
-      const links = screen.getAllByTestId('contributor-link')
+      const names = screen.getAllByTestId('contributor-name')
 
-      for (const link of links) {
-        expect(link).toHaveClass(
+      for (const name of names) {
+        expect(name).toHaveClass(
           'cursor-pointer',
           'overflow-hidden',
           'text-ellipsis',

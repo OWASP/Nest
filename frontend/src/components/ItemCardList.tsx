@@ -63,14 +63,18 @@ const ItemCardList = ({
   data,
   icon,
   renderDetails,
+  renderBadge,
   showAvatar = true,
   showSingleColumn = true,
+  bare = false,
 }: {
-  title: React.ReactNode
+  title?: React.ReactNode
   data: Issue[] | Milestone[] | PullRequest[] | Release[]
   icon?: IconType
   showAvatar?: boolean
   showSingleColumn?: boolean
+  bare?: boolean
+  renderBadge?: (item: ItemCardData) => JSX.Element | null
   renderDetails: (item: {
     createdAt: string
     commentsCount: number
@@ -86,11 +90,11 @@ const ItemCardList = ({
       name: string
     }
   }) => JSX.Element
-}) => (
-  <SecondaryCard icon={icon} title={title}>
-    {data && data.length > 0 ? (
+}) => {
+  const content =
+    data && data.length > 0 ? (
       <div
-        className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+        className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 sm:grid-cols-1 md:grid-cols-2'}`}
       >
         {data.map((item, index) => {
           const getItemKey = (i: ItemCardData, idx: number): string => {
@@ -151,6 +155,7 @@ const ItemCardList = ({
                       />
                     )}
                   </h3>
+                  {renderBadge?.(item)}
                 </div>
                 <div className="ml-0.5 w-full">
                   {renderDetails(item as unknown as Parameters<typeof renderDetails>[0])}
@@ -162,8 +167,15 @@ const ItemCardList = ({
       </div>
     ) : (
       <p>Nothing to display.</p>
-    )}
-  </SecondaryCard>
-)
+    )
+
+  if (bare) return content
+
+  return (
+    <SecondaryCard icon={icon} title={title}>
+      {content}
+    </SecondaryCard>
+  )
+}
 
 export default ItemCardList

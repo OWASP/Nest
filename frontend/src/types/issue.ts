@@ -6,6 +6,7 @@ export type Issue = {
   body?: string
   createdAt: string
   hint?: string
+  isMerged?: boolean
   labels?: string[]
   number?: string | number
   objectID?: string
