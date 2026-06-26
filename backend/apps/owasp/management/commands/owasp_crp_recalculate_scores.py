@@ -27,8 +27,7 @@ class Command(BaseCommand):
             )
         )
 
-        failed_count = result.get("failed_count", 0)
-        if failed_count > 0:
+        if failed_count := result.get("failed_count", 0):
             failures = result.get("failures", [])
             failed_users = [username for username, _ in failures]
             failed_str = ", ".join(failed_users)

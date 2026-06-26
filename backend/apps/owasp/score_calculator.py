@@ -11,6 +11,7 @@ from apps.common.models import BulkSaveModel
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
+from apps.owasp.exceptions import CertificateIssuanceError
 from apps.owasp.models.crp.contribution_score import ContributionScore
 from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.models.crp.scoring_weight import ScoringWeight
@@ -312,7 +313,7 @@ class ContributionScoreCalculator:
                             pending_score.value,
                             TierChoices(pending_score.tier),
                         )
-                    except Exception as e:
+                    except CertificateIssuanceError as e:
                         logger.exception(
                             "Failed to issue certificate for user %s",
                             pending_score.github_user.login,
@@ -332,7 +333,7 @@ class ContributionScoreCalculator:
                         pending_score.value,
                         TierChoices(pending_score.tier),
                     )
-                except Exception as e:
+                except CertificateIssuanceError as e:
                     logger.exception(
                         "Failed to issue certificate for user %s",
                         pending_score.github_user.login,
