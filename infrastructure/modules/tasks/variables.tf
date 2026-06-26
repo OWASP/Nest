@@ -21,6 +21,18 @@ variable "container_parameters_arns" {
   default     = {}
 }
 
+variable "create_snapshot_task_cpu" {
+  description = "The CPU for the create-snapshot task."
+  type        = string
+  default     = "256"
+}
+
+variable "create_snapshot_task_memory" {
+  description = "The memory for the create-snapshot task."
+  type        = string
+  default     = "1024"
+}
+
 variable "ecr_repository_arn" {
   description = "The ARN of the ECR repository for the backend image."
   type        = string

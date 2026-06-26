@@ -20,6 +20,7 @@
 | <a name="module_load_data_task"></a> [load\_data\_task](#module\_load\_data\_task) | ./modules/task | n/a |
 | <a name="module_mentorship_sync_modules_data"></a> [mentorship\_sync\_modules\_data](#module\_mentorship\_sync\_modules\_data) | ./modules/task | n/a |
 | <a name="module_migrate_task"></a> [migrate\_task](#module\_migrate\_task) | ./modules/task | n/a |
+| <a name="module_owasp_create_snapshot_task"></a> [owasp\_create\_snapshot\_task](#module\_owasp\_create\_snapshot\_task) | ./modules/task | n/a |
 | <a name="module_owasp_update_project_health_metrics_task"></a> [owasp\_update\_project\_health\_metrics\_task](#module\_owasp\_update\_project\_health\_metrics\_task) | ./modules/task | n/a |
 | <a name="module_owasp_update_project_health_scores_task"></a> [owasp\_update\_project\_health\_scores\_task](#module\_owasp\_update\_project\_health\_scores\_task) | ./modules/task | n/a |
 | <a name="module_slack_sync_data_task"></a> [slack\_sync\_data\_task](#module\_slack\_sync\_data\_task) | ./modules/task | n/a |
@@ -53,6 +54,8 @@
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region. | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
 | <a name="input_container_parameters_arns"></a> [container\_parameters\_arns](#input\_container\_parameters\_arns) | Map of environment variable names to the ARNs of all SSM parameters. | `map(string)` | `{}` | no |
+| <a name="input_create_snapshot_task_cpu"></a> [create\_snapshot\_task\_cpu](#input\_create\_snapshot\_task\_cpu) | The CPU for the create-snapshot task. | `string` | `"256"` | no |
+| <a name="input_create_snapshot_task_memory"></a> [create\_snapshot\_task\_memory](#input\_create\_snapshot\_task\_memory) | The memory for the create-snapshot task. | `string` | `"1024"` | no |
 | <a name="input_ecr_repository_arn"></a> [ecr\_repository\_arn](#input\_ecr\_repository\_arn) | The ARN of the ECR repository for the backend image. | `string` | n/a | yes |
 | <a name="input_ecr_repository_url"></a> [ecr\_repository\_url](#input\_ecr\_repository\_url) | The URL of the ECR repository for the backend image. | `string` | n/a | yes |
 | <a name="input_ecs_sg_id"></a> [ecs\_sg\_id](#input\_ecs\_sg\_id) | The ID of the security group for the ECS tasks. | `string` | n/a | yes |
