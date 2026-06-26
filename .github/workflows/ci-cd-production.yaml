@@ -19,6 +19,7 @@ jobs:
     name: Run production CI/CD
     permissions:
       actions: write
+      attestations: write
       contents: write
       id-token: write
     secrets:
@@ -45,6 +46,13 @@ jobs:
     with:
       backend_gid: '1002'
       backend_uid: '1002'
+      auto_scaling_cpu_target: 70
+      auto_scaling_scale_in_cooldown: 300
+      auto_scaling_scale_out_cooldown: 60
+      backend_desired_count: 2
+      backend_enable_auto_scaling: true
+      backend_max_count: 6
+      backend_min_count: 2
       backend_use_fargate_spot: false
       base_url: https://nest.owasp.org
       django_configuration: Production
@@ -54,6 +62,10 @@ jobs:
       enable_nat_gateway: true
       enable_rds_proxy: true
       environment: production
+      frontend_desired_count: 2
+      frontend_enable_auto_scaling: true
+      frontend_max_count: 6
+      frontend_min_count: 2
       frontend_use_fargate_spot: false
       release_tag: ${{ github.event.release.tag_name }}
       tasks_use_fargate_spot: false

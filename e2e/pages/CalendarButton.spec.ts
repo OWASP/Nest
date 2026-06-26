@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import { test, expect } from '@playwright/test'
+import formatIcsText from 'utils/formatIcsText'
 import slugify from 'utils/slugify'
 
 test.describe('Calendar Export Functionality', () => {
@@ -27,14 +28,11 @@ test.describe('Calendar Export Functionality', () => {
     expect(download.suggestedFilename()).toBe(expectedFilename)
     const path = await download.path()
     expect(path, 'Expected Playwright to provide a download path').toBeTruthy()
-
-    if (path) {
-      const content = fs.readFileSync(path, 'utf-8')
-      expect(content).toContain('BEGIN:VCALENDAR')
-      expect(content).toContain('VERSION:2.0')
-      expect(content).toContain('BEGIN:VEVENT')
-      expect(content).toContain(`SUMMARY:${eventName}`)
-      expect(content).toContain('END:VCALENDAR')
-    }
+    const content = fs.readFileSync(path, 'utf-8')
+    expect(content).toContain('BEGIN:VCALENDAR')
+    expect(content).toContain('VERSION:2.0')
+    expect(content).toContain('BEGIN:VEVENT')
+    expect(content).toContain(`SUMMARY:${formatIcsText(eventName)}`)
+    expect(content).toContain('END:VCALENDAR')
   })
 })
