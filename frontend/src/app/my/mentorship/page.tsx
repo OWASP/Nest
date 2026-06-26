@@ -153,7 +153,7 @@ const MyMentorshipPage: React.FC = () => {
             ) : (
               menteePrograms.map((p) => (
                 <ProgramCard
-                  accessLevel="mentee"
+                  accessLevel="user"
                   isAdmin={false}
                   key={p.id}
                   href={`/my/mentorship/programs/${p.key}`}
