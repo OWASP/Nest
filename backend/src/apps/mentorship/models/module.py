@@ -54,6 +54,14 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         verbose_name="Order",
         help_text="Display order of the module within its program.",
     )
+    mentees_can_manage_deadlines = models.BooleanField(
+        default=False,
+        verbose_name="Mentees can manage deadlines",
+        help_text=(
+            "If enabled, mentees can set or update deadlines for issues "
+            "assigned to them in this module."
+        ),
+    )
 
     # FKs.
     labels = models.JSONField(
