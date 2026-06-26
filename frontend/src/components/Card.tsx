@@ -13,6 +13,7 @@ import Markdown from 'components/MarkdownWrapper'
 const Card = ({
   button,
   cardKey,
+  className = '',
   icons,
   labels,
   level,
@@ -26,7 +27,9 @@ const Card = ({
   url,
 }: CardProps) => {
   return (
-    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
+    <div
+      className={`mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529] ${className}`}
+    >
       {/* Card Header with Badge and Title */}
       <div className="w-full">
         <div className="flex items-center gap-3">

@@ -37,7 +37,6 @@ class Snapshot(models.Model):
     frequency = models.CharField(
         max_length=10,
         choices=Frequency.choices,
-        db_default=Frequency.WEEKLY,
         default=Frequency.WEEKLY,
     )
 
