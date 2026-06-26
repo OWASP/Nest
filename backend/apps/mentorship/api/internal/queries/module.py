@@ -3,14 +3,14 @@
 import logging
 
 import strawberry
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 
 from apps.mentorship.api.internal.graphql_errors import (
     AuthenticationRequiredError,
     ManagementProgramAccessDeniedError,
 )
 from apps.mentorship.api.internal.nodes.module import ModuleNode
-from apps.mentorship.models import Module, Program
+from apps.mentorship.models import Mentor, Module, Program
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,14 @@ class ModuleQuery:
         return (
             Module.objects.filter(program=program)
             .select_related("program", "project")
-            .prefetch_related("mentors__github_user")
+            .prefetch_related(
+                Prefetch(
+                    "mentors",
+                    queryset=Mentor.objects.select_related("github_user").order_by(
+                        "github_user__login"
+                    ),
+                )
+            )
             .order_by("order", "started_at")
         )
 
@@ -66,7 +73,14 @@ class ModuleQuery:
 
         return (
             modules.select_related("program", "project")
-            .prefetch_related("mentors__github_user")
+            .prefetch_related(
+                Prefetch(
+                    "mentors",
+                    queryset=Mentor.objects.select_related("github_user").order_by(
+                        "github_user__login"
+                    ),
+                )
+            )
             .distinct()
             .order_by("order", "started_at")
         )
@@ -77,7 +91,14 @@ class ModuleQuery:
         return (
             Module.objects.filter(project__key=project_key)
             .select_related("program", "project")
-            .prefetch_related("mentors__github_user")
+            .prefetch_related(
+                Prefetch(
+                    "mentors",
+                    queryset=Mentor.objects.select_related("github_user").order_by(
+                        "github_user__login"
+                    ),
+                )
+            )
             .order_by("order", "started_at")
         )
 
@@ -89,7 +110,14 @@ class ModuleQuery:
         try:
             module = (
                 Module.objects.select_related("program", "project")
-                .prefetch_related("mentors__github_user")
+                .prefetch_related(
+                    Prefetch(
+                        "mentors",
+                        queryset=Mentor.objects.select_related("github_user").order_by(
+                            "github_user__login"
+                        ),
+                    )
+                )
                 .get(key=module_key, program__key=program_key)
             )
         except Module.DoesNotExist:
@@ -116,7 +144,14 @@ class ModuleQuery:
         try:
             module = (
                 Module.objects.select_related("program", "project")
-                .prefetch_related("mentors__github_user")
+                .prefetch_related(
+                    Prefetch(
+                        "mentors",
+                        queryset=Mentor.objects.select_related("github_user").order_by(
+                            "github_user__login"
+                        ),
+                    )
+                )
                 .get(key=module_key, program__key=program_key)
             )
         except Module.DoesNotExist:

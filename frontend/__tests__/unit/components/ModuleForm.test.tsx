@@ -325,10 +325,16 @@ describe('ModuleForm', () => {
       expect(screen.getByTestId('text-input-module-labels')).toBeInTheDocument()
     })
 
-    it('renders mentor logins field only when isEdit is true (line 312)', () => {
+    it('renders mentor logins field when isEdit is false', () => {
       renderModuleForm({ isEdit: false })
-      expect(screen.queryByTestId('text-input-module-mentor-logins')).not.toBeInTheDocument()
+      expect(screen.getByTestId('text-input-module-mentor-logins')).toBeInTheDocument()
 
+      const input = screen.getByTestId('input-module-mentor-logins')
+      fireEvent.change(input, { target: { value: 'johndoe, Kateryna' } })
+      expect(mockSetFormData).toHaveBeenCalled()
+    })
+
+    it('renders mentor logins field when isEdit is true', () => {
       renderModuleForm({ isEdit: true })
       expect(screen.getByTestId('text-input-module-mentor-logins')).toBeInTheDocument()
     })

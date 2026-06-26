@@ -505,6 +505,9 @@ select:disabled,
 
 .md-wrapper h1,
 .md-wrapper h2,
-.md-wrapper h3 {
+.md-wrapper h3,
+.md-wrapper h4,
+.md-wrapper h5,
+.md-wrapper h6 {
   margin: 24px 0 16px;
 }
