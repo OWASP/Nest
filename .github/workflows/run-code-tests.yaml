@@ -9,6 +9,12 @@ env:
   FORCE_COLOR: 1
 
 jobs:
+  check-fork:
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Not a fork,continuing the workflow"
+
   run-backend-tests:
     name: Backend tests
     permissions:
@@ -18,8 +24,8 @@ jobs:
 
   run-backend-coverage-upload:
     name: Backend coverage upload
-    if: github.event.repository.fork == false
     needs:
+      - check-fork
       - run-backend-tests
     permissions:
       actions: read
@@ -41,8 +47,8 @@ jobs:
 
   run-frontend-coverage-upload:
     name: Frontend coverage upload
-    if: github.event.repository.fork == false
     needs:
+      - check-fork
       - run-frontend-tests
     permissions:
       actions: read
