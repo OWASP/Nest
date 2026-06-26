@@ -385,10 +385,12 @@ export type ModuleNodeTaskDeadlineArgs = {
 export type Mutation = {
   __typename?: 'Mutation';
   assignIssueToUser: ModuleNode;
+  cancelSnapshotSubscription: SnapshotSubscriptionResult;
   clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
+  createSnapshotSubscription: SnapshotSubscriptionResult;
   deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
@@ -396,9 +398,11 @@ export type Mutation = {
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
+  unsubscribeByToken: SnapshotSubscriptionResult;
   updateModule: ModuleNode;
   updateProgram: ProgramNode;
   updateProgramStatus: ProgramNode;
+  updateSnapshotSubscription: SnapshotSubscriptionResult;
 };
 
 
@@ -430,6 +434,19 @@ export type MutationCreateModuleArgs = {
 
 export type MutationCreateProgramArgs = {
   inputData: CreateProgramInput;
+};
+
+
+export type MutationCreateSnapshotSubscriptionArgs = {
+  frequency?: Scalars['String']['input'];
+  includeChapters?: Scalars['Boolean']['input'];
+  includeEvents?: Scalars['Boolean']['input'];
+  includeIssues?: Scalars['Boolean']['input'];
+  includePosts?: Scalars['Boolean']['input'];
+  includeProjects?: Scalars['Boolean']['input'];
+  includePullRequests?: Scalars['Boolean']['input'];
+  includeReleases?: Scalars['Boolean']['input'];
+  includeUsers?: Scalars['Boolean']['input'];
 };
 
 
@@ -470,6 +487,11 @@ export type MutationUnassignIssueFromUserArgs = {
 };
 
 
+export type MutationUnsubscribeByTokenArgs = {
+  token: Scalars['String']['input'];
+};
+
+
 export type MutationUpdateModuleArgs = {
   inputData: UpdateModuleInput;
 };
@@ -482,6 +504,19 @@ export type MutationUpdateProgramArgs = {
 
 export type MutationUpdateProgramStatusArgs = {
   inputData: UpdateProgramStatusInput;
+};
+
+
+export type MutationUpdateSnapshotSubscriptionArgs = {
+  frequency?: InputMaybe<Scalars['String']['input']>;
+  includeChapters?: InputMaybe<Scalars['Boolean']['input']>;
+  includeEvents?: InputMaybe<Scalars['Boolean']['input']>;
+  includeIssues?: InputMaybe<Scalars['Boolean']['input']>;
+  includePosts?: InputMaybe<Scalars['Boolean']['input']>;
+  includeProjects?: InputMaybe<Scalars['Boolean']['input']>;
+  includePullRequests?: InputMaybe<Scalars['Boolean']['input']>;
+  includeReleases?: InputMaybe<Scalars['Boolean']['input']>;
+  includeUsers?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** An object with a Globally Unique ID */
@@ -730,6 +765,7 @@ export type Query = {
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
   myPrograms: PaginatedPrograms;
+  mySubscription?: Maybe<SnapshotSubscriptionNode>;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
   /** List of project health metrics. */
@@ -1104,6 +1140,31 @@ export type SnapshotNodePullRequestsArgs = {
 export type SnapshotNodeUsersArgs = {
   limit?: Scalars['Int']['input'];
   offset?: Scalars['Int']['input'];
+};
+
+export type SnapshotSubscriptionNode = Node & {
+  __typename?: 'SnapshotSubscriptionNode';
+  createdAt: Scalars['DateTime']['output'];
+  frequency: Scalars['String']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  includeChapters: Scalars['Boolean']['output'];
+  includeEvents: Scalars['Boolean']['output'];
+  includeIssues: Scalars['Boolean']['output'];
+  includePosts: Scalars['Boolean']['output'];
+  includeProjects: Scalars['Boolean']['output'];
+  includePullRequests: Scalars['Boolean']['output'];
+  includeReleases: Scalars['Boolean']['output'];
+  includeUsers: Scalars['Boolean']['output'];
+  isActive: Scalars['Boolean']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type SnapshotSubscriptionResult = {
+  __typename?: 'SnapshotSubscriptionResult';
+  message: Scalars['String']['output'];
+  ok: Scalars['Boolean']['output'];
+  subscription?: Maybe<SnapshotSubscriptionNode>;
 };
 
 export type SponsorNode = Node & {
