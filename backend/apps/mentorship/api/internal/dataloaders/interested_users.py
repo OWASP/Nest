@@ -21,7 +21,7 @@ async def load_interested_users_by_issue_id(issue_ids: list[int]) -> list[list[U
     )
 
 
-def get_interested_users_loader() -> dict[str, DataLoader[int, list[User]]]:
+def get_interested_users_loaders() -> dict[str, DataLoader[int, list[User]]]:
     """Return a mapping of per-request DataLoader instances."""
     return {
         INTERESTED_USERS_BY_ISSUE_ID_LOADER: DataLoader[int, list[User]](
