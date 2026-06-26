@@ -31,6 +31,7 @@ NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
 NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines."
 NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
 NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
+NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG = "You can only set deadlines for issues assigned to you."
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +245,10 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not module.has_mentor(user):
+        is_mentor = module.has_mentor(user)
+        is_mentee = module.has_mentee(user)
+
+        if not is_mentor and not (is_mentee and module.mentees_can_manage_deadlines):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
@@ -259,6 +263,11 @@ class ModuleMutation:
         assignees = issue.assignees.all()
         if not assignees.exists():
             raise ValidationError(message="Cannot set deadline: issue has no assignees.")
+
+        if is_mentee and not is_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None or not assignees.filter(id=github_user.id).exists():
+                raise PermissionDenied(NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG)
 
         normalized_deadline = deadline_at
         if timezone.is_naive(normalized_deadline):

@@ -124,3 +124,54 @@ class ProgramQuery:
             programs=results,
             total_pages=total_pages,
         )
+
+    @strawberry.field(permission_classes=[IsAuthenticated])
+    def my_mentee_programs(
+        self,
+        info: strawberry.Info,
+        search: str = "",
+        page: int = 1,
+        limit: int = 24,
+    ) -> PaginatedPrograms:
+        """Get paginated programs where the current user is enrolled as a mentee."""
+        user = info.context.request.user
+        github_user = getattr(user, "github_user", None)
+
+        mentee_q = Q(menteeprogram__mentee__nest_user=user)
+        if github_user is not None:
+            mentee_q |= Q(menteeprogram__mentee__github_user=github_user)
+
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            normalized_limit = PAGE_SIZE
+
+        queryset = (
+            Program.objects.prefetch_related(
+                "admins__github_user",
+                "admins__nest_user",
+            )
+            .filter(mentee_q)
+            .distinct()
+        )
+
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+
+        total_count = queryset.count()
+        total_pages = max(1, (total_count + normalized_limit - 1) // normalized_limit)
+        page = max(1, min(page, total_pages))
+        offset = (page - 1) * normalized_limit
+
+        paginated_programs = queryset.order_by("-nest_created_at")[
+            offset : offset + normalized_limit
+        ]
+
+        results = []
+        for program in paginated_programs:
+            program.user_role = "mentee"
+            results.append(program)
+
+        return PaginatedPrograms(
+            current_page=page,
+            programs=results,
+            total_pages=total_pages,
+        )

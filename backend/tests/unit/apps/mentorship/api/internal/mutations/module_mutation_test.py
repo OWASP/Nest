@@ -712,6 +712,7 @@ class TestModuleMutationSetTaskDeadline:
             mock_mod
         )
         mock_mod.has_mentor.return_value = False
+        mock_mod.has_mentee.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):

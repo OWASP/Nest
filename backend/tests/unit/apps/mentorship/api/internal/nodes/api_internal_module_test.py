@@ -48,6 +48,7 @@ class FakeModuleNode:
         self.project = MagicMock()
         self.project.name = "Test Project"
         self.has_mentor = MagicMock(return_value=True)
+        self.has_mentee = MagicMock(return_value=False)
 
     def mock_mentors(self):
         return _call_module_resolver(self, "mentors")
