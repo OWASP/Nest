@@ -1,5 +1,6 @@
 """Tests for snapshot subscription model."""
 
+import uuid
 from unittest.mock import MagicMock
 
 from django.test import SimpleTestCase
@@ -73,3 +74,12 @@ class TestSnapshotSubscription(SimpleTestCase):
         """Test frequency choices are correctly defined."""
         assert SnapshotSubscription.Frequency.WEEKLY == "weekly"
         assert SnapshotSubscription.Frequency.MONTHLY == "monthly"
+
+    def test_unsubscribe_token_defaults(self):
+        """Test that unsubscribe_token is a unique UUID for each instance."""
+        first = SnapshotSubscription()
+        second = SnapshotSubscription()
+
+        assert isinstance(first.unsubscribe_token, uuid.UUID)
+        assert isinstance(second.unsubscribe_token, uuid.UUID)
+        assert first.unsubscribe_token != second.unsubscribe_token
