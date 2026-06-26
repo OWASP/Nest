@@ -8,7 +8,10 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
-import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
+import {
+  GetMyMenteeProgramsDocument,
+  GetMyProgramsDocument,
+} from 'types/__generated__/programsQueries.generated'
 import { hasExtendedUser } from 'types/auth'
 
 import type { Program } from 'types/mentorship'
@@ -63,6 +66,21 @@ const MyMentorshipPage: React.FC = () => {
   })
 
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
+  const isMentor = hasExtendedUser(session) ? session.user.isMentor : undefined
+
+  const { data: menteeData, loading: loadingMenteePrograms } = useQuery(
+    GetMyMenteeProgramsDocument,
+    {
+      variables: { search: debouncedQuery, page, limit: 24 },
+      fetchPolicy: 'cache-and-network',
+      skip: Boolean(isProjectLeader || isMentor),
+    }
+  )
+
+  const isMentee =
+    !isProjectLeader &&
+    !isMentor &&
+    ((menteeData?.myMenteePrograms?.programs?.length ?? 0) > 0 || loadingMenteePrograms === false)
 
   useEffect(() => {
     if (programData?.myPrograms) {
@@ -89,12 +107,63 @@ const MyMentorshipPage: React.FC = () => {
     return <LoadingSpinner />
   }
 
-  if (!isProjectLeader) {
+  if (loadingMenteePrograms && !isProjectLeader && !isMentor) {
+    return <LoadingSpinner />
+  }
+
+  if (!isProjectLeader && !isMentor && !isMentee) {
     return (
       <AccessDeniedDisplay
         title="Access Denied"
-        message="Only project leaders can access this page."
+        message="Only project leaders, mentors, and enrolled mentees can access this page."
       />
+    )
+  }
+
+  if (isMentee) {
+    const menteePrograms = menteeData?.myMenteePrograms?.programs ?? []
+    const menteeTotalPages = menteeData?.myMenteePrograms?.totalPages ?? 1
+    return (
+      <div className="container mx-auto px-4 py-8 dark:bg-[#212529]">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-600 dark:text-white">My Mentorship</h1>
+          <p className="text-gray-600 dark:text-gray-400">Programs you are enrolled in</p>
+        </div>
+        <SearchPageLayout
+          isLoaded={!loadingMenteePrograms}
+          totalPages={menteeTotalPages}
+          currentPage={page}
+          onPageChange={(p) => {
+            setPage(p)
+            globalThis.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+          onSearch={(q) => {
+            setSearchQuery(q)
+            setPage(1)
+          }}
+          searchQuery={searchQuery}
+          searchPlaceholder="Search your programs"
+          indexName="my-mentee-programs"
+        >
+          <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            {menteePrograms.length === 0 ? (
+              <div className="col-span-full flex min-h-[40vh] flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                <p className="text-lg font-semibold">No programs found</p>
+              </div>
+            ) : (
+              menteePrograms.map((p) => (
+                <ProgramCard
+                  accessLevel="mentee"
+                  isAdmin={false}
+                  key={p.id}
+                  href={`/my/mentorship/programs/${p.key}`}
+                  program={p}
+                />
+              ))
+            )}
+          </div>
+        </SearchPageLayout>
+      </div>
     )
   }
 

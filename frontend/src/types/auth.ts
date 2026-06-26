@@ -12,6 +12,7 @@ export type ExtendedSession = Session & {
     expires?: string
     image?: string
     isLeader?: boolean
+    isMentee?: boolean
     isMentor?: boolean
     isOwaspStaff?: boolean
     login?: string
@@ -23,6 +24,7 @@ export function hasExtendedUser(session: Session | null): session is Session & {
   user: {
     login?: string
     isLeader?: boolean
+    isMentee?: boolean
     isMentor?: boolean
   }
 } {

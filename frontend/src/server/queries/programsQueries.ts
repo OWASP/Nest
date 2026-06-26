@@ -198,6 +198,25 @@ export const GET_PROGRAM_AND_MODULES = gql`
   }
 `
 
+export const GET_MY_MENTEE_PROGRAMS = gql`
+  query GetMyMenteePrograms($search: String, $page: Int, $limit: Int) {
+    myMenteePrograms(search: $search, page: $page, limit: $limit) {
+      currentPage
+      totalPages
+      programs {
+        id
+        key
+        name
+        status
+        description
+        startedAt
+        endedAt
+        userRole
+      }
+    }
+  }
+`
+
 export const GET_MANAGEMENT_PROGRAM_ADMIN_DETAILS = gql`
   query GetManagementProgramAdminDetails($programKey: String!) {
     managementProgram(programKey: $programKey) {
