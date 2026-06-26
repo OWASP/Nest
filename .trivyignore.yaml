@@ -7,6 +7,7 @@ misconfigurations:
       - infrastructure/modules/ecr-cache/main.tf
   - id: DS-0002  # Specify at least 1 USER command in Dockerfile with non-root user as argument.
     paths:
+      - .clusterfuzzlite/Dockerfile
       - docker/e2e/Dockerfile
       - docker/semgrep/Dockerfile
       - docker/trivy/Dockerfile

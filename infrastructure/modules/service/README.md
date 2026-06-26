@@ -45,6 +45,9 @@ No modules.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether to assign public IPs to ECS tasks (required for public subnets). | `bool` | `false` | no |
+| <a name="input_auto_scaling_cpu_target"></a> [auto\_scaling\_cpu\_target](#input\_auto\_scaling\_cpu\_target) | Target average CPU utilization percentage for auto scaling. | `number` | `70` | no |
+| <a name="input_auto_scaling_scale_in_cooldown"></a> [auto\_scaling\_scale\_in\_cooldown](#input\_auto\_scaling\_scale\_in\_cooldown) | Cooldown period in seconds after a scale-in activity. | `number` | `300` | no |
+| <a name="input_auto_scaling_scale_out_cooldown"></a> [auto\_scaling\_scale\_out\_cooldown](#input\_auto\_scaling\_scale\_out\_cooldown) | Cooldown period in seconds after a scale-out activity. | `number` | `60` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region. | `string` | n/a | yes |
 | <a name="input_command"></a> [command](#input\_command) | The command to run in the container. If null, the container's default CMD is used. | `list(string)` | `null` | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |

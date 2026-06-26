@@ -115,14 +115,14 @@ repos:
       - id: file-contents-sorter
         args:
           - --unique
-        files: (.github/workflows/check-pr-issue-skip-usernames.txt|cspell/custom-dict.txt)
+        files: (.github/check-contribution-skip-usernames.txt|cspell/custom-dict.txt)
       - id: mixed-line-ending
         args:
           - --fix=lf
       - id: name-tests-test
         args:
           - --pytest
-        exclude: backend/tests/data
+        exclude: backend/tests/(cluster-fuzz-lite|data)
         files: backend/tests
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml

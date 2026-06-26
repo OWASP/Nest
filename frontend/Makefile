@@ -1,4 +1,4 @@
-.PHONY: audit-frontend-dependencies sbom-frontend-image
+.PHONY: audit-frontend-dependencies install-frontend-dependencies sbom-frontend-image
 
 ##@ Frontend
 
@@ -10,11 +10,9 @@ build-frontend-local-image:
 	    -t nest-frontend-local \
 	    frontend
 
-check-frontend: ## Run frontend code quality checks
-check-frontend: \
-	format-frontend-code \
-	lint-frontend-code \
-	generate-graphql-types
+install-frontend-dependencies:
+	@(cd frontend && (pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 \
+	  || pnpm install --prefer-offline))
 
 clean-frontend-dependencies:
 	@rm -rf frontend/.next
@@ -33,32 +31,11 @@ exec-frontend-command:
 exec-frontend-command-it:
 	@docker exec -it nest-frontend $(CMD)
 
-format-frontend-code:
-	@(cd frontend && (pnpm list prettier --depth=0 | grep -q 'prettier' || pnpm add -D prettier >/dev/null 2>&1) \
-	  && pnpm run format:check >/dev/null 2>&1 \
-	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
-
-graphql-codegen:
-	@cd frontend && pnpm run graphql-codegen
-
 lighthouse-ci:
 	@cd frontend && pnpm run lighthouse-ci
 
 lighthouse-ci-desktop:
 	@cd frontend && pnpm run lighthouse-ci:desktop
-
-lint-frontend-code:
-	@(cd frontend && (pnpm list eslint --depth=0 | grep -q 'eslint' || pnpm add -D eslint >/dev/null 2>&1) \
-	  && pnpm run lint:check >/dev/null 2>&1 \
-	  && (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
-
-generate-graphql-types:
-	@(cd frontend && pnpm run graphql-codegen >/dev/null 2>&1 \
-	&& (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
-		&& pnpm run graphql-codegen))
 
 FRONTEND_IMAGE_NAME ?= nest-frontend-local
 IMAGE_SCANNERS ?= misconfig,secret,vuln
@@ -105,17 +82,17 @@ test-frontend: \
 	test-frontend-a11y
 
 test-frontend-a11y:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build -q \
 		--cache-from nest-test-frontend-a11y \
 		-f docker/frontend/Dockerfile.a11y-tests frontend \
-		-t nest-test-frontend-a11y
+		-t nest-test-frontend-a11y 1>/dev/null
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
 test-frontend-unit:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build -q \
 		--cache-from nest-test-frontend-unit \
 		-f docker/frontend/Dockerfile.unit-tests frontend \
-		-t nest-test-frontend-unit
+		-t nest-test-frontend-unit 1>/dev/null
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
 
 audit-frontend-dependencies: ## Audit frontend npm dependencies

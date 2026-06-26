@@ -58,13 +58,16 @@ const ModuleIssueDetailsPage = () => {
 
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 
+  const moduleStartedAt = accessData?.managementModule?.startedAt
+  const moduleEndedAt = accessData?.managementModule?.endedAt
+
   useEffect(() => {
     if (accessError && !isForbiddenGraphQLError(accessError)) {
       handleAppError(accessError)
     }
   }, [accessError])
 
-  const formatDeadline = (deadline: string | null) => {
+  const formatDeadline = (deadline: string | null, isOpen: boolean) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
 
     const now = new Date()
@@ -72,6 +75,11 @@ const ModuleIssueDetailsPage = () => {
     const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
 
     const deadlineDate = new Date(deadline)
+
+    const displayDate = deadlineDate.toLocaleDateString()
+    if (!isOpen) {
+      return { text: displayDate, color: 'text-gray-600 dark:text-gray-300' }
+    }
 
     const deadlineUTC = Date.UTC(
       deadlineDate.getUTCFullYear(),
@@ -90,8 +98,6 @@ const ModuleIssueDetailsPage = () => {
     } else {
       statusText = `(${daysLeft} days left)`
     }
-
-    const displayDate = deadlineDate.toLocaleDateString()
 
     let color: string
     if (isOverdue) {
@@ -306,7 +312,16 @@ const ModuleIssueDetailsPage = () => {
                             }
                           }
                         }}
-                        min={new Date().toISOString().slice(0, 10)}
+                        min={
+                          moduleStartedAt
+                            ? new Date(moduleStartedAt).toISOString().slice(0, 10)
+                            : undefined
+                        }
+                        max={
+                          moduleEndedAt
+                            ? new Date(moduleEndedAt).toISOString().slice(0, 10)
+                            : undefined
+                        }
                         className="h-8 rounded border border-gray-300 px-2 dark:border-gray-600"
                       />
                     </div>
@@ -327,7 +342,7 @@ const ModuleIssueDetailsPage = () => {
                       }`}
                     >
                       {(() => {
-                        const { text, color } = formatDeadline(taskDeadline)
+                        const { text, color } = formatDeadline(taskDeadline, issue.state === 'open')
                         return <span className={`font-normal ${color}`}>{text}</span>
                       })()}
                     </button>
