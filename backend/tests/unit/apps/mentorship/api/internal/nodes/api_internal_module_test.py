@@ -98,7 +98,7 @@ def mock_module_node():
     """Fixture for a mock ModuleNode instance."""
     m = FakeModuleNode()
 
-    m.mentors.all.return_value = [MagicMock(), MagicMock()]
+    m.mentors.order_by.return_value = [MagicMock(), MagicMock()]
     m.menteemodule_set.select_related.return_value.filter.return_value.values_list.return_value = [
         "github_user_id_1",
         "github_user_id_2",
@@ -136,7 +136,7 @@ class TestModuleNodeResolvers:
         """Test the mentors resolver."""
         mentors = mock_module_node.mock_mentors()
         assert len(mentors) == 2
-        mock_module_node.mentors.all.assert_called_once()
+        mock_module_node.mentors.order_by.assert_called_once_with("github_user__login")
 
     def test_module_node_mentees(self, mock_module_node):
         """Test the mentees resolver."""
