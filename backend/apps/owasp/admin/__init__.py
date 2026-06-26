@@ -16,6 +16,7 @@ from .post import PostAdmin
 from .project import ProjectAdmin
 from .project_health_metrics import ProjectHealthMetricsAdmin
 from .snapshot import SnapshotAdmin
+from .snapshot_subscription import SnapshotSubscriptionAdmin
 from .sponsor import SponsorAdmin
 
 admin.site.register(ProjectHealthRequirements)
