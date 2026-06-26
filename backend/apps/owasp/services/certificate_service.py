@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from django.db import IntegrityError, transaction
+from django.db import transaction
 
 from apps.github.models.user import User
 from apps.owasp.exceptions import CertificateIssuanceError
@@ -57,7 +57,7 @@ class CertificateService:
         )
         try:
             provider.issue_certificate(user, score, tier)
-        except IntegrityError as e:
+        except Exception as e:
             logger.exception(
                 "Failed to issue %s certificate for user %s",
                 tier,
