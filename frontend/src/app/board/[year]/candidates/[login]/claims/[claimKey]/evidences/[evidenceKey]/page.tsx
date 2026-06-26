@@ -1,6 +1,7 @@
 'use client'
 
 import { useLazyQuery, useQuery } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
 
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { useDjangoSession } from 'hooks/useDjangoSession'
@@ -82,10 +83,22 @@ const EvidenceDetailsPage = () => {
   ]
 
   const handleDownloadEvidence = async () => {
-    const { data } = await fetchFileUrl({
-      variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
-    })
-    const url = data?.boardCandidateClaimEvidenceFileUrl
+    let url: string | null | undefined
+    try {
+      const { data } = await fetchFileUrl({
+        variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
+      })
+      url = data?.boardCandidateClaimEvidenceFileUrl
+    } catch {
+      addToast({
+        description: 'Unable to download evidence. Please try again.',
+        title: 'Error',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
+      return
+    }
     if (url) {
       const a = document.createElement('a')
       a.href = url

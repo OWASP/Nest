@@ -52,7 +52,7 @@ const EvidenceForm = ({
   const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
   const [fileError, setFileError] = useState<string | undefined>()
 
-  const handleInputChange = (name: string, value: string | number) => {
+  const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
     if (backendErrors[name]) {
       setBackendErrors((prev) => {
@@ -111,8 +111,7 @@ const EvidenceForm = ({
     const descriptionError = validateDescription(formData.description)
     const nameError = validateName(formData.name)
 
-    // Prevent submission if any validation errors exist
-    if (descriptionError || nameError) {
+    if (descriptionError || nameError || fileError) {
       return
     }
     if (!formData.sourceUrl.trim() && !formData.file) {
@@ -135,7 +134,6 @@ const EvidenceForm = ({
 
   return (
     <FormContainer title={title} onSubmit={handleSubmit} containerClassName="claim-form-container">
-      {/* Basic Information */}
       <section className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
           <FormTextInput

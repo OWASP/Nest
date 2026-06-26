@@ -144,8 +144,6 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
           <ModalHeader className="flex flex-col gap-1">Remove Evidence</ModalHeader>
           <ModalBody>
             <p>Are you sure you want to remove this evidence? This action cannot be undone.</p>
-          </ModalBody>
-          <ModalBody>
             <textarea
               aria-label="Reason for removal"
               className="mt-2 w-full rounded border p-2"
@@ -162,7 +160,7 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
               onPress={() => {
                 resetConfirm()
               }}
-              disabled={isLoading}
+              isDisabled={isLoading}
             >
               Cancel
             </Button>
@@ -170,7 +168,7 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
               color="danger"
               onPress={handleConfirmRemove}
               isLoading={isLoading}
-              disabled={isLoading}
+              isDisabled={isLoading}
               className="text-white"
             >
               Remove
