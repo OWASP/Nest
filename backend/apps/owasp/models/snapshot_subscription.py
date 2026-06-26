@@ -63,7 +63,11 @@ class SnapshotSubscription(models.Model):
 
     def __str__(self):
         """Return a string representation."""
-        status = "active" if self.is_active else "inactive"
+        status = (
+            SnapshotSubscription.Status.ACTIVE
+            if self.is_active
+            else SnapshotSubscription.Status.INACTIVE
+        )
         return f"{self.user} ({self.frequency}, {status})"
 
     @property
