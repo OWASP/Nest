@@ -149,7 +149,7 @@ class ProgramMutation:
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
 
-        if not program.admins.filter(nest_user=user).exists():
+        if not program.has_admin(user):
             msg = "You must be an admin of this program to update it."
             logger.warning(
                 "Permission denied for user '%s' to update program '%s'.",
@@ -208,7 +208,7 @@ class ProgramMutation:
             msg = f"Program with key '{input_data.key}' not found."
             raise ObjectDoesNotExist(msg) from e
 
-        if not program.admins.filter(nest_user=user).exists():
+        if not program.has_admin(user):
             raise PermissionDenied
 
         program.status = input_data.status.value
