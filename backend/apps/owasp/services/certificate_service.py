@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 
 from apps.github.models.user import User
 from apps.owasp.exceptions import CertificateIssuanceError
@@ -36,13 +36,11 @@ class CertificateService:
         user = User.objects.select_for_update().get(id=user.id)
 
         # Check if user already has an active certificate for this specific tier
-        has_active_cert = Certificate.objects.filter(
+        if Certificate.objects.filter(
             github_user=user,
             tier=tier,
             is_revoked=False,
-        ).exists()
-
-        if has_active_cert:
+        ).exists():
             return
 
         try:
@@ -58,8 +56,8 @@ class CertificateService:
             score,
         )
         try:
-            provider.issue(user, score, tier)
-        except Exception as e:
+            provider.issue_certificate(user, score, tier)
+        except IntegrityError as e:
             logger.exception(
                 "Failed to issue %s certificate for user %s",
                 tier,
