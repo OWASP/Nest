@@ -12,9 +12,11 @@
 
 [![DeepWiki](https://img.shields.io/badge/docs-deep%20wiki-blue?style=for-the-badge)](https://deepwiki.com/OWASP/Nest) [![ReadTheDocs](https://img.shields.io/badge/docs-read%20the%20docs-blue?style=for-the-badge)](https://owasp-nest.readthedocs.io/latest/)
 
-[![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?color=blue&server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/summary/new_code?id=OWASP_Nest&branch=main) [![Snyk Security](https://img.shields.io/badge/Snyk-Scanning-blue?style=for-the-badge)](https://snyk.io)
+ [![Snyk Security](https://img.shields.io/badge/Snyk-Scanning-blue?style=for-the-badge)](https://snyk.io) [![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?color=blue&server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/summary/new_code?id=OWASP_Nest&branch=main)
 
 [![Codecov](https://img.shields.io/codecov/c/github/OWASP/Nest/main?style=for-the-badge&color=blue&label=Code%20Coverage)](https://codecov.io/gh/OWASP/Nest/tree/main)
+
+[![RUNS ON ARM 64](https://img.shields.io/badge/runs%20on-arm64-blue?style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/docker-compose/local/compose.yaml)
 
 # [OWASP Nest](https://nest.owasp.org/)
 

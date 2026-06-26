@@ -1,7 +1,7 @@
 ##@ Infrastructure
 
 test-infrastructure: ## Run infrastructure tests
-	@find infrastructure/modules \
+	@find infrastructure/bootstrap infrastructure/modules \
 		-name "tests" \
 		-type d \
 		-not -path "*/.terraform/*" | \
