@@ -27,7 +27,8 @@ class TestLoadAdminsByProgramId:
         """Queryset is built with select_related, filter, prefetch_related, and order_by."""
         program_ids = [1, 2, 3]
         mock_queryset = MagicMock()
-        mock_order_by = mock_admin.objects.select_related.return_value.filter.return_value.prefetch_related.return_value.order_by
+        mock_admin_filter = mock_admin.objects.select_related.return_value.filter
+        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
         mock_order_by.return_value.distinct.return_value = mock_queryset
         mock_get_m2m_results_by_keys.return_value = [[], [], []]
 
@@ -53,7 +54,8 @@ class TestLoadAdminsByProgramId:
         """get_m2m_results_by_keys receives the queryset, program_ids, and correct field names."""
         program_ids = [10, 20]
         mock_queryset = MagicMock()
-        mock_order_by = mock_admin.objects.select_related.return_value.filter.return_value.prefetch_related.return_value.order_by
+        mock_admin_filter = mock_admin.objects.select_related.return_value.filter
+        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
         mock_order_by.return_value.distinct.return_value = mock_queryset
         mock_get_m2m_results_by_keys.return_value = [[], []]
 
@@ -76,7 +78,8 @@ class TestLoadAdminsByProgramId:
         mock_admin_a = MagicMock()
         mock_admin_b = MagicMock()
         expected = [[mock_admin_a, mock_admin_b], [], [mock_admin_a]]
-        mock_order_by = mock_admin.objects.select_related.return_value.filter.return_value.prefetch_related.return_value.order_by
+        mock_admin_filter = mock_admin.objects.select_related.return_value.filter
+        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
         mock_order_by.return_value.distinct.return_value = MagicMock()
         mock_get_m2m_results_by_keys.return_value = expected
 
