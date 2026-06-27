@@ -6,7 +6,11 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from apps.github.api.internal.dataloaders.user import USER_BADGES_BY_USER_ID_LOADER
+from apps.github.api.internal.dataloaders.user import (
+    USER_BADGES_BY_USER_ID_LOADER,
+    USER_ISSUES_COUNT_LOADER,
+    USER_RELEASES_COUNT_LOADER,
+)
 from apps.github.api.internal.nodes.user import UserNode
 from apps.nest.api.internal.nodes.badge import BadgeNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -61,22 +65,30 @@ class TestUserNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_user)
         assert math.isclose(result, 1234567890.0)
 
-    def test_issues_count_field(self):
+    @pytest.mark.asyncio
+    async def test_issues_count_field(self):
         """Test issues_count field resolution."""
-        mock_user = Mock()
-        mock_user.issues_count = 42
+        mock_user = Mock(pk=1)
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=42)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {USER_ISSUES_COUNT_LOADER: mock_loader}
 
         field = self._get_field_by_name("issues_count", UserNode)
-        result = field.base_resolver.wrapped_func(None, mock_user)
+        result = await field.base_resolver.wrapped_func(None, mock_user, mock_info)
         assert result == 42
 
-    def test_releases_count_field(self):
+    @pytest.mark.asyncio
+    async def test_releases_count_field(self):
         """Test releases_count field resolution."""
-        mock_user = Mock()
-        mock_user.releases_count = 15
+        mock_user = Mock(pk=1)
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=15)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {USER_RELEASES_COUNT_LOADER: mock_loader}
 
         field = self._get_field_by_name("releases_count", UserNode)
-        result = field.base_resolver.wrapped_func(None, mock_user)
+        result = await field.base_resolver.wrapped_func(None, mock_user, mock_info)
         assert result == 15
 
     def test_updated_at_field(self):

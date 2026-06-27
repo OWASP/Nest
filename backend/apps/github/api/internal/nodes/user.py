@@ -1,11 +1,14 @@
 """GitHub user GraphQL node."""
 
 import strawberry_django
-from django.db.models import Count
 from django.db.models.query import Prefetch
 from strawberry.types.info import Info
 
-from apps.github.api.internal.dataloaders.user import USER_BADGES_BY_USER_ID_LOADER
+from apps.github.api.internal.dataloaders.user import (
+    USER_BADGES_BY_USER_ID_LOADER,
+    USER_ISSUES_COUNT_LOADER,
+    USER_RELEASES_COUNT_LOADER,
+)
 from apps.github.models.user import User
 from apps.nest.api.internal.nodes.badge import BadgeNode
 from apps.nest.models.user_badge import UserBadge
@@ -82,10 +85,10 @@ class UserNode:
         """Resolve if member is a Google Summer of Code mentor."""
         return root.owasp_profile.is_gsoc_mentor if hasattr(root, "owasp_profile") else False
 
-    @strawberry_django.field(annotate={"issues_count": Count("created_issues")})
-    def issues_count(self, root: User) -> int:
+    @strawberry_django.field
+    async def issues_count(self, root: User, info: Info) -> int:
         """Resolve issues count."""
-        return root.issues_count
+        return await info.context.github_dataloaders[USER_ISSUES_COUNT_LOADER].load(root.pk)
 
     @strawberry_django.field(select_related=["owasp_profile"])
     def linkedin_page_id(self, root: User) -> str:
@@ -96,10 +99,10 @@ class UserNode:
             else ""
         )
 
-    @strawberry_django.field(annotate={"releases_count": Count("created_releases")})
-    def releases_count(self, root: User) -> int:
+    @strawberry_django.field
+    async def releases_count(self, root: User, info: Info) -> int:
         """Resolve releases count."""
-        return root.releases_count
+        return await info.context.github_dataloaders[USER_RELEASES_COUNT_LOADER].load(root.pk)
 
     @strawberry_django.field
     def updated_at(self, root: User) -> str:
