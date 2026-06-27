@@ -16,6 +16,7 @@ def configure_slack_events():
         owasp_community,
         project_nest,
     )
+    from apps.slack.events.reaction_added import bot_feedback
 
     if SlackConfig.app:
         EventBase.configure_events()

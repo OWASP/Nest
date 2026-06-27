@@ -1,3 +1,4 @@
+from .bot_interaction import BotInteraction
 from .conversation import Conversation
 from .event import Event
 from .member import Member

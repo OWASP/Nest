@@ -39,10 +39,12 @@ class TestMessageAutoReply:
         message.id = 1
         message.slack_message_id = "1234567890.123456"
         message.text = "What is OWASP?"
+        message.raw_data = {"user": "U789"}
         message.conversation = mock_conversation
         return message
 
     @patch.object(SlackConfig, "app")
+    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
     @patch("apps.slack.services.message_auto_reply.get_blocks")
@@ -51,6 +53,7 @@ class TestMessageAutoReply:
         mock_get_blocks,
         mock_process_ai_query,
         mock_message_get,
+        mock_bot_interaction_create,  # ← ADDED
         mock_app,
         mock_message,
     ):
@@ -69,6 +72,7 @@ class TestMessageAutoReply:
         mock_client = Mock()
         mock_app.client = mock_client
         mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
+        mock_client.chat_postMessage.return_value = {"ts": "1234567890.999999"}
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
@@ -92,6 +96,13 @@ class TestMessageAutoReply:
             ],
             text="OWASP is a security organization...",
             thread_ts=mock_message.slack_message_id,
+        )
+        mock_bot_interaction_create.assert_called_once_with(
+            channel_id=mock_message.conversation.slack_channel_id,
+            user_id=mock_message.raw_data.get("user", ""),
+            user_message=mock_message.text,
+            bot_response="OWASP is a security organization...",
+            slack_reply_ts="1234567890.999999",
         )
 
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
@@ -144,6 +155,7 @@ class TestMessageAutoReply:
         mock_process_ai_query.assert_not_called()
 
     @patch.object(SlackConfig, "app")
+    @patch("apps.slack.services.message_auto_reply.BotInteraction.objects.create")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
     @patch("apps.slack.services.message_auto_reply.get_blocks")
@@ -154,6 +166,7 @@ class TestMessageAutoReply:
         mock_get_blocks,
         mock_process_ai_query,
         mock_message_get,
+        mock_bot_interaction_create,  # ← ADDED
         mock_app,
         mock_message,
     ):
@@ -172,12 +185,14 @@ class TestMessageAutoReply:
                 },
             }
         ]
+        mock_client.chat_postMessage.return_value = {"ts": "1234567890.999999"}
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
         mock_logger.exception.assert_called_once_with("Error checking for replies for message")
         mock_process_ai_query.assert_called_once()
         mock_client.chat_postMessage.assert_called_once()
+        mock_bot_interaction_create.assert_called_once()
 
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
