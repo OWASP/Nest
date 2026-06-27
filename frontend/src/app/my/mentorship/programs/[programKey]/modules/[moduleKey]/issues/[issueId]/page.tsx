@@ -20,8 +20,12 @@ import {
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import {
+  GetManagementModuleIssueViewDocument,
+  GetModuleIssueViewDocument,
+} from 'types/__generated__/issueQueries.generated'
 import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { hasExtendedUser } from 'types/auth'
 import type { ExtendedSession } from 'types/auth'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -45,6 +49,9 @@ const ModuleIssueDetailsPage = () => {
   const limit = 4
   const { programKey, moduleKey, issueId } = params
   const currentUserLogin = session?.user?.login
+  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
+  const isMentor = hasExtendedUser(session) ? session.user.isMentor : false
+  const isMenteeUser = !isProjectLeader && !isMentor
 
   const {
     data: accessData,
@@ -52,7 +59,7 @@ const ModuleIssueDetailsPage = () => {
     error: accessError,
   } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
-    skip: !programKey || !moduleKey,
+    skip: !programKey || !moduleKey || isMenteeUser,
     fetchPolicy: 'network-only',
   })
 
@@ -60,6 +67,21 @@ const ModuleIssueDetailsPage = () => {
 
   const moduleStartedAt = accessData?.managementModule?.startedAt
   const moduleEndedAt = accessData?.managementModule?.endedAt
+
+  const { data: menteeIssueData, loading: menteeIssueLoading } = useQuery(
+    GetModuleIssueViewDocument,
+    {
+      variables: {
+        programKey,
+        moduleKey,
+        number: Number(issueId),
+        limit,
+        offset: 0,
+      },
+      skip: !issueId || !isMenteeUser,
+      fetchPolicy: 'cache-first',
+    }
+  )
 
   useEffect(() => {
     if (accessError && !isForbiddenGraphQLError(accessError)) {
@@ -121,7 +143,7 @@ const ModuleIssueDetailsPage = () => {
       limit,
       offset: 0,
     },
-    skip: !issueId || !hasAccess,
+    skip: !issueId || !hasAccess || isMenteeUser,
     fetchPolicy: 'cache-first',
     nextFetchPolicy: 'cache-and-network',
   })
@@ -158,6 +180,128 @@ const ModuleIssueDetailsPage = () => {
         ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
+
+  if (isMenteeUser) {
+    if (menteeIssueLoading) return <LoadingSpinner />
+
+    const menteeIssue = menteeIssueData?.getModule?.issueByNumber
+    const menteeTaskDeadline =
+      (menteeIssueData?.getModule?.taskDeadline as string | undefined) ?? null
+    const menteeTaskAssignedAt = menteeIssueData?.getModule?.taskAssignedAt
+
+    if (!menteeIssue) {
+      return (
+        <ErrorDisplay
+          statusCode={404}
+          title="Issue Not Found"
+          message="This issue was not found or is not assigned to you."
+        />
+      )
+    }
+
+    const menteeAssignees = menteeIssue.assignees || []
+    const menteeLabels = menteeIssue.labels || []
+    const { text: deadlineText, color: deadlineColor } = formatDeadline(
+      menteeTaskDeadline,
+      menteeIssue.state === 'open'
+    )
+
+    let issueStatusClass: string
+    let issueStatusLabel: string
+    if (menteeIssue.state === 'open') {
+      issueStatusClass = 'bg-[#238636] text-white'
+      issueStatusLabel = 'Open'
+    } else if (menteeIssue.isMerged) {
+      issueStatusClass = 'bg-[#8657E5] text-white'
+      issueStatusLabel = 'Merged'
+    } else {
+      issueStatusClass = 'bg-[#DA3633] text-white'
+      issueStatusLabel = 'Closed'
+    }
+
+    return (
+      <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+        <div className="min-h-screen bg-white p-8 text-gray-700 dark:bg-[#212529] dark:text-gray-300">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl font-bold sm:text-3xl">
+                  <span className="break-words">{menteeIssue.title}</span>
+                </h1>
+                <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+                  <span>
+                    {menteeIssue.organizationName}/{menteeIssue.repositoryName} #
+                    {menteeIssue.number}
+                  </span>
+                  <span
+                    className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${issueStatusClass}`}
+                  >
+                    {issueStatusLabel}
+                  </span>
+                </div>
+              </div>
+              <ActionButton url={menteeIssue.url}>
+                <FaLink className="mr-2 inline-block" /> View on GitHub
+              </ActionButton>
+            </div>
+
+            <SecondaryCard title={<AnchorTitle title="Description" />}>
+              <div className="prose dark:prose-invert line-clamp-[15] max-w-none">
+                <Markdown content={menteeIssue.body || 'No description.'} />
+              </div>
+            </SecondaryCard>
+
+            <SecondaryCard title={<AnchorTitle title="Task Timeline" />}>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <span className="font-medium">Assigned:</span>{' '}
+                  <span>
+                    {menteeTaskAssignedAt
+                      ? new Date(menteeTaskAssignedAt).toLocaleDateString()
+                      : 'Not assigned'}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium">Deadline:</span>{' '}
+                  <span className={deadlineColor}>{deadlineText}</span>
+                </div>
+              </div>
+            </SecondaryCard>
+
+            {menteeLabels.length > 0 && (
+              <SecondaryCard title={<AnchorTitle title="Labels" />}>
+                <LabelList labels={menteeLabels} icon={FaTags} />
+              </SecondaryCard>
+            )}
+
+            {menteeAssignees.length > 0 && (
+              <SecondaryCard title={<AnchorTitle title="Assignees" />}>
+                <div className="flex flex-wrap gap-3">
+                  {menteeAssignees.map((assignee) => (
+                    <Link
+                      key={assignee.login}
+                      href={`https://github.com/${assignee.login}`}
+                      target="_blank"
+                      className="flex items-center gap-2 text-sm hover:underline"
+                    >
+                      <Image
+                        src={assignee.avatarUrl}
+                        alt={assignee.login}
+                        width={24}
+                        height={24}
+                        className="rounded-full"
+                      />
+                      <span>{assignee.name || assignee.login}</span>
+                    </Link>
+                  ))}
+                </div>
+              </SecondaryCard>
+            )}
+          </div>
+        </div>
+      </BreadcrumbStyleProvider>
+    )
+  }
 
   if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
     return <LoadingSpinner />
