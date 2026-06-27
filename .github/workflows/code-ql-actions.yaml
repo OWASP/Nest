@@ -28,7 +28,6 @@ env:
 jobs:
   run-code-ql:
     name: CodeQL Actions
-    if: github.event.repository.fork == false
     permissions:
       contents: read
       security-events: write

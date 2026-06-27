@@ -44,7 +44,6 @@ env:
 jobs:
   run-code-ql:
     name: CodeQL JavaScript/TypeScript
-    if: github.event.repository.fork == false
     permissions:
       contents: read
       security-events: write
