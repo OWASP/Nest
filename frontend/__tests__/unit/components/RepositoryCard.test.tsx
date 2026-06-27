@@ -358,7 +358,9 @@ describe('RepositoryCard', () => {
 
       render(<RepositoryCard repositories={[repository]} />)
 
-      expect(screen.getByTestId('text-info-item-updated')).toBeInTheDocument()
+      const updatedItem = screen.getByTestId('text-info-item-updated')
+      expect(updatedItem).toBeInTheDocument()
+      expect(updatedItem).toHaveTextContent('Jun 15, 2024')
     })
 
     it('does not display updated date when updatedAt is undefined', () => {
@@ -382,6 +384,7 @@ describe('RepositoryCard', () => {
 
       const updatedItems = screen.getAllByTestId('text-info-item-updated')
       expect(updatedItems).toHaveLength(3)
+      updatedItems.forEach((item) => expect(item).toHaveTextContent('Jun 15, 2024'))
     })
 
     it('only shows updated date for repositories that have updatedAt', () => {
