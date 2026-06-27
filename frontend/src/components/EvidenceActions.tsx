@@ -10,6 +10,7 @@ import type React from 'react'
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import type { GetClaimAndEvidencesQuery } from 'types/__generated__/claimQueries.generated'
 import { RemoveBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
+import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import DropdownActions from 'components/DropdownActions'
 
 interface ClaimProperties {
@@ -17,7 +18,7 @@ interface ClaimProperties {
   description: string
   key: string
   name: string
-  status: string
+  status: ClaimStatusEnum
   updatedAt: string
 }
 
@@ -109,7 +110,7 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
   }
 
   const options = [
-    ...(claim.status == 'DRAFT'
+    ...(claim.status === ClaimStatusEnum.Draft
       ? [
           {
             key: 'edit',
@@ -121,7 +122,9 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
           },
         ]
       : []),
-    ...(['DRAFT', 'DISCARDED', 'WITHDRAWN'].includes(claim.status)
+    ...([ClaimStatusEnum.Draft, ClaimStatusEnum.Discarded, ClaimStatusEnum.Withdrawn].includes(
+      claim.status
+    )
       ? [
           {
             key: 'remove',

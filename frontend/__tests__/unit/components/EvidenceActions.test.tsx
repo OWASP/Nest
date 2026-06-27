@@ -3,6 +3,7 @@ import { addToast } from '@heroui/toast'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
+import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import EvidenceActions from 'components/EvidenceActions'
 
 jest.mock('@apollo/client/react', () => ({
@@ -21,7 +22,7 @@ const baseClaim = {
   key: 'test-claim',
   name: 'Test Claim',
   description: 'Test description',
-  status: 'DRAFT',
+  status: ClaimStatusEnum.Draft,
   updatedAt: '2025-01-15T10:00:00Z',
 }
 
@@ -64,7 +65,7 @@ describe('EvidenceActions', () => {
     })
 
     it('shows only remove for DISCARDED', () => {
-      renderEvidenceActions({ ...baseClaim, status: 'DISCARDED' })
+      renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Discarded })
 
       fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
       expect(screen.getByText('Remove Evidence')).toBeInTheDocument()
@@ -72,7 +73,7 @@ describe('EvidenceActions', () => {
     })
 
     it('shows only remove for WITHDRAWN', () => {
-      renderEvidenceActions({ ...baseClaim, status: 'WITHDRAWN' })
+      renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Withdrawn })
 
       fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
       expect(screen.getByText('Remove Evidence')).toBeInTheDocument()
@@ -80,21 +81,21 @@ describe('EvidenceActions', () => {
     })
 
     it('shows no dropdown items for SUBMITTED', () => {
-      renderEvidenceActions({ ...baseClaim, status: 'SUBMITTED' })
+      renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Submitted })
       fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
       expect(screen.queryByText('Edit Evidence')).not.toBeInTheDocument()
       expect(screen.queryByText('Remove Evidence')).not.toBeInTheDocument()
     })
 
     it('shows no dropdown items for APPROVED', () => {
-      renderEvidenceActions({ ...baseClaim, status: 'APPROVED' })
+      renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Approved })
       fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
       expect(screen.queryByText('Edit Evidence')).not.toBeInTheDocument()
       expect(screen.queryByText('Remove Evidence')).not.toBeInTheDocument()
     })
 
     it('shows no dropdown items for REJECTED', () => {
-      renderEvidenceActions({ ...baseClaim, status: 'REJECTED' })
+      renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Rejected })
       fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
       expect(screen.queryByText('Edit Evidence')).not.toBeInTheDocument()
       expect(screen.queryByText('Remove Evidence')).not.toBeInTheDocument()
