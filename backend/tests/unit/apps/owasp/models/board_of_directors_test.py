@@ -13,6 +13,11 @@ class TestBoardOfDirectorsModel:
         assert BoardOfDirectors._meta.db_table == "owasp_board_of_directors"
         assert BoardOfDirectors._meta.verbose_name_plural == "Board of Directors"
 
+    def test_reviews_threshold_default_three(self):
+        field = BoardOfDirectors._meta.get_field("reviews_threshold")
+
+        assert field.default == 3
+
     def test_year_field_unique(self):
         field = BoardOfDirectors._meta.get_field("year")
 

@@ -254,3 +254,9 @@ class TestUserModel:
             User, "created_releases", all=Mock(return_value=["release1", "release2"])
         ):
             assert user.releases == ["release1", "release2"]
+
+    def test_is_claim_reviewer_default_false(self):
+        """Test is_claim_reviewer defaults to False."""
+        field = User._meta.get_field("is_claim_reviewer")
+
+        assert field.default is False
