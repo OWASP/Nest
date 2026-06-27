@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=BoardOfDirectors)
 def board_post_save_re_evaluate_claims(sender, instance, **kwargs):  # noqa: ARG001
     """Signal handler to re-evaluate claims when the threshold changes."""
+    update_fields = kwargs.get("update_fields")
+    if kwargs.get("created") or (
+        update_fields is not None and "reviews_threshold" not in update_fields
+    ):
+        return
+
     threshold = instance.reviews_threshold
     claims_to_approve = []
 
