@@ -105,6 +105,14 @@ const EvidenceDetailsPage = () => {
       a.target = '_blank'
       a.rel = 'noopener noreferrer'
       a.click()
+    } else {
+      addToast({
+        description: 'No file URL available for this evidence.',
+        title: 'Error',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 

@@ -1,5 +1,6 @@
 import { useLazyQuery, useQuery } from '@apollo/client/react'
-import { screen, waitFor } from '@testing-library/react'
+import { addToast } from '@heroui/toast'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { render } from 'wrappers/testUtil'
 import EvidenceDetailsPage from 'app/board/[year]/candidates/[login]/claims/[claimKey]/evidences/[evidenceKey]/page'
@@ -46,6 +47,11 @@ jest.mock('components/EvidenceActions', () => ({
 const mockUseQuery = useQuery as unknown as jest.Mock
 const mockUseLazyQuery = useLazyQuery as unknown as jest.Mock
 const mockUseDjangoSession = useDjangoSession as jest.Mock
+const mockAddToast = addToast as jest.Mock
+
+let mockFetchFileUrl: jest.Mock
+let createElementSpy: jest.SpyInstance
+let clickSpy: jest.SpyInstance
 
 const stableData = {
   boardCandidateClaim: {
@@ -92,11 +98,14 @@ describe('EvidenceDetailsPage', () => {
       status: 'authenticated',
     })
     mockUseQuery.mockReturnValue({ data: stableData, loading: false, error: null })
-    mockUseLazyQuery.mockReturnValue([jest.fn(), { loading: false }])
+    mockFetchFileUrl = jest.fn()
+    mockUseLazyQuery.mockReturnValue([mockFetchFileUrl, { loading: false }])
+    createElementSpy = jest.spyOn(document, 'createElement')
+    clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    jest.restoreAllMocks()
   })
 
   test('renders loading state when query is loading', () => {
@@ -213,5 +222,75 @@ describe('EvidenceDetailsPage', () => {
       expect(screen.getByTestId('error-display')).toBeInTheDocument()
     })
     expect(screen.getByTestId('error-title')).toHaveTextContent('Error loading evidence')
+  })
+
+  test('downloads file when URL is returned', async () => {
+    mockFetchFileUrl.mockResolvedValue({
+      data: { boardCandidateClaimEvidenceFileUrl: 'https://example.com/file.pdf' },
+    })
+
+    render(<EvidenceDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /download evidence/i })).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /download evidence/i }))
+
+    await waitFor(() => {
+      expect(mockFetchFileUrl).toHaveBeenCalledWith({
+        variables: {
+          claimKey: 'experience-leadership',
+          key: 'certificate',
+          login: 'testuser',
+          year: 2025,
+        },
+      })
+    })
+    expect(createElementSpy).toHaveBeenCalledWith('a')
+    expect(clickSpy).toHaveBeenCalled()
+  })
+
+  test('shows error toast when file URL is null', async () => {
+    mockFetchFileUrl.mockResolvedValue({
+      data: { boardCandidateClaimEvidenceFileUrl: null },
+    })
+
+    render(<EvidenceDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /download evidence/i })).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /download evidence/i }))
+
+    await waitFor(() => {
+      expect(mockAddToast).toHaveBeenCalledWith({
+        description: 'No file URL available for this evidence.',
+        title: 'Error',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
+    })
+  })
+
+  test('shows error toast when fetchFileUrl rejects', async () => {
+    mockFetchFileUrl.mockRejectedValue(new Error('network error'))
+
+    render(<EvidenceDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /download evidence/i })).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /download evidence/i }))
+
+    await waitFor(() => {
+      expect(mockAddToast).toHaveBeenCalledWith({
+        description: 'Unable to download evidence. Please try again.',
+        title: 'Error',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
+    })
   })
 })
