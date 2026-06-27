@@ -1,14 +1,15 @@
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import { FaExclamationCircle } from 'react-icons/fa'
+import { FaExclamationCircle, FaRegClock } from 'react-icons/fa'
 import { FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { RepositoryCardListProps, RepositoryCardProps } from 'types/project'
-import InfoItem from 'components/InfoItem'
+import InfoItem, { TextInfoItem } from 'components/InfoItem'
 import ShowMoreButton from 'components/ShowMoreButton'
 import StatusBadge from 'components/StatusBadge'
 import { TruncatedText } from 'components/TruncatedText'
+import { formatDate } from 'utils/dateFormatter'
 
 const RepositoryCard: React.FC<RepositoryCardListProps> = ({
   maxInitialDisplay = 4,
@@ -54,7 +55,7 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   }
 
   return (
-    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-start justify-between gap-2">
         <button
           type="button"
@@ -86,6 +87,9 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
           unit="Issue"
           value={details.openIssuesCount}
         />
+        {details.updatedAt && (
+          <TextInfoItem icon={FaRegClock} label="Updated" value={formatDate(details.updatedAt)} />
+        )}
       </div>
     </div>
   )

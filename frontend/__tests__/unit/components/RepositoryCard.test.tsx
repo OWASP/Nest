@@ -30,11 +30,15 @@ jest.mock('components/TruncatedText', () => ({
   TruncatedText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
-jest.mock('components/InfoItem', () => {
-  return function MockInfoItem({ unit, value }: { unit: string; value: number }) {
+jest.mock('components/InfoItem', () => ({
+  __esModule: true,
+  default: function MockInfoItem({ unit, value }: { unit: string; value: number }) {
     return <div data-testid={`info-item-${unit}`}>{value}</div>
-  }
-})
+  },
+  TextInfoItem: function MockTextInfoItem({ label, value }: { label: string; value: string }) {
+    return <div data-testid={`text-info-item-${label.toLowerCase()}`}>{value}</div>
+  },
+}))
 
 const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.Mock
@@ -69,6 +73,7 @@ describe('RepositoryCard', () => {
     },
     starsCount: 100 + index,
     subscribersCount: 20 + index,
+    updatedAt: '2024-06-15T00:00:00.000Z',
     url: `https://github.com/org-${index}/repo-${index}`,
   })
 
@@ -341,6 +346,55 @@ describe('RepositoryCard', () => {
       fireEvent.click(repositoryButton)
 
       expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    })
+  })
+
+  describe('Last Updated Date on Repository Cards', () => {
+    it('displays formatted updatedAt date when provided', () => {
+      const repository: RepositoryCardProps = {
+        ...createMockRepository(0),
+        updatedAt: '2024-06-15T00:00:00.000Z',
+      }
+
+      render(<RepositoryCard repositories={[repository]} />)
+
+      expect(screen.getByTestId('text-info-item-updated')).toBeInTheDocument()
+    })
+
+    it('does not display updated date when updatedAt is undefined', () => {
+      const repository: RepositoryCardProps = {
+        ...createMockRepository(0),
+        updatedAt: undefined,
+      }
+
+      render(<RepositoryCard repositories={[repository]} />)
+
+      expect(screen.queryByTestId('text-info-item-updated')).not.toBeInTheDocument()
+    })
+
+    it('displays updated date for each repository in list', () => {
+      const repositories = Array.from({ length: 3 }, (_, i) => ({
+        ...createMockRepository(i),
+        updatedAt: '2024-06-15T00:00:00.000Z',
+      }))
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const updatedItems = screen.getAllByTestId('text-info-item-updated')
+      expect(updatedItems).toHaveLength(3)
+    })
+
+    it('only shows updated date for repositories that have updatedAt', () => {
+      const repositories = [
+        { ...createMockRepository(0), updatedAt: '2024-06-15T00:00:00.000Z' },
+        { ...createMockRepository(1), updatedAt: undefined },
+        { ...createMockRepository(2), updatedAt: '2024-03-01T00:00:00.000Z' },
+      ]
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const updatedItems = screen.getAllByTestId('text-info-item-updated')
+      expect(updatedItems).toHaveLength(2)
     })
   })
 

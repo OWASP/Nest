@@ -72,5 +72,6 @@ export type RepositoryCardProps = {
   organization?: Organization | null
   starsCount: number
   subscribersCount?: number
+  updatedAt?: string
   url: string
 }

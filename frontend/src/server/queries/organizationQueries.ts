@@ -88,6 +88,7 @@ export const GET_ORGANIZATION_DATA = gql`
         login
       }
       starsCount
+      updatedAt
       url
     }
     recentIssues(limit: 5, organization: $login, distinct: true) {
