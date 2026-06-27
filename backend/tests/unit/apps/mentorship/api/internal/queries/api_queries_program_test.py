@@ -125,22 +125,26 @@ class TestManagementProgram:
     """Tests for the get_management_program query (staff-only management UI)."""
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
-    def test_management_program_success(
+    @pytest.mark.asyncio
+    async def test_management_program_success(
         self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
     ) -> None:
         """Authenticated admin or mentor receives the program (including when published)."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.PUBLISHED
-        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
         mock_program.user_has_access.return_value = True
 
-        result = api_program_queries.get_management_program(info=mock_info, program_key="program1")
+        result = await api_program_queries.get_management_program(
+            info=mock_info, program_key="program1"
+        )
 
         assert result == mock_program
         mock_program.user_has_access.assert_called_once_with(mock_info.context.request.user)
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
-    def test_management_program_forbidden_when_not_staff_on_published(
+    @pytest.mark.asyncio
+    async def test_management_program_forbidden_when_not_staff_on_published(
         self,
         mock_program_prefetch_related: MagicMock,
         mock_info: MagicMock,
@@ -149,33 +153,41 @@ class TestManagementProgram:
         """Published programs still require admin or mentor for get_management_program."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.PUBLISHED
-        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
         mock_program.user_has_access.return_value = False
 
         with pytest.raises(GraphQLError) as exc_info:
-            api_program_queries.get_management_program(info=mock_info, program_key="program1")
+            await api_program_queries.get_management_program(
+                info=mock_info, program_key="program1"
+            )
 
         assert exc_info.value.extensions["code"] == "FORBIDDEN"
 
-    def test_management_program_unauthenticated(
+    @pytest.mark.asyncio
+    async def test_management_program_unauthenticated(
         self, mock_anonymous_info: MagicMock, api_program_queries
     ) -> None:
         """Anonymous users cannot call get_management_program."""
         with pytest.raises(GraphQLError) as exc_info:
-            api_program_queries.get_management_program(
+            await api_program_queries.get_management_program(
                 info=mock_anonymous_info, program_key="program1"
             )
 
         assert exc_info.value.extensions["code"] == "UNAUTHORIZED"
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
-    def test_management_program_not_found(
+    @pytest.mark.asyncio
+    async def test_management_program_not_found(
         self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
     ) -> None:
         """Missing program returns None."""
-        mock_program_prefetch_related.return_value.get.side_effect = Program.DoesNotExist
+        mock_program_prefetch_related.return_value.aget = AsyncMock(
+            side_effect=Program.DoesNotExist
+        )
 
-        result = api_program_queries.get_management_program(info=mock_info, program_key="missing")
+        result = await api_program_queries.get_management_program(
+            info=mock_info, program_key="missing"
+        )
 
         assert result is None
 

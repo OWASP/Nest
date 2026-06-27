@@ -52,8 +52,8 @@ class FakeModuleNode:
     def mock_mentors(self):
         return _call_module_resolver(self, "mentors")
 
-    def mock_mentees(self):
-        return _call_module_resolver(self, "mentees")
+    async def mock_mentees(self):
+        return await _call_module_resolver(self, "mentees")
 
     def mock_issue_mentees(self, issue_number: int):
         return _call_module_resolver(self, "issue_mentees", issue_number=issue_number)
@@ -99,10 +99,15 @@ def mock_module_node():
     m = FakeModuleNode()
 
     m.mentors.all.return_value = [MagicMock(), MagicMock()]
-    m.menteemodule_set.select_related.return_value.filter.return_value.values_list.return_value = [
-        "github_user_id_1",
-        "github_user_id_2",
-    ]
+
+    async def _values_list_async_iter():
+        for item in ["github_user_id_1", "github_user_id_2"]:
+            yield item
+
+    values_list_mock = (
+        m.menteemodule_set.select_related.return_value.filter.return_value.values_list
+    )
+    values_list_mock.return_value = _values_list_async_iter()
     m.issues.filter.return_value.values_list.return_value = ["issue_id_1"]
     mocked_query_prefetch = m.issues.select_related.return_value.prefetch_related.return_value
     mocked_query_prefetch.filter.return_value.order_by.return_value = [MagicMock()]
@@ -138,7 +143,8 @@ class TestModuleNodeResolvers:
         assert len(mentors) == 2
         mock_module_node.mentors.all.assert_called_once()
 
-    def test_module_node_mentees(self, mock_module_node):
+    @pytest.mark.asyncio
+    async def test_module_node_mentees(self, mock_module_node):
         """Test the mentees resolver."""
         with patch("apps.github.models.user.User.objects") as mock_user_objects:
             mock_user_objects.filter.return_value.order_by.return_value = [
@@ -146,7 +152,7 @@ class TestModuleNodeResolvers:
                 MagicMock(),
             ]
 
-            mentees = mock_module_node.mock_mentees()
+            mentees = await mock_module_node.mock_mentees()
             assert len(mentees) == 2
             mock_module_node.menteemodule_set.select_related.assert_called_once_with(
                 "mentee__github_user"
