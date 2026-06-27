@@ -212,4 +212,9 @@ describe('DropdownActions', () => {
     fireEvent.keyDown(screen.getByRole('menu'), { key: 'a' })
     expect(screen.getByRole('menu')).toBeInTheDocument()
   })
+
+  it('renders nothing when options are empty', () => {
+    const { container } = render(<DropdownActions options={[]} />)
+    expect(container.innerHTML).toBe('')
+  })
 })

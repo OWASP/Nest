@@ -43,6 +43,8 @@ const DropdownActions: React.FC<DropdownActionsProps> = ({ options, label }) => 
     }
   }, [focusIndex])
 
+  if (options.length === 0) return null
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const optionsCount = options.length
 

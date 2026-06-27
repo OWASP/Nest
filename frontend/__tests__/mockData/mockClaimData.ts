@@ -74,6 +74,7 @@ export const mockSingleClaim = {
   name: 'Leadership Experience',
   description: 'Experience in leadership.',
   status: 'DRAFT',
+  hasEvidence: true,
   createdAt: '2025-01-15T10:00:00Z',
   updatedAt: '2025-01-15T10:00:00Z',
 }

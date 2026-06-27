@@ -20,7 +20,7 @@ import type { Claim } from 'types/claim'
 import DropdownActions from 'components/DropdownActions'
 
 interface ClaimActionsProps {
-  claim: Claim
+  claim: { key: string; status: ClaimStatusEnum }
   login: string
   year: string
 }
