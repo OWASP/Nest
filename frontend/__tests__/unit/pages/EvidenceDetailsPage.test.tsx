@@ -92,6 +92,7 @@ const stableData = {
 
 describe('EvidenceDetailsPage', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     mockUseDjangoSession.mockReturnValue({
       isSyncing: false,
       session: { user: { login: 'testuser' } },

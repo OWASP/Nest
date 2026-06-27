@@ -185,7 +185,7 @@ const EvidenceForm = ({
           />
           <FormFileInput
             id="evidence-file"
-            label="File"
+            label="File (optional)"
             onChange={handleFileChange}
             accept={EVIDENCE_ALLOWED_EXTENSIONS.map((e) => '.' + e).join(',')}
             selectedFile={formData.file}
