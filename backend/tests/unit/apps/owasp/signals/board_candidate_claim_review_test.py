@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
-from apps.owasp.signals.board_candidate_claim_review_signal import (
+from apps.owasp.signals.board_candidate_claim_review import (
     review_post_save_finalize_claim_decision,
 )
 
