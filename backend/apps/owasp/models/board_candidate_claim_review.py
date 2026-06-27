@@ -6,8 +6,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.github.models.user import User
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
-from apps.owasp.models.entity_member import EntityMember
 
 
 class BoardCandidateClaimReview(TimestampedModel):
@@ -39,11 +39,11 @@ class BoardCandidateClaimReview(TimestampedModel):
         verbose_name="Review Decision",
     )
     notes = models.TextField(blank=True, default="", verbose_name="Notes")
-    reviewer = models.ForeignKey(EntityMember, on_delete=models.CASCADE, related_name="reviews")
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Review."""
-        return f"{self.claim.name} - {self.reviewer.member.login}"
+        return f"{self.claim.name} - {self.reviewer.login}"
 
     def clean(self) -> None:
         """Validate review."""
@@ -53,18 +53,13 @@ class BoardCandidateClaimReview(TimestampedModel):
             err = "Review can only be added to submitted claims."
             raise ValidationError(err)
 
-        reviewer_user = self.reviewer.member
-        if not reviewer_user or not (
-            reviewer_user.is_owasp_staff or reviewer_user.is_claim_reviewer
+        if not self.reviewer or not (
+            self.reviewer.is_owasp_staff or self.reviewer.is_claim_reviewer
         ):
             err = "Only OWASP Staff or Claim Reviewers can review claims."
             raise ValidationError(err)
 
-        if (
-            reviewer_user
-            and self.claim.board
-            and self.claim.board.get_candidate(login=reviewer_user.login)
-        ):
+        if self.claim.board and self.claim.board.get_candidate(login=self.reviewer.login):
             err = "A candidate cannot review claims in the same election year."
             raise ValidationError(err)
 

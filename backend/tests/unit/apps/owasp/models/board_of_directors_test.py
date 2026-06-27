@@ -18,6 +18,11 @@ class TestBoardOfDirectorsModel:
 
         assert field.default == 3
 
+    def test_meta_constraints(self):
+        constraint_names = {c.name for c in BoardOfDirectors._meta.constraints}
+
+        assert "reviews_threshold_min_1" in constraint_names
+
     def test_year_field_unique(self):
         field = BoardOfDirectors._meta.get_field("year")
 
