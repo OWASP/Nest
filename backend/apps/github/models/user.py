@@ -48,6 +48,11 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     )
 
     has_public_member_page = models.BooleanField(default=True)
+    is_claim_reviewer = models.BooleanField(
+        default=False,
+        verbose_name="Is Claim Reviewer",
+        help_text="Indicates if the user is Claim reviewer for BoD candidate elections.",
+    )
     is_owasp_staff = models.BooleanField(
         default=False,
         verbose_name="Is OWASP Staff",

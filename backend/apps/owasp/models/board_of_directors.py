@@ -24,6 +24,11 @@ class BoardOfDirectors(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    reviews_threshold = models.PositiveSmallIntegerField(
+        default=3,
+        verbose_name="Reviews Threshold",
+        help_text="Minimum number of reviews required to finalize a claim.",
+    )
     year = models.PositiveSmallIntegerField(unique=True)
 
     def __str__(self):
