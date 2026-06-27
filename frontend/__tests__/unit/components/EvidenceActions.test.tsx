@@ -82,21 +82,21 @@ describe('EvidenceActions', () => {
 
     it('shows no dropdown items for SUBMITTED', () => {
       renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Submitted })
-      fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
+      expect(screen.queryByRole('button', { name: /actions menu/i })).not.toBeInTheDocument()
       expect(screen.queryByText('Edit Evidence')).not.toBeInTheDocument()
       expect(screen.queryByText('Remove Evidence')).not.toBeInTheDocument()
     })
 
     it('shows no dropdown items for APPROVED', () => {
       renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Approved })
-      fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
+      expect(screen.queryByRole('button', { name: /actions menu/i })).not.toBeInTheDocument()
       expect(screen.queryByText('Edit Evidence')).not.toBeInTheDocument()
       expect(screen.queryByText('Remove Evidence')).not.toBeInTheDocument()
     })
 
     it('shows no dropdown items for REJECTED', () => {
       renderEvidenceActions({ ...baseClaim, status: ClaimStatusEnum.Rejected })
-      fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
+      expect(screen.queryByRole('button', { name: /actions menu/i })).not.toBeInTheDocument()
       expect(screen.queryByText('Edit Evidence')).not.toBeInTheDocument()
       expect(screen.queryByText('Remove Evidence')).not.toBeInTheDocument()
     })
