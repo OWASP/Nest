@@ -10,6 +10,7 @@ import strawberry_django
 
 from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROGRAM_ID
 from apps.github.api.internal.nodes.milestone import MilestoneNode  # noqa: TC001
+from apps.mentorship.api.internal.dataloaders.admin import ADMINS_BY_PROGRAM_ID_LOADER
 from apps.mentorship.api.internal.nodes.enum import (
     ExperienceLevelEnum,  # noqa: TC001
     ProgramStatusEnum,  # noqa: TC001
@@ -40,15 +41,15 @@ class ProgramNode:
     user_role: str | None = None
     tags: list[str] | None = None
 
-    @strawberry.field
-    def admins(
-        self,
+    @strawberry_django.field
+    async def admins(
+        self, root: Program, info: strawberry.Info
     ) -> (
         list[Annotated[AdminNode, strawberry.lazy("apps.mentorship.api.internal.nodes.admin")]]
         | None
     ):
         """Get the list of program administrators."""
-        return self.admins.order_by("github_user__login")
+        return await info.context.mentorship_dataloaders[ADMINS_BY_PROGRAM_ID_LOADER].load(root.pk)
 
     @strawberry_django.field
     async def recent_milestones(self, root: Program, info: strawberry.Info) -> list[MilestoneNode]:
