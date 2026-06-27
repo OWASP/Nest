@@ -7,10 +7,10 @@ RUN python -m pip install --no-cache-dir --require-hashes -r /tmp/cluster-fuzz-l
 
 COPY .clusterfuzzlite/seed_corpora $SRC/seed_corpora
 
-COPY backend/apps/__init__.py $SRC/apps/__init__.py
-COPY backend/apps/common/search $SRC/apps/common/search
-COPY backend/apps/slack/__init__.py $SRC/apps/slack/__init__.py
-COPY backend/apps/slack/common/text.py $SRC/apps/slack/common/text.py
+COPY backend/src/apps/__init__.py $SRC/apps/__init__.py
+COPY backend/src/apps/common/search $SRC/apps/common/search
+COPY backend/src/apps/slack/__init__.py $SRC/apps/slack/__init__.py
+COPY backend/src/apps/slack/common/text.py $SRC/apps/slack/common/text.py
 COPY backend/tests/cluster-fuzz-lite/apps $SRC/tests/cluster-fuzz-lite/apps
 COPY --chmod=755 .clusterfuzzlite/build.sh $SRC/build.sh
 

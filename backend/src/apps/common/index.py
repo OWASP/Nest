@@ -232,7 +232,9 @@ class IndexBase(AlgoliaIndex):
             int or None: The number of synonyms reindexed, or None if an error occurs.
 
         """
-        file_path = Path(f"{settings.BASE_DIR}/apps/{app_name}/index/synonyms/{index_name}.txt")
+        file_path = Path(
+            f"{settings.BASE_DIR}/src/apps/{app_name}/index/synonyms/{index_name}.txt"
+        )
 
         if not (synonyms := IndexBase._parse_synonyms_file(file_path)):
             return None
