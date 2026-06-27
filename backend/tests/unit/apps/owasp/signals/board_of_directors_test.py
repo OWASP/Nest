@@ -91,3 +91,36 @@ class TestBoardPostSaveReEvaluateClaims:
             [claim_a, claim_b], ["is_locked", "status"]
         )
         mock_logger.info.assert_called_once()
+
+    @patch("apps.owasp.signals.board_of_directors.BoardCandidateClaim")
+    def test_skips_when_threshold_not_in_update_fields(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        instance = MagicMock(spec=BoardOfDirectors)
+        instance.claims.filter.return_value = [MagicMock()]
+
+        board_post_save_re_evaluate_claims(sender=None, instance=instance, update_fields=["year"])
+
+        instance.claims.filter.assert_not_called()
+        mock_claim_model.objects.bulk_update.assert_not_called()
+
+    def test_skips_for_new_board(self):
+        instance = MagicMock(spec=BoardOfDirectors)
+
+        board_post_save_re_evaluate_claims(sender=None, instance=instance, created=True)
+
+        instance.claims.filter.assert_not_called()
+
+    @patch("apps.owasp.signals.board_of_directors.BoardCandidateClaim")
+    def test_runs_when_threshold_in_update_fields(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        instance = MagicMock(spec=BoardOfDirectors)
+        instance.reviews_threshold = 2
+        instance.year = 2025
+        instance.claims.filter.return_value = []
+
+        board_post_save_re_evaluate_claims(
+            sender=None, instance=instance, update_fields=["reviews_threshold"]
+        )
+
+        instance.claims.filter.assert_called_once()
+        mock_claim_model.objects.bulk_update.assert_not_called()
