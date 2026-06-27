@@ -24,6 +24,7 @@ from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
 ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
+DEADLINE_OUT_OF_RANGE_MSG = "Deadline must be within the module's start and end dates."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
 NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
@@ -48,20 +49,6 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
             raise ValueError(msg) from e
 
     return mentors
-
-
-def _is_mentor_of_module(user, module) -> bool:
-    """Check if the given user is a mentor for the module.
-
-    Runs a fallback check against github_user if the mentor hasn't linked
-    their nest_user profile yet.
-    """
-    if Mentor.objects.filter(nest_user=user, modules=module).exists():
-        return True
-    return (
-        hasattr(user, "github_user")
-        and Mentor.objects.filter(github_user=user.github_user, modules=module).exists()
-    )
 
 
 def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
@@ -177,7 +164,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -216,7 +203,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_UNASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -257,7 +244,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
@@ -277,8 +264,8 @@ class ModuleMutation:
         if timezone.is_naive(normalized_deadline):
             normalized_deadline = timezone.make_aware(normalized_deadline)
 
-        if normalized_deadline.date() < timezone.now().date():
-            raise ValidationError(message="Deadline cannot be in the past.")
+        if not module.started_at.date() <= normalized_deadline.date() <= module.ended_at.date():
+            raise ValidationError(message=DEADLINE_OUT_OF_RANGE_MSG)
 
         now = timezone.now()
         tasks_to_update: list[Task] = []
@@ -319,7 +306,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
+        if not module.has_mentor(user):
             raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
 
         issue = (
@@ -371,9 +358,7 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
-        is_admin = module.program.admins.filter(nest_user=user).exists()
-        is_mentor = _is_mentor_of_module(user, module)
-        if not (is_admin or is_mentor):
+        if not module.program.has_admin(user) and not module.has_mentor(user):
             msg = "Only admins of the program or mentors of this module can edit modules."
             raise PermissionDenied(msg)
 

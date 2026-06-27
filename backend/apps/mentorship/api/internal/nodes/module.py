@@ -84,7 +84,8 @@ class ModuleNode:
         self, info: Info, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
-        if not self.program or not self.program.user_has_access(info.context.request.user):
+        user = info.context.request.user
+        if not self.program or (not self.program.has_admin(user) and not self.has_mentor(user)):
             return []
 
         info.context.current_module = self
@@ -153,7 +154,8 @@ class ModuleNode:
     @strawberry.field
     def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
-        if not self.program or not self.program.user_has_access(info.context.request.user):
+        user = info.context.request.user
+        if not self.program or (not self.program.has_admin(user) and not self.has_mentor(user)):
             return None
 
         info.context.current_module = self

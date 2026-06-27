@@ -430,7 +430,7 @@ class TestModuleMutationAssignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.exists.return_value = False
+        mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can assign"):
@@ -562,7 +562,7 @@ class TestModuleMutationUnassignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.exists.return_value = False
+        mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
@@ -646,6 +646,8 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
@@ -709,7 +711,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.exists.return_value = False
+        mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
@@ -785,6 +787,8 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
@@ -822,15 +826,66 @@ class TestModuleMutationSetTaskDeadline:
         assert result == mock_mod
         mock_tz.make_aware.assert_called_once_with(naive_deadline)
 
+    @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_in_past(self, mock_tz, mock_module, mock_mentor):
-        """Test ValidationError when deadline is in the past."""
+    def test_set_deadline_past_within_range(self, mock_tz, mock_module, mock_mentor, mock_task):
+        """Test a past deadline succeeds when it falls within the module's range."""
+        user = MagicMock()
+        info = self._make_info(user)
+        mock_task.Status = Task.Status
+
+        mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
+            mock_mod
+        )
+        mock_mentor.objects.filter.return_value.exists.return_value = True
+
+        mock_issue = MagicMock()
+        assignee = MagicMock()
+        assignees_qs = MagicMock()
+        assignees_qs.exists.return_value = True
+        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
+        mock_issue.assignees.all.return_value = assignees_qs
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+
+        # Deadline is in the past relative to "now" but still inside the module window.
+        past_deadline = datetime(2025, 3, 1, tzinfo=UTC)
+        mock_tz.is_naive.return_value = False
+        mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
+
+        mock_task_obj = MagicMock()
+        mock_task_obj.assigned_at = None
+        mock_task.objects.get_or_create.return_value = (mock_task_obj, True)
+
+        mutation = ModuleMutation()
+        result = mutation.set_task_deadline(
+            info,
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_number=1,
+            deadline_at=past_deadline,
+        )
+
+        assert result == mock_mod
+        mock_task.objects.bulk_update.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.timezone")
+    def test_set_deadline_before_module_start(self, mock_tz, mock_module, mock_mentor):
+        """Test ValidationError when deadline is before the module's start date."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
@@ -841,18 +896,53 @@ class TestModuleMutationSetTaskDeadline:
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
-        past_deadline = datetime(2020, 1, 1, tzinfo=UTC)
+        early_deadline = datetime(2024, 12, 31, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
         mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
 
         mutation = ModuleMutation()
-        with pytest.raises(ValidationError, match="Deadline cannot be in the past"):
+        with pytest.raises(ValidationError, match="within the module's start and end dates"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
                 issue_number=1,
-                deadline_at=past_deadline,
+                deadline_at=early_deadline,
+            )
+
+    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.timezone")
+    def test_set_deadline_after_module_end(self, mock_tz, mock_module, mock_mentor):
+        """Test ValidationError when deadline is after the module's end date."""
+        user = MagicMock()
+        info = self._make_info(user)
+        mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
+            mock_mod
+        )
+        mock_mentor.objects.filter.return_value.exists.return_value = True
+
+        mock_issue = MagicMock()
+        mock_issue.assignees.all.return_value.exists.return_value = True
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+
+        late_deadline = datetime(2026, 1, 1, tzinfo=UTC)
+        mock_tz.is_naive.return_value = False
+        mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
+
+        mutation = ModuleMutation()
+        with pytest.raises(ValidationError, match="within the module's start and end dates"):
+            mutation.set_task_deadline(
+                info,
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_number=1,
+                deadline_at=late_deadline,
             )
 
 
@@ -1032,7 +1122,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.exists.return_value = False
+        mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
@@ -1173,10 +1263,10 @@ class TestModuleMutationUpdateModule:
         info = self._make_info(user)
         input_data = self._make_input_data()
         mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = False
+        mock_mod.program.has_admin.return_value = False
         mod_qs = mock_module.objects.select_related.return_value
         mod_qs.select_for_update.return_value.get.return_value = mock_mod
-        mock_mentor.objects.filter.return_value.exists.return_value = False
+        mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(

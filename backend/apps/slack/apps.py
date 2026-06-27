@@ -28,6 +28,7 @@ class SlackConfig(AppConfig):
     def ready(self):
         """Configure Slack events when the app is ready."""
         super().ready()
+        from apps.slack import actions, commands  # noqa: F401, PLC0415 -- register handlers
         from apps.slack.events import configure_slack_events  # noqa: PLC0415
 
         configure_slack_events()

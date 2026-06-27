@@ -6,10 +6,6 @@ on:
     branches:
       - feature/**
       - main
-  push:
-    branches:
-      - feature/**
-      - main
   workflow_dispatch:
 
 concurrency:
@@ -37,3 +33,9 @@ jobs:
       contents: read
       id-token: write
     uses: ./.github/workflows/run-code-tests.yaml
+
+  run-dependency-audit:
+    name: Dependency audit
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-dependency-audit.yaml

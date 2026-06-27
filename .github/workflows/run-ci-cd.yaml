@@ -15,6 +15,34 @@ on:
         description: Use Fargate spot for backend
         required: true
         type: boolean
+      auto_scaling_cpu_target:
+        description: Target average CPU utilization percentage for ECS service auto scaling
+        required: true
+        type: number
+      auto_scaling_scale_in_cooldown:
+        description: Cooldown period in seconds after an ECS service scale-in activity
+        required: true
+        type: number
+      auto_scaling_scale_out_cooldown:
+        description: Cooldown period in seconds after an ECS service scale-out activity
+        required: true
+        type: number
+      backend_desired_count:
+        description: Desired number of backend tasks
+        required: true
+        type: number
+      backend_enable_auto_scaling:
+        description: Enable auto scaling for backend
+        required: true
+        type: boolean
+      backend_max_count:
+        description: Maximum number of backend tasks for auto scaling
+        required: true
+        type: number
+      backend_min_count:
+        description: Minimum number of backend tasks for auto scaling
+        required: true
+        type: number
       base_url:
         description: The base URL for Lighthouse and ZAP scans
         required: true
@@ -52,6 +80,22 @@ on:
         description: Use Fargate spot for frontend
         required: true
         type: boolean
+      frontend_desired_count:
+        description: Desired number of frontend tasks
+        required: true
+        type: number
+      frontend_enable_auto_scaling:
+        description: Enable auto scaling for frontend
+        required: true
+        type: boolean
+      frontend_max_count:
+        description: Maximum number of frontend tasks for auto scaling
+        required: true
+        type: number
+      frontend_min_count:
+        description: Minimum number of frontend tasks for auto scaling
+        required: true
+        type: number
       release_tag:
         description: Release tag for uploading SBOM (Production only)
         required: false
@@ -172,8 +216,7 @@ jobs:
       - run-release-version-resolution
     permissions:
       actions: write
-      contents: write
-      id-token: write
+      contents: read
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -186,13 +229,37 @@ jobs:
       backend_ecr_repo: nest-${{ inputs.environment }}-backend
       environment: ${{ inputs.environment }}
       frontend_ecr_repo: nest-${{ inputs.environment }}-frontend
+      release_version: ${{ needs.run-release-version-resolution.outputs.release_version }}
+
+  run-image-sign:
+    name: Image sign
+    needs:
+      - run-image-scan
+      - run-release-version-resolution
+    permissions:
+      actions: write
+      attestations: write
+      contents: write
+      id-token: write
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    uses: ./.github/workflows/run-image-sign.yaml
+    with:
+      aws_role_name: nest-${{ inputs.environment }}-terraform
+      aws_role_session_name: github-actions-${{ inputs.environment }}-image-sign
+      backend_ecr_repo: nest-${{ inputs.environment }}-backend
+      environment: ${{ inputs.environment }}
+      frontend_ecr_repo: nest-${{ inputs.environment }}-frontend
       release_tag: ${{ inputs.release_tag }}
       release_version: ${{ needs.run-release-version-resolution.outputs.release_version }}
 
   run-infrastructure-bootstrap:
     name: Infrastructure bootstrap
     needs:
-      - run-image-scan
+      - run-image-sign
     permissions:
       contents: read
     secrets:
@@ -221,6 +288,13 @@ jobs:
     with:
       aws_role_name: nest-${{ inputs.environment }}-terraform
       aws_role_session_name: github-actions-${{ inputs.environment }}-deploy
+      auto_scaling_cpu_target: ${{ inputs.auto_scaling_cpu_target }}
+      auto_scaling_scale_in_cooldown: ${{ inputs.auto_scaling_scale_in_cooldown }}
+      auto_scaling_scale_out_cooldown: ${{ inputs.auto_scaling_scale_out_cooldown }}
+      backend_desired_count: ${{ inputs.backend_desired_count }}
+      backend_enable_auto_scaling: ${{ inputs.backend_enable_auto_scaling }}
+      backend_max_count: ${{ inputs.backend_max_count }}
+      backend_min_count: ${{ inputs.backend_min_count }}
       backend_use_fargate_spot: ${{ inputs.backend_use_fargate_spot }}
       django_configuration: ${{ inputs.django_configuration }}
       django_settings_module: ${{ inputs.django_settings_module }}
@@ -229,6 +303,10 @@ jobs:
       enable_nat_gateway: ${{ inputs.enable_nat_gateway }}
       enable_rds_proxy: ${{ inputs.enable_rds_proxy }}
       environment: ${{ inputs.environment }}
+      frontend_desired_count: ${{ inputs.frontend_desired_count }}
+      frontend_enable_auto_scaling: ${{ inputs.frontend_enable_auto_scaling }}
+      frontend_max_count: ${{ inputs.frontend_max_count }}
+      frontend_min_count: ${{ inputs.frontend_min_count }}
       frontend_use_fargate_spot: ${{ inputs.frontend_use_fargate_spot }}
       index_task_definition: nest-${{ inputs.environment }}-index-data
       migrate_task_definition: nest-${{ inputs.environment }}-migrate

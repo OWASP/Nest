@@ -76,15 +76,22 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
     return count
   }
 
-  const getDeadlineStatus = (deadline?: string | null) => {
+  const getDeadlineStatus = (deadline: string | null | undefined, isOpen: boolean) => {
     if (!deadline)
       return {
         text: 'No Deadline',
         class: 'border border-dashed border-gray-500 text-gray-500 bg-transparent',
       }
 
-    const now = new Date()
     const deadlineDate = new Date(deadline)
+
+    if (!isOpen)
+      return {
+        text: deadlineDate.toLocaleDateString(),
+        class: 'bg-gray-500/15 text-gray-400 border border-gray-500/30',
+      }
+
+    const now = new Date()
     const utcStart = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
     const diffDays = Math.floor((utcStart(deadlineDate) - utcStart(now)) / 86400000)
 
@@ -216,7 +223,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
               {/* Deadline */}
               {showDeadline &&
                 (() => {
-                  const status = getDeadlineStatus(issue.deadline)
+                  const status = getDeadlineStatus(issue.deadline, issue.state === 'open')
                   return (
                     <td className="block pt-2 text-right lg:table-cell lg:px-6 lg:py-4 lg:pt-0">
                       <span

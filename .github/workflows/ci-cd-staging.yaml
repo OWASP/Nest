@@ -1,4 +1,4 @@
-name: CI/CD Staging
+name: Deploy to Staging
 
 on:
   schedule:
@@ -17,8 +17,10 @@ env:
 jobs:
   run-ci-cd:
     name: Run staging CI/CD
+    if: github.event.repository.fork == false
     permissions:
       actions: write
+      attestations: write
       contents: write
       id-token: write
     secrets:
@@ -45,6 +47,13 @@ jobs:
     with:
       backend_gid: '1001'
       backend_uid: '1001'
+      auto_scaling_cpu_target: 75
+      auto_scaling_scale_in_cooldown: 180
+      auto_scaling_scale_out_cooldown: 60
+      backend_desired_count: 1
+      backend_enable_auto_scaling: true
+      backend_max_count: 3
+      backend_min_count: 1
       backend_use_fargate_spot: true
       base_url: https://nest.owasp.dev
       django_configuration: Staging
@@ -53,5 +62,9 @@ jobs:
       enable_nat_gateway: false
       enable_rds_proxy: false
       environment: staging
+      frontend_desired_count: 1
+      frontend_enable_auto_scaling: true
+      frontend_max_count: 3
+      frontend_min_count: 1
       frontend_use_fargate_spot: true
       tasks_use_fargate_spot: true
