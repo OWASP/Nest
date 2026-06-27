@@ -1,2 +1,2 @@
-from .board_candidate_claim_review import review_post_save_finalize_claim_decision
-from .board_of_directors import board_post_save_re_evaluate_claims
+from .board_candidate_claim_review_signal import review_post_save_finalize_claim_decision
+from .board_of_directors_signal import board_post_save_re_evaluate_claims
