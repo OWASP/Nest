@@ -36,6 +36,7 @@ export const FormFileInput = ({
           type="file"
           onChange={onChange}
           accept={accept}
+          required={required}
           className="w-full text-sm text-gray-700 file:mr-3 file:rounded file:border-0 file:bg-[#1D7BD7] file:px-3 file:py-1 file:text-sm file:text-white hover:file:bg-[#1a6ebd] dark:text-gray-200"
         />
         {selectedFile && <p className="truncate text-sm text-gray-500">{selectedFile.name}</p>}

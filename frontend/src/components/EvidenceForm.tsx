@@ -80,6 +80,13 @@ const EvidenceForm = ({
         return next
       })
     }
+    if (file && backendErrors['sourceUrl']) {
+      setBackendErrors((prev) => {
+        const next = { ...prev }
+        delete next['sourceUrl']
+        return next
+      })
+    }
   }
 
   const errors = useFormValidation(
@@ -178,7 +185,7 @@ const EvidenceForm = ({
           />
           <FormFileInput
             id="evidence-file"
-            label="File (optional)"
+            label="File"
             onChange={handleFileChange}
             accept={EVIDENCE_ALLOWED_EXTENSIONS.map((e) => '.' + e).join(',')}
             selectedFile={formData.file}
