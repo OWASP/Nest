@@ -71,7 +71,13 @@ class BoardCandidateClaimQuery:
 
         """
         try:
-            claim = BoardCandidateClaim.objects.get(
+            claim = BoardCandidateClaim.objects.annotate(
+                evidence_exists=Exists(
+                    BoardCandidateClaimEvidence.objects.filter(
+                        claim=OuterRef("pk"), is_removed=False
+                    )
+                ),
+            ).get(
                 board__year=year,
                 candidate__member__login=login,
                 key=key,
