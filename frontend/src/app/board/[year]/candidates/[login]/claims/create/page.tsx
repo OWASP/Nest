@@ -5,7 +5,7 @@ import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-import { handleAppError } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetBoardCandidateDocument } from 'types/__generated__/boardQueries.generated'
 import { CreateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
@@ -43,6 +43,16 @@ const CreateClaimPage = () => {
 
   if (isSyncing || isCandidateLoading) {
     return <LoadingSpinner />
+  }
+
+  if (candidateQueryError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading candidate"
+        message="An error occurred while loading the candidate data"
+      />
+    )
   }
 
   const isCandidate = candidateGraphQLData?.boardOfDirectors?.candidate != null

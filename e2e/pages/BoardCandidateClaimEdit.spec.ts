@@ -11,7 +11,7 @@ const mockData = {
     ...mockSingleClaim,
   },
   updateBoardCandidateClaim: {
-    __typename: 'UpdateBoardCandidateClaimResult',
+    __typename: 'ClaimResult',
     ok: true,
     message: 'Claim updated successfully!',
     claim: {

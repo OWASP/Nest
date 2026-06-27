@@ -3,12 +3,12 @@ import { ClaimStatusEnum } from 'types/__generated__/graphql'
 export type Claim = {
   __typename?: string
   id: string
-  createdAt?: string
+  createdAt: string
   description: string
-  hasEvidence?: boolean
+  hasEvidence: boolean
   key: string
   name: string
-  order?: number
+  order: number
   status: ClaimStatusEnum
-  updatedAt?: string
+  updatedAt: string
 }
