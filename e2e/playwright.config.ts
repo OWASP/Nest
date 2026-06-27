@@ -24,12 +24,12 @@ export default defineConfig({
     : [['list', { printSteps: true }]],
   retries: 2,
   testDir: '.',
-  timeout: 120_000,
+  timeout: 30_000,
   use: {
     baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
     headless: true,
-    navigationTimeout: 60_000,
+    navigationTimeout: 15_000,
     trace: 'off',
   },
-  workers: Math.max(1, os.cpus().length - 1),
+  workers: Math.max(1, Math.floor(os.cpus().length / 2)),
 })

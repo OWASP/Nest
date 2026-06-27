@@ -213,7 +213,7 @@ class TestModuleMutationCreateModule:
 
         mock_creator = MagicMock()
         mock_mentor.objects.get.return_value = mock_creator
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
 
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
 
@@ -260,7 +260,7 @@ class TestModuleMutationCreateModule:
         mock_project.objects.get.return_value = MagicMock()
         mock_creator = MagicMock()
         mock_mentor.objects.get.return_value = mock_creator
-        mock_prog.admins.filter.return_value.exists.return_value = False
+        mock_prog.has_admin.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
@@ -1447,7 +1447,7 @@ class TestModuleMutationDeleteModule:
         info = self._make_info(user)
 
         mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = False
+        mock_mod.program.has_admin.return_value = False
 
         mock_module.objects.select_related.return_value.get.return_value = mock_mod
         mock_module.DoesNotExist = ObjectDoesNotExist
@@ -1520,7 +1520,7 @@ class TestModuleMutationReorderModules:
 
         mock_prog = MagicMock()
         mock_program.objects.get.return_value = mock_prog
-        mock_prog.admins.filter.return_value.exists.return_value = False
+        mock_prog.has_admin.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
@@ -1549,7 +1549,7 @@ class TestModuleMutationReorderModules:
 
         mock_prog = MagicMock()
         mock_program.objects.get.return_value = mock_prog
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
 
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match=r"Duplicate module keys are not allowed."):
