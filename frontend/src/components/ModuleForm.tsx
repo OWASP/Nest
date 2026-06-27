@@ -39,7 +39,6 @@ interface ModuleFormProps {
   setFormData: React.Dispatch<React.SetStateAction<ModuleFormProps['formData']>>
   onSubmit: (e: React.FormEvent) => void
   loading: boolean
-  isEdit?: boolean
   title: string
   submitText?: string
   minDate?: string

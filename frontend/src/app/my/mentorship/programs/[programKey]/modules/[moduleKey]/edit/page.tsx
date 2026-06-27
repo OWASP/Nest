@@ -190,7 +190,6 @@ const EditModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       submitText="Save"
-      isEdit
       validationErrors={validationErrors}
       minDate={
         data?.managementProgram?.startedAt

@@ -325,18 +325,21 @@ describe('ModuleForm', () => {
       expect(screen.getByTestId('text-input-module-labels')).toBeInTheDocument()
     })
 
-    it('renders mentor logins field when isEdit is false', () => {
-      renderModuleForm({ isEdit: false })
+    it('renders and updates mentor logins field', () => {
+      renderModuleForm()
       expect(screen.getByTestId('text-input-module-mentor-logins')).toBeInTheDocument()
 
       const input = screen.getByTestId('input-module-mentor-logins')
       fireEvent.change(input, { target: { value: 'johndoe, Kateryna' } })
       expect(mockSetFormData).toHaveBeenCalled()
-    })
 
-    it('renders mentor logins field when isEdit is true', () => {
-      renderModuleForm({ isEdit: true })
-      expect(screen.getByTestId('text-input-module-mentor-logins')).toBeInTheDocument()
+      const setterFn = mockSetFormData.mock.calls[mockSetFormData.mock.calls.length - 1][0]
+      const result = setterFn(defaultFormData)
+      expect(result).toEqual(
+        expect.objectContaining({
+          mentorLogins: 'johndoe, Kateryna',
+        })
+      )
     })
   })
 
@@ -381,13 +384,6 @@ describe('ModuleForm', () => {
       expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    it('updates mentor logins field when in edit mode (line 312)', () => {
-      renderModuleForm({ isEdit: true })
-      const mentorInput = screen.getByTestId('input-module-mentor-logins')
-      fireEvent.change(mentorInput, { target: { value: 'johndoe, Kateryna' } })
-
-      expect(mockSetFormData).toHaveBeenCalled()
-    })
 
     it('updates start date field', () => {
       renderModuleForm()

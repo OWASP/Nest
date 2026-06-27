@@ -4,6 +4,7 @@ import logging
 
 import strawberry
 from django.db.models import Prefetch, Q
+from django.db.models.functions import Lower
 
 from apps.mentorship.api.internal.graphql_errors import (
     AuthenticationRequiredError,
@@ -39,7 +40,7 @@ class ModuleQuery:
                 Prefetch(
                     "mentors",
                     queryset=Mentor.objects.select_related("github_user").order_by(
-                        "github_user__login"
+                        Lower("github_user__login")
                     ),
                 )
             )
@@ -77,7 +78,7 @@ class ModuleQuery:
                 Prefetch(
                     "mentors",
                     queryset=Mentor.objects.select_related("github_user").order_by(
-                        "github_user__login"
+                        Lower("github_user__login")
                     ),
                 )
             )
@@ -95,7 +96,7 @@ class ModuleQuery:
                 Prefetch(
                     "mentors",
                     queryset=Mentor.objects.select_related("github_user").order_by(
-                        "github_user__login"
+                        Lower("github_user__login")
                     ),
                 )
             )
@@ -114,7 +115,7 @@ class ModuleQuery:
                     Prefetch(
                         "mentors",
                         queryset=Mentor.objects.select_related("github_user").order_by(
-                            "github_user__login"
+                            Lower("github_user__login")
                         ),
                     )
                 )
@@ -148,7 +149,7 @@ class ModuleQuery:
                     Prefetch(
                         "mentors",
                         queryset=Mentor.objects.select_related("github_user").order_by(
-                            "github_user__login"
+                            Lower("github_user__login")
                         ),
                     )
                 )
