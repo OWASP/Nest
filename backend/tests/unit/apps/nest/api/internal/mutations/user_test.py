@@ -158,7 +158,8 @@ class TestUserMutations:
     async def test_logout_user_not_authenticated(self, user_mutations):
         """Test logout when user is not authenticated."""
         info = mock_info()
-        info.context.request.user.is_authenticated = False
+        mock_user = MagicMock(is_authenticated=False)
+        info.context.request.auser = AsyncMock(return_value=mock_user)
 
         result = await user_mutations.logout_user(info)
         assert not result.ok
@@ -169,7 +170,8 @@ class TestUserMutations:
         """Test successful user logout."""
         with patch("apps.nest.api.internal.mutations.user.logout") as mock_logout:
             info = mock_info()
-            info.context.request.user.is_authenticated = True
+            mock_user = MagicMock(is_authenticated=True)
+            info.context.request.auser = AsyncMock(return_value=mock_user)
 
             result = await user_mutations.logout_user(info)
             assert result.ok

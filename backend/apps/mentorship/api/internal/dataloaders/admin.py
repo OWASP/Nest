@@ -15,6 +15,7 @@ async def load_admins_by_program_id(program_ids: list[int]) -> list[list[Admin]]
         .filter(admin_programs__in=program_ids)
         .prefetch_related("admin_programs")
         .order_by("github_user__login")
+        .distinct()
     )
     return await get_m2m_results_by_keys(admins, program_ids, "admin_programs", "pk")
 

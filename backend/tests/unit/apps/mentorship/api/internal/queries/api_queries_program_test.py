@@ -46,54 +46,52 @@ def mock_anonymous_info() -> MagicMock:
 class TestGetProgram:
     """Tests for the get_program query."""
 
-    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    @patch(
+        "apps.mentorship.api.internal.queries.program.Program.objects.aget", new_callable=AsyncMock
+    )
     @pytest.mark.asyncio
     async def test_get_program_success(
-        self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
+        self, mock_aget: AsyncMock, mock_info: MagicMock, api_program_queries
     ) -> None:
         """Test successful retrieval of a published program by key."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.PUBLISHED
-        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
+        mock_aget.return_value = mock_program
 
         result = await api_program_queries.get_program(info=mock_info, program_key="program1")
 
         assert result == mock_program
-        mock_program_prefetch_related.assert_called_once_with(
-            "admins__github_user", "admins__nest_user"
-        )
-        mock_program_prefetch_related.return_value.aget.assert_called_once_with(key="program1")
+        mock_aget.assert_called_once_with(key="program1")
 
-    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    @patch(
+        "apps.mentorship.api.internal.queries.program.Program.objects.aget", new_callable=AsyncMock
+    )
     @pytest.mark.asyncio
     async def test_get_program_does_not_exist(
-        self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
+        self, mock_aget: AsyncMock, mock_info: MagicMock, api_program_queries
     ) -> None:
         """Test when the program does not exist."""
-        mock_program_prefetch_related.return_value.aget = AsyncMock(
-            side_effect=Program.DoesNotExist
-        )
+        mock_aget.side_effect = Program.DoesNotExist
 
         result = await api_program_queries.get_program(info=mock_info, program_key="nonexistent")
 
         assert result is None
-        mock_program_prefetch_related.assert_called_once_with(
-            "admins__github_user", "admins__nest_user"
-        )
-        mock_program_prefetch_related.return_value.aget.assert_called_once_with(key="nonexistent")
+        mock_aget.assert_called_once_with(key="nonexistent")
 
-    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    @patch(
+        "apps.mentorship.api.internal.queries.program.Program.objects.aget", new_callable=AsyncMock
+    )
     @pytest.mark.asyncio
     async def test_get_draft_program_hidden_for_anonymous_user(
         self,
-        mock_program_prefetch_related: MagicMock,
+        mock_aget: AsyncMock,
         mock_anonymous_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test that a draft program is not visible to anonymous users."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
-        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
+        mock_aget.return_value = mock_program
         mock_program.user_has_access.return_value = False
 
         result = await api_program_queries.get_program(
@@ -102,18 +100,20 @@ class TestGetProgram:
 
         assert result is None
 
-    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    @patch(
+        "apps.mentorship.api.internal.queries.program.Program.objects.aget", new_callable=AsyncMock
+    )
     @pytest.mark.asyncio
     async def test_get_draft_program_visible_for_admin(
         self,
-        mock_program_prefetch_related: MagicMock,
+        mock_aget: AsyncMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test that a draft program is visible to an admin."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
-        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
+        mock_aget.return_value = mock_program
         mock_program.user_has_access.return_value = True
 
         result = await api_program_queries.get_program(info=mock_info, program_key="draft-program")

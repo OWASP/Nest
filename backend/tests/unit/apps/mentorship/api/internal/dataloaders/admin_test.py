@@ -27,10 +27,8 @@ class TestLoadAdminsByProgramId:
         """Queryset is built with select_related, filter, prefetch_related, and order_by."""
         program_ids = [1, 2, 3]
         mock_queryset = MagicMock()
-        mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_admin_filter.return_value.prefetch_related.return_value.order_by.return_value = (
-            mock_queryset
-        )
+        mock_order_by = mock_admin.objects.select_related.return_value.filter.return_value.prefetch_related.return_value.order_by
+        mock_order_by.return_value.distinct.return_value = mock_queryset
         mock_get_m2m_results_by_keys.return_value = [[], [], []]
 
         await load_admins_by_program_id(program_ids)
@@ -55,10 +53,8 @@ class TestLoadAdminsByProgramId:
         """get_m2m_results_by_keys receives the queryset, program_ids, and correct field names."""
         program_ids = [10, 20]
         mock_queryset = MagicMock()
-        mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_admin_filter.return_value.prefetch_related.return_value.order_by.return_value = (
-            mock_queryset
-        )
+        mock_order_by = mock_admin.objects.select_related.return_value.filter.return_value.prefetch_related.return_value.order_by
+        mock_order_by.return_value.distinct.return_value = mock_queryset
         mock_get_m2m_results_by_keys.return_value = [[], []]
 
         await load_admins_by_program_id(program_ids)
@@ -80,8 +76,8 @@ class TestLoadAdminsByProgramId:
         mock_admin_a = MagicMock()
         mock_admin_b = MagicMock()
         expected = [[mock_admin_a, mock_admin_b], [], [mock_admin_a]]
-        mock_admin_chain = mock_admin.objects.select_related.return_value.filter.return_value
-        mock_admin_chain.prefetch_related.return_value.order_by.return_value = MagicMock()
+        mock_order_by = mock_admin.objects.select_related.return_value.filter.return_value.prefetch_related.return_value.order_by
+        mock_order_by.return_value.distinct.return_value = MagicMock()
         mock_get_m2m_results_by_keys.return_value = expected
 
         result = await load_admins_by_program_id([1, 2, 3])
@@ -97,9 +93,8 @@ class TestLoadAdminsByProgramId:
     async def test_empty_program_ids(self, mock_admin, mock_get_m2m_results_by_keys):
         """An empty program_ids list results in an empty filter and empty return."""
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_admin_filter.return_value.prefetch_related.return_value.order_by.return_value = (
-            MagicMock()
-        )
+        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
+        mock_order_by.return_value.distinct.return_value = MagicMock()
         mock_get_m2m_results_by_keys.return_value = []
 
         result = await load_admins_by_program_id([])
@@ -119,9 +114,8 @@ class TestLoadAdminsByProgramId:
         """A single-element list is handled correctly end-to-end."""
         mock_admin_obj = MagicMock()
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_admin_filter.return_value.prefetch_related.return_value.order_by.return_value = (
-            MagicMock()
-        )
+        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
+        mock_order_by.return_value.distinct.return_value = MagicMock()
         mock_get_m2m_results_by_keys.return_value = [[mock_admin_obj]]
 
         result = await load_admins_by_program_id([42])

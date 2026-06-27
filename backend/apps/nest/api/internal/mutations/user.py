@@ -99,7 +99,7 @@ class UserMutations:
     @strawberry.mutation
     async def logout_user(self, info: Info) -> LogoutResult:
         """Logout the current user."""
-        user = await sync_to_async(lambda: info.context.request.user)()
+        user = await info.context.request.auser()
         if not user.is_authenticated:
             return LogoutResult(
                 message="User is not logged in.",

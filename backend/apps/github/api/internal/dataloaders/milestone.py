@@ -36,9 +36,12 @@ async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[l
 
     mapping: dict[int, list[Milestone]] = defaultdict(list)
     async for milestone in milestones:
+        seen_program_ids = set()
         for project in milestone.repository.project_set.all():
             for module in project.module_set.all():
-                mapping[module.prefetched_program.pk].append(milestone)
+                if module.prefetched_program.pk not in seen_program_ids:
+                    mapping[module.prefetched_program.pk].append(milestone)
+                    seen_program_ids.add(module.prefetched_program.pk)
 
     return [mapping.get(program_id, []) for program_id in program_ids]
 
