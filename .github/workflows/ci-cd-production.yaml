@@ -17,6 +17,7 @@ env:
 jobs:
   run-ci-cd:
     name: Run production CI/CD
+    if: github.event.repository.fork == false
     permissions:
       actions: write
       attestations: write
