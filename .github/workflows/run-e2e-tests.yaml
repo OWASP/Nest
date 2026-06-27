@@ -138,7 +138,7 @@ jobs:
         env:
           CI: 'true'
           FRONTEND_URL: http://localhost:3000
-        run: pnpm run test:e2e --shard=${{ matrix.shard }}/${{ matrix.total }} --workers=2
+        run: pnpm run test:e2e --shard=${{ matrix.shard }}/${{ matrix.total }}
         working-directory: e2e
 
       - name: Upload Playwright test results
