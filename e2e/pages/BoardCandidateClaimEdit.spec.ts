@@ -71,4 +71,31 @@ test.describe('Board Candidate Claim Edit Page', () => {
     await page.getByRole('button', { name: /edit claim/i }).click()
     await expect(page.getByText('Name is required')).toBeVisible()
   })
+
+  test('shows error when claim is locked', async ({ page }) => {
+    const lockedMockData = {
+      boardCandidateClaim: {
+        __typename: 'BoardCandidateClaimNode',
+        id: mockSingleClaim.key,
+        ...mockSingleClaim,
+        is_locked: true,
+      },
+      updateBoardCandidateClaim: {
+        __typename: 'ClaimResult',
+        ok: false,
+        message: 'Cannot update a locked claim.',
+      },
+    }
+    await mockClaimAuth(page, lockedMockData, 'testuser', [
+      'GetBoardCandidateClaim',
+      'UpdateBoardCandidateClaim',
+    ])
+    await page.goto(baseUrl)
+
+    await expect(page.getByRole('heading', { name: /^Edit Claim$/ })).toBeVisible()
+
+    await page.getByLabel(/name/i).fill('Updated Leadership')
+    await page.getByRole('button', { name: /edit claim/i }).click()
+    await expect(page.getByText('Cannot update a locked claim')).toBeVisible()
+  })
 })

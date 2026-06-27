@@ -180,9 +180,16 @@ class TestBoardCandidateClaimSingleQuery:
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
         user.is_authenticated = False
+        info = _make_info(user)
 
         claim = MagicMock()
         claim.status = BoardCandidateClaim.Status.APPROVED
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
         mock_claim_model.objects.annotate.return_value = mock_qs
+
+        query = BoardCandidateClaimQuery()
+        result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
+
+        mock_claim_model.objects.annotate.assert_called_once()
+        assert result == claim
