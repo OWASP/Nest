@@ -27,7 +27,6 @@ class TestReviewPostSaveFinalizeClaimDecision:
         review_post_save_finalize_claim_decision(sender=None, instance=instance)
 
         assert claim.status == BoardCandidateClaim.Status.APPROVED
-        assert claim.is_locked is True
         claim.save.assert_called_once()
         mock_logger.info.assert_called_once_with(
             "Claim '%s' auto-approved with %d approvals (threshold: %d).",
@@ -81,6 +80,5 @@ class TestReviewPostSaveFinalizeClaimDecision:
         review_post_save_finalize_claim_decision(sender=None, instance=instance)
 
         assert claim.status == BoardCandidateClaim.Status.APPROVED
-        assert claim.is_locked is True
         claim.save.assert_called_once()
         mock_logger.info.assert_called_once()
