@@ -106,7 +106,7 @@ class ModuleMutation:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
 
-        if not program.admins.filter(nest_user=user).exists():
+        if not program.has_admin(user):
             raise PermissionDenied
 
         started_at, ended_at = _validate_module_dates(
@@ -439,7 +439,7 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
-        if not module.program.admins.filter(nest_user=user).exists():
+        if not module.program.has_admin(user):
             msg = "Only program admins can delete modules."
             raise PermissionDenied(msg)
 
@@ -476,7 +476,7 @@ class ModuleMutation:
             msg = f"Program with key '{input_data.program_key}' not found."
             raise ObjectDoesNotExist(msg) from e
 
-        if not program.admins.filter(nest_user=user).exists():
+        if not program.has_admin(user):
             raise PermissionDenied
 
         if len(set(input_data.module_keys)) != len(input_data.module_keys):
