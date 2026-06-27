@@ -22,7 +22,7 @@ class TestLoadRecentMilestonesByProgramId:
         mock_filter_result = mock_milestone.open_milestones.filter.return_value
         mock_select_result = mock_filter_result.select_related.return_value
         mock_chain = mock_select_result.prefetch_related.return_value.order_by.return_value
-        mock_chain.distinct.return_value = (qs := MagicMock())
+        mock_chain.distinct.return_value = qs = MagicMock()
         qs.__aiter__.return_value = iter([])
 
         await load_recent_milestones_by_program_id([1, 2])
