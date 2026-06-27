@@ -7,9 +7,9 @@ import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type React from 'react'
+import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
+import type { GetClaimAndEvidencesQuery } from 'types/__generated__/claimQueries.generated'
 import { RemoveBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
-import { GetBoardCandidateClaimEvidencesDocument } from 'types/__generated__/evidenceQueries.generated'
-import type { GetBoardCandidateClaimEvidencesQuery } from 'types/__generated__/evidenceQueries.generated'
 import DropdownActions from 'components/DropdownActions'
 
 interface ClaimProperties {
@@ -64,15 +64,16 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
           },
         },
         update(cache) {
-          const existing = cache.readQuery<GetBoardCandidateClaimEvidencesQuery>({
-            query: GetBoardCandidateClaimEvidencesDocument,
-            variables: { claimKey: claim.key, login, year: Number.parseInt(year) },
+          const existing = cache.readQuery<GetClaimAndEvidencesQuery>({
+            query: GetClaimAndEvidencesDocument,
+            variables: { key: claim.key, login, year: Number.parseInt(year) },
           })
           if (existing) {
             cache.writeQuery({
-              query: GetBoardCandidateClaimEvidencesDocument,
-              variables: { claimKey: claim.key, login, year: Number.parseInt(year) },
+              query: GetClaimAndEvidencesDocument,
+              variables: { key: claim.key, login, year: Number.parseInt(year) },
               data: {
+                ...existing,
                 boardCandidateClaimEvidences: existing.boardCandidateClaimEvidences.filter(
                   (e) => e.key !== evidence.key
                 ),

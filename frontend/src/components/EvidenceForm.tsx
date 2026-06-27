@@ -63,7 +63,7 @@ const EvidenceForm = ({
     }
   }
 
-  const handleFilechange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null
     setFormData((prev) => ({ ...prev, file }))
     if (file) {
@@ -179,8 +179,8 @@ const EvidenceForm = ({
           <FormFileInput
             id="evidence-file"
             label="File (optional)"
-            onChange={handleFilechange}
-            accept={EVIDENCE_ALLOWED_EXTENSIONS.join(',')}
+            onChange={handleFileChange}
+            accept={EVIDENCE_ALLOWED_EXTENSIONS.map((e) => '.' + e).join(',')}
             selectedFile={formData.file}
             error={fileError}
             touched={true}

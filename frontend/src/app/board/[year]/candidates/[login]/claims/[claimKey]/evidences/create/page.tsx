@@ -5,8 +5,8 @@ import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
+import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import { CreateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
-import { GetBoardCandidateClaimEvidencesDocument } from 'types/__generated__/evidenceQueries.generated'
 import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
@@ -58,14 +58,15 @@ const CreateEvidencePage = () => {
           const newEvidence = data?.createBoardCandidateClaimEvidence?.evidence
           if (!newEvidence) return
           const existing = cache.readQuery({
-            query: GetBoardCandidateClaimEvidencesDocument,
-            variables: { claimKey, login, year: Number.parseInt(year) },
+            query: GetClaimAndEvidencesDocument,
+            variables: { key: claimKey, login, year: Number.parseInt(year) },
           })
           if (existing) {
             cache.writeQuery({
-              query: GetBoardCandidateClaimEvidencesDocument,
-              variables: { claimKey, login, year: Number.parseInt(year) },
+              query: GetClaimAndEvidencesDocument,
+              variables: { key: claimKey, login, year: Number.parseInt(year) },
               data: {
+                ...existing,
                 boardCandidateClaimEvidences: [
                   ...existing.boardCandidateClaimEvidences,
                   newEvidence,

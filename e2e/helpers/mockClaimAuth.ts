@@ -15,8 +15,20 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser', operatio
     })
   })
   await page.route('**/graphql/', async (route, request) => {
-    const postData = request.postDataJSON()
-    if (postData.operationName === 'SyncDjangoSession') {
+    const headers = request.headers()
+    const contentType = headers['content-type'] || ''
+    let operationName: string | undefined
+
+    if (contentType.includes('application/json')) {
+      const postData = request.postDataJSON()
+      operationName = postData.operationName
+    } else {
+      const body = (await request.body()).toString()
+      const match = body.match(/"operationName"\s*:\s*"([^"]+)"/)
+      operationName = match?.[1] ?? undefined
+    }
+
+    if (operationName === 'SyncDjangoSession') {
       await route.fulfill({
         status: 200,
         json: {
@@ -29,7 +41,7 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser', operatio
           },
         },
       })
-    } else if (operationNames && postData.operationName && !operationNames.includes(postData.operationName)) {
+    } else if (operationNames && operationName && !operationNames.includes(operationName)) {
       await route.abort('aborted')
     } else {
       await route.fulfill({

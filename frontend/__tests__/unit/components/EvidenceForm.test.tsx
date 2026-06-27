@@ -36,7 +36,7 @@ describe('EvidenceForm', () => {
     mockOnSubmit.mockResolvedValue(undefined)
   })
 
-  describe('file upload (handleFilechange)', () => {
+  describe('file upload (handleFileChange)', () => {
     it('accepts a valid file upload', async () => {
       render(<TestWrapper />)
 

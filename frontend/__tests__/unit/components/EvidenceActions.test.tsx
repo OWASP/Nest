@@ -2,7 +2,7 @@ import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
-import { GetBoardCandidateClaimEvidencesDocument } from 'types/__generated__/evidenceQueries.generated'
+import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import EvidenceActions from 'components/EvidenceActions'
 
 jest.mock('@apollo/client/react', () => ({
@@ -277,6 +277,7 @@ describe('EvidenceActions', () => {
     it('filters removed evidence from cache when existing data is present', async () => {
       const mockCache = {
         readQuery: jest.fn().mockReturnValue({
+          boardCandidateClaim: { key: 'test-claim', name: 'Test Claim' },
           boardCandidateClaimEvidences: [
             { key: 'test-evidence', name: 'Test Evidence' },
             { key: 'other-evidence', name: 'Other Evidence' },
@@ -301,12 +302,13 @@ describe('EvidenceActions', () => {
 
       await waitFor(() => {
         expect(mockCache.readQuery).toHaveBeenCalledWith({
-          query: GetBoardCandidateClaimEvidencesDocument,
-          variables: { claimKey: 'test-claim', login: 'testuser', year: 2025 },
+          query: GetClaimAndEvidencesDocument,
+          variables: { key: 'test-claim', login: 'testuser', year: 2025 },
         })
         expect(mockCache.writeQuery).toHaveBeenCalledWith(
           expect.objectContaining({
             data: {
+              boardCandidateClaim: { key: 'test-claim', name: 'Test Claim' },
               boardCandidateClaimEvidences: [{ key: 'other-evidence', name: 'Other Evidence' }],
             },
           })
