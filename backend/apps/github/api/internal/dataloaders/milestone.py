@@ -24,7 +24,6 @@ async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[l
             "author",
         )
         .prefetch_related(
-            "labels",
             Prefetch(
                 "repository__project_set__module_set__program",
                 queryset=Program.objects.only("pk"),
