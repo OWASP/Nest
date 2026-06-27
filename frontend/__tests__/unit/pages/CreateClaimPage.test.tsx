@@ -84,6 +84,21 @@ describe('CreateClaimPage', () => {
     expect(loadingIndicators.length).toBeGreaterThan(0)
   })
 
+  test('renders error display when candidate query fails', () => {
+    mockUseQuery.mockReturnValue({
+      data: null,
+      loading: false,
+      error: new Error('Network error'),
+    })
+
+    render(<CreateClaimPage />)
+
+    expect(screen.getByText('Error loading candidate')).toBeInTheDocument()
+    expect(
+      screen.getByText('An error occurred while loading the candidate data')
+    ).toBeInTheDocument()
+  })
+
   test('renders access denied when user is not a candidate', () => {
     mockUseQuery.mockReturnValue({
       data: { boardOfDirectors: { candidate: null } },

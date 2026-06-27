@@ -12,10 +12,7 @@ import { FaChevronUp, FaChevronDown } from 'react-icons/fa'
 import { FaPlus } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
 import { ReorderBoardCandidateClaimsDocument } from 'types/__generated__/claimMutations.generated'
-import {
-  GetBoardCandidateAndClaimsDocument,
-  GetBoardCandidateClaimsDocument,
-} from 'types/__generated__/claimQueries.generated'
+import { GetBoardCandidateAndClaimsDocument } from 'types/__generated__/claimQueries.generated'
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -138,14 +135,15 @@ const CandidateClaimsPage = () => {
           const reorderedClaims = data?.reorderBoardCandidateClaims?.claims
           if (!reorderedClaims) return
           const existing = cache.readQuery({
-            query: GetBoardCandidateClaimsDocument,
+            query: GetBoardCandidateAndClaimsDocument,
             variables: { login, year: Number.parseInt(year) },
           })
           if (existing) {
             cache.writeQuery({
-              query: GetBoardCandidateClaimsDocument,
+              query: GetBoardCandidateAndClaimsDocument,
               variables: { login, year: Number.parseInt(year) },
               data: {
+                ...existing,
                 boardCandidateClaims: [
                   ...existing.boardCandidateClaims.filter((c) => c.status !== status),
                   ...reorderedClaims,
