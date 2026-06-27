@@ -9,7 +9,6 @@ from apps.github.models.user import User
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
 from apps.owasp.models.board_of_directors import BoardOfDirectors
-from apps.owasp.models.entity_member import EntityMember
 
 
 class TestBoardCandidateClaimReviewModel:
@@ -18,10 +17,8 @@ class TestBoardCandidateClaimReviewModel:
     def test_str_representation(self):
         """Test __str__ returns claim name and reviewer login."""
         claim = BoardCandidateClaim(name="Community Outreach")
-        reviewer_user = User()
-        reviewer_user.login = "alice"
-        reviewer = EntityMember()
-        reviewer.member = reviewer_user
+        reviewer = User()
+        reviewer.login = "alice"
 
         review = BoardCandidateClaimReview(decision=BoardCandidateClaimReview.Decision.APPROVED)
         review.claim = claim
@@ -68,18 +65,16 @@ class TestBoardCandidateClaimReviewModel:
     def _build_review(
         self, *, decision=None, claim_status=None, reviewer_user=None, claim_board=None
     ):
-        """Build a review with mocked claim and reviewer relations."""
+        """Build a review with mocked claim and reviewer."""
         claim = BoardCandidateClaim(status=claim_status or BoardCandidateClaim.Status.SUBMITTED)
         claim.board = claim_board
-        reviewer = EntityMember()
-        reviewer.member = reviewer_user
 
         review = BoardCandidateClaimReview(
             decision=decision or BoardCandidateClaimReview.Decision.APPROVED,
             notes="Some notes",
         )
         review.claim = claim
-        review.reviewer = reviewer
+        review.reviewer = reviewer_user
 
         return review
 
@@ -130,21 +125,6 @@ class TestBoardCandidateClaimReviewModel:
             review.clean()
 
         assert str(exc_info.value.messages[0]) == "Review can only be added to submitted claims."
-
-    def test_clean_no_reviewer_member_raises(self):
-        """Test that clean raises ValidationError when reviewer has no linked member."""
-        review = self._build_review(
-            claim_status=BoardCandidateClaim.Status.SUBMITTED,
-            reviewer_user=None,
-        )
-
-        with pytest.raises(ValidationError) as exc_info:
-            review.clean()
-
-        assert (
-            str(exc_info.value.messages[0])
-            == "Only OWASP Staff or Claim Reviewers can review claims."
-        )
 
     def test_clean_reviewer_without_staff_or_reviewer_role_raises(self):
         """Test that clean raises ValidationError when reviewer lacks required roles."""
