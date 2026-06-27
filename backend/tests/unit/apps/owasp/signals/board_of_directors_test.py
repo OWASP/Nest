@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
-from apps.owasp.signals.board_of_directors_signal import (
+from apps.owasp.signals.board_of_directors import (
     board_post_save_re_evaluate_claims,
 )
 
