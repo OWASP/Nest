@@ -21,6 +21,7 @@ permissions: {}
 jobs:
   dependency-review:
     name: Dependency review
+    if: github.event.repository.fork == false
     permissions:
       contents: read
     runs-on: ubuntu-latest
