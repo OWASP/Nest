@@ -11,7 +11,9 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
   GetManagementModuleIssuesDocument,
   GetManagementProgramAdminsAndModulesDocument,
+  GetModuleIssuesDocument,
 } from 'types/__generated__/moduleQueries.generated'
+import { hasExtendedUser } from 'types/auth'
 import type { ExtendedSession } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
@@ -32,6 +34,9 @@ const IssuesPage = () => {
     status: string
   }
   const currentUserLogin = session?.user?.login
+  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
+  const isMentor = hasExtendedUser(session) ? session.user.isMentor : false
+  const isMenteeUser = !isProjectLeader && !isMentor
 
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
   const [selectedDeadline, setSelectedDeadline] = useState<string>(
@@ -48,7 +53,7 @@ const IssuesPage = () => {
     error: accessError,
   } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
-    skip: !programKey || !moduleKey,
+    skip: !programKey || !moduleKey || isMenteeUser,
     fetchPolicy: 'network-only',
   })
 
@@ -68,7 +73,23 @@ const IssuesPage = () => {
       offset: isDeadlineFilterActive ? 0 : (currentPage - 1) * ITEMS_PER_PAGE,
       label: selectedLabel === LABEL_ALL ? null : selectedLabel,
     },
-    skip: !programKey || !moduleKey || !hasAccess,
+    skip: !programKey || !moduleKey || !hasAccess || isMenteeUser,
+    fetchPolicy: 'cache-and-network',
+  })
+
+  const {
+    data: menteeIssuesData,
+    loading: menteeIssuesLoading,
+    error: menteeIssuesError,
+  } = useQuery(GetModuleIssuesDocument, {
+    variables: {
+      programKey,
+      moduleKey,
+      limit: isDeadlineFilterActive ? MAX_ISSUES_FOR_DEADLINE_FILTER : ITEMS_PER_PAGE,
+      offset: isDeadlineFilterActive ? 0 : (currentPage - 1) * ITEMS_PER_PAGE,
+      label: selectedLabel === LABEL_ALL ? null : selectedLabel,
+    },
+    skip: !programKey || !moduleKey || !isMenteeUser,
     fetchPolicy: 'cache-and-network',
   })
 
@@ -159,6 +180,48 @@ const IssuesPage = () => {
     },
     [router, programKey, moduleKey]
   )
+
+  if (isMenteeUser) {
+    if (menteeIssuesLoading) return <LoadingSpinner />
+
+    const menteeModuleData = menteeIssuesData?.getModule
+    const menteeIssues = (menteeModuleData?.issues || []).map((i) => ({
+      objectID: i.id,
+      number: i.number,
+      title: i.title,
+      state: i.state,
+      isMerged: i.isMerged,
+      labels: i.labels || [],
+      assignees: i.assignees || [],
+      deadline: i.taskDeadline ?? null,
+    }))
+
+    const menteeTotalPages = Math.ceil((menteeModuleData?.issuesCount || 0) / ITEMS_PER_PAGE)
+
+    return (
+      <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+        <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+          <div className="mx-auto max-w-6xl">
+            <h1 className="mb-6 text-2xl font-bold sm:text-3xl">
+              {menteeModuleData?.name} — My Issues
+            </h1>
+            <IssuesTable
+              issues={menteeIssues}
+              onIssueClick={handleIssueClick}
+              currentUserLogin={currentUserLogin}
+            />
+            {menteeTotalPages > 1 && (
+              <Pagination
+                total={menteeTotalPages}
+                initialPage={currentPage}
+                onChange={handlePageChange}
+              />
+            )}
+          </div>
+        </div>
+      </BreadcrumbStyleProvider>
+    )
+  }
 
   if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
     return <LoadingSpinner />
