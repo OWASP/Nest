@@ -16,10 +16,18 @@ class TestBoardCandidateClaimReviewModel:
     """Tests for BoardCandidateClaimReview model."""
 
     def test_str_representation(self):
-        """Test __str__ returns the decision."""
-        review = BoardCandidateClaimReview(decision=BoardCandidateClaimReview.Decision.APPROVED)
+        """Test __str__ returns claim name and reviewer login."""
+        claim = BoardCandidateClaim(name="Community Outreach")
+        reviewer_user = User()
+        reviewer_user.login = "alice"
+        reviewer = EntityMember()
+        reviewer.member = reviewer_user
 
-        assert str(review) == "APPROVED"
+        review = BoardCandidateClaimReview(decision=BoardCandidateClaimReview.Decision.APPROVED)
+        review.claim = claim
+        review.reviewer = reviewer
+
+        assert str(review) == "Community Outreach - alice"
 
     def test_meta_options(self):
         """Test model meta options."""
