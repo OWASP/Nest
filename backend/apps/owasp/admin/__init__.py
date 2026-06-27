@@ -6,6 +6,7 @@ from apps.owasp.models.project_health_requirements import ProjectHealthRequireme
 
 from .board_candidate_claim import BoardCandidateClaimAdmin
 from .board_candidate_claim_evidence import BoardCandidateClaimEvidenceAdmin
+from .board_candidate_claim_review import BoardCandidateClaimReviewAdmin
 from .board_of_directors import BoardOfDirectorsAdmin
 from .chapter import ChapterAdmin
 from .committee import CommitteeAdmin
