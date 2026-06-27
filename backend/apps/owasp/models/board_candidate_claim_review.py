@@ -43,7 +43,7 @@ class BoardCandidateClaimReview(TimestampedModel):
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Review."""
-        return f"{self.decision}"
+        return f"{self.claim.name} - {self.reviewer.member.login}"
 
     def clean(self) -> None:
         """Validate review."""
