@@ -8,6 +8,6 @@ class UrlVerification(EventBase):
 
     event_type = "url_verification"
 
-    def handle_event(self, event, client):
-        """Handle the URL verification event."""
-        return event["challenge"]
+    def handler(self, event, client, ack):
+        """Acknowledge Slack URL verification challenges."""
+        ack(event["challenge"])
