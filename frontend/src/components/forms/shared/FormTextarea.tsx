@@ -40,11 +40,21 @@ export const FormTextarea = ({
           onChange={onChange}
           rows={rows}
           required={required}
+          aria-invalid={hasError}
+          aria-describedby={hasError ? `${id}-error` : undefined}
           className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
             hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
         />
-        {hasError && <p className="text-sm break-words whitespace-normal text-red-500">{error}</p>}
+        {hasError && (
+          <p
+            id={`${id}-error`}
+            role="alert"
+            className="text-sm break-words whitespace-normal text-red-500"
+          >
+            {error}
+          </p>
+        )}
       </div>
     </div>
   )
