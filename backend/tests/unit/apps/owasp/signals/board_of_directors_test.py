@@ -102,5 +102,5 @@ class TestBoardPostSaveReEvaluateClaims:
 
         board_post_save_re_evaluate_claims(sender=None, instance=instance)
 
-        instance.claims.filter.assert_called_once()
+        instance.claims.filter.assert_called_once_with(status=BoardCandidateClaim.Status.SUBMITTED)
         mock_claim_model.objects.bulk_update.assert_not_called()
