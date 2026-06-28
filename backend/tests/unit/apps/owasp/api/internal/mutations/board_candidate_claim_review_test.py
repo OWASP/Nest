@@ -60,6 +60,7 @@ class TestCreateBoardCandidateClaimReview:
         user.is_authenticated = True
         mock_github_user = MagicMock()
         mock_github_user.is_owasp_staff = True
+        mock_github_user.is_claim_reviewer = False
         user.github_user = mock_github_user
         info = _make_info(user)
         input_data = _make_input_data()
@@ -143,6 +144,7 @@ class TestCreateBoardCandidateClaimReview:
         user.is_authenticated = True
         mock_github_user = MagicMock()
         mock_github_user.is_owasp_staff = True
+        mock_github_user.is_claim_reviewer = False
         user.github_user = mock_github_user
         info = _make_info(user)
         input_data = _make_input_data()
@@ -167,6 +169,7 @@ class TestCreateBoardCandidateClaimReview:
         user.is_authenticated = True
         mock_github_user = MagicMock()
         mock_github_user.is_owasp_staff = True
+        mock_github_user.is_claim_reviewer = False
         user.github_user = mock_github_user
         info = _make_info(user)
         input_data = _make_input_data()
@@ -192,6 +195,7 @@ class TestCreateBoardCandidateClaimReview:
         user.is_authenticated = True
         mock_github_user = MagicMock()
         mock_github_user.is_owasp_staff = True
+        mock_github_user.is_claim_reviewer = False
         mock_github_user.login = "reviewer"
         user.github_user = mock_github_user
         info = _make_info(user)
@@ -220,6 +224,7 @@ class TestCreateBoardCandidateClaimReview:
         user.is_authenticated = True
         mock_github_user = MagicMock()
         mock_github_user.is_owasp_staff = True
+        mock_github_user.is_claim_reviewer = False
         user.github_user = mock_github_user
         info = _make_info(user)
         input_data = _make_input_data()
@@ -253,6 +258,7 @@ class TestCreateBoardCandidateClaimReview:
         user.is_authenticated = True
         mock_github_user = MagicMock()
         mock_github_user.is_owasp_staff = True
+        mock_github_user.is_claim_reviewer = False
         user.github_user = mock_github_user
         info = _make_info(user)
         input_data = _make_input_data()
@@ -283,6 +289,7 @@ class TestCreateBoardCandidateClaimReview:
         user.is_authenticated = True
         mock_github_user = MagicMock()
         mock_github_user.is_owasp_staff = True
+        mock_github_user.is_claim_reviewer = False
         user.github_user = mock_github_user
         info = _make_info(user)
         input_data = _make_input_data()
