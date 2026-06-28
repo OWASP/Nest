@@ -13,7 +13,7 @@ test.describe('Organization Page', () => {
         }),
       })
     })
-    await page.goto('/organizations')
+    await page.goto('/organizations', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders organization data correctly', async ({ page }) => {

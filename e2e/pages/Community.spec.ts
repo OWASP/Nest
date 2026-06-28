@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Community Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/community')
+    await page.goto('/community', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders main heading', async ({ page }) => {
