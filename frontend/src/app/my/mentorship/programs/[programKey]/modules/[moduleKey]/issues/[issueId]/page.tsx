@@ -263,7 +263,59 @@ const ModuleIssueDetailsPage = () => {
                 </div>
                 <div>
                   <span className="font-medium">Deadline:</span>{' '}
-                  <span className={deadlineColor}>{deadlineText}</span>
+                  {menteeIssueData?.getModule?.menteesCanManageDeadlines ? (
+                    isEditingDeadline ? (
+                      <span className="inline-flex items-center gap-2">
+                        <input
+                          type="date"
+                          className="rounded border border-gray-300 px-2 py-0.5 text-sm dark:border-gray-600 dark:bg-[#2c2f33] dark:text-white"
+                          value={deadlineInput}
+                          onChange={(e) => setDeadlineInput(e.target.value)}
+                        />
+                        <button
+                          disabled={settingDeadline || !deadlineInput}
+                          onClick={async () => {
+                            await setTaskDeadlineMutation({
+                              variables: {
+                                programKey,
+                                moduleKey,
+                                issueNumber: Number(issueId),
+                                deadlineAt: new Date(deadlineInput).toISOString(),
+                              },
+                            })
+                          }}
+                          className="rounded bg-blue-600 px-2 py-0.5 text-xs text-white hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          {settingDeadline ? 'Saving…' : 'Save'}
+                        </button>
+                        <button
+                          onClick={() => setIsEditingDeadline(false)}
+                          className="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                        >
+                          Cancel
+                        </button>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2">
+                        <span className={deadlineColor}>{deadlineText}</span>
+                        <button
+                          onClick={() => {
+                            setDeadlineInput(
+                              menteeTaskDeadline
+                                ? new Date(menteeTaskDeadline).toISOString().slice(0, 10)
+                                : ''
+                            )
+                            setIsEditingDeadline(true)
+                          }}
+                          className="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                        >
+                          {menteeTaskDeadline ? 'Edit' : 'Set'}
+                        </button>
+                      </span>
+                    )
+                  ) : (
+                    <span className={deadlineColor}>{deadlineText}</span>
+                  )}
                 </div>
               </div>
             </SecondaryCard>

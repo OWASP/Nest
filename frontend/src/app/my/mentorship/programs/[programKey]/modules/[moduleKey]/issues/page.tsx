@@ -183,6 +183,15 @@ const IssuesPage = () => {
 
   if (isMenteeUser) {
     if (menteeIssuesLoading) return <LoadingSpinner />
+    if (menteeIssuesError) {
+      return (
+        <ErrorDisplay
+          statusCode={500}
+          title="Failed to load issues"
+          message="Something went wrong loading your issues. Please try again."
+        />
+      )
+    }
 
     const menteeModuleData = menteeIssuesData?.getModule
     const menteeIssues = (menteeModuleData?.issues || []).map((i) => ({
