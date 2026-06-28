@@ -26,6 +26,8 @@ minimumReleaseAgeExclude:
   - ws@8.20.1
 
 overrides:
+  '@opentelemetry/resources': 2.7.1
+  '@opentelemetry/sdk-metrics': 2.7.1
   brace-expansion@5: 5.0.6
   fast-uri: 3.1.2
   glob: 11.1.0
