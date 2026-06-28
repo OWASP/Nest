@@ -4,8 +4,14 @@ from typing import TYPE_CHECKING, Annotated
 
 import strawberry
 import strawberry_django
+from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
+from apps.github.api.internal.dataloaders.issue import ISSUES_BY_REPOSITORY_ID_LOADER
+from apps.github.api.internal.dataloaders.release import (
+    LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
+    RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
@@ -17,8 +23,6 @@ if TYPE_CHECKING:
     from apps.owasp.api.internal.nodes.project import ProjectNode
 
 MAX_LIMIT = 1000
-RECENT_ISSUES_LIMIT = 5
-RECENT_RELEASES_LIMIT = 5
 
 
 @strawberry_django.type(
@@ -45,21 +49,23 @@ class RepositoryNode(strawberry.relay.Node):
 
     organization: OrganizationNode | None = strawberry_django.field()
 
-    @strawberry_django.field(prefetch_related=["issues"])
-    def issues(self, root: Repository) -> list[IssueNode]:
+    @strawberry_django.field
+    async def issues(self, root: Repository, info: Info) -> list[IssueNode]:
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        return await info.context.github_dataloaders[ISSUES_BY_REPOSITORY_ID_LOADER].load(root.pk)
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["languages"])
     def languages(self, root: Repository) -> list[str]:
         """Resolve languages."""
         return list(root.languages.keys())
 
     @strawberry_django.field
-    def latest_release(self, root: Repository) -> str | None:
+    async def latest_release(self, root: Repository, info: Info) -> ReleaseNode | None:
         """Resolve latest release."""
-        return root.latest_release
+        return await info.context.github_dataloaders[LATEST_RELEASE_BY_REPOSITORY_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field(prefetch_related=["project_set"])
     def project(
@@ -76,23 +82,25 @@ class RepositoryNode(strawberry.relay.Node):
 
         return root.recent_milestones.order_by("-created_at")[:normalized_limit]
 
-    @strawberry_django.field(prefetch_related=["releases"])
-    def releases(self, root: Repository) -> list[ReleaseNode]:
+    @strawberry_django.field
+    async def releases(self, root: Repository, info: Info) -> list[ReleaseNode]:
         """Resolve recent releases."""
         # TODO(arkid15r): rename this to recent_releases.
-        return root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+        return await info.context.github_dataloaders[RECENT_RELEASES_BY_REPOSITORY_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
     def top_contributors(self, root: Repository) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
         return [RepositoryContributorNode(**tc) for tc in root.idx_top_contributors]
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["topics"])
     def topics(self, root: Repository) -> list[str]:
         """Resolve topics."""
         return root.topics
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["owner"], only=["owner__login", "name"])
     def url(self, root: Repository) -> str:
         """Resolve URL."""
         return root.url
