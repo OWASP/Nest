@@ -172,9 +172,9 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 from django.core.files.base import ContentFile
 
                 self.file = ContentFile(output.read(), name=self.file.name)
-        except Exception:
-            # TODO:  not sure i should raise error here ? or let it pass
-            pass
+        except Exception as ex:
+            err = "Unable to sanitize evidence file metadata."
+            raise ValidationError(err) from ex
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
