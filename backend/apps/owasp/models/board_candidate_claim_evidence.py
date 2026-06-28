@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from io import BytesIO
 from pathlib import Path
 
 from django.core.exceptions import ValidationError
@@ -122,11 +123,67 @@ class BoardCandidateClaimEvidence(TimestampedModel):
             self.file_name = self.file.name
             self.file_size = self.file.size
 
+    def _strip_exif_data(self) -> None:
+        """Strip EXIF/XMP metadata from image and PDF files."""
+        ext = Path(self.file.name).suffix.lower()
+
+        try:
+            if ext in {".jpg", ".jpeg", ".png", ".webp"}:
+                from PIL import Image
+
+                img = Image.open(self.file)
+                output = BytesIO()
+
+                save_kwargs = {"format": img.format}
+                if img.format == "JPEG":
+                    save_kwargs["exif"] = b""
+
+                img.save(output, **save_kwargs)
+                output.seek(0)
+
+                from django.core.files.base import ContentFile
+
+                self.file = ContentFile(output.read(), name=self.file.name)
+            elif ext == ".pdf":
+                from pypdf import PdfReader, PdfWriter
+
+                reader = PdfReader(self.file)
+                writer = PdfWriter()
+
+                writer.append(reader)
+                if reader.metadata is not None:
+                    writer.add_metadata(
+                        {
+                            "/Author": "",
+                            "/Producer": "",
+                            "/Title": "",
+                            "/Subject": "",
+                            "/Keywords": "",
+                            "/CreationDate": "",
+                            "/ModDate": "",
+                            "/Creator": "",
+                        }
+                    )
+
+                output = BytesIO()
+                writer.write(output)
+                output.seek(0)
+
+                from django.core.files.base import ContentFile
+
+                self.file = ContentFile(output.read(), name=self.file.name)
+        except Exception:
+            # TODO:  not sure i should raise error here ? or let it pass
+            pass
+
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
         self.key = slugify(self.name)[: self._meta.get_field("key").max_length]
 
         self.full_clean()
+
+        if self.file:
+            self._strip_exif_data()
 
         super().save(*args, **kwargs)
         if self.pk and self.file:

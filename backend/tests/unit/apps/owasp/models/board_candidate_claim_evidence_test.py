@@ -203,7 +203,9 @@ class TestBoardCandidateClaimEvidenceModel:
         with _mock_evidence_full_clean():
             evidence.full_clean()
 
-    @pytest.mark.parametrize("name", ["evidence.pdf", "evidence.png", "evidence.docx"])
+    @pytest.mark.parametrize(
+        "name", ["evidence.pdf", "evidence.png", "evidence.jpeg", "evidence.jpg", "evidence.webp"]
+    )
     def test_full_clean_allowed_extension_passes(self, name):
         """Test that full_clean passes for representative allowed extensions."""
         evidence = self._evidence_with_file(name=name)
@@ -211,7 +213,19 @@ class TestBoardCandidateClaimEvidenceModel:
         with _mock_evidence_full_clean():
             evidence.full_clean()
 
-    @pytest.mark.parametrize("name", ["evidence.exe", "evidence.gif", "evidence"])
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "evidence.exe",
+            "evidence.gif",
+            "evidence",
+            "evidence.csv",
+            "evidence.doc",
+            "evidence.docx",
+            "evidence.xls",
+            "evidence.xlsx",
+        ],
+    )
     def test_full_clean_disallowed_extension_raises_error(self, name):
         """Test that full_clean rejects disallowed extensions."""
         evidence = self._evidence_with_file(name=name)
