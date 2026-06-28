@@ -30,12 +30,10 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const ProgramDetailsPage = () => {
   const { programKey } = useParams<{ programKey: string }>()
 
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const username = (session as ExtendedSession)?.user?.login
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
   const isMentor = hasExtendedUser(session) ? session.user.isMentor : false
-  const isMenteeUser = !isProjectLeader && !isMentor
-
   const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
@@ -46,10 +44,12 @@ const ProgramDetailsPage = () => {
     error: queryError,
   } = useQuery(GetManagementProgramAndModulesDocument, {
     variables: { programKey },
-    skip: !programKey || isMenteeUser,
+    skip: !programKey,
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   })
+
+  const isMenteeUser = sessionStatus === 'authenticated' && !isProjectLeader && !isMentor && isForbiddenGraphQLError(queryError)
 
   const { data: menteeData, loading: isMenteeQueryLoading } = useQuery(
     GetProgramAndModulesDocument,

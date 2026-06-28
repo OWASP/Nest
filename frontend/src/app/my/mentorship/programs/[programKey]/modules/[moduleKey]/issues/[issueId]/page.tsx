@@ -51,17 +51,17 @@ const ModuleIssueDetailsPage = () => {
   const currentUserLogin = session?.user?.login
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
   const isMentor = hasExtendedUser(session) ? session.user.isMentor : false
-  const isMenteeUser = !isProjectLeader && !isMentor
-
   const {
     data: accessData,
     loading: accessLoading,
     error: accessError,
   } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
-    skip: !programKey || !moduleKey || isMenteeUser,
+    skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
   })
+
+  const isMenteeUser = sessionStatus === 'authenticated' && !isProjectLeader && !isMentor && isForbiddenGraphQLError(accessError)
 
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 

@@ -26,23 +26,22 @@ import { getSimpleDuration } from 'components/ModuleCard'
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
 
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
   const isMentor = hasExtendedUser(session) ? session.user.isMentor : false
-  const isMenteeUser = !isProjectLeader && !isMentor
-
   const {
     data,
     error,
     loading: isLoading,
   } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: isMenteeUser,
     variables: {
       programKey,
       moduleKey,
     },
   })
+
+  const isMenteeUser = sessionStatus === 'authenticated' && !isProjectLeader && !isMentor && isForbiddenGraphQLError(error)
 
   const { data: menteeModuleData, loading: isMenteeModuleLoading } = useQuery(
     GetModuleByIdDocument,
