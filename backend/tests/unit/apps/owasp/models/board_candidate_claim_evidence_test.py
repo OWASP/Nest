@@ -408,6 +408,28 @@ class TestBoardCandidateClaimEvidenceModel:
         assert evidence.file_name == "document.pdf"
         assert evidence.file_size == 12000
 
+    def test_clean_without_file_clears_file_metadata(self):
+        """Test that clean clears file metadata when file is absent."""
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.claim_id = 1
+        evidence.file = None
+        evidence.file_name = "custom_name.pdf"
+        evidence.file_size = 99999
+        evidence._original_file_name = "custom_name.pdf"
+        evidence.source_url = "https://example.com"
+
+        with patch(
+            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+        ) as mock_objects:
+            mock_objects.values_list.return_value.filter.return_value.first.return_value = (
+                BoardCandidateClaim.Status.DRAFT
+            )
+            evidence.clean()
+
+        assert evidence.file_name == ""
+        assert evidence.file_size is None
+        assert evidence._original_file_name is None
+
     def test_clean_calls_strip_file_metadata(self):
         """Test that clean calls strip_file_metadata when file is present."""
         mock_file = MagicMock()
@@ -669,7 +691,10 @@ class TestBoardCandidateClaimEvidenceModel:
         """Test that save deletes old blob when an existing record's file is cleared."""
         evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
 
-        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
+        with (
+            patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects,
+            patch("django.db.transaction.on_commit", side_effect=lambda f, **_: f()),
+        ):
             mock_objects.filter.return_value.values_list.return_value.first.return_value = (
                 "bod/claim/evidence/uuid-old.pdf"
             )
@@ -687,7 +712,10 @@ class TestBoardCandidateClaimEvidenceModel:
         evidence.file.name = "new_file.pdf"
         evidence.file.size = 1000
 
-        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
+        with (
+            patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects,
+            patch("django.db.transaction.on_commit", side_effect=lambda f, **_: f()),
+        ):
             mock_objects.filter.return_value.values_list.return_value.first.return_value = (
                 "bod/claim/evidence/uuid-old.pdf"
             )

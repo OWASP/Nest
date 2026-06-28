@@ -7,7 +7,7 @@ from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.core.files import storage
-from django.db import models
+from django.db import models, transaction
 
 from apps.common.models import TimestampedModel
 from apps.common.utils import slugify
@@ -137,6 +137,10 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
             self.file_name = self.file.name
             self.file_size = self.file.size
+        else:
+            self.file_name = ""
+            self.file_size = None
+            self._original_file_name = None
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
@@ -152,6 +156,5 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
         super().save(*args, **kwargs)
         self._original_file_name = self.file.name if self.file else None
-        current_file_name = self.file.name if self.file else None
-        if old_file and old_file != current_file_name:
-            storage.default_storage.delete(old_file)
+        if old_file and old_file != self._original_file_name:
+            transaction.on_commit(lambda f=old_file: storage.default_storage.delete(f))
