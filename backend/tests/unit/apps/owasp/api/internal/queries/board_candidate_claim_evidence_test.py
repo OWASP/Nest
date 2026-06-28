@@ -131,6 +131,7 @@ class TestBoardCandidateClaimEvidenceQuery:
         user.is_authenticated = True
         user.github_user = MagicMock()
         user.github_user.is_owasp_staff = True
+        user.github_user.is_claim_reviewer = False
         info = _make_info(user)
         claim_key = "my-key"
         login = "alice"
@@ -424,6 +425,7 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
         user.is_authenticated = True
         user.github_user = MagicMock()
         user.github_user.is_owasp_staff = True
+        user.github_user.is_claim_reviewer = False
         info = _make_info(user)
 
         evidence = MagicMock()

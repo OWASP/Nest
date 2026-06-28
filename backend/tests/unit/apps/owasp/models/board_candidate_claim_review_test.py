@@ -67,7 +67,11 @@ class TestBoardCandidateClaimReviewModel:
     ):
         """Build a review with mocked claim and reviewer."""
         claim = BoardCandidateClaim(status=claim_status or BoardCandidateClaim.Status.SUBMITTED)
+        claim.pk = 1
         claim.board = claim_board
+
+        if reviewer_user is not None:
+            reviewer_user.pk = 1
 
         review = BoardCandidateClaimReview(
             decision=decision or BoardCandidateClaimReview.Decision.APPROVED,
@@ -201,6 +205,28 @@ class TestBoardCandidateClaimReviewModel:
         )
 
         review.clean()
+
+    def test_clean_missing_claim_raises(self):
+        """Test that clean raises ValidationError when claim is not set."""
+        review = BoardCandidateClaimReview(decision=BoardCandidateClaimReview.Decision.APPROVED)
+        review.reviewer_id = 1
+
+        with pytest.raises(ValidationError) as exc_info:
+            review.clean()
+
+        assert str(exc_info.value.messages[0]) == "Claim is required."
+
+    def test_clean_missing_reviewer_raises(self):
+        """Test that clean raises ValidationError when reviewer is not set."""
+        claim = BoardCandidateClaim(status=BoardCandidateClaim.Status.SUBMITTED)
+        claim.pk = 1
+        review = BoardCandidateClaimReview(decision=BoardCandidateClaimReview.Decision.APPROVED)
+        review.claim = claim
+
+        with pytest.raises(ValidationError) as exc_info:
+            review.clean()
+
+        assert str(exc_info.value.messages[0]) == "Reviewer is required."
 
     @patch.object(BoardCandidateClaimReview, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_review.TimestampedModel.save")

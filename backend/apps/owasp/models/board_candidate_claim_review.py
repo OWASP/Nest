@@ -49,13 +49,18 @@ class BoardCandidateClaimReview(TimestampedModel):
         """Validate review."""
         super().clean()
 
+        if self.claim_id is None:
+            err = "Claim is required."
+            raise ValidationError(err)
+        if self.reviewer_id is None:
+            err = "Review is required."
+            raise ValidationError(err)
+
         if self.claim.status != BoardCandidateClaim.Status.SUBMITTED:
             err = "Review can only be added to submitted claims."
             raise ValidationError(err)
 
-        if not self.reviewer or not (
-            self.reviewer.is_owasp_staff or self.reviewer.is_claim_reviewer
-        ):
+        if not (self.reviewer.is_owasp_staff or self.reviewer.is_claim_reviewer):
             err = "Only OWASP Staff or Claim Reviewers can review claims."
             raise ValidationError(err)
 

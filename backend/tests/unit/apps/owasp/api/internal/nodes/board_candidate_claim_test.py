@@ -80,6 +80,7 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         user.is_authenticated = True
         user.github_user = mock_github_user
         user.github_user.is_owasp_staff = True
+        user.github_user.is_claim_reviewer = False
         info = self._make_info(user)
 
         mock_claim = Mock()

@@ -2,6 +2,7 @@
 
 import logging
 
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -20,16 +21,19 @@ def review_post_save_finalize_claim_decision(sender, instance, **kwargs):  # noq
         return
 
     threshold = claim.board.reviews_threshold
-    approved_count = claim.reviews.filter(
-        decision=BoardCandidateClaimReview.Decision.APPROVED,
-    ).count()
 
-    if approved_count >= threshold:
-        claim.status = BoardCandidateClaim.Status.APPROVED
-        claim.save()
-        logger.info(
-            "Claim '%s' auto-approved with %d approvals (threshold: %d).",
-            claim.key,
-            approved_count,
-            threshold,
-        )
+    def _update_claim():
+        approved_count = claim.reviews.filter(
+            decision=BoardCandidateClaimReview.Decision.APPROVED,
+        ).count()
+        if approved_count >= threshold:
+            claim.status = BoardCandidateClaim.Status.APPROVED
+            claim.save()
+            logger.info(
+                "Claim '%s' auto-approved with %d approvals (threshold: %d).",
+                claim.key,
+                approved_count,
+                threshold,
+            )
+
+    transaction.on_commit(_update_claim)

@@ -89,6 +89,7 @@ class TestBoardCandidateClaimQuery:
         user.is_authenticated = True
         user.github_user = MagicMock()
         user.github_user.is_owasp_staff = True
+        user.github_user.is_claim_reviewer = False
         info = _make_info(user)
 
         base_qs = MagicMock()
@@ -234,6 +235,7 @@ class TestBoardCandidateClaimSingleQuery:
         user.is_authenticated = True
         user.github_user = MagicMock()
         user.github_user.is_owasp_staff = True
+        user.github_user.is_claim_reviewer = False
         info = _make_info(user)
 
         claim = MagicMock()
