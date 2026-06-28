@@ -270,7 +270,7 @@ const ModuleIssueDetailsPage = () => {
 
             {menteeLabels.length > 0 && (
               <SecondaryCard title={<AnchorTitle title="Labels" />}>
-                <LabelList labels={menteeLabels} icon={FaTags} />
+                <LabelList entityKey={String(menteeIssue.number)} labels={menteeLabels} />
               </SecondaryCard>
             )}
 

@@ -208,13 +208,13 @@ const IssuesPage = () => {
             <IssuesTable
               issues={menteeIssues}
               onIssueClick={handleIssueClick}
-              currentUserLogin={currentUserLogin}
             />
             {menteeTotalPages > 1 && (
               <Pagination
-                total={menteeTotalPages}
-                initialPage={currentPage}
-                onChange={handlePageChange}
+                currentPage={currentPage}
+                totalPages={menteeTotalPages}
+                isLoaded={!menteeIssuesLoading}
+                onPageChange={handlePageChange}
               />
             )}
           </div>
