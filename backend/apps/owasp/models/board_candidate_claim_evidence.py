@@ -134,9 +134,8 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 except ValidationError as e:
                     raise ValidationError({"file": e.message}) from e
                 self._original_file_name = self.file.name
-
-            self.file_name = self.file.name
-            self.file_size = self.file.size
+                self.file_name = self.file.name
+                self.file_size = self.file.size
         else:
             self.file_name = ""
             self.file_size = None
