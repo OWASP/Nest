@@ -5,16 +5,11 @@ from django.core.validators import FileExtensionValidator
 from django.template.defaultfilters import filesizeformat
 
 EVIDENCE_ALLOWED_EXTENSIONS = [
-    "csv",
-    "doc",
-    "docx",
     "jpeg",
     "jpg",
     "pdf",
     "png",
     "webp",
-    "xls",
-    "xlsx",
 ]
 
 EVIDENCE_MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
