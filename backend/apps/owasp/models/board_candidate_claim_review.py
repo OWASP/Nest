@@ -53,7 +53,7 @@ class BoardCandidateClaimReview(TimestampedModel):
             err = "Claim is required."
             raise ValidationError(err)
         if self.reviewer_id is None:
-            err = "Review is required."
+            err = "Reviewer is required."
             raise ValidationError(err)
 
         if self.claim.status != BoardCandidateClaim.Status.SUBMITTED:
