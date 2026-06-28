@@ -17,7 +17,7 @@ test.describe('Chapters Page', () => {
         }),
       })
     })
-    await page.goto('/chapters')
+    await page.goto('/chapters', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders chapter data correctly', async ({ page }) => {
@@ -34,7 +34,7 @@ test.describe('Chapters Page', () => {
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/chapters')
+    await page.goto('/chapters', { waitUntil: 'domcontentloaded' })
     await expect(page.getByText('No chapters found')).toBeVisible()
   })
 

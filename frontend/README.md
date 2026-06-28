@@ -41,18 +41,37 @@ pnpm run dev
 
 ## Key Scripts
 
-Common `pnpm` scripts defined in `package.json`:
+### Prettier
 
-| Task                   | Command                    |
-| ---------------------- | -------------------------- |
-| Start dev server       | `pnpm run dev`             |
-| Build for production   | `pnpm run build`           |
-| Lint code              | `pnpm run lint`            |
-| Format code            | `pnpm run format`          |
-| Generate GraphQL types | `pnpm run graphql-codegen` |
-| Run unit tests         | `pnpm run test:unit`       |
+Runs from the **repository root**. See [CONTRIBUTING.md — Prettier](../CONTRIBUTING.md#prettier) for scope.
 
-See the `Makefile` for Docker-based convenience targets.
+| Task | Command |
+| ---- | ------- |
+| Verify formatting (read-only; part of `make check`) | `make prettier` |
+| Auto-fix formatting issues | `make fix-prettier` |
+
+Equivalent `pnpm` commands: `pnpm run format:check` (verify) and `pnpm run format` (fix).
+
+### ESLint
+
+Runs from the **repository root**. See [CONTRIBUTING.md — ESLint](../CONTRIBUTING.md#eslint) for scope.
+
+| Task | Command |
+| ---- | ------- |
+| Verify lint (read-only; part of `make check`) | `make eslint` |
+| Auto-fix lint issues | `make fix-eslint` |
+
+Equivalent `pnpm` commands: `pnpm run lint:check` (verify) and `pnpm run lint` (fix).
+
+### Frontend scripts
+
+| Task                 | Command              |
+| -------------------- | -------------------- |
+| Start dev server     | `pnpm run dev`       |
+| Build for production | `pnpm run build`     |
+| Run unit tests       | `pnpm run test:unit` |
+
+See the root and `frontend/` Makefiles for Docker-based convenience targets.
 
 ## GraphQL Codegen
 
@@ -61,12 +80,17 @@ TypeScript types for GraphQL operations are auto-generated from the backend sche
 - Configuration: `graphql-codegen.ts`
 - Output: `src/types/__generated__/`
 
-Run the codegen with:
+From the **repository root** (with the backend running on `PUBLIC_API_URL`, default `http://localhost:8000`):
 
 ```bash
-# Requires the backend to be running
-pnpm run graphql-codegen
+# Regenerate types after schema or operation changes
+make graphql-codegen
+
+# Verify committed types match the live schema
+make check-graphql
 ```
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md#graphql-types) for when to run each command.
 
 ## Dependencies
 

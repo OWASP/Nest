@@ -170,6 +170,12 @@ export const projectTimeline: ProjectTimeline[] = [
     description: 'OWASP Nest accepted for Google Summer of Code 2026 as part of OWASP.',
     year: 'May 2026',
   },
+  {
+    title: 'Sponsorship Program Extension for 2026',
+    description:
+      'OWASP Nest extended its Sponsorship Program for 2026 to support observability, NestBot development, and platform maintenance efforts.',
+    year: 'June 2026',
+  },
 ]
 
 export const technologies = [
