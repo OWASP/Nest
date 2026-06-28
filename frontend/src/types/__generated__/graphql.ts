@@ -326,6 +326,7 @@ export type ModuleNode = {
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
   mentees: Array<UserNode>;
+  menteesCanManageDeadlines: Scalars['Boolean']['output'];
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
@@ -729,6 +730,7 @@ export type Query = {
   managementProgramModules: Array<ModuleNode>;
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
+  myMenteePrograms: PaginatedPrograms;
   myPrograms: PaginatedPrograms;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
@@ -849,6 +851,13 @@ export type QueryMemberSnapshotArgs = {
 export type QueryMemberSnapshotsArgs = {
   limit?: Scalars['Int']['input'];
   userLogin?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryMyMenteeProgramsArgs = {
+  limit?: Scalars['Int']['input'];
+  page?: Scalars['Int']['input'];
+  search?: Scalars['String']['input'];
 };
 
 
