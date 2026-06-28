@@ -1,7 +1,7 @@
 import { metrics } from '@opentelemetry/api'
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto'
 import { HostMetrics } from '@opentelemetry/host-metrics'
-import { resourceFromAttributes } from '@opentelemetry/resources'
+import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
 
 // Server-side Otel metrics for the Next.js Node runtime. The exporter and
@@ -17,9 +17,11 @@ export function startMetrics() {
 
   const provider = new MeterProvider({
     readers: [reader],
-    resource: resourceFromAttributes({
-      'service.name': process.env.OTEL_SERVICE_NAME ?? 'nest-frontend',
-    }),
+    resource: defaultResource().merge(
+      resourceFromAttributes({
+        'service.name': process.env.OTEL_SERVICE_NAME ?? 'nest-frontend',
+      })
+    ),
   })
 
   metrics.setGlobalMeterProvider(provider)

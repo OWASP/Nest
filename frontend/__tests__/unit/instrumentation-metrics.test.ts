@@ -17,6 +17,7 @@ jest.mock('@opentelemetry/host-metrics', () => ({
   HostMetrics: jest.fn(() => ({ start: jest.fn() })),
 }))
 jest.mock('@opentelemetry/resources', () => ({
+  defaultResource: jest.fn(() => ({ merge: jest.fn((resource) => resource) })),
   resourceFromAttributes: jest.fn((attributes) => attributes),
 }))
 jest.mock('@opentelemetry/sdk-metrics', () => ({
@@ -44,18 +45,22 @@ describe('startMetrics', () => {
 
     startMetrics()
 
+    const exporter = (OTLPMetricExporter as jest.Mock).mock.instances[0]
+    const reader = (PeriodicExportingMetricReader as jest.Mock).mock.instances[0]
+    const provider = (MeterProvider as jest.Mock).mock.instances[0]
+
     expect(OTLPMetricExporter).toHaveBeenCalledTimes(1)
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
-      exporter: expect.any(OTLPMetricExporter),
+      exporter,
       exportIntervalMillis: 15000,
     })
     expect(resourceFromAttributes).toHaveBeenCalledWith({ 'service.name': 'custom-service' })
     expect(MeterProvider).toHaveBeenCalledWith({
-      readers: [expect.any(PeriodicExportingMetricReader)],
+      readers: [reader],
       resource: { 'service.name': 'custom-service' },
     })
-    expect(metrics.setGlobalMeterProvider).toHaveBeenCalledWith(expect.any(MeterProvider))
-    expect(HostMetrics).toHaveBeenCalledWith({ meterProvider: expect.any(MeterProvider) })
+    expect(metrics.setGlobalMeterProvider).toHaveBeenCalledWith(provider)
+    expect(HostMetrics).toHaveBeenCalledWith({ meterProvider: provider })
   })
 
   test('falls back to defaults when env vars are unset', () => {
