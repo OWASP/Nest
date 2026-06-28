@@ -61,7 +61,11 @@ const ModuleIssueDetailsPage = () => {
     fetchPolicy: 'network-only',
   })
 
-  const isMenteeUser = sessionStatus === 'authenticated' && !isProjectLeader && !isMentor && isForbiddenGraphQLError(accessError)
+  const isMenteeUser =
+    sessionStatus === 'authenticated' &&
+    !isProjectLeader &&
+    !isMentor &&
+    isForbiddenGraphQLError(accessError)
 
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 

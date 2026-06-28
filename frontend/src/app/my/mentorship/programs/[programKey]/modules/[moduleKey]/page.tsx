@@ -3,8 +3,8 @@ import { useQuery } from '@apollo/client/react'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
-import { useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
   GetManagementProgramAdminsAndModulesDocument,
@@ -41,7 +41,11 @@ const ModuleDetailsPage = () => {
     },
   })
 
-  const isMenteeUser = sessionStatus === 'authenticated' && !isProjectLeader && !isMentor && isForbiddenGraphQLError(error)
+  const isMenteeUser =
+    sessionStatus === 'authenticated' &&
+    !isProjectLeader &&
+    !isMentor &&
+    isForbiddenGraphQLError(error)
 
   const { data: menteeModuleData, loading: isMenteeModuleLoading } = useQuery(
     GetModuleByIdDocument,

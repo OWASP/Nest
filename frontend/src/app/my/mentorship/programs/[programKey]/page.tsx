@@ -49,7 +49,11 @@ const ProgramDetailsPage = () => {
     notifyOnNetworkStatusChange: true,
   })
 
-  const isMenteeUser = sessionStatus === 'authenticated' && !isProjectLeader && !isMentor && isForbiddenGraphQLError(queryError)
+  const isMenteeUser =
+    sessionStatus === 'authenticated' &&
+    !isProjectLeader &&
+    !isMentor &&
+    isForbiddenGraphQLError(queryError)
 
   const { data: menteeData, loading: isMenteeQueryLoading } = useQuery(
     GetProgramAndModulesDocument,

@@ -55,7 +55,11 @@ const IssuesPage = () => {
     fetchPolicy: 'network-only',
   })
 
-  const isMenteeUser = sessionStatus === 'authenticated' && !isProjectLeader && !isMentor && isForbiddenGraphQLError(accessError)
+  const isMenteeUser =
+    sessionStatus === 'authenticated' &&
+    !isProjectLeader &&
+    !isMentor &&
+    isForbiddenGraphQLError(accessError)
 
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 
@@ -214,10 +218,7 @@ const IssuesPage = () => {
             <h1 className="mb-6 text-2xl font-bold sm:text-3xl">
               {menteeModuleData?.name} — My Issues
             </h1>
-            <IssuesTable
-              issues={menteeIssues}
-              onIssueClick={handleIssueClick}
-            />
+            <IssuesTable issues={menteeIssues} onIssueClick={handleIssueClick} />
             {menteeTotalPages > 1 && (
               <Pagination
                 currentPage={currentPage}
