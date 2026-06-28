@@ -11,6 +11,7 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 from apps.common.utils import slugify
+from apps.owasp.metadata import strip_file_metadata
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.validators import (
     validate_evidence_extension,
@@ -119,6 +120,7 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 raise ValidationError(err)
 
         if self.file:
+            self.file = strip_file_metadata(self.file)
             self.file_name = self.file.name
             self.file_size = self.file.size
 

@@ -26,16 +26,21 @@ class TestValidateEvidenceExtension:
     @pytest.mark.parametrize(
         "filename",
         [
+            "evidence.csv",
+            "evidence.doc",
+            "evidence.docx",
             "evidence.exe",
             "evidence.gif",
-            "evidence.txt",
-            "evidence.zip",
-            "evidence.tar.gz",
-            "evidence",
-            "evidence.py",
-            "evidence.js",
             "evidence.html",
+            "evidence.js",
+            "evidence.py",
             "evidence.svg",
+            "evidence.tar.gz",
+            "evidence.txt",
+            "evidence.xls",
+            "evidence.xlsx",
+            "evidence.zip",
+            "evidence",
         ],
     )
     def test_disallowed_extension_raises_error(self, filename):

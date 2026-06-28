@@ -23,6 +23,10 @@ def _mock_evidence_full_clean(*, claim_status=BoardCandidateClaim.Status.DRAFT):
         patch.object(BoardCandidateClaimEvidence, "validate_unique"),
         patch.object(BoardCandidateClaimEvidence, "validate_constraints"),
         patch.object(BoardCandidateClaimEvidence._meta.get_field("claim"), "validate"),
+        patch(
+            "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+            side_effect=lambda x: x,
+        ),
     ):
         mock_objects.values_list.return_value.filter.return_value.first.return_value = claim_status
         yield
@@ -153,12 +157,11 @@ class TestBoardCandidateClaimEvidenceModel:
     @pytest.mark.parametrize(
         ("filename", "expected_ext"),
         [
-            ("doc.docx", ".docx"),
             ("image.png", ".png"),
             ("photo.jpeg", ".jpeg"),
             ("photo.jpg", ".jpg"),
-            ("data.xlsx", ".xlsx"),
-            ("data.xls", ".xls"),
+            ("document.pdf", ".pdf"),
+            ("image.webp", ".webp"),
             ("webpage", ""),
             ("archive.tar.gz", ".gz"),
         ],
@@ -203,7 +206,7 @@ class TestBoardCandidateClaimEvidenceModel:
         with _mock_evidence_full_clean():
             evidence.full_clean()
 
-    @pytest.mark.parametrize("name", ["evidence.pdf", "evidence.png", "evidence.docx"])
+    @pytest.mark.parametrize("name", ["evidence.pdf", "evidence.png", "evidence.jpg"])
     def test_full_clean_allowed_extension_passes(self, name):
         """Test that full_clean passes for representative allowed extensions."""
         evidence = self._evidence_with_file(name=name)
@@ -342,22 +345,33 @@ class TestBoardCandidateClaimEvidenceModel:
         mock_file.size = 12345
         mock_file.__bool__ = Mock(return_value=True)
 
+        stripped_file = MagicMock()
+        stripped_file.name = "document.pdf"
+        stripped_file.size = 12000
+        stripped_file.__bool__ = Mock(return_value=True)
+
         evidence = BoardCandidateClaimEvidence(name="Test Evidence")
         evidence.claim_id = 1
         evidence.file = mock_file
         evidence.file_name = ""
         evidence.file_size = None
 
-        with patch(
-            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
-        ) as mock_objects:
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+                return_value=stripped_file,
+            ),
+        ):
             mock_objects.values_list.return_value.filter.return_value.first.return_value = (
                 BoardCandidateClaim.Status.DRAFT
             )
             evidence.clean()
 
         assert evidence.file_name == "document.pdf"
-        assert evidence.file_size == 12345
+        assert evidence.file_size == 12000
 
     def test_clean_with_file_overwrites_existing_file_name(self):
         """Test that clean overwrites file_name when already set."""
@@ -366,22 +380,60 @@ class TestBoardCandidateClaimEvidenceModel:
         mock_file.size = 12345
         mock_file.__bool__ = Mock(return_value=True)
 
+        stripped_file = MagicMock()
+        stripped_file.name = "document.pdf"
+        stripped_file.size = 12000
+        stripped_file.__bool__ = Mock(return_value=True)
+
         evidence = BoardCandidateClaimEvidence(name="Test Evidence")
         evidence.claim_id = 1
         evidence.file = mock_file
         evidence.file_name = "custom_name.pdf"
         evidence.file_size = 99999
 
-        with patch(
-            "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
-        ) as mock_objects:
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+                return_value=stripped_file,
+            ),
+        ):
             mock_objects.values_list.return_value.filter.return_value.first.return_value = (
                 BoardCandidateClaim.Status.DRAFT
             )
             evidence.clean()
 
         assert evidence.file_name == "document.pdf"
-        assert evidence.file_size == 12345
+        assert evidence.file_size == 12000
+
+    def test_clean_calls_strip_file_metadata(self):
+        """Test that clean calls strip_file_metadata when file is present."""
+        mock_file = MagicMock()
+        mock_file.name = "photo.jpg"
+        mock_file.size = 5000
+        mock_file.__bool__ = Mock(return_value=True)
+
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.claim_id = 1
+        evidence.file = mock_file
+
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+                return_value=mock_file,
+            ) as mock_strip,
+        ):
+            mock_objects.values_list.return_value.filter.return_value.first.return_value = (
+                BoardCandidateClaim.Status.DRAFT
+            )
+            evidence.clean()
+
+        mock_strip.assert_called_once_with(mock_file)
 
     def test_removal_allowed_statuses_constant(self):
         """Test REMOVAL_ALLOWED_STATUSES contains the correct statuses."""
