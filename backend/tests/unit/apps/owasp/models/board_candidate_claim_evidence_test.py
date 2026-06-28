@@ -463,6 +463,42 @@ class TestBoardCandidateClaimEvidenceModel:
         assert "file" in exc_info.value.message_dict
         assert exc_info.value.message_dict["file"] == ["Invalid file metadata"]
 
+    def test_clean_file_exceeds_size_limit_after_strip_raises_error(self):
+        """Test clean() raises ValidationError if file exceeds limit after stripping."""
+        mock_file = MagicMock()
+        mock_file.name = "photo.jpg"
+        mock_file.size = 5000
+        mock_file.__bool__ = Mock(return_value=True)
+
+        stripped_file = MagicMock()
+        stripped_file.name = "photo.jpg"
+        stripped_file.size = 10 * 1024 * 1024 + 1
+        stripped_file.__bool__ = Mock(return_value=True)
+
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.claim_id = 1
+        evidence.file = mock_file
+
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+                return_value=stripped_file,
+            ),
+        ):
+            mock_objects.values_list.return_value.filter.return_value.first.return_value = (
+                BoardCandidateClaim.Status.DRAFT
+            )
+            with pytest.raises(ValidationError) as exc_info:
+                evidence.clean()
+
+        assert "file" in exc_info.value.message_dict
+        assert (
+            "File size exceeds the maximum allowed size" in exc_info.value.message_dict["file"][0]
+        )
+
     def test_clean_skips_metadata_stripping_for_existing_unmodified_file(self):
         """Test that clean does not call strip_file_metadata when file has not changed."""
         mock_file = MagicMock()
@@ -518,29 +554,6 @@ class TestBoardCandidateClaimEvidenceModel:
             evidence.clean()
 
         mock_strip.assert_called_once_with(mock_file)
-
-    @patch("apps.owasp.models.board_candidate_claim_evidence.storage.default_storage")
-    def test_save_deletes_old_file_when_file_changes(self, mock_storage):
-        """Test that save deletes the old file if a new file is uploaded."""
-        mock_file = MagicMock()
-        mock_file.name = "new_file.pdf"
-
-        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
-        evidence.pk = 123
-        evidence.file = mock_file
-
-        with (
-            patch.object(BoardCandidateClaimEvidence, "full_clean"),
-            patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save"),
-            patch(
-                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaimEvidence.objects"
-            ) as mock_evidence_objects,
-        ):
-            mock_first = mock_evidence_objects.filter.return_value.values_list.return_value.first
-            mock_first.return_value = "old_file.pdf"
-            evidence.save()
-
-        mock_storage.delete.assert_called_once_with("old_file.pdf")
 
     def test_removal_allowed_statuses_constant(self):
         """Test REMOVAL_ALLOWED_STATUSES contains the correct statuses."""
@@ -640,13 +653,30 @@ class TestBoardCandidateClaimEvidenceModel:
     @patch.object(BoardCandidateClaimEvidence, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_without_file_skips_cleanup(self, mock_super_save, mock_full_clean):
-        """Test that save on evidence without file does not attempt cleanup."""
+        """Test save on evidence without file skips cleanup if DB has no file."""
         evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
 
-        with patch("django.core.files.storage.default_storage") as mock_storage:
-            evidence.save()
+        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
+            mock_objects.filter.return_value.values_list.return_value.first.return_value = None
+            with patch("django.core.files.storage.default_storage") as mock_storage:
+                evidence.save()
 
         mock_storage.delete.assert_not_called()
+
+    @patch.object(BoardCandidateClaimEvidence, "full_clean")
+    @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
+    def test_save_with_cleared_file_deletes_old_file(self, mock_super_save, mock_full_clean):
+        """Test that save deletes old blob when an existing record's file is cleared."""
+        evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
+
+        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
+            mock_objects.filter.return_value.values_list.return_value.first.return_value = (
+                "bod/claim/evidence/uuid-old.pdf"
+            )
+            with patch("django.core.files.storage.default_storage") as mock_storage:
+                evidence.save()
+
+                mock_storage.delete.assert_called_once_with("bod/claim/evidence/uuid-old.pdf")
 
     @patch.object(BoardCandidateClaimEvidence, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")

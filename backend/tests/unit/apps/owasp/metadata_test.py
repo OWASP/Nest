@@ -92,6 +92,34 @@ def _create_test_pdf(*, with_metadata=True):
     )
 
 
+def _create_test_pdf_with_xmp():
+    """Create a test PDF file containing an XMP /Metadata stream."""
+    xmp_xml = (
+        b'<?xml version="1.0" encoding="UTF-8"?>'
+        b'<x:xmpmeta xmlns:x="adobe:ns:meta/">'
+        b'<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'
+        b'<rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/">'
+        b"<dc:creator>XMP Test Author</dc:creator>"
+        b"</rdf:Description>"
+        b"</rdf:RDF>"
+        b"</x:xmpmeta>"
+    )
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    writer.add_metadata({"/Author": "Test Author"})
+    writer.xmp_metadata = xmp_xml
+
+    output = io.BytesIO()
+    writer.write(output)
+    content = output.getvalue()
+
+    return SimpleUploadedFile(
+        name="test_document.pdf",
+        content=content,
+        content_type=PDF_CONTENT_TYPE,
+    )
+
+
 class TestStripFileMetadata:
     """Tests for strip_file_metadata dispatch function."""
 
@@ -256,6 +284,7 @@ class TestStripImageMetadata:
 
         result_image = Image.open(io.BytesIO(result.read()))
         assert result_image.size == (5, 10)
+        assert result_image.getexif().get(0x0112) is None
 
 
 class TestStripPdfMetadata:
@@ -317,6 +346,16 @@ class TestStripPdfMetadata:
         metadata = reader.metadata
         assert not metadata.get("/Producer")
         assert not metadata.get("/Creator")
+
+    def test_strips_xmp_metadata_stream(self):
+        mock_file = _create_test_pdf_with_xmp()
+
+        result = _strip_pdf_metadata(mock_file)
+
+        cleaned_bytes = result.read()
+        reader = PdfReader(io.BytesIO(cleaned_bytes))
+        assert reader.xmp_metadata is None
+        assert b"/Metadata" not in cleaned_bytes
 
     def test_corrupt_pdf_raises_validation_error(self):
         mock_file = SimpleUploadedFile(

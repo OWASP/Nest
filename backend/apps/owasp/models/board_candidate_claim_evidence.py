@@ -130,6 +130,7 @@ class BoardCandidateClaimEvidence(TimestampedModel):
             if is_new_file:
                 try:
                     self.file = strip_file_metadata(self.file)
+                    validate_evidence_file_size(self.file)
                 except ValidationError as e:
                     raise ValidationError({"file": e.message}) from e
                 self._original_file_name = self.file.name
@@ -143,12 +144,14 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
         old_file = (
             self.__class__.objects.filter(pk=self.pk).values_list("file", flat=True).first()
-            if self.pk and self.file
+            if self.pk
             else None
         )
 
         self.full_clean()
 
         super().save(*args, **kwargs)
-        if old_file and old_file != self.file.name:
+        self._original_file_name = self.file.name if self.file else None
+        current_file_name = self.file.name if self.file else None
+        if old_file and old_file != current_file_name:
             storage.default_storage.delete(old_file)

@@ -55,7 +55,7 @@ def strip_file_metadata(file):
     except ValidationError:
         raise
     except Exception as e:
-        msg = f"Invalid or corrupt file: {e}"
+        msg = "Invalid or corrupt file."
         raise ValidationError(msg) from e
 
     return file
@@ -85,7 +85,7 @@ def _strip_image_metadata(file, ext):
             transposed_image.save(output, format=image_format)
             cleaned_bytes = output.getvalue()
     except Exception as e:
-        msg = f"Invalid or corrupt image: {e}"
+        msg = "Invalid or corrupt image."
         raise ValidationError(msg) from e
 
     content_type = IMAGE_CONTENT_TYPE_MAP[ext]
@@ -119,7 +119,7 @@ def _strip_pdf_metadata(file):
         writer.write(output)
         cleaned_bytes = output.getvalue()
     except Exception as e:
-        msg = f"Invalid or corrupt PDF: {e}"
+        msg = "Invalid or corrupt PDF."
         raise ValidationError(msg) from e
 
     return SimpleUploadedFile(
