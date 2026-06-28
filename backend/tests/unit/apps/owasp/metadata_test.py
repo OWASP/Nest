@@ -1,10 +1,10 @@
 """Tests for OWASP app file metadata stripping utilities."""
 
 import io
-import struct
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
@@ -13,7 +13,7 @@ from apps.owasp.metadata import (
     IMAGE_CONTENT_TYPE_MAP,
     IMAGE_EXTENSIONS,
     PDF_CONTENT_TYPE,
-    PDF_EXTENSIONS,
+    PDF_EXTENSION,
     _strip_image_metadata,
     _strip_pdf_metadata,
     strip_file_metadata,
@@ -38,43 +38,32 @@ def _create_jpeg_with_exif():
     """Create a JPEG with EXIF data embedded via Pillow."""
     image = Image.new("RGB", (10, 10), color="blue")
     output = io.BytesIO()
-    image.save(output, format="JPEG")
-    jpeg_bytes = output.getvalue()
-
-    # Build a minimal EXIF APP1 segment with a Make tag.
-    byte_order = b"MM"
-    ifd_entry_count = 1
-    tag_make = 0x010F
-    tag_type_ascii = 2
-    make_value = b"TestCamera\x00"
-    make_length = len(make_value)
-    ifd_offset = 8
-    value_offset = ifd_offset + 2 + 12 + 4
-
-    exif_body = bytearray()
-    exif_body += byte_order
-    exif_body += struct.pack(">H", 0x002A)
-    exif_body += struct.pack(">I", ifd_offset)
-    exif_body += struct.pack(">H", ifd_entry_count)
-    exif_body += struct.pack(">HHI", tag_make, tag_type_ascii, make_length)
-    exif_body += struct.pack(">I", value_offset)
-    exif_body += struct.pack(">I", 0)
-    exif_body += make_value
-
-    app1_marker = b"\xff\xe1"
-    app1_length = len(exif_body) + 2 + 6
-    app1_header = app1_marker + struct.pack(">H", app1_length) + b"Exif\x00\x00"
-
-    soi = jpeg_bytes[:2]
-    rest = jpeg_bytes[2:]
-    modified_jpeg = soi + app1_header + exif_body + rest
+    exif = image.getexif()
+    exif[271] = "TestCamera"
+    image.save(output, format="JPEG", exif=exif)
+    content = output.getvalue()
 
     file = SimpleUploadedFile(
         name="test_exif.jpg",
-        content=modified_jpeg,
+        content=content,
         content_type="image/jpeg",
     )
-    return file, modified_jpeg
+    return file, content
+
+
+def _create_jpeg_with_orientation():
+    """Create a 10x5 JPEG image with EXIF Orientation = 6 (requires 90 CW rotation)."""
+    image = Image.new("RGB", (10, 5), color="blue")
+    output = io.BytesIO()
+    exif = image.getexif()
+    exif[0x0112] = 6  # Orientation tag
+    image.save(output, format="JPEG", exif=exif)
+    content = output.getvalue()
+    return SimpleUploadedFile(
+        name="test_orientation.jpg",
+        content=content,
+        content_type="image/jpeg",
+    )
 
 
 def _create_test_pdf(*, with_metadata=True):
@@ -129,7 +118,7 @@ class TestStripFileMetadata:
         mock_strip.assert_called_once_with(mock_file, ext)
         assert result == mock_file
 
-    @pytest.mark.parametrize("ext", sorted(PDF_EXTENSIONS))
+    @pytest.mark.parametrize("ext", [PDF_EXTENSION])
     def test_dispatches_to_pdf_handler_for_pdf_extensions(self, ext):
         mock_file = MagicMock()
         mock_file.name = f"test.{ext}"
@@ -171,6 +160,15 @@ class TestStripFileMetadata:
             strip_file_metadata(mock_file)
 
         mock_strip.assert_called_once_with(mock_file)
+
+    def test_corrupt_file_raises_validation_error(self):
+        mock_file = SimpleUploadedFile(
+            name="corrupt.jpg",
+            content=b"not an image",
+            content_type="image/jpeg",
+        )
+        with pytest.raises(ValidationError, match="Invalid or corrupt image"):
+            strip_file_metadata(mock_file)
 
 
 class TestStripImageMetadata:
@@ -240,7 +238,24 @@ class TestStripImageMetadata:
 
         result = _strip_image_metadata(mock_file, ".jpg")
 
-        assert b"TestCamera" not in result.read()
+        result_image = Image.open(io.BytesIO(result.read()))
+        assert not result_image.getexif()
+
+    def test_corrupt_image_raises_validation_error(self):
+        mock_file = SimpleUploadedFile(
+            name="corrupt.jpg",
+            content=b"not an image file data",
+            content_type="image/jpeg",
+        )
+        with pytest.raises(ValidationError, match="Invalid or corrupt image"):
+            _strip_image_metadata(mock_file, ".jpg")
+
+    def test_exif_transpose_preserves_orientation(self):
+        mock_file = _create_jpeg_with_orientation()
+        result = _strip_image_metadata(mock_file, ".jpg")
+
+        result_image = Image.open(io.BytesIO(result.read()))
+        assert result_image.size == (5, 10)
 
 
 class TestStripPdfMetadata:
@@ -302,3 +317,12 @@ class TestStripPdfMetadata:
         metadata = reader.metadata
         assert not metadata.get("/Producer")
         assert not metadata.get("/Creator")
+
+    def test_corrupt_pdf_raises_validation_error(self):
+        mock_file = SimpleUploadedFile(
+            name="corrupt.pdf",
+            content=b"not a pdf file data",
+            content_type="application/pdf",
+        )
+        with pytest.raises(ValidationError, match="Invalid or corrupt PDF"):
+            _strip_pdf_metadata(mock_file)

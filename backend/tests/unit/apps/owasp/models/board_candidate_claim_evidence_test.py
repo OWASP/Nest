@@ -435,6 +435,113 @@ class TestBoardCandidateClaimEvidenceModel:
 
         mock_strip.assert_called_once_with(mock_file)
 
+    def test_clean_strip_metadata_error_raises_field_validation_error(self):
+        """Test clean() re-raises ValidationError associated with the file field."""
+        mock_file = MagicMock()
+        mock_file.name = "corrupt.jpg"
+        mock_file.__bool__ = Mock(return_value=True)
+
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.claim_id = 1
+        evidence.file = mock_file
+
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+                side_effect=ValidationError("Invalid file metadata"),
+            ),
+        ):
+            mock_objects.values_list.return_value.filter.return_value.first.return_value = (
+                BoardCandidateClaim.Status.DRAFT
+            )
+            with pytest.raises(ValidationError) as exc_info:
+                evidence.clean()
+
+        assert "file" in exc_info.value.message_dict
+        assert exc_info.value.message_dict["file"] == ["Invalid file metadata"]
+
+    def test_clean_skips_metadata_stripping_for_existing_unmodified_file(self):
+        """Test that clean does not call strip_file_metadata when file has not changed."""
+        mock_file = MagicMock()
+        mock_file.name = "existing_file.pdf"
+        mock_file.__bool__ = Mock(return_value=True)
+
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.pk = 123
+        evidence.claim_id = 1
+        evidence.file = mock_file
+        evidence._original_file_name = "existing_file.pdf"
+
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_claim_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata"
+            ) as mock_strip,
+        ):
+            mock_claim_objects.values_list.return_value.filter.return_value.first.return_value = (
+                BoardCandidateClaim.Status.DRAFT
+            )
+            evidence.clean()
+
+        mock_strip.assert_not_called()
+
+    def test_clean_strips_metadata_for_existing_modified_file(self):
+        """Test that clean calls strip_file_metadata when an existing instance gets a new file."""
+        mock_file = MagicMock()
+        mock_file.name = "new_file.pdf"
+        mock_file.size = 12345
+        mock_file.__bool__ = Mock(return_value=True)
+
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.pk = 123
+        evidence.claim_id = 1
+        evidence.file = mock_file
+        evidence._original_file_name = "existing_file.pdf"
+
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_claim_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+                return_value=mock_file,
+            ) as mock_strip,
+        ):
+            mock_claim_objects.values_list.return_value.filter.return_value.first.return_value = (
+                BoardCandidateClaim.Status.DRAFT
+            )
+            evidence.clean()
+
+        mock_strip.assert_called_once_with(mock_file)
+
+    @patch("apps.owasp.models.board_candidate_claim_evidence.storage.default_storage")
+    def test_save_deletes_old_file_when_file_changes(self, mock_storage):
+        """Test that save deletes the old file if a new file is uploaded."""
+        mock_file = MagicMock()
+        mock_file.name = "new_file.pdf"
+
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.pk = 123
+        evidence.file = mock_file
+
+        with (
+            patch.object(BoardCandidateClaimEvidence, "full_clean"),
+            patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save"),
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaimEvidence.objects"
+            ) as mock_evidence_objects,
+        ):
+            mock_first = mock_evidence_objects.filter.return_value.values_list.return_value.first
+            mock_first.return_value = "old_file.pdf"
+            evidence.save()
+
+        mock_storage.delete.assert_called_once_with("old_file.pdf")
+
     def test_removal_allowed_statuses_constant(self):
         """Test REMOVAL_ALLOWED_STATUSES contains the correct statuses."""
         expected = frozenset(
