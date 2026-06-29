@@ -3,12 +3,12 @@
 import uuid
 from unittest.mock import MagicMock
 
-from django.test import SimpleTestCase
-
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
 
-class TestSnapshotSubscription(SimpleTestCase):
+class TestSnapshotSubscription:
     """Test SnapshotSubscription model."""
 
     def test_str_representation_active(self):
@@ -85,21 +85,13 @@ class TestSnapshotSubscription(SimpleTestCase):
         assert first.unsubscribe_token != second.unsubscribe_token
 
     def test_subscribed_projects_m2m_field(self):
-        """Test subscribed_projects M2M relationship using mocks."""
-        sub = MagicMock(spec=SnapshotSubscription)
-        sub.subscribed_projects = MagicMock()
-        sub.subscribed_projects.all.return_value = []
-
-        sub.subscribed_projects.set([1, 2, 3])
-        sub.subscribed_projects.set.assert_called_once_with([1, 2, 3])
-        assert sub.subscribed_projects.all() == []
+        """Test subscribed_projects M2M field is correctly configured."""
+        field = SnapshotSubscription._meta.get_field("subscribed_projects")
+        assert field.many_to_many
+        assert field.related_model is Project
 
     def test_subscribed_chapters_m2m_field(self):
-        """Test subscribed_chapters M2M relationship using mocks."""
-        sub = MagicMock(spec=SnapshotSubscription)
-        sub.subscribed_chapters = MagicMock()
-        sub.subscribed_chapters.all.return_value = []
-
-        sub.subscribed_chapters.set([4, 5])
-        sub.subscribed_chapters.set.assert_called_once_with([4, 5])
-        assert sub.subscribed_chapters.all() == []
+        """Test subscribed_chapters M2M field is correctly configured."""
+        field = SnapshotSubscription._meta.get_field("subscribed_chapters")
+        assert field.many_to_many
+        assert field.related_model is Chapter
