@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockModuleData } from '@mockData/mockModuleData'
 import { screen, waitFor } from '@testing-library/react'
 import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
@@ -358,7 +359,6 @@ describe('Mentee view', () => {
   }
 
   beforeEach(() => {
-    const { useSession } = require('next-auth/react')
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
       status: 'authenticated',
