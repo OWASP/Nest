@@ -8,7 +8,6 @@ from strawberry.dataloader import DataLoader
 from apps.github.api.internal.dataloaders.milestone import (
     RECENT_MILESTONES_BY_PROGRAM_ID,
     RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
-    RECENT_MILESTONES_LIMIT,
     get_milestone_loaders,
     load_recent_milestones_by_program_id,
     load_recent_milestones_by_repository_id,
@@ -164,16 +163,21 @@ class TestLoadRecentMilestonesByRepositoryId:
     async def test_builds_queryset_with_correct_chain(
         self, mock_milestone, mock_get_results_by_keys
     ):
-        """Queryset is built with filter and order_by in the right order."""
-        repository_ids = [1, 2, 3]
-        mock_queryset = MagicMock()
-        mock_milestone.objects.filter.return_value.order_by.return_value = mock_queryset
+        """Queryset is built with filter, annotate, and order_by."""
+        keys = [(1, 5), (2, 5), (3, 5)]
+        mock_qs = MagicMock()
+        mock_filter = mock_milestone.objects.filter.return_value
+        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], [], []]
 
-        await load_recent_milestones_by_repository_id(repository_ids)
+        await load_recent_milestones_by_repository_id(keys)
 
-        mock_milestone.objects.filter.assert_called_once_with(repository_id__in=repository_ids)
-        mock_milestone.objects.filter.return_value.order_by.assert_called_once_with(
+        mock_milestone.objects.filter.assert_called_once_with(repository_id__in=[1, 2, 3])
+        mock_milestone.objects.filter.return_value.annotate.assert_called_once()
+        mock_milestone.objects.filter.return_value.annotate.return_value.filter.assert_called_once_with(
+            row_number__lte=5
+        )
+        mock_milestone.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.assert_called_once_with(
             "repository_id", "-created_at"
         )
 
@@ -187,15 +191,16 @@ class TestLoadRecentMilestonesByRepositoryId:
         self, mock_milestone, mock_get_results_by_keys
     ):
         """get_results_by_keys receives the queryset, ids, and correct key_field."""
-        repository_ids = [10, 20]
-        mock_queryset = MagicMock()
-        mock_milestone.objects.filter.return_value.order_by.return_value = mock_queryset
+        keys = [(10, 5), (20, 5)]
+        mock_qs = MagicMock()
+        mock_filter = mock_milestone.objects.filter.return_value
+        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], []]
 
-        await load_recent_milestones_by_repository_id(repository_ids)
+        await load_recent_milestones_by_repository_id(keys)
 
         mock_get_results_by_keys.assert_called_once_with(
-            mock_queryset, repository_ids, key_field="repository_id"
+            mock_qs, [10, 20], key_field="repository_id"
         )
 
     @patch(
@@ -204,15 +209,20 @@ class TestLoadRecentMilestonesByRepositoryId:
     )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_limits_groups_to_limit(self, mock_milestone, mock_get_results_by_keys):
-        """Each result group is sliced to RECENT_MILESTONES_LIMIT."""
-        mock_milestone.objects.filter.return_value.order_by.return_value = MagicMock()
-        groups = [list(range(RECENT_MILESTONES_LIMIT + 5))]
-        mock_get_results_by_keys.return_value = groups
+    async def test_limits_via_window_filter(self, mock_milestone, mock_get_results_by_keys):
+        """The window function filter enforces the limit."""
+        keys = [(1, 3)]
+        mock_qs = MagicMock()
+        mock_filter = mock_milestone.objects.filter.return_value
+        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
+        mock_get_results_by_keys.return_value = [[MagicMock(), MagicMock(), MagicMock()]]
 
-        result = await load_recent_milestones_by_repository_id([1])
+        result = await load_recent_milestones_by_repository_id(keys)
 
-        assert len(result[0]) == RECENT_MILESTONES_LIMIT
+        mock_milestone.objects.filter.return_value.annotate.return_value.filter.assert_called_once_with(
+            row_number__lte=3
+        )
+        assert len(result[0]) == 3
 
     @patch(
         "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",
@@ -223,13 +233,16 @@ class TestLoadRecentMilestonesByRepositoryId:
     async def test_returns_result_from_get_results_by_keys(
         self, mock_milestone, mock_get_results_by_keys
     ):
-        """The return value is what get_results_by_keys resolves to (sliced)."""
-        mock_milestone.objects.filter.return_value.order_by.return_value = MagicMock()
+        """The return value is what get_results_by_keys resolves to."""
+        keys = [(1, 5)]
+        mock_qs = MagicMock()
+        mock_filter = mock_milestone.objects.filter.return_value
+        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
         mock_milestone_obj = MagicMock()
         expected = [[mock_milestone_obj]]
         mock_get_results_by_keys.return_value = expected
 
-        result = await load_recent_milestones_by_repository_id([1])
+        result = await load_recent_milestones_by_repository_id(keys)
 
         assert result == expected
 
@@ -239,14 +252,13 @@ class TestLoadRecentMilestonesByRepositoryId:
     )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_empty_repository_ids(self, mock_milestone, mock_get_results_by_keys):
-        """An empty repository_ids list returns an empty list."""
+    async def test_empty_keys(self, mock_milestone, mock_get_results_by_keys):
+        """An empty keys list returns an empty list."""
         mock_milestone.objects.filter.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = []
 
         result = await load_recent_milestones_by_repository_id([])
 
-        mock_milestone.objects.filter.assert_called_once_with(repository_id__in=[])
         assert result == []
 
     @patch(
@@ -255,13 +267,16 @@ class TestLoadRecentMilestonesByRepositoryId:
     )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_single_repository_id(self, mock_milestone, mock_get_results_by_keys):
-        """A single-element list is handled correctly end-to-end."""
-        mock_milestone.objects.filter.return_value.order_by.return_value = MagicMock()
+    async def test_single_key(self, mock_milestone, mock_get_results_by_keys):
+        """A single-element keys list is handled correctly end-to-end."""
+        keys = [(42, 5)]
+        mock_qs = MagicMock()
+        mock_filter = mock_milestone.objects.filter.return_value
+        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
         mock_milestone_obj = MagicMock()
         mock_get_results_by_keys.return_value = [[mock_milestone_obj]]
 
-        result = await load_recent_milestones_by_repository_id([42])
+        result = await load_recent_milestones_by_repository_id(keys)
 
         mock_milestone.objects.filter.assert_called_once_with(repository_id__in=[42])
         assert result == [[mock_milestone_obj]]
@@ -276,10 +291,13 @@ class TestLoadRecentMilestonesByRepositoryId:
         self, mock_milestone, mock_get_results_by_keys
     ):
         """A repository ID with no matching milestones gets an empty list."""
-        mock_milestone.objects.filter.return_value.order_by.return_value = MagicMock()
+        keys = [(99, 5)]
+        mock_qs = MagicMock()
+        mock_filter = mock_milestone.objects.filter.return_value
+        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[]]
 
-        result = await load_recent_milestones_by_repository_id([99])
+        result = await load_recent_milestones_by_repository_id(keys)
 
         assert result == [[]]
 

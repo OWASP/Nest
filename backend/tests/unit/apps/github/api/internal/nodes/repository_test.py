@@ -118,7 +118,19 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
 
         assert result == mock_issues
-        mock_loader.load.assert_awaited_once_with(1)
+        mock_loader.load.assert_awaited_once_with((1, 5))
+
+    @pytest.mark.asyncio
+    async def test_issues_method_invalid_limit(self):
+        """Test issues returns empty list for invalid limit."""
+        mock_repository = Mock()
+        mock_repository.pk = 1
+        mock_info = Mock()
+
+        field = self._get_field_by_name("issues", RepositoryNode)
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info, limit=0)
+
+        assert result == []
 
     def test_languages_method(self):
         """Test languages method resolution."""
@@ -185,7 +197,19 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
 
         assert result == mock_milestones
-        mock_loader.load.assert_awaited_once_with(1)
+        mock_loader.load.assert_awaited_once_with((1, 5))
+
+    @pytest.mark.asyncio
+    async def test_recent_milestones_method_invalid_limit(self):
+        """Test recent_milestones returns empty list for invalid limit."""
+        mock_repository = Mock()
+        mock_repository.pk = 1
+        mock_info = Mock()
+
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info, limit=0)
+
+        assert result == []
 
     @pytest.mark.asyncio
     async def test_releases_method(self):
@@ -205,7 +229,19 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
 
         assert result == mock_releases
-        mock_loader.load.assert_awaited_once_with(1)
+        mock_loader.load.assert_awaited_once_with((1, 5))
+
+    @pytest.mark.asyncio
+    async def test_releases_method_invalid_limit(self):
+        """Test releases returns empty list for invalid limit."""
+        mock_repository = Mock()
+        mock_repository.pk = 1
+        mock_info = Mock()
+
+        field = self._get_field_by_name("releases", RepositoryNode)
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info, limit=0)
+
+        assert result == []
 
     def test_top_contributors_method(self):
         """Test top_contributors method resolution."""
