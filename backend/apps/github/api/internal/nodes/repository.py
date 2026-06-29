@@ -6,6 +6,7 @@ import strawberry
 import strawberry_django
 from strawberry.types import Info
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.dataloaders.issue import ISSUES_BY_REPOSITORY_ID_LOADER
 from apps.github.api.internal.dataloaders.milestone import (
     RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
@@ -53,10 +54,13 @@ class RepositoryNode(strawberry.relay.Node):
     organization: OrganizationNode | None = strawberry_django.field()
 
     @strawberry_django.field
-    async def issues(self, root: Repository, info: Info) -> list[IssueNode]:
+    async def issues(self, root: Repository, info: Info, limit: int = 5) -> list[IssueNode]:
         """Resolve recent issues."""
-        # TODO(arkid15r): rename this to recent_issues.
-        return await info.context.github_dataloaders[ISSUES_BY_REPOSITORY_ID_LOADER].load(root.pk)
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+        return await info.context.github_dataloaders[ISSUES_BY_REPOSITORY_ID_LOADER].load(
+            (root.pk, normalized_limit)
+        )
 
     @strawberry_django.field(only=["languages"])
     def languages(self, root: Repository) -> list[str]:
@@ -78,18 +82,23 @@ class RepositoryNode(strawberry.relay.Node):
         return await info.context.owasp_dataloaders[PROJECT_BY_REPOSITORY_ID_LOADER].load(root.pk)
 
     @strawberry_django.field
-    async def recent_milestones(self, root: Repository, info: Info) -> list[MilestoneNode]:
+    async def recent_milestones(
+        self, root: Repository, info: Info, limit: int = 5
+    ) -> list[MilestoneNode]:
         """Resolve recent milestones."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
         return await info.context.github_dataloaders[
             RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER
-        ].load(root.pk)
+        ].load((root.pk, normalized_limit))
 
     @strawberry_django.field
-    async def releases(self, root: Repository, info: Info) -> list[ReleaseNode]:
+    async def releases(self, root: Repository, info: Info, limit: int = 5) -> list[ReleaseNode]:
         """Resolve recent releases."""
-        # TODO(arkid15r): rename this to recent_releases.
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
         return await info.context.github_dataloaders[RECENT_RELEASES_BY_REPOSITORY_ID_LOADER].load(
-            root.pk
+            (root.pk, normalized_limit)
         )
 
     @strawberry_django.field

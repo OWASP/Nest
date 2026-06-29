@@ -1,5 +1,7 @@
 """DataLoaders for releases."""
 
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
 from apps.common.api.internal.dataloaders.utils import get_result_by_keys, get_results_by_keys
@@ -47,21 +49,34 @@ async def load_latest_releases_by_repository_id(
 
 
 async def load_recent_releases_by_repository_id(
-    repository_ids: list[int],
+    keys: list[tuple[int, int]],
 ) -> list[list[Release]]:
     """Batch-load recent releases for each repository ID."""
-    recent_releases = Release.objects.filter(
-        repository_id__in=repository_ids,
-        is_draft=False,
-        is_pre_release=False,
-        published_at__isnull=False,
-    ).order_by("repository_id", "-published_at")
+    if not keys:
+        return []
 
-    results: list[list[Release]] = await get_results_by_keys(
-        recent_releases, repository_ids, key_field="repository_id"
+    repository_ids = [key[0] for key in keys]
+    limit = keys[0][1]
+
+    recent_releases = (
+        Release.objects.filter(
+            repository_id__in=repository_ids,
+            is_draft=False,
+            is_pre_release=False,
+            published_at__isnull=False,
+        )
+        .annotate(
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("repository_id")],
+                order_by=F("published_at").desc(),
+            )
+        )
+        .filter(row_number__lte=limit)
+        .order_by("repository_id", "-published_at")
     )
 
-    return [group[:RECENT_RELEASES_LIMIT] for group in results]
+    return await get_results_by_keys(recent_releases, repository_ids, key_field="repository_id")
 
 
 def get_release_loaders() -> dict[str, object]:
@@ -70,7 +85,7 @@ def get_release_loaders() -> dict[str, object]:
         LATEST_RELEASE_BY_REPOSITORY_ID_LOADER: DataLoader[int, Release | None](
             load_fn=load_latest_releases_by_repository_id,
         ),
-        RECENT_RELEASES_BY_REPOSITORY_ID_LOADER: DataLoader[int, list[Release]](
+        RECENT_RELEASES_BY_REPOSITORY_ID_LOADER: DataLoader[tuple[int, int], list[Release]](
             load_fn=load_recent_releases_by_repository_id,
         ),
         RELEASE_URL_BY_ID_LOADER: DataLoader[int, str](

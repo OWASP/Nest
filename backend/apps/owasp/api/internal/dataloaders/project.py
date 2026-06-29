@@ -12,8 +12,11 @@ async def load_projects_by_repository_id(
     repository_ids: list[int],
 ) -> list[Project | None]:
     """Batch-load the first project for the given repository IDs in a single query."""
-    projects = Project.objects.filter(repositories__in=repository_ids).prefetch_related(
-        "repositories"
+    projects = (
+        Project.objects.filter(repositories__in=repository_ids)
+        .prefetch_related("repositories")
+        .order_by("pk")
+        .distinct()
     )
 
     results: list[list[Project | None]] = await get_m2m_results_by_keys(

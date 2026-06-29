@@ -2,7 +2,8 @@
 
 from collections import defaultdict
 
-from django.db.models import Prefetch
+from django.db.models import F, Prefetch, Window
+from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
 from apps.common.api.internal.dataloaders.utils import get_results_by_keys
@@ -50,27 +51,38 @@ async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[l
 
 
 async def load_recent_milestones_by_repository_id(
-    repository_ids: list[int],
+    keys: list[tuple[int, int]],
 ) -> list[list[Milestone]]:
     """Batch-load recent milestones for the given repository IDs."""
-    milestones = Milestone.objects.filter(repository_id__in=repository_ids).order_by(
-        "repository_id", "-created_at"
+    if not keys:
+        return []
+
+    repository_ids = [key[0] for key in keys]
+    limit = keys[0][1]
+
+    milestones = (
+        Milestone.objects.filter(repository_id__in=repository_ids)
+        .annotate(
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("repository_id")],
+                order_by=F("created_at").desc(),
+            )
+        )
+        .filter(row_number__lte=limit)
+        .order_by("repository_id", "-created_at")
     )
 
-    results: list[list[Milestone]] = await get_results_by_keys(
-        milestones, repository_ids, key_field="repository_id"
-    )
-
-    return [group[:RECENT_MILESTONES_LIMIT] for group in results]
+    return await get_results_by_keys(milestones, repository_ids, key_field="repository_id")
 
 
-def get_milestone_loaders() -> dict[str, DataLoader[int, list[Milestone]]]:
+def get_milestone_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
         RECENT_MILESTONES_BY_PROGRAM_ID: DataLoader[int, list[Milestone]](
             load_fn=load_recent_milestones_by_program_id,
         ),
-        RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER: DataLoader[int, list[Milestone]](
+        RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER: DataLoader[tuple[int, int], list[Milestone]](
             load_fn=load_recent_milestones_by_repository_id,
         ),
     }
