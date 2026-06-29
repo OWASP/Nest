@@ -1307,4 +1307,193 @@ describe('Mentee deadline management', () => {
     })
     expect(screen.getByText('Set')).toBeInTheDocument()
   })
+
+  it('calls setIsEditingDeadline(true) when Edit button is clicked', async () => {
+    const setIsEditingDeadline = jest.fn()
+    const setDeadlineInput = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      setIsEditingDeadline,
+      setDeadlineInput,
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((query) => {
+      const opName = query?.definitions?.[0]?.name?.value ?? ''
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      if (opName === 'GetModuleIssueView') {
+        return {
+          data: {
+            getModule: {
+              id: '1',
+              menteesCanManageDeadlines: true,
+              taskDeadline: '2026-12-01T00:00:00Z',
+              taskAssignedAt: '2026-01-01T00:00:00Z',
+              issueByNumber: {
+                id: '1',
+                number: 42,
+                title: 'Edit Deadline Issue',
+                body: '',
+                url: 'https://github.com/issue/42',
+                state: 'open',
+                isMerged: false,
+                organizationName: 'OWASP',
+                repositoryName: 'Nest',
+                labels: [],
+                assignees: [],
+                pullRequests: [],
+              },
+              interestedUsers: [],
+              issueMentees: [],
+            },
+          },
+          loading: false,
+          error: undefined,
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
+    })
+
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Edit Deadline Issue')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /^Edit$/i }))
+    await waitFor(() => {
+      expect(setIsEditingDeadline).toHaveBeenCalledWith(true)
+    })
+  })
+
+  it('calls setIsEditingDeadline(false) when Cancel is clicked', async () => {
+    const setIsEditingDeadline = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      isEditingDeadline: true,
+      deadlineInput: '2026-12-01',
+      setIsEditingDeadline,
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((query) => {
+      const opName = query?.definitions?.[0]?.name?.value ?? ''
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      if (opName === 'GetModuleIssueView') {
+        return {
+          data: {
+            getModule: {
+              id: '1',
+              menteesCanManageDeadlines: true,
+              taskDeadline: '2026-12-01T00:00:00Z',
+              taskAssignedAt: '2026-01-01T00:00:00Z',
+              issueByNumber: {
+                id: '1',
+                number: 42,
+                title: 'Cancel Deadline Issue',
+                body: '',
+                url: 'https://github.com/issue/42',
+                state: 'open',
+                isMerged: false,
+                organizationName: 'OWASP',
+                repositoryName: 'Nest',
+                labels: [],
+                assignees: [],
+                pullRequests: [],
+              },
+              interestedUsers: [],
+              issueMentees: [],
+            },
+          },
+          loading: false,
+          error: undefined,
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
+    })
+
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Cancel Deadline Issue')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Cancel/i }))
+    await waitFor(() => {
+      expect(setIsEditingDeadline).toHaveBeenCalledWith(false)
+    })
+  })
+
+  it('calls setTaskDeadlineMutation when Save is clicked with a date', async () => {
+    const setTaskDeadlineMutation = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      isEditingDeadline: true,
+      deadlineInput: '2026-12-25',
+      setTaskDeadlineMutation,
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((query) => {
+      const opName = query?.definitions?.[0]?.name?.value ?? ''
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      if (opName === 'GetModuleIssueView') {
+        return {
+          data: {
+            getModule: {
+              id: '1',
+              menteesCanManageDeadlines: true,
+              taskDeadline: '2026-12-01T00:00:00Z',
+              taskAssignedAt: '2026-01-01T00:00:00Z',
+              issueByNumber: {
+                id: '1',
+                number: 42,
+                title: 'Save Deadline Issue',
+                body: '',
+                url: 'https://github.com/issue/42',
+                state: 'open',
+                isMerged: false,
+                organizationName: 'OWASP',
+                repositoryName: 'Nest',
+                labels: [],
+                assignees: [],
+                pullRequests: [],
+              },
+              interestedUsers: [],
+              issueMentees: [],
+            },
+          },
+          loading: false,
+          error: undefined,
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
+    })
+
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Save Deadline Issue')).toBeInTheDocument()
+    })
+    const saveButton = screen.getByRole('button', { name: /^Save$/i })
+    expect(saveButton).not.toBeDisabled()
+    fireEvent.click(saveButton)
+    await waitFor(() => {
+      expect(setTaskDeadlineMutation).toHaveBeenCalledWith({
+        variables: expect.objectContaining({
+          deadlineAt: new Date('2026-12-25').toISOString(),
+        }),
+      })
+    })
+  })
 })

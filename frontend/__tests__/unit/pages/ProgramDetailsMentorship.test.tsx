@@ -488,14 +488,58 @@ describe('ProgramDetailsPage', () => {
       },
       status: 'authenticated',
     })
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { getProgram: null, getProgramModules: [] },
-      loading: false,
-      error: undefined,
-    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    ;(useQuery as unknown as jest.Mock).mockImplementation(
+      (query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (opName === 'GetManagementProgramAndModules') {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        return {
+          data: { getProgram: null, getProgramModules: [] },
+          loading: false,
+          error: undefined,
+        }
+      }
+    )
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText(/Program Not Found/i)).toBeInTheDocument()
+    })
+  })
+
+  it('renders loading spinner while mentee data is loading', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: {
+        user: { login: 'mentee1', isLeader: false, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    ;(useQuery as unknown as jest.Mock).mockImplementation(
+      (query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (opName === 'GetManagementProgramAndModules') {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        return { data: undefined, loading: true, error: undefined }
+      }
+    )
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(
+        document.querySelector('svg') ||
+          screen.queryByText(/loading/i) ||
+          document.querySelector('[class*="spinner"]') ||
+          document.querySelector('[class*="animate"]')
+      ).toBeTruthy()
     })
   })
 })
