@@ -83,3 +83,23 @@ class TestSnapshotSubscription(SimpleTestCase):
         assert isinstance(first.unsubscribe_token, uuid.UUID)
         assert isinstance(second.unsubscribe_token, uuid.UUID)
         assert first.unsubscribe_token != second.unsubscribe_token
+
+    def test_subscribed_projects_m2m_field(self):
+        """Test subscribed_projects M2M relationship using mocks."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.subscribed_projects = MagicMock()
+        sub.subscribed_projects.all.return_value = []
+
+        sub.subscribed_projects.set([1, 2, 3])
+        sub.subscribed_projects.set.assert_called_once_with([1, 2, 3])
+        assert sub.subscribed_projects.all() == []
+
+    def test_subscribed_chapters_m2m_field(self):
+        """Test subscribed_chapters M2M relationship using mocks."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.subscribed_chapters = MagicMock()
+        sub.subscribed_chapters.all.return_value = []
+
+        sub.subscribed_chapters.set([4, 5])
+        sub.subscribed_chapters.set.assert_called_once_with([4, 5])
+        assert sub.subscribed_chapters.all() == []

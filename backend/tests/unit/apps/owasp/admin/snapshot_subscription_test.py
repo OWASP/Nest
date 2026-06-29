@@ -25,9 +25,10 @@ class TestSnapshotSubscriptionAdmin:
         assert admin.search_fields == ("user__email", "user__username")
         assert admin.raw_id_fields == ("user",)
         assert admin.readonly_fields == ("unsubscribe_token", "created_at", "updated_at")
+        assert admin.autocomplete_fields == ("subscribed_projects", "subscribed_chapters")
 
         # Check fieldsets structure
-        assert len(admin.fieldsets) == 3
+        assert len(admin.fieldsets) == 4
 
         # Check Content Preferences fieldset
         preferences_fieldset = admin.fieldsets[1]
@@ -42,4 +43,12 @@ class TestSnapshotSubscriptionAdmin:
             "include_pull_requests",
             "include_releases",
             "include_users",
+        )
+
+        # Check Subscription Filters fieldset
+        filters_fieldset = admin.fieldsets[2]
+        assert filters_fieldset[0] == "Subscription Filters"
+        assert filters_fieldset[1]["fields"] == (
+            "subscribed_projects",
+            "subscribed_chapters",
         )

@@ -58,6 +58,18 @@ class SnapshotSubscription(models.Model):
     include_releases = models.BooleanField(default=True)
     include_users = models.BooleanField(default=True)
 
+    # Specific project/chapter subscriptions
+    subscribed_projects = models.ManyToManyField(
+        "owasp.Project",
+        blank=True,
+        related_name="snapshot_subscriptions",
+    )
+    subscribed_chapters = models.ManyToManyField(
+        "owasp.Chapter",
+        blank=True,
+        related_name="snapshot_subscriptions",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

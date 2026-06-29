@@ -13,6 +13,7 @@ class SnapshotSubscriptionAdmin(admin.ModelAdmin):
     search_fields = ("user__email", "user__username")
     raw_id_fields = ("user",)
     readonly_fields = ("unsubscribe_token", "created_at", "updated_at")
+    autocomplete_fields = ("subscribed_projects", "subscribed_chapters")
 
     fieldsets = (
         (None, {"fields": ("user", "frequency", "is_active")}),
@@ -29,6 +30,12 @@ class SnapshotSubscriptionAdmin(admin.ModelAdmin):
                     "include_releases",
                     "include_users",
                 ),
+            },
+        ),
+        (
+            "Subscription Filters",
+            {
+                "fields": ("subscribed_projects", "subscribed_chapters"),
             },
         ),
         (
