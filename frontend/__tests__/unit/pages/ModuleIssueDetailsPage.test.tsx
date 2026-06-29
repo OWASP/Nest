@@ -994,4 +994,210 @@ describe('ModuleIssueDetailsPage', () => {
       ).toBeInTheDocument()
     })
   })
+  describe('Mentee view', () => {
+    beforeEach(() => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: { login: 'mentee1', isLeader: false, isMentor: false },
+          expires: '2099-01-01T00:00:00.000Z',
+        },
+        status: 'authenticated',
+      })
+    })
+
+    it('renders mentee issue view when management query returns forbidden error', async () => {
+      const forbiddenError = {
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+        message: 'Forbidden',
+      }
+      mockUseQuery.mockImplementation((query) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (query === GetManagementProgramAdminsAndModulesDocument) {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        if (opName === 'GetModuleIssueView') {
+          return {
+            data: {
+              getModule: {
+                id: '1',
+                menteesCanManageDeadlines: false,
+                taskDeadline: null,
+                taskAssignedAt: null,
+                issueByNumber: {
+                  id: '1',
+                  number: 42,
+                  title: 'My Issue',
+                  body: 'Issue body',
+                  url: 'https://github.com/issue/42',
+                  state: 'open',
+                  isMerged: false,
+                  organizationName: 'OWASP',
+                  repositoryName: 'Nest',
+                  labels: [],
+                  assignees: [{ id: '1', login: 'mentee1', name: 'Mentee One', avatarUrl: 'https://github.com/mentee1.png' }],
+                  pullRequests: [],
+                },
+                interestedUsers: [],
+                issueMentees: [],
+              },
+            },
+            loading: false,
+            error: undefined,
+          }
+        }
+        return { data: undefined, loading: false, error: undefined }
+      })
+      render(<ModuleIssueDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByText('My Issue')).toBeInTheDocument()
+      })
+    })
+
+    it('shows issue not found for mentee when issueByNumber is null', async () => {
+      const forbiddenError = {
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+        message: 'Forbidden',
+      }
+      mockUseQuery.mockImplementation((query) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (query === GetManagementProgramAdminsAndModulesDocument) {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        if (opName === 'GetModuleIssueView') {
+          return {
+            data: { getModule: { id: '1', menteesCanManageDeadlines: false, taskDeadline: null, taskAssignedAt: null, issueByNumber: null, interestedUsers: [], issueMentees: [] } },
+            loading: false,
+            error: undefined,
+          }
+        }
+        return { data: undefined, loading: false, error: undefined }
+      })
+      render(<ModuleIssueDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByText('Issue Not Found')).toBeInTheDocument()
+      })
+    })
+  })
+
 })
+    it('renders mentee issue view for merged issue', async () => {
+      const forbiddenError = {
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+        message: 'Forbidden',
+      }
+      mockUseQuery.mockImplementation((query) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (query === GetManagementProgramAdminsAndModulesDocument) {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        if (opName === 'GetModuleIssueView') {
+          return {
+            data: {
+              getModule: {
+                id: '1',
+                menteesCanManageDeadlines: false,
+                taskDeadline: null,
+                taskAssignedAt: null,
+                issueByNumber: {
+                  id: '1', number: 42, title: 'Merged Issue',
+                  body: '', url: 'https://github.com/issue/42',
+                  state: 'closed', isMerged: true,
+                  organizationName: 'OWASP', repositoryName: 'Nest',
+                  labels: [], assignees: [], pullRequests: [],
+                },
+                interestedUsers: [], issueMentees: [],
+              },
+            },
+            loading: false, error: undefined,
+          }
+        }
+        return { data: undefined, loading: false, error: undefined }
+      })
+      render(<ModuleIssueDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByText('Merged Issue')).toBeInTheDocument()
+      })
+    })
+
+    it('renders mentee issue view with deadline management enabled', async () => {
+      const forbiddenError = {
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+        message: 'Forbidden',
+      }
+      mockUseQuery.mockImplementation((query) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (query === GetManagementProgramAdminsAndModulesDocument) {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        if (opName === 'GetModuleIssueView') {
+          return {
+            data: {
+              getModule: {
+                id: '1',
+                menteesCanManageDeadlines: true,
+                taskDeadline: '2026-12-01T00:00:00Z',
+                taskAssignedAt: '2026-01-01T00:00:00Z',
+                issueByNumber: {
+                  id: '1', number: 42, title: 'Deadline Issue',
+                  body: '', url: 'https://github.com/issue/42',
+                  state: 'open', isMerged: false,
+                  organizationName: 'OWASP', repositoryName: 'Nest',
+                  labels: [], assignees: [{ id: '1', login: 'mentee1', name: 'Mentee', avatarUrl: 'https://github.com/mentee1.png' }],
+                  pullRequests: [],
+                },
+                interestedUsers: [], issueMentees: [],
+              },
+            },
+            loading: false, error: undefined,
+          }
+        }
+        return { data: undefined, loading: false, error: undefined }
+      })
+      render(<ModuleIssueDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByText('Deadline Issue')).toBeInTheDocument()
+      })
+    })
+
+    it('renders mentee deadline edit input when Edit button is clicked', async () => {
+      const forbiddenError = {
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+        message: 'Forbidden',
+      }
+      mockUseQuery.mockImplementation((query) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (query === GetManagementProgramAdminsAndModulesDocument) {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        if (opName === 'GetModuleIssueView') {
+          return {
+            data: {
+              getModule: {
+                id: '1',
+                menteesCanManageDeadlines: true,
+                taskDeadline: '2026-12-01T00:00:00Z',
+                taskAssignedAt: '2026-01-01T00:00:00Z',
+                issueByNumber: {
+                  id: '1', number: 42, title: 'Editable Deadline Issue',
+                  body: '', url: 'https://github.com/issue/42',
+                  state: 'open', isMerged: false,
+                  organizationName: 'OWASP', repositoryName: 'Nest',
+                  labels: [], assignees: [],
+                  pullRequests: [],
+                },
+                interestedUsers: [], issueMentees: [],
+              },
+            },
+            loading: false, error: undefined,
+          }
+        }
+        return { data: undefined, loading: false, error: undefined }
+      })
+      render(<ModuleIssueDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByText('Editable Deadline Issue')).toBeInTheDocument()
+      })
+      await waitFor(() => {
+        expect(screen.getByText('Edit')).toBeInTheDocument()
+      })
+    })
