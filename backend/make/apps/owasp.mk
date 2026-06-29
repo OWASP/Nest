@@ -27,6 +27,12 @@ owasp-create-project-metadata-file:
 	@echo "Generating metadata"
 	@CMD="python manage.py owasp_create_project_metadata_file $(entity_key)" $(MAKE) backend-exec-command
 
+SNAPSHOT_FREQUENCY ?= weekly
+
+owasp-create-snapshot:
+	@echo "Creating OWASP community snapshot"
+	@CMD="python manage.py owasp_create_snapshot --frequency $(SNAPSHOT_FREQUENCY)" $(MAKE) exec-backend-command
+
 owasp-crp-recalculate-scores:
 	@echo "Recalculating contributor scores"
 	@CMD="python manage.py owasp_crp_recalculate_scores" $(MAKE) backend-exec-command
