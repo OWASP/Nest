@@ -1536,7 +1536,12 @@ describe('PR pagination edge cases', () => {
     })
   })
 
-  const setupPRMock = (prs: object[], fetchMore: Function) => {
+  const setupPRMock = (
+    prs: object[],
+    fetchMore: (opts: {
+      updateQuery: (prev: unknown, next: { fetchMoreResult: unknown }) => unknown
+    }) => Promise<unknown>
+  ) => {
     mockUseQuery.mockImplementation((query: unknown) => {
       if (query === GetManagementProgramAdminsAndModulesDocument)
         return { data: mockAccessData, loading: false, error: undefined }
@@ -1558,18 +1563,21 @@ describe('PR pagination edge cases', () => {
 
   it('does not append PRs when fetchMore returns empty list', async () => {
     const prs = makePRs(4)
-    setupPRMock(prs, (opts: { updateQuery: Function }) => {
-      opts.updateQuery(
-        {
-          managementModule: {
-            ...mockIssueData.managementModule,
-            issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+    setupPRMock(
+      prs,
+      (opts: { updateQuery: (prev: unknown, next: { fetchMoreResult: unknown }) => unknown }) => {
+        opts.updateQuery(
+          {
+            managementModule: {
+              ...mockIssueData.managementModule,
+              issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+            },
           },
-        },
-        { fetchMoreResult: { managementModule: { issueByNumber: { pullRequests: [] } } } }
-      )
-      return Promise.resolve({})
-    })
+          { fetchMoreResult: { managementModule: { issueByNumber: { pullRequests: [] } } } }
+        )
+        return Promise.resolve({})
+      }
+    )
     render(<ModuleIssueDetailsPage />)
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Show more/i }))
@@ -1597,7 +1605,9 @@ describe('PR pagination edge cases', () => {
           },
           loading: false,
           error: undefined,
-          fetchMore: (opts: { updateQuery: Function }) => {
+          fetchMore: (opts: {
+            updateQuery: (prev: unknown, next: { fetchMoreResult: unknown }) => unknown
+          }) => {
             currentPRs = [...prs, ...extraPRs]
             opts.updateQuery(
               {
@@ -1681,7 +1691,9 @@ describe('Mentee issue status badges', () => {
       message: 'Forbidden',
     }
     mockUseQuery.mockImplementation((query: unknown) => {
-      const opName = (query as any)?.definitions?.[0]?.name?.value ?? ''
+      const opName =
+        (query as { definitions?: Array<{ name?: { value?: string } }> })?.definitions?.[0]?.name
+          ?.value ?? ''
       if (query === GetManagementProgramAdminsAndModulesDocument)
         return { data: null, loading: false, error: forbiddenError }
       if (opName === 'GetModuleIssueView')
