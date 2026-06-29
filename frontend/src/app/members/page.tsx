@@ -1,27 +1,56 @@
 'use client'
+
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
 import type { User } from 'types/user'
+import { sortOptionsUser } from 'utils/sortingOptions'
+import MembersFilter from 'components/MembersFilter'
 import SearchPageLayout from 'components/SearchPageLayout'
+import SortBy from 'components/SortBy'
 import UserCard from 'components/UserCard'
 
 const UsersPage = () => {
+  const [selectedAffinity, setSelectedAffinity] = useState<string>('all')
+
+  const facetFilters = useMemo(() => {
+    const filters: (string | string[])[] = []
+
+    if (selectedAffinity === 'projects') {
+      filters.push('idx_has_project_affinity:true')
+    } else if (selectedAffinity === 'chapters') {
+      filters.push('idx_has_chapter_affinity:true')
+    } else if (selectedAffinity === 'committees') {
+      filters.push('idx_has_committee_affinity:true')
+    }
+
+    return filters
+  }, [selectedAffinity])
+
   const {
     items: users,
     isLoaded,
     currentPage,
     totalPages,
     searchQuery,
+    sortBy,
+    order,
     handleSearch,
     handlePageChange,
+    handleSortChange,
+    handleOrderChange,
   } = useSearchPage<User>({
     indexName: 'users',
     pageTitle: 'OWASP Users',
+    defaultSortBy: 'default',
+    defaultOrder: 'desc',
     hitsPerPage: 24,
+    facetFilters,
   })
 
   const router = useRouter()
+
   const handleButtonClick = (user: User) => {
     router.push(`/members/${user.key}`)
   }
@@ -61,6 +90,19 @@ const UsersPage = () => {
       onSearch={handleSearch}
       searchPlaceholder="Search for members..."
       searchQuery={searchQuery}
+      filterChildren={
+        <MembersFilter selectedAffinity={selectedAffinity} onAffinityChange={setSelectedAffinity} />
+      }
+      inlineSort
+      sortChildren={
+        <SortBy
+          onOrderChange={handleOrderChange}
+          onSortChange={handleSortChange}
+          selectedOrder={order}
+          selectedSortOption={sortBy}
+          sortOptions={sortOptionsUser}
+        />
+      }
       totalPages={totalPages}
     >
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

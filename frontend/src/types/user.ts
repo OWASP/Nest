@@ -15,10 +15,14 @@ export type User = {
   bio?: string
   company?: string
   contributionsCount?: number
+  country?: string
   createdAt?: string
   email?: string
   followersCount?: number
   followingCount?: number
+  hasChapterAffinity?: boolean
+  hasCommitteeAffinity?: boolean
+  hasProjectAffinity?: boolean
   isOwaspStaff?: boolean
   issues?: Issue[]
   issuesCount?: number

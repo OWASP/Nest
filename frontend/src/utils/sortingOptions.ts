@@ -13,3 +13,10 @@ export const sortOptionsProject = [
   { label: 'Name', key: 'name' },
   { label: 'Stars', key: 'stars_count' },
 ]
+
+export const sortOptionsUser = [
+  { label: 'Relevancy', key: 'default' },
+  { label: 'Contributions', key: 'contributions_count' },
+  { label: 'Followers', key: 'followers_count' },
+  { label: 'Public Repositories', key: 'public_repositories_count' },
+]
