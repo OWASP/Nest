@@ -14,21 +14,6 @@ RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER = "recent_milestones_by_repository_id"
 RECENT_MILESTONES_LIMIT = 5
 
 
-async def load_recent_milestones_by_repository_id(
-    repository_ids: list[int],
-) -> list[list[Milestone]]:
-    """Batch-load recent milestones for the given repository IDs."""
-    milestones = Milestone.objects.filter(repository_id__in=repository_ids).order_by(
-        "repository_id", "-created_at"
-    )
-
-    results: list[list[Milestone]] = await get_results_by_keys(
-        milestones, repository_ids, key_field="repository_id"
-    )
-
-    return [group[:RECENT_MILESTONES_LIMIT] for group in results]
-
-
 async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[list[Milestone]]:
     """Batch-load interested users for the given issue IDs in a single query."""
     milestones = (
@@ -62,6 +47,21 @@ async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[l
                     seen_program_ids.add(module.prefetched_program.pk)
 
     return [mapping.get(program_id, []) for program_id in program_ids]
+
+
+async def load_recent_milestones_by_repository_id(
+    repository_ids: list[int],
+) -> list[list[Milestone]]:
+    """Batch-load recent milestones for the given repository IDs."""
+    milestones = Milestone.objects.filter(repository_id__in=repository_ids).order_by(
+        "repository_id", "-created_at"
+    )
+
+    results: list[list[Milestone]] = await get_results_by_keys(
+        milestones, repository_ids, key_field="repository_id"
+    )
+
+    return [group[:RECENT_MILESTONES_LIMIT] for group in results]
 
 
 def get_milestone_loaders() -> dict[str, DataLoader[int, list[Milestone]]]:

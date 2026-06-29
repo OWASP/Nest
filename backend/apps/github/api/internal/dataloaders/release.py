@@ -38,7 +38,9 @@ async def load_latest_releases_by_repository_id(
             published_at__isnull=False,
         )
         .distinct("repository_id")
+        .select_related("author")
         .order_by("repository_id", "-published_at")
+        .only("repository_id", "author__login", "author__name", "name")
     )
 
     return await get_result_by_keys(latest_releases, repository_ids, key_field="repository_id")

@@ -64,7 +64,7 @@ class RepositoryNode(strawberry.relay.Node):
         return list(root.languages.keys())
 
     @strawberry_django.field
-    async def latest_release(self, root: Repository, info: Info) -> ReleaseNode | None:
+    async def latest_release(self, root: Repository, info: Info) -> str | None:
         """Resolve latest release."""
         return await info.context.github_dataloaders[LATEST_RELEASE_BY_REPOSITORY_ID_LOADER].load(
             root.pk
