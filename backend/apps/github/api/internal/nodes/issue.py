@@ -44,7 +44,7 @@ class IssueNode(strawberry.relay.Node):
     """GitHub issue node."""
 
     assignees: list[UserNode] = strawberry_django.field()
-    author: UserNode | None = strawberry_django.field()
+    author: UserNode | None = strawberry_django.field(select_related=["author"])
 
     @strawberry_django.field(prefetch_related=["pull_requests"])
     def pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
@@ -57,7 +57,7 @@ class IssueNode(strawberry.relay.Node):
             self.pull_requests.all().order_by("-created_at")[offset : offset + normalized_limit]
         )
 
-    @strawberry_django.field(select_related=["repository__organization", "repository"])
+    @strawberry_django.field(select_related=["repository__organization"])
     def organization_name(self, root: Issue) -> str | None:
         """Resolve organization name."""
         return (
