@@ -1497,3 +1497,244 @@ describe('Mentee deadline management', () => {
     })
   })
 })
+
+describe('PR pagination edge cases', () => {
+  const makePRs = (count: number) =>
+    Array.from({ length: count }, (_, i) => ({
+      id: `pr-${i}`,
+      title: `PR ${i + 1}`,
+      url: `https://github.com/pr/${i}`,
+      state: 'open',
+      mergedAt: null,
+      createdAt: new Date().toISOString(),
+      author: { login: `user${i}`, avatarUrl: 'https://github.com/avatar.png' },
+    }))
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId: '123' })
+    mockUseIssueMutations.mockReturnValue({
+      assignIssue: jest.fn(),
+      unassignIssue: jest.fn(),
+      setTaskDeadlineMutation: jest.fn(),
+      clearTaskDeadlineMutation: jest.fn(),
+      assigning: false,
+      unassigning: false,
+      settingDeadline: false,
+      clearingDeadline: false,
+      isEditingDeadline: false,
+      setIsEditingDeadline: jest.fn(),
+      deadlineInput: '',
+      setDeadlineInput: jest.fn(),
+    })
+    mockUseSession.mockReturnValue({
+      data: {
+        user: { login: 'test-user', isLeader: true, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+  })
+
+  const setupPRMock = (prs: object[], fetchMore: Function) => {
+    mockUseQuery.mockImplementation((query: unknown) => {
+      if (query === GetManagementProgramAdminsAndModulesDocument)
+        return { data: mockAccessData, loading: false, error: undefined }
+      if (query === GetManagementModuleIssueViewDocument)
+        return {
+          data: {
+            managementModule: {
+              ...mockIssueData.managementModule,
+              issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+            },
+          },
+          loading: false,
+          error: undefined,
+          fetchMore,
+        }
+      return { data: undefined, loading: false, error: undefined }
+    })
+  }
+
+  it('does not append PRs when fetchMore returns empty list', async () => {
+    const prs = makePRs(4)
+    setupPRMock(prs, (opts: { updateQuery: Function }) => {
+      opts.updateQuery(
+        {
+          managementModule: {
+            ...mockIssueData.managementModule,
+            issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+          },
+        },
+        { fetchMoreResult: { managementModule: { issueByNumber: { pullRequests: [] } } } }
+      )
+      return Promise.resolve({})
+    })
+    render(<ModuleIssueDetailsPage />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show more/i }))
+    })
+    expect(screen.queryByText('PR 5')).not.toBeInTheDocument()
+  })
+
+  it('hides Show more when fetchMore returns fewer than limit PRs', async () => {
+    const prs = makePRs(4)
+    const extraPRs = [{ ...makePRs(1)[0], id: 'extra-0', title: 'Extra PR' }]
+    let currentPRs = prs
+    mockUseQuery.mockImplementation((query: unknown) => {
+      if (query === GetManagementProgramAdminsAndModulesDocument)
+        return { data: mockAccessData, loading: false, error: undefined }
+      if (query === GetManagementModuleIssueViewDocument)
+        return {
+          data: {
+            managementModule: {
+              ...mockIssueData.managementModule,
+              issueByNumber: {
+                ...mockIssueData.managementModule.issueByNumber,
+                pullRequests: currentPRs,
+              },
+            },
+          },
+          loading: false,
+          error: undefined,
+          fetchMore: (opts: { updateQuery: Function }) => {
+            currentPRs = [...prs, ...extraPRs]
+            opts.updateQuery(
+              {
+                managementModule: {
+                  ...mockIssueData.managementModule,
+                  issueByNumber: {
+                    ...mockIssueData.managementModule.issueByNumber,
+                    pullRequests: prs,
+                  },
+                },
+              },
+              {
+                fetchMoreResult: {
+                  managementModule: { issueByNumber: { pullRequests: extraPRs } },
+                },
+              }
+            )
+            return Promise.resolve({})
+          },
+        }
+      return { data: undefined, loading: false, error: undefined }
+    })
+    render(<ModuleIssueDetailsPage />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show more/i }))
+    })
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /Show more/i })).not.toBeInTheDocument()
+    })
+  })
+
+  it('collapses PR list when Show less is clicked', async () => {
+    setupPRMock(makePRs(6), jest.fn().mockResolvedValue({}))
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.queryByText('PR 5')).not.toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show more/i }))
+    })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeInTheDocument()
+    )
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show less/i }))
+    })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Show more/i })).toBeInTheDocument()
+    )
+  })
+})
+
+describe('Mentee issue status badges', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId: '123' })
+    mockUseIssueMutations.mockReturnValue({
+      assignIssue: jest.fn(),
+      unassignIssue: jest.fn(),
+      setTaskDeadlineMutation: jest.fn(),
+      clearTaskDeadlineMutation: jest.fn(),
+      assigning: false,
+      unassigning: false,
+      settingDeadline: false,
+      clearingDeadline: false,
+      isEditingDeadline: false,
+      setIsEditingDeadline: jest.fn(),
+      deadlineInput: '',
+      setDeadlineInput: jest.fn(),
+    })
+    mockUseSession.mockReturnValue({
+      data: {
+        user: { login: 'mentee1', isLeader: false, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+  })
+
+  const setupMenteeIssueMock = (state: string, isMerged: boolean) => {
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((query: unknown) => {
+      const opName = (query as any)?.definitions?.[0]?.name?.value ?? ''
+      if (query === GetManagementProgramAdminsAndModulesDocument)
+        return { data: null, loading: false, error: forbiddenError }
+      if (opName === 'GetModuleIssueView')
+        return {
+          data: {
+            getModule: {
+              id: '1',
+              menteesCanManageDeadlines: false,
+              taskDeadline: null,
+              taskAssignedAt: null,
+              issueByNumber: {
+                id: '1',
+                number: 42,
+                title: 'Status Issue',
+                body: '',
+                url: 'https://github.com/issue/42',
+                state,
+                isMerged,
+                organizationName: 'OWASP',
+                repositoryName: 'Nest',
+                labels: [],
+                assignees: [
+                  {
+                    id: '1',
+                    login: 'mentee1',
+                    name: 'Mentee',
+                    avatarUrl: 'https://github.com/mentee1.png',
+                  },
+                ],
+                pullRequests: [],
+              },
+              interestedUsers: [],
+              issueMentees: [],
+            },
+          },
+          loading: false,
+          error: undefined,
+        }
+      return { data: undefined, loading: false, error: undefined }
+    })
+  }
+
+  it('shows Merged badge for mentee view when issue is merged', async () => {
+    setupMenteeIssueMock('closed', true)
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => expect(screen.getByText('Status Issue')).toBeInTheDocument())
+    expect(screen.getByText('Merged')).toBeInTheDocument()
+  })
+
+  it('shows Closed badge for mentee view when issue is closed and not merged', async () => {
+    setupMenteeIssueMock('closed', false)
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => expect(screen.getByText('Status Issue')).toBeInTheDocument())
+    expect(screen.getAllByText('Closed')[0]).toBeInTheDocument()
+  })
+})
