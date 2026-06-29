@@ -529,5 +529,4 @@ describe('MyMentorshipPage', () => {
     render(<MyMentorshipPage />)
     expect(await screen.findByText(/Access Denied/i)).toBeInTheDocument()
   })
-
 })

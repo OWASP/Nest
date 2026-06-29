@@ -465,13 +465,15 @@ describe('ProgramDetailsPage', () => {
       },
       getProgramModules: [],
     }
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (opName === 'GetManagementProgramAndModules') {
-        return { data: null, loading: false, error: forbiddenError }
+    ;(useQuery as unknown as jest.Mock).mockImplementation(
+      (query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (opName === 'GetManagementProgramAndModules') {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        return { data: menteeData, loading: false, error: undefined }
       }
-      return { data: menteeData, loading: false, error: undefined }
-    })
+    )
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('GSoC 2025')).toBeInTheDocument()
@@ -496,5 +498,4 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByText(/Program Not Found/i)).toBeInTheDocument()
     })
   })
-
 })

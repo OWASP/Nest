@@ -309,13 +309,15 @@ describe('ModuleDetailsPage', () => {
         order: 0,
       },
     }
-    mockUseQuery.mockImplementation((query: { definitions?: Array<{ name?: { value?: string } }> }) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (opName === 'GetManagementProgramAdminsAndModules') {
-        return { data: null, loading: false, error: forbiddenError }
+    mockUseQuery.mockImplementation(
+      (query: { definitions?: Array<{ name?: { value?: string } }> }) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (opName === 'GetManagementProgramAdminsAndModules') {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        return { data: menteeModuleData, loading: false, error: undefined }
       }
-      return { data: menteeModuleData, loading: false, error: undefined }
-    })
+    )
     render(<ModuleDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
@@ -332,17 +334,18 @@ describe('ModuleDetailsPage', () => {
       graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
       message: 'Forbidden',
     }
-    mockUseQuery.mockImplementation((query: { definitions?: Array<{ name?: { value?: string } }> }) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (opName === 'GetManagementProgramAdminsAndModules') {
-        return { data: null, loading: false, error: forbiddenError }
+    mockUseQuery.mockImplementation(
+      (query: { definitions?: Array<{ name?: { value?: string } }> }) => {
+        const opName = query?.definitions?.[0]?.name?.value ?? ''
+        if (opName === 'GetManagementProgramAdminsAndModules') {
+          return { data: null, loading: false, error: forbiddenError }
+        }
+        return { data: { getModule: null }, loading: false, error: undefined }
       }
-      return { data: { getModule: null }, loading: false, error: undefined }
-    })
+    )
     render(<ModuleDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText(/Module Not Found/i)).toBeInTheDocument()
     })
   })
-
 })
