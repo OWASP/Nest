@@ -204,6 +204,16 @@ class UserIndexMixin:
         ]
 
     @property
+    def idx_calculated_score(self) -> float:
+        """Get the calculated ranking score for indexing.
+
+        Returns:
+            float: The composite ranking score.
+
+        """
+        return self.calculated_score
+
+    @property
     def idx_contributions_count(self) -> int:
         """Get the total number of contributions made by the user.
 
