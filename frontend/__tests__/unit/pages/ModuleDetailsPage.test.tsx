@@ -11,6 +11,13 @@ jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn().mockReturnValue({
+    data: { user: { login: 'test-user', isLeader: true, isMentor: true } },
+    status: 'authenticated',
+  }),
+}))
+
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
@@ -275,4 +282,67 @@ describe('ModuleDetailsPage', () => {
 
     expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
   })
+  it('renders mentee view when management query returns forbidden error', async () => {
+    const { useSession } = jest.requireMock('next-auth/react')
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
+      status: 'authenticated',
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    const menteeModuleData = {
+      getModule: {
+        id: '1',
+        key: 'owasp-nest',
+        name: 'OWASP Nest',
+        description: 'Nest module',
+        experienceLevel: 'BEGINNER',
+        startedAt: '2025-01-01',
+        endedAt: '2025-12-31',
+        domains: [],
+        tags: [],
+        labels: [],
+        mentors: [],
+        mentees: [],
+        order: 0,
+      },
+    }
+    mockUseQuery.mockImplementation((query: { definitions?: Array<{ name?: { value?: string } }> }) => {
+      const opName = query?.definitions?.[0]?.name?.value ?? ''
+      if (opName === 'GetManagementProgramAdminsAndModules') {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      return { data: menteeModuleData, loading: false, error: undefined }
+    })
+    render(<ModuleDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
+    })
+  })
+
+  it('shows module not found for mentee when getModule returns null', async () => {
+    const { useSession } = jest.requireMock('next-auth/react')
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
+      status: 'authenticated',
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((query: { definitions?: Array<{ name?: { value?: string } }> }) => {
+      const opName = query?.definitions?.[0]?.name?.value ?? ''
+      if (opName === 'GetManagementProgramAdminsAndModules') {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      return { data: { getModule: null }, loading: false, error: undefined }
+    })
+    render(<ModuleDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText(/Module Not Found/i)).toBeInTheDocument()
+    })
+  })
+
 })

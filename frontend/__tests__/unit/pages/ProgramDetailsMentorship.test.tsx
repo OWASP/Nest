@@ -435,4 +435,66 @@ describe('ProgramDetailsPage', () => {
       expect(detailsContent).toHaveTextContent('Mentees Limit0')
     })
   })
+  it('renders mentee view when user gets forbidden error on management query', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: {
+        user: { login: 'mentee1', isLeader: false, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    const menteeData = {
+      getProgram: {
+        id: '1',
+        key: 'gsoc-2025',
+        name: 'GSoC 2025',
+        description: 'Test program',
+        status: 'ACTIVE',
+        menteesLimit: null,
+        experienceLevels: null,
+        startedAt: '2025-01-01',
+        endedAt: '2025-12-31',
+        domains: null,
+        tags: null,
+        admins: [],
+        recentMilestones: [],
+      },
+      getProgramModules: [],
+    }
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
+      const opName = query?.definitions?.[0]?.name?.value ?? ''
+      if (opName === 'GetManagementProgramAndModules') {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      return { data: menteeData, loading: false, error: undefined }
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('GSoC 2025')).toBeInTheDocument()
+    })
+  })
+
+  it('renders program not found for mentee with no enrolled program', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: {
+        user: { login: 'mentee1', isLeader: false, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: { getProgram: null, getProgramModules: [] },
+      loading: false,
+      error: undefined,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText(/Program Not Found/i)).toBeInTheDocument()
+    })
+  })
+
 })

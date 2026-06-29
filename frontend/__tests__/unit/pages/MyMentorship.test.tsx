@@ -461,4 +461,73 @@ describe('MyMentorshipPage', () => {
       jest.useRealTimers()
     }
   })
+  it('renders mentee view when user is enrolled as mentee', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Mentee User',
+          email: 'mentee@example.com',
+          login: 'mentee1',
+          isLeader: false,
+          isMentor: false,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        myMenteePrograms: {
+          programs: [
+            {
+              id: '1',
+              key: 'gsoc-2025',
+              name: 'GSoC 2025',
+              status: 'ACTIVE',
+              description: 'Google Summer of Code 2025',
+              startedAt: '2025-01-01',
+              endedAt: '2025-12-31',
+              userRole: 'mentee',
+            },
+          ],
+          totalPages: 1,
+          currentPage: 1,
+        },
+      },
+      loading: false,
+      error: undefined,
+    })
+    render(<MyMentorshipPage />)
+    expect(await screen.findByText(/Programs you are enrolled in/i)).toBeInTheDocument()
+  })
+
+  it('shows access denied when non-mentee non-leader user has no enrolled programs', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'User',
+          email: 'user@example.com',
+          login: 'user1',
+          isLeader: false,
+          isMentor: false,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        myMenteePrograms: {
+          programs: [],
+          totalPages: 1,
+          currentPage: 1,
+        },
+      },
+      loading: false,
+      error: undefined,
+    })
+    render(<MyMentorshipPage />)
+    expect(await screen.findByText(/Access Denied/i)).toBeInTheDocument()
+  })
+
 })
