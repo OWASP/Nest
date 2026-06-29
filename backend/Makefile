@@ -65,6 +65,12 @@ exec-backend-command-fuzz:
 exec-backend-command-fuzz-it:
 	@docker exec -it fuzz-nest-backend $(CMD)
 
+exec-backend-command-staging:
+	@docker exec -i staging-nest-backend $(CMD)
+
+exec-backend-command-staging-it:
+	@docker exec -it staging-nest-backend $(CMD)
+
 exec-db-command:
 	@docker exec -i nest-db $(CMD)
 
@@ -82,6 +88,12 @@ exec-db-command-fuzz:
 
 exec-db-command-fuzz-it:
 	@docker exec -it fuzz-nest-db $(CMD)
+
+exec-db-command-staging:
+	@docker exec -i staging-nest-db $(CMD)
+
+exec-db-command-staging-it:
+	@docker exec -it staging-nest-db $(CMD)
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -124,21 +136,21 @@ fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy c
 		--rm \
 		backend python -m scripts.fetch_nest_dump
 
-load-data: fetch-nest-dump ## Load initial data from fixtures
+load-data: purge-data fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
 
-load-data-e2e: fetch-nest-dump
+load-data-e2e: purge-data-e2e fetch-nest-dump
 	@echo "Loading Nest e2e data"
 	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) exec-db-command-e2e
 
-load-data-fuzz: fetch-nest-dump
+load-data-fuzz: purge-data-fuzz fetch-nest-dump
 	@echo "Loading Nest fuzz data"
 	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
-load-data-staging: fetch-nest-dump
+load-data-staging: purge-data-staging fetch-nest-dump
 	@echo "Loading Nest staging data"
-	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-staging
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -160,6 +172,9 @@ purge-data-e2e:
 
 purge-data-fuzz:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-fuzz
+
+purge-data-staging:
+	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-staging
 
 recreate-schema:
 	@echo "Recreating Nest schema"
