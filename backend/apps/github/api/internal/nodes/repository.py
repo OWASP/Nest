@@ -6,8 +6,10 @@ import strawberry
 import strawberry_django
 from strawberry.types import Info
 
-from apps.common.utils import normalize_limit
 from apps.github.api.internal.dataloaders.issue import ISSUES_BY_REPOSITORY_ID_LOADER
+from apps.github.api.internal.dataloaders.milestone import (
+    RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
+)
 from apps.github.api.internal.dataloaders.release import (
     LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
     RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
@@ -18,6 +20,7 @@ from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository import Repository
+from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID_LOADER
 
 if TYPE_CHECKING:
     from apps.owasp.api.internal.nodes.project import ProjectNode
@@ -67,20 +70,19 @@ class RepositoryNode(strawberry.relay.Node):
             root.pk
         )
 
-    @strawberry_django.field(prefetch_related=["project_set"])
-    def project(
-        self, root: Repository
+    @strawberry_django.field
+    async def project(
+        self, root: Repository, info: Info
     ) -> Annotated["ProjectNode", strawberry.lazy("apps.owasp.api.internal.nodes.project")] | None:
         """Resolve project."""
-        return root.project
+        return await info.context.owasp_dataloaders[PROJECT_BY_REPOSITORY_ID_LOADER].load(root.pk)
 
-    @strawberry_django.field(prefetch_related=["milestones"])
-    def recent_milestones(self, root: Repository, limit: int = 5) -> list[MilestoneNode]:
+    @strawberry_django.field
+    async def recent_milestones(self, root: Repository, info: Info) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
-            return []
-
-        return root.recent_milestones.order_by("-created_at")[:normalized_limit]
+        return await info.context.github_dataloaders[
+            RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER
+        ].load(root.pk)
 
     @strawberry_django.field
     async def releases(self, root: Repository, info: Info) -> list[ReleaseNode]:

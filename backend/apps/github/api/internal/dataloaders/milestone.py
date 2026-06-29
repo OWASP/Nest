@@ -5,10 +5,28 @@ from collections import defaultdict
 from django.db.models import Prefetch
 from strawberry.dataloader import DataLoader
 
+from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 from apps.github.models.milestone import Milestone
 from apps.mentorship.models.program import Program
 
 RECENT_MILESTONES_BY_PROGRAM_ID = "recent_milestones_by_program_id"
+RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER = "recent_milestones_by_repository_id"
+RECENT_MILESTONES_LIMIT = 5
+
+
+async def load_recent_milestones_by_repository_id(
+    repository_ids: list[int],
+) -> list[list[Milestone]]:
+    """Batch-load recent milestones for the given repository IDs."""
+    milestones = Milestone.objects.filter(repository_id__in=repository_ids).order_by(
+        "repository_id", "-created_at"
+    )
+
+    results: list[list[Milestone]] = await get_results_by_keys(
+        milestones, repository_ids, key_field="repository_id"
+    )
+
+    return [group[:RECENT_MILESTONES_LIMIT] for group in results]
 
 
 async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[list[Milestone]]:
@@ -51,5 +69,8 @@ def get_milestone_loaders() -> dict[str, DataLoader[int, list[Milestone]]]:
     return {
         RECENT_MILESTONES_BY_PROGRAM_ID: DataLoader[int, list[Milestone]](
             load_fn=load_recent_milestones_by_program_id,
+        ),
+        RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER: DataLoader[int, list[Milestone]](
+            load_fn=load_recent_milestones_by_repository_id,
         ),
     }

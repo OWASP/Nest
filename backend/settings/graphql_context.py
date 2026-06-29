@@ -4,6 +4,7 @@ from strawberry.django.context import StrawberryDjangoContext
 
 from apps.github.api.internal.dataloaders import get_github_dataloaders
 from apps.mentorship.api.internal.dataloaders import get_mentorship_dataloaders
+from apps.owasp.api.internal.dataloaders import get_owasp_dataloaders
 
 
 class NestGraphQLContext(StrawberryDjangoContext):
@@ -14,3 +15,4 @@ class NestGraphQLContext(StrawberryDjangoContext):
         super().__init__(*args, **kwargs)
         self.github_dataloaders = get_github_dataloaders()
         self.mentorship_dataloaders = get_mentorship_dataloaders()
+        self.owasp_dataloaders = get_owasp_dataloaders()
