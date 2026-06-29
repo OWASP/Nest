@@ -12,7 +12,7 @@ import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk
 export function startMetrics() {
   const reader = new PeriodicExportingMetricReader({
     exporter: new OTLPMetricExporter(),
-    exportIntervalMillis: Number(process.env.OTEL_METRIC_EXPORT_INTERVAL) || 60000,
+    exportIntervalMillis: Number(process.env.OTEL_METRIC_EXPORT_INTERVAL) || 60_000,
   })
 
   const provider = new MeterProvider({

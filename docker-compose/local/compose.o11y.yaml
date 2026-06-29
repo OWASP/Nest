@@ -2,15 +2,15 @@ services:
   backend:
     environment:
       - DJANGO_OTEL_METRICS_ENABLED=true
-      - OTEL_SERVICE_NAME=nest-backend
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://o11y-metrics:8428/opentelemetry
       - OTEL_METRIC_EXPORT_INTERVAL=15000
+      - OTEL_SERVICE_NAME=nest-backend
 
   frontend:
     environment:
-      - OTEL_SERVICE_NAME=nest-frontend
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://o11y-metrics:8428/opentelemetry
       - OTEL_METRIC_EXPORT_INTERVAL=15000
+      - OTEL_SERVICE_NAME=nest-frontend
 
   o11y-metrics:
     container_name: nest-o11y-metrics

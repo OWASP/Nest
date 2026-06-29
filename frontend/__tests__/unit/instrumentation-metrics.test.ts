@@ -70,7 +70,7 @@ describe('startMetrics', () => {
     startMetrics()
 
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith(
-      expect.objectContaining({ exportIntervalMillis: 60000 })
+      expect.objectContaining({ exportIntervalMillis: 60_000 })
     )
     expect(resourceFromAttributes).toHaveBeenCalledWith({ 'service.name': 'nest-frontend' })
   })
