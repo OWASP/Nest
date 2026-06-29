@@ -9,7 +9,7 @@ test.describe('Header - Desktop (Chrome)', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
 
   test('should have logo', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('Header - Desktop (Chrome)', () => {
   })
 
   test('all dropdown triggers should use pointer cursor', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
 
     const dropdownButtons = page.locator('#navbar-sticky button')
 
@@ -60,7 +60,7 @@ test.use({
 
 test.describe('Header - Mobile (iPhone 13)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
   })
 
   test('should have logo', async ({ page }) => {
@@ -72,12 +72,14 @@ test.describe('Header - Mobile (iPhone 13)', () => {
   test('should have mobile menu button', async ({ page }) => {
     await expect(page.getByRole('button', { name: /menu/i })).toBeVisible()
   })
+
   test('should show button when menu clicked', async ({ page }) => {
     const menuButton = page.getByRole('button', { name: /menu/i })
     await menuButton.click()
     await expect(page.getByRole('link', { name: 'Star On Github' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Sponsor Us' })).toBeVisible()
   })
+
   test('should show navigation when menu clicked', async ({ page }) => {
     const menuButton = page.getByRole('button', { name: /menu/i })
     await menuButton.click()

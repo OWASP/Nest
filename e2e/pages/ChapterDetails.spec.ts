@@ -22,17 +22,16 @@ test.describe('Chapter Details Page', () => {
 
   test('should have map with geolocation', async ({ page }) => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
-    await unlockButton.waitFor({ state: 'attached', timeout: 30000 })
+    await expect(unlockButton).toBeAttached()
 
     await unlockButton.dispatchEvent('click')
 
-    await unlockButton.waitFor({ state: 'detached', timeout: 10000 })
+    await expect(unlockButton).not.toBeAttached()
 
-    await page.locator('.leaflet-control-zoom-in').waitFor({ state: 'attached', timeout: 10000 })
-    await page.locator('.leaflet-control-zoom-out').waitFor({ state: 'attached', timeout: 10000 })
-
-    await page.locator('.leaflet-container').waitFor({ state: 'attached' })
-    await page.locator('.leaflet-tile-pane').waitFor({ state: 'attached' })
+    await expect(page.locator('.leaflet-control-zoom-in')).toBeAttached()
+    await expect(page.locator('.leaflet-control-zoom-out')).toBeAttached()
+    await expect(page.locator('.leaflet-container')).toBeAttached()
+    await expect(page.locator('.leaflet-tile-pane')).toBeAttached()
   })
 
   test('should have top contributors', async ({ page }) => {

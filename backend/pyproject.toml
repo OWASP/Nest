@@ -8,11 +8,12 @@ version = "0.0.0"
 description = "Your gateway to OWASP"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
-packages = [ { include = "apps" } ]
+packages = [ { include = "apps", from = "src" } ]
 dependencies.python = "^3.13"
-dependencies.aiohttp = "3.14.0"
+dependencies.aiohttp = "3.14.1"
 dependencies.algoliasearch = "4.40.0"
 dependencies.algoliasearch-django = "4.0.0"
+dependencies.cryptography = "48.0.1"
 dependencies.django = "6.0.6"
 dependencies.django-configurations = "2.5.1"
 dependencies.django-cors-headers = "4.9.0"
@@ -26,9 +27,8 @@ dependencies.gunicorn = "25.3.0"
 dependencies.humanize = "4.15.0"
 dependencies.idna = "3.15"
 dependencies.jinja2 = "3.1.6"
-dependencies.langchain-core = "1.3.3"
-dependencies.langgraph = "1.1.10"
-dependencies.langsmith = "0.8.0"
+dependencies.langchain-core = "1.4.8"
+dependencies.langgraph = "1.2.6"
 dependencies.lxml = "6.1.0"
 dependencies.markdown = "3.10.2"
 dependencies.openai = "2.33.0"
@@ -50,7 +50,7 @@ dependencies.requests = "2.33.1"
 dependencies.sentry-sdk = { extras = [ "django" ], version = "2.58.0" }
 dependencies.slack-bolt = "1.28.0"
 dependencies.slack-sdk = "3.41.0"
-dependencies.starlette = "1.0.1"
+dependencies.starlette = "1.3.1"
 dependencies.strawberry-graphql = { extras = [ "django" ], version = "0.316.0" }
 dependencies.strawberry-graphql-django = "0.75.3"
 dependencies.thefuzz = "0.22.1"
@@ -77,6 +77,7 @@ format = true
 [tool.ruff]
 target-version = "py313"
 line-length = 99
+src = [ "src" ]
 lint.select = [ "ALL" ]
 lint.extend-select = [ "I" ]
 lint.ignore = [
@@ -97,12 +98,12 @@ lint.per-file-ignores."**/__init__.py" = [
   "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
 ]
-lint.per-file-ignores."apps/**/management/commands/*.py" = [
+lint.per-file-ignores."**/src/apps/**/management/commands/*.py" = [
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D102",   # https://docs.astral.sh/ruff/rules/undocumented-public-method/
   "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
-lint.per-file-ignores."apps/**/migrations/*.py" = [
+lint.per-file-ignores."**/src/apps/**/migrations/*.py" = [
   "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
@@ -111,15 +112,15 @@ lint.per-file-ignores."apps/**/migrations/*.py" = [
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
-lint.per-file-ignores."apps/api/rest/**/*.py" = [
+lint.per-file-ignores."**/src/apps/api/rest/**/*.py" = [
   "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
 ]
-lint.per-file-ignores."apps/github/models/mixins/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."apps/slack/commands/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."apps/slack/common/handlers/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."apps/slack/events/**/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."settings/*.py" = [
+lint.per-file-ignores."**/src/apps/github/models/mixins/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/apps/slack/commands/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/apps/slack/common/handlers/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/apps/slack/events/**/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/settings/*.py" = [
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
 lint.per-file-ignores."tests/**/*.py" = [
@@ -134,9 +135,14 @@ lint.per-file-ignores."tests/**/*.py" = [
   "S101",    # https://docs.astral.sh/ruff/rules/assert/
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
+lint.per-file-ignores."tests/cluster-fuzz-lite/**/*.py" = [
+  "INP001", # Atheris fuzz harnesses mirror production paths; not importable packages.
+]
+lint.isort.detect-same-package = false
+lint.isort.known-first-party = [ "apps", "tests" ]
 
 [tool.mypy]
-mypy_path = "backend"
+mypy_path = "src"
 explicit_package_bases = true
 ignore_missing_imports = true
 plugins = [ "strawberry.ext.mypy_plugin" ]
@@ -157,17 +163,18 @@ disable_error_code = [ "attr-defined", "misc", "return-value" ]
 pythonVersion = "3.13"
 venv = ".venv"
 venvPath = "."
-include = [ "apps", "tests" ]
-extraPaths = [ "." ]
+include = [ "src", "tests" ]
+extraPaths = [ "src" ]
 
 [tool.pytest]
+ini_options.pythonpath = [ "src" ]
 ini_options.addopts = [
   "--cov-config=pyproject.toml",
   "--cov-fail-under=95",
   "--cov-precision=2",
   "--cov-report=term-missing",
   "--cov-report=xml",
-  "--cov=.",
+  "--cov=src",
   "--dist=loadscope",
   "--durations-min=1",
   "--durations=5",
@@ -190,7 +197,7 @@ run.omit = [
   "**/migrations/*",
   "__init__.py",
   "manage.py",
-  "settings/*",
+  "src/settings/*",
+  "src/wsgi.py",
   "tests/*",
-  "wsgi.py",
 ]
