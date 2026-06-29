@@ -556,9 +556,7 @@ class TestModuleNodeMenteeAccess:
 
         mock_qs = m.issues.select_related.return_value.prefetch_related.return_value
         mock_filtered = mock_qs.filter.return_value
-        mock_filtered.filter.return_value.order_by.return_value.__getitem__.return_value = [
-            MagicMock()
-        ]
+        mock_filtered.order_by.return_value.__getitem__.return_value = [MagicMock()]
 
         with patch("apps.mentorship.models.task.Task.objects"):
             result = _call_module_resolver(m, "issues", info, limit=20, offset=0, label=None)

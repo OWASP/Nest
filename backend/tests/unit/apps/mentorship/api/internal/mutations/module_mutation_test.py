@@ -1650,3 +1650,50 @@ class TestModuleMutationMenteeDeadline:
                 issue_number=1,
                 deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
             )
+
+    @patch("apps.mentorship.api.internal.mutations.module.Task")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.timezone")
+    def test_mentee_can_set_deadline_when_assignee(self, mock_tz, mock_module, mock_task):
+        """Mentee can set deadline when enabled and assigned to the issue."""
+        github_user = MagicMock()
+        user = MagicMock()
+        user.github_user = github_user
+        info = MagicMock()
+        info.context.request.user = user
+
+        mock_mod = MagicMock()
+        mock_mod.has_mentor.return_value = False
+        mock_mod.has_mentee.return_value = True
+        mock_mod.mentees_can_manage_deadlines = True
+        mock_mod.program.has_admin.return_value = False
+        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
+            mock_mod
+        )
+
+        mock_issue = MagicMock()
+        assignees_qs = MagicMock()
+        assignees_qs.exists.return_value = True
+        assignees_qs.filter.return_value.exists.return_value = True
+        mock_issue.assignees.all.return_value = assignees_qs
+        (
+            mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value
+        ) = mock_issue
+
+        mock_tz.is_naive.return_value = False
+
+        mock_task_instance = MagicMock()
+        mock_task.objects.get_or_create.return_value = (mock_task_instance, True)
+
+        mutation = ModuleMutation()
+        result = mutation.set_task_deadline(
+            info,
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_number=1,
+            deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
+        )
+        assert result is not None
+        mock_task_instance.save.assert_called_once()

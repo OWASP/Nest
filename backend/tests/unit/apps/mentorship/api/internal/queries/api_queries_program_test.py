@@ -449,6 +449,7 @@ class TestMyMenteePrograms:
 
         assert isinstance(result, PaginatedPrograms)
         assert result.current_page == 1
+        assert len(result.programs) == 1
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     def test_returns_empty_when_not_enrolled(
@@ -499,6 +500,7 @@ class TestMyMenteePrograms:
         result = api_program_queries.my_mentee_programs(info=mock_info, search="gsoc")
 
         assert isinstance(result, PaginatedPrograms)
+        mock_qs.filter.assert_called()
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     def test_no_github_user_still_queries(

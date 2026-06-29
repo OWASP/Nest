@@ -78,7 +78,7 @@ const MyMentorshipPage: React.FC = () => {
   )
 
   const isMentee =
-    !isProjectLeader && !isMentor && (menteeData?.myMenteePrograms?.programs?.length ?? 0) > 0
+    !isProjectLeader && !isMentor && (menteeData?.myMenteePrograms?.totalPages ?? 0) > 0
 
   useEffect(() => {
     if (programData?.myPrograms) {

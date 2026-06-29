@@ -245,10 +245,15 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
+        is_admin = module.program and module.program.has_admin(user)
         is_mentor = module.has_mentor(user)
         is_mentee = module.has_mentee(user)
 
-        if not is_mentor and not (is_mentee and module.mentees_can_manage_deadlines):
+        if (
+            not is_admin
+            and not is_mentor
+            and not (is_mentee and module.mentees_can_manage_deadlines)
+        ):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
@@ -264,7 +269,7 @@ class ModuleMutation:
         if not assignees.exists():
             raise ValidationError(message="Cannot set deadline: issue has no assignees.")
 
-        if is_mentee and not is_mentor:
+        if is_mentee and not is_mentor and not is_admin:
             github_user = getattr(user, "github_user", None)
             if github_user is None or not assignees.filter(id=github_user.id).exists():
                 raise PermissionDenied(NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG)
@@ -389,6 +394,7 @@ class ModuleMutation:
             "domains": input_data.domains,
             "labels": input_data.labels,
             "tags": input_data.tags,
+            "mentees_can_manage_deadlines": input_data.mentees_can_manage_deadlines,
         }
 
         for field, value in field_mapping.items():
