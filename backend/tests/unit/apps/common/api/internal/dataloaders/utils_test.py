@@ -36,8 +36,7 @@ def make_m2m_item(m2m_field: str, related_items: list, **kwargs):
         for item in related_items:
             yield item
 
-    related_mgr = SimpleNamespace(all=_agen)
-    return SimpleNamespace(**{m2m_field: related_mgr}, **kwargs)
+    return SimpleNamespace(**{m2m_field: SimpleNamespace(all=_agen)}, **kwargs)
 
 
 class TestResultsByKeys:

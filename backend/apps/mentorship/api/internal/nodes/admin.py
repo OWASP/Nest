@@ -16,17 +16,14 @@ class AdminNode:
     @strawberry_django.field(name="avatarUrl", select_related=["github_user"])
     async def avatar_url(self, root: Admin) -> str:
         """Get the GitHub avatar URL of the admin."""
-        user = await sync_to_async(lambda: root.github_user)()
-        return user.avatar_url if user else ""
+        return user.avatar_url if (user := await sync_to_async(lambda: root.github_user)()) else ""
 
     @strawberry_django.field(select_related=["github_user"])
     async def login(self, root: Admin) -> str:
         """Get the GitHub login of the admin."""
-        user = await sync_to_async(lambda: root.github_user)()
-        return user.login if user else ""
+        return user.login if (user := await sync_to_async(lambda: root.github_user)()) else ""
 
     @strawberry_django.field(select_related=["github_user"])
     async def name(self, root: Admin) -> str:
         """Get the GitHub name of the admin."""
-        user = await sync_to_async(lambda: root.github_user)()
-        return user.name if user else ""
+        return user.name if (user := await sync_to_async(lambda: root.github_user)()) else ""
