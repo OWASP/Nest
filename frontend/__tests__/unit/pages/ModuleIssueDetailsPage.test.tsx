@@ -1496,6 +1496,60 @@ describe('Mentee deadline management', () => {
       })
     })
   })
+  it('calls setDeadlineInput when date input changes in mentee editing mode', async () => {
+    const setDeadlineInput = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      isEditingDeadline: true,
+      deadlineInput: '',
+      setDeadlineInput,
+    })
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((query) => {
+      const opName = query?.definitions?.[0]?.name?.value ?? ''
+      if (query === GetManagementProgramAdminsAndModulesDocument)
+        return { data: null, loading: false, error: forbiddenError }
+      if (opName === 'GetModuleIssueView')
+        return {
+          data: {
+            getModule: {
+              id: '1',
+              menteesCanManageDeadlines: true,
+              taskDeadline: null,
+              taskAssignedAt: null,
+              issueByNumber: {
+                id: '1',
+                number: 42,
+                title: 'Date Input Issue',
+                body: '',
+                url: 'https://github.com/issue/42',
+                state: 'open',
+                isMerged: false,
+                organizationName: 'OWASP',
+                repositoryName: 'Nest',
+                labels: [],
+                assignees: [],
+                pullRequests: [],
+              },
+              interestedUsers: [],
+              issueMentees: [],
+            },
+          },
+          loading: false,
+          error: undefined,
+        }
+      return { data: undefined, loading: false, error: undefined }
+    })
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => expect(screen.getByText('Date Input Issue')).toBeInTheDocument())
+    const dateInput = screen.getByDisplayValue('')
+    fireEvent.change(dateInput, { target: { value: '2026-12-01' } })
+    expect(setDeadlineInput).toHaveBeenCalledWith('2026-12-01')
+  })
 })
 
 it('shows deadline in gray for mentee view when issue is closed', async () => {
