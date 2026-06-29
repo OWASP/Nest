@@ -349,3 +349,72 @@ describe('ModuleDetailsPage', () => {
     })
   })
 })
+
+describe('Mentee view', () => {
+  const mockUseQueryLocal = useQuery as unknown as jest.Mock
+  const forbiddenError = {
+    graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+    message: 'Forbidden',
+  }
+
+  beforeEach(() => {
+    const { useSession } = require('next-auth/react')
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
+      status: 'authenticated',
+    })
+  })
+
+  it('shows loading spinner while mentee module is loading', () => {
+    mockUseQueryLocal.mockImplementation(() => {
+      if (
+        mockUseQueryLocal.mock.calls[mockUseQueryLocal.mock.calls.length - 1]?.[1]?.skip === false
+      ) {
+        return { data: undefined, loading: true, error: undefined }
+      }
+      return { data: null, loading: false, error: forbiddenError }
+    })
+    mockUseQueryLocal
+      .mockReturnValueOnce({ data: null, loading: false, error: forbiddenError })
+      .mockReturnValueOnce({ data: undefined, loading: true, error: undefined })
+    const { container } = render(<ModuleDetailsPage />)
+    expect(container.innerHTML).toContain('LoadingSpinner')
+  })
+
+  it('shows module not found when mentee module data is null', async () => {
+    mockUseQueryLocal
+      .mockReturnValueOnce({ data: null, loading: false, error: forbiddenError })
+      .mockReturnValueOnce({ data: { getModule: null }, loading: false, error: undefined })
+    render(<ModuleDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Module Not Found')).toBeInTheDocument()
+    })
+  })
+
+  it('renders mentee module details when data is available', async () => {
+    mockUseQueryLocal
+      .mockReturnValueOnce({ data: null, loading: false, error: forbiddenError })
+      .mockReturnValueOnce({
+        data: {
+          getModule: {
+            ...mockModuleData,
+            name: 'Mentee Module',
+            description: 'Mentee module description',
+            experienceLevel: 'beginner',
+            startedAt: '2026-01-01',
+            endedAt: '2026-12-01',
+            tags: [],
+            domains: [],
+            mentors: [],
+            mentees: [],
+          },
+        },
+        loading: false,
+        error: undefined,
+      })
+    render(<ModuleDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Mentee Module')).toBeInTheDocument()
+    })
+  })
+})

@@ -1112,3 +1112,85 @@ describe('IssuesPage', () => {
     })
   })
 })
+
+describe('Mentee view', () => {
+  beforeEach(() => {
+    mockUseParams.mockReturnValue({ programKey: 'prog-1', moduleKey: 'mod-1' })
+    mockUseRouter.mockReturnValue({ push: mockPush, replace: mockReplace })
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    mockUseSession.mockReturnValue({
+      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
+      status: 'authenticated',
+    })
+  })
+
+  it('shows loading spinner when mentee issues are loading', () => {
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((document) => {
+      if (document === GetManagementProgramAdminsAndModulesDocument) {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      return { data: undefined, loading: true, error: undefined }
+    })
+    render(<IssuesPage />)
+    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+  })
+
+  it('renders mentee issues list when data is available', async () => {
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((document) => {
+      if (document === GetManagementProgramAdminsAndModulesDocument) {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      return {
+        data: {
+          getModule: {
+            issues: [
+              {
+                id: '1',
+                number: 1,
+                title: 'Mentee Issue One',
+                state: 'open',
+                isMerged: false,
+                labels: [],
+                assignees: [],
+                taskDeadline: null,
+              },
+            ],
+            issuesCount: 1,
+            availableLabels: [],
+          },
+        },
+        loading: false,
+        error: undefined,
+      }
+    })
+    render(<IssuesPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Mentee Issue One')).toBeInTheDocument()
+    })
+  })
+
+  it('shows error display when mentee issues query fails', async () => {
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    mockUseQuery.mockImplementation((document) => {
+      if (document === GetManagementProgramAdminsAndModulesDocument) {
+        return { data: null, loading: false, error: forbiddenError }
+      }
+      return { data: undefined, loading: false, error: new Error('Failed') }
+    })
+    render(<IssuesPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Failed to load issues')).toBeInTheDocument()
+    })
+  })
+})

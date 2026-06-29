@@ -63,6 +63,12 @@ jest.mock('next-auth/react', () => {
     useSession: jest.fn(),
   }
 })
+jest.mock('components/ProgramCard', () => {
+  return function MockProgramCard({ program }: { program: { name: string } }) {
+    return <div data-testid="program-card">{program.name}</div>
+  }
+})
+
 jest.mock('hooks/useUpdateProgramStatus', () => ({
   useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
 }))
@@ -528,5 +534,20 @@ describe('MyMentorshipPage', () => {
     })
     render(<MyMentorshipPage />)
     expect(await screen.findByText(/Access Denied/i)).toBeInTheDocument()
+  })
+})
+
+describe('Mentee view', () => {
+  beforeEach(() => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
+      status: 'authenticated',
+    })
+  })
+
+  it('shows loading spinner while mentee programs are loading', () => {
+    mockUseQuery.mockReturnValue({ data: undefined, loading: true, error: undefined })
+    render(<MyMentorshipPage />)
+    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
   })
 })
