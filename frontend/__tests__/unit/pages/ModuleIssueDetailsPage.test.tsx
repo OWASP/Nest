@@ -1498,6 +1498,68 @@ describe('Mentee deadline management', () => {
   })
 })
 
+it('shows deadline in gray for mentee view when issue is closed', async () => {
+  const forbiddenError = {
+    graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+    message: 'Forbidden',
+  }
+  mockUseSession.mockReturnValue({
+    data: {
+      user: { login: 'mentee1', isLeader: false, isMentor: false },
+      expires: '2099-01-01T00:00:00.000Z',
+    },
+    status: 'authenticated',
+  })
+  mockUseQuery.mockImplementation((query: unknown) => {
+    const opName =
+      (query as { definitions?: Array<{ name?: { value?: string } }> })?.definitions?.[0]?.name
+        ?.value ?? ''
+    if (query === GetManagementProgramAdminsAndModulesDocument)
+      return { data: null, loading: false, error: forbiddenError }
+    if (opName === 'GetModuleIssueView')
+      return {
+        data: {
+          getModule: {
+            id: '1',
+            menteesCanManageDeadlines: false,
+            taskDeadline: '2025-01-01T00:00:00Z',
+            taskAssignedAt: '2024-01-01T00:00:00Z',
+            issueByNumber: {
+              id: '1',
+              number: 42,
+              title: 'Closed Deadline Issue',
+              body: '',
+              url: 'https://github.com/issue/42',
+              state: 'closed',
+              isMerged: false,
+              organizationName: 'OWASP',
+              repositoryName: 'Nest',
+              labels: [],
+              assignees: [
+                {
+                  id: '1',
+                  login: 'mentee1',
+                  name: 'Mentee',
+                  avatarUrl: 'https://github.com/mentee1.png',
+                },
+              ],
+              pullRequests: [],
+            },
+            interestedUsers: [],
+            issueMentees: [],
+          },
+        },
+        loading: false,
+        error: undefined,
+      }
+    return { data: undefined, loading: false, error: undefined }
+  })
+  render(<ModuleIssueDetailsPage />)
+  await waitFor(() => expect(screen.getByText('Closed Deadline Issue')).toBeInTheDocument())
+  const deadlineEl = document.querySelector('.text-gray-600')
+  expect(deadlineEl).toBeInTheDocument()
+})
+
 describe('PR pagination edge cases', () => {
   const makePRs = (count: number) =>
     Array.from({ length: count }, (_, i) => ({
