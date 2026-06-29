@@ -38,8 +38,8 @@ run: ## Run Nest application locally
 
 run-o11y: ## Run Nest application locally with the observability stack
 	@DOCKER_BUILDKIT=1 \
-	docker compose -f docker-compose/local/compose.yaml -f docker-compose/local/compose.o11y.yaml --project-name nest-local build && \
-	docker compose -f docker-compose/local/compose.yaml -f docker-compose/local/compose.o11y.yaml --project-name nest-local up --remove-orphans
+	docker compose -f docker-compose/local/compose.yaml -f docker-compose/local/compose.o11y.yaml --project-name nest-local-o11y build && \
+	docker compose -f docker-compose/local/compose.yaml -f docker-compose/local/compose.o11y.yaml --project-name nest-local-o11y up --remove-orphans
 
 ##@ Testing
 
