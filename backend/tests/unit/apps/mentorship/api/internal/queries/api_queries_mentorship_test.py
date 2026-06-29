@@ -1,11 +1,12 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from apps.github.models import User as GithubUser
+from apps.github.models.user import User as GithubUser
 from apps.mentorship.api.internal.nodes.mentee import MenteeNode
 from apps.mentorship.api.internal.queries.mentorship import MentorshipQuery
-from apps.mentorship.models import Mentee, Module
+from apps.mentorship.models.mentee import Mentee
+from apps.mentorship.models.module import Module
 
 
 @pytest.fixture
@@ -17,64 +18,75 @@ def api_mentorship_queries() -> MentorshipQuery:
 class TestIsMentor:
     """Tests for the is_mentor query."""
 
-    @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
+    @patch(
+        "apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.aget",
+        new_callable=AsyncMock,
+    )
     @patch("apps.mentorship.api.internal.queries.mentorship.Mentor.objects.filter")
-    def test_is_mentor_true(
+    @pytest.mark.asyncio
+    async def test_is_mentor_true(
         self,
         mock_mentor_filter: MagicMock,
-        mock_github_user_get: MagicMock,
+        mock_github_user_aget: AsyncMock,
         api_mentorship_queries,
     ) -> None:
         """Test that is_mentor returns True when the user is a mentor."""
-        mock_github_user_get.return_value = MagicMock(spec=GithubUser)
-        mock_mentor_filter.return_value.exists.return_value = True
+        mock_github_user_aget.return_value = MagicMock(spec=GithubUser)
+        mock_mentor_filter.return_value.aexists = AsyncMock(return_value=True)
 
-        is_mentor = api_mentorship_queries.is_mentor
-        result = is_mentor(login="testuser")
+        result = await api_mentorship_queries.is_mentor(login="testuser")
 
         assert result
-        mock_github_user_get.assert_called_once_with(login="testuser")
+        mock_github_user_aget.assert_called_once_with(login="testuser")
         mock_mentor_filter.assert_called_once()
-        mock_mentor_filter.return_value.exists.assert_called_once()
+        mock_mentor_filter.return_value.aexists.assert_called_once()
 
-    @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
+    @patch(
+        "apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.aget",
+        new_callable=AsyncMock,
+    )
     @patch("apps.mentorship.api.internal.queries.mentorship.Mentor.objects.filter")
-    def test_is_mentor_false_not_mentor(
+    @pytest.mark.asyncio
+    async def test_is_mentor_false_not_mentor(
         self,
         mock_mentor_filter: MagicMock,
-        mock_github_user_get: MagicMock,
+        mock_github_user_aget: AsyncMock,
         api_mentorship_queries,
     ) -> None:
         """Test that is_mentor returns False when the user is not a mentor."""
-        mock_github_user_get.return_value = MagicMock(spec=GithubUser)
-        mock_mentor_filter.return_value.exists.return_value = False
+        mock_github_user_aget.return_value = MagicMock(spec=GithubUser)
+        mock_mentor_filter.return_value.aexists = AsyncMock(return_value=False)
 
-        is_mentor = api_mentorship_queries.is_mentor
-        result = is_mentor(login="testuser")
+        result = await api_mentorship_queries.is_mentor(login="testuser")
 
         assert not result
-        mock_github_user_get.assert_called_once_with(login="testuser")
+        mock_github_user_aget.assert_called_once_with(login="testuser")
         mock_mentor_filter.assert_called_once()
-        mock_mentor_filter.return_value.exists.assert_called_once()
+        mock_mentor_filter.return_value.aexists.assert_called_once()
 
-    @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
-    def test_is_mentor_false_no_github_user(
-        self, mock_github_user_get: MagicMock, api_mentorship_queries
+    @patch(
+        "apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.aget",
+        new_callable=AsyncMock,
+    )
+    @pytest.mark.asyncio
+    async def test_is_mentor_false_no_github_user(
+        self, mock_github_user_aget: AsyncMock, api_mentorship_queries
     ) -> None:
         """Test that is_mentor returns False when the GitHub user does not exist."""
-        mock_github_user_get.side_effect = GithubUser.DoesNotExist
+        mock_github_user_aget.side_effect = GithubUser.DoesNotExist
 
-        is_mentor = api_mentorship_queries.is_mentor
-        result = is_mentor(login="non_existent_user")
+        result = await api_mentorship_queries.is_mentor(login="non_existent_user")
 
         assert not result
-        mock_github_user_get.assert_called_once_with(login="non_existent_user")
+        mock_github_user_aget.assert_called_once_with(login="non_existent_user")
 
     @pytest.mark.parametrize("login", ["", "   ", None])
-    def test_is_mentor_false_empty_login(self, login: str | None, api_mentorship_queries) -> None:
+    @pytest.mark.asyncio
+    async def test_is_mentor_false_empty_login(
+        self, login: str | None, api_mentorship_queries
+    ) -> None:
         """Test that is_mentor returns False for empty or whitespace login."""
-        is_mentor = api_mentorship_queries.is_mentor
-        result = is_mentor(login=login)
+        result = await api_mentorship_queries.is_mentor(login=login)
 
         assert not result
 

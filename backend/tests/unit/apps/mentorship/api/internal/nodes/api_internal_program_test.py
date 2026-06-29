@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from typing import get_type_hints
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import strawberry
@@ -18,6 +18,7 @@ from apps.mentorship.api.internal.nodes.program import (
 class FakeProgramNode:
     def __init__(self):
         self.id = strawberry.ID("prog-1")
+        self.pk = strawberry.ID("prog-1")
         self.key = "test-program"
         self.name = "Test Program"
         self.description = "A test mentorship program."
@@ -31,9 +32,12 @@ class FakeProgramNode:
         self.tags = ["python", "javascript"]
         self.admins = MagicMock()
 
-    # the real resolver code should behave similarly: return the manager's .all()
-    def mock_admins(self):
-        return ProgramNode.admins(self)
+    async def mock_admins(self):
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[MagicMock(), MagicMock()])
+        info.context.mentorship_dataloaders = {"admins_by_program_id": mock_dataloader}
+        return await ProgramNode.admins(self, self, info)
 
 
 @pytest.fixture
@@ -68,9 +72,10 @@ class TestProgramNodeFields:
         assert mock_program_node.user_role == "admin"
         assert mock_program_node.tags == ["python", "javascript"]
 
-    def test_program_node_admins(self, mock_program_node):
+    @pytest.mark.asyncio
+    async def test_program_node_admins(self, mock_program_node):
         """Test the admins resolver."""
-        admins = mock_program_node.mock_admins()
+        admins = await mock_program_node.mock_admins()
         assert len(admins) == 2
 
 

@@ -6,9 +6,11 @@ from datetime import datetime  # noqa: TC003
 from typing import TYPE_CHECKING, Annotated
 
 import strawberry
+import strawberry_django
 
+from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROGRAM_ID
 from apps.github.api.internal.nodes.milestone import MilestoneNode  # noqa: TC001
-from apps.github.models.milestone import Milestone
+from apps.mentorship.api.internal.dataloaders.admin import ADMINS_BY_PROGRAM_ID_LOADER
 from apps.mentorship.api.internal.nodes.enum import (
     ExperienceLevelEnum,  # noqa: TC001
     ProgramStatusEnum,  # noqa: TC001
@@ -19,6 +21,7 @@ from apps.mentorship.api.internal.nodes.enum import (
 # cause UnresolvedFieldTypeError at startup.
 if TYPE_CHECKING:
     from apps.mentorship.api.internal.nodes.admin import AdminNode
+    from apps.mentorship.models.program import Program
 
 
 @strawberry.type
@@ -38,28 +41,20 @@ class ProgramNode:
     user_role: str | None = None
     tags: list[str] | None = None
 
-    @strawberry.field
-    def admins(
-        self,
+    @strawberry_django.field
+    async def admins(
+        self, root: Program, info: strawberry.Info
     ) -> (
         list[Annotated[AdminNode, strawberry.lazy("apps.mentorship.api.internal.nodes.admin")]]
         | None
     ):
         """Get the list of program administrators."""
-        return self.admins.order_by("github_user__login")
+        return await info.context.mentorship_dataloaders[ADMINS_BY_PROGRAM_ID_LOADER].load(root.pk)
 
-    @strawberry.field
-    def recent_milestones(self) -> list[MilestoneNode]:
+    @strawberry_django.field
+    async def recent_milestones(self, root: Program, info: strawberry.Info) -> list[MilestoneNode]:
         """Get the list of recent milestones for the program."""
-        project_ids = self.modules.values_list("project_id", flat=True)
-
-        return (
-            Milestone.open_milestones.filter(repository__project__in=project_ids)
-            .select_related("repository__organization", "author")
-            .prefetch_related("labels")
-            .order_by("-created_at")
-            .distinct()
-        )
+        return await info.context.github_dataloaders[RECENT_MILESTONES_BY_PROGRAM_ID].load(root.pk)
 
 
 @strawberry.type

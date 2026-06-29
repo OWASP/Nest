@@ -37,7 +37,7 @@ class MentorshipQuery:
     """GraphQL queries for mentorship-related data."""
 
     @strawberry.field
-    def is_mentor(self, login: str) -> bool:
+    async def is_mentor(self, login: str) -> bool:
         """Check if a GitHub login is a mentor."""
         if not login or not login.strip():
             return False
@@ -45,11 +45,11 @@ class MentorshipQuery:
         login = login.strip()
 
         try:
-            github_user = GithubUser.objects.get(login=login)
+            github_user = await GithubUser.objects.aget(login=login)
         except GithubUser.DoesNotExist:
             return False
 
-        return Mentor.objects.filter(github_user=github_user).exists()
+        return await Mentor.objects.filter(github_user=github_user).aexists()
 
     @strawberry.field
     def get_mentee_details(

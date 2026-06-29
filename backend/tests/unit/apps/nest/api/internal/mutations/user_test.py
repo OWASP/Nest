@@ -1,6 +1,6 @@
 """Test cases for Nest user GraphQL Mutations."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from github.AuthenticatedUser import AuthenticatedUser
@@ -49,7 +49,8 @@ class TestUserMutations:
         mock_user.email = "testuser@example.com"
         return mock_user
 
-    def test_github_auth_new_user_success(self, user_mutations):
+    @pytest.mark.asyncio
+    async def test_github_auth_new_user_success(self, user_mutations):
         """Test successful GitHub authentication for new user."""
         with (
             patch("apps.nest.api.internal.mutations.user.Github") as mock_github_class,
@@ -71,14 +72,15 @@ class TestUserMutations:
 
             mock_github_user_model = MagicMock(spec=GitHubUser)
             mock_update_data.return_value = mock_github_user_model
-            mock_user_objects.get_or_create.return_value = (MagicMock(), True)
+            mock_user_objects.aget_or_create = AsyncMock(return_value=(MagicMock(), True))
 
-            result = user_mutations.github_auth(info, "valid_token")
+            result = await user_mutations.github_auth(info, "valid_token")
             assert isinstance(result, GitHubAuthResult)
             assert result.ok
             assert result.message == "Successfully authenticated with GitHub."
 
-    def test_github_auth_no_primary_email(self, user_mutations):
+    @pytest.mark.asyncio
+    async def test_github_auth_no_primary_email(self, user_mutations):
         """Test GitHub auth fails if no primary verified email."""
         with (
             patch("apps.nest.api.internal.mutations.user.Github") as mock_github_class,
@@ -92,11 +94,12 @@ class TestUserMutations:
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
 
-            result = user_mutations.github_auth(info, "token")
+            result = await user_mutations.github_auth(info, "token")
             assert not result.ok
             assert "Verified primary email" in result.message
 
-    def test_github_auth_not_authenticated_user(self, user_mutations):
+    @pytest.mark.asyncio
+    async def test_github_auth_not_authenticated_user(self, user_mutations):
         """Test GitHub auth fails if user is not AuthenticatedUser."""
         with (
             patch("apps.nest.api.internal.mutations.user.Github") as mock_github_class,
@@ -109,11 +112,12 @@ class TestUserMutations:
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
 
-            result = user_mutations.github_auth(info, "token")
+            result = await user_mutations.github_auth(info, "token")
             assert not result.ok
             assert "Authenticated user required" in result.message
 
-    def test_github_auth_update_data_returns_none(self, user_mutations):
+    @pytest.mark.asyncio
+    async def test_github_auth_update_data_returns_none(self, user_mutations):
         """Test GitHub auth fails when update_data returns None."""
         with (
             patch("apps.nest.api.internal.mutations.user.Github") as mock_github_class,
@@ -133,11 +137,12 @@ class TestUserMutations:
             mock_github_class.return_value = mock_github
             mock_update_data.return_value = None
 
-            result = user_mutations.github_auth(info, "token")
+            result = await user_mutations.github_auth(info, "token")
             assert not result.ok
             assert "Failed to retrieve GitHub user" in result.message
 
-    def test_github_auth_github_exception(self, user_mutations):
+    @pytest.mark.asyncio
+    async def test_github_auth_github_exception(self, user_mutations):
         """Test GitHub auth handles BadCredentialsException."""
         with patch("apps.nest.api.internal.mutations.user.Github") as mock_github_class:
             info = mock_info()
@@ -145,26 +150,30 @@ class TestUserMutations:
             mock_github.get_user.side_effect = BadCredentialsException(401, "Unauthorized", None)
             mock_github_class.return_value = mock_github
 
-            result = user_mutations.github_auth(info, "token")
+            result = await user_mutations.github_auth(info, "token")
             assert not result.ok
             assert "authentication request failed" in result.message.lower()
 
-    def test_logout_user_not_authenticated(self, user_mutations):
+    @pytest.mark.asyncio
+    async def test_logout_user_not_authenticated(self, user_mutations):
         """Test logout when user is not authenticated."""
         info = mock_info()
-        info.context.request.user.is_authenticated = False
+        mock_user = MagicMock(is_authenticated=False)
+        info.context.request.auser = AsyncMock(return_value=mock_user)
 
-        result = user_mutations.logout_user(info)
+        result = await user_mutations.logout_user(info)
         assert not result.ok
         assert result.message == "User is not logged in."
 
-    def test_logout_user_success(self, user_mutations):
+    @pytest.mark.asyncio
+    async def test_logout_user_success(self, user_mutations):
         """Test successful user logout."""
         with patch("apps.nest.api.internal.mutations.user.logout") as mock_logout:
             info = mock_info()
-            info.context.request.user.is_authenticated = True
+            mock_user = MagicMock(is_authenticated=True)
+            info.context.request.auser = AsyncMock(return_value=mock_user)
 
-            result = user_mutations.logout_user(info)
+            result = await user_mutations.logout_user(info)
             assert result.ok
             assert result.message == "User logged out successfully."
             mock_logout.assert_called_once_with(info.context.request)
