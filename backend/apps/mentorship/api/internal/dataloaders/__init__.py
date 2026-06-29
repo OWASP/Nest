@@ -10,6 +10,6 @@ from apps.mentorship.api.internal.dataloaders.interested_users import get_intere
 def get_mentorship_dataloaders() -> dict[str, object]:
     """Return a dict of dataloader instances for Mentorship API resolvers."""
     loaders: dict[str, object] = {}
-    loaders.update(get_interested_users_loaders())
     loaders.update(get_admin_loaders())
+    loaders.update(get_interested_users_loaders())
     return loaders
