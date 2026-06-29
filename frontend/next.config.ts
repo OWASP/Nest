@@ -1,5 +1,13 @@
+import { existsSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
+
+const frontendDir = path.dirname(fileURLToPath(import.meta.url))
+const repositoryRoot = path.join(frontendDir, '..')
+const repositoryPackageJson = path.join(repositoryRoot, 'package.json')
 
 const forceStandalone = process.env.FORCE_STANDALONE === 'yes'
 const isEnd2End = Boolean(process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL)
@@ -68,6 +76,7 @@ const nextConfig: NextConfig = {
       }
     : undefined,
   ...(isLocal && !forceStandalone ? {} : { output: 'standalone' }),
+  ...(existsSync(repositoryPackageJson) ? { outputFileTracingRoot: repositoryRoot } : {}),
 }
 
 export default withSentryConfig(nextConfig, {

@@ -4,6 +4,10 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Chapters Page', () => {
   test.beforeEach(async ({ page }) => {
+    // Block OpenStreetMap tile requests; the chapters page renders a map but these
+    // tests do not assert on it, and external tile loads add latency and flakiness.
+    await page.route('https://*.tile.openstreetmap.org/**', (route) => route.abort())
+
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
@@ -13,7 +17,7 @@ test.describe('Chapters Page', () => {
         }),
       })
     })
-    await page.goto('/chapters')
+    await page.goto('/chapters', { waitUntil: 'domcontentloaded' })
   })
 
   test('renders chapter data correctly', async ({ page }) => {
@@ -30,7 +34,7 @@ test.describe('Chapters Page', () => {
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/chapters')
+    await page.goto('/chapters', { waitUntil: 'domcontentloaded' })
     await expect(page.getByText('No chapters found')).toBeVisible()
   })
 

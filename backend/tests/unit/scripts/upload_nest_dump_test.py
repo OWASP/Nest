@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from botocore.exceptions import ClientError
-
 from scripts import common, upload_nest_dump
 
 
