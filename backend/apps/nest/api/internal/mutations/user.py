@@ -3,6 +3,7 @@
 import logging
 
 import strawberry
+from asgiref.sync import sync_to_async
 from django.contrib.auth import login, logout
 from github import Github
 from github.AuthenticatedUser import AuthenticatedUser
@@ -39,7 +40,7 @@ class UserMutations:
     """GraphQL mutations related to user."""
 
     @strawberry.mutation
-    def github_auth(self, info: Info, access_token: str) -> GitHubAuthResult:
+    async def github_auth(self, info: Info, access_token: str) -> GitHubAuthResult:
         """Authenticate via GitHub OAuth2."""
         try:
             github = Github(access_token)
@@ -63,7 +64,7 @@ class UserMutations:
                     ok=False,
                 )
 
-            github_user = GithubUser.update_data(gh_user, email=gh_user_email)
+            github_user = await sync_to_async(GithubUser.update_data)(gh_user, email=gh_user_email)
             if not github_user:
                 logger.warning("Failed to retrieve GitHub user data for %s.", gh_user)
                 return GitHubAuthResult(
@@ -71,7 +72,7 @@ class UserMutations:
                     ok=False,
                 )
 
-            nest_user, _ = User.objects.get_or_create(
+            nest_user, _ = await User.objects.aget_or_create(
                 defaults={
                     "email": gh_user_email,
                     "github_user": github_user,
@@ -82,7 +83,7 @@ class UserMutations:
             # Log the user in and attach it to a session.
             # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.login
             # https://docs.djangoproject.com/en/5.2/topics/http/sessions/
-            login(info.context.request, nest_user)
+            await sync_to_async(login)(info.context.request, nest_user)
 
             return GitHubAuthResult(
                 message="Successfully authenticated with GitHub.",
@@ -96,9 +97,10 @@ class UserMutations:
             )
 
     @strawberry.mutation
-    def logout_user(self, info: Info) -> LogoutResult:
+    async def logout_user(self, info: Info) -> LogoutResult:
         """Logout the current user."""
-        if not info.context.request.user.is_authenticated:
+        user = await info.context.request.auser()
+        if not user.is_authenticated:
             return LogoutResult(
                 message="User is not logged in.",
                 ok=False,
@@ -106,7 +108,7 @@ class UserMutations:
 
         # Log the user out and clear the session.
         # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.logout
-        logout(info.context.request)
+        await sync_to_async(logout)(info.context.request)
 
         return LogoutResult(
             message="User logged out successfully.",

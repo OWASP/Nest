@@ -12,6 +12,7 @@ Balbin
 Balbin's
 Birda
 CCSP
+CFL
 CISSP
 CSSLP
 Cañón
@@ -79,6 +80,7 @@ Xmark
 ZYXW
 a2eeef
 acodec
+agen
 agentic
 ahmedxgouda
 algoliasearch
@@ -90,7 +92,9 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+atheris
 attisdropped
+auser
 bangbang
 boardofdirectors
 bsky
@@ -119,6 +123,7 @@ envsubst
 ephemerals
 euo
 facebookexternalhit
+fdp
 gamesec
 geocoders
 geoloc
@@ -146,6 +151,7 @@ kasya
 langgraph
 lhci
 libexpat
+libfuzzer
 libgobject
 libharfbuzz
 libpango

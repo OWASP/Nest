@@ -44,7 +44,7 @@ class ModuleQuery:
         )
 
     @strawberry.field(name="managementProgramModules")
-    def get_management_program_modules(
+    async def get_management_program_modules(
         self, info: strawberry.Info, program_key: str
     ) -> list[ModuleNode]:
         """List modules for management UI; requires admin or mentor on the program."""
@@ -52,16 +52,16 @@ class ModuleQuery:
         if not user.is_authenticated:
             raise AuthenticationRequiredError()  # noqa: RSE102
         try:
-            program = Program.objects.get(key=program_key)
+            program = await Program.objects.aget(key=program_key)
         except Program.DoesNotExist:
             return []
 
-        if not program.user_has_access(user):
+        if not await sync_to_async(program.user_has_access)(user):
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         modules = Module.objects.filter(program=program)
 
-        if not program.has_admin(user):
+        if not await sync_to_async(program.has_admin)(user):
             mentor_q = Q(mentors__nest_user=user)
             github_user = getattr(user, "github_user", None)
             if github_user is not None:
@@ -86,31 +86,30 @@ class ModuleQuery:
         )
 
     @strawberry.field
-    def get_module(
+    async def get_module(
         self, info: strawberry.Info, module_key: str, program_key: str
     ) -> ModuleNode | None:
         """Get a single module by its key within a specific program."""
         try:
-            module = (
+            module = await (
                 Module.objects.select_related("program", "project")
                 .prefetch_related("mentors__github_user")
-                .get(key=module_key, program__key=program_key)
+                .aget(key=module_key, program__key=program_key)
             )
         except Module.DoesNotExist:
             msg = f"Module with key '{module_key}' under program '{program_key}' not found."
             logger.warning(msg, exc_info=True)
             return None
 
-        if (
-            module.program.status != Program.ProgramStatus.PUBLISHED
-            and not module.program.user_has_access(info.context.request.user)
-        ):
+        if module.program.status != Program.ProgramStatus.PUBLISHED and not await sync_to_async(
+            module.program.user_has_access
+        )(info.context.request.user):
             return None
 
         return module
 
     @strawberry.field(name="managementModule")
-    def get_management_module(
+    async def get_management_module(
         self, info: strawberry.Info, module_key: str, program_key: str
     ) -> ModuleNode | None:
         """Single module for management UI; requires admin or mentor on the program."""
@@ -118,17 +117,19 @@ class ModuleQuery:
         if not user.is_authenticated:
             raise AuthenticationRequiredError()  # noqa: RSE102
         try:
-            module = (
+            module = await (
                 Module.objects.select_related("program", "project")
                 .prefetch_related("mentors__github_user")
-                .get(key=module_key, program__key=program_key)
+                .aget(key=module_key, program__key=program_key)
             )
         except Module.DoesNotExist:
             msg = f"Module with key '{module_key}' under program '{program_key}' not found."
             logger.warning(msg, exc_info=True)
             return None
 
-        if not module.program.has_admin(user) and not module.has_mentor(user):
+        if not await sync_to_async(module.program.has_admin)(user) and not await sync_to_async(
+            module.has_mentor
+        )(user):
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         return module
