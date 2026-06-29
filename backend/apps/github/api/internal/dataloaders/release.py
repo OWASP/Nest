@@ -67,13 +67,13 @@ async def load_recent_releases_by_repository_id(
 def get_release_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
-        RELEASE_URL_BY_ID_LOADER: DataLoader[int, str](
-            load_fn=load_release_urls_by_id,
-        ),
         LATEST_RELEASE_BY_REPOSITORY_ID_LOADER: DataLoader[int, Release | None](
             load_fn=load_latest_releases_by_repository_id,
         ),
         RECENT_RELEASES_BY_REPOSITORY_ID_LOADER: DataLoader[int, list[Release]](
             load_fn=load_recent_releases_by_repository_id,
+        ),
+        RELEASE_URL_BY_ID_LOADER: DataLoader[int, str](
+            load_fn=load_release_urls_by_id,
         ),
     }
