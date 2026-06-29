@@ -25,6 +25,7 @@ from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
 
 logger: logging.Logger = logging.getLogger(__name__)
+GITHUB_SYNC_FALLBACK_WINDOW = td(days=365)
 
 
 def sync_repository(
@@ -79,7 +80,7 @@ def sync_repository(
         until = (
             latest_updated_milestone.updated_at
             if (latest_updated_milestone := repository.latest_updated_milestone)
-            else timezone.now() - td(days=30)
+            else timezone.now() - GITHUB_SYNC_FALLBACK_WINDOW
         )
 
         for gh_milestone in gh_repository.get_milestones(**kwargs):
@@ -102,7 +103,7 @@ def sync_repository(
 
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
-        month_ago = timezone.now() - td(days=30)
+        year_ago = timezone.now() - GITHUB_SYNC_FALLBACK_WINDOW
 
         if repository.track_issues and project_track_issues:
             kwargs = {
@@ -113,8 +114,9 @@ def sync_repository(
             until = (
                 latest_updated_issue.updated_at
                 if (latest_updated_issue := repository.latest_updated_issue)
-                else month_ago
+                else year_ago
             )
+            kwargs["since"] = until
             for gh_issue in gh_repository.get_issues(**kwargs):
                 if gh_issue.pull_request:  # Skip pull requests.
                     continue
@@ -164,7 +166,7 @@ def sync_repository(
         until = (
             latest_updated_pull_request.updated_at
             if (latest_updated_pull_request := repository.latest_updated_pull_request)
-            else month_ago
+            else year_ago
         )
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
             if gh_pull_request.updated_at < until:
