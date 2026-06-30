@@ -50,10 +50,7 @@ const ProgramDetailsPage = () => {
   })
 
   const isMenteeUser =
-    sessionStatus === 'authenticated' &&
-    !isProjectLeader &&
-    !isMentor &&
-    isForbiddenGraphQLError(queryError)
+    sessionStatus === 'authenticated' && !isProjectLeader && isForbiddenGraphQLError(queryError)
 
   const { data: menteeData, loading: isMenteeQueryLoading } = useQuery(
     GetProgramAndModulesDocument,

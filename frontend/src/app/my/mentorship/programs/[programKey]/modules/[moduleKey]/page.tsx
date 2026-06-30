@@ -42,10 +42,7 @@ const ModuleDetailsPage = () => {
   })
 
   const isMenteeUser =
-    sessionStatus === 'authenticated' &&
-    !isProjectLeader &&
-    !isMentor &&
-    isForbiddenGraphQLError(error)
+    sessionStatus === 'authenticated' && !isProjectLeader && isForbiddenGraphQLError(error)
 
   const { data: menteeModuleData, loading: isMenteeModuleLoading } = useQuery(
     GetModuleByIdDocument,
