@@ -525,7 +525,7 @@ describe('MyMentorshipPage', () => {
       data: {
         myMenteePrograms: {
           programs: [],
-          totalPages: 1,
+          totalPages: 0,
           currentPage: 1,
         },
       },
