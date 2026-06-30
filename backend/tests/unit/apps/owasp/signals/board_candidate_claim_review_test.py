@@ -26,6 +26,9 @@ class TestReviewPostSaveFinalizeClaimStatus:
 
         review_post_save_finalize_claim_status(sender=None, instance=instance)
 
+        claim.reviews.filter.assert_called_once_with(
+            status=BoardCandidateClaimReview.Status.APPROVED,
+        )
         assert claim.status == BoardCandidateClaim.Status.APPROVED
         claim.save.assert_called_once()
         mock_logger.info.assert_called_once_with(
@@ -48,6 +51,9 @@ class TestReviewPostSaveFinalizeClaimStatus:
 
         review_post_save_finalize_claim_status(sender=None, instance=instance)
 
+        claim.reviews.filter.assert_called_once_with(
+            status=BoardCandidateClaimReview.Status.APPROVED,
+        )
         assert claim.status == BoardCandidateClaim.Status.SUBMITTED
         claim.save.assert_not_called()
         mock_logger.info.assert_not_called()
@@ -79,6 +85,9 @@ class TestReviewPostSaveFinalizeClaimStatus:
 
         review_post_save_finalize_claim_status(sender=None, instance=instance)
 
+        claim.reviews.filter.assert_called_once_with(
+            status=BoardCandidateClaimReview.Status.APPROVED,
+        )
         assert claim.status == BoardCandidateClaim.Status.APPROVED
         claim.save.assert_called_once()
         mock_logger.info.assert_called_once()

@@ -56,6 +56,10 @@ class BoardCandidateClaimReview(TimestampedModel):
         """Validate review."""
         super().clean()
 
+        if not self.reviewer.github_user:
+            err = "Reviewers must have a linked GitHub account."
+            raise ValidationError(err)
+
         if self.claim.status != BoardCandidateClaim.Status.SUBMITTED:
             err = "Review can only be added to submitted claims."
             raise ValidationError(err)
@@ -67,10 +71,8 @@ class BoardCandidateClaimReview(TimestampedModel):
             err = "Only Claim Reviewers can review claims."
             raise ValidationError(err)
 
-        if (
-            self.claim.board
-            and self.reviewer.github_user
-            and self.claim.board.get_candidate(login=self.reviewer.github_user.login)
+        if self.claim.board and self.claim.board.get_candidate(
+            login=self.reviewer.github_user.login
         ):
             err = "A candidate cannot review claims in the same election year."
             raise ValidationError(err)

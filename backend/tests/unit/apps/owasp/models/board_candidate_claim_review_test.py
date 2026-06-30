@@ -1,10 +1,11 @@
 """Tests for BoardCandidateClaimReview model."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
 
+from apps.github.models.user import User as GithubUser
 from apps.nest.models.user import User
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
@@ -82,8 +83,15 @@ class TestBoardCandidateClaimReviewModel:
         """Test that clean passes when reviewer is a claim reviewer."""
         reviewer_user = User()
         board = BoardOfDirectors()
-        with patch.object(BoardOfDirectors, "reviewers") as mock_reviewers:
+        board.get_candidate = MagicMock(return_value=None)
+
+        with (
+            patch.object(BoardOfDirectors, "reviewers") as mock_reviewers,
+            patch.object(User, "github_user", new_callable=PropertyMock) as mock_github_user,
+        ):
             mock_reviewers.filter.return_value.exists.return_value = True
+            mock_github_user.return_value = GithubUser(login="alice")
+
             review = self._build_review(
                 claim_status=BoardCandidateClaim.Status.SUBMITTED,
                 reviewer_user=reviewer_user,
@@ -107,8 +115,10 @@ class TestBoardCandidateClaimReviewModel:
         reviewer_user = User()
         review = self._build_review(claim_status=status, reviewer_user=reviewer_user)
 
-        with pytest.raises(ValidationError) as exc_info:
-            review.clean()
+        with patch.object(User, "github_user") as mock_github_user:
+            mock_github_user.login = "alice"
+            with pytest.raises(ValidationError) as exc_info:
+                review.clean()
 
         assert str(exc_info.value.messages[0]) == "Review can only be added to submitted claims."
 
@@ -120,8 +130,10 @@ class TestBoardCandidateClaimReviewModel:
             reviewer_user=reviewer_user,
         )
 
-        with pytest.raises(ValidationError) as exc_info:
-            review.clean()
+        with patch.object(User, "github_user") as mock_github_user:
+            mock_github_user.login = "alice"
+            with pytest.raises(ValidationError) as exc_info:
+                review.clean()
 
         assert str(exc_info.value.messages[0]) == "Only Claim Reviewers can review claims."
 
@@ -153,8 +165,8 @@ class TestBoardCandidateClaimReviewModel:
 
             board.get_candidate.assert_called_once_with(login="alice")
 
-    def test_clean_skips_candidate_check_when_no_github_user(self):
-        """Test that clean skips candidate check when reviewer has no linked github user."""
+    def test_clean_raises_validation_error_when_no_github_user(self):
+        """Test that clean raises ValidationError when when reviewer has no linked github user."""
         reviewer_user = User()
         board = BoardOfDirectors()
         with patch.object(BoardOfDirectors, "reviewers") as mock_reviewers:
@@ -164,8 +176,8 @@ class TestBoardCandidateClaimReviewModel:
                 reviewer_user=reviewer_user,
                 claim_board=board,
             )
-
-            review.clean()
+            with pytest.raises(ValidationError):
+                review.clean()
 
     @patch.object(BoardCandidateClaimReview, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_review.TimestampedModel.save")
