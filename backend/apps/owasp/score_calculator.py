@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.db.models import Count, Q
 
@@ -15,6 +15,7 @@ from apps.owasp.models.crp.contribution_score import ContributionScore
 from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.models.crp.scoring_weight import ScoringWeight
 from apps.owasp.services.certificate_service import CertificateService
+from apps.owasp.models.crp.scoring_weight import ScoringWeight
 
 if TYPE_CHECKING:
     from datetime import date
@@ -94,7 +95,7 @@ class ContributionScoreCalculator:
         counts = {
             "pr_merged": self.count_merged_pull_requests(user, start_date, end_date),
             "pr_opened": self.count_opened_pull_requests(user, start_date, end_date),
-            "issue_opened": self.count_opened_issues(user, start_date, end_date),
+            "issue_completed": self.count_completed_issues(user, start_date, end_date),
         }
         _, breakdown = self.calculate_score(counts)
         return breakdown
@@ -160,13 +161,13 @@ class ContributionScoreCalculator:
 
         return query.count()
 
-    def count_opened_issues(
+    def count_completed_issues(
         self,
         user: User,
         start_date: date | None = None,
         end_date: date | None = None,
     ) -> int:
-        """Count opened issues created by user."""
+        """Count completed issues created by user."""
         query = Issue.objects.filter(
             author=user,
             state_reason=Issue.StateReason.COMPLETED,
@@ -181,14 +182,14 @@ class ContributionScoreCalculator:
 
         return query.count()
 
-    def get_tier(self, score: int) -> TierChoices:
+    def get_tier(self, score: int) -> str:
         """Determine contributor tier based on score.
 
         Args:
             score (int): The contributor's total score.
 
         Returns:
-            TierChoices: The tier level choice.
+            str: The tier level.
 
         """
         # Tier thresholds mapped to tier values
@@ -201,11 +202,11 @@ class ContributionScoreCalculator:
 
         for tier_value, threshold in tiers_by_score:
             if score >= threshold:
-                return TierChoices(tier_value)
+                return tier_value
 
-        return TierChoices("level_1")
+        return "level_1"
 
-    def recalculate_all(self) -> dict[str, Any]:
+    def recalculate_all(self) -> dict[str, int]:
         """Recalculate scores for all users.
 
         Returns:
@@ -259,7 +260,7 @@ class ContributionScoreCalculator:
             .values_list("author_id", "count")
         )
 
-        issue_opened_counts: dict[int, int] = dict(
+        issue_completed_counts: dict[int, int] = dict(
             Issue.objects.filter(
                 state_reason=Issue.StateReason.COMPLETED,
                 repository__is_fork=False,
@@ -271,14 +272,12 @@ class ContributionScoreCalculator:
         )
 
         contribution_scores = []
-        pending_certificates = []
-        failed_certificates: list[tuple[str, Exception]] = []
 
         for user in users_with_contributions:
             counts = {
                 "pr_merged": pr_merged_counts.get(user.id, 0),
                 "pr_opened": pr_opened_counts.get(user.id, 0),
-                "issue_opened": issue_opened_counts.get(user.id, 0),
+                "issue_completed": issue_completed_counts.get(user.id, 0),
             }
             total_score, _ = self.calculate_score(counts)
             tier = self.get_tier(total_score)
@@ -299,46 +298,16 @@ class ContributionScoreCalculator:
                 contribution_scores.append(score)
                 created_count += 1
 
-            pending_certificates.append(score)
-
             if len(contribution_scores) >= self.BATCH_SIZE:
                 BulkSaveModel.bulk_save(
                     ContributionScore, contribution_scores, fields=["value", "tier"]
                 )
-                for pending_score in pending_certificates:
-                    try:
-                        CertificateService.issue_certificate(
-                            pending_score.github_user,
-                            pending_score.value,
-                            TierChoices(pending_score.tier),
-                        )
-                    except Exception as e:
-                        logger.exception(
-                            "Failed to issue certificate for user %s",
-                            pending_score.github_user.login,
-                        )
-                        failed_certificates.append((pending_score.github_user.login, e))
-                pending_certificates.clear()
                 contribution_scores.clear()
 
         if contribution_scores:
             BulkSaveModel.bulk_save(
                 ContributionScore, contribution_scores, fields=["value", "tier"]
             )
-            for pending_score in pending_certificates:
-                try:
-                    CertificateService.issue_certificate(
-                        pending_score.github_user,
-                        pending_score.value,
-                        TierChoices(pending_score.tier),
-                    )
-                except Exception as e:
-                    logger.exception(
-                        "Failed to issue certificate for user %s",
-                        pending_score.github_user.login,
-                    )
-                    failed_certificates.append((pending_score.github_user.login, e))
-            pending_certificates.clear()
             contribution_scores.clear()
 
         logger.info(
@@ -351,8 +320,6 @@ class ContributionScoreCalculator:
             "total": total_users,
             "created": created_count,
             "updated": updated_count,
-            "failed_count": len(failed_certificates),
-            "failures": failed_certificates,
         }
 
     def recalculate_user(self, user: User) -> dict[str, str | int | bool]:
@@ -375,8 +342,6 @@ class ContributionScoreCalculator:
                 "tier": tier,
             },
         )
-
-        CertificateService.issue_certificate(user, total_score, tier)
 
         logger.info(
             "Recalculated score for %s: %s points (%s)",
