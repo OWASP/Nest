@@ -16,7 +16,7 @@ class BoardCandidateClaimReview(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "owasp_board_candidate_claim_review"
+        db_table = "owasp_board_candidate_claim_reviews"
         constraints = [
             models.UniqueConstraint(
                 fields=["claim", "reviewer"], name="owasp_claim_reviewer_unique"
@@ -24,8 +24,8 @@ class BoardCandidateClaimReview(TimestampedModel):
         ]
         verbose_name_plural = "Board Candidate Claim Reviews"
 
-    class Decision(models.TextChoices):
-        """Decision choices."""
+    class Status(models.TextChoices):
+        """Status choices."""
 
         APPROVED = "APPROVED", "Approved"
         REJECTED = "REJECTED", "Rejected"
@@ -33,13 +33,13 @@ class BoardCandidateClaimReview(TimestampedModel):
     claim = models.ForeignKey(
         BoardCandidateClaim, on_delete=models.CASCADE, related_name="reviews"
     )
-    decision = models.CharField(
-        choices=Decision.choices,
-        max_length=8,
-        verbose_name="Review Decision",
-    )
     notes = models.TextField(blank=True, default="", verbose_name="Notes")
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    status = models.CharField(
+        choices=Status.choices,
+        max_length=8,
+        verbose_name="Review Status",
+    )
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Review."""

@@ -10,7 +10,7 @@ from .mixins import GenericEntityAdminMixin
 class BoardCandidateClaimReviewAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for BoardCandidateClaimReview model."""
 
-    list_filter = ("decision",)
+    list_filter = ("status",)
     search_fields = ("notes",)
 
 

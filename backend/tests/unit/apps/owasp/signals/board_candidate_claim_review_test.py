@@ -5,12 +5,12 @@ from unittest.mock import MagicMock, patch
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
 from apps.owasp.signals.board_candidate_claim_review import (
-    review_post_save_finalize_claim_decision,
+    review_post_save_finalize_claim_status,
 )
 
 
-class TestReviewPostSaveFinalizeClaimDecision:
-    """Tests for review_post_save_finalize_claim_decision signal."""
+class TestReviewPostSaveFinalizeClaimStatus:
+    """Tests for review_post_save_finalize_claim_status signal."""
 
     @patch("apps.owasp.signals.board_candidate_claim_review.logger")
     def test_auto_approves_when_threshold_met(self, mock_logger):
@@ -24,7 +24,7 @@ class TestReviewPostSaveFinalizeClaimDecision:
         instance = MagicMock(spec=BoardCandidateClaimReview)
         instance.claim = claim
 
-        review_post_save_finalize_claim_decision(sender=None, instance=instance)
+        review_post_save_finalize_claim_status(sender=None, instance=instance)
 
         assert claim.status == BoardCandidateClaim.Status.APPROVED
         claim.save.assert_called_once()
@@ -46,7 +46,7 @@ class TestReviewPostSaveFinalizeClaimDecision:
         instance = MagicMock(spec=BoardCandidateClaimReview)
         instance.claim = claim
 
-        review_post_save_finalize_claim_decision(sender=None, instance=instance)
+        review_post_save_finalize_claim_status(sender=None, instance=instance)
 
         assert claim.status == BoardCandidateClaim.Status.SUBMITTED
         claim.save.assert_not_called()
@@ -60,7 +60,7 @@ class TestReviewPostSaveFinalizeClaimDecision:
         instance = MagicMock(spec=BoardCandidateClaimReview)
         instance.claim = claim
 
-        review_post_save_finalize_claim_decision(sender=None, instance=instance)
+        review_post_save_finalize_claim_status(sender=None, instance=instance)
 
         claim.save.assert_not_called()
         mock_logger.info.assert_not_called()
@@ -77,7 +77,7 @@ class TestReviewPostSaveFinalizeClaimDecision:
         instance = MagicMock(spec=BoardCandidateClaimReview)
         instance.claim = claim
 
-        review_post_save_finalize_claim_decision(sender=None, instance=instance)
+        review_post_save_finalize_claim_status(sender=None, instance=instance)
 
         assert claim.status == BoardCandidateClaim.Status.APPROVED
         claim.save.assert_called_once()

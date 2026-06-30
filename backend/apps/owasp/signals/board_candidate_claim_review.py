@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender=BoardCandidateClaimReview)
-def review_post_save_finalize_claim_decision(sender, instance, **kwargs):  # noqa: ARG001
+def review_post_save_finalize_claim_status(sender, instance, **kwargs):  # noqa: ARG001
     """Signal handler to finalize a claim."""
     claim = instance.claim
 
@@ -21,7 +21,7 @@ def review_post_save_finalize_claim_decision(sender, instance, **kwargs):  # noq
 
     threshold = claim.board.reviews_threshold
     approved_count = claim.reviews.filter(
-        decision=BoardCandidateClaimReview.Decision.APPROVED,
+        status=BoardCandidateClaimReview.Status.APPROVED,
     ).count()
 
     if approved_count >= threshold:

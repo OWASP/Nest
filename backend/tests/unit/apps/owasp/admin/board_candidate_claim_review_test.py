@@ -12,10 +12,10 @@ class TestBoardCandidateClaimReviewAdmin:
     """Tests for BoardCandidateClaimReviewAdmin."""
 
     def test_list_filter(self):
-        """Test list_filter includes decision."""
+        """Test list_filter includes status."""
         admin_instance = BoardCandidateClaimReviewAdmin(BoardCandidateClaimReview, AdminSite())
 
-        assert admin_instance.list_filter == ("decision",)
+        assert admin_instance.list_filter == ("status",)
 
     def test_search_fields(self):
         """Test search_fields includes notes."""

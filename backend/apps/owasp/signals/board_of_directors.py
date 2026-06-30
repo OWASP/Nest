@@ -20,7 +20,7 @@ def board_post_save_re_evaluate_claims(sender, instance, **kwargs):  # noqa: ARG
 
     for claim in instance.claims.filter(status=BoardCandidateClaim.Status.SUBMITTED):
         approved_count = claim.reviews.filter(
-            decision=BoardCandidateClaimReview.Decision.APPROVED,
+            status=BoardCandidateClaimReview.Status.APPROVED,
         ).count()
 
         if approved_count >= threshold:

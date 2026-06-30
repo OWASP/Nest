@@ -20,7 +20,7 @@ class TestBoardCandidateClaimReviewModel:
         reviewer = User()
         reviewer.login = "alice"
 
-        review = BoardCandidateClaimReview(decision=BoardCandidateClaimReview.Decision.APPROVED)
+        review = BoardCandidateClaimReview(status=BoardCandidateClaimReview.Status.APPROVED)
         review.claim = claim
         review.reviewer = reviewer
 
@@ -28,7 +28,7 @@ class TestBoardCandidateClaimReviewModel:
 
     def test_meta_options(self):
         """Test model meta options."""
-        assert BoardCandidateClaimReview._meta.db_table == "owasp_board_candidate_claim_review"
+        assert BoardCandidateClaimReview._meta.db_table == "owasp_board_candidate_claim_reviews"
         assert (
             BoardCandidateClaimReview._meta.verbose_name_plural == "Board Candidate Claim Reviews"
         )
@@ -44,17 +44,6 @@ class TestBoardCandidateClaimReviewModel:
         assert hasattr(BoardCandidateClaimReview, "nest_created_at")
         assert hasattr(BoardCandidateClaimReview, "nest_updated_at")
 
-    def test_decision_choices(self):
-        """Test decision choices are correctly defined."""
-        assert BoardCandidateClaimReview.Decision.APPROVED == "APPROVED"
-        assert BoardCandidateClaimReview.Decision.REJECTED == "REJECTED"
-
-    def test_decision_max_length(self):
-        """Test decision field max_length."""
-        field = BoardCandidateClaimReview._meta.get_field("decision")
-
-        assert field.max_length == 8
-
     def test_notes_default_empty(self):
         """Test notes field defaults to empty string."""
         field = BoardCandidateClaimReview._meta.get_field("notes")
@@ -62,15 +51,26 @@ class TestBoardCandidateClaimReviewModel:
         assert field.default == ""
         assert field.blank
 
+    def test_status_choices(self):
+        """Test status choices are correctly defined."""
+        assert BoardCandidateClaimReview.Status.APPROVED == "APPROVED"
+        assert BoardCandidateClaimReview.Status.REJECTED == "REJECTED"
+
+    def test_status_max_length(self):
+        """Test status field max_length."""
+        field = BoardCandidateClaimReview._meta.get_field("status")
+
+        assert field.max_length == 8
+
     def _build_review(
-        self, *, decision=None, claim_status=None, reviewer_user=None, claim_board=None
+        self, *, status=None, claim_status=None, reviewer_user=None, claim_board=None
     ):
         """Build a review with mocked claim and reviewer."""
         claim = BoardCandidateClaim(status=claim_status or BoardCandidateClaim.Status.SUBMITTED)
         claim.board = claim_board
 
         review = BoardCandidateClaimReview(
-            decision=decision or BoardCandidateClaimReview.Decision.APPROVED,
+            status=status or BoardCandidateClaimReview.Status.APPROVED,
             notes="Some notes",
         )
         review.claim = claim
@@ -206,7 +206,7 @@ class TestBoardCandidateClaimReviewModel:
     @patch("apps.owasp.models.board_candidate_claim_review.TimestampedModel.save")
     def test_save_calls_full_clean(self, mock_super_save, mock_full_clean):
         """Test that save calls full_clean before saving."""
-        review = BoardCandidateClaimReview(decision=BoardCandidateClaimReview.Decision.APPROVED)
+        review = BoardCandidateClaimReview(status=BoardCandidateClaimReview.Status.APPROVED)
 
         review.save()
 
