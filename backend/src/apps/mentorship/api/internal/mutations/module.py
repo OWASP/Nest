@@ -394,7 +394,11 @@ class ModuleMutation:
             "domains": input_data.domains,
             "labels": input_data.labels,
             "tags": input_data.tags,
-            "mentees_can_manage_deadlines": input_data.mentees_can_manage_deadlines,
+            **(
+                {"mentees_can_manage_deadlines": input_data.mentees_can_manage_deadlines}
+                if input_data.mentees_can_manage_deadlines is not None
+                else {}
+            ),
         }
 
         for field, value in field_mapping.items():

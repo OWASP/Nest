@@ -295,7 +295,7 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
-    mentees_can_manage_deadlines: bool = False
+    mentees_can_manage_deadlines: bool | None = None
 
 
 @strawberry.input
