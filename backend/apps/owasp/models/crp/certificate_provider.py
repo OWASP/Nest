@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING
 
 from django.conf import settings
 
-from apps.owasp.models.crp.certificate import Certificate
-
 if TYPE_CHECKING:
     from apps.github.models.user import User
     from apps.owasp.models.crp.recognition_enums import TierChoices
@@ -41,6 +39,8 @@ class LocalCertificateProvider(BaseCertificateProvider):
             tier (TierChoices): The tier for which the certificate is issued.
 
         """
+        from apps.owasp.models.crp.certificate import Certificate
+        
         Certificate.objects.create(
             github_user=user,
             score=score,

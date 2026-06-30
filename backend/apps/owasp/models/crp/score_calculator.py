@@ -12,10 +12,10 @@ from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
 from apps.owasp.exceptions import CertificateIssuanceError
+from apps.owasp.models.crp.certificate import Certificate
 from apps.owasp.models.crp.contribution_score import ContributionScore
 from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.models.crp.scoring_weight import ScoringWeight
-from apps.owasp.services.certificate_service import CertificateService
 
 if TYPE_CHECKING:
     from datetime import date
@@ -308,7 +308,7 @@ class ContributionScoreCalculator:
                 )
                 for pending_score in pending_certificates:
                     try:
-                        CertificateService.issue_certificate(
+                        Certificate.issue_certificate(
                             pending_score.github_user,
                             pending_score.value,
                             TierChoices(pending_score.tier),
@@ -334,7 +334,7 @@ class ContributionScoreCalculator:
             )
             for pending_score in pending_certificates:
                 try:
-                    CertificateService.issue_certificate(
+                    Certificate.issue_certificate(
                         pending_score.github_user,
                         pending_score.value,
                         TierChoices(pending_score.tier),
@@ -383,7 +383,7 @@ class ContributionScoreCalculator:
             },
         )
 
-        CertificateService.issue_certificate(user, total_score, tier)
+        Certificate.issue_certificate(user, total_score, tier)
 
         logger.info(
             "Recalculated score for %s: %s points (%s)",
