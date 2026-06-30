@@ -198,16 +198,22 @@ const IssuesPage = () => {
     }
 
     const menteeModuleData = menteeIssuesData?.getModule
-    const menteeIssues = (menteeModuleData?.issues || []).map((i) => ({
-      objectID: i.id,
-      number: i.number,
-      title: i.title,
-      state: i.state,
-      isMerged: i.isMerged,
-      labels: i.labels || [],
-      assignees: i.assignees || [],
-      deadline: i.taskDeadline ?? null,
-    }))
+    const menteeIssues = (menteeModuleData?.issues || [])
+      .map((i) => ({
+        objectID: i.id,
+        number: i.number,
+        title: i.title,
+        state: i.state,
+        isMerged: i.isMerged,
+        labels: i.labels || [],
+        assignees: i.assignees || [],
+        deadline: i.taskDeadline ?? null,
+      }))
+      .filter(
+        (issue) =>
+          selectedDeadline === DEADLINE_ALL ||
+          getDeadlineCategory(issue.deadline) === selectedDeadline
+      )
 
     const menteeTotalPages = Math.ceil((menteeModuleData?.issuesCount || 0) / ITEMS_PER_PAGE)
 
