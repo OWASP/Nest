@@ -38,7 +38,7 @@ class Certificate(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "owasp_crp_recognition_certificates"
+        db_table = "owasp_crp_certificates"
         verbose_name_plural = "Certificates"
         indexes = [
             models.Index(fields=["-issued_at"], name="cert_issued_at_desc"),
