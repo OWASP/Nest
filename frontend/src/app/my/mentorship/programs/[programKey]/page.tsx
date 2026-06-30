@@ -33,7 +33,6 @@ const ProgramDetailsPage = () => {
   const { data: session, status: sessionStatus } = useSession()
   const username = (session as ExtendedSession)?.user?.login
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
-  const isMentor = hasExtendedUser(session) ? session.user.isMentor : false
   const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })

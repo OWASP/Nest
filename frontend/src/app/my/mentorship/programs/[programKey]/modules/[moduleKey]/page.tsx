@@ -28,7 +28,6 @@ const ModuleDetailsPage = () => {
 
   const { data: session, status: sessionStatus } = useSession()
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
-  const isMentor = hasExtendedUser(session) ? session.user.isMentor : false
   const {
     data,
     error,
