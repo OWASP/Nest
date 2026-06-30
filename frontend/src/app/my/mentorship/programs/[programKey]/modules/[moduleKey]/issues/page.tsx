@@ -198,6 +198,15 @@ const IssuesPage = () => {
     }
 
     const menteeModuleData = menteeIssuesData?.getModule
+    if (!menteeModuleData) {
+      return (
+        <ErrorDisplay
+          statusCode={404}
+          title="Module Not Found"
+          message="Sorry, the module you're looking for doesn't exist or you are not enrolled."
+        />
+      )
+    }
     const menteeIssues = (menteeModuleData?.issues || [])
       .map((i) => ({
         objectID: i.id,
