@@ -27,7 +27,7 @@ class CertificateNode:
         """Resolve whether the certificate is active/verified."""
         return not root.is_revoked
 
-    @strawberry_django.field(select_related=["github_user", "github_user__contribution_score"])
+    @strawberry_django.field(select_related=["github_user"])
     def github_user(self, root: Certificate) -> UserNode:
         """Resolve the associated GitHub user."""
         return root.github_user

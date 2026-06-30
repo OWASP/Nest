@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING
 
 from django.conf import settings
 
-from apps.owasp.models.crp.certificate import Certificate
-
 if TYPE_CHECKING:
     from apps.github.models.user import User
     from apps.owasp.models.crp.recognition_enums import TierChoices
@@ -18,7 +16,7 @@ class BaseCertificateProvider(ABC):
     """Abstract base class for certificate providers."""
 
     @abstractmethod
-    def issue(self, user: User, score: int, tier: TierChoices) -> None:
+    def issue_certificate(self, user: User, score: int, tier: TierChoices) -> None:
         """Issue a certificate.
 
         Args:
@@ -32,7 +30,7 @@ class BaseCertificateProvider(ABC):
 class LocalCertificateProvider(BaseCertificateProvider):
     """Certificate provider that records certificate metadata in local database."""
 
-    def issue(self, user: User, score: int, tier: TierChoices) -> None:
+    def issue_certificate(self, user: User, score: int, tier: TierChoices) -> None:
         """Record the certificate metadata in the local database.
 
         Args:
@@ -41,6 +39,8 @@ class LocalCertificateProvider(BaseCertificateProvider):
             tier (TierChoices): The tier for which the certificate is issued.
 
         """
+        from apps.owasp.models.crp.certificate import Certificate
+        
         Certificate.objects.create(
             github_user=user,
             score=score,
@@ -66,7 +66,7 @@ class CertificateProviderFactory:
             ValueError: If the configured provider is unknown.
 
         """
-        provider_type = getattr(settings, "CERTIFICATE_PROVIDER", "local")
+        provider_type = settings.CERTIFICATE_PROVIDER
         provider_class = cls.PROVIDERS.get(provider_type)
         if not provider_class:
             error_msg = f"Unknown certificate provider: {provider_type}"

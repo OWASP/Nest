@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Count, Q
 
@@ -11,10 +11,10 @@ from apps.common.models import BulkSaveModel
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
+from apps.owasp.exceptions import CertificateIssuanceError
+from apps.owasp.models.crp.certificate import Certificate
 from apps.owasp.models.crp.contribution_score import ContributionScore
 from apps.owasp.models.crp.recognition_enums import TierChoices
-from apps.owasp.models.crp.scoring_weight import ScoringWeight
-from apps.owasp.services.certificate_service import CertificateService
 from apps.owasp.models.crp.scoring_weight import ScoringWeight
 
 if TYPE_CHECKING:
@@ -206,7 +206,7 @@ class ContributionScoreCalculator:
 
         return "level_1"
 
-    def recalculate_all(self) -> dict[str, int]:
+    def recalculate_all(self) -> dict[str, Any]:
         """Recalculate scores for all users.
 
         Returns:
@@ -272,6 +272,8 @@ class ContributionScoreCalculator:
         )
 
         contribution_scores = []
+        pending_certificates = []
+        failed_certificates: list[tuple[str, Exception]] = []
 
         for user in users_with_contributions:
             counts = {
@@ -298,16 +300,52 @@ class ContributionScoreCalculator:
                 contribution_scores.append(score)
                 created_count += 1
 
+            pending_certificates.append(score)
+
             if len(contribution_scores) >= self.BATCH_SIZE:
                 BulkSaveModel.bulk_save(
                     ContributionScore, contribution_scores, fields=["value", "tier"]
                 )
+                for pending_score in pending_certificates:
+                    try:
+                        Certificate.issue_certificate(
+                            pending_score.github_user,
+                            pending_score.value,
+                            TierChoices(pending_score.tier),
+                        )
+                    except CertificateIssuanceError as e:
+                        logger.exception(
+                            "Failed to issue certificate for user %s",
+                            pending_score.github_user.login,
+                        )
+                        failed_certificates.append((pending_score.github_user.login, e))
+                    except Exception as e:
+                        logger.exception(
+                            "Unexpected certificate processing error for user %s",
+                            pending_score.github_user.login,
+                        )
+                        failed_certificates.append((pending_score.github_user.login, e))
+                pending_certificates.clear()
                 contribution_scores.clear()
 
         if contribution_scores:
             BulkSaveModel.bulk_save(
                 ContributionScore, contribution_scores, fields=["value", "tier"]
             )
+            for pending_score in pending_certificates:
+                try:
+                    Certificate.issue_certificate(
+                        pending_score.github_user,
+                        pending_score.value,
+                        TierChoices(pending_score.tier),
+                    )
+                except CertificateIssuanceError as e:
+                    logger.exception(
+                        "Failed to issue certificate for user %s",
+                        pending_score.github_user.login,
+                    )
+                    failed_certificates.append((pending_score.github_user.login, e))
+            pending_certificates.clear()
             contribution_scores.clear()
 
         logger.info(
@@ -320,6 +358,8 @@ class ContributionScoreCalculator:
             "total": total_users,
             "created": created_count,
             "updated": updated_count,
+            "failed_count": len(failed_certificates),
+            "failures": failed_certificates,
         }
 
     def recalculate_user(self, user: User) -> dict[str, str | int | bool]:
@@ -342,6 +382,8 @@ class ContributionScoreCalculator:
                 "tier": tier,
             },
         )
+
+        Certificate.issue_certificate(user, total_score, tier)
 
         logger.info(
             "Recalculated score for %s: %s points (%s)",

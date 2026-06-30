@@ -13,7 +13,6 @@ from apps.owasp.models.crp.certificate import Certificate
 
 if TYPE_CHECKING:
     from apps.owasp.api.internal.nodes.certificate import CertificateNode
-    from apps.owasp.api.internal.nodes.contribution_score import ContributionScoreNode
 
 USER_BADGES_PREFETCH = Prefetch(
     "user_badges",
@@ -54,19 +53,6 @@ USER_CERTIFICATE_PREFETCH = Prefetch(
 )
 class UserNode:
     """GitHub user node."""
-
-    @strawberry_django.field(select_related=["contribution_score"])
-    def contribution_score(
-        self, root: User
-    ) -> (
-        Annotated[
-            "ContributionScoreNode",
-            strawberry.lazy("apps.owasp.api.internal.nodes.contribution_score"),
-        ]
-        | None
-    ):
-        """Resolve current contribution score."""
-        return getattr(root, "contribution_score", None)
 
     @strawberry_django.field(prefetch_related=[USER_CERTIFICATE_PREFETCH])
     def current_certificate(

@@ -1,8 +1,8 @@
 """Command to recalculate contributor scores."""
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
-from apps.owasp.score_calculator import ContributionScoreCalculator
+from apps.owasp.models.crp.score_calculator import ContributionScoreCalculator
 
 
 class Command(BaseCommand):
@@ -22,6 +22,17 @@ class Command(BaseCommand):
                 f"Score recalculation complete:\n"
                 f"  - Total users: {result['total']}\n"
                 f"  - Created: {result['created']}\n"
-                f"  - Updated: {result['updated']}"
+                f"  - Updated: {result['updated']}\n"
+                f"  - Failed: {result['failed_count']}"
             )
         )
+
+        if failed_count := result.get("failed_count", 0):
+            failures = result.get("failures", [])
+            failed_users = [username for username, _ in failures]
+            failed_str = ", ".join(failed_users)
+            self.stdout.write(
+                self.style.WARNING(f"Failed to issue certificates for: {failed_str}")
+            )
+            error_msg = f"Failed to issue certificates for {failed_count} user(s)"
+            raise CommandError(error_msg)
