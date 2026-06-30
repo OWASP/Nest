@@ -5,6 +5,7 @@ import {
   AssignIssueToUserDocument,
   ClearTaskDeadlineDocument,
   GetManagementModuleIssueViewDocument,
+  GetModuleIssueViewDocument,
   SetTaskDeadlineDocument,
   UnassignIssueFromUserDocument,
 } from 'types/__generated__/issueQueries.generated'
@@ -23,6 +24,10 @@ export const useIssueMutations = ({ programKey, moduleKey, issueId }: UseIssueMu
     refetchQueries: [
       {
         query: GetManagementModuleIssueViewDocument,
+        variables: { programKey, moduleKey, number: Number(issueId) },
+      },
+      {
+        query: GetModuleIssueViewDocument,
         variables: { programKey, moduleKey, number: Number(issueId) },
       },
     ],
