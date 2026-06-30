@@ -45,12 +45,11 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --only main
 
 # Less likely to cause cache invalidation items go first.
-COPY entrypoint.sh manage.py wsgi.py Makefile ./
+COPY entrypoint.sh manage.py Makefile ./
 COPY scripts scripts
-COPY settings settings
 COPY templates templates
 COPY static static
-COPY apps apps
+COPY src src
 
 # Required to run make targets.
 RUN ln -s . backend
@@ -74,6 +73,7 @@ RUN apk --no-cache update && \
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONPATH="/home/owasp/src" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
@@ -95,12 +95,11 @@ ARG OWASP_UID
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --no-root --verbose --only main --only video
 
-COPY entrypoint.sh manage.py wsgi.py Makefile ./
+COPY entrypoint.sh manage.py Makefile ./
 COPY scripts scripts
-COPY settings settings
+COPY src src
 COPY templates templates
 COPY static static
-COPY apps apps
 
 RUN ln -s . backend
 
@@ -126,6 +125,7 @@ RUN apk --no-cache update && \
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONPATH="/home/owasp/src" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
