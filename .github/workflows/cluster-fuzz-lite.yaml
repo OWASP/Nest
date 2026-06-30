@@ -7,10 +7,10 @@ on:
     paths:
       - .clusterfuzzlite/**
       - .github/workflows/cluster-fuzz-lite.yaml
-      - backend/apps/common/search/**
-      - backend/apps/slack/apps.py
-      - backend/apps/slack/common/**
-      - backend/apps/slack/utils/format.py
+      - backend/src/apps/common/search/**
+      - backend/src/apps/slack/apps.py
+      - backend/src/apps/slack/common/**
+      - backend/src/apps/slack/utils/format.py
       - backend/requirements/cluster-fuzz-lite.in
       - backend/requirements/cluster-fuzz-lite.txt
       - backend/tests/cluster-fuzz-lite/**
