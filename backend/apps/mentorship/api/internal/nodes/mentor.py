@@ -2,6 +2,9 @@
 
 import strawberry
 import strawberry_django
+from asgiref.sync import sync_to_async
+
+from apps.mentorship.models.mentor import Mentor
 
 
 @strawberry.type
@@ -11,16 +14,16 @@ class MentorNode:
     id: strawberry.ID
 
     @strawberry_django.field(select_related=["github_user"])
-    def avatar_url(self) -> str:
+    async def avatar_url(self, root: Mentor) -> str:
         """Get the GitHub avatar URL of the mentor."""
-        return self.github_user.avatar_url if self.github_user else ""
+        return user.avatar_url if (user := await sync_to_async(lambda: root.github_user)()) else ""
 
     @strawberry_django.field(select_related=["github_user"])
-    def name(self) -> str:
+    async def name(self, root: Mentor) -> str:
         """Get the GitHub name of the mentor."""
-        return self.github_user.name if self.github_user else ""
+        return user.name if (user := await sync_to_async(lambda: root.github_user)()) else ""
 
     @strawberry_django.field(select_related=["github_user"])
-    def login(self) -> str:
+    async def login(self, root: Mentor) -> str:
         """Get the GitHub login of the mentor."""
-        return self.github_user.login if self.github_user else ""
+        return user.login if (user := await sync_to_async(lambda: root.github_user)()) else ""
