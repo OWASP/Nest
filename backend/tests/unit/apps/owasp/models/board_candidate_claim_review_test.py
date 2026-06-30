@@ -122,8 +122,8 @@ class TestBoardCandidateClaimReviewModel:
 
         assert str(exc_info.value.messages[0]) == "Review can only be added to submitted claims."
 
-    def test_clean_reviewer_without_reviewer_role_raises(self):
-        """Test that clean raises ValidationError when reviewer lacks required roles."""
+    def test_clean_user_not_reviewer_raises(self):
+        """Test that clean raises ValidationError when user is not a reviewer."""
         reviewer_user = User()
         review = self._build_review(
             claim_status=BoardCandidateClaim.Status.SUBMITTED,
