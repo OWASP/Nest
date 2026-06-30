@@ -455,6 +455,84 @@ class TestUpdateProgram:
         assert result == mock_prog
         assert mock_prog.status == ProgramStatusEnum.COMPLETED.value
 
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_update_program_adjusts_module_dates_start(self, mock_program, mutation):
+        user = MagicMock()
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.key = "prog-1"
+        input_data.name = "Updated"
+        input_data.started_at = datetime(2025, 6, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+        input_data.status = None
+        input_data.admin_logins = None
+
+        mock_prog = MagicMock()
+        mock_prog.started_at = datetime(2025, 6, 1, tzinfo=UTC)
+        mock_prog.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+
+        mock_module_1 = MagicMock()
+        mock_module_1.started_at = datetime(2025, 5, 1, tzinfo=UTC)
+        mock_module_1.ended_at = datetime(2025, 5, 15, tzinfo=UTC)
+
+        mock_module_2 = MagicMock()
+        mock_module_2.started_at = datetime(2025, 7, 1, tzinfo=UTC)
+        mock_module_2.ended_at = datetime(2025, 8, 1, tzinfo=UTC)
+
+        mock_prog.modules.all.return_value = [mock_module_1, mock_module_2]
+
+        mutation.update_program(info, input_data)
+
+        assert mock_module_1.started_at == datetime(2025, 6, 1, tzinfo=UTC)
+        assert mock_module_1.ended_at == datetime(2025, 6, 1, tzinfo=UTC)
+        mock_module_1.save.assert_called_once()
+
+        assert mock_module_2.started_at == datetime(2025, 7, 1, tzinfo=UTC)
+        assert mock_module_2.ended_at == datetime(2025, 8, 1, tzinfo=UTC)
+        mock_module_2.save.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_update_program_adjusts_module_dates_end(self, mock_program, mutation):
+        user = MagicMock()
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.key = "prog-1"
+        input_data.name = "Updated"
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 10, 1, tzinfo=UTC)
+        input_data.status = None
+        input_data.admin_logins = None
+
+        mock_prog = MagicMock()
+        mock_prog.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        mock_prog.ended_at = datetime(2025, 10, 1, tzinfo=UTC)
+        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+
+        mock_module_1 = MagicMock()
+        mock_module_1.started_at = datetime(2025, 11, 1, tzinfo=UTC)
+        mock_module_1.ended_at = datetime(2025, 11, 15, tzinfo=UTC)
+
+        mock_module_2 = MagicMock()
+        mock_module_2.started_at = datetime(2025, 2, 1, tzinfo=UTC)
+        mock_module_2.ended_at = datetime(2025, 3, 1, tzinfo=UTC)
+
+        mock_prog.modules.all.return_value = [mock_module_1, mock_module_2]
+
+        mutation.update_program(info, input_data)
+
+        assert mock_module_1.started_at == datetime(2025, 10, 1, tzinfo=UTC)
+        assert mock_module_1.ended_at == datetime(2025, 10, 1, tzinfo=UTC)
+        mock_module_1.save.assert_called_once()
+
+        assert mock_module_2.started_at == datetime(2025, 2, 1, tzinfo=UTC)
+        assert mock_module_2.ended_at == datetime(2025, 3, 1, tzinfo=UTC)
+        mock_module_2.save.assert_not_called()
+
 
 class TestUpdateProgramStatus:
     """Tests for ProgramMutation.update_program_status."""

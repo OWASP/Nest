@@ -189,6 +189,24 @@ class ProgramMutation:
         except IntegrityError as e:
             _handle_program_save_integrity_error(e)
 
+        if input_data.started_at is not None or input_data.ended_at is not None:
+            for module in program.modules.all():
+                changed = False
+                if module.started_at < program.started_at:
+                    module.started_at = program.started_at
+                    changed = True
+                    if module.ended_at < program.started_at:
+                        module.ended_at = program.started_at
+
+                if module.ended_at > program.ended_at:
+                    module.ended_at = program.ended_at
+                    changed = True
+                    if module.started_at > program.ended_at:
+                        module.started_at = program.ended_at
+
+                if changed:
+                    module.save()
+
         if input_data.admin_logins is not None:
             program.admins.set(resolve_admins_from_logins(input_data.admin_logins))
 
