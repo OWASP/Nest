@@ -12,7 +12,7 @@ from settings.values import OptionalSecretValue
 class Base(Configuration):
     """Base configuration."""
 
-    BASE_DIR = Path(__file__).resolve().parent.parent
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
     ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION", "Local")
 
