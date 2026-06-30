@@ -1,9 +1,9 @@
-include backend/apps/ai/Makefile
-include backend/apps/github/Makefile
-include backend/apps/mentorship/Makefile
-include backend/apps/nest/Makefile
-include backend/apps/owasp/Makefile
-include backend/apps/slack/Makefile
+include backend/src/apps/ai/Makefile
+include backend/src/apps/github/Makefile
+include backend/src/apps/mentorship/Makefile
+include backend/src/apps/nest/Makefile
+include backend/src/apps/owasp/Makefile
+include backend/src/apps/slack/Makefile
 
 .PHONY: audit-backend-dependencies build-cluster-fuzz-lite build-cluster-fuzz-lite-fuzzers \
 	clean-cluster-fuzz-lite compile-backend-requirements fetch-nest-dump sbom-backend-image \

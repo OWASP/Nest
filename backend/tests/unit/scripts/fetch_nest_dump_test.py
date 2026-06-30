@@ -2,7 +2,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from botocore.exceptions import ClientError
-
 from scripts import common, fetch_nest_dump
 
 
