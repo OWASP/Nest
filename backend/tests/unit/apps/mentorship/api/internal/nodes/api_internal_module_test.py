@@ -563,6 +563,7 @@ class TestModuleNodeMenteeAccess:
 
         mock_qs.filter.assert_called_once_with(assignees=github_user)
         assert isinstance(result, list)
+        assert len(result) == 1
 
     def test_issues_mentee_no_github_user_returns_empty(self):
         """Mentee with no github_user gets empty list."""
