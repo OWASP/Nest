@@ -276,6 +276,7 @@ class CreateModuleInput:
     project_id: strawberry.ID
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+    mentees_can_manage_deadlines: bool = False
 
 
 @strawberry.input

@@ -128,6 +128,7 @@ class ModuleMutation:
                     domains=input_data.domains,
                     labels=input_data.labels,
                     tags=input_data.tags,
+                    mentees_can_manage_deadlines=input_data.mentees_can_manage_deadlines,
                     program=program,
                     project=project,
                 )
