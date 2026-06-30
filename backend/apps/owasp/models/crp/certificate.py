@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import uuid
+import secrets
 
 from django.db import models
 from django.db.models import Q
@@ -10,6 +10,17 @@ from django.db.models import Q
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
 from apps.owasp.models.crp.recognition_enums import TierChoices
+
+
+CERTIFICATE_ID_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+CERTIFICATE_ID_LENGTH = 12
+
+
+def generate_certificate_id() -> str:
+    """Generate a unique 12-character alphanumeric ID for certificates."""
+    return "".join(
+        secrets.choice(CERTIFICATE_ID_ALPHABET) for _ in range(CERTIFICATE_ID_LENGTH)
+    )
 
 
 class Certificate(TimestampedModel):
@@ -38,9 +49,10 @@ class Certificate(TimestampedModel):
             ),
         ]
 
-    id = models.UUIDField(
+    id = models.CharField(
         primary_key=True,
-        default=uuid.uuid4,
+        default=generate_certificate_id,
+        max_length=12,
         editable=False,
         verbose_name="Certificate ID",
     )
