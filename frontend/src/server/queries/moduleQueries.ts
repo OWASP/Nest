@@ -36,6 +36,7 @@ export const GET_MODULE_BY_ID = gql`
       name
       description
       tags
+      labels
       domains
       experienceLevel
       startedAt

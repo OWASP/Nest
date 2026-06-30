@@ -111,6 +111,7 @@ const ModuleDetailsPage = () => {
           <Tags
             entityKey={moduleKey}
             tags={menteeModule.tags ?? undefined}
+            labels={menteeModule.labels ?? undefined}
             domains={menteeModule.domains ?? undefined}
           />
           <Contributors
