@@ -52,21 +52,21 @@ class MentorshipQuery:
         return await Mentor.objects.filter(github_user=github_user).aexists()
 
     @strawberry.field
-    def get_mentee_details(
+    async def get_mentee_details(
         self, program_key: str, module_key: str, mentee_key: str
     ) -> MenteeNode | None:
         """Get detailed information about a mentee in a specific module."""
         try:
-            module = Module.objects.only("id").get(key=module_key, program__key=program_key)
+            module = await Module.objects.only("id").aget(key=module_key, program__key=program_key)
 
-            github_user = GithubUser.objects.only("login", "name", "avatar_url", "bio").get(
+            github_user = await GithubUser.objects.only("login", "name", "avatar_url", "bio").aget(
                 login=mentee_key
             )
 
-            mentee = Mentee.objects.only("id", "experience_level", "domains", "tags").get(
+            mentee = await Mentee.objects.only("id", "experience_level", "domains", "tags").aget(
                 github_user=github_user
             )
-            is_enrolled = MenteeModule.objects.filter(mentee=mentee, module=module).exists()
+            is_enrolled = await MenteeModule.objects.filter(mentee=mentee, module=module).aexists()
 
             if not is_enrolled:
                 message = f"Mentee {mentee_key} is not enrolled in module {module_key}"
@@ -90,7 +90,7 @@ class MentorshipQuery:
             return None
 
     @strawberry.field
-    def get_mentee_module_issues(
+    async def get_mentee_module_issues(
         self,
         program_key: str,
         module_key: str,
@@ -103,12 +103,12 @@ class MentorshipQuery:
             return []
 
         try:
-            module = Module.objects.only("id").get(key=module_key, program__key=program_key)
+            module = await Module.objects.only("id").aget(key=module_key, program__key=program_key)
 
-            github_user = GithubUser.objects.only("id").get(login=mentee_key)
+            github_user = await GithubUser.objects.only("id").aget(login=mentee_key)
 
-            mentee = Mentee.objects.only("id").get(github_user=github_user)
-            is_enrolled = MenteeModule.objects.filter(mentee=mentee, module=module).exists()
+            mentee = await Mentee.objects.only("id").aget(github_user=github_user)
+            is_enrolled = await MenteeModule.objects.filter(mentee=mentee, module=module).aexists()
 
             if not is_enrolled:
                 message = f"Mentee {mentee_key} is not enrolled in module {module_key}"
@@ -128,9 +128,8 @@ class MentorshipQuery:
                 )
                 .order_by("-created_at")
             )
-            issues = issues_qs[offset : offset + normalized_limit]
 
-            return list(issues)
+            return issues_qs[offset : offset + normalized_limit]
 
         except (Module.DoesNotExist, GithubUser.DoesNotExist, Mentee.DoesNotExist) as e:
             message = f"Mentee issues not found: {e}"
