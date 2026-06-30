@@ -1491,7 +1491,7 @@ describe('Mentee deadline management', () => {
     await waitFor(() => {
       expect(setTaskDeadlineMutation).toHaveBeenCalledWith({
         variables: expect.objectContaining({
-          deadlineAt: new Date('2026-12-25').toISOString(),
+          deadlineAt: new Date(Date.UTC(2026, 11, 25, 23, 59, 59, 999)).toISOString(),
         }),
       })
     })
