@@ -274,20 +274,6 @@ const ModuleIssueDetailsPage = () => {
                           type="date"
                           className="rounded border border-gray-300 px-2 py-0.5 text-sm dark:border-gray-600 dark:bg-[#2c2f33] dark:text-white"
                           value={deadlineInput}
-                          min={
-                            menteeIssueData?.getModule?.startedAt
-                              ? new Date(menteeIssueData.getModule.startedAt)
-                                  .toISOString()
-                                  .slice(0, 10)
-                              : undefined
-                          }
-                          max={
-                            menteeIssueData?.getModule?.endedAt
-                              ? new Date(menteeIssueData.getModule.endedAt)
-                                  .toISOString()
-                                  .slice(0, 10)
-                              : undefined
-                          }
                           onChange={(e) => setDeadlineInput(e.target.value)}
                         />
                         <button
