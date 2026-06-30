@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.exceptions import ValidationError
 
-from apps.github.models.user import User
+from apps.nest.models.user import User
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
 from apps.owasp.models.board_of_directors import BoardOfDirectors
@@ -18,7 +18,7 @@ class TestBoardCandidateClaimReviewModel:
         """Test __str__ returns claim name and reviewer login."""
         claim = BoardCandidateClaim(name="Community Outreach")
         reviewer = User()
-        reviewer.login = "alice"
+        reviewer.username = "alice"
 
         review = BoardCandidateClaimReview(status=BoardCandidateClaimReview.Status.APPROVED)
         review.claim = claim
@@ -78,31 +78,19 @@ class TestBoardCandidateClaimReviewModel:
 
         return review
 
-    def test_clean_passes_for_submitted_claim_with_valid_reviewer(self):
-        """Test that clean passes when claim is submitted and reviewer is staff."""
-        reviewer_user = User()
-        reviewer_user.is_owasp_staff = True
-        reviewer_user.is_claim_reviewer = False
-        review = self._build_review(
-            claim_status=BoardCandidateClaim.Status.SUBMITTED,
-            reviewer_user=reviewer_user,
-            claim_board=None,
-        )
-
-        review.clean()
-
     def test_clean_passes_for_claim_reviewer_role(self):
-        """Test that clean passes when reviewer is a claim reviewer (not staff)."""
+        """Test that clean passes when reviewer is a claim reviewer."""
         reviewer_user = User()
-        reviewer_user.is_owasp_staff = False
-        reviewer_user.is_claim_reviewer = True
-        review = self._build_review(
-            claim_status=BoardCandidateClaim.Status.SUBMITTED,
-            reviewer_user=reviewer_user,
-            claim_board=None,
-        )
+        board = BoardOfDirectors()
+        with patch.object(BoardOfDirectors, "reviewers") as mock_reviewers:
+            mock_reviewers.filter.return_value.exists.return_value = True
+            review = self._build_review(
+                claim_status=BoardCandidateClaim.Status.SUBMITTED,
+                reviewer_user=reviewer_user,
+                claim_board=board,
+            )
 
-        review.clean()
+            review.clean()
 
     @pytest.mark.parametrize(
         "status",
@@ -117,8 +105,6 @@ class TestBoardCandidateClaimReviewModel:
     def test_clean_non_submitted_claim_raises(self, status):
         """Test that clean raises ValidationError when claim is not submitted."""
         reviewer_user = User()
-        reviewer_user.is_owasp_staff = True
-        reviewer_user.is_claim_reviewer = False
         review = self._build_review(claim_status=status, reviewer_user=reviewer_user)
 
         with pytest.raises(ValidationError) as exc_info:
@@ -126,11 +112,9 @@ class TestBoardCandidateClaimReviewModel:
 
         assert str(exc_info.value.messages[0]) == "Review can only be added to submitted claims."
 
-    def test_clean_reviewer_without_staff_or_reviewer_role_raises(self):
+    def test_clean_reviewer_without_reviewer_role_raises(self):
         """Test that clean raises ValidationError when reviewer lacks required roles."""
         reviewer_user = User()
-        reviewer_user.is_owasp_staff = False
-        reviewer_user.is_claim_reviewer = False
         review = self._build_review(
             claim_status=BoardCandidateClaim.Status.SUBMITTED,
             reviewer_user=reviewer_user,
@@ -139,68 +123,49 @@ class TestBoardCandidateClaimReviewModel:
         with pytest.raises(ValidationError) as exc_info:
             review.clean()
 
-        assert (
-            str(exc_info.value.messages[0])
-            == "Only OWASP Staff or Claim Reviewers can review claims."
-        )
+        assert str(exc_info.value.messages[0]) == "Only Claim Reviewers can review claims."
 
     def test_clean_candidate_reviewing_same_election_year_raises(self):
         """Test that clean raises ValidationError when reviewer is candidate in the same board."""
         reviewer_user = User()
-        reviewer_user.is_owasp_staff = True
-        reviewer_user.is_claim_reviewer = False
-        reviewer_user.login = "alice"
         board = BoardOfDirectors()
         board.get_candidate = MagicMock(return_value=MagicMock())  # candidate found
 
-        review = self._build_review(
-            claim_status=BoardCandidateClaim.Status.SUBMITTED,
-            reviewer_user=reviewer_user,
-            claim_board=board,
-        )
+        with (
+            patch.object(BoardOfDirectors, "reviewers") as mock_reviewers,
+            patch.object(User, "github_user") as mock_github_user,
+        ):
+            mock_reviewers.filter.return_value.exists.return_value = True
+            mock_github_user.login = "alice"
+            review = self._build_review(
+                claim_status=BoardCandidateClaim.Status.SUBMITTED,
+                reviewer_user=reviewer_user,
+                claim_board=board,
+            )
 
-        with pytest.raises(ValidationError) as exc_info:
-            review.clean()
+            with pytest.raises(ValidationError) as exc_info:
+                review.clean()
 
-        assert (
-            str(exc_info.value.messages[0])
-            == "A candidate cannot review claims in the same election year."
-        )
+            assert (
+                str(exc_info.value.messages[0])
+                == "A candidate cannot review claims in the same election year."
+            )
 
-        board.get_candidate.assert_called_once_with(login="alice")
+            board.get_candidate.assert_called_once_with(login="alice")
 
-    def test_clean_passes_when_reviewer_not_a_candidate_on_board(self):
-        """Test that clean passes when reviewer is staff and not a candidate on the board."""
+    def test_clean_skips_candidate_check_when_no_github_user(self):
+        """Test that clean skips candidate check when reviewer has no linked github user."""
         reviewer_user = User()
-        reviewer_user.is_owasp_staff = True
-        reviewer_user.is_claim_reviewer = False
-        reviewer_user.login = "bob"
         board = BoardOfDirectors()
-        board.get_candidate = MagicMock(return_value=None)  # not a candidate
+        with patch.object(BoardOfDirectors, "reviewers") as mock_reviewers:
+            mock_reviewers.filter.return_value.exists.return_value = True
+            review = self._build_review(
+                claim_status=BoardCandidateClaim.Status.SUBMITTED,
+                reviewer_user=reviewer_user,
+                claim_board=board,
+            )
 
-        review = self._build_review(
-            claim_status=BoardCandidateClaim.Status.SUBMITTED,
-            reviewer_user=reviewer_user,
-            claim_board=board,
-        )
-
-        review.clean()
-
-        board.get_candidate.assert_called_once_with(login="bob")
-
-    def test_clean_skips_candidate_check_when_no_board(self):
-        """Test that clean skips the candidate-on-board check when claim has no board."""
-        reviewer_user = User()
-        reviewer_user.is_owasp_staff = True
-        reviewer_user.is_claim_reviewer = False
-        reviewer_user.login = "carol"
-        review = self._build_review(
-            claim_status=BoardCandidateClaim.Status.SUBMITTED,
-            reviewer_user=reviewer_user,
-            claim_board=None,
-        )
-
-        review.clean()
+            review.clean()
 
     @patch.object(BoardCandidateClaimReview, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_review.TimestampedModel.save")

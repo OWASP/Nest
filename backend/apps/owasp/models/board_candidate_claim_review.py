@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.github.models.user import User
+from apps.nest.models.user import User
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 
 
@@ -43,7 +43,14 @@ class BoardCandidateClaimReview(TimestampedModel):
 
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Review."""
-        return f"{self.claim.name} - {self.reviewer.login}"
+        return (
+            f"{self.claim.name} - "
+            f"{
+                self.reviewer.github_user.login
+                if self.reviewer.github_user
+                else self.reviewer.username
+            }"
+        )
 
     def clean(self) -> None:
         """Validate review."""
@@ -53,13 +60,18 @@ class BoardCandidateClaimReview(TimestampedModel):
             err = "Review can only be added to submitted claims."
             raise ValidationError(err)
 
-        if not self.reviewer or not (
-            self.reviewer.is_owasp_staff or self.reviewer.is_claim_reviewer
+        if (
+            not self.claim.board
+            or not self.claim.board.reviewers.filter(id=self.reviewer.id).exists()
         ):
-            err = "Only OWASP Staff or Claim Reviewers can review claims."
+            err = "Only Claim Reviewers can review claims."
             raise ValidationError(err)
 
-        if self.claim.board and self.claim.board.get_candidate(login=self.reviewer.login):
+        if (
+            self.claim.board
+            and self.reviewer.github_user
+            and self.claim.board.get_candidate(login=self.reviewer.github_user.login)
+        ):
             err = "A candidate cannot review claims in the same election year."
             raise ValidationError(err)
 

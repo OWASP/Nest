@@ -31,7 +31,6 @@ USER_BADGES_PREFETCH = Prefetch(
         "followers_count",
         "following_count",
         "id",
-        "is_claim_reviewer",
         "is_owasp_staff",
         "location",
         "login",

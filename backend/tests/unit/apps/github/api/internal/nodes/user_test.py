@@ -32,7 +32,6 @@ class TestUserNode(GraphQLNodeBaseTest):
             "followers_count",
             "following_count",
             "id",
-            "is_claim_reviewer",
             "is_former_owasp_staff",
             "is_gsoc_mentor",
             "is_owasp_board_member",
