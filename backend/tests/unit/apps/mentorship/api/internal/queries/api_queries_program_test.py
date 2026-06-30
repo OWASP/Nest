@@ -490,7 +490,7 @@ class TestMyMenteePrograms:
         """Search param filters programs by name."""
         mock_qs = MagicMock()
         mock_qs.filter.return_value.distinct.return_value = mock_qs
-        mock_qs.count.return_value = 0
+        mock_qs.count.return_value = 1
         mock_filtered = MagicMock()
         mock_filtered.count.return_value = 0
         mock_filtered.order_by.return_value.__getitem__.return_value = []

@@ -153,6 +153,10 @@ class ProgramQuery:
             .distinct()
         )
 
+        enrolled_count = queryset.count()
+        if enrolled_count == 0:
+            return PaginatedPrograms(current_page=1, programs=[], total_pages=0)
+
         if search:
             queryset = queryset.filter(name__icontains=search)
 
