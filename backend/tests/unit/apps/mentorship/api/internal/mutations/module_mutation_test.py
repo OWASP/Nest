@@ -1699,4 +1699,4 @@ class TestModuleMutationMenteeDeadline:
             deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
         )
         assert result is not None
-        mock_task_instance.save.assert_called_once()
+        mock_task.objects.bulk_update.assert_called_once()
