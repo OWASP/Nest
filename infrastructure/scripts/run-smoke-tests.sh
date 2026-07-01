@@ -13,8 +13,12 @@ STARTED_CONTAINER=false
 wait_for_localstack() {
   echo "Waiting for LocalStack to be ready..."
   for i in $(seq 1 30); do
-    if curl -sf "${LOCALSTACK_URL}/_localstack/health" | grep -q '"s3".*"available"' && \
-      curl -sf "${LOCALSTACK_URL}/_localstack/health" | grep -q '"kms".*"available"'; then
+    local health
+    health=$(curl -sf "${LOCALSTACK_URL}/_localstack/health") || health=""
+    if echo "${health}" | grep -q '"s3".*"available"' && \
+       echo "${health}" | grep -q '"kms".*"available"' && \
+       echo "${health}" | grep -q '"iam".*"available"' && \
+       echo "${health}" | grep -q '"sts".*"available"'; then
       echo "LocalStack is ready."
       return 0
     fi
@@ -24,8 +28,9 @@ wait_for_localstack() {
   exit 1
 }
 
-if curl -sf "${LOCALSTACK_URL}/_localstack/health" | grep -q '"s3".*"available"'; then
-  echo "Reusing existing LocalStack instance at ${LOCALSTACK_URL}."
+if curl -sf "${LOCALSTACK_URL}/_localstack/health" >/dev/null 2>&1; then
+  echo "Found existing LocalStack instance at ${LOCALSTACK_URL}, verifying readiness..."
+  wait_for_localstack
 else
   echo "Starting LocalStack container..."
   docker run -d \
@@ -34,6 +39,7 @@ else
     -e LOCALSTACK_AUTH_TOKEN="${LOCALSTACK_AUTH_TOKEN:-}" \
     "${LOCALSTACK_IMAGE}"
   STARTED_CONTAINER=true
+  trap 'override_s3_lifecycle remove; cleanup' EXIT
   wait_for_localstack
 fi
 
