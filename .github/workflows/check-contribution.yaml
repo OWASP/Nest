@@ -15,12 +15,13 @@ jobs:
       contents: read
       issues: read
       pull-requests: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check contribution requirements
-        uses: arkid15r/check-contribution-action@f43cc6c6f4e390df58fc5c97b645cda8ba8b66fb  # v0.1.3
+        uses: arkid15r/check-contribution-action@9c046adddcf2c0bdf8a5eb3471d3775d3596c02a  # v0.1.5
         with:
           check_for: commit_sign_off, commit_signature, issue_assignee, issue_reference
-          close_on: issue_assignee
+          close_on: issue_assignee, issue_reference
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_users_file_path: .github/check-contribution-skip-usernames.txt
     timeout-minutes: 5
