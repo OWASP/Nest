@@ -20,6 +20,7 @@ variables {
   nextauth_url                  = "https://nest.owasp.dev"
   project_name                  = "nest"
   redis_password_arn            = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_REDIS_PASSWORD"
+  runtime_secrets_mode = "prepare"
   slack_bot_token_suffix        = "T04T40NHX"
 }
 

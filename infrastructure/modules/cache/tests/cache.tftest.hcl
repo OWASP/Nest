@@ -10,6 +10,7 @@ variables {
   redis_node_type       = "cache.t3.micro"
   redis_num_cache_nodes = 1
   redis_port            = 6379
+  runtime_secrets_mode = "prepare"
   security_group_ids    = ["sg-12345678"]
   subnet_ids            = ["subnet-12345678"]
 }

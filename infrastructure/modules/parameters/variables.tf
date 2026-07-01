@@ -108,6 +108,19 @@ variable "redis_password_arn" {
   sensitive   = true
 }
 
+variable "runtime_secrets_mode" {
+  description = "Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager."
+  type        = string
+
+  validation {
+    condition = contains(
+      ["prepare", "complete"],
+      var.runtime_secrets_mode,
+    )
+    error_message = "runtime_secrets_mode must be either prepare or complete."
+  }
+}
+
 variable "slack_bot_token_suffix" {
   description = "The Suffix for the Slack bot token."
   type        = string

@@ -75,6 +75,7 @@ module "cache" {
   redis_node_type       = var.redis_node_type
   redis_num_cache_nodes = var.redis_num_cache_nodes
   redis_port            = var.redis_port
+  runtime_secrets_mode  = var.runtime_secrets_mode
   security_group_ids    = [module.security.redis_sg_id]
   subnet_ids            = module.networking.private_subnet_ids
 }
@@ -99,6 +100,7 @@ module "database" {
   kms_key_arn                    = module.kms.key_arn
   project_name                   = var.project_name
   proxy_security_group_ids       = [module.security.rds_proxy_sg_id]
+  runtime_secrets_mode           = var.runtime_secrets_mode
   secret_recovery_window_in_days = var.secret_recovery_window_in_days
   security_group_ids             = [module.security.rds_sg_id]
 }
@@ -197,6 +199,7 @@ module "parameters" {
   nextauth_url                  = "https://${var.domain_name}"
   project_name                  = var.project_name
   redis_password_arn            = module.cache.redis_password_arn
+  runtime_secrets_mode          = var.runtime_secrets_mode
   slack_bot_token_suffix        = var.slack_bot_token_suffix
 }
 

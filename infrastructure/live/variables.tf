@@ -351,6 +351,19 @@ variable "redis_port" {
   }
 }
 
+variable "runtime_secrets_mode" {
+  description = "Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager."
+  type        = string
+
+  validation {
+    condition = contains(
+      ["prepare", "complete"],
+      var.runtime_secrets_mode,
+    )
+    error_message = "runtime_secrets_mode must be either prepare or complete."
+  }
+}
+
 variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number

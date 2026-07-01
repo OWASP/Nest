@@ -72,6 +72,36 @@ variable "redis_port" {
   }
 }
 
+variable "runtime_secrets_mode" {
+  description = "Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager."
+  type        = string
+
+  validation {
+    condition = contains(
+      ["prepare", "complete"],
+      var.runtime_secrets_mode,
+    )
+    error_message = "runtime_secrets_mode must be either prepare or complete."
+  }
+}
+
+variable "secret_recovery_window_in_days" {
+  description = "The number of days Secrets Manager waits before deleting the Redis secret."
+  type        = string
+  default     = 7
+
+  validation {
+    condition = (
+      var.secret_recovery_window_in_days == 0 ||
+      (
+        var.secret_recovery_window_in_days >= 7 &&
+        var.secret_recovery_window_in_days <= 30
+      )
+    )
+    error_message = "secret_recovery_window_in_days must be 0 or between 7 and 30."
+  }
+}
+
 variable "security_group_ids" {
   description = "A list of security group IDs to associate with the Redis cache."
   type        = list(string)

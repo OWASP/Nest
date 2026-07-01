@@ -12,6 +12,7 @@ variables {
   environment          = "test"
   kms_key_arn          = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name         = "nest"
+  runtime_secrets_mode = "prepare"
   security_group_ids   = ["sg-12345678"]
 }
 
