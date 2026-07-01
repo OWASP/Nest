@@ -41,8 +41,8 @@ jobs:
       VITE_CSRF_URL: ${{ secrets.VITE_CSRF_URL }}
       VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
       VITE_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
-      VITE_IDX_URL: ${{ secrets.VITE_IDX_URL }}
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+      VITE_IDX_URL: ${{ secrets.VITE_IDX_URL }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
     uses: ./.github/workflows/run-ci-cd.yaml
     with:
