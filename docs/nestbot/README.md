@@ -1,1 +1,1 @@
---8<-- "backend/apps/slack/README.md"
+--8<-- "backend/src/apps/slack/README.md"

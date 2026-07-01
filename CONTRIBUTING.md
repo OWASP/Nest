@@ -269,7 +269,7 @@ To set up the NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/src/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
 ##### Testing NestBot Locally
@@ -511,7 +511,7 @@ You can access the UI at [http://localhost:3800](http://localhost:3800).
 Nest uses two complementary fuzzing layers:
 
 - **API fuzz tests** (`make test-fuzz`) run [Schemathesis](https://schemathesis.readthedocs.io/) against the REST and GraphQL APIs with a live backend, database, and cache.
-- **ClusterFuzzLite** (`.github/workflows/cluster-fuzz-lite.yaml`) runs [Atheris](https://github.com/google/atheris) targets in CI from `backend/tests/cluster-fuzz-lite/apps/`, mirroring the production `apps/` layout (for example `slack/common/text.py` and `common/search/query_parser.py`). Seed inputs live in `.clusterfuzzlite/seed_corpora/` with the same layout.
+- **ClusterFuzzLite** (`.github/workflows/cluster-fuzz-lite.yaml`) runs [Atheris](https://github.com/google/atheris) targets in CI from `backend/tests/cluster-fuzz-lite/apps/`, mirroring the production `src/apps/` layout (for example `slack/common/text.py` and `common/search/query_parser.py`). Seed inputs live in `.clusterfuzzlite/seed_corpora/` with the same layout.
 
 Run the API fuzz tests with the following command:
 

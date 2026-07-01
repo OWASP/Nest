@@ -49,6 +49,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-stage" \
     FORCE_COLOR=1 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONPATH="/home/owasp/src" \
     PYTHONUNBUFFERED=1
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
