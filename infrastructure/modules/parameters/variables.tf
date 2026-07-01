@@ -4,8 +4,8 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "db_credencials_secret_arn" {
-  description = "The Secret Manager ARM containing the database credencial"
+variable "db_credentials_secret_arn" {
+  description = "The Secrets Manager ARN containing the database credentials."
   type        = string
 }
 

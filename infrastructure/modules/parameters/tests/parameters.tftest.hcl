@@ -2,6 +2,7 @@ mock_provider "aws" {}
 
 variables {
   common_tags                   = { Environment = "test", Project = "nest" }
+  db_credentials_secret_arn = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials"
   db_password_arn               = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_DB_PASSWORD"
   django_allowed_hosts          = "nest.owasp.dev"
   django_allowed_origins        = "https://nest.owasp.dev"
@@ -15,11 +16,13 @@ variables {
   django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
   environment                   = "test"
+  kms_key_arn               = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   next_server_csrf_url          = "https://nest.owasp.dev/csrf"
   next_server_graphql_url       = "https://nest.owasp.dev/graphql"
   nextauth_url                  = "https://nest.owasp.dev"
   project_name                  = "nest"
   redis_password_arn            = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_REDIS_PASSWORD"
+  redis_password_secret_arn = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/DJANGO_REDIS_PASSWORD"
   runtime_secrets_mode = "prepare"
   slack_bot_token_suffix        = "T04T40NHX"
 }
