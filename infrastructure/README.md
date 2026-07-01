@@ -436,3 +436,39 @@ make test-infrastructure
 ## Documentation
 
 Documentation is generated using [terraform-docs](https://github.com/terraform-docs/terraform-docs).
+
+## Testing
+
+### Unit tests
+
+Unit tests use `mock_provider` and run without any external dependencies:
+
+```bash
+make test-infrastructure
+```
+
+### Smoke tests
+
+Smoke tests apply Phase 1 modules against LocalStack using staging variable values and verify naming conventions match what the real staging deployment expects.
+
+### Prerequisites
+
+- Docker
+- Terraform ~> 1.14.0
+- A valid `LOCALSTACK_AUTH_TOKEN` (available via the [LocalStack for Open Source program](https://localstack.cloud/solutions/open-source/))
+
+### Run locally
+
+Export the token, then run:
+
+```bash
+export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
+make test-infrastructure-smoke
+```
+
+The script will start a LocalStack container automatically if one is not already running on port 4566, run the smoke tests, and tear it down on exit.
+
+### Known limitations
+
+- ECR smoke tests require LocalStack Pro/Ultimate (ECR is not available in community edition)
+- S3 smoke tests require LocalStack >= 4.13 due to a known `MalformedXML` bug with `terraform-provider-aws` >= 6.23 ([localstack/localstack#13426](https://github.com/localstack/localstack/issues/13426))
