@@ -2,7 +2,7 @@ mock_provider "aws" {}
 
 variables {
   common_tags                   = { Environment = "test", Project = "nest" }
-  db_credentials_secret_arn = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials"
+  db_credentials_secret_arn     = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials"
   db_password_arn               = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_DB_PASSWORD"
   django_allowed_hosts          = "nest.owasp.dev"
   django_allowed_origins        = "https://nest.owasp.dev"
@@ -16,14 +16,14 @@ variables {
   django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
   environment                   = "test"
-  kms_key_arn               = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+  kms_key_arn                   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   next_server_csrf_url          = "https://nest.owasp.dev/csrf"
   next_server_graphql_url       = "https://nest.owasp.dev/graphql"
   nextauth_url                  = "https://nest.owasp.dev"
   project_name                  = "nest"
   redis_password_arn            = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_REDIS_PASSWORD"
-  redis_password_secret_arn = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/DJANGO_REDIS_PASSWORD"
-  runtime_secrets_mode = "prepare"
+  redis_password_secret_arn     = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/DJANGO_REDIS_PASSWORD"
+  runtime_secrets_mode          = "prepare"
   slack_bot_token_suffix        = "T04T40NHX"
 }
 
@@ -39,7 +39,7 @@ run "test_django_algolia_application_id_is_string" {
   command = plan
   assert {
     condition     = aws_ssm_parameter.django_algolia_application_id.type == "String"
-    error_message = "DJANGO_ALGOLIA_APPLICATION_ID must be stored as SecureString."
+    error_message = "DJANGO_ALGOLIA_APPLICATION_ID must be stored as String."
   }
 }
 
@@ -54,7 +54,7 @@ run "test_django_algolia_write_api_key_path_format" {
 run "test_django_algolia_write_api_key_is_secure_string" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.django_algolia_write_api_key.type == "SecureString"
+    condition     = aws_ssm_parameter.django_algolia_write_api_key[0].type == "SecureString"
     error_message = "DJANGO_ALGOLIA_WRITE_API_KEY must be stored as SecureString."
   }
 }
@@ -314,7 +314,7 @@ run "test_django_release_version_path_format" {
 run "test_django_secret_key_path_format" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.django_secret_key.name == "/${var.project_name}/${var.environment}/DJANGO_SECRET_KEY"
+    condition     = aws_ssm_parameter.django_secret_key[0].name == "/${var.project_name}/${var.environment}/DJANGO_SECRET_KEY"
     error_message = "DJANGO_SECRET_KEY must follow path: /{project}/{environment}/DJANGO_SECRET_KEY."
   }
 }
@@ -322,7 +322,7 @@ run "test_django_secret_key_path_format" {
 run "test_django_secret_key_is_secure_string" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.django_secret_key.type == "SecureString"
+    condition     = aws_ssm_parameter.django_secret_key[0].type == "SecureString"
     error_message = "DJANGO_SECRET_KEY must be stored as SecureString."
   }
 }
@@ -346,7 +346,7 @@ run "test_django_settings_module_is_string" {
 run "test_django_sentry_dsn_path_format" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.django_sentry_dsn.name == "/${var.project_name}/${var.environment}/DJANGO_SENTRY_DSN"
+    condition     = aws_ssm_parameter.django_sentry_dsn[0].name == "/${var.project_name}/${var.environment}/DJANGO_SENTRY_DSN"
     error_message = "DJANGO_SENTRY_DSN must follow path: /{project}/{environment}/DJANGO_SENTRY_DSN."
   }
 }
@@ -362,7 +362,7 @@ run "test_django_sentry_dsn_is_secure_string" {
 run "test_django_slack_bot_token_path_format" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.django_slack_bot_token.name == "/${var.project_name}/${var.environment}/DJANGO_SLACK_BOT_TOKEN"
+    condition     = aws_ssm_parameter.django_slack_bot_token[0].name == "/${var.project_name}/${var.environment}/DJANGO_SLACK_BOT_TOKEN"
     error_message = "DJANGO_SLACK_BOT_TOKEN must follow path: /{project}/{environment}/DJANGO_SLACK_BOT_TOKEN."
   }
 }
@@ -378,7 +378,7 @@ run "test_django_slack_bot_token_is_secure_string" {
 run "test_django_slack_signing_secret_path_format" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.django_slack_signing_secret.name == "/${var.project_name}/${var.environment}/DJANGO_SLACK_SIGNING_SECRET"
+    condition     = aws_ssm_parameter.django_slack_signing_secret[0].name == "/${var.project_name}/${var.environment}/DJANGO_SLACK_SIGNING_SECRET"
     error_message = "DJANGO_SLACK_SIGNING_SECRET must follow path: /{project}/{environment}/DJANGO_SLACK_SIGNING_SECRET."
   }
 }
@@ -402,7 +402,7 @@ run "test_github_token_is_secure_string" {
 run "test_github_token_path_format" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.github_token.name == "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
+    condition     = aws_ssm_parameter.github_token[0].name == "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
     error_message = "GITHUB_TOKEN must follow path: /{project}/{environment}/GITHUB_TOKEN."
   }
 }
@@ -496,7 +496,7 @@ run "test_next_server_github_client_secret_path_format" {
 run "test_next_server_github_client_secret_is_secure_string" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.next_server_github_client_secret.type == "SecureString"
+    condition     = aws_ssm_parameter.next_server_github_client_secret[0].type == "SecureString"
     error_message = "NEXT_SERVER_GITHUB_CLIENT_SECRET must be stored as SecureString."
   }
 }
@@ -520,7 +520,7 @@ run "test_next_server_graphql_url_is_string" {
 run "test_nextauth_secret_path_format" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.nextauth_secret.name == "/${var.project_name}/${var.environment}/NEXTAUTH_SECRET"
+    condition     = aws_ssm_parameter.nextauth_secret[0].name == "/${var.project_name}/${var.environment}/NEXTAUTH_SECRET"
     error_message = "NEXTAUTH_SECRET must follow path: /{project}/{environment}/NEXTAUTH_SECRET."
   }
 }
@@ -528,7 +528,7 @@ run "test_nextauth_secret_path_format" {
 run "test_nextauth_secret_is_secure_string" {
   command = plan
   assert {
-    condition     = aws_ssm_parameter.nextauth_secret.type == "SecureString"
+    condition     = aws_ssm_parameter.nextauth_secret[0].type == "SecureString"
     error_message = "NEXTAUTH_SECRET must be stored as SecureString."
   }
 }
