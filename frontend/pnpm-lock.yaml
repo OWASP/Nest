@@ -74,8 +74,8 @@ importers:
         specifier: 2.2.29
         version: 2.2.29(@heroui/system@2.4.28(@heroui/theme@2.4.26(tailwindcss@4.2.4))(@react-spectrum/provider@3.11.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(framer-motion@12.40.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@heroui/theme@2.4.26(tailwindcss@4.2.4))(@react-spectrum/provider@3.11.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(framer-motion@12.40.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@next/third-parties':
-        specifier: 16.2.7
-        version: 16.2.7(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
+        specifier: 16.2.9
+        version: 16.2.9(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
       '@react-leaflet/core':
         specifier: 3.0.0
         version: 3.0.0(leaflet@1.9.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -2002,8 +2002,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@next/third-parties@16.2.7':
-    resolution: {integrity: sha512-mSvF8eg2egIqP0GaPYn0sDvsP45CodwVsavl7RkLsOVQL/CDy7wUg0WUV5uEtlWoWOq0pEYRRsbld7NQIh+Eqg==}
+  '@next/third-parties@16.2.9':
+    resolution: {integrity: sha512-JZPGQRN8eQs2WMfBXOf6Zjrma+JIN0KyA24MvmIa3bUI4BwTaJ1UlxmYVc5ri6l30LQ8fPv6Kmx20447hCltrg==}
     peerDependencies:
       next: ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0-beta.0
       react: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
@@ -9563,7 +9563,7 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.2.6':
     optional: true
 
-  '@next/third-parties@16.2.7(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)':
+  '@next/third-parties@16.2.9(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)':
     dependencies:
       next: 16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react: 19.2.6
