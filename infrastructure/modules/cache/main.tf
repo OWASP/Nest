@@ -86,9 +86,14 @@ resource "aws_elasticache_replication_group" "main" {
 }
 
 resource "aws_ssm_parameter" "django_redis_password" {
+  count       = var.runtime_secrets_mode == "prepare" ? 1 : 0
   description = "The password of Redis cache (Required by Django)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
   tags        = var.common_tags
   type        = "SecureString"
   value       = local.redis_auth_token
+}
+moved {
+  from = aws_ssm_parameter.django_redis_password
+  to   = aws_ssm_parameter.django_redis_password[0]
 }
