@@ -2,6 +2,7 @@ __pycache__
 .ash_history
 .bash_history
 .cache
+.clusterfuzzlite/out/
 .coverage
 .cursor/rules/snyk_rules.mdc
 .DS_Store

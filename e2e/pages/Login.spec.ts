@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Login Page', () => {
   test('shows message authentication is enabled', async ({ page }) => {
-    await page.goto('/auth/login')
+    await page.goto('/auth/login', { waitUntil: 'domcontentloaded' })
 
     const welcomeMessage = page.getByText('Welcome back')
     const gitHubLoginButton = page.getByRole('button', { name: 'Sign In with GitHub' })

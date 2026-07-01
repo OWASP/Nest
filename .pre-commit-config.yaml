@@ -87,9 +87,7 @@ repos:
           - types-python-dateutil==2.9.0.20260518
           - types-PyYAML==6.0.12.20260518
           - types-requests==2.33.0.20260518
-        args:
-          - --config-file
-          - backend/pyproject.toml
+        entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # v6.0.0
@@ -115,14 +113,14 @@ repos:
       - id: file-contents-sorter
         args:
           - --unique
-        files: (.github/workflows/check-pr-issue-skip-usernames.txt|cspell/custom-dict.txt)
+        files: (.github/check-contribution-skip-usernames.txt|cspell/custom-dict.txt)
       - id: mixed-line-ending
         args:
           - --fix=lf
       - id: name-tests-test
         args:
           - --pytest
-        exclude: backend/tests/data
+        exclude: backend/tests/(cluster-fuzz-lite|data)
         files: backend/tests
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
