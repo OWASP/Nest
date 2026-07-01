@@ -1,5 +1,9 @@
 name: Setup Terraform Environment
-description: "Checks out the repository, installs Terraform, and configures the provider cache."
+description: >
+  Installs Terraform and configures the provider cache.
+  NOTE: The calling job must check out the repository before using this
+  action - local composite actions can only be resolved by the runner
+  after checkout, so an internal checkout here would be unreachable.
 
 inputs:
   terraform_version:
@@ -10,11 +14,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Check out repository
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
-      with:
-        persist-credentials: false
-
     - name: Install Terraform
       uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
       with:
