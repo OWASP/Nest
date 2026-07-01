@@ -64,6 +64,7 @@ class FakeModuleNode:
 
     async def mock_issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
         info = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=MagicMock())
         info.context.task_deadlines_by_issue = None
         info.context.task_assigned_at_by_issue = None
         return await _call_module_resolver(
@@ -73,11 +74,12 @@ class FakeModuleNode:
     async def mock_issues_count(self, label: str | None = None):
         return await _call_module_resolver(self, "issues_count", label=label)
 
-    def mock_available_labels(self):
-        return _call_module_resolver(self, "available_labels")
+    async def mock_available_labels(self):
+        return await _call_module_resolver(self, "available_labels")
 
     async def mock_issue_by_number(self, number: int):
         info = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=MagicMock())
         info.context.task_deadlines_by_issue = None
         info.context.task_assigned_at_by_issue = None
         return await _call_module_resolver(self, "issue_by_number", info, number=number)
@@ -103,7 +105,11 @@ def mock_module_node():
     """Fixture for a mock ModuleNode instance."""
     m = FakeModuleNode()
 
-    m.mentors.all.return_value = [MagicMock(), MagicMock()]
+    async def _mentors_async_iter():
+        yield MagicMock()
+        yield MagicMock()
+
+    m.mentors.all.return_value = _mentors_async_iter()
 
     async def _values_list_async_iter():
         for item in ["github_user_id_1", "github_user_id_2"]:
@@ -113,7 +119,11 @@ def mock_module_node():
         m.menteemodule_set.select_related.return_value.filter.return_value.values_list
     )
     values_list_mock.return_value = _values_list_async_iter()
-    m.issues.filter.return_value.values_list.return_value = ["issue_id_1"]
+
+    async def _issues_values_list_async_iter():
+        yield "issue_id_1"
+
+    m.issues.filter.return_value.values_list.return_value = _issues_values_list_async_iter()
     mocked_query_prefetch = m.issues.select_related.return_value.prefetch_related.return_value
     mocked_query_prefetch.filter.return_value.order_by.return_value = [MagicMock()]
     m.issues.acount = AsyncMock(return_value=5)
@@ -142,9 +152,10 @@ class TestModuleNodeFields:
 
 
 class TestModuleNodeResolvers:
-    def test_module_node_mentors(self, mock_module_node):
+    @pytest.mark.asyncio
+    async def test_module_node_mentors(self, mock_module_node):
         """Test the mentors resolver."""
-        mentors = mock_module_node.mock_mentors()
+        mentors = await mock_module_node.mock_mentors()
         assert len(mentors) == 2
         mock_module_node.mentors.all.assert_called_once()
 
@@ -184,7 +195,11 @@ class TestModuleNodeResolvers:
                 yield "assignee_id_1"
 
             mock_task_filter_related.values_list.return_value.distinct.return_value = _async_iter()
-            mock_user_objects.filter.return_value.order_by.return_value = [MagicMock()]
+
+            async def _async_users_iter():
+                yield MagicMock()
+
+            mock_user_objects.filter.return_value.order_by.return_value = _async_users_iter()
 
             mentees = await mock_module_node.mock_issue_mentees(issue_number=123)
             assert len(mentees) == 1
@@ -198,28 +213,58 @@ class TestModuleNodeResolvers:
     @pytest.mark.asyncio
     async def test_module_node_issue_mentees_no_issue(self, mock_module_node):
         """Test issue_mentees when no issue is found."""
-        mock_module_node.issues.filter.return_value.values_list.return_value = []
+
+        async def _empty_values_iter():
+            if False:
+                yield
+
+        mock_module_node.issues.filter.return_value.values_list.return_value = _empty_values_iter()
         mentees = await mock_module_node.mock_issue_mentees(issue_number=123)
         assert mentees == []
 
-    def test_module_node_project_name(self, mock_module_node):
+    @pytest.mark.asyncio
+    async def test_module_node_project_name(self, mock_module_node):
         """Test the project_name resolver."""
-        assert mock_module_node.mock_project_name() == "Test Project"
+        assert await mock_module_node.mock_project_name() == "Test Project"
 
-    def test_module_node_project_name_no_project(self):
+    @pytest.mark.asyncio
+    async def test_module_node_project_name_no_project(self):
         """Test project_name when no project is associated."""
         mock = FakeModuleNode()
         mock.project = None
-        assert mock.mock_project_name() is None
+        assert await mock.mock_project_name() is None
 
     @pytest.mark.asyncio
     async def test_module_node_issues_with_label(self, mock_module_node):
         """Test the issues resolver with a label filter."""
-        with patch("apps.mentorship.models.task.Task.objects"):
+
+        async def _empty_task_iter():
+            if False:
+                yield
+
+        async def _issues_iter():
+            yield MagicMock()
+
+        mock_qs = MagicMock()
+        mock_qs.select_related = MagicMock(return_value=mock_qs)
+        mock_qs.prefetch_related = MagicMock(return_value=mock_qs)
+        mock_qs.filter = MagicMock(return_value=mock_qs)
+        order_by_result = MagicMock()
+        order_by_result.__getitem__.return_value = _issues_iter()
+        mock_qs.order_by = MagicMock(return_value=order_by_result)
+        mock_module_node.issues = mock_qs
+
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
+            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
+                _empty_task_iter()
+            )
             issues_list = await mock_module_node.mock_issues(label="bug")
         assert len(issues_list) == 1
-        mock_module_node_qs_related = mock_module_node.issues.select_related.return_value
-        mock_module_node_qs_related.prefetch_related.return_value.filter.assert_called_once_with(
+        mock_module_node.issues.select_related.assert_called_once_with("repository", "author")
+        mock_module_node.issues.select_related.return_value.prefetch_related.assert_called_once_with(
+            "assignees", "labels", MERGED_PULL_REQUESTS_PREFETCH
+        )
+        mock_module_node.issues.select_related.return_value.prefetch_related.return_value.filter.assert_called_once_with(
             labels__name="bug"
         )
 
@@ -238,16 +283,19 @@ class TestModuleNodeResolvers:
         assert count == 2
         mock_module_node.issues.filter.assert_called_once_with(labels__name="feature")
 
-    def test_module_node_available_labels(self, mock_module_node):
+    @pytest.mark.asyncio
+    async def test_module_node_available_labels(self, mock_module_node):
         """Test the available_labels resolver."""
+
+        async def _labels_async_iter():
+            yield "label1"
+            yield "label2"
+
         with patch("apps.github.models.Label.objects") as mock_label_objects:
             label_chain = mock_label_objects.filter.return_value.values_list.return_value
-            label_chain.distinct.return_value = [
-                "label1",
-                "label2",
-            ]
+            label_chain.distinct.return_value = _labels_async_iter()
 
-            labels = mock_module_node.mock_available_labels()
+            labels = await mock_module_node.mock_available_labels()
             assert labels == ["label1", "label2"]
             mock_label_objects.filter.assert_called_once_with(
                 issue__mentorship_modules=mock_module_node
@@ -286,10 +334,12 @@ class TestModuleNodeResolvers:
             mock_interest2 = MagicMock()
             mock_interest2.user = MagicMock(login="user2")
             mock_user_interests = mock_issue_user_interest_objects.select_related.return_value
-            mock_user_interests.filter.return_value.order_by.return_value = [
-                mock_interest1,
-                mock_interest2,
-            ]
+
+            async def _interests_async_iter():
+                yield mock_interest1
+                yield mock_interest2
+
+            mock_user_interests.filter.return_value.order_by.return_value = _interests_async_iter()
 
             users = await mock_module_node.mock_interested_users(issue_number=789)
             assert len(users) == 2
@@ -416,17 +466,36 @@ class TestModuleNodeResolvers:
     @pytest.mark.asyncio
     async def test_module_node_issues_invalid_limit(self, mock_module_node):
         """Test the issues resolver returns [] when limit is invalid."""
-        with patch("apps.mentorship.models.task.Task.objects"):
+
+        async def _empty_task_iter():
+            if False:
+                yield
+
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
+            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
+                _empty_task_iter()
+            )
             issues_list = await mock_module_node.mock_issues(limit=0)
         assert issues_list == []
 
     @pytest.mark.asyncio
     async def test_module_node_issues_no_label(self, mock_module_node):
         """Test the issues resolver without label filter."""
-        mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
-        mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
 
-        with patch("apps.mentorship.models.task.Task.objects"):
+        async def _empty_task_iter():
+            if False:
+                yield
+
+        async def _issues_iter():
+            yield MagicMock()
+
+        mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
+        mock_qs.order_by.return_value.__getitem__.return_value = _issues_iter()
+
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
+            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
+                _empty_task_iter()
+            )
             issues_list = await mock_module_node.mock_issues()
         assert len(issues_list) == 1
         mock_qs.filter.assert_not_called()
@@ -434,61 +503,80 @@ class TestModuleNodeResolvers:
     @pytest.mark.asyncio
     async def test_module_node_issues_label_all(self, mock_module_node):
         """Test the issues resolver with label='all' does not filter."""
-        mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
-        mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
 
-        with patch("apps.mentorship.models.task.Task.objects"):
+        async def _empty_task_iter():
+            if False:
+                yield
+
+        async def _issues_iter():
+            yield MagicMock()
+
+        mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
+        mock_qs.order_by.return_value.__getitem__.return_value = _issues_iter()
+
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
+            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
+                _empty_task_iter()
+            )
             issues_list = await mock_module_node.mock_issues(label="all")
         assert len(issues_list) == 1
 
     @pytest.mark.asyncio
     async def test_module_node_issues_bulk_load_with_duplicates(self, mock_module_node):
         """Test issues resolver properly handles duplicate deadlines during bulk load."""
-        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            deadline_data = [
+
+        async def _deadline_async_iter():
+            for row in [
                 {"issue__number": 101, "deadline_at": datetime(2025, 10, 26, tzinfo=UTC)},
                 {
                     "issue__number": 101,
                     "deadline_at": datetime(2025, 10, 27, tzinfo=UTC),
                 },
                 {"issue__number": 102, "deadline_at": datetime(2025, 10, 28, tzinfo=UTC)},
-            ]
-            assigned_data = [
+            ]:
+                yield row
+
+        async def _assigned_async_iter():
+            for row in [
                 {"issue__number": 101, "assigned_at": datetime(2025, 9, 15, tzinfo=UTC)},
                 {
                     "issue__number": 101,
                     "assigned_at": datetime(2025, 9, 16, tzinfo=UTC),
                 },
                 {"issue__number": 102, "assigned_at": datetime(2025, 9, 17, tzinfo=UTC)},
-            ]
+            ]:
+                yield row
 
-            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
-                deadline_data
-            )
+        async def _issues_iter():
+            yield MagicMock(number=101)
+            yield MagicMock(number=102)
 
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
             mock_qs = (
                 mock_module_node.issues.select_related.return_value.prefetch_related.return_value
             )
-            mock_qs.order_by.return_value.__getitem__.return_value = [
-                MagicMock(number=101),
-                MagicMock(number=102),
-            ]
+            mock_qs.order_by.return_value.__getitem__.return_value = _issues_iter()
 
             filter_mock = mock_task_objects.filter
             filter_mock.side_effect = [
                 MagicMock(
                     order_by=MagicMock(
-                        return_value=MagicMock(values=MagicMock(return_value=deadline_data))
+                        return_value=MagicMock(
+                            values=MagicMock(return_value=_deadline_async_iter())
+                        )
                     )
                 ),
                 MagicMock(
                     order_by=MagicMock(
-                        return_value=MagicMock(values=MagicMock(return_value=assigned_data))
+                        return_value=MagicMock(
+                            values=MagicMock(return_value=_assigned_async_iter())
+                        )
                     )
                 ),
             ]
 
             info = MagicMock()
+            info.context.request.auser = AsyncMock(return_value=MagicMock())
             info.context.task_deadlines_by_issue = {}
             info.context.task_assigned_at_by_issue = {}
 
@@ -510,14 +598,17 @@ class TestModuleNodeResolvers:
             yield 1
             yield 2
 
+        async def _pr_async_iter():
+            yield MagicMock()
+            yield MagicMock()
+
         with patch(
             "apps.mentorship.api.internal.nodes.module.PullRequest.objects"
         ) as mock_pr_objects:
             pr_chain = mock_pr_objects.filter.return_value.select_related.return_value
-            pr_chain.distinct.return_value.order_by.return_value.__getitem__.return_value = [
-                MagicMock(),
-                MagicMock(),
-            ]
+            pr_chain.distinct.return_value.order_by.return_value.__getitem__.return_value = (
+                _pr_async_iter()
+            )
             mock_module_node.issues.values_list.return_value = _async_values_iter()
             result = await _call_module_resolver(mock_module_node, "recent_pull_requests", limit=5)
             assert len(result) == 2
@@ -532,9 +623,10 @@ class TestModuleNodeResolvers:
     async def test_module_node_issues_unauthorized(self, mock_module_node):
         """Test issues resolver returns empty list for unauthorized user."""
         info = MagicMock()
+        info.context.request.user = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=info.context.request.user)
         info.context.task_deadlines_by_issue = None
         info.context.task_assigned_at_by_issue = None
-        info.context.request.user = MagicMock()
 
         mock_module_node.program.has_admin.return_value = False
         mock_module_node.has_mentor.return_value = False
@@ -550,9 +642,10 @@ class TestModuleNodeResolvers:
     async def test_module_node_issue_by_number_unauthorized(self, mock_module_node):
         """Test issue_by_number resolver returns None for unauthorized user."""
         info = MagicMock()
+        info.context.request.user = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=info.context.request.user)
         info.context.task_deadlines_by_issue = None
         info.context.task_assigned_at_by_issue = None
-        info.context.request.user = MagicMock()
 
         mock_module_node.program.has_admin.return_value = False
         mock_module_node.has_mentor.return_value = False

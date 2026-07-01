@@ -251,7 +251,7 @@ class ModuleMutation:
         if issue is None:
             raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
-        assignees = await issue.assignees.aall()
+        assignees = issue.assignees.all()
         if not assignees:
             raise ValidationError(message="Cannot set deadline: issue has no assignees.")
 
@@ -311,7 +311,7 @@ class ModuleMutation:
         if issue is None:
             raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
-        assignees = await issue.assignees.aall()
+        assignees = issue.assignees.all()
         if not assignees:
             raise ValidationError(message="Cannot clear deadline: issue has no assignees.")
 

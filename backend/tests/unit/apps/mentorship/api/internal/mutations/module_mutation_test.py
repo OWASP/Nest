@@ -20,6 +20,7 @@ class TestResolveMentorsFromLogins:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @pytest.mark.asyncio
     async def test_resolve_mentors_success(self, mock_github_user, mock_mentor):
         """Test successful resolution of mentor logins."""
         mock_gh_user = MagicMock()
@@ -38,12 +39,13 @@ class TestResolveMentorsFromLogins:
         assert len(result) == 2
         assert mock_mentor_obj1 in result
         assert mock_mentor_obj2 in result
-        assert mock_github_user.objects.get.call_count == 2
+        assert mock_github_user.objects.aget.call_count == 2
 
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @pytest.mark.asyncio
     async def test_resolve_mentors_user_not_found(self, mock_github_user):
         """Test ValueError when GitHub user not found."""
-        mock_github_user.DoesNotExist = Exception
+        mock_github_user.DoesNotExist = type("DoesNotExist", (Exception,), {})
         mock_github_user.objects.aget = AsyncMock(side_effect=mock_github_user.DoesNotExist)
 
         with pytest.raises(ValueError, match="GitHub user 'bad_user' not found"):
@@ -211,9 +213,12 @@ class TestModuleMutationCreateModule:
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "intermediate"
+        mock_mod.mentors.aset = AsyncMock()
         mock_module.objects.acreate = AsyncMock(return_value=mock_mod)
 
         mock_resolve.return_value = set()
+
+        mock_prog.asave = AsyncMock()
 
         mutation = ModuleMutation()
         result = await mutation.create_module(info, input_data)
@@ -293,9 +298,12 @@ class TestModuleMutationCreateModule:
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "advanced"
+        mock_mod.mentors.aset = AsyncMock()
         mock_module.objects.acreate = AsyncMock(return_value=mock_mod)
 
         mock_resolve.return_value = set()
+
+        mock_prog.asave = AsyncMock()
 
         mutation = ModuleMutation()
         await mutation.create_module(info, input_data)
@@ -338,6 +346,7 @@ class TestModuleMutationCreateModule:
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "intermediate"
+        mock_mod.mentors.aset = AsyncMock()
         mock_module.objects.acreate = AsyncMock(return_value=mock_mod)
 
         mock_resolve.return_value = set()
@@ -380,7 +389,10 @@ class TestModuleMutationAssignIssue:
         mock_gh_user.objects.filter.return_value.afirst = AsyncMock(return_value=mock_gh)
 
         mock_issue = MagicMock()
+        mock_issue.assignees.aadd = AsyncMock()
         mock_mod.issues.filter.return_value.afirst = AsyncMock(return_value=mock_issue)
+
+        mock_interest.objects.filter.return_value.adelete = AsyncMock()
 
         mutation = ModuleMutation()
         result = await mutation.assign_issue_to_user(
@@ -513,6 +525,7 @@ class TestModuleMutationUnassignIssue:
         mock_gh = MagicMock()
         mock_gh_user.objects.filter.return_value.afirst = AsyncMock(return_value=mock_gh)
         mock_issue = MagicMock()
+        mock_issue.assignees.aremove = AsyncMock()
         mock_mod.issues.filter.return_value.afirst = AsyncMock(return_value=mock_issue)
 
         mutation = ModuleMutation()
@@ -649,7 +662,7 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[assignee])
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -757,7 +770,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[])
+        mock_issue.assignees.all = MagicMock(return_value=[])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -793,7 +806,7 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[assignee])
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -845,7 +858,7 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[assignee])
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -889,7 +902,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[MagicMock()])
+        mock_issue.assignees.all = MagicMock(return_value=[MagicMock()])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -926,7 +939,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[MagicMock()])
+        mock_issue.assignees.all = MagicMock(return_value=[MagicMock()])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -972,7 +985,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[assignee])
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -980,6 +993,7 @@ class TestModuleMutationClearTaskDeadline:
 
         task_obj = MagicMock()
         task_obj.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
+        task_obj.asave = AsyncMock()
         mock_task.objects.filter.return_value.afirst = AsyncMock(return_value=task_obj)
 
         mutation = ModuleMutation()
@@ -1009,7 +1023,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_issue = MagicMock()
         assignee1 = MagicMock()
         assignee2 = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[assignee1, assignee2])
+        mock_issue.assignees.all = MagicMock(return_value=[assignee1, assignee2])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -1048,7 +1062,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[assignee])
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -1083,7 +1097,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[assignee])
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -1168,7 +1182,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.aall = AsyncMock(return_value=[])
+        mock_issue.assignees.all = MagicMock(return_value=[])
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
             return_value=mock_issue
@@ -1239,6 +1253,10 @@ class TestModuleMutationUpdateModule:
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
         mock_project.objects.aget = AsyncMock(return_value=MagicMock())
         mock_resolve.return_value = {MagicMock()}
+
+        mock_mod.asave = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
+        mock_mod.mentors.aset = AsyncMock()
 
         mutation = ModuleMutation()
         result = await mutation.update_module(info, input_data)
@@ -1339,6 +1357,9 @@ class TestModuleMutationUpdateModule:
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
         mock_project.objects.aget = AsyncMock(return_value=MagicMock())
 
+        mock_mod.asave = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
+
         mutation = ModuleMutation()
         result = await mutation.update_module(info, input_data)
 
@@ -1374,6 +1395,9 @@ class TestModuleMutationUpdateModule:
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
         mock_project.objects.aget = AsyncMock(return_value=MagicMock())
 
+        mock_mod.asave = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
+
         mutation = ModuleMutation()
         await mutation.update_module(info, input_data)
 
@@ -1398,14 +1422,23 @@ class TestModuleMutationDeleteModule:
         mock_mod = MagicMock()
         mock_mod.name = "Test Module"
         mock_mod.experience_level = "intermediate"
-        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.has_admin.return_value = True
         mock_mod.program.experience_levels = ["beginner", "intermediate"]
+
+        mock_mod.adelete = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
 
         mock_module.objects.select_related.return_value.aget = AsyncMock(return_value=mock_mod)
         mock_module.DoesNotExist = ObjectDoesNotExist
-        mock_module.objects.filter.return_value.exclude.return_value.aexists = AsyncMock(
-            return_value=False
-        )
+
+        other_mod = MagicMock()
+        other_mod.experience_level = "beginner"
+
+        async def _other_modules_aiter():
+            yield other_mod
+
+        mock_exclude = mock_module.objects.filter.return_value.exclude.return_value
+        mock_exclude.aexists = AsyncMock(return_value=False)
 
         mutation = ModuleMutation()
         result = await mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
@@ -1424,14 +1457,16 @@ class TestModuleMutationDeleteModule:
         mock_mod = MagicMock()
         mock_mod.name = "Test Module"
         mock_mod.experience_level = "beginner"
-        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.has_admin.return_value = True
         mock_mod.program.experience_levels = ["beginner", "advanced"]
+
+        mock_mod.adelete = AsyncMock()
 
         mock_module.objects.select_related.return_value.aget = AsyncMock(return_value=mock_mod)
         mock_module.DoesNotExist = ObjectDoesNotExist
-        mock_module.objects.filter.return_value.exclude.return_value.aexists = AsyncMock(
-            return_value=True
-        )
+
+        mock_exclude = mock_module.objects.filter.return_value.exclude.return_value
+        mock_exclude.aexists = AsyncMock(return_value=True)
 
         mutation = ModuleMutation()
         result = await mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
@@ -1490,6 +1525,7 @@ class TestModuleMutationReorderModules:
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Program")
+    @pytest.mark.asyncio
     async def test_reorder_modules_success(self, mock_program, mock_module):
         """Test successful module reordering by admin."""
         user = MagicMock()
@@ -1498,7 +1534,6 @@ class TestModuleMutationReorderModules:
 
         mock_prog = MagicMock()
         mock_program.objects.aget = AsyncMock(return_value=mock_prog)
-        mock_prog.admins.filter.return_value.exists.return_value = True
 
         mod_a = MagicMock()
         mod_a.key = "mod-a"
@@ -1507,16 +1542,32 @@ class TestModuleMutationReorderModules:
         mod_c = MagicMock()
         mod_c.key = "mod-c"
 
-        mock_module.objects.filter.return_value.acount = AsyncMock(return_value=3)
-        mock_module.objects.filter.return_value.select_for_update.return_value = [
-            mod_a,
-            mod_b,
-            mod_c,
-        ]
+        class _AsyncIterableQS:
+            def __init__(self, items):
+                self._items = items
 
-        mock_result_qs = MagicMock()
-        mock_qs = mock_module.objects.filter.return_value.select_related.return_value
-        mock_qs.prefetch_related.return_value.order_by.return_value = mock_result_qs
+            def __aiter__(self):
+                return self._agen()
+
+            async def _agen(self):
+                for item in self._items:
+                    yield item
+
+            def select_related(self, *args, **kwargs):
+                return self
+
+            def prefetch_related(self, *args, **kwargs):
+                return self
+
+            def order_by(self, *args, **kwargs):
+                return self
+
+            @property
+            def select_for_update(self):
+                return self
+
+        mock_filter = _AsyncIterableQS([mod_a, mod_b, mod_c])
+        mock_module.objects.filter.return_value = mock_filter
 
         mutation = ModuleMutation()
         await mutation.reorder_modules(info, input_data)
