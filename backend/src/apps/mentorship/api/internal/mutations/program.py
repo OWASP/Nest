@@ -89,7 +89,7 @@ class ProgramMutation:
         user = await info.context.request.auser()
 
         github_user = await sync_to_async(lambda: user.github_user)()
-        if not github_user or await sync_to_async(lambda: github_user.is_project_leader)():
+        if not github_user or not await sync_to_async(github_user.is_project_leader)():
             msg = "You must be a project leader to create a program."
             logger.warning(
                 "Permission denied for user '%s' to create program '%s'.",

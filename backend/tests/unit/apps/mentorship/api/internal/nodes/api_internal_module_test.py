@@ -50,8 +50,8 @@ class FakeModuleNode:
         self.project.name = "Test Project"
         self.has_mentor = MagicMock(return_value=True)
 
-    def mock_mentors(self):
-        return _call_module_resolver(self, "mentors")
+    async def mock_mentors(self):
+        return await _call_module_resolver(self, "mentors")
 
     async def mock_mentees(self):
         return await _call_module_resolver(self, "mentees")
@@ -59,8 +59,8 @@ class FakeModuleNode:
     async def mock_issue_mentees(self, issue_number: int):
         return await _call_module_resolver(self, "issue_mentees", issue_number=issue_number)
 
-    def mock_project_name(self):
-        return _call_module_resolver(self, "project_name")
+    async def mock_project_name(self):
+        return await _call_module_resolver(self, "project_name")
 
     async def mock_issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
         info = MagicMock()
