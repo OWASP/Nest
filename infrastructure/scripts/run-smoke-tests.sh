@@ -95,10 +95,10 @@ run_smoke_tests() {
 override_s3_lifecycle create
 trap 'override_s3_lifecycle remove; cleanup' EXIT
 
-for test_dir in $(find infrastructure/bootstrap infrastructure/modules \
-  -name "tests" -type d -not -path "*/.terraform/*" | sort); do
+while IFS= read -r test_dir; do
   run_smoke_tests "$(dirname "${test_dir}")"
-done
+done < <(find infrastructure/bootstrap infrastructure/modules \
+  -name "tests" -type d -not -path "*/.terraform/*" | sort)
 
 echo ""
 echo "Smoke test results: ${test_count} passed, ${fail_count} failed."
