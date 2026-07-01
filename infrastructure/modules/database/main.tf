@@ -87,6 +87,10 @@ resource "aws_ssm_parameter" "django_db_password" {
   type        = "SecureString"
   value       = local.db_password
 }
+moved {
+  to = aws_ssm_parameter.django_db_password
+  from = aws_ssm_parameter.django_db_password[0]
+}
 
 resource "aws_iam_role" "rds_proxy" {
   count = var.enable_rds_proxy ? 1 : 0
