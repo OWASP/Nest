@@ -34,7 +34,6 @@ else
     -e LOCALSTACK_AUTH_TOKEN="${LOCALSTACK_AUTH_TOKEN:-}" \
     "${LOCALSTACK_IMAGE}"
   STARTED_CONTAINER=true
-  trap 'override_s3_lifecycle remove; cleanup' EXIT
   wait_for_localstack
 fi
 
@@ -93,6 +92,7 @@ run_smoke_tests() {
 }
 
 override_s3_lifecycle create
+trap 'override_s3_lifecycle remove; cleanup' EXIT
 
 for test_dir in $(find infrastructure/bootstrap infrastructure/modules \
   -name "tests" -type d -not -path "*/.terraform/*" | sort); do
