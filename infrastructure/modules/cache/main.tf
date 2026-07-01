@@ -105,3 +105,8 @@ resource "aws_secretsmanager_secret" "django_redis_password" {
   recovery_window_in_days = var.secret_recovery_window_in_days
   tags                    = var.common_tags
 }
+
+resource "aws_secretsmanager_secret_version" "name" {
+  secret_id = aws_secretsmanager_secret.django_redis_password.id
+  secret_string = local.redis_auth_token
+}
