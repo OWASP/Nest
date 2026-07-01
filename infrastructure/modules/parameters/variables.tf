@@ -4,6 +4,11 @@ variable "common_tags" {
   default     = {}
 }
 
+variable "db_credencials_secret_arn" {
+  description = "The Secret Manager ARM containing the database credencial"
+  type        = string
+}
+
 variable "db_password_arn" {
   description = "The SSM Parameter ARN of password of the database."
   type        = string
@@ -82,6 +87,11 @@ variable "environment" {
   type        = string
 }
 
+variable "kms_key_arn" {
+  description = "The KMS key arm used to encrypt runtime secrets"
+  type        = string
+}
+
 variable "next_server_csrf_url" {
   description = "The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/)."
   type        = string
@@ -108,6 +118,11 @@ variable "redis_password_arn" {
   sensitive   = true
 }
 
+variable "redis_password_secret_arn" {
+  description = "The Secrets Manager ARN containing the Redis password."
+  type        = string
+}
+
 variable "runtime_secrets_mode" {
   description = "Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager."
   type        = string
@@ -120,6 +135,23 @@ variable "runtime_secrets_mode" {
     error_message = "runtime_secrets_mode must be either prepare or complete."
   }
 }
+variable "secret_recovery_window_in_days" {
+  description = "The number of days Secrets Manager waits before deleting a secret."
+  type        = number
+  default     = 7
+  validation {
+    condition = (
+      var.secret_recovery_window_in_days == 0 ||
+      (
+        var.secret_recovery_window_in_days >= 7 &&
+        var.secret_recovery_window_in_days <= 30
+      )
+    )
+    error_message = "secret_recovery_window_in_days must be between 7 and 30"
+  }
+
+}
+
 
 variable "slack_bot_token_suffix" {
   description = "The Suffix for the Slack bot token."
