@@ -138,7 +138,7 @@ run "test_ssm_parameter_is_secure_string" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_db_password.type == "SecureString"
+    condition     = aws_ssm_parameter.django_db_password[0].type == "SecureString"
     error_message = "Database password must be stored as SecureString."
   }
 }
@@ -147,7 +147,7 @@ run "test_ssm_parameter_path_format" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_db_password.name == "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
+    condition     = aws_ssm_parameter.django_db_password[0].name == "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
     error_message = "SSM parameter must follow path: /{project}/{environment}/DJANGO_DB_PASSWORD."
   }
 }

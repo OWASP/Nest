@@ -28,15 +28,6 @@ output "backend_service_name" {
   value       = module.backend.ecs_service_name
 }
 
-output "db_password-arn" {
-  description = "The legacy SSM parameter ARN for the database password."
-  value       = try(aws_ssm_parameter.django_db_password[0].arn, null)
-}
-
-output "db_credentials_secret_arn" {
-  description = "The Secret Manager ARN containing the database credencials."
-  value       = aws_secretsmanager_secret.db_credentials.arn
-}
 output "fixtures_bucket_name" {
   description = "The name of the S3 bucket for database fixtures."
   value       = module.storage.fixtures_s3_bucket_name
