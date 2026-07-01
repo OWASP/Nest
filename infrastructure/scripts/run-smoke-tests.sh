@@ -44,7 +44,7 @@ else
 fi
 
 cleanup() {
-  if [ "${STARTED_CONTAINER}" = "true" ]; then
+  if [[ "${STARTED_CONTAINER}" = "true" ]]; then
     echo "Stopping LocalStack container..."
     docker stop "${LOCALSTACK_CONTAINER}" >/dev/null 2>&1 || true
     docker rm "${LOCALSTACK_CONTAINER}" >/dev/null 2>&1 || true
@@ -56,14 +56,14 @@ override_s3_lifecycle() {
   local s3_override="infrastructure/modules/storage/modules/s3-bucket/test_override.tf"
   local shared_override="infrastructure/modules/storage/modules/shared-data-bucket/test_override.tf"
 
-  if [ "${action}" = "create" ]; then
-    if [ -f "${s3_override}" ] || [ -f "${shared_override}" ]; then
-      echo "Error: test_override.tf already exists. Refusing to overwrite."
+  if [[ "${action}" = "create" ]]; then
+    if [[ -f "${s3_override}" ]] || [[ -f "${shared_override}" ]]; then
+      echo "Error: test_override.tf already exists. Refusing to overwrite." >&2
       exit 1
     fi
     printf 'resource "aws_s3_bucket" "this" {\n  lifecycle {\n    prevent_destroy = false\n  }\n}\n' > "${s3_override}"
     printf 'resource "aws_s3_bucket" "nest_shared_data" {\n  lifecycle {\n    prevent_destroy = false\n  }\n}\n' > "${shared_override}"
-  elif [ "${action}" = "remove" ]; then
+  elif [[ "${action}" = "remove" ]]; then
     rm -f "${s3_override}" "${shared_override}"
   fi
 }
@@ -77,15 +77,16 @@ run_smoke_tests() {
   local filters=""
 
   for test_file in "${test_dir}"/*.tftest.hcl; do
-    [ -e "${test_file}" ] || continue
+    [[ -e "${test_file}" ]] || continue
     filename=$(basename "${test_file}")
     # Match only *smoke* files — mirrors the exclusion pattern in infrastructure/Makefile
     case "${filename}" in
       *smoke*) filters="${filters} -filter=tests/${filename}" ;;
+      *) ;;
     esac
   done
 
-  [ -n "${filters}" ] || return 0
+  [[ -n "${filters}" ]] || return 0
 
   echo "Running smoke tests for ${module_dir}..."
   terraform -chdir="${module_dir}" init -backend=false -input=false
@@ -111,9 +112,9 @@ done <<< "${test_dirs}"
 echo ""
 echo "Smoke test results: ${test_count} passed, ${fail_count} failed."
 
-if [ "${test_count}" -eq 0 ]; then
+if [[ "${test_count}" -eq 0 ]]; then
   echo "Error: no smoke tests were executed."
   exit 1
 fi
 
-[ "${fail_count}" -eq 0 ] || exit 1
+[[ "${fail_count}" -eq 0 ]] || exit 1
