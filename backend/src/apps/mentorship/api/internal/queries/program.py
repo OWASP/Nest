@@ -9,7 +9,6 @@ from django.db.models import Q
 
 from apps.common.utils import normalize_limit
 from apps.mentorship.api.internal.graphql_errors import (
-    AuthenticationRequiredError,
     ManagementProgramAccessDeniedError,
 )
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
@@ -43,14 +42,12 @@ class ProgramQuery:
 
         return program
 
-    @strawberry.field(name="managementProgram")
+    @strawberry_django.field(name="managementProgram", permission_classes=[IsAuthenticatedAsync])
     async def get_management_program(
         self, info: strawberry.Info, program_key: str
     ) -> ProgramNode | None:
         """Return program details for admins or mentors."""
-        user = info.context.request.user
-        if not user.is_authenticated:
-            raise AuthenticationRequiredError()  # noqa: RSE102
+        user = await info.context.request.auser()
         try:
             program = await Program.objects.prefetch_related(
                 "admins__github_user", "admins__nest_user"
@@ -82,7 +79,7 @@ class ProgramQuery:
 
         query = Q(id__in=admin_program_ids)
         mentor_q = Q(modules__mentors__nest_user=user)
-        github_user = await sync_to_async(getattr)(user, "github_user", None)
+        github_user = await sync_to_async(getattr)(user, "github_user", None)  # type: ignore[call-arg]
         if github_user is not None:
             mentor_q |= Q(modules__mentors__github_user=github_user)
         query |= mentor_q
