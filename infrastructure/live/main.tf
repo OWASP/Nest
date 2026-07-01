@@ -67,17 +67,18 @@ module "backend" {
 module "cache" {
   source = "../modules/cache"
 
-  common_tags           = local.common_tags
-  environment           = var.environment
-  kms_key_arn           = module.kms.key_arn
-  project_name          = var.project_name
-  redis_engine_version  = var.redis_engine_version
-  redis_node_type       = var.redis_node_type
-  redis_num_cache_nodes = var.redis_num_cache_nodes
-  redis_port            = var.redis_port
-  runtime_secrets_mode  = var.runtime_secrets_mode
-  security_group_ids    = [module.security.redis_sg_id]
-  subnet_ids            = module.networking.private_subnet_ids
+  common_tags                    = local.common_tags
+  environment                    = var.environment
+  kms_key_arn                    = module.kms.key_arn
+  project_name                   = var.project_name
+  redis_engine_version           = var.redis_engine_version
+  redis_node_type                = var.redis_node_type
+  redis_num_cache_nodes          = var.redis_num_cache_nodes
+  redis_port                     = var.redis_port
+  runtime_secrets_mode           = var.runtime_secrets_mode
+  secret_recovery_window_in_days = var.secret_recovery_window_in_days
+  security_group_ids             = [module.security.redis_sg_id]
+  subnet_ids                     = module.networking.private_subnet_ids
 }
 
 module "database" {

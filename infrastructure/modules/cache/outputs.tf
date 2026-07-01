@@ -5,5 +5,5 @@ output "redis_password_arn" {
 
 output "redis_password_secret_arn" {
   description = "The Secrets Manager ARN containing the Redis password."
-  value       = aws_secretsmanager_secret.django_redis_password
+  value       = aws_secretsmanager_secret.django_redis_password.arn
 }

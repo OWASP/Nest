@@ -106,7 +106,7 @@ resource "aws_secretsmanager_secret" "django_redis_password" {
   tags                    = var.common_tags
 }
 
-resource "aws_secretsmanager_secret_version" "name" {
+resource "aws_secretsmanager_secret_version" "django_redis_password" {
   secret_id     = aws_secretsmanager_secret.django_redis_password.id
   secret_string = local.redis_auth_token
 }

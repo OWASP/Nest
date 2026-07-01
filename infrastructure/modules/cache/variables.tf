@@ -87,7 +87,7 @@ variable "runtime_secrets_mode" {
 
 variable "secret_recovery_window_in_days" {
   description = "The number of days Secrets Manager waits before deleting the Redis secret."
-  type        = string
+  type        = number
   default     = 7
 
   validation {
