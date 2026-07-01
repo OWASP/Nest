@@ -64,19 +64,10 @@ jobs:
       - name: Setup Terraform Environment
         uses: ./.github/actions/setup-terraform-environment
 
-      - name: Validate LocalStack auth token
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
-        run: |
-          test -n "$LOCALSTACK_AUTH_TOKEN" || {
-            echo "LOCALSTACK_AUTH_TOKEN is required for LocalStack integration tests."
-            exit 1
-          }
-
       - name: Start LocalStack
         uses: localstack/setup-localstack@7c8a0cb3405bc58be4c8f763f812aa000bc46303  # v0.3.2
         with:
-          image-tag: 4.2.0
+          image-tag: 4.14.0
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
