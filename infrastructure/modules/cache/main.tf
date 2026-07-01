@@ -97,3 +97,11 @@ moved {
   from = aws_ssm_parameter.django_redis_password
   to   = aws_ssm_parameter.django_redis_password[0]
 }
+
+resource "aws_secretsmanager_secret" "django_redis_password" {
+  description             = "Redis authentication token used by Django."
+  kms_key_id              = var.kms_key_arn
+  name                    = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
+  recovery_window_in_days = var.secret_recovery_window_in_days
+  tags                    = var.common_tags
+}
