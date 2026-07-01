@@ -30,5 +30,27 @@ services:
     volumes:
       - o11y-metrics-data:/data
 
+  o11y-grafana:
+    container_name: nest-o11y-grafana
+    depends_on:
+      o11y-metrics:
+        condition: service_healthy
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_USERS_DEFAULT_THEME=light
+    image: grafana/grafana-oss:13.0.2@sha256:5dad0df181cb644a14e13617b913b261a54f7d4fd4510721dba420929f35bea2
+    networks:
+      - nest-network
+    ports:
+      - 3001:3000
+    volumes:
+      - o11y-grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
 volumes:
+  o11y-grafana-data:
   o11y-metrics-data:
