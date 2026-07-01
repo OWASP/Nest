@@ -11,3 +11,6 @@ test-infrastructure: ## Run infrastructure tests
 		terraform -chdir="$$module_dir" init -backend=false -input=false && \
 		terraform -chdir="$$module_dir" test || exit 1; \
 	done
+
+test-infrastructure-smoke: ## Run infrastructure smoke tests against LocalStack
+	@bash infrastructure/scripts/run-smoke-tests.sh
