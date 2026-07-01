@@ -455,4 +455,4 @@ Documentation is generated using [terraform-docs](https://github.com/terraform-d
   The script auto-starts a LocalStack container if one isn't already running on port 4566 and tears it down on exit.
 
 > [!NOTE]
-> ECR smoke tests require LocalStack Pro/Ultimate. S3 smoke tests require LocalStack >= 4.13 due to a known compatibility issue with `terraform-provider-aws` >= 6.23 ([localstack/localstack#13426](https://github.com/localstack/localstack/issues/13426)).
+> ECR smoke tests require a paid LocalStack plan (Base or above). S3 smoke tests require LocalStack >= 4.13 due to a known compatibility issue with `terraform-provider-aws` >= 6.23 ([localstack/localstack#13426](https://github.com/localstack/localstack/issues/13426)).

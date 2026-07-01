@@ -36,7 +36,7 @@ variables {
   nextauth_url                  = "https://nest.owasp.dev"
   project_name                  = "nest"
   redis_password_arn            = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/staging/DJANGO_REDIS_PASSWORD"
-  slack_bot_token_suffix        = "T04T40NHX"
+  slack_bot_token_suffix        = "T00000000X"
 }
 
 run "smoke_staging_parameters" {
