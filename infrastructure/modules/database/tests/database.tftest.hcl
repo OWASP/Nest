@@ -16,6 +16,33 @@ variables {
   security_group_ids   = ["sg-12345678"]
 }
 
+run "test_complete_mode_removes_legacy_ssm_parameter" {
+    command = plan
+
+    variables {
+      runtime_secrets_mode = "complete"
+    }
+
+    assert {
+      condition     = length(aws_ssm_parameter.django_db_password) == 0
+      error_message = "Complete mode must remove the legacy database password parameter."
+    }
+  }
+
+  run "test_database_credentials_secret" {
+    command = plan
+
+    assert {
+      condition = aws_secretsmanager_secret.db_credentials.kms_key_id == var.kms_key_arn
+      error_message = "Database credentials must use the environment KMS key."
+    }
+
+    assert {
+         condition     = aws_secretsmanager_secret.db_credentials.name == "${var.project_name}-${var.environment}-db-credentials"
+         error_message = "Database credentials secret must use the expected name."
+       }
+  }
+
 run "test_database_not_publicly_accessible" {
   command = plan
 

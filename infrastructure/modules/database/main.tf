@@ -88,7 +88,7 @@ resource "aws_ssm_parameter" "django_db_password" {
   value       = local.db_password
 }
 moved {
-  to = aws_ssm_parameter.django_db_password
+  to   = aws_ssm_parameter.django_db_password
   from = aws_ssm_parameter.django_db_password[0]
 }
 
