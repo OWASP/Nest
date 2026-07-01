@@ -377,6 +377,37 @@ aws ecs run-task \
         --region AWS_REGION
     ```
 
+## Testing
+
+Infrastructure configurations are tested using Terraform's native testing framework (`terraform test`).
+
+### Unit/Mock Testing
+
+These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.
+
+To run unit/mock tests:
+
+```bash
+make test-infrastructure
+```
+
+### Integration Testing (with LocalStack)
+
+Integration tests deploy resources against a local LocalStack instance to verify IAM policies, SSM/KMS interactions, and resource wiring.
+
+#### Prerequisite
+
+You must have Docker running locally.
+
+To run integration tests, you only need to run:
+
+```bash
+export LOCALSTACK_AUTH_TOKEN="<your_auth_token>"
+make test-infrastructure-integration
+```
+
+The test runner script will automatically start, check health, and tear down the LocalStack container if it is not already running on port 4566.
+
 ## Cleaning Up
 
 - Ensure all buckets and ECR repositories are empty.

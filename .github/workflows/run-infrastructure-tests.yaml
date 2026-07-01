@@ -2,6 +2,9 @@ name: Infrastructure tests
 
 on:
   workflow_call:
+    secrets:
+      LOCALSTACK_AUTH_TOKEN:
+        required: false
 
 env:
   FORCE_COLOR: 1
@@ -10,6 +13,22 @@ env:
 permissions: {}
 
 jobs:
+  check-secrets:
+    name: Check secrets availability
+    runs-on: ubuntu-24.04-arm
+    outputs:
+      has-token: ${{ steps.check.outputs.has-token }}
+    steps:
+      - id: check
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          if [ -n "$LOCALSTACK_AUTH_TOKEN" ]; then
+            echo "has-token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-token=false" >> "$GITHUB_OUTPUT"
+          fi
+
   run-infrastructure-tests:
     name: Infrastructure tests
     permissions:
@@ -37,4 +56,51 @@ jobs:
 
       - name: Run tests
         run: make test-infrastructure
+    timeout-minutes: 10
+
+  infrastructure-integration-tests:
+    name: Infrastructure integration tests
+    needs: check-secrets
+    if: ${{ needs.check-secrets.outputs.has-token == 'true' }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
+        with:
+          terraform_version: 1.14
+
+      - name: Validate LocalStack auth token
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          test -n "$LOCALSTACK_AUTH_TOKEN" || {
+            echo "LOCALSTACK_AUTH_TOKEN is required for LocalStack integration tests."
+            exit 1
+          }
+
+      - name: Start LocalStack
+        uses: localstack/setup-localstack@e6a1e5c3a9cb6c37fca3b4bb951c87e3967afa59  # v0.2.1
+        with:
+          image-tag: 4.2.0
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+
+      - name: Create plugin cache directory
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: ${{ runner.os }}-${{ runner.arch }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Run integration tests
+        run: make test-infrastructure-integration
     timeout-minutes: 10

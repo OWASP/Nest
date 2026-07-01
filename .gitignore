@@ -38,6 +38,11 @@ __pycache__
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+# Override files
+*_override.tf
+*_override.tf.json
+override.tf
+override.tf.json
 **/.terraform/
 backend-sbom-local.cdx.json
 backend/.hypothesis/
