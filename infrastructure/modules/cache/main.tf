@@ -107,6 +107,6 @@ resource "aws_secretsmanager_secret" "django_redis_password" {
 }
 
 resource "aws_secretsmanager_secret_version" "name" {
-  secret_id = aws_secretsmanager_secret.django_redis_password.id
+  secret_id     = aws_secretsmanager_secret.django_redis_password.id
   secret_string = local.redis_auth_token
 }
