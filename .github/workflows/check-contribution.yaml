@@ -23,5 +23,5 @@ jobs:
           check_for: commit_sign_off, commit_signature, issue_assignee, issue_reference
           close_on: issue_assignee, issue_reference
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          skip_users_file_path: .github/check-contribution-skip-users.txt
+          skip_users_file_path: .github/check-contribution-skip-usernames.txt
     timeout-minutes: 5
