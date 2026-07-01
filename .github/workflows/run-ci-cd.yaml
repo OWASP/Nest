@@ -140,6 +140,8 @@ on:
         required: true
       VITE_GRAPHQL_URL:
         required: true
+      LOCALSTACK_AUTH_TOKEN:
+        required: false
       VITE_IDX_URL:
         required: true
       VITE_SENTRY_DSN:
@@ -256,10 +258,24 @@ jobs:
       release_tag: ${{ inputs.release_tag }}
       release_version: ${{ needs.run-release-version-resolution.outputs.release_version }}
 
+  run-infrastructure-smoke:
+    name: Infrastructure smoke tests
+    needs:
+      - run-image-sign
+      - run-release-version-resolution
+    permissions:
+      contents: read
+    secrets:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+    uses: ./.github/workflows/run-infrastructure-smoke.yaml
+    with:
+      environment: ${{ inputs.environment }}
+
   run-infrastructure-bootstrap:
     name: Infrastructure bootstrap
     needs:
       - run-image-sign
+      - run-infrastructure-smoke
     permissions:
       contents: read
     secrets:

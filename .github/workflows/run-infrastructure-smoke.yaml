@@ -1,0 +1,73 @@
+name: Infrastructure smoke tests
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: The environment name (e.g., staging, production)
+        required: true
+        type: string
+    secrets:
+      LOCALSTACK_AUTH_TOKEN:
+        required: false
+
+env:
+  FORCE_COLOR: 1
+  TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
+
+permissions: {}
+
+jobs:
+  check-secrets:
+    name: Check secrets availability
+    permissions: {}
+    runs-on: ubuntu-24.04-arm
+    outputs:
+      has-token: ${{ steps.check.outputs.has-token }}
+    steps:
+      - id: check
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          if [ -n "$LOCALSTACK_AUTH_TOKEN" ]; then
+            echo "has-token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-token=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::LOCALSTACK_AUTH_TOKEN is not set; infrastructure smoke tests will be skipped"
+          fi
+
+  run-infrastructure-smoke-tests:
+    name: Infrastructure smoke tests
+    needs: check-secrets
+    if: ${{ needs.check-secrets.outputs.has-token == 'true' }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform environment
+        uses: ./.github/actions/setup-terraform-environment
+
+      - name: Validate auth token
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          test -n "$LOCALSTACK_AUTH_TOKEN" || {
+            echo "LOCALSTACK_AUTH_TOKEN is required for infrastructure smoke tests."
+            exit 1
+          }
+
+      - name: Start LocalStack
+        uses: localstack/setup-localstack@7c8a0cb3405bc58be4c8f763f812aa000bc46303  # v0.3.2
+        with:
+          image-tag: 4.14.0
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+
+      - name: Run smoke tests
+        run: make test-infrastructure-smoke
+    timeout-minutes: 15
