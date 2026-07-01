@@ -73,6 +73,7 @@ run_smoke_tests() {
   for test_file in "${test_dir}"/*.tftest.hcl; do
     [ -e "${test_file}" ] || continue
     filename=$(basename "${test_file}")
+    # Match only *smoke* files — mirrors the exclusion pattern in infrastructure/Makefile
     case "${filename}" in
       *smoke*) filters="${filters} -filter=tests/${filename}" ;;
     esac
