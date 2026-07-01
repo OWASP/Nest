@@ -35,4 +35,14 @@ run "integration_apply" {
     condition     = aws_ecr_repository.main.image_tag_mutability == "MUTABLE"
     error_message = "ECR cache repository must allow mutable tags for build cache manifests."
   }
+
+  assert {
+    condition     = aws_ecr_repository.main.image_scanning_configuration[0].scan_on_push == false
+    error_message = "ECR cache repository image scanning on push must be disabled."
+  }
+
+  assert {
+    condition     = aws_ecr_lifecycle_policy.main.repository == aws_ecr_repository.main.name
+    error_message = "ECR lifecycle policy repository name does not match."
+  }
 }

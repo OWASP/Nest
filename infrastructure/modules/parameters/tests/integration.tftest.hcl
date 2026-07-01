@@ -50,4 +50,34 @@ run "integration_apply" {
     condition     = aws_ssm_parameter.django_allowed_hosts.value == var.django_allowed_hosts
     error_message = "SSM parameter value format is incorrect."
   }
+
+  assert {
+    condition     = aws_ssm_parameter.django_db_host.name == "/${var.project_name}/${var.environment}/DJANGO_DB_HOST"
+    error_message = "SSM database host parameter path format is incorrect."
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.django_db_host.value == var.django_db_host
+    error_message = "SSM database host parameter value format is incorrect."
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.nextauth_url.name == "/${var.project_name}/${var.environment}/NEXTAUTH_URL"
+    error_message = "SSM nextauth_url parameter path format is incorrect."
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.nextauth_url.value == var.nextauth_url
+    error_message = "SSM nextauth_url parameter value format is incorrect."
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.django_secret_key.name == "/${var.project_name}/${var.environment}/DJANGO_SECRET_KEY"
+    error_message = "SSM django_secret_key parameter path format is incorrect."
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.django_secret_key.type == "SecureString"
+    error_message = "SSM django_secret_key parameter type must be SecureString."
+  }
 }

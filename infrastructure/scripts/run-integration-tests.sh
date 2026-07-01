@@ -102,11 +102,13 @@ run_module_tests() {
         filters+=("-filter=tests/$(basename "$test_file")")
     done < <(find "$test_dir" -maxdepth 1 -name "*integration*.tftest.hcl" -print0)
 
-    [[ "${#filters[@]}" -eq 0 ]] && return 1
+    [[ "${#filters[@]}" -eq 0 ]] && return 0
 
     echo "Testing integration for $module_dir..."
-    terraform -chdir="$module_dir" init -backend=false -input=false
-    terraform -chdir="$module_dir" test "${filters[@]}"
+    terraform -chdir="$module_dir" init -backend=false -input=false || exit 1
+    terraform -chdir="$module_dir" test "${filters[@]}" || exit 1
+    
+    test_count=$((test_count + 1))
     return 0
 }
 
@@ -138,9 +140,7 @@ write_override_files
 
 test_count=0
 while IFS= read -r -d '' test_dir; do
-    if run_module_tests "$test_dir"; then
-        test_count=$((test_count + 1))
-    fi
+    run_module_tests "$test_dir"
 done < <(find infrastructure/bootstrap infrastructure/modules -name "tests" -type d -not -path "*/.terraform/*" -print0)
 
 if [[ "$test_count" -eq 0 ]]; then
