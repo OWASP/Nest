@@ -71,13 +71,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ minHeight: '100vh' }}
       >
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
         <Providers>
           <BreadcrumbRoot>
             <div className="flex min-h-screen flex-col">
               <AutoScrollToTop />
               <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
               <BreadCrumbsWrapper />
-              <main className="flex flex-1 flex-col justify-center">{children}</main>
+              <main id="main" className="flex flex-1 flex-col justify-center">{children}</main>
               <Footer />
               <ScrollToTop />
             </div>
