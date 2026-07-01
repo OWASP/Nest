@@ -11,7 +11,6 @@ test-infrastructure: ## Run infrastructure tests
 		for test_file in "$$test_dir"/*.tftest.hcl; do \
 			[ -e "$$test_file" ] || continue; \
 		filename=$$(basename "$$test_file"); \
-			# Exclude *smoke* files — mirrored inclusion pattern lives in infrastructure/scripts/run-smoke-tests.sh
 			case "$$filename" in \
 				*smoke*) ;; \
 				*) filters="$$filters -filter=tests/$$filename" ;; \
