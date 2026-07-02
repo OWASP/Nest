@@ -39,8 +39,8 @@ class LocalCertificateProvider(BaseCertificateProvider):
             tier (TierChoices): The tier for which the certificate is issued.
 
         """
-        from apps.owasp.models.crp.certificate import Certificate
-        
+        from apps.owasp.models.crp.certificate import Certificate  # noqa: PLC0415
+
         Certificate.objects.create(
             github_user=user,
             score=score,

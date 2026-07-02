@@ -11,8 +11,8 @@ from django.db.models import Q
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
 from apps.owasp.exceptions import CertificateIssuanceError
-from apps.owasp.models.crp.certificate_provider import CertificateProviderFactory
 from apps.owasp.models.crp.recognition_enums import TierChoices
+from apps.owasp.utils.certificate_provider import CertificateProviderFactory
 
 logger = logging.getLogger(__name__)
 
