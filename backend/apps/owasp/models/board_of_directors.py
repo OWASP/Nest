@@ -19,11 +19,29 @@ class BoardOfDirectors(models.Model):
     class Meta:
         """Model options."""
 
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(reviews_threshold__gte=1),
+                name="reviews_threshold_min_1",
+            ),
+        ]
         db_table = "owasp_board_of_directors"
         verbose_name_plural = "Board of Directors"
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    reviewers = models.ManyToManyField(
+        "nest.User",
+        verbose_name="Reviewers",
+        related_name="+",
+        blank=True,
+        help_text="Reviewers for this year's board election claims.",
+    )
+    reviews_threshold = models.PositiveSmallIntegerField(
+        default=3,
+        verbose_name="Reviews Threshold",
+        help_text="Minimum number of reviews required to finalize a claim.",
+    )
     year = models.PositiveSmallIntegerField(unique=True)
 
     def __str__(self):
