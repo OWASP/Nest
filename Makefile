@@ -42,14 +42,14 @@ check: ## Run all code quality checks
 	@echo "================================== pre-commit =================================="
 	@$(MAKE) pre-commit
 	@echo ""
-	@echo "==================================== cspell ===================================="
-	@$(MAKE) cspell
-	@echo ""
 	@echo "=================================== prettier ==================================="
 	@$(MAKE) prettier
 	@echo ""
 	@echo "==================================== eslint ===================================="
 	@$(MAKE) eslint
+	@echo ""
+	@echo "==================================== cspell ===================================="
+	@$(MAKE) cspell
 	@echo ""
 
 check-test: ## Run all checks and tests
