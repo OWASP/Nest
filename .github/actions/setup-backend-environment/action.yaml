@@ -54,6 +54,7 @@ runs:
         export DJANGO_DB_HOST=localhost
         export DJANGO_REDIS_AUTH_ENABLED=False
         export DJANGO_REDIS_HOST=localhost
+        export PYTHONPATH="${PWD}/src"
         poetry run python manage.py migrate
       shell: bash
       working-directory: backend
@@ -82,6 +83,7 @@ runs:
         export DJANGO_DB_HOST=localhost
         export DJANGO_REDIS_AUTH_ENABLED=False
         export DJANGO_REDIS_HOST=localhost
+        export PYTHONPATH="${PWD}/src"
         nohup poetry run gunicorn wsgi:application \
           --bind 0.0.0.0:$BACKEND_PORT \
           --workers 4 \

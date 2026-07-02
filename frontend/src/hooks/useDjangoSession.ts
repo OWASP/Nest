@@ -31,7 +31,7 @@ export const useDjangoSession: () => {
       setIsSyncing(true)
 
       // The backend response contains a backend session cookie if successful.
-      // The cookie name is set in SESSION_COOKIE_NAME of backend/settings/base.py.
+      // The cookie name is set in SESSION_COOKIE_NAME of backend/src/settings/base.py.
       syncSession({
         variables: {
           accessToken: (session as ExtendedSession).accessToken ?? '',

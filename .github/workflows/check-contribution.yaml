@@ -1,0 +1,27 @@
+name: Check contribution
+
+on:
+  pull_request_target:
+    types:
+      - edited
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  check-contribution:
+    if: github.event.pull_request.base.repo.full_name == github.repository
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check contribution requirements
+        uses: arkid15r/check-contribution-action@9c046adddcf2c0bdf8a5eb3471d3775d3596c02a  # v0.1.5
+        with:
+          check_for: commit_sign_off, commit_signature, issue_assignee, issue_reference
+          close_on: issue_assignee, issue_reference
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_users_file_path: .github/check-contribution-skip-usernames.txt
+    timeout-minutes: 5

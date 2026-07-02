@@ -2,7 +2,7 @@ ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
 # Shared builder setup for Production/Staging (builder-backend) and video (builder-video) images.
-FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04 AS builder-base
+FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76 AS builder-base
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -45,12 +45,11 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --only main
 
 # Less likely to cause cache invalidation items go first.
-COPY entrypoint.sh manage.py wsgi.py Makefile ./
+COPY entrypoint.sh manage.py Makefile ./
 COPY scripts scripts
-COPY settings settings
 COPY templates templates
 COPY static static
-COPY apps apps
+COPY src src
 
 # Required to run make targets.
 RUN ln -s . backend
@@ -60,7 +59,7 @@ RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + &&
     (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
 
 # Runtime for Production/Staging backend.
-FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04 AS backend
+FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76 AS backend
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -74,6 +73,7 @@ RUN apk --no-cache update && \
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONPATH="/home/owasp/src" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
@@ -95,12 +95,11 @@ ARG OWASP_UID
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --no-root --verbose --only main --only video
 
-COPY entrypoint.sh manage.py wsgi.py Makefile ./
+COPY entrypoint.sh manage.py Makefile ./
 COPY scripts scripts
-COPY settings settings
+COPY src src
 COPY templates templates
 COPY static static
-COPY apps apps
 
 RUN ln -s . backend
 
@@ -109,7 +108,7 @@ RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + &&
     (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
 
 # Runtime for video generation: ffmpeg for encoding and WeasyPrint libs for slide rendering.
-FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04 AS video
+FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76 AS video
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -126,6 +125,7 @@ RUN apk --no-cache update && \
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONPATH="/home/owasp/src" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
