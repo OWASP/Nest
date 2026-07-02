@@ -1,6 +1,7 @@
 """OWASP GraphQL queries."""
 
 from .board_of_directors import BoardOfDirectorsQuery
+from .certificate import CertificateQuery
 from .chapter import ChapterQuery
 from .committee import CommitteeQuery
 from .event import EventQuery
@@ -15,6 +16,7 @@ from .stats import StatsQuery
 
 class OwaspQuery(
     BoardOfDirectorsQuery,
+    CertificateQuery,
     ChapterQuery,
     CommitteeQuery,
     EventQuery,
