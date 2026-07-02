@@ -15,9 +15,11 @@ wait_for_localstack() {
   for i in $(seq 1 30); do
     local health
     health=$(curl -sf "${LOCALSTACK_URL}/_localstack/health") || health=""
-    if echo "${health}" | grep -q '"s3".*"available"' && \
-       echo "${health}" | grep -q '"kms".*"available"' && \
+    if echo "${health}" | grep -q '"ecr".*"available"' && \
        echo "${health}" | grep -q '"iam".*"available"' && \
+       echo "${health}" | grep -q '"kms".*"available"' && \
+       echo "${health}" | grep -q '"s3".*"available"' && \
+       echo "${health}" | grep -q '"ssm".*"available"' && \
        echo "${health}" | grep -q '"sts".*"available"'; then
       echo "LocalStack is ready."
       return 0
@@ -27,21 +29,6 @@ wait_for_localstack() {
   echo "LocalStack did not become ready in time."
   exit 1
 }
-
-if curl -sf "${LOCALSTACK_URL}/_localstack/health" >/dev/null 2>&1; then
-  echo "Found existing LocalStack instance at ${LOCALSTACK_URL}, verifying readiness..."
-  wait_for_localstack
-else
-  echo "Starting LocalStack container..."
-  docker run -d \
-    --name "${LOCALSTACK_CONTAINER}" \
-    -p "${LOCALSTACK_PORT}:4566" \
-    -e LOCALSTACK_AUTH_TOKEN="${LOCALSTACK_AUTH_TOKEN:?LOCALSTACK_AUTH_TOKEN must be set}" \
-    "${LOCALSTACK_IMAGE}"
-  STARTED_CONTAINER=true
-  trap 'override_s3_lifecycle remove; cleanup' EXIT
-  wait_for_localstack
-fi
 
 cleanup() {
   if [[ "${STARTED_CONTAINER}" = "true" ]]; then
@@ -67,6 +54,21 @@ override_s3_lifecycle() {
     rm -f "${s3_override}" "${shared_override}"
   fi
 }
+
+if curl -sf "${LOCALSTACK_URL}/_localstack/health" >/dev/null 2>&1; then
+  echo "Found existing LocalStack instance at ${LOCALSTACK_URL}, verifying readiness..."
+  wait_for_localstack
+else
+  echo "Starting LocalStack container..."
+  docker run -d \
+    --name "${LOCALSTACK_CONTAINER}" \
+    -p "${LOCALSTACK_PORT}:4566" \
+    -e LOCALSTACK_AUTH_TOKEN="${LOCALSTACK_AUTH_TOKEN:?LOCALSTACK_AUTH_TOKEN must be set}" \
+    "${LOCALSTACK_IMAGE}"
+  STARTED_CONTAINER=true
+  trap 'override_s3_lifecycle remove; cleanup' EXIT
+  wait_for_localstack
+fi
 
 test_count=0
 fail_count=0
@@ -113,7 +115,7 @@ echo ""
 echo "Smoke test results: ${test_count} passed, ${fail_count} failed."
 
 if [[ "${test_count}" -eq 0 ]]; then
-  echo "Error: no smoke tests were executed."
+  echo "Error: no smoke tests were executed." >&2
   exit 1
 fi
 
