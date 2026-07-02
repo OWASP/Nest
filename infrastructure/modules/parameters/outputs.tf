@@ -39,26 +39,26 @@ output "django_container_secrets" {
       } : {}
       ) : merge(
       {
-        "DJANGO_ALGOLIA_WRITE_API_KEY" = aws_secretmanager_secret.external_runtime["DJANGO_ALGOLIA_WRITE_API_KEY"].arn
-        "DJANGO_DB_PASSWORD"           = "${var.var.db_credentials_secret_arn}:password::"
-        "DJANGO_OPEN_AI_SECRET_KEY"    = aws_secretmanager_secret.external_runtime["DJANGO_OPEN_AI_SECRET_KEY"].arn
+        "DJANGO_ALGOLIA_WRITE_API_KEY" = aws_secretsmanager_secret.external_runtime["DJANGO_ALGOLIA_WRITE_API_KEY"].arn
+        "DJANGO_DB_PASSWORD"           = "${var.db_credentials_secret_arn}:password::"
+        "DJANGO_OPEN_AI_SECRET_KEY"    = aws_secretsmanager_secret.external_runtime["DJANGO_OPEN_AI_SECRET_KEY"].arn
         "DJANGO_REDIS_PASSWORD"        = var.redis_password_secret_arn
-        "DJANGO_SECRET_KEY"            = aws_secretmanager_secret.django_secret_key.arn
-        "DJANGO_SENTRY_DSN"            = aws_secretmanager_secret.external_runtime["DJANGO_SENTRY_DSN"].arn
-        "DJANGO_SLACK_BOT_TOKEN"       = aws_secretmanager_secret.external_runtime["DJANGO_SLACK_BOT_TOKEN"].arn
-        "DJANGO_SLACK_SIGNING_SECRET"  = aws_secretmanager_secret.external_runtime["DJANGO_SLACK_SIGNING_SECRET"].arn
-        "GITHUB_TOKEN"                 = aws_secretmanager_secret.external_runtime["GITHUB_TOKEN"].arn
+        "DJANGO_SECRET_KEY"            = aws_secretsmanager_secret.django_secret_key.arn
+        "DJANGO_SENTRY_DSN"            = aws_secretsmanager_secret.external_runtime["DJANGO_SENTRY_DSN"].arn
+        "DJANGO_SLACK_BOT_TOKEN"       = aws_secretsmanager_secret.external_runtime["DJANGO_SLACK_BOT_TOKEN"].arn
+        "DJANGO_SLACK_SIGNING_SECRET"  = aws_secretsmanager_secret.external_runtime["DJANGO_SLACK_SIGNING_SECRET"].arn
+        "GITHUB_TOKEN"                 = aws_secretsmanager_secret.external_runtime["GITHUB_TOKEN"].arn
       },
-      var.var.enable_additional_parameters ? {
-        "NEST_GITHUB_APP_PRIVATE_KEY"                   = aws_secretmanager_secret.external_runtime["NEST_GITHUB_APP_PRIVATE_KEY"].arn
-        "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_secretmanager_secret.external_runtime["SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"].arn
+      var.enable_additional_parameters ? {
+        "NEST_GITHUB_APP_PRIVATE_KEY"                   = aws_secretsmanager_secret.external_runtime["NEST_GITHUB_APP_PRIVATE_KEY"].arn
+        "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_secretsmanager_secret.external_runtime["SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"].arn
       } : {}
     )
   )
 }
 
 output "frontend_container_secrets" {
-  description = "Map of frontend environment variable names to the ARNs of all SSM parameters."
+  description = "Frontend environment variables mapped to ECS valueFrom references."
   sensitive   = true
 
   value = merge(
@@ -73,13 +73,13 @@ output "frontend_container_secrets" {
       "NEXT_SERVER_GITHUB_CLIENT_SECRET" = aws_ssm_parameter.next_server_github_client_secret[0].arn
       "NEXTAUTH_SECRET"                  = aws_ssm_parameter.nextauth_secret[0].arn
       } : {
-      "NEXT_SERVER_GITHUB_CLIENT_SECRET" = aws_secretmanager_secret.external_runtime["NEXT_SERVER_GITHUB_CLIENT_SECRET"].arn
+      "NEXT_SERVER_GITHUB_CLIENT_SECRET" = aws_secretsmanager_secret.external_runtime["NEXT_SERVER_GITHUB_CLIENT_SECRET"].arn
       "NEXTAUTH_SECRET"                  = aws_secretsmanager_secret.nextauth_secret.arn
     }
   )
 }
 
-output "secretmanager_secret_arns" {
+output "secretsmanager_secret_arns" {
   description = "Bare Secrets Manager ARNs required by ECS execution roles."
 
   value = toset(concat(
