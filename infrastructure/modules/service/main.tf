@@ -39,7 +39,7 @@ locals {
           protocol      = "tcp"
         }
       ]
-      secrets = [for name, valueFrom in var.parameters_arns : {
+      secrets = [for name, valueFrom in var.container_secrets : {
         name      = name
         valueFrom = valueFrom
       }]
