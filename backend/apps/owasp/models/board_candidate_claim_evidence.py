@@ -7,10 +7,11 @@ from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.core.files import storage
-from django.db import models
+from django.db import models, transaction
 
 from apps.common.models import TimestampedModel
 from apps.common.utils import slugify
+from apps.owasp.metadata import strip_file_metadata
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.validators import (
     validate_evidence_extension,
@@ -87,6 +88,11 @@ class BoardCandidateClaimEvidence(TimestampedModel):
     removed_reason = models.TextField(blank=True)
     source_url = models.TextField(blank=True, verbose_name="Source URL")
 
+    def __init__(self, *args, **kwargs):
+        """Initialize and track original file name."""
+        super().__init__(*args, **kwargs)
+        self._original_file_name = self.file.name if self.file else None
+
     def __str__(self):
         """Return a string representation of the a Board Candidate Claim Evidence."""
         return f"{self.name}"
@@ -119,19 +125,35 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 raise ValidationError(err)
 
         if self.file:
-            self.file_name = self.file.name
-            self.file_size = self.file.size
+            is_new_file = not self.pk or self.file.name != self._original_file_name
+
+            if is_new_file:
+                try:
+                    self.file = strip_file_metadata(self.file)
+                    validate_evidence_file_size(self.file)
+                except ValidationError as e:
+                    raise ValidationError({"file": e.message}) from e
+                self._original_file_name = self.file.name
+                self.file_name = self.file.name
+                self.file_size = self.file.size
+        else:
+            self.file_name = ""
+            self.file_size = None
+            self._original_file_name = None
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
         self.key = slugify(self.name)[: self._meta.get_field("key").max_length]
 
+        old_file = (
+            self.__class__.objects.filter(pk=self.pk).values_list("file", flat=True).first()
+            if self.pk
+            else None
+        )
+
         self.full_clean()
 
         super().save(*args, **kwargs)
-        if self.pk and self.file:
-            old_file = (
-                self.__class__.objects.filter(pk=self.pk).values_list("file", flat=True).first()
-            )
-            if old_file and old_file != self.file.name:
-                storage.default_storage.delete(old_file)
+        self._original_file_name = self.file.name if self.file else None
+        if old_file and old_file != self._original_file_name:
+            transaction.on_commit(lambda f=old_file: storage.default_storage.delete(f))
