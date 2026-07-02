@@ -4,6 +4,10 @@
 
 import os
 import sys
+from pathlib import Path
+
+_SRC_DIR = Path(__file__).resolve().parent / "src"
+sys.path.insert(0, str(_SRC_DIR))
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.local")

@@ -32,7 +32,7 @@ services:
       '
     container_name: nest-cache
     env_file: ../../backend/.env
-    image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    image: redis:8.8.0-alpine3.23@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
     healthcheck:
       interval: 5s
       retries: 5
@@ -46,7 +46,7 @@ services:
   db:
     container_name: nest-db
     env_file: ../../backend/.env
-    image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
+    image: pgvector/pgvector:pg16@sha256:131dcf7ff6a900545df8e7e092c270aa8c6db2f2c818e408cb45ec21316b74e6
     healthcheck:
       interval: 5s
       retries: 5
