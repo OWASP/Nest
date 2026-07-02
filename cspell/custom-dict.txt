@@ -210,6 +210,7 @@ rediss
 relativedelta
 replicationgroup
 repositorycontributor
+reqps
 requirepass
 rqworker
 rsc

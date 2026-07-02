@@ -45,7 +45,7 @@ services:
     networks:
       - nest-network
     ports:
-      - 3001:3000
+      - 127.0.0.1:3001:3000
     volumes:
       - o11y-grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
