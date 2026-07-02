@@ -33,7 +33,7 @@ output "django_container_secrets" {
         "DJANGO_SLACK_SIGNING_SECRET"  = aws_ssm_parameter.django_slack_signing_secret[0].arn
         "GITHUB_TOKEN"                 = aws_ssm_parameter.github_token[0].arn
       },
-      var.var.enable_additional_parameters ? {
+      var.enable_additional_parameters ? {
         "NEST_GITHUB_APP_PRIVATE_KEY"                   = aws_ssm_parameter.nest_github_app_private_key[0].arn
         "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_ssm_parameter.slack_bot_token[0].arn
       } : {}

@@ -582,7 +582,7 @@ run "test_slack_bot_token_path_format" {
 run "test_django_secret_key_length" {
   command = plan
   assert {
-    condition     = random_string.django_secret_key[0].length == 50
+    condition     = random_string.django_secret_key.length == 50
     error_message = "Django secret key must be 50 characters long."
   }
 }
@@ -598,7 +598,7 @@ run "test_django_secret_key_has_special_chars" {
 run "test_nextauth_secret_length" {
   command = plan
   assert {
-    condition     = random_string.nextauth_secret[0].length == 32
+    condition     = random_string.nextauth_secret.length == 32
     error_message = "NextAuth secret must be 32 characters long."
   }
 }
