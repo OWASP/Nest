@@ -11,6 +11,7 @@ export type Scalars = {
   DateTime: { input: string | number; output: string | number; }
   JSON: { input: Record<string, unknown>; output: Record<string, unknown>; }
   UUID: { input: unknown; output: unknown; }
+  Upload: { input: unknown; output: unknown; }
 };
 
 export type AdminNode = {
@@ -49,8 +50,39 @@ export type BadgeNode = Node & {
   weight: Scalars['Int']['output'];
 };
 
+export type BoardCandidateClaimEvidenceNode = Node & {
+  __typename?: 'BoardCandidateClaimEvidenceNode';
+  createdAt: Scalars['DateTime']['output'];
+  description: Scalars['String']['output'];
+  hasFile: Scalars['Boolean']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  key: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  sourceUrl: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type BoardCandidateClaimNode = Node & {
+  __typename?: 'BoardCandidateClaimNode';
+  createdAt: Scalars['DateTime']['output'];
+  description: Scalars['String']['output'];
+  hasEvidence: Scalars['Boolean']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  isLocked: Scalars['Boolean']['output'];
+  key: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  status: ClaimStatusEnum;
+  updatedAt: Scalars['DateTime']['output'];
+  withdrawnAt?: Maybe<Scalars['DateTime']['output']>;
+  withdrawnReason: Scalars['String']['output'];
+};
+
 export type BoardOfDirectorsNode = Node & {
   __typename?: 'BoardOfDirectorsNode';
+  candidate?: Maybe<EntityMemberNode>;
   candidates: Array<EntityMemberNode>;
   createdAt: Scalars['DateTime']['output'];
   /** The Globally Unique ID of this object */
@@ -59,6 +91,11 @@ export type BoardOfDirectorsNode = Node & {
   owaspUrl: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
   year: Scalars['Int']['output'];
+};
+
+
+export type BoardOfDirectorsNodeCandidateArgs = {
+  login: Scalars['String']['input'];
 };
 
 export type ChapterNode = Node & {
@@ -86,6 +123,23 @@ export type ChapterNode = Node & {
   updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
+
+export type ClaimResult = {
+  __typename?: 'ClaimResult';
+  claim?: Maybe<BoardCandidateClaimNode>;
+  code?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+};
+
+export enum ClaimStatusEnum {
+  Approved = 'APPROVED',
+  Discarded = 'DISCARDED',
+  Draft = 'DRAFT',
+  Rejected = 'REJECTED',
+  Submitted = 'SUBMITTED',
+  Withdrawn = 'WITHDRAWN'
+}
 
 export type CommitteeNode = Node & {
   __typename?: 'CommitteeNode';
@@ -116,6 +170,21 @@ export type CreateApiKeyResult = {
   rawKey?: Maybe<Scalars['String']['output']>;
 };
 
+export type CreateClaimInput = {
+  description: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
+};
+
+export type CreateEvidenceInput = {
+  claimKey: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  file?: InputMaybe<Scalars['Upload']['input']>;
+  name: Scalars['String']['input'];
+  sourceUrl?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
 export type CreateModuleInput = {
   description: Scalars['String']['input'];
   domains?: Array<Scalars['String']['input']>;
@@ -139,6 +208,11 @@ export type CreateProgramInput = {
   name: Scalars['String']['input'];
   startedAt: Scalars['DateTime']['input'];
   tags?: Array<Scalars['String']['input']>;
+};
+
+export type DiscardClaimInput = {
+  key: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
 };
 
 export type EntityMemberNode = Node & {
@@ -168,6 +242,14 @@ export type EventNode = Node & {
   suggestedLocation: Scalars['String']['output'];
   summary: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type EvidenceResult = {
+  __typename?: 'EvidenceResult';
+  code?: Maybe<Scalars['String']['output']>;
+  evidence?: Maybe<BoardCandidateClaimEvidenceNode>;
+  message?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
 };
 
 export enum ExperienceLevelEnum {
@@ -387,18 +469,27 @@ export type Mutation = {
   assignIssueToUser: ModuleNode;
   clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
+  createBoardCandidateClaim: ClaimResult;
+  createBoardCandidateClaimEvidence: EvidenceResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
   deleteModule: Scalars['String']['output'];
+  discardBoardCandidateClaim: ClaimResult;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
+  removeBoardCandidateClaimEvidence: EvidenceResult;
+  reorderBoardCandidateClaims: ReorderClaimsResult;
   reorderModules: Array<ModuleNode>;
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
+  submitBoardCandidateClaim: ClaimResult;
   unassignIssueFromUser: ModuleNode;
+  updateBoardCandidateClaim: ClaimResult;
+  updateBoardCandidateClaimEvidence: EvidenceResult;
   updateModule: ModuleNode;
   updateProgram: ProgramNode;
   updateProgramStatus: ProgramNode;
+  withdrawBoardCandidateClaim: ClaimResult;
 };
 
 
@@ -423,6 +514,16 @@ export type MutationCreateApiKeyArgs = {
 };
 
 
+export type MutationCreateBoardCandidateClaimArgs = {
+  inputData: CreateClaimInput;
+};
+
+
+export type MutationCreateBoardCandidateClaimEvidenceArgs = {
+  inputData: CreateEvidenceInput;
+};
+
+
 export type MutationCreateModuleArgs = {
   inputData: CreateModuleInput;
 };
@@ -439,8 +540,23 @@ export type MutationDeleteModuleArgs = {
 };
 
 
+export type MutationDiscardBoardCandidateClaimArgs = {
+  inputData: DiscardClaimInput;
+};
+
+
 export type MutationGithubAuthArgs = {
   accessToken: Scalars['String']['input'];
+};
+
+
+export type MutationRemoveBoardCandidateClaimEvidenceArgs = {
+  inputData: RemoveEvidenceInput;
+};
+
+
+export type MutationReorderBoardCandidateClaimsArgs = {
+  inputData: ReorderClaimsInput;
 };
 
 
@@ -462,11 +578,26 @@ export type MutationSetTaskDeadlineArgs = {
 };
 
 
+export type MutationSubmitBoardCandidateClaimArgs = {
+  inputData: SubmitClaimInput;
+};
+
+
 export type MutationUnassignIssueFromUserArgs = {
   issueNumber: Scalars['Int']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateBoardCandidateClaimArgs = {
+  inputData: UpdateClaimInput;
+};
+
+
+export type MutationUpdateBoardCandidateClaimEvidenceArgs = {
+  inputData: UpdateEvidenceInput;
 };
 
 
@@ -482,6 +613,11 @@ export type MutationUpdateProgramArgs = {
 
 export type MutationUpdateProgramStatusArgs = {
   inputData: UpdateProgramStatusInput;
+};
+
+
+export type MutationWithdrawBoardCandidateClaimArgs = {
+  inputData: WithdrawClaimInput;
 };
 
 /** An object with a Globally Unique ID */
@@ -711,6 +847,11 @@ export type Query = {
   __typename?: 'Query';
   activeApiKeyCount: Scalars['Int']['output'];
   apiKeys: Array<ApiKeyNode>;
+  boardCandidateClaim?: Maybe<BoardCandidateClaimNode>;
+  boardCandidateClaimEvidence?: Maybe<BoardCandidateClaimEvidenceNode>;
+  boardCandidateClaimEvidenceFileUrl?: Maybe<Scalars['String']['output']>;
+  boardCandidateClaimEvidences: Array<BoardCandidateClaimEvidenceNode>;
+  boardCandidateClaims: Array<BoardCandidateClaimNode>;
   boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
   chapter?: Maybe<ChapterNode>;
@@ -754,6 +895,42 @@ export type Query = {
   topContributors: Array<RepositoryContributorNode>;
   upcomingEvents: Array<EventNode>;
   user?: Maybe<UserNode>;
+};
+
+
+export type QueryBoardCandidateClaimArgs = {
+  key: Scalars['String']['input'];
+  login: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryBoardCandidateClaimEvidenceArgs = {
+  claimKey: Scalars['String']['input'];
+  key: Scalars['String']['input'];
+  login: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryBoardCandidateClaimEvidenceFileUrlArgs = {
+  claimKey: Scalars['String']['input'];
+  key: Scalars['String']['input'];
+  login: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryBoardCandidateClaimEvidencesArgs = {
+  claimKey: Scalars['String']['input'];
+  login: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryBoardCandidateClaimsArgs = {
+  login: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
 };
 
 
@@ -999,6 +1176,26 @@ export type ReleaseNode = Node & {
   url: Scalars['String']['output'];
 };
 
+export type RemoveEvidenceInput = {
+  claimKey: Scalars['String']['input'];
+  key: Scalars['String']['input'];
+  removedReason?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+export type ReorderClaimsInput = {
+  keys: Array<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+export type ReorderClaimsResult = {
+  __typename?: 'ReorderClaimsResult';
+  claims?: Maybe<Array<BoardCandidateClaimNode>>;
+  code?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+};
+
 export type ReorderModulesInput = {
   moduleKeys: Array<Scalars['String']['input']>;
   programKey: Scalars['String']['input'];
@@ -1092,6 +1289,28 @@ export type StatsNode = {
   slackWorkspaceStats: Scalars['Int']['output'];
 };
 
+export type SubmitClaimInput = {
+  key: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
+};
+
+export type UpdateClaimInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  key: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+export type UpdateEvidenceInput = {
+  claimKey: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  file?: InputMaybe<Scalars['Upload']['input']>;
+  key: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  sourceUrl?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
 export type UpdateModuleInput = {
   description: Scalars['String']['input'];
   domains?: Array<Scalars['String']['input']>;
@@ -1154,4 +1373,10 @@ export type UserNode = {
   releasesCount: Scalars['Int']['output'];
   updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type WithdrawClaimInput = {
+  key: Scalars['String']['input'];
+  withdrawnReason: Scalars['String']['input'];
+  year: Scalars['Int']['input'];
 };

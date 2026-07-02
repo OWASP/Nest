@@ -57,6 +57,7 @@ class TestDiscardBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.DISCARDED
         claim.save.assert_called_once()
 
@@ -130,6 +131,7 @@ class TestSubmitBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.SUBMITTED
         claim.save.assert_called_once()
 
@@ -210,6 +212,7 @@ class TestWithdrawBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.WITHDRAWN
         assert claim.withdrawn_reason == "No longer relevant"
         assert claim.withdrawn_at == now
@@ -238,6 +241,7 @@ class TestWithdrawBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.WITHDRAWN
         assert claim.withdrawn_reason == "No longer relevant"
         assert claim.withdrawn_at == now
@@ -548,6 +552,7 @@ class TestCreateBoardCandidateClaim:
         )
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is not None
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
     def test_create_claim_board_not_found(self, mock_board_model):
@@ -688,6 +693,7 @@ class TestUpdateBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.name == input_data.name
         assert claim.description == input_data.description
         claim.save.assert_called_once()
@@ -713,6 +719,7 @@ class TestUpdateBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.name == "Updated Name"
         claim.save.assert_called_once_with(update_fields=["name", "key"])
 

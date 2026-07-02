@@ -1,6 +1,6 @@
 import { authCookies } from './mockAuthCookies'
 
-export const mockDashboardCookies = async (page, mockDashboardData, isOwaspStaff) => {
+export const mockClaimAuth = async (page, mockData, login = 'testuser', operationNames?: string[]) => {
   await page.route('**/api/auth/session', async (route) => {
     await route.fulfill({
       status: 200,
@@ -8,8 +8,8 @@ export const mockDashboardCookies = async (page, mockDashboardData, isOwaspStaff
         accessToken: 'test-access-token',
         expires: '2125-08-28T01:33:56.550Z',
         user: {
-          isOwaspStaff: isOwaspStaff,
-          login: 'testuser',
+          isOwaspStaff: false,
+          login,
         },
       },
     })
@@ -24,17 +24,17 @@ export const mockDashboardCookies = async (page, mockDashboardData, isOwaspStaff
             githubAuth: {
               message: 'test message',
               ok: true,
-              user: { isOwaspStaff: isOwaspStaff },
+              user: { isOwaspStaff: false },
             },
           },
         },
       })
+    } else if (operationNames && postData.operationName && !operationNames.includes(postData.operationName)) {
+      await route.abort('aborted')
     } else {
       await route.fulfill({
         status: 200,
-        json: {
-          data: mockDashboardData,
-        },
+        json: { data: mockData },
       })
     }
   })
