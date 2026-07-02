@@ -55,15 +55,14 @@ module "backend" {
   kms_key_arn                     = module.kms.key_arn
   max_count                       = var.backend_max_count
   min_count                       = var.backend_min_count
-  # parameters_arns                 = module.parameters.django_ssm_parameter_arns
-  project_name               = var.project_name
-  secretsmanager_secret_arns = module.parameters.secretsmanager_secret_arns
-  security_group_id          = module.security.backend_sg_id
-  service_name               = "backend"
-  subnet_ids                 = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  target_group_arn           = module.alb.backend_target_group_arn
-  task_role_policy_arns      = [module.storage.static_read_write_policy_arn]
-  use_fargate_spot           = var.backend_use_fargate_spot
+  project_name                    = var.project_name
+  secretsmanager_secret_arns      = module.parameters.secretsmanager_secret_arns
+  security_group_id               = module.security.backend_sg_id
+  service_name                    = "backend"
+  subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  target_group_arn                = module.alb.backend_target_group_arn
+  task_role_policy_arns           = [module.storage.static_read_write_policy_arn]
+  use_fargate_spot                = var.backend_use_fargate_spot
 }
 
 module "cache" {
@@ -127,14 +126,13 @@ module "frontend" {
   kms_key_arn                     = module.kms.key_arn
   max_count                       = var.frontend_max_count
   min_count                       = var.frontend_min_count
-  # parameters_arns                 = module.parameters.frontend_ssm_parameter_arns
-  project_name               = var.project_name
-  security_group_id          = module.security.frontend_sg_id
-  service_name               = "frontend"
-  secretsmanager_secret_arns = module.parameters.secretsmanager_secret_arns
-  subnet_ids                 = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  target_group_arn           = module.alb.frontend_target_group_arn
-  use_fargate_spot           = var.frontend_use_fargate_spot
+  project_name                    = var.project_name
+  security_group_id               = module.security.frontend_sg_id
+  service_name                    = "frontend"
+  secretsmanager_secret_arns      = module.parameters.secretsmanager_secret_arns
+  subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  target_group_arn                = module.alb.frontend_target_group_arn
+  use_fargate_spot                = var.frontend_use_fargate_spot
 }
 
 module "backend_build_cache" {
