@@ -238,6 +238,8 @@ class Base(Configuration):
 
     OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
 
+    CERTIFICATE_PROVIDER = "local"
+
     SLACK_BOT_TOKEN = OptionalSecretValue()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
