@@ -128,7 +128,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
    - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v0) is responding.
    - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
-   - To also start the observability stack, run `make run-o11y` instead. It is opt-in, so the regular `make run` does not start it.
+   - To also start the observability stack, run `make run-o11y` instead. It is opt-in, so the regular `make run` does not start it. This brings up VictoriaMetrics and Grafana; the pre-provisioned RED dashboard is available at [Grafana](http://localhost:3001) (login `admin` / `admin`).
 
 1. **Load Initial Data**:
 
