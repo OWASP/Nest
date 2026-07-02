@@ -1,13 +1,24 @@
 """Test cases for RepositoryNode."""
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from apps.github.api.internal.dataloaders.issue import ISSUES_BY_REPOSITORY_ID_LOADER
+from apps.github.api.internal.dataloaders.milestone import (
+    RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
+)
+from apps.github.api.internal.dataloaders.release import (
+    LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
+    RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
+from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID_LOADER
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -91,23 +102,34 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         assert field is not None
         assert field.type is str
 
-    def test_issues_method(self):
-        """Test issues method resolution."""
+    @pytest.mark.asyncio
+    async def test_issues_method(self):
+        """Test issues async resolution via dataloader."""
+        mock_issues = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_issues)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {ISSUES_BY_REPOSITORY_ID_LOADER: mock_loader}
+
         mock_repository = Mock()
-        mock_issues = Mock()
-        mock_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
-        mock_repository.issues = mock_issues
+        mock_repository.pk = 1
 
         field = self._get_field_by_name("issues", RepositoryNode)
-        field.base_resolver.wrapped_func(None, mock_repository)
-        mock_issues.order_by.assert_called_with("-created_at")
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
 
-    def test_recent_milestones_with_invalid_limit(self):
-        """Test recent_milestones returns empty list for invalid limit."""
+        assert result == mock_issues
+        mock_loader.load.assert_awaited_once_with((1, 5))
+
+    @pytest.mark.asyncio
+    async def test_issues_method_invalid_limit(self):
+        """Test issues returns empty list for invalid limit."""
         mock_repository = Mock()
+        mock_repository.pk = 1
+        mock_info = Mock()
 
-        field = self._get_field_by_name("recent_milestones", RepositoryNode)
-        result = field.base_resolver.wrapped_func(None, mock_repository, limit=0)
+        field = self._get_field_by_name("issues", RepositoryNode)
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info, limit=0)
+
         assert result == []
 
     def test_languages_method(self):
@@ -119,48 +141,107 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == ["Python", "JavaScript"]
 
-    def test_latest_release_method(self):
-        """Test latest_release method resolution."""
+    @pytest.mark.asyncio
+    async def test_latest_release_method(self):
+        """Test latest_release async resolution via dataloader."""
+        mock_release = Mock()
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_release)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {
+            LATEST_RELEASE_BY_REPOSITORY_ID_LOADER: mock_loader
+        }
+
         mock_repository = Mock()
-        mock_repository.latest_release = "v1.0.0"
+        mock_repository.pk = 1
 
         field = self._get_field_by_name("latest_release", RepositoryNode)
-        result = field.base_resolver.wrapped_func(None, mock_repository)
-        assert result == "v1.0.0"
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
 
-    def test_project_method(self):
-        """Test project method resolution."""
-        mock_repository = Mock()
+        assert result == mock_release
+        mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_project_method(self):
+        """Test project async resolution via dataloader."""
         mock_project = Mock()
-        mock_repository.project = mock_project
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_project)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {PROJECT_BY_REPOSITORY_ID_LOADER: mock_loader}
+
+        mock_repository = Mock()
+        mock_repository.pk = 1
 
         field = self._get_field_by_name("project", RepositoryNode)
-        result = field.base_resolver.wrapped_func(None, mock_repository)
-        assert result == mock_project
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
 
-    def test_recent_milestones_method(self):
-        """Test recent_milestones method resolution."""
+        assert result == mock_project
+        mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_recent_milestones_method(self):
+        """Test recent_milestones async resolution via dataloader."""
+        mock_milestones = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_milestones)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {
+            RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER: mock_loader
+        }
+
         mock_repository = Mock()
-        mock_milestones = Mock()
-        mock_milestones.order_by.return_value.__getitem__ = Mock(return_value=[])
-        mock_repository.recent_milestones = mock_milestones
+        mock_repository.pk = 1
 
         field = self._get_field_by_name("recent_milestones", RepositoryNode)
-        resolver = field.base_resolver.wrapped_func
-        resolver(None, mock_repository, limit=3)
-        mock_milestones.order_by.assert_called_with("-created_at")
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
 
-    def test_releases_method(self):
-        """Test releases method resolution."""
+        assert result == mock_milestones
+        mock_loader.load.assert_awaited_once_with((1, 5))
+
+    @pytest.mark.asyncio
+    async def test_recent_milestones_method_invalid_limit(self):
+        """Test recent_milestones returns empty list for invalid limit."""
         mock_repository = Mock()
-        mock_releases = Mock()
-        mock_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
-        mock_repository.published_releases = mock_releases
+        mock_repository.pk = 1
+        mock_info = Mock()
+
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info, limit=0)
+
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_releases_method(self):
+        """Test releases async resolution via dataloader."""
+        mock_releases = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_releases)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {
+            RECENT_RELEASES_BY_REPOSITORY_ID_LOADER: mock_loader
+        }
+
+        mock_repository = Mock()
+        mock_repository.pk = 1
 
         field = self._get_field_by_name("releases", RepositoryNode)
-        resolver = field.base_resolver.wrapped_func
-        resolver(None, mock_repository)
-        mock_releases.order_by.assert_called_with("-published_at")
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
+
+        assert result == mock_releases
+        mock_loader.load.assert_awaited_once_with((1, 5))
+
+    @pytest.mark.asyncio
+    async def test_releases_method_invalid_limit(self):
+        """Test releases returns empty list for invalid limit."""
+        mock_repository = Mock()
+        mock_repository.pk = 1
+        mock_info = Mock()
+
+        field = self._get_field_by_name("releases", RepositoryNode)
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info, limit=0)
+
+        assert result == []
 
     def test_top_contributors_method(self):
         """Test top_contributors method resolution."""
