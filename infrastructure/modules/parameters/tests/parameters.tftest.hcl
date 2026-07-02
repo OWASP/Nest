@@ -27,6 +27,47 @@ variables {
   slack_bot_token_suffix        = "T04T40NHX"
 }
 
+run "test_complete_mode_uses_secrets_manager" {
+  command = plan
+
+  variables{
+    enable_additional_parameters = true
+    runtime_secrets_mode = "complete"
+  }
+
+  assert {
+    condition = (
+    output.django_container_secrets["DJANGO_DB_PASSWORD"] == "${var.db_credentials_secret_arn}:password::"
+  )
+  error_message = "Database password must use the Secrets Manager password JSON key."
+  }
+
+  assert {
+       condition = (
+         output.django_container_secrets["DJANGO_REDIS_PASSWORD"] ==
+         var.redis_password_secret_arn
+       )
+       error_message = "Redis password must use its Secrets Manager ARN."
+     }
+
+     assert {
+       condition = alltrue([
+         length(aws_ssm_parameter.django_algolia_write_api_key) == 0,
+         length(aws_ssm_parameter.django_open_ai_secret_key) == 0,
+         length(aws_ssm_parameter.django_secret_key) == 0,
+         length(aws_ssm_parameter.django_sentry_dsn) == 0,
+         length(aws_ssm_parameter.django_slack_bot_token) == 0,
+         length(aws_ssm_parameter.django_slack_signing_secret) == 0,
+         length(aws_ssm_parameter.github_token) == 0,
+         length(aws_ssm_parameter.nest_github_app_private_key) == 0,
+         length(aws_ssm_parameter.next_server_github_client_secret) == 0,
+         length(aws_ssm_parameter.nextauth_secret) == 0,
+         length(aws_ssm_parameter.slack_bot_token) == 0,
+       ])
+       error_message = "Complete mode must remove all legacy secret-valued SSM parameters."
+     }
+}
+
 run "test_django_algolia_application_id_path_format" {
   command = plan
   assert {
