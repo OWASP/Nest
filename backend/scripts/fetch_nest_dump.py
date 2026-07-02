@@ -13,6 +13,7 @@ import boto3
 from botocore import UNSIGNED
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
+
 from scripts.common import (
     AWS_REGION,
     NEST_DUMP_S3_OBJECT_KEY,

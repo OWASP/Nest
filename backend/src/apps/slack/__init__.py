@@ -1,1 +1,0 @@
-"""OWASP Nest Slack app."""
