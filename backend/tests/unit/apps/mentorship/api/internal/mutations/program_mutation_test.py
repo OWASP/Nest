@@ -220,7 +220,7 @@ class TestCreateProgram:
         user = MagicMock()
         user.username = "testuser"
         user.github_user = MagicMock()
-        user.github_user.is_project_leader = MagicMock(return_value=False)
+        user.github_user.is_project_leader = False
         info = _make_info(user)
 
         input_data = MagicMock()
