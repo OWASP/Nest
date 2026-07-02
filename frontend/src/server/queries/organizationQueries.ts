@@ -76,6 +76,7 @@ export const GET_ORGANIZATION_DATA = gql`
       url
     }
     repositories(organization: $login, limit: 12) {
+      updatedAt
       id
       contributorsCount
       forksCount

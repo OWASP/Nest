@@ -63,6 +63,7 @@ export type RepositoryCardListProps = {
 }
 
 export type RepositoryCardProps = {
+  updatedAt?: string
   contributorsCount: number
   forksCount: number
   isArchived?: boolean

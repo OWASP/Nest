@@ -5,6 +5,7 @@ import { RepositoryCardProps } from 'types/project'
 import RepositoryCard from 'components/RepositoryCard'
 
 const createMockRepository = (index: number): RepositoryCardProps => ({
+  updatedAt: '2025-01-01T00:00:00.000Z',
   contributorsCount: 10 + index,
   forksCount: 5 + index,
   key: `repo-${index}`,
