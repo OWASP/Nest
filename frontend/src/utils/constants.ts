@@ -3,7 +3,7 @@ import { FaGithub, FaSlack, FaLinkedin } from 'react-icons/fa'
 import { FaBluesky } from 'react-icons/fa6'
 import type { Link } from 'types/link'
 import type { Section } from 'types/section'
-
+export const SEARCH_DEBOUNCE_DELAY_MS = 300
 export const headerLinks: Link[] = [
   {
     text: 'Community',
