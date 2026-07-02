@@ -2,6 +2,7 @@ import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
 import {
+  IsMenteeDocument,
   IsMentorDocument,
   IsProjectLeaderDocument,
 } from 'types/__generated__/mentorshipQueries.generated'
@@ -37,6 +38,23 @@ async function checkIfMentor(login: string): Promise<boolean> {
   } catch (err) {
     throw new Error(
       `Failed to fetch mentor status: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err }
+    )
+  }
+}
+
+async function checkIfMentee(login: string): Promise<boolean> {
+  try {
+    const client = await apolloClient
+    const { data } = await client.query({
+      query: IsMenteeDocument,
+      variables: { login },
+      fetchPolicy: 'no-cache',
+    })
+    return data?.isMentee ?? false
+  } catch (err) {
+    throw new Error(
+      `Failed to fetch mentee status: ${err instanceof Error ? err.message : String(err)}`,
       { cause: err }
     )
   }
@@ -83,8 +101,10 @@ const authOptions: AuthOptions = {
 
         const isLeader = await checkIfProjectLeader(login)
         const isMentor = await checkIfMentor(login)
+        const isMentee = await checkIfMentee(login)
         token.isLeader = isLeader
         token.isMentor = isMentor
+        token.isMentee = isMentee
       }
 
       if (trigger === 'update' && session) {
@@ -101,6 +121,7 @@ const authOptions: AuthOptions = {
         const extSession = session as ExtendedSession
         extSession.user!.login = token.login as string
         extSession.user!.isMentor = token.isMentor as boolean
+        extSession.user!.isMentee = token.isMentee as boolean
         extSession.user!.isLeader = token.isLeader as boolean
         extSession.user!.isOwaspStaff = token.isOwaspStaff as boolean
       }

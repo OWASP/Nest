@@ -4,17 +4,11 @@ import { addToast } from '@heroui/toast'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useMemo } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
-import {
-  GetManagementProgramAndModulesDocument,
-  GetProgramAndModulesDocument,
-} from 'types/__generated__/programsQueries.generated'
-import type { ExtendedSession } from 'types/auth'
-import { hasExtendedUser } from 'types/auth'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
@@ -30,16 +24,13 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const ProgramDetailsPage = () => {
   const { programKey } = useParams<{ programKey: string }>()
 
-  const { data: session, status: sessionStatus } = useSession()
-  const username = (session as ExtendedSession)?.user?.login
-  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
   const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
 
   const {
     data,
-    loading: isQueryLoading,
+    loading: isLoading,
     error: queryError,
   } = useQuery(GetManagementProgramAndModulesDocument, {
     variables: { programKey },
@@ -48,26 +39,15 @@ const ProgramDetailsPage = () => {
     notifyOnNetworkStatusChange: true,
   })
 
-  const isMenteeUser =
-    sessionStatus === 'authenticated' && !isProjectLeader && isForbiddenGraphQLError(queryError)
-
-  const { data: menteeData, loading: isMenteeQueryLoading } = useQuery(
-    GetProgramAndModulesDocument,
-    {
-      variables: { programKey },
-      skip: !programKey || !isMenteeUser,
-      fetchPolicy: 'cache-and-network',
-    }
-  )
-
-  const isLoading = isQueryLoading
   const program = data?.managementProgram ?? null
   const modules = data?.managementProgramModules ?? []
 
-  const isAdmin = useMemo(
-    () => !!program?.admins?.some((admin) => admin.login === username),
-    [program, username]
-  )
+  // Role comes straight from the backend, so we never rely on a failing request
+  // to tell an admin/mentor apart from a mentee.
+  const userRole = program?.userRole ?? null
+  const isAdmin = userRole === 'admin'
+  // Admins and mentors share the full management view; mentees get a read-only one.
+  const isPrivileged = isAdmin || userRole === 'mentor'
 
   const canUpdateStatus = useMemo(() => {
     if (!isAdmin || !program?.status) return false
@@ -126,59 +106,6 @@ const ProgramDetailsPage = () => {
     }
   }
 
-  if (isMenteeUser) {
-    if (isMenteeQueryLoading && !menteeData) return <LoadingSpinner />
-
-    const menteeProgram = menteeData?.getProgram ?? null
-    const menteeModules = menteeData?.getProgramModules ?? []
-
-    if (!menteeProgram && !isMenteeQueryLoading) {
-      return (
-        <ErrorDisplay
-          statusCode={404}
-          title="Program Not Found"
-          message="Sorry, the program you're looking for doesn't exist or you are not enrolled."
-        />
-      )
-    }
-
-    const menteeProgramDetails = [
-      { label: 'Status', value: titleCaseWord(menteeProgram?.status ?? '') },
-      { label: 'Start Date', value: formatDate(menteeProgram?.startedAt ?? '') },
-      { label: 'End Date', value: formatDate(menteeProgram?.endedAt ?? '') },
-    ]
-
-    return (
-      <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-        <PageWrapper>
-          <Header
-            title={menteeProgram?.name ?? ''}
-            status={menteeProgram?.status ?? ''}
-            setStatus={async () => {}}
-            canUpdateStatus={false}
-            programKey={menteeProgram?.key ?? ''}
-            entityKey={menteeProgram?.key ?? ''}
-            admins={menteeProgram?.admins ?? undefined}
-            isActive={true}
-            isArchived={false}
-            showProgramActions={false}
-          />
-          <Summary summary={menteeProgram?.description ?? ''} />
-          <Metadata details={menteeProgramDetails} detailsTitle="Program Details" />
-          <Tags
-            tags={menteeProgram?.tags ?? undefined}
-            domains={menteeProgram?.domains ?? undefined}
-          />
-          <RepositoriesModules
-            programKey={menteeProgram?.key ?? ''}
-            accessLevel="user"
-            modules={menteeModules}
-          />
-        </PageWrapper>
-      </BreadcrumbStyleProvider>
-    )
-  }
-
   if (queryError && isForbiddenGraphQLError(queryError)) {
     return (
       <ErrorDisplay
@@ -205,11 +132,17 @@ const ProgramDetailsPage = () => {
     { label: 'Status', value: titleCaseWord(program?.status ?? '') },
     { label: 'Start Date', value: formatDate(program?.startedAt ?? '') },
     { label: 'End Date', value: formatDate(program?.endedAt ?? '') },
-    { label: 'Mentees Limit', value: String(program?.menteesLimit ?? 0) },
-    {
-      label: 'Experience Levels',
-      value: program?.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
-    },
+    // Full program configuration is only shown to admins and mentors, not mentees.
+    ...(isPrivileged
+      ? [
+          { label: 'Mentees Limit', value: String(program?.menteesLimit ?? 0) },
+          {
+            label: 'Experience Levels',
+            value:
+              program?.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -225,7 +158,7 @@ const ProgramDetailsPage = () => {
           admins={program?.admins ?? undefined}
           isActive={true}
           isArchived={false}
-          showProgramActions={true}
+          showProgramActions={isPrivileged}
         />
 
         <Summary summary={program?.description ?? ''} />
@@ -234,11 +167,13 @@ const ProgramDetailsPage = () => {
 
         <Tags tags={program?.tags ?? undefined} domains={program?.domains ?? undefined} />
 
-        <Contributors
-          entityKey={program?.key ?? ''}
-          programKey={programKey}
-          admins={program?.admins ?? undefined}
-        />
+        {isPrivileged && (
+          <Contributors
+            entityKey={program?.key ?? ''}
+            programKey={programKey}
+            admins={program?.admins ?? undefined}
+          />
+        )}
 
         <RepositoriesModules
           programKey={program?.key ?? ''}

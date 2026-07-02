@@ -163,9 +163,12 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders program details correctly for a non-admin', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin' } },
-      status: 'authenticated',
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        ...mockProgramDetailsData,
+        managementProgram: { ...mockProgramDetailsData.managementProgram, userRole: 'mentor' },
+      },
     })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
@@ -315,9 +318,12 @@ describe('ProgramDetailsPage', () => {
   test('calls addToast with permission denied when non-admin calls setStatus', async () => {
     const mockUpdateProgram = jest.fn()
     ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin-user' } },
-      status: 'authenticated',
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        ...mockProgramDetailsData,
+        managementProgram: { ...mockProgramDetailsData.managementProgram, userRole: 'mentor' },
+      },
     })
 
     render(<ProgramDetailsPage />)
@@ -435,111 +441,53 @@ describe('ProgramDetailsPage', () => {
       expect(detailsContent).toHaveTextContent('Mentees Limit0')
     })
   })
-  it('renders mentee view when user gets forbidden error on management query', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
+  it('renders a read-only view for a mentee', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
       data: {
-        user: { login: 'mentee1', isLeader: false, isMentor: false },
-        expires: '2099-01-01T00:00:00.000Z',
+        managementProgram: {
+          ...mockProgramDetailsData.managementProgram,
+          key: 'gsoc-2025',
+          name: 'GSoC 2025',
+          userRole: 'mentee',
+        },
+        managementProgramModules: [],
       },
-      status: 'authenticated',
     })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    const menteeData = {
-      getProgram: {
-        id: '1',
-        key: 'gsoc-2025',
-        name: 'GSoC 2025',
-        description: 'Test program',
-        status: 'ACTIVE',
-        menteesLimit: null,
-        experienceLevels: null,
-        startedAt: '2025-01-01',
-        endedAt: '2025-12-31',
-        domains: null,
-        tags: null,
-        admins: [],
-        recentMilestones: [],
-      },
-      getProgramModules: [],
-    }
-    ;(useQuery as unknown as jest.Mock).mockImplementation(
-      (query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
-        const opName = query?.definitions?.[0]?.name?.value ?? ''
-        if (opName === 'GetManagementProgramAndModules') {
-          return { data: null, loading: false, error: forbiddenError }
-        }
-        return { data: menteeData, loading: false, error: undefined }
-      }
-    )
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('GSoC 2025')).toBeInTheDocument()
+      // Mentees get a read-only view: no admin status controls or full config.
+      expect(screen.queryByRole('button', { name: /Program actions menu/ })).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentees Limit')).not.toBeInTheDocument()
     })
   })
 
-  it('renders program not found for mentee with no enrolled program', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: {
-        user: { login: 'mentee1', isLeader: false, isMentor: false },
-        expires: '2099-01-01T00:00:00.000Z',
-      },
-      status: 'authenticated',
-    })
+  it('renders access denied when the user has no role in the program', async () => {
     const forbiddenError = {
       graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
       message: 'Forbidden',
     }
-    ;(useQuery as unknown as jest.Mock).mockImplementation(
-      (query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
-        const opName = query?.definitions?.[0]?.name?.value ?? ''
-        if (opName === 'GetManagementProgramAndModules') {
-          return { data: null, loading: false, error: forbiddenError }
-        }
-        return {
-          data: { getProgram: null, getProgramModules: [] },
-          loading: false,
-          error: undefined,
-        }
-      }
-    )
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      loading: false,
+      error: forbiddenError,
+    })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText(/Program Not Found/i)).toBeInTheDocument()
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
     })
   })
 
-  it('renders loading spinner while mentee data is loading', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: {
-        user: { login: 'mentee1', isLeader: false, isMentor: false },
-        expires: '2099-01-01T00:00:00.000Z',
-      },
-      status: 'authenticated',
+  it('renders loading spinner while the program is loading', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: true,
+      error: undefined,
     })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    ;(useQuery as unknown as jest.Mock).mockImplementation(
-      (query: { kind?: string; definitions?: Array<{ name?: { value?: string } }> }) => {
-        const opName = query?.definitions?.[0]?.name?.value ?? ''
-        if (opName === 'GetManagementProgramAndModules') {
-          return { data: null, loading: false, error: forbiddenError }
-        }
-        return { data: undefined, loading: true, error: undefined }
-      }
-    )
     render(<ProgramDetailsPage />)
     await waitFor(() => {
-      expect(
-        document.querySelector('svg') ||
-          screen.queryByText(/loading/i) ||
-          document.querySelector('[class*="spinner"]') ||
-          document.querySelector('[class*="animate"]')
-      ).toBeTruthy()
+      expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
     })
   })
 })

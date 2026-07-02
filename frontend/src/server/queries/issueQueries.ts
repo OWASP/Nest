@@ -3,7 +3,10 @@ import { gql } from '@apollo/client'
 const MODULE_ISSUE_VIEW_FIELDS = gql`
   fragment ModuleIssueViewFields on ModuleNode {
     id
+    userRole
     menteesCanManageDeadlines
+    startedAt
+    endedAt
     taskDeadline(issueNumber: $number)
     taskAssignedAt(issueNumber: $number)
     issueByNumber(number: $number) {

@@ -3,14 +3,9 @@ import { useQuery } from '@apollo/client/react'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GetManagementProgramAdminsAndModulesDocument,
-  GetModuleByIdDocument,
-} from 'types/__generated__/moduleQueries.generated'
-import { hasExtendedUser } from 'types/auth'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
@@ -26,8 +21,6 @@ import { getSimpleDuration } from 'components/ModuleCard'
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
 
-  const { data: session, status: sessionStatus } = useSession()
-  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : false
   const {
     data,
     error,
@@ -40,21 +33,6 @@ const ModuleDetailsPage = () => {
     },
   })
 
-  const isMenteeUser =
-    sessionStatus === 'authenticated' && !isProjectLeader && isForbiddenGraphQLError(error)
-
-  const { data: menteeModuleData, loading: isMenteeModuleLoading } = useQuery(
-    GetModuleByIdDocument,
-    {
-      fetchPolicy: 'cache-and-network',
-      skip: !isMenteeUser,
-      variables: {
-        programKey,
-        moduleKey,
-      },
-    }
-  )
-
   useEffect(() => {
     if (error && !isForbiddenGraphQLError(error)) {
       handleAppError(error)
@@ -64,68 +42,17 @@ const ModuleDetailsPage = () => {
   const mentorshipModule: Module | null | undefined = data?.managementModule
   const admins = data?.managementProgram?.admins
 
-  if (isMenteeUser) {
-    if (isMenteeModuleLoading && !menteeModuleData) return <LoadingSpinner />
-
-    const menteeModule = menteeModuleData?.getModule ?? null
-
-    if (!menteeModule) {
-      return (
-        <ErrorDisplay
-          statusCode={404}
-          title="Module Not Found"
-          message="Sorry, the module you're looking for doesn't exist or you are not enrolled."
-        />
-      )
-    }
-
-    const menteeModuleDetails = [
-      { label: 'Experience Level', value: capitalize(menteeModule.experienceLevel) },
-      { label: 'Start Date', value: formatDate(String(menteeModule.startedAt)) },
-      { label: 'End Date', value: formatDate(String(menteeModule.endedAt)) },
-      {
-        label: 'Duration',
-        value: getSimpleDuration(String(menteeModule.startedAt), String(menteeModule.endedAt)),
-      },
-    ]
-
-    return (
-      <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-        <PageWrapper>
-          <Header
-            title={menteeModule.name}
-            programKey={programKey}
-            moduleKey={moduleKey}
-            entityKey={moduleKey}
-            accessLevel="user"
-            isActive={true}
-            isArchived={false}
-            showModuleActions={false}
-          />
-          <Summary summary={menteeModule.description} />
-          <Metadata details={menteeModuleDetails} detailsTitle="Module Details" />
-          <Tags
-            entityKey={moduleKey}
-            tags={menteeModule.tags ?? undefined}
-            domains={menteeModule.domains ?? undefined}
-          />
-          <Contributors
-            entityKey={moduleKey}
-            programKey={programKey}
-            mentors={menteeModule.mentors ?? undefined}
-            mentees={menteeModule.mentees ?? undefined}
-          />
-        </PageWrapper>
-      </BreadcrumbStyleProvider>
-    )
-  }
+  // Role comes straight from the backend; admins and mentors get the full
+  // management view, mentees a read-only one.
+  const isPrivileged =
+    mentorshipModule?.userRole === 'admin' || mentorshipModule?.userRole === 'mentor'
 
   if (error && isForbiddenGraphQLError(error)) {
     return (
       <ErrorDisplay
         statusCode={403}
         title="Access Denied"
-        message="You do not have permission to manage this module."
+        message="You do not have permission to view this module."
       />
     )
   }
@@ -163,9 +90,10 @@ const ModuleDetailsPage = () => {
           programKey={programKey}
           moduleKey={moduleKey}
           entityKey={moduleKey}
-          accessLevel="admin"
+          accessLevel={isPrivileged ? 'admin' : 'user'}
           admins={admins ?? undefined}
           mentors={mentorshipModule.mentors ?? undefined}
+          isMentee={mentorshipModule.userRole === 'mentee'}
           isActive={true}
           isArchived={false}
           showModuleActions={true}
@@ -179,7 +107,7 @@ const ModuleDetailsPage = () => {
           entityKey={moduleKey}
           tags={mentorshipModule.tags ?? undefined}
           domains={mentorshipModule.domains ?? undefined}
-          labels={mentorshipModule.labels ?? undefined}
+          labels={isPrivileged ? (mentorshipModule.labels ?? undefined) : undefined}
         />
 
         <Contributors

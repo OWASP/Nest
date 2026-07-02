@@ -2,7 +2,6 @@ import { useQuery } from '@apollo/client/react'
 import { mockModuleData } from '@mockData/mockModuleData'
 import { screen, waitFor } from '@testing-library/react'
 import { useParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
@@ -283,108 +282,48 @@ describe('ModuleDetailsPage', () => {
 
     expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
   })
-  it('renders mentee view when management query returns forbidden error', async () => {
-    const { useSession } = jest.requireMock('next-auth/react')
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
-      status: 'authenticated',
-    })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    const menteeModuleData = {
-      getModule: {
-        id: '1',
-        key: 'owasp-nest',
-        name: 'OWASP Nest',
-        description: 'Nest module',
-        experienceLevel: 'BEGINNER',
-        startedAt: '2025-01-01',
-        endedAt: '2025-12-31',
-        domains: [],
-        tags: [],
-        labels: [],
-        mentors: [],
-        mentees: [],
-        order: 0,
+  it('renders the module for a mentee (read-only view)', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        managementModule: { ...mockModuleData, userRole: 'mentee' },
+        managementProgram: { admins },
       },
-    }
-    mockUseQuery.mockImplementation(
-      (query: { definitions?: Array<{ name?: { value?: string } }> }) => {
-        const opName = query?.definitions?.[0]?.name?.value ?? ''
-        if (opName === 'GetManagementProgramAdminsAndModules') {
-          return { data: null, loading: false, error: forbiddenError }
-        }
-        return { data: menteeModuleData, loading: false, error: undefined }
-      }
-    )
+    })
     render(<ModuleDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
-    })
-  })
-
-  it('shows module not found for mentee when getModule returns null', async () => {
-    const { useSession } = jest.requireMock('next-auth/react')
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
-      status: 'authenticated',
-    })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation(
-      (query: { definitions?: Array<{ name?: { value?: string } }> }) => {
-        const opName = query?.definitions?.[0]?.name?.value ?? ''
-        if (opName === 'GetManagementProgramAdminsAndModules') {
-          return { data: null, loading: false, error: forbiddenError }
-        }
-        return { data: { getModule: null }, loading: false, error: undefined }
-      }
-    )
-    render(<ModuleDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText(/Module Not Found/i)).toBeInTheDocument()
+      expect(screen.getByTestId('header')).toHaveTextContent('Intro to Web')
     })
   })
 })
 
 describe('Mentee view', () => {
   const mockUseQueryLocal = useQuery as unknown as jest.Mock
-  const forbiddenError = {
-    graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-    message: 'Forbidden',
-  }
+  const admins = [{ login: 'admin1' }]
 
   beforeEach(() => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'mentee1', isLeader: false, isMentor: false } },
-      status: 'authenticated',
+    ;(useParams as jest.Mock).mockReturnValue({
+      programKey: 'program-1',
+      moduleKey: 'module-1',
     })
   })
 
-  it('shows loading spinner while mentee module is loading', () => {
-    mockUseQueryLocal.mockImplementation(() => {
-      if (
-        mockUseQueryLocal.mock.calls[mockUseQueryLocal.mock.calls.length - 1]?.[1]?.skip === false
-      ) {
-        return { data: undefined, loading: true, error: undefined }
-      }
-      return { data: null, loading: false, error: forbiddenError }
-    })
-    mockUseQueryLocal
-      .mockReturnValueOnce({ data: null, loading: false, error: forbiddenError })
-      .mockReturnValueOnce({ data: undefined, loading: true, error: undefined })
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('shows loading spinner while the module is loading', () => {
+    mockUseQueryLocal.mockReturnValue({ data: undefined, loading: true, error: undefined })
     const { container } = render(<ModuleDetailsPage />)
     expect(container.innerHTML).toContain('LoadingSpinner')
   })
 
-  it('shows module not found when mentee module data is null', async () => {
-    mockUseQueryLocal
-      .mockReturnValueOnce({ data: null, loading: false, error: forbiddenError })
-      .mockReturnValueOnce({ data: { getModule: null }, loading: false, error: undefined })
+  it('shows module not found when the module is null', async () => {
+    mockUseQueryLocal.mockReturnValue({
+      data: { managementModule: null, managementProgram: { admins } },
+      loading: false,
+      error: undefined,
+    })
     render(<ModuleDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Module Not Found')).toBeInTheDocument()
@@ -392,26 +331,19 @@ describe('Mentee view', () => {
   })
 
   it('renders mentee module details when data is available', async () => {
-    mockUseQueryLocal
-      .mockReturnValueOnce({ data: null, loading: false, error: forbiddenError })
-      .mockReturnValueOnce({
-        data: {
-          getModule: {
-            ...mockModuleData,
-            name: 'Mentee Module',
-            description: 'Mentee module description',
-            experienceLevel: 'beginner',
-            startedAt: '2026-01-01',
-            endedAt: '2026-12-01',
-            tags: [],
-            domains: [],
-            mentors: [],
-            mentees: [],
-          },
+    mockUseQueryLocal.mockReturnValue({
+      data: {
+        managementModule: {
+          ...mockModuleData,
+          userRole: 'mentee',
+          name: 'Mentee Module',
+          description: 'Mentee module description',
         },
-        loading: false,
-        error: undefined,
-      })
+        managementProgram: { admins },
+      },
+      loading: false,
+      error: undefined,
+    })
     render(<ModuleDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Mentee Module')).toBeInTheDocument()

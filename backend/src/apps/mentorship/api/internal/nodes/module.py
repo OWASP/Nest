@@ -43,6 +43,16 @@ class ModuleNode:
     tags: list[str] | None = None
 
     @strawberry.field
+    def user_role(self) -> str | None:
+        """Return the caller's role on this module when a resolver assigned one.
+
+        Resolvers that gate access (e.g. managementModule) set ``user_role`` on the
+        Django instance; other resolvers leave it unset, so default to None instead
+        of raising AttributeError.
+        """
+        return getattr(self, "user_role", None)
+
+    @strawberry.field
     def mentors(self) -> list[MentorNode]:
         """Get the list of mentors for this module."""
         return self.mentors.all()
@@ -142,9 +152,27 @@ class ModuleNode:
         return list(queryset.order_by("-updated_at")[offset : offset + normalized_limit])
 
     @strawberry.field
-    def issues_count(self, label: str | None = None) -> int:
-        """Return total count of issues linked to this module, optionally filtered by label."""
+    def issues_count(self, info: Info, label: str | None = None) -> int:
+        """Return the count of issues visible to the caller, optionally filtered by label.
+
+        Mentees are scoped to the issues assigned to them, mirroring the ``issues``
+        field, so pagination reflects what they can actually see.
+        """
+        user = info.context.request.user
+        is_admin_or_mentor = self.program and (
+            self.program.has_admin(user) or self.has_mentor(user)
+        )
+        is_mentee = self.has_mentee(user)
+        if not is_admin_or_mentor and not is_mentee:
+            return 0
+
         queryset = self.issues
+
+        if is_mentee and not is_admin_or_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None:
+                return 0
+            queryset = queryset.filter(assignees=github_user)
 
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)

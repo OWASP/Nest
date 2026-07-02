@@ -938,75 +938,18 @@ describe('IssuesPage', () => {
   })
 
   describe('Authorization', () => {
-    it('denies access for unauthenticated users', () => {
-      mockUseSession.mockReturnValue({
-        data: null,
-        status: 'unauthenticated',
-      })
-
-      const deniedAccessData = {
-        managementProgram: {
-          admins: [],
+    it('denies access when the query is forbidden', () => {
+      mockUseQuery.mockImplementation(() => ({
+        data: undefined,
+        loading: false,
+        error: {
+          graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
         },
-        managementModule: {
-          mentors: [],
-        },
-      }
-
-      mockUseQuery.mockImplementation((document) => {
-        if (document === GetManagementProgramAdminsAndModulesDocument) {
-          return { data: deniedAccessData, loading: false, error: undefined }
-        }
-        return { data: mockModuleData, loading: false, error: undefined }
-      })
+      }))
 
       render(<IssuesPage />)
 
       expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
-      expect(screen.queryAllByAltText('Loading indicator')).toHaveLength(0)
-      expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
-    })
-
-    it('denies access for authenticated user who is not an admin or mentor', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'unauthorized-user',
-            email: 'unauth@example.com',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const deniedAccessData = {
-        managementProgram: {
-          admins: [{ id: 'admin-1', login: 'other-admin', name: 'Other Admin', avatarUrl: '' }],
-        },
-        managementModule: {
-          mentors: [{ id: 'mentor-1', login: 'other-mentor', name: 'Other Mentor', avatarUrl: '' }],
-        },
-      }
-
-      mockUseQuery.mockImplementation((document) => {
-        if (document === GetManagementProgramAdminsAndModulesDocument) {
-          return { data: deniedAccessData, loading: false, error: undefined }
-        }
-        return { data: mockModuleData, loading: false, error: undefined }
-      })
-
-      render(<IssuesPage />)
-
-      // Verify access denied UI is displayed
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
-      // Ensure we're not in a loading state
-      expect(screen.queryAllByAltText('Loading indicator')).toHaveLength(0)
-      // User should not see the issues list when not authorized
       expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
     })
 
@@ -1074,42 +1017,6 @@ describe('IssuesPage', () => {
       expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
     })
 
-    it('displays an access denied message when access is revoked', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'revoked-user',
-            email: 'revoked@example.com',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const revokedAccessData = {
-        managementProgram: {
-          admins: [],
-        },
-        managementModule: {
-          mentors: [],
-        },
-      }
-
-      mockUseQuery.mockImplementation((document) => {
-        if (document === GetManagementProgramAdminsAndModulesDocument) {
-          return { data: revokedAccessData, loading: false, error: undefined }
-        }
-        return { data: mockModuleData, loading: false, error: undefined }
-      })
-
-      render(<IssuesPage />)
-
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
-      expect(screen.queryAllByAltText('Loading indicator')).toHaveLength(0)
-      expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
-    })
   })
 })
 
@@ -1124,14 +1031,19 @@ describe('Mentee view', () => {
     })
   })
 
+  const menteeAccessData = {
+    data: {
+      managementProgram: { admins: [] },
+      managementModule: { ...mockModuleData.managementModule, userRole: 'mentee' },
+    },
+    loading: false,
+    error: undefined,
+  }
+
   it('shows loading spinner when mentee issues are loading', () => {
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
     mockUseQuery.mockImplementation((document) => {
       if (document === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
+        return menteeAccessData
       }
       return { data: undefined, loading: true, error: undefined }
     })
@@ -1140,57 +1052,47 @@ describe('Mentee view', () => {
   })
 
   it('renders mentee issues list when data is available', async () => {
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((document) => {
-      if (document === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
-      }
-      return {
-        data: {
-          getModule: {
-            issues: [
-              {
-                id: '1',
-                number: 1,
-                title: 'Mentee Issue One',
-                state: 'open',
-                isMerged: false,
-                labels: [],
-                assignees: [],
-                taskDeadline: null,
-              },
-            ],
-            issuesCount: 1,
-            availableLabels: [],
-          },
+    mockUseQuery.mockImplementation(() => ({
+      data: {
+        managementModule: {
+          name: 'Test Module',
+          userRole: 'mentee',
+          issuesCount: 1,
+          availableLabels: [],
+          issues: [
+            {
+              id: '1',
+              number: 1,
+              title: 'Mentee Issue One',
+              state: 'open',
+              isMerged: false,
+              labels: [],
+              assignees: [],
+              taskDeadline: null,
+            },
+          ],
         },
-        loading: false,
-        error: undefined,
-      }
-    })
+      },
+      loading: false,
+      error: undefined,
+    }))
     render(<IssuesPage />)
     await waitFor(() => {
       expect(screen.getByText('Mentee Issue One')).toBeInTheDocument()
     })
+    // Mentees don't get the management filter controls.
+    expect(screen.queryByRole('button', { name: /Label/i })).not.toBeInTheDocument()
   })
 
-  it('shows error display when mentee issues query fails', async () => {
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((document) => {
-      if (document === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
-      }
-      return { data: undefined, loading: false, error: new Error('Failed') }
-    })
+  it('shows error display when the query fails', async () => {
+    mockUseQuery.mockImplementation(() => ({
+      data: undefined,
+      loading: false,
+      error: new Error('Failed'),
+    }))
     render(<IssuesPage />)
     await waitFor(() => {
-      expect(screen.getByText('Failed to load issues')).toBeInTheDocument()
+      expect(screen.getByText('Server Error')).toBeInTheDocument()
     })
   })
 })

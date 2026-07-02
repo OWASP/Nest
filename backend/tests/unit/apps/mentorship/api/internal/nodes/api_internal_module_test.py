@@ -69,7 +69,9 @@ class FakeModuleNode:
         return _call_module_resolver(self, "issues", info, limit=limit, offset=offset, label=label)
 
     def mock_issues_count(self, label: str | None = None):
-        return _call_module_resolver(self, "issues_count", label=label)
+        info = MagicMock()
+        info.context.request.user = MagicMock()
+        return _call_module_resolver(self, "issues_count", info, label=label)
 
     def mock_available_labels(self):
         return _call_module_resolver(self, "available_labels")

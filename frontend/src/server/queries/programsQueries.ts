@@ -74,6 +74,7 @@ export const GET_MANAGEMENT_PROGRAM_AND_MODULES = gql`
       name
       description
       status
+      userRole
       menteesLimit
       experienceLevels
       startedAt
@@ -193,25 +194,6 @@ export const GET_PROGRAM_AND_MODULES = gql`
         login
         name
         avatarUrl
-      }
-    }
-  }
-`
-
-export const GET_MY_MENTEE_PROGRAMS = gql`
-  query GetMyMenteePrograms($search: String, $page: Int, $limit: Int) {
-    myMenteePrograms(search: $search, page: $page, limit: $limit) {
-      currentPage
-      totalPages
-      programs {
-        id
-        key
-        name
-        status
-        description
-        startedAt
-        endedAt
-        userRole
       }
     }
   }

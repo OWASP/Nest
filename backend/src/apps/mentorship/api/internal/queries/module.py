@@ -43,7 +43,11 @@ class ModuleQuery:
     def get_management_program_modules(
         self, info: strawberry.Info, program_key: str
     ) -> list[ModuleNode]:
-        """List modules for management UI; requires admin or mentor on the program."""
+        """List modules for the management UI, scoped to the caller's role.
+
+        Admins see every module; mentors see the modules they mentor; mentees see
+        the modules they're enrolled in.
+        """
         user = info.context.request.user
         if not user.is_authenticated:
             raise AuthenticationRequiredError()  # noqa: RSE102
@@ -58,11 +62,12 @@ class ModuleQuery:
         modules = Module.objects.filter(program=program)
 
         if not program.has_admin(user):
-            mentor_q = Q(mentors__nest_user=user)
             github_user = getattr(user, "github_user", None)
+            role_q = Q(mentors__nest_user=user) | Q(menteemodule__mentee__nest_user=user)
             if github_user is not None:
-                mentor_q |= Q(mentors__github_user=github_user)
-            modules = modules.filter(mentor_q)
+                role_q |= Q(mentors__github_user=github_user)
+                role_q |= Q(menteemodule__mentee__github_user=github_user)
+            modules = modules.filter(role_q)
 
         return (
             modules.select_related("program", "project")
@@ -109,7 +114,11 @@ class ModuleQuery:
     def get_management_module(
         self, info: strawberry.Info, module_key: str, program_key: str
     ) -> ModuleNode | None:
-        """Single module for management UI; requires admin or mentor on the program."""
+        """Single module for the management UI; open to admins, mentors, and mentees.
+
+        Sets ``user_role`` so the client can render a management or read-only view
+        without probing for access-denied errors.
+        """
         user = info.context.request.user
         if not user.is_authenticated:
             raise AuthenticationRequiredError()  # noqa: RSE102
@@ -124,7 +133,13 @@ class ModuleQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if not module.program.has_admin(user) and not module.has_mentor(user):
+        if module.program.has_admin(user):
+            module.user_role = "admin"
+        elif module.has_mentor(user):
+            module.user_role = "mentor"
+        elif module.has_mentee(user):
+            module.user_role = "mentee"
+        else:
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         return module

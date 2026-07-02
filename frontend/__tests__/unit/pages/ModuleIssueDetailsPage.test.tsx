@@ -97,6 +97,10 @@ const mockIssueData = {
         },
       ],
     },
+    userRole: 'mentor',
+    menteesCanManageDeadlines: false,
+    startedAt: null,
+    endedAt: null,
     taskAssignedAt: new Date().toISOString(),
     taskDeadline: null,
     interestedUsers: [
@@ -109,9 +113,55 @@ const mockIssueData = {
   },
 }
 
+// Builds the single role-aware query (managementModule) response for a mentee.
+const menteeIssueView = (
+  issueOverrides: Record<string, unknown> = {},
+  moduleOverrides: Record<string, unknown> = {}
+) => ({
+  managementModule: {
+    userRole: 'mentee',
+    menteesCanManageDeadlines: false,
+    startedAt: null,
+    endedAt: null,
+    taskDeadline: null,
+    taskAssignedAt: null,
+    interestedUsers: [],
+    issueMentees: [],
+    ...moduleOverrides,
+    issueByNumber: {
+      id: '1',
+      number: 42,
+      title: 'Mentee Issue',
+      body: '',
+      url: 'https://github.com/issue/42',
+      state: 'open',
+      isMerged: false,
+      organizationName: 'OWASP',
+      repositoryName: 'Nest',
+      labels: [],
+      assignees: [
+        {
+          id: '1',
+          login: 'mentee1',
+          name: 'Mentee',
+          avatarUrl: 'https://github.com/mentee1.png',
+        },
+      ],
+      pullRequests: [],
+      ...issueOverrides,
+    },
+  },
+})
+
+// A GraphQL error carrying the FORBIDDEN extension, as the backend returns for
+// a user with no role on the module.
+const forbiddenError = {
+  graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+}
+
 function setupQueryMock(
-  issueData: typeof mockIssueData = mockIssueData,
-  accessData: typeof mockAccessData = mockAccessData
+  issueData: unknown = mockIssueData,
+  accessData: unknown = mockAccessData
 ) {
   mockUseQuery.mockImplementation((query) => {
     if (query === GetManagementProgramAdminsAndModulesDocument) {
@@ -419,7 +469,7 @@ describe('ModuleIssueDetailsPage', () => {
 
   describe('issue states', () => {
     it.each([
-      { state: 'closed', isMerged: true, expectedText: 'Closed' },
+      { state: 'closed', isMerged: true, expectedText: 'Merged' },
       { state: 'closed', isMerged: false, expectedText: 'Closed' },
       { state: 'open', isMerged: false, expectedText: 'Open' },
     ])('renders issue state as "$expectedText"', ({ state, isMerged, expectedText }) => {
@@ -857,141 +907,23 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   describe('Authorization', () => {
-    it('denies access for unauthenticated users', () => {
-      mockUseSession.mockReturnValue({
-        data: null,
-        status: 'unauthenticated',
-      })
-
-      const deniedAccessData = {
-        managementProgram: {
-          admins: [],
-        },
-        managementModule: {
-          mentors: [],
-        },
-      }
-      setupQueryMock(mockIssueData, deniedAccessData)
-      render(<ModuleIssueDetailsPage />)
-
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
-      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
-      expect(assignButtons.length).toBe(0)
-    })
-
-    it('denies access for authenticated user who is not an admin or mentor', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'unauthorized-user',
-            email: 'unauth@example.com',
-            name: 'Unauthorized User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const deniedAccessData = {
-        managementProgram: {
-          admins: [{ login: 'other-admin' }],
-        },
-        managementModule: {
-          mentors: [{ login: 'other-mentor' }],
-        },
-      }
-      setupQueryMock(mockIssueData, deniedAccessData)
-      render(<ModuleIssueDetailsPage />)
-
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
-      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
-      expect(assignButtons.length).toBe(0)
-    })
-
-    it('grants access for authenticated user who is a program admin', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'admin-user',
-            email: 'admin@example.com',
-            name: 'Admin User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const adminAccessData = {
-        managementProgram: {
-          admins: [{ login: 'admin-user' }],
-        },
-        managementModule: {
-          mentors: [],
-        },
-      }
-      setupQueryMock(mockIssueData, adminAccessData)
+    it('renders the issue for a user with access', () => {
+      setupQueryMock()
       render(<ModuleIssueDetailsPage />)
 
       expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
     })
 
-    it('grants access for authenticated user who is a module mentor', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'mentor-user',
-            email: 'mentor@example.com',
-            name: 'Mentor User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const mentorAccessData = {
-        managementProgram: {
-          admins: [],
-        },
-        managementModule: {
-          mentors: [{ login: 'mentor-user' }],
-        },
-      }
-      setupQueryMock(mockIssueData, mentorAccessData)
-      render(<ModuleIssueDetailsPage />)
-
-      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
-    })
-
-    it('displays Access Denied when user authorization is revoked', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'revoked-user',
-            email: 'revoked@example.com',
-            name: 'Revoked User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const revokedAccessData = {
-        managementProgram: {
-          admins: [],
-        },
-        managementModule: {
-          mentors: [],
-        },
-      }
-      setupQueryMock(mockIssueData, revokedAccessData)
+    it('denies access when the query is forbidden', () => {
+      setupQueryMockError(forbiddenError as unknown as Error)
       render(<ModuleIssueDetailsPage />)
 
       expect(screen.getByText('Access Denied')).toBeInTheDocument()
       expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
+        screen.getByText('You do not have permission to view this issue.')
       ).toBeInTheDocument()
+      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
+      expect(assignButtons.length).toBe(0)
     })
   })
   describe('Mentee view', () => {
@@ -1005,89 +937,22 @@ describe('ModuleIssueDetailsPage', () => {
       })
     })
 
-    it('renders mentee issue view when management query returns forbidden error', async () => {
-      const forbiddenError = {
-        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-        message: 'Forbidden',
-      }
-      mockUseQuery.mockImplementation((query) => {
-        const opName = query?.definitions?.[0]?.name?.value ?? ''
-        if (query === GetManagementProgramAdminsAndModulesDocument) {
-          return { data: null, loading: false, error: forbiddenError }
-        }
-        if (opName === 'GetModuleIssueView') {
-          return {
-            data: {
-              getModule: {
-                id: '1',
-                menteesCanManageDeadlines: false,
-                taskDeadline: null,
-                taskAssignedAt: null,
-                issueByNumber: {
-                  id: '1',
-                  number: 42,
-                  title: 'My Issue',
-                  body: 'Issue body',
-                  url: 'https://github.com/issue/42',
-                  state: 'open',
-                  isMerged: false,
-                  organizationName: 'OWASP',
-                  repositoryName: 'Nest',
-                  labels: [],
-                  assignees: [
-                    {
-                      id: '1',
-                      login: 'mentee1',
-                      name: 'Mentee One',
-                      avatarUrl: 'https://github.com/mentee1.png',
-                    },
-                  ],
-                  pullRequests: [],
-                },
-                interestedUsers: [],
-                issueMentees: [],
-              },
-            },
-            loading: false,
-            error: undefined,
-          }
-        }
-        return { data: undefined, loading: false, error: undefined }
-      })
+    it('renders the issue view for a mentee without management controls', async () => {
+      setupQueryMock(menteeIssueView({ title: 'My Issue', body: 'Issue body' }))
       render(<ModuleIssueDetailsPage />)
       await waitFor(() => {
         expect(screen.getByText('My Issue')).toBeInTheDocument()
       })
+      expect(screen.queryByRole('button', { name: /Unassign/i })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('heading', { name: /Interested Users/i })
+      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /Pull Requests/i })).not.toBeInTheDocument()
     })
 
-    it('shows issue not found for mentee when issueByNumber is null', async () => {
-      const forbiddenError = {
-        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-        message: 'Forbidden',
-      }
-      mockUseQuery.mockImplementation((query) => {
-        const opName = query?.definitions?.[0]?.name?.value ?? ''
-        if (query === GetManagementProgramAdminsAndModulesDocument) {
-          return { data: null, loading: false, error: forbiddenError }
-        }
-        if (opName === 'GetModuleIssueView') {
-          return {
-            data: {
-              getModule: {
-                id: '1',
-                menteesCanManageDeadlines: false,
-                taskDeadline: null,
-                taskAssignedAt: null,
-                issueByNumber: null,
-                interestedUsers: [],
-                issueMentees: [],
-              },
-            },
-            loading: false,
-            error: undefined,
-          }
-        }
-        return { data: undefined, loading: false, error: undefined }
+    it('shows issue not found for a mentee when issueByNumber is null', async () => {
+      setupQueryMock({
+        managementModule: { ...menteeIssueView().managementModule, issueByNumber: null },
       })
       render(<ModuleIssueDetailsPage />)
       await waitFor(() => {
@@ -1097,47 +962,7 @@ describe('ModuleIssueDetailsPage', () => {
   })
 })
 it('renders mentee issue view for merged issue', async () => {
-  const forbiddenError = {
-    graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-    message: 'Forbidden',
-  }
-  mockUseQuery.mockImplementation((query) => {
-    const opName = query?.definitions?.[0]?.name?.value ?? ''
-    if (query === GetManagementProgramAdminsAndModulesDocument) {
-      return { data: null, loading: false, error: forbiddenError }
-    }
-    if (opName === 'GetModuleIssueView') {
-      return {
-        data: {
-          getModule: {
-            id: '1',
-            menteesCanManageDeadlines: false,
-            taskDeadline: null,
-            taskAssignedAt: null,
-            issueByNumber: {
-              id: '1',
-              number: 42,
-              title: 'Merged Issue',
-              body: '',
-              url: 'https://github.com/issue/42',
-              state: 'closed',
-              isMerged: true,
-              organizationName: 'OWASP',
-              repositoryName: 'Nest',
-              labels: [],
-              assignees: [],
-              pullRequests: [],
-            },
-            interestedUsers: [],
-            issueMentees: [],
-          },
-        },
-        loading: false,
-        error: undefined,
-      }
-    }
-    return { data: undefined, loading: false, error: undefined }
-  })
+  setupQueryMock(menteeIssueView({ title: 'Merged Issue', state: 'closed', isMerged: true }))
   render(<ModuleIssueDetailsPage />)
   await waitFor(() => {
     expect(screen.getByText('Merged Issue')).toBeInTheDocument()
@@ -1145,54 +970,16 @@ it('renders mentee issue view for merged issue', async () => {
 })
 
 it('renders mentee issue view with deadline management enabled', async () => {
-  const forbiddenError = {
-    graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-    message: 'Forbidden',
-  }
-  mockUseQuery.mockImplementation((query) => {
-    const opName = query?.definitions?.[0]?.name?.value ?? ''
-    if (query === GetManagementProgramAdminsAndModulesDocument) {
-      return { data: null, loading: false, error: forbiddenError }
-    }
-    if (opName === 'GetModuleIssueView') {
-      return {
-        data: {
-          getModule: {
-            id: '1',
-            menteesCanManageDeadlines: true,
-            taskDeadline: '2026-12-01T00:00:00Z',
-            taskAssignedAt: '2026-01-01T00:00:00Z',
-            issueByNumber: {
-              id: '1',
-              number: 42,
-              title: 'Deadline Issue',
-              body: '',
-              url: 'https://github.com/issue/42',
-              state: 'open',
-              isMerged: false,
-              organizationName: 'OWASP',
-              repositoryName: 'Nest',
-              labels: [],
-              assignees: [
-                {
-                  id: '1',
-                  login: 'mentee1',
-                  name: 'Mentee',
-                  avatarUrl: 'https://github.com/mentee1.png',
-                },
-              ],
-              pullRequests: [],
-            },
-            interestedUsers: [],
-            issueMentees: [],
-          },
-        },
-        loading: false,
-        error: undefined,
+  setupQueryMock(
+    menteeIssueView(
+      { title: 'Deadline Issue' },
+      {
+        menteesCanManageDeadlines: true,
+        taskDeadline: '2026-12-01T00:00:00Z',
+        taskAssignedAt: '2026-01-01T00:00:00Z',
       }
-    }
-    return { data: undefined, loading: false, error: undefined }
-  })
+    )
+  )
   render(<ModuleIssueDetailsPage />)
   await waitFor(() => {
     expect(screen.getByText('Deadline Issue')).toBeInTheDocument()
@@ -1210,105 +997,27 @@ describe('Mentee deadline management', () => {
     })
   })
 
-  it('shows Edit button when mentee can manage deadlines and deadline is set', async () => {
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((query) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (query === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
-      }
-      if (opName === 'GetModuleIssueView') {
-        return {
-          data: {
-            getModule: {
-              id: '1',
-              menteesCanManageDeadlines: true,
-              taskDeadline: '2026-12-01T00:00:00Z',
-              taskAssignedAt: '2026-01-01T00:00:00Z',
-              issueByNumber: {
-                id: '1',
-                number: 42,
-                title: 'Editable Deadline Issue',
-                body: '',
-                url: 'https://github.com/issue/42',
-                state: 'open',
-                isMerged: false,
-                organizationName: 'OWASP',
-                repositoryName: 'Nest',
-                labels: [],
-                assignees: [],
-                pullRequests: [],
-              },
-              interestedUsers: [],
-              issueMentees: [],
-            },
-          },
-          loading: false,
-          error: undefined,
-        }
-      }
-      return { data: undefined, loading: false, error: undefined }
-    })
+  it('enables the deadline control when the module allows it and the mentee is assigned', async () => {
+    setupQueryMock(
+      menteeIssueView({ title: 'Editable Deadline Issue' }, { menteesCanManageDeadlines: true })
+    )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Editable Deadline Issue')).toBeInTheDocument()
     })
-    expect(screen.getByText('Edit')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /No deadline set/i })).not.toBeDisabled()
   })
 
-  it('shows Set button when mentee can manage deadlines but no deadline is set', async () => {
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((query) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (query === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
-      }
-      if (opName === 'GetModuleIssueView') {
-        return {
-          data: {
-            getModule: {
-              id: '1',
-              menteesCanManageDeadlines: true,
-              taskDeadline: null,
-              taskAssignedAt: null,
-              issueByNumber: {
-                id: '1',
-                number: 42,
-                title: 'No Deadline Issue',
-                body: '',
-                url: 'https://github.com/issue/42',
-                state: 'open',
-                isMerged: false,
-                organizationName: 'OWASP',
-                repositoryName: 'Nest',
-                labels: [],
-                assignees: [],
-                pullRequests: [],
-              },
-              interestedUsers: [],
-              issueMentees: [],
-            },
-          },
-          loading: false,
-          error: undefined,
-        }
-      }
-      return { data: undefined, loading: false, error: undefined }
-    })
+  it('keeps the deadline control disabled when the module disallows it', async () => {
+    setupQueryMock(menteeIssueView({ title: 'Locked Deadline Issue' }))
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('No Deadline Issue')).toBeInTheDocument()
+      expect(screen.getByText('Locked Deadline Issue')).toBeInTheDocument()
     })
-    expect(screen.getByText('Set')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /No deadline set/i })).toBeDisabled()
   })
 
-  it('calls setIsEditingDeadline(true) when Edit button is clicked', async () => {
+  it('enters edit mode when an allowed mentee clicks the deadline', async () => {
     const setIsEditingDeadline = jest.fn()
     const setDeadlineInput = jest.fn()
     const baseMocks = (useIssueMutations as jest.Mock)()
@@ -1317,177 +1026,59 @@ describe('Mentee deadline management', () => {
       setIsEditingDeadline,
       setDeadlineInput,
     })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((query) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (query === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
-      }
-      if (opName === 'GetModuleIssueView') {
-        return {
-          data: {
-            getModule: {
-              id: '1',
-              menteesCanManageDeadlines: true,
-              taskDeadline: '2026-12-01T00:00:00Z',
-              taskAssignedAt: '2026-01-01T00:00:00Z',
-              issueByNumber: {
-                id: '1',
-                number: 42,
-                title: 'Edit Deadline Issue',
-                body: '',
-                url: 'https://github.com/issue/42',
-                state: 'open',
-                isMerged: false,
-                organizationName: 'OWASP',
-                repositoryName: 'Nest',
-                labels: [],
-                assignees: [],
-                pullRequests: [],
-              },
-              interestedUsers: [],
-              issueMentees: [],
-            },
-          },
-          loading: false,
-          error: undefined,
-        }
-      }
-      return { data: undefined, loading: false, error: undefined }
-    })
-
+    setupQueryMock(
+      menteeIssueView({ title: 'Edit Deadline Issue' }, { menteesCanManageDeadlines: true })
+    )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Edit Deadline Issue')).toBeInTheDocument()
     })
-    fireEvent.click(screen.getByRole('button', { name: /^Edit$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /No deadline set/i }))
     await waitFor(() => {
       expect(setIsEditingDeadline).toHaveBeenCalledWith(true)
     })
   })
 
-  it('calls setIsEditingDeadline(false) when Cancel is clicked', async () => {
-    const setIsEditingDeadline = jest.fn()
-    const baseMocks = (useIssueMutations as jest.Mock)()
-    mockUseIssueMutations.mockReturnValue({
-      ...baseMocks,
-      isEditingDeadline: true,
-      deadlineInput: '2026-12-01',
-      setIsEditingDeadline,
-    })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((query) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (query === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
-      }
-      if (opName === 'GetModuleIssueView') {
-        return {
-          data: {
-            getModule: {
-              id: '1',
-              menteesCanManageDeadlines: true,
-              taskDeadline: '2026-12-01T00:00:00Z',
-              taskAssignedAt: '2026-01-01T00:00:00Z',
-              issueByNumber: {
-                id: '1',
-                number: 42,
-                title: 'Cancel Deadline Issue',
-                body: '',
-                url: 'https://github.com/issue/42',
-                state: 'open',
-                isMerged: false,
-                organizationName: 'OWASP',
-                repositoryName: 'Nest',
-                labels: [],
-                assignees: [],
-                pullRequests: [],
-              },
-              interestedUsers: [],
-              issueMentees: [],
-            },
-          },
-          loading: false,
-          error: undefined,
-        }
-      }
-      return { data: undefined, loading: false, error: undefined }
-    })
-
-    render(<ModuleIssueDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Cancel Deadline Issue')).toBeInTheDocument()
-    })
-    fireEvent.click(screen.getByRole('button', { name: /Cancel/i }))
-    await waitFor(() => {
-      expect(setIsEditingDeadline).toHaveBeenCalledWith(false)
-    })
-  })
-
-  it('calls setTaskDeadlineMutation when Save is clicked with a date', async () => {
-    const setTaskDeadlineMutation = jest.fn()
+  it('does not let a mentee clear the deadline', async () => {
+    const clearTaskDeadlineMutation = jest.fn()
     const baseMocks = (useIssueMutations as jest.Mock)()
     mockUseIssueMutations.mockReturnValue({
       ...baseMocks,
       isEditingDeadline: true,
       deadlineInput: '2026-12-25',
+      clearTaskDeadlineMutation,
+    })
+    setupQueryMock(
+      menteeIssueView(
+        { title: 'No Clear Issue' },
+        { menteesCanManageDeadlines: true, taskDeadline: '2026-12-25T00:00:00Z' }
+      )
+    )
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('No Clear Issue')).toBeInTheDocument()
+    })
+    fireEvent.change(screen.getByDisplayValue('2026-12-25'), { target: { value: '' } })
+    expect(clearTaskDeadlineMutation).not.toHaveBeenCalled()
+  })
+
+  it('saves the deadline when the mentee picks a date', async () => {
+    const setTaskDeadlineMutation = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      isEditingDeadline: true,
+      deadlineInput: '',
       setTaskDeadlineMutation,
     })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((query) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (query === GetManagementProgramAdminsAndModulesDocument) {
-        return { data: null, loading: false, error: forbiddenError }
-      }
-      if (opName === 'GetModuleIssueView') {
-        return {
-          data: {
-            getModule: {
-              id: '1',
-              menteesCanManageDeadlines: true,
-              taskDeadline: '2026-12-01T00:00:00Z',
-              taskAssignedAt: '2026-01-01T00:00:00Z',
-              issueByNumber: {
-                id: '1',
-                number: 42,
-                title: 'Save Deadline Issue',
-                body: '',
-                url: 'https://github.com/issue/42',
-                state: 'open',
-                isMerged: false,
-                organizationName: 'OWASP',
-                repositoryName: 'Nest',
-                labels: [],
-                assignees: [],
-                pullRequests: [],
-              },
-              interestedUsers: [],
-              issueMentees: [],
-            },
-          },
-          loading: false,
-          error: undefined,
-        }
-      }
-      return { data: undefined, loading: false, error: undefined }
-    })
-
+    setupQueryMock(
+      menteeIssueView({ title: 'Save Deadline Issue' }, { menteesCanManageDeadlines: true })
+    )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Save Deadline Issue')).toBeInTheDocument()
     })
-    const saveButton = screen.getByRole('button', { name: /^Save$/i })
-    expect(saveButton).not.toBeDisabled()
-    fireEvent.click(saveButton)
+    fireEvent.change(screen.getByDisplayValue(''), { target: { value: '2026-12-25' } })
     await waitFor(() => {
       expect(setTaskDeadlineMutation).toHaveBeenCalledWith({
         variables: expect.objectContaining({
@@ -1496,7 +1087,7 @@ describe('Mentee deadline management', () => {
       })
     })
   })
-  it('calls setDeadlineInput when date input changes in mentee editing mode', async () => {
+  it('updates the deadline input as the mentee types', async () => {
     const setDeadlineInput = jest.fn()
     const baseMocks = (useIssueMutations as jest.Mock)()
     mockUseIssueMutations.mockReturnValue({
@@ -1505,45 +1096,9 @@ describe('Mentee deadline management', () => {
       deadlineInput: '',
       setDeadlineInput,
     })
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((query) => {
-      const opName = query?.definitions?.[0]?.name?.value ?? ''
-      if (query === GetManagementProgramAdminsAndModulesDocument)
-        return { data: null, loading: false, error: forbiddenError }
-      if (opName === 'GetModuleIssueView')
-        return {
-          data: {
-            getModule: {
-              id: '1',
-              menteesCanManageDeadlines: true,
-              taskDeadline: null,
-              taskAssignedAt: null,
-              issueByNumber: {
-                id: '1',
-                number: 42,
-                title: 'Date Input Issue',
-                body: '',
-                url: 'https://github.com/issue/42',
-                state: 'open',
-                isMerged: false,
-                organizationName: 'OWASP',
-                repositoryName: 'Nest',
-                labels: [],
-                assignees: [],
-                pullRequests: [],
-              },
-              interestedUsers: [],
-              issueMentees: [],
-            },
-          },
-          loading: false,
-          error: undefined,
-        }
-      return { data: undefined, loading: false, error: undefined }
-    })
+    setupQueryMock(
+      menteeIssueView({ title: 'Date Input Issue' }, { menteesCanManageDeadlines: true })
+    )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => expect(screen.getByText('Date Input Issue')).toBeInTheDocument())
     const dateInput = screen.getByDisplayValue('')
@@ -1553,10 +1108,6 @@ describe('Mentee deadline management', () => {
 })
 
 it('shows deadline in gray for mentee view when issue is closed', async () => {
-  const forbiddenError = {
-    graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-    message: 'Forbidden',
-  }
   mockUseSession.mockReturnValue({
     data: {
       user: { login: 'mentee1', isLeader: false, isMentor: false },
@@ -1564,50 +1115,12 @@ it('shows deadline in gray for mentee view when issue is closed', async () => {
     },
     status: 'authenticated',
   })
-  mockUseQuery.mockImplementation((query: unknown) => {
-    const opName =
-      (query as { definitions?: Array<{ name?: { value?: string } }> })?.definitions?.[0]?.name
-        ?.value ?? ''
-    if (query === GetManagementProgramAdminsAndModulesDocument)
-      return { data: null, loading: false, error: forbiddenError }
-    if (opName === 'GetModuleIssueView')
-      return {
-        data: {
-          getModule: {
-            id: '1',
-            menteesCanManageDeadlines: false,
-            taskDeadline: '2025-01-01T00:00:00Z',
-            taskAssignedAt: '2024-01-01T00:00:00Z',
-            issueByNumber: {
-              id: '1',
-              number: 42,
-              title: 'Closed Deadline Issue',
-              body: '',
-              url: 'https://github.com/issue/42',
-              state: 'closed',
-              isMerged: false,
-              organizationName: 'OWASP',
-              repositoryName: 'Nest',
-              labels: [],
-              assignees: [
-                {
-                  id: '1',
-                  login: 'mentee1',
-                  name: 'Mentee',
-                  avatarUrl: 'https://github.com/mentee1.png',
-                },
-              ],
-              pullRequests: [],
-            },
-            interestedUsers: [],
-            issueMentees: [],
-          },
-        },
-        loading: false,
-        error: undefined,
-      }
-    return { data: undefined, loading: false, error: undefined }
-  })
+  setupQueryMock(
+    menteeIssueView(
+      { title: 'Closed Deadline Issue', state: 'closed' },
+      { taskDeadline: '2025-01-01T00:00:00Z', taskAssignedAt: '2024-01-01T00:00:00Z' }
+    )
+  )
   render(<ModuleIssueDetailsPage />)
   await waitFor(() => expect(screen.getByText('Closed Deadline Issue')).toBeInTheDocument())
   const deadlineEl = document.querySelector('.text-gray-600')
@@ -1802,54 +1315,7 @@ describe('Mentee issue status badges', () => {
   })
 
   const setupMenteeIssueMock = (state: string, isMerged: boolean) => {
-    const forbiddenError = {
-      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-      message: 'Forbidden',
-    }
-    mockUseQuery.mockImplementation((query: unknown) => {
-      const opName =
-        (query as { definitions?: Array<{ name?: { value?: string } }> })?.definitions?.[0]?.name
-          ?.value ?? ''
-      if (query === GetManagementProgramAdminsAndModulesDocument)
-        return { data: null, loading: false, error: forbiddenError }
-      if (opName === 'GetModuleIssueView')
-        return {
-          data: {
-            getModule: {
-              id: '1',
-              menteesCanManageDeadlines: false,
-              taskDeadline: null,
-              taskAssignedAt: null,
-              issueByNumber: {
-                id: '1',
-                number: 42,
-                title: 'Status Issue',
-                body: '',
-                url: 'https://github.com/issue/42',
-                state,
-                isMerged,
-                organizationName: 'OWASP',
-                repositoryName: 'Nest',
-                labels: [],
-                assignees: [
-                  {
-                    id: '1',
-                    login: 'mentee1',
-                    name: 'Mentee',
-                    avatarUrl: 'https://github.com/mentee1.png',
-                  },
-                ],
-                pullRequests: [],
-              },
-              interestedUsers: [],
-              issueMentees: [],
-            },
-          },
-          loading: false,
-          error: undefined,
-        }
-      return { data: undefined, loading: false, error: undefined }
-    })
+    setupQueryMock(menteeIssueView({ title: 'Status Issue', state, isMerged }))
   }
 
   it('shows Merged badge for mentee view when issue is merged', async () => {
