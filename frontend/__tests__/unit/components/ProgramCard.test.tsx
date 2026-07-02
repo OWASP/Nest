@@ -166,11 +166,24 @@ describe('ProgramCard', () => {
   })
 
   describe('Access Level - User', () => {
-    it('does not show user role badge when accessLevel is user', () => {
+    it('shows the user role badge even when accessLevel is user', () => {
       render(
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
+          href="/test/path"
+          accessLevel="user"
+        />
+      )
+
+      expect(screen.getByText('admin')).toBeInTheDocument()
+    })
+
+    it('does not show a role badge when the program has no userRole', () => {
+      render(
+        <ProgramCard
+          isAdmin={false}
+          program={{ ...baseMockProgram, userRole: undefined }}
           href="/test/path"
           accessLevel="user"
         />
@@ -220,6 +233,16 @@ describe('ProgramCard', () => {
 
       const badge = screen.getByText('admin')
       expect(badge).toHaveClass('bg-blue-100', 'text-blue-800')
+    })
+
+    it('applies mentee role styling', () => {
+      const menteeProgram = { ...baseMockProgram, userRole: 'mentee' }
+      render(
+        <ProgramCard isAdmin={false} program={menteeProgram} href="/test/path" accessLevel="user" />
+      )
+
+      const badge = screen.getByText('mentee')
+      expect(badge).toHaveClass('bg-amber-100', 'text-amber-800')
     })
 
     it('applies mentor role styling', () => {

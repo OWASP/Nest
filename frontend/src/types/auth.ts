@@ -13,6 +13,7 @@ export type ExtendedSession = Session & {
     image?: string
     isLeader?: boolean
     isMentor?: boolean
+    isMentee?: boolean
     isOwaspStaff?: boolean
     login?: string
     name?: string

@@ -82,6 +82,8 @@ const MODULE_DETAIL_WITH_RECENT_PRS = gql`
     projectName
     domains
     experienceLevel
+    userRole
+    menteesCanManageDeadlines
     startedAt
     endedAt
     mentors {
@@ -154,6 +156,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
 const MODULE_ISSUES_LIST = gql`
   fragment ModuleIssuesList on ModuleNode {
     name
+    userRole
     issuesCount(label: $label)
     availableLabels
     issues(limit: $limit, offset: $offset, label: $label) {

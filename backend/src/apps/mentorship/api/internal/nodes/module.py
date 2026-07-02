@@ -35,11 +35,22 @@ class ModuleNode:
     ended_at: datetime
     experience_level: ExperienceLevelEnum
     labels: list[str] | None = None
+    mentees_can_manage_deadlines: bool = False
     order: int = 0
     program: ProgramNode | None = None
     project_id: strawberry.ID | None = None
     started_at: datetime
     tags: list[str] | None = None
+
+    @strawberry.field
+    def user_role(self) -> str | None:
+        """Return the caller's role on this module when a resolver assigned one.
+
+        Resolvers that gate access (e.g. managementModule) set ``user_role`` on the
+        Django instance; other resolvers leave it unset, so default to None instead
+        of raising AttributeError.
+        """
+        return getattr(self, "user_role", None)
 
     @strawberry.field
     def mentors(self) -> list[MentorNode]:
@@ -85,7 +96,11 @@ class ModuleNode:
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
         user = info.context.request.user
-        if not self.program or (not self.program.has_admin(user) and not self.has_mentor(user)):
+        is_admin_or_mentor = self.program and (
+            self.program.has_admin(user) or self.has_mentor(user)
+        )
+        is_mentee = self.has_mentee(user)
+        if not is_admin_or_mentor and not is_mentee:
             return []
 
         info.context.current_module = self
@@ -125,15 +140,39 @@ class ModuleNode:
             MERGED_PULL_REQUESTS_PREFETCH,
         )
 
+        if is_mentee and not is_admin_or_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None:
+                return []
+            queryset = queryset.filter(assignees=github_user)
+
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
 
         return list(queryset.order_by("-updated_at")[offset : offset + normalized_limit])
 
     @strawberry.field
-    def issues_count(self, label: str | None = None) -> int:
-        """Return total count of issues linked to this module, optionally filtered by label."""
+    def issues_count(self, info: Info, label: str | None = None) -> int:
+        """Return the count of issues visible to the caller, optionally filtered by label.
+
+        Mentees are scoped to the issues assigned to them, mirroring the ``issues``
+        field, so pagination reflects what they can actually see.
+        """
+        user = info.context.request.user
+        is_admin_or_mentor = self.program and (
+            self.program.has_admin(user) or self.has_mentor(user)
+        )
+        is_mentee = self.has_mentee(user)
+        if not is_admin_or_mentor and not is_mentee:
+            return 0
+
         queryset = self.issues
+
+        if is_mentee and not is_admin_or_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None:
+                return 0
+            queryset = queryset.filter(assignees=github_user)
 
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
@@ -155,12 +194,16 @@ class ModuleNode:
     def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
         user = info.context.request.user
-        if not self.program or (not self.program.has_admin(user) and not self.has_mentor(user)):
+        is_admin_or_mentor = self.program and (
+            self.program.has_admin(user) or self.has_mentor(user)
+        )
+        is_mentee = self.has_mentee(user)
+        if not is_admin_or_mentor and not is_mentee:
             return None
 
         info.context.current_module = self
 
-        return (
+        queryset = (
             self.issues.select_related("repository", "author")
             .prefetch_related(
                 "assignees",
@@ -168,8 +211,15 @@ class ModuleNode:
                 MERGED_PULL_REQUESTS_PREFETCH,
             )
             .filter(number=number)
-            .first()
         )
+
+        if is_mentee and not is_admin_or_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None:
+                return None
+            queryset = queryset.filter(assignees=github_user)
+
+        return queryset.first()
 
     @strawberry.field
     def interested_users(self, issue_number: int) -> list[UserNode]:
@@ -254,6 +304,7 @@ class CreateModuleInput:
     project_id: strawberry.ID
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+    mentees_can_manage_deadlines: bool = False
 
 
 @strawberry.input
@@ -273,6 +324,7 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+    mentees_can_manage_deadlines: bool | None = None
 
 
 @strawberry.input

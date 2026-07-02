@@ -311,12 +311,13 @@ class TestModuleQuery:
         mock_info: MagicMock,
         api_module_queries,
     ) -> None:
-        """A mentor not assigned to this module cannot load it, even with program access."""
+        """A user who is neither admin, mentor, nor mentee of this module is forbidden."""
         mock_program = MagicMock(spec=Program)
         mock_program.has_admin.return_value = False
         mock_module = MagicMock(spec=Module)
         mock_module.program = mock_program
         mock_module.has_mentor.return_value = False
+        mock_module.has_mentee.return_value = False
         mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = (
             mock_module
         )
