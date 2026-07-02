@@ -10,7 +10,7 @@ variables {
   redis_node_type       = "cache.t3.micro"
   redis_num_cache_nodes = 1
   redis_port            = 6379
-  runtime_secrets_mode = "prepare"
+  runtime_secrets_mode  = "prepare"
   security_group_ids    = ["sg-12345678"]
   subnet_ids            = ["subnet-12345678"]
 }
@@ -109,18 +109,18 @@ run "test_log_groups_created" {
   }
 }
 run "test_redis_secret_configuration" {
-    command = plan
+  command = plan
 
-    assert {
-      condition     = aws_secretsmanager_secret.django_redis_password.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
-      error_message = "Redis password secret must use the expected name."
-    }
-
-    assert {
-      condition     = aws_secretsmanager_secret.django_redis_password.kms_key_id == var.kms_key_arn
-      error_message = "Redis password secret must use the environment KMS key."
-    }
+  assert {
+    condition     = aws_secretsmanager_secret.django_redis_password.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
+    error_message = "Redis password secret must use the expected name."
   }
+
+  assert {
+    condition     = aws_secretsmanager_secret.django_redis_password.kms_key_id == var.kms_key_arn
+    error_message = "Redis password secret must use the environment KMS key."
+  }
+}
 
 run "test_replication_group_id_format" {
   command = plan

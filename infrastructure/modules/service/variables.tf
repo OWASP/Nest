@@ -151,8 +151,8 @@ variable "container_secrets" {
 
 variable "secretsmanager_secret_arns" {
   description = "Bare secrets manager ARNs that the ECS execution role may read"
-  type = set(string)
-  default = []
+  type        = set(string)
+  default     = []
 }
 
 variable "project_name" {

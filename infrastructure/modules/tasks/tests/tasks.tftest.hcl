@@ -17,7 +17,7 @@ variables {
   secretsmanager_secret_arns = [
     "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/EXAMPLE"
   ]
-  subnet_ids                    = ["subnet-12345678"]
+  subnet_ids = ["subnet-12345678"]
 }
 
 run "test_cron_tasks_disabled_removes_schedules" {
