@@ -1,5 +1,15 @@
 import { gql } from '@apollo/client'
 
+export const GET_BOARD_CANDIDATE = gql`
+  query GetBoardCandidate($year: Int!, $login: String!) {
+    boardOfDirectors(year: $year) {
+      candidate(login: $login) {
+        id
+      }
+    }
+  }
+`
+
 export const GET_BOARD_CANDIDATES = gql`
   query GetBoardCandidates($year: Int!) {
     boardOfDirectors(year: $year) {

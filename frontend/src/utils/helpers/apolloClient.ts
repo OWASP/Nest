@@ -1,8 +1,10 @@
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+import { ApolloClient, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
+import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs'
 import { AppError, handleAppError } from 'app/global-error'
 import { GRAPHQL_URL } from 'utils/env.client'
 import { getCsrfToken } from 'utils/utility'
+
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
     const error = new AppError(500, 'Missing GraphQL URL')
@@ -10,7 +12,7 @@ const createApolloClient = () => {
     return null
   }
 
-  const httpLink = new HttpLink({
+  const httpLink = new UploadHttpLink({
     credentials: 'include',
     uri: GRAPHQL_URL,
   })

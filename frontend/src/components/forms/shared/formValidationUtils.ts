@@ -32,6 +32,30 @@ export const validateEndDate = (value: string, startDate?: string): string | und
   return undefined
 }
 
+export const validateFileExtension = (
+  file: File,
+  allowedExtensions: string[]
+): string | undefined => {
+  const dotIndex = file.name.lastIndexOf('.')
+  if (dotIndex === -1) {
+    return `File has no extension. Allowed: ${allowedExtensions.map((e) => '.' + e).join(', ')}`
+  }
+  const ext = file.name.slice(dotIndex + 1).toLowerCase()
+  if (!allowedExtensions.some((e) => e.toLowerCase() === ext)) {
+    const allowed = allowedExtensions.map((e) => '.' + e).join(', ')
+    return `File extension .${ext} is not supported. Allowed: ${allowed}`
+  }
+  return undefined
+}
+
+export const validateFileSize = (file: File, maxSizeMb: number): string | undefined => {
+  const size = file.size
+  if (size > maxSizeMb * 1024 * 1024) {
+    return `File size must be under ${maxSizeMb} MB.`
+  }
+  return undefined
+}
+
 type CommonFormData = {
   name: string
   description: string

@@ -2,9 +2,11 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Exists, OuterRef
 
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
 
 
 @strawberry.type
@@ -32,10 +34,20 @@ class BoardCandidateClaimQuery:
             and user.github_user is not None
             and user.github_user.login == login
         )
-        claims = BoardCandidateClaim.objects.filter(
-            board__year=year,
-            candidate__member__login=login,
-        ).order_by("order", "nest_created_at")
+        claims = (
+            BoardCandidateClaim.objects.filter(
+                board__year=year,
+                candidate__member__login=login,
+            )
+            .annotate(
+                evidence_exists=Exists(
+                    BoardCandidateClaimEvidence.objects.filter(
+                        claim=OuterRef("pk"), is_removed=False
+                    )
+                ),
+            )
+            .order_by("order", "nest_created_at")
+        )
 
         if not is_self:
             claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
@@ -59,7 +71,13 @@ class BoardCandidateClaimQuery:
 
         """
         try:
-            claim = BoardCandidateClaim.objects.get(
+            claim = BoardCandidateClaim.objects.annotate(
+                evidence_exists=Exists(
+                    BoardCandidateClaimEvidence.objects.filter(
+                        claim=OuterRef("pk"), is_removed=False
+                    )
+                ),
+            ).get(
                 board__year=year,
                 candidate__member__login=login,
                 key=key,
