@@ -140,6 +140,7 @@ jobs:
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
         }}
+      RUNTIME_SECRETS_MODE: ${{ vars.RUNTIME_SECRETS_MODE }}
       TF_IN_AUTOMATION: true
       TF_INPUT: false
     permissions:
@@ -162,6 +163,20 @@ jobs:
           role-session-name: ${{ inputs.aws_role_session_name }}
           role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Validate runtime secrets migration mode
+        run: |
+          if [[ "$RUNTIME_SECRETS_MODE" != "prepare" && "$RUNTIME_SECRETS_MODE" != "complete" ]]; then
+            echo "::error::RUNTIME_SECRETS_MODE must be prepare or complete."
+            exit 1
+          fi
+
+      - name: Verify runtime secrets are populated
+        if: env.RUNTIME_SECRETS_MODE == 'complete'
+        run: |
+          bash .github/scripts/verify-runtime-secrets.sh \
+            "${{ inputs.environment }}" \
+            "${{ inputs.enable_additional_parameters }}"
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
@@ -220,6 +235,7 @@ jobs:
             frontend_use_fargate_spot=${{ inputs.frontend_use_fargate_spot }}
             frontend_image_tag="${{ inputs.release_version }}"
             project_name="nest"
+            runtime_secrets_mode="${{ vars.RUNTIME_SECRETS_MODE }}"
             tasks_use_fargate_spot=${{ inputs.tasks_use_fargate_spot }}
           working-directory: infrastructure/live
 
