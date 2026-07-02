@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 LOCALSTACK_CONTAINER_NAME="localstack"
-LOCALSTACK_IMAGE="$(grep -E '^FROM localstack/localstack:' "$ROOT_DIR/docker/localstack/Dockerfile" | sed 's/^FROM //')"
+LOCALSTACK_IMAGE="$(grep -E '^FROM localstack/localstack(-pro)?:' "$ROOT_DIR/docker/localstack/Dockerfile" | sed 's/^FROM //')"
 LOCALSTACK_HEALTH_URL="http://localhost:4566/_localstack/health"
 HEALTH_MAX_ATTEMPTS=30
 HEALTH_POLL_INTERVAL=2
@@ -89,6 +89,20 @@ start_localstack() {
         sleep "$HEALTH_POLL_INTERVAL"
         attempt=$((attempt + 1))
     done
+
+    echo "Waiting for LocalStack license activation..."
+    local license_attempt=1
+    local license_max_attempts=15
+    while ! docker logs "$LOCALSTACK_CONTAINER_NAME" 2>&1 | grep -E -q "Successfully .*activated|activated.*license|Ready\."; do
+        if [[ "$license_attempt" -ge "$license_max_attempts" ]]; then
+            echo "Error: LocalStack license failed to activate within $((license_max_attempts * HEALTH_POLL_INTERVAL)) seconds." >&2
+            docker logs "$LOCALSTACK_CONTAINER_NAME" 2>&1 | tail -30
+            exit 1
+        fi
+        sleep "$HEALTH_POLL_INTERVAL"
+        license_attempt=$((license_attempt + 1))
+    done
+
     echo "LocalStack is ready!"
 }
 
@@ -107,7 +121,7 @@ run_module_tests() {
     echo "Testing integration for $module_dir..."
     terraform -chdir="$module_dir" init -backend=false -input=false || exit 1
     terraform -chdir="$module_dir" test "${filters[@]}" || exit 1
-    
+
     test_count=$((test_count + 1))
     return 0
 }

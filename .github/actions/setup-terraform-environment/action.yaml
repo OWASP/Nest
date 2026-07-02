@@ -7,9 +7,9 @@ description: >
 
 inputs:
   terraform_version:
-    description: "The version of Terraform to install"
+    description: The version of Terraform to install
     required: false
-    default: "1.14"
+    default: '1.14'
 
 runs:
   using: composite
@@ -20,7 +20,9 @@ runs:
         terraform_version: ${{ inputs.terraform_version }}
 
     - name: Create plugin cache directory
-      run: mkdir -p "${{ env.TF_PLUGIN_CACHE_DIR }}"
+      env:
+        TF_PLUGIN_CACHE_DIR: ${{ env.TF_PLUGIN_CACHE_DIR }}
+      run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
       shell: bash
 
     - name: Cache Terraform plugins
