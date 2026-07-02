@@ -12,12 +12,15 @@ variables {
   image_tag             = "test-tag"
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
-  parameters_arns       = { "NEXT_PUBLIC_API_URL" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/NEXT_PUBLIC_API_URL" }
+  container_secrets     = { "NEXT_PUBLIC_API_URL" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/NEXT_PUBLIC_API_URL" }
   project_name          = "nest"
   security_group_id     = "sg-service-12345"
-  service_name          = "service"
-  subnet_ids            = ["subnet-1", "subnet-2"]
-  target_group_arn      = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
+  secretsmanager_secret_arns = [
+    "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/EXAMPLE"
+  ]
+  service_name     = "service"
+  subnet_ids       = ["subnet-1", "subnet-2"]
+  target_group_arn = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
 }
 
 run "test_cloudwatch_log_group_name_format" {
@@ -300,7 +303,7 @@ run "test_service_works_with_backend_config" {
     container_memory = 2048
     container_port   = 8000
     service_name     = "backend"
-    parameters_arns = {
+    container_secrets = {
       "DJANGO_SECRET_KEY" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_SECRET_KEY"
     }
   }

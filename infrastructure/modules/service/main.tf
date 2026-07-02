@@ -275,7 +275,7 @@ resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
       },
       {
-        Action   = ["secretmanger:GetSecretValue"]
+        Action   = ["secretsmanager:GetSecretValue"]
         Effect   = "Allow"
         Resource = var.secretsmanager_secret_arns
       },

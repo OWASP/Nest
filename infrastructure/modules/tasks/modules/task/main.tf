@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "task" {
         }
       }
       name = "backend"
-      secrets = [for name, valueFrom in var.container_parameters_arns : {
+      secrets = [for name, valueFrom in var.container_secrets : {
         name      = name
         valueFrom = valueFrom
       }]

@@ -242,7 +242,7 @@ module "tasks" {
   assign_public_ip              = local.assign_public_ip
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
-  container_parameters_arns     = module.parameters.django_ssm_parameter_arns
+  container_secrets             = module.parameters.django_container_secrets
   ecr_repository_arn            = module.backend.ecr_repository_arn
   ecr_repository_url            = module.backend.ecr_repository_url
   ecs_sg_id                     = module.security.tasks_sg_id
@@ -253,6 +253,7 @@ module "tasks" {
   image_tag                     = var.backend_image_tag
   kms_key_arn                   = module.kms.key_arn
   project_name                  = var.project_name
+  secretsmanager_secret_arns    = module.parameters.secretsmanager_secret_arns
   subnet_ids                    = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   use_fargate_spot              = var.tasks_use_fargate_spot
 }

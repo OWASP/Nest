@@ -3,7 +3,7 @@ mock_provider "aws" {}
 variables {
   aws_region                    = "us-east-2"
   common_tags                   = { Environment = "test", Project = "nest" }
-  container_parameters_arns     = {}
+  container_secrets             = {}
   ecr_repository_arn            = "arn:aws:ecr:us-east-2:123456789012:repository/nest-test-backend"
   ecr_repository_url            = "123456789012.dkr.ecr.us-east-2.amazonaws.com/nest-test-backend"
   ecs_sg_id                     = "sg-12345678"
@@ -14,6 +14,9 @@ variables {
   image_tag                     = "test-tag"
   kms_key_arn                   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name                  = "nest"
+  secretsmanager_secret_arns = [
+    "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/EXAMPLE"
+  ]
   subnet_ids                    = ["subnet-12345678"]
 }
 
