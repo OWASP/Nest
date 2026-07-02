@@ -8,11 +8,11 @@ from asgiref.sync import sync_to_async
 from django.db.models import Q
 
 from apps.mentorship.api.internal.graphql_errors import (
-    AuthenticationRequiredError,
     ManagementProgramAccessDeniedError,
 )
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module, Program
+from apps.nest.api.internal.permissions import IsAuthenticatedAsync
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +43,14 @@ class ModuleQuery:
             .order_by("order", "started_at")
         )
 
-    @strawberry.field(name="managementProgramModules")
+    @strawberry_django.field(
+        name="managementProgramModules", permission_classes=[IsAuthenticatedAsync]
+    )
     async def get_management_program_modules(
         self, info: strawberry.Info, program_key: str
     ) -> list[ModuleNode]:
         """List modules for management UI; requires admin or mentor on the program."""
-        user = info.context.request.user
-        if not user.is_authenticated:
-            raise AuthenticationRequiredError()  # noqa: RSE102
+        user = await info.context.request.auser()
         try:
             program = await Program.objects.aget(key=program_key)
         except Program.DoesNotExist:
@@ -108,14 +108,12 @@ class ModuleQuery:
 
         return module
 
-    @strawberry.field(name="managementModule")
+    @strawberry.field(name="managementModule", permission_classes=[IsAuthenticatedAsync])
     async def get_management_module(
         self, info: strawberry.Info, module_key: str, program_key: str
     ) -> ModuleNode | None:
         """Single module for management UI; requires admin or mentor on the program."""
-        user = info.context.request.user
-        if not user.is_authenticated:
-            raise AuthenticationRequiredError()  # noqa: RSE102
+        user = await info.context.request.auser()
         try:
             module = await (
                 Module.objects.select_related("program", "project")

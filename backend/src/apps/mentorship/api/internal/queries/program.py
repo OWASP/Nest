@@ -9,13 +9,12 @@ from django.db.models import Q
 
 from apps.common.utils import normalize_limit
 from apps.mentorship.api.internal.graphql_errors import (
-    AuthenticationRequiredError,
     ManagementProgramAccessDeniedError,
 )
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models.program import Program
 from apps.mentorship.models.program_admin import ProgramAdmin
-from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.nest.api.internal.permissions import IsAuthenticatedAsync
 
 PAGE_SIZE = 25
 MAX_LIMIT = 1000
@@ -43,14 +42,12 @@ class ProgramQuery:
 
         return program
 
-    @strawberry.field(name="managementProgram")
+    @strawberry_django.field(name="managementProgram", permission_classes=[IsAuthenticatedAsync])
     async def get_management_program(
         self, info: strawberry.Info, program_key: str
     ) -> ProgramNode | None:
         """Return program details for admins or mentors."""
-        user = info.context.request.user
-        if not user.is_authenticated:
-            raise AuthenticationRequiredError()  # noqa: RSE102
+        user = await info.context.request.auser()
         try:
             program = await Program.objects.prefetch_related(
                 "admins__github_user", "admins__nest_user"
@@ -65,8 +62,8 @@ class ProgramQuery:
 
         return program
 
-    @strawberry.field(permission_classes=[IsAuthenticated])
-    def my_programs(
+    @strawberry_django.field(permission_classes=[IsAuthenticatedAsync])
+    async def my_programs(
         self,
         info: strawberry.Info,
         search: str = "",
@@ -74,7 +71,7 @@ class ProgramQuery:
         limit: int = 24,
     ) -> PaginatedPrograms:
         """Get paginated programs where the current user is admin or mentor."""
-        user = info.context.request.user
+        user = await info.context.request.auser()
 
         admin_program_ids = ProgramAdmin.objects.filter(admin__nest_user=user).values_list(
             "program_id", flat=True
@@ -82,7 +79,7 @@ class ProgramQuery:
 
         query = Q(id__in=admin_program_ids)
         mentor_q = Q(modules__mentors__nest_user=user)
-        github_user = getattr(user, "github_user", None)
+        github_user = await sync_to_async(getattr)(user, "github_user", None)  # type: ignore[call-arg]
         if github_user is not None:
             mentor_q |= Q(modules__mentors__github_user=github_user)
         query |= mentor_q
@@ -104,7 +101,7 @@ class ProgramQuery:
         if search:
             queryset = queryset.filter(name__icontains=search)
 
-        total_count = queryset.count()
+        total_count = await queryset.acount()
         total_pages = max(1, (total_count + normalized_limit - 1) // normalized_limit)
         page = max(1, min(page, total_pages))
         offset = (page - 1) * normalized_limit
@@ -114,7 +111,7 @@ class ProgramQuery:
         ]
 
         results = []
-        for program in paginated_programs:
+        async for program in paginated_programs:
             is_admin = any(admin.nest_user_id == user.id for admin in program.admins.all())
             program.user_role = "admin" if is_admin else "mentor"
             results.append(program)
