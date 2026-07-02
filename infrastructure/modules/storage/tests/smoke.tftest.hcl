@@ -32,7 +32,7 @@ run "smoke_staging_storage" {
   }
 
   assert {
-    condition     = can(module.fixtures_bucket.arn)
+    condition     = length(module.fixtures_bucket.arn) > 0
     error_message = "Fixtures bucket ARN must exist."
   }
 

@@ -73,6 +73,11 @@ run "smoke_staging_parameters" {
   }
 
   assert {
+    condition     = aws_ssm_parameter.django_secret_key.name == "/nest/staging/DJANGO_SECRET_KEY"
+    error_message = "SSM parameter path must follow /nest/staging/DJANGO_SECRET_KEY format."
+  }
+
+  assert {
     condition     = aws_ssm_parameter.django_secret_key.type == "SecureString"
     error_message = "DJANGO_SECRET_KEY must be SecureString type."
   }

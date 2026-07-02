@@ -36,7 +36,7 @@ else
   docker run -d \
     --name "${LOCALSTACK_CONTAINER}" \
     -p "${LOCALSTACK_PORT}:4566" \
-    -e LOCALSTACK_AUTH_TOKEN="${LOCALSTACK_AUTH_TOKEN:-}" \
+    -e LOCALSTACK_AUTH_TOKEN="${LOCALSTACK_AUTH_TOKEN:?LOCALSTACK_AUTH_TOKEN must be set}" \
     "${LOCALSTACK_IMAGE}"
   STARTED_CONTAINER=true
   trap 'override_s3_lifecycle remove; cleanup' EXIT
