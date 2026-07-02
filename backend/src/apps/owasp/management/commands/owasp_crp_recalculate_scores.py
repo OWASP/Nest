@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.owasp.models.crp.score_calculator import ContributionScoreCalculator
+from apps.owasp.utils.score_calculator import ContributionScoreCalculator
 
 
 class Command(BaseCommand):

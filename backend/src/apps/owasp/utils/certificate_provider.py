@@ -40,7 +40,7 @@ class LocalCertificateProvider(BaseCertificateProvider):
 
         """
         from apps.owasp.models.crp.certificate import Certificate
-        
+
         Certificate.objects.create(
             github_user=user,
             score=score,

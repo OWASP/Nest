@@ -5,7 +5,7 @@ import logging
 from django.contrib import admin
 
 from apps.owasp.models.crp.contribution_score import ContributionScore
-from apps.owasp.models.crp.score_calculator import ContributionScoreCalculator
+from apps.owasp.utils.score_calculator import ContributionScoreCalculator
 
 logger: logging.Logger = logging.getLogger(__name__)
 

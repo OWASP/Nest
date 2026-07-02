@@ -11,9 +11,8 @@ from django.db.models import Q
 from apps.common.models import TimestampedModel
 from apps.github.models.user import User
 from apps.owasp.exceptions import CertificateIssuanceError
-from apps.owasp.models.crp.certificate_provider import CertificateProviderFactory
 from apps.owasp.models.crp.recognition_enums import TierChoices
-
+from apps.owasp.utils.certificate_provider import CertificateProviderFactory
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +22,7 @@ CERTIFICATE_ID_LENGTH = 12
 
 def generate_certificate_id() -> str:
     """Generate a unique 12-character alphanumeric ID for certificates."""
-    return "".join(
-        secrets.choice(CERTIFICATE_ID_ALPHABET) for _ in range(CERTIFICATE_ID_LENGTH)
-    )
+    return "".join(secrets.choice(CERTIFICATE_ID_ALPHABET) for _ in range(CERTIFICATE_ID_LENGTH))
 
 
 class Certificate(TimestampedModel):
