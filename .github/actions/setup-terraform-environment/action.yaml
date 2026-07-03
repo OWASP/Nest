@@ -4,6 +4,9 @@ description: >
   NOTE: The calling job must check out the repository before using this
   action - local composite actions can only be resolved by the runner
   after checkout, so an internal checkout here would be unreachable.
+  NOTE: The calling job must also set the TF_PLUGIN_CACHE_DIR env var
+  at the workflow or job level; this action reads it implicitly for
+  both the cache directory creation and the plugin cache step.
 
 inputs:
   terraform_version:
