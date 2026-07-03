@@ -13,7 +13,7 @@ from apps.nest.models.user import User
 from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
     BoardCandidateClaimReviewNode,
 )
-from apps.owasp.api.internal.nodes.enum import ReviewDecisionEnum
+from apps.owasp.api.internal.nodes.enum import ReviewStatusEnum
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
 from apps.owasp.models.board_of_directors import BoardOfDirectors
@@ -33,8 +33,8 @@ class CreateReviewInput:
 
     claim_key: str
     claim_member_login: str
-    decision: ReviewDecisionEnum
     notes: str = ""
+    status: ReviewStatusEnum
     year: int
 
 
@@ -113,7 +113,7 @@ class BoardCandidateClaimReviewMutations:
         try:
             review = BoardCandidateClaimReview.objects.create(
                 claim=claim,
-                status=input_data.decision.value,
+                status=input_data.status.value,
                 notes=input_data.notes,
                 reviewer=user,
             )

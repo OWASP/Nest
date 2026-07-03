@@ -21,8 +21,8 @@ class ClaimStatusEnum(enum.Enum):
 
 
 @strawberry.enum
-class ReviewDecisionEnum(enum.Enum):
-    """Review decision enum."""
+class ReviewStatusEnum(enum.Enum):
+    """Review status enum."""
 
     APPROVED = BoardCandidateClaimReview.Status.APPROVED
     REJECTED = BoardCandidateClaimReview.Status.REJECTED

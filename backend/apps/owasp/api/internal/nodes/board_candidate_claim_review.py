@@ -6,7 +6,7 @@ import strawberry
 import strawberry_django
 
 from apps.github.api.internal.nodes.user import UserNode
-from apps.owasp.api.internal.nodes.enum import ReviewDecisionEnum
+from apps.owasp.api.internal.nodes.enum import ReviewStatusEnum
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
 
 
@@ -30,6 +30,6 @@ class BoardCandidateClaimReviewNode(strawberry.relay.Node):
         return root.reviewer.github_user
 
     @strawberry_django.field
-    def status(self, root: BoardCandidateClaimReview) -> ReviewDecisionEnum:
+    def status(self, root: BoardCandidateClaimReview) -> ReviewStatusEnum:
         """Resolve review status."""
-        return ReviewDecisionEnum(root.status)
+        return ReviewStatusEnum(root.status)

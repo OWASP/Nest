@@ -32,15 +32,15 @@ def _make_info(user):
 def _make_input_data(
     claim_key="test-claim",
     claim_member_login="alice",
-    decision="APPROVED",
-    year=2025,
     notes="",
+    status="APPROVED",
+    year=2025,
 ):
     data = MagicMock()
     data.claim_key = claim_key
     data.claim_member_login = claim_member_login
-    data.decision = MagicMock()
-    data.decision.value = decision
+    data.status = MagicMock()
+    data.status.value = status
     data.year = year
     data.notes = notes
     return data
