@@ -22,6 +22,11 @@ No modules.
 
 | Name | Type |
 | ---- | ---- |
+| [aws_secretsmanager_secret.django_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret.external_runtime](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret.nextauth_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret_version.django_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_secretsmanager_secret_version.nextauth_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_ssm_parameter.django_algolia_application_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_algolia_write_api_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -61,6 +66,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
+| <a name="input_db_credentials_secret_arn"></a> [db\_credentials\_secret\_arn](#input\_db\_credentials\_secret\_arn) | The Secrets Manager ARN containing the database credentials. | `string` | n/a | yes |
 | <a name="input_db_password_arn"></a> [db\_password\_arn](#input\_db\_password\_arn) | The SSM Parameter ARN of password of the database. | `string` | n/a | yes |
 | <a name="input_django_allowed_hosts"></a> [django\_allowed\_hosts](#input\_django\_allowed\_hosts) | Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev). | `string` | n/a | yes |
 | <a name="input_django_allowed_origins"></a> [django\_allowed\_origins](#input\_django\_allowed\_origins) | The Django allowed CORS origins (comma-separated URLs with protocol). | `string` | n/a | yes |
@@ -76,17 +82,22 @@ No modules.
 | <a name="input_django_settings_module"></a> [django\_settings\_module](#input\_django\_settings\_module) | The location of the Django settings module to use (e.g., settings.staging, settings.production). | `string` | n/a | yes |
 | <a name="input_enable_additional_parameters"></a> [enable\_additional\_parameters](#input\_enable\_additional\_parameters) | Whether to create additional parameters (e.g. for production). | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The KMS key ARN used to encrypt runtime secrets | `string` | n/a | yes |
 | <a name="input_next_server_csrf_url"></a> [next\_server\_csrf\_url](#input\_next\_server\_csrf\_url) | The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/). | `string` | n/a | yes |
 | <a name="input_next_server_graphql_url"></a> [next\_server\_graphql\_url](#input\_next\_server\_graphql\_url) | The server-side GraphQL URL for Next.js SSR (e.g., https://nest.owasp.dev/graphql/). | `string` | n/a | yes |
 | <a name="input_nextauth_url"></a> [nextauth\_url](#input\_nextauth\_url) | The NextAuth base URL (frontend URL with protocol). | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_redis_password_arn"></a> [redis\_password\_arn](#input\_redis\_password\_arn) | The SSM Parameter ARN of password of the Redis cache. | `string` | n/a | yes |
+| <a name="input_redis_password_secret_arn"></a> [redis\_password\_secret\_arn](#input\_redis\_password\_secret\_arn) | The Secrets Manager ARN containing the Redis password. | `string` | n/a | yes |
+| <a name="input_runtime_secrets_mode"></a> [runtime\_secrets\_mode](#input\_runtime\_secrets\_mode) | Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager. | `string` | n/a | yes |
+| <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days Secrets Manager waits before deleting a secret. | `number` | `7` | no |
 | <a name="input_slack_bot_token_suffix"></a> [slack\_bot\_token\_suffix](#input\_slack\_bot\_token\_suffix) | The Suffix for the Slack bot token. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_django_ssm_parameter_arns"></a> [django\_ssm\_parameter\_arns](#output\_django\_ssm\_parameter\_arns) | Map of environment variable names to the ARNs of all SSM parameters (Required by Django). |
-| <a name="output_frontend_ssm_parameter_arns"></a> [frontend\_ssm\_parameter\_arns](#output\_frontend\_ssm\_parameter\_arns) | Map of frontend environment variable names to the ARNs of all SSM parameters. |
+| <a name="output_django_container_secrets"></a> [django\_container\_secrets](#output\_django\_container\_secrets) | Django environment variables mapped to ECS valueFrom references. |
+| <a name="output_frontend_container_secrets"></a> [frontend\_container\_secrets](#output\_frontend\_container\_secrets) | Frontend environment variables mapped to ECS valueFrom references. |
+| <a name="output_secretsmanager_secret_arns"></a> [secretsmanager\_secret\_arns](#output\_secretsmanager\_secret\_arns) | Bare Secrets Manager ARNs required by ECS execution roles. |
 <!-- END_TF_DOCS -->

@@ -26,6 +26,8 @@ No modules.
 | [aws_cloudwatch_log_group.slow_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_elasticache_replication_group.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group) | resource |
 | [aws_elasticache_subnet_group.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_subnet_group) | resource |
+| [aws_secretsmanager_secret.django_redis_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret_version.django_redis_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_ssm_parameter.django_redis_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [random_password.redis_auth_token](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 
@@ -44,6 +46,8 @@ No modules.
 | <a name="input_redis_node_type"></a> [redis\_node\_type](#input\_redis\_node\_type) | The node type for the Redis cache. | `string` | n/a | yes |
 | <a name="input_redis_num_cache_nodes"></a> [redis\_num\_cache\_nodes](#input\_redis\_num\_cache\_nodes) | The number of cache nodes in the Redis cluster. | `number` | n/a | yes |
 | <a name="input_redis_port"></a> [redis\_port](#input\_redis\_port) | The port for the Redis cache. | `number` | n/a | yes |
+| <a name="input_runtime_secrets_mode"></a> [runtime\_secrets\_mode](#input\_runtime\_secrets\_mode) | Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager. | `string` | n/a | yes |
+| <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days Secrets Manager waits before deleting the Redis secret. | `number` | `7` | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | A list of security group IDs to associate with the Redis cache. | `list(string)` | n/a | yes |
 | <a name="input_snapshot_retention_limit"></a> [snapshot\_retention\_limit](#input\_snapshot\_retention\_limit) | The number of days for which automatic snapshots are retained. | `number` | `5` | no |
 | <a name="input_snapshot_window"></a> [snapshot\_window](#input\_snapshot\_window) | The daily time range (in UTC) during which ElastiCache will begin taking a daily snapshot. | `string` | `"03:00-05:00"` | no |
@@ -53,6 +57,7 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_redis_password_arn"></a> [redis\_password\_arn](#output\_redis\_password\_arn) | The SSM Parameter ARN of password of Redis. |
+| <a name="output_redis_password_arn"></a> [redis\_password\_arn](#output\_redis\_password\_arn) | The legacy SSM parameter ARN for the Redis password. |
+| <a name="output_redis_password_secret_arn"></a> [redis\_password\_secret\_arn](#output\_redis\_password\_secret\_arn) | The Secrets Manager ARN containing the Redis password. |
 | <a name="output_redis_primary_endpoint"></a> [redis\_primary\_endpoint](#output\_redis\_primary\_endpoint) | The primary endpoint of the Redis replication group. |
 <!-- END_TF_DOCS -->

@@ -10,5 +10,5 @@ output "redis_password_secret_arn" {
 
 output "redis_primary_endpoint" {
   description = "The primary endpoint of the Redis replication group."
-  value = aws_elasticache_replication_group.main.primary_endpoint_address
+  value       = aws_elasticache_replication_group.main.primary_endpoint_address
 }
