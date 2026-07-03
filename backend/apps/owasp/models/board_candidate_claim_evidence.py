@@ -11,8 +11,8 @@ from django.db import models, transaction
 
 from apps.common.models import TimestampedModel
 from apps.common.utils import slugify
-from apps.owasp.metadata import strip_file_metadata
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.utils.file import strip_file_metadata
 from apps.owasp.validators import (
     validate_evidence_extension,
     validate_evidence_file_size,
@@ -89,11 +89,11 @@ class BoardCandidateClaimEvidence(TimestampedModel):
     source_url = models.TextField(blank=True, verbose_name="Source URL")
 
     def __init__(self, *args, **kwargs):
-        """Initialize and track original file name."""
+        """Initialize BoardCandidateClaimEvidence."""
         super().__init__(*args, **kwargs)
         self._original_file_name = self.file.name if self.file else None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of the a Board Candidate Claim Evidence."""
         return f"{self.name}"
 
@@ -124,32 +124,23 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 err = "Cannot add or modify evidence on a non-draft claim."
                 raise ValidationError(err)
 
-        if self.file:
-            is_new_file = not self.pk or self.file.name != self._original_file_name
-
-            if is_new_file:
-                try:
-                    self.file = strip_file_metadata(self.file)
-                    validate_evidence_file_size(self.file)
-                except ValidationError as e:
-                    raise ValidationError({"file": e.message}) from e
-                self._original_file_name = self.file.name
-                self.file_name = self.file.name
-                self.file_size = self.file.size
-        else:
+        if self.file and (not self.pk or self.file.name != self._original_file_name):
+            try:
+                self.file = strip_file_metadata(self.file)
+                validate_evidence_file_size(self.file)
+            except ValidationError as e:
+                raise ValidationError({"file": e.message}) from e
+            self.file_name = self.file.name
+            self.file_size = self.file.size
+        elif not self.file:
             self.file_name = ""
             self.file_size = None
-            self._original_file_name = None
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
         self.key = slugify(self.name)[: self._meta.get_field("key").max_length]
 
-        old_file = (
-            self.__class__.objects.filter(pk=self.pk).values_list("file", flat=True).first()
-            if self.pk
-            else None
-        )
+        old_file = self._original_file_name if self.pk else None
 
         self.full_clean()
 

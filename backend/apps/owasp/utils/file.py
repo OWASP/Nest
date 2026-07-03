@@ -1,12 +1,18 @@
-"""OWASP app file metadata stripping utilities."""
+"""OWASP app file utilities."""
+
+from __future__ import annotations
 
 import io
+import logging
 from pathlib import Path
 
 from django.core.exceptions import ValidationError
-from django.core.files.uploadedfile import SimpleUploadedFile
-from PIL import Image, ImageOps
+from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
+from PIL import Image, ImageOps, UnidentifiedImageError
 from pypdf import PdfWriter
+from pypdf.errors import PdfReadError, PyPdfError
+
+logger = logging.getLogger(__name__)
 
 IMAGE_EXTENSIONS = frozenset({".jpeg", ".jpg", ".png", ".webp"})
 PDF_EXTENSION = ".pdf"
@@ -28,7 +34,7 @@ IMAGE_CONTENT_TYPE_MAP = {
 PDF_CONTENT_TYPE = "application/pdf"
 
 
-def strip_file_metadata(file):
+def strip_file_metadata(file: UploadedFile | None) -> UploadedFile | None:
     """Strip EXIF/XMP metadata from an uploaded file.
 
     Dispatches to the appropriate handler based on file extension.
@@ -44,9 +50,9 @@ def strip_file_metadata(file):
     if not file:
         return file
 
-    ext = Path(file.name).suffix.lower()
-
     try:
+        ext = Path(file.name).suffix.lower()
+
         if ext in IMAGE_EXTENSIONS:
             return _strip_image_metadata(file, ext)
 
@@ -55,13 +61,14 @@ def strip_file_metadata(file):
     except ValidationError:
         raise
     except Exception as e:
+        logger.exception("Unexpected error in strip_file_metadata")
         msg = "Invalid or corrupt file."
         raise ValidationError(msg) from e
 
     return file
 
 
-def _strip_image_metadata(file, ext):
+def _strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
     """Strip EXIF/XMP metadata from an image file.
 
     Opens the image with Pillow and re-saves it without metadata.
@@ -84,7 +91,12 @@ def _strip_image_metadata(file, ext):
             image_format = IMAGE_FORMAT_MAP[ext]
             transposed_image.save(output, format=image_format)
             cleaned_bytes = output.getvalue()
+    except (UnidentifiedImageError, OSError, ValueError) as e:
+        logger.warning("Failed to strip image metadata: %s", e)
+        msg = "Invalid or corrupt image."
+        raise ValidationError(msg) from e
     except Exception as e:
+        logger.exception("Unexpected error stripping image metadata")
         msg = "Invalid or corrupt image."
         raise ValidationError(msg) from e
 
@@ -96,7 +108,7 @@ def _strip_image_metadata(file, ext):
     )
 
 
-def _strip_pdf_metadata(file):
+def _strip_pdf_metadata(file: UploadedFile) -> SimpleUploadedFile:
     """Strip metadata from a PDF file.
 
     Uses pypdf to read and rewrite the PDF, removing the /Info
@@ -118,7 +130,12 @@ def _strip_pdf_metadata(file):
         output = io.BytesIO()
         writer.write(output)
         cleaned_bytes = output.getvalue()
+    except (PyPdfError, PdfReadError, ValueError, KeyError) as e:
+        logger.warning("Failed to strip PDF metadata: %s", e)
+        msg = "Invalid or corrupt PDF."
+        raise ValidationError(msg) from e
     except Exception as e:
+        logger.exception("Unexpected error stripping PDF metadata")
         msg = "Invalid or corrupt PDF."
         raise ValidationError(msg) from e
 

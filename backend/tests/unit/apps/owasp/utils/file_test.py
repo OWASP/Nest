@@ -1,4 +1,4 @@
-"""Tests for OWASP app file metadata stripping utilities."""
+"""Tests for OWASP app file utilities."""
 
 import io
 from unittest.mock import MagicMock, patch
@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
 
-from apps.owasp.metadata import (
+from apps.owasp.utils.file import (
     IMAGE_CONTENT_TYPE_MAP,
     IMAGE_EXTENSIONS,
     PDF_CONTENT_TYPE,
@@ -139,7 +139,7 @@ class TestStripFileMetadata:
         mock_file.name = f"test.{ext}"
 
         with patch(
-            "apps.owasp.metadata._strip_image_metadata", return_value=mock_file
+            "apps.owasp.utils.file._strip_image_metadata", return_value=mock_file
         ) as mock_strip:
             result = strip_file_metadata(mock_file)
 
@@ -152,7 +152,7 @@ class TestStripFileMetadata:
         mock_file.name = f"test.{ext}"
 
         with patch(
-            "apps.owasp.metadata._strip_pdf_metadata", return_value=mock_file
+            "apps.owasp.utils.file._strip_pdf_metadata", return_value=mock_file
         ) as mock_strip:
             result = strip_file_metadata(mock_file)
 
@@ -172,7 +172,7 @@ class TestStripFileMetadata:
         mock_file.name = "test.JPEG"
 
         with patch(
-            "apps.owasp.metadata._strip_image_metadata", return_value=mock_file
+            "apps.owasp.utils.file._strip_image_metadata", return_value=mock_file
         ) as mock_strip:
             strip_file_metadata(mock_file)
 
@@ -183,7 +183,7 @@ class TestStripFileMetadata:
         mock_file.name = "test.Pdf"
 
         with patch(
-            "apps.owasp.metadata._strip_pdf_metadata", return_value=mock_file
+            "apps.owasp.utils.file._strip_pdf_metadata", return_value=mock_file
         ) as mock_strip:
             strip_file_metadata(mock_file)
 

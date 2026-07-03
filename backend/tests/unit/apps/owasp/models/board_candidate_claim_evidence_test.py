@@ -428,7 +428,7 @@ class TestBoardCandidateClaimEvidenceModel:
 
         assert evidence.file_name == ""
         assert evidence.file_size is None
-        assert evidence._original_file_name is None
+        assert evidence._original_file_name == "custom_name.pdf"
 
     def test_clean_calls_strip_file_metadata(self):
         """Test that clean calls strip_file_metadata when file is present."""
@@ -690,71 +690,60 @@ class TestBoardCandidateClaimEvidenceModel:
     def test_save_with_cleared_file_deletes_old_file(self, mock_super_save, mock_full_clean):
         """Test that save deletes old blob when an existing record's file is cleared."""
         evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
+        evidence._original_file_name = "bod/claim/evidence/uuid-old.pdf"
 
         with (
-            patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects,
             patch("django.db.transaction.on_commit", side_effect=lambda f, **_: f()),
+            patch("django.core.files.storage.default_storage") as mock_storage,
         ):
-            mock_objects.filter.return_value.values_list.return_value.first.return_value = (
-                "bod/claim/evidence/uuid-old.pdf"
-            )
-            with patch("django.core.files.storage.default_storage") as mock_storage:
-                evidence.save()
+            evidence.save()
 
-                mock_storage.delete.assert_called_once_with("bod/claim/evidence/uuid-old.pdf")
+            mock_storage.delete.assert_called_once_with("bod/claim/evidence/uuid-old.pdf")
 
     @patch.object(BoardCandidateClaimEvidence, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_with_replaced_file_deletes_old_file(self, mock_super_save, mock_full_clean):
         """Test that save deletes old file from storage when replaced."""
         evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
+        evidence._original_file_name = "bod/claim/evidence/uuid-old.pdf"
         evidence.file = MagicMock()
         evidence.file.name = "new_file.pdf"
         evidence.file.size = 1000
 
         with (
-            patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects,
             patch("django.db.transaction.on_commit", side_effect=lambda f, **_: f()),
+            patch("django.core.files.storage.default_storage") as mock_storage,
         ):
-            mock_objects.filter.return_value.values_list.return_value.first.return_value = (
-                "bod/claim/evidence/uuid-old.pdf"
-            )
-            with patch("django.core.files.storage.default_storage") as mock_storage:
-                evidence.save()
+            evidence.save()
 
-                mock_objects.filter.assert_called_once_with(pk=1)
-                mock_storage.delete.assert_called_once_with("bod/claim/evidence/uuid-old.pdf")
+            mock_storage.delete.assert_called_once_with("bod/claim/evidence/uuid-old.pdf")
 
     @patch.object(BoardCandidateClaimEvidence, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_when_db_has_no_old_file_skips_cleanup(self, mock_super_save, mock_full_clean):
         """Test that save skips cleanup when DB has no old file."""
         evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
+        evidence._original_file_name = None
         evidence.file = MagicMock()
         evidence.file.name = "new_file.pdf"
         evidence.file.size = 1000
 
-        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
-            mock_objects.filter.return_value.values_list.return_value.first.return_value = None
-            with patch("django.core.files.storage.default_storage") as mock_storage:
-                evidence.save()
+        with patch("django.core.files.storage.default_storage") as mock_storage:
+            evidence.save()
 
-                mock_storage.delete.assert_not_called()
+            mock_storage.delete.assert_not_called()
 
     @patch.object(BoardCandidateClaimEvidence, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim_evidence.TimestampedModel.save")
     def test_save_with_unchanged_file_skips_cleanup(self, mock_super_save, mock_full_clean):
         """Test that save skips cleanup when file name hasn't changed."""
         evidence = BoardCandidateClaimEvidence(name="Test", source_url="https://example.com", pk=1)
+        evidence._original_file_name = "bod/claim/evidence/uuid-old.pdf"
         evidence.file = MagicMock()
         evidence.file.name = "bod/claim/evidence/uuid-old.pdf"
         evidence.file.size = 1000
 
-        with patch.object(BoardCandidateClaimEvidence, "objects") as mock_objects:
-            mock_objects.filter.return_value.values_list.return_value.first.return_value = (
-                "bod/claim/evidence/uuid-old.pdf"
-            )
-            with patch("django.core.files.storage.default_storage") as mock_storage:
-                evidence.save()
+        with patch("django.core.files.storage.default_storage") as mock_storage:
+            evidence.save()
 
-                mock_storage.delete.assert_not_called()
+            mock_storage.delete.assert_not_called()
