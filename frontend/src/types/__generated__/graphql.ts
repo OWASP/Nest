@@ -101,7 +101,7 @@ export type BoardOfDirectorsNode = Node & {
   id: Scalars['ID']['output'];
   members: Array<EntityMemberNode>;
   owaspUrl: Scalars['String']['output'];
-  reviewer?: Maybe<AuthUserNode>;
+  reviewer?: Maybe<UserNode>;
   updatedAt: Scalars['DateTime']['output'];
   year: Scalars['Int']['output'];
 };

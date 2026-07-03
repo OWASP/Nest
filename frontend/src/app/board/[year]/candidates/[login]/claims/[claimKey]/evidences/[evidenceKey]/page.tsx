@@ -28,13 +28,18 @@ const EvidenceDetailsPage = () => {
     year: string
   }>()
   const { isSyncing, session } = useDjangoSession()
-
   const { data, loading, error } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey || !login || !year || session?.user?.login !== login,
-    variables: { key: claimKey, login, year: Number.parseInt(year) },
+    skip: !claimKey || !login || !year || !session?.user?.login,
+    variables: {
+      key: claimKey,
+      login,
+      sessionLogin: session?.user?.login ?? '',
+      year: Number.parseInt(year),
+    },
   })
 
+  const isReviewer = data?.boardOfDirectors?.reviewer != null
   const [fetchFileUrl] = useLazyQuery(GetBoardCandidateClaimEvidenceFileUrlDocument)
 
   const claim = data?.boardCandidateClaim
@@ -49,7 +54,7 @@ const EvidenceDetailsPage = () => {
 
   if (loading || isSyncing) return <LoadingSpinner />
 
-  if (session?.user?.login !== login) {
+  if (session?.user?.login !== login && !isReviewer) {
     return (
       <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
     )
@@ -130,7 +135,15 @@ const EvidenceDetailsPage = () => {
                 {'Download Evidence'}
               </ActionButton>
             )}
-            <EvidenceActions evidence={evidence} claim={claim} login={login} year={year} />
+            {!isReviewer && (
+              <EvidenceActions
+                evidence={evidence}
+                claim={claim}
+                login={login}
+                sessionLogin={session?.user?.login ?? ''}
+                year={year}
+              />
+            )}
           </div>
         </div>
         <Metadata details={evidenceDetails} detailsTitle="Evidence Details" />

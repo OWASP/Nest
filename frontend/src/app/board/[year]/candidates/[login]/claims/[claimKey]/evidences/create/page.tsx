@@ -59,12 +59,22 @@ const CreateEvidencePage = () => {
           if (!newEvidence) return
           const existing = cache.readQuery({
             query: GetClaimAndEvidencesDocument,
-            variables: { key: claimKey, login, year: Number.parseInt(year) },
+            variables: {
+              key: claimKey,
+              login,
+              sessionLogin: session?.user?.login ?? '',
+              year: Number.parseInt(year),
+            },
           })
           if (existing) {
             cache.writeQuery({
               query: GetClaimAndEvidencesDocument,
-              variables: { key: claimKey, login, year: Number.parseInt(year) },
+              variables: {
+                key: claimKey,
+                login,
+                sessionLogin: session?.user?.login ?? '',
+                year: Number.parseInt(year),
+              },
               data: {
                 ...existing,
                 boardCandidateClaimEvidences: [

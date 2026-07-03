@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
-export const GET_BOARD_CANDIDATE_CLAIM_REVIEWS = gql`
-  query GetBoardCandidateClaimReviews($login: String!, $year: Int!) {
+export const GET_CLAIMS_AND_REVIEWS = gql`
+  query GetClaimsAndReviews($sessionLogin: String!, $year: Int!) {
     boardCandidateClaims(year: $year) {
       id
       createdAt
@@ -26,10 +26,11 @@ export const GET_BOARD_CANDIDATE_CLAIM_REVIEWS = gql`
       }
     }
     boardOfDirectors(year: $year) {
-      candidate(login: $login) {
+      id
+      candidate(login: $sessionLogin) {
         id
       }
-      reviewer(login: $login) {
+      reviewer(login: $sessionLogin) {
         id
       }
     }

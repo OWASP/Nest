@@ -36,10 +36,17 @@ interface EvidenceActionsProps {
   claim: ClaimProperties
   evidence: EvidenceProperties
   login: string
+  sessionLogin: string
   year: string
 }
 
-const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, login, year }) => {
+const EvidenceActions: React.FC<EvidenceActionsProps> = ({
+  claim,
+  evidence,
+  login,
+  sessionLogin,
+  year,
+}) => {
   const router = useRouter()
   const [confirmRemove, setConfirmRemove] = useState<boolean>(false)
   const [reason, setReason] = useState<string | null>(null)
@@ -67,12 +74,12 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({ claim, evidence, logi
         update(cache) {
           const existing = cache.readQuery<GetClaimAndEvidencesQuery>({
             query: GetClaimAndEvidencesDocument,
-            variables: { key: claim.key, login, year: Number.parseInt(year) },
+            variables: { key: claim.key, login, sessionLogin, year: Number.parseInt(year) },
           })
           if (existing) {
             cache.writeQuery({
               query: GetClaimAndEvidencesDocument,
-              variables: { key: claim.key, login, year: Number.parseInt(year) },
+              variables: { key: claim.key, login, sessionLogin, year: Number.parseInt(year) },
               data: {
                 ...existing,
                 boardCandidateClaimEvidences: existing.boardCandidateClaimEvidences.filter(

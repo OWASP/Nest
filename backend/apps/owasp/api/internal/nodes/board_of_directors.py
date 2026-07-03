@@ -3,7 +3,7 @@
 import strawberry
 import strawberry_django
 
-from apps.nest.api.internal.nodes.user import AuthUserNode
+from apps.github.api.internal.nodes.user import UserNode
 from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 
@@ -40,6 +40,7 @@ class BoardOfDirectorsNode(strawberry.relay.Node):
         return root.owasp_url
 
     @strawberry_django.field
-    def reviewer(self, root: BoardOfDirectors, login: str) -> AuthUserNode | None:
+    def reviewer(self, root: BoardOfDirectors, login: str) -> UserNode | None:
         """Resolve board election reviewer."""
-        return root.reviewers.filter(github_user__login=login).first()
+        user = root.reviewers.filter(github_user__login=login).first()
+        return user.github_user if user else None

@@ -3,6 +3,7 @@
 import { useQuery } from '@apollo/client/react'
 
 import { Button } from '@heroui/button'
+import { Chip } from '@heroui/react'
 import { BreadcrumbStyleProvider, registerBreadcrumb } from 'contexts/BreadcrumbContext'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { toLower, upperFirst } from 'lodash'
@@ -11,9 +12,10 @@ import { useEffect } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
-import { ClaimStatusEnum } from 'types/__generated__/graphql'
+import { ClaimStatusEnum, ReviewStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
@@ -31,18 +33,20 @@ const ClaimDetailsPage = () => {
     error: graphQLRequestError,
   } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey,
+    skip: !claimKey || !year || !session?.user?.login,
     variables: {
       key: claimKey,
       login,
+      sessionLogin: session?.user?.login ?? '',
       year: Number.parseInt(year),
-      currentUserLogin: session?.user?.login ?? '',
     },
   })
 
+  const isReviewer = graphQLData?.boardOfDirectors?.reviewer != null
   const claim = graphQLData?.boardCandidateClaim
   const evidences = graphQLData?.boardCandidateClaimEvidences ?? []
-  const isReviewer = graphQLData?.boardOfDirectors?.reviewer != null
+  const hasReviewed =
+    claim?.reviews?.some((r) => r.reviewer?.login === session?.user?.login) ?? false
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -60,6 +64,12 @@ const ClaimDetailsPage = () => {
   }, [claim, claimKey, login, year])
 
   if (isLoading || isSyncing) return <LoadingSpinner />
+
+  if (session?.user?.login !== login && !isReviewer) {
+    return (
+      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
+    )
+  }
 
   if (graphQLRequestError) {
     return (
@@ -108,7 +118,13 @@ const ClaimDetailsPage = () => {
                 {'Add Evidence'}
               </ActionButton>
             )}
-            <ClaimActions claim={claim} isReviewer={isReviewer} login={login} year={year} />
+            <ClaimActions
+              claim={claim}
+              hasReviewed={hasReviewed}
+              isReviewer={isReviewer}
+              login={login}
+              year={year}
+            />
           </div>
         </div>
         <Metadata details={claimDetails} detailsTitle="Claim Details" />
@@ -134,6 +150,40 @@ const ClaimDetailsPage = () => {
                     {formatDate(evidence.createdAt)}
                   </span>
                 </Button>
+              ))}
+            </div>
+          )}
+        </SecondaryCard>
+        <SecondaryCard title="Reviews">
+          {claim.reviews.length === 0 ? (
+            <p> No reviews. </p>
+          ) : (
+            <div className="grid gap-4">
+              {claim.reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="h-28 flex-col items-start justify-start rounded-xl border border-gray-200 bg-transparent p-4 dark:border-gray-800"
+                >
+                  <div className="flex items-center gap-2">
+                    <h3 className="min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
+                      {review.reviewer?.login ?? 'Unknown Reviewer'}
+                    </h3>
+                  </div>
+                  <p className="mt-2 flex-1 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
+                    {review.notes || 'No notes provided.'}
+                  </p>
+                  <span className="mt-2 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                    {formatDate(review.createdAt)}
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      color={review.status === ReviewStatusEnum.Approved ? 'success' : 'danger'}
+                      className="text-tiny h-5 shrink-0"
+                    >
+                      {upperFirst(toLower(review.status))}
+                    </Chip>
+                  </span>
+                </div>
               ))}
             </div>
           )}

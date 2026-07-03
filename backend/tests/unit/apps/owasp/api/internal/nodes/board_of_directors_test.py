@@ -21,6 +21,7 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
             "created_at",
             "members",
             "owasp_url",
+            "reviewer",
             "updated_at",
             "year",
         }
