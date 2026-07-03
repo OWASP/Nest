@@ -21,13 +21,11 @@ class TestSnapshotSubscriptionNode(GraphQLNodeBaseTest):
             "is_active",
             "include_chapters",
             "include_events",
-            "include_issues",
             "include_posts",
-            "include_projects",
-            "include_pull_requests",
-            "include_releases",
             "include_users",
             "created_at",
             "updated_at",
+            "project_preferences",
+            "chapters",
         }
         assert expected_field_names.issubset(field_names)

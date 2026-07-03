@@ -48,27 +48,20 @@ class SnapshotSubscription(models.Model):
         editable=False,
     )
 
-    # Content preferences
+    # Global content preferences
     include_chapters = models.BooleanField(default=True)
     include_events = models.BooleanField(default=True)
-    include_issues = models.BooleanField(default=True)
     include_posts = models.BooleanField(default=True)
-    include_projects = models.BooleanField(default=True)
-    include_pull_requests = models.BooleanField(default=True)
-    include_releases = models.BooleanField(default=True)
     include_users = models.BooleanField(default=True)
 
-    # Specific project/chapter subscriptions
-    subscribed_projects = models.ManyToManyField(
-        "owasp.Project",
-        blank=True,
-        related_name="snapshot_subscriptions",
-    )
-    subscribed_chapters = models.ManyToManyField(
+    # Specific chapter subscriptions
+    chapters = models.ManyToManyField(
         "owasp.Chapter",
         blank=True,
         related_name="snapshot_subscriptions",
     )
+
+    # Per-project preferences
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -88,10 +81,6 @@ class SnapshotSubscription(models.Model):
         return {
             "chapters": self.include_chapters,
             "events": self.include_events,
-            "issues": self.include_issues,
             "posts": self.include_posts,
-            "projects": self.include_projects,
-            "pull_requests": self.include_pull_requests,
-            "releases": self.include_releases,
             "users": self.include_users,
         }

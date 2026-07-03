@@ -4,6 +4,8 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from apps.owasp.api.internal.mutations.snapshot_subscription import (
     CreateSnapshotSubscriptionInput,
@@ -14,6 +16,16 @@ from apps.owasp.api.internal.mutations.snapshot_subscription import (
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
 MOCK_TOKEN = "mock-unsubscribe-token"  # noqa: S105
+
+
+@pytest.fixture(autouse=True)
+def _mock_transaction_atomic():
+    """Disable transaction.atomic decorator for all tests."""
+    with (
+        patch("django.db.transaction.Atomic.__enter__", return_value=None),
+        patch("django.db.transaction.Atomic.__exit__", return_value=False),
+    ):
+        yield
 
 
 def mock_info() -> MagicMock:
@@ -47,29 +59,63 @@ class TestCreateSnapshotSubscription:
     def mutations(self):
         return SnapshotSubscriptionMutations()
 
-    def test_duplicate_subscription(self, mutations):
-        """Test create fails when subscription already exists."""
+    def test_duplicate_active_subscription(self, mutations):
+        """Test create fails when active subscription already exists."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput()
+        mock_existing = MagicMock(spec=SnapshotSubscription)
+        mock_existing.is_active = True
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
-            mock_objects.filter.return_value.exists.return_value = True
+            mock_objects.get_or_create.return_value = (mock_existing, False)
             result = mutations.create_snapshot_subscription(info, input_data=input_data)
             assert not result.ok
             assert result.message == "Subscription already exists."
+
+    def test_reactivate_inactive_subscription(self, mutations):
+        """Test create reactivates an inactive subscription."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(frequency="weekly")
+        mock_existing = MagicMock(spec=SnapshotSubscription)
+        mock_existing.is_active = False
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get_or_create.return_value = (mock_existing, False)
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert result.ok
+            assert result.message == "Subscription reactivated successfully."
+            assert mock_existing.is_active is True
+            mock_existing.save.assert_called_once()
+
+    def test_reactivate_inactive_subscription_with_m2m_fields(self, mutations):
+        """Test create reactivates an inactive subscription with M2M fields."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            subscribed_chapter_ids=[3, 4],
+        )
+        mock_existing = MagicMock(spec=SnapshotSubscription)
+        mock_existing.is_active = False
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get_or_create.return_value = (mock_existing, False)
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert result.ok
+            assert result.message == "Subscription reactivated successfully."
+            assert mock_existing.is_active is True
+            mock_existing.save.assert_called_once()
+            mock_existing.chapters.set.assert_called_once_with([3, 4])
 
     def test_invalid_frequency(self, mutations):
         """Test create fails with invalid frequency."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(frequency="daily")
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.filter.return_value.exists.return_value = False
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert not result.ok
-            assert "Invalid frequency" in result.message
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+        assert not result.ok
+        assert "Invalid frequency" in result.message
 
     def test_success(self, mutations):
         """Test successful subscription creation."""
@@ -79,12 +125,57 @@ class TestCreateSnapshotSubscription:
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
-            mock_objects.filter.return_value.exists.return_value = False
-            mock_objects.create.return_value = mock_sub
+            mock_objects.get_or_create.return_value = (mock_sub, True)
             result = mutations.create_snapshot_subscription(info, input_data=input_data)
             assert result.ok
             assert result.message == "Subscription created successfully."
             assert result.subscription == mock_sub
+
+    def test_success_with_m2m_fields(self, mutations):
+        """Test successful creation with subscribed chapters."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            subscribed_chapter_ids=[4, 5],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get_or_create.return_value = (mock_sub, True)
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert result.ok
+            mock_sub.chapters.set.assert_called_once_with([4, 5])
+
+    def test_concurrent_create_integrity_error(self, mutations):
+        """Test create handles race condition with IntegrityError."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(frequency="weekly")
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get_or_create.side_effect = IntegrityError
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert not result.ok
+            assert result.message == "Subscription already exists."
+
+    def test_create_after_cancel(self, mutations):
+        """Test user can create subscription after cancelling previous one."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(frequency="monthly")
+        mock_existing = MagicMock(spec=SnapshotSubscription)
+        mock_existing.is_active = False
+        mock_existing.frequency = "weekly"
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get_or_create.return_value = (mock_existing, False)
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert result.ok
+            assert result.message == "Subscription reactivated successfully."
+            assert mock_existing.is_active is True
+            assert mock_existing.frequency == "monthly"
+            mock_existing.save.assert_called_once()
 
 
 class TestUpdateSnapshotSubscription:
@@ -132,6 +223,21 @@ class TestUpdateSnapshotSubscription:
             assert result.ok
             assert result.message == "Subscription updated successfully."
             mock_sub.save.assert_called_once()
+
+    def test_success_with_m2m_fields(self, mutations):
+        """Test successful update with subscribed chapters."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(
+            subscribed_chapter_ids=[30],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(info, input_data=input_data)
+            assert result.ok
+            mock_sub.chapters.set.assert_called_once_with([30])
 
 
 class TestCancelSnapshotSubscription:
@@ -189,7 +295,7 @@ class TestUnsubscribeByToken:
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
-            mock_objects.get.side_effect = ValueError
+            mock_objects.get.side_effect = ValidationError("Invalid UUID")
             result = mutations.unsubscribe_by_token(token=MOCK_TOKEN)
             assert not result.ok
             assert result.message == "Invalid unsubscribe token."

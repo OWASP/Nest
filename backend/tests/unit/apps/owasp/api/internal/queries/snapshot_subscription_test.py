@@ -31,10 +31,15 @@ class TestSnapshotSubscriptionQuery:
         ]
         assert "my_subscription" in field_names
 
+    def _resolve_my_subscription(self, info):
+        """Invoke the underlying resolver for my_subscription."""
+        field = SnapshotSubscriptionQuery.__dict__["my_subscription"]
+        return field(self.query, info=info)
+
     def test_my_subscription_unauthenticated(self):
         """Test mySubscription returns None for unauthenticated user."""
         info = mock_info(authenticated=False)
-        result = self.query.__class__.__dict__["my_subscription"](self.query, info=info)
+        result = self._resolve_my_subscription(info)
         assert result is None
 
     def test_my_subscription_not_found(self):
@@ -44,7 +49,7 @@ class TestSnapshotSubscriptionQuery:
             "apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
             mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
-            result = self.query.__class__.__dict__["my_subscription"](self.query, info=info)
+            result = self._resolve_my_subscription(info)
             assert result is None
 
     def test_my_subscription_found(self):
@@ -55,5 +60,5 @@ class TestSnapshotSubscriptionQuery:
             "apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
             mock_objects.get.return_value = mock_sub
-            result = self.query.__class__.__dict__["my_subscription"](self.query, info=info)
+            result = self._resolve_my_subscription(info)
             assert result == mock_sub
