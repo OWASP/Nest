@@ -75,16 +75,15 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         assert result == mock_queryset
 
     def test_reviews_reviewer_sees_own(self):
-        mock_github_user = Mock()
         user = MagicMock()
         user.is_authenticated = True
-        user.github_user = mock_github_user
-        user.github_user.is_owasp_staff = True
+        user.github_user = Mock()
         info = self._make_info(user)
 
         mock_claim = Mock()
         mock_claim.candidate.member = Mock()
         mock_claim.status = BoardCandidateClaim.Status.SUBMITTED
+        mock_claim.board.reviewers.filter.return_value.exists.return_value = True
         mock_queryset = MagicMock()
         mock_claim.reviews = MagicMock()
         mock_claim.reviews.filter.return_value = mock_queryset
@@ -92,21 +91,19 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("reviews", BoardCandidateClaimNode)
         result = field.base_resolver.wrapped_func(None, mock_claim, info)
 
-        mock_claim.reviews.filter.assert_called_once_with(reviewer=mock_github_user)
+        mock_claim.reviews.filter.assert_called_once_with(reviewer=user)
         assert result == mock_queryset
 
     def test_reviews_non_reviewer_gets_empty_on_submitted(self):
         user = MagicMock()
         user.is_authenticated = True
-        mock_github_user = Mock()
-        user.github_user = mock_github_user
-        mock_github_user.is_owasp_staff = False
-        mock_github_user.is_claim_reviewer = False
+        user.github_user = Mock()
         info = self._make_info(user)
 
         mock_claim = Mock()
         mock_claim.candidate.member = Mock()
         mock_claim.status = BoardCandidateClaim.Status.SUBMITTED
+        mock_claim.board.reviewers.filter.return_value.exists.return_value = False
 
         field = self._get_field_by_name("reviews", BoardCandidateClaimNode)
         result = field.base_resolver.wrapped_func(None, mock_claim, info)

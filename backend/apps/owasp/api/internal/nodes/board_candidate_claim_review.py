@@ -19,14 +19,17 @@ from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimRe
 class BoardCandidateClaimReviewNode(strawberry.relay.Node):
     """Board Candidate Claim Review node."""
 
-    reviewer: UserNode
-
     @strawberry_django.field
     def created_at(self, root: BoardCandidateClaimReview) -> datetime:
         """Resolve review creation date."""
         return root.nest_created_at
 
     @strawberry_django.field
-    def decision(self, root: BoardCandidateClaimReview) -> ReviewDecisionEnum:
-        """Resolve review decision."""
-        return ReviewDecisionEnum(root.decision)
+    def reviewer(self, root: BoardCandidateClaimReview) -> UserNode | None:
+        """Resolve reviewer's GitHub user."""
+        return root.reviewer.github_user
+
+    @strawberry_django.field
+    def status(self, root: BoardCandidateClaimReview) -> ReviewDecisionEnum:
+        """Resolve review status."""
+        return ReviewDecisionEnum(root.status)

@@ -5,6 +5,7 @@ import strawberry_django
 
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 
 @strawberry.type
@@ -34,8 +35,7 @@ class BoardCandidateClaimQuery:
         )
         is_reviewer = (
             user.is_authenticated
-            and user.github_user is not None
-            and (user.github_user.is_claim_reviewer or user.github_user.is_owasp_staff)
+            and BoardOfDirectors.objects.filter(year=year, reviewers=user).exists()
         )
         claims = BoardCandidateClaim.objects.filter(
             board__year=year,
@@ -85,11 +85,7 @@ class BoardCandidateClaimQuery:
             and user.github_user is not None
             and user.github_user == claim.candidate.member
         )
-        is_reviewer = (
-            user.is_authenticated
-            and user.github_user is not None
-            and (user.github_user.is_claim_reviewer or user.github_user.is_owasp_staff)
-        )
+        is_reviewer = user.is_authenticated and claim.board.reviewers.filter(id=user.id).exists()
 
         return (
             claim

@@ -24,5 +24,5 @@ class ClaimStatusEnum(enum.Enum):
 class ReviewDecisionEnum(enum.Enum):
     """Review decision enum."""
 
-    APPROVED = BoardCandidateClaimReview.Decision.APPROVED
-    REJECTED = BoardCandidateClaimReview.Decision.REJECTED
+    APPROVED = BoardCandidateClaimReview.Status.APPROVED
+    REJECTED = BoardCandidateClaimReview.Status.REJECTED

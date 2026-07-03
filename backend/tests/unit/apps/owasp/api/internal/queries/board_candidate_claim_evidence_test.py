@@ -75,14 +75,13 @@ class TestBoardCandidateClaimEvidenceQuery:
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
-        user.github_user.is_owasp_staff = False
-        user.github_user.is_claim_reviewer = False
         info = _make_info(user)
         claim_key = "my-key"
         login = "alice"
 
         claim = MagicMock()
-        claim.candidate.member = MagicMock()
+        claim.board.reviewers.filter.return_value.exists.return_value = False
+        claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
@@ -130,12 +129,12 @@ class TestBoardCandidateClaimEvidenceQuery:
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
-        user.github_user.is_owasp_staff = True
         info = _make_info(user)
         claim_key = "my-key"
         login = "alice"
 
         claim = MagicMock()
+        claim.board.reviewers.filter.return_value.exists.return_value = True
         claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidences_qs = MagicMock()
@@ -217,12 +216,11 @@ class TestBoardCandidateClaimEvidenceSingleQuery:
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
-        user.github_user.is_owasp_staff = False
-        user.github_user.is_claim_reviewer = False
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.candidate.member = MagicMock()
+        evidence.claim.board.reviewers.filter.return_value.exists.return_value = False
+        evidence.claim.candidate.member = None
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
 
         with patch(
@@ -263,10 +261,10 @@ class TestBoardCandidateClaimEvidenceSingleQuery:
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
-        user.github_user.is_claim_reviewer = True
         info = _make_info(user)
 
         evidence = MagicMock()
+        evidence.claim.board.reviewers.filter.return_value.exists.return_value = True
         evidence.claim.candidate.member = MagicMock()
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
 
@@ -348,12 +346,11 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
-        user.github_user.is_owasp_staff = False
-        user.github_user.is_claim_reviewer = False
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.candidate.member = MagicMock()
+        evidence.claim.board.reviewers.filter.return_value.exists.return_value = False
+        evidence.claim.candidate.member = None
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidence.file = MagicMock()
         evidence.file.url = "/media/test.pdf"
@@ -423,11 +420,11 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
-        user.github_user.is_owasp_staff = True
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.candidate.member = MagicMock()
+        evidence.claim.board.reviewers.filter.return_value.exists.return_value = True
+        evidence.claim.candidate.member = None
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidence.file = MagicMock()
         evidence.file.url = "/media/test.pdf"

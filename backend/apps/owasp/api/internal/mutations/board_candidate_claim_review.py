@@ -8,14 +8,15 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from strawberry.types import Info
 
-from apps.github.models.user import User
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.nest.models.user import User
 from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
     BoardCandidateClaimReviewNode,
 )
 from apps.owasp.api.internal.nodes.enum import ReviewDecisionEnum
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
+from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,11 @@ def _validate_review_eligibility(
             message=INVALID_STATUS_MSG,
         )
 
-    if claim.board and claim.board.get_candidate(login=reviewer.login):
+    if (
+        claim.board
+        and reviewer.github_user
+        and claim.board.get_candidate(login=reviewer.github_user.login)
+    ):
         return ReviewResult(
             ok=False,
             code="FORBIDDEN",
@@ -84,9 +89,11 @@ class BoardCandidateClaimReviewMutations:
     ) -> ReviewResult:
         """Create review for a claim."""
         user = info.context.request.user
-        if user.github_user is None or not (
-            user.github_user.is_owasp_staff or user.github_user.is_claim_reviewer
-        ):
+
+        is_reviewer = BoardOfDirectors.objects.filter(
+            year=input_data.year, reviewers=user
+        ).exists()
+        if not user.github_user or not is_reviewer:
             return ReviewResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
@@ -98,7 +105,7 @@ class BoardCandidateClaimReviewMutations:
         except BoardCandidateClaim.DoesNotExist:
             return ReviewResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
 
-        result = _validate_review_eligibility(claim, reviewer=user.github_user)
+        result = _validate_review_eligibility(claim, reviewer=user)
 
         if result:
             return result
@@ -106,9 +113,9 @@ class BoardCandidateClaimReviewMutations:
         try:
             review = BoardCandidateClaimReview.objects.create(
                 claim=claim,
-                decision=input_data.decision.value,
+                status=input_data.decision.value,
                 notes=input_data.notes,
-                reviewer=user.github_user,
+                reviewer=user,
             )
         except IntegrityError:
             logger.warning(
