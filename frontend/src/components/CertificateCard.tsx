@@ -234,9 +234,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
-        const parentWidth =
-          containerRef.current.clientWidth ||
-          (typeof globalThis.window !== 'undefined' ? globalThis.window.innerWidth : 0)
+        const parentWidth = containerRef.current.clientWidth || (globalThis.window?.innerWidth ?? 0)
         const newScale = Math.min(1, (parentWidth - 32) / CERTIFICATE_LAYOUT.width)
         setScale(newScale)
       }
@@ -245,7 +243,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
 
     let resizeObserver: ResizeObserver | null = null
     if (
-      typeof globalThis.window !== 'undefined' &&
+      globalThis.window !== undefined &&
       'ResizeObserver' in globalThis.window &&
       containerRef.current
     ) {
@@ -255,14 +253,14 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
       resizeObserver.observe(containerRef.current)
     }
 
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       globalThis.window.addEventListener('resize', handleResize)
     }
     return () => {
       if (resizeObserver) {
         resizeObserver.disconnect()
       }
-      if (typeof globalThis.window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         globalThis.window.removeEventListener('resize', handleResize)
       }
     }
