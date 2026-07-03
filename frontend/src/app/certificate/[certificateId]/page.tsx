@@ -24,7 +24,7 @@ const CertificateVerificationPage: React.FC = () => {
     return <LoadingSpinner />
   }
 
-  if (error) {
+  if (error && !data?.certificate) {
     return (
       <ErrorDisplay
         statusCode={500}
@@ -73,7 +73,7 @@ const CertificateVerificationPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="mb-6 flex w-full max-w-[842px] flex-col items-center justify-between gap-4 rounded-xl border border-red-200/30 bg-red-50/5 sm:flex-row dark:border-red-900/20 dark:bg-red-950/5">
+          <div className="mb-6 flex w-full max-w-[842px] flex-col items-center justify-between gap-4 rounded-xl border border-red-200/30 bg-red-50/5 px-5 py-4 sm:flex-row dark:border-red-900/20 dark:bg-red-950/5">
             <div className="flex flex-col items-center gap-3.5 text-center sm:flex-row sm:items-start sm:text-left">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100/80 text-red-700 dark:bg-red-900/30 dark:text-red-400">
                 <FaCircleXmark size={22} />

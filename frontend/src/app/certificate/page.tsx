@@ -5,13 +5,13 @@ import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { FaCopy, FaFilePdf, FaImage, FaLinkedin } from 'react-icons/fa6'
 
 import { GetMyCertificateDocument } from 'types/__generated__/certificateQueries.generated'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
-import { CertificateCard } from 'components/CertificateCard'
+import { CertificateCard, CERTIFICATE_LAYOUT } from 'components/CertificateCard'
 import LoadingSpinner from 'components/LoadingSpinner'
 import PageLayout from 'components/PageLayout'
 
@@ -20,6 +20,7 @@ const MyCertificatePage: React.FC = () => {
   const router = useRouter()
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSavingPdf, setIsSavingPdf] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   const { data, loading, error } = useQuery(GetMyCertificateDocument, {
     skip: !session,
@@ -76,7 +77,7 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const getCertificateImageDataUrl = async (): Promise<string> => {
-    const node = document.getElementById('certificate-card')
+    const node = cardRef.current
     if (!node) throw new Error('Certificate element not found')
     const { toPng } = await import('html-to-image')
     return toPng(node, {
@@ -95,7 +96,9 @@ const MyCertificatePage: React.FC = () => {
       link.href = dataUrl
       link.click()
       addToast({ title: 'Downloaded', description: 'Certificate saved as PNG.', color: 'success' })
-    } catch {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to save certificate as image:', error)
       // Failed to save certificate
       addToast({
         title: 'Error',
@@ -113,15 +116,27 @@ const MyCertificatePage: React.FC = () => {
       const dataUrl = await getCertificateImageDataUrl()
       const { jsPDF } = await import('jspdf')
 
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [842, 595] })
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 842, 595)
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [CERTIFICATE_LAYOUT.width, CERTIFICATE_LAYOUT.height],
+      })
+      pdf.addImage(dataUrl, 'PNG', 0, 0, CERTIFICATE_LAYOUT.width, CERTIFICATE_LAYOUT.height)
 
       const verifyUrl = `${window.location.origin}/certificate/${certificate.id}`
-      pdf.link(560, 530, 260, 40, { url: verifyUrl })
+      pdf.link(
+        CERTIFICATE_LAYOUT.verifyLink.x,
+        CERTIFICATE_LAYOUT.verifyLink.y,
+        CERTIFICATE_LAYOUT.verifyLink.width,
+        CERTIFICATE_LAYOUT.verifyLink.height,
+        { url: verifyUrl }
+      )
 
       pdf.save(`certificate-${certificate.id}-${new Date().toISOString().split('T')[0]}.pdf`)
       addToast({ title: 'Downloaded', description: 'Certificate saved as PDF.', color: 'success' })
-    } catch {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to save certificate as PDF:', error)
       addToast({
         title: 'Error',
         description: 'Failed to save certificate as PDF.',
@@ -177,7 +192,7 @@ const MyCertificatePage: React.FC = () => {
     <PageLayout title={`${displayName}'s Certificate`}>
       <div className="container mx-auto flex flex-col items-center px-4 py-8">
         <div className="flex w-full justify-center">
-          <CertificateCard certificate={certificate} isPublicView={false} />
+          <CertificateCard certificate={certificate} isPublicView={false} cardRef={cardRef} />
         </div>
 
         <div className="mt-6 w-full max-w-3xl rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 dark:border-gray-800 dark:bg-[#1E2227]">

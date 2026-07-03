@@ -60,7 +60,7 @@ const Recipient: React.FC<RecipientProps> = ({ name, login, avatarUrl }) => {
       </span>
       <div className="flex flex-row items-center justify-center gap-5">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[#0B2545]/20 shadow-[0_2px_12px_rgba(11,37,69,0.08)]">
-          <Image src={avatarUrl} alt={displayName} fill className="object-cover" />
+          <Image src={avatarUrl} alt={displayName} fill sizes="96px" className="object-cover" />
         </div>
         <div className="flex h-24 flex-col justify-center text-left">
           <span className="block font-sans text-[32px] leading-none font-bold text-[#0B2545]">
@@ -83,6 +83,21 @@ const RecognitionText: React.FC = () => (
   </p>
 )
 
+interface LabelProps {
+  children: React.ReactNode
+  size?: 'sm' | 'md'
+}
+
+const Label: React.FC<LabelProps> = ({ children, size = 'md' }) => (
+  <span
+    className={`${
+      size === 'sm' ? 'text-[11px]' : 'text-[13px]'
+    } font-semibold tracking-[0.08em] text-[#1D70B8] uppercase`}
+  >
+    {children}
+  </span>
+)
+
 interface MetricsProps {
   score: number
   tier: string
@@ -95,9 +110,7 @@ const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
         <FaChartBar size={22} className="text-white" />
       </div>
       <div className="flex flex-col items-center justify-center text-center leading-none">
-        <span className="text-[11px] font-semibold tracking-[0.08em] text-[#1D70B8] uppercase">
-          Contribution Score
-        </span>
+        <Label size="sm">Contribution Score</Label>
         <span className="mt-1.5 text-[28px] leading-[0.95] font-extrabold text-[#111827]">
           {score}
         </span>
@@ -112,9 +125,7 @@ const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
         <FaAward size={22} className="text-white" />
       </div>
       <div className="flex flex-col items-center justify-center text-center leading-none">
-        <span className="text-[11px] font-semibold tracking-[0.08em] text-[#1D70B8] uppercase">
-          Achievement Tier
-        </span>
+        <Label size="sm">Achievement Tier</Label>
         <span className="mt-1.5 text-[20px] leading-[0.95] font-extrabold tracking-[0.12em] text-[#111827]">
           {tier.toUpperCase()}
         </span>
@@ -133,9 +144,7 @@ const Footer: React.FC<FooterProps> = ({ id, issuedAt }) => (
     <div className="flex flex-1 flex-row items-center justify-center gap-4">
       <FaShieldHalved className="shrink-0 text-[28px] text-[#1D70B8]" />
       <div className="flex flex-col items-start justify-center leading-none">
-        <span className="text-[13px] font-semibold tracking-[0.08em] text-[#1D70B8] uppercase">
-          Certificate ID
-        </span>
+        <Label>Certificate ID</Label>
         <span
           className="mt-1.5 block font-mono text-[14px] font-bold text-[#111827] uppercase"
           title={id}
@@ -148,9 +157,7 @@ const Footer: React.FC<FooterProps> = ({ id, issuedAt }) => (
     <div className="flex flex-1 flex-row items-center justify-center gap-4">
       <FaCalendarDays className="shrink-0 text-[28px] text-[#1D70B8]" />
       <div className="flex flex-col items-start justify-center leading-none">
-        <span className="text-[13px] font-semibold tracking-[0.08em] text-[#1D70B8] uppercase">
-          Issued On
-        </span>
+        <Label>Issued On</Label>
         <span className="mt-1.5 block text-[14px] font-bold text-[#111827]">
           {formatDate(issuedAt)}
         </span>
@@ -160,9 +167,7 @@ const Footer: React.FC<FooterProps> = ({ id, issuedAt }) => (
     <div className="flex flex-1 flex-row items-center justify-center gap-4">
       <FaGlobe className="shrink-0 text-[28px] text-[#1D70B8]" />
       <div className="flex max-w-[220px] flex-col items-start justify-center leading-none">
-        <span className="text-[13px] font-semibold tracking-[0.08em] text-[#1D70B8] uppercase">
-          Verify Certificate
-        </span>
+        <Label>Verify Certificate</Label>
         <a
           href={`/certificate/${id}`}
           target="_blank"
@@ -200,36 +205,60 @@ const RevokedWatermark: React.FC = () => (
   </div>
 )
 
+export const CERTIFICATE_LAYOUT = {
+  width: 842,
+  height: 595,
+  verifyLink: {
+    x: 560,
+    y: 530,
+    width: 260,
+    height: 40,
+  },
+}
+
 interface CertificateCardProps {
   certificate: Certificate
   isPublicView?: boolean
+  cardRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export const CertificateCard: React.FC<CertificateCardProps> = ({
   certificate,
   isPublicView = false,
+  cardRef,
 }) => {
   const { id, tier, issuedAt, score, isVerified, githubUser } = certificate
   const [scale, setScale] = useState(1)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const CERT_WIDTH = 842
-  const CERT_HEIGHT = 595
-
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
         const parentWidth = containerRef.current.clientWidth || window.innerWidth
-        const newScale = Math.min(1, (parentWidth - 32) / CERT_WIDTH)
+        const newScale = Math.min(1, (parentWidth - 32) / CERTIFICATE_LAYOUT.width)
         setScale(newScale)
       }
     }
     handleResize()
+
+    let resizeObserver: ResizeObserver | null = null
+    if (typeof window !== 'undefined' && 'ResizeObserver' in window && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize()
+      })
+      resizeObserver.observe(containerRef.current)
+    }
+
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
+      window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
-  const scaledHeight = Math.round(CERT_HEIGHT * scale)
+  const scaledHeight = Math.round(CERTIFICATE_LAYOUT.height * scale)
 
   return (
     <div ref={containerRef} className="flex w-full justify-center py-8">
@@ -237,16 +266,17 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
       <div
         className="relative overflow-hidden shadow-[0_8px_40px_rgba(11,37,69,0.18),0_2px_8px_rgba(0,0,0,0.08)]"
         style={{
-          width: `${Math.round(CERT_WIDTH * scale)}px`,
+          width: `${Math.round(CERTIFICATE_LAYOUT.width * scale)}px`,
           height: `${scaledHeight}px`,
         }}
       >
         <div
+          ref={cardRef}
           id="certificate-card"
           className="absolute top-0 left-0 origin-top-left"
           style={{
-            width: `${CERT_WIDTH}px`,
-            height: `${CERT_HEIGHT}px`,
+            width: `${CERTIFICATE_LAYOUT.width}px`,
+            height: `${CERTIFICATE_LAYOUT.height}px`,
             transform: `scale(${scale})`,
           }}
         >
