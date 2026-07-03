@@ -1,7 +1,12 @@
 ##@ Infrastructure
 
+MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+start-localstack: ## Start LocalStack (requires .env with LOCALSTACK_AUTH_TOKEN)
+	@$(MAKEFILE_DIR)scripts/start-localstack.sh
+
 test-infrastructure: ## Run infrastructure tests
-	@find infrastructure/bootstrap infrastructure/modules \
+	@find $(MAKEFILE_DIR)bootstrap $(MAKEFILE_DIR)modules \
 		-name "tests" \
 		-type d \
 		-not -path "*/.terraform/*" | \

@@ -12,7 +12,7 @@ include infrastructure/Makefile
 	check-graphql clean clean-tooling-dependencies clean-trivy-cache eslint fix-eslint fix-prettier graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prettier prune run \
 	scan-images security-scan security-scan-backend-image security-scan-code security-scan-code-semgrep \
 	security-scan-code-trivy security-scan-frontend-image security-scan-images security-scan-zap test \
-	test-infrastructure test-nest-app update update-tooling-dependencies
+	start-localstack test-infrastructure test-nest-app update update-tooling-dependencies
 
 AUDIT_LEVEL ?= high
 
