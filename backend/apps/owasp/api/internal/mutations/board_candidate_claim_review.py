@@ -120,8 +120,8 @@ class BoardCandidateClaimReviewMutations:
         except IntegrityError:
             logger.warning(
                 "Error creating Board Candidate Claim Review for claim %s of user %s",
-                claim.key,
-                claim.candidate.member.login,
+                input_data.claim_key,
+                input_data.claim_member_login,
             )
             return ReviewResult(
                 ok=False,
