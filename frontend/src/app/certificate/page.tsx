@@ -123,7 +123,7 @@ const MyCertificatePage: React.FC = () => {
       })
       pdf.addImage(dataUrl, 'PNG', 0, 0, CERTIFICATE_LAYOUT.width, CERTIFICATE_LAYOUT.height)
 
-      const verifyUrl = `${globalThis.location.origin}/certificate/${certificate.id}`
+      const verifyUrl = certificateUrl
       pdf.link(
         CERTIFICATE_LAYOUT.verifyLink.x,
         CERTIFICATE_LAYOUT.verifyLink.y,
@@ -148,7 +148,7 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleCopyLink = () => {
-    const shareUrl = `${globalThis.location.origin}/certificate/${certificate.id}`
+    const shareUrl = certificateUrl
     navigator.clipboard
       .writeText(shareUrl)
       .then(() => {
@@ -168,7 +168,7 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleShareLinkedIn = () => {
-    const certUrl = `${globalThis.location.origin}/certificate/${certificate.id}`
+    const certUrl = certificateUrl
     const issuedDate = new Date(certificate.issuedAt)
     const params = new URLSearchParams({
       startTask: 'CERTIFICATION_NAME',
@@ -186,6 +186,7 @@ const MyCertificatePage: React.FC = () => {
     )
   }
 
+  const certificateUrl = `${globalThis.location?.origin ?? ''}/certificate/${certificate.id}`
   const displayName = certificate.githubUser.name || certificate.githubUser.login
 
   return (
