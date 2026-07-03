@@ -88,7 +88,7 @@ variable "environment" {
 }
 
 variable "kms_key_arn" {
-  description = "The KMS key arm used to encrypt runtime secrets"
+  description = "The KMS key ARN used to encrypt runtime secrets"
   type        = string
 }
 

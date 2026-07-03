@@ -260,7 +260,7 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
 }
 
 resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
-  description = "Policy to allow ECS tasks to read SSM parameters."
+  description = "Policy to allow ECS tasks to read SSM parameters and Secrets Manager secrets."
   name        = "${local.name_prefix}-ssm-policy"
 
   policy = jsonencode({
