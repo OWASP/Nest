@@ -585,7 +585,7 @@ data "aws_iam_policy_document" "part_two" {
       "secretsmanager:UntagResource",
       "secretsmanager:UpdateSecret",
     ]
-    resources = ["arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${each.key}-*"]
+    resources = ["arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${each.key}-*", "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:/${var.project_name}/${each.key}-*", ]
   }
 
   statement {
