@@ -17,7 +17,7 @@ if ! curl -sf "http://localhost.localstack.cloud:4566/_localstack/health" >/dev/
     exit 1
 fi
 
-for cmd in tflocal awslocal docker; do
+for cmd in curl tflocal awslocal docker; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
         exit 1
@@ -41,22 +41,22 @@ DOMAIN_NAME="${DOMAIN_NAME:-localhost}"
 ENABLE_CRON_TASKS="${ENABLE_CRON_TASKS:-false}"
 DB_PASSWORD="${DB_PASSWORD:-nest_local_db_password}"
 
-TFVARS=$(mktemp)
-trap 'rm -f "$TFVARS"' EXIT
+TFVARS_JSON=$(mktemp /tmp/nest-tfvars-XXXXXX.json)
+trap 'rm -f "$TFVARS_JSON"' EXIT
 
-cat > "$TFVARS" << EOF
-environment           = "local"
-backend_image_tag     = "$TAG"
-frontend_image_tag    = "$TAG"
-django_configuration  = "$DJANGO_CONFIGURATION"
-django_settings_module = "$DJANGO_SETTINGS_MODULE"
-domain_name           = "$DOMAIN_NAME"
-enable_cron_tasks     = $ENABLE_CRON_TASKS
-db_password           = "$DB_PASSWORD"
-db_deletion_protection = false
-db_skip_final_snapshot = true
-enable_nat_gateway    = false
-EOF
+jq -n \
+    --arg environment "local" \
+    --arg backend_image_tag "$TAG" \
+    --arg frontend_image_tag "$TAG" \
+    --arg django_configuration "$DJANGO_CONFIGURATION" \
+    --arg django_settings_module "$DJANGO_SETTINGS_MODULE" \
+    --arg domain_name "$DOMAIN_NAME" \
+    --argjson enable_cron_tasks "$ENABLE_CRON_TASKS" \
+    --arg db_password "$DB_PASSWORD" \
+    --argjson db_deletion_protection false \
+    --argjson db_skip_final_snapshot true \
+    --argjson enable_nat_gateway false \
+    '$ARGS.named' > "$TFVARS_JSON"
 
 cd "$INFRA_LIVE_DIR"
 
@@ -64,7 +64,7 @@ echo "Initializing Terraform with tflocal..."
 tflocal init
 
 echo "Applying Terraform..."
-tflocal apply -auto-approve -var-file="$TFVARS"
+tflocal apply -auto-approve -var-file="$TFVARS_JSON"
 
 echo "Retrieving ECR repository URLs..."
 BACKEND_ECR=$(tflocal output -raw backend_ecr_repository_url)
