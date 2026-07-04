@@ -78,6 +78,18 @@ class TestStripMarkdown:
                 "Multiple links: <https://example.com|First> and <https://example.org|Second>.",
                 "Multiple links: First (https://example.com) and Second (https://example.org).",
             ),
+            (
+                "This is _italic_ text and ~strikethrough~ text.",
+                "This is italic text and strikethrough text.",
+            ),
+            (
+                "Here is some `inline code` and a ```code block\nwith multiple lines```.",
+                "Here is some inline code and a code block\nwith multiple lines.",
+            ),
+            (
+                "Mixed formatting: *bold*, _italic_, ~strike~, `code`.",
+                "Mixed formatting: bold, italic, strike, code.",
+            ),
         ],
     )
     def test_process_mrkdwn(self, input_text, expected_output):

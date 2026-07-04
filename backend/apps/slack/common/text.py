@@ -46,4 +46,12 @@ def strip_markdown(text: str) -> str:
         str: The text with markdown formatting removed.
 
     """
-    return SLACK_LINK_PATTERN.sub(r"\2 (\1)", text).replace("*", "")
+    if not text:
+        return text
+
+    text = SLACK_LINK_PATTERN.sub(r"\2 (\1)", text)
+    text = re.sub(r"```([\s\S]*?)```", r"\1", text)
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    text = re.sub(r"\*([^*]+)\*", r"\1", text)
+    text = re.sub(r"_([^_]+)_", r"\1", text)
+    return re.sub(r"~([^~]+)~", r"\1", text)
