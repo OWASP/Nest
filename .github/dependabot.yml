@@ -102,25 +102,7 @@ updates:
     cooldown:
       default-days: 21
     directories:
-      - infrastructure/bootstrap
-      - infrastructure/live
-      - infrastructure/modules/alb
-      - infrastructure/modules/cache
-      - infrastructure/modules/database
-      - infrastructure/modules/ecr-cache
-      - infrastructure/modules/kms
-      - infrastructure/modules/networking
-      - infrastructure/modules/networking/modules/nacl
-      - infrastructure/modules/networking/modules/vpc-endpoint
-      - infrastructure/modules/parameters
-      - infrastructure/modules/security
-      - infrastructure/modules/service
-      - infrastructure/modules/storage
-      - infrastructure/modules/storage/modules/s3-bucket
-      - infrastructure/modules/storage/modules/shared-data-bucket
-      - infrastructure/modules/tasks
-      - infrastructure/modules/tasks/modules/task
-      - infrastructure/state
+      - infrastructure/**/*
     groups:
       version-updates:
         applies-to: version-updates
