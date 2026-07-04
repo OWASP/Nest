@@ -35,6 +35,14 @@ repos:
     hooks:
       - id: terraform_fmt
         files: ^infrastructure/.*\.(tf|tftest\.hcl)$
+      - id: terraform_providers_lock
+        args:
+          - --hook-config=--mode=regenerate-lockfile-if-some-platform-missed
+          - --args=-platform=darwin_arm64
+          - --args=-platform=linux_amd64
+          - --args=-platform=linux_arm64
+        files: .terraform.lock.hcl
+        name: Lock terraform providers (takes a few minutes if hashes are missing)
       - id: terraform_tflint
         files: ^infrastructure/.*\.tf$
         args:
