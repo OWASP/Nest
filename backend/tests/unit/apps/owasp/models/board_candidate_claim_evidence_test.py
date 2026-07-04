@@ -577,6 +577,41 @@ class TestBoardCandidateClaimEvidenceModel:
 
         mock_strip.assert_called_once_with(mock_file)
 
+    def test_clean_updates_stripped_file_name_and_preserves_original_for_cleanup(self):
+        """Test clean avoids double stripping and preserves original_file_name for cleanup."""
+        mock_file = MagicMock()
+        mock_file.name = "new_file.pdf"
+        mock_file.size = 12345
+        mock_file.__bool__ = Mock(return_value=True)
+
+        evidence = BoardCandidateClaimEvidence(name="Test Evidence")
+        evidence.pk = 123
+        evidence.claim_id = 1
+        evidence.file = mock_file
+        evidence._original_file_name = "existing_file.pdf"
+
+        with (
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.BoardCandidateClaim.objects"
+            ) as mock_claim_objects,
+            patch(
+                "apps.owasp.models.board_candidate_claim_evidence.strip_file_metadata",
+                return_value=mock_file,
+            ) as mock_strip,
+        ):
+            mock_claim_objects.values_list.return_value.filter.return_value.first.return_value = (
+                BoardCandidateClaim.Status.DRAFT
+            )
+            evidence.clean()
+            assert evidence._stripped_file_name == "new_file.pdf"
+            assert evidence._original_file_name == "existing_file.pdf"
+            mock_strip.assert_called_once_with(mock_file)
+
+            mock_strip.reset_mock()
+
+            evidence.clean()
+            mock_strip.assert_not_called()
+
     def test_removal_allowed_statuses_constant(self):
         """Test REMOVAL_ALLOWED_STATUSES contains the correct statuses."""
         expected = frozenset(

@@ -125,11 +125,13 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 raise ValidationError(err)
 
         if self.file and (not self.pk or self.file.name != self._original_file_name):
-            try:
-                self.file = strip_file_metadata(self.file)
-                validate_evidence_file_size(self.file)
-            except ValidationError as e:
-                raise ValidationError({"file": e.message}) from e
+            if self.file.name != getattr(self, "_stripped_file_name", None):
+                try:
+                    self.file = strip_file_metadata(self.file)
+                    validate_evidence_file_size(self.file)
+                except ValidationError as e:
+                    raise ValidationError({"file": e.message}) from e
+                self._stripped_file_name = self.file.name
             self.file_name = self.file.name
             self.file_size = self.file.size
         elif not self.file:
