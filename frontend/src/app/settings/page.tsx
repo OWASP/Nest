@@ -181,6 +181,8 @@ function EntityPicker({
   const isPopupOpen = showDropdown && inputValue.trim().length >= 3
   const suggestionsId = `${label.toLowerCase()}-suggestions`
 
+  const listboxRole = 'listbox'
+
   return (
     <div className="space-y-3">
       <h3 className="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">{label}</h3>
@@ -225,7 +227,7 @@ function EntityPicker({
         {isPopupOpen && (
           <div
             id={suggestionsId}
-            role="listbox"
+            role={listboxRole}
             aria-label={`${label} suggestions`}
             className="absolute z-[1000] mt-1 w-full rounded-md border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-[#2a2a2a]"
           >
