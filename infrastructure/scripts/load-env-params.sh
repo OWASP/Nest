@@ -56,7 +56,7 @@ is_secret() {
     local upper
     upper=$(echo "$key" | tr '[:lower:]' '[:upper:]')
     case "$upper" in
-        *SECRET*|*PASSWORD*|*TOKEN*|*KEY) return 0 ;;
+        *SECRET*|*PASSWORD*|*TOKEN*|*KEY*|*DSN*) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -97,10 +97,15 @@ for env_file in "${ENV_FILES[@]}"; do
         fi
 
         if [[ "$DRY_RUN" == true ]]; then
-            display="${value:0:40}"
-            if [[ ${#value} -gt 40 ]]; then
-                display="${display}..."
+            if [[ "$PARAM_TYPE" == "SecureString" ]]; then
+                display="***"
+            else
+                display="${value:0:40}"
+                if [[ ${#value} -gt 40 ]]; then
+                    display="${display}..."
+                fi
             fi
+            
             echo "  WOULD PUT: $PARAM_NAME ($PARAM_TYPE) = $display"
             ((PARAMETER_COUNT++)) || true
             continue
@@ -111,7 +116,7 @@ for env_file in "${ENV_FILES[@]}"; do
             --name "$PARAM_NAME" \
             --value "$value" \
             --type "$PARAM_TYPE" \
-            $([ "$OVERWRITE" == true ] && echo "--overwrite") \
+            $([[ "$OVERWRITE" == true ]] && echo "--overwrite") \
             --output text 2>/dev/null; then
             echo "  SKIP: $PARAM_NAME (already exists or error, use --overwrite to force)"
             ((SKIPPED_COUNT++)) || true
