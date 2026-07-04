@@ -8,6 +8,9 @@ start-localstack: ## Start LocalStack (requires .env with LOCALSTACK_AUTH_TOKEN)
 provision-infra: ## Create resource on localstack and push images
 	@$(MAKEFILE_DIR)scripts/provision-infra.sh
 
+load-env-params: ## Upload local .env variables to LocalStack SSM Parameter Store
+	@$(MAKEFILE_DIR)scripts/load-env-params.sh $(ARGS)
+
 test-infrastructure: ## Run infrastructure tests
 	@find $(MAKEFILE_DIR)bootstrap $(MAKEFILE_DIR)modules \
 		-name "tests" \
