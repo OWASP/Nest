@@ -5,6 +5,9 @@ MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 start-localstack: ## Start LocalStack (requires .env with LOCALSTACK_AUTH_TOKEN)
 	@$(MAKEFILE_DIR)scripts/start-localstack.sh
 
+provision-infra: ## Create resource on localstack and push images
+	@$(MAKEFILE_DIR)scripts/provision-infra.sh
+
 test-infrastructure: ## Run infrastructure tests
 	@find $(MAKEFILE_DIR)bootstrap $(MAKEFILE_DIR)modules \
 		-name "tests" \

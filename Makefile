@@ -9,7 +9,7 @@ include infrastructure/Makefile
 
 .PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
 	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies audit-tooling-dependencies build check cspell \
-	check-graphql clean clean-tooling-dependencies clean-trivy-cache eslint fix-eslint fix-prettier graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prettier prune run \
+	check-graphql clean clean-tooling-dependencies clean-trivy-cache eslint fix-eslint fix-prettier graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prettier provision-infra prune run \
 	scan-images security-scan security-scan-backend-image security-scan-code security-scan-code-semgrep \
 	security-scan-code-trivy security-scan-frontend-image security-scan-images security-scan-zap test \
 	start-localstack test-infrastructure test-nest-app update update-tooling-dependencies
