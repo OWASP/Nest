@@ -17,7 +17,7 @@ if ! curl -sf "http://localhost.localstack.cloud:4566/_localstack/health" >/dev/
     exit 1
 fi
 
-for cmd in curl tflocal awslocal docker; do
+for cmd in curl tflocal awslocal docker openssl; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
         exit 1
@@ -39,7 +39,7 @@ DJANGO_CONFIGURATION="${DJANGO_CONFIGURATION:-Local}"
 DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-settings.local}"
 DOMAIN_NAME="${DOMAIN_NAME:-localhost}"
 ENABLE_CRON_TASKS="${ENABLE_CRON_TASKS:-false}"
-DB_PASSWORD="${DB_PASSWORD:-nest_local_db_password}"
++DB_PASSWORD="${DB_PASSWORD:-$(openssl rand -base64 24)}"
 
 TFVARS_JSON=$(mktemp /tmp/nest-tfvars-XXXXXX.json)
 trap 'rm -f "$TFVARS_JSON"' EXIT

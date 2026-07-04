@@ -8,6 +8,7 @@ Ensure you have the following setup/installed:
 
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
 - Curl: [Curl](https://github.com/curl/curl)
+- OpenSSL: [OpenSSL](https://www.openssl.org/)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - LocalStack CLI: [LocalStack CLI](https://docs.localstack.cloud/aws/getting-started/installation/)
