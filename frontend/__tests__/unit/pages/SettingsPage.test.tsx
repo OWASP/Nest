@@ -6,7 +6,7 @@ import {
   mockNoSubscription,
   mockUpdateSubscriptionResult,
 } from '@mockData/mockSubscriptionData'
-import { screen, fireEvent } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import SettingsPage from 'app/settings/page'
@@ -57,23 +57,19 @@ describe('SettingsPage Component', () => {
     mockUpdateMutation.mockResolvedValue(mockUpdateSubscriptionResult)
     mockCancelMutation.mockResolvedValue(mockCancelSubscriptionResult)
 
+    let mutationCallIndex = 0
     mockUseMutation.mockImplementation((_mutation, options) => {
+      const currentIndex = mutationCallIndex++ % 3
       const wrappedFn = jest.fn(async (vars) => {
         let result
+        if (currentIndex === 0) {
+          result = await mockCreateMutation(vars)
+        } else if (currentIndex === 1) {
+          result = await mockUpdateMutation(vars)
+        } else {
+          result = await mockCancelMutation(vars)
+        }
         if (options?.onCompleted) {
-          if (
-            _mutation ===
-            jest.requireActual('server/queries/subscriptionQueries')?.CREATE_SNAPSHOT_SUBSCRIPTION
-          ) {
-            result = await mockCreateMutation(vars)
-          } else if (
-            _mutation ===
-            jest.requireActual('server/queries/subscriptionQueries')?.UPDATE_SNAPSHOT_SUBSCRIPTION
-          ) {
-            result = await mockUpdateMutation(vars)
-          } else {
-            result = await mockCancelMutation(vars)
-          }
           options.onCompleted(result.data)
         }
         return result
@@ -210,6 +206,90 @@ describe('SettingsPage Component', () => {
 
       expect(screen.getByText('Monthly')).toBeInTheDocument()
       expect(screen.getByText('Weekly')).toBeInTheDocument()
+    })
+  })
+
+  describe('Mutation Payload', () => {
+    test('Subscribe sends correct default variables', async () => {
+      setupMocks({ data: mockNoSubscription })
+      render(<SettingsPage />)
+
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      await waitFor(() => {
+        expect(mockCreateMutation).toHaveBeenCalledWith({
+          variables: {
+            inputData: {
+              frequency: 'weekly',
+              includeChapters: true,
+              includeEvents: true,
+              includePosts: true,
+              includeUsers: true,
+              subscribedChapterIds: [],
+              projectPreferences: [],
+            },
+          },
+        })
+      })
+    })
+
+    test('Subscribe sends selected frequency', async () => {
+      setupMocks({ data: mockNoSubscription })
+      render(<SettingsPage />)
+
+      fireEvent.click(screen.getByText('Monthly'))
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      await waitFor(() => {
+        expect(mockCreateMutation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            variables: expect.objectContaining({
+              inputData: expect.objectContaining({ frequency: 'monthly' }),
+            }),
+          })
+        )
+      })
+    })
+
+    test('Save Changes sends correct variables for active subscription', async () => {
+      setupMocks({ data: mockActiveSubscription })
+      render(<SettingsPage />)
+
+      fireEvent.click(screen.getByText('Save Changes'))
+
+      await waitFor(() => {
+        expect(mockUpdateMutation).toHaveBeenCalledWith({
+          variables: {
+            inputData: {
+              frequency: 'weekly',
+              includeChapters: true,
+              includeEvents: true,
+              includePosts: true,
+              includeUsers: true,
+              subscribedChapterIds: [200],
+              projectPreferences: [
+                {
+                  projectId: 100,
+                  includeIssues: true,
+                  includePullRequests: true,
+                  includeReleases: false,
+                },
+              ],
+            },
+          },
+        })
+      })
+    })
+
+    test('Unsubscribe calls cancel mutation', async () => {
+      setupMocks({ data: mockActiveSubscription })
+      render(<SettingsPage />)
+
+      fireEvent.click(screen.getByText('Unsubscribe'))
+
+      await waitFor(() => {
+        expect(mockCancelMutation).toHaveBeenCalled()
+      })
     })
   })
 

@@ -1,6 +1,6 @@
-import { useQuery } from '@apollo/client/react'
+import { useApolloClient, useQuery } from '@apollo/client/react'
 import { mockActiveSubscription, mockNoSubscription } from '@mockData/mockSubscriptionData'
-import { screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useSession } from 'next-auth/react'
 import { useTheme } from 'next-themes'
@@ -33,6 +33,10 @@ describe.each([
     document.documentElement.classList.toggle('dark', theme === 'dark')
   })
 
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   const mockUseQuery = useQuery as unknown as jest.Mock
 
   it('should have no violations when not subscribed', async () => {
@@ -55,7 +59,6 @@ describe.each([
     const { container } = render(<SettingsPage />)
     const results = await axe(container)
     expect(results).toHaveNoViolations()
-    jest.restoreAllMocks()
   })
 
   it('should have no violations with active subscription', async () => {
@@ -78,7 +81,44 @@ describe.each([
     const { container } = render(<SettingsPage />)
     const results = await axe(container)
     expect(results).toHaveNoViolations()
-    jest.restoreAllMocks()
+  })
+
+  it('should have no violations with open suggestions dropdown', async () => {
+    jest.spyOn(console, 'error').mockImplementation((...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('not wrapped in act')) return
+      throw new Error(`Console error: ${args.join(' ')}`)
+    })
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { name: 'testuser' } },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: mockNoSubscription,
+      loading: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+    const mockClientQuery = jest.fn().mockResolvedValue({
+      data: {
+        searchProjects: [
+          { id: '1', name: 'OWASP ZAP' },
+          { id: '2', name: 'OWASP Juice Shop' },
+        ],
+      },
+    })
+    ;(useApolloClient as jest.Mock).mockReturnValue({ query: mockClientQuery })
+
+    const { container } = render(<SettingsPage />)
+    const projectInput = screen.getByLabelText('Search projects...')
+    fireEvent.change(projectInput, { target: { value: 'OWASP' } })
+    fireEvent.focus(projectInput)
+
+    await waitFor(() => {
+      expect(screen.getByRole('listbox')).toBeInTheDocument()
+    })
+
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
   })
 
   it('should have no violations in unauthenticated state', async () => {

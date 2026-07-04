@@ -5,7 +5,7 @@ import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
 import debounce from 'lodash/debounce'
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { FaBell, FaBellSlash, FaFloppyDisk, FaXmark } from 'react-icons/fa6'
 
 import { SEARCH_CHAPTERS } from 'server/queries/chapterQueries'
@@ -86,19 +86,25 @@ function EntityPicker({
   onRemove,
   searchQuery,
   searchResultKey,
-}: {
+}: Readonly<{
   label: string
   selectedItems: EntityItem[]
   onAdd: (item: EntityItem) => void
   onRemove: (id: string) => void
   searchQuery: ReturnType<typeof import('@apollo/client').gql>
   searchResultKey: string
-}) {
+}>) {
   const client = useApolloClient()
   const [inputValue, setInputValue] = useState('')
   const [suggestions, setSuggestions] = useState<EntityItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
+  const selectedItemsRef = useRef(selectedItems)
+  const requestIdRef = useRef(0)
+
+  useEffect(() => {
+    selectedItemsRef.current = selectedItems
+  }, [selectedItems])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchSuggestions = useCallback(
@@ -110,22 +116,28 @@ function EntityPicker({
         return
       }
 
+      const currentRequestId = ++requestIdRef.current
       setIsLoading(true)
       try {
         const { data } = await client.query({
           query: searchQuery,
           variables: { query: trimmed },
         })
+        if (currentRequestId !== requestIdRef.current) return
         const results: EntityItem[] = data?.[searchResultKey as keyof typeof data] || []
-        const selectedIds = new Set(selectedItems.map((item) => item.id))
+        const selectedIds = new Set(selectedItemsRef.current.map((item) => item.id))
         setSuggestions(results.filter((item) => !selectedIds.has(item.id)))
       } catch {
-        setSuggestions([])
+        if (currentRequestId === requestIdRef.current) {
+          setSuggestions([])
+        }
       } finally {
-        setIsLoading(false)
+        if (currentRequestId === requestIdRef.current) {
+          setIsLoading(false)
+        }
       }
     }, 300),
-    [client, searchQuery, searchResultKey, selectedItems]
+    [client, searchQuery, searchResultKey]
   )
 
   useEffect(() => {
@@ -140,6 +152,27 @@ function EntityPicker({
     setInputValue('')
     setSuggestions([])
     setShowDropdown(false)
+  }
+
+  const renderSuggestions = () => {
+    if (isLoading) {
+      return <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
+    }
+    if (suggestions.length === 0) {
+      return <div className="px-3 py-2 text-sm text-gray-500">No results found</div>
+    }
+    return suggestions.map((item) => (
+      <button
+        key={item.id}
+        type="button"
+        role="option"
+        aria-selected={false}
+        onMouseDown={() => handleSelect(item)}
+        className="w-full cursor-pointer rounded-sm px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-[#404040] dark:focus:bg-[#404040]"
+      >
+        {item.name}
+      </button>
+    ))
   }
 
   return (
@@ -174,29 +207,19 @@ function EntityPicker({
             onFocus={() => setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
             placeholder={selectedItems.length > 0 ? '' : `Search ${label.toLowerCase()}...`}
-            aria-label={`Search ${label.toLowerCase()}`}
+            aria-label={`Search ${label.toLowerCase()}...`}
             className="min-w-[120px] flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 dark:text-gray-200"
           />
         </div>
 
         {showDropdown && inputValue.trim().length >= 3 && (
-          <div className="absolute z-[1000] mt-1 w-full rounded-md border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-[#2a2a2a]">
-            {isLoading ? (
-              <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
-            ) : suggestions.length > 0 ? (
-              suggestions.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onMouseDown={() => handleSelect(item)}
-                  className="w-full cursor-pointer rounded-sm px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-[#404040] dark:focus:bg-[#404040]"
-                >
-                  {item.name}
-                </button>
-              ))
-            ) : (
-              <div className="px-3 py-2 text-sm text-gray-500">No results found</div>
-            )}
+          <div
+            {...(!isLoading && suggestions.length > 0
+              ? { role: 'listbox', 'aria-label': `${label} suggestions` }
+              : {})}
+            className="absolute z-[1000] mt-1 w-full rounded-md border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-[#2a2a2a]"
+          >
+            {renderSuggestions()}
           </div>
         )}
       </div>
@@ -208,11 +231,11 @@ function ProjectPreferenceCard({
   preference,
   onToggle,
   onRemove,
-}: {
+}: Readonly<{
   preference: ProjectPreference
   onToggle: (key: ProjectContentKey) => void
   onRemove: () => void
-}) {
+}>) {
   return (
     <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
       <div className="mb-3 flex items-center justify-between">
@@ -262,16 +285,179 @@ function ProjectPreferenceCard({
   )
 }
 
+function FrequencySelector({
+  hasActiveSubscription,
+  frequency,
+  setFrequency,
+}: {
+  hasActiveSubscription: boolean
+  frequency: string
+  setFrequency: (f: 'weekly' | 'monthly') => void
+}) {
+  return (
+    <SecondaryCard>
+      <h2 className="mb-4 text-xl font-semibold">
+        {hasActiveSubscription ? 'Frequency' : 'Choose Frequency'}
+      </h2>
+      <div className="flex gap-3">
+        {(['weekly', 'monthly'] as const).map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => setFrequency(option)}
+            className={`flex cursor-pointer items-center gap-3 rounded-md border px-5 py-3 text-sm font-medium transition-all ${
+              frequency === option
+                ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+            }`}
+          >
+            <div
+              className={`flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors ${
+                frequency === option ? 'border-[#1D7BD7]' : 'border-gray-300 dark:border-gray-600'
+              }`}
+            >
+              {frequency === option && <div className="h-2 w-2 rounded-full bg-[#1D7BD7]" />}
+            </div>
+            {option.charAt(0).toUpperCase() + option.slice(1)}
+          </button>
+        ))}
+      </div>
+    </SecondaryCard>
+  )
+}
+
+function GlobalContentPreferences({
+  globalPreferences,
+  toggleGlobalPreference,
+}: {
+  globalPreferences: Record<GlobalContentKey, boolean>
+  toggleGlobalPreference: (key: GlobalContentKey) => void
+}) {
+  return (
+    <SecondaryCard>
+      <h2 className="mb-4 text-xl font-semibold">General Subscriptions</h2>
+      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Manage your general OWASP subscriptions.
+      </p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {GLOBAL_CONTENT_FIELDS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => toggleGlobalPreference(key)}
+            className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
+              globalPreferences[key]
+                ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+            }`}
+          >
+            <span className="truncate">{label}</span>
+            <div
+              className={`flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+                globalPreferences[key] ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <div
+                className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+                  globalPreferences[key] ? 'translate-x-3' : 'translate-x-0'
+                }`}
+              />
+            </div>
+          </button>
+        ))}
+      </div>
+    </SecondaryCard>
+  )
+}
+
+function ProjectSubscriptions({
+  projectPreferences,
+  handleAddProject,
+  handleRemoveProject,
+  handleToggleProjectContent,
+}: {
+  projectPreferences: ProjectPreference[]
+  handleAddProject: (item: EntityItem) => void
+  handleRemoveProject: (projectId: string) => void
+  handleToggleProjectContent: (projectId: string, key: ProjectContentKey) => void
+}) {
+  const selectedProjectItems = projectPreferences.map((p) => p.project)
+
+  return (
+    <SecondaryCard>
+      <h2 className="mb-2 text-xl font-semibold">Project Subscriptions</h2>
+      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Add projects and choose which content types (Issues, Pull Requests, Releases) you want from
+        each one. Leave empty to skip project-specific content.
+      </p>
+
+      <EntityPicker
+        label="Projects"
+        selectedItems={selectedProjectItems}
+        onAdd={handleAddProject}
+        onRemove={handleRemoveProject}
+        searchQuery={SEARCH_PROJECTS}
+        searchResultKey="searchProjects"
+      />
+
+      {projectPreferences.length > 0 && (
+        <div className="mt-4 flex flex-col gap-3">
+          {projectPreferences.map((pref) => (
+            <ProjectPreferenceCard
+              key={pref.project.id}
+              preference={pref}
+              onToggle={(key) => handleToggleProjectContent(pref.project.id, key)}
+              onRemove={() => handleRemoveProject(pref.project.id)}
+            />
+          ))}
+        </div>
+      )}
+    </SecondaryCard>
+  )
+}
+
+function ChapterFilters({
+  includeChapters,
+  selectedChapters,
+  handleAddChapter,
+  handleRemoveChapter,
+}: {
+  includeChapters: boolean
+  selectedChapters: EntityItem[]
+  handleAddChapter: (item: EntityItem) => void
+  handleRemoveChapter: (id: string) => void
+}) {
+  if (!includeChapters) return null
+
+  return (
+    <SecondaryCard>
+      <h2 className="mb-2 text-xl font-semibold">Chapter Subscriptions</h2>
+      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Optionally select specific chapters to follow. Leave empty to receive updates about all
+        chapters.
+      </p>
+      <EntityPicker
+        label="Chapters"
+        selectedItems={selectedChapters}
+        onAdd={handleAddChapter}
+        onRemove={handleRemoveChapter}
+        searchQuery={SEARCH_CHAPTERS}
+        searchResultKey="searchChapters"
+      />
+    </SecondaryCard>
+  )
+}
+
 function SubscriptionContent() {
   const { status } = useSession()
-  const [frequency, setFrequency] = useState('weekly')
+  const [frequency, setFrequency] = useState<'weekly' | 'monthly'>('weekly')
   const [globalPreferences, setGlobalPreferences] = useState<Record<GlobalContentKey, boolean>>(
     DEFAULT_GLOBAL_PREFERENCES
   )
   const [projectPreferences, setProjectPreferences] = useState<ProjectPreference[]>([])
   const [selectedChapters, setSelectedChapters] = useState<EntityItem[]>([])
 
-  const { data, loading, refetch } = useQuery<GetSubscriptionResponse>(GET_MY_SUBSCRIPTION, {
+  const { data, loading, error, refetch } = useQuery<GetSubscriptionResponse>(GET_MY_SUBSCRIPTION, {
     skip: status !== 'authenticated',
     errorPolicy: 'all',
   })
@@ -280,8 +466,8 @@ function SubscriptionContent() {
   const hasActiveSubscription = subscription?.isActive === true
 
   useEffect(() => {
-    if (subscription) {
-      setFrequency(subscription.frequency)
+    if (subscription?.isActive) {
+      setFrequency(subscription.frequency as 'weekly' | 'monthly')
       setGlobalPreferences({
         includeChapters: subscription.includeChapters,
         includeEvents: subscription.includeEvents,
@@ -435,127 +621,12 @@ function SubscriptionContent() {
     return <LoadingSpinner />
   }
 
-  const FrequencySelector = () => (
-    <SecondaryCard>
-      <h2 className="mb-4 text-xl font-semibold">
-        {hasActiveSubscription ? 'Frequency' : 'Choose Frequency'}
-      </h2>
-      <div className="flex gap-3">
-        {(['weekly', 'monthly'] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setFrequency(option)}
-            className={`flex cursor-pointer items-center gap-3 rounded-md border px-5 py-3 text-sm font-medium transition-all ${
-              frequency === option
-                ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
-                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-            }`}
-          >
-            <div
-              className={`flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors ${
-                frequency === option ? 'border-[#1D7BD7]' : 'border-gray-300 dark:border-gray-600'
-              }`}
-            >
-              {frequency === option && <div className="h-2 w-2 rounded-full bg-[#1D7BD7]" />}
-            </div>
-            {option.charAt(0).toUpperCase() + option.slice(1)}
-          </button>
-        ))}
-      </div>
-    </SecondaryCard>
-  )
-
-  const GlobalContentPreferences = () => (
-    <SecondaryCard>
-      <h2 className="mb-4 text-xl font-semibold">General Subscriptions</h2>
-      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Manage your general OWASP subscriptions.
-      </p>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {GLOBAL_CONTENT_FIELDS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => toggleGlobalPreference(key)}
-            className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
-              globalPreferences[key]
-                ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
-                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-            }`}
-          >
-            <span className="truncate">{label}</span>
-            <div
-              className={`flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-                globalPreferences[key] ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <div
-                className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
-                  globalPreferences[key] ? 'translate-x-3' : 'translate-x-0'
-                }`}
-              />
-            </div>
-          </button>
-        ))}
-      </div>
-    </SecondaryCard>
-  )
-
-  const ProjectSubscriptions = () => {
-    const selectedProjectItems = projectPreferences.map((p) => p.project)
-
+  if (error) {
     return (
       <SecondaryCard>
-        <h2 className="mb-2 text-xl font-semibold">Project Subscriptions</h2>
-        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          Add projects and choose which content types (Issues, Pull Requests, Releases) you want
-          from each one. Leave empty to skip project-specific content.
-        </p>
-
-        <EntityPicker
-          label="Add a Project"
-          selectedItems={selectedProjectItems}
-          onAdd={handleAddProject}
-          onRemove={handleRemoveProject}
-          searchQuery={SEARCH_PROJECTS}
-          searchResultKey="searchProjects"
-        />
-
-        {projectPreferences.length > 0 && (
-          <div className="mt-4 flex flex-col gap-3">
-            {projectPreferences.map((pref) => (
-              <ProjectPreferenceCard
-                key={pref.project.id}
-                preference={pref}
-                onToggle={(key) => handleToggleProjectContent(pref.project.id, key)}
-                onRemove={() => handleRemoveProject(pref.project.id)}
-              />
-            ))}
-          </div>
-        )}
-      </SecondaryCard>
-    )
-  }
-
-  const ChapterFilters = () => {
-    if (!globalPreferences.includeChapters) return null
-
-    return (
-      <SecondaryCard>
-        <h2 className="mb-2 text-xl font-semibold">Chapter Subscriptions</h2>
-        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          Optionally select specific chapters to follow. Leave empty to receive updates about all
-          chapters.
-        </p>
-        <EntityPicker
-          label="Chapters"
-          selectedItems={selectedChapters}
-          onAdd={handleAddChapter}
-          onRemove={handleRemoveChapter}
-          searchQuery={SEARCH_CHAPTERS}
-          searchResultKey="searchChapters"
-        />
+        <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+          Failed to load subscription settings. Please try again later.
+        </div>
       </SecondaryCard>
     )
   }
@@ -579,10 +650,27 @@ function SubscriptionContent() {
             </div>
           </SecondaryCard>
 
-          <FrequencySelector />
-          <GlobalContentPreferences />
-          <ProjectSubscriptions />
-          <ChapterFilters />
+          <FrequencySelector
+            hasActiveSubscription={hasActiveSubscription}
+            frequency={frequency}
+            setFrequency={setFrequency}
+          />
+          <GlobalContentPreferences
+            globalPreferences={globalPreferences}
+            toggleGlobalPreference={toggleGlobalPreference}
+          />
+          <ProjectSubscriptions
+            projectPreferences={projectPreferences}
+            handleAddProject={handleAddProject}
+            handleRemoveProject={handleRemoveProject}
+            handleToggleProjectContent={handleToggleProjectContent}
+          />
+          <ChapterFilters
+            includeChapters={globalPreferences.includeChapters}
+            selectedChapters={selectedChapters}
+            handleAddChapter={handleAddChapter}
+            handleRemoveChapter={handleRemoveChapter}
+          />
 
           <div className="flex gap-3">
             <Button
@@ -620,10 +708,27 @@ function SubscriptionContent() {
             </div>
           </SecondaryCard>
 
-          <FrequencySelector />
-          <GlobalContentPreferences />
-          <ProjectSubscriptions />
-          <ChapterFilters />
+          <FrequencySelector
+            hasActiveSubscription={hasActiveSubscription}
+            frequency={frequency}
+            setFrequency={setFrequency}
+          />
+          <GlobalContentPreferences
+            globalPreferences={globalPreferences}
+            toggleGlobalPreference={toggleGlobalPreference}
+          />
+          <ProjectSubscriptions
+            projectPreferences={projectPreferences}
+            handleAddProject={handleAddProject}
+            handleRemoveProject={handleRemoveProject}
+            handleToggleProjectContent={handleToggleProjectContent}
+          />
+          <ChapterFilters
+            includeChapters={globalPreferences.includeChapters}
+            selectedChapters={selectedChapters}
+            handleAddChapter={handleAddChapter}
+            handleRemoveChapter={handleRemoveChapter}
+          />
 
           <Button
             onPress={handleSubscribe}
