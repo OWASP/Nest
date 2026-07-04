@@ -1,0 +1,698 @@
+'use client'
+
+import { useApolloClient, useMutation, useQuery } from '@apollo/client/react'
+import { Button } from '@heroui/button'
+import { addToast } from '@heroui/toast'
+import debounce from 'lodash/debounce'
+import { useSession } from 'next-auth/react'
+import { useCallback, useEffect, useState } from 'react'
+import { FaBell, FaBellSlash, FaFloppyDisk, FaXmark } from 'react-icons/fa6'
+
+import { SEARCH_CHAPTERS } from 'server/queries/chapterQueries'
+import { SEARCH_PROJECTS } from 'server/queries/projectQueries'
+import {
+  CANCEL_SNAPSHOT_SUBSCRIPTION,
+  CREATE_SNAPSHOT_SUBSCRIPTION,
+  GET_MY_SUBSCRIPTION,
+  UPDATE_SNAPSHOT_SUBSCRIPTION,
+} from 'server/queries/subscriptionQueries'
+import LoadingSpinner from 'components/LoadingSpinner'
+import SecondaryCard from 'components/SecondaryCard'
+
+const GLOBAL_CONTENT_FIELDS = [
+  { key: 'includeChapters', label: 'Chapters' },
+  { key: 'includeEvents', label: 'Events' },
+  { key: 'includePosts', label: 'Posts' },
+  { key: 'includeUsers', label: 'Users' },
+] as const
+
+type GlobalContentKey = (typeof GLOBAL_CONTENT_FIELDS)[number]['key']
+
+const PROJECT_CONTENT_FIELDS = [
+  { key: 'includeIssues', label: 'Issues' },
+  { key: 'includePullRequests', label: 'Pull Requests' },
+  { key: 'includeReleases', label: 'Releases' },
+] as const
+
+type ProjectContentKey = (typeof PROJECT_CONTENT_FIELDS)[number]['key']
+
+interface EntityItem {
+  id: string
+  name: string
+}
+
+interface ProjectPreference {
+  project: EntityItem
+  includeIssues: boolean
+  includePullRequests: boolean
+  includeReleases: boolean
+}
+
+interface SubscriptionData {
+  id: string
+  frequency: string
+  isActive: boolean
+  includeChapters: boolean
+  includeEvents: boolean
+  includePosts: boolean
+  includeUsers: boolean
+  projectPreferences: ProjectPreference[]
+  chapters: EntityItem[]
+  createdAt: string
+  updatedAt: string
+}
+
+interface GetSubscriptionResponse {
+  mySubscription?: SubscriptionData | null
+}
+
+interface MutationResponse {
+  ok: boolean
+  message: string
+  subscription?: SubscriptionData | null
+}
+
+const DEFAULT_GLOBAL_PREFERENCES: Record<GlobalContentKey, boolean> = {
+  includeChapters: true,
+  includeEvents: true,
+  includePosts: true,
+  includeUsers: true,
+}
+
+function EntityPicker({
+  label,
+  selectedItems,
+  onAdd,
+  onRemove,
+  searchQuery,
+  searchResultKey,
+}: {
+  label: string
+  selectedItems: EntityItem[]
+  onAdd: (item: EntityItem) => void
+  onRemove: (id: string) => void
+  searchQuery: ReturnType<typeof import('@apollo/client').gql>
+  searchResultKey: string
+}) {
+  const client = useApolloClient()
+  const [inputValue, setInputValue] = useState('')
+  const [suggestions, setSuggestions] = useState<EntityItem[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchSuggestions = useCallback(
+    debounce(async (query: string) => {
+      const trimmed = query.trim()
+      if (trimmed.length < 3) {
+        setSuggestions([])
+        setIsLoading(false)
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        const { data } = await client.query({
+          query: searchQuery,
+          variables: { query: trimmed },
+        })
+        const results: EntityItem[] = data?.[searchResultKey as keyof typeof data] || []
+        const selectedIds = new Set(selectedItems.map((item) => item.id))
+        setSuggestions(results.filter((item) => !selectedIds.has(item.id)))
+      } catch {
+        setSuggestions([])
+      } finally {
+        setIsLoading(false)
+      }
+    }, 300),
+    [client, searchQuery, searchResultKey, selectedItems]
+  )
+
+  useEffect(() => {
+    fetchSuggestions(inputValue)
+    return () => {
+      fetchSuggestions.cancel()
+    }
+  }, [inputValue, fetchSuggestions])
+
+  const handleSelect = (item: EntityItem) => {
+    onAdd(item)
+    setInputValue('')
+    setSuggestions([])
+    setShowDropdown(false)
+  }
+
+  return (
+    <div className="space-y-3">
+      <h3 className="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">{label}</h3>
+
+      <div className="relative">
+        <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-gray-300 bg-transparent px-3 py-2 focus-within:border-[#1D7BD7] dark:border-gray-600">
+          {selectedItems.map((item) => (
+            <span
+              key={item.id}
+              className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+            >
+              {item.name}
+              <button
+                type="button"
+                onClick={() => onRemove(item.id)}
+                className="ml-0.5 cursor-pointer rounded-sm p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600"
+                aria-label={`Remove ${item.name}`}
+              >
+                <FaXmark className="h-2.5 w-2.5" />
+              </button>
+            </span>
+          ))}
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value)
+              setShowDropdown(true)
+            }}
+            onFocus={() => setShowDropdown(true)}
+            onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+            placeholder={selectedItems.length > 0 ? '' : `Search ${label.toLowerCase()}...`}
+            aria-label={`Search ${label.toLowerCase()}`}
+            className="min-w-[120px] flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 dark:text-gray-200"
+          />
+        </div>
+
+        {showDropdown && inputValue.trim().length >= 3 && (
+          <div className="absolute z-[1000] mt-1 w-full rounded-md border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-[#2a2a2a]">
+            {isLoading ? (
+              <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
+            ) : suggestions.length > 0 ? (
+              suggestions.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onMouseDown={() => handleSelect(item)}
+                  className="w-full cursor-pointer rounded-sm px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-[#404040] dark:focus:bg-[#404040]"
+                >
+                  {item.name}
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-2 text-sm text-gray-500">No results found</div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ProjectPreferenceCard({
+  preference,
+  onToggle,
+  onRemove,
+}: {
+  preference: ProjectPreference
+  onToggle: (key: ProjectContentKey) => void
+  onRemove: () => void
+}) {
+  return (
+    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+      <div className="mb-3 flex items-center justify-between">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+          {preference.project.name}
+        </h4>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="cursor-pointer rounded-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-red-400"
+          aria-label={`Remove ${preference.project.name}`}
+        >
+          <FaXmark className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {PROJECT_CONTENT_FIELDS.map(({ key, label }) => {
+          const isOn = preference[key]
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onToggle(key)}
+              className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-all ${
+                isOn
+                  ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+                  : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+              }`}
+            >
+              <span>{label}</span>
+              <div
+                className={`flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+                  isOn ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+              >
+                <div
+                  className={`h-2.5 w-2.5 rounded-full bg-white shadow-sm transition-transform ${
+                    isOn ? 'translate-x-2.5' : 'translate-x-0'
+                  }`}
+                />
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function SubscriptionContent() {
+  const { status } = useSession()
+  const [frequency, setFrequency] = useState('weekly')
+  const [globalPreferences, setGlobalPreferences] = useState<Record<GlobalContentKey, boolean>>(
+    DEFAULT_GLOBAL_PREFERENCES
+  )
+  const [projectPreferences, setProjectPreferences] = useState<ProjectPreference[]>([])
+  const [selectedChapters, setSelectedChapters] = useState<EntityItem[]>([])
+
+  const { data, loading, refetch } = useQuery<GetSubscriptionResponse>(GET_MY_SUBSCRIPTION, {
+    skip: status !== 'authenticated',
+    errorPolicy: 'all',
+  })
+
+  const subscription = data?.mySubscription
+  const hasActiveSubscription = subscription?.isActive === true
+
+  useEffect(() => {
+    if (subscription) {
+      setFrequency(subscription.frequency)
+      setGlobalPreferences({
+        includeChapters: subscription.includeChapters,
+        includeEvents: subscription.includeEvents,
+        includePosts: subscription.includePosts,
+        includeUsers: subscription.includeUsers,
+      })
+      setProjectPreferences(subscription.projectPreferences || [])
+      setSelectedChapters(subscription.chapters || [])
+    }
+  }, [subscription])
+
+  const [createSubscription, { loading: creating }] = useMutation<{
+    createSnapshotSubscription: MutationResponse
+  }>(CREATE_SNAPSHOT_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.createSnapshotSubscription
+      if (result.ok) {
+        addToast({
+          title: 'Subscribed!',
+          description: 'You will receive snapshot digest emails.',
+          color: 'success',
+        })
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({ title: 'Error', description: 'Failed to create subscription.', color: 'danger' })
+    },
+  })
+
+  const [updateSubscription, { loading: updating }] = useMutation<{
+    updateSnapshotSubscription: MutationResponse
+  }>(UPDATE_SNAPSHOT_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.updateSnapshotSubscription
+      if (result.ok) {
+        addToast({
+          title: 'Updated',
+          description: 'Your preferences have been saved.',
+          color: 'success',
+        })
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({
+        title: 'Error',
+        description: 'Failed to update subscription.',
+        color: 'danger',
+      })
+    },
+  })
+
+  const [cancelSubscription, { loading: cancelling }] = useMutation<{
+    cancelSnapshotSubscription: MutationResponse
+  }>(CANCEL_SNAPSHOT_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.cancelSnapshotSubscription
+      if (result.ok) {
+        addToast({
+          title: 'Unsubscribed',
+          description: 'You will no longer receive digest emails.',
+          color: 'success',
+        })
+        setGlobalPreferences(DEFAULT_GLOBAL_PREFERENCES)
+        setFrequency('weekly')
+        setProjectPreferences([])
+        setSelectedChapters([])
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({
+        title: 'Error',
+        description: 'Failed to cancel subscription.',
+        color: 'danger',
+      })
+    },
+  })
+
+  const toggleGlobalPreference = useCallback((key: GlobalContentKey) => {
+    setGlobalPreferences((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
+
+  const handleAddProject = useCallback((item: EntityItem) => {
+    setProjectPreferences((prev) => {
+      if (prev.some((p) => p.project.id === item.id)) return prev
+      return [
+        ...prev,
+        {
+          project: item,
+          includeIssues: true,
+          includePullRequests: true,
+          includeReleases: true,
+        },
+      ]
+    })
+  }, [])
+
+  const handleRemoveProject = useCallback((projectId: string) => {
+    setProjectPreferences((prev) => prev.filter((p) => p.project.id !== projectId))
+  }, [])
+
+  const handleToggleProjectContent = useCallback((projectId: string, key: ProjectContentKey) => {
+    setProjectPreferences((prev) =>
+      prev.map((p) => (p.project.id === projectId ? { ...p, [key]: !p[key] } : p))
+    )
+  }, [])
+
+  const handleAddChapter = useCallback((item: EntityItem) => {
+    setSelectedChapters((prev) => [...prev, item])
+  }, [])
+
+  const handleRemoveChapter = useCallback((id: string) => {
+    setSelectedChapters((prev) => prev.filter((c) => c.id !== id))
+  }, [])
+
+  const getMutationVariables = () => ({
+    inputData: {
+      frequency,
+      ...globalPreferences,
+      subscribedChapterIds: selectedChapters.map((c) => Number.parseInt(c.id, 10)),
+      projectPreferences: projectPreferences.map((p) => ({
+        projectId: Number.parseInt(p.project.id, 10),
+        includeIssues: p.includeIssues,
+        includePullRequests: p.includePullRequests,
+        includeReleases: p.includeReleases,
+      })),
+    },
+  })
+
+  const handleSubscribe = () => {
+    createSubscription({ variables: getMutationVariables() })
+  }
+
+  const handleUpdate = () => {
+    updateSubscription({ variables: getMutationVariables() })
+  }
+
+  const handleCancel = () => {
+    cancelSubscription()
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
+  const FrequencySelector = () => (
+    <SecondaryCard>
+      <h2 className="mb-4 text-xl font-semibold">
+        {hasActiveSubscription ? 'Frequency' : 'Choose Frequency'}
+      </h2>
+      <div className="flex gap-3">
+        {(['weekly', 'monthly'] as const).map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => setFrequency(option)}
+            className={`flex cursor-pointer items-center gap-3 rounded-md border px-5 py-3 text-sm font-medium transition-all ${
+              frequency === option
+                ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+            }`}
+          >
+            <div
+              className={`flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors ${
+                frequency === option ? 'border-[#1D7BD7]' : 'border-gray-300 dark:border-gray-600'
+              }`}
+            >
+              {frequency === option && <div className="h-2 w-2 rounded-full bg-[#1D7BD7]" />}
+            </div>
+            {option.charAt(0).toUpperCase() + option.slice(1)}
+          </button>
+        ))}
+      </div>
+    </SecondaryCard>
+  )
+
+  const GlobalContentPreferences = () => (
+    <SecondaryCard>
+      <h2 className="mb-4 text-xl font-semibold">General Subscriptions</h2>
+      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Manage your general OWASP subscriptions.
+      </p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {GLOBAL_CONTENT_FIELDS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => toggleGlobalPreference(key)}
+            className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
+              globalPreferences[key]
+                ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+            }`}
+          >
+            <span className="truncate">{label}</span>
+            <div
+              className={`flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+                globalPreferences[key] ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <div
+                className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+                  globalPreferences[key] ? 'translate-x-3' : 'translate-x-0'
+                }`}
+              />
+            </div>
+          </button>
+        ))}
+      </div>
+    </SecondaryCard>
+  )
+
+  const ProjectSubscriptions = () => {
+    const selectedProjectItems = projectPreferences.map((p) => p.project)
+
+    return (
+      <SecondaryCard>
+        <h2 className="mb-2 text-xl font-semibold">Project Subscriptions</h2>
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          Add projects and choose which content types (Issues, Pull Requests, Releases) you want
+          from each one. Leave empty to skip project-specific content.
+        </p>
+
+        <EntityPicker
+          label="Add a Project"
+          selectedItems={selectedProjectItems}
+          onAdd={handleAddProject}
+          onRemove={handleRemoveProject}
+          searchQuery={SEARCH_PROJECTS}
+          searchResultKey="searchProjects"
+        />
+
+        {projectPreferences.length > 0 && (
+          <div className="mt-4 flex flex-col gap-3">
+            {projectPreferences.map((pref) => (
+              <ProjectPreferenceCard
+                key={pref.project.id}
+                preference={pref}
+                onToggle={(key) => handleToggleProjectContent(pref.project.id, key)}
+                onRemove={() => handleRemoveProject(pref.project.id)}
+              />
+            ))}
+          </div>
+        )}
+      </SecondaryCard>
+    )
+  }
+
+  const ChapterFilters = () => {
+    if (!globalPreferences.includeChapters) return null
+
+    return (
+      <SecondaryCard>
+        <h2 className="mb-2 text-xl font-semibold">Chapter Subscriptions</h2>
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          Optionally select specific chapters to follow. Leave empty to receive updates about all
+          chapters.
+        </p>
+        <EntityPicker
+          label="Chapters"
+          selectedItems={selectedChapters}
+          onAdd={handleAddChapter}
+          onRemove={handleRemoveChapter}
+          searchQuery={SEARCH_CHAPTERS}
+          searchResultKey="searchChapters"
+        />
+      </SecondaryCard>
+    )
+  }
+
+  return (
+    <>
+      {hasActiveSubscription ? (
+        <>
+          <SecondaryCard>
+            <div className="flex items-start gap-3">
+              <FaBell className="mt-0.5 text-green-600 dark:text-green-400" />
+              <div>
+                <h2 className="font-semibold text-green-800 dark:text-green-300">
+                  Subscription Active
+                </h2>
+                <p className="mt-1 text-sm text-green-700 dark:text-green-400">
+                  You are currently receiving <strong>{subscription?.frequency}</strong> digest
+                  emails.
+                </p>
+              </div>
+            </div>
+          </SecondaryCard>
+
+          <FrequencySelector />
+          <GlobalContentPreferences />
+          <ProjectSubscriptions />
+          <ChapterFilters />
+
+          <div className="flex gap-3">
+            <Button
+              onPress={handleUpdate}
+              isDisabled={updating}
+              radius="md"
+              className="border border-[#1D7BD7] bg-[#1D7BD7] font-medium text-white transition-all hover:bg-[#1565b0]"
+            >
+              <FaFloppyDisk className="mr-2" />
+              {updating ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <Button
+              variant="bordered"
+              onPress={handleCancel}
+              isDisabled={cancelling}
+              radius="md"
+              className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+            >
+              <FaBellSlash className="mr-2" />
+              {cancelling ? 'Cancelling...' : 'Unsubscribe'}
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          <SecondaryCard>
+            <div className="flex items-start gap-3">
+              <FaBellSlash className="mt-0.5 text-gray-500 dark:text-gray-400" />
+              <div>
+                <h2 className="font-semibold text-gray-700 dark:text-gray-300">Not Subscribed</h2>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Subscribe to get curated OWASP community updates delivered to your inbox.
+                </p>
+              </div>
+            </div>
+          </SecondaryCard>
+
+          <FrequencySelector />
+          <GlobalContentPreferences />
+          <ProjectSubscriptions />
+          <ChapterFilters />
+
+          <Button
+            onPress={handleSubscribe}
+            isDisabled={creating}
+            radius="md"
+            className="border border-[#1D7BD7] bg-[#1D7BD7] font-medium text-white transition-all hover:bg-[#1565b0]"
+          >
+            <FaBell className="mr-2" />
+            {creating ? 'Subscribing...' : 'Subscribe'}
+          </Button>
+        </>
+      )}
+    </>
+  )
+}
+
+const SETTINGS_TABS = [{ key: 'subscriptions', label: 'Subscriptions' }] as const
+
+type SettingsTabKey = (typeof SETTINGS_TABS)[number]['key']
+
+export default function SettingsPage() {
+  const { status } = useSession()
+  const [activeTab, setActiveTab] = useState<SettingsTabKey>('subscriptions')
+
+  if (status === 'loading') {
+    return <LoadingSpinner />
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <h2 className="mb-2 text-2xl font-bold text-gray-700 dark:text-gray-300">
+            Sign in required
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400">
+            Please sign in to manage your settings.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex min-h-[80vh] flex-col items-center p-8">
+      <div className="w-full max-w-3xl">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">Settings</h1>
+        </div>
+
+        <div className="mb-6 flex border-b border-gray-200 dark:border-gray-700">
+          {SETTINGS_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab.key
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'subscriptions' && <SubscriptionContent />}
+      </div>
+    </div>
+  )
+}
