@@ -8,6 +8,7 @@ from apps.owasp.models.board_of_directors import BoardOfDirectors
 class BoardOfDirectorsAdmin(admin.ModelAdmin):
     """Admin for Snapshot model."""
 
+    filter_horizontal = ("reviewers",)
     list_filter = ("year",)
     ordering = ("-year",)
     search_fields = ("year",)

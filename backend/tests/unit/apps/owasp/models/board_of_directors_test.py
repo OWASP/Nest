@@ -1,5 +1,7 @@
 from unittest.mock import Mock, patch
 
+from django.db import models
+
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 
@@ -12,6 +14,19 @@ class TestBoardOfDirectorsModel:
     def test_meta_options(self):
         assert BoardOfDirectors._meta.db_table == "owasp_board_of_directors"
         assert BoardOfDirectors._meta.verbose_name_plural == "Board of Directors"
+
+    def test_reviews_threshold_default_three(self):
+        field = BoardOfDirectors._meta.get_field("reviews_threshold")
+
+        assert field.default == 3
+
+    def test_meta_constraints(self):
+        constraints = {c.name: c for c in BoardOfDirectors._meta.constraints}
+
+        assert "reviews_threshold_min_1" in constraints
+        constraint = constraints["reviews_threshold_min_1"]
+        assert isinstance(constraint, models.CheckConstraint)
+        assert constraint.condition.children == [("reviews_threshold__gte", 1)]
 
     def test_year_field_unique(self):
         field = BoardOfDirectors._meta.get_field("year")
