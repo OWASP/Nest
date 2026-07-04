@@ -1,5 +1,6 @@
 'use client'
 
+import { useQuery } from '@apollo/client/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
@@ -7,6 +8,8 @@ import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { FaGithub } from 'react-icons/fa'
+
+import { GetMyCertificateDocument } from 'types/__generated__/certificateQueries.generated'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -20,6 +23,12 @@ export default function UserMenu({
   const dropdownId = useId()
   const isProjectLeader = session?.user?.isLeader
   const isOwaspStaff = session?.user?.isOwaspStaff
+
+  const { data: certificateData } = useQuery(GetMyCertificateDocument, {
+    skip: status !== 'authenticated',
+    fetchPolicy: 'cache-first',
+  })
+  const hasCertificate = !!certificateData?.myCertificate
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -106,6 +115,16 @@ export default function UserMenu({
               onClick={() => setIsOpen(false)}
             >
               Project Health Dashboard
+            </Link>
+          )}
+
+          {hasCertificate && (
+            <Link
+              href="/certificate"
+              className={userMenuItemClasses}
+              onClick={() => setIsOpen(false)}
+            >
+              My Certificate
             </Link>
           )}
 
