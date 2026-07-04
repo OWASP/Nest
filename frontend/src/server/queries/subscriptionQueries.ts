@@ -1,33 +1,40 @@
 import { gql } from '@apollo/client'
 
-export const GET_MY_SUBSCRIPTION = gql`
-  query GetMySubscription {
-    mySubscription {
+const SUBSCRIPTION_FIELDS = gql`
+  fragment SubscriptionFields on SnapshotSubscriptionNode {
+    id
+    frequency
+    isActive
+    includeChapters
+    includeEvents
+    includePosts
+    includeUsers
+    projectPreferences {
       id
-      frequency
-      isActive
-      includeChapters
-      includeEvents
-      includePosts
-      includeUsers
-      projectPreferences {
-        id
-        project {
-          id
-          name
-        }
-        includeIssues
-        includePullRequests
-        includeReleases
-      }
-      chapters {
+      project {
         id
         name
       }
-      createdAt
-      updatedAt
+      includeIssues
+      includePullRequests
+      includeReleases
+    }
+    chapters {
+      id
+      name
+    }
+    createdAt
+    updatedAt
+  }
+`
+
+export const GET_MY_SUBSCRIPTION = gql`
+  query GetMySubscription {
+    mySubscription {
+      ...SubscriptionFields
     }
   }
+  ${SUBSCRIPTION_FIELDS}
 `
 
 export const CREATE_SNAPSHOT_SUBSCRIPTION = gql`
@@ -36,32 +43,11 @@ export const CREATE_SNAPSHOT_SUBSCRIPTION = gql`
       ok
       message
       subscription {
-        id
-        frequency
-        isActive
-        includeChapters
-        includeEvents
-        includePosts
-        includeUsers
-        projectPreferences {
-          id
-          project {
-            id
-            name
-          }
-          includeIssues
-          includePullRequests
-          includeReleases
-        }
-        chapters {
-          id
-          name
-        }
-        createdAt
-        updatedAt
+        ...SubscriptionFields
       }
     }
   }
+  ${SUBSCRIPTION_FIELDS}
 `
 
 export const UPDATE_SNAPSHOT_SUBSCRIPTION = gql`
@@ -70,32 +56,11 @@ export const UPDATE_SNAPSHOT_SUBSCRIPTION = gql`
       ok
       message
       subscription {
-        id
-        frequency
-        isActive
-        includeChapters
-        includeEvents
-        includePosts
-        includeUsers
-        projectPreferences {
-          id
-          project {
-            id
-            name
-          }
-          includeIssues
-          includePullRequests
-          includeReleases
-        }
-        chapters {
-          id
-          name
-        }
-        createdAt
-        updatedAt
+        ...SubscriptionFields
       }
     }
   }
+  ${SUBSCRIPTION_FIELDS}
 `
 
 export const CANCEL_SNAPSHOT_SUBSCRIPTION = gql`
