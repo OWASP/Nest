@@ -63,22 +63,24 @@ def _sync_project_preferences(
     """Sync per-project preferences for a subscription.
 
     Replaces all existing project preferences with the provided ones.
+    Wrapped in a transaction to prevent partial preference sets.
 
     Args:
         subscription: The snapshot subscription instance.
         preferences: List of per-project preference inputs.
 
     """
-    subscription.project_preferences.all().delete()
+    with transaction.atomic():
+        subscription.project_preferences.all().delete()
 
-    for pref in preferences:
-        ProjectSubscriptionPreference.objects.create(
-            subscription=subscription,
-            project_id=pref.project_id,
-            include_issues=pref.include_issues,
-            include_pull_requests=pref.include_pull_requests,
-            include_releases=pref.include_releases,
-        )
+        for pref in preferences:
+            ProjectSubscriptionPreference.objects.create(
+                subscription=subscription,
+                project_id=pref.project_id,
+                include_issues=pref.include_issues,
+                include_pull_requests=pref.include_pull_requests,
+                include_releases=pref.include_releases,
+            )
 
 
 def _apply_subscription_preferences(
@@ -92,19 +94,20 @@ def _apply_subscription_preferences(
         input_data: The input data containing preference values.
 
     """
-    subscription.is_active = True
-    subscription.frequency = input_data.frequency
-    subscription.include_chapters = input_data.include_chapters
-    subscription.include_events = input_data.include_events
-    subscription.include_posts = input_data.include_posts
-    subscription.include_users = input_data.include_users
-    subscription.save()
+    with transaction.atomic():
+        subscription.is_active = True
+        subscription.frequency = input_data.frequency
+        subscription.include_chapters = input_data.include_chapters
+        subscription.include_events = input_data.include_events
+        subscription.include_posts = input_data.include_posts
+        subscription.include_users = input_data.include_users
+        subscription.save()
 
-    if input_data.subscribed_chapter_ids is not None:
-        subscription.chapters.set(input_data.subscribed_chapter_ids)
+        if input_data.subscribed_chapter_ids is not None:
+            subscription.chapters.set(input_data.subscribed_chapter_ids)
 
-    if input_data.project_preferences is not None:
-        _sync_project_preferences(subscription, input_data.project_preferences)
+        if input_data.project_preferences is not None:
+            _sync_project_preferences(subscription, input_data.project_preferences)
 
 
 @strawberry.type
@@ -208,13 +211,14 @@ class SnapshotSubscriptionMutations:
             if value is not None:
                 setattr(subscription, field_name, value)
 
-        subscription.save()
+        with transaction.atomic():
+            subscription.save()
 
-        if input_data.subscribed_chapter_ids is not None:
-            subscription.chapters.set(input_data.subscribed_chapter_ids)
+            if input_data.subscribed_chapter_ids is not None:
+                subscription.chapters.set(input_data.subscribed_chapter_ids)
 
-        if input_data.project_preferences is not None:
-            _sync_project_preferences(subscription, input_data.project_preferences)
+            if input_data.project_preferences is not None:
+                _sync_project_preferences(subscription, input_data.project_preferences)
 
         return SnapshotSubscriptionResult(
             ok=True,

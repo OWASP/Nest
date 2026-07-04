@@ -48,20 +48,16 @@ class SnapshotSubscription(models.Model):
         editable=False,
     )
 
-    # Global content preferences
     include_chapters = models.BooleanField(default=True)
     include_events = models.BooleanField(default=True)
     include_posts = models.BooleanField(default=True)
     include_users = models.BooleanField(default=True)
 
-    # Specific chapter subscriptions
     chapters = models.ManyToManyField(
         "owasp.Chapter",
         blank=True,
         related_name="snapshot_subscriptions",
     )
-
-    # Per-project preferences
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

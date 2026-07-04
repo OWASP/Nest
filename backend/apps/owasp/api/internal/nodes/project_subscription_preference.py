@@ -18,7 +18,7 @@ from apps.owasp.models.project_subscription_preference import ProjectSubscriptio
 class ProjectSubscriptionPreferenceNode(strawberry.relay.Node):
     """Project subscription preference node."""
 
-    @strawberry_django.field(prefetch_related=["project"])
+    @strawberry_django.field(select_related=["project"])
     def project(self, root: ProjectSubscriptionPreference) -> ProjectNode:
         """Resolve the associated project."""
         return root.project

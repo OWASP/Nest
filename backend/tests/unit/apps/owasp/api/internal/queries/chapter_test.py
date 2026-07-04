@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.owasp.api.internal.queries.chapter import ChapterQuery
+from apps.owasp.api.internal.queries.chapter import SEARCH_CHAPTERS_LIMIT, ChapterQuery
 from apps.owasp.models.chapter import Chapter
 
 
@@ -148,6 +148,7 @@ class TestSearchChapters:
 
             mock_active.filter.assert_called_once_with(name__icontains="test")
             mock_qs.order_by.assert_called_once_with("name")
+            mock_ordered_qs.__getitem__.assert_called_once_with(slice(None, SEARCH_CHAPTERS_LIMIT))
             assert result == mock_chapters
 
     def test_search_chapters_whitespace_query(self):
