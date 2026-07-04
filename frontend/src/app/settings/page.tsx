@@ -111,6 +111,7 @@ function EntityPicker({
     debounce(async (query: string) => {
       const trimmed = query.trim()
       if (trimmed.length < 3) {
+        ++requestIdRef.current
         setSuggestions([])
         setIsLoading(false)
         return
@@ -165,9 +166,8 @@ function EntityPicker({
       <button
         key={item.id}
         type="button"
-        role="option"
-        aria-selected={false}
-        onMouseDown={() => handleSelect(item)}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => handleSelect(item)}
         className="w-full cursor-pointer rounded-sm px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-[#404040] dark:focus:bg-[#404040]"
       >
         {item.name}
@@ -214,9 +214,7 @@ function EntityPicker({
 
         {showDropdown && inputValue.trim().length >= 3 && (
           <div
-            {...(!isLoading && suggestions.length > 0
-              ? { role: 'listbox', 'aria-label': `${label} suggestions` }
-              : {})}
+            aria-label={`${label} suggestions`}
             className="absolute z-[1000] mt-1 w-full rounded-md border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-[#2a2a2a]"
           >
             {renderSuggestions()}
@@ -289,11 +287,11 @@ function FrequencySelector({
   hasActiveSubscription,
   frequency,
   setFrequency,
-}: {
+}: Readonly<{
   hasActiveSubscription: boolean
   frequency: string
   setFrequency: (f: 'weekly' | 'monthly') => void
-}) {
+}>) {
   return (
     <SecondaryCard>
       <h2 className="mb-4 text-xl font-semibold">
@@ -329,10 +327,10 @@ function FrequencySelector({
 function GlobalContentPreferences({
   globalPreferences,
   toggleGlobalPreference,
-}: {
+}: Readonly<{
   globalPreferences: Record<GlobalContentKey, boolean>
   toggleGlobalPreference: (key: GlobalContentKey) => void
-}) {
+}>) {
   return (
     <SecondaryCard>
       <h2 className="mb-4 text-xl font-semibold">General Subscriptions</h2>
@@ -375,12 +373,12 @@ function ProjectSubscriptions({
   handleAddProject,
   handleRemoveProject,
   handleToggleProjectContent,
-}: {
+}: Readonly<{
   projectPreferences: ProjectPreference[]
   handleAddProject: (item: EntityItem) => void
   handleRemoveProject: (projectId: string) => void
   handleToggleProjectContent: (projectId: string, key: ProjectContentKey) => void
-}) {
+}>) {
   const selectedProjectItems = projectPreferences.map((p) => p.project)
 
   return (
@@ -421,12 +419,12 @@ function ChapterFilters({
   selectedChapters,
   handleAddChapter,
   handleRemoveChapter,
-}: {
+}: Readonly<{
   includeChapters: boolean
   selectedChapters: EntityItem[]
   handleAddChapter: (item: EntityItem) => void
   handleRemoveChapter: (id: string) => void
-}) {
+}>) {
   if (!includeChapters) return null
 
   return (
@@ -555,7 +553,13 @@ function SubscriptionContent() {
   })
 
   const toggleGlobalPreference = useCallback((key: GlobalContentKey) => {
-    setGlobalPreferences((prev) => ({ ...prev, [key]: !prev[key] }))
+    setGlobalPreferences((prev) => {
+      const next = { ...prev, [key]: !prev[key] }
+      if (key === 'includeChapters' && !next.includeChapters) {
+        setSelectedChapters([])
+      }
+      return next
+    })
   }, [])
 
   const handleAddProject = useCallback((item: EntityItem) => {
@@ -621,7 +625,7 @@ function SubscriptionContent() {
     return <LoadingSpinner />
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <SecondaryCard>
         <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
