@@ -10,6 +10,10 @@ import { screen, fireEvent, waitFor } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import SettingsPage from 'app/settings/page'
+import {
+  CREATE_SNAPSHOT_SUBSCRIPTION,
+  UPDATE_SNAPSHOT_SUBSCRIPTION,
+} from 'server/queries/subscriptionQueries'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -57,14 +61,12 @@ describe('SettingsPage Component', () => {
     mockUpdateMutation.mockResolvedValue(mockUpdateSubscriptionResult)
     mockCancelMutation.mockResolvedValue(mockCancelSubscriptionResult)
 
-    let mutationCallIndex = 0
-    mockUseMutation.mockImplementation((_mutation, options) => {
-      const currentIndex = mutationCallIndex++ % 3
+    mockUseMutation.mockImplementation((mutation, options) => {
       const wrappedFn = jest.fn(async (vars) => {
         let result
-        if (currentIndex === 0) {
+        if (mutation === CREATE_SNAPSHOT_SUBSCRIPTION) {
           result = await mockCreateMutation(vars)
-        } else if (currentIndex === 1) {
+        } else if (mutation === UPDATE_SNAPSHOT_SUBSCRIPTION) {
           result = await mockUpdateMutation(vars)
         } else {
           result = await mockCancelMutation(vars)

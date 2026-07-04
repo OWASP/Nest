@@ -35,6 +35,7 @@ describe.each([
 
   afterEach(() => {
     jest.restoreAllMocks()
+    jest.clearAllMocks()
   })
 
   const mockUseQuery = useQuery as unknown as jest.Mock
@@ -114,7 +115,7 @@ describe.each([
     fireEvent.focus(projectInput)
 
     await waitFor(() => {
-      expect(screen.getByRole('listbox')).toBeInTheDocument()
+      expect(screen.getByText('OWASP ZAP')).toBeInTheDocument()
     })
 
     const results = await axe(container)
