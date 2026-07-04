@@ -9,6 +9,7 @@ from django.db import IntegrityError
 
 from apps.owasp.api.internal.mutations.snapshot_subscription import (
     CreateSnapshotSubscriptionInput,
+    ProjectPreferenceInput,
     SnapshotSubscriptionMutations,
     SnapshotSubscriptionResult,
     UpdateSnapshotSubscriptionInput,
@@ -147,6 +148,42 @@ class TestCreateSnapshotSubscription:
             assert result.ok
             mock_sub.chapters.set.assert_called_once_with([4, 5])
 
+    def test_success_with_project_preferences(self, mutations):
+        """Test successful creation with project preferences."""
+        info = mock_info()
+        pref = ProjectPreferenceInput(
+            project_id=10,
+            include_issues=True,
+            include_pull_requests=False,
+            include_releases=True,
+        )
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            project_preferences=[pref],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with (
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "SnapshotSubscription.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "ProjectSubscriptionPreference"
+            ) as mock_pref_model,
+        ):
+            mock_objects.get_or_create.return_value = (mock_sub, True)
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert result.ok
+            mock_sub.project_preferences.all.return_value.delete.assert_called_once()
+            mock_pref_model.objects.create.assert_called_once_with(
+                subscription=mock_sub,
+                project_id=10,
+                include_issues=True,
+                include_pull_requests=False,
+                include_releases=True,
+            )
+
     def test_concurrent_create_integrity_error(self, mutations):
         """Test create handles race condition with IntegrityError."""
         info = mock_info()
@@ -238,6 +275,41 @@ class TestUpdateSnapshotSubscription:
             result = mutations.update_snapshot_subscription(info, input_data=input_data)
             assert result.ok
             mock_sub.chapters.set.assert_called_once_with([30])
+
+    def test_success_with_project_preferences(self, mutations):
+        """Test successful update with project preferences."""
+        info = mock_info()
+        pref = ProjectPreferenceInput(
+            project_id=20,
+            include_issues=False,
+            include_pull_requests=True,
+            include_releases=False,
+        )
+        input_data = UpdateSnapshotSubscriptionInput(
+            project_preferences=[pref],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with (
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "SnapshotSubscription.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "ProjectSubscriptionPreference"
+            ) as mock_pref_model,
+        ):
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(info, input_data=input_data)
+            assert result.ok
+            mock_sub.project_preferences.all.return_value.delete.assert_called_once()
+            mock_pref_model.objects.create.assert_called_once_with(
+                subscription=mock_sub,
+                project_id=20,
+                include_issues=False,
+                include_pull_requests=True,
+                include_releases=False,
+            )
 
 
 class TestCancelSnapshotSubscription:

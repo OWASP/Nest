@@ -69,18 +69,30 @@ def _sync_project_preferences(
         subscription: The snapshot subscription instance.
         preferences: List of per-project preference inputs.
 
-    """
-    with transaction.atomic():
-        subscription.project_preferences.all().delete()
+    Raises:
+        ValueError: If duplicate project IDs or invalid project references.
 
-        for pref in preferences:
-            ProjectSubscriptionPreference.objects.create(
-                subscription=subscription,
-                project_id=pref.project_id,
-                include_issues=pref.include_issues,
-                include_pull_requests=pref.include_pull_requests,
-                include_releases=pref.include_releases,
-            )
+    """
+    project_ids = [pref.project_id for pref in preferences]
+    if len(project_ids) != len(set(project_ids)):
+        msg = "Duplicate project IDs in preferences."
+        raise ValueError(msg)
+
+    try:
+        with transaction.atomic():
+            subscription.project_preferences.all().delete()
+
+            for pref in preferences:
+                ProjectSubscriptionPreference.objects.create(
+                    subscription=subscription,
+                    project_id=pref.project_id,
+                    include_issues=pref.include_issues,
+                    include_pull_requests=pref.include_pull_requests,
+                    include_releases=pref.include_releases,
+                )
+    except IntegrityError:
+        msg = "Invalid project ID in preferences."
+        raise ValueError(msg) from None
 
 
 def _apply_subscription_preferences(
@@ -144,30 +156,36 @@ class SnapshotSubscriptionMutations:
                     user=user,
                     defaults=defaults,
                 )
+
+                if not created:
+                    if subscription.is_active:
+                        return SnapshotSubscriptionResult(
+                            ok=False,
+                            message="Subscription already exists.",
+                        )
+                    _apply_subscription_preferences(subscription, input_data)
+                    return SnapshotSubscriptionResult(
+                        ok=True,
+                        message="Subscription reactivated successfully.",
+                        subscription=subscription,
+                    )
+
+                if input_data.subscribed_chapter_ids is not None:
+                    subscription.chapters.set(input_data.subscribed_chapter_ids)
+
+                if input_data.project_preferences is not None:
+                    _sync_project_preferences(subscription, input_data.project_preferences)
+
         except IntegrityError:
             return SnapshotSubscriptionResult(
                 ok=False,
                 message="Subscription already exists.",
             )
-
-        if not created:
-            if subscription.is_active:
-                return SnapshotSubscriptionResult(
-                    ok=False,
-                    message="Subscription already exists.",
-                )
-            _apply_subscription_preferences(subscription, input_data)
+        except ValueError as err:
             return SnapshotSubscriptionResult(
-                ok=True,
-                message="Subscription reactivated successfully.",
-                subscription=subscription,
+                ok=False,
+                message=str(err),
             )
-
-        if input_data.subscribed_chapter_ids is not None:
-            subscription.chapters.set(input_data.subscribed_chapter_ids)
-
-        if input_data.project_preferences is not None:
-            _sync_project_preferences(subscription, input_data.project_preferences)
 
         return SnapshotSubscriptionResult(
             ok=True,
@@ -211,14 +229,20 @@ class SnapshotSubscriptionMutations:
             if value is not None:
                 setattr(subscription, field_name, value)
 
-        with transaction.atomic():
-            subscription.save()
+        try:
+            with transaction.atomic():
+                subscription.save()
 
-            if input_data.subscribed_chapter_ids is not None:
-                subscription.chapters.set(input_data.subscribed_chapter_ids)
+                if input_data.subscribed_chapter_ids is not None:
+                    subscription.chapters.set(input_data.subscribed_chapter_ids)
 
-            if input_data.project_preferences is not None:
-                _sync_project_preferences(subscription, input_data.project_preferences)
+                if input_data.project_preferences is not None:
+                    _sync_project_preferences(subscription, input_data.project_preferences)
+        except ValueError as err:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message=str(err),
+            )
 
         return SnapshotSubscriptionResult(
             ok=True,
