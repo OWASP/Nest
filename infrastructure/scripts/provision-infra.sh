@@ -35,23 +35,33 @@ fi
 
 echo "Using image tag: $TAG"
 
+ENVIRONMENT="${ENVIRONMENT:-local}"
 DJANGO_CONFIGURATION="${DJANGO_CONFIGURATION:-Local}"
 DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-settings.local}"
 DOMAIN_NAME="${DOMAIN_NAME:-localhost}"
 ENABLE_CRON_TASKS="${ENABLE_CRON_TASKS:-false}"
-+DB_PASSWORD="${DB_PASSWORD:-$(openssl rand -base64 24)}"
+DB_PASSWORD="${DB_PASSWORD:-$(openssl rand -base64 24)}"
 
 TFVARS_JSON=$(mktemp /tmp/nest-tfvars-XXXXXX.json)
 trap 'rm -f "$TFVARS_JSON"' EXIT
 
+_normalize_bool() {
+    local val="${1//\"/}"
+    case "${val,,}" in
+        true)  echo true ;;
+        false) echo false ;;
+        *) echo "ERROR: ENABLE_CRON_TASKS must be 'true' or 'false', got '$1'." >&2; exit 1 ;;
+    esac
+}
+
 jq -n \
-    --arg environment "local" \
+    --arg environment "$ENVIRONMENT" \
     --arg backend_image_tag "$TAG" \
     --arg frontend_image_tag "$TAG" \
     --arg django_configuration "$DJANGO_CONFIGURATION" \
     --arg django_settings_module "$DJANGO_SETTINGS_MODULE" \
     --arg domain_name "$DOMAIN_NAME" \
-    --argjson enable_cron_tasks "$ENABLE_CRON_TASKS" \
+    --argjson enable_cron_tasks "$(_normalize_bool "${ENABLE_CRON_TASKS:-false}")"
     --arg db_password "$DB_PASSWORD" \
     --argjson db_deletion_protection false \
     --argjson db_skip_final_snapshot true \
