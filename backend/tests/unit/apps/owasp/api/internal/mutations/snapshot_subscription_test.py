@@ -184,6 +184,49 @@ class TestCreateSnapshotSubscription:
                 include_releases=True,
             )
 
+    def test_duplicate_project_ids_in_preferences(self, mutations):
+        """Test create fails with duplicate project IDs."""
+        info = mock_info()
+        pref1 = ProjectPreferenceInput(project_id=10)
+        pref2 = ProjectPreferenceInput(project_id=10)
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            project_preferences=[pref1, pref2],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get_or_create.return_value = (mock_sub, True)
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert not result.ok
+            assert result.message == "Duplicate project IDs in preferences."
+
+    def test_invalid_project_id_in_preferences(self, mutations):
+        """Test create fails with invalid project FK."""
+        info = mock_info()
+        pref = ProjectPreferenceInput(project_id=999)
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            project_preferences=[pref],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with (
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "SnapshotSubscription.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "ProjectSubscriptionPreference"
+            ) as mock_pref_model,
+        ):
+            mock_objects.get_or_create.return_value = (mock_sub, True)
+            mock_pref_model.objects.create.side_effect = IntegrityError
+            result = mutations.create_snapshot_subscription(info, input_data=input_data)
+            assert not result.ok
+            assert result.message == "Invalid project ID in preferences."
+
     def test_concurrent_create_integrity_error(self, mutations):
         """Test create handles race condition with IntegrityError."""
         info = mock_info()
@@ -310,6 +353,47 @@ class TestUpdateSnapshotSubscription:
                 include_pull_requests=True,
                 include_releases=False,
             )
+
+    def test_duplicate_project_ids_in_preferences(self, mutations):
+        """Test update fails with duplicate project IDs."""
+        info = mock_info()
+        pref1 = ProjectPreferenceInput(project_id=20)
+        pref2 = ProjectPreferenceInput(project_id=20)
+        input_data = UpdateSnapshotSubscriptionInput(
+            project_preferences=[pref1, pref2],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(info, input_data=input_data)
+            assert not result.ok
+            assert result.message == "Duplicate project IDs in preferences."
+
+    def test_invalid_project_id_in_preferences(self, mutations):
+        """Test update fails with invalid project FK."""
+        info = mock_info()
+        pref = ProjectPreferenceInput(project_id=999)
+        input_data = UpdateSnapshotSubscriptionInput(
+            project_preferences=[pref],
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with (
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "SnapshotSubscription.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.api.internal.mutations.snapshot_subscription."
+                "ProjectSubscriptionPreference"
+            ) as mock_pref_model,
+        ):
+            mock_objects.get.return_value = mock_sub
+            mock_pref_model.objects.create.side_effect = IntegrityError
+            result = mutations.update_snapshot_subscription(info, input_data=input_data)
+            assert not result.ok
+            assert result.message == "Invalid project ID in preferences."
 
 
 class TestCancelSnapshotSubscription:
