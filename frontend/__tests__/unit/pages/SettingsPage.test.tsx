@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import SettingsPage from 'app/settings/page'
 import {
+  CANCEL_SNAPSHOT_SUBSCRIPTION,
   CREATE_SNAPSHOT_SUBSCRIPTION,
   UPDATE_SNAPSHOT_SUBSCRIPTION,
 } from 'server/queries/subscriptionQueries'
@@ -68,8 +69,10 @@ describe('SettingsPage Component', () => {
           result = await mockCreateMutation(vars)
         } else if (mutation === UPDATE_SNAPSHOT_SUBSCRIPTION) {
           result = await mockUpdateMutation(vars)
-        } else {
+        } else if (mutation === CANCEL_SNAPSHOT_SUBSCRIPTION) {
           result = await mockCancelMutation(vars)
+        } else {
+          throw new Error('Unexpected mutation document')
         }
         if (options?.onCompleted) {
           options.onCompleted(result.data)
