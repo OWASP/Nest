@@ -793,6 +793,23 @@ export type ProjectNodeRecentMilestonesArgs = {
   limit?: Scalars['Int']['input'];
 };
 
+export type ProjectPreferenceInput = {
+  includeIssues?: Scalars['Boolean']['input'];
+  includePullRequests?: Scalars['Boolean']['input'];
+  includeReleases?: Scalars['Boolean']['input'];
+  projectId: Scalars['Int']['input'];
+};
+
+export type ProjectSubscriptionPreferenceNode = Node & {
+  __typename?: 'ProjectSubscriptionPreferenceNode';
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  includeIssues: Scalars['Boolean']['output'];
+  includePullRequests: Scalars['Boolean']['output'];
+  includeReleases: Scalars['Boolean']['output'];
+  project: ProjectNode;
+};
+
 export type PullRequestNode = Node & {
   __typename?: 'PullRequestNode';
   author?: Maybe<UserNode>;
@@ -1216,19 +1233,17 @@ export type SnapshotNodeUsersArgs = {
 
 export type SnapshotSubscriptionNode = Node & {
   __typename?: 'SnapshotSubscriptionNode';
+  chapters: Array<ChapterNode>;
   createdAt: Scalars['DateTime']['output'];
   frequency: Scalars['String']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   includeChapters: Scalars['Boolean']['output'];
   includeEvents: Scalars['Boolean']['output'];
-  includeIssues: Scalars['Boolean']['output'];
   includePosts: Scalars['Boolean']['output'];
-  includeProjects: Scalars['Boolean']['output'];
-  includePullRequests: Scalars['Boolean']['output'];
-  includeReleases: Scalars['Boolean']['output'];
   includeUsers: Scalars['Boolean']['output'];
   isActive: Scalars['Boolean']['output'];
+  projectPreferences: Array<ProjectSubscriptionPreferenceNode>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
