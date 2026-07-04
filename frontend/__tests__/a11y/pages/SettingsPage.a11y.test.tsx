@@ -115,7 +115,8 @@ describe.each([
     fireEvent.focus(projectInput)
 
     await waitFor(() => {
-      expect(screen.getByText('OWASP ZAP')).toBeInTheDocument()
+      expect(screen.getByRole('listbox', { name: /projects suggestions/i })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'OWASP ZAP' })).toBeInTheDocument()
     })
 
     const results = await axe(container)

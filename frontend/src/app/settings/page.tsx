@@ -162,10 +162,13 @@ function EntityPicker({
     if (suggestions.length === 0) {
       return <div className="px-3 py-2 text-sm text-gray-500">No results found</div>
     }
+    const accessibleRole = 'option'
     return suggestions.map((item) => (
       <button
         key={item.id}
         type="button"
+        role={accessibleRole}
+        aria-selected={false}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => handleSelect(item)}
         className="w-full cursor-pointer rounded-sm px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-[#404040] dark:focus:bg-[#404040]"
@@ -174,6 +177,9 @@ function EntityPicker({
       </button>
     ))
   }
+
+  const isPopupOpen = showDropdown && inputValue.trim().length >= 3
+  const suggestionsId = `${label.toLowerCase()}-suggestions`
 
   return (
     <div className="space-y-3">
@@ -199,6 +205,10 @@ function EntityPicker({
           ))}
           <input
             type="text"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={isPopupOpen}
+            aria-controls={isPopupOpen ? suggestionsId : undefined}
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value)
@@ -212,8 +222,10 @@ function EntityPicker({
           />
         </div>
 
-        {showDropdown && inputValue.trim().length >= 3 && (
+        {isPopupOpen && (
           <div
+            id={suggestionsId}
+            role="listbox"
             aria-label={`${label} suggestions`}
             className="absolute z-[1000] mt-1 w-full rounded-md border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-[#2a2a2a]"
           >
@@ -625,7 +637,7 @@ function SubscriptionContent() {
     return <LoadingSpinner />
   }
 
-  if (error && !data) {
+  if (error && !subscription) {
     return (
       <SecondaryCard>
         <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
