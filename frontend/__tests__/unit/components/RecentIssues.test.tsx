@@ -210,4 +210,16 @@ describe('<RecentIssues />', () => {
     const avatarImage = screen.queryByAltText("Author's avatar")
     expect(avatarImage).not.toBeInTheDocument()
   })
+
+  it('renders Open status badge for open issues', () => {
+    const issue = { ...baseIssue, state: 'open' }
+    render(<RecentIssues data={[issue]} />)
+    expect(screen.getByText('Open')).toBeInTheDocument()
+  })
+
+  it('renders Closed status badge for closed issues', () => {
+    const issue = { ...baseIssue, state: 'closed' }
+    render(<RecentIssues data={[issue]} />)
+    expect(screen.getByText('Closed')).toBeInTheDocument()
+  })
 })

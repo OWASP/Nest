@@ -117,4 +117,22 @@ describe('RecentPullRequests', () => {
     render(<RecentPullRequests data={minimalData} />)
     expect(screen.getByText('Recent Pull Requests').parentElement).toHaveClass('flex')
   })
+
+  it('renders Open status badge for open PRs', () => {
+    const data = [{ ...minimalData[0], state: 'open', mergedAt: undefined }]
+    render(<RecentPullRequests data={data} />)
+    expect(screen.getByText('Open')).toBeInTheDocument()
+  })
+
+  it('renders Merged status badge for closed + merged PRs', () => {
+    const data = [{ ...minimalData[0], state: 'closed', mergedAt: '2024-06-02T12:00:00Z' }]
+    render(<RecentPullRequests data={data} />)
+    expect(screen.getByText('Merged')).toBeInTheDocument()
+  })
+
+  it('renders Closed status badge for closed + unmerged PRs', () => {
+    const data = [{ ...minimalData[0], state: 'closed', mergedAt: undefined }]
+    render(<RecentPullRequests data={data} />)
+    expect(screen.getByText('Closed')).toBeInTheDocument()
+  })
 })

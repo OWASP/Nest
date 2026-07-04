@@ -85,6 +85,8 @@ const ItemCardList = ({
       login: string
       name: string
     }
+    state?: string
+    mergedAt?: string
   }) => JSX.Element
 }) => (
   <SecondaryCard icon={icon} title={title}>

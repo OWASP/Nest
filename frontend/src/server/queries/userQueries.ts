@@ -7,6 +7,7 @@ export const GET_USER_DATA = gql`
       createdAt
       organizationName
       repositoryName
+      state
       title
       url
     }
@@ -23,8 +24,10 @@ export const GET_USER_DATA = gql`
     recentPullRequests(limit: 5, login: $key) {
       id
       createdAt
+      mergedAt
       organizationName
       repositoryName
+      state
       title
       url
     }
