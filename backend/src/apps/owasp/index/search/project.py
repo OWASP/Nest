@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from apps.common.index_types import ProjectSearchResult
+
 from algoliasearch_django import raw_search
 
 from apps.owasp.models.project import Project
@@ -10,11 +15,11 @@ from apps.owasp.models.project import Project
 def get_projects(
     query: str,
     *,
-    attributes: list | None = None,
+    attributes: list[str] | None = None,
     limit: int = 25,
     page: int = 1,
-    searchable_attributes: list | None = None,
-) -> dict:
+    searchable_attributes: list[str] | None = None,
+) -> ProjectSearchResult:
     """Return projects relevant to a search query.
 
     Args:
