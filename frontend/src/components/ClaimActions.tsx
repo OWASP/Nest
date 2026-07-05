@@ -141,6 +141,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
         shouldShowTimeoutProgress: true,
         color: 'danger',
       })
+      resetConfirm()
     } finally {
       setIsLoading(false)
     }
