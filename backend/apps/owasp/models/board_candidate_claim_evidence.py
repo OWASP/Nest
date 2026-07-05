@@ -124,19 +124,27 @@ class BoardCandidateClaimEvidence(TimestampedModel):
                 err = "Cannot add or modify evidence on a non-draft claim."
                 raise ValidationError(err)
 
-        if self.file and (not self.pk or self.file.name != self._original_file_name):
-            if self.file.name != getattr(self, "_stripped_file_name", None):
-                try:
-                    self.file = strip_file_metadata(self.file)
-                    validate_evidence_file_size(self.file)
-                except ValidationError as e:
-                    raise ValidationError({"file": e.message}) from e
-                self._stripped_file_name = self.file.name
-            self.file_name = self.file.name
-            self.file_size = self.file.size
-        elif not self.file:
+        self._strip_file_metadata()
+
+    def _strip_file_metadata(self) -> None:
+        if not self.file:
             self.file_name = ""
             self.file_size = None
+            return
+
+        file_changed = not self.pk or self.file.name != self._original_file_name
+        already_stripped = self.file.name == getattr(self, "_stripped_file_name", None)
+
+        if file_changed and not already_stripped:
+            try:
+                self.file = strip_file_metadata(self.file)
+                validate_evidence_file_size(self.file)
+            except ValidationError as e:
+                raise ValidationError({"file": e.messages}) from e
+            self._stripped_file_name = self.file.name
+
+        self.file_name = self.file.name
+        self.file_size = self.file.size
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
