@@ -8,9 +8,11 @@ Ensure you have the following setup/installed:
 
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
 - Curl: [Curl](https://github.com/curl/curl)
+- jq: [jq](https://jqlang.github.io/jq/)
 - OpenSSL: [OpenSSL](https://www.openssl.org/)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- Docker: [Docker](https://docs.docker.com/engine/install/)
 - LocalStack CLI: [LocalStack CLI](https://docs.localstack.cloud/aws/getting-started/installation/)
 - AWSLocal CLI: [AWSLocal CLI](https://github.com/localstack/awscli-local)
 - Terraform Local CLI: [Terraform Local CLI](https://github.com/localstack/terraform-local)
@@ -168,6 +170,109 @@ To do this locally:
 
 - Visit the AWS Console > Systems Manager > Parameter Store.
 - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
+
+## Local Development with LocalStack
+
+These steps provision the entire infrastructure, build and push Docker images, and run ECS tasks locally using [LocalStack](https://www.localstack.cloud/).
+
+> [!NOTE]
+> All commands below are run from the project root.
+
+### Prerequisites
+
+- Docker
+- LocalStack Pro (requires `LOCALSTACK_AUTH_TOKEN`)
+- `jq`, `curl`, `openssl` (usually pre-installed)
+- `awslocal`, `tflocal` (see [Prerequisites](#prerequisites) above)
+
+### 1. Create environment file
+
+Create `infrastructure/.env`:
+
+```bash
+LOCALSTACK_AUTH_TOKEN=<your-pro-token>
+```
+
+Optionally set environment variables for the provisioning script:
+
+```bash
+# infrastructure/.env or export these
+ENVIRONMENT=local
+DOMAIN_NAME=localhost
+DJANGO_CONFIGURATION=Local
+DJANGO_SETTINGS_MODULE=settings.local
+FORCE_NEW_DEPLOYMENT=true
+```
+
+### 2. Start LocalStack
+
+```bash
+make start-localstack
+```
+
+Wait for LocalStack to be ready (health check at `http://localhost.localstack.cloud:4566/_localstack/health`).
+
+### 3. Provision infrastructure
+
+Builds and pushes Docker images to local ECR, then runs Terraform via `tflocal`:
+
+```bash
+make provision-infra
+```
+
+This single command:
+- Runs Terraform (VPC, subnets, security groups, ALB, ECS clusters/services, ECR repos, RDS, ElastiCache, ACM cert, S3 buckets, SSM params)
+- Builds the backend Docker image and pushes it to the local ECR
+- Builds the frontend Docker image and pushes it to the local ECR
+
+### 4. Upload environment parameters to SSM
+
+Upload `backend/.env` and `frontend/.env` variables to the LocalStack SSM Parameter Store:
+
+```bash
+make load-env-params
+```
+
+To overwrite existing parameters:
+
+```bash
+make load-env-params ARGS="--overwrite"
+```
+
+### 5. Run database tasks
+
+Run ECS tasks (migrate, load data, index data) against the local cluster. Wait for each to finish before starting the next.
+
+```bash
+make ecs-migrate
+make ecs-load-data   # ensure backend/data/nest.dump exists first
+make ecs-index-data
+```
+
+To run any other task definition (e.g. `nest-local-sync-data`):
+
+```bash
+make ecs-task TASK=sync-data
+```
+
+> [!NOTE]
+> Task definition names follow the pattern `nest-{environment}-{task-name}`.
+
+### 6. Clean up
+
+To tear down all LocalStack resources:
+
+```bash
+cd infrastructure/live
+tflocal destroy -auto-approve
+```
+
+To wipe everything (including images) and start fresh, restart LocalStack 
+
+```bash
+# Stop LocalStack (Ctrl+C), then:
+make start-localstack
+```
 
 ## Populate ECR Repositories
 
