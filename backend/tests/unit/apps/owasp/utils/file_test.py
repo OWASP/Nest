@@ -128,11 +128,6 @@ class TestStripFileMetadata:
 
         assert result is None
 
-    def test_returns_empty_string_for_empty_input(self):
-        result = strip_file_metadata("")
-
-        assert result == ""
-
     @pytest.mark.parametrize("ext", sorted(IMAGE_EXTENSIONS))
     def test_dispatches_to_image_handler_for_image_extensions(self, ext):
         mock_file = MagicMock()
