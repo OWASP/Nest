@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from algoliasearch_django import raw_search
 
 from apps.github.models.issue import Issue
@@ -12,11 +14,11 @@ ISSUE_CACHE_PREFIX = "issue:"
 def get_issues(
     query: str,
     *,
-    attributes: list | None = None,
+    attributes: list[str] | None = None,
     distinct: bool = False,
     limit: int = 25,
     page: int = 1,
-) -> dict:
+) -> dict[str, Any]:
     """Return issues relevant to a search query.
 
     Args:
