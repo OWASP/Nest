@@ -11,18 +11,18 @@ if [[ -f "$ENV_FILE" ]]; then
     set -a && source "$ENV_FILE" && set +a
 fi
 
-if ! curl -sf "http://localhost.localstack.cloud:4566/_localstack/health" >/dev/null 2>&1; then
-    echo "ERROR: LocalStack is not running or not ready." >&2
-    echo "Start it in another terminal with: make start-localstack" >&2
-    exit 1
-fi
-
-for cmd in curl tflocal awslocal docker openssl; do
+for cmd in curl jq openssl tflocal awslocal docker; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
         exit 1
     fi
 done
+
+if ! curl -sf "http://localhost.localstack.cloud:4566/_localstack/health" >/dev/null 2>&1; then
+    echo "ERROR: LocalStack is not running or not ready." >&2
+    echo "Start it in another terminal with: make start-localstack" >&2
+    exit 1
+fi
 
 GIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || true)
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
@@ -53,11 +53,12 @@ TFVARS_JSON=$(mktemp /tmp/nest-tfvars-XXXXXX.json)
 trap 'rm -f "$TFVARS_JSON"' EXIT
 
 _normalize_bool() {
-    local val="${1//\"/}"
+    local raw="$1"
+    local val="${raw//\"/}"
     case "$val" in
         [Tt]rue)  echo true ;;
         [Ff]alse) echo false ;;
-        *) echo "ERROR: ENABLE_CRON_TASKS must be 'true' or 'false', got '$1'." >&2; exit 1 ;;
+        *) echo "ERROR: Boolean must be 'true' or 'false', got '$raw'." >&2; exit 1 ;;
     esac
 }
 
@@ -79,7 +80,7 @@ jq -n \
 cd "$INFRA_LIVE_DIR"
 
 echo "Initializing Terraform with tflocal..."
-tflocal init
+tflocal init --reconfigure
 
 echo "Applying Terraform..."
 tflocal apply -auto-approve -var-file="$TFVARS_JSON"
