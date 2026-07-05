@@ -8,7 +8,7 @@ from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageOps
 from pypdf import PdfWriter
 from pypdf.errors import PdfReadError, PyPdfError
 
@@ -91,7 +91,7 @@ def _strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
             image_format = IMAGE_FORMAT_MAP[ext]
             transposed_image.save(output, format=image_format)
             cleaned_bytes = output.getvalue()
-    except (UnidentifiedImageError, OSError, ValueError) as e:
+    except (OSError, ValueError) as e:
         logger.warning("Failed to strip image metadata: %s", e)
         msg = "Invalid or corrupt image."
         raise ValidationError(msg) from e
