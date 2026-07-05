@@ -69,6 +69,7 @@ jq -n \
     --arg django_settings_module "$DJANGO_SETTINGS_MODULE" \
     --arg domain_name "$DOMAIN_NAME" \
     --argjson enable_cron_tasks "$(_normalize_bool "${ENABLE_CRON_TASKS:-false}")" \
+    --argjson force_new_deployment "$(_normalize_bool "${FORCE_NEW_DEPLOYMENT:-true}")" \
     --arg db_password "$DB_PASSWORD" \
     --argjson db_deletion_protection false \
     --argjson db_skip_final_snapshot true \
@@ -95,6 +96,7 @@ awslocal ecr get-login-password | docker login --username AWS --password-stdin "
 
 echo "Building backend image..."
 docker build \
+    --target backend \
     -f "$REPO_ROOT/docker/backend/Dockerfile" \
     -t "$BACKEND_ECR:$TAG" \
     "$REPO_ROOT/backend"
@@ -111,9 +113,10 @@ fi
 echo "Building frontend image..."
 docker build \
     -f "$REPO_ROOT/docker/frontend/Dockerfile" \
-    --build-arg "ENV_FILE=$FRONTEND_ENV_FILE" \
+    --build-arg "ENV_FILE=${FRONTEND_ENV_FILE#frontend/}" \
+    --build-arg "FORCE_STANDALONE=yes" \
     -t "$FRONTEND_ECR:$TAG" \
-    "$REPO_ROOT"
+    "$REPO_ROOT/frontend"
 
 echo "Pushing frontend image to local ECR..."
 docker push "$FRONTEND_ECR:$TAG"
