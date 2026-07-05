@@ -250,6 +250,12 @@ variable "fixtures_bucket_name" {
   default     = null
 }
 
+variable "force_new_deployment" {
+  description = "Whether to force a new deployment on each apply."
+  type        = bool
+  default     = false
+}
+
 variable "frontend_desired_count" {
   description = "The desired number of frontend tasks."
   type        = number

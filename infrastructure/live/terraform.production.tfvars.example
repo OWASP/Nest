@@ -26,3 +26,4 @@ frontend_min_count              = 2
 frontend_use_fargate_spot       = false
 project_name                  = "nest"
 tasks_use_fargate_spot        = false
+force_new_deployment          = false
