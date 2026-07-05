@@ -154,13 +154,14 @@ class TestStripFileMetadata:
         mock_strip.assert_called_once_with(mock_file)
         assert result == mock_file
 
-    def test_returns_file_unchanged_for_unsupported_extension(self):
+    def test_raises_error_for_unsupported_extension(self):
         mock_file = MagicMock()
         mock_file.name = "test.txt"
 
-        result = strip_file_metadata(mock_file)
-
-        assert result is mock_file
+        with pytest.raises(
+            ValidationError, match=r"Unsupported file type for metadata stripping: \.txt"
+        ):
+            strip_file_metadata(mock_file)
 
     def test_handles_uppercase_extension(self):
         mock_file = MagicMock()

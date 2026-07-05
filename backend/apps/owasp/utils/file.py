@@ -10,19 +10,9 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from PIL import Image, ImageOps
 from pypdf import PdfWriter
-from pypdf.errors import PdfReadError, PyPdfError
+from pypdf.errors import PyPdfError
 
 logger = logging.getLogger(__name__)
-
-IMAGE_EXTENSIONS = frozenset({".jpeg", ".jpg", ".png", ".webp"})
-PDF_EXTENSION = ".pdf"
-
-IMAGE_FORMAT_MAP = {
-    ".jpeg": "JPEG",
-    ".jpg": "JPEG",
-    ".png": "PNG",
-    ".webp": "WEBP",
-}
 
 IMAGE_CONTENT_TYPE_MAP = {
     ".jpeg": "image/jpeg",
@@ -30,42 +20,44 @@ IMAGE_CONTENT_TYPE_MAP = {
     ".png": "image/png",
     ".webp": "image/webp",
 }
+IMAGE_EXTENSIONS = frozenset({".jpeg", ".jpg", ".png", ".webp"})
+IMAGE_FORMAT_MAP = {
+    ".jpeg": "JPEG",
+    ".jpg": "JPEG",
+    ".png": "PNG",
+    ".webp": "WEBP",
+}
 
 PDF_CONTENT_TYPE = "application/pdf"
+PDF_EXTENSION = ".pdf"
 
 
 def strip_file_metadata(file: UploadedFile | None) -> UploadedFile | None:
     """Strip EXIF/XMP metadata from an uploaded file.
 
-    Dispatches to the appropriate handler based on file extension.
-
     Args:
-        file: An uploaded file object with `name`, `read()`, and `seek()`.
+        file (UploadedFile, optional): An uploaded file object.
 
     Returns:
-        A new SimpleUploadedFile with metadata stripped, or the original
-        file unchanged if the extension is not supported.
+        UploadedFile, optional: A new SimpleUploadedFile with metadata stripped.
+
+    Raises:
+        ValidationError: If the file is invalid, corrupt, or has an unsupported extension.
 
     """
     if not file:
         return file
 
-    try:
-        ext = Path(file.name).suffix.lower()
+    ext = Path(file.name).suffix.lower()
 
-        if ext in IMAGE_EXTENSIONS:
-            return _strip_image_metadata(file, ext)
+    if ext in IMAGE_EXTENSIONS:
+        return _strip_image_metadata(file, ext)
 
-        if ext == PDF_EXTENSION:
-            return _strip_pdf_metadata(file)
-    except ValidationError:
-        raise
-    except Exception as e:
-        logger.exception("Unexpected error in strip_file_metadata")
-        msg = "Invalid or corrupt file."
-        raise ValidationError(msg) from e
+    if ext == PDF_EXTENSION:
+        return _strip_pdf_metadata(file)
 
-    return file
+    msg = f"Unsupported file type for metadata stripping: {ext}"
+    raise ValidationError(msg)
 
 
 def _strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
@@ -76,20 +68,21 @@ def _strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
     parameter is not explicitly passed.
 
     Args:
-        file: An uploaded image file object.
-        ext: The lowercase file extension (e.g. "jpeg", "png").
+        file (UploadedFile): An uploaded image file object.
+        ext (str): The lowercase file extension (e.g. ".jpeg", ".png").
 
     Returns:
-        A new SimpleUploadedFile containing the cleaned image.
+        SimpleUploadedFile: A new file object containing the cleaned image.
+
+    Raises:
+        ValidationError: If the image is invalid or corrupt.
 
     """
     try:
         file.seek(0)
         with Image.open(file) as image:
-            transposed_image = ImageOps.exif_transpose(image)
             output = io.BytesIO()
-            image_format = IMAGE_FORMAT_MAP[ext]
-            transposed_image.save(output, format=image_format)
+            ImageOps.exif_transpose(image).save(output, format=IMAGE_FORMAT_MAP[ext])
             cleaned_bytes = output.getvalue()
     except (OSError, ValueError) as e:
         logger.warning("Failed to strip image metadata: %s", e)
@@ -100,11 +93,10 @@ def _strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
         msg = "Invalid or corrupt image."
         raise ValidationError(msg) from e
 
-    content_type = IMAGE_CONTENT_TYPE_MAP[ext]
     return SimpleUploadedFile(
         name=file.name,
         content=cleaned_bytes,
-        content_type=content_type,
+        content_type=IMAGE_CONTENT_TYPE_MAP[ext],
     )
 
 
@@ -115,10 +107,13 @@ def _strip_pdf_metadata(file: UploadedFile) -> SimpleUploadedFile:
     dictionary and /Metadata XMP stream from the output.
 
     Args:
-        file: An uploaded PDF file object.
+        file (UploadedFile): An uploaded PDF file object.
 
     Returns:
-        A new SimpleUploadedFile containing the cleaned PDF.
+        SimpleUploadedFile: A new cleaned PDF file object.
+
+    Raises:
+        ValidationError: If the PDF is invalid or corrupt.
 
     """
     try:
@@ -130,7 +125,7 @@ def _strip_pdf_metadata(file: UploadedFile) -> SimpleUploadedFile:
         output = io.BytesIO()
         writer.write(output)
         cleaned_bytes = output.getvalue()
-    except (PyPdfError, PdfReadError, ValueError, KeyError) as e:
+    except (PyPdfError, ValueError, KeyError) as e:
         logger.warning("Failed to strip PDF metadata: %s", e)
         msg = "Invalid or corrupt PDF."
         raise ValidationError(msg) from e
