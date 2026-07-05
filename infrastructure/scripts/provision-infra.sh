@@ -54,9 +54,9 @@ trap 'rm -f "$TFVARS_JSON"' EXIT
 
 _normalize_bool() {
     local val="${1//\"/}"
-    case "${val,,}" in
-        true)  echo true ;;
-        false) echo false ;;
+    case "$val" in
+        [Tt]rue)  echo true ;;
+        [Ff]alse) echo false ;;
         *) echo "ERROR: ENABLE_CRON_TASKS must be 'true' or 'false', got '$1'." >&2; exit 1 ;;
     esac
 }
@@ -87,6 +87,8 @@ echo "Retrieving ECR repository URLs..."
 BACKEND_ECR=$(tflocal output -raw backend_ecr_repository_url)
 FRONTEND_ECR=$(tflocal output -raw frontend_ecr_repository_url)
 
+export AWS_DEFAULT_REGION=us-east-2
+
 REGISTRY="$(echo "$BACKEND_ECR" | cut -d/ -f1)"
 echo "Logging into local ECR at $REGISTRY..."
 awslocal ecr get-login-password | docker login --username AWS --password-stdin "$REGISTRY"
@@ -95,7 +97,7 @@ echo "Building backend image..."
 docker build \
     -f "$REPO_ROOT/docker/backend/Dockerfile" \
     -t "$BACKEND_ECR:$TAG" \
-    "$REPO_ROOT"
+    "$REPO_ROOT/backend"
 
 echo "Pushing backend image to local ECR..."
 docker push "$BACKEND_ECR:$TAG"
