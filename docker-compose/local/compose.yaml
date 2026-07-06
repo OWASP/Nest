@@ -4,7 +4,6 @@ services:
     command: >
       sh -c '
         python manage.py migrate &&
-        python manage.py slack_sync_moderation_rules &&
         python manage.py clear_cache &&
         python manage.py runserver 0.0.0.0:8000
       '
