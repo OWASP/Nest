@@ -1603,13 +1603,14 @@ class TestModuleMutationMenteeDeadline:
         )
 
         mutation = ModuleMutation()
+        deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
         with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
                 issue_number=1,
-                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
+                deadline_at=deadline_at,
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
@@ -1645,13 +1646,14 @@ class TestModuleMutationMenteeDeadline:
         mock_tz.is_naive.return_value = False
 
         mutation = ModuleMutation()
+        deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
         with pytest.raises(PermissionDenied, match="You can only set deadlines"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
                 issue_number=1,
-                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
+                deadline_at=deadline_at,
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")

@@ -159,10 +159,7 @@ const forbiddenError = {
   graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
 }
 
-function setupQueryMock(
-  issueData: unknown = mockIssueData,
-  accessData: unknown = mockAccessData
-) {
+function setupQueryMock(issueData: unknown = mockIssueData, accessData: unknown = mockAccessData) {
   mockUseQuery.mockImplementation((query) => {
     if (query === GetManagementProgramAdminsAndModulesDocument) {
       return { data: accessData, loading: false, error: undefined }
@@ -919,9 +916,7 @@ describe('ModuleIssueDetailsPage', () => {
       render(<ModuleIssueDetailsPage />)
 
       expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('You do not have permission to view this issue.')
-      ).toBeInTheDocument()
+      expect(screen.getByText('You do not have permission to view this issue.')).toBeInTheDocument()
       const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
       expect(assignButtons.length).toBe(0)
     })
@@ -944,9 +939,7 @@ describe('ModuleIssueDetailsPage', () => {
         expect(screen.getByText('My Issue')).toBeInTheDocument()
       })
       expect(screen.queryByRole('button', { name: /Unassign/i })).not.toBeInTheDocument()
-      expect(
-        screen.queryByRole('heading', { name: /Interested Users/i })
-      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /Interested Users/i })).not.toBeInTheDocument()
       expect(screen.queryByRole('heading', { name: /Pull Requests/i })).not.toBeInTheDocument()
     })
 

@@ -435,7 +435,8 @@ const ModuleIssueDetailsPage = () => {
                               updateQuery: (prevResult, { fetchMoreResult }) => {
                                 if (!fetchMoreResult) return prevResult
                                 const newPRs =
-                                  fetchMoreResult.managementModule?.issueByNumber?.pullRequests || []
+                                  fetchMoreResult.managementModule?.issueByNumber?.pullRequests ||
+                                  []
                                 if (newPRs.length < limit) setHasMorePRs(false)
                                 if (newPRs.length === 0) return prevResult
                                 return {

@@ -1016,7 +1016,6 @@ describe('IssuesPage', () => {
 
       expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
     })
-
   })
 })
 
@@ -1039,6 +1038,30 @@ describe('Mentee view', () => {
     loading: false,
     error: undefined,
   }
+
+  it('clears URL-driven filters a mentee cannot see or reset', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('?label=bug&deadline=overdue'))
+    mockUseQuery.mockReturnValue({
+      data: {
+        managementModule: {
+          name: 'Test Module',
+          userRole: 'mentee',
+          issuesCount: 0,
+          availableLabels: [],
+          issues: [],
+        },
+      },
+      loading: false,
+      error: undefined,
+    })
+    render(<IssuesPage />)
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalled()
+    })
+    const target = mockReplace.mock.calls.at(-1)?.[0]
+    expect(target).not.toContain('label')
+    expect(target).not.toContain('deadline')
+  })
 
   it('shows loading spinner when mentee issues are loading', () => {
     mockUseQuery.mockImplementation((document) => {

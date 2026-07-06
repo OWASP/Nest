@@ -166,7 +166,7 @@ describe('ProgramCard', () => {
   })
 
   describe('Access Level - User', () => {
-    it('shows the user role badge even when accessLevel is user', () => {
+    it('shows the role badge even when accessLevel is user', () => {
       render(
         <ProgramCard
           isAdmin={false}

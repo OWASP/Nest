@@ -129,7 +129,7 @@ describe('MyMentorshipPage', () => {
     expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
   })
 
-  it('renders the unified program list for a non-leader (mentee/mentor)', async () => {
+  it('renders the unified program list for a non-leader (e.g., mentee)', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {

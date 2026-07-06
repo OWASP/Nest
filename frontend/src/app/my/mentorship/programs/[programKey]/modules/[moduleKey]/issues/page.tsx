@@ -29,9 +29,7 @@ const IssuesPage = () => {
   const isDeadlineFilterActive = selectedDeadline !== DEADLINE_ALL
   const MAX_ISSUES_FOR_DEADLINE_FILTER = 1000
 
-  // A single role-aware query serves admins, mentors, and mentees. The backend
-  // scopes the issue list by role and reports `userRole`, so the client renders
-  // one view and only toggles management affordances off for mentees.
+  // A single role-aware query serves admins, mentors, and mentees.
   const { data, loading, error } = useQuery(GetManagementModuleIssuesDocument, {
     variables: {
       programKey,
@@ -52,6 +50,22 @@ const IssuesPage = () => {
 
   const moduleData = data?.managementModule
   const isMentee = moduleData?.userRole === 'mentee'
+
+  // Mentees have no filter controls, so a filtered URL (shared link, history, manual
+  // edit) would trap them on a filtered/empty list with no way to clear it. Once we
+  // know the caller is a mentee, drop any active filters and strip the URL params.
+  useEffect(() => {
+    if (isMentee && (selectedLabel !== LABEL_ALL || selectedDeadline !== DEADLINE_ALL)) {
+      setSelectedLabel(LABEL_ALL)
+      setSelectedDeadline(DEADLINE_ALL)
+      setCurrentPage(1)
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('label')
+      params.delete('deadline')
+      const qs = params.toString()
+      router.replace(qs ? `?${qs}` : globalThis.location.pathname, { scroll: false })
+    }
+  }, [isMentee, selectedLabel, selectedDeadline, searchParams, router])
 
   const { moduleIssues, filteredCount } = useMemo(() => {
     const allIssues = (moduleData?.issues || []).map((i) => ({

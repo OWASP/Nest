@@ -2,8 +2,8 @@
 
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
-import { debounce } from 'lodash'
 import { useDjangoSession } from 'hooks/useDjangoSession'
+import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
