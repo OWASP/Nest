@@ -97,3 +97,18 @@ updates:
     schedule:
       interval: daily
     target-branch: main
+
+  - package-ecosystem: terraform
+    cooldown:
+      default-days: 21
+    directories:
+      - infrastructure/**/*
+    groups:
+      version-updates:
+        applies-to: version-updates
+        group-by: dependency-name
+        patterns:
+          - '*'
+    schedule:
+      interval: daily
+    target-branch: main
