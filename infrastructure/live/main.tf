@@ -192,7 +192,7 @@ module "parameters" {
   django_aws_static_bucket_name = module.storage.static_s3_bucket_name
   django_db_host                = module.database.db_proxy_endpoint
   django_db_name                = var.db_name
-  django_db_port                = var.db_port
+  django_db_port                = module.database.db_port
   django_db_user                = var.db_user
   django_redis_host             = module.cache.redis_primary_endpoint
   django_release_version        = var.django_release_version
