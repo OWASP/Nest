@@ -28,6 +28,11 @@ run "test_complete_mode_removes_legacy_ssm_parameter" {
     condition     = length(aws_ssm_parameter.django_db_password) == 0
     error_message = "Complete mode must remove the legacy database password parameter."
   }
+
+  assert {
+    condition     = output.db_password_arn == null
+    error_message = "Complete mode must not expose a legacy SSM database password ARN."
+  }
 }
 
 run "test_database_credentials_secret" {
