@@ -27,6 +27,18 @@ variables {
   slack_bot_token_suffix        = "T04T40NHX"
 }
 
+run "test_secret_recovery_window_rejects_invalid_value" {
+  command = plan
+
+  variables {
+    secret_recovery_window_in_days = 6
+  }
+
+  expect_failures = [
+    var.secret_recovery_window_in_days,
+  ]
+}
+
 run "test_complete_mode_uses_secrets_manager" {
   command = plan
 
