@@ -79,16 +79,27 @@ output "frontend_container_secrets" {
   )
 }
 
-output "secretsmanager_secret_arns" {
-  description = "Bare Secrets Manager ARNs required by ECS execution roles."
+output "django_secretsmanager_secret_arns" {
+  description = "Bare Secrets Manager ARNs required by Django ECS execution roles."
 
-  value = toset(concat(
-    [for secret in values(aws_secretsmanager_secret.external_runtime) : secret.arn],
+  value = var.runtime_secrets_mode == "complete" ? concat(
+    [
+      for name, secret in aws_secretsmanager_secret.external_runtime : secret.arn
+      if name != "NEXT_SERVER_GITHUB_CLIENT_SECRET"
+    ],
     [
       aws_secretsmanager_secret.django_secret_key.arn,
-      aws_secretsmanager_secret.nextauth_secret.arn,
       var.db_credentials_secret_arn,
       var.redis_password_secret_arn,
     ]
-  ))
+  ) : []
+}
+
+output "frontend_secretsmanager_secret_arns" {
+  description = "Bare Secrets Manager ARNs required by the frontend ECS execution role."
+
+  value = var.runtime_secrets_mode == "complete" ? [
+    aws_secretsmanager_secret.external_runtime["NEXT_SERVER_GITHUB_CLIENT_SECRET"].arn,
+    aws_secretsmanager_secret.nextauth_secret.arn,
+  ] : []
 }

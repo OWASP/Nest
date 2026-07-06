@@ -51,6 +51,16 @@ run "test_complete_mode_uses_secrets_manager" {
   }
 
   assert {
+    condition     = length(output.frontend_secretsmanager_secret_arns) == 2
+    error_message = "The frontend role must only receive its two Secrets Manager ARNs."
+  }
+
+  assert {
+    condition     = length(output.django_secretsmanager_secret_arns) == 11
+    error_message = "The Django role must only receive Django runtime secret ARNs."
+  }
+
+  assert {
     condition = alltrue([
       length(aws_ssm_parameter.django_algolia_write_api_key) == 0,
       length(aws_ssm_parameter.django_open_ai_secret_key) == 0,
@@ -65,6 +75,18 @@ run "test_complete_mode_uses_secrets_manager" {
       length(aws_ssm_parameter.slack_bot_token) == 0,
     ])
     error_message = "Complete mode must remove all legacy secret-valued SSM parameters."
+  }
+}
+
+run "test_prepare_mode_does_not_grant_secretsmanager_access" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      length(output.django_secretsmanager_secret_arns) == 0,
+      length(output.frontend_secretsmanager_secret_arns) == 0,
+    ])
+    error_message = "Prepare mode ECS roles must keep using SSM without Secrets Manager access."
   }
 }
 

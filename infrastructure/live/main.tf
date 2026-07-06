@@ -56,7 +56,7 @@ module "backend" {
   max_count                       = var.backend_max_count
   min_count                       = var.backend_min_count
   project_name                    = var.project_name
-  secretsmanager_secret_arns      = module.parameters.secretsmanager_secret_arns
+  secretsmanager_secret_arns      = module.parameters.django_secretsmanager_secret_arns
   security_group_id               = module.security.backend_sg_id
   service_name                    = "backend"
   subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
@@ -129,7 +129,7 @@ module "frontend" {
   project_name                    = var.project_name
   security_group_id               = module.security.frontend_sg_id
   service_name                    = "frontend"
-  secretsmanager_secret_arns      = module.parameters.secretsmanager_secret_arns
+  secretsmanager_secret_arns      = module.parameters.frontend_secretsmanager_secret_arns
   subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn                = module.alb.frontend_target_group_arn
   use_fargate_spot                = var.frontend_use_fargate_spot
@@ -251,7 +251,7 @@ module "tasks" {
   image_tag                     = var.backend_image_tag
   kms_key_arn                   = module.kms.key_arn
   project_name                  = var.project_name
-  secretsmanager_secret_arns    = module.parameters.secretsmanager_secret_arns
+  secretsmanager_secret_arns    = module.parameters.django_secretsmanager_secret_arns
   subnet_ids                    = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   use_fargate_spot              = var.tasks_use_fargate_spot
 }
