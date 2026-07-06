@@ -1,11 +1,11 @@
 """Handle Slack reaction_added events."""
 
 from apps.slack.events.event import EventBase
-from apps.slack.services.moderation import process_reaction_added
+from apps.slack.services.reaction import process_reaction_added
 
 
 class ReactionAdded(EventBase):
-    """Route reaction_added to moderation service for processing."""
+    """Route reaction_added to the reaction service for processing."""
 
     event_type = "reaction_added"
 

@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="ModerationAlert",
+            name="ReactionAlert",
             fields=[
                 (
                     "id",
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 (
                     "report_type",
                     models.CharField(
-                        help_text="Moderation report category for the emitted alert.",
+                        help_text="Report category for the emitted reaction alert.",
                         max_length=64,
                     ),
                 ),
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="Slack timestamp of the posted moderation alert message.",
+                        help_text="Slack timestamp of the posted reaction alert message.",
                         max_length=32,
                     ),
                 ),
@@ -54,12 +54,12 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "db_table": "slack_moderation_alerts",
+                "db_table": "slack_reaction_alerts",
                 "unique_together": {("conversation", "message_ts", "report_type")},
             },
         ),
         migrations.CreateModel(
-            name="ModerationRule",
+            name="ReactionRule",
             fields=[
                 (
                     "id",
@@ -72,14 +72,14 @@ class Migration(migrations.Migration):
                 (
                     "emoji_name",
                     models.CharField(
-                        help_text="Slack emoji name that triggers this moderation rule.",
+                        help_text="Slack emoji name that triggers this reaction rule.",
                         max_length=64,
                     ),
                 ),
                 (
                     "report_type",
                     models.CharField(
-                        help_text=("Moderation report category recorded when this rule triggers."),
+                        help_text="Report category recorded when this reaction rule triggers.",
                         max_length=64,
                     ),
                 ),
@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
                 (
                     "alert_channel_id",
                     models.CharField(
-                        help_text="Slack channel ID where moderation alerts are posted.",
+                        help_text="Slack channel ID where reaction alerts are posted.",
                         max_length=50,
                     ),
                 ),
@@ -106,7 +106,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "db_table": "slack_moderation_rules",
+                "db_table": "slack_reaction_rules",
                 "unique_together": {("conversation", "emoji_name")},
             },
         ),

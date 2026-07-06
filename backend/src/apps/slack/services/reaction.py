@@ -1,4 +1,4 @@
-"""Slack moderation services."""
+"""Slack reaction services."""
 
 import logging
 
@@ -7,27 +7,28 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.blocks import markdown
 from apps.slack.models import Conversation
-from apps.slack.models.moderation import ModerationAlert, ModerationRule
+from apps.slack.models.reaction_alert import ReactionAlert
+from apps.slack.models.reaction_rule import ReactionRule
 
 logger = logging.getLogger(__name__)
 
 
 def process_reaction_added(event, client):
     """Process Slack reaction_added events for moderation alerts."""
-    details = _get_message_reaction_details(event)
+    details = get_message_reaction_details(event)
     if details is None:
         return
 
     channel_id, message_ts, emoji_name = details
-    conversation, rule = _get_moderation_rule(channel_id, emoji_name)
+    conversation, rule = get_reaction_rule(channel_id, emoji_name)
     if rule is None:
         return
 
-    reaction_count = _get_reaction_count(client, channel_id, message_ts, emoji_name)
+    reaction_count = get_reaction_count(client, channel_id, message_ts, emoji_name)
     if reaction_count < rule.threshold:
         return
 
-    moderation_alert, created = _get_or_create_alert(
+    reaction_alert, created = get_or_create_alert(
         conversation,
         message_ts,
         rule.report_type,
@@ -36,21 +37,21 @@ def process_reaction_added(event, client):
     if not created:
         return
 
-    permalink = _get_permalink(client, channel_id, message_ts)
+    permalink = get_permalink(client, channel_id, message_ts)
     if not permalink:
-        moderation_alert.delete()
+        reaction_alert.delete()
         return
 
-    text = _build_alert_text(rule, channel_id, emoji_name, reaction_count, permalink)
-    alert = _post_alert(client, rule.alert_channel_id, text)
+    text = build_alert_text(rule, channel_id, emoji_name, reaction_count, permalink)
+    alert = post_alert(client, rule.alert_channel_id, text)
     if alert is None:
-        moderation_alert.delete()
+        reaction_alert.delete()
         return
 
-    _update_alert_message_ts(moderation_alert, alert)
+    update_alert_message_ts(reaction_alert, alert)
 
 
-def _get_message_reaction_details(event):
+def get_message_reaction_details(event):
     """Extract message reaction details from a Slack event."""
     item = event.get("item", {})
     if item.get("type") != "message":
@@ -66,22 +67,22 @@ def _get_message_reaction_details(event):
     return channel_id, message_ts, emoji_name
 
 
-def _get_moderation_rule(channel_id, emoji_name):
-    """Get the matching conversation and moderation rule, if configured."""
+def get_reaction_rule(channel_id, emoji_name):
+    """Get the matching conversation and reaction rule, if configured."""
     try:
         conversation = Conversation.objects.get(slack_channel_id=channel_id)
-        rule = ModerationRule.objects.get(
+        rule = ReactionRule.objects.get(
             conversation=conversation,
             emoji_name=emoji_name,
             is_enabled=True,
         )
-    except (Conversation.DoesNotExist, ModerationRule.DoesNotExist):
+    except (Conversation.DoesNotExist, ReactionRule.DoesNotExist):
         return None, None
 
     return conversation, rule
 
 
-def _get_reaction_count(client, channel_id, message_ts, emoji_name):
+def get_reaction_count(client, channel_id, message_ts, emoji_name):
     """Get the current unique user count for a reaction."""
     try:
         response = client.reactions_get(channel=channel_id, timestamp=message_ts)
@@ -100,11 +101,11 @@ def _get_reaction_count(client, channel_id, message_ts, emoji_name):
     return 0
 
 
-def _get_or_create_alert(conversation, message_ts, report_type, reaction_count):
+def get_or_create_alert(conversation, message_ts, report_type, reaction_count):
     """Atomically claim the moderation alert before posting to Slack."""
     for _attempt in range(2):
         try:
-            return ModerationAlert.objects.get_or_create(
+            return ReactionAlert.objects.get_or_create(
                 conversation=conversation,
                 message_ts=message_ts,
                 report_type=report_type,
@@ -113,20 +114,20 @@ def _get_or_create_alert(conversation, message_ts, report_type, reaction_count):
         except IntegrityError:
             try:
                 return (
-                    ModerationAlert.objects.get(
+                    ReactionAlert.objects.get(
                         conversation=conversation,
                         message_ts=message_ts,
                         report_type=report_type,
                     ),
                     False,
                 )
-            except ModerationAlert.DoesNotExist:
+            except ReactionAlert.DoesNotExist:
                 continue
 
     return None, False
 
 
-def _get_permalink(client, channel_id, message_ts):
+def get_permalink(client, channel_id, message_ts):
     """Get the Slack permalink for the reported message."""
     try:
         return client.chat_getPermalink(
@@ -141,7 +142,7 @@ def _get_permalink(client, channel_id, message_ts):
         return ""
 
 
-def _post_alert(client, channel_id, text):
+def post_alert(client, channel_id, text):
     """Post a moderation alert to Slack."""
     try:
         return client.chat_postMessage(
@@ -157,13 +158,13 @@ def _post_alert(client, channel_id, text):
         return None
 
 
-def _update_alert_message_ts(moderation_alert, alert):
+def update_alert_message_ts(reaction_alert, alert):
     """Record the Slack notification timestamp on the claimed alert."""
-    moderation_alert.alert_message_ts = alert.get("ts", "")
-    moderation_alert.save(update_fields=["alert_message_ts"])
+    reaction_alert.alert_message_ts = alert.get("ts", "")
+    reaction_alert.save(update_fields=["alert_message_ts"])
 
 
-def _build_alert_text(rule, channel_id, emoji_name, reaction_count, permalink):
+def build_alert_text(rule, channel_id, emoji_name, reaction_count, permalink):
     """Build the Slack moderation alert message."""
     mentions = " ".join(f"<@{user_id}>" for user_id in rule.alert_user_ids or [])
 
