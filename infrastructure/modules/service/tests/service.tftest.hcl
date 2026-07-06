@@ -46,6 +46,26 @@ run "test_empty_secretsmanager_arns_omit_policy_statement" {
     ]) == 0
     error_message = "The execution policy must omit Secrets Manager access when no secret ARNs are supplied."
   }
+
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]) == 0
+    error_message = "The execution policy must omit KMS decrypt access when no secret ARNs are supplied."
+  }
+}
+
+run "test_kms_decrypt_is_limited_to_secretsmanager" {
+  command = plan
+
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]).Condition.StringEquals["kms:ViaService"] == "secretsmanager.${var.aws_region}.amazonaws.com"
+    error_message = "KMS decrypt access must be limited to requests from Secrets Manager."
+  }
 }
 
 run "test_cloudwatch_log_group_retention" {

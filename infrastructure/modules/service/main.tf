@@ -280,13 +280,18 @@ resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
         Effect   = "Allow"
         Resource = var.secretsmanager_secret_arns
       }
-      ] : [], [
+      ] : [], length(var.secretsmanager_secret_arns) > 0 ? [
       {
-        Action   = ["kms:Decrypt"]
+        Action = ["kms:Decrypt"]
+        Condition = {
+          StringEquals = {
+            "kms:ViaService" = "secretsmanager.${var.aws_region}.amazonaws.com"
+          }
+        }
         Effect   = "Allow"
         Resource = var.kms_key_arn
       }
-    ])
+    ] : [])
   })
 }
 
