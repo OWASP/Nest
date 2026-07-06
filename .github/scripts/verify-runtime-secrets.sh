@@ -18,12 +18,18 @@ fi
 
 check_secret() {
   local secret_id=$1
+  local secret_metadata
 
   # Check version metadata without retrieving or printing the secret value.
-  if ! aws secretsmanager describe-secret \
+  if ! secret_metadata=$(aws secretsmanager describe-secret \
     --secret-id "$secret_id" \
     --query 'VersionIdsToStages' \
-    --output json | jq -e 'any(.[]; index("AWSCURRENT") != null)' >/dev/null; then
+    --output json); then
+    echo "::error::Unable to describe required secret: ${secret_id}" >&2
+    exit 1
+  fi
+
+  if ! jq -e 'any(.[]; index("AWSCURRENT") != null)' <<<"$secret_metadata" >/dev/null; then
     echo "::error::Secret has no AWSCURRENT version: ${secret_id}" >&2
     exit 1
   fi
