@@ -16,7 +16,6 @@ SSM_PREFIX="/nest/${ENVIRONMENT:-local}"
 
 DRY_RUN=false
 OVERWRITE=false
-INCLUDE_EMPTY=false
 PARAMETER_COUNT=0
 SKIPPED_COUNT=0
 
@@ -30,7 +29,6 @@ to LocalStack SSM Parameter Store under $SSM_PREFIX/
 Options:
   -n, --dry-run      Print what would be done without actually uploading
   -o, --overwrite    Overwrite existing parameters
-  -e, --include-empty   Include variables with empty values
   -h, --help         Show this help message
 EOF
     exit 0
@@ -40,7 +38,6 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -n|--dry-run) DRY_RUN=true; shift ;;
         -o|--overwrite) OVERWRITE=true; shift ;;
-        -e|--include-empty) INCLUDE_EMPTY=true; shift ;;
         -h|--help) usage ;;
         *) echo "ERROR: Unknown option: $1" >&2; usage ;;
     esac
@@ -82,8 +79,8 @@ for env_file in "${ENV_FILES[@]}"; do
         value="${value%\"}"
         value="${value#\"}"
 
-        if [[ -z "$value" && "$INCLUDE_EMPTY" == false ]]; then
-            echo "  SKIP: $key (empty value, use --include-empty to override)"
+        if [[ -z "$value" ]]; then
+            echo "  SKIP: $key (empty value, SSM Parameter Store does not accepts empty value)"
             ((SKIPPED_COUNT++)) || true
             continue
         fi
