@@ -124,7 +124,7 @@ variable "redis_password_secret_arn" {
 }
 
 variable "runtime_secrets_mode" {
-  description = "Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager."
+  description = "Runtime secret migration phase: 'prepare' retains SSM injection, while 'complete' uses Secrets Manager."
   type        = string
 
   validation {
@@ -147,7 +147,7 @@ variable "secret_recovery_window_in_days" {
         var.secret_recovery_window_in_days <= 30
       )
     )
-    error_message = "secret_recovery_window_in_days must be between 7 and 30"
+    error_message = "secret_recovery_window_in_days must be 0 (immediate deletion) or between 7 and 30."
   }
 
 }

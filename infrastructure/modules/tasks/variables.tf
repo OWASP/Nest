@@ -16,7 +16,7 @@ variable "common_tags" {
 }
 
 variable "container_secrets" {
-  description = "Map of environment variable names to the ARNs of all SSM parameters."
+  description = "Environment variable names mapped to SSM or Secrets Manager valueFrom references."
   type        = map(string)
   default     = {}
 }

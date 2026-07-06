@@ -89,7 +89,7 @@ No modules.
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_redis_password_arn"></a> [redis\_password\_arn](#input\_redis\_password\_arn) | The SSM Parameter ARN of password of the Redis cache. | `string` | n/a | yes |
 | <a name="input_redis_password_secret_arn"></a> [redis\_password\_secret\_arn](#input\_redis\_password\_secret\_arn) | The Secrets Manager ARN containing the Redis password. | `string` | n/a | yes |
-| <a name="input_runtime_secrets_mode"></a> [runtime\_secrets\_mode](#input\_runtime\_secrets\_mode) | Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager. | `string` | n/a | yes |
+| <a name="input_runtime_secrets_mode"></a> [runtime\_secrets\_mode](#input\_runtime\_secrets\_mode) | Runtime secret migration phase: 'prepare' retains SSM injection, while 'complete' uses Secrets Manager. | `string` | n/a | yes |
 | <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days Secrets Manager waits before deleting a secret. | `number` | `7` | no |
 | <a name="input_slack_bot_token_suffix"></a> [slack\_bot\_token\_suffix](#input\_slack\_bot\_token\_suffix) | The Suffix for the Slack bot token. | `string` | n/a | yes |
 
@@ -98,6 +98,7 @@ No modules.
 | Name | Description |
 | ---- | ----------- |
 | <a name="output_django_container_secrets"></a> [django\_container\_secrets](#output\_django\_container\_secrets) | Django environment variables mapped to ECS valueFrom references. |
+| <a name="output_django_secretsmanager_secret_arns"></a> [django\_secretsmanager\_secret\_arns](#output\_django\_secretsmanager\_secret\_arns) | Bare Secrets Manager ARNs required by Django ECS execution roles. |
 | <a name="output_frontend_container_secrets"></a> [frontend\_container\_secrets](#output\_frontend\_container\_secrets) | Frontend environment variables mapped to ECS valueFrom references. |
-| <a name="output_secretsmanager_secret_arns"></a> [secretsmanager\_secret\_arns](#output\_secretsmanager\_secret\_arns) | Bare Secrets Manager ARNs required by ECS execution roles. |
+| <a name="output_frontend_secretsmanager_secret_arns"></a> [frontend\_secretsmanager\_secret\_arns](#output\_frontend\_secretsmanager\_secret\_arns) | Bare Secrets Manager ARNs required by the frontend ECS execution role. |
 <!-- END_TF_DOCS -->

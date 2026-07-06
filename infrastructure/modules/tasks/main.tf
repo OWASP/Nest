@@ -55,7 +55,7 @@ resource "aws_iam_role" "ecs_tasks_execution_role" {
 
 
 resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
-  description = "Allow ECS tasks to read SSM parameters"
+  description = "Allow ECS tasks to read SSM parameters and Secrets Manager secrets"
   name        = "${var.project_name}-${var.environment}-ecs-tasks-ssm-policy"
   policy = jsonencode({
     Version = "2012-10-17"

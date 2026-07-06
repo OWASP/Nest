@@ -352,7 +352,7 @@ variable "redis_port" {
 }
 
 variable "runtime_secrets_mode" {
-  description = "Runtime secret migration phase : prepare retains SSM injection , complete uses Secrets Manager."
+  description = "Runtime secret migration phase: 'prepare' retains SSM injection, while 'complete' uses Secrets Manager."
   type        = string
 
   validation {
