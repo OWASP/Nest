@@ -17,7 +17,7 @@
     "@heroui/tooltip": "2.2.29",
     "@next/third-parties": "16.2.9",
     "@react-leaflet/core": "3.0.0",
-    "@sentry/nextjs": "10.57.0",
+    "@sentry/nextjs": "10.58.0",
     "apexcharts": "5.15.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
