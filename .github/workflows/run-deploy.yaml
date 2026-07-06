@@ -173,10 +173,13 @@ jobs:
 
       - name: Verify runtime secrets are populated
         if: env.RUNTIME_SECRETS_MODE == 'complete'
+        env:
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+          ENABLE_ADDITIONAL_PARAMETERS: ${{ inputs.enable_additional_parameters }}
         run: |
           bash .github/scripts/verify-runtime-secrets.sh \
-            "${{ inputs.environment }}" \
-            "${{ inputs.enable_additional_parameters }}"
+            "$DEPLOY_ENVIRONMENT" \
+            "$ENABLE_ADDITIONAL_PARAMETERS"
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
