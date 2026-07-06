@@ -61,10 +61,16 @@ run "test_secrets_manager_namespace_staging" {
   command = plan
 
   assert {
-    condition = strcontains(
-      data.aws_iam_policy_document.part_two["staging"].json,
-      "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:/${var.project_name}/staging/*",
-    )
+    condition = alltrue([
+      strcontains(
+        data.aws_iam_policy_document.part_two["staging"].json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:${var.project_name}-staging-*",
+      ),
+      strcontains(
+        data.aws_iam_policy_document.part_two["staging"].json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:/${var.project_name}/staging/*",
+      ),
+    ])
     error_message = "The staging Terraform policy must allow management of the staging Secrets Manager namespace."
   }
 }
@@ -73,10 +79,16 @@ run "test_secrets_manager_namespace_production" {
   command = plan
 
   assert {
-    condition = strcontains(
-      data.aws_iam_policy_document.part_two["production"].json,
-      "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:/${var.project_name}/production/*",
-    )
+    condition = alltrue([
+      strcontains(
+        data.aws_iam_policy_document.part_two["production"].json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:${var.project_name}-production-*",
+      ),
+      strcontains(
+        data.aws_iam_policy_document.part_two["production"].json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:/${var.project_name}/production/*",
+      ),
+    ])
     error_message = "The production Terraform policy must allow management of the production Secrets Manager namespace."
   }
 }

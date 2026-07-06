@@ -81,6 +81,7 @@ output "frontend_container_secrets" {
 
 output "django_secretsmanager_secret_arns" {
   description = "Bare Secrets Manager ARNs required by Django ECS execution roles."
+  sensitive   = true
 
   value = var.runtime_secrets_mode == "complete" ? concat(
     [
@@ -97,6 +98,7 @@ output "django_secretsmanager_secret_arns" {
 
 output "frontend_secretsmanager_secret_arns" {
   description = "Bare Secrets Manager ARNs required by the frontend ECS execution role."
+  sensitive   = true
 
   value = var.runtime_secrets_mode == "complete" ? [
     aws_secretsmanager_secret.external_runtime["NEXT_SERVER_GITHUB_CLIENT_SECRET"].arn,

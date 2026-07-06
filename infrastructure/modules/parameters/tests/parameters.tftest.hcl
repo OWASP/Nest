@@ -77,12 +77,12 @@ run "test_complete_mode_uses_secrets_manager" {
   }
 
   assert {
-    condition     = length(output.frontend_secretsmanager_secret_arns) == 2
+    condition     = length(nonsensitive(output.frontend_secretsmanager_secret_arns)) == 2
     error_message = "The frontend role must only receive its two Secrets Manager ARNs."
   }
 
   assert {
-    condition     = length(output.django_secretsmanager_secret_arns) == 11
+    condition     = length(nonsensitive(output.django_secretsmanager_secret_arns)) == 11
     error_message = "The Django role must only receive Django runtime secret ARNs."
   }
 
@@ -109,8 +109,8 @@ run "test_prepare_mode_does_not_grant_secretsmanager_access" {
 
   assert {
     condition = alltrue([
-      length(output.django_secretsmanager_secret_arns) == 0,
-      length(output.frontend_secretsmanager_secret_arns) == 0,
+      length(nonsensitive(output.django_secretsmanager_secret_arns)) == 0,
+      length(nonsensitive(output.frontend_secretsmanager_secret_arns)) == 0,
     ])
     error_message = "Prepare mode ECS roles must keep using SSM without Secrets Manager access."
   }

@@ -139,6 +139,9 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days Secrets Manager waits before deleting a secret."
   type        = number
   default     = 7
+
+  # A value of 0 maps to ForceDeleteWithoutRecovery and should only be used for
+  # ephemeral/test environments. Staging and production should use 7-30 days.
   validation {
     condition = (
       var.secret_recovery_window_in_days == 0 ||
