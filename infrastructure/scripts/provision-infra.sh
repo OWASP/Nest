@@ -11,14 +11,14 @@ if [[ -f "$ENV_FILE" ]]; then
     set -a && source "$ENV_FILE" && set +a
 fi
 
-for cmd in curl jq openssl tflocal awslocal docker; do
+for cmd in localstack jq openssl tflocal awslocal docker; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
         exit 1
     fi
 done
 
-if ! curl -sf "http://localhost.localstack.cloud:4566/_localstack/health" >/dev/null 2>&1; then
+if ! localstack wait -t 60 2>/dev/null; then
     echo "ERROR: LocalStack is not running or not ready." >&2
     echo "Start it in another terminal with: make start-localstack" >&2
     exit 1
