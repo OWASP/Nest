@@ -4,6 +4,7 @@ from configurations import values
 
 from settings.base import Base
 
+
 class Local(Base):
     """Local configuration."""
 
