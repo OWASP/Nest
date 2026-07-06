@@ -82,6 +82,26 @@ run "test_kms_decrypt_is_limited_to_secretsmanager" {
     ]).Condition.StringEquals["kms:ViaService"] == "secretsmanager.${var.aws_region}.amazonaws.com"
     error_message = "KMS decrypt access must be limited to requests from Secrets Manager."
   }
+
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]).Resource == var.kms_key_arn
+    error_message = "KMS decrypt access must be limited to the configured key."
+  }
+}
+
+run "test_secretsmanager_policy_uses_supplied_arns" {
+  command = plan
+
+  assert {
+    condition = toset(one([
+      for statement in jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "secretsmanager:GetSecretValue")
+    ]).Resource) == var.secretsmanager_secret_arns
+    error_message = "Secrets Manager access must be limited to the supplied secret ARNs."
+  }
 }
 
 run "test_cron_tasks_enabled_creates_schedules" {
