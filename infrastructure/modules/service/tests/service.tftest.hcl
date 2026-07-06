@@ -32,6 +32,22 @@ run "test_cloudwatch_log_group_name_format" {
   }
 }
 
+run "test_empty_secretsmanager_arns_omit_policy_statement" {
+  command = plan
+
+  variables {
+    secretsmanager_secret_arns = []
+  }
+
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "secretsmanager:GetSecretValue")
+    ]) == 0
+    error_message = "The execution policy must omit Secrets Manager access when no secret ARNs are supplied."
+  }
+}
+
 run "test_cloudwatch_log_group_retention" {
   command = plan
 

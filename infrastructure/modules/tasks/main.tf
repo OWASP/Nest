@@ -59,24 +59,27 @@ resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
   name        = "${var.project_name}-${var.environment}-ecs-tasks-ssm-policy"
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Action = [
           "ssm:GetParameters"
         ]
         Effect   = "Allow"
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
-        }, {
+      }
+      ], length(var.secretsmanager_secret_arns) > 0 ? [
+      {
         Action   = ["secretsmanager:GetSecretValue"]
         Effect   = "Allow"
         Resource = var.secretsmanager_secret_arns
-      },
+      }
+      ] : [], [
       {
         Action   = ["kms:Decrypt"]
         Effect   = "Allow"
         Resource = var.kms_key_arn
       }
-    ]
+    ])
   })
   tags = var.common_tags
 }
