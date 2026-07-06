@@ -35,6 +35,22 @@ run "test_complete_mode_uses_secrets_manager" {
     runtime_secrets_mode         = "complete"
   }
 
+  override_resource {
+    target          = aws_secretsmanager_secret.django_secret_key
+    override_during = plan
+    values = {
+      arn = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/DJANGO_SECRET_KEY"
+    }
+  }
+
+  override_resource {
+    target          = aws_secretsmanager_secret.nextauth_secret
+    override_during = plan
+    values = {
+      arn = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/NEXTAUTH_SECRET"
+    }
+  }
+
   assert {
     condition = (
       output.django_container_secrets["DJANGO_DB_PASSWORD"] == "${var.db_credentials_secret_arn}:password::"
@@ -48,6 +64,16 @@ run "test_complete_mode_uses_secrets_manager" {
       var.redis_password_secret_arn
     )
     error_message = "Redis password must use its Secrets Manager ARN."
+  }
+
+  assert {
+    condition     = output.django_container_secrets["DJANGO_SECRET_KEY"] == aws_secretsmanager_secret.django_secret_key.arn
+    error_message = "Django secret key must use its Secrets Manager ARN."
+  }
+
+  assert {
+    condition     = output.frontend_container_secrets["NEXTAUTH_SECRET"] == aws_secretsmanager_secret.nextauth_secret.arn
+    error_message = "NextAuth secret must use its Secrets Manager ARN."
   }
 
   assert {
