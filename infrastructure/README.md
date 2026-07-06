@@ -7,7 +7,6 @@ This document provides instructions on how to setup the infrastructure for this 
 Ensure you have the following setup/installed:
 
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
-- Curl: [Curl](https://github.com/curl/curl)
 - jq: [jq](https://jqlang.github.io/jq/)
 - OpenSSL: [OpenSSL](https://www.openssl.org/)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
@@ -182,7 +181,7 @@ These steps provision the entire infrastructure, build and push Docker images, a
 
 - Docker
 - LocalStack Pro (requires `LOCALSTACK_AUTH_TOKEN`)
-- `jq`, `curl`, `openssl` (usually pre-installed)
+- `jq`, `openssl` (usually pre-installed)
 - `awslocal`, `tflocal` (see [Prerequisites](#prerequisites) above)
 
 ### 1. Create environment file
