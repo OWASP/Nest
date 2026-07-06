@@ -39,6 +39,14 @@ run "test_secret_recovery_window_rejects_invalid_value" {
   ]
 }
 
+run "test_secret_recovery_window_accepts_minimum_valid_value" {
+  command = plan
+
+  variables {
+    secret_recovery_window_in_days = 7
+  }
+}
+
 run "test_complete_mode_uses_secrets_manager" {
   command = plan
 
