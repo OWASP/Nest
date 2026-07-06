@@ -219,6 +219,8 @@ Builds and pushes Docker images to local ECR, then runs Terraform via `tflocal`:
 ```bash
 make provision-infra
 ```
+> [!NOTE]
+> If you want to recreate every resource, restart LocalStack and then rerun this script
 
 This single command:
 - Runs Terraform (VPC, subnets, security groups, ALB, ECS clusters/services, ECR repos, RDS, ElastiCache, ACM cert, S3 buckets, SSM params)
