@@ -18,13 +18,10 @@ HEALTH_MAX_ATTEMPTS=30
 HEALTH_POLL_INTERVAL=2
 
 # S3 bucket override files, used to disable prevent_destroy during tests.
-OVERRIDE_FILES=(
-    "infrastructure/modules/storage/modules/s3-bucket/test_override.tf"
-    "infrastructure/modules/storage/modules/shared-data-bucket/test_override.tf"
-)
-OVERRIDE_RESOURCES=(
-    "aws_s3_bucket.this"
-    "aws_s3_bucket.nest_shared_data"
+# Format: "file_path:resource_type.resource_name"
+OVERRIDES=(
+    "infrastructure/modules/storage/modules/s3-bucket/test_override.tf:aws_s3_bucket.this"
+    "infrastructure/modules/storage/modules/shared-data-bucket/test_override.tf:aws_s3_bucket.nest_shared_data"
 )
 
 LOCALSTACK_STARTED=false
@@ -44,18 +41,24 @@ localstack_healthy() {
 }
 
 write_override_files() {
-    local i resource_name local_name
-    for i in "${!OVERRIDE_FILES[@]}"; do
-        local_name="${OVERRIDE_RESOURCES[$i]#*.}"
-        resource_name="${OVERRIDE_RESOURCES[$i]%%.*}"
+    local item file resource resource_name local_name
+    for item in "${OVERRIDES[@]}"; do
+        file="${item%%:*}"
+        resource="${item#*:}"
+        local_name="${resource#*.}"
+        resource_name="${resource%%.*}"
         printf 'resource "%s" "%s" {\n  lifecycle {\n    prevent_destroy = false\n  }\n}\n' \
-            "$resource_name" "$local_name" > "${OVERRIDE_FILES[$i]}"
+            "$resource_name" "$local_name" > "$file"
     done
 }
 
 cleanup() {
     echo "Cleaning up override files..."
-    rm -f "${OVERRIDE_FILES[@]}"
+    local item file
+    for item in "${OVERRIDES[@]}"; do
+        file="${item%%:*}"
+        rm -f "$file"
+    done
 
     if [[ "$LOCALSTACK_STARTED" == "true" ]]; then
         echo "Stopping and removing LocalStack container..."
@@ -139,9 +142,10 @@ require_cmd curl
 
 cd "$ROOT_DIR"
 
-for f in "${OVERRIDE_FILES[@]}"; do
-    if [[ -f "$f" ]]; then
-        echo "Error: $f already exists. Refusing to run to avoid overwriting." >&2
+for item in "${OVERRIDES[@]}"; do
+    file="${item%%:*}"
+    if [[ -f "$file" ]]; then
+        echo "Error: $file already exists. Refusing to run to avoid overwriting." >&2
         exit 1
     fi
 done
