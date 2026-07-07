@@ -44,12 +44,7 @@ class ModuleNode:
 
     @strawberry.field
     def user_role(self) -> str | None:
-        """Return the caller's role on this module when a resolver assigned one.
-
-        Resolvers that gate access (e.g. managementModule) set ``user_role`` on the
-        Django instance; other resolvers leave it unset, so default to None instead
-        of raising AttributeError.
-        """
+        """Return the caller's role on this module when a resolver assigned one."""
         return getattr(self, "user_role", None)
 
     @strawberry.field
@@ -153,11 +148,7 @@ class ModuleNode:
 
     @strawberry.field
     def issues_count(self, info: Info, label: str | None = None) -> int:
-        """Return the count of issues visible to the caller, optionally filtered by label.
-
-        Mentees are scoped to the issues assigned to them, mirroring the ``issues``
-        field, so pagination reflects what they can actually see.
-        """
+        """Return the count of issues visible to the caller, optionally filtered by label."""
         user = info.context.request.user
         is_admin_or_mentor = self.program and (
             self.program.has_admin(user) or self.has_mentor(user)

@@ -39,11 +39,7 @@ class ProgramNode:
 
     @strawberry.field
     def user_role(self) -> str | None:
-        """Return the caller's role on this program when a resolver assigned one.
-
-        Access-gating resolvers set ``user_role`` on the Django instance; others
-        leave it unset, so default to None instead of raising AttributeError.
-        """
+        """Return the caller's role on this program when a resolver assigned one."""
         return getattr(self, "user_role", None)
 
     @strawberry.field

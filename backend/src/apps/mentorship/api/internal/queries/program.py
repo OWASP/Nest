@@ -121,8 +121,6 @@ class ProgramQuery:
             queryset.order_by("-nest_created_at")[offset : offset + normalized_limit]
         )
 
-        # Determine each program's role in bulk (admin > mentor > mentee), scoped to
-        # the current page — a fixed number of queries regardless of page size.
         page_ids = [program.id for program in paginated_programs]
         admin_ids = set(
             ProgramAdmin.objects.filter(
