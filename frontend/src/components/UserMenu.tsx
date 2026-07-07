@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery } from '@apollo/client/react'
+import { useLazyQuery } from '@apollo/client/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
@@ -24,8 +24,7 @@ export default function UserMenu({
   const isProjectLeader = session?.user?.isLeader
   const isOwaspStaff = session?.user?.isOwaspStaff
 
-  const { data: certificateData } = useQuery(GetMyCertificateDocument, {
-    skip: status !== 'authenticated',
+  const [getMyCertificate, { data: certificateData }] = useLazyQuery(GetMyCertificateDocument, {
     fetchPolicy: 'cache-first',
   })
   const hasCertificate = !!certificateData?.myCertificate
@@ -75,7 +74,12 @@ export default function UserMenu({
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (!isOpen && status === 'authenticated') {
+            getMyCertificate()
+          }
+          setIsOpen((prev) => !prev)
+        }}
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
