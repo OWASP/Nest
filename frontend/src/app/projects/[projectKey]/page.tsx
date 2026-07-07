@@ -18,6 +18,7 @@ import type { Release } from 'types/release'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
+import { getSlackChannelUrl } from 'utils/urlFormatter'
 import Contributions from 'components/cards/Contributions'
 import Contributors from 'components/cards/Contributors'
 import Header from 'components/cards/Header'
@@ -74,6 +75,7 @@ const ProjectDetailsPage = () => {
       />
     )
   }
+
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     { label: 'Leaders', value: project.leaders.join(', ') },
@@ -85,11 +87,33 @@ const ProjectDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <Link href={project.url} className="hover:underline dark:text-sky-600">
+        <Link href={project.url} className="text-blue-400 hover:underline">
           {project.url}
         </Link>
       ),
     },
+    ...(project.entityChannels && project.entityChannels.length > 0
+      ? [
+          {
+            label: 'Slack',
+            value: (
+              <div className="inline-flex flex-wrap gap-3">
+                {project.entityChannels.map((ch) => (
+                  <Link
+                    key={ch.slackChannelId}
+                    href={getSlackChannelUrl(ch.slackChannelId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:underline"
+                  >
+                    #{ch.name}
+                  </Link>
+                ))}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ]
   const projectStats = [
     { icon: FaStar, value: project.starsCount, unit: 'Star' },

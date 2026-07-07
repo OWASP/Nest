@@ -76,3 +76,4 @@ site/
 TODO
 venv/
 zap.yaml
+.agents/

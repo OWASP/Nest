@@ -145,7 +145,14 @@ class Command(BaseCommand):
 
             current_score = max(scores)
 
-            if current_score >= threshold and current_score > best_score:
+            if current_score >= threshold and (
+                current_score > best_score
+                or (
+                    current_score == best_score
+                    and best_match
+                    and len(conversation.name) < len(best_match.name)
+                )
+            ):
                 best_match = conversation
                 best_score = current_score
 

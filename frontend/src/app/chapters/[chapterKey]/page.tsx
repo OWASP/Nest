@@ -8,6 +8,7 @@ import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.gener
 import type { Chapter } from 'types/chapter'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getSlackChannelUrl } from 'utils/urlFormatter'
 import Contributions from 'components/cards/Contributions'
 import Contributors from 'components/cards/Contributors'
 import Header from 'components/cards/Header'
@@ -75,6 +76,28 @@ export default function ChapterDetailsPage() {
         </Link>
       ),
     },
+    ...(chapter.entityChannels && chapter.entityChannels.length > 0
+      ? [
+          {
+            label: 'Slack',
+            value: (
+              <div className="inline-flex flex-wrap gap-3">
+                {chapter.entityChannels.map((ch) => (
+                  <Link
+                    key={ch.slackChannelId}
+                    href={getSlackChannelUrl(ch.slackChannelId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:underline"
+                  >
+                    #{ch.name}
+                  </Link>
+                ))}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ]
 
   const { startDate, endDate } = getDateRange({ years: 1 })
