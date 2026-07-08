@@ -293,6 +293,12 @@ describe('SettingsPage Component', () => {
       fireEvent.click(screen.getByText('Unsubscribe'))
 
       await waitFor(() => {
+        expect(screen.getByText('Confirm Unsubscribe')).toBeInTheDocument()
+      })
+
+      fireEvent.click(screen.getByText('Yes, Unsubscribe'))
+
+      await waitFor(() => {
         expect(mockCancelMutation).toHaveBeenCalled()
       })
     })
@@ -318,7 +324,9 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockNoSubscription })
       render(<SettingsPage />)
       expect(
-        screen.getByText(/Add projects and choose which content types.*you want from each one/)
+        screen.getByText(
+          /Select projects and choose which updates you would like to receive/
+        )
       ).toBeInTheDocument()
     })
 

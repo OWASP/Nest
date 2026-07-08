@@ -8,6 +8,7 @@ interface ActionButtonProps {
   onClick?: () => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLAnchorElement | HTMLButtonElement>) => void
   tooltipLabel?: string
+  isDisabled?: boolean
   children: ReactNode
 }
 
@@ -16,6 +17,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
   onKeyDown,
   tooltipLabel,
+  isDisabled,
   children,
 }) => {
   const baseStyles =
@@ -44,6 +46,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
         onKeyDown={onKeyDown}
         className={baseStyles}
         aria-label={tooltipLabel}
+        isDisabled={isDisabled}
       >
         {children}
       </Button>
