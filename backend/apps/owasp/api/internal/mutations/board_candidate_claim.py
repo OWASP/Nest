@@ -479,18 +479,11 @@ class BoardCandidateClaimMutations:
         for claim in claims:
             claim.order = keys_to_order[claim.key]
 
-        if any(
-            claim.status
-            not in {
-                BoardCandidateClaim.Status.DRAFT,
-                BoardCandidateClaim.Status.APPROVED,
-            }
-            for claim in claims
-        ):
+        if any(claim.status != BoardCandidateClaim.Status.APPROVED for claim in claims):
             return ReorderClaimsResult(
                 ok=False,
                 code="VALIDATION_ERROR",
-                message="Only draft and approved claims can be reordered.",
+                message="Only approved claims can be reordered.",
             )
 
         BoardCandidateClaim.objects.bulk_update(claims, ["order"])

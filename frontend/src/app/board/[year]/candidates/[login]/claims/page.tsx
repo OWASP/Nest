@@ -23,22 +23,19 @@ import SecondaryCard from 'components/SecondaryCard'
 const ReorderButton = ({
   direction,
   claimKey,
-  status,
   onReorder,
 }: {
   direction: 'up' | 'down'
   claimKey: string
-  status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
   onReorder: (
     key: string,
     direction: 'up' | 'down',
-    status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
   ) => void
 }) => {
   const Icon = direction === 'up' ? FaChevronUp : FaChevronDown
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onReorder(claimKey, direction, status)
+    onReorder(claimKey, direction)
   }
   return (
     <div className="relative rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -57,7 +54,6 @@ const CandidateClaimsPage = () => {
   const router = useRouter()
   const { isSyncing, session } = useDjangoSession()
   const { login, year } = useParams<{ login: string; year: string }>()
-  const [draftOrder, setDraftOrder] = useState<string[]>([])
   const [approvedOrder, setApprovedOrder] = useState<string[]>([])
   const [reorderClaims] = useMutation(ReorderBoardCandidateClaimsDocument)
 
@@ -75,9 +71,6 @@ const CandidateClaimsPage = () => {
 
   useEffect(() => {
     const c = graphQLData?.boardCandidateClaims ?? []
-    setDraftOrder(
-      c.filter((claim) => claim.status === ClaimStatusEnum.Draft).map((claim) => claim.key)
-    )
     setApprovedOrder(
       c.filter((claim) => claim.status === ClaimStatusEnum.Approved).map((claim) => claim.key)
     )
@@ -99,22 +92,17 @@ const CandidateClaimsPage = () => {
     )
   }
 
-  const originalDraftOrder = claims
-    .filter((c) => c.status === ClaimStatusEnum.Draft)
-    .map((c) => c.key)
   const originalApprovedOrder = claims
     .filter((c) => c.status === ClaimStatusEnum.Approved)
     .map((c) => c.key)
 
-  const draftChanged = draftOrder.join() !== originalDraftOrder.join()
   const approvedChanged = approvedOrder.join() !== originalApprovedOrder.join()
 
   const handleReorder = (
     key: string,
     direction: 'up' | 'down',
-    status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved
   ) => {
-    const setOrder = status === ClaimStatusEnum.Draft ? setDraftOrder : setApprovedOrder
+    const setOrder = setApprovedOrder
     setOrder((prev) => {
       const idx = prev.indexOf(key)
       if (idx === -1) return prev
@@ -126,8 +114,8 @@ const CandidateClaimsPage = () => {
     })
   }
 
-  const handleSave = async (status: ClaimStatusEnum.Draft | ClaimStatusEnum.Approved) => {
-    const keys = status === ClaimStatusEnum.Draft ? draftOrder : approvedOrder
+  const handleSave = async () => {
+    const keys = approvedOrder
     try {
       const { data } = await reorderClaims({
         variables: { input: { keys, year: Number.parseInt(year) } },
@@ -145,7 +133,7 @@ const CandidateClaimsPage = () => {
               data: {
                 ...existing,
                 boardCandidateClaims: [
-                  ...existing.boardCandidateClaims.filter((c) => c.status !== status),
+                  ...existing.boardCandidateClaims.filter((c) => c.status !== ClaimStatusEnum.Approved),
                   ...reorderedClaims,
                 ],
               },
@@ -189,9 +177,7 @@ const CandidateClaimsPage = () => {
     {
       type: ClaimStatusEnum.Draft,
       title: 'Draft Claims',
-      items: [...claims.filter((c) => c.status === ClaimStatusEnum.Draft)].sort(
-        (a, b) => draftOrder.indexOf(a.key) - draftOrder.indexOf(b.key)
-      ),
+      items: claims.filter((c) => c.status === ClaimStatusEnum.Draft),
     },
     {
       type: ClaimStatusEnum.Submitted,
@@ -217,7 +203,6 @@ const CandidateClaimsPage = () => {
     },
   ]
   const orderChanged: Partial<Record<ClaimStatusEnum, boolean>> = {
-    [ClaimStatusEnum.Draft]: draftChanged,
     [ClaimStatusEnum.Approved]: approvedChanged,
   }
 
@@ -237,13 +222,13 @@ const CandidateClaimsPage = () => {
         <SecondaryCard
           key={title}
           title={
-            [ClaimStatusEnum.Draft, ClaimStatusEnum.Approved].includes(statusType) &&
+            [ClaimStatusEnum.Approved].includes(statusType) &&
             orderChanged[statusType] ? (
               <div className="flex w-full items-center justify-between">
                 <span>{title}</span>
                 <ActionButton
                   onClick={() =>
-                    handleSave(statusType as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved)
+                    handleSave()
                   }
                 >
                   Save Order
@@ -291,18 +276,16 @@ const CandidateClaimsPage = () => {
                       )}
                     </div>
                   </div>
-                  {[ClaimStatusEnum.Draft, ClaimStatusEnum.Approved].includes(claim.status) && (
+                  {[ClaimStatusEnum.Approved].includes(claim.status) && (
                     <div className="flex flex-row gap-2 p-1">
                       <ReorderButton
                         direction="up"
                         claimKey={claim.key}
-                        status={claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved}
                         onReorder={handleReorder}
                       />
                       <ReorderButton
                         direction="down"
                         claimKey={claim.key}
-                        status={claim.status as ClaimStatusEnum.Draft | ClaimStatusEnum.Approved}
                         onReorder={handleReorder}
                       />
                     </div>
