@@ -41,7 +41,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - cache-data-crp:/data
 
   db:
     container_name: nest-db
@@ -77,7 +77,7 @@ services:
       - ../../README.md:/home/owasp/README.md:ro
       - ../../CODE_OF_CONDUCT.md:/home/owasp/CODE_OF_CONDUCT.md:ro
       - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
-      - docs-venv:/home/owasp/.venv
+      - docs-venv-crp:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -99,8 +99,8 @@ services:
       - 3000:3000
     volumes:
       - ../../frontend:/home/owasp
-      - frontend-next:/home/owasp/.next
-      - frontend-node-modules:/home/owasp/node_modules
+      - frontend-next-crp:/home/owasp/.next
+      - frontend-node-modules-crp:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -121,15 +121,15 @@ services:
       - nest-network
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-crp:/home/owasp/.venv
 
 networks:
   nest-network:
 
 volumes:
-  backend-venv:
-  cache-data:
+  backend-venv-crp:
+  cache-data-crp:
   db-data-issue-4702:
-  docs-venv:
-  frontend-next:
-  frontend-node-modules:
+  docs-venv-crp:
+  frontend-next-crp:
+  frontend-node-modules-crp:
