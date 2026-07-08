@@ -34,6 +34,7 @@ minimumReleaseAgeExclude:
   - '@graphql-codegen/client-preset@6.1.0'
   - '@graphql-codegen/core@6.2.0'
   - '@graphql-codegen/gql-tag-operations@6.1.0'
+  - '@graphql-codegen/near-operation-file-preset@5.2.1'
   - '@graphql-codegen/plugin-helpers@7.1.0'
   - '@graphql-codegen/schema-ast@6.1.0'
   - '@graphql-codegen/typed-document-node@7.1.0'
