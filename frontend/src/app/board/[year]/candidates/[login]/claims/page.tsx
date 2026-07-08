@@ -275,7 +275,7 @@ const CandidateClaimsPage = () => {
                       )}
                     </div>
                   </div>
-                  {[ClaimStatusEnum.Approved].includes(claim.status) && (
+                  {[ClaimStatusEnum.Approved].includes(claim.status) && items.length > 1 && (
                     <div className="flex flex-row gap-2 p-1">
                       <ReorderButton
                         direction="up"
