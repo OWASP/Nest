@@ -91,12 +91,12 @@ const DropdownActions: React.FC<DropdownActionsProps> = ({ options, label }) => 
         ref={triggerButtonRef}
         type="button"
         onClick={handleToggle}
-        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-transparent hover:bg-gray-200 dark:hover:bg-gray-700"
         aria-label={label ?? 'Actions menu'}
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
       >
-        <FaEllipsisV className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200" />
+        <FaEllipsisV className="text-gray-400" />
       </button>
       {dropdownOpen && (
         <div

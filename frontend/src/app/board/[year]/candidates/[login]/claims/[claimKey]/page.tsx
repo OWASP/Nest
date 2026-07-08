@@ -102,7 +102,7 @@ const ClaimDetailsPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Claim</h1>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {claim.status == ClaimStatusEnum.Draft && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
