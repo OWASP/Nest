@@ -2,6 +2,7 @@
 
 import { useApolloClient, useMutation, useQuery } from '@apollo/client/react'
 import { Button } from '@heroui/button'
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import { addToast } from '@heroui/toast'
 import debounce from 'lodash/debounce'
 import { useSession } from 'next-auth/react'
@@ -16,6 +17,7 @@ import {
   GET_MY_SUBSCRIPTION,
   UPDATE_SNAPSHOT_SUBSCRIPTION,
 } from 'server/queries/subscriptionQueries'
+import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
@@ -399,8 +401,8 @@ function ProjectSubscriptions({
     <SecondaryCard>
       <h2 className="mb-2 text-xl font-semibold">Project Subscriptions</h2>
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Add projects and choose which content types (Issues, Pull Requests, Releases) you want from
-        each one. Leave empty to skip project-specific content.
+        Select projects and choose which updates you would like to receive (Issues, Pull Requests,
+        Releases). Leave this empty if you don't want project-specific updates.
       </p>
 
       <EntityPicker
@@ -623,15 +625,24 @@ function SubscriptionContent() {
     },
   })
 
-  const handleSubscribe = () => {
-    createSubscription({ variables: getMutationVariables() })
+  const handleSave = () => {
+    if (hasActiveSubscription) {
+      updateSubscription({ variables: getMutationVariables() })
+    } else {
+      createSubscription({ variables: getMutationVariables() })
+    }
   }
 
-  const handleUpdate = () => {
-    updateSubscription({ variables: getMutationVariables() })
-  }
+  const isSaving = creating || updating
+
+  const [showCancelModal, setShowCancelModal] = useState(false)
 
   const handleCancel = () => {
+    setShowCancelModal(true)
+  }
+
+  const handleConfirmCancel = () => {
+    setShowCancelModal(false)
     cancelSubscription()
   }
 
@@ -652,113 +663,114 @@ function SubscriptionContent() {
   return (
     <>
       {hasActiveSubscription ? (
-        <>
-          <SecondaryCard>
-            <div className="flex items-start gap-3">
-              <FaBell className="mt-0.5 text-green-600 dark:text-green-400" />
-              <div>
-                <h2 className="font-semibold text-green-800 dark:text-green-300">
-                  Subscription Active
-                </h2>
-                <p className="mt-1 text-sm text-green-700 dark:text-green-400">
-                  You are currently receiving <strong>{subscription?.frequency}</strong> digest
-                  emails.
-                </p>
-              </div>
+        <SecondaryCard>
+          <div className="flex items-start gap-3">
+            <FaBell className="mt-0.5 text-green-600 dark:text-green-400" />
+            <div>
+              <h2 className="font-semibold text-green-800 dark:text-green-300">
+                Subscription Active
+              </h2>
+              <p className="mt-1 text-sm text-green-700 dark:text-green-400">
+                You are currently receiving <strong>{subscription?.frequency}</strong> digest
+                emails.
+              </p>
             </div>
-          </SecondaryCard>
+          </div>
+        </SecondaryCard>
+      ) : (
+        <SecondaryCard>
+          <div className="flex items-start gap-3">
+            <FaBellSlash className="mt-0.5 text-gray-500 dark:text-gray-400" />
+            <div>
+              <h2 className="font-semibold text-gray-700 dark:text-gray-300">Not Subscribed</h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Subscribe to get curated OWASP community updates delivered to your inbox.
+              </p>
+            </div>
+          </div>
+        </SecondaryCard>
+      )}
 
-          <FrequencySelector
-            hasActiveSubscription={hasActiveSubscription}
-            frequency={frequency}
-            setFrequency={setFrequency}
-          />
-          <GlobalContentPreferences
-            globalPreferences={globalPreferences}
-            toggleGlobalPreference={toggleGlobalPreference}
-          />
-          <ProjectSubscriptions
-            projectPreferences={projectPreferences}
-            handleAddProject={handleAddProject}
-            handleRemoveProject={handleRemoveProject}
-            handleToggleProjectContent={handleToggleProjectContent}
-          />
-          <ChapterFilters
-            includeChapters={globalPreferences.includeChapters}
-            selectedChapters={selectedChapters}
-            handleAddChapter={handleAddChapter}
-            handleRemoveChapter={handleRemoveChapter}
-          />
+      <FrequencySelector
+        hasActiveSubscription={hasActiveSubscription}
+        frequency={frequency}
+        setFrequency={setFrequency}
+      />
+      <GlobalContentPreferences
+        globalPreferences={globalPreferences}
+        toggleGlobalPreference={toggleGlobalPreference}
+      />
+      <ProjectSubscriptions
+        projectPreferences={projectPreferences}
+        handleAddProject={handleAddProject}
+        handleRemoveProject={handleRemoveProject}
+        handleToggleProjectContent={handleToggleProjectContent}
+      />
+      <ChapterFilters
+        includeChapters={globalPreferences.includeChapters}
+        selectedChapters={selectedChapters}
+        handleAddChapter={handleAddChapter}
+        handleRemoveChapter={handleRemoveChapter}
+      />
 
-          <div className="flex gap-3">
-            <Button
-              onPress={handleUpdate}
-              isDisabled={updating}
-              radius="md"
-              className="border border-[#1D7BD7] bg-[#1D7BD7] font-medium text-white transition-all hover:bg-[#1565b0]"
-            >
-              <FaFloppyDisk className="mr-2" />
+      <div className="flex gap-3">
+        <ActionButton onClick={handleSave} isDisabled={isSaving}>
+          {hasActiveSubscription ? (
+            <>
+              <FaFloppyDisk />
               {updating ? 'Saving...' : 'Save Changes'}
+            </>
+          ) : (
+            <>
+              <FaBell />
+              {creating ? 'Subscribing...' : 'Subscribe'}
+            </>
+          )}
+        </ActionButton>
+        {hasActiveSubscription && (
+          <Button
+            variant="bordered"
+            onPress={handleCancel}
+            isDisabled={cancelling}
+            radius="md"
+            className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+          >
+            <FaBellSlash className="mr-2" />
+            {cancelling ? 'Cancelling...' : 'Unsubscribe'}
+          </Button>
+        )}
+      </div>
+
+      <Modal isOpen={showCancelModal} onClose={() => setShowCancelModal(false)} size="md">
+        <ModalContent className="rounded-lg bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-[#212529]">
+          <ModalHeader className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Confirm Unsubscribe</h2>
+          </ModalHeader>
+          <ModalBody className="px-5 py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to unsubscribe? All your preferences including selected
+              projects, content types, and chapter filters will be lost.
+            </p>
+          </ModalBody>
+          <ModalFooter className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-gray-700">
+            <Button
+              variant="ghost"
+              onPress={() => setShowCancelModal(false)}
+              className="rounded-md bg-gray-600 px-4 py-1 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              Keep Subscription
             </Button>
             <Button
-              variant="bordered"
-              onPress={handleCancel}
+              onPress={handleConfirmCancel}
               isDisabled={cancelling}
-              radius="md"
-              className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+              className="rounded-md bg-red-600 px-4 py-1 text-sm font-medium text-white hover:bg-red-700"
             >
               <FaBellSlash className="mr-2" />
-              {cancelling ? 'Cancelling...' : 'Unsubscribe'}
+              {cancelling ? 'Cancelling...' : 'Yes, Unsubscribe'}
             </Button>
-          </div>
-        </>
-      ) : (
-        <>
-          <SecondaryCard>
-            <div className="flex items-start gap-3">
-              <FaBellSlash className="mt-0.5 text-gray-500 dark:text-gray-400" />
-              <div>
-                <h2 className="font-semibold text-gray-700 dark:text-gray-300">Not Subscribed</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Subscribe to get curated OWASP community updates delivered to your inbox.
-                </p>
-              </div>
-            </div>
-          </SecondaryCard>
-
-          <FrequencySelector
-            hasActiveSubscription={hasActiveSubscription}
-            frequency={frequency}
-            setFrequency={setFrequency}
-          />
-          <GlobalContentPreferences
-            globalPreferences={globalPreferences}
-            toggleGlobalPreference={toggleGlobalPreference}
-          />
-          <ProjectSubscriptions
-            projectPreferences={projectPreferences}
-            handleAddProject={handleAddProject}
-            handleRemoveProject={handleRemoveProject}
-            handleToggleProjectContent={handleToggleProjectContent}
-          />
-          <ChapterFilters
-            includeChapters={globalPreferences.includeChapters}
-            selectedChapters={selectedChapters}
-            handleAddChapter={handleAddChapter}
-            handleRemoveChapter={handleRemoveChapter}
-          />
-
-          <Button
-            onPress={handleSubscribe}
-            isDisabled={creating}
-            radius="md"
-            className="border border-[#1D7BD7] bg-[#1D7BD7] font-medium text-white transition-all hover:bg-[#1565b0]"
-          >
-            <FaBell className="mr-2" />
-            {creating ? 'Subscribing...' : 'Subscribe'}
-          </Button>
-        </>
-      )}
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   )
 }
