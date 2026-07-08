@@ -9,6 +9,8 @@ import Metadata from 'components/cards/Metadata'
 jest.mock('react-icons/fa6', () => ({
   FaChartPie: () => <span data-testid="chart-pie-icon">ChartIcon</span>,
   FaRectangleList: () => <span data-testid="rectangle-list-icon">ListIcon</span>,
+  FaChartLine: () => <span data-testid="chart-line-icon">LineIcon</span>,
+  FaStar: () => <span data-testid="star-icon">StarIcon</span>,
 }))
 
 jest.mock('components/AnchorTitle', () => ({
@@ -182,5 +184,33 @@ describe('Metadata', () => {
     render(<Metadata details={details} socialLinks={[]} showSocialLinks={true} />)
 
     expect(screen.queryByText('Social Links')).not.toBeInTheDocument()
+  })
+
+  it('renders contribution score and tier level when both are provided', () => {
+    const details = [{ label: 'Name', value: 'Test User' }]
+    render(<Metadata details={details} contributionScore={1234} tierLevel="level 1" />)
+
+    expect(screen.getByText('Contribution Score')).toBeInTheDocument()
+    expect(screen.getByText((1234).toLocaleString())).toBeInTheDocument()
+    expect(screen.getByText('Tier Level')).toBeInTheDocument()
+    expect(screen.getByText('level 1')).toBeInTheDocument()
+  })
+
+  it('renders only contribution score when tier level is not provided', () => {
+    const details = [{ label: 'Name', value: 'Test User' }]
+    render(<Metadata details={details} contributionScore={5678} />)
+
+    expect(screen.getByText('Contribution Score')).toBeInTheDocument()
+    expect(screen.getByText((5678).toLocaleString())).toBeInTheDocument()
+    expect(screen.queryByText('Tier Level')).not.toBeInTheDocument()
+  })
+
+  it('renders only tier level when contribution score is not provided', () => {
+    const details = [{ label: 'Name', value: 'Test User' }]
+    render(<Metadata details={details} tierLevel="level 2" />)
+
+    expect(screen.queryByText('Contribution Score')).not.toBeInTheDocument()
+    expect(screen.getByText('Tier Level')).toBeInTheDocument()
+    expect(screen.getByText('level 2')).toBeInTheDocument()
   })
 })
