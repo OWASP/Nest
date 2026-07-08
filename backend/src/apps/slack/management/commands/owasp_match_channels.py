@@ -24,7 +24,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--threshold",
             type=int,
-            default=80,
+            default=90,
             help="Threshold for fuzzy matching (0-100)",
         )
 
@@ -46,7 +46,8 @@ class Command(BaseCommand):
         project_conversations = [
             conv
             for conv in all_conversations
-            if conv.name and conv.name.lower().startswith("project-")
+            if conv.name
+            and (conv.name.lower().startswith("project-") or conv.name.lower().startswith("proj-"))
         ]
         self.stdout.write(f"Found {len(project_conversations)} project-specific channels")
 
