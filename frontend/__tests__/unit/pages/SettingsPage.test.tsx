@@ -127,16 +127,15 @@ describe('SettingsPage Component', () => {
       ).toBeInTheDocument()
     })
 
-    test('shows Choose Frequency heading when not subscribed', () => {
+    test.each([
+      ['Choose Frequency'],
+      ['Subscribe'],
+      ['Project Subscriptions'],
+      ['Chapter Subscriptions'],
+    ])('renders %s when not subscribed', (text) => {
       setupMocks({ data: mockNoSubscription })
       render(<SettingsPage />)
-      expect(screen.getByText('Choose Frequency')).toBeInTheDocument()
-    })
-
-    test('shows Subscribe button when not subscribed', () => {
-      setupMocks({ data: mockNoSubscription })
-      render(<SettingsPage />)
-      expect(screen.getByText('Subscribe')).toBeInTheDocument()
+      expect(screen.getByText(text)).toBeInTheDocument()
     })
 
     test('renders frequency options (Weekly and Monthly)', () => {
@@ -155,44 +154,23 @@ describe('SettingsPage Component', () => {
       expect(screen.getByText('Posts')).toBeInTheDocument()
       expect(screen.getByText('Users')).toBeInTheDocument()
     })
-
-    test('renders Project Subscriptions section', () => {
-      setupMocks({ data: mockNoSubscription })
-      render(<SettingsPage />)
-      expect(screen.getByText('Project Subscriptions')).toBeInTheDocument()
-    })
-
-    test('renders Chapter Subscriptions section when chapters enabled', () => {
-      setupMocks({ data: mockNoSubscription })
-      render(<SettingsPage />)
-      expect(screen.getByText('Chapter Subscriptions')).toBeInTheDocument()
-    })
   })
 
   describe('Active Subscription State', () => {
-    test('shows Subscription Active status', () => {
-      setupMocks({ data: mockActiveSubscription })
-      render(<SettingsPage />)
-      expect(screen.getByText('Subscription Active')).toBeInTheDocument()
-    })
-
-    test('shows Frequency heading when subscribed', () => {
-      setupMocks({ data: mockActiveSubscription })
-      render(<SettingsPage />)
-      expect(screen.getByText('Frequency')).toBeInTheDocument()
-    })
+    test.each([['Subscription Active'], ['Frequency'], ['weekly']])(
+      'renders %s when subscribed',
+      (text) => {
+        setupMocks({ data: mockActiveSubscription })
+        render(<SettingsPage />)
+        expect(screen.getByText(text)).toBeInTheDocument()
+      }
+    )
 
     test('shows Save Changes and Unsubscribe buttons', () => {
       setupMocks({ data: mockActiveSubscription })
       render(<SettingsPage />)
       expect(screen.getByText('Save Changes')).toBeInTheDocument()
       expect(screen.getByText('Unsubscribe')).toBeInTheDocument()
-    })
-
-    test('displays current frequency in status message', () => {
-      setupMocks({ data: mockActiveSubscription })
-      render(<SettingsPage />)
-      expect(screen.getByText('weekly')).toBeInTheDocument()
     })
 
     test('displays project preference cards for subscribed projects', () => {
@@ -324,9 +302,7 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockNoSubscription })
       render(<SettingsPage />)
       expect(
-        screen.getByText(
-          /Select projects and choose which updates you would like to receive/
-        )
+        screen.getByText(/Select projects and choose which updates you would like to receive/)
       ).toBeInTheDocument()
     })
 

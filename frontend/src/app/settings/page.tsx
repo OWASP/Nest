@@ -493,7 +493,7 @@ function SubscriptionContent() {
     }
   }, [subscription])
 
-  const [createSubscription, { loading: creating }] = useMutation<{
+  const [createSubscription] = useMutation<{
     createSnapshotSubscription: MutationResponse
   }>(CREATE_SNAPSHOT_SUBSCRIPTION, {
     onCompleted: (data) => {
@@ -514,7 +514,7 @@ function SubscriptionContent() {
     },
   })
 
-  const [updateSubscription, { loading: updating }] = useMutation<{
+  const [updateSubscription] = useMutation<{
     updateSnapshotSubscription: MutationResponse
   }>(UPDATE_SNAPSHOT_SUBSCRIPTION, {
     onCompleted: (data) => {
@@ -633,8 +633,6 @@ function SubscriptionContent() {
     }
   }
 
-  const isSaving = creating || updating
-
   const [showCancelModal, setShowCancelModal] = useState(false)
 
   const handleCancel = () => {
@@ -714,16 +712,16 @@ function SubscriptionContent() {
       />
 
       <div className="flex gap-3">
-        <ActionButton onClick={handleSave} isDisabled={isSaving}>
+        <ActionButton onClick={handleSave}>
           {hasActiveSubscription ? (
             <>
               <FaFloppyDisk />
-              {updating ? 'Saving...' : 'Save Changes'}
+              Save Changes
             </>
           ) : (
             <>
               <FaBell />
-              {creating ? 'Subscribing...' : 'Subscribe'}
+              Subscribe
             </>
           )}
         </ActionButton>
