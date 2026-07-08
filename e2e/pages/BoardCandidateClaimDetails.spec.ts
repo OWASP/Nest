@@ -67,10 +67,7 @@ test.describe('Board Candidate Claim Details Page', () => {
   test('breadcrumb renders correct segments', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, [
       'Home',
-      'Board',
-      '2025',
-      'Candidates',
-      'Testuser',
+      '2025 Board Candidates',
       'Claims',
       'Leadership Experience',
     ])

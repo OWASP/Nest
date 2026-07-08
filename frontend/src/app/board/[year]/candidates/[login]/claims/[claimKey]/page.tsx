@@ -101,6 +101,7 @@ const ClaimDetailsPage = () => {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Claim</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">@{login}</p>
           </div>
           <div className="flex items-center gap-2">
             {claim.status == ClaimStatusEnum.Draft && (
