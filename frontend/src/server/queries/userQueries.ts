@@ -68,6 +68,8 @@ export const GET_USER_DATA = gql`
       contributionData
       contributionsCount
       createdAt
+      contributionScore
+      tier
       email
       followersCount
       followingCount
