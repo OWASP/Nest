@@ -140,7 +140,7 @@ jobs:
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
         }}
-      RUNTIME_SECRETS_MODE: ${{ vars.RUNTIME_SECRETS_MODE }}
+      RUNTIME_SECRETS_MODE: ${{ vars.RUNTIME_SECRETS_MODE || 'prepare' }}
       TF_IN_AUTOMATION: true
       TF_INPUT: false
     permissions:
@@ -238,7 +238,7 @@ jobs:
             frontend_use_fargate_spot=${{ inputs.frontend_use_fargate_spot }}
             frontend_image_tag="${{ inputs.release_version }}"
             project_name="nest"
-            runtime_secrets_mode="${{ vars.RUNTIME_SECRETS_MODE }}"
+            runtime_secrets_mode="${{ vars.RUNTIME_SECRETS_MODE || 'prepare' }}"
             tasks_use_fargate_spot=${{ inputs.tasks_use_fargate_spot }}
           working-directory: infrastructure/live
 
