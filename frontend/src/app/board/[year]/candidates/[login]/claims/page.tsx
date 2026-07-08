@@ -27,10 +27,7 @@ const ReorderButton = ({
 }: {
   direction: 'up' | 'down'
   claimKey: string
-  onReorder: (
-    key: string,
-    direction: 'up' | 'down',
-  ) => void
+  onReorder: (key: string, direction: 'up' | 'down') => void
 }) => {
   const Icon = direction === 'up' ? FaChevronUp : FaChevronDown
   const handleClick = (e: React.MouseEvent) => {
@@ -98,10 +95,7 @@ const CandidateClaimsPage = () => {
 
   const approvedChanged = approvedOrder.join() !== originalApprovedOrder.join()
 
-  const handleReorder = (
-    key: string,
-    direction: 'up' | 'down',
-  ) => {
+  const handleReorder = (key: string, direction: 'up' | 'down') => {
     const setOrder = setApprovedOrder
     setOrder((prev) => {
       const idx = prev.indexOf(key)
@@ -133,7 +127,9 @@ const CandidateClaimsPage = () => {
               data: {
                 ...existing,
                 boardCandidateClaims: [
-                  ...existing.boardCandidateClaims.filter((c) => c.status !== ClaimStatusEnum.Approved),
+                  ...existing.boardCandidateClaims.filter(
+                    (c) => c.status !== ClaimStatusEnum.Approved
+                  ),
                   ...reorderedClaims,
                 ],
               },
@@ -221,17 +217,10 @@ const CandidateClaimsPage = () => {
         <SecondaryCard
           key={title}
           title={
-            [ClaimStatusEnum.Approved].includes(statusType) &&
-            orderChanged[statusType] ? (
+            [ClaimStatusEnum.Approved].includes(statusType) && orderChanged[statusType] ? (
               <div className="flex w-full items-center justify-between">
                 <span>{title}</span>
-                <ActionButton
-                  onClick={() =>
-                    handleSave()
-                  }
-                >
-                  Save Order
-                </ActionButton>
+                <ActionButton onClick={() => handleSave()}>Save Order</ActionButton>
               </div>
             ) : (
               title
