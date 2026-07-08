@@ -213,4 +213,12 @@ describe('Metadata', () => {
     expect(screen.getByText('Tier Level')).toBeInTheDocument()
     expect(screen.getByText('level 2')).toBeInTheDocument()
   })
+
+  it('renders neither contribution score nor tier level when neither is provided', () => {
+    const details = [{ label: 'Name', value: 'Test User' }]
+    render(<Metadata details={details} />)
+
+    expect(screen.queryByText('Contribution Score')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tier Level')).not.toBeInTheDocument()
+  })
 })

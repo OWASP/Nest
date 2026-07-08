@@ -23,7 +23,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-crp:/home/owasp/.venv
 
   cache:
     command: >

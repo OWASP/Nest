@@ -75,7 +75,10 @@ const Metadata = ({
               <div className="flex flex-1 flex-col justify-center gap-3 sm:pl-6">
                 {contributionScore !== undefined && (
                   <div className="flex items-center gap-3">
-                    <FaChartLine className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <FaChartLine
+                      aria-hidden="true"
+                      className="h-5 w-5 text-gray-400 dark:text-gray-500"
+                    />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Contribution Score</p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -89,7 +92,10 @@ const Metadata = ({
                 )}
                 {tierLevel !== undefined && (
                   <div className="flex items-center gap-3">
-                    <FaStar className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <FaStar
+                      aria-hidden="true"
+                      className="h-5 w-5 text-gray-400 dark:text-gray-500"
+                    />
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Tier Level</p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
