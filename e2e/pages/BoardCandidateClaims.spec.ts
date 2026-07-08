@@ -16,7 +16,7 @@ test.describe('Board Candidate Claims Page', () => {
   })
 
   test('renders claims page with heading and create button', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /^Claims$/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /^Your Claims$/ })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Create Claim' })).toBeVisible()
   })
 

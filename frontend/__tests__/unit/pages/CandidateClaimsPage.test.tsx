@@ -86,7 +86,7 @@ describe('CandidateClaimsPage', () => {
     render(<CandidateClaimsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Claims')).toBeInTheDocument()
+      expect(screen.getByText('Your Claims')).toBeInTheDocument()
     })
     expect(screen.getByText('Create Claim')).toBeInTheDocument()
   })

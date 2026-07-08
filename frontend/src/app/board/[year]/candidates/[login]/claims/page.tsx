@@ -210,8 +210,7 @@ const CandidateClaimsPage = () => {
     <div className="container mx-auto px-4 py-8 dark:bg-[#212529]">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Claims</h1>
-          <p className="text-gray-600 dark:text-gray-400">Claims you've created</p>
+          <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Your Claims</h1>
         </div>
         <ActionButton onClick={handleCreate}>
           <FaPlus className="mr-2" />
