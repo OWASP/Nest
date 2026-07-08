@@ -134,6 +134,16 @@ run "test_prepare_mode_does_not_grant_secretsmanager_access" {
     ])
     error_message = "Prepare mode ECS roles must keep using SSM without Secrets Manager access."
   }
+
+  assert {
+    condition     = output.django_container_secrets["DJANGO_DB_PASSWORD"] == var.db_password_arn
+    error_message = "In prepare mode DJANGO_DB_PASSWORD must still resolve to the SSM parameter ARN."
+  }
+
+  assert {
+    condition     = output.django_container_secrets["DJANGO_REDIS_PASSWORD"] == var.redis_password_arn
+    error_message = "In prepare mode DJANGO_REDIS_PASSWORD must still resolve to the SSM parameter ARN."
+  }
 }
 
 run "test_django_algolia_application_id_path_format" {
