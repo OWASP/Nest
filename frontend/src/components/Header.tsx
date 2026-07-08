@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   FaRegHeart,
   FaRegStar,
@@ -24,6 +24,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const previousActiveElement = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -46,12 +47,44 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       }
     }
 
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false)
+      }
+    }
+
+    // Focus management: when opening mobile nav, move focus to first focusable inside it.
+    if (mobileMenuOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement | null
+      // Defer to next tick so the panel is in the DOM
+      setTimeout(() => {
+        const mobileNav = document.getElementById('mobile-navigation')
+        if (mobileNav) {
+          const first = mobileNav.querySelector<HTMLElement>('a, button, [tabindex]:not([tabindex="-1"])')
+          first?.focus()
+        }
+      }, 0)
+    } else {
+      // restore focus to previous element or to the toggle button
+      setTimeout(() => {
+        const prev = previousActiveElement.current
+        if (prev) {
+          prev.focus()
+        } else {
+          const toggle = document.getElementById('mobile-menu-toggle') as HTMLElement | null
+          toggle?.focus()
+        }
+      }, 0)
+    }
+
     globalThis.addEventListener('resize', handleResize)
     globalThis.addEventListener('click', handleOutsideClick)
+    globalThis.addEventListener('keydown', handleKeydown)
 
     return () => {
       globalThis.removeEventListener('resize', handleResize)
       globalThis.removeEventListener('click', handleOutsideClick)
+      globalThis.removeEventListener('keydown', handleKeydown)
     }
   }, [mobileMenuOpen])
 
@@ -139,15 +172,20 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
               className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              <span className="sr-only">Open main menu</span>
+              <span className="sr-only">{mobileMenuOpen ? 'Close main menu' : 'Open main menu'}</span>
               {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
             </Button>
           </div>
         </div>
       </div>
       <div
+        id="mobile-navigation"
+        role="navigation"
+        aria-hidden={!mobileMenuOpen}
         className={cn(
           'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
