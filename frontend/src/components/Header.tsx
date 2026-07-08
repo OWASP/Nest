@@ -19,20 +19,12 @@ import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
-import { useTheme } from 'next-themes'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
-
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  const logoSrc = mounted && resolvedTheme === 'light' ? '/img/logo_light.png' : '/img/logo_dark.png'
+  const logoSrc = '/img/logo_dark.png'
 
   useEffect(() => {
     const handleResize = () => {
