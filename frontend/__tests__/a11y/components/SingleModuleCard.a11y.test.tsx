@@ -58,7 +58,7 @@ const mockModule: Module = {
     },
   ],
   startedAt: 1704067200,
-  endedAt: 1735689599,
+  endedAt: new Date(1735689599 * 1000).toISOString(),
   domains: ['frontend', 'backend'],
   tags: ['react', 'nodejs'],
   labels: ['good first issue', 'bug'],

@@ -1,0 +1,333 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      aws_role_name:
+        description: AWS role name to assume
+        required: true
+        type: string
+      aws_role_session_name:
+        description: AWS role session name
+        required: true
+        type: string
+      auto_scaling_cpu_target:
+        description: Target average CPU utilization percentage for ECS service auto scaling
+        required: true
+        type: number
+      auto_scaling_scale_in_cooldown:
+        description: Cooldown period in seconds after an ECS service scale-in activity
+        required: true
+        type: number
+      auto_scaling_scale_out_cooldown:
+        description: Cooldown period in seconds after an ECS service scale-out activity
+        required: true
+        type: number
+      backend_desired_count:
+        description: Desired number of backend tasks
+        required: true
+        type: number
+      backend_enable_auto_scaling:
+        description: Enable auto scaling for backend
+        required: true
+        type: boolean
+      backend_max_count:
+        description: Maximum number of backend tasks for auto scaling
+        required: true
+        type: number
+      backend_min_count:
+        description: Minimum number of backend tasks for auto scaling
+        required: true
+        type: number
+      backend_use_fargate_spot:
+        description: Use Fargate spot for backend
+        required: true
+        type: boolean
+      django_configuration:
+        description: Django configuration string
+        required: true
+        type: string
+      django_settings_module:
+        description: Django settings module
+        required: true
+        type: string
+      enable_additional_parameters:
+        description: Enable additional SSM parameters
+        required: false
+        default: false
+        type: boolean
+      enable_cron_tasks:
+        description: Enable cron tasks
+        required: true
+        type: boolean
+      enable_nat_gateway:
+        description: Enable NAT gateway
+        required: true
+        type: boolean
+      enable_rds_proxy:
+        description: Enable RDS proxy
+        required: true
+        type: boolean
+      environment:
+        description: GitHub environment name
+        required: true
+        type: string
+      frontend_use_fargate_spot:
+        description: Use Fargate spot for frontend
+        required: true
+        type: boolean
+      frontend_desired_count:
+        description: Desired number of frontend tasks
+        required: true
+        type: number
+      frontend_enable_auto_scaling:
+        description: Enable auto scaling for frontend
+        required: true
+        type: boolean
+      frontend_max_count:
+        description: Maximum number of frontend tasks for auto scaling
+        required: true
+        type: number
+      frontend_min_count:
+        description: Minimum number of frontend tasks for auto scaling
+        required: true
+        type: number
+      index_task_definition:
+        description: ECS task definition for index task
+        required: true
+        type: string
+      migrate_task_definition:
+        description: ECS task definition for migrate task
+        required: true
+        type: string
+      release_version:
+        description: Release version to deploy
+        required: true
+        type: string
+      tasks_use_fargate_spot:
+        description: Use Fargate spot for tasks
+        required: true
+        type: boolean
+      tf_state_key:
+        description: Terraform state key
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      AWS_ROLE_EXTERNAL_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      TF_STATE_BUCKET_NAME:
+        required: true
+
+env:
+  FORCE_COLOR: 1
+  COSIGN_CERTIFICATE_IDENTITY_REGEXP: ^https://github.com/${{ github.repository }}/
+  COSIGN_CERTIFICATE_OIDC_ISSUER: https://token.actions.githubusercontent.com
+
+permissions: {}
+
+jobs:
+  run-deploy:
+    name: Deploy
+    environment: ${{ inputs.environment }}
+    env:
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-backend:${{ inputs.release_version
+        }}
+      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
+        }}
+      TF_IN_AUTOMATION: true
+      TF_INPUT: false
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b  # v6.2.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: ${{ inputs.aws_role_session_name }}
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5  # v4.1.0
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+
+      - name: Verify release image signatures
+        run: |
+          bash .github/scripts/cosign-image-by-digest.sh verify "$BACKEND_IMAGE"
+          bash .github/scripts/cosign-image-by-digest.sh verify "$FRONTEND_IMAGE"
+
+      - name: Verify release image SBOM attestations
+        run: |
+          bash .github/scripts/verify-ecr-image-sbom.sh verify "$BACKEND_IMAGE"
+          bash .github/scripts/verify-ecr-image-sbom.sh verify "$FRONTEND_IMAGE"
+
+      - name: Apply infrastructure changes
+        uses: ./.github/actions/apply-infrastructure-changes
+        with:
+          summary-title: Terraform Plan Output
+          tfbackend-path: infrastructure/live/terraform.tfbackend
+          tfbackend-content: |
+            bucket="${{ secrets.TF_STATE_BUCKET_NAME }}"
+            key="${{ inputs.tf_state_key }}"
+            region="${{ vars.AWS_REGION }}"
+          tfvars-path: infrastructure/live/terraform.tfvars
+          tfvars-content: |
+            availability_zones=${{ vars.AWS_AVAILABILITY_ZONES }}
+            auto_scaling_cpu_target=${{ inputs.auto_scaling_cpu_target }}
+            auto_scaling_scale_in_cooldown=${{ inputs.auto_scaling_scale_in_cooldown }}
+            auto_scaling_scale_out_cooldown=${{ inputs.auto_scaling_scale_out_cooldown }}
+            aws_region="${{ vars.AWS_REGION }}"
+            backend_desired_count=${{ inputs.backend_desired_count }}
+            backend_enable_auto_scaling=${{ inputs.backend_enable_auto_scaling }}
+            backend_image_tag="${{ inputs.release_version }}"
+            backend_max_count=${{ inputs.backend_max_count }}
+            backend_min_count=${{ inputs.backend_min_count }}
+            backend_use_fargate_spot=${{ inputs.backend_use_fargate_spot }}
+            domain_name="${{ vars.DOMAIN_NAME }}"
+            django_configuration="${{ inputs.django_configuration }}"
+            django_release_version="${{ inputs.release_version }}"
+            django_settings_module="${{ inputs.django_settings_module }}"
+            enable_additional_parameters=${{ inputs.enable_additional_parameters }}
+            enable_cron_tasks=${{ inputs.enable_cron_tasks }}
+            enable_nat_gateway=${{ inputs.enable_nat_gateway }}
+            enable_rds_proxy=${{ inputs.enable_rds_proxy }}
+            environment="${{ inputs.environment }}"
+            frontend_desired_count=${{ inputs.frontend_desired_count }}
+            frontend_enable_auto_scaling=${{ inputs.frontend_enable_auto_scaling }}
+            frontend_max_count=${{ inputs.frontend_max_count }}
+            frontend_min_count=${{ inputs.frontend_min_count }}
+            frontend_use_fargate_spot=${{ inputs.frontend_use_fargate_spot }}
+            frontend_image_tag="${{ inputs.release_version }}"
+            project_name="nest"
+            tasks_use_fargate_spot=${{ inputs.tasks_use_fargate_spot }}
+          working-directory: infrastructure/live
+
+      - name: Capture terraform outputs
+        id: tf-outputs
+        run: |
+          {
+            echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)"
+            echo "backend_service_name=$(terraform output -raw backend_service_name)"
+            echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)"
+            echo "frontend_service_name=$(terraform output -raw frontend_service_name)"
+            echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)"
+            echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)"
+            echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)"
+            echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')"
+          } >> "$GITHUB_OUTPUT"
+        working-directory: infrastructure/live
+
+      - name: Run ECS migrate task
+        id: migrate-task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASK_DEFINITION: ${{ inputs.migrate_task_definition }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
+        run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+          echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for migrate task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+        run: |
+          aws ecs wait tasks-stopped \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}"
+
+      - name: Check migrate task exit code
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+        run: |
+          EXIT_CODE=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}" \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "::error::Migrate task failed with exit code $EXIT_CODE"
+            exit 1
+          fi
+          echo "Migrate task completed successfully"
+
+      - name: Run ECS index-data task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
+          TASK_DEFINITION: ${{ inputs.index_task_definition }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
+        run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          RESPONSE=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
+
+          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
+          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
+
+          if [ "$FAILURE_COUNT" -gt 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
+            echo "$RESPONSE" | jq '.failures'
+            exit 1
+          fi
+
+          if [ "$TASK_COUNT" -eq 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Index-data task started successfully (runs async, ~30 min)"
+
+      - name: Wait for backend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+
+      - name: Wait for frontend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+    timeout-minutes: 60

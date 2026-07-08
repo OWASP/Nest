@@ -9,12 +9,13 @@ services:
     build:
       context: ../../backend
       dockerfile: ../docker/backend/Dockerfile
+      target: backend
     depends_on:
       db:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../../backend/.env.fuzz.example
+    env_file: ../../backend/.env.fuzz-tests
     networks:
       - fuzz-nest-network
     ports:
@@ -24,14 +25,14 @@ services:
       retries: 10
       test: >
         sh -c '
-          wget --spider http://backend:9500/a/
+          wget --spider http://backend:9500/status/
         '
       timeout: 10s
       start_period: 5s
 
   data-loader:
     container_name: fuzz-nest-data-loader
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:ad2e18408bf447f62092a8a5259e7df10505c5a0360bd1a1853ac8b8b0763da2
     depends_on:
       db:
         condition: service_healthy
@@ -53,7 +54,7 @@ services:
       '
   db:
     container_name: fuzz-nest-db
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:ad2e18408bf447f62092a8a5259e7df10505c5a0360bd1a1853ac8b8b0763da2
     environment:
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_fuzz}
       POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_fuzz_password}
@@ -76,7 +77,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
       '
     container_name: fuzz-nest-cache
-    image: redis:8.6-alpine3.23
+    image: redis:8.8.0-alpine3.23@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-fuzz-cache-password}
     healthcheck:
@@ -93,7 +94,7 @@ services:
     container_name: fuzz-nest-graphql
     build:
       context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile.fuzz
+      dockerfile: ../docker/backend/Dockerfile.fuzz-tests
     environment:
       BASE_URL: http://backend:9500
       TEST_FILE: graphql_test.py
@@ -107,7 +108,7 @@ services:
     container_name: fuzz-nest-rest
     build:
       context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile.fuzz
+      dockerfile: ../docker/backend/Dockerfile.fuzz-tests
     environment:
       BASE_URL: http://backend:9500
       REST_URL: http://backend:9500/api/v0

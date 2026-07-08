@@ -117,7 +117,8 @@ describe('ChaptersPage Component', () => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for chapters...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for chapters...')
+      expect(searchInputs.length).toBeGreaterThan(0)
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

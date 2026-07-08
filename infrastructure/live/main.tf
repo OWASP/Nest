@@ -4,7 +4,12 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.53.0"
+    }
+    # tflint-ignore: terraform_unused_required_providers
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.9.0"
     }
   }
 }
@@ -22,42 +27,46 @@ locals {
 module "alb" {
   source = "../modules/alb"
 
-  alb_sg_id                  = module.security.alb_sg_id
-  common_tags                = local.common_tags
-  domain_name                = var.domain_name
-  environment                = var.environment
-  frontend_health_check_path = "/"
-  frontend_port              = 3000
-  project_name               = var.project_name
-  public_subnet_ids          = module.networking.public_subnet_ids
-  vpc_id                     = module.networking.vpc_id
+  alb_sg_id             = module.security.alb_sg_id
+  common_tags           = local.common_tags
+  domain_name           = var.domain_name
+  environment           = var.environment
+  frontend_port         = 3000
+  project_name          = var.project_name
+  public_subnet_ids     = module.networking.public_subnet_ids
+  static_s3_bucket_name = module.storage.static_s3_bucket_name
+  vpc_id                = module.networking.vpc_id
 }
 
 module "backend" {
   source = "../modules/service"
 
-  assign_public_ip      = local.assign_public_ip
-  aws_region            = var.aws_region
-  command               = ["./entrypoint.sh"]
-  common_tags           = local.common_tags
-  container_cpu         = 1024
-  container_memory      = 2048
-  container_port        = 8000
-  desired_count         = var.backend_desired_count
-  enable_auto_scaling   = var.backend_enable_auto_scaling
-  environment           = var.environment
-  image_tag             = var.backend_image_tag
-  kms_key_arn           = module.kms.key_arn
-  max_count             = var.backend_max_count
-  min_count             = var.backend_min_count
-  parameters_arns       = module.parameters.django_ssm_parameter_arns
-  project_name          = var.project_name
-  security_group_id     = module.security.backend_sg_id
-  service_name          = "backend"
-  subnet_ids            = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  target_group_arn      = module.alb.backend_target_group_arn
-  task_role_policy_arns = [module.storage.static_read_write_policy_arn]
-  use_fargate_spot      = var.backend_use_fargate_spot
+  assign_public_ip                = local.assign_public_ip
+  auto_scaling_cpu_target         = var.auto_scaling_cpu_target
+  auto_scaling_scale_in_cooldown  = var.auto_scaling_scale_in_cooldown
+  auto_scaling_scale_out_cooldown = var.auto_scaling_scale_out_cooldown
+  aws_region                      = var.aws_region
+  command                         = ["./entrypoint.sh"]
+  common_tags                     = local.common_tags
+  container_cpu                   = 1024
+  container_memory                = 2048
+  container_port                  = 8000
+  desired_count                   = var.backend_desired_count
+  enable_auto_scaling             = var.backend_enable_auto_scaling
+  environment                     = var.environment
+  health_check_path               = "/status/"
+  image_tag                       = var.backend_image_tag
+  kms_key_arn                     = module.kms.key_arn
+  max_count                       = var.backend_max_count
+  min_count                       = var.backend_min_count
+  parameters_arns                 = module.parameters.django_ssm_parameter_arns
+  project_name                    = var.project_name
+  security_group_id               = module.security.backend_sg_id
+  service_name                    = "backend"
+  subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  target_group_arn                = module.alb.backend_target_group_arn
+  task_role_policy_arns           = [module.storage.static_read_write_policy_arn]
+  use_fargate_spot                = var.backend_use_fargate_spot
 }
 
 module "cache" {
@@ -102,24 +111,42 @@ module "database" {
 module "frontend" {
   source = "../modules/service"
 
-  assign_public_ip    = local.assign_public_ip
-  aws_region          = var.aws_region
-  common_tags         = local.common_tags
-  container_port      = 3000
-  desired_count       = var.frontend_desired_count
-  enable_auto_scaling = var.frontend_enable_auto_scaling
-  environment         = var.environment
-  image_tag           = var.frontend_image_tag
-  kms_key_arn         = module.kms.key_arn
-  max_count           = var.frontend_max_count
-  min_count           = var.frontend_min_count
-  parameters_arns     = module.parameters.frontend_ssm_parameter_arns
-  project_name        = var.project_name
-  security_group_id   = module.security.frontend_sg_id
-  service_name        = "frontend"
-  subnet_ids          = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  target_group_arn    = module.alb.frontend_target_group_arn
-  use_fargate_spot    = var.frontend_use_fargate_spot
+  assign_public_ip                = local.assign_public_ip
+  auto_scaling_cpu_target         = var.auto_scaling_cpu_target
+  auto_scaling_scale_in_cooldown  = var.auto_scaling_scale_in_cooldown
+  auto_scaling_scale_out_cooldown = var.auto_scaling_scale_out_cooldown
+  aws_region                      = var.aws_region
+  common_tags                     = local.common_tags
+  container_port                  = 3000
+  desired_count                   = var.frontend_desired_count
+  enable_auto_scaling             = var.frontend_enable_auto_scaling
+  environment                     = var.environment
+  health_check_path               = "/api/health"
+  image_tag                       = var.frontend_image_tag
+  kms_key_arn                     = module.kms.key_arn
+  max_count                       = var.frontend_max_count
+  min_count                       = var.frontend_min_count
+  parameters_arns                 = module.parameters.frontend_ssm_parameter_arns
+  project_name                    = var.project_name
+  security_group_id               = module.security.frontend_sg_id
+  service_name                    = "frontend"
+  subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  target_group_arn                = module.alb.frontend_target_group_arn
+  use_fargate_spot                = var.frontend_use_fargate_spot
+}
+
+module "backend_build_cache" {
+  source = "../modules/ecr-cache"
+
+  common_tags = local.common_tags
+  name        = "${var.project_name}-${var.environment}-backend-cache"
+}
+
+module "frontend_build_cache" {
+  source = "../modules/ecr-cache"
+
+  common_tags = local.common_tags
+  name        = "${var.project_name}-${var.environment}-frontend-cache"
 }
 
 module "kms" {
@@ -166,13 +193,16 @@ module "parameters" {
   django_db_port                = var.db_port
   django_db_user                = var.db_user
   django_redis_host             = module.cache.redis_primary_endpoint
+  django_release_version        = var.django_release_version
   django_settings_module        = var.django_settings_module
+  enable_additional_parameters  = var.enable_additional_parameters
   environment                   = var.environment
   next_server_csrf_url          = "https://${var.domain_name}/csrf/"
   next_server_graphql_url       = "https://${var.domain_name}/graphql/"
   nextauth_url                  = "https://${var.domain_name}"
   project_name                  = var.project_name
   redis_password_arn            = module.cache.redis_password_arn
+  slack_bot_token_suffix        = var.slack_bot_token_suffix
 }
 
 module "security" {

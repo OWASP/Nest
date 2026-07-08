@@ -4,6 +4,39 @@ variable "assign_public_ip" {
   default     = false
 }
 
+variable "auto_scaling_cpu_target" {
+  description = "Target average CPU utilization percentage for auto scaling."
+  type        = number
+  default     = 70
+
+  validation {
+    condition     = var.auto_scaling_cpu_target >= 1 && var.auto_scaling_cpu_target <= 100
+    error_message = "auto_scaling_cpu_target must be between 1 and 100."
+  }
+}
+
+variable "auto_scaling_scale_in_cooldown" {
+  description = "Cooldown period in seconds after a scale-in activity."
+  type        = number
+  default     = 300
+
+  validation {
+    condition     = var.auto_scaling_scale_in_cooldown >= 0
+    error_message = "auto_scaling_scale_in_cooldown must be >= 0."
+  }
+}
+
+variable "auto_scaling_scale_out_cooldown" {
+  description = "Cooldown period in seconds after a scale-out activity."
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = var.auto_scaling_scale_out_cooldown >= 0
+    error_message = "auto_scaling_scale_out_cooldown must be >= 0."
+  }
+}
+
 variable "aws_region" {
   description = "The AWS region."
   type        = string
@@ -59,6 +92,17 @@ variable "force_new_deployment" {
   description = "Whether to force a new deployment on each apply."
   type        = bool
   default     = false
+}
+
+variable "health_check_path" {
+  description = "The path for the ECS container health checks."
+  type        = string
+  default     = "/"
+
+  validation {
+    condition     = startswith(var.health_check_path, "/")
+    error_message = "health_check_path must start with '/'."
+  }
 }
 
 variable "image_tag" {

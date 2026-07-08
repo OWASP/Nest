@@ -8,6 +8,7 @@ variables {
   container_port        = 3000
   desired_count         = 2
   environment           = "test"
+  health_check_path     = "/"
   image_tag             = "test-tag"
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
@@ -118,6 +119,45 @@ run "test_task_definition_memory" {
   }
 }
 
+run "test_task_definition_has_container_health_check" {
+  command = plan
+
+  assert {
+    condition     = can(local.container_definition.healthCheck)
+    error_message = "Task definition container must include ECS healthCheck configuration."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.command[0] == "CMD-SHELL"
+    error_message = "Health check command must use CMD-SHELL."
+  }
+
+  assert {
+    condition     = strcontains(local.container_definition.healthCheck.command[1], ":${var.container_port}${var.health_check_path}")
+    error_message = "Health check command must target the configured container_port and health_check_path."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.interval == 30
+    error_message = "Health check interval must be 30 seconds."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.retries == 3
+    error_message = "Health check retries must be 3."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.startPeriod == 100
+    error_message = "Health check startPeriod must be 100 seconds."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.timeout == 5
+    error_message = "Health check timeout must be 5 seconds."
+  }
+}
+
 run "test_task_definition_network_mode" {
   command = plan
 
@@ -133,6 +173,20 @@ run "test_task_definition_requires_fargate" {
   assert {
     condition     = contains(aws_ecs_task_definition.main.requires_compatibilities, "FARGATE")
     error_message = "Task definition must require FARGATE compatibility."
+  }
+}
+
+run "test_task_definition_runtime_platform" {
+  command = plan
+
+  assert {
+    condition     = aws_ecs_task_definition.main.runtime_platform[0].cpu_architecture == "ARM64"
+    error_message = "Task definition must use ARM64 CPU architecture."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.main.runtime_platform[0].operating_system_family == "LINUX"
+    error_message = "Task definition must use LINUX operating system family."
   }
 }
 
@@ -182,6 +236,26 @@ run "test_auto_scaling_enabled_when_configured" {
   assert {
     condition     = length(aws_appautoscaling_target.main) == 1
     error_message = "Auto scaling must be enabled when enable_auto_scaling is true."
+  }
+}
+
+run "test_auto_scaling_policy_uses_configured_values" {
+  command = plan
+
+  variables {
+    auto_scaling_cpu_target         = 80
+    auto_scaling_scale_in_cooldown  = 240
+    auto_scaling_scale_out_cooldown = 90
+    enable_auto_scaling             = true
+  }
+
+  assert {
+    condition = (
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].target_value == 80 &&
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].scale_in_cooldown == 240 &&
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].scale_out_cooldown == 90
+    )
+    error_message = "Auto scaling policy must use configured CPU target and cooldown values."
   }
 }
 

@@ -1,0 +1,37 @@
+name: Backend tests
+
+on:
+  workflow_call:
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-unit-tests:
+    name: Backend unit tests
+    permissions:
+      actions: write
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install backend dependencies
+        uses: ./.github/actions/install-backend-dependencies
+
+      - name: Run backend tests
+        run: set -a && source .env.unit-tests && set +a && poetry run pytest tests/unit
+        working-directory: backend
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          if-no-files-found: error
+          name: coverage-xml
+          path: backend/coverage.xml
+    timeout-minutes: 5

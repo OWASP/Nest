@@ -2,15 +2,29 @@
 
 import { useQuery } from '@apollo/client/react'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { useAccessControl } from 'hooks/useAccessControl'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState } from 'react'
-import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+import {
+  FaCodeBranch,
+  FaChevronDown,
+  FaChevronUp,
+  FaLink,
+  FaPlus,
+  FaTags,
+  FaXmark,
+} from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
-import { ErrorDisplay } from 'app/global-error'
-import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
+import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import type { ExtendedSession } from 'types/auth'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import { LabelList } from 'components/LabelList'
@@ -18,14 +32,42 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import SecondaryCard from 'components/SecondaryCard'
-import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
-  const [showAllPRs, setShowAllPRs] = useState(false)
+  const { data: session, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
+  const [hasMorePRs, setHasMorePRs] = useState(true)
+  const [visibleCount, setVisibleCount] = useState(4)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const limit = 4
   const { programKey, moduleKey, issueId } = params
+  const currentUserLogin = session?.user?.login
 
-  const formatDeadline = (deadline: string | null) => {
+  const {
+    data: accessData,
+    loading: accessLoading,
+    error: accessError,
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
+    variables: { programKey, moduleKey },
+    skip: !programKey || !moduleKey,
+    fetchPolicy: 'network-only',
+  })
+
+  const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
+
+  const moduleStartedAt = accessData?.managementModule?.startedAt
+  const moduleEndedAt = accessData?.managementModule?.endedAt
+
+  useEffect(() => {
+    if (accessError && !isForbiddenGraphQLError(accessError)) {
+      handleAppError(accessError)
+    }
+  }, [accessError])
+
+  const formatDeadline = (deadline: string | null, isOpen: boolean) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
 
     const now = new Date()
@@ -33,6 +75,11 @@ const ModuleIssueDetailsPage = () => {
     const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
 
     const deadlineDate = new Date(deadline)
+
+    const displayDate = deadlineDate.toLocaleDateString()
+    if (!isOpen) {
+      return { text: displayDate, color: 'text-gray-600 dark:text-gray-300' }
+    }
 
     const deadlineUTC = Date.UTC(
       deadlineDate.getUTCFullYear(),
@@ -52,8 +99,6 @@ const ModuleIssueDetailsPage = () => {
       statusText = `(${daysLeft} days left)`
     }
 
-    const displayDate = deadlineDate.toLocaleDateString()
-
     let color: string
     if (isOverdue) {
       color = 'text-[#DA3633]'
@@ -68,12 +113,26 @@ const ModuleIssueDetailsPage = () => {
       color,
     }
   }
-  const { data, loading, error } = useQuery(GetModuleIssueViewDocument, {
-    variables: { programKey, moduleKey, number: Number(issueId) },
-    skip: !issueId,
+  const { data, loading, error, fetchMore } = useQuery(GetManagementModuleIssueViewDocument, {
+    variables: {
+      programKey,
+      moduleKey,
+      number: Number(issueId),
+      limit,
+      offset: 0,
+    },
+    skip: !issueId || !hasAccess,
     fetchPolicy: 'cache-first',
     nextFetchPolicy: 'cache-and-network',
   })
+
+  useEffect(() => {
+    const prCount = data?.managementModule?.issueByNumber?.pullRequests?.length
+    if (prCount == null) return
+    if (prCount <= limit) {
+      setHasMorePRs(prCount >= limit)
+    }
+  }, [data, limit])
 
   const {
     assignIssue,
@@ -90,8 +149,8 @@ const ModuleIssueDetailsPage = () => {
     setDeadlineInput,
   } = useIssueMutations({ programKey, moduleKey, issueId })
 
-  const issue = data?.getModule?.issueByNumber
-  const taskDeadline = (data?.getModule?.taskDeadline as string | undefined) ?? null
+  const issue = data?.managementModule?.issueByNumber
+  const taskDeadline = (data?.managementModule?.taskDeadline as string | undefined) ?? null
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
@@ -100,10 +159,46 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
+  if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
+    return <LoadingSpinner />
+  }
+
+  if (accessError && isForbiddenGraphQLError(accessError)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to view this issue in the mentorship workspace."
+      />
+    )
+  }
+
+  if (accessError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error Loading Access Information"
+        message="Failed to verify access permissions. Please try again later."
+      />
+    )
+  }
+
+  if (!hasAccess) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Only program admins and module mentors can access this page."
+      />
+    )
+  }
+
+  if (loading && !issue) {
+    return <LoadingSpinner />
+  }
+
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
   }
-  if (loading) return <LoadingSpinner />
   if (!issue)
     return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
 
@@ -172,8 +267,8 @@ const ModuleIssueDetailsPage = () => {
               <div>
                 <span className="font-medium">Assigned:</span>{' '}
                 <span>
-                  {data?.getModule?.taskAssignedAt
-                    ? new Date(data.getModule.taskAssignedAt).toLocaleDateString()
+                  {data?.managementModule?.taskAssignedAt
+                    ? new Date(data.managementModule.taskAssignedAt).toLocaleDateString()
                     : 'Not assigned'}
                 </span>
               </div>
@@ -207,7 +302,6 @@ const ModuleIssueDetailsPage = () => {
                                 },
                               })
                             } else {
-                              // Clear deadline
                               await clearTaskDeadlineMutation({
                                 variables: {
                                   programKey,
@@ -218,7 +312,16 @@ const ModuleIssueDetailsPage = () => {
                             }
                           }
                         }}
-                        min={new Date().toISOString().slice(0, 10)}
+                        min={
+                          moduleStartedAt
+                            ? new Date(moduleStartedAt).toISOString().slice(0, 10)
+                            : undefined
+                        }
+                        max={
+                          moduleEndedAt
+                            ? new Date(moduleEndedAt).toISOString().slice(0, 10)
+                            : undefined
+                        }
                         className="h-8 rounded border border-gray-300 px-2 dark:border-gray-600"
                       />
                     </div>
@@ -239,7 +342,7 @@ const ModuleIssueDetailsPage = () => {
                       }`}
                     >
                       {(() => {
-                        const { text, color } = formatDeadline(taskDeadline)
+                        const { text, color } = formatDeadline(taskDeadline, issue.state === 'open')
                         return <span className={`font-normal ${color}`}>{text}</span>
                       })()}
                     </button>
@@ -321,14 +424,80 @@ const ModuleIssueDetailsPage = () => {
 
           <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
             <div className="grid grid-cols-1 gap-3">
-              {(issue.pullRequests || []).slice(0, showAllPRs ? undefined : 4).map((pr) => (
+              {(issue.pullRequests || []).slice(0, visibleCount).map((pr) => (
                 <MentorshipPullRequest key={pr.id} pr={pr} />
               ))}
+
+              {(hasMorePRs ||
+                (issue.pullRequests || []).length > visibleCount ||
+                (visibleCount > limit && (issue.pullRequests || []).length > limit)) && (
+                <div className="mt-4 flex justify-start gap-4">
+                  {(hasMorePRs || (issue.pullRequests || []).length > visibleCount) && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={() => {
+                        if (isFetchingMore) return
+                        const currentLength = issue.pullRequests?.length || 0
+                        if (hasMorePRs && currentLength < visibleCount + limit) {
+                          setIsFetchingMore(true)
+                          fetchMore({
+                            variables: {
+                              programKey,
+                              moduleKey,
+                              number: Number(issueId),
+                              offset: currentLength,
+                              limit,
+                            },
+                            updateQuery: (prevResult, { fetchMoreResult }) => {
+                              if (!fetchMoreResult) return prevResult
+                              const newPRs =
+                                fetchMoreResult.managementModule?.issueByNumber?.pullRequests || []
+                              if (newPRs.length < limit) setHasMorePRs(false)
+                              if (newPRs.length === 0) return prevResult
+                              return {
+                                ...prevResult,
+                                managementModule: {
+                                  ...prevResult.managementModule!,
+                                  issueByNumber: {
+                                    ...prevResult.managementModule!.issueByNumber!,
+                                    pullRequests: [
+                                      ...(prevResult.managementModule?.issueByNumber
+                                        ?.pullRequests || []),
+                                      ...newPRs,
+                                    ],
+                                  },
+                                },
+                              }
+                            },
+                          })
+                            .catch((err) => handleAppError(err))
+                            .finally(() => setIsFetchingMore(false))
+                        }
+                        setVisibleCount((prev) => prev + limit)
+                      }}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
+                      <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+
+                  {visibleCount > limit && (issue.pullRequests || []).length > limit && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={() => setVisibleCount(limit)}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+                </div>
+              )}
+
               {(!issue.pullRequests || issue.pullRequests.length === 0) && (
                 <span className="text-sm text-gray-400">No linked pull requests.</span>
-              )}
-              {issue.pullRequests && issue.pullRequests.length > 4 && (
-                <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
               )}
             </div>
           </SecondaryCard>
@@ -343,7 +512,7 @@ const ModuleIssueDetailsPage = () => {
               </div>
             </h2>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {(data?.getModule?.interestedUsers || []).map((u) => (
+              {(data?.managementModule?.interestedUsers || []).map((u) => (
                 <div
                   key={u.id}
                   className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
@@ -366,6 +535,7 @@ const ModuleIssueDetailsPage = () => {
                     type="button"
                     disabled={!issueId || assigning}
                     onClick={async () => {
+                      if (!issueId || assigning) return
                       await assignIssue({
                         variables: {
                           programKey,
@@ -383,7 +553,7 @@ const ModuleIssueDetailsPage = () => {
                   </button>
                 </div>
               ))}
-              {(data?.getModule?.interestedUsers || []).length === 0 && (
+              {(data?.managementModule?.interestedUsers || []).length === 0 && (
                 <span className="text-sm text-gray-400">No interested users yet.</span>
               )}
             </div>

@@ -9,7 +9,12 @@ import { GetProgramAndModulesDocument } from 'types/__generated__/programsQuerie
 
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
@@ -68,20 +73,23 @@ const ProgramDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <DetailsCard
-        admins={program.admins ?? undefined}
-        details={programDetails}
-        domains={program.domains ?? undefined}
-        modules={modules}
-        recentMilestones={
-          (program.recentMilestones as unknown as import('types/milestone').Milestone[]) ??
-          undefined
-        }
-        summary={program.description}
-        tags={program.tags ?? undefined}
-        title={program.name}
-        type="program"
-      />
+      <PageWrapper>
+        <Header
+          title={program.name}
+          admins={program.admins ?? undefined}
+          isActive={true}
+          isArchived={false}
+          showProgramActions={false}
+        />
+
+        <Summary summary={program.description} />
+
+        <Metadata details={programDetails} detailsTitle="Program Details" />
+
+        <Tags tags={program.tags ?? undefined} domains={program.domains ?? undefined} />
+
+        <RepositoriesModules modules={modules} />
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

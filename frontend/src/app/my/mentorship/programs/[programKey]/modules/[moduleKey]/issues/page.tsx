@@ -3,11 +3,19 @@
 import { useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { useAccessControl } from 'hooks/useAccessControl'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
+import {
+  GetManagementModuleIssuesDocument,
+  GetManagementProgramAdminsAndModulesDocument,
+} from 'types/__generated__/moduleQueries.generated'
+import type { ExtendedSession } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import IssuesTable from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
@@ -19,6 +27,12 @@ const IssuesPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
+  const currentUserLogin = session?.user?.login
+
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
   const [selectedDeadline, setSelectedDeadline] = useState<string>(
     searchParams.get('deadline') || DEADLINE_ALL
@@ -28,7 +42,25 @@ const IssuesPage = () => {
   const isDeadlineFilterActive = selectedDeadline !== DEADLINE_ALL
   const MAX_ISSUES_FOR_DEADLINE_FILTER = 1000
 
-  const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
+  const {
+    data: accessData,
+    loading: accessLoading,
+    error: accessError,
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
+    variables: { programKey, moduleKey },
+    skip: !programKey || !moduleKey,
+    fetchPolicy: 'network-only',
+  })
+
+  const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
+
+  useEffect(() => {
+    if (accessError && !isForbiddenGraphQLError(accessError)) {
+      handleAppError(accessError)
+    }
+  }, [accessError])
+
+  const { data, loading, error } = useQuery(GetManagementModuleIssuesDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -36,15 +68,17 @@ const IssuesPage = () => {
       offset: isDeadlineFilterActive ? 0 : (currentPage - 1) * ITEMS_PER_PAGE,
       label: selectedLabel === LABEL_ALL ? null : selectedLabel,
     },
-    skip: !programKey || !moduleKey,
+    skip: !programKey || !moduleKey || !hasAccess,
     fetchPolicy: 'cache-and-network',
   })
 
   useEffect(() => {
-    if (error) handleAppError(error)
+    if (error && !isForbiddenGraphQLError(error)) {
+      handleAppError(error)
+    }
   }, [error])
 
-  const moduleData = data?.getModule
+  const moduleData = data?.managementModule
 
   const { moduleIssues, filteredCount } = useMemo(() => {
     const allIssues = (moduleData?.issues || []).map((i) => ({
@@ -126,7 +160,63 @@ const IssuesPage = () => {
     [router, programKey, moduleKey]
   )
 
-  if (loading) return <LoadingSpinner />
+  if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
+    return <LoadingSpinner />
+  }
+
+  if (accessError && isForbiddenGraphQLError(accessError)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to manage issues for this module."
+      />
+    )
+  }
+
+  if (accessError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error Loading Access Information"
+        message="Failed to verify access permissions. Please try again later."
+      />
+    )
+  }
+
+  if (!hasAccess) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Only program admins and module mentors can access this page."
+      />
+    )
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
+  if (error && isForbiddenGraphQLError(error)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to view issues for this module."
+      />
+    )
+  }
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Server Error"
+        message="Failed to load issues for this module. Please try again later."
+      />
+    )
+  }
+
   if (!moduleData)
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 
@@ -134,10 +224,10 @@ const IssuesPage = () => {
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
       <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold">{moduleData.name} Issues</h1>
-            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-bold sm:text-3xl">{moduleData.name} Issues</h1>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="flex h-12 w-full items-center overflow-hidden rounded-lg bg-gray-200 sm:w-auto dark:bg-[#323232]">
                 <Select
                   labelPlacement="outside-left"
                   size="md"
@@ -146,7 +236,9 @@ const IssuesPage = () => {
                   classNames={{
                     label:
                       'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                    trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-40',
+                    trigger:
+                      'bg-transparent shadow-none pl-0 text-nowrap rounded-none w-full sm:w-40',
+                    selectorIcon: 'right-3',
                     popoverContent: 'text-md min-w-40 dark:bg-[#323232] rounded-none p-0',
                   }}
                   selectedKeys={new Set([selectedLabel])}
@@ -167,7 +259,7 @@ const IssuesPage = () => {
                   ))}
                 </Select>
               </div>
-              <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+              <div className="flex h-12 w-full items-center overflow-hidden rounded-lg bg-gray-200 sm:w-auto dark:bg-[#323232]">
                 <Select
                   labelPlacement="outside-left"
                   size="md"
@@ -176,7 +268,9 @@ const IssuesPage = () => {
                   classNames={{
                     label:
                       'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                    trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-36',
+                    trigger:
+                      'bg-transparent pl-0 shadow-none text-nowrap rounded-none w-full sm:w-36',
+                    selectorIcon: 'right-3',
                     popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
                   }}
                   selectedKeys={new Set([selectedDeadline])}

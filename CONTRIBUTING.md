@@ -76,14 +76,21 @@ Follow these steps to set up the OWASP Nest application:
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
 
-**Please note you need to restart the application in order to apply any `.env` file changes.**
+**Please note you might need to restart the application in order to apply any `.env` file changes.**
 
-1. **Configure Environment Variables**:
+1. **Configure Django Secret Key**:
 
-   - Open the `backend/.env` file in your preferred text editor and change the `DJANGO_CONFIGURATION` value to `Local`:
+   - The backend requires `DJANGO_SECRET_KEY` before it can start. The example file leaves this empty — you must set it yourself.
+   - Generate a value by running:
+
+     ```bash
+     openssl rand -base64 32
+     ```
+
+   - Update your `backend/.env` file:
 
      ```plaintext
-     DJANGO_CONFIGURATION=Local
+     DJANGO_SECRET_KEY=<output-from-openssl-command>
      ```
 
 1. **Set Up Algolia**:
@@ -220,7 +227,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 ❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
 ❗ **Always use a different workspace (create your own if needed).**
 
-To setup NestBot development environment, follow these steps:
+To set up the NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
 
@@ -262,8 +269,20 @@ To setup NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/src/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+
+##### Testing NestBot Locally
+
+With `make run` and `ngrok start NestBot` running, smoke-test the integration — for example:
+
+- Direct message: send a direct message to the bot in your Slack workspace.
+- Channel mention: Add the bot to a channel and `@`-mention it.
+- Or post a normal channel message when your app subscribes to the `message.channels` bot event.
+
+To confirm Slack is reaching your machine, check the backend container logs.
+
+> **Note:** Keep ngrok running while you test. Slack must use a publicly accessible URL to reach your local server.
 
 #### Local Access to Internal Dashboards
 
@@ -333,11 +352,66 @@ Nest enforces code quality standards to ensure consistency and maintainability. 
 make check
 ```
 
-This command runs linters and other static analysis tools for both the frontend and backend.
+This command runs static analysis only (no tests, no running application). It runs, in order:
+
+1. **Pre-commit** — repository hooks (formatting, linting, and other configured checks)
+2. **Spelling** — cspell over the repository
+3. **Prettier** — formatting for repository source files covered by `.prettierignore` (read-only; see [Prettier](#prettier))
+4. **ESLint** — lint for `e2e/` and `frontend/` (read-only; see [ESLint](#eslint))
 
 We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address (mark as resolved) all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project maintainer(s) you're working with for further guidance.
 
 **Please note that your pull request will not be reviewed until all code quality checks pass and all automated suggestions have been addressed or resolved.**
+
+### Prettier
+
+Prettier runs from the **repository root**. `make prettier` is read-only — it fails if formatting is wrong and does not modify your working tree.
+
+It formats JS/TS/JSON/CSS/HTML and similar files across the repository, excluding paths in `.prettierignore` (generated artifacts, caches, lockfiles, Markdown, YAML, `backend/static/`, `backend/templates/`, and other listed paths). Markdown and YAML are handled by pre-commit hooks instead.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify formatting before pushing (included in `make check`) | `make prettier` |
+| Auto-fix formatting issues | `make fix-prettier` |
+
+Equivalent `pnpm` commands (what CI runs): `pnpm run format:check` (verify) and `pnpm run format` (fix).
+
+If `make prettier` fails, run `make fix-prettier`, review the diff, then run `make check` again.
+
+### ESLint
+
+ESLint runs from the **repository root**. `make eslint` is read-only — it fails if lint issues are found and does not modify your working tree.
+
+It lints JavaScript and TypeScript in `frontend/` and `e2e/`. It loads `eslint.config.mjs` from the repository root automatically; that file is not linted.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify lint before pushing (included in `make check`) | `make eslint` |
+| Auto-fix lint issues | `make fix-eslint` |
+
+Equivalent `pnpm` commands (what CI runs): `pnpm run lint:check` (verify) and `pnpm run lint` (fix).
+
+If `make eslint` fails, run `make fix-eslint`, review the diff, then run `make check` again.
+
+### GraphQL types
+
+Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. They are **not** part of `make check`, `make test`, or CI because codegen introspects a **running backend** with GraphQL introspection enabled.
+
+#### When to run
+
+| Situation | Command |
+| --------- | ------- |
+| You changed the backend GraphQL schema or frontend operations | `make graphql-codegen` then commit generated files |
+| You want to confirm committed types are current before opening a PR | `make check-graphql` |
+
+#### Requirements
+
+1. Start the stack (for example `docker compose -f docker-compose/local/compose.yaml up`) so the backend answers on port `8000`.
+2. Ensure GraphQL introspection is enabled on that backend.
+3. Run commands from the repository root.
+4. Optional: set `PUBLIC_API_URL` if the backend is not at `http://localhost:8000` (for example `http://localhost:9000` for some e2e setups).
+
+`make graphql-codegen` regenerates files. `make check-graphql` regenerates and fails if `frontend/src/types/__generated__/` would change — use this to verify before pushing GraphQL-related work.
 
 ## Testing
 
@@ -387,10 +461,10 @@ make security-scan-images
 
 ### Running e2e Tests
 
-Run the frontend e2e tests with the following command:
+Playwright specs and their package live in the repository `e2e/` directory at the project root. Make targets for the stack are defined in `e2e/Makefile` (included from the repository root). Run the e2e suite with:
 
 ```bash
-make test-frontend-e2e
+make test-e2e
 ```
 
 This command automatically:
@@ -400,10 +474,10 @@ This command automatically:
 - Executes the e2e tests
 - Cleans up containers when done
 
-To run e2e tests without initializing the database, use the following command:
+To run e2e tests without initializing the database, use:
 
 ```bash
-make test-frontend-e2e-no-init
+make test-e2e-no-db-init
 ```
 
 For debugging, you can run the e2e backend separately:
@@ -418,23 +492,28 @@ Then load data manually in another terminal:
 make load-data-e2e
 ```
 
-For debugging the frontend e2e tests UI mode, run:
+For Playwright UI mode:
 
 ```bash
-make test-frontend-e2e-ui
+make test-e2e-ui
 ```
 
-To run the frontend e2e tests UI mode without the database initialized, use the following command:
+To run UI mode without the database initialized:
 
 ```bash
-make test-frontend-e2e-ui-no-db-init
+make test-e2e-ui-no-db-init
 ```
 
 You can access the UI at [http://localhost:3800](http://localhost:3800).
 
 ### Running Fuzz Tests
 
-Run the fuzz tests with the following command:
+Nest uses two complementary fuzzing layers:
+
+- **API fuzz tests** (`make test-fuzz`) run [Schemathesis](https://schemathesis.readthedocs.io/) against the REST and GraphQL APIs with a live backend, database, and cache.
+- **ClusterFuzzLite** (`.github/workflows/cluster-fuzz-lite.yaml`) runs [Atheris](https://github.com/google/atheris) targets in CI from `backend/tests/cluster-fuzz-lite/apps/`, mirroring the production `src/apps/` layout (for example `slack/common/text.py` and `common/search/query_parser.py`). Seed inputs live in `.clusterfuzzlite/seed_corpora/` with the same layout.
+
+Run the API fuzz tests with the following command:
 
 ```bash
 make test-fuzz
@@ -457,6 +536,12 @@ Then load data manually in another terminal:
 
 ```bash
 make load-data-fuzz
+```
+
+ClusterFuzzLite runs on pull requests for 5 minutes and on a nightly schedule for 15 minutes; fuzz targets run in parallel during that window. Build integration lives in `.clusterfuzzlite/`; the workflow sets `language: python` (a `project.yaml` is not required for CI). ClusterFuzzLite dependencies are pinned in `backend/requirements/cluster-fuzz-lite.txt`, generated from `backend/requirements/cluster-fuzz-lite.in`. Regenerate the lockfile after changing them:
+
+```bash
+make compile-backend-requirements
 ```
 
 ### Test Coverage
@@ -603,6 +688,8 @@ git checkout -b feature/my-feature-name
   ```bash
   make check-test
   ```
+
+  If you changed the GraphQL schema or frontend GraphQL operations, also run `make check-graphql` with the backend running (see [GraphQL types](#graphql-types)).
 
 - Write meaningful commit messages:
 

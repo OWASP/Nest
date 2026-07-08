@@ -3,12 +3,10 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      source = "hashicorp/aws"
     }
     random = {
-      source  = "hashicorp/random"
-      version = "~> 3.8.0"
+      source = "hashicorp/random"
     }
   }
 }
@@ -39,6 +37,14 @@ resource "aws_iam_policy" "fixtures_read_only" {
     }]
   })
   tags = var.common_tags
+}
+
+module "shared_data_bucket" {
+  source = "./modules/shared-data-bucket"
+
+  common_tags = merge(var.common_tags, {
+    Purpose = "owasp-nest-shared-data"
+  })
 }
 
 module "static_bucket" {

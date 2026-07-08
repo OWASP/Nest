@@ -1,0 +1,116 @@
+from unittest.mock import MagicMock, patch
+
+import pytest
+from django.test import override_settings
+
+from apps.slack.commands.gsoc import SUPPORTED_YEAR_START, Gsoc
+from apps.slack.constants import FEEDBACK_SHARING_INVITE
+
+
+class TestGsocCommand:
+    @pytest.fixture
+    def mock_slack_command(self):
+        return {
+            "text": "",
+            "user_id": "U123456",
+        }
+
+    @pytest.fixture
+    def mock_slack_client(self):
+        client = MagicMock()
+        client.conversations_open.return_value = {"channel": {"id": "C123456"}}
+        return client
+
+    @pytest.mark.parametrize(
+        ("commands_enabled", "command_text", "expected_message"),
+        [
+            (False, "", None),
+            (True, "", None),
+            (
+                True,
+                "invalid",
+                "*`/gsoc invalid` is not supported",
+            ),
+            (
+                True,
+                "2011",
+                f"Year 2011 is not supported. Supported years: "
+                f"{SUPPORTED_YEAR_START}-{Gsoc().supported_year_end}",
+            ),
+        ],
+    )
+    def test_handler_responses(
+        self, commands_enabled, command_text, expected_message, mock_slack_client
+    ):
+        command = {"text": command_text, "user_id": "U123456"}
+
+        with override_settings(SLACK_COMMANDS_ENABLED=commands_enabled):
+            ack = MagicMock()
+            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+            ack.assert_called_once()
+
+            if not commands_enabled:
+                mock_slack_client.conversations_open.assert_not_called()
+                mock_slack_client.chat_postMessage.assert_not_called()
+            else:
+                mock_slack_client.conversations_open.assert_called_once_with(
+                    users=command["user_id"]
+                )
+                mock_slack_client.chat_postMessage.assert_called_once()
+                blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+                block_texts = [block["text"]["text"] for block in blocks]
+
+                if command_text == "":
+                    assert "Getting Started with OWASP GSoC" in block_texts[0]
+                    assert any(FEEDBACK_SHARING_INVITE in text for text in block_texts)
+                else:
+                    assert any(expected_message in text for text in block_texts)
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_with_projects(self, mock_slack_client):
+        mock_projects = [
+            {
+                "idx_name": "Test Project",
+                "idx_url": "https://owasp.org/www-project-bug-logging-tool/",
+            }
+        ]
+        command = {"text": "2024", "user_id": "U123456"}
+        with patch(
+            "apps.slack.commands.gsoc.get_gsoc_projects",
+            return_value=mock_projects,
+        ):
+            ack = MagicMock()
+            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+            ack.assert_called_once()
+
+            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+            project_block = str(blocks[0])
+
+            assert (
+                "<https://owasp.org/www-project-bug-logging-tool/|Test Project>" in project_block
+            )
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_with_2026_projects(self, mock_slack_client):
+        mock_projects = [
+            {
+                "idx_name": "Test Project 2026",
+                "idx_url": "https://owasp.org/www-project-test/",
+            }
+        ]
+        command = {"text": "2026", "user_id": "U123456"}
+        with patch(
+            "apps.slack.commands.gsoc.get_gsoc_projects",
+            return_value=mock_projects,
+        ):
+            ack = MagicMock()
+            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+            ack.assert_called_once()
+
+            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+            project_block = str(blocks[0])
+
+            assert "<https://owasp.org/www-project-test/|Test Project 2026>" in project_block

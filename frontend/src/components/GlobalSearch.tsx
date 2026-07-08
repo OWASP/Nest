@@ -20,6 +20,7 @@ type SearchHit = Chapter | Event | Organization | Project | User
 
 const INDEXES = ['chapters', 'events', 'organizations', 'projects', 'users']
 const SUGGESTION_COUNT = 3
+const EMPTY_STATE_EXAMPLES = 'Try searches like "OWASP", "London", "AppSec", "Nest", or "John".'
 
 export default function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false)
@@ -380,8 +381,8 @@ export default function GlobalSearch() {
     }
 
     return (
-      <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
-        Start typing to search across projects, chapters, events, organizations, and members.
+      <div className="px-4 py-2 text-center text-sm text-gray-400 dark:text-gray-500">
+        {EMPTY_STATE_EXAMPLES}
       </div>
     )
   }

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/AleksaC/hadolint-py
-    rev: v2.14.0
+    rev: 458cb25edf664682e3e856a53a2f9af33e068297  # v2.14.0
     hooks:
       - id: hadolint
         args:
@@ -8,7 +8,7 @@ repos:
         name: hadolint
 
   - repo: https://github.com/EbodShojaei/bake
-    rev: v1.4.5
+    rev: a39df91c8e2c8ee584f81ff8d7d00f137a5fc160  # v1.4.6
     hooks:
       - id: mbake-format
         args:
@@ -21,7 +21,7 @@ repos:
         exclude: ^backend/
 
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.38.0
+    rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # v1.38.0
     hooks:
       - id: yamllint
         args:
@@ -30,23 +30,17 @@ repos:
           - --strict
         exclude: pnpm-lock.yaml
 
-  - repo: https://github.com/ansible/ansible-lint
-    rev: v26.3.0
-    hooks:
-      - id: ansible-lint
-        additional_dependencies:
-          - ansible-core
-        args:
-          - -c
-          - .github/ansible/.ansible-lint.yaml
-          - .github/ansible
-        files: ^\.github/ansible/.*\.ya?ml$
-        language_version: python3
-        pass_filenames: true
-
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.105.0
+    rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015  # v1.106.0
     hooks:
+      - id: terraform_providers_lock
+        args:
+          - --args=-platform=darwin_arm64
+          - --args=-platform=linux_amd64
+          - --args=-platform=linux_arm64
+          - --hook-config=--mode=regenerate-lockfile-if-some-platform-missed
+        files: .terraform.lock.hcl
+        name: Lock Terraform providers
       - id: terraform_fmt
         files: ^infrastructure/.*\.(tf|tftest\.hcl)$
       - id: terraform_tflint
@@ -55,7 +49,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.7
+    rev: 3b3f7c3f57fe9925356faf5fe6230835138be230  # v0.15.17
     hooks:
       - id: ruff-check
         args:
@@ -63,7 +57,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: v1.36.4
+    rev: a8264ddb425b07a8bd1bfd758c4d8d938ed064ad  # v1.39.2
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -72,7 +66,7 @@ repos:
           - html
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.48.0
+    rev: a4d5d37e66ebcd6b3705204a1d6dbb56dea66338  # v0.49.0
     hooks:
       - id: markdownlint
         args:
@@ -80,7 +74,7 @@ repos:
         files: \.md$
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.3
+    rev: 8d1b9cadaf854cb25bb0b0f5870e1cc66a083d6b  # 0.2.3
     hooks:
       - id: yamlfmt
         args:
@@ -91,21 +85,20 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
+    rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # v2.1.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql-django
-          - types-lxml
-          - types-python-dateutil
-          - types-PyYAML
-          - types-requests
-        args:
-          - --config-file
-          - backend/pyproject.toml
+          - strawberry-graphql==0.316.0
+          - strawberry-graphql-django==0.86.1
+          - types-lxml==2026.2.16
+          - types-python-dateutil==2.9.0.20260518
+          - types-PyYAML==6.0.12.20260518
+          - types-requests==2.33.0.20260518
+        entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # v6.0.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -113,9 +106,13 @@ repos:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: check-json
+        # tsconfig.json uses JSONC (comments).
+        # Matches frontend/tsconfig.json and frontend/**/tsconfig.json
+        exclude: ^frontend/(?:[^/]+/)*tsconfig\.json$
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml
+        exclude: pnpm-lock\.yaml$
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: frontend/src/types/__generated__
@@ -124,19 +121,41 @@ repos:
       - id: file-contents-sorter
         args:
           - --unique
-        files: (.github/workflows/check-pr-issue-skip-usernames.txt|cspell/custom-dict.txt)
+        files: (.github/check-contribution-skip-usernames.txt|cspell/custom-dict.txt)
       - id: mixed-line-ending
         args:
           - --fix=lf
       - id: name-tests-test
         args:
           - --pytest
-        exclude: backend/tests/data
+        exclude: backend/tests/(cluster-fuzz-lite|data)
         files: backend/tests
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
 
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # v1.7.12
+    hooks:
+      - id: actionlint-docker
+
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: 9d4455198941806aa02ec14369de030cda2c2b59  # v0.24.0
+    hooks:
+      - id: terraform-docs-go
+        args:
+          - infrastructure/
+        files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
+
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.20.0
+    rev: ca620e0df5ae9a02b7b81a6e4c954894f043ce42  # v2.24.1
     hooks:
       - id: pyproject-fmt
+        additional_dependencies:
+          - toml-fmt-common<1.3.3
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # v1.25.2
+    hooks:
+      - id: zizmor
+        args:
+          - --min-severity=low

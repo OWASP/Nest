@@ -3,8 +3,7 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      source = "hashicorp/aws"
     }
   }
 }
@@ -12,6 +11,8 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
+  mentorship_sync_modules_data_schedule_expression  = var.enable_cron_tasks ? "cron(30 06 * * ? *)" : null
+  slack_sync_data_schedule_expression               = var.enable_cron_tasks ? "cron(0 */6 ? * MON-FRI *)" : null
   sync_data_schedule_expression                     = var.enable_cron_tasks ? "cron(17 05 * * ? *)" : null
   update_project_health_metrics_schedule_expression = var.enable_cron_tasks ? "cron(17 17 * * ? *)" : null
   update_project_health_scores_schedule_expression  = var.enable_cron_tasks ? "cron(22 17 * * ? *)" : null
@@ -241,6 +242,38 @@ module "sync_data_task" {
   use_fargate_spot             = var.use_fargate_spot
 }
 
+module "slack_sync_data_task" {
+  source = "./modules/task"
+
+  assign_public_ip = var.assign_public_ip
+  aws_region       = var.aws_region
+  command = [
+    "/bin/sh",
+    "-c",
+    <<-EOT
+    set -e
+    EXEC_MODE=direct make slack-sync-data
+    EXEC_MODE=direct make slack-check-invite-link
+    EOT
+  ]
+  common_tags                  = var.common_tags
+  container_parameters_arns    = var.container_parameters_arns
+  cpu                          = var.slack_sync_data_task_cpu
+  ecs_cluster_arn              = aws_ecs_cluster.main.arn
+  ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
+  environment                  = var.environment
+  event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
+  memory                       = var.slack_sync_data_task_memory
+  project_name                 = var.project_name
+  schedule_expression          = local.slack_sync_data_schedule_expression
+  security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
+  task_name                    = "slack-sync-data"
+  use_fargate_spot             = var.use_fargate_spot
+}
+
 module "owasp_update_project_health_metrics_task" {
   source = "./modules/task"
 
@@ -294,6 +327,38 @@ module "owasp_update_project_health_scores_task" {
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-scores"
+  use_fargate_spot             = var.use_fargate_spot
+}
+
+module "mentorship_sync_modules_data" {
+  source = "./modules/task"
+
+  assign_public_ip = var.assign_public_ip
+  aws_region       = var.aws_region
+  command = [
+    "/bin/sh",
+    "-c",
+    <<-EOT
+    set -e
+    EXEC_MODE=direct make mentorship-sync-module-issues
+    EXEC_MODE=direct make github-update-pull-requests
+    EOT
+  ]
+  common_tags                  = var.common_tags
+  container_parameters_arns    = var.container_parameters_arns
+  cpu                          = var.mentorship_sync_modules_data_task_cpu
+  ecs_cluster_arn              = aws_ecs_cluster.main.arn
+  ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
+  environment                  = var.environment
+  event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
+  memory                       = var.mentorship_sync_modules_data_task_memory
+  project_name                 = var.project_name
+  schedule_expression          = local.mentorship_sync_modules_data_schedule_expression
+  security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
+  task_name                    = "mentorship-sync-modules-data"
   use_fargate_spot             = var.use_fargate_spot
 }
 

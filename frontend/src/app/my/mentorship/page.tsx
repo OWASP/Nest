@@ -6,12 +6,13 @@ import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
-import { FaPlus, FaGraduationCap } from 'react-icons/fa6'
+import { FaPlus } from 'react-icons/fa6'
 
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import { hasExtendedUser } from 'types/auth'
 
 import type { Program } from 'types/mentorship'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
@@ -90,13 +91,10 @@ const MyMentorshipPage: React.FC = () => {
 
   if (!isProjectLeader) {
     return (
-      <div className="flex min-h-[80vh] flex-col items-center justify-center px-4 text-center">
-        <FaGraduationCap className="mb-4 text-6xl text-red-400" />
-        <h2 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">Access Denied</h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Only project leaders can access this page.
-        </p>
-      </div>
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Only project leaders can access this page."
+      />
     )
   }
 

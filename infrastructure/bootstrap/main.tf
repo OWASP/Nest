@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.53.0"
     }
   }
 }
@@ -29,6 +29,7 @@ data "aws_iam_policy_document" "part_one" {
     actions = [
       "acm:DescribeCertificate",
       "application-autoscaling:DescribeScalableTargets",
+      "application-autoscaling:DescribeScalingActivities",
       "application-autoscaling:DescribeScalingPolicies",
       "ec2:Describe*",
       "ec2:DescribeFlowLogs",
@@ -43,6 +44,9 @@ data "aws_iam_policy_document" "part_one" {
       "kms:DescribeKey",
       "logs:DescribeLogGroups",
       "rds:DescribeDBInstances",
+      "rds:DescribeDBProxies",
+      "rds:DescribeDBProxyTargetGroups",
+      "rds:DescribeDBProxyTargets",
       "rds:DescribeDBSubnetGroups",
       "secretsmanager:DescribeSecret",
       "ssm:DescribeParameters",
@@ -67,22 +71,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "AppAutoscalingManagement"
-    effect = "Allow"
-    actions = [
-      "application-autoscaling:DeleteScalingPolicy",
-      "application-autoscaling:DeregisterScalableTarget",
-      "application-autoscaling:ListTagsForResource",
-      "application-autoscaling:PutScalingPolicy",
-      "application-autoscaling:RegisterScalableTarget",
-      "application-autoscaling:TagResource",
-      "application-autoscaling:UntagResource",
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "CloudWatchLogsManagement"
+    sid    = "CWLogsMgmt"
     effect = "Allow"
     actions = [
       "logs:AssociateKmsKey",
@@ -116,7 +105,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "ElastiCacheManagement"
+    sid    = "ElastiCacheMgmt"
     effect = "Allow"
     actions = [
       "elasticache:AddTagsToResource",
@@ -244,19 +233,6 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "ECSGlobal"
-    effect = "Allow"
-    actions = [
-      "ecs:DeregisterTaskDefinition",
-      "ecs:ListClusters",
-      "ecs:ListTaskDefinitions",
-      "ecs:RegisterTaskDefinition",
-      "ecs:TagResource",
-    ]
-    resources = ["*"]
-  }
-
-  statement {
     sid    = "ECSOrchestration"
     effect = "Allow"
     actions = [
@@ -275,7 +251,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "ECSServiceManagement"
+    sid    = "ECSServiceMgmt"
     effect = "Allow"
     actions = [
       "ecs:CreateService",
@@ -287,7 +263,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "ECSTaskDefinition"
+    sid    = "ECSTaskDef"
     effect = "Allow"
     actions = [
       "ecs:DescribeTaskDefinition",
@@ -295,10 +271,98 @@ data "aws_iam_policy_document" "part_one" {
     ]
     resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${each.key}-*:*"]
   }
+
+  statement {
+    sid    = "RDSManagement"
+    effect = "Allow"
+    actions = [
+      "rds:AddTagsToResource",
+      "rds:CreateDBInstance",
+      "rds:CreateDBProxy",
+      "rds:CreateDBProxyTargetGroup",
+      "rds:CreateDBSubnetGroup",
+      "rds:DeleteDBInstance",
+      "rds:DeleteDBProxy",
+      "rds:DeleteDBProxyTargetGroup",
+      "rds:DeleteDBSubnetGroup",
+      "rds:DeregisterDBProxyTargets",
+      "rds:ListTagsForResource",
+      "rds:ModifyDBInstance",
+      "rds:ModifyDBProxy",
+      "rds:ModifyDBProxyTargetGroup",
+      "rds:ModifyDBSubnetGroup",
+      "rds:RegisterDBProxyTargets",
+      "rds:RemoveTagsFromResource",
+    ]
+    resources = [
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:target-group:*",
+    ]
+  }
 }
 
 data "aws_iam_policy_document" "part_two" {
   for_each = local.environments
+
+  statement {
+    sid    = "AppAutoscalingManagement"
+    effect = "Allow"
+    actions = [
+      "application-autoscaling:DeleteScalingPolicy",
+      "application-autoscaling:DeregisterScalableTarget",
+      "application-autoscaling:ListTagsForResource",
+      "application-autoscaling:PutScalingPolicy",
+      "application-autoscaling:RegisterScalableTarget",
+      "application-autoscaling:TagResource",
+      "application-autoscaling:UntagResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "IAMCreateECSAutoScalingSLR"
+    effect = "Allow"
+    actions = [
+      "iam:CreateServiceLinkedRole",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:AWSServiceName"
+      values   = ["ecs.application-autoscaling.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid    = "CWAutoscalingAlarms"
+    effect = "Allow"
+    actions = [
+      "cloudwatch:DeleteAlarms",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:PutMetricAlarm",
+    ]
+    resources = [
+      "arn:aws:cloudwatch:${var.aws_region}:${data.aws_caller_identity.current.account_id}:alarm:TargetTracking-service/${var.project_name}-${each.key}-*",
+    ]
+  }
+
+  statement {
+    sid    = "ECSGlobal"
+    effect = "Allow"
+    actions = [
+      "ecs:DeregisterTaskDefinition",
+      "ecs:ListClusters",
+      "ecs:ListTaskDefinitions",
+      "ecs:RegisterTaskDefinition",
+      "ecs:TagResource",
+    ]
+    resources = ["*"]
+  }
 
   statement {
     sid    = "ELBManagement"
@@ -358,10 +422,12 @@ data "aws_iam_policy_document" "part_two" {
       "iam:DeletePolicy",
       "iam:DeletePolicyVersion",
       "iam:DeleteRole",
+      "iam:DeleteRolePolicy",
       "iam:DetachRolePolicy",
       "iam:GetPolicy",
       "iam:GetPolicyVersion",
       "iam:GetRole",
+      "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
       "iam:ListInstanceProfilesForRole",
       "iam:ListPolicyVersions",
@@ -458,27 +524,6 @@ data "aws_iam_policy_document" "part_two" {
     ]
   }
 
-
-  statement {
-    sid    = "RDSManagement"
-    effect = "Allow"
-    actions = [
-      "rds:AddTagsToResource",
-      "rds:CreateDBInstance",
-      "rds:CreateDBSubnetGroup",
-      "rds:DeleteDBInstance",
-      "rds:DeleteDBSubnetGroup",
-      "rds:ListTagsForResource",
-      "rds:ModifyDBInstance",
-      "rds:ModifyDBSubnetGroup",
-      "rds:RemoveTagsFromResource",
-    ]
-    resources = [
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*"
-    ]
-  }
-
   statement {
     sid    = "S3Management"
     effect = "Allow"
@@ -520,6 +565,8 @@ data "aws_iam_policy_document" "part_two" {
     resources = [
       "arn:aws:s3:::${var.project_name}-${each.key}-*",
       "arn:aws:s3:::${var.project_name}-${each.key}-*/*",
+      "arn:aws:s3:::${var.shared_data_bucket_name}",
+      "arn:aws:s3:::${var.shared_data_bucket_name}/*",
     ]
   }
 
@@ -588,13 +635,13 @@ resource "aws_iam_role" "terraform" {
 resource "aws_iam_policy" "part_one" {
   for_each = local.environments
   name     = "${var.project_name}-${each.key}-part-one-terraform"
-  policy   = data.aws_iam_policy_document.part_one[each.key].json
+  policy   = data.aws_iam_policy_document.part_one[each.key].minified_json
 }
 
 resource "aws_iam_policy" "part_two" {
   for_each = local.environments
   name     = "${var.project_name}-${each.key}-part-two-terraform"
-  policy   = data.aws_iam_policy_document.part_two[each.key].json
+  policy   = data.aws_iam_policy_document.part_two[each.key].minified_json
 }
 
 resource "aws_iam_role_policy_attachment" "attach_part_one" {

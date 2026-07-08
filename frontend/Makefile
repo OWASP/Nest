@@ -1,6 +1,4 @@
-SHELL := /bin/bash
-
-.PHONY: sbom-frontend-image
+.PHONY: audit-frontend-dependencies install-frontend-dependencies sbom-frontend-image
 
 ##@ Frontend
 
@@ -12,11 +10,9 @@ build-frontend-local-image:
 	    -t nest-frontend-local \
 	    frontend
 
-check-frontend: ## Run frontend code quality checks
-check-frontend: \
-	format-frontend-code \
-	lint-frontend-code \
-	generate-graphql-types
+install-frontend-dependencies:
+	@(cd frontend && (pnpm install --frozen-lockfile --prefer-offline >/dev/null 2>&1 \
+	  || pnpm install --prefer-offline))
 
 clean-frontend-dependencies:
 	@rm -rf frontend/.next
@@ -35,42 +31,11 @@ exec-frontend-command:
 exec-frontend-command-it:
 	@docker exec -it nest-frontend $(CMD)
 
-format-frontend-code:
-	@(cd frontend && (pnpm list prettier --depth=0 | grep -q 'prettier' || pnpm add -D prettier >/dev/null 2>&1) \
-	  && pnpm run format:check >/dev/null 2>&1 \
-	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
-
-graphql-codegen:
-	@cd frontend && pnpm run graphql-codegen
-
-init-e2e-db:
-	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
-	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit backend cache db data-loader \
-		--build \
-		--remove-orphans
-
 lighthouse-ci:
 	@cd frontend && pnpm run lighthouse-ci
 
 lighthouse-ci-desktop:
 	@cd frontend && pnpm run lighthouse-ci:desktop
-
-lint-frontend-code:
-	@(cd frontend && (pnpm list eslint --depth=0 | grep -q 'eslint' || pnpm add -D eslint >/dev/null 2>&1) \
-	  && pnpm run lint:check >/dev/null 2>&1 \
-	  && (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
-
-generate-graphql-types:
-	@(cd frontend && pnpm run graphql-codegen >/dev/null 2>&1 \
-	&& (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
-		&& pnpm run graphql-codegen))
 
 FRONTEND_IMAGE_NAME ?= nest-frontend-local
 IMAGE_SCANNERS ?= misconfig,secret,vuln
@@ -114,43 +79,25 @@ shell-frontend:
 test-frontend: ## Run all frontend tests
 test-frontend: \
 	test-frontend-unit \
-	test-frontend-a11y \
-	test-frontend-e2e
+	test-frontend-a11y
 
 test-frontend-a11y:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build -q \
 		--cache-from nest-test-frontend-a11y \
-		-f docker/frontend/Dockerfile.a11y.test frontend \
-		-t nest-test-frontend-a11y
+		-f docker/frontend/Dockerfile.a11y-tests frontend \
+		-t nest-test-frontend-a11y 1>/dev/null
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
-test-frontend-e2e-no-db-init:
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit backend cache db frontend e2e-tests \
-		--build \
-		--remove-orphans
-
-test-frontend-e2e: ## Run frontend e2e tests
-test-frontend-e2e: init-e2e-db test-frontend-e2e-no-db-init
-
-test-frontend-e2e-ui-no-db-init:
-	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit backend cache db frontend e2e-tests \
-		--build \
-		--remove-orphans
-
-test-frontend-e2e-ui: init-e2e-db test-frontend-e2e-ui-no-db-init
-
 test-frontend-unit:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build -q \
 		--cache-from nest-test-frontend-unit \
-		-f docker/frontend/Dockerfile.unit.test frontend \
-		-t nest-test-frontend-unit
+		-f docker/frontend/Dockerfile.unit-tests frontend \
+		-t nest-test-frontend-unit 1>/dev/null
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
+
+audit-frontend-dependencies: ## Audit frontend npm dependencies
+	@echo "Auditing frontend npm dependencies..."
+	@cd frontend && pnpm audit --audit-level=$(AUDIT_LEVEL)
 
 update-frontend-dependencies:
 	cd frontend && pnpm update

@@ -40,6 +40,7 @@ export type Project = {
   level?: string
   name: string
   openIssuesCount?: number
+  openPullRequestsCount?: number
   organizations?: string
   repositoriesCount?: number
   starsCount?: number

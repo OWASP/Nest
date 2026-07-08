@@ -3,8 +3,7 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      source = "hashicorp/aws"
     }
   }
 }
@@ -84,7 +83,6 @@ resource "aws_security_group_rule" "backend_from_alb" {
   type                     = "ingress"
 }
 
-#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "backend_egress_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow HTTPS for external API calls"
@@ -147,7 +145,6 @@ resource "aws_security_group" "tasks" {
   vpc_id = var.vpc_id
 }
 
-#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "task_egress_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow HTTPS for external API calls"
@@ -220,7 +217,6 @@ resource "aws_security_group_rule" "frontend_from_alb" {
   type                     = "ingress"
 }
 
-#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "frontend_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow HTTPS for external API calls"
