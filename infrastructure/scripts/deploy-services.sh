@@ -126,11 +126,26 @@ echo "  Cluster: $BACKEND_CLUSTER"
 echo "  Security Group: $BACKEND_SG"
 echo "  Target Group ARN: $BACKEND_TG_ARN"
 
+BACKEND_OVERRIDES=$(cat <<'EOF'
+{
+    "containerOverrides": [{
+        "name": "backend",
+        "environment": [
+            {"name": "DJANGO_REDIS_PORT", "value": "4511"},
+            {"name": "DJANGO_REDIS_USE_TLS", "value": "false"},
+            {"name": "DJANGO_REDIS_AUTH_ENABLED", "value": "false"}
+        ]
+    }]
+}
+EOF
+)
+
 BACKEND_TASK=$(awslocal ecs run-task \
     --cluster "$BACKEND_CLUSTER" \
     --launch-type FARGATE \
     --network-configuration "awsvpcConfiguration={subnets=[$PUBLIC_SUBNETS],securityGroups=[$BACKEND_SG],assignPublicIp=ENABLED}" \
     --task-definition "${STACK_PREFIX}-backend" \
+    --overrides "$BACKEND_OVERRIDES" \
     --region "$AWS_DEFAULT_REGION" \
     --query "tasks[0].taskArn" \
     --output text)
