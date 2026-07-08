@@ -23,7 +23,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-crp:/home/owasp/.venv
 
   cache:
     command: >
@@ -41,7 +41,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - cache-data-crp:/data
 
   db:
     container_name: nest-db
@@ -96,8 +96,8 @@ services:
       - 3000:3000
     volumes:
       - ../../frontend:/home/owasp
-      - frontend-next:/home/owasp/.next
-      - frontend-node-modules:/home/owasp/node_modules
+      - frontend-next-crp:/home/owasp/.next
+      - frontend-node-modules-crp:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -118,7 +118,7 @@ services:
       - nest-network
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-crp:/home/owasp/.venv
 
 networks:
   nest-network:

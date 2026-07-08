@@ -51,6 +51,18 @@ class UserNode:
         """Resolve created at."""
         return root.idx_created_at
 
+    @strawberry_django.field(select_related=["contribution_score"])
+    def contribution_score(self, root: User) -> int | None:
+        """Resolve the contributor's score."""
+        score = getattr(root, "contribution_score", None)
+        return score.value if score else None
+
+    @strawberry_django.field(select_related=["contribution_score"])
+    def tier(self, root: User) -> str | None:
+        """Resolve the contributor's tier."""
+        score = getattr(root, "contribution_score", None)
+        return score.get_tier_display() if score else None
+
     @strawberry_django.field(select_related=["owasp_profile"])
     def first_owasp_contribution_at(self, root: User) -> str | None:
         """Resolve first OWASP contribution date."""
