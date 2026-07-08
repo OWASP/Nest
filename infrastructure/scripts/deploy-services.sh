@@ -12,12 +12,14 @@ fi
 
 AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-2}"
 
-for cmd in awslocal jq; do
+for cmd in awslocal tflocal jq; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
         exit 1
     fi
 done
+
+cd "$INFRA_LIVE_DIR"
 
 TF_OUTPUTS=$(tflocal output -json 2>/dev/null) || {
     echo "ERROR: Failed to get Terraform outputs. Run 'make provision-infra' first." >&2
@@ -107,7 +109,7 @@ get_task_eni_ip() {
 }
 
 STACK_PREFIX="nest-local"
-PUBLIC_SUBNETS=$(get_tf_output "tasks_subnet_ids")
+PUBLIC_SUBNETS=$(echo "$TF_OUTPUTS" | jq -r '.tasks_subnet_ids.value | join(",")')
 
 echo ""
 echo "--- Backend ---"
