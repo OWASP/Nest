@@ -47,7 +47,11 @@ class Command(BaseCommand):
             conv
             for conv in all_conversations
             if conv.name
-            and (conv.name.lower().startswith("project-") or conv.name.lower().startswith("proj-"))
+            and (
+                conv.name.lower().startswith("project-")
+                or conv.name.lower().startswith("proj-")
+                or conv.name.lower().endswith("-project")
+            )
         ]
         self.stdout.write(f"Found {len(project_conversations)} project-specific channels")
 
