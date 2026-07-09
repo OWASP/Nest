@@ -713,7 +713,18 @@ function SubscriptionContent() {
         handleRemoveChapter={handleRemoveChapter}
       />
 
-      <div className="flex gap-3">
+      <div className="flex justify-end gap-3">
+        {hasActiveSubscription && (
+          <Button
+            variant="bordered"
+            onPress={handleCancel}
+            isDisabled={cancelling}
+            className="flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
+          >
+            <FaBellSlash />
+            {cancelling ? 'Cancelling...' : 'Unsubscribe'}
+          </Button>
+        )}
         <ActionButton onClick={handleSave} isDisabled={isSaving}>
           {hasActiveSubscription ? (
             <>
@@ -727,18 +738,6 @@ function SubscriptionContent() {
             </>
           )}
         </ActionButton>
-        {hasActiveSubscription && (
-          <Button
-            variant="bordered"
-            onPress={handleCancel}
-            isDisabled={cancelling}
-            radius="md"
-            className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-          >
-            <FaBellSlash className="mr-2" />
-            {cancelling ? 'Cancelling...' : 'Unsubscribe'}
-          </Button>
-        )}
       </div>
 
       <Modal isOpen={showCancelModal} onClose={() => setShowCancelModal(false)} size="md">
@@ -753,19 +752,13 @@ function SubscriptionContent() {
             </p>
           </ModalBody>
           <ModalFooter className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-gray-700">
-            <Button
-              variant="ghost"
-              onPress={() => setShowCancelModal(false)}
-              className="rounded-md bg-gray-600 px-4 py-1 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
-            >
-              Keep Subscription
-            </Button>
+            <ActionButton onClick={() => setShowCancelModal(false)}>Keep Subscription</ActionButton>
             <Button
               onPress={handleConfirmCancel}
               isDisabled={cancelling}
-              className="rounded-md bg-red-600 px-4 py-1 text-sm font-medium text-white hover:bg-red-700"
+              className="flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
             >
-              <FaBellSlash className="mr-2" />
+              <FaBellSlash />
               {cancelling ? 'Cancelling...' : 'Yes, Unsubscribe'}
             </Button>
           </ModalFooter>
