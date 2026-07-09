@@ -8,8 +8,8 @@ from unittest.mock import patch, MagicMock, mock_open
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import run_tests
 
-class TestRunTests(unittest.TestCase):
 
+class TestRunTests(unittest.TestCase):
     @patch("shutil.which")
     def test_require_cmd_exists(self, mock_which):
         mock_which.return_value = "/usr/bin/terraform"
@@ -53,18 +53,22 @@ class TestRunTests(unittest.TestCase):
     @patch("os.path.exists")
     def test_get_localstack_image_info_pro(self, mock_exists):
         mock_exists.return_value = True
-        dockerfile_content = "FROM localstack/localstack-pro:2026.6.0@sha256:123456\nUSER localstack\n"
-        
+        dockerfile_content = (
+            "FROM localstack/localstack-pro:2026.6.0@sha256:123456\nUSER localstack\n"
+        )
+
         with patch("builtins.open", mock_open(read_data=dockerfile_content)):
             full_img, tag = run_tests.get_localstack_image_info("/dummy/root")
-            self.assertEqual(full_img, "localstack/localstack-pro:2026.6.0@sha256:123456")
+            self.assertEqual(
+                full_img, "localstack/localstack-pro:2026.6.0@sha256:123456"
+            )
             self.assertEqual(tag, "2026.6.0")
 
     @patch("os.path.exists")
     def test_get_localstack_image_info_standard(self, mock_exists):
         mock_exists.return_value = True
         dockerfile_content = "FROM localstack/localstack:2.3.1\n"
-        
+
         with patch("builtins.open", mock_open(read_data=dockerfile_content)):
             full_img, tag = run_tests.get_localstack_image_info("/dummy/root")
             self.assertEqual(full_img, "localstack/localstack:2.3.1")
@@ -98,54 +102,86 @@ class TestRunTests(unittest.TestCase):
         self.assertEqual(mock_remove.call_count, len(run_tests.OVERRIDES))
         # Ensure docker stop and docker rm are called
         self.assertEqual(mock_sub_run.call_count, 2)
-        mock_sub_run.assert_any_call(["docker", "stop", run_tests.LOCALSTACK_CONTAINER_NAME], stdout=-3, stderr=-3)
-        mock_sub_run.assert_any_call(["docker", "rm", run_tests.LOCALSTACK_CONTAINER_NAME], stdout=-3, stderr=-3)
+        mock_sub_run.assert_any_call(
+            ["docker", "stop", run_tests.LOCALSTACK_CONTAINER_NAME],
+            stdout=-3,
+            stderr=-3,
+        )
+        mock_sub_run.assert_any_call(
+            ["docker", "rm", run_tests.LOCALSTACK_CONTAINER_NAME], stdout=-3, stderr=-3
+        )
 
     @patch("os.environ.get")
     @patch("subprocess.run")
     @patch("time.sleep")
     @patch("run_tests.localstack_healthy")
     @patch("run_tests.localstack_license_activated")
-    def test_start_localstack_success(self, mock_license, mock_healthy, mock_sleep, mock_sub_run, mock_env):
+    def test_start_localstack_success(
+        self, mock_license, mock_healthy, mock_sleep, mock_sub_run, mock_env
+    ):
         mock_env.return_value = "dummy-token"
         mock_healthy.return_value = True
         mock_license.return_value = True
-        
+
         run_tests.start_localstack("localstack/localstack:latest")
-        
+
         # Verify docker run was called
-        mock_sub_run.assert_any_call([
-            "docker", "run", "-d",
-            "--name", run_tests.LOCALSTACK_CONTAINER_NAME,
-            "-p", "4566:4566",
-            "-e", "LOCALSTACK_AUTH_TOKEN=dummy-token",
-            "localstack/localstack:latest"
-        ], check=True, stdout=-3)
+        mock_sub_run.assert_any_call(
+            [
+                "docker",
+                "run",
+                "-d",
+                "--name",
+                run_tests.LOCALSTACK_CONTAINER_NAME,
+                "-p",
+                "4566:4566",
+                "-e",
+                "LOCALSTACK_AUTH_TOKEN=dummy-token",
+                "localstack/localstack:latest",
+            ],
+            check=True,
+            stdout=-3,
+        )
 
     @patch("os.path.exists")
     @patch("os.walk")
     @patch("os.listdir")
     @patch("subprocess.run")
-    def test_discover_and_run_tests_unit(self, mock_sub_run, mock_listdir, mock_walk, mock_exists):
+    def test_discover_and_run_tests_unit(
+        self, mock_sub_run, mock_listdir, mock_walk, mock_exists
+    ):
         mock_exists.return_value = True
-        mock_walk.return_value = [
-            ("infrastructure/modules/storage/tests", [], ["integration.tftest.hcl", "storage.tftest.hcl"])
-        ]
         # Simulate walking directories and finding "tests" in dirs
         mock_walk.return_value = [
             ("infrastructure/modules/storage", ["tests"], []),
-            ("infrastructure/modules/storage/tests", [], [])
+            ("infrastructure/modules/storage/tests", [], []),
         ]
         mock_listdir.return_value = ["integration.tftest.hcl", "storage.tftest.hcl"]
-        
+
         mock_sub_run.return_value.returncode = 0
-        
+
         run_tests.discover_and_run_tests("unit")
-        
+
         # Verify terraform init and terraform test were called
-        mock_sub_run.assert_any_call(["terraform", "-chdir=infrastructure/modules/storage", "init", "-backend=false", "-input=false"])
+        mock_sub_run.assert_any_call(
+            [
+                "terraform",
+                "-chdir=infrastructure/modules/storage",
+                "init",
+                "-backend=false",
+                "-input=false",
+            ]
+        )
         # In unit mode, it should filter storage.tftest.hcl (and NOT integration.tftest.hcl)
-        mock_sub_run.assert_any_call(["terraform", "-chdir=infrastructure/modules/storage", "test", "-filter=tests/storage.tftest.hcl"])
+        mock_sub_run.assert_any_call(
+            [
+                "terraform",
+                "-chdir=infrastructure/modules/storage",
+                "test",
+                "-filter=tests/storage.tftest.hcl",
+            ]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
