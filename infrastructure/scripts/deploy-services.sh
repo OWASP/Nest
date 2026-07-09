@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INFRA_LIVE_DIR="$(cd "$SCRIPT_DIR/../live" && pwd)"
+
+ENV_FILE="$SCRIPT_DIR/../.env"
+
+if [[ -f "$ENV_FILE" ]]; then
+    set -a && source "$ENV_FILE" && set +a
+fi
+
+AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-2}"
+
+for cmd in awslocal jq; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
+        exit 1
+    fi
+done
+
+TF_OUTPUTS=$(tflocal output -json 2>/dev/null) || {
+    echo "ERROR: Failed to get Terraform outputs. Run 'make provision-infra' first." >&2
+    exit 1
+}
+
+echo "Deploying ECS services..."
+
+get_tf_output() {
+    echo "$TF_OUTPUTS" | jq -r ".[\"$1\"].value"
+}
+
+get_sg_id() {
+    local name="$1"
+    awslocal ec2 describe-security-groups \
+        --filters "Name=group-name,Values=$name" \
+        --region "$AWS_DEFAULT_REGION" \
+        --query "SecurityGroups[0].GroupId" \
+        --output text
+}
+
+wait_for_task_running() {
+    local cluster="$1"
+    local task_arn="$2"
+    local service_name="$3"
+    local max_attempts=30
+    local attempt=0
+
+    echo "  Waiting for $service_name task to be RUNNING..."
+    while [[ $attempt -lt $max_attempts ]]; do
+        status=$(awslocal ecs describe-tasks \
+            --cluster "$cluster" \
+            --tasks "$task_arn" \
+            --region "$AWS_DEFAULT_REGION" \
+            --query "tasks[0].lastStatus" \
+            --output text)
+
+        if [[ "$status" == "RUNNING" ]]; then
+            echo "  $service_name task is RUNNING."
+            return 0
+        fi
+
+        if [[ "$status" == "STOPPED" ]]; then
+            stop_code=$(awslocal ecs describe-tasks \
+                --cluster "$cluster" \
+                --tasks "$task_arn" \
+                --region "$AWS_DEFAULT_REGION" \
+                --query "tasks[0].stoppedReason" \
+                --output text)
+            echo "  ERROR: $service_name task STOPPED: $stop_code" >&2
+            return 1
+        fi
+
+        sleep 5
+        ((attempt++)) || true
+    done
+
+    echo "  ERROR: $service_name task did not become RUNNING after $((max_attempts * 5)) seconds." >&2
+    return 1
+}
+
+get_task_eni_ip() {
+    local cluster="$1"
+    local task_arn="$2"
+
+    local eni
+    eni=$(awslocal ecs describe-tasks \
+        --cluster "$cluster" \
+        --tasks "$task_arn" \
+        --region "$AWS_DEFAULT_REGION" \
+        --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" \
+        --output text)
+
+    if [[ -z "$eni" || "$eni" == "None" ]]; then
+        echo "  ERROR: Could not get ENI for task $task_arn" >&2
+        return 1
+    fi
+
+    local ip
+    ip=$(awslocal ec2 describe-network-interfaces \
+        --network-interface-ids "$eni" \
+        --region "$AWS_DEFAULT_REGION" \
+        --query "NetworkInterfaces[0].PrivateIpAddress" \
+        --output text)
+
+    echo "$ip"
+}
+
+STACK_PREFIX="nest-local"
+PUBLIC_SUBNETS=$(get_tf_output "tasks_subnet_ids")
+
+echo ""
+echo "--- Backend ---"
+
+BACKEND_CLUSTER=$(get_tf_output "backend_cluster_name")
+BACKEND_SG=$(get_sg_id "${STACK_PREFIX}-backend-sg")
+BACKEND_TG_ARN=$(awslocal elbv2 describe-target-groups \
+    --names "${STACK_PREFIX}-backend-tg" \
+    --region "$AWS_DEFAULT_REGION" \
+    --query "TargetGroups[0].TargetGroupArn" \
+    --output text)
+
+echo "  Cluster: $BACKEND_CLUSTER"
+echo "  Security Group: $BACKEND_SG"
+echo "  Target Group ARN: $BACKEND_TG_ARN"
+
+BACKEND_TASK=$(awslocal ecs run-task \
+    --cluster "$BACKEND_CLUSTER" \
+    --launch-type FARGATE \
+    --network-configuration "awsvpcConfiguration={subnets=[$PUBLIC_SUBNETS],securityGroups=[$BACKEND_SG],assignPublicIp=ENABLED}" \
+    --task-definition "${STACK_PREFIX}-backend" \
+    --region "$AWS_DEFAULT_REGION" \
+    --query "tasks[0].taskArn" \
+    --output text)
+
+echo "  Task ARN: $BACKEND_TASK"
+
+wait_for_task_running "$BACKEND_CLUSTER" "$BACKEND_TASK" "Backend"
+
+BACKEND_IP=$(get_task_eni_ip "$BACKEND_CLUSTER" "$BACKEND_TASK")
+echo "  Backend IP: $BACKEND_IP"
+
+echo "  Registering backend target with ALB..."
+awslocal elbv2 register-targets \
+    --target-group-arn "$BACKEND_TG_ARN" \
+    --targets "Id=$BACKEND_IP,Port=8000" \
+    --region "$AWS_DEFAULT_REGION"
+
+echo ""
+echo "--- Frontend ---"
+
+FRONTEND_CLUSTER=$(get_tf_output "frontend_cluster_name")
+FRONTEND_SG=$(get_sg_id "${STACK_PREFIX}-frontend-sg")
+FRONTEND_TG_ARN=$(awslocal elbv2 describe-target-groups \
+    --names "${STACK_PREFIX}-frontend-tg" \
+    --region "$AWS_DEFAULT_REGION" \
+    --query "TargetGroups[0].TargetGroupArn" \
+    --output text)
+
+echo "  Cluster: $FRONTEND_CLUSTER"
+echo "  Security Group: $FRONTEND_SG"
+echo "  Target Group ARN: $FRONTEND_TG_ARN"
+
+FRONTEND_TASK=$(awslocal ecs run-task \
+    --cluster "$FRONTEND_CLUSTER" \
+    --launch-type FARGATE \
+    --network-configuration "awsvpcConfiguration={subnets=[$PUBLIC_SUBNETS],securityGroups=[$FRONTEND_SG],assignPublicIp=ENABLED}" \
+    --task-definition "${STACK_PREFIX}-frontend" \
+    --region "$AWS_DEFAULT_REGION" \
+    --query "tasks[0].taskArn" \
+    --output text)
+
+echo "  Task ARN: $FRONTEND_TASK"
+
+wait_for_task_running "$FRONTEND_CLUSTER" "$FRONTEND_TASK" "Frontend"
+
+FRONTEND_IP=$(get_task_eni_ip "$FRONTEND_CLUSTER" "$FRONTEND_TASK")
+echo "  Frontend IP: $FRONTEND_IP"
+
+echo "  Registering frontend target with ALB..."
+awslocal elbv2 register-targets \
+    --target-group-arn "$FRONTEND_TG_ARN" \
+    --targets "Id=$FRONTEND_IP,Port=3000" \
+    --region "$AWS_DEFAULT_REGION"
+
+echo ""
+echo "--- Health Checks ---"
+
+ALB_DNS=$(get_tf_output "alb_dns_name")
+echo "  ALB DNS: $ALB_DNS"
+
+# Wait for target group health
+sleep 10
+
+check_health() {
+    local tg_arn="$1"
+    local service="$2"
+    local max_attempts=12
+
+    for ((i = 1; i <= max_attempts; i++)); do
+        local health
+        health=$(awslocal elbv2 describe-target-health \
+            --target-group-arn "$tg_arn" \
+            --region "$AWS_DEFAULT_REGION" \
+            --query "TargetHealthDescriptions[0].TargetHealth.State" \
+            --output text 2>/dev/null)
+
+        if [[ "$health" == "healthy" ]]; then
+            echo "  $service target group health: healthy"
+            return 0
+        fi
+
+        echo "  $service target group: $health (attempt $i/$max_attempts)"
+        sleep 10
+    done
+
+    echo "  ERROR: $service target did not become healthy." >&2
+    return 1
+}
+
+check_health "$BACKEND_TG_ARN" "Backend"
+check_health "$FRONTEND_TG_ARN" "Frontend"
+
+echo ""
+echo "--- Deployment Complete ---"
+echo "  ALB DNS: $ALB_DNS"
+echo "  Backend: https://$ALB_DNS/status/"
+echo "  Frontend: https://$ALB_DNS/"
+echo ""
+echo "  Backend task: $BACKEND_TASK"
+echo "  Frontend task: $FRONTEND_TASK"
