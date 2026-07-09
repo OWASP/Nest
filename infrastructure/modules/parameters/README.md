@@ -2,7 +2,7 @@
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.14.0 |
 
 ## Providers
@@ -19,7 +19,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [aws_ssm_parameter.django_algolia_application_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_algolia_write_api_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -33,7 +33,9 @@ No modules.
 | [aws_ssm_parameter.django_github_app_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_github_app_installation_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_open_ai_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.django_redis_auth_enabled](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_redis_host](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.django_redis_port](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_redis_use_tls](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_release_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -57,7 +59,8 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
+| <a name="input_alb_dns_name"></a> [alb\_dns\_name](#input\_alb\_dns\_name) | The DNS name of the ALB (set for LocalStack/ECS, empty for production). | `string` | `""` | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
 | <a name="input_db_password_arn"></a> [db\_password\_arn](#input\_db\_password\_arn) | The SSM Parameter ARN of password of the database. | `string` | n/a | yes |
 | <a name="input_django_allowed_hosts"></a> [django\_allowed\_hosts](#input\_django\_allowed\_hosts) | Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev). | `string` | n/a | yes |
@@ -68,7 +71,9 @@ No modules.
 | <a name="input_django_db_name"></a> [django\_db\_name](#input\_django\_db\_name) | The name of the database. | `string` | n/a | yes |
 | <a name="input_django_db_port"></a> [django\_db\_port](#input\_django\_db\_port) | The port of the database. | `string` | n/a | yes |
 | <a name="input_django_db_user"></a> [django\_db\_user](#input\_django\_db\_user) | The user for the database. | `string` | n/a | yes |
+| <a name="input_django_redis_auth_enabled"></a> [django\_redis\_auth\_enabled](#input\_django\_redis\_auth\_enabled) | Whether Redis authentication is enabled. | `bool` | `true` | no |
 | <a name="input_django_redis_host"></a> [django\_redis\_host](#input\_django\_redis\_host) | The hostname of the Redis cache. | `string` | n/a | yes |
+| <a name="input_django_redis_port"></a> [django\_redis\_port](#input\_django\_redis\_port) | The port of the Redis cache. | `string` | `"6379"` | no |
 | <a name="input_django_redis_use_tls"></a> [django\_redis\_use\_tls](#input\_django\_redis\_use\_tls) | Whether Redis connections should use TLS (required for ElastiCache with transit encryption). | `bool` | `true` | no |
 | <a name="input_django_release_version"></a> [django\_release\_version](#input\_django\_release\_version) | The Django release version. | `string` | n/a | yes |
 | <a name="input_django_settings_module"></a> [django\_settings\_module](#input\_django\_settings\_module) | The location of the Django settings module to use (e.g., settings.staging, settings.production). | `string` | n/a | yes |
@@ -84,7 +89,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_django_ssm_parameter_arns"></a> [django\_ssm\_parameter\_arns](#output\_django\_ssm\_parameter\_arns) | Map of environment variable names to the ARNs of all SSM parameters (Required by Django). |
 | <a name="output_frontend_ssm_parameter_arns"></a> [frontend\_ssm\_parameter\_arns](#output\_frontend\_ssm\_parameter\_arns) | Map of frontend environment variable names to the ARNs of all SSM parameters. |
 <!-- END_TF_DOCS -->

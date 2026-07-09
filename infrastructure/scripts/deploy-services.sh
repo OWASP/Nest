@@ -12,7 +12,7 @@ fi
 
 AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-2}"
 
-for cmd in awslocal tflocal jq; do
+for cmd in awslocal tflocal jq docker; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
         exit 1
@@ -58,7 +58,8 @@ AWS_PAGER="" awslocal ssm put-parameter \
     --output text >/dev/null
 
 get_tf_output() {
-    echo "$TF_OUTPUTS" | jq -r ".[\"$1\"].value"
+    local key="$1"
+    echo "$TF_OUTPUTS" | jq -r ".[\"$key\"].value"
 }
 
 get_sg_id() {
@@ -114,7 +115,7 @@ get_task_docker_ip() {
     local task_arn="$1"
     local task_id="${task_arn##*/}"
     local container
-    container=$(docker ps --format '{{.Names}}' | grep "$task_id" | head -1)
+    container=$(docker ps --format '{{.Names}}' | grep "$task_id" | head -1) || true
 
     if [[ -z "$container" ]]; then
         echo "  ERROR: Could not find Docker container for task $task_id" >&2
