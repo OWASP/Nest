@@ -75,7 +75,14 @@ const nextConfig: NextConfig = {
         ]
       }
     : undefined,
-  ...(isLocal && !forceStandalone ? {} : { output: 'standalone' }),
+  ...(isLocal && !forceStandalone
+    ? {}
+    : {
+        output: 'standalone',
+        outputFileTracingIncludes: {
+          '/*': ['./node_modules/graphql/**/*.mjs', './node_modules/graphql/index.mjs'],
+        },
+      }),
   ...(existsSync(repositoryPackageJson) ? { outputFileTracingRoot: repositoryRoot } : {}),
 }
 
