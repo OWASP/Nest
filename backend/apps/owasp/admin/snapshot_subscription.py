@@ -2,7 +2,17 @@
 
 from django.contrib import admin
 
+from apps.owasp.models.project_subscription_preference import ProjectSubscriptionPreference
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
+
+
+class ProjectSubscriptionPreferenceInline(admin.StackedInline):
+    """Inline admin for per-project subscription preferences."""
+
+    model = ProjectSubscriptionPreference
+    extra = 0
+    can_delete = True
+    autocomplete_fields = ("project",)
 
 
 class SnapshotSubscriptionAdmin(admin.ModelAdmin):
@@ -13,36 +23,33 @@ class SnapshotSubscriptionAdmin(admin.ModelAdmin):
     search_fields = ("user__email", "user__username")
     raw_id_fields = ("user",)
     readonly_fields = ("unsubscribe_token", "created_at", "updated_at")
-    autocomplete_fields = ("subscribed_projects", "subscribed_chapters")
+    autocomplete_fields = ("chapters",)
+    inlines = [ProjectSubscriptionPreferenceInline]
 
     fieldsets = (
         (None, {"fields": ("user", "frequency", "is_active")}),
-        (
-            "Content Preferences",
-            {
-                "fields": (
-                    "include_chapters",
-                    "include_events",
-                    "include_issues",
-                    "include_posts",
-                    "include_projects",
-                    "include_pull_requests",
-                    "include_releases",
-                    "include_users",
-                ),
-            },
-        ),
-        (
-            "Subscription Filters",
-            {
-                "fields": ("subscribed_projects", "subscribed_chapters"),
-            },
-        ),
         (
             "System",
             {
                 "fields": ("unsubscribe_token", "created_at", "updated_at"),
                 "classes": ("collapse",),
+            },
+        ),
+        (
+            "General Subscriptions",
+            {
+                "fields": (
+                    "include_chapters",
+                    "include_events",
+                    "include_posts",
+                    "include_users",
+                ),
+            },
+        ),
+        (
+            "Chapter Subscriptions",
+            {
+                "fields": ("chapters",),
             },
         ),
     )

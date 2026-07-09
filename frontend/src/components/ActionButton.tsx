@@ -8,6 +8,7 @@ interface ActionButtonProps {
   onClick?: () => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLAnchorElement | HTMLButtonElement>) => void
   tooltipLabel?: string
+  isDisabled?: boolean
   children: ReactNode
 }
 
@@ -16,6 +17,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
   onKeyDown,
   tooltipLabel,
+  isDisabled,
   children,
 }) => {
   const baseStyles =
@@ -24,15 +26,19 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   return url ? (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
       <Link
-        href={url}
-        target="_blank"
+        href={isDisabled ? '#' : url}
+        target={isDisabled ? undefined : '_blank'}
         rel="noopener noreferrer"
-        className={baseStyles}
+        className={`${baseStyles} ${
+          isDisabled ? 'pointer-events-none cursor-not-allowed opacity-50' : ''
+        }`}
         data-tooltip-id="button-tooltip"
         data-tooltip-content={tooltipLabel}
-        onClick={onClick}
-        onKeyDown={onKeyDown}
+        onClick={isDisabled ? (e) => e.preventDefault() : onClick}
+        onKeyDown={isDisabled ? undefined : onKeyDown}
         aria-label={tooltipLabel}
+        aria-disabled={isDisabled}
+        tabIndex={isDisabled ? -1 : undefined}
       >
         {children}
       </Link>
@@ -40,10 +46,11 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   ) : (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
       <Button
-        onPress={onClick}
-        onKeyDown={onKeyDown}
-        className={baseStyles}
+        onPress={isDisabled ? undefined : onClick}
+        onKeyDown={isDisabled ? undefined : onKeyDown}
+        className={`${baseStyles} ${isDisabled ? 'cursor-not-allowed' : ''}`}
         aria-label={tooltipLabel}
+        isDisabled={isDisabled}
       >
         {children}
       </Button>
