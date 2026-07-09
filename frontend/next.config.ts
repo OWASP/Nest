@@ -79,6 +79,8 @@ const nextConfig: NextConfig = {
     ? {}
     : {
         output: 'standalone',
+        // GraphQL v17 ESM exports resolve to index.mjs; standalone tracing omits them,
+        // causing SSR failures in Docker/e2e. See also nodeLinker: hoisted in pnpm-workspace.yaml.
         outputFileTracingIncludes: {
           '/*': ['./node_modules/graphql/**/*.mjs', './node_modules/graphql/index.mjs'],
         },
