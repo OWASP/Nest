@@ -2,21 +2,13 @@
 import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons, footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
-  const { theme } = useTheme()
-
-  const [nestLogoSrc, setNestLogoSrc] = useState('/img/logo_light.png')
-  useEffect(() => {
-    setNestLogoSrc(theme === 'dark' ? '/img/logo_dark.png' : '/img/logo_light.png')
-  }, [theme])
-
   // State to keep track of the open section in the footer
   const [openSection, setOpenSection] = useState<string | null>(null)
 
@@ -27,8 +19,8 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
-      <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
+    <footer className="bg-owasp-blue mt-auto w-full border-t-1 border-t-slate-300 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
+      <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-700 md:py-8 dark:text-slate-200">
         <div className="grid w-full sm:grid-cols-2 sm:gap-x-10 sm:gap-y-6 md:grid-cols-4 md:gap-x-14 lg:gap-x-20">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="flex flex-col gap-4">
@@ -61,10 +53,10 @@ export default function Footer() {
                   return (
                     <div key={link.href || `span-${link.text}`} className="py-1">
                       {link.isSpan ? (
-                        <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
+                        <span className="text-slate-700 dark:text-slate-400">{link.text}</span>
                       ) : (
                         <Link
-                          className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                          className="rounded-md text-slate-700 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                           href={link.href || '/'}
                           target={isExternal ? '_blank' : undefined}
                           rel={isExternal ? 'noopener noreferrer' : undefined}
@@ -91,7 +83,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`OWASP Nest ${social.label}`}
-                className="rounded-full p-2 text-slate-600 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                className="rounded-full p-2 text-slate-700 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
               >
                 <SocialIcon className="h-4 w-4" />
               </Link>
@@ -111,7 +103,7 @@ export default function Footer() {
             <Image
               src="/img/OWASP_logo.svg"
               alt="OWASP Logo"
-              width={100}
+              width={108}
               height={32}
               className="h-8 w-auto dark:invert"
             />
@@ -127,7 +119,7 @@ export default function Footer() {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <Image
-              src={nestLogoSrc}
+              src="/img/logo_dark.png"
               alt="Nest Logo"
               width={28}
               height={32}
@@ -140,13 +132,13 @@ export default function Footer() {
         {/* Footer bottom section with copyright and version */}
         <div className="grid w-full place-content-center">
           <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-700 dark:text-slate-400">
               © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
             </p>
             {RELEASE_VERSION && (
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-slate-700 dark:text-slate-400">
                 <Link
-                  className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                  className="rounded-md text-slate-700 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                   href={
                     ENVIRONMENT === 'production'
                       ? `https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`

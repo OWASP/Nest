@@ -3,7 +3,41 @@ mock_provider "aws" {}
 override_data {
   target = data.aws_iam_policy_document.key_policy
   values = {
-    json = "{\"Statement\":[{\"Sid\":\"EnableIAMUserPermissions\"},{\"Sid\":\"AllowCloudWatchLogs\"}]}"
+    json = <<EOF
+{
+  "Statement": [
+    {
+      "Sid": "EnableIAMUserPermissions",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:root"
+      },
+      "Action": "kms:*",
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowCloudWatchLogs",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "logs.us-east-1.amazonaws.com"
+      },
+      "Action": [
+        "kms:Decrypt",
+        "kms:Describe*",
+        "kms:Encrypt",
+        "kms:GenerateDataKey*",
+        "kms:ReEncrypt*"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ArnLike": {
+          "kms:EncryptionContext:aws:logs:arn": "arn:aws:logs:us-east-1:123456789012:log-group:*"
+        }
+      }
+    }
+  ]
+}
+EOF
   }
 }
 
@@ -29,6 +63,14 @@ run "test_cloudwatch_logs_policy_statement_exists" {
   assert {
     condition     = can(regex("AllowCloudWatchLogs", data.aws_iam_policy_document.key_policy.json))
     error_message = "Key policy must include CloudWatch Logs permissions."
+  }
+
+  assert {
+    condition = (
+      can(regex("arn:aws:logs:[a-z0-9-]+:\\d{12}:log-group:\\*", data.aws_iam_policy_document.key_policy.json)) &&
+      can(regex("logs\\.[a-z0-9-]+\\.amazonaws\\.com", data.aws_iam_policy_document.key_policy.json))
+    )
+    error_message = "CloudWatch Logs KMS policy must use the current AWS region in the encryption context and principal."
   }
 }
 

@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check contribution requirements
-        uses: arkid15r/check-contribution-action@9c046adddcf2c0bdf8a5eb3471d3775d3596c02a  # v0.1.5
+        uses: arkid15r/check-contribution-action@8d461a5dce23432339eaa12ce3c8d35013b038ab  # v0.1.6
         with:
           check_for: commit_sign_off, commit_signature, issue_assignee, issue_reference
           close_on: issue_assignee, issue_reference
