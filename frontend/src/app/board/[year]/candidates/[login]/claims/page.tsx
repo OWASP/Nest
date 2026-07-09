@@ -1,18 +1,36 @@
 'use client'
 
 import { useMutation, useQuery } from '@apollo/client/react'
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import type { DragEndEvent } from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Button } from '@heroui/button'
 import { Chip, Tooltip } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useParams, useRouter } from 'next/navigation'
-import type React from 'react'
-import { useEffect, useState } from 'react'
-import { FaChevronUp, FaChevronDown } from 'react-icons/fa'
-import { FaPlus } from 'react-icons/fa6'
+import React, { useCallback, useEffect, useState } from 'react'
+import { FaGripVertical, FaPlus } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
 import { ReorderBoardCandidateClaimsDocument } from 'types/__generated__/claimMutations.generated'
-import { GetBoardCandidateAndClaimsDocument } from 'types/__generated__/claimQueries.generated'
+import {
+  GetBoardCandidateAndClaimsDocument,
+  type GetBoardCandidateAndClaimsQuery,
+} from 'types/__generated__/claimQueries.generated'
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -20,29 +38,96 @@ import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
-const ReorderButton = ({
-  direction,
-  claimKey,
-  onReorder,
+type Claim = NonNullable<GetBoardCandidateAndClaimsQuery['boardCandidateClaims']>[number]
+
+const ClaimItem = ({
+  claim,
+  onClick,
+  dragHandleProps,
 }: {
-  direction: 'up' | 'down'
-  claimKey: string
-  onReorder: (key: string, direction: 'up' | 'down') => void
+  claim: Claim
+  onClick: (key: string) => void
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>
 }) => {
-  const Icon = direction === 'up' ? FaChevronUp : FaChevronDown
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onReorder(claimKey, direction)
-  }
+  const dragListeners = dragHandleProps as React.HTMLAttributes<HTMLDivElement>
+
   return (
-    <div className="relative rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
-      <input
-        type="button"
-        aria-label={direction === 'up' ? 'Move claim up' : 'Move claim down'}
-        className="absolute inset-0 cursor-pointer opacity-0"
-        onClick={handleClick}
+    <Button
+      disableAnimation
+      onPress={() => onClick(claim.key)}
+      className="h-24 w-full flex-row justify-between bg-transparent dark:hover:bg-gray-900"
+    >
+      <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
+        <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
+          {claim.name}
+        </h3>
+        <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
+          {claim.description}
+        </p>
+        <div className="mt-1 flex items-center gap-2">
+          <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
+            {formatDate(claim.createdAt)}
+          </span>
+          {claim.hasEvidence && (
+            <Tooltip
+              content="This claim has an evidence attached"
+              delay={150}
+              closeDelay={100}
+              showArrow
+              placement="right"
+            >
+              <Chip size="sm" variant="flat" color="success" className="text-tiny h-5">
+                Evidence
+              </Chip>
+            </Tooltip>
+          )}
+        </div>
+      </div>
+      {dragHandleProps && (
+        <div className="flex flex-row gap-2 pl-2">
+          <div
+            {...dragHandleProps}
+            className="cursor-grab touch-none rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+            aria-label="Drag to reorder"
+            onPointerDown={(e) => {
+              e.stopPropagation()
+              dragListeners?.onPointerDown?.(e)
+            }}
+          >
+            <FaGripVertical className="text-gray-400 dark:text-gray-500" size={24} />
+          </div>
+        </div>
+      )}
+    </Button>
+  )
+}
+
+const SortableClaimItem = ({
+  claim,
+  onClick,
+}: {
+  claim: Claim
+  onClick: (key: string) => void
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: claim.key,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: 'relative' as const,
+    zIndex: isDragging ? 1 : 0,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="w-full min-w-0">
+      <ClaimItem
+        claim={claim}
+        onClick={onClick}
+        dragHandleProps={{ ...attributes, ...listeners }}
       />
-      <Icon className="pointer-events-none text-gray-400 dark:text-gray-500" size={24} />
     </div>
   )
 }
@@ -52,6 +137,7 @@ const CandidateClaimsPage = () => {
   const { isSyncing, session } = useDjangoSession()
   const { login, year } = useParams<{ login: string; year: string }>()
   const [approvedOrder, setApprovedOrder] = useState<string[]>([])
+  const [isSaving, setIsSaving] = useState(false)
   const [reorderClaims] = useMutation(ReorderBoardCandidateClaimsDocument)
 
   const {
@@ -66,6 +152,17 @@ const CandidateClaimsPage = () => {
   const isCandidate = graphQLData?.boardOfDirectors?.candidate != null
   const claims = graphQLData?.boardCandidateClaims ?? []
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
   useEffect(() => {
     const c = graphQLData?.boardCandidateClaims ?? []
     setApprovedOrder(
@@ -79,40 +176,24 @@ const CandidateClaimsPage = () => {
     }
   }, [graphQLRequestError])
 
-  if (isSyncing || isLoading) {
-    return <LoadingSpinner />
-  }
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      if (isSaving) return
 
-  if (!isCandidate || session?.user?.login !== login) {
-    return (
-      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
-    )
-  }
+      const previousOrder = [...approvedOrder]
+      const oldIndex = approvedOrder.indexOf(String(active.id))
+      const newIndex = approvedOrder.indexOf(String(over.id))
 
-  const originalApprovedOrder = claims
-    .filter((c) => c.status === ClaimStatusEnum.Approved)
-    .map((c) => c.key)
+      if (oldIndex === -1 || newIndex === -1) return
 
-  const approvedChanged = approvedOrder.join() !== originalApprovedOrder.join()
+      const newOrder = arrayMove(approvedOrder, oldIndex, newIndex)
+      setApprovedOrder(newOrder)
+      setIsSaving(true)
 
-  const handleReorder = (key: string, direction: 'up' | 'down') => {
-    const setOrder = setApprovedOrder
-    setOrder((prev) => {
-      const idx = prev.indexOf(key)
-      if (idx === -1) return prev
-      const swapIdx = direction === 'up' ? idx - 1 : idx + 1
-      if (swapIdx < 0 || swapIdx >= prev.length) return prev
-      const next = [...prev]
-      ;[next[idx], next[swapIdx]] = [next[swapIdx], next[idx]]
-      return next
-    })
-  }
-
-  const handleSave = async () => {
-    const keys = approvedOrder
-    try {
-      const { data } = await reorderClaims({
-        variables: { input: { keys, year: Number.parseInt(year) } },
+      reorderClaims({
+        variables: { input: { keys: newOrder, year: Number.parseInt(year) } },
         update(cache, { data }) {
           const reorderedClaims = data?.reorderBoardCandidateClaims?.claims
           if (!reorderedClaims) return
@@ -137,32 +218,51 @@ const CandidateClaimsPage = () => {
           }
         },
       })
-      if (data?.reorderBoardCandidateClaims?.ok) {
-        addToast({
-          title: 'Success',
-          description: 'Claim order updated.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'success',
+        .then(({ data }) => {
+          if (data?.reorderBoardCandidateClaims?.ok) {
+            addToast({
+              title: 'Success',
+              description: 'Claim order updated.',
+              timeout: 3000,
+              shouldShowTimeoutProgress: true,
+              color: 'success',
+            })
+          } else {
+            setApprovedOrder(previousOrder)
+            addToast({
+              title: 'Error',
+              description: 'Failed to update claim order.',
+              timeout: 3000,
+              shouldShowTimeoutProgress: true,
+              color: 'danger',
+            })
+          }
         })
-      } else {
-        addToast({
-          title: 'Error',
-          description: 'Failed to update claim order.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
+        .catch(() => {
+          setApprovedOrder(previousOrder)
+          addToast({
+            title: 'Error',
+            description: 'Failed to update claim order.',
+            timeout: 3000,
+            shouldShowTimeoutProgress: true,
+            color: 'danger',
+          })
         })
-      }
-    } catch {
-      addToast({
-        title: 'Error',
-        description: 'Failed to update claim order.',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-      })
-    }
+        .finally(() => {
+          setIsSaving(false)
+        })
+    },
+    [approvedOrder, isSaving, reorderClaims, login, year]
+  )
+
+  if (isSyncing || isLoading) {
+    return <LoadingSpinner />
+  }
+
+  if (!isCandidate || session?.user?.login !== login) {
+    return (
+      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
+    )
   }
 
   const handleCreate = () => router.push(`/board/${year}/candidates/${login}/claims/create`)
@@ -198,9 +298,6 @@ const CandidateClaimsPage = () => {
       items: claims.filter((c) => c.status === ClaimStatusEnum.Withdrawn),
     },
   ]
-  const orderChanged: Partial<Record<ClaimStatusEnum, boolean>> = {
-    [ClaimStatusEnum.Approved]: approvedChanged,
-  }
 
   return (
     <div className="container mx-auto px-4 py-8 dark:bg-[#212529]">
@@ -215,72 +312,28 @@ const CandidateClaimsPage = () => {
         </ActionButton>
       </div>
       {sectionConfig.map(({ type: statusType, title, items }) => (
-        <SecondaryCard
-          key={title}
-          title={
-            [ClaimStatusEnum.Approved].includes(statusType) && orderChanged[statusType] ? (
-              <div className="flex w-full items-center justify-between">
-                <span>{title}</span>
-                <ActionButton onClick={() => handleSave()}>Save Order</ActionButton>
-              </div>
-            ) : (
-              title
-            )
-          }
-        >
+        <SecondaryCard key={title} title={title}>
           {items.length == 0 ? (
             <p> No {title.toLowerCase()}. </p>
           ) : (
             <div className="grid gap-2">
-              {items.map((claim) => (
-                <Button
-                  disableAnimation
-                  key={claim.key}
-                  onPress={() => handleClaimClick(claim.key)}
-                  className="h-24 flex-row justify-between bg-transparent dark:hover:bg-gray-900"
+              {statusType === ClaimStatusEnum.Approved && items.length > 1 ? (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
                 >
-                  <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
-                    <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
-                      {claim.name}
-                    </h3>
-                    <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
-                      {claim.description}
-                    </p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
-                        {formatDate(claim.createdAt)}
-                      </span>
-                      {claim.hasEvidence && (
-                        <Tooltip
-                          content="This claim has an evidence attached"
-                          delay={150}
-                          closeDelay={100}
-                          showArrow
-                          placement="right"
-                        >
-                          <Chip size="sm" variant="flat" color="success" className="text-tiny h-5">
-                            Evidence
-                          </Chip>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </div>
-                  {[ClaimStatusEnum.Approved].includes(claim.status) && items.length > 1 && (
-                    <div className="flex flex-row gap-2 p-1">
-                      <ReorderButton
-                        direction="up"
-                        claimKey={claim.key}
-                        onReorder={handleReorder}
-                      />
-                      <ReorderButton
-                        direction="down"
-                        claimKey={claim.key}
-                        onReorder={handleReorder}
-                      />
-                    </div>
-                  )}
-                </Button>
-              ))}
+                  <SortableContext items={approvedOrder} strategy={verticalListSortingStrategy}>
+                    {items.map((claim) => (
+                      <SortableClaimItem key={claim.key} claim={claim} onClick={handleClaimClick} />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              ) : (
+                items.map((claim) => (
+                  <ClaimItem key={claim.key} claim={claim} onClick={handleClaimClick} />
+                ))
+              )}
             </div>
           )}
         </SecondaryCard>
