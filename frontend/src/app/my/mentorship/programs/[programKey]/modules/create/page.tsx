@@ -41,6 +41,7 @@ const CreateModulePage = () => {
     endedAt: string
     experienceLevel: string
     labels: string
+    menteeCanManageDeadlines: boolean
     mentorLogins: string
     name: string
     projectId: string
@@ -53,6 +54,7 @@ const CreateModulePage = () => {
     endedAt: '',
     experienceLevel: ExperienceLevelEnum.Beginner,
     labels: '',
+    menteeCanManageDeadlines: false,
     mentorLogins: '',
     name: '',
     projectId: '',
@@ -105,6 +107,7 @@ const CreateModulePage = () => {
         endedAt: formData.endedAt,
         experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         labels: parseCommaSeparated(formData.labels),
+        menteeCanManageDeadlines: formData.menteeCanManageDeadlines,
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
         name: formData.name,
         programKey: programKey,
