@@ -14,8 +14,10 @@ output "django_ssm_parameter_arns" {
     "DJANGO_DB_PORT"                 = aws_ssm_parameter.django_db_port.arn
     "DJANGO_DB_USER"                 = aws_ssm_parameter.django_db_user.arn
     "DJANGO_OPEN_AI_SECRET_KEY"      = aws_ssm_parameter.django_open_ai_secret_key.arn
+    "DJANGO_REDIS_AUTH_ENABLED"      = aws_ssm_parameter.django_redis_auth_enabled.arn
     "DJANGO_REDIS_HOST"              = aws_ssm_parameter.django_redis_host.arn
     "DJANGO_REDIS_PASSWORD"          = var.redis_password_arn
+    "DJANGO_REDIS_PORT"              = aws_ssm_parameter.django_redis_port.arn
     "DJANGO_REDIS_USE_TLS"           = aws_ssm_parameter.django_redis_use_tls.arn
     "DJANGO_RELEASE_VERSION"         = aws_ssm_parameter.django_release_version.arn
     "DJANGO_SECRET_KEY"              = aws_ssm_parameter.django_secret_key.arn

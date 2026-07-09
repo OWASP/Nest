@@ -184,6 +184,7 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
+  alb_dns_name                  = module.alb.alb_dns_name
   common_tags                   = local.common_tags
   db_password_arn               = module.database.db_password_arn
   django_configuration          = var.django_configuration
@@ -194,7 +195,10 @@ module "parameters" {
   django_db_name                = var.db_name
   django_db_port                = module.database.db_port
   django_db_user                = var.db_user
+  django_redis_auth_enabled     = var.django_redis_auth_enabled
   django_redis_host             = module.cache.redis_primary_endpoint
+  django_redis_port             = var.django_redis_port
+  django_redis_use_tls          = var.django_redis_use_tls
   django_release_version        = var.django_release_version
   django_settings_module        = var.django_settings_module
   enable_additional_parameters  = var.enable_additional_parameters

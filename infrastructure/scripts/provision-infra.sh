@@ -50,7 +50,8 @@ if [[ -z "${DB_PASSWORD:-}" ]]; then
 fi
 
 TFVARS_JSON=$(mktemp /tmp/nest-tfvars-XXXXXX.json)
-trap 'rm -f "$TFVARS_JSON"' EXIT
+FRONTEND_ENV_BUILD="$REPO_ROOT/frontend/.env.build"
+trap 'rm -f "$TFVARS_JSON" "$FRONTEND_ENV_BUILD"' EXIT
 
 _normalize_bool() {
     local raw="$1"
@@ -75,6 +76,9 @@ jq -n \
     --argjson db_deletion_protection false \
     --argjson db_skip_final_snapshot true \
     --argjson enable_nat_gateway false \
+    --argjson django_redis_use_tls false \
+    --arg django_redis_port "4511" \
+    --argjson django_redis_auth_enabled false \
     '$ARGS.named' > "$TFVARS_JSON"
 
 cd "$INFRA_LIVE_DIR"
@@ -105,16 +109,33 @@ docker build \
 echo "Pushing backend image to local ECR..."
 docker push "$BACKEND_ECR:$TAG"
 
-FRONTEND_ENV_FILE="frontend/.env"
-if [[ ! -f "$REPO_ROOT/$FRONTEND_ENV_FILE" ]]; then
-    echo "WARNING: $FRONTEND_ENV_FILE not found, using frontend/.env.example." >&2
-    FRONTEND_ENV_FILE="frontend/.env.example"
-fi
+ALB_DNS=$(tflocal output -raw alb_dns_name 2>/dev/null || echo "localhost")
 
-echo "Building frontend image..."
+cat > "$FRONTEND_ENV_BUILD" <<ENV
+NEXTAUTH_SECRET=local-dev-insecure-secret-key-change-me
+NEXTAUTH_URL=http://${ALB_DNS}/
+NEXT_PUBLIC_API_URL=/
+NEXT_PUBLIC_CSRF_URL=/csrf/
+NEXT_PUBLIC_ENVIRONMENT=local
+NEXT_PUBLIC_GRAPHQL_URL=/graphql/
+NEXT_PUBLIC_GTM_ID=
+NEXT_PUBLIC_IDX_URL=/idx/
+NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=true
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_RELEASE_VERSION=
+NEXT_PUBLIC_SENTRY_DSN=
+NEXT_SERVER_CSRF_URL=http://${ALB_DNS}/csrf/
+NEXT_SERVER_DISABLE_SSR=false
+NEXT_SERVER_GITHUB_CLIENT_ID=your-github-client-id
+NEXT_SERVER_GITHUB_CLIENT_SECRET=your-github-client-secret
+NEXT_SERVER_GRAPHQL_URL=http://${ALB_DNS}/graphql/
+ENV
+
+echo "Building frontend image with ALB DNS: ${ALB_DNS}..."
 docker build \
     -f "$REPO_ROOT/docker/frontend/Dockerfile" \
-    --build-arg "ENV_FILE=${FRONTEND_ENV_FILE#frontend/}" \
+    --build-arg "ENV_FILE=.env.build" \
     --build-arg "FORCE_STANDALONE=yes" \
     -t "$FRONTEND_ECR:$TAG" \
     "$REPO_ROOT/frontend"

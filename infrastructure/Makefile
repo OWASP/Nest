@@ -26,9 +26,6 @@ provision-infra: ## Create resource on localstack and push images
 load-env-params: ## Upload local .env variables to LocalStack SSM Parameter Store
 	@$(MAKEFILE_DIR)scripts/load-env-params.sh $(ARGS)
 
-fix-ssm-params: ## Fix SSM params for LocalStack (Redis port/TLS/auth, ALLOWED_HOSTS)
-	@$(MAKEFILE_DIR)scripts/fix-ssm-params.sh
-
 deploy-services: ## Run backend/frontend ECS tasks on Fargate and register ALB targets
 	@$(MAKEFILE_DIR)scripts/deploy-services.sh
 
@@ -47,7 +44,6 @@ ecs-task: ## Run an ECS task (set TASK=name, e.g. make ecs-task TASK=migrate)
 provision: ## Full LocalStack provision: infra + images + SSM params + deploy services
 	@$(MAKEFILE_DIR)scripts/provision-infra.sh
 	@$(MAKEFILE_DIR)scripts/load-env-params.sh
-	@$(MAKEFILE_DIR)scripts/fix-ssm-params.sh
 	@$(MAKEFILE_DIR)scripts/deploy-services.sh
 
 test-infrastructure: ## Run infrastructure tests
