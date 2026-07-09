@@ -660,6 +660,9 @@ function SubscriptionContent() {
     )
   }
 
+  const destructiveButtonStyles =
+    'flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white'
+
   return (
     <>
       {hasActiveSubscription ? (
@@ -719,7 +722,7 @@ function SubscriptionContent() {
             variant="bordered"
             onPress={handleCancel}
             isDisabled={cancelling}
-            className="flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
+            className={destructiveButtonStyles}
           >
             <FaBellSlash />
             {cancelling ? 'Cancelling...' : 'Unsubscribe'}
@@ -756,7 +759,7 @@ function SubscriptionContent() {
             <Button
               onPress={handleConfirmCancel}
               isDisabled={cancelling}
-              className="flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
+              className={destructiveButtonStyles}
             >
               <FaBellSlash />
               {cancelling ? 'Cancelling...' : 'Yes, Unsubscribe'}
