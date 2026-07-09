@@ -27,6 +27,8 @@ __pycache__
 .trivy-cache
 .venv/
 .vscode
+*_override.tf
+*_override.tf.json
 *.bak
 *.code-workspace
 *.key
@@ -38,11 +40,6 @@ __pycache__
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
-# Override files
-*_override.tf
-*_override.tf.json
-override.tf
-override.tf.json
 **/.terraform/
 backend-sbom-local.cdx.json
 backend/.hypothesis/
@@ -76,6 +73,8 @@ frontend/out
 frontend/test-results/
 logs
 node_modules/
+override.tf
+override.tf.json
 semgrep-security-report.txt
 site/
 TODO

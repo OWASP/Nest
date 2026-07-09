@@ -10,12 +10,11 @@ description: >
 
 inputs:
   terraform_version:
+    default: 1.14.6
     description: The version of Terraform to install
     required: false
-    default: 1.14.6
 
 runs:
-  using: composite
   steps:
     - name: Install Terraform
       uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
@@ -33,3 +32,4 @@ runs:
       with:
         key: ${{ runner.os }}-${{ runner.arch }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
         path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+  using: composite
