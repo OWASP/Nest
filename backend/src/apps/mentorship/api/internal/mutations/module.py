@@ -128,7 +128,7 @@ class ModuleMutation:
                     domains=input_data.domains,
                     labels=input_data.labels,
                     tags=input_data.tags,
-                    mentees_can_manage_deadlines=input_data.mentees_can_manage_deadlines,
+                    mentee_can_manage_deadlines=input_data.mentee_can_manage_deadlines,
                     program=program,
                     project=project,
                 )
@@ -253,7 +253,7 @@ class ModuleMutation:
         if (
             not is_admin
             and not is_mentor
-            and not (is_mentee and module.mentees_can_manage_deadlines)
+            and not (is_mentee and module.mentee_can_manage_deadlines)
         ):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
@@ -396,8 +396,8 @@ class ModuleMutation:
             "labels": input_data.labels,
             "tags": input_data.tags,
             **(
-                {"mentees_can_manage_deadlines": input_data.mentees_can_manage_deadlines}
-                if input_data.mentees_can_manage_deadlines is not None
+                {"mentee_can_manage_deadlines": input_data.mentee_can_manage_deadlines}
+                if input_data.mentee_can_manage_deadlines is not None
                 else {}
             ),
         }

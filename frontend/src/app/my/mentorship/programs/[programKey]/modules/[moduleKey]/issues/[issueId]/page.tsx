@@ -137,7 +137,7 @@ const ModuleIssueDetailsPage = () => {
   const taskDeadline = (mentorshipModule?.taskDeadline as string | undefined) ?? null
   const moduleStartedAt = mentorshipModule?.startedAt
   const moduleEndedAt = mentorshipModule?.endedAt
-  const menteesCanManageDeadlines = mentorshipModule?.menteesCanManageDeadlines
+  const menteeCanManageDeadlines = mentorshipModule?.menteeCanManageDeadlines
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
@@ -178,7 +178,7 @@ const ModuleIssueDetailsPage = () => {
   // Admins/mentors can set a deadline on any assigned issue; a mentee can only do
   // so when the module allows it and the issue is assigned to them.
   const canEditDeadline = isMentee
-    ? Boolean(menteesCanManageDeadlines && isAssignee)
+    ? Boolean(menteeCanManageDeadlines && isAssignee)
     : assignees.length > 0
 
   let issueStatusClass: string

@@ -29,7 +29,7 @@ interface ModuleFormProps {
     endedAt: string
     experienceLevel: string
     labels: string
-    menteesCanManageDeadlines: boolean
+    menteeCanManageDeadlines: boolean
     mentorLogins: string
     name: string
     projectId: string
@@ -322,9 +322,9 @@ const ModuleForm = ({
                 <div className="flex w-full min-w-0 items-center gap-3 lg:col-span-2">
                   <Switch
                     aria-label="Mentees can manage deadlines"
-                    isSelected={formData.menteesCanManageDeadlines}
+                    isSelected={formData.menteeCanManageDeadlines}
                     onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, menteesCanManageDeadlines: value }))
+                      setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
                     }
                   />
                   <div>

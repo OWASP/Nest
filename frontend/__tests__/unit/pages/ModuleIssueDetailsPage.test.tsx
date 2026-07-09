@@ -98,7 +98,7 @@ const mockIssueData = {
       ],
     },
     userRole: 'mentor',
-    menteesCanManageDeadlines: false,
+    menteeCanManageDeadlines: false,
     startedAt: null,
     endedAt: null,
     taskAssignedAt: new Date().toISOString(),
@@ -120,7 +120,7 @@ const menteeIssueView = (
 ) => ({
   managementModule: {
     userRole: 'mentee',
-    menteesCanManageDeadlines: false,
+    menteeCanManageDeadlines: false,
     startedAt: null,
     endedAt: null,
     taskDeadline: null,
@@ -967,7 +967,7 @@ it('renders mentee issue view with deadline management enabled', async () => {
     menteeIssueView(
       { title: 'Deadline Issue' },
       {
-        menteesCanManageDeadlines: true,
+        menteeCanManageDeadlines: true,
         taskDeadline: '2026-12-01T00:00:00Z',
         taskAssignedAt: '2026-01-01T00:00:00Z',
       }
@@ -992,7 +992,7 @@ describe('Mentee deadline management', () => {
 
   it('enables the deadline control when the module allows it and the mentee is assigned', async () => {
     setupQueryMock(
-      menteeIssueView({ title: 'Editable Deadline Issue' }, { menteesCanManageDeadlines: true })
+      menteeIssueView({ title: 'Editable Deadline Issue' }, { menteeCanManageDeadlines: true })
     )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => {
@@ -1020,7 +1020,7 @@ describe('Mentee deadline management', () => {
       setDeadlineInput,
     })
     setupQueryMock(
-      menteeIssueView({ title: 'Edit Deadline Issue' }, { menteesCanManageDeadlines: true })
+      menteeIssueView({ title: 'Edit Deadline Issue' }, { menteeCanManageDeadlines: true })
     )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => {
@@ -1044,7 +1044,7 @@ describe('Mentee deadline management', () => {
     setupQueryMock(
       menteeIssueView(
         { title: 'No Clear Issue' },
-        { menteesCanManageDeadlines: true, taskDeadline: '2026-12-25T00:00:00Z' }
+        { menteeCanManageDeadlines: true, taskDeadline: '2026-12-25T00:00:00Z' }
       )
     )
     render(<ModuleIssueDetailsPage />)
@@ -1065,7 +1065,7 @@ describe('Mentee deadline management', () => {
       setTaskDeadlineMutation,
     })
     setupQueryMock(
-      menteeIssueView({ title: 'Save Deadline Issue' }, { menteesCanManageDeadlines: true })
+      menteeIssueView({ title: 'Save Deadline Issue' }, { menteeCanManageDeadlines: true })
     )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => {
@@ -1090,7 +1090,7 @@ describe('Mentee deadline management', () => {
       setDeadlineInput,
     })
     setupQueryMock(
-      menteeIssueView({ title: 'Date Input Issue' }, { menteesCanManageDeadlines: true })
+      menteeIssueView({ title: 'Date Input Issue' }, { menteeCanManageDeadlines: true })
     )
     render(<ModuleIssueDetailsPage />)
     await waitFor(() => expect(screen.getByText('Date Input Issue')).toBeInTheDocument())

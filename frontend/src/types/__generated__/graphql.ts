@@ -122,7 +122,7 @@ export type CreateModuleInput = {
   endedAt: Scalars['DateTime']['input'];
   experienceLevel: ExperienceLevelEnum;
   labels?: Array<Scalars['String']['input']>;
-  menteesCanManageDeadlines?: Scalars['Boolean']['input'];
+  menteeCanManageDeadlines?: Scalars['Boolean']['input'];
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
@@ -327,7 +327,7 @@ export type ModuleNode = {
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
   mentees: Array<UserNode>;
-  menteesCanManageDeadlines: Scalars['Boolean']['output'];
+  menteeCanManageDeadlines: Scalars['Boolean']['output'];
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
@@ -1108,7 +1108,7 @@ export type UpdateModuleInput = {
   experienceLevel: ExperienceLevelEnum;
   key: Scalars['String']['input'];
   labels?: Array<Scalars['String']['input']>;
-  menteesCanManageDeadlines?: InputMaybe<Scalars['Boolean']['input']>;
+  menteeCanManageDeadlines?: InputMaybe<Scalars['Boolean']['input']>;
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];

@@ -35,7 +35,7 @@ class ModuleNode:
     ended_at: datetime
     experience_level: ExperienceLevelEnum
     labels: list[str] | None = None
-    mentees_can_manage_deadlines: bool = False
+    mentee_can_manage_deadlines: bool = False
     order: int = 0
     program: ProgramNode | None = None
     project_id: strawberry.ID | None = None
@@ -194,7 +194,7 @@ class ModuleNode:
 
         info.context.current_module = self
 
-        queryset = (
+        issues = (
             self.issues.select_related("repository", "author")
             .prefetch_related(
                 "assignees",
@@ -208,9 +208,9 @@ class ModuleNode:
             github_user = getattr(user, "github_user", None)
             if github_user is None:
                 return None
-            queryset = queryset.filter(assignees=github_user)
+            issues = issues.filter(assignees=github_user)
 
-        return queryset.first()
+        return issues.first()
 
     @strawberry.field
     def interested_users(self, issue_number: int) -> list[UserNode]:
@@ -295,7 +295,7 @@ class CreateModuleInput:
     project_id: strawberry.ID
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
-    mentees_can_manage_deadlines: bool = False
+    mentee_can_manage_deadlines: bool = False
 
 
 @strawberry.input
@@ -315,7 +315,7 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
-    mentees_can_manage_deadlines: bool | None = None
+    mentee_can_manage_deadlines: bool | None = None
 
 
 @strawberry.input

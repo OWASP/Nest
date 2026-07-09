@@ -133,12 +133,16 @@ class ModuleQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if module.program.has_admin(user):
-            module.user_role = "admin"
-        elif module.has_mentor(user):
-            module.user_role = "mentor"
-        elif module.has_mentee(user):
-            module.user_role = "mentee"
+        roles = [
+            ("admin", module.program.has_admin),
+            ("mentor", module.has_mentor),
+            ("mentee", module.has_mentee),
+        ]
+
+        for role, checker in roles:
+            if checker(user):
+                module.user_role = role
+                break
         else:
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 

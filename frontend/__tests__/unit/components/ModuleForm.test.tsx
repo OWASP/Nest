@@ -285,7 +285,7 @@ describe('ModuleForm', () => {
     endedAt: '',
     experienceLevel: '',
     labels: '',
-    menteesCanManageDeadlines: false,
+    menteeCanManageDeadlines: false,
     mentorLogins: '',
     name: '',
     projectId: '',
@@ -410,9 +410,9 @@ describe('ModuleForm', () => {
       expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    it('reflects the current menteesCanManageDeadlines value', () => {
+    it('reflects the current menteeCanManageDeadlines value', () => {
       renderModuleForm({
-        formData: { ...defaultFormData, menteesCanManageDeadlines: true },
+        formData: { ...defaultFormData, menteeCanManageDeadlines: true },
       })
       const toggle = screen.getByRole('switch', { name: /mentees can manage deadlines/i })
       expect(toggle).toBeChecked()

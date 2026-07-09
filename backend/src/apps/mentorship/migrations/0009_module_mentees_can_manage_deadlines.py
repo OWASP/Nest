@@ -11,11 +11,11 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="module",
-            name="mentees_can_manage_deadlines",
+            name="mentee_can_manage_deadlines",
             field=models.BooleanField(
                 default=False,
                 help_text="If enabled, mentees can set or update deadlines for issues assigned to them in this module.",
-                verbose_name="Mentees can manage deadlines",
+                verbose_name="Mentee can manage deadlines",
             ),
         ),
     ]

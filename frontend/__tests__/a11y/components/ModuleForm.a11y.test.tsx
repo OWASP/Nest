@@ -15,7 +15,7 @@ const mockFormData = {
   endedAt: '2025-06-01',
   experienceLevel: 'BEGINNER',
   labels: '',
-  menteesCanManageDeadlines: false,
+  menteeCanManageDeadlines: false,
   mentorLogins: '',
   name: 'Test Module',
   projectId: '',

@@ -83,7 +83,7 @@ const MODULE_DETAIL_WITH_RECENT_PRS = gql`
     domains
     experienceLevel
     userRole
-    menteesCanManageDeadlines
+    menteeCanManageDeadlines
     startedAt
     endedAt
     mentors {

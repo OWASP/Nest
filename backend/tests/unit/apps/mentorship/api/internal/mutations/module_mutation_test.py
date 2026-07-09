@@ -1590,13 +1590,13 @@ class TestModuleMutationMenteeDeadline:
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_mentee_blocked_when_setting_disabled(self, mock_module):
-        """Mentee cannot set deadline when mentees_can_manage_deadlines is False."""
+        """Mentee cannot set deadline when mentee_can_manage_deadlines is False."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.has_mentor.return_value = False
         mock_mod.has_mentee.return_value = True
-        mock_mod.mentees_can_manage_deadlines = False
+        mock_mod.mentee_can_manage_deadlines = False
         mock_mod.program.has_admin.return_value = False
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
@@ -1626,7 +1626,7 @@ class TestModuleMutationMenteeDeadline:
         mock_mod = MagicMock()
         mock_mod.has_mentor.return_value = False
         mock_mod.has_mentee.return_value = True
-        mock_mod.mentees_can_manage_deadlines = True
+        mock_mod.mentee_can_manage_deadlines = True
         mock_mod.program.has_admin.return_value = False
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
@@ -1670,7 +1670,7 @@ class TestModuleMutationMenteeDeadline:
         mock_mod = MagicMock()
         mock_mod.has_mentor.return_value = False
         mock_mod.has_mentee.return_value = True
-        mock_mod.mentees_can_manage_deadlines = True
+        mock_mod.mentee_can_manage_deadlines = True
         mock_mod.program.has_admin.return_value = False
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
