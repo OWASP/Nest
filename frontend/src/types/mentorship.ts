@@ -69,8 +69,8 @@ export type ModuleFormData = {
   labels: string
   projectName: string
   projectId: string
-  mentorLogins: string
   menteeCanManageDeadlines: boolean
+  mentorLogins: string
 }
 
 export type CompletedLevel = {
