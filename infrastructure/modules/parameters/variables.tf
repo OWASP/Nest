@@ -55,8 +55,20 @@ variable "django_redis_host" {
   type        = string
 }
 
+variable "django_redis_port" {
+  description = "The port of the Redis cache."
+  type        = string
+  default     = "6379"
+}
+
 variable "django_redis_use_tls" {
   description = "Whether Redis connections should use TLS (required for ElastiCache with transit encryption)."
+  type        = bool
+  default     = true
+}
+
+variable "django_redis_auth_enabled" {
+  description = "Whether Redis authentication is enabled."
   type        = bool
   default     = true
 }
@@ -80,6 +92,12 @@ variable "enable_additional_parameters" {
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
+}
+
+variable "alb_dns_name" {
+  description = "The DNS name of the ALB (set for LocalStack/ECS, empty for production)."
+  type        = string
+  default     = ""
 }
 
 variable "next_server_csrf_url" {

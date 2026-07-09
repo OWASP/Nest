@@ -26,4 +26,5 @@ if ! command -v localstack >/dev/null 2>&1; then
 fi
 
 echo "Starting LocalStack..."
+export DISABLE_CORS_CHECKS=1
 exec localstack start

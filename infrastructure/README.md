@@ -211,36 +211,32 @@ make start-localstack
 
 Wait for LocalStack to be ready (health check at `http://localhost.localstack.cloud:4566/_localstack/health`).
 
-### 3. Provision infrastructure
+### 3. Provision everything
 
-Builds and pushes Docker images to local ECR, then runs Terraform via `tflocal`:
+Builds and pushes Docker images, runs Terraform via `tflocal`, uploads SSM parameters, and deploys ECS services:
 
 ```bash
-make provision-infra
+make provision
 ```
+
 > [!NOTE]
 > If you want to recreate every resource, restart LocalStack and then rerun this script
 
 This single command:
 - Runs Terraform (VPC, subnets, security groups, ALB, ECS clusters/services, ECR repos, RDS, ElastiCache, ACM cert, S3 buckets, SSM params)
 - Builds the backend Docker image and pushes it to the local ECR
-- Builds the frontend Docker image and pushes it to the local ECR
+- Builds the frontend Docker image (with env vars resolved against the ALB DNS name) and pushes it to the local ECR
+- Uploads local `backend/.env` and `frontend/.env` variables to the LocalStack SSM Parameter Store
+- Runs backend and frontend ECS tasks on Fargate and registers them with the ALB target groups
+- Waits for both target groups to report healthy
 
-### 4. Upload environment parameters to SSM
+> [!NOTE]
+> **Redis overrides for LocalStack compatibility:**
+> LocalStack's ElastiCache mock ignores the configured Redis port and assigns a random one from its internal port range. The Terraform variable `django_redis_port` creates the SSM parameter as a placeholder, but `deploy-services.sh` discovers the actual port at runtime via `awslocal elasticache describe-replication-groups` and overwrites the SSM value.
+>
+> Similarly, `DJANGO_REDIS_HOST` is overwritten with the LocalStack container's bridge IP — the default `localhost.localstack.cloud` resolves to loopback inside ECS containers and would be unreachable.
 
-Upload `backend/.env` and `frontend/.env` variables to the LocalStack SSM Parameter Store:
-
-```bash
-make load-env-params
-```
-
-To overwrite existing parameters:
-
-```bash
-make load-env-params ARGS="--overwrite"
-```
-
-### 5. Run database tasks
+### 4. Run database tasks
 
 Run ECS tasks (migrate, load data, index data) against the local cluster. Wait for each to finish before starting the next.
 
@@ -259,7 +255,7 @@ make ecs-task TASK=sync-data
 > [!NOTE]
 > Task definition names follow the pattern `nest-{environment}-{task-name}`.
 
-### 6. Clean up
+### 5. Clean up
 
 To tear down all LocalStack resources:
 

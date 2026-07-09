@@ -28,6 +28,35 @@ TF_OUTPUTS=$(tflocal output -json 2>/dev/null) || {
 
 echo "Deploying ECS services..."
 
+# Fix DJANGO_REDIS_HOST to use the LocalStack container IP instead of
+# localhost.localstack.cloud (which resolves to loopback inside ECS tasks).
+LOCALSTACK_CONTAINER_IP=$(docker inspect localstack-main --format '{{.NetworkSettings.Networks.bridge.IPAddress}}')
+SSM_PREFIX="/nest/local"
+echo "  Setting DJANGO_REDIS_HOST to LocalStack container IP: $LOCALSTACK_CONTAINER_IP"
+AWS_PAGER="" awslocal ssm put-parameter \
+    --region "$AWS_DEFAULT_REGION" \
+    --name "$SSM_PREFIX/DJANGO_REDIS_HOST" \
+    --value "$LOCALSTACK_CONTAINER_IP" \
+    --type "String" \
+    --overwrite \
+    --output text >/dev/null
+
+# Discover the actual Redis port from Elasticache (LocalStack ignores the
+# configured port and assigns one from its port range).
+ACTUAL_REDIS_PORT=$(awslocal elasticache describe-replication-groups \
+    --region "$AWS_DEFAULT_REGION" \
+    --replication-group-id "nest-local-cache" \
+    --query "ReplicationGroups[0].NodeGroups[0].PrimaryEndpoint.Port" \
+    --output text)
+echo "  Setting DJANGO_REDIS_PORT to actual Elasticache port: $ACTUAL_REDIS_PORT"
+AWS_PAGER="" awslocal ssm put-parameter \
+    --region "$AWS_DEFAULT_REGION" \
+    --name "$SSM_PREFIX/DJANGO_REDIS_PORT" \
+    --value "$ACTUAL_REDIS_PORT" \
+    --type "String" \
+    --overwrite \
+    --output text >/dev/null
+
 get_tf_output() {
     echo "$TF_OUTPUTS" | jq -r ".[\"$1\"].value"
 }
@@ -81,71 +110,39 @@ wait_for_task_running() {
     return 1
 }
 
-get_task_eni_ip() {
-    local cluster="$1"
-    local task_arn="$2"
+get_task_docker_ip() {
+    local task_arn="$1"
+    local task_id="${task_arn##*/}"
+    local container
+    container=$(docker ps --format '{{.Names}}' | grep "$task_id" | head -1)
 
-    local eni
-    eni=$(awslocal ecs describe-tasks \
-        --cluster "$cluster" \
-        --tasks "$task_arn" \
-        --region "$AWS_DEFAULT_REGION" \
-        --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" \
-        --output text)
-
-    if [[ -z "$eni" || "$eni" == "None" ]]; then
-        echo "  ERROR: Could not get ENI for task $task_arn" >&2
+    if [[ -z "$container" ]]; then
+        echo "  ERROR: Could not find Docker container for task $task_id" >&2
         return 1
     fi
 
-    local ip
-    ip=$(awslocal ec2 describe-network-interfaces \
-        --network-interface-ids "$eni" \
-        --region "$AWS_DEFAULT_REGION" \
-        --query "NetworkInterfaces[0].PrivateIpAddress" \
-        --output text)
-
-    echo "$ip"
+    docker inspect "$container" --format '{{.NetworkSettings.Networks.bridge.IPAddress}}'
 }
 
 STACK_PREFIX="nest-local"
-PUBLIC_SUBNETS=$(echo "$TF_OUTPUTS" | jq -r '.tasks_subnet_ids.value | join(",")')
+PUBLIC_SUBNETS=$(get_tf_output "tasks_subnet_ids" | jq -r 'join(",")')
 
 echo ""
 echo "--- Backend ---"
 
 BACKEND_CLUSTER=$(get_tf_output "backend_cluster_name")
 BACKEND_SG=$(get_sg_id "${STACK_PREFIX}-backend-sg")
-BACKEND_TG_ARN=$(awslocal elbv2 describe-target-groups \
-    --names "${STACK_PREFIX}-backend-tg" \
-    --region "$AWS_DEFAULT_REGION" \
-    --query "TargetGroups[0].TargetGroupArn" \
-    --output text)
+BACKEND_TG_ARN=$(get_tf_output "backend_target_group_arn")
 
 echo "  Cluster: $BACKEND_CLUSTER"
 echo "  Security Group: $BACKEND_SG"
 echo "  Target Group ARN: $BACKEND_TG_ARN"
-
-BACKEND_OVERRIDES=$(cat <<'EOF'
-{
-    "containerOverrides": [{
-        "name": "backend",
-        "environment": [
-            {"name": "DJANGO_REDIS_PORT", "value": "4511"},
-            {"name": "DJANGO_REDIS_USE_TLS", "value": "false"},
-            {"name": "DJANGO_REDIS_AUTH_ENABLED", "value": "false"}
-        ]
-    }]
-}
-EOF
-)
 
 BACKEND_TASK=$(awslocal ecs run-task \
     --cluster "$BACKEND_CLUSTER" \
     --launch-type FARGATE \
     --network-configuration "awsvpcConfiguration={subnets=[$PUBLIC_SUBNETS],securityGroups=[$BACKEND_SG],assignPublicIp=ENABLED}" \
     --task-definition "${STACK_PREFIX}-backend" \
-    --overrides "$BACKEND_OVERRIDES" \
     --region "$AWS_DEFAULT_REGION" \
     --query "tasks[0].taskArn" \
     --output text)
@@ -154,8 +151,8 @@ echo "  Task ARN: $BACKEND_TASK"
 
 wait_for_task_running "$BACKEND_CLUSTER" "$BACKEND_TASK" "Backend"
 
-BACKEND_IP=$(get_task_eni_ip "$BACKEND_CLUSTER" "$BACKEND_TASK")
-echo "  Backend IP: $BACKEND_IP"
+BACKEND_IP=$(get_task_docker_ip "$BACKEND_TASK")
+echo "  Backend Docker bridge IP: $BACKEND_IP"
 
 echo "  Registering backend target with ALB..."
 awslocal elbv2 register-targets \
@@ -168,11 +165,7 @@ echo "--- Frontend ---"
 
 FRONTEND_CLUSTER=$(get_tf_output "frontend_cluster_name")
 FRONTEND_SG=$(get_sg_id "${STACK_PREFIX}-frontend-sg")
-FRONTEND_TG_ARN=$(awslocal elbv2 describe-target-groups \
-    --names "${STACK_PREFIX}-frontend-tg" \
-    --region "$AWS_DEFAULT_REGION" \
-    --query "TargetGroups[0].TargetGroupArn" \
-    --output text)
+FRONTEND_TG_ARN=$(get_tf_output "frontend_target_group_arn")
 
 echo "  Cluster: $FRONTEND_CLUSTER"
 echo "  Security Group: $FRONTEND_SG"
@@ -191,8 +184,8 @@ echo "  Task ARN: $FRONTEND_TASK"
 
 wait_for_task_running "$FRONTEND_CLUSTER" "$FRONTEND_TASK" "Frontend"
 
-FRONTEND_IP=$(get_task_eni_ip "$FRONTEND_CLUSTER" "$FRONTEND_TASK")
-echo "  Frontend IP: $FRONTEND_IP"
+FRONTEND_IP=$(get_task_docker_ip "$FRONTEND_TASK")
+echo "  Frontend Docker bridge IP: $FRONTEND_IP"
 
 echo "  Registering frontend target with ALB..."
 awslocal elbv2 register-targets \
@@ -206,13 +199,12 @@ echo "--- Health Checks ---"
 ALB_DNS=$(get_tf_output "alb_dns_name")
 echo "  ALB DNS: $ALB_DNS"
 
-# Wait for target group health
-sleep 10
+sleep 5
 
 check_health() {
     local tg_arn="$1"
     local service="$2"
-    local max_attempts=12
+    local max_attempts=36
 
     for ((i = 1; i <= max_attempts; i++)); do
         local health
