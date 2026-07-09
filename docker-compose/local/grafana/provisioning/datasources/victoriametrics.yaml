@@ -5,7 +5,7 @@ datasources:
     uid: victoriametrics
     type: prometheus
     access: proxy
-    url: http://o11y-metrics:8428
+    url: ${O11Y_METRICS_URL}
     isDefault: true
     jsonData:
       httpMethod: POST
