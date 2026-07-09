@@ -124,19 +124,19 @@ fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy c
 
 load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
-	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
+	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/bod.dump" $(MAKE) exec-db-command
 
-load-data-e2e: fetch-nest-dump
+load-data-e2e:
 	@echo "Loading Nest e2e data"
-	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) exec-db-command-e2e
+	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/bod.dump" $(MAKE) exec-db-command-e2e
 
-load-data-fuzz: fetch-nest-dump
+load-data-fuzz:
 	@echo "Loading Nest fuzz data"
-	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/bod.dump" $(MAKE) exec-db-command-fuzz
 
-load-data-staging: fetch-nest-dump
+load-data-staging:
 	@echo "Loading Nest staging data"
-	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/bod.dump" $(MAKE) exec-db-command-fuzz
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
