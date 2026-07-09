@@ -67,12 +67,7 @@ jobs:
       - name: Read LocalStack image tag from Dockerfile
         id: localstack-tag
         run: |
-          tag=$(grep -E '^FROM localstack/localstack(-pro)?:' docker/localstack/Dockerfile \
-            | sed 's|^FROM localstack/localstack[^:]*:||;s|@.*||')
-          if [[ -z "$tag" ]]; then
-            echo "Error: could not determine LocalStack image tag from docker/localstack/Dockerfile." >&2
-            exit 1
-          fi
+          tag=$(python3 infrastructure/scripts/run_tests.py --get-tag)
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Start LocalStack
