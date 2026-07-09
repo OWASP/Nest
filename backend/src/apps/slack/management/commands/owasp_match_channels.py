@@ -47,6 +47,7 @@ class Command(BaseCommand):
             conv
             for conv in all_conversations
             if conv.name
+            and not conv.name.lower().startswith("chapter-")
             and (
                 conv.name.lower().startswith("project-")
                 or conv.name.lower().startswith("proj-")
