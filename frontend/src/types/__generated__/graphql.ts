@@ -1151,6 +1151,7 @@ export type UserNode = {
   bio: Scalars['String']['output'];
   company: Scalars['String']['output'];
   contributionData?: Maybe<Scalars['JSON']['output']>;
+  contributionScore: Scalars['Int']['output'];
   contributionsCount: Scalars['Int']['output'];
   createdAt: Scalars['String']['output'];
   currentCertificate?: Maybe<CertificateNode>;
@@ -1170,6 +1171,7 @@ export type UserNode = {
   name: Scalars['String']['output'];
   publicRepositoriesCount: Scalars['Int']['output'];
   releasesCount: Scalars['Int']['output'];
+  tier: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
