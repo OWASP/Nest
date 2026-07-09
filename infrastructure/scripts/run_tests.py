@@ -216,69 +216,79 @@ def wait_localstack_ready():
     print("LocalStack is ready!")
 
 
-def discover_and_run_tests(mode):
+def _find_test_dirs(search_paths):
     test_dirs = []
-    search_paths = ["infrastructure/bootstrap", "infrastructure/modules"]
     for path in search_paths:
-        if not os.path.exists(path):
-            continue
-        for root, dirs, files in os.walk(path):
-            if ".terraform" in root:
-                continue
-            if "tests" in dirs:
-                test_dirs.append(os.path.join(root, "tests"))
+        if os.path.exists(path):
+            for root, dirs, _ in os.walk(path):
+                if ".terraform" not in root and "tests" in dirs:
+                    test_dirs.append(os.path.join(root, "tests"))
+    return sorted(test_dirs)
 
-    test_dirs = sorted(test_dirs)
+
+def _match_test_mode(entry, mode):
+    if not entry.endswith(".tftest.hcl"):
+        return False
+    is_integration = "integration" in entry
+    return (mode == "integration" and is_integration) or (
+        mode == "unit" and not is_integration
+    )
+
+
+def _find_test_files(test_dir, mode):
+    try:
+        return [
+            entry
+            for entry in os.listdir(test_dir)
+            if _match_test_mode(entry, mode)
+        ]
+    except Exception as e:
+        print(f"Warning: could not read {test_dir}: {e}", file=sys.stderr)
+        return []
+
+
+def _run_module_tests(module_dir, test_files):
+    init_cmd = [
+        "terraform",
+        f"-chdir={module_dir}",
+        "init",
+        "-backend=false",
+        "-input=false",
+    ]
+    if subprocess.run(init_cmd).returncode != 0:
+        print(f"Error: terraform init failed in {module_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    test_cmd = ["terraform", f"-chdir={module_dir}", "test"]
+    for test_file in sorted(test_files):
+        test_cmd.append(f"-filter=tests/{test_file}")
+
+    if subprocess.run(test_cmd).returncode != 0:
+        print(f"Error: terraform test failed in {module_dir}", file=sys.stderr)
+        sys.exit(1)
+
+
+def discover_and_run_tests(mode):
+    search_paths = ["infrastructure/bootstrap", "infrastructure/modules"]
+    test_dirs = _find_test_dirs(search_paths)
     test_count = 0
+
     for test_dir in test_dirs:
-        module_dir = os.path.dirname(test_dir)
-
-        test_files = []
-        try:
-            for entry in os.listdir(test_dir):
-                if entry.endswith(".tftest.hcl"):
-                    is_integration = "integration" in entry
-                    if (mode == "integration" and is_integration) or (
-                        mode == "unit" and not is_integration
-                    ):
-                        test_files.append(entry)
-        except Exception as e:
-            print(f"Warning: could not read {test_dir}: {e}", file=sys.stderr)
-            continue
-
+        test_files = _find_test_files(test_dir, mode)
         if not test_files:
             continue
 
+        module_dir = os.path.dirname(test_dir)
         print(
             f"Testing {'integration' if mode == 'integration' else 'unit'} for {module_dir}..."
         )
-
-        init_cmd = [
-            "terraform",
-            f"-chdir={module_dir}",
-            "init",
-            "-backend=false",
-            "-input=false",
-        ]
-        init_res = subprocess.run(init_cmd)
-        if init_res.returncode != 0:
-            print(f"Error: terraform init failed in {module_dir}", file=sys.stderr)
-            sys.exit(1)
-
-        test_cmd = ["terraform", f"-chdir={module_dir}", "test"]
-        for test_file in sorted(test_files):
-            test_cmd.append(f"-filter=tests/{test_file}")
-
-        test_res = subprocess.run(test_cmd)
-        if test_res.returncode != 0:
-            print(f"Error: terraform test failed in {module_dir}", file=sys.stderr)
-            sys.exit(1)
-
+        _run_module_tests(module_dir, test_files)
         test_count += 1
 
     if test_count == 0:
         print(f"Error: No {mode} tests were found or executed.", file=sys.stderr)
         sys.exit(1)
+
 
 
 # --- Main -------------------------------------------------------------
