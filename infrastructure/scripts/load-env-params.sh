@@ -23,7 +23,7 @@ usage() {
     cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
-Upload local .env variables from backend/.env and frontend/.env
+Upload local .env variables from backend/.env.localstack and frontend/.env.localstack
 to LocalStack SSM Parameter Store under $SSM_PREFIX/
 
 Options:
@@ -59,8 +59,8 @@ is_secret() {
 }
 
 ENV_FILES=(
-    "$REPO_ROOT/backend/.env"
-    "$REPO_ROOT/frontend/.env"
+    "$REPO_ROOT/backend/.env.localstack"
+    "$REPO_ROOT/frontend/.env.localstack"
 )
 
 for env_file in "${ENV_FILES[@]}"; do
