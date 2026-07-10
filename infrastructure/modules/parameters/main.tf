@@ -52,7 +52,7 @@ resource "aws_ssm_parameter" "django_allowed_origins" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_ORIGINS"
   tags        = var.common_tags
   type        = "String"
-  value       = var.alb_dns_name != "" ? "${var.django_allowed_origins},${var.environment=="local"?"http":"https"}://${var.alb_dns_name}" : var.django_allowed_origins
+  value       = var.alb_dns_name != "" ? "${var.django_allowed_origins},https://${var.alb_dns_name}" : var.django_allowed_origins
 
   lifecycle {
     ignore_changes = [value]
