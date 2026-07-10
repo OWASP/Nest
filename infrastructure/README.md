@@ -226,7 +226,7 @@ This single command:
 - Runs Terraform (VPC, subnets, security groups, ALB, ECS clusters/services, ECR repos, RDS, ElastiCache, ACM cert, S3 buckets, SSM params)
 - Builds the backend Docker image and pushes it to the local ECR
 - Builds the frontend Docker image (with env vars resolved against the ALB DNS name) and pushes it to the local ECR
-- Uploads local `backend/.env` and `frontend/.env` variables to the LocalStack SSM Parameter Store
+- Uploads local `backend/.env.localstack` and `frontend/.env.localstack` variables to the LocalStack SSM Parameter Store
 - Runs backend and frontend ECS tasks on Fargate and registers them with the ALB target groups
 - Waits for both target groups to report healthy
 
