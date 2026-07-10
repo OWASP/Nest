@@ -100,7 +100,7 @@ services:
     volumes:
       - ../../frontend:/home/owasp
       - frontend-next-crp:/home/owasp/.next
-      - frontend-node-modules:/home/owasp/node_modules
+      - frontend-node-modules-crp:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -132,4 +132,4 @@ volumes:
   db-data-issue-4702:
   docs-venv-crp:
   frontend-next-crp:
-  frontend-node-modules:
+  frontend-node-modules-crp:

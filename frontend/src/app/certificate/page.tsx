@@ -220,7 +220,8 @@ const MyCertificatePage: React.FC = () => {
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 md:grid-cols-1">
             <ActionButton
               onClick={handleSaveAsImage}
-              className={`w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base ${isDownloading ? 'pointer-events-none cursor-not-allowed opacity-50' : ''}`}
+              isDisabled={isDownloading}
+              className="w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base"
             >
               <FaImage size={18} />
               {isDownloading ? 'Downloading...' : 'Save as Image'}
@@ -228,7 +229,8 @@ const MyCertificatePage: React.FC = () => {
 
             <ActionButton
               onClick={handleSaveAsPdf}
-              className={`w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base ${isSavingPdf ? 'pointer-events-none cursor-not-allowed opacity-50' : ''}`}
+              isDisabled={isSavingPdf}
+              className="w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base"
             >
               <FaFilePdf size={18} />
               {isSavingPdf ? 'Preparing...' : 'Save as PDF'}

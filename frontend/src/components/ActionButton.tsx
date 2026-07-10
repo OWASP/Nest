@@ -12,6 +12,7 @@ interface ActionButtonProps {
   tooltipLabel?: string
   children: ReactNode
   className?: string
+  isDisabled?: boolean
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -21,24 +22,27 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   tooltipLabel,
   children,
   className = '',
+  isDisabled = false,
 }) => {
   const baseStyles =
     'flex items-center gap-2 px-2 py-2 rounded-md border border-[#1D7BD7] transition-all whitespace-nowrap justify-center bg-transparent text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white'
 
-  const combinedStyles = cn(baseStyles, className)
+  const disabledStyles = isDisabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+  const combinedStyles = cn(baseStyles, disabledStyles, className)
 
   return url ? (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
       <Link
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={isDisabled ? '#' : url}
+        target={isDisabled ? undefined : '_blank'}
+        rel={isDisabled ? undefined : 'noopener noreferrer'}
         className={combinedStyles}
         data-tooltip-id="button-tooltip"
         data-tooltip-content={tooltipLabel}
         onClick={onClick}
         onKeyDown={onKeyDown}
         aria-label={tooltipLabel}
+        aria-disabled={isDisabled}
       >
         {children}
       </Link>
@@ -50,6 +54,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
         onKeyDown={onKeyDown}
         className={combinedStyles}
         aria-label={tooltipLabel}
+        isDisabled={isDisabled}
       >
         {children}
       </Button>
