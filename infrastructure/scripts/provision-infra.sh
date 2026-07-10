@@ -89,6 +89,17 @@ tflocal init --reconfigure
 echo "Applying Terraform..."
 tflocal apply -auto-approve -var-file="$TFVARS_JSON"
 
+echo "Uploading nest.dump to fixtures bucket..."
+FIXTURES_BUCKET=$(tflocal output -raw fixtures_bucket_name)
+DUMP_FILE="$REPO_ROOT/backend/data/nest.dump"
+
+if [[ ! -f "$DUMP_FILE" ]]; then
+    echo "Downloading nest.dump from public S3..."
+    make -C "$REPO_ROOT" fetch-nest-dump
+fi
+
+awslocal s3 cp "$DUMP_FILE" "s3://$FIXTURES_BUCKET/nest.dump"
+
 echo "Retrieving ECR repository URLs..."
 BACKEND_ECR=$(tflocal output -raw backend_ecr_repository_url)
 FRONTEND_ECR=$(tflocal output -raw frontend_ecr_repository_url)
