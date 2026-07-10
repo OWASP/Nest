@@ -56,7 +56,7 @@
     "@graphql-codegen/typescript": "6.1.0",
     "@graphql-codegen/typescript-operations": "6.1.0",
     "@lhci/cli": "0.15.1",
-    "@swc/core": "1.15.32",
+    "@swc/core": "1.15.41",
     "@swc/jest": "0.2.39",
     "@tailwindcss/postcss": "4.2.4",
     "@testing-library/dom": "10.4.1",
