@@ -3,12 +3,15 @@ import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
 
+import { cn } from 'utils/utility'
+
 interface ActionButtonProps {
   url?: string
   onClick?: () => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLAnchorElement | HTMLButtonElement>) => void
   tooltipLabel?: string
   children: ReactNode
+  className?: string
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -17,9 +20,12 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   onKeyDown,
   tooltipLabel,
   children,
+  className = '',
 }) => {
   const baseStyles =
     'flex items-center gap-2 px-2 py-2 rounded-md border border-[#1D7BD7] transition-all whitespace-nowrap justify-center bg-transparent text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white'
+
+  const combinedStyles = cn(baseStyles, className)
 
   return url ? (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
@@ -27,7 +33,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className={baseStyles}
+        className={combinedStyles}
         data-tooltip-id="button-tooltip"
         data-tooltip-content={tooltipLabel}
         onClick={onClick}
@@ -42,7 +48,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
       <Button
         onPress={onClick}
         onKeyDown={onKeyDown}
-        className={baseStyles}
+        className={combinedStyles}
         aria-label={tooltipLabel}
       >
         {children}

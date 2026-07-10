@@ -1,7 +1,6 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
-import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -61,7 +60,7 @@ const MyCertificatePage: React.FC = () => {
 
   if (!certificate) {
     return (
-      <PageLayout title="My Certificate">
+      <PageLayout title="My Certificate" breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]">
         <div className="container mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
           <h2 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">
             No Certificate Found
@@ -88,6 +87,7 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleSaveAsImage = async () => {
+    if (isDownloading) return
     setIsDownloading(true)
     try {
       const dataUrl = await getCertificateImageDataUrl()
@@ -111,6 +111,7 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleSaveAsPdf = async () => {
+    if (isSavingPdf) return
     setIsSavingPdf(true)
     try {
       const dataUrl = await getCertificateImageDataUrl()
@@ -131,6 +132,22 @@ const MyCertificatePage: React.FC = () => {
         CERTIFICATE_LAYOUT.verifyLink.height,
         { url: verifyUrl }
       )
+
+      const linkEl = cardRef.current?.querySelector('[data-github-link="true"]')
+      if (linkEl && cardRef.current) {
+        const cardRect = cardRef.current.getBoundingClientRect()
+        const linkRect = linkEl.getBoundingClientRect()
+        const scale = cardRect.width / CERTIFICATE_LAYOUT.width
+        if (scale > 0) {
+          pdf.link(
+            (linkRect.left - cardRect.left) / scale,
+            (linkRect.top - cardRect.top) / scale,
+            linkRect.width / scale,
+            linkRect.height / scale,
+            { url: `https://github.com/${certificate.githubUser.login}` }
+          )
+        }
+      }
 
       pdf.save(`certificate-${certificate.id}-${new Date().toISOString().split('T')[0]}.pdf`)
       addToast({ title: 'Downloaded', description: 'Certificate saved as PDF.', color: 'success' })
@@ -190,55 +207,48 @@ const MyCertificatePage: React.FC = () => {
   const displayName = certificate.githubUser.name || certificate.githubUser.login
 
   return (
-    <PageLayout title={`${displayName}'s Certificate`}>
-      <div className="container mx-auto flex flex-col items-center px-4 py-8">
-        <div className="flex w-full justify-center">
+    <PageLayout
+      title={`${displayName}'s Certificate`}
+      breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]"
+    >
+      <div className="container mx-auto mb-auto flex flex-col items-center justify-center gap-6 px-4 pt-2 pb-8 md:flex-row md:items-start md:gap-8 lg:gap-10">
+        <div className="flex w-full max-w-[842px] flex-1 justify-center md:justify-end">
           <CertificateCard certificate={certificate} isPublicView={false} cardRef={cardRef} />
         </div>
 
-        <div className="mt-6 w-full max-w-3xl rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 dark:border-gray-800 dark:bg-[#1E2227]">
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
-            <Button
-              onPress={handleSaveAsImage}
-              isDisabled={isDownloading}
-              size="lg"
-              variant="bordered"
-              className="w-full border-[#1D70B8] font-semibold text-[#1D70B8] hover:bg-[#1D70B8] hover:text-white sm:w-auto dark:hover:text-white"
+        <div className="w-full max-w-md shrink-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:w-64 md:max-w-none md:self-center lg:w-80 lg:p-5 dark:border-gray-800 dark:bg-[#212529]">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 md:grid-cols-1">
+            <ActionButton
+              onClick={handleSaveAsImage}
+              className={`w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base ${isDownloading ? 'pointer-events-none cursor-not-allowed opacity-50' : ''}`}
             >
               <FaImage size={18} />
               {isDownloading ? 'Downloading...' : 'Save as Image'}
-            </Button>
+            </ActionButton>
 
-            <Button
-              onPress={handleSaveAsPdf}
-              isDisabled={isSavingPdf}
-              size="lg"
-              variant="bordered"
-              className="w-full border-[#1D70B8] font-semibold text-[#1D70B8] hover:bg-[#1D70B8] hover:text-white sm:w-auto dark:hover:text-white"
+            <ActionButton
+              onClick={handleSaveAsPdf}
+              className={`w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base ${isSavingPdf ? 'pointer-events-none cursor-not-allowed opacity-50' : ''}`}
             >
               <FaFilePdf size={18} />
               {isSavingPdf ? 'Preparing...' : 'Save as PDF'}
-            </Button>
+            </ActionButton>
 
-            <Button
-              onPress={handleCopyLink}
-              size="lg"
-              variant="bordered"
-              className="w-full border-[#1D70B8] font-semibold text-[#1D70B8] hover:bg-[#1D70B8] hover:text-white sm:w-auto dark:hover:text-white"
+            <ActionButton
+              onClick={handleCopyLink}
+              className="w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base"
             >
               <FaCopy size={18} />
-              Copy Shareable Link
-            </Button>
+              Copy Link
+            </ActionButton>
 
-            <Button
-              onPress={handleShareLinkedIn}
-              size="lg"
-              variant="solid"
-              className="w-full bg-[#1D70B8] font-semibold text-white hover:bg-[#155a96] sm:w-auto"
+            <ActionButton
+              onClick={handleShareLinkedIn}
+              className="w-full rounded-xl border-transparent bg-[#1D7BD7] px-2 py-3 text-xs font-semibold whitespace-normal text-white hover:bg-[#155a96] hover:text-white sm:px-4 sm:text-sm md:text-base dark:hover:text-white"
             >
               <FaLinkedin size={18} />
               Add to LinkedIn
-            </Button>
+            </ActionButton>
           </div>
         </div>
       </div>

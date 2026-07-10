@@ -49,54 +49,42 @@ const CertificateVerificationPage: React.FC = () => {
   const displayName = certificate.githubUser.name || certificate.githubUser.login
 
   return (
-    <PageLayout title={`Verify ${displayName}'s Certificate`}>
-      <div className="container mx-auto flex flex-col items-center px-4 py-8">
-        {/* Verification Status Header */}
-        {certificate.isVerified ? (
-          <div className="mb-6 flex w-full max-w-[842px] flex-col items-center justify-between gap-4 rounded-xl border border-green-200/30 bg-green-50/5 px-5 py-4 sm:flex-row dark:border-green-900/20 dark:bg-green-950/5">
-            <div className="flex flex-col items-center gap-3.5 text-center sm:flex-row sm:items-start sm:text-left">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                <FaCircleCheck size={22} />
-              </div>
-              <div className="flex flex-col justify-center">
-                <h2 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">
-                  Verified Certificate
-                </h2>
-                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                  This is an official verification record from the OWASP Nest registry, confirming
-                  active contributions and achievements.
-                </p>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-[10px] font-black tracking-widest text-green-700 uppercase dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400">
-              Valid
-            </div>
-          </div>
-        ) : (
-          <div className="mb-6 flex w-full max-w-[842px] flex-col items-center justify-between gap-4 rounded-xl border border-red-200/30 bg-red-50/5 px-5 py-4 sm:flex-row dark:border-red-900/20 dark:bg-red-950/5">
-            <div className="flex flex-col items-center gap-3.5 text-center sm:flex-row sm:items-start sm:text-left">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100/80 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                <FaCircleXmark size={22} />
-              </div>
-              <div className="flex flex-col justify-center">
-                <h2 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">
-                  Revoked Certificate
-                </h2>
-                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                  This certificate has been revoked and is no longer recognized as a valid record by
-                  the OWASP Registry.
-                </p>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[10px] font-black tracking-widest text-red-700 uppercase dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
-              Revoked
-            </div>
-          </div>
-        )}
-
-        {/* Certificate Rendering */}
-        <div className="flex w-full justify-center">
+    <PageLayout
+      title={`Verify ${displayName}'s Certificate`}
+      breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]"
+    >
+      <div className="container mx-auto flex w-full flex-1 flex-col items-center self-stretch px-4 py-4">
+        <div className="relative flex w-full justify-center">
           <CertificateCard certificate={certificate} isPublicView={true} />
+          {certificate.isVerified ? (
+            <div className="absolute -bottom-3 left-1/2 z-20 -translate-x-1/2 md:bottom-0">
+              <div className="flex items-center gap-3 rounded-full border border-green-300 bg-white/95 px-5 py-2.5 shadow-lg backdrop-blur-sm dark:border-green-600/50 dark:bg-gray-900/95">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
+                  <FaCircleCheck size={14} />
+                </div>
+                <span className="text-[14px] font-bold whitespace-nowrap text-gray-800 dark:text-white">
+                  Verified Certificate
+                </span>
+                <span className="rounded-full bg-green-500 px-3 py-0.5 text-[11px] font-black tracking-widest text-white uppercase">
+                  Valid
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="absolute bottom-0 left-1/2 z-20 -translate-x-1/2">
+              <div className="flex items-center gap-3 rounded-full border border-red-300 bg-white/95 px-5 py-2.5 shadow-lg backdrop-blur-sm dark:border-red-600/50 dark:bg-gray-900/95">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-white">
+                  <FaCircleXmark size={14} />
+                </div>
+                <span className="text-[14px] font-bold whitespace-nowrap text-gray-800 dark:text-white">
+                  Revoked Certificate
+                </span>
+                <span className="rounded-full bg-red-500 px-3 py-0.5 text-[11px] font-black tracking-widest text-white uppercase">
+                  Revoked
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </PageLayout>

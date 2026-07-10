@@ -66,10 +66,18 @@ const Recipient: React.FC<RecipientProps> = ({ name, login, avatarUrl }) => {
           <span className="block font-sans text-[32px] leading-none font-bold text-[#0B2545]">
             {displayName}
           </span>
-          <div className="mt-2.5 flex flex-row items-center gap-2">
+          <a
+            data-github-link="true"
+            href={`https://github.com/${login}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-2.5 flex flex-row items-center gap-2"
+          >
             <FaGithub className="shrink-0 text-[18px] text-[#111827]" />
-            <span className="text-[15px] leading-none font-semibold text-[#1D70B8]">@{login}</span>
-          </div>
+            <span className="text-[15px] leading-none font-semibold text-[#1D70B8] group-hover:underline">
+              @{login}
+            </span>
+          </a>
         </div>
       </div>
     </div>
@@ -235,7 +243,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
     const handleResize = () => {
       if (containerRef.current) {
         const parentWidth = containerRef.current.clientWidth || (globalThis.window?.innerWidth ?? 0)
-        const newScale = Math.min(1, (parentWidth - 32) / CERTIFICATE_LAYOUT.width)
+        const newScale = Math.min(1, parentWidth / CERTIFICATE_LAYOUT.width)
         setScale(newScale)
       }
     }
