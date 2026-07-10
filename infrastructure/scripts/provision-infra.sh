@@ -50,8 +50,7 @@ if [[ -z "${DB_PASSWORD:-}" ]]; then
 fi
 
 TFVARS_JSON=$(mktemp /tmp/nest-tfvars-XXXXXX.json)
-FRONTEND_ENV_BUILD="$REPO_ROOT/frontend/.env.build"
-trap 'rm -f "$TFVARS_JSON" "$FRONTEND_ENV_BUILD"' EXIT
+trap 'rm -f "$TFVARS_JSON"' EXIT
 
 _normalize_bool() {
     local raw="$1"
@@ -120,33 +119,10 @@ docker build \
 echo "Pushing backend image to local ECR..."
 docker push "$BACKEND_ECR:$TAG"
 
-ALB_DNS=$(tflocal output -raw alb_dns_name 2>/dev/null || echo "localhost")
-
-cat > "$FRONTEND_ENV_BUILD" <<ENV
-NEXTAUTH_SECRET=local-dev-insecure-secret-key-change-me
-NEXTAUTH_URL=http://${ALB_DNS}/
-NEXT_PUBLIC_API_URL=/
-NEXT_PUBLIC_CSRF_URL=/csrf/
-NEXT_PUBLIC_ENVIRONMENT=local
-NEXT_PUBLIC_GRAPHQL_URL=/graphql/
-NEXT_PUBLIC_GTM_ID=
-NEXT_PUBLIC_IDX_URL=/idx/
-NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=true
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-NEXT_PUBLIC_POSTHOG_KEY=
-NEXT_PUBLIC_RELEASE_VERSION=
-NEXT_PUBLIC_SENTRY_DSN=
-NEXT_SERVER_CSRF_URL=http://${ALB_DNS}/csrf/
-NEXT_SERVER_DISABLE_SSR=false
-NEXT_SERVER_GITHUB_CLIENT_ID=${NEXT_SERVER_GITHUB_CLIENT_ID:-}
-NEXT_SERVER_GITHUB_CLIENT_SECRET=${NEXT_SERVER_GITHUB_CLIENT_SECRET:-}
-NEXT_SERVER_GRAPHQL_URL=http://${ALB_DNS}/graphql/
-ENV
-
-echo "Building frontend image with ALB DNS: ${ALB_DNS}..."
+echo "Building frontend image..."
 docker build \
     -f "$REPO_ROOT/docker/frontend/Dockerfile" \
-    --build-arg "ENV_FILE=.env.build" \
+    --build-arg "ENV_FILE=.env.localstack" \
     --build-arg "FORCE_STANDALONE=yes" \
     -t "$FRONTEND_ECR:$TAG" \
     "$REPO_ROOT/frontend"
