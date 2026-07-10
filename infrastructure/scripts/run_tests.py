@@ -11,7 +11,8 @@ import urllib.request
 
 # --- Config -------------------------------------------------------------
 
-LOCALSTACK_CONTAINER_NAME = "localstack"
+# Using a unique container name to avoid conflicts with unrelated localstack containers.
+LOCALSTACK_CONTAINER_NAME = "nest-localstack"
 LOCALSTACK_HEALTH_URL = "http://localhost:4566/_localstack/info"
 HEALTH_MAX_ATTEMPTS = 30
 HEALTH_POLL_INTERVAL = 2
@@ -29,57 +30,66 @@ OVERRIDES = [
     ),
 ]
 
+
+class TestRunnerError(Exception):
+    """Custom exception for errors during test runner execution."""
+
+    pass
+
+
 # --- Helpers --------------------------------------------------------------
 
 
 def require_cmd(cmd):
     if not shutil.which(cmd):
-        print(f"Error: required command '{cmd}' not found on PATH.", file=sys.stderr)
-        sys.exit(1)
+        raise TestRunnerError(f"required command '{cmd}' not found on PATH.")
 
 
-def localstack_healthy():
+def localstack_healthy(log_error=False):
     try:
         req = urllib.request.Request(LOCALSTACK_HEALTH_URL, method="GET")
         with urllib.request.urlopen(req, timeout=2) as response:
             return response.status == 200
-    except Exception:
+    except Exception as e:
+        if log_error:
+            print(f"Health check connection error: {e}", file=sys.stderr)
         return False
 
 
-def localstack_license_activated():
+def localstack_license_activated(log_error=False):
     try:
         req = urllib.request.Request(LOCALSTACK_HEALTH_URL, method="GET")
         with urllib.request.urlopen(req, timeout=2) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode("utf-8"))
                 return data.get("is_license_activated") is True
-    except Exception:
-        pass
+    except Exception as e:
+        if log_error:
+            print(f"License check connection error: {e}", file=sys.stderr)
     return False
 
 
 def get_localstack_image_info(root_dir):
     dockerfile_path = os.path.join(root_dir, "docker/localstack/Dockerfile")
     if not os.path.exists(dockerfile_path):
-        print(f"Error: Dockerfile not found at {dockerfile_path}", file=sys.stderr)
-        sys.exit(1)
+        raise TestRunnerError(f"Dockerfile not found at {dockerfile_path}")
 
     with open(dockerfile_path, "r") as f:
         content = f.read()
 
     match_line = None
+    # Note: This assumes a single-stage Dockerfile and returns the first matching FROM line.
+    # If the Dockerfile is changed to a multi-stage build, this logic should be updated
+    # to identify the correct target stage image.
     for line in content.splitlines():
         if re.match(r"^FROM\s+localstack/localstack(?:-pro)?:", line):
             match_line = line
             break
 
     if not match_line:
-        print(
-            f"Error: could not determine LocalStack image from {dockerfile_path}.",
-            file=sys.stderr,
+        raise TestRunnerError(
+            f"could not determine LocalStack image from {dockerfile_path}."
         )
-        sys.exit(1)
 
     full_image = re.sub(r"^FROM\s+", "", match_line).strip()
 
@@ -87,11 +97,9 @@ def get_localstack_image_info(root_dir):
         r"^FROM\s+localstack/localstack(?:-pro)?:\s*([^\s@]+)", match_line
     )
     if not match_tag:
-        print(
-            f"Error: could not determine LocalStack image tag from {dockerfile_path}.",
-            file=sys.stderr,
+        raise TestRunnerError(
+            f"could not determine LocalStack image tag from {dockerfile_path}."
         )
-        sys.exit(1)
 
     tag = match_tag.group(1)
     return full_image, tag
@@ -100,11 +108,9 @@ def get_localstack_image_info(root_dir):
 def check_existing_overrides():
     for filepath, _ in OVERRIDES:
         if os.path.exists(filepath):
-            print(
-                f"Error: {filepath} already exists. Refusing to run to avoid overwriting.",
-                file=sys.stderr,
+            raise TestRunnerError(
+                f"{filepath} already exists. Refusing to run to avoid overwriting."
             )
-            sys.exit(1)
 
 
 def write_override_files():
@@ -117,8 +123,7 @@ def write_override_files():
             with open(filepath, "w") as f:
                 f.write(content)
         except Exception as e:
-            print(f"Error writing override file {filepath}: {e}", file=sys.stderr)
-            sys.exit(1)
+            raise TestRunnerError(f"Error writing override file {filepath}: {e}")
 
 
 def cleanup(localstack_started):
@@ -132,6 +137,8 @@ def cleanup(localstack_started):
 
     if localstack_started:
         print("Stopping and removing LocalStack container...")
+        # Note: Best-effort container cleanup. We intentionally swallow any exceptions
+        # during stop/rm to avoid crashing the runner or masking the original test results.
         subprocess.run(
             ["docker", "stop", LOCALSTACK_CONTAINER_NAME],
             stdout=subprocess.DEVNULL,
@@ -147,16 +154,12 @@ def cleanup(localstack_started):
 def start_localstack(localstack_image):
     auth_token = os.environ.get("LOCALSTACK_AUTH_TOKEN")
     if not auth_token:
-        print(
-            "Error: LOCALSTACK_AUTH_TOKEN environment variable is not set.",
-            file=sys.stderr,
+        raise TestRunnerError(
+            "LOCALSTACK_AUTH_TOKEN environment variable is not set.\n"
+            "LocalStack integration tests require a valid auth token to run."
         )
-        print(
-            "LocalStack integration tests require a valid auth token to run.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
 
+    # Clean up any lingering container with our project-specific name from a previous failed run.
     subprocess.run(
         ["docker", "rm", "-f", LOCALSTACK_CONTAINER_NAME],
         stdout=subprocess.DEVNULL,
@@ -164,6 +167,8 @@ def start_localstack(localstack_image):
     )
 
     print("Starting LocalStack container...")
+    # Passing the env variable via "-e LOCALSTACK_AUTH_TOKEN" safely forwards the token
+    # from the Python process's environment without exposing it in the process argv.
     cmd = [
         "docker",
         "run",
@@ -173,14 +178,13 @@ def start_localstack(localstack_image):
         "-p",
         "4566:4566",
         "-e",
-        f"LOCALSTACK_AUTH_TOKEN={auth_token}",
+        "LOCALSTACK_AUTH_TOKEN",
         localstack_image,
     ]
     try:
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
-        print(f"Error starting LocalStack container: {e}", file=sys.stderr)
-        sys.exit(1)
+        raise TestRunnerError(f"Error starting LocalStack container: {e}")
 
 
 def wait_localstack_ready():
@@ -189,11 +193,11 @@ def wait_localstack_ready():
         if localstack_healthy():
             break
         if attempt == HEALTH_MAX_ATTEMPTS:
-            print(
-                f"Error: LocalStack failed to become healthy within {HEALTH_MAX_ATTEMPTS * HEALTH_POLL_INTERVAL} seconds.",
-                file=sys.stderr,
+            # Output the underlying connection error on the final attempt
+            localstack_healthy(log_error=True)
+            raise TestRunnerError(
+                f"LocalStack failed to become healthy within {HEALTH_MAX_ATTEMPTS * HEALTH_POLL_INTERVAL} seconds."
             )
-            sys.exit(1)
         print(f"Waiting... (attempt {attempt}/{HEALTH_MAX_ATTEMPTS})")
         time.sleep(HEALTH_POLL_INTERVAL)
 
@@ -203,14 +207,14 @@ def wait_localstack_ready():
         if localstack_license_activated():
             break
         if attempt == license_max_attempts:
-            print(
-                f"Error: LocalStack license failed to activate within {license_max_attempts * HEALTH_POLL_INTERVAL} seconds.",
-                file=sys.stderr,
-            )
+            # Output the underlying connection error on the final attempt
+            localstack_license_activated(log_error=True)
             subprocess.run(
-                f"docker logs {LOCALSTACK_CONTAINER_NAME} 2>&1 | tail -30", shell=True
+                ["docker", "logs", "--tail", "30", LOCALSTACK_CONTAINER_NAME]
             )
-            sys.exit(1)
+            raise TestRunnerError(
+                f"LocalStack license failed to activate within {license_max_attempts * HEALTH_POLL_INTERVAL} seconds."
+            )
         time.sleep(HEALTH_POLL_INTERVAL)
 
     print("LocalStack is ready!")
@@ -229,7 +233,10 @@ def _find_test_dirs(search_paths):
 def _match_test_mode(entry, mode):
     if not entry.endswith(".tftest.hcl"):
         return False
-    is_integration = "integration" in entry
+    # Integration tests are named 'integration.tftest.hcl' or end with '.integration.tftest.hcl'
+    is_integration = entry == "integration.tftest.hcl" or entry.endswith(
+        ".integration.tftest.hcl"
+    )
     return (mode == "integration" and is_integration) or (
         mode == "unit" and not is_integration
     )
@@ -238,13 +245,10 @@ def _match_test_mode(entry, mode):
 def _find_test_files(test_dir, mode):
     try:
         return [
-            entry
-            for entry in os.listdir(test_dir)
-            if _match_test_mode(entry, mode)
+            entry for entry in os.listdir(test_dir) if _match_test_mode(entry, mode)
         ]
     except Exception as e:
-        print(f"Warning: could not read {test_dir}: {e}", file=sys.stderr)
-        return []
+        raise TestRunnerError(f"could not read {test_dir}: {e}")
 
 
 def _run_module_tests(module_dir, test_files):
@@ -256,16 +260,14 @@ def _run_module_tests(module_dir, test_files):
         "-input=false",
     ]
     if subprocess.run(init_cmd).returncode != 0:
-        print(f"Error: terraform init failed in {module_dir}", file=sys.stderr)
-        sys.exit(1)
+        raise TestRunnerError(f"terraform init failed in {module_dir}")
 
     test_cmd = ["terraform", f"-chdir={module_dir}", "test"]
     for test_file in sorted(test_files):
         test_cmd.append(f"-filter=tests/{test_file}")
 
     if subprocess.run(test_cmd).returncode != 0:
-        print(f"Error: terraform test failed in {module_dir}", file=sys.stderr)
-        sys.exit(1)
+        raise TestRunnerError(f"terraform test failed in {module_dir}")
 
 
 def discover_and_run_tests(mode):
@@ -286,9 +288,7 @@ def discover_and_run_tests(mode):
         test_count += 1
 
     if test_count == 0:
-        print(f"Error: No {mode} tests were found or executed.", file=sys.stderr)
-        sys.exit(1)
-
+        raise TestRunnerError(f"No {mode} tests were found or executed.")
 
 
 # --- Main -------------------------------------------------------------
@@ -320,41 +320,45 @@ def main():
     except Exception as e:
         print(f"Warning: could not configure TF_PLUGIN_CACHE_DIR: {e}", file=sys.stderr)
 
-    if args.get_tag:
-        _, tag = get_localstack_image_info(root_dir)
-        print(tag)
-        return
+    try:
+        if args.get_tag:
+            _, tag = get_localstack_image_info(root_dir)
+            print(tag)
+            return
 
-    # Check executable commands based on requirements
-    require_cmd("terraform")
+        # Check executable commands based on requirements
+        require_cmd("terraform")
 
-    if args.integration:
-        require_cmd("docker")
+        if args.integration:
+            require_cmd("docker")
 
-        full_image, _ = get_localstack_image_info(root_dir)
-        check_existing_overrides()
+            full_image, _ = get_localstack_image_info(root_dir)
+            check_existing_overrides()
 
-        localstack_started = False
-        try:
-            if localstack_healthy():
-                print("Using already running LocalStack instance.")
-            else:
-                print(
-                    "LocalStack is not running on port 4566. Attempting to start it..."
-                )
-                start_localstack(full_image)
-                localstack_started = True
-                wait_localstack_ready()
+            localstack_started = False
+            try:
+                if localstack_healthy():
+                    print("Using already running LocalStack instance.")
+                else:
+                    print(
+                        "LocalStack is not running on port 4566. Attempting to start it..."
+                    )
+                    start_localstack(full_image)
+                    localstack_started = True
+                    wait_localstack_ready()
 
-            write_override_files()
-            discover_and_run_tests("integration")
-            print("All integration tests executed successfully!")
-        finally:
-            cleanup(localstack_started)
-    else:
-        # Default mode: unit tests
-        discover_and_run_tests("unit")
-        print("All unit tests executed successfully!")
+                write_override_files()
+                discover_and_run_tests("integration")
+                print("All integration tests executed successfully!")
+            finally:
+                cleanup(localstack_started)
+        else:
+            # Default mode: unit tests
+            discover_and_run_tests("unit")
+            print("All unit tests executed successfully!")
+    except TestRunnerError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

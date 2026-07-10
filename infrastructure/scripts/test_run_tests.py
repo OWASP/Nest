@@ -13,13 +13,13 @@ class TestRunTests(unittest.TestCase):
     @patch("shutil.which")
     def test_require_cmd_exists(self, mock_which):
         mock_which.return_value = "/usr/bin/terraform"
-        # Should not raise SystemExit
+        # Should not raise SystemExit or TestRunnerError
         run_tests.require_cmd("terraform")
 
     @patch("shutil.which")
     def test_require_cmd_not_exists(self, mock_which):
         mock_which.return_value = None
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(run_tests.TestRunnerError):
             run_tests.require_cmd("nonexistent-cmd")
 
     @patch("urllib.request.urlopen")
@@ -77,13 +77,13 @@ class TestRunTests(unittest.TestCase):
     @patch("os.path.exists")
     def test_check_existing_overrides_exist(self, mock_exists):
         mock_exists.return_value = True
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(run_tests.TestRunnerError):
             run_tests.check_existing_overrides()
 
     @patch("os.path.exists")
     def test_check_existing_overrides_none(self, mock_exists):
         mock_exists.return_value = False
-        # Should not raise SystemExit
+        # Should not raise SystemExit or TestRunnerError
         run_tests.check_existing_overrides()
 
     @patch("os.makedirs")
@@ -136,7 +136,7 @@ class TestRunTests(unittest.TestCase):
                 "-p",
                 "4566:4566",
                 "-e",
-                "LOCALSTACK_AUTH_TOKEN=dummy-token",
+                "LOCALSTACK_AUTH_TOKEN",
                 "localstack/localstack:latest",
             ],
             check=True,
@@ -181,6 +181,70 @@ class TestRunTests(unittest.TestCase):
                 "-filter=tests/storage.tftest.hcl",
             ]
         )
+
+    @patch("os.listdir")
+    def test_find_test_files_error(self, mock_listdir):
+        mock_listdir.side_effect = Exception("Permission denied")
+        with self.assertRaises(run_tests.TestRunnerError) as ctx:
+            run_tests._find_test_files("/dummy/dir", "unit")
+        self.assertIn("could not read /dummy/dir", str(ctx.exception))
+
+    @patch("subprocess.run")
+    def test_run_module_tests_init_failure(self, mock_sub_run):
+        mock_sub_run.return_value.returncode = 1
+        with self.assertRaises(run_tests.TestRunnerError) as ctx:
+            run_tests._run_module_tests("dummy_dir", ["test.tftest.hcl"])
+        self.assertIn("terraform init failed in dummy_dir", str(ctx.exception))
+
+    @patch("subprocess.run")
+    def test_run_module_tests_test_failure(self, mock_sub_run):
+        # init succeeds (returncode = 0), test fails (returncode = 1)
+        mock_sub_run.side_effect = [
+            MagicMock(returncode=0),
+            MagicMock(returncode=1),
+        ]
+        with self.assertRaises(run_tests.TestRunnerError) as ctx:
+            run_tests._run_module_tests("dummy_dir", ["test.tftest.hcl"])
+        self.assertIn("terraform test failed in dummy_dir", str(ctx.exception))
+
+    @patch("time.sleep")
+    @patch("run_tests.localstack_healthy")
+    def test_wait_localstack_ready_healthy_timeout(self, mock_healthy, mock_sleep):
+        mock_healthy.return_value = False
+        with self.assertRaises(run_tests.TestRunnerError) as ctx:
+            run_tests.wait_localstack_ready()
+        self.assertIn("failed to become healthy", str(ctx.exception))
+
+    @patch("subprocess.run")
+    @patch("time.sleep")
+    @patch("run_tests.localstack_healthy")
+    @patch("run_tests.localstack_license_activated")
+    def test_wait_localstack_ready_license_timeout(
+        self, mock_license, mock_healthy, mock_sleep, mock_sub_run
+    ):
+        mock_healthy.return_value = True
+        mock_license.return_value = False
+        with self.assertRaises(run_tests.TestRunnerError) as ctx:
+            run_tests.wait_localstack_ready()
+        self.assertIn("license failed to activate", str(ctx.exception))
+        mock_sub_run.assert_any_call(
+            ["docker", "logs", "--tail", "30", run_tests.LOCALSTACK_CONTAINER_NAME]
+        )
+
+    @patch("run_tests.require_cmd")
+    @patch("builtins.print")
+    @patch("sys.exit")
+    def test_main_handles_test_runner_error(
+        self, mock_exit, mock_print, mock_require_cmd
+    ):
+        mock_require_cmd.side_effect = run_tests.TestRunnerError("Mocked failure")
+        with patch("argparse.ArgumentParser.parse_args") as mock_args:
+            mock_args.return_value = MagicMock(
+                unit=True, integration=False, get_tag=False
+            )
+            run_tests.main()
+            mock_exit.assert_called_once_with(1)
+            mock_print.assert_any_call("Error: Mocked failure", file=sys.stderr)
 
 
 if __name__ == "__main__":
