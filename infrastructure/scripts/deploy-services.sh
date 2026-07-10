@@ -57,6 +57,30 @@ AWS_PAGER="" awslocal ssm put-parameter \
     --overwrite \
     --output text >/dev/null
 
+ACTUAL_DB_PORT=$(AWS_PAGER="" awslocal rds describe-db-instances \
+    --region "$AWS_DEFAULT_REGION" \
+    --db-instance-identifier "nest-local-db" \
+    --query "DBInstances[0].Endpoint.Port" \
+    --output text)
+
+echo "  Setting DJANGO_DB_HOST to LocalStack container IP: $LOCALSTACK_CONTAINER_IP"
+AWS_PAGER="" awslocal ssm put-parameter \
+    --region "$AWS_DEFAULT_REGION" \
+    --name "$SSM_PREFIX/DJANGO_DB_HOST" \
+    --value "$LOCALSTACK_CONTAINER_IP" \
+    --type "String" \
+    --overwrite \
+    --output text >/dev/null
+
+echo "  Setting DJANGO_DB_PORT to actual RDS port: $ACTUAL_DB_PORT"
+AWS_PAGER="" awslocal ssm put-parameter \
+    --region "$AWS_DEFAULT_REGION" \
+    --name "$SSM_PREFIX/DJANGO_DB_PORT" \
+    --value "$ACTUAL_DB_PORT" \
+    --type "String" \
+    --overwrite \
+    --output text >/dev/null
+
 get_tf_output() {
     local key="$1"
     echo "$TF_OUTPUTS" | jq -r ".[\"$key\"].value"
