@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015  # v1.106.0
+    rev: 60814e259af5e9b712edbd18af333d2650624735  # v1.107.0
     hooks:
       - id: terraform_providers_lock
         args:
