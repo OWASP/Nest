@@ -43,6 +43,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
         onKeyDown={onKeyDown}
         aria-label={tooltipLabel}
         aria-disabled={isDisabled}
+        tabIndex={isDisabled ? -1 : undefined}
       >
         {children}
       </Link>
