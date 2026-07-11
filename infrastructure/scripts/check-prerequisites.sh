@@ -8,4 +8,5 @@ check_prerequisites(){
             exit 1
         fi
     done
+    return 0
 }
