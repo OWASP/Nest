@@ -54,7 +54,7 @@ module "backend" {
   desired_count                   = var.backend_desired_count
   enable_auto_scaling             = var.backend_enable_auto_scaling
   environment                     = var.environment
-  force_new_deployment              = var.force_new_deployment
+  force_new_deployment            = var.force_new_deployment
   health_check_path               = "/status/"
   image_tag                       = var.backend_image_tag
   kms_key_arn                     = module.kms.key_arn
@@ -122,7 +122,7 @@ module "frontend" {
   desired_count                   = var.frontend_desired_count
   enable_auto_scaling             = var.frontend_enable_auto_scaling
   environment                     = var.environment
-  force_new_deployment              = var.force_new_deployment
+  force_new_deployment            = var.force_new_deployment
   health_check_path               = "/api/health"
   image_tag                       = var.frontend_image_tag
   kms_key_arn                     = module.kms.key_arn

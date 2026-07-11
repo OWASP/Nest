@@ -10,11 +10,11 @@ define RUN_ECS_TASK
 		SUBNETS=$$(tflocal output -json tasks_subnet_ids | jq -r 'join(",")') && \
 		SG=$$(tflocal output -raw tasks_security_group_id) && \
 		AWS_DEFAULT_REGION=$(AWS_REGION) awslocal ecs run-task \
-			--cluster $$CLUSTER \
-			--launch-type FARGATE \
-			--network-configuration "awsvpcConfiguration={subnets=[$$SUBNETS],securityGroups=[$$SG],assignPublicIp=ENABLED}" \
-			--task-definition nest-local-$(1) \
-			--region $(AWS_REGION)
+		--cluster $$CLUSTER \
+		--launch-type FARGATE \
+		--network-configuration "awsvpcConfiguration={subnets=[$$SUBNETS],securityGroups=[$$SG],assignPublicIp=ENABLED}" \
+		--task-definition nest-local-$(1) \
+		--region $(AWS_REGION)
 endef
 
 start-localstack: ## Start LocalStack (requires .env with LOCALSTACK_AUTH_TOKEN)
