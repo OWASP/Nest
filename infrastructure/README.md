@@ -217,7 +217,7 @@ Wait for LocalStack to be ready (health check at `http://localhost.localstack.cl
 Builds and pushes Docker images, runs Terraform via `tflocal`, uploads SSM parameters, and deploys ECS services:
 
 ```bash
-make provision
+make deploy-on-localstack
 ```
 
 > [!NOTE]

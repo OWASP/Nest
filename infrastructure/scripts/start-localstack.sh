@@ -27,6 +27,6 @@ check_prerequisites localstack
 echo "Starting LocalStack..."
 
 # Disable LocalStack's server-side CSRF checks for local development
-export DISABLE_CORS_CHECKS=1
+export LOCALSTACK_DISABLE_CORS_CHECKS=1
 
 localstack start
