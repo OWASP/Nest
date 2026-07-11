@@ -42,9 +42,9 @@ ecs-task: ## Run an ECS task (set TASK=name, e.g. make ecs-task TASK=migrate)
 	$(call RUN_ECS_TASK,$(TASK))
 
 provision: ## Full LocalStack provision: infra + images + SSM params + deploy services
-	@$(MAKEFILE_DIR)scripts/provision-infra.sh 
-	@$(MAKEFILE_DIR)scripts/load-env-params.sh --overwrite
-	@$(MAKEFILE_DIR)scripts/deploy-services.sh
+	@$(MAKEFILE_DIR)scripts/provision-infra.sh && \
+	$(MAKEFILE_DIR)scripts/load-env-params.sh --overwrite && \
+	$(MAKEFILE_DIR)scripts/deploy-services.sh
 
 test-infrastructure: ## Run infrastructure tests
 	@find $(MAKEFILE_DIR)bootstrap $(MAKEFILE_DIR)modules \
