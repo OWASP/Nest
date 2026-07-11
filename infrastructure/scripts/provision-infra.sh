@@ -55,7 +55,7 @@ _normalize_bool() {
     local val="${raw//\"/}"
     case "$val" in
         [Tt]rue)  echo true ;;
-        [Ff]alse) echo false ;;
+        [Ff]alse) echo false ;; #cspell:disable-line
         *) echo "ERROR: Boolean must be 'true' or 'false', got '$raw'." >&2; exit 1 ;;
     esac
 }

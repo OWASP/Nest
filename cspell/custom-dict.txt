@@ -83,6 +83,7 @@ acodec
 agentic
 ahmedxgouda
 algoliasearch
+alse
 ansa
 apexcharts
 apk
@@ -115,6 +116,7 @@ dismissable
 dkr
 dsn
 dvo
+elbv
 elevenlabs
 env
 envsubst
@@ -230,6 +232,7 @@ speakerdeck
 subgrp
 superfences
 tfbackend
+tflocal
 tgz
 tiktok
 trailofbits
