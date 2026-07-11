@@ -247,7 +247,7 @@ const ModuleItem = ({
       <div className="flex items-center justify-between">
         <Link
           href={`${pathname}/modules/${module.key}`}
-          className="text-start font-semibold text-gray-600 hover:underline dark:text-gray-300"
+          className="mr-2 min-w-0 flex-1 text-start font-semibold text-gray-600 hover:underline dark:text-gray-300"
         >
           <TruncatedText text={module?.name} />
         </Link>
