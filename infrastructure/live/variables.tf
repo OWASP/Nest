@@ -161,19 +161,19 @@ variable "django_configuration" {
 }
 
 variable "django_redis_port" {
-  description = "The port of the Redis cache (overrides default for LocalStack)."
+  description = "The port of the Redis cache."
   type        = string
   default     = "6379"
 }
 
 variable "django_redis_auth_enabled" {
-  description = "Whether Redis authentication is enabled (overrides default for LocalStack)."
+  description = "Whether Redis authentication is enabled."
   type        = bool
   default     = true
 }
 
 variable "django_redis_use_tls" {
-  description = "Whether Redis connections should use TLS (overrides default for LocalStack)."
+  description = "Whether Redis connections should use TLS."
   type        = bool
   default     = true
 }

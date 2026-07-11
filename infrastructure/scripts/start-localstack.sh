@@ -3,6 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+source "$SCRIPT_DIR/check-prerequisites.sh"
+
 ENV_FILE="$SCRIPT_DIR/../.env"
 
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -20,10 +22,7 @@ if [[ -z "${LOCALSTACK_AUTH_TOKEN:-}" ]]; then
     exit 1
 fi
 
-if ! command -v localstack >/dev/null 2>&1; then
-    echo "ERROR: 'localstack' CLI not found. See infrastructure/README.md prerequisites." >&2
-    exit 1
-fi
+check_prerequisites localstack 
 
 echo "Starting LocalStack..."
 export DISABLE_CORS_CHECKS=1

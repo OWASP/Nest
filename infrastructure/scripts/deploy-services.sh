@@ -6,18 +6,15 @@ INFRA_LIVE_DIR="$(cd "$SCRIPT_DIR/../live" && pwd)"
 
 ENV_FILE="$SCRIPT_DIR/../.env"
 
+source "$SCRIPT_DIR/check-prerequisites.sh"
+
 if [[ -f "$ENV_FILE" ]]; then
     set -a && source "$ENV_FILE" && set +a
 fi
 
 AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-2}"
 
-for cmd in awslocal tflocal jq docker; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-        echo "ERROR: '$cmd' not found. See infrastructure/README.md prerequisites." >&2
-        exit 1
-    fi
-done
+check_prerequisites awslocal tflocal jq docker
 
 cd "$INFRA_LIVE_DIR"
 

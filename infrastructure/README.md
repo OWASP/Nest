@@ -12,10 +12,11 @@ Ensure you have the following setup/installed:
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - Docker: [Docker](https://docs.docker.com/engine/install/)
-- LocalStack CLI: [LocalStack CLI](https://docs.localstack.cloud/aws/getting-started/installation/)
+- LocalStack CLI: [LocalStack CLI](https://www.localstack.cloud/aws/getting-started/installation/)
 - AWSLocal CLI: [AWSLocal CLI](https://github.com/localstack/awscli-local)
 - Terraform Local CLI: [Terraform Local CLI](https://github.com/localstack/terraform-local)
 - An AWS account.
+
 Note: Refer to the respective `README.md` files for more information.
 
 ## External Documentation

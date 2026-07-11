@@ -7,6 +7,8 @@ INFRA_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 ENV_FILE="$INFRA_DIR/.env"
 
+source "$SCRIPT_DIR/check-prerequisites.sh"
+
 if [[ -f "$ENV_FILE" ]]; then
     set -a && source "$ENV_FILE" && set +a
 fi
@@ -43,10 +45,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if ! command -v awslocal >/dev/null 2>&1; then
-    echo "ERROR: 'awslocal' not found. See infrastructure/README.md prerequisites." >&2
-    exit 1
-fi
+check_prerequisites awslocal
 
 is_secret() {
     local key="$1"
@@ -80,7 +79,7 @@ for env_file in "${ENV_FILES[@]}"; do
         value="${value#\"}"
 
         if [[ -z "$value" ]]; then
-            echo "  SKIP: $key (empty value, SSM Parameter Store does not accepts empty value)"
+            echo "  SKIP: $key (empty value, SSM Parameter Store does not accept empty value)"
             ((SKIPPED_COUNT++)) || true
             continue
         fi
@@ -102,18 +101,21 @@ for env_file in "${ENV_FILES[@]}"; do
                     display="${display}..."
                 fi
             fi
-            
+
             echo "  WOULD PUT: $PARAM_NAME ($PARAM_TYPE) = $display"
             ((PARAMETER_COUNT++)) || true
             continue
         fi
+
+        OVERWRITE_FLAG=()
+        [[ "$OVERWRITE" == true ]] && OVERWRITE_FLAG=(--overwrite)
 
         if ! AWS_PAGER="" awslocal ssm put-parameter \
             --region "$AWS_DEFAULT_REGION" \
             --name "$PARAM_NAME" \
             --value "$value" \
             --type "$PARAM_TYPE" \
-            $([[ "$OVERWRITE" == true ]] && echo "--overwrite") \
+            "${OVERWRITE_FLAG[@]}" \
             --output text 2>/dev/null; then
             echo "  SKIP: $PARAM_NAME (already exists or error, use --overwrite to force)"
             ((SKIPPED_COUNT++)) || true
