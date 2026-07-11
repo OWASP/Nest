@@ -13,6 +13,7 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-2}"
+SSM_PARAM_TYPE="String"
 
 check_prerequisites awslocal tflocal jq docker
 
@@ -34,7 +35,7 @@ AWS_PAGER="" awslocal ssm put-parameter \
     --region "$AWS_DEFAULT_REGION" \
     --name "$SSM_PREFIX/DJANGO_REDIS_HOST" \
     --value "$LOCALSTACK_CONTAINER_IP" \
-    --type "String" \
+    --type "$SSM_PARAM_TYPE" \
     --overwrite \
     --output text >/dev/null
 
@@ -50,7 +51,7 @@ AWS_PAGER="" awslocal ssm put-parameter \
     --region "$AWS_DEFAULT_REGION" \
     --name "$SSM_PREFIX/DJANGO_REDIS_PORT" \
     --value "$ACTUAL_REDIS_PORT" \
-    --type "String" \
+    --type "$SSM_PARAM_TYPE" \
     --overwrite \
     --output text >/dev/null
 
@@ -65,7 +66,7 @@ AWS_PAGER="" awslocal ssm put-parameter \
     --region "$AWS_DEFAULT_REGION" \
     --name "$SSM_PREFIX/DJANGO_DB_HOST" \
     --value "$LOCALSTACK_CONTAINER_IP" \
-    --type "String" \
+    --type "$SSM_PARAM_TYPE" \
     --overwrite \
     --output text >/dev/null
 
@@ -74,7 +75,7 @@ AWS_PAGER="" awslocal ssm put-parameter \
     --region "$AWS_DEFAULT_REGION" \
     --name "$SSM_PREFIX/DJANGO_DB_PORT" \
     --value "$ACTUAL_DB_PORT" \
-    --type "String" \
+    --type "$SSM_PARAM_TYPE" \
     --overwrite \
     --output text >/dev/null
 

@@ -103,7 +103,7 @@ echo "Retrieving ECR repository URLs..."
 BACKEND_ECR=$(tflocal output -raw backend_ecr_repository_url)
 FRONTEND_ECR=$(tflocal output -raw frontend_ecr_repository_url)
 
-export AWS_DEFAULT_REGION=us-east-2
+export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-2}"
 
 REGISTRY="$(echo "$BACKEND_ECR" | cut -d/ -f1)"
 echo "Logging into local ECR at $REGISTRY..."
