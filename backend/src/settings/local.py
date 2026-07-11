@@ -1,7 +1,5 @@
 """OWASP Nest local configuration."""
 
-from os import environ
-
 from configurations import values
 
 from settings.base import Base
@@ -36,7 +34,6 @@ class Local(Base):
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
 
-    # fixme(@devnchill): i had to set environ=false to false to bypass auth
     SLACK_BOT_TOKEN = OptionalSecretValue(environ=False)
     SLACK_COMMANDS_ENABLED = False
     SLACK_EVENTS_ENABLED = False
