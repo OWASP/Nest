@@ -482,3 +482,32 @@ select:disabled,
 .chapter-map .leaflet-marker-shadow {
   cursor: pointer !important;
 }
+
+/* MarkdownWrapper CSS */
+
+.md-wrapper p {
+  margin: 0 0 16px;
+}
+
+.md-wrapper ul {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.md-wrapper ol {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.md-wrapper li {
+  margin-bottom: 8px;
+}
+
+.md-wrapper h1,
+.md-wrapper h2,
+.md-wrapper h3,
+.md-wrapper h4,
+.md-wrapper h5,
+.md-wrapper h6 {
+  margin: 24px 0 16px;
+}
