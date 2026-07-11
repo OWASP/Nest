@@ -75,14 +75,14 @@ const MyCertificatePage: React.FC = () => {
     )
   }
 
-  const getCertificateImageDataUrl = async (): Promise<string> => {
+  const getCertificateImageDataUrl = async (pixelRatio = 2): Promise<string> => {
     const node = cardRef.current
     if (!node) throw new Error('Certificate element not found')
     const { toPng } = await import('html-to-image')
     return toPng(node, {
       cacheBust: true,
       style: { transform: 'scale(1)', transformOrigin: 'top center' },
-      pixelRatio: 2,
+      pixelRatio,
     })
   }
 
@@ -114,39 +114,49 @@ const MyCertificatePage: React.FC = () => {
     if (isSavingPdf) return
     setIsSavingPdf(true)
     try {
-      const dataUrl = await getCertificateImageDataUrl()
+      const PDF_PIXEL_RATIO = 4
+      const dataUrl = await getCertificateImageDataUrl(PDF_PIXEL_RATIO)
       const { jsPDF } = await import('jspdf')
+
+      const CSS_PX_PER_INCH = 96
+      const PT_PER_INCH = 72
+      const widthPt = (CERTIFICATE_LAYOUT.width / CSS_PX_PER_INCH) * PT_PER_INCH
+      const heightPt = (CERTIFICATE_LAYOUT.height / CSS_PX_PER_INCH) * PT_PER_INCH
 
       const pdf = new jsPDF({
         orientation: 'landscape',
-        unit: 'px',
-        format: [CERTIFICATE_LAYOUT.width, CERTIFICATE_LAYOUT.height],
+        unit: 'pt',
+        format: [widthPt, heightPt],
       })
-      pdf.addImage(dataUrl, 'PNG', 0, 0, CERTIFICATE_LAYOUT.width, CERTIFICATE_LAYOUT.height)
+      pdf.addImage(dataUrl, 'PNG', 0, 0, widthPt, heightPt)
 
+      const pxToPt = (px: number) => (px / 96) * 72
       const verifyUrl = certificateUrl
       pdf.link(
-        CERTIFICATE_LAYOUT.verifyLink.x,
-        CERTIFICATE_LAYOUT.verifyLink.y,
-        CERTIFICATE_LAYOUT.verifyLink.width,
-        CERTIFICATE_LAYOUT.verifyLink.height,
+        pxToPt(CERTIFICATE_LAYOUT.verifyLink.x),
+        pxToPt(CERTIFICATE_LAYOUT.verifyLink.y),
+        pxToPt(CERTIFICATE_LAYOUT.verifyLink.width),
+        pxToPt(CERTIFICATE_LAYOUT.verifyLink.height),
         { url: verifyUrl }
       )
 
       const linkEl = cardRef.current?.querySelector('[data-github-link="true"]')
       if (linkEl && cardRef.current) {
-        const cardRect = cardRef.current.getBoundingClientRect()
-        const linkRect = linkEl.getBoundingClientRect()
-        const scale = cardRect.width / CERTIFICATE_LAYOUT.width
-        if (scale > 0) {
-          pdf.link(
-            (linkRect.left - cardRect.left) / scale,
-            (linkRect.top - cardRect.top) / scale,
-            linkRect.width / scale,
-            linkRect.height / scale,
-            { url: `https://github.com/${certificate.githubUser.login}` }
-          )
+        let x = 0
+        let y = 0
+        let el: HTMLElement | null = linkEl as HTMLElement
+        while (el && el !== cardRef.current) {
+          x += el.offsetLeft
+          y += el.offsetTop
+          el = el.offsetParent as HTMLElement | null
         }
+        pdf.link(
+          pxToPt(x),
+          pxToPt(y),
+          pxToPt((linkEl as HTMLElement).offsetWidth),
+          pxToPt((linkEl as HTMLElement).offsetHeight),
+          { url: `https://github.com/${certificate.githubUser.login}` }
+        )
       }
 
       pdf.save(`certificate-${certificate.id}-${new Date().toISOString().split('T')[0]}.pdf`)
