@@ -193,7 +193,7 @@ const VerificationBadge: React.FC = () => (
   <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-green-700 shadow-sm">
     <FaCircleCheck className="shrink-0 text-sm text-green-500" />
     <span className="font-sans text-[10px] font-bold tracking-wider uppercase">
-      Verified Contributor
+      Verified Certificate
     </span>
   </div>
 )
@@ -277,7 +277,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
   const scaledHeight = Math.round(CERTIFICATE_LAYOUT.height * scale)
 
   return (
-    <div ref={containerRef} className="flex w-full justify-center py-8">
+    <div ref={containerRef} className="flex w-full justify-center py-4 sm:py-6 md:py-8">
       {/* Wrapper sized to scaled dimensions — shadow here avoids filter artifacts on the scaled element */}
       <div
         className="relative overflow-hidden shadow-[0_8px_40px_rgba(11,37,69,0.18),0_2px_8px_rgba(0,0,0,0.08)]"

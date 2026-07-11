@@ -211,17 +211,17 @@ const MyCertificatePage: React.FC = () => {
       title={`${displayName}'s Certificate`}
       breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]"
     >
-      <div className="container mx-auto mb-auto flex flex-col items-center justify-center gap-6 px-4 pt-2 pb-8 md:flex-row md:items-start md:gap-8 lg:gap-10">
-        <div className="flex w-full max-w-[842px] flex-1 justify-center md:justify-end">
+      <div className="container mx-auto mb-auto flex flex-col items-center justify-center gap-4 px-4 pt-2 pb-3 md:flex-row md:items-start md:gap-8 lg:gap-10">
+        <div className="flex w-full max-w-[842px] min-w-0 flex-1 justify-center md:justify-end">
           <CertificateCard certificate={certificate} isPublicView={false} cardRef={cardRef} />
         </div>
 
-        <div className="w-full max-w-md shrink-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:w-64 md:max-w-none md:self-center lg:w-80 lg:p-5 dark:border-gray-800 dark:bg-[#212529]">
+        <div className="w-full max-w-md shrink-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:w-64 md:max-w-none md:self-center lg:w-80 lg:p-5 dark:border-gray-700 dark:bg-gray-800">
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 md:grid-cols-1">
             <ActionButton
               onClick={handleSaveAsImage}
               isDisabled={isDownloading}
-              className="w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base"
+              className="w-full whitespace-normal"
             >
               <FaImage size={18} />
               {isDownloading ? 'Downloading...' : 'Save as Image'}
@@ -230,23 +230,20 @@ const MyCertificatePage: React.FC = () => {
             <ActionButton
               onClick={handleSaveAsPdf}
               isDisabled={isSavingPdf}
-              className="w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base"
+              className="w-full whitespace-normal"
             >
               <FaFilePdf size={18} />
               {isSavingPdf ? 'Preparing...' : 'Save as PDF'}
             </ActionButton>
 
-            <ActionButton
-              onClick={handleCopyLink}
-              className="w-full rounded-xl px-2 py-3 text-xs font-semibold whitespace-normal sm:px-4 sm:text-sm md:text-base"
-            >
+            <ActionButton onClick={handleCopyLink} className="w-full whitespace-normal">
               <FaCopy size={18} />
               Copy Link
             </ActionButton>
 
             <ActionButton
               onClick={handleShareLinkedIn}
-              className="w-full rounded-xl border-transparent bg-[#1D7BD7] px-2 py-3 text-xs font-semibold whitespace-normal text-white hover:bg-[#155a96] hover:text-white sm:px-4 sm:text-sm md:text-base dark:hover:text-white"
+              className="w-full border-transparent bg-[#1D7BD7] whitespace-normal text-white hover:bg-[#155a96] hover:text-white dark:hover:text-white"
             >
               <FaLinkedin size={18} />
               Add to LinkedIn
