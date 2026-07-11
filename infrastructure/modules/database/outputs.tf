@@ -10,5 +10,5 @@ output "db_proxy_endpoint" {
 
 output "db_port" {
   description = "The port of the RDS database."
-  value = aws_db_instance.main.port
+  value       = aws_db_instance.main.port
 }

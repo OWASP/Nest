@@ -22,7 +22,7 @@ if [[ -z "${LOCALSTACK_AUTH_TOKEN:-}" ]]; then
     exit 1
 fi
 
-check_prerequisites localstack 
+check_prerequisites localstack
 
 echo "Starting LocalStack..."
 

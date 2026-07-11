@@ -21,7 +21,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_ssm_parameter.django_algolia_application_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_algolia_write_api_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -61,7 +61,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_alb_dns_name"></a> [alb\_dns\_name](#input\_alb\_dns\_name) | The DNS name of the ALB (set for LocalStack/ECS, empty for production). | `string` | `""` | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
 | <a name="input_db_password_arn"></a> [db\_password\_arn](#input\_db\_password\_arn) | The SSM Parameter ARN of password of the database. | `string` | n/a | yes |
@@ -91,7 +91,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_django_ssm_parameter_arns"></a> [django\_ssm\_parameter\_arns](#output\_django\_ssm\_parameter\_arns) | Map of environment variable names to the ARNs of all SSM parameters (Required by Django). |
 | <a name="output_frontend_ssm_parameter_arns"></a> [frontend\_ssm\_parameter\_arns](#output\_frontend\_ssm\_parameter\_arns) | Map of frontend environment variable names to the ARNs of all SSM parameters. |
 <!-- END_TF_DOCS -->

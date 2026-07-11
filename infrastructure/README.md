@@ -224,6 +224,7 @@ make deploy-on-localstack
 > If you want to recreate every resource, restart LocalStack and then rerun this script
 
 This single command:
+
 - Runs Terraform (VPC, subnets, security groups, ALB, ECS clusters/services, ECR repos, RDS, ElastiCache, ACM cert, S3 buckets, SSM params)
 - Builds the backend Docker image and pushes it to the local ECR
 - Builds the frontend Docker image (with env vars resolved against the ALB DNS name) and pushes it to the local ECR
@@ -265,7 +266,7 @@ cd infrastructure/live
 tflocal destroy -auto-approve
 ```
 
-To wipe everything (including images) and start fresh, restart LocalStack 
+To wipe everything (including images) and start fresh, restart LocalStack
 
 ```bash
 # Stop LocalStack (Ctrl+C), then:
