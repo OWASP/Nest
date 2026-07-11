@@ -99,7 +99,7 @@
     "lighthouse-ci:desktop": "lhci autorun --collect.settings.preset=desktop",
     "start": "next start",
     "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/a11y/ --coverage=false",
-    "test:unit": "tsc --noEmit && tsc --noEmit -p __tests__/tsconfig.json && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
+    "test:unit": "tsc --noEmit && tsc --noEmit -p __tests__/tsconfig.json && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/unit/"
   },
   "version": "0.0.0"
 }

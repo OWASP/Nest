@@ -13,6 +13,16 @@ jest.mock('framer-motion', () => {
   }
 })
 
+// react-leaflet-cluster is ESM-only; Jest CJS interop leaves the default export as
+// a module namespace object, which React rejects as an invalid element type.
+jest.mock('react-leaflet-cluster', () => {
+  return {
+    __esModule: true,
+    default: ({ children }: { children?: React.ReactNode }) =>
+      React.createElement('div', { 'data-testid': 'marker-cluster-group' }, children),
+  }
+})
+
 jest.mock('next-auth/react', () => {
   return {
     ...jest.requireActual('next-auth/react'),
