@@ -79,6 +79,12 @@ jq -n \
 
 cd "$INFRA_LIVE_DIR"
 
+OVERRIDE_FILE="localstack_providers_override.tf"
+if [[ -f "$OVERRIDE_FILE" ]]; then
+    echo "Removing stale $OVERRIDE_FILE from previous run..."
+    rm -f "$OVERRIDE_FILE"
+fi
+
 echo "Initializing Terraform with tflocal..."
 tflocal init --reconfigure
 
