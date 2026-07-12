@@ -74,6 +74,7 @@ export const GET_MANAGEMENT_PROGRAM_AND_MODULES = gql`
       name
       description
       status
+      userRole
       menteesLimit
       experienceLevels
       startedAt

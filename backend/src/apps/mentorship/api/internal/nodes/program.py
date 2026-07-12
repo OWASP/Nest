@@ -35,8 +35,12 @@ class ProgramNode:
     mentees_limit: int | None = None
     started_at: datetime
     status: ProgramStatusEnum
-    user_role: str | None = None
     tags: list[str] | None = None
+
+    @strawberry.field
+    def user_role(self) -> str | None:
+        """Return the caller's role on this program when a resolver assigned one."""
+        return getattr(self, "user_role", None)
 
     @strawberry.field
     def admins(

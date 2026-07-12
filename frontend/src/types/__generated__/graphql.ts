@@ -124,6 +124,7 @@ export type CreateModuleInput = {
   endedAt: Scalars['DateTime']['input'];
   experienceLevel: ExperienceLevelEnum;
   labels?: Array<Scalars['String']['input']>;
+  menteeCanManageDeadlines?: Scalars['Boolean']['input'];
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
@@ -340,6 +341,7 @@ export type ModuleNode = {
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
   mentees: Array<UserNode>;
+  menteeCanManageDeadlines: Scalars['Boolean']['output'];
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
@@ -351,6 +353,7 @@ export type ModuleNode = {
   tags?: Maybe<Array<Scalars['String']['output']>>;
   taskAssignedAt?: Maybe<Scalars['DateTime']['output']>;
   taskDeadline?: Maybe<Scalars['DateTime']['output']>;
+  userRole?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -737,6 +740,7 @@ export type Query = {
   getProgram?: Maybe<ProgramNode>;
   getProgramModules: Array<ModuleNode>;
   getProjectModules: Array<ModuleNode>;
+  isMentee: Scalars['Boolean']['output'];
   isMentor: Scalars['Boolean']['output'];
   isProjectLeader: Scalars['Boolean']['output'];
   managementModule?: Maybe<ModuleNode>;
@@ -826,6 +830,11 @@ export type QueryGetProgramModulesArgs = {
 
 export type QueryGetProjectModulesArgs = {
   projectKey: Scalars['String']['input'];
+};
+
+
+export type QueryIsMenteeArgs = {
+  login: Scalars['String']['input'];
 };
 
 
@@ -1114,6 +1123,7 @@ export type UpdateModuleInput = {
   experienceLevel: ExperienceLevelEnum;
   key: Scalars['String']['input'];
   labels?: Array<Scalars['String']['input']>;
+  menteeCanManageDeadlines?: InputMaybe<Scalars['Boolean']['input']>;
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
