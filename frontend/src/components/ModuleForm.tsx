@@ -40,7 +40,6 @@ interface ModuleFormProps {
   setFormData: React.Dispatch<React.SetStateAction<ModuleFormProps['formData']>>
   onSubmit: (e: React.FormEvent) => void
   loading: boolean
-  isEdit?: boolean
   title: string
   submitText?: string
   minDate?: string
@@ -61,7 +60,6 @@ const ModuleForm = ({
   onSubmit,
   loading,
   title,
-  isEdit,
   submitText = 'Save',
   minDate,
   maxDate,
@@ -309,16 +307,14 @@ const ModuleForm = ({
                     errorMessage={touched.projectId ? errors.projectId : undefined}
                   />
                 </div>
-                {isEdit && (
-                  <FormTextInput
-                    id="module-mentor-logins"
-                    label="Mentor GitHub Usernames"
-                    placeholder="johndoe, jane-doe"
-                    value={formData.mentorLogins}
-                    onValueChange={(value) => handleInputChange('mentorLogins', value)}
-                    className="w-full min-w-0 lg:col-span-2"
-                  />
-                )}
+                <FormTextInput
+                  id="module-mentor-logins"
+                  label="Mentor GitHub Usernames"
+                  placeholder="johndoe, jane-doe"
+                  value={formData.mentorLogins}
+                  onValueChange={(value) => handleInputChange('mentorLogins', value)}
+                  className="w-full min-w-0 lg:col-span-2"
+                />
                 <div className="flex w-full min-w-0 items-center gap-3 lg:col-span-2">
                   <Switch
                     aria-label="Mentees can manage deadlines"

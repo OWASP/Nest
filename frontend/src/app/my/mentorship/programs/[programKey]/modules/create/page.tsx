@@ -172,7 +172,6 @@ const CreateModulePage = () => {
       setFormData={setFormData}
       onSubmit={handleSubmit}
       loading={mutationLoading}
-      isEdit={false}
       validationErrors={validationErrors}
       minDate={
         programData?.managementProgram?.startedAt

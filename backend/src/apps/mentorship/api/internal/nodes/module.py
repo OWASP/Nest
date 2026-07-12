@@ -50,7 +50,7 @@ class ModuleNode:
     @strawberry.field
     def mentors(self) -> list[MentorNode]:
         """Get the list of mentors for this module."""
-        return self.mentors.all()
+        return self.mentors.order_by( "github_user__login" )
 
     @strawberry.field
     def mentees(self) -> list[UserNode]:

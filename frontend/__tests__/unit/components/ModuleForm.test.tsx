@@ -343,10 +343,12 @@ describe('ModuleForm', () => {
       expect(screen.getByTestId('text-input-module-labels')).toBeInTheDocument()
     })
 
-    it('renders mentor logins field only when isEdit is true (line 312)', () => {
+    it('renders mentor logins field when creating a module', () => {
       renderModuleForm({ isEdit: false })
-      expect(screen.queryByTestId('text-input-module-mentor-logins')).not.toBeInTheDocument()
+      expect(screen.getByTestId('text-input-module-mentor-logins')).toBeInTheDocument()
+    })
 
+    it('renders mentor logins field when editing a module', () => {
       renderModuleForm({ isEdit: true })
       expect(screen.getByTestId('text-input-module-mentor-logins')).toBeInTheDocument()
     })
