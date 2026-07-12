@@ -95,6 +95,8 @@ class InfrastructureTestRunner:
             self.terraform_tests.discover_and_run("integration")
             logger.info("All integration tests executed successfully!")
         finally:
-            self.overrides.cleanup()
-            if localstack_started:
-                self.localstack.stop()
+            try:
+                self.overrides.cleanup()
+            finally:
+                if localstack_started:
+                    self.localstack.stop()

@@ -74,10 +74,11 @@ class TestTerraformTests:
             stdout="",
             stderr="Error: Failed to query available provider packages",
         )
+        terraform_tests = TerraformTests(commands)
         with pytest.raises(
             TestRunnerError, match="terraform init failed in dummy_dir"
         ) as exc_info:
-            TerraformTests(commands).run_module_tests("dummy_dir", ["test.tftest.hcl"])
+            terraform_tests.run_module_tests("dummy_dir", ["test.tftest.hcl"])
         assert "Failed to query available provider packages" in str(exc_info.value)
 
     def test_run_module_tests_test_failure(self) -> None:
@@ -90,9 +91,10 @@ class TestTerraformTests:
                 stderr="Error: test failed\n",
             ),
         ]
+        terraform_tests = TerraformTests(commands)
         with pytest.raises(
             TestRunnerError, match="terraform test failed in dummy_dir"
         ) as exc_info:
-            TerraformTests(commands).run_module_tests("dummy_dir", ["test.tftest.hcl"])
+            terraform_tests.run_module_tests("dummy_dir", ["test.tftest.hcl"])
         assert "tests/test.tftest.hcl... fail" in str(exc_info.value)
         assert "Error: test failed" in str(exc_info.value)

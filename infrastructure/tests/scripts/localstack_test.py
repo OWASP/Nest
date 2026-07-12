@@ -87,8 +87,9 @@ class TestLocalStack:
     @patch("pathlib.Path.exists")
     def test_image_info_missing_dockerfile(self, mock_exists: MagicMock) -> None:
         mock_exists.return_value = False
+        localstack = LocalStack()
         with pytest.raises(TestRunnerError, match="Dockerfile not found"):
-            LocalStack().image_info("/dummy/root")
+            localstack.image_info("/dummy/root")
 
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.read_text")
@@ -99,8 +100,9 @@ class TestLocalStack:
     ) -> None:
         mock_exists.return_value = True
         mock_read_text.return_value = "FROM alpine:3.20\n"
+        localstack = LocalStack()
         with pytest.raises(TestRunnerError, match="could not determine LocalStack image"):
-            LocalStack().image_info("/dummy/root")
+            localstack.image_info("/dummy/root")
 
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.read_text")
@@ -111,8 +113,9 @@ class TestLocalStack:
     ) -> None:
         mock_exists.return_value = True
         mock_read_text.return_value = "FROM localstack/localstack:\n"
+        localstack = LocalStack()
         with pytest.raises(TestRunnerError, match="could not determine LocalStack image tag"):
-            LocalStack().image_info("/dummy/root")
+            localstack.image_info("/dummy/root")
 
     @patch("os.environ.get")
     def test_start_success(self, mock_env: MagicMock) -> None:
@@ -166,8 +169,9 @@ class TestLocalStack:
     @patch("os.environ.get")
     def test_start_missing_auth_token(self, mock_env: MagicMock) -> None:
         mock_env.return_value = None
+        localstack = LocalStack(MagicMock(spec=CommandRunner))
         with pytest.raises(MissingAuthTokenError):
-            LocalStack(MagicMock(spec=CommandRunner)).start("localstack/localstack:latest")
+            localstack.start("localstack/localstack:latest")
 
     @patch("os.environ.get")
     def test_start_docker_run_failure(self, mock_env: MagicMock) -> None:
@@ -177,8 +181,9 @@ class TestLocalStack:
             MagicMock(returncode=0),
             CommandNotFoundError("docker"),
         ]
+        localstack = LocalStack(commands)
         with pytest.raises(TestRunnerError, match="Error starting LocalStack container"):
-            LocalStack(commands).start("localstack/localstack:latest")
+            localstack.start("localstack/localstack:latest")
 
     def test_wait_ready_healthy_timeout(self) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner))

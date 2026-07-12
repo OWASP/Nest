@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
 from scripts.commands import CommandRunner
 from scripts.localstack import LOCALSTACK_PORT, LocalStack, OverrideManager
 from scripts.runner import InfrastructureTestRunner
@@ -79,6 +80,31 @@ class TestInfrastructureTestRunner:
         localstack.wait_ready.assert_called_once()
         localstack.stop.assert_called_once()
         terraform_tests.discover_and_run.assert_called_once_with("integration")
+
+    def test_run_integration_stops_localstack_when_cleanup_fails(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = MagicMock(spec=LocalStack)
+        localstack.port = LOCALSTACK_PORT
+        localstack.host = "localhost"
+        localstack.can_start_container = True
+        localstack.healthy.return_value = False
+        localstack.image_info.return_value = ("localstack/localstack:1.0", "1.0")
+        overrides = MagicMock(spec=OverrideManager)
+        overrides.cleanup.side_effect = RuntimeError("cleanup failed")
+        terraform_tests = MagicMock(spec=TerraformTests)
+
+        runner = InfrastructureTestRunner(
+            root_dir=Path("/repo"),
+            commands=commands,
+            localstack=localstack,
+            overrides=overrides,
+            terraform_tests=terraform_tests,
+        )
+        with pytest.raises(RuntimeError, match="cleanup failed"):
+            runner.run_integration()
+
+        overrides.cleanup.assert_called_once()
+        localstack.stop.assert_called_once()
 
     def test_run_integration_waits_for_external_localstack(self) -> None:
         commands = MagicMock(spec=CommandRunner)

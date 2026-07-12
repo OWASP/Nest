@@ -64,6 +64,7 @@ class TestCommandRunner:
     @patch("shutil.which")
     def test_run_missing_command(self, mock_which: MagicMock, mock_run: MagicMock) -> None:
         mock_which.return_value = None
+        runner = CommandRunner()
         with pytest.raises(CommandNotFoundError):
-            CommandRunner().run("missing")
+            runner.run("missing")
         mock_run.assert_not_called()
