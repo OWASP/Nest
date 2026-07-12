@@ -17,6 +17,7 @@ import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getLinkableEntityChannels } from 'utils/entityChannels'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import Contributions from 'components/cards/Contributions'
 import Contributors from 'components/cards/Contributors'
@@ -28,6 +29,7 @@ import PageWrapper from 'components/cards/PageWrapper'
 import RepositoriesModules from 'components/cards/RepositoriesModules'
 import Summary from 'components/cards/Summary'
 import Tags from 'components/cards/Tags'
+import EntityChannelLinks from 'components/EntityChannelLinks'
 import HealthMetrics from 'components/HealthMetrics'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
@@ -74,6 +76,9 @@ const ProjectDetailsPage = () => {
       />
     )
   }
+
+  const channels = getLinkableEntityChannels(project.entityChannels)
+
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     { label: 'Leaders', value: project.leaders.join(', ') },
@@ -85,11 +90,19 @@ const ProjectDetailsPage = () => {
     {
       label: 'URL',
       value: (
-        <Link href={project.url} className="hover:underline dark:text-sky-600">
+        <Link href={project.url} className="text-blue-400 hover:underline">
           {project.url}
         </Link>
       ),
     },
+    ...(channels.length > 0
+      ? [
+          {
+            label: 'Channels',
+            value: <EntityChannelLinks channels={channels} />,
+          },
+        ]
+      : []),
   ]
   const projectStats = [
     { icon: FaStar, value: project.starsCount, unit: 'Star' },

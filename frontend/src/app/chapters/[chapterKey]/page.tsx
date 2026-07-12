@@ -8,6 +8,7 @@ import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.gener
 import type { Chapter } from 'types/chapter'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getLinkableEntityChannels } from 'utils/entityChannels'
 import Contributions from 'components/cards/Contributions'
 import Contributors from 'components/cards/Contributors'
 import Header from 'components/cards/Header'
@@ -16,6 +17,7 @@ import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
 import Summary from 'components/cards/Summary'
 import Tags from 'components/cards/Tags'
+import EntityChannelLinks from 'components/EntityChannelLinks'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
 
@@ -63,6 +65,8 @@ export default function ChapterDetailsPage() {
     )
   }
 
+  const channels = getLinkableEntityChannels(chapter.entityChannels)
+
   const details = [
     { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
     { label: 'Location', value: chapter.suggestedLocation ?? '' },
@@ -75,6 +79,14 @@ export default function ChapterDetailsPage() {
         </Link>
       ),
     },
+    ...(channels.length > 0
+      ? [
+          {
+            label: 'Channels',
+            value: <EntityChannelLinks channels={channels} />,
+          },
+        ]
+      : []),
   ]
 
   const { startDate, endDate } = getDateRange({ years: 1 })
