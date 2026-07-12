@@ -10,6 +10,7 @@ from .post import Post
 from .project import Project
 from .project_health_metrics import ProjectHealthMetrics
 from .project_health_requirements import ProjectHealthRequirements
+from .project_subscription_preference import ProjectSubscriptionPreference
 from .snapshot import Snapshot
 from .snapshot_subscription import SnapshotSubscription
 from .sponsor import Sponsor

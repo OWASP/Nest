@@ -4,7 +4,6 @@ import uuid
 from unittest.mock import MagicMock
 
 from apps.owasp.models.chapter import Chapter
-from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
 
@@ -38,11 +37,7 @@ class TestSnapshotSubscription:
         assert prefs == {
             "chapters": True,
             "events": True,
-            "issues": True,
             "posts": True,
-            "projects": True,
-            "pull_requests": True,
-            "releases": True,
             "users": True,
         }
 
@@ -51,22 +46,14 @@ class TestSnapshotSubscription:
         sub = MagicMock(spec=SnapshotSubscription)
         sub.include_chapters = False
         sub.include_events = True
-        sub.include_issues = True
         sub.include_posts = False
-        sub.include_projects = False
-        sub.include_pull_requests = True
-        sub.include_releases = True
         sub.include_users = True
 
         prefs = SnapshotSubscription.content_preferences.fget(sub)
         assert prefs == {
             "chapters": False,
             "events": True,
-            "issues": True,
             "posts": False,
-            "projects": False,
-            "pull_requests": True,
-            "releases": True,
             "users": True,
         }
 
@@ -84,14 +71,8 @@ class TestSnapshotSubscription:
         assert isinstance(second.unsubscribe_token, uuid.UUID)
         assert first.unsubscribe_token != second.unsubscribe_token
 
-    def test_subscribed_projects_m2m_field(self):
-        """Test subscribed_projects M2M field is correctly configured."""
-        field = SnapshotSubscription._meta.get_field("subscribed_projects")
-        assert field.many_to_many
-        assert field.related_model is Project
-
-    def test_subscribed_chapters_m2m_field(self):
-        """Test subscribed_chapters M2M field is correctly configured."""
-        field = SnapshotSubscription._meta.get_field("subscribed_chapters")
+    def test_chapters_m2m_field(self):
+        """Test chapters M2M field is correctly configured."""
+        field = SnapshotSubscription._meta.get_field("chapters")
         assert field.many_to_many
         assert field.related_model is Chapter

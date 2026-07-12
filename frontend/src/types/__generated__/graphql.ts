@@ -69,7 +69,6 @@ export type ChapterNode = Node & {
   createdAt: Scalars['String']['output'];
   entityLeaders: Array<EntityMemberNode>;
   geoLocation?: Maybe<GeoLocationType>;
-  /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
   key: Scalars['String']['output'];
@@ -139,6 +138,16 @@ export type CreateProgramInput = {
   name: Scalars['String']['input'];
   startedAt: Scalars['DateTime']['input'];
   tags?: Array<Scalars['String']['input']>;
+};
+
+export type CreateSnapshotSubscriptionInput = {
+  frequency?: Scalars['String']['input'];
+  includeChapters?: Scalars['Boolean']['input'];
+  includeEvents?: Scalars['Boolean']['input'];
+  includePosts?: Scalars['Boolean']['input'];
+  includeUsers?: Scalars['Boolean']['input'];
+  projectPreferences?: InputMaybe<Array<ProjectPreferenceInput>>;
+  subscribedChapterIds?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
 export type EntityMemberNode = Node & {
@@ -385,10 +394,12 @@ export type ModuleNodeTaskDeadlineArgs = {
 export type Mutation = {
   __typename?: 'Mutation';
   assignIssueToUser: ModuleNode;
+  cancelSnapshotSubscription: SnapshotSubscriptionResult;
   clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
+  createSnapshotSubscription: SnapshotSubscriptionResult;
   deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
@@ -396,9 +407,11 @@ export type Mutation = {
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
+  unsubscribeByToken: SnapshotSubscriptionResult;
   updateModule: ModuleNode;
   updateProgram: ProgramNode;
   updateProgramStatus: ProgramNode;
+  updateSnapshotSubscription: SnapshotSubscriptionResult;
 };
 
 
@@ -430,6 +443,11 @@ export type MutationCreateModuleArgs = {
 
 export type MutationCreateProgramArgs = {
   inputData: CreateProgramInput;
+};
+
+
+export type MutationCreateSnapshotSubscriptionArgs = {
+  inputData: CreateSnapshotSubscriptionInput;
 };
 
 
@@ -470,6 +488,11 @@ export type MutationUnassignIssueFromUserArgs = {
 };
 
 
+export type MutationUnsubscribeByTokenArgs = {
+  token: Scalars['String']['input'];
+};
+
+
 export type MutationUpdateModuleArgs = {
   inputData: UpdateModuleInput;
 };
@@ -482,6 +505,11 @@ export type MutationUpdateProgramArgs = {
 
 export type MutationUpdateProgramStatusArgs = {
   inputData: UpdateProgramStatusInput;
+};
+
+
+export type MutationUpdateSnapshotSubscriptionArgs = {
+  inputData: UpdateSnapshotSubscriptionInput;
 };
 
 /** An object with a Globally Unique ID */
@@ -693,6 +721,23 @@ export type ProjectNodeRecentMilestonesArgs = {
   limit?: Scalars['Int']['input'];
 };
 
+export type ProjectPreferenceInput = {
+  includeIssues?: Scalars['Boolean']['input'];
+  includePullRequests?: Scalars['Boolean']['input'];
+  includeReleases?: Scalars['Boolean']['input'];
+  projectId: Scalars['Int']['input'];
+};
+
+export type ProjectSubscriptionPreferenceNode = Node & {
+  __typename?: 'ProjectSubscriptionPreferenceNode';
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  includeIssues: Scalars['Boolean']['output'];
+  includePullRequests: Scalars['Boolean']['output'];
+  includeReleases: Scalars['Boolean']['output'];
+  project: ProjectNode;
+};
+
 export type PullRequestNode = Node & {
   __typename?: 'PullRequestNode';
   author?: Maybe<UserNode>;
@@ -730,6 +775,7 @@ export type Query = {
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
   myPrograms: PaginatedPrograms;
+  mySubscription?: Maybe<SnapshotSubscriptionNode>;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
   /** List of project health metrics. */
@@ -745,6 +791,7 @@ export type Query = {
   recentReleases: Array<ReleaseNode>;
   repositories: Array<RepositoryNode>;
   repository?: Maybe<RepositoryNode>;
+  searchChapters: Array<ChapterNode>;
   searchProjects: Array<ProjectNode>;
   snapshot?: Maybe<SnapshotNode>;
   snapshots: Array<SnapshotNode>;
@@ -943,6 +990,11 @@ export type QueryRepositoryArgs = {
 };
 
 
+export type QuerySearchChaptersArgs = {
+  query: Scalars['String']['input'];
+};
+
+
 export type QuerySearchProjectsArgs = {
   query: Scalars['String']['input'];
 };
@@ -1106,6 +1158,29 @@ export type SnapshotNodeUsersArgs = {
   offset?: Scalars['Int']['input'];
 };
 
+export type SnapshotSubscriptionNode = Node & {
+  __typename?: 'SnapshotSubscriptionNode';
+  chapters: Array<ChapterNode>;
+  createdAt: Scalars['DateTime']['output'];
+  frequency: Scalars['String']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  includeChapters: Scalars['Boolean']['output'];
+  includeEvents: Scalars['Boolean']['output'];
+  includePosts: Scalars['Boolean']['output'];
+  includeUsers: Scalars['Boolean']['output'];
+  isActive: Scalars['Boolean']['output'];
+  projectPreferences: Array<ProjectSubscriptionPreferenceNode>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type SnapshotSubscriptionResult = {
+  __typename?: 'SnapshotSubscriptionResult';
+  message: Scalars['String']['output'];
+  ok: Scalars['Boolean']['output'];
+  subscription?: Maybe<SnapshotSubscriptionNode>;
+};
+
 export type SponsorNode = Node & {
   __typename?: 'SponsorNode';
   /** The Globally Unique ID of this object */
@@ -1158,6 +1233,16 @@ export type UpdateProgramStatusInput = {
   key: Scalars['String']['input'];
   name: Scalars['String']['input'];
   status: ProgramStatusEnum;
+};
+
+export type UpdateSnapshotSubscriptionInput = {
+  frequency?: InputMaybe<Scalars['String']['input']>;
+  includeChapters?: InputMaybe<Scalars['Boolean']['input']>;
+  includeEvents?: InputMaybe<Scalars['Boolean']['input']>;
+  includePosts?: InputMaybe<Scalars['Boolean']['input']>;
+  includeUsers?: InputMaybe<Scalars['Boolean']['input']>;
+  projectPreferences?: InputMaybe<Array<ProjectPreferenceInput>>;
+  subscribedChapterIds?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
 export type UserNode = {
