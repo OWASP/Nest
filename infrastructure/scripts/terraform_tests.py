@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 from pathlib import Path
+from subprocess import CompletedProcess
 
 from scripts.commands import CommandRunner
 from scripts.errors import TestRunnerError
@@ -83,6 +85,25 @@ class TerraformTests:
             message = f"could not read {test_dir}: {exc}"
             raise TestRunnerError(message) from exc
 
+    @staticmethod
+    def emit_output(result: CompletedProcess[str]) -> None:
+        """Write captured Terraform output to the parent streams."""
+        if result.stdout:
+            sys.stdout.write(result.stdout)
+        if result.stderr:
+            sys.stderr.write(result.stderr)
+
+    @staticmethod
+    def failure_message(action: str, module_dir: str, result: CompletedProcess[str]) -> str:
+        """Build a self-documenting failure message with Terraform diagnostics."""
+        message = f"terraform {action} failed in {module_dir}"
+        details = "\n".join(
+            part.rstrip() for part in (result.stdout, result.stderr) if part and part.strip()
+        )
+        if details:
+            return f"{message}\n{details}"
+        return message
+
     def run_module_tests(self, module_dir: str, test_files: list[str]) -> None:
         """Initialize and test a Terraform module with the given filters."""
         init_result = self.commands.run(
@@ -92,10 +113,11 @@ class TerraformTests:
             "-backend=false",
             "-input=false",
             check=False,
+            capture_output=True,
         )
         if init_result.returncode != 0:
-            message = f"terraform init failed in {module_dir}"
-            raise TestRunnerError(message)
+            raise TestRunnerError(self.failure_message("init", module_dir, init_result))
+        self.emit_output(init_result)
 
         filter_args = [f"-filter=tests/{test_file}" for test_file in test_files]
         test_result = self.commands.run(
@@ -104,7 +126,8 @@ class TerraformTests:
             "test",
             *filter_args,
             check=False,
+            capture_output=True,
         )
         if test_result.returncode != 0:
-            message = f"terraform test failed in {module_dir}"
-            raise TestRunnerError(message)
+            raise TestRunnerError(self.failure_message("test", module_dir, test_result))
+        self.emit_output(test_result)

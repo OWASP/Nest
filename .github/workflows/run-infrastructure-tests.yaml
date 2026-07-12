@@ -73,24 +73,29 @@ jobs:
       - name: Install infrastructure dependencies
         uses: ./.github/actions/install-infrastructure-dependencies
 
-      - name: Read LocalStack image tag from Dockerfile
-        id: localstack-tag
+      - name: Read LocalStack image from Dockerfile
+        id: localstack-image
         run: |
+          image=$(poetry run python -m scripts.run_tests --get-image)
           tag=$(poetry run python -m scripts.run_tests --get-tag)
-          if [[ -z "$tag" ]]; then
-            echo "Error: could not determine LocalStack image tag." >&2
+          if [[ -z "$image" || -z "$tag" ]]; then
+            echo "Error: could not determine LocalStack image from Dockerfile." >&2
             exit 1
           fi
+          echo "image=$image" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
         working-directory: infrastructure
 
       - name: Start LocalStack
         env:
+          # Prefer the digest-pinned image from docker/localstack/Dockerfile over the
+          # action default (unpinned localstack/localstack-pro:${tag}).
+          IMAGE_NAME: ${{ steps.localstack-image.outputs.image }}
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         uses: localstack/setup-localstack@7c8a0cb3405bc58be4c8f763f812aa000bc46303  # v0.3.2
         with:
           configuration: ECR_ENDPOINT_STRATEGY=off
-          image-tag: ${{ steps.localstack-tag.outputs.tag }}
+          image-tag: ${{ steps.localstack-image.outputs.tag }}
 
       - name: Run integration tests
         run: poetry run python -m scripts.run_tests --integration

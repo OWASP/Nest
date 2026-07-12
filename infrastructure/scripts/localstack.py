@@ -148,7 +148,7 @@ class LocalStack:
                 "--name",
                 self.container_name,
                 "-p",
-                f"{self.port}:{self.port}",
+                f"{self.port}:{LOCALSTACK_PORT}",
                 "-e",
                 "ECR_ENDPOINT_STRATEGY=off",
                 "-e",

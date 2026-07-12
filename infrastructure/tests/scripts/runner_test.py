@@ -49,6 +49,7 @@ class TestInfrastructureTestRunner:
         runner.run_integration()
 
         localstack.start.assert_not_called()
+        localstack.wait_ready.assert_called_once()
         overrides.write.assert_called_once()
         terraform_tests.discover_and_run.assert_called_once_with("integration")
         overrides.cleanup.assert_called_once()

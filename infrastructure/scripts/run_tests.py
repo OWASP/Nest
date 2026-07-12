@@ -21,6 +21,11 @@ def main() -> None:
     group.add_argument(
         "--get-tag", action="store_true", help="Print LocalStack image tag and exit"
     )
+    group.add_argument(
+        "--get-image",
+        action="store_true",
+        help="Print full LocalStack image reference (with digest) and exit",
+    )
     args = parser.parse_args()
 
     runner = InfrastructureTestRunner()
@@ -29,6 +34,9 @@ def main() -> None:
     try:
         if args.get_tag:
             runner.print_localstack_tag()
+            return
+        if args.get_image:
+            runner.print_localstack_image()
             return
         if args.integration:
             runner.run_integration()

@@ -19,9 +19,8 @@ install-infrastructure-dependencies:
 	@cd infrastructure && poetry install --no-interaction --with test
 
 test-infrastructure: ## Run infrastructure unit and integration tests
-test-infrastructure: \
-	test-infrastructure-unit \
-	test-infrastructure-integration
+	@$(MAKE) test-infrastructure-unit
+	@$(MAKE) test-infrastructure-integration
 
 build-infrastructure-test-image:
 	@DOCKER_BUILDKIT=1 docker build -q \
@@ -47,7 +46,7 @@ test-infrastructure-integration: ## Run infrastructure integration tests
 		fi; \
 		exit 0; \
 	fi; \
-	$(MAKE) build-infrastructure-test-image; \
+	$(MAKE) build-infrastructure-test-image || exit $$?; \
 	status=0; \
 	rm -f $(INFRASTRUCTURE_TEST_OVERRIDES); \
 	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \

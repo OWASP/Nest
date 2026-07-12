@@ -49,6 +49,11 @@ class InfrastructureTestRunner:
         _, tag = self.localstack.image_info(self.root_dir)
         sys.stdout.write(f"{tag}\n")
 
+    def print_localstack_image(self) -> None:
+        """Print the full LocalStack image reference from the Dockerfile."""
+        full_image, _ = self.localstack.image_info(self.root_dir)
+        sys.stdout.write(f"{full_image}\n")
+
     def run_unit(self) -> None:
         """Run Terraform unit tests."""
         self.commands.require("terraform")
@@ -76,14 +81,15 @@ class InfrastructureTestRunner:
                 full_image, _ = self.localstack.image_info(self.root_dir)
                 self.localstack.start(full_image)
                 localstack_started = True
-                self.localstack.wait_ready()
             else:
                 logger.info(
                     "Waiting for external LocalStack at %s:%s...",
                     self.localstack.host,
                     self.localstack.port,
                 )
-                self.localstack.wait_ready()
+
+            # Always wait: /_localstack/info can succeed before the Pro license activates.
+            self.localstack.wait_ready()
 
             self.overrides.write()
             self.terraform_tests.discover_and_run("integration")

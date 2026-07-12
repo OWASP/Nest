@@ -40,7 +40,7 @@ class TestTerraformTests:
         ]
 
         commands = MagicMock(spec=CommandRunner)
-        commands.run.return_value.returncode = 0
+        commands.run.return_value = MagicMock(returncode=0, stdout="", stderr="")
         TerraformTests(commands).discover_and_run("unit")
 
         commands.run.assert_any_call(
@@ -50,6 +50,7 @@ class TestTerraformTests:
             "-backend=false",
             "-input=false",
             check=False,
+            capture_output=True,
         )
         commands.run.assert_any_call(
             "terraform",
@@ -57,6 +58,7 @@ class TestTerraformTests:
             "test",
             "-filter=tests/storage.tftest.hcl",
             check=False,
+            capture_output=True,
         )
 
     @patch("pathlib.Path.iterdir")
@@ -67,15 +69,30 @@ class TestTerraformTests:
 
     def test_run_module_tests_init_failure(self) -> None:
         commands = MagicMock(spec=CommandRunner)
-        commands.run.return_value.returncode = 1
-        with pytest.raises(TestRunnerError, match="terraform init failed in dummy_dir"):
+        commands.run.return_value = MagicMock(
+            returncode=1,
+            stdout="",
+            stderr="Error: Failed to query available provider packages",
+        )
+        with pytest.raises(
+            TestRunnerError, match="terraform init failed in dummy_dir"
+        ) as exc_info:
             TerraformTests(commands).run_module_tests("dummy_dir", ["test.tftest.hcl"])
+        assert "Failed to query available provider packages" in str(exc_info.value)
 
     def test_run_module_tests_test_failure(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         commands.run.side_effect = [
-            MagicMock(returncode=0),
-            MagicMock(returncode=1),
+            MagicMock(returncode=0, stdout="Terraform initialized!\n", stderr=""),
+            MagicMock(
+                returncode=1,
+                stdout="tests/test.tftest.hcl... fail\n",
+                stderr="Error: test failed\n",
+            ),
         ]
-        with pytest.raises(TestRunnerError, match="terraform test failed in dummy_dir"):
+        with pytest.raises(
+            TestRunnerError, match="terraform test failed in dummy_dir"
+        ) as exc_info:
             TerraformTests(commands).run_module_tests("dummy_dir", ["test.tftest.hcl"])
+        assert "tests/test.tftest.hcl... fail" in str(exc_info.value)
+        assert "Error: test failed" in str(exc_info.value)

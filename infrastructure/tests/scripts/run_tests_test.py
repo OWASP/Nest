@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from scripts import run_tests
 from scripts.errors import TestRunnerError
 
 
@@ -25,9 +26,8 @@ class TestRunTestsMain:
                 unit=True,
                 integration=False,
                 get_tag=False,
+                get_image=False,
             )
-            from scripts import run_tests
-
             run_tests.main()
             mock_stderr_write.assert_any_call("Error: Mocked failure\n")
             mock_exit.assert_called_once_with(1)
