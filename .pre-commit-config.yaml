@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015  # v1.106.0
+    rev: 60814e259af5e9b712edbd18af333d2650624735  # v1.107.0
     hooks:
       - id: terraform_providers_lock
         args:
@@ -49,7 +49,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 3b3f7c3f57fe9925356faf5fe6230835138be230  # v0.15.17
+    rev: 77039ccbba72c8aede339c5f8ae29b42aced0a2e  # v0.15.18
     hooks:
       - id: ruff-check
         args:
@@ -89,7 +89,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.317.2
+          - strawberry-graphql==0.318.0
           - strawberry-graphql-django==0.86.3
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
@@ -147,7 +147,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: ca620e0df5ae9a02b7b81a6e4c954894f043ce42  # v2.24.1
+    rev: f073523dfd27b01ec7997cc970a2a7b36c303460  # v2.25.0
     hooks:
       - id: pyproject-fmt
         additional_dependencies:

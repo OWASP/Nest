@@ -54,9 +54,25 @@ check: ## Run all code quality checks
 	@echo ""
 
 check-test: ## Run all checks and tests
-check-test: \
-	check \
-	test
+check-test:
+	@$(MAKE) check
+	@$(MAKE) test
+
+check-test-backend: ## Run Backend checks and tests
+	@$(MAKE) check
+	@$(MAKE) test-backend
+
+check-test-frontend: ## Run Frontend checks and tests
+	@$(MAKE) check
+	@$(MAKE) test-frontend
+
+check-test-e2e: ## Run E2E checks and tests
+	@$(MAKE) check
+	@$(MAKE) test-e2e
+
+check-test-infrastructure: ## Run Infrastructure checks and tests
+	@$(MAKE) check
+	@$(MAKE) test-infrastructure
 
 ##@ Prettier
 
