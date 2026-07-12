@@ -17,6 +17,12 @@ describe('entityChannels utils', () => {
     expect(getEntityChannelUrl('discord', '123')).toBeNull()
   })
 
+  test('getEntityChannelUrl returns null for missing Slack channel ids', () => {
+    expect(getEntityChannelUrl('slack', '')).toBeNull()
+    expect(getEntityChannelUrl('slack', null)).toBeNull()
+    expect(getEntityChannelUrl('slack', undefined)).toBeNull()
+  })
+
   test('getLinkableEntityChannels keeps only channels with name, id, platform, and URL', () => {
     expect(
       getLinkableEntityChannels([

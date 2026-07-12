@@ -19,7 +19,14 @@ export const getEntityChannelIcon = (platform: string): IconType => {
   }
 }
 
-export const getEntityChannelUrl = (platform: string, externalId: string): string | null => {
+export const getEntityChannelUrl = (
+  platform: string,
+  externalId: string | null | undefined
+): string | null => {
+  if (!externalId) {
+    return null
+  }
+
   switch (platform.toLowerCase()) {
     case 'slack':
       return getSlackChannelUrl(externalId)
