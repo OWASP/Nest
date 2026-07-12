@@ -16,7 +16,8 @@ export const mockProjectDetailsData = {
     entityChannels: [
       {
         name: 'project-security',
-        slackChannelId: 'C456DEF',
+        externalId: 'C456DEF',
+        platform: 'slack',
       },
     ],
     forksCount: 10,

@@ -51,6 +51,11 @@ const Metadata = ({
                 leaders={String(detail?.value ?? 'Unknown')}
               />
             </div>
+          ) : detail?.label === 'Channels' ? (
+            <div key={detail.label} className="flex flex-row items-start gap-1 pb-1">
+              <strong>{detail.label}:</strong>
+              <div className="pt-0.5">{detail.value}</div>
+            </div>
           ) : (
             <div key={detail.label} className="pb-1">
               <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}

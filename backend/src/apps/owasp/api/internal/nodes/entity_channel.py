@@ -19,13 +19,15 @@ class EntityChannelNode(strawberry.relay.Node):
     """Entity channel node."""
 
     @strawberry_django.field
-    def name(self, root: EntityChannel) -> str:
-        """Channel display name from the linked Slack Conversation."""
-        conv = root.channel
-        return conv.name if conv and conv.name else ""
+    def external_id(self, root: EntityChannel) -> str | None:
+        """Platform-specific channel ID."""
+        return (
+            channel.slack_channel_id
+            if (channel := root.channel) and channel.slack_channel_id
+            else None
+        )
 
     @strawberry_django.field
-    def slack_channel_id(self, root: EntityChannel) -> str:
-        """Slack channel ID for linking (e.g. C123ABC)."""
-        conv = root.channel
-        return conv.slack_channel_id if conv and conv.slack_channel_id else ""
+    def name(self, root: EntityChannel) -> str | None:
+        """Channel display name."""
+        return channel.name if (channel := root.channel) and channel.name else None

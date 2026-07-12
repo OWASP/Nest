@@ -94,18 +94,18 @@ class RepositoryBasedEntityModel(models.Model):
     )
 
     # GRs.
-    entity_members = GenericRelation(
-        EntityMember,
-        content_type_field="entity_type",
-        object_id_field="entity_id",
-        related_query_name="entity_member",
-    )
-
     entity_channels = GenericRelation(
         EntityChannel,
         content_type_field="entity_type",
         object_id_field="entity_id",
         related_query_name="entity_channel",
+    )
+
+    entity_members = GenericRelation(
+        EntityMember,
+        content_type_field="entity_type",
+        object_id_field="entity_id",
+        related_query_name="entity_member",
     )
 
     @cached_property

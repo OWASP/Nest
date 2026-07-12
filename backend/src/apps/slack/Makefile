@@ -15,13 +15,13 @@ slack-check-invite-link:
 	@echo "Checking Slack invite link usage"
 	@CMD="python manage.py slack_check_invite_link" $(MAKE) exec-backend-command
 
+slack-match-owasp-channels:
+	@echo "Matching Slack channels to OWASP chapters, committees, and projects"
+	@CMD="python manage.py slack_match_owasp_channels" $(MAKE) exec-backend-command
+
 slack-set-conversation-sync-messages-flags:
 	@echo "Setting conversation sync messages flags"
 	@CMD="python manage.py slack_set_conversation_sync_messages_flags" $(MAKE) exec-backend-command
-
-slack-match-channels:
-	@echo "Matching Slack channels to OWASP chapters, committees, and projects"
-	@CMD="python manage.py owasp_match_channels" $(MAKE) exec-backend-command
 
 slack-sync-data:
 	@echo "Syncing Slack data"

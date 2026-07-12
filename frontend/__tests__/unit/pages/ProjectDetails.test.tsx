@@ -303,18 +303,19 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
-  test('renders Slack channel link with expected Slack URL', async () => {
+  test('renders channel link with platform icon and expected Slack URL', async () => {
     render(<ProjectDetailsPage />)
 
     await waitFor(() => {
-      const slackLink = screen.getByRole('link', { name: '#project-security' })
-      expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C456DEF')
-      expect(slackLink).toHaveAttribute('target', '_blank')
-      expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
+      const channelLink = screen.getByRole('link', { name: 'slack channel #project-security' })
+      expect(channelLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C456DEF')
+      expect(channelLink).toHaveAttribute('target', '_blank')
+      expect(channelLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(screen.getByText(/Channels/)).toBeInTheDocument()
     })
   })
 
-  test('does not render Slack channel link when entityChannels is empty or missing', async () => {
+  test('does not render channel links when entityChannels is empty or missing', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         ...mockProjectDetailsData,
@@ -330,7 +331,7 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Slack')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Channels/)).not.toBeInTheDocument()
   })
 
   test('renders contribution activity when contributionStats with total > 0 is provided', async () => {

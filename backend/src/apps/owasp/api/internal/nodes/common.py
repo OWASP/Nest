@@ -12,15 +12,15 @@ from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 class GenericEntityNode(strawberry.relay.Node):
     """Base node class for OWASP entities with common fields and resolvers."""
 
-    @strawberry_django.field(prefetch_related=["entity_members__member"])
-    def entity_leaders(self, root) -> list[EntityMemberNode]:
-        """Resolve entity leaders."""
-        return root.entity_leaders
-
     @strawberry_django.field
     def entity_channels(self, root) -> list[EntityChannelNode]:
         """Resolve entity channels."""
         return list(root.entity_channels.filter(is_active=True, is_reviewed=True))
+
+    @strawberry_django.field(prefetch_related=["entity_members__member"])
+    def entity_leaders(self, root) -> list[EntityMemberNode]:
+        """Resolve entity leaders."""
+        return root.entity_leaders
 
     @strawberry_django.field
     def leaders(self, root) -> list[str]:

@@ -146,14 +146,14 @@ export type CreateProgramInput = {
 
 export type EntityChannelNode = Node & {
   __typename?: 'EntityChannelNode';
+  externalId?: Maybe<Scalars['String']['output']>;
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
   isDefault: Scalars['Boolean']['output'];
   isReviewed: Scalars['Boolean']['output'];
-  name: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
   platform: Scalars['String']['output'];
-  slackChannelId: Scalars['String']['output'];
 };
 
 export type EntityMemberNode = Node & {
@@ -340,8 +340,8 @@ export type ModuleNode = {
   issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
-  mentees: Array<UserNode>;
   menteeCanManageDeadlines: Scalars['Boolean']['output'];
+  mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];

@@ -17,8 +17,8 @@ import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getLinkableEntityChannels } from 'utils/entityChannels'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
-import { getSlackChannelUrl } from 'utils/urlFormatter'
 import Contributions from 'components/cards/Contributions'
 import Contributors from 'components/cards/Contributors'
 import Header from 'components/cards/Header'
@@ -29,6 +29,7 @@ import PageWrapper from 'components/cards/PageWrapper'
 import RepositoriesModules from 'components/cards/RepositoriesModules'
 import Summary from 'components/cards/Summary'
 import Tags from 'components/cards/Tags'
+import EntityChannelLinks from 'components/EntityChannelLinks'
 import HealthMetrics from 'components/HealthMetrics'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
@@ -76,6 +77,8 @@ const ProjectDetailsPage = () => {
     )
   }
 
+  const channels = getLinkableEntityChannels(project.entityChannels)
+
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     { label: 'Leaders', value: project.leaders.join(', ') },
@@ -92,25 +95,11 @@ const ProjectDetailsPage = () => {
         </Link>
       ),
     },
-    ...(project.entityChannels && project.entityChannels.length > 0
+    ...(channels.length > 0
       ? [
           {
-            label: 'Slack',
-            value: (
-              <div className="inline-flex flex-wrap gap-3">
-                {project.entityChannels.map((ch) => (
-                  <Link
-                    key={ch.slackChannelId}
-                    href={getSlackChannelUrl(ch.slackChannelId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:underline"
-                  >
-                    #{ch.name}
-                  </Link>
-                ))}
-              </div>
-            ),
+            label: 'Channels',
+            value: <EntityChannelLinks channels={channels} />,
           },
         ]
       : []),
