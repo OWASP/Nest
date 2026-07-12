@@ -1,0 +1,28 @@
+name: Install infrastructure dependencies
+
+description: >-
+  Installs Python and Poetry, and installs infrastructure dependencies.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      with:
+        python-version: '3.13'
+
+    - name: Install Poetry
+      uses: ./.github/actions/install-poetry
+
+    - name: Cache infrastructure dependencies
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+      with:
+        key: poetry-venv-${{ runner.os }}-${{ runner.arch }}-python-3.13-${{ hashFiles('infrastructure/poetry.lock') }}
+        path: infrastructure/.venv
+        restore-keys: |
+          poetry-venv-${{ runner.os }}-${{ runner.arch }}-python-3.13-
+
+    - name: Install infrastructure dependencies
+      run: poetry install --no-interaction --with test
+      shell: bash
+      working-directory: infrastructure

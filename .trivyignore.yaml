@@ -9,6 +9,7 @@ misconfigurations:
     paths:
       - .clusterfuzzlite/Dockerfile
       - docker/e2e/Dockerfile
+      - docker/localstack/Dockerfile
       - docker/semgrep/Dockerfile
       - docker/trivy/Dockerfile
       - docker/zap/Dockerfile

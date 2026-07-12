@@ -379,34 +379,44 @@ aws ecs run-task \
 
 ## Testing
 
-Infrastructure configurations are tested using Terraform's native testing framework (`terraform test`).
+Local Make targets use Docker (like backend). CI runs Poetry + Terraform directly on the runner for speed (cached plugins/venv, no image build).
 
-### Unit/Mock Testing
+### Unit Testing
 
 These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.
 
-To run unit/mock tests:
+Locally, `make test-infrastructure-unit` builds the shared `nest-test-infrastructure` image from `docker/infrastructure/Dockerfile.tests` (Poetry + Terraform), mounts `scripts`, `tests`, `bootstrap`, and `modules` from the host, and runs:
+
+1. The runner's pytest suite
+2. Terraform unit tests via `python -m scripts.run_tests --unit`
 
 ```bash
-make test-infrastructure
+make test-infrastructure-unit
 ```
+
+Rebuild the image when `infrastructure/poetry.lock` (or Terraform version) changes; source edits do not require a rebuild.
 
 ### Integration Testing (with LocalStack)
 
-Integration tests deploy resources against a local LocalStack instance to verify IAM policies, SSM/KMS interactions, and resource wiring.
+Integration tests deploy resources against LocalStack to verify IAM policies, SSM/KMS interactions, and resource wiring. Locally, `make test-infrastructure-integration` reuses `nest-test-infrastructure`, starts LocalStack via Compose, and runs `--integration`.
 
 #### Prerequisite
 
-You must have Docker running locally.
-
-To run integration tests, you only need to run:
+- Docker running locally
+- `LOCALSTACK_AUTH_TOKEN` set (if unset, the Make target skips integration tests)
 
 ```bash
 export LOCALSTACK_AUTH_TOKEN="<your_auth_token>"
 make test-infrastructure-integration
 ```
 
-The test runner script will automatically start, check health, and tear down the LocalStack container if it is not already running on port 4566.
+### Run All Infrastructure Tests
+
+`make test-infrastructure` runs unit tests, then integration tests when `LOCALSTACK_AUTH_TOKEN` is set.
+
+```bash
+make test-infrastructure
+```
 
 ## Cleaning Up
 

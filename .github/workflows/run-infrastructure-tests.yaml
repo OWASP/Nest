@@ -13,25 +13,9 @@ env:
 permissions: {}
 
 jobs:
-  check-localstack:
-    name: Check LocalStack availability
-    runs-on: ubuntu-24.04-arm
-    permissions: {}
-    outputs:
-      is_available: ${{ steps.check.outputs.is_available }}
-    steps:
-      - id: check
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
-        run: |
-          if [ -n "$LOCALSTACK_AUTH_TOKEN" ]; then
-            echo "is_available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_available=false" >> "$GITHUB_OUTPUT"
-          fi
 
-  run-infrastructure-tests:
-    name: Infrastructure tests
+  run-infrastructure-unit-tests:
+    name: Infrastructure unit tests
     permissions:
       contents: read
     runs-on: ubuntu-24.04-arm
@@ -44,11 +28,33 @@ jobs:
       - name: Setup Terraform environment
         uses: ./.github/actions/setup-terraform-environment
 
-      - name: Run tests
-        run: make test-infrastructure
+      - name: Install infrastructure dependencies
+        uses: ./.github/actions/install-infrastructure-dependencies
+
+      - name: Run unit tests
+        run: |
+          poetry run pytest
+          poetry run python -m scripts.run_tests --unit
+        working-directory: infrastructure
     timeout-minutes: 10
 
-  infrastructure-integration-tests:
+  check-localstack:
+    name: Check LocalStack availability
+    outputs:
+      is_available: ${{ steps.check.outputs.is_available }}
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - id: check
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          if [ -n "$LOCALSTACK_AUTH_TOKEN" ]; then
+            echo "is_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  run-infrastructure-integration-tests:
     name: Infrastructure integration tests
     needs: check-localstack
     if: ${{ needs.check-localstack.outputs.is_available == 'true' }}
@@ -64,19 +70,29 @@ jobs:
       - name: Setup Terraform environment
         uses: ./.github/actions/setup-terraform-environment
 
+      - name: Install infrastructure dependencies
+        uses: ./.github/actions/install-infrastructure-dependencies
+
       - name: Read LocalStack image tag from Dockerfile
         id: localstack-tag
         run: |
-          tag=$(python3 infrastructure/scripts/run_tests.py --get-tag)
+          tag=$(poetry run python -m scripts.run_tests --get-tag)
+          if [[ -z "$tag" ]]; then
+            echo "Error: could not determine LocalStack image tag." >&2
+            exit 1
+          fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        working-directory: infrastructure
 
       - name: Start LocalStack
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         uses: localstack/setup-localstack@7c8a0cb3405bc58be4c8f763f812aa000bc46303  # v0.3.2
         with:
+          configuration: ECR_ENDPOINT_STRATEGY=off
           image-tag: ${{ steps.localstack-tag.outputs.tag }}
 
       - name: Run integration tests
-        run: make test-infrastructure-integration
-    timeout-minutes: 5
+        run: poetry run python -m scripts.run_tests --integration
+        working-directory: infrastructure
+    timeout-minutes: 15

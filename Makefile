@@ -8,11 +8,12 @@ include infrastructure/Makefile
 .DEFAULT_GOAL := help
 
 .PHONY: audit-backend-dependencies audit-cspell-dependencies audit-docs-dependencies \
-	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies audit-tooling-dependencies build check cspell \
-	check-graphql clean clean-tooling-dependencies clean-trivy-cache eslint fix-eslint fix-prettier graphql-codegen help install-frontend-dependencies install-tooling-dependencies pre-commit prettier prune run \
+	audit-dependencies audit-e2e-dependencies audit-frontend-dependencies \
+	audit-infrastructure-dependencies audit-tooling-dependencies build check cspell \
+	check-graphql clean clean-tooling-dependencies clean-trivy-cache eslint fix-eslint fix-prettier graphql-codegen help install-frontend-dependencies install-infrastructure-dependencies install-tooling-dependencies pre-commit prettier prune run \
 	scan-images security-scan security-scan-backend-image security-scan-code security-scan-code-semgrep \
 	security-scan-code-trivy security-scan-frontend-image security-scan-images security-scan-zap test \
-	test-infrastructure test-infrastructure-integration test-nest-app update update-tooling-dependencies
+	test-infrastructure test-infrastructure-integration test-infrastructure-unit update update-infrastructure-dependencies update-tooling-dependencies
 
 AUDIT_LEVEL ?= high
 
@@ -110,15 +111,11 @@ update-tooling-dependencies:
 pre-commit: ## Run pre-commit hooks
 	@pre-commit run --all-files --color=always --show-diff-on-failure
 
-test: ## Run all tests
-test: \
-	test-nest-app
-
-test-nest-app:
+test: ## Run tests
+test:
 	@$(MAKE) test-backend
 	@$(MAKE) test-frontend
 	@$(MAKE) test-e2e
-	@$(MAKE) test-infrastructure
 
 ##@ Security
 
@@ -129,6 +126,7 @@ audit-dependencies: \
 	audit-docs-dependencies \
 	audit-e2e-dependencies \
 	audit-frontend-dependencies \
+	audit-infrastructure-dependencies \
 	audit-tooling-dependencies
 
 security-scan: ## Run all security scans
@@ -247,6 +245,7 @@ update: ## Update all dependencies
 update: \
 	clean-dependencies \
 	update-docs-dependencies \
+	update-infrastructure-dependencies \
 	update-nest-app-dependencies \
 	update-pre-commit
 
