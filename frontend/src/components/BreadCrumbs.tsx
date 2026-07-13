@@ -1,4 +1,4 @@
-import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
+import { Breadcrumbs, BreadcrumbsItem as HeroUIBreadcrumbItem } from '@heroui/react'
 import Link from 'next/link'
 import { FaChevronRight } from 'react-icons/fa'
 import type { BreadcrumbItem } from 'types/breadcrumb'
@@ -16,11 +16,6 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
           aria-label="breadcrumb"
           separator={<FaChevronRight className="mx-1 text-xs text-gray-400 dark:text-gray-500" />}
           className="text-gray-800 dark:text-gray-200"
-          itemClasses={{
-            base: 'transition-colors duration-200',
-            item: 'text-sm font-medium',
-            separator: 'flex items-center',
-          }}
         >
           {items.map((item, index) => {
             const isLast = index === items.length - 1

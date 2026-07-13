@@ -1,3 +1,4 @@
+import React from 'react'
 import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
@@ -9,6 +10,147 @@ import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/cr
 
 // Mock dependencies to isolate the component
 jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
+
+jest.mock('@heroui/react', () => ({
+  ...jest.requireActual('@heroui/react'),
+  ComboBox: Object.assign(
+    ({ children, inputValue, onInputChange, onSelectionChange, isInvalid, isRequired, allowsCustomValue, menuTrigger, className }) => {
+      const childrenWithProps = React.Children.map(children, (child) => {
+        if (!React.isValidElement(child)) return child
+        return React.cloneElement(child as React.ReactElement<any>, { _onInputChange: onInputChange, _inputValue: inputValue, _onSelectionChange: onSelectionChange })
+      })
+      return <div data-testid="combobox">{childrenWithProps}</div>
+    },
+    {
+      InputGroup: ({ children, _onInputChange, _inputValue, _onSelectionChange }) => {
+        const childrenWithProps = React.Children.map(children, (child) => {
+          if (!React.isValidElement(child)) return child
+          return React.cloneElement(child as React.ReactElement<any>, { _onInputChange, _inputValue, _onSelectionChange })
+        })
+        return <div>{childrenWithProps}</div>
+      },
+      Popover: ({ children, _onInputChange, _inputValue, _onSelectionChange }) => {
+        const childrenWithProps = React.Children.map(children, (child) => {
+          if (!React.isValidElement(child)) return child
+          return React.cloneElement(child as React.ReactElement<any>, { _onSelectionChange })
+        })
+        return <div>{childrenWithProps}</div>
+      },
+      Trigger: () => null,
+    }
+  ),
+  Input: ({ id, type, placeholder, className, onChange, value, onBlur, min, max, _onInputChange, _inputValue, _tfValue, _tfOnChange, _tfRequired, _tfInvalid }: any) => (
+    <input
+      id={id}
+      type={type}
+      placeholder={placeholder}
+      className={className}
+      min={min}
+      max={max}
+      onBlur={onBlur}
+      value={_inputValue !== undefined ? _inputValue : (_tfValue !== undefined ? _tfValue : (value || ''))}
+      required={_tfRequired}
+      aria-invalid={_tfInvalid}
+      onChange={(e) => {
+        onChange?.(e)
+        _onInputChange?.(e.target.value)
+        _tfOnChange?.(e.target.value)
+      }}
+    />
+  ),
+  Label: ({ children, htmlFor, className }) => (
+    <label htmlFor={htmlFor} className={className}>{children}</label>
+  ),
+  ListBox: Object.assign(
+    ({ children, _onSelectionChange }) => {
+      const childrenWithProps = React.Children.map(children, (child) => {
+        if (!React.isValidElement(child)) return child
+        return React.cloneElement(child as React.ReactElement<any>, { _onSelectionChange })
+      })
+      return <ul>{childrenWithProps}</ul>
+    },
+    {
+      Item: ({ children, id, textValue, _onSelectionChange, ...props }) => (
+        <li
+          data-testid="listbox-item"
+          data-id={id}
+          data-key={id}
+          role="option"
+          aria-label={textValue}
+          tabIndex={0}
+          onClick={() => _onSelectionChange?.(id)}
+          {...props}
+        >
+          {textValue || children}
+        </li>
+      ),
+    }
+  ),
+  FieldError: ({ children }: any) => <span role="alert">{children}</span>,
+  TextField: ({ children, value, onChange, isRequired, isInvalid }: any) => (
+    <div data-slot="textfield" data-invalid={isInvalid} data-required={isRequired}>
+      {React.Children.map(children, (child: any) => {
+        if (!React.isValidElement(child)) return child
+        return React.cloneElement(child as React.ReactElement<any>, {
+          _tfValue: value,
+          _tfOnChange: onChange,
+          _tfRequired: isRequired,
+          _tfInvalid: isInvalid,
+        })
+      })}
+    </div>
+  ),
+  Switch: Object.assign(
+    ({ children, isSelected, onChange, 'aria-label': ariaLabel }) => (
+      <div>
+        <input
+          type="checkbox"
+          role="switch"
+          aria-label={ariaLabel}
+          checked={!!isSelected}
+          onChange={(e) => onChange?.(e.target.checked)}
+        />
+        {children}
+      </div>
+    ),
+    {
+      Control: ({ children }) => <div>{children}</div>,
+      Thumb: () => <span />,
+    }
+  ),
+}))
+jest.mock('@heroui/select', () => ({
+  Select: ({
+    children,
+    onSelectionChange,
+    label,
+    id,
+    isRequired,
+    isInvalid,
+    errorMessage,
+    selectedKeys,
+  }: any) => (
+    <div>
+      <label htmlFor={id}>{label}</label>
+      <select
+        id={id}
+        aria-label={label}
+        required={isRequired}
+        aria-invalid={isInvalid}
+        onChange={(e) => onSelectionChange?.(new Set([e.target.value]))}
+      >
+        <option value="">Select...</option>
+        {React.Children.map(children, (child: any, i: number) => {
+          const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT']
+          return <option key={i} value={levels[i]}>{child?.props?.children}</option>
+        })}
+      </select>
+      {isInvalid && errorMessage && <span>{errorMessage}</span>}
+    </div>
+  ),
+  SelectItem: ({ children }: any) => null,
+}))
+
 jest.mock('app/global-error', () => ({
   handleAppError: jest.fn(),
   ErrorDisplay: ({ title }: { title: string }) => <div>{title}</div>,
@@ -83,6 +225,7 @@ describe('CreateModulePage', () => {
     await user.type(screen.getByLabelText(/Description/i), 'This is a test module')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
+    await user.selectOptions(screen.getByRole('combobox', { name: /Experience Level/i }), 'BEGINNER')
     await user.type(screen.getByLabelText(/Domains/i), 'AI, ML')
     await user.type(screen.getByLabelText(/Tags/i), 'react, graphql')
 

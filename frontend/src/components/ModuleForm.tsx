@@ -1,6 +1,6 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
-import { Autocomplete, AutocompleteItem, Switch } from '@heroui/react'
+import { ComboBox, FieldError, Input, Label, ListBox, Switch } from '@heroui/react'
 import { Select, SelectItem } from '@heroui/select'
 import debounce from 'lodash/debounce'
 import type React from 'react'
@@ -321,12 +321,16 @@ const ModuleForm = ({
                 )}
                 <div className="flex w-full min-w-0 items-center gap-3 lg:col-span-2">
                   <Switch
-                    aria-label="Mentees can manage deadlines"
-                    isSelected={formData.menteeCanManageDeadlines}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
-                    }
-                  />
+                      aria-label="Mentees can manage deadlines"
+                      isSelected={formData.menteeCanManageDeadlines}
+                      onChange={(value) =>
+                        setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
+                      }
+                    >
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch>
                   <div>
                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                       Mentees can manage deadlines
@@ -449,44 +453,38 @@ export const ProjectSelector = ({
 
   return (
     <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-      <Autocomplete
-        id="projectSelector"
-        label="Project Name"
-        labelPlacement="outside"
-        placeholder="Start typing project name..."
-        inputValue={inputValue}
-        selectedKey={value || null}
-        onInputChange={handleInputChange}
-        onSelectionChange={handleSelectionChange}
-        menuTrigger="input"
-        isRequired
-        isInvalid={shouldShowInvalid}
-        errorMessage={displayError}
-        isLoading={isLoading}
-        allowsCustomValue={false}
-        classNames={{
-          base: 'w-full min-w-0',
-          selectorButton: 'hidden',
-        }}
-        inputProps={{
-          classNames: {
-            label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-            input: 'text-gray-800 dark:text-gray-200',
-            inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-            helperWrapper: 'min-w-0 max-w-full w-full',
-            errorMessage: 'break-words whitespace-normal max-w-full w-full',
-          },
-        }}
-        clearButtonProps={{
-          'aria-label': 'clear selected project',
-        }}
-      >
-        {items.map((project) => (
-          <AutocompleteItem key={project.id} textValue={project.name}>
-            {project.name}
-          </AutocompleteItem>
-        ))}
-      </Autocomplete>
+      <ComboBox
+          isRequired
+          isInvalid={shouldShowInvalid}
+          inputValue={inputValue}
+          selectedKey={value || null}
+          onInputChange={handleInputChange}
+          onSelectionChange={handleSelectionChange}
+          menuTrigger="input"
+          allowsCustomValue={false}
+          className="w-full min-w-0"
+        >
+          <Label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+            Project Name
+          </Label>
+          <ComboBox.InputGroup>
+            <Input
+              id="projectSelector"
+              placeholder="Start typing project name..."
+              className="bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+            />
+          </ComboBox.InputGroup>
+          <ComboBox.Popover>
+            <ListBox>
+              {items.map((project) => (
+                <ListBox.Item key={project.id} id={project.id} textValue={project.name}>
+                  {project.name}
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </ComboBox.Popover>
+          {shouldShowInvalid && displayError && <FieldError>{displayError}</FieldError>}
+        </ComboBox>
     </div>
   )
 }

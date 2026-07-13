@@ -74,11 +74,11 @@ jest.mock('@heroui/react', () => ({
       {children}
     </div>
   ),
-  DropdownSection: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <fieldset data-testid="dropdown-section" data-title={title}>
-      <legend id={`section-${title}`} className="section-title">
-        {title}
-      </legend>
+  Header: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dropdown-section-header">{children}</div>
+  ),
+  DropdownSection: ({ children, title, 'aria-label': ariaLabel }: { children: React.ReactNode; title?: string; 'aria-label'?: string }) => (
+    <fieldset data-testid="dropdown-section" data-title={ariaLabel || title}>
       {children}
     </fieldset>
   ),
@@ -586,7 +586,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
       const button = screen.getByTestId('dropdown-button')
-      expect(button).toHaveAttribute('data-variant', 'solid')
+      expect(button).toHaveAttribute('data-variant', 'ghost')
     })
 
     it('renders proper flex layout structure', () => {

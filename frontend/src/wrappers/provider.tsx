@@ -1,6 +1,6 @@
 'use client'
 import { ApolloProvider } from '@apollo/client/react'
-import { HeroUIProvider, ToastProvider } from '@heroui/react'
+import { ToastProvider } from '@heroui/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
@@ -33,15 +33,13 @@ export function Providers({
   return (
     <Suspense>
       <SessionProvider>
-        <HeroUIProvider>
-          <NextThemesProvider attribute="class" defaultTheme="dark">
+        <NextThemesProvider attribute="class" defaultTheme="dark">
             <ToastProvider />
             <ApolloProvider client={apolloClient}>
               <AppInitializer />
               {children}
             </ApolloProvider>
-          </NextThemesProvider>
-        </HeroUIProvider>
+        </NextThemesProvider>
       </SessionProvider>
     </Suspense>
   )
