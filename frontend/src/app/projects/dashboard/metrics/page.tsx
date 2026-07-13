@@ -303,11 +303,10 @@ const MetricsPage: FC = () => {
             )}
           </div>
           <div className="mt-4 flex items-center justify-center">
-            <Pagination
-              initialPage={getCurrentPage()}
-              page={getCurrentPage()}
-              total={Math.ceil(metricsLength / PAGINATION_LIMIT)}
-              onChange={async (page) => {
+            {(() => {
+              const currentPage = getCurrentPage()
+              const totalPages = Math.ceil(metricsLength / PAGINATION_LIMIT)
+              const goToPage = async (page: number) => {
                 const newOffset = (page - 1) * PAGINATION_LIMIT
                 const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
                 setPagination(newPagination)
@@ -325,11 +324,37 @@ const MetricsPage: FC = () => {
                     }
                   },
                 })
-              }}
-              showControls
-              color="warning"
-              className="mt-4"
-            />
+              }
+              return (
+                <Pagination className="mt-4">
+                  <Pagination.Content>
+                    <Pagination.Item>
+                      <Pagination.Previous
+                        isDisabled={currentPage === 1}
+                        onPress={() => goToPage(currentPage - 1)}
+                      >
+                        <Pagination.PreviousIcon />
+                      </Pagination.Previous>
+                    </Pagination.Item>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <Pagination.Item key={p}>
+                        <Pagination.Link isActive={currentPage === p} onPress={() => goToPage(p)}>
+                          {p}
+                        </Pagination.Link>
+                      </Pagination.Item>
+                    ))}
+                    <Pagination.Item>
+                      <Pagination.Next
+                        isDisabled={currentPage === totalPages}
+                        onPress={() => goToPage(currentPage + 1)}
+                      >
+                        <Pagination.NextIcon />
+                      </Pagination.Next>
+                    </Pagination.Item>
+                  </Pagination.Content>
+                </Pagination>
+              )
+            })()}
           </div>
         </>
       )}

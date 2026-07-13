@@ -76,8 +76,8 @@ describe('PageLayout', () => {
         </PageLayout>
       )
 
-      await screen.findByRole('navigation', { name: 'breadcrumb' })
-      const breadcrumbNav = screen.getByRole('navigation', { name: 'breadcrumb' })
+      await screen.findByRole('list', { name: 'breadcrumb' })
+      const breadcrumbNav = screen.getByRole('list', { name: 'breadcrumb' })
       const wrapper = breadcrumbNav.parentElement?.parentElement
       expect(wrapper).toHaveClass('bg-white')
       expect(wrapper).toHaveClass('dark:bg-[#212529]')
@@ -92,8 +92,8 @@ describe('PageLayout', () => {
         </PageLayout>
       )
 
-      await screen.findByRole('navigation', { name: 'breadcrumb' })
-      const breadcrumbNav = screen.getByRole('navigation', { name: 'breadcrumb' })
+      await screen.findByRole('list', { name: 'breadcrumb' })
+      const breadcrumbNav = screen.getByRole('list', { name: 'breadcrumb' })
       const wrapper = breadcrumbNav.parentElement?.parentElement
       expect(wrapper).toHaveClass('custom-bg')
     })

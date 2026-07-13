@@ -4,6 +4,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownSection,
+  Header,
   Button,
 } from '@heroui/react'
 import type { Key } from 'react'
@@ -41,7 +42,7 @@ const ProjectsDashboardDropDown: FC<{
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button variant="solid">
+        <Button variant="ghost">
           <IconWrapper
             icon={
               isOrdering
@@ -62,9 +63,12 @@ const ProjectsDashboardDropDown: FC<{
       </DropdownTrigger>
       <DropdownMenu onAction={onAction} selectedKeys={selectedKeys} selectionMode={selectionMode}>
         {sections.map((section) => (
-          <DropdownSection key={section.title} title={section.title}>
+          <DropdownSection key={section.title} aria-label={section.title}>
+            <Header>{section.title}</Header>
             {section.items.map((item) => (
-              <DropdownItem key={item.key}>{item.label}</DropdownItem>
+              <DropdownItem key={item.key} id={item.key} textValue={item.label}>
+                {item.label}
+              </DropdownItem>
             ))}
           </DropdownSection>
         ))}

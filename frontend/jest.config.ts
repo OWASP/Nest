@@ -48,9 +48,14 @@ const config: Config = {
     '^@unit/(.*)$': '<rootDir>/__tests__/unit/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(scss|sass|css)$': 'identity-obj-proxy',
+    '^@heroui/react$': '<rootDir>/node_modules/@heroui/react/dist/index.js',
+    '^@heroui/toast$': '<rootDir>/node_modules/@heroui/toast/dist/index.js',
+    '^@heroui/select$': '<rootDir>/node_modules/@heroui/select/dist/index.js',
+    '^@heroui/button$': '<rootDir>/node_modules/@heroui/button/dist/index.js',
+    '^@heroui/modal$': '<rootDir>/node_modules/@heroui/modal/dist/index.js',
   },
   moduleDirectories: ['node_modules', 'src'],
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!@zag-js)'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!@zag-js|@heroui|@internationalized|react-aria|react-stately|@react-aria|@react-stately)'],
 }
 
 export default config
