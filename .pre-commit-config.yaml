@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: 60814e259af5e9b712edbd18af333d2650624735  # v1.107.0
+    rev: 05fd71a57a467ccf5598f7e836d3af4cf9225abb  # v1.108.0
     hooks:
       - id: terraform_providers_lock
         args:
@@ -89,8 +89,8 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.318.0
-          - strawberry-graphql-django==0.86.3
+          - strawberry-graphql==0.319.0
+          - strawberry-graphql-django==0.86.4
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
           - types-PyYAML==6.0.12.20260518
@@ -154,7 +154,7 @@ repos:
           - toml-fmt-common<1.3.3
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # v1.25.2
+    rev: e3eebf65325ccc992422292cb7a4baee967cf815  # v1.26.1
     hooks:
       - id: zizmor
         args:
