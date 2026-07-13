@@ -143,8 +143,8 @@ importers:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       posthog-js:
-        specifier: 1.391.2
-        version: 1.391.2
+        specifier: 1.391.3
+        version: 1.391.3
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -5673,8 +5673,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@3.3.13:
-    resolution: {integrity: sha512-sPdqC6ByMVVGvF1ynvvMo0/o+oD1VX7DaHhijt1bFgjvBkHBib4t49GoNDhf2NDta4oeUNlaGbSt5K7qjZ955Q==}
+  nanoid@3.3.15:
+    resolution: {integrity: sha512-y7Wygv/7mEOvxTuEQDB8StXdMRBWf1kR/tlhAzBRUFkB2jfcLOAxO/SHmOO2zgz1pVgK29/kyupn059/bCHdjA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -5951,8 +5951,8 @@ packages:
     resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@1.391.2:
-    resolution: {integrity: sha512-q0DZN6ljchSnAFJIXf+sQFTPlsLjTlRa+TvrL+QRb6413BGtib/MNiQy1bnwLKt8KR+f6xJYvkqdLyty9s4Aww==}
+  posthog-js@1.391.3:
+    resolution: {integrity: sha512-Na3HkHcte8MHhDnyPVhwJQITDB81ipvidEoANfT7s3umS54iFfqvW5tLm5VY4v23ybsUzM8SmtTFry/nSZZrgQ==}
 
   preact-render-to-string@5.2.6:
     resolution: {integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw==}
@@ -13738,7 +13738,7 @@ snapshots:
 
   nanoid@3.3.12: {}
 
-  nanoid@3.3.13: {}
+  nanoid@3.3.15: {}
 
   napi-postinstall@0.3.4: {}
 
@@ -13986,11 +13986,11 @@ snapshots:
 
   postcss@8.5.10:
     dependencies:
-      nanoid: 3.3.13
+      nanoid: 3.3.15
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  posthog-js@1.391.2:
+  posthog-js@1.391.3:
     dependencies:
       '@posthog/core': 1.35.3
       '@posthog/types': 1.390.2
