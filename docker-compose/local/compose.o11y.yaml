@@ -43,6 +43,11 @@ services:
       - GF_USERS_DEFAULT_THEME=light
       - O11Y_METRICS_URL=http://o11y-metrics:8428
     image: grafana/grafana-oss:13.0.2@sha256:5dad0df181cb644a14e13617b913b261a54f7d4fd4510721dba420929f35bea2
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, wget, --spider, -q, http://127.0.0.1:3000/api/health]
+      timeout: 5s
     networks:
       - nest-network
     ports:
