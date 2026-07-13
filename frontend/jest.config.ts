@@ -55,7 +55,9 @@ const config: Config = {
     '^@heroui/modal$': '<rootDir>/node_modules/@heroui/modal/dist/index.js',
   },
   moduleDirectories: ['node_modules', 'src'],
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!@zag-js|@heroui|@internationalized|react-aria|react-stately|@react-aria|@react-stately)'],
+  transformIgnorePatterns: [
+    '<rootDir>/node_modules/(?!@zag-js|@heroui|@internationalized|react-aria|react-stately|@react-aria|@react-stately)',
+  ],
 }
 
 export default config

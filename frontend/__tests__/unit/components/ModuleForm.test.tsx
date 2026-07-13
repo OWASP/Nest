@@ -102,14 +102,7 @@ jest.mock('@heroui/react', () => ({
     placeholder?: string
     className?: string
     onChange?: React.ChangeEventHandler<HTMLInputElement>
-  }) => (
-    <input
-      id={id}
-      placeholder={placeholder}
-      className={className}
-onChange={onChange}
-    />
-  ),
+  }) => <input id={id} placeholder={placeholder} className={className} onChange={onChange} />,
   Label: ({
     children,
     htmlFor,

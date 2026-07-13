@@ -23,13 +23,13 @@ const ProjectsDashboardNavBar: React.FC = () => {
   const pathname = usePathname()
   const isActive = (path: string) => pathname === path
   return (
-    <nav className="flex lg:w-64 lg:flex-col flex-row items-start justify-start py-4">
+    <nav className="flex flex-row items-start justify-start py-4 lg:w-64 lg:flex-col">
       <ul className="flex h-full justify-center lg:flex-col lg:items-start">
         {NAVIGATION_ITEMS.map(({ href, label, icon }) => (
           <li
             key={href}
             className={`w-full rounded ${
-              isActive(href) ? 'bg-gray-200 dark:bg-gray-800 text-align-left' : ''
+              isActive(href) ? 'text-align-left bg-gray-200 dark:bg-gray-800' : ''
             }`}
           >
             <Link
