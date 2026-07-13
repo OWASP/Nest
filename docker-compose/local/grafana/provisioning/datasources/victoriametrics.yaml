@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+  - name: VictoriaMetrics
+    uid: victoriametrics
+    type: prometheus
+    access: proxy
+    url: ${O11Y_METRICS_URL}
+    isDefault: true
+    jsonData:
+      httpMethod: POST
