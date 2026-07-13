@@ -13,14 +13,7 @@ jest.mock('@heroui/react', () => ({
     </label>
   ),
   Input: ({ id, type, min, max, className }) => (
-    <input
-      id={id}
-      type={type}
-      min={min}
-      max={max}
-      className={className}
-      onChange={() => {}}
-    />
+    <input id={id} type={type} min={min} max={max} className={className} onChange={() => {}} />
   ),
   FieldError: ({ children, className }) => (
     <span data-testid="error-message" className={className}>

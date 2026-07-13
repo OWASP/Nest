@@ -77,7 +77,15 @@ jest.mock('@heroui/react', () => ({
   Header: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dropdown-section-header">{children}</div>
   ),
-  DropdownSection: ({ children, title, 'aria-label': ariaLabel }: { children: React.ReactNode; title?: string; 'aria-label'?: string }) => (
+  DropdownSection: ({
+    children,
+    title,
+    'aria-label': ariaLabel,
+  }: {
+    children: React.ReactNode
+    title?: string
+    'aria-label'?: string
+  }) => (
     <fieldset data-testid="dropdown-section" data-title={ariaLabel || title}>
       {children}
     </fieldset>

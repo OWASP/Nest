@@ -34,11 +34,11 @@ export function Providers({
     <Suspense>
       <SessionProvider>
         <NextThemesProvider attribute="class" defaultTheme="dark">
-            <ToastProvider />
-            <ApolloProvider client={apolloClient}>
-              <AppInitializer />
-              {children}
-            </ApolloProvider>
+          <ToastProvider />
+          <ApolloProvider client={apolloClient}>
+            <AppInitializer />
+            {children}
+          </ApolloProvider>
         </NextThemesProvider>
       </SessionProvider>
     </Suspense>

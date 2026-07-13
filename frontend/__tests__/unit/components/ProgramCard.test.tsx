@@ -335,7 +335,6 @@ describe('ProgramCard', () => {
     })
 
     it('shows fallback text when description is undefined', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const noDescProgram = { ...baseMockProgram, description: undefined as any }
 
       render(

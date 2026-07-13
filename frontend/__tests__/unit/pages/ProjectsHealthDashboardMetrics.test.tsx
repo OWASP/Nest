@@ -40,30 +40,29 @@ jest.mock('hooks/useDjangoSession', () => ({
 
 jest.mock('@heroui/react', () => ({
   ...jest.requireActual('@heroui/react'),
-  Pagination: Object.assign(
-    ({ children }) => <div>{children}</div>,
-    {
-      Content: ({ children }) => <div>{children}</div>,
-      Item: ({ children }) => <div>{children}</div>,
-      Previous: ({ children, onPress, isDisabled }) => (
-        <button onClick={onPress} disabled={isDisabled}>
-          {children}
-        </button>
-      ),
-      PreviousIcon: () => <span>Prev</span>,
-      Next: ({ children, onPress, isDisabled }) => (
-        <button onClick={() => onPress && onPress()} disabled={isDisabled}>Next Page</button>
-      ),
-      NextIcon: () => <span>Next</span>,
-      Link: ({ children, onPress, isActive }) => (
-        <button onClick={() => onPress && onPress()} aria-current={isActive ? 'page' : undefined}>
-          {children}
-        </button>
-      ),
-      Ellipsis: () => <span>...</span>,
-      Summary: ({ children }) => <div>{children}</div>,
-    }
-  ),
+  Pagination: Object.assign(({ children }) => <div>{children}</div>, {
+    Content: ({ children }) => <div>{children}</div>,
+    Item: ({ children }) => <div>{children}</div>,
+    Previous: ({ children, onPress, isDisabled }) => (
+      <button onClick={onPress} disabled={isDisabled}>
+        {children}
+      </button>
+    ),
+    PreviousIcon: () => <span>Prev</span>,
+    Next: ({ children, onPress, isDisabled }) => (
+      <button onClick={() => onPress && onPress()} disabled={isDisabled}>
+        Next Page
+      </button>
+    ),
+    NextIcon: () => <span>Next</span>,
+    Link: ({ children, onPress, isActive }) => (
+      <button onClick={() => onPress && onPress()} aria-current={isActive ? 'page' : undefined}>
+        {children}
+      </button>
+    ),
+    Ellipsis: () => <span>...</span>,
+    Summary: ({ children }) => <div>{children}</div>,
+  }),
 }))
 
 const graphQLError = new Error('GraphQL Error')

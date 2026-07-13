@@ -1,4 +1,3 @@
-import React from 'react'
 import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
@@ -11,114 +10,257 @@ import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/cr
 // Mock dependencies to isolate the component
 jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
 
-jest.mock('@heroui/react', () => ({
-  ...jest.requireActual('@heroui/react'),
-  ComboBox: Object.assign(
-    ({ children, inputValue, onInputChange, onSelectionChange, isInvalid, isRequired, allowsCustomValue, menuTrigger, className }) => {
-      const childrenWithProps = React.Children.map(children, (child) => {
-        if (!React.isValidElement(child)) return child
-        return React.cloneElement(child as React.ReactElement<any>, { _onInputChange: onInputChange, _inputValue: inputValue, _onSelectionChange: onSelectionChange })
-      })
-      return <div data-testid="combobox">{childrenWithProps}</div>
-    },
-    {
-      InputGroup: ({ children, _onInputChange, _inputValue, _onSelectionChange }) => {
-        const childrenWithProps = React.Children.map(children, (child) => {
-          if (!React.isValidElement(child)) return child
-          return React.cloneElement(child as React.ReactElement<any>, { _onInputChange, _inputValue, _onSelectionChange })
-        })
-        return <div>{childrenWithProps}</div>
+jest.mock('@heroui/react', () => {
+  const ReactActual = jest.requireActual('react')
+  return {
+    ...jest.requireActual('@heroui/react'),
+    ComboBox: Object.assign(
+      ({
+        children,
+        inputValue,
+        onInputChange,
+        onSelectionChange,
+      }: {
+        children?: React.ReactNode
+        inputValue?: string
+        onInputChange?: (value: string) => void
+        onSelectionChange?: (key: React.Key | null) => void
+      }) => {
+        const childrenWithProps = ReactActual.Children.map(
+          children,
+          (child: React.ReactElement) => {
+            if (!ReactActual.isValidElement(child)) return child
+            return ReactActual.cloneElement(child as React.ReactElement<Record<string, unknown>>, {
+              _onInputChange: onInputChange,
+              _inputValue: inputValue,
+              _onSelectionChange: onSelectionChange,
+            })
+          }
+        )
+        return <div data-testid="combobox">{childrenWithProps}</div>
       },
-      Popover: ({ children, _onInputChange, _inputValue, _onSelectionChange }) => {
-        const childrenWithProps = React.Children.map(children, (child) => {
-          if (!React.isValidElement(child)) return child
-          return React.cloneElement(child as React.ReactElement<any>, { _onSelectionChange })
-        })
-        return <div>{childrenWithProps}</div>
-      },
-      Trigger: () => null,
-    }
-  ),
-  Input: ({ id, type, placeholder, className, onChange, value, onBlur, min, max, _onInputChange, _inputValue, _tfValue, _tfOnChange, _tfRequired, _tfInvalid }: any) => (
-    <input
-      id={id}
-      type={type}
-      placeholder={placeholder}
-      className={className}
-      min={min}
-      max={max}
-      onBlur={onBlur}
-      value={_inputValue !== undefined ? _inputValue : (_tfValue !== undefined ? _tfValue : (value || ''))}
-      required={_tfRequired}
-      aria-invalid={_tfInvalid}
-      onChange={(e) => {
-        onChange?.(e)
-        _onInputChange?.(e.target.value)
-        _tfOnChange?.(e.target.value)
-      }}
-    />
-  ),
-  Label: ({ children, htmlFor, className }) => (
-    <label htmlFor={htmlFor} className={className}>{children}</label>
-  ),
-  ListBox: Object.assign(
-    ({ children, _onSelectionChange }) => {
-      const childrenWithProps = React.Children.map(children, (child) => {
-        if (!React.isValidElement(child)) return child
-        return React.cloneElement(child as React.ReactElement<any>, { _onSelectionChange })
-      })
-      return <ul>{childrenWithProps}</ul>
-    },
-    {
-      Item: ({ children, id, textValue, _onSelectionChange, ...props }) => (
-        <li
-          data-testid="listbox-item"
-          data-id={id}
-          data-key={id}
-          role="option"
-          aria-label={textValue}
-          tabIndex={0}
-          onClick={() => _onSelectionChange?.(id)}
-          {...props}
-        >
-          {textValue || children}
-        </li>
-      ),
-    }
-  ),
-  FieldError: ({ children }: any) => <span role="alert">{children}</span>,
-  TextField: ({ children, value, onChange, isRequired, isInvalid }: any) => (
-    <div data-slot="textfield" data-invalid={isInvalid} data-required={isRequired}>
-      {React.Children.map(children, (child: any) => {
-        if (!React.isValidElement(child)) return child
-        return React.cloneElement(child as React.ReactElement<any>, {
-          _tfValue: value,
-          _tfOnChange: onChange,
-          _tfRequired: isRequired,
-          _tfInvalid: isInvalid,
-        })
-      })}
-    </div>
-  ),
-  Switch: Object.assign(
-    ({ children, isSelected, onChange, 'aria-label': ariaLabel }) => (
-      <div>
-        <input
-          type="checkbox"
-          role="switch"
-          aria-label={ariaLabel}
-          checked={!!isSelected}
-          onChange={(e) => onChange?.(e.target.checked)}
-        />
+      {
+        InputGroup: ({
+          children,
+          _onInputChange,
+          _inputValue,
+          _onSelectionChange,
+        }: {
+          children?: React.ReactNode
+          _onInputChange?: (value: string) => void
+          _inputValue?: string
+          _onSelectionChange?: (key: React.Key | null) => void
+        }) => {
+          const childrenWithProps = ReactActual.Children.map(
+            children,
+            (child: React.ReactElement) => {
+              if (!ReactActual.isValidElement(child)) return child
+              return ReactActual.cloneElement(
+                child as React.ReactElement<Record<string, unknown>>,
+                { _onInputChange, _inputValue, _onSelectionChange }
+              )
+            }
+          )
+          return <div>{childrenWithProps}</div>
+        },
+        Popover: ({
+          children,
+          _onSelectionChange,
+        }: {
+          children?: React.ReactNode
+          _onSelectionChange?: (key: React.Key | null) => void
+        }) => {
+          const childrenWithProps = ReactActual.Children.map(
+            children,
+            (child: React.ReactElement) => {
+              if (!ReactActual.isValidElement(child)) return child
+              return ReactActual.cloneElement(
+                child as React.ReactElement<Record<string, unknown>>,
+                { _onSelectionChange }
+              )
+            }
+          )
+          return <div>{childrenWithProps}</div>
+        },
+        Trigger: () => null,
+      }
+    ),
+    Input: ({
+      id,
+      type,
+      placeholder,
+      className,
+      onChange,
+      value,
+      onBlur,
+      min,
+      max,
+      _onInputChange,
+      _inputValue,
+      _tfValue,
+      _tfOnChange,
+      _tfRequired,
+      _tfInvalid,
+    }: {
+      id?: string
+      type?: string
+      placeholder?: string
+      className?: string
+      onChange?: React.ChangeEventHandler<HTMLInputElement>
+      value?: string
+      onBlur?: () => void
+      min?: string | number
+      max?: string | number
+      _onInputChange?: (value: string) => void
+      _inputValue?: string
+      _tfValue?: string
+      _tfOnChange?: (value: string) => void
+      _tfRequired?: boolean
+      _tfInvalid?: boolean
+    }) => (
+      <input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        className={className}
+        min={min}
+        max={max}
+        onBlur={onBlur}
+        value={
+          _inputValue !== undefined ? _inputValue : _tfValue !== undefined ? _tfValue : value || ''
+        }
+        required={_tfRequired}
+        aria-invalid={_tfInvalid}
+        onChange={(e) => {
+          onChange?.(e)
+          _onInputChange?.(e.target.value)
+          _tfOnChange?.(e.target.value)
+        }}
+      />
+    ),
+    Label: ({
+      children,
+      htmlFor,
+      className,
+    }: {
+      children?: React.ReactNode
+      htmlFor?: string
+      className?: string
+    }) => (
+      <label htmlFor={htmlFor} className={className}>
         {children}
+      </label>
+    ),
+    ListBox: Object.assign(
+      ({
+        children,
+        _onSelectionChange,
+      }: {
+        children?: React.ReactNode
+        _onSelectionChange?: (key: string) => void
+      }) => {
+        const childrenWithProps = ReactActual.Children.map(
+          children,
+          (child: React.ReactElement) => {
+            if (!ReactActual.isValidElement(child)) return child
+            return ReactActual.cloneElement(child as React.ReactElement<Record<string, unknown>>, {
+              _onSelectionChange,
+            })
+          }
+        )
+        return <ul>{childrenWithProps}</ul>
+      },
+      {
+        Item: ({
+          children,
+          id,
+          textValue,
+          _onSelectionChange,
+          ...props
+        }: {
+          children?: React.ReactNode
+          id?: string
+          textValue?: string
+          _onSelectionChange?: (key: string) => void
+          [key: string]: unknown
+        }) => (
+          <li
+            data-testid="listbox-item"
+            data-id={id}
+            data-key={id}
+            role="option"
+            aria-selected={false}
+            aria-label={textValue}
+            tabIndex={0}
+            onClick={() => _onSelectionChange?.(id ?? '')}
+            onKeyDown={(e) => e.key === 'Enter' && _onSelectionChange?.(id ?? '')}
+            {...props}
+          >
+            {textValue ?? children}
+          </li>
+        ),
+      }
+    ),
+    FieldError: ({ children }: { children?: React.ReactNode }) => (
+      <span role="alert">{children}</span>
+    ),
+    TextField: ({
+      children,
+      value,
+      onChange,
+      isRequired,
+      isInvalid,
+    }: {
+      children?: React.ReactNode
+      value?: string
+      onChange?: (value: string) => void
+      isRequired?: boolean
+      isInvalid?: boolean
+    }) => (
+      <div data-slot="textfield" data-invalid={isInvalid} data-required={isRequired}>
+        {ReactActual.Children.map(children, (child: React.ReactElement) => {
+          if (!ReactActual.isValidElement(child)) return child
+          return ReactActual.cloneElement(child as React.ReactElement<Record<string, unknown>>, {
+            _tfValue: value,
+            _tfOnChange: onChange,
+            _tfRequired: isRequired,
+            _tfInvalid: isInvalid,
+          })
+        })}
       </div>
     ),
-    {
-      Control: ({ children }) => <div>{children}</div>,
-      Thumb: () => <span />,
-    }
-  ),
-}))
+    Switch: Object.assign(
+      ({
+        children,
+        isSelected,
+        onChange,
+        'aria-label': ariaLabel,
+      }: {
+        children?: React.ReactNode
+        isSelected?: boolean
+        onChange?: (value: boolean) => void
+        'aria-label'?: string
+      }) => (
+        <div>
+          <input
+            type="checkbox"
+            role="switch"
+            aria-label={ariaLabel}
+            checked={!!isSelected}
+            onChange={(e) => onChange?.(e.target.checked)}
+          />
+          {children}
+        </div>
+      ),
+      {
+        Control: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+        Thumb: () => <span />,
+      }
+    ),
+  }
+})
+// eslint-enable @typescript-eslint/no-explicit-any
+
 jest.mock('@heroui/select', () => ({
   Select: ({
     children,
@@ -140,9 +282,13 @@ jest.mock('@heroui/select', () => ({
         onChange={(e) => onSelectionChange?.(new Set([e.target.value]))}
       >
         <option value="">Select...</option>
-        {React.Children.map(children, (child: any, i: number) => {
+        {(children as React.ReactElement[])?.map((child: any, i: number) => {
           const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT']
-          return <option key={i} value={levels[i]}>{child?.props?.children}</option>
+          return (
+            <option key={levels[i]} value={levels[i]}>
+              {child?.props?.children}
+            </option>
+          )
         })}
       </select>
       {isInvalid && errorMessage && <span>{errorMessage}</span>}
@@ -225,7 +371,10 @@ describe('CreateModulePage', () => {
     await user.type(screen.getByLabelText(/Description/i), 'This is a test module')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
-    await user.selectOptions(screen.getByRole('combobox', { name: /Experience Level/i }), 'BEGINNER')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /Experience Level/i }),
+      'BEGINNER'
+    )
     await user.type(screen.getByLabelText(/Domains/i), 'AI, ML')
     await user.type(screen.getByLabelText(/Tags/i), 'react, graphql')
 

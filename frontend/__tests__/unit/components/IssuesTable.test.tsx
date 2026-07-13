@@ -76,7 +76,7 @@ const MockLabelList = (props: MockLabelListProps) => {
 
 jest.mock('components/LabelList', () => ({
   // Must match the module export name for the mock to be used by IssuesTable
-  // eslint-disable-next-line @typescript-eslint/naming-convention -- component export name
+
   LabelList: jest.fn((props: MockLabelListProps) => <MockLabelList {...props} />),
 }))
 

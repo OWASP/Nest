@@ -321,16 +321,16 @@ const ModuleForm = ({
                 )}
                 <div className="flex w-full min-w-0 items-center gap-3 lg:col-span-2">
                   <Switch
-                      aria-label="Mentees can manage deadlines"
-                      isSelected={formData.menteeCanManageDeadlines}
-                      onChange={(value) =>
-                        setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
-                      }
-                    >
-                      <Switch.Control>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                    </Switch>
+                    aria-label="Mentees can manage deadlines"
+                    isSelected={formData.menteeCanManageDeadlines}
+                    onChange={(value) =>
+                      setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
+                    }
+                  >
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch>
                   <div>
                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                       Mentees can manage deadlines
@@ -372,7 +372,7 @@ export const ProjectSelector = ({
   const client = useApolloClient()
   const [inputValue, setInputValue] = useState(defaultName || '')
   const [items, setItems] = useState<{ id: string; name: string }[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [_isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (value && defaultName && defaultName !== inputValue) {
@@ -454,37 +454,37 @@ export const ProjectSelector = ({
   return (
     <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <ComboBox
-          isRequired
-          isInvalid={shouldShowInvalid}
-          inputValue={inputValue}
-          selectedKey={value || null}
-          onInputChange={handleInputChange}
-          onSelectionChange={handleSelectionChange}
-          menuTrigger="input"
-          allowsCustomValue={false}
-          className="w-full min-w-0"
-        >
-          <Label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-            Project Name
-          </Label>
-          <ComboBox.InputGroup>
-            <Input
-              id="projectSelector"
-              placeholder="Start typing project name..."
-              className="bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-            />
-          </ComboBox.InputGroup>
-          <ComboBox.Popover>
-            <ListBox>
-              {items.map((project) => (
-                <ListBox.Item key={project.id} id={project.id} textValue={project.name}>
-                  {project.name}
-                </ListBox.Item>
-              ))}
-            </ListBox>
-          </ComboBox.Popover>
-          {shouldShowInvalid && displayError && <FieldError>{displayError}</FieldError>}
-        </ComboBox>
+        isRequired
+        isInvalid={shouldShowInvalid}
+        inputValue={inputValue}
+        selectedKey={value || null}
+        onInputChange={handleInputChange}
+        onSelectionChange={handleSelectionChange}
+        menuTrigger="input"
+        allowsCustomValue={false}
+        className="w-full min-w-0"
+      >
+        <Label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+          Project Name
+        </Label>
+        <ComboBox.InputGroup>
+          <Input
+            id="projectSelector"
+            placeholder="Start typing project name..."
+            className="bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+          />
+        </ComboBox.InputGroup>
+        <ComboBox.Popover>
+          <ListBox>
+            {items.map((project) => (
+              <ListBox.Item key={project.id} id={project.id} textValue={project.name}>
+                {project.name}
+              </ListBox.Item>
+            ))}
+          </ListBox>
+        </ComboBox.Popover>
+        {shouldShowInvalid && displayError && <FieldError>{displayError}</FieldError>}
+      </ComboBox>
     </div>
   )
 }
