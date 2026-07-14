@@ -30,7 +30,7 @@ class CertificateQuery:
         if getattr(user, "github_user", None) is None:
             return []
 
-        return list(
+        return (
             Certificate.objects.select_related(
                 "github_user",
             )
