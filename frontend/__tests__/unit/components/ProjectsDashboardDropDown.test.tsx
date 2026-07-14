@@ -183,7 +183,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       }).not.toThrow()
 
       expect(screen.getByTestId('dropdown')).toBeInTheDocument()
-      expect(screen.getByTestId('dropdown-button')).toBeInTheDocument()
+      expect(screen.getByTestId('dropdown-trigger')).toBeInTheDocument()
       expect(screen.getByText('Filter')).toBeInTheDocument()
     })
 
@@ -511,9 +511,8 @@ describe('ProjectsDashboardDropDown Component', () => {
     it('renders button with proper structure for accessibility', () => {
       render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
-      const button = screen.getByTestId('dropdown-button')
-      expect(button).toBeInTheDocument()
-      expect(button.tagName.toLowerCase()).toBe('button')
+      const trigger = screen.getByTestId('dropdown-trigger')
+      expect(trigger).toBeInTheDocument()
     })
 
     it('maintains proper structure for screen readers', () => {
@@ -588,13 +587,6 @@ describe('ProjectsDashboardDropDown Component', () => {
       const menu = screen.getByTestId('dropdown-menu')
       expect(menu).toHaveAttribute('data-selection-mode', 'single')
       expect(menu).toHaveAttribute('data-selected-keys', 'TestKey')
-    })
-
-    it('applies correct variant to button', () => {
-      render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
-
-      const button = screen.getByTestId('dropdown-button')
-      expect(button).toHaveAttribute('data-variant', 'ghost')
     })
 
     it('renders proper flex layout structure', () => {
