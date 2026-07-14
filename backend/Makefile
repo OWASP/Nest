@@ -122,7 +122,7 @@ fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy c
 		--rm \
 		backend python -m scripts.fetch_nest_dump
 
-load-data: fetch-nest-dump ## Load initial data from fixtures
+load-data: ## Load initial data from fixtures
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/bod.dump" $(MAKE) exec-db-command
 
