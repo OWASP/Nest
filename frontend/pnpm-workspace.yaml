@@ -42,7 +42,7 @@ minimumReleaseAgeExclude:
   - webpack@5.104.1
   - ws@8.21.0
   - '@heroui/react@3.2.2'
-  - '@heroui/styles@3.2.1'
+  - '@heroui/styles@3.2.2'
 
 overrides:
   '@opentelemetry/core': 2.8.0
