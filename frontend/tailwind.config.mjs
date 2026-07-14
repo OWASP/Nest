@@ -1,5 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-import { heroui } from '@heroui/react'
 import tailwindcssAnimate from 'tailwindcss-animate'
 
 export default {
@@ -67,5 +66,5 @@ export default {
     },
   },
   darkMode: 'class',
-  plugins: [heroui(), tailwindcssAnimate],
+  plugins: [tailwindcssAnimate],
 }

@@ -345,7 +345,7 @@ const MetricsPage: FC = () => {
                     ))}
                     <Pagination.Item>
                       <Pagination.Next
-                        isDisabled={currentPage === totalPages}
+                        isDisabled={currentPage >= totalPages}
                         onPress={() => goToPage(currentPage + 1)}
                       >
                         <Pagination.NextIcon />

@@ -372,7 +372,6 @@ export const ProjectSelector = ({
   const client = useApolloClient()
   const [inputValue, setInputValue] = useState(defaultName || '')
   const [items, setItems] = useState<{ id: string; name: string }[]>([])
-  const [_isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (value && defaultName && defaultName !== inputValue) {
@@ -389,11 +388,9 @@ export const ProjectSelector = ({
       const trimmedQuery = query.trim()
       if (trimmedQuery.length < 2) {
         setItems([])
-        setIsLoading(false)
         return
       }
 
-      setIsLoading(true)
       try {
         const { data } = await client.query({
           query: SearchProjectNamesDocument,
@@ -411,8 +408,6 @@ export const ProjectSelector = ({
           err
         )
         setItems([])
-      } finally {
-        setIsLoading(false)
       }
     }, 300),
     [client, value]
