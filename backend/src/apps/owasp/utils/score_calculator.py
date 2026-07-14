@@ -272,7 +272,7 @@ class ContributionScoreCalculator:
         )
 
         contribution_scores = []
-        pending_certificates = []
+        pending_scores = []
         failed_certificates: list[tuple[str, Exception]] = []
 
         for user in users_with_contributions:
@@ -300,13 +300,13 @@ class ContributionScoreCalculator:
                 contribution_scores.append(score)
                 created_count += 1
 
-            pending_certificates.append(score)
+            pending_scores.append(score)
 
             if len(contribution_scores) >= self.BATCH_SIZE:
                 BulkSaveModel.bulk_save(
                     ContributionScore, contribution_scores, fields=["value", "tier"]
                 )
-                for pending_score in pending_certificates:
+                for pending_score in pending_scores:
                     try:
                         Certificate.issue_certificate(
                             pending_score.github_user,
@@ -325,14 +325,14 @@ class ContributionScoreCalculator:
                             pending_score.github_user.login,
                         )
                         failed_certificates.append((pending_score.github_user.login, e))
-                pending_certificates.clear()
+                pending_scores.clear()
                 contribution_scores.clear()
 
         if contribution_scores:
             BulkSaveModel.bulk_save(
                 ContributionScore, contribution_scores, fields=["value", "tier"]
             )
-            for pending_score in pending_certificates:
+            for pending_score in pending_scores:
                 try:
                     Certificate.issue_certificate(
                         pending_score.github_user,
@@ -345,7 +345,7 @@ class ContributionScoreCalculator:
                         pending_score.github_user.login,
                     )
                     failed_certificates.append((pending_score.github_user.login, e))
-            pending_certificates.clear()
+            pending_scores.clear()
             contribution_scores.clear()
 
         logger.info(
