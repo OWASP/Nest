@@ -56,7 +56,8 @@ const MyCertificatePage: React.FC = () => {
     return <LoadingSpinner />
   }
 
-  const certificate = data?.myCertificate
+  const certificates = data?.myCertificates ?? []
+  const certificate = certificates[0]
 
   if (!certificate) {
     return (

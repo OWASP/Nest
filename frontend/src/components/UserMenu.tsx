@@ -27,7 +27,8 @@ export default function UserMenu({
   const [getMyCertificate, { data: certificateData }] = useLazyQuery(GetMyCertificateDocument, {
     fetchPolicy: 'cache-first',
   })
-  const hasCertificate = !!certificateData?.myCertificate
+  const hasCertificate =
+    !!certificateData?.myCertificates && certificateData.myCertificates.length > 0
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

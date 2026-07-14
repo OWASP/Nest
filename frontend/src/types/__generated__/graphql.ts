@@ -740,7 +740,7 @@ export type Query = {
   managementProgramModules: Array<ModuleNode>;
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
-  myCertificate?: Maybe<CertificateNode>;
+  myCertificates: Array<CertificateNode>;
   myPrograms: PaginatedPrograms;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;

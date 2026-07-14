@@ -19,7 +19,7 @@ export const GET_CERTIFICATE = gql`
 
 export const GET_MY_CERTIFICATE = gql`
   query GetMyCertificate {
-    myCertificate {
+    myCertificates {
       id
       tier
       issuedAt
