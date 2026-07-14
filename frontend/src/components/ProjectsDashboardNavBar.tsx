@@ -29,7 +29,7 @@ const ProjectsDashboardNavBar: React.FC = () => {
           <li
             key={href}
             className={`w-full rounded ${
-              isActive(href) ? 'text-align-left bg-gray-200 dark:bg-gray-800' : ''
+              isActive(href) ? 'bg-gray-200 text-left dark:bg-gray-800' : ''
             }`}
           >
             <Link
