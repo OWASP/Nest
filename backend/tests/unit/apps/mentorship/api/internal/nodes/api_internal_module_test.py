@@ -141,7 +141,7 @@ class TestModuleNodeResolvers:
         """Test the mentors resolver."""
         mentors = mock_module_node.mock_mentors()
         assert len(mentors) == 2
-        mock_module_node.mentors.order_by.assert_called_once_with( "github_user__login" )
+        mock_module_node.mentors.order_by.assert_called_once_with("github_user__login")
 
     def test_module_node_mentees(self, mock_module_node):
         """Test the mentees resolver."""
