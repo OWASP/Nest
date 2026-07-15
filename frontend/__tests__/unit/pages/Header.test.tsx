@@ -38,7 +38,6 @@ jest.mock('react-icons/fa', () => ({
 
 // Mock HeroUI Button
 jest.mock('@heroui/button', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Button: ({ children, onPress, className, ...props }: any) => (
     <button type="button" onClick={onPress} className={className} {...props}>
       {children}
@@ -54,7 +53,6 @@ jest.mock('components/ModeToggle', () => {
 })
 
 jest.mock('components/NavButton', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function MockNavButton({ href, text, className }: any) {
     return (
       <a href={href} className={className} data-testid="nav-button">
@@ -65,7 +63,6 @@ jest.mock('components/NavButton', () => {
 })
 
 jest.mock('components/NavDropDown', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function MockNavDropdown({ link, pathname }: any) {
     return (
       <div data-testid="nav-dropdown">
@@ -126,13 +123,11 @@ jest.mock('utils/constants', () => {
 
 // Mock utility function
 jest.mock('utils/utility', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cn: (...classes: any[]) => classes.filter(Boolean).join(' '),
 }))
 
 // Mock next-auth
 jest.mock('next-auth/react', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SessionProvider: ({ children }: any) => children,
   useSession: () => ({
     data: null,

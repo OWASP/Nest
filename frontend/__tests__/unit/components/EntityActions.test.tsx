@@ -898,7 +898,6 @@ describe('EntityActions', () => {
       }
 
       mockDeleteMutation.mockImplementationOnce(({ update }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (update) update(mockCache as any)
         return Promise.resolve({ data: { deleteModule: true } })
       })
@@ -1046,7 +1045,6 @@ describe('EntityActions', () => {
       }
 
       mockDeleteMutation.mockImplementationOnce(({ update }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (update) update(mockCache as any)
         return Promise.resolve({ data: { deleteModule: true } })
       })

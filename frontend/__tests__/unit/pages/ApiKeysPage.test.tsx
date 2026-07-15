@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { useQuery, useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { mockApiKeys, mockCreateApiKeyResult } from '@mockData/mockApiKeysData'

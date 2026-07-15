@@ -40,11 +40,29 @@ jest.mock('hooks/useDjangoSession', () => ({
 
 jest.mock('@heroui/react', () => ({
   ...jest.requireActual('@heroui/react'),
-  Pagination: ({ page, onChange }) => (
-    <div>
-      <button onClick={() => onChange(page + 1)}>Next Page</button>
-    </div>
-  ),
+  Pagination: Object.assign(({ children }) => <div>{children}</div>, {
+    Content: ({ children }) => <div>{children}</div>,
+    Item: ({ children }) => <div>{children}</div>,
+    Previous: ({ children, onPress, isDisabled }) => (
+      <button onClick={onPress} disabled={isDisabled}>
+        {children}
+      </button>
+    ),
+    PreviousIcon: () => <span>Prev</span>,
+    Next: ({ children, onPress, isDisabled }) => (
+      <button onClick={() => onPress && onPress()} disabled={isDisabled}>
+        Next Page
+      </button>
+    ),
+    NextIcon: () => <span>Next</span>,
+    Link: ({ children, onPress, isActive }) => (
+      <button onClick={() => onPress && onPress()} aria-current={isActive ? 'page' : undefined}>
+        {children}
+      </button>
+    ),
+    Ellipsis: () => <span>...</span>,
+    Summary: ({ children }) => <div>{children}</div>,
+  }),
 }))
 
 const graphQLError = new Error('GraphQL Error')
@@ -196,7 +214,7 @@ describe('MetricsPage', () => {
     })
 
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
+      data: { ...mockHealthMetricsData, projectHealthMetricsDistinctLength: 25 },
       loading: false,
       error: null,
       fetchMore: mockFetchMore,
@@ -623,7 +641,7 @@ describe('MetricsPage', () => {
     })
 
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
+      data: { ...mockHealthMetricsData, projectHealthMetricsDistinctLength: 25 },
       loading: false,
       error: null,
       fetchMore: mockFetchMore,

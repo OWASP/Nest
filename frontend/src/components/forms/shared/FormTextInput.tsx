@@ -1,15 +1,6 @@
 'use client'
 
-import { Input } from '@heroui/react'
-
-const COMMON_INPUT_CLASS_NAMES = {
-  base: 'w-full min-w-0',
-  label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-  input: 'text-gray-800 dark:text-gray-200',
-  inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-  helperWrapper: 'min-w-0 max-w-full w-full',
-  errorMessage: 'break-words whitespace-normal max-w-full w-full',
-}
+import { FieldError, Input, Label, TextField } from '@heroui/react'
 
 interface FormTextInputProps {
   id: string
@@ -42,21 +33,30 @@ export const FormTextInput = ({
 }: FormTextInputProps) => {
   return (
     <div className={className || 'w-full min-w-0'} style={{ maxWidth: '100%', overflow: 'hidden' }}>
-      <Input
+      <TextField
         id={id}
-        type={type}
-        label={label}
-        labelPlacement="outside"
-        placeholder={placeholder}
-        value={value}
-        onValueChange={onValueChange}
-        onBlur={onBlur}
         isRequired={required}
         isInvalid={touched && !!error}
-        errorMessage={touched ? error : undefined}
-        min={min}
-        classNames={COMMON_INPUT_CLASS_NAMES}
-      />
+        value={value}
+        onChange={onValueChange}
+      >
+        <Label htmlFor={id} className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+          {label}
+        </Label>
+        <Input
+          id={id}
+          type={type}
+          placeholder={placeholder}
+          onBlur={onBlur}
+          min={min}
+          className="w-full min-w-0 bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+        />
+        {touched && error && (
+          <FieldError className="w-full max-w-full text-sm break-words text-red-500">
+            {error}
+          </FieldError>
+        )}
+      </TextField>
     </div>
   )
 }

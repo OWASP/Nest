@@ -29,9 +29,7 @@ jest.mock('@dnd-kit/core', () => ({
   closestCenter: jest.fn(),
   useSensor: jest.fn(() => ({})),
   useSensors: jest.fn(() => []),
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   KeyboardSensor: jest.fn(),
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   PointerSensor: jest.fn(),
 }))
 
@@ -59,7 +57,6 @@ jest.mock('@dnd-kit/sortable', () => ({
 }))
 
 jest.mock('@dnd-kit/utilities', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   CSS: { Transform: { toString: () => null } },
 }))
 

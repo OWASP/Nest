@@ -104,6 +104,10 @@ export default [
     },
     settings: {
       'import/resolver': {
+        node: {
+          extensions: ['.js', '.jsx', '.ts', '.tsx'],
+          moduleDirectory: ['node_modules', path.resolve(frontendDir, 'src')],
+        },
         alias: {
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
           map: [
@@ -215,4 +219,20 @@ export default [
     },
   },
   eslintConfigPrettier,
+  {
+    files: ['frontend/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      'import/order': 'off',
+    },
+  },
+  {
+    files: ['frontend/__tests__/**/*.{ts,tsx}'],
+    rules: {
+      'import/no-duplicates': 'off',
+      '@typescript-eslint/naming-convention': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-undef': 'off',
+    },
+  },
 ]

@@ -74,11 +74,19 @@ jest.mock('@heroui/react', () => ({
       {children}
     </div>
   ),
-  DropdownSection: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <fieldset data-testid="dropdown-section" data-title={title}>
-      <legend id={`section-${title}`} className="section-title">
-        {title}
-      </legend>
+  Header: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dropdown-section-header">{children}</div>
+  ),
+  DropdownSection: ({
+    children,
+    title,
+    'aria-label': ariaLabel,
+  }: {
+    children: React.ReactNode
+    title?: string
+    'aria-label'?: string
+  }) => (
+    <fieldset data-testid="dropdown-section" data-title={ariaLabel || title}>
       {children}
     </fieldset>
   ),
@@ -175,7 +183,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       }).not.toThrow()
 
       expect(screen.getByTestId('dropdown')).toBeInTheDocument()
-      expect(screen.getByTestId('dropdown-button')).toBeInTheDocument()
+      expect(screen.getByTestId('dropdown-trigger')).toBeInTheDocument()
       expect(screen.getByText('Filter')).toBeInTheDocument()
     })
 
@@ -503,9 +511,8 @@ describe('ProjectsDashboardDropDown Component', () => {
     it('renders button with proper structure for accessibility', () => {
       render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
-      const button = screen.getByTestId('dropdown-button')
-      expect(button).toBeInTheDocument()
-      expect(button.tagName.toLowerCase()).toBe('button')
+      const trigger = screen.getByTestId('dropdown-trigger')
+      expect(trigger).toBeInTheDocument()
     })
 
     it('maintains proper structure for screen readers', () => {
@@ -580,13 +587,6 @@ describe('ProjectsDashboardDropDown Component', () => {
       const menu = screen.getByTestId('dropdown-menu')
       expect(menu).toHaveAttribute('data-selection-mode', 'single')
       expect(menu).toHaveAttribute('data-selected-keys', 'TestKey')
-    })
-
-    it('applies correct variant to button', () => {
-      render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
-
-      const button = screen.getByTestId('dropdown-button')
-      expect(button).toHaveAttribute('data-variant', 'solid')
     })
 
     it('renders proper flex layout structure', () => {
