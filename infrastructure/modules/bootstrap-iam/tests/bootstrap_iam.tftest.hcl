@@ -77,7 +77,7 @@ run "test_autoscaling_permissions_in_part_two" {
       can(regex("application-autoscaling:PutScalingPolicy", data.aws_iam_policy_document.part_two.json)),
       can(regex("cloudwatch:PutMetricAlarm", data.aws_iam_policy_document.part_two.json)),
       can(regex("iam:CreateServiceLinkedRole", data.aws_iam_policy_document.part_two.json)),
-      can(regex("TargetTracking-service/nest-staging-", data.aws_iam_policy_document.part_two.json)),
+      can(regex("TargetTracking-service/${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_two.json)),
     ])
     error_message = "part_two must include environment-scoped ECS auto-scaling permissions."
   }
@@ -101,9 +101,27 @@ run "test_environment_scoped_resources" {
 
   assert {
     condition = alltrue([
-      can(regex("nest-staging-", data.aws_iam_policy_document.part_one.json)),
-      !can(regex("nest-production-", data.aws_iam_policy_document.part_one.json)),
+      can(regex("${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_one.json)),
+      !can(regex("${var.project_name}-production-", data.aws_iam_policy_document.part_one.json)),
     ])
     error_message = "Policy documents must only reference the configured environment."
+  }
+}
+
+run "test_production_environment_scoped_resources" {
+  command = plan
+
+  variables {
+    environment = "production"
+  }
+
+  assert {
+    condition = alltrue([
+      can(regex("${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_one.json)),
+      can(regex("TargetTracking-service/${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_two.json)),
+      !can(regex("${var.project_name}-staging-", data.aws_iam_policy_document.part_one.json)),
+      !can(regex("${var.project_name}-staging-", data.aws_iam_policy_document.part_two.json)),
+    ])
+    error_message = "Production policy documents must only reference production resources."
   }
 }

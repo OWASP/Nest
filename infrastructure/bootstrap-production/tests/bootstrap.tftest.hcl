@@ -7,7 +7,7 @@ provider "aws" {
 }
 
 override_data {
-  target = data.aws_caller_identity.current
+  target = module.bootstrap_iam.data.aws_caller_identity.current
   values = {
     account_id = "160885282306"
     arn        = "arn:aws:iam::160885282306:user/nest-bootstrap"
@@ -20,20 +20,23 @@ variables {
   project_name         = "nest"
 }
 
-run "test_part_one_policy_size_production" {
+run "test_production_policy_names" {
   command = plan
 
   assert {
-    condition     = module.bootstrap_iam.part_one_policy_arn != ""
-    error_message = "Production part_one policy must be created."
+    condition = alltrue([
+      module.bootstrap_iam.part_one_policy_name == "nest-production-part-one-terraform",
+      module.bootstrap_iam.part_two_policy_name == "nest-production-part-two-terraform",
+    ])
+    error_message = "Production bootstrap must only create production policies."
   }
 }
 
-run "test_production_secrets_manager_namespace" {
+run "test_production_terraform_role_name" {
   command = plan
 
   assert {
-    condition     = module.bootstrap_iam.terraform_role_arn != ""
-    error_message = "Production Terraform role must be created."
+    condition     = module.bootstrap_iam.terraform_role_name == "nest-production-terraform"
+    error_message = "Production bootstrap must only create the production Terraform role."
   }
 }
