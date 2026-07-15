@@ -1,0 +1,109 @@
+provider "aws" {
+  access_key                  = "mock"
+  region                      = "us-east-2"
+  secret_key                  = "mock"
+  skip_credentials_validation = true
+  skip_requesting_account_id  = true
+}
+
+override_data {
+  target = data.aws_caller_identity.current
+  values = {
+    account_id = "160885282306"
+    arn        = "arn:aws:iam::160885282306:user/nest-bootstrap"
+    user_id    = "EXAMPLE"
+  }
+}
+
+variables {
+  aws_role_external_id = "test-external-id"
+  environment          = "staging"
+  project_name         = "nest"
+}
+
+run "test_part_one_policy_size" {
+  command = plan
+
+  assert {
+    condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= 6144
+    error_message = "part_one policy exceeds the IAM managed policy size limit of 6144 characters."
+  }
+}
+
+run "test_part_two_policy_size" {
+  command = plan
+
+  assert {
+    condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= 6144
+    error_message = "part_two policy exceeds the IAM managed policy size limit of 6144 characters."
+  }
+}
+
+run "test_secrets_manager_namespace" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      strcontains(
+        data.aws_iam_policy_document.part_two.json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:${var.project_name}-${var.environment}-*",
+      ),
+      strcontains(
+        data.aws_iam_policy_document.part_two.json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:/${var.project_name}/${var.environment}/*",
+      ),
+    ])
+    error_message = "The Terraform policy must allow management of the environment Secrets Manager namespace."
+  }
+}
+
+run "test_minified_json_is_smaller_than_pretty_json" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      length(data.aws_iam_policy_document.part_one.minified_json) < length(data.aws_iam_policy_document.part_one.json),
+      length(data.aws_iam_policy_document.part_two.minified_json) < length(data.aws_iam_policy_document.part_two.json),
+    ])
+    error_message = "IAM policies must use minified_json because pretty JSON exceeds the AWS size limit."
+  }
+}
+
+run "test_autoscaling_permissions_in_part_two" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      can(regex("application-autoscaling:PutScalingPolicy", data.aws_iam_policy_document.part_two.json)),
+      can(regex("cloudwatch:PutMetricAlarm", data.aws_iam_policy_document.part_two.json)),
+      can(regex("iam:CreateServiceLinkedRole", data.aws_iam_policy_document.part_two.json)),
+      can(regex("TargetTracking-service/nest-staging-", data.aws_iam_policy_document.part_two.json)),
+    ])
+    error_message = "part_two must include environment-scoped ECS auto-scaling permissions."
+  }
+}
+
+run "test_autoscaling_permissions_not_in_part_one" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      can(regex("application-autoscaling:DescribeScalingActivities", data.aws_iam_policy_document.part_one.json)),
+      !can(regex("application-autoscaling:PutScalingPolicy", data.aws_iam_policy_document.part_one.json)),
+      !can(regex("cloudwatch:PutMetricAlarm", data.aws_iam_policy_document.part_one.json)),
+    ])
+    error_message = "part_one must include DescribeScalingActivities discovery and exclude ECS auto-scaling management permissions."
+  }
+}
+
+run "test_environment_scoped_resources" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      can(regex("nest-staging-", data.aws_iam_policy_document.part_one.json)),
+      !can(regex("nest-production-", data.aws_iam_policy_document.part_one.json)),
+    ])
+    error_message = "Policy documents must only reference the configured environment."
+  }
+}
