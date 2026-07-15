@@ -1,4 +1,4 @@
-FROM node:24.14-alpine3.23 AS base
+FROM node:24.18-alpine3.23@sha256:595398b0081eacda8e1c4c5b97b76cd1020e4d58a8ebcb4843b9bca1e79e7436 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -9,6 +9,8 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
     COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_CONFIG_FETCH_RETRIES=5 \
+    PNPM_CONFIG_FETCH_TIMEOUT=30000 \
     PNPM_HOME="/pnpm"
 
 ARG ENV_FILE=.env
@@ -26,12 +28,12 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
 
 WORKDIR /app
 
-COPY --chmod=444 package.json pnpm-lock.yaml ./
+COPY --chmod=444 package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile
 
-COPY --chmod=444 .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
 COPY --chmod=444 ${ENV_FILE} ./.env
 COPY --chmod=555 public public
 COPY --chmod=555 src src
@@ -100,7 +102,8 @@ RUN npm pack tar@7.5.11 && \
     rm -rf package picomatch-4.0.4.tgz && \
     grep -q '"version": "4.0.4"' "${PICOMATCH_DIR}/package.json" && \
     addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 -G nodejs nextjs
+    adduser --system --uid 1001 -G nodejs nextjs && \
+    rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
 
 WORKDIR /app
 

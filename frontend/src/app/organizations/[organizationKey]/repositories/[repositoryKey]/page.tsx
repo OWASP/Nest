@@ -9,8 +9,15 @@ import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
+import SponsorCard from 'components/SponsorCard'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams<{
@@ -104,23 +111,42 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      entityKey={repository.project?.key}
-      isArchived={repository.isArchived}
-      languages={repository.languages}
-      projectName={repository.project?.name}
-      pullRequests={recentPullRequests ?? []}
-      recentIssues={recentIssues ?? []}
-      recentMilestones={repository.recentMilestones ?? []}
-      recentReleases={repository.releases ?? []}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <PageWrapper>
+      <Header
+        title={repository.name}
+        isActive={!repository.isArchived}
+        isArchived={repository.isArchived}
+        showArchivedBadge={true}
+      />
+
+      <Summary summary={repository.description} />
+
+      <Metadata
+        details={repositoryDetails}
+        stats={RepositoryStats}
+        detailsTitle="Repository Details"
+      />
+
+      <Tags languages={repository.languages} topics={repository.topics} />
+
+      <Contributors topContributors={topContributors} />
+
+      <IssuesMilestones
+        recentIssues={recentIssues ?? []}
+        recentMilestones={repository.recentMilestones ?? []}
+        pullRequests={recentPullRequests ?? []}
+        recentReleases={repository.releases ?? []}
+        showAvatar={true}
+      />
+
+      {repository.project?.key && repository.project?.name && (
+        <SponsorCard
+          target={repository.project.key}
+          title={repository.project.name}
+          type="project"
+        />
+      )}
+    </PageWrapper>
   )
 }
 export default RepositoryDetailsPage

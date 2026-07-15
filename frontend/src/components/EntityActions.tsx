@@ -10,7 +10,7 @@ import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 
 const DELETE_MODULE_MUTATION = gql`
   mutation DeleteModule($programKey: String!, $moduleKey: String!) {
@@ -30,6 +30,7 @@ interface EntityActionsProps {
   setStatus?: (newStatus: ProgramStatusEnum) => void | Promise<void>
   isAdmin?: boolean
   isMentor?: boolean
+  isMentee?: boolean
 }
 
 const EntityActions: React.FC<EntityActionsProps> = ({
@@ -40,6 +41,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   setStatus,
   isAdmin = false,
   isMentor = false,
+  isMentee = false,
 }) => {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -97,17 +99,17 @@ const EntityActions: React.FC<EntityActionsProps> = ({
 
         update(cache) {
           const existing = cache.readQuery({
-            query: GetProgramAndModulesDocument,
+            query: GetManagementProgramAndModulesDocument,
             variables: { programKey },
           })
 
-          if (existing?.getProgramModules) {
+          if (existing?.managementProgramModules) {
             cache.writeQuery({
-              query: GetProgramAndModulesDocument,
+              query: GetManagementProgramAndModulesDocument,
               variables: { programKey },
               data: {
                 ...existing,
-                getProgramModules: existing.getProgramModules.filter(
+                managementProgramModules: existing.managementProgramModules.filter(
                   (module) => module.key !== moduleKey
                 ),
               },
@@ -164,8 +166,10 @@ const EntityActions: React.FC<EntityActionsProps> = ({
             : []),
         ]
       : [
-          { key: 'edit_module', label: 'Edit' },
-          ...(isAdmin || isMentor ? [{ key: 'view_issues', label: 'View Issues' }] : []),
+          ...(isAdmin || isMentor ? [{ key: 'edit_module', label: 'Edit' }] : []),
+          ...(isAdmin || isMentor || isMentee
+            ? [{ key: 'view_issues', label: 'View Issues' }]
+            : []),
           ...(isAdmin
             ? [{ key: 'delete_module', label: 'Delete', className: 'text-red-500' }]
             : []),

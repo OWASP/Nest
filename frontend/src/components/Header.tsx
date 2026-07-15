@@ -24,6 +24,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const logoSrc = '/img/logo_dark.png'
 
   useEffect(() => {
     const handleResize = () => {
@@ -70,7 +71,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 width={64}
                 height={64}
                 priority={true}
-                src={'/img/logo_dark.png'}
+                src={logoSrc}
                 className="h-full w-auto object-contain"
                 alt="OWASP Logo"
               />
@@ -167,7 +168,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     width={64}
                     height={64}
                     priority={true}
-                    src={'/img/logo_dark.png'}
+                    src={logoSrc}
                     className="h-full w-auto object-contain"
                     alt="OWASP Logo"
                   />

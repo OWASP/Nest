@@ -1,17 +1,20 @@
-include backend/apps/ai/Makefile
-include backend/apps/github/Makefile
-include backend/apps/mentorship/Makefile
-include backend/apps/nest/Makefile
-include backend/apps/owasp/Makefile
-include backend/apps/slack/Makefile
+include backend/src/apps/ai/Makefile
+include backend/src/apps/github/Makefile
+include backend/src/apps/mentorship/Makefile
+include backend/src/apps/nest/Makefile
+include backend/src/apps/owasp/Makefile
+include backend/src/apps/slack/Makefile
 
-.PHONY: fetch-nest-dump sbom-backend-image upload-nest-dump
+.PHONY: audit-backend-dependencies build-cluster-fuzz-lite build-cluster-fuzz-lite-fuzzers \
+	clean-cluster-fuzz-lite compile-backend-requirements fetch-nest-dump sbom-backend-image \
+	test-cluster-fuzz-lite upload-nest-dump
 
 ##@ Backend
 
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
 		--no-cache \
+		--target backend \
 		-f docker/backend/Dockerfile \
 		-t nest-backend-local \
 		backend
@@ -28,7 +31,6 @@ clean-backend-docker:
 	@docker container rm -f nest-cache >/dev/null 2>&1 || true
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
 	@docker container rm -f nest-worker >/dev/null 2>&1 || true
-	@docker image rm -f nest-backend:base >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker image rm -f nest-snapshot-video >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
@@ -233,13 +235,13 @@ sync-data: \
 
 test-backend: ## Run backend tests
 test-backend:
-	@DOCKER_BUILDKIT=1 docker build \
+	@DOCKER_BUILDKIT=1 docker build -q \
 		--cache-from nest-test-backend \
-		-f docker/backend/Dockerfile.test backend \
-		-t nest-test-backend
+		-f docker/backend/Dockerfile.unit-tests backend \
+		-t nest-test-backend 1>/dev/null
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
-		--env-file backend/.env.example \
+		--env-file backend/.env.unit-tests \
 		--rm nest-test-backend pytest
 
 test-fuzz: ## Run fuzz tests (REST API and GraphQL)
@@ -253,6 +255,73 @@ test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
+
+CFL_DOCKERFILE ?= .clusterfuzzlite/Dockerfile
+CFL_IMAGE ?= nest-cluster-fuzz-lite
+CFL_OUT_DIR ?= $(CURDIR)/.clusterfuzzlite/out
+CFL_PLATFORM ?= linux/amd64
+CFL_SANITIZER ?= address
+CFL_SECONDS ?= 60
+CFL_TARGETS ?= text query_parser
+
+build-cluster-fuzz-lite: ## Build the ClusterFuzzLite Docker image
+	@docker build \
+		--platform $(CFL_PLATFORM) \
+		-f $(CFL_DOCKERFILE) \
+		-t $(CFL_IMAGE) \
+		$(CURDIR)
+
+build-cluster-fuzz-lite-fuzzers: build-cluster-fuzz-lite ## Compile ClusterFuzzLite fuzz targets
+	@mkdir -p $(CFL_OUT_DIR)
+	@docker run \
+		--platform $(CFL_PLATFORM) \
+		--rm \
+		-e ARCH=x86_64 \
+		-e FUZZING_ENGINE=libfuzzer \
+		-e OUT=/out \
+		-e SANITIZER=$(CFL_SANITIZER) \
+		-v $(CFL_OUT_DIR):/out \
+		$(CFL_IMAGE) \
+		bash build.sh
+
+test-cluster-fuzz-lite: build-cluster-fuzz-lite-fuzzers ## Run ClusterFuzzLite fuzz targets locally
+	@for target in $(CFL_TARGETS); do \
+		echo "Running ClusterFuzzLite target: $$target ($(CFL_SECONDS)s)"; \
+		docker run \
+		--platform $(CFL_PLATFORM) \
+		--rm \
+		-e ARCH=x86_64 \
+		-e FUZZING_ENGINE=libfuzzer \
+		-e OUT=/out \
+		-e SANITIZER=$(CFL_SANITIZER) \
+		-v $(CFL_OUT_DIR):/out \
+		$(CFL_IMAGE) \
+		/out/$$target -max_total_time=$(CFL_SECONDS); \
+	done
+
+clean-cluster-fuzz-lite: ## Remove locally built ClusterFuzzLite artifacts
+	@rm -rf $(CFL_OUT_DIR)
+	@docker image rm -f $(CFL_IMAGE) >/dev/null 2>&1 || true
+
+compile-backend-requirements: ## Regenerate hashed pip requirements from backend/requirements/*.in
+	@docker run \
+		--rm \
+		--user $$(id -u):$$(id -g) \
+		-e HOME=/tmp \
+		-e PIP_ROOT_USER_ACTION=ignore \
+		-v "$(CURDIR):/work" \
+		-w /work \
+		$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
+		sh -c 'python -m pip install --no-warn-script-location --quiet pip-tools && \
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in && \
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/cluster-fuzz-lite.txt backend/requirements/cluster-fuzz-lite.in && \
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/pre-commit.txt backend/requirements/pre-commit.in'
+
+audit-backend-dependencies: ## Audit backend Python dependencies
+	@echo "Auditing backend Python dependencies..."
+	@command -v pip-audit >/dev/null 2>&1 || python -m pip install -q pip-audit
+	@cd backend && poetry export -f requirements.txt --without-hashes --all-groups | \
+		pip-audit -r /dev/stdin
 
 update-backend-dependencies:
 	@cd backend && poetry update

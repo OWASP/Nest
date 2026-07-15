@@ -31,8 +31,16 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: d0e12caebb2ab0ee8bf98181c8bfe9702bca103d  # v1.105.0
+    rev: 05fd71a57a467ccf5598f7e836d3af4cf9225abb  # v1.108.0
     hooks:
+      - id: terraform_providers_lock
+        args:
+          - --args=-platform=darwin_arm64
+          - --args=-platform=linux_amd64
+          - --args=-platform=linux_arm64
+          - --hook-config=--mode=regenerate-lockfile-if-some-platform-missed
+        files: .terraform.lock.hcl
+        name: Lock Terraform providers
       - id: terraform_fmt
         files: ^infrastructure/.*\.(tf|tftest\.hcl)$
       - id: terraform_tflint
@@ -41,7 +49,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: aca6d4c8045a504e2812ea4bedff1d0a09e437bc  # v0.15.8
+    rev: 77039ccbba72c8aede339c5f8ae29b42aced0a2e  # v0.15.18
     hooks:
       - id: ruff-check
         args:
@@ -49,7 +57,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: 9112cb64851c95a7802358af285d21ad8b7f6437  # v1.36.4
+    rev: a8264ddb425b07a8bd1bfd758c4d8d938ed064ad  # v1.39.2
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -58,7 +66,7 @@ repos:
           - html
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: e72a3ca1632f0b11a07d171449fe447a7ff6795e  # v0.48.0
+    rev: a4d5d37e66ebcd6b3705204a1d6dbb56dea66338  # v0.49.0
     hooks:
       - id: markdownlint
         args:
@@ -77,18 +85,17 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 8e5c80792e2ec0c87804d8ef915bf35e2caea6da  # v1.20.0
+    rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # v2.1.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql-django
-          - types-lxml
-          - types-python-dateutil
-          - types-PyYAML
-          - types-requests
-        args:
-          - --config-file
-          - backend/pyproject.toml
+          - strawberry-graphql==0.319.0
+          - strawberry-graphql-django==0.86.4
+          - types-lxml==2026.2.16
+          - types-python-dateutil==2.9.0.20260518
+          - types-PyYAML==6.0.12.20260518
+          - types-requests==2.33.0.20260518
+        entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # v6.0.0
@@ -105,6 +112,7 @@ repos:
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml
+        exclude: pnpm-lock\.yaml$
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: frontend/src/types/__generated__
@@ -113,19 +121,41 @@ repos:
       - id: file-contents-sorter
         args:
           - --unique
-        files: (.github/workflows/check-pr-issue-skip-usernames.txt|cspell/custom-dict.txt)
+        files: (.github/check-contribution-skip-usernames.txt|cspell/custom-dict.txt)
       - id: mixed-line-ending
         args:
           - --fix=lf
       - id: name-tests-test
         args:
           - --pytest
-        exclude: backend/tests/data
+        exclude: backend/tests/(cluster-fuzz-lite|data)
         files: backend/tests
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
 
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # v1.7.12
+    hooks:
+      - id: actionlint-docker
+
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: 9d4455198941806aa02ec14369de030cda2c2b59  # v0.24.0
+    hooks:
+      - id: terraform-docs-go
+        args:
+          - infrastructure/
+        files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
+
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: 6e10264313f53d6247a8b1b984f5b5ccf50ba539  # v2.21.0
+    rev: f073523dfd27b01ec7997cc970a2a7b36c303460  # v2.25.0
     hooks:
       - id: pyproject-fmt
+        additional_dependencies:
+          - toml-fmt-common<1.3.3
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: e3eebf65325ccc992422292cb7a4baee967cf815  # v1.26.1
+    hooks:
+      - id: zizmor
+        args:
+          - --min-severity=low

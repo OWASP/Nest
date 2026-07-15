@@ -1,0 +1,99 @@
+name: Image scan
+
+on:
+  workflow_call:
+    inputs:
+      aws_role_name:
+        description: AWS role name to assume
+        required: true
+        type: string
+      aws_role_session_name:
+        description: AWS role session name
+        required: true
+        type: string
+      backend_ecr_repo:
+        description: Backend ECR repository name
+        required: true
+        type: string
+      environment:
+        description: The workflow environment to use for scanning (e.g., staging, production)
+        required: true
+        type: string
+      frontend_ecr_repo:
+        description: Frontend ECR repository name
+        required: true
+        type: string
+      release_version:
+        description: The release version to set
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      AWS_ROLE_EXTERNAL_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-image-scan:
+    name: Image scan
+    environment: ${{ inputs.environment }}
+    env:
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
+        }}
+      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
+        }}
+      RELEASE_VERSION: ${{ inputs.release_version }}
+    permissions:
+      actions: write
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b  # v6.2.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: ${{ inputs.aws_role_session_name }}
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
+
+      - name: Run trivy scan
+        uses: ./.github/actions/run-trivy-scan
+        with:
+          command: |
+            docker pull "$BACKEND_IMAGE"
+            docker pull "$FRONTEND_IMAGE"
+            make security-scan-images \
+              BACKEND_IMAGE_NAME="$BACKEND_IMAGE" \
+              FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+            make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
+            make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+
+      - name: Upload unsigned SBOM as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: sbom-${{ env.RELEASE_VERSION }}-unsigned
+          path: |
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+    timeout-minutes: 10

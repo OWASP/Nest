@@ -12,6 +12,7 @@ Balbin
 Balbin's
 Birda
 CCSP
+CFL
 CISSP
 CSSLP
 Cañón
@@ -23,6 +24,7 @@ Emay
 FOSS
 GBP
 GFKs
+GPG
 GRC
 GSOC
 GTM
@@ -46,6 +48,7 @@ NOSONAR
 Nadu
 Nagori
 Nominatim
+OSSF
 OWHF
 Obmondo
 Oleksiuk
@@ -54,6 +57,7 @@ PLR
 PYTHONPATH
 PYTHONUNBUFFERED
 RUF
+SARIF
 SEO
 SLF
 SRE
@@ -87,6 +91,7 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+atheris
 attisdropped
 bangbang
 boardofdirectors
@@ -94,6 +99,7 @@ bsky
 carryforward
 cdx
 certbot
+cjs
 collectstatic
 coraza
 corsheaders
@@ -107,7 +113,6 @@ defectdojo
 demojize
 dismissable
 dkr
-dockerhub
 dsn
 dvo
 elevenlabs
@@ -116,6 +121,7 @@ envsubst
 ephemerals
 euo
 facebookexternalhit
+fdp
 gamesec
 geocoders
 geoloc
@@ -133,6 +139,7 @@ ics
 igoat
 igw
 inlinehilite
+intoto
 isanori
 isready
 janedoe
@@ -142,6 +149,7 @@ kasya
 langgraph
 lhci
 libexpat
+libfuzzer
 libgobject
 libharfbuzz
 libpango
@@ -169,12 +177,14 @@ mpim
 navlink
 nestbot
 ngx
+nohup
 noinput
 nosniff
 notab
 nspname
 numfmt
 openblas
+opencre
 openstreetmap
 owasppcitoolkit
 owtf
@@ -187,9 +197,11 @@ pil
 pnpmrc
 psql
 psycopg
+pyc
 pygithub
 pygoat
 pymdownx
+pyo
 pypa
 pypoetry
 pyyaml
@@ -227,6 +239,7 @@ trivyignores
 tsc
 unassigning
 unhover
+unrs
 usefixtures
 vcodec
 webgoat

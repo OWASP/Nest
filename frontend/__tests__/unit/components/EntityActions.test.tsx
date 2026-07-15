@@ -55,7 +55,14 @@ describe('EntityActions', () => {
 
   describe('Module Actions - Edit Module', () => {
     it('navigates to edit module page when Edit is clicked with moduleKey', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -68,7 +75,7 @@ describe('EntityActions', () => {
     })
 
     it('does not navigate when moduleKey is missing for edit action', () => {
-      render(<EntityActions type="module" programKey="test-program" />)
+      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -79,7 +86,14 @@ describe('EntityActions', () => {
     })
 
     it('closes dropdown after clicking Edit', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
@@ -878,7 +892,7 @@ describe('EntityActions', () => {
     it('calls update cache function when delete is successful', async () => {
       const mockCache = {
         readQuery: jest.fn().mockReturnValue({
-          getProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
+          managementProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
         }),
         writeQuery: jest.fn(),
       }
@@ -907,7 +921,7 @@ describe('EntityActions', () => {
         expect(mockCache.writeQuery).toHaveBeenCalledWith(
           expect.objectContaining({
             data: {
-              getProgramModules: [{ key: 'other-module' }],
+              managementProgramModules: [{ key: 'other-module' }],
             },
           })
         )
@@ -1025,7 +1039,7 @@ describe('EntityActions', () => {
       })
     })
 
-    it('skips cache update when getProgramModules is not in cache', async () => {
+    it('skips cache update when managementProgramModules is not in cache', async () => {
       const mockCache = {
         readQuery: jest.fn().mockReturnValue(null),
         writeQuery: jest.fn(),

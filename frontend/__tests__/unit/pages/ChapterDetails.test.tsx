@@ -103,6 +103,18 @@ describe('chapterDetailsPage Component', () => {
     })
   })
 
+  test('renders channel link with platform icon and expected Slack URL', async () => {
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      const channelLink = screen.getByRole('link', { name: 'slack channel #chapter-test' })
+      expect(channelLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C123ABC')
+      expect(channelLink).toHaveAttribute('target', '_blank')
+      expect(channelLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(screen.getByText(/Channels/)).toBeInTheDocument()
+    })
+  })
+
   test('handles contributors with missing names gracefully', async () => {
     const chapterDataWithIncompleteContributors = {
       ...mockChapterDetailsData,
@@ -202,5 +214,83 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
+  })
+
+  test('renders contributions section when contributionStats total > 0', async () => {
+    const chapterDataWithStats = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        contributionStats: {
+          commits: 5,
+          pullRequests: 3,
+          issues: 2,
+          releases: 1,
+          total: 11,
+        },
+        contributionData: undefined,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithStats,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
+  })
+
+  test('does not render contributions section when contributionStats total is 0 and contributionData is empty', async () => {
+    const chapterDataWithZeroStats = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        contributionStats: {
+          commits: 0,
+          pullRequests: 0,
+          issues: 0,
+          releases: 0,
+          total: 0,
+        },
+        contributionData: {},
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithZeroStats,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Chapter Contribution Activity')).not.toBeInTheDocument()
+  })
+
+  test('renders contributions section when contributionData is non-empty', async () => {
+    const chapterDataWithContributionData = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        contributionStats: undefined,
+        contributionData: {
+          '2024-01': 10,
+          '2024-02': 20,
+        },
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithContributionData,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
   })
 })

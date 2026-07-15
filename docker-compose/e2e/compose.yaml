@@ -3,6 +3,7 @@ services:
     build:
       context: ../../backend
       dockerfile: ../docker/backend/Dockerfile
+      target: backend
     command: >
       sh -c '
         python manage.py migrate &&
@@ -14,7 +15,7 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../../backend/.env.e2e.example
+    env_file: ../../backend/.env.e2e-tests
     healthcheck:
       interval: 10s
       retries: 10
@@ -33,7 +34,7 @@ services:
 
   data-loader:
     container_name: e2e-nest-data-loader
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
     depends_on:
       db:
         condition: service_healthy
@@ -55,7 +56,7 @@ services:
       '
   db:
     container_name: e2e-nest-db
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
     environment:
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
       POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
@@ -78,7 +79,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
       '
     container_name: e2e-nest-cache
-    image: redis:8.6-alpine3.23
+    image: redis:8.8.0-alpine3.23@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-e2e-password}
     healthcheck:
@@ -96,7 +97,7 @@ services:
       context: ../../frontend
       dockerfile: ../docker/frontend/Dockerfile
       args:
-        ENV_FILE: .env.e2e.example
+        ENV_FILE: .env.e2e
         NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://backend:9000
         NEXT_SERVER_CSRF_URL: http://backend:9000/csrf/
         NEXT_SERVER_GRAPHQL_URL: http://backend:9000/graphql/
@@ -104,7 +105,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    env_file: ../../frontend/.env.e2e.example
+    env_file: ../../frontend/.env.e2e
     healthcheck:
       interval: 5s
       retries: 10
@@ -121,8 +122,8 @@ services:
 
   e2e-tests:
     build:
-      context: ../../frontend
-      dockerfile: ../docker/frontend/Dockerfile.e2e.test
+      context: ../..
+      dockerfile: docker/e2e/Dockerfile
     container_name: e2e-nest-tests
     command: ${E2E_TEST_COMMAND:-sh -c "pnpm run test:e2e"}
     depends_on:

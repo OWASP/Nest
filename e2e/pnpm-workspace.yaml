@@ -1,0 +1,17 @@
+ignoreScripts: true
+
+# 21 days (in minutes)
+minimumReleaseAge: 30240
+
+minimumReleaseAgeExclude:
+  - '@playwright/test@1.61.1'
+  - playwright-core@1.61.1
+  - playwright@1.61.1
+
+overrides:
+  glob: 11.1.0
+  test-exclude: 7.0.2
+
+saveExact: true
+
+strictDepBuilds: true

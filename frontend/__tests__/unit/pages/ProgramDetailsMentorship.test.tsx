@@ -3,6 +3,7 @@ import { addToast } from '@heroui/toast'
 import mockProgramDetailsData from '@mockData/mockProgramData'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
+import React from 'react'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
 import ProgramDetailsPage from 'app/my/mentorship/programs/[programKey]/page'
@@ -11,21 +12,16 @@ import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 let capturedSetStatus: ((status: string) => void) | null = null
 
-jest.mock('components/CardDetailsPage', () => {
-  return jest.fn((props) => {
-    capturedSetStatus = props.setStatus
+jest.mock('components/cards/Header', () => {
+  return function MockHeader(props: {
+    title: string
+    canUpdateStatus?: boolean
+    setStatus?: (status: string) => void
+  }) {
+    capturedSetStatus = props.setStatus || null
     return (
       <div data-testid="details-card">
         <h1>{props.title}</h1>
-        <p>{props.summary}</p>
-        <div data-testid="details-content">
-          {props.details?.map((detail: { label: string; value: string }) => (
-            <div key={detail.label}>
-              <span>{detail.label}</span>
-              <span>{detail.value}</span>
-            </div>
-          ))}
-        </div>
         {props.canUpdateStatus && (
           <div>
             <button aria-label="Program actions menu">Program actions menu</button>
@@ -36,7 +32,46 @@ jest.mock('components/CardDetailsPage', () => {
         )}
       </div>
     )
-  })
+  }
+})
+
+jest.mock('components/cards/Summary', () => {
+  return function MockSummary(props: { summary: string }) {
+    return <p>{props.summary}</p>
+  }
+})
+
+jest.mock('components/cards/Metadata', () => {
+  return function MockMetadata(props: { details?: Array<{ label: string; value: string }> }) {
+    return (
+      <div data-testid="details-content">
+        {props.details?.map((detail: { label: string; value: string }) => (
+          <div key={detail.label}>
+            <span>{detail.label}</span>
+            <span>{detail.value}</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+})
+
+jest.mock('components/cards/PageWrapper', () => {
+  return function MockWrapper({ children }: { children: React.ReactNode }) {
+    return <div>{children}</div>
+  }
+})
+
+jest.mock('components/cards/RepositoriesModules', () => {
+  return function MockReposModules() {
+    return <div />
+  }
+})
+
+jest.mock('components/cards/Tags', () => {
+  return function MockTags() {
+    return <div />
+  }
 })
 
 jest.mock('@heroui/toast', () => ({
@@ -103,7 +138,7 @@ describe('ProgramDetailsPage', () => {
   test('renders 404 if no program found', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
-      data: { program: null },
+      data: { managementProgram: null },
     })
 
     render(<ProgramDetailsPage />)
@@ -128,9 +163,12 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders program details correctly for a non-admin', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin' } },
-      status: 'authenticated',
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        ...mockProgramDetailsData,
+        managementProgram: { ...mockProgramDetailsData.managementProgram, userRole: 'mentor' },
+      },
     })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
@@ -143,7 +181,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders N/A if experienceLevels is null', async () => {
     const mockDataWithoutLevels = {
-      getProgram: { ...mockProgramDetailsData.getProgram, experienceLevels: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, experienceLevels: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -180,15 +218,17 @@ describe('ProgramDetailsPage', () => {
       fireEvent.click(publishButton)
 
       await waitFor(() => {
-        expect(mockUpdateProgram).toHaveBeenCalledWith({
-          variables: {
-            inputData: {
-              key: 'test-program',
-              name: 'Test Program',
-              status: ProgramStatusEnum.Published,
+        expect(mockUpdateProgram).toHaveBeenCalledWith(
+          expect.objectContaining({
+            variables: {
+              inputData: {
+                key: 'test-program',
+                name: 'Test Program',
+                status: ProgramStatusEnum.Published,
+              },
             },
-          },
-        })
+          })
+        )
       })
     })
 
@@ -235,7 +275,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with null admins (uses undefined fallback)', async () => {
     const mockDataWithoutAdmins = {
-      getProgram: { ...mockProgramDetailsData.getProgram, admins: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, admins: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -249,7 +289,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with null domains (uses undefined fallback)', async () => {
     const mockDataWithoutDomains = {
-      getProgram: { ...mockProgramDetailsData.getProgram, domains: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, domains: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -263,7 +303,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with null tags (uses undefined fallback)', async () => {
     const mockDataWithoutTags = {
-      getProgram: { ...mockProgramDetailsData.getProgram, tags: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, tags: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -278,9 +318,12 @@ describe('ProgramDetailsPage', () => {
   test('calls addToast with permission denied when non-admin calls setStatus', async () => {
     const mockUpdateProgram = jest.fn()
     ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin-user' } },
-      status: 'authenticated',
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        ...mockProgramDetailsData,
+        managementProgram: { ...mockProgramDetailsData.managementProgram, userRole: 'mentor' },
+      },
     })
 
     render(<ProgramDetailsPage />)
@@ -323,15 +366,17 @@ describe('ProgramDetailsPage', () => {
     }
 
     await waitFor(() => {
-      expect(mockUpdateProgram).toHaveBeenCalledWith({
-        variables: {
-          inputData: {
-            key: 'test-program',
-            name: 'Test Program',
-            status: ProgramStatusEnum.Published,
+      expect(mockUpdateProgram).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: {
+            inputData: {
+              key: 'test-program',
+              name: 'Test Program',
+              status: ProgramStatusEnum.Published,
+            },
           },
-        },
-      })
+        })
+      )
       expect(addToast).toHaveBeenCalledWith({
         title: 'Program status updated to Published',
         description: 'The status has been successfully updated.',
@@ -369,8 +414,8 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with minimal details ensuring default values are used', async () => {
     const mockDataWithNullFields = {
-      getProgram: {
-        ...mockProgramDetailsData.getProgram,
+      managementProgram: {
+        ...mockProgramDetailsData.managementProgram,
         status: null,
         startedAt: null,
         endedAt: null,
@@ -379,7 +424,7 @@ describe('ProgramDetailsPage', () => {
         description: null,
         name: null,
       },
-      getProgramModules: [],
+      managementProgramModules: [],
     }
 
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -394,6 +439,55 @@ describe('ProgramDetailsPage', () => {
 
       const detailsContent = screen.getByTestId('details-content')
       expect(detailsContent).toHaveTextContent('Mentees Limit0')
+    })
+  })
+  it('renders a read-only view for a mentee', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        managementProgram: {
+          ...mockProgramDetailsData.managementProgram,
+          key: 'gsoc-2025',
+          name: 'GSoC 2025',
+          userRole: 'mentee',
+        },
+        managementProgramModules: [],
+      },
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('GSoC 2025')).toBeInTheDocument()
+      // Mentees get a read-only view: no admin status controls or full config.
+      expect(screen.queryByRole('button', { name: /Program actions menu/ })).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentees Limit')).not.toBeInTheDocument()
+    })
+  })
+
+  it('renders access denied when the user has no role in the program', async () => {
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      loading: false,
+      error: forbiddenError,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    })
+  })
+
+  it('renders loading spinner while the program is loading', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: true,
+      error: undefined,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
     })
   })
 })

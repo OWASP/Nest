@@ -1,0 +1,222 @@
+name: Image sign
+
+on:
+  workflow_call:
+    inputs:
+      aws_role_name:
+        description: AWS role name to assume
+        required: true
+        type: string
+      aws_role_session_name:
+        description: AWS role session name
+        required: true
+        type: string
+      backend_ecr_repo:
+        description: Backend ECR repository name
+        required: true
+        type: string
+      environment:
+        description: The workflow environment to use for signing (e.g., production)
+        required: true
+        type: string
+      frontend_ecr_repo:
+        description: Frontend ECR repository name
+        required: true
+        type: string
+      release_tag:
+        description: Release tag for uploading signed SBOM (production only)
+        required: false
+        type: string
+        default: ''
+      release_version:
+        description: The release version to sign
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      AWS_ROLE_EXTERNAL_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+env:
+  COSIGN_CERTIFICATE_IDENTITY_REGEXP: ^https://github.com/${{ github.repository }}/
+  COSIGN_CERTIFICATE_OIDC_ISSUER: https://token.actions.githubusercontent.com
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  sign-images:
+    name: Sign images
+    environment: ${{ inputs.environment }}
+    env:
+      BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
+        }}
+      FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
+        }}
+    permissions:
+      id-token: write
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b  # v6.2.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: ${{ inputs.aws_role_session_name }}
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+
+      - name: Sign release images
+        run: |
+          bash .github/scripts/cosign-image-by-digest.sh sign "$BACKEND_IMAGE"
+          bash .github/scripts/cosign-image-by-digest.sh sign "$FRONTEND_IMAGE"
+    timeout-minutes: 5
+
+  sign-sbom:
+    name: Sign SBOM
+    environment: ${{ inputs.environment }}
+    permissions:
+      actions: write
+      attestations: write
+      contents: read
+      id-token: write
+    runs-on: ubuntu-24.04-arm
+    env:
+      RELEASE_VERSION: ${{ inputs.release_version }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Download unsigned SBOM
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: sbom-${{ env.RELEASE_VERSION }}-unsigned
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+
+      - name: Sign SBOM
+        run: |
+          backend_sbom="backend-sbom-$RELEASE_VERSION.cdx.json"
+          frontend_sbom="frontend-sbom-$RELEASE_VERSION.cdx.json"
+
+          cosign sign-blob --yes \
+            --bundle "${backend_sbom}.sigstore.json" \
+            "$backend_sbom"
+
+          cosign sign-blob --yes \
+            --bundle "${frontend_sbom}.sigstore.json" \
+            "$frontend_sbom"
+
+      - name: Verify SBOM signatures
+        run: |
+          backend_sbom="backend-sbom-$RELEASE_VERSION.cdx.json"
+          frontend_sbom="frontend-sbom-$RELEASE_VERSION.cdx.json"
+
+          cosign verify-blob \
+            --bundle "${backend_sbom}.sigstore.json" \
+            "$backend_sbom"
+
+          cosign verify-blob \
+            --bundle "${frontend_sbom}.sigstore.json" \
+            "$frontend_sbom"
+
+      - name: Attest backend SBOM
+        id: attest-backend-sbom
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26  # v4.1.0
+        with:
+          sbom-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+          subject-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+
+      - name: Attest frontend SBOM
+        id: attest-frontend-sbom
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26  # v4.1.0
+        with:
+          sbom-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+          subject-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+
+      - name: Verify SBOM attestations
+        env:
+          CYCLONEDX_PREDICATE_TYPE: https://cyclonedx.org/bom
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh attestation verify "backend-sbom-$RELEASE_VERSION.cdx.json" \
+            --predicate-type "$CYCLONEDX_PREDICATE_TYPE" \
+            --repo "${{ github.repository }}"
+          gh attestation verify "frontend-sbom-$RELEASE_VERSION.cdx.json" \
+            --predicate-type "$CYCLONEDX_PREDICATE_TYPE" \
+            --repo "${{ github.repository }}"
+
+      - name: Prepare SBOM provenance for release upload
+        run: |
+          cp "${{ steps.attest-backend-sbom.outputs.bundle-path }}" \
+            "backend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl"
+          cp "${{ steps.attest-frontend-sbom.outputs.bundle-path }}" \
+            "frontend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl"
+
+      - name: Upload signed SBOM as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: sbom-${{ env.RELEASE_VERSION }}
+          path: |
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
+    timeout-minutes: 10
+
+  upload-release-sbom:
+    name: Upload release SBOM
+    if: inputs.environment == 'production'
+    environment: ${{ inputs.environment }}
+    needs:
+      - sign-sbom
+    permissions:
+      actions: read
+      contents: write
+    runs-on: ubuntu-24.04-arm
+    env:
+      RELEASE_VERSION: ${{ inputs.release_version }}
+    steps:
+      - name: Download signed SBOM
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: sbom-${{ env.RELEASE_VERSION }}
+
+      - name: Add signed SBOM to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            --repo "${{ github.repository }}" \
+            "backend-sbom-$RELEASE_VERSION.cdx.json" \
+            "backend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl" \
+            "backend-sbom-$RELEASE_VERSION.cdx.json.sigstore.json" \
+            "frontend-sbom-$RELEASE_VERSION.cdx.json" \
+            "frontend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl" \
+            "frontend-sbom-$RELEASE_VERSION.cdx.json.sigstore.json"
+    timeout-minutes: 5

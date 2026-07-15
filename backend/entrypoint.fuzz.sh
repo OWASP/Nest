@@ -43,7 +43,7 @@ fi
 echo "Starting fuzzing process..."
 
 if [ -n "$CI" ]; then
-    pytest ./tests/${TEST_FILE}
+    pytest "./tests/${TEST_FILE}"
 else
-    pytest --log-cli-level=INFO -s ./tests/${TEST_FILE}
+    pytest --log-cli-level=INFO -s "./tests/${TEST_FILE}"
 fi

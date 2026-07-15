@@ -176,6 +176,20 @@ run "test_task_definition_requires_fargate" {
   }
 }
 
+run "test_task_definition_runtime_platform" {
+  command = plan
+
+  assert {
+    condition     = aws_ecs_task_definition.main.runtime_platform[0].cpu_architecture == "ARM64"
+    error_message = "Task definition must use ARM64 CPU architecture."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.main.runtime_platform[0].operating_system_family == "LINUX"
+    error_message = "Task definition must use LINUX operating system family."
+  }
+}
+
 run "test_ecs_service_name_format" {
   command = plan
 
@@ -222,6 +236,26 @@ run "test_auto_scaling_enabled_when_configured" {
   assert {
     condition     = length(aws_appautoscaling_target.main) == 1
     error_message = "Auto scaling must be enabled when enable_auto_scaling is true."
+  }
+}
+
+run "test_auto_scaling_policy_uses_configured_values" {
+  command = plan
+
+  variables {
+    auto_scaling_cpu_target         = 80
+    auto_scaling_scale_in_cooldown  = 240
+    auto_scaling_scale_out_cooldown = 90
+    enable_auto_scaling             = true
+  }
+
+  assert {
+    condition = (
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].target_value == 80 &&
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].scale_in_cooldown == 240 &&
+      aws_appautoscaling_policy.cpu[0].target_tracking_scaling_policy_configuration[0].scale_out_cooldown == 90
+    )
+    error_message = "Auto scaling policy must use configured CPU target and cooldown values."
   }
 }
 

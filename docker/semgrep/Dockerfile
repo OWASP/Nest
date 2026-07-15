@@ -1,1 +1,1 @@
-FROM semgrep/semgrep:1.156.0
+FROM semgrep/semgrep:1.168.0@sha256:59fbed6127ea7c5dde3ba6a85142733bb20ea9aaa36120c953904f1539aaf66e

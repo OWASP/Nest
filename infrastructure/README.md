@@ -191,7 +191,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend + Sche
 - Build the backend image using the following command:
 
     ```bash
-    docker build -t nest-staging-backend:latest -f docker/backend/Dockerfile backend/
+    docker build -t nest-staging-backend:latest --target backend -f docker/backend/Dockerfile backend/
     ```
 
 - Tag the image:
@@ -389,3 +389,7 @@ aws ecs run-task \
   ```bash
   terraform destroy
   ```
+
+## Documentation
+
+Documentation is generated using [terraform-docs](https://github.com/terraform-docs/terraform-docs).

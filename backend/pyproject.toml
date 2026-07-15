@@ -8,59 +8,73 @@ version = "0.0.0"
 description = "Your gateway to OWASP"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
-packages = [ { include = "apps" } ]
-dependencies.algoliasearch = "^4.13.2"
-dependencies.algoliasearch-django = "^4.0.0"
-dependencies.django = "^6.0.5"
-dependencies.django-configurations = "^2.5.1"
-dependencies.django-cors-headers = "^4.7.0"
-dependencies.django-ninja = "^1.5.3"
-dependencies.django-redis = "^6.0.0"
-dependencies.django-rq = "^3.1"
-dependencies.django-storages = { extras = [ "s3" ], version = "^1.14.4" }
-dependencies.emoji = "^2.14.1"
-dependencies.geopy = "^2.4.1"
-dependencies.gunicorn = "^25.0.0"
-dependencies.humanize = "^4.11.0"
-dependencies.jinja2 = "^3.1.6"
-dependencies.langgraph = "^1.0.1"
-dependencies.lxml = "^6.0.0"
-dependencies.markdown = "^3.7"
-dependencies.openai = "^2.0.1"
-dependencies.owasp-schema = "^0.1.46"
-dependencies.pgvector = "^0.4.1"
-dependencies.psycopg2-binary = "^2.9.9"
-dependencies.pydantic = "^2.11.1"
-dependencies.pydantic-core = "^2.33.0"
-dependencies.pygithub = "^2.5.0"
+packages = [ { include = "apps", from = "src" } ]
 dependencies.python = "^3.13"
-dependencies.python-dateutil = "^2.9.0.post0"
-dependencies.pyyaml = "^6.0.2"
-dependencies.reportlab = "^4.4.2"
-dependencies.requests = "^2.32.5"
-dependencies.sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
-dependencies.slack-bolt = "^1.22.0"
-dependencies.slack-sdk = "^3.37.0"
-dependencies.strawberry-graphql = { extras = [ "django" ], version = "^0.312.3" }
-dependencies.strawberry-graphql-django = "^0.75.0"
-dependencies.thefuzz = "^0.22.1"
-dependencies.pyparsing = "^3.2.3"
-group.fuzz.dependencies.schemathesis = "^4.10.2"
-group.test.dependencies.pytest = "^9.0.1"
-group.test.dependencies.pytest-cov = "^7.0"
-group.test.dependencies.pytest-django = "^4.5"
-group.test.dependencies.pytest-mock = "^3.0"
-group.test.dependencies.pytest-xdist = "^3.0"
-group.test.dependencies.python-dotenv = "^1.0.1"
-group.video.dependencies.elevenlabs = "^2.27.0"
-group.video.dependencies.ffmpeg-python = "^0.2.0"
-group.video.dependencies.pillow = "^12.1.0"
-group.video.dependencies.pypdfium2 = "^5.4.0"
-group.video.dependencies.weasyprint = "^68.0"
+dependencies.aiohttp = "3.14.1"
+dependencies.algoliasearch = "4.40.0"
+dependencies.algoliasearch-django = "4.0.0"
+dependencies.cryptography = "48.0.1"
+dependencies.django = "6.0.7"
+dependencies.django-configurations = "2.5.1"
+dependencies.django-cors-headers = "4.9.0"
+dependencies.django-ninja = "1.6.2"
+dependencies.django-redis = "6.0.0"
+dependencies.django-rq = "3.2.2"
+dependencies.django-storages = { extras = [ "s3" ], version = "1.14.6" }
+dependencies.emoji = "2.15.0"
+dependencies.geopy = "2.4.1"
+dependencies.gunicorn = "25.3.0"
+dependencies.humanize = "4.15.0"
+dependencies.idna = "3.15"
+dependencies.jinja2 = "3.1.6"
+dependencies.langchain-core = "1.4.8"
+dependencies.langgraph = "1.2.6"
+dependencies.lxml = "6.1.0"
+dependencies.markdown = "3.10.2"
+dependencies.openai = "2.33.0"
+dependencies.owasp-schema = "0.1.51"
+dependencies.pgvector = "0.4.2"
+dependencies.psycopg2-binary = "2.9.12"
+dependencies.pydantic = "2.12.5"
+dependencies.pydantic-core = "2.41.5"
+dependencies.pygithub = "2.9.1"
+dependencies.pyjwt = { extras = [ "crypto" ], version = "2.13.0" }
+dependencies.pyparsing = "3.3.2"
+dependencies.python-dateutil = "2.9.0.post0"
+dependencies.pyyaml = "6.0.3"
+dependencies.reportlab = "4.4.10"
+dependencies.requests = "2.33.1"
+dependencies.sentry-sdk = { extras = [ "django" ], version = "2.58.0" }
+dependencies.slack-bolt = "1.28.0"
+dependencies.slack-sdk = "3.41.0"
+dependencies.starlette = "1.3.1"
+dependencies.strawberry-graphql = { extras = [ "django" ], version = "0.316.0" }
+dependencies.strawberry-graphql-django = "0.75.3"
+dependencies.thefuzz = "0.22.1"
+dependencies.urllib3 = "2.7.0"
+group.fuzz.dependencies.schemathesis = "4.16.0"
+group.test.dependencies.pytest = "9.0.3"
+group.test.dependencies.pytest-cov = "7.1.0"
+group.test.dependencies.pytest-django = "4.12.0"
+group.test.dependencies.pytest-mock = "3.15.1"
+group.test.dependencies.pytest-xdist = "3.8.0"
+group.test.dependencies.python-dotenv = "1.2.2"
+group.video.dependencies.elevenlabs = "2.45.0"
+group.video.dependencies.ffmpeg-python = "0.2.0"
+group.video.dependencies.pillow = "12.2.0"
+group.video.dependencies.pypdfium2 = "5.7.1"
+group.video.dependencies.weasyprint = "68.1"
+
+[tool.djlint]
+indent = 4
+format_css = true
+format_js = true
+format = true
 
 [tool.ruff]
 target-version = "py313"
 line-length = 99
+src = [ "src" ]
 lint.select = [ "ALL" ]
 lint.extend-select = [ "I" ]
 lint.ignore = [
@@ -81,27 +95,29 @@ lint.per-file-ignores."**/__init__.py" = [
   "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
 ]
-lint.per-file-ignores."apps/**/management/commands/*.py" = [
+lint.per-file-ignores."**/src/apps/**/management/commands/*.py" = [
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D102",   # https://docs.astral.sh/ruff/rules/undocumented-public-method/
   "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
-lint.per-file-ignores."apps/**/migrations/*.py" = [
+lint.per-file-ignores."**/src/apps/**/migrations/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D103",   # https://docs.astral.sh/ruff/rules/undocumented-public-function/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
-lint.per-file-ignores."apps/api/rest/**/*.py" = [
+lint.per-file-ignores."**/src/apps/api/rest/**/*.py" = [
   "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
 ]
-lint.per-file-ignores."apps/github/models/mixins/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."apps/slack/commands/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."apps/slack/common/handlers/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."apps/slack/events/**/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."settings/*.py" = [
+lint.per-file-ignores."**/src/apps/github/models/mixins/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/apps/slack/commands/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/apps/slack/common/handlers/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/apps/slack/events/**/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."**/src/settings/*.py" = [
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
 lint.per-file-ignores."tests/**/*.py" = [
@@ -116,35 +132,46 @@ lint.per-file-ignores."tests/**/*.py" = [
   "S101",    # https://docs.astral.sh/ruff/rules/assert/
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
+lint.per-file-ignores."tests/cluster-fuzz-lite/**/*.py" = [
+  "INP001", # Atheris fuzz harnesses mirror production paths; not importable packages.
+]
+lint.isort.detect-same-package = false
+lint.isort.known-first-party = [ "apps", "tests" ]
 
 [tool.mypy]
+mypy_path = "src"
 explicit_package_bases = true
 ignore_missing_imports = true
-mypy_path = "backend"
 plugins = [ "strawberry.ext.mypy_plugin" ]
 
 [[tool.mypy.overrides]]
+module = [ "apps.*.admin.*", "apps.*.models.mixins.*" ]
 disable_error_code = [ "attr-defined" ]
-module = [ "apps.*.models.mixins.*", "apps.*.admin.*" ]
 
 [[tool.mypy.overrides]]
-disable_error_code = [ "var-annotated" ]
 module = [ "apps.*.migrations.*" ]
+disable_error_code = [ "var-annotated" ]
 
 [[tool.mypy.overrides]]
-disable_error_code = [ "return-value", "attr-defined", "misc" ]
-module = [ "apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*" ]
+module = [ "apps.*.api.internal.nodes.*", "apps.*.api.internal.queries.*" ]
+disable_error_code = [ "attr-defined", "misc", "return-value" ]
+
+[tool.pyright]
+pythonVersion = "3.13"
+venv = ".venv"
+venvPath = "."
+include = [ "src", "tests" ]
+extraPaths = [ "src" ]
 
 [tool.pytest]
-ini_options.DJANGO_CONFIGURATION = "Test"
-ini_options.DJANGO_SETTINGS_MODULE = "settings.test"
+ini_options.pythonpath = [ "src" ]
 ini_options.addopts = [
   "--cov-config=pyproject.toml",
   "--cov-fail-under=95",
   "--cov-precision=2",
   "--cov-report=term-missing",
   "--cov-report=xml",
-  "--cov=.",
+  "--cov=src",
   "--dist=loadscope",
   "--durations-min=1",
   "--durations=5",
@@ -154,9 +181,12 @@ ini_options.addopts = [
 ini_options.filterwarnings = [
   "ignore::DeprecationWarning:pytest_cov",
   "ignore::DeprecationWarning:xdist",
+  "ignore::langchain_core._api.deprecation.LangChainPendingDeprecationWarning",
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
 ini_options.log_level = "INFO"
+ini_options.DJANGO_CONFIGURATION = "Test"
+ini_options.DJANGO_SETTINGS_MODULE = "settings.test"
 
 [tool.coverage]
 run.branch = true
@@ -164,13 +194,7 @@ run.omit = [
   "**/migrations/*",
   "__init__.py",
   "manage.py",
-  "settings/*",
+  "src/settings/*",
+  "src/wsgi.py",
   "tests/*",
-  "wsgi.py",
 ]
-
-[tool.djlint]
-format = true
-format_css = true
-format_js = true
-indent = 4

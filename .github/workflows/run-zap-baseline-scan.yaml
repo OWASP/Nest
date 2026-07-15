@@ -1,0 +1,43 @@
+name: ZAP baseline scan
+
+on:
+  workflow_call:
+    inputs:
+      base_url:
+        description: Base URL for ZAP baseline scan
+        required: true
+        type: string
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-zap-baseline-scan:
+    name: ZAP baseline scan
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run baseline scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25  # v0.15.0
+        with:
+          allow_issue_writing: false
+          cmd_options: -a -c .zapconfig -r report_html.html
+          fail_action: true
+          target: ${{ inputs.base_url }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: zap-baseline-scan-report-${{ github.run_id }}
+          path: report_html.html
+    timeout-minutes: 5

@@ -469,6 +469,16 @@ select:disabled,
   }
 }
 
-.leaflet-container {
+.chapter-map .leaflet-container {
   background: transparent !important;
+  cursor: default !important;
+}
+
+.chapter-map .leaflet-interactive {
+  cursor: default !important;
+}
+
+.chapter-map .leaflet-marker-icon,
+.chapter-map .leaflet-marker-shadow {
+  cursor: pointer !important;
 }

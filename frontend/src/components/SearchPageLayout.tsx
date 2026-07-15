@@ -1,5 +1,5 @@
 import { Skeleton } from '@heroui/skeleton'
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Pagination from 'components/Pagination'
 import SearchBar from 'components/Search'
 import SkeletonBase from 'components/SkeletonsBase'
@@ -39,7 +39,7 @@ const SearchPageLayout = ({
   children,
 }: SearchPageLayoutProps) => {
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true)
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isLoaded && isFirstLoad) {
       setIsFirstLoad(false)
     }
