@@ -48,7 +48,7 @@ jest.mock('@heroui/react', () => ({
           value={inputValue || ''}
           onChange={(e) => onInputChange?.(e.target.value)}
         />
-        <div data-testid="autocomplete-items">{children}</div>
+        <div data-testid="combobox-children">{children}</div>
         <button
           type="button"
           data-testid="autocomplete-select-item"
