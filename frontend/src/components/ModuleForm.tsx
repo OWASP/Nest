@@ -449,6 +449,7 @@ export const ProjectSelector = ({
       <ComboBox
         isRequired
         isInvalid={shouldShowInvalid}
+        allowsEmptyCollection
         inputValue={inputValue}
         selectedKey={value || null}
         onInputChange={handleInputChange}
