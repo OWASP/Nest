@@ -20,6 +20,7 @@ from apps.github.constants import (
     GITHUB_USER_RE,
 )
 from apps.github.utils import get_repository_file_content
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.enums.project import AudienceChoices
 
@@ -93,6 +94,13 @@ class RepositoryBasedEntityModel(models.Model):
     )
 
     # GRs.
+    entity_channels = GenericRelation(
+        EntityChannel,
+        content_type_field="entity_type",
+        object_id_field="entity_id",
+        related_query_name="entity_channel",
+    )
+
     entity_members = GenericRelation(
         EntityMember,
         content_type_field="entity_type",

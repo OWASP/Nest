@@ -1,6 +1,6 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
-import { Autocomplete, AutocompleteItem } from '@heroui/react'
+import { Autocomplete, AutocompleteItem, Switch } from '@heroui/react'
 import { Select, SelectItem } from '@heroui/select'
 import debounce from 'lodash/debounce'
 import type React from 'react'
@@ -29,6 +29,7 @@ interface ModuleFormProps {
     endedAt: string
     experienceLevel: string
     labels: string
+    menteeCanManageDeadlines: boolean
     mentorLogins: string
     name: string
     projectId: string
@@ -318,6 +319,24 @@ const ModuleForm = ({
                     className="w-full min-w-0 lg:col-span-2"
                   />
                 )}
+                <div className="flex w-full min-w-0 items-center gap-3 lg:col-span-2">
+                  <Switch
+                    aria-label="Mentees can manage deadlines"
+                    isSelected={formData.menteeCanManageDeadlines}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
+                    }
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      Mentees can manage deadlines
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Allow enrolled mentees to set or update deadlines on issues assigned to them
+                      in this module.
+                    </p>
+                  </div>
+                </div>
               </div>
             </section>
 
