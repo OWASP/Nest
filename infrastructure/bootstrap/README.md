@@ -1,3 +1,11 @@
+> **⚠️ DEPRECATED**: This shared bootstrap root is deprecated.
+> Use the per-environment roots instead:
+>
+> - [bootstrap-staging](../bootstrap-staging/README.md) — staging IAM resources
+> - [bootstrap-production](../bootstrap-production/README.md) — production IAM resources
+>
+> See [Issue #5077](https://github.com/OWASP/Nest/issues/5077) for details.
+
 ## Users
 
 `bootstrap` creates a role for each environment that IAM users can assume.
