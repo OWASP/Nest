@@ -24,7 +24,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--threshold",
             type=int,
-            default=80,
+            default=90,
             help="Threshold for fuzzy matching (0-100)",
         )
 
@@ -41,21 +41,27 @@ class Command(BaseCommand):
             self.stdout.write("")
 
         self.stdout.write(f"Using fuzzy matching with threshold: {threshold}%")
-        all_conversations = list(Conversation.objects.only("id", "name").iterator())
 
-        project_conversations = [
-            conv
-            for conv in all_conversations
-            if conv.name and conv.name.lower().startswith("project-")
-        ]
-        self.stdout.write(f"Found {len(project_conversations)} project-specific channels")
+        bare_channel_names = frozenset({"chapter-", "proj-", "project-"})
+        conversations = []
+        chapter_conversations = []
+        project_conversations = []
+        for conversation in Conversation.objects.only("id", "name"):
+            if not conversation.name:
+                continue
 
-        chapter_conversations = [
-            conv
-            for conv in all_conversations
-            if conv.name and conv.name.lower().startswith("chapter-")
-        ]
+            name = conversation.name.lower().lstrip("#")
+            if name in bare_channel_names:
+                continue
+
+            conversations.append(conversation)
+            if name.startswith("chapter-"):
+                chapter_conversations.append(conversation)
+            elif name.startswith(("project-", "proj-")) or name.endswith("-project"):
+                project_conversations.append(conversation)
+
         self.stdout.write(f"Found {len(chapter_conversations)} chapter-specific channels")
+        self.stdout.write(f"Found {len(project_conversations)} project-specific channels")
 
         for model in (Chapter, Committee, Project):
             content_type = ContentType.objects.get_for_model(model)
@@ -77,7 +83,7 @@ class Command(BaseCommand):
                         entity.name, chapter_conversations, threshold
                     )
                 else:
-                    matches = self.find_fuzzy_matches(entity.name, all_conversations, threshold)
+                    matches = self.find_fuzzy_matches(entity.name, conversations, threshold)
 
                 for conversation, match_score in matches:
                     if dry_run:
@@ -123,14 +129,14 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f"Created {created_count} EntityChannel records.")
             )
 
-    def find_fuzzy_matches(self, entity_name, all_conversations, threshold):
+    def find_fuzzy_matches(self, entity_name, conversations, threshold):
         """Find the single best conversation match using fuzzy matching."""
         cleaned_name = self.strip_owasp_prefix(entity_name)
         entity_slug = slugify(cleaned_name)
         best_match = None
         best_score = 0
 
-        for conversation in all_conversations:
+        for conversation in conversations:
             if not conversation.name:
                 continue
 
@@ -145,7 +151,14 @@ class Command(BaseCommand):
 
             current_score = max(scores)
 
-            if current_score >= threshold and current_score > best_score:
+            if current_score >= threshold and (
+                current_score > best_score
+                or (
+                    current_score == best_score
+                    and best_match
+                    and len(conversation.name) < len(best_match.name)
+                )
+            ):
                 best_match = conversation
                 best_score = current_score
 

@@ -3,8 +3,7 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      source = "hashicorp/aws"
     }
   }
 }
@@ -40,12 +39,12 @@ data "aws_iam_policy_document" "key_policy" {
 
     condition {
       test     = "ArnLike"
-      values   = ["arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:*"]
+      values   = ["arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:*"]
       variable = "kms:EncryptionContext:aws:logs:arn"
     }
 
     principals {
-      identifiers = ["logs.${data.aws_region.current.id}.amazonaws.com"]
+      identifiers = ["logs.${data.aws_region.current.region}.amazonaws.com"]
       type        = "Service"
     }
   }

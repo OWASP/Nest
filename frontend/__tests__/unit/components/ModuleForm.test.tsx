@@ -106,6 +106,23 @@ jest.mock('@heroui/react', () => ({
       {children}
     </div>
   ),
+  Switch: ({
+    isSelected,
+    onValueChange,
+    'aria-label': ariaLabel,
+  }: {
+    isSelected?: boolean
+    onValueChange?: (value: boolean) => void
+    'aria-label'?: string
+  }) => (
+    <input
+      type="checkbox"
+      role="switch"
+      aria-label={ariaLabel}
+      checked={!!isSelected}
+      onChange={(e) => onValueChange?.(e.target.checked)}
+    />
+  ),
 }))
 
 jest.mock('@heroui/select', () => ({
@@ -268,6 +285,7 @@ describe('ModuleForm', () => {
     endedAt: '',
     experienceLevel: '',
     labels: '',
+    menteeCanManageDeadlines: false,
     mentorLogins: '',
     name: '',
     projectId: '',
@@ -381,6 +399,23 @@ describe('ModuleForm', () => {
       fireEvent.change(mentorInput, { target: { value: 'johndoe, Kateryna' } })
 
       expect(mockSetFormData).toHaveBeenCalled()
+    })
+
+    it('toggles the "mentees can manage deadlines" switch', () => {
+      renderModuleForm()
+      const toggle = screen.getByRole('switch', { name: /mentees can manage deadlines/i })
+      expect(toggle).not.toBeChecked()
+      fireEvent.click(toggle)
+
+      expect(mockSetFormData).toHaveBeenCalled()
+    })
+
+    it('reflects the current menteeCanManageDeadlines value', () => {
+      renderModuleForm({
+        formData: { ...defaultFormData, menteeCanManageDeadlines: true },
+      })
+      const toggle = screen.getByRole('switch', { name: /mentees can manage deadlines/i })
+      expect(toggle).toBeChecked()
     })
 
     it('updates start date field', () => {
