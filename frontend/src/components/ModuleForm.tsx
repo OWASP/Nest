@@ -327,9 +327,11 @@ const ModuleForm = ({
                       setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
                     }
                   >
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
+                    <Switch.Content>
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch.Content>
                   </Switch>
                   <div>
                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
@@ -451,6 +453,7 @@ export const ProjectSelector = ({
       <ComboBox
         isRequired
         isInvalid={shouldShowInvalid}
+        allowsEmptyCollection
         inputValue={inputValue}
         selectedKey={value || null}
         onInputChange={handleInputChange}

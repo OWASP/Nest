@@ -1,10 +1,18 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 
 jest.mock('@heroui/react', () => ({
   TextField: ({ children, isRequired, isInvalid, value, onChange }) => (
     <div data-testid="mock-textfield" data-required={isRequired} data-invalid={isInvalid}>
-      {typeof children === 'function' ? children({ isRequired, isInvalid }) : children}
+      {React.Children.map(children, (child) =>
+        React.isValidElement(child)
+          ? React.cloneElement(child as React.ReactElement<Record<string, unknown>>, {
+              _tfValue: value,
+              _tfOnChange: onChange,
+            })
+          : child
+      )}
     </div>
   ),
   Label: ({ children, htmlFor, className }) => (
@@ -12,8 +20,16 @@ jest.mock('@heroui/react', () => ({
       {children}
     </label>
   ),
-  Input: ({ id, type, min, max, className }) => (
-    <input id={id} type={type} min={min} max={max} className={className} onChange={() => {}} />
+  Input: ({ id, type, min, max, className, _tfValue, _tfOnChange }) => (
+    <input
+      id={id}
+      type={type}
+      min={min}
+      max={max}
+      className={className}
+      value={_tfValue ?? ''}
+      onChange={(e) => _tfOnChange?.(e.target.value)}
+    />
   ),
   FieldError: ({ children, className }) => (
     <span data-testid="error-message" className={className}>
@@ -80,8 +96,8 @@ describe('FormDateInput Component', () => {
     it('calls onValueChange when input changes', () => {
       const onValueChange = jest.fn()
       render(<FormDateInput {...defaultProps} onValueChange={onValueChange} />)
-      // TextField onChange is wired to onValueChange in the component
-      expect(screen.getByLabelText('Test Date')).toBeInTheDocument()
+      fireEvent.change(screen.getByLabelText('Test Date'), { target: { value: '2024-06-01' } })
+      expect(onValueChange).toHaveBeenCalledWith('2024-06-01')
     })
   })
 

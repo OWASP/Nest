@@ -253,6 +253,7 @@ jest.mock('@heroui/react', () => {
         </div>
       ),
       {
+        Content: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
         Control: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
         Thumb: () => <span />,
       }
@@ -282,14 +283,11 @@ jest.mock('@heroui/select', () => ({
         onChange={(e) => onSelectionChange?.(new Set([e.target.value]))}
       >
         <option value="">Select...</option>
-        {(children as React.ReactElement[])?.map((child: any, i: number) => {
-          const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT']
-          return (
-            <option key={levels[i]} value={levels[i]}>
-              {child?.props?.children}
-            </option>
-          )
-        })}
+        {(children as React.ReactElement[])?.map((child: any) => (
+          <option key={child?.key ?? child?.props?.id} value={child?.props?.id ?? child?.key}>
+            {child?.props?.children}
+          </option>
+        ))}
       </select>
       {isInvalid && errorMessage && <span>{errorMessage}</span>}
     </div>
@@ -577,6 +575,10 @@ describe('CreateModulePage', () => {
     await user.type(screen.getByLabelText(/Description/i), 'Desc')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /Experience Level/i }),
+      'BEGINNER'
+    )
 
     const projectInput = await waitFor(() =>
       screen.getByPlaceholderText('Start typing project name...')
@@ -629,6 +631,10 @@ describe('CreateModulePage', () => {
     await user.type(screen.getByLabelText(/Description/i), 'Desc 2')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /Experience Level/i }),
+      'BEGINNER'
+    )
 
     const projectInput = await waitFor(() =>
       screen.getByPlaceholderText('Start typing project name...')

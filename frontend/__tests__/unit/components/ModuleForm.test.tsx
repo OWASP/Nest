@@ -163,6 +163,7 @@ jest.mock('@heroui/react', () => ({
       </div>
     ),
     {
+      Content: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
       Control: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
       Thumb: () => <span />,
     }
