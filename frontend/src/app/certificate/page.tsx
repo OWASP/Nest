@@ -295,6 +295,7 @@ const MyCertificatePage: React.FC = () => {
               <button
                 key={cert.id}
                 onClick={() => handleSelectCertificate(idx)}
+                disabled={isDownloading || isSavingPdf}
                 className="group flex w-64 flex-col rounded-lg bg-white p-5 text-left shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
               >
                 <div className="mb-3 flex items-center gap-2">
