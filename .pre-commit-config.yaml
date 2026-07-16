@@ -49,7 +49,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 77039ccbba72c8aede339c5f8ae29b42aced0a2e  # v0.15.18
+    rev: 745be0411e3c150e246d527e531e5a221b8c3462  # v0.15.19
     hooks:
       - id: ruff-check
         args:
@@ -57,7 +57,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: a8264ddb425b07a8bd1bfd758c4d8d938ed064ad  # v1.39.2
+    rev: 36d5c17806dbe418e108cb3a3718b453ea613465  # v1.39.4
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
