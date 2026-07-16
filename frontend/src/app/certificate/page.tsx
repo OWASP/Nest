@@ -5,9 +5,18 @@ import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useRef, useState } from 'react'
-import { FaCopy, FaFilePdf, FaImage, FaLinkedin } from 'react-icons/fa6'
+import {
+  FaAward,
+  FaCalendarDays,
+  FaChevronRight,
+  FaCopy,
+  FaFilePdf,
+  FaImage,
+  FaLinkedin,
+} from 'react-icons/fa6'
 
 import { GetMyCertificateDocument } from 'types/__generated__/certificateQueries.generated'
+import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import { CertificateCard, CERTIFICATE_LAYOUT } from 'components/CertificateCard'
@@ -19,6 +28,7 @@ const MyCertificatePage: React.FC = () => {
   const router = useRouter()
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSavingPdf, setIsSavingPdf] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const { data, loading, error } = useQuery(GetMyCertificateDocument, {
@@ -57,9 +67,8 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const certificates = data?.myCertificates ?? []
-  const certificate = certificates[0]
 
-  if (!certificate) {
+  if (certificates.length === 0) {
     return (
       <PageLayout title="My Certificate" breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]">
         <div className="container mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
@@ -75,6 +84,8 @@ const MyCertificatePage: React.FC = () => {
       </PageLayout>
     )
   }
+
+  const certificate = certificates[selectedIndex]
 
   const getCertificateImageDataUrl = async (pixelRatio = 2): Promise<string> => {
     const node = cardRef.current
@@ -176,9 +187,8 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleCopyLink = () => {
-    const shareUrl = certificateUrl
     navigator.clipboard
-      .writeText(shareUrl)
+      .writeText(certificateUrl)
       .then(() => {
         addToast({
           title: 'Link Copied',
@@ -196,7 +206,6 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleShareLinkedIn = () => {
-    const certUrl = certificateUrl
     const issuedDate = new Date(certificate.issuedAt)
     const params = new URLSearchParams({
       startTask: 'CERTIFICATION_NAME',
@@ -204,7 +213,7 @@ const MyCertificatePage: React.FC = () => {
       organizationId: '250673',
       issueYear: String(issuedDate.getFullYear()),
       issueMonth: String(issuedDate.getMonth() + 1),
-      certUrl,
+      certUrl: certificateUrl,
       certId: certificate.id,
     })
     window.open(
@@ -214,8 +223,17 @@ const MyCertificatePage: React.FC = () => {
     )
   }
 
+  const handleSelectCertificate = (index: number) => {
+    setSelectedIndex(index)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const certificateUrl = `${globalThis.location?.origin ?? ''}/certificate/${certificate.id}`
   const displayName = certificate.githubUser.name || certificate.githubUser.login
+
+  const otherCertificates = certificates
+    .map((cert, idx) => ({ cert, idx }))
+    .filter(({ idx }) => idx !== selectedIndex)
 
   return (
     <PageLayout
@@ -262,6 +280,61 @@ const MyCertificatePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {otherCertificates.length > 0 && (
+        <div className="container mx-auto px-4 pb-12">
+          <div className="mb-6 flex flex-col items-center gap-2 text-center">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+              {selectedIndex === 0 ? 'Previous Certificates' : 'Other Certificates'}
+            </h2>
+            <div className="h-0.5 w-16 rounded-full bg-blue-400" />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            {otherCertificates.map(({ cert, idx }) => (
+              <button
+                key={cert.id}
+                onClick={() => handleSelectCertificate(idx)}
+                className="group flex w-64 flex-col rounded-lg bg-white p-5 text-left shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+              >
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-400/15 dark:bg-blue-400/20">
+                    <FaAward className="h-4 w-4 text-blue-400" />
+                  </div>
+                  <span className="text-sm font-bold tracking-wide text-gray-900 uppercase dark:text-white">
+                    {cert.tier}
+                  </span>
+                </div>
+
+                <div className="mb-3 border-t border-gray-100 dark:border-gray-700" />
+
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
+                      Issued
+                    </span>
+                    <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+                      <FaCalendarDays className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+                      <span className="font-medium">{formatDate(cert.issuedAt)}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
+                      Score
+                    </span>
+                    <span className="font-bold text-blue-400">{cert.score} pts</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center text-sm font-medium text-blue-400">
+                  View Certificate
+                  <FaChevronRight className="ml-1.5 h-3 w-3 transform transition-transform duration-200 group-hover:translate-x-1" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </PageLayout>
   )
 }
