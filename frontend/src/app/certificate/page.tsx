@@ -340,5 +340,4 @@ const MyCertificatePage: React.FC = () => {
   )
 }
 
-
 export default MyCertificatePage
