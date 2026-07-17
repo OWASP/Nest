@@ -8,8 +8,7 @@ using the shared `bootstrap-iam` module. It has its own Terraform state file
 with the staging root. Most IAM permissions are scoped to production-named
 resources by the shared `bootstrap-iam` module. This is **not** complete
 cross-environment isolation: the role retains account-wide permissions for
-EC2 networking, Elastic Load Balancing, Application Auto Scaling, and selected
-KMS operations. See the [shared module documentation](../modules/bootstrap-iam/README.md#permission-boundaries)
+EC2 networking, Application Auto Scaling, and selected KMS operations. See the [shared module documentation](../modules/bootstrap-iam/README.md#permission-boundaries)
 for the complete exceptions.
 
 ## Setup

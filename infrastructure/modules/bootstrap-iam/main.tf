@@ -346,9 +346,15 @@ data "aws_iam_policy_document" "part_two" {
       "ecs:ListClusters",
       "ecs:ListTaskDefinitions",
       "ecs:RegisterTaskDefinition",
-      "ecs:TagResource",
     ]
     resources = ["*"]
+  }
+
+  statement {
+    sid       = "ECSTaskDefinitionTagging"
+    effect    = "Allow"
+    actions   = ["ecs:TagResource"]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*"]
   }
 
   statement {
@@ -376,7 +382,12 @@ data "aws_iam_policy_document" "part_two" {
       "elasticloadbalancing:SetRulePriorities",
       "elasticloadbalancing:SetSecurityGroups",
     ]
-    resources = ["*"]
+    resources = [
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:targetgroup/${var.project_name}-${var.environment}-*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener/app/${var.project_name}-${var.environment}-*/*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener-rule/app/${var.project_name}-${var.environment}-*/*/*",
+    ]
   }
 
   statement {
