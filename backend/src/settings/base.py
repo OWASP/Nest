@@ -30,6 +30,7 @@ class Base(Configuration):
     IS_TEST_ENVIRONMENT = False
 
     OTEL_METRICS_ENABLED = values.BooleanValue(environ_name="OTEL_METRICS_ENABLED", default=False)
+    OTEL_METRICS_IMPORT_URL = values.Value(environ_name="OTEL_METRICS_IMPORT_URL", default="")
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
 
     CSRF_COOKIE_SAMESITE = "Strict"
