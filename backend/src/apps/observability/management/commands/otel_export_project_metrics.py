@@ -99,4 +99,10 @@ class Command(BaseCommand):
             response = requests.post(import_url, data=payload, timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
 
-        self.stdout.write(self.style.SUCCESS(f"Exported {len(lines)} series to VictoriaMetrics."))
+        # VictoriaMetrics accepts the import without confirming storage (samples may be
+        # dropped, e.g. outside the retention window), so verify the result in Grafana.
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Sent {len(lines)} series to VictoriaMetrics. Verify they appear in Grafana."
+            )
+        )
