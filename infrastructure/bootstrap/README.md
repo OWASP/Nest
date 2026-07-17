@@ -1,6 +1,6 @@
 > [!CAUTION]
 > **DEPRECATED — DO NOT INITIALIZE, PLAN, OR APPLY FROM THIS DIRECTORY.**
-> Running `terraform init`, `terraform plan`, or `terraform apply` here is disabled and unsupported.
+> Running `terraform init`, `terraform plan`, or `terraform apply` here is prohibited and unsupported. This legacy root remains runnable for historical compatibility, so Terraform does not technically prevent those commands.
 > This shared bootstrap root is superseded by the per-environment roots:
 >
 > - [`bootstrap-staging/`](../bootstrap-staging/README.md) — manages `nest-staging-terraform` only

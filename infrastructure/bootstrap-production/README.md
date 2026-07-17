@@ -5,9 +5,12 @@ Per-environment Terraform root for the **production** bootstrap IAM resources.
 This root manages only `nest-production-terraform` IAM role and its policies,
 using the shared `bootstrap-iam` module. It has its own Terraform state file
 (`production/bootstrap/terraform.tfstate`), preventing Terraform state collisions
-with the staging root. IAM access isolation (ensuring the production role cannot
-modify staging resources) is enforced by the environment-scoped policies defined
-in the shared `bootstrap-iam` module.
+with the staging root. Most IAM permissions are scoped to production-named
+resources by the shared `bootstrap-iam` module. This is **not** complete
+cross-environment isolation: the role retains account-wide permissions for
+EC2 networking, Elastic Load Balancing, Application Auto Scaling, and selected
+KMS operations. See the [shared module documentation](../modules/bootstrap-iam/README.md#permission-boundaries)
+for the complete exceptions.
 
 ## Setup
 

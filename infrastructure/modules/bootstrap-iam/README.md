@@ -4,9 +4,27 @@ Reusable Terraform module that creates environment-scoped IAM resources for CI/C
 bootstrap. Each invocation manages a **single** environment (staging or production).
 Most IAM policy resources are scoped to `${project_name}-${environment}-*` ARNs or
 environment-specific aliases, reducing the blast radius compared to the deprecated
-shared bootstrap root. Some AWS services (EC2 networking, ELB, Application Auto
-Scaling) require wildcard resource ARNs per AWS API constraints and remain
-unscoped at the account level.
+shared bootstrap root. This module does **not** provide complete cross-environment
+isolation; see [Permission boundaries](#permission-boundaries).
+
+## Permission boundaries
+
+The following statements intentionally use wildcard or otherwise non-environment-
+scoped resources. A role created for one environment can affect resources covered
+by these statements in the same AWS account:
+
+- `GlobalDiscovery` — account-wide discovery actions.
+- `ACMManagement` — all certificates in the configured region.
+- `CWLogsMgmt` — all log groups in the configured region.
+- `ElastiCacheMgmt` — all ElastiCache parameter groups in the configured region.
+- `RDSManagement` — all DB proxy and proxy target-group resources in the configured region.
+- `EC2Management` and `ECRAuth` — account-wide EC2 networking management and ECR authentication.
+- `AppAutoscalingMgmt`, `ECSGlobal`, and `ELBMgmt` — account-wide Application Auto Scaling, selected ECS, and ELB management actions. The ELB actions are explicitly allowlisted; they are not `elasticloadbalancing:*`.
+- `KMSMgmt`, `KMSKeyUsageAndPolicy`, and `KMSAliasManagement` — account-wide KMS management or key access. `KMSKeyUsageAndPolicy` is further limited by the listed key aliases, including the shared `${project_name}-state` alias.
+
+Consumers requiring a strict environment security boundary must further restrict
+these statements (for example, with resource ARNs and tag-based conditions) before
+using the module.
 
 ## Usage
 
