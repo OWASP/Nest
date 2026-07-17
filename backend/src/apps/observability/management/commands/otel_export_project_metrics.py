@@ -55,6 +55,11 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR("OTEL_METRICS_IMPORT_URL is not set."))
             return
 
+        batch_size = options["batch_size"]
+        if batch_size < 1:
+            self.stderr.write(self.style.ERROR("--batch-size must be a positive integer."))
+            return
+
         queryset = ProjectHealthMetrics.objects.select_related("project").order_by(
             "project_id", "nest_created_at"
         )
@@ -89,7 +94,6 @@ class Command(BaseCommand):
         ]
 
         import_url = f"{base_url.rstrip('/')}/api/v1/import"
-        batch_size = options["batch_size"]
         for start in range(0, len(lines), batch_size):
             payload = "\n".join(lines[start : start + batch_size])
             response = requests.post(import_url, data=payload, timeout=REQUEST_TIMEOUT)

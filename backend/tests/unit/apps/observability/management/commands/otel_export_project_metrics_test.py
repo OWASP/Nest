@@ -35,7 +35,7 @@ class TestOtelExportProjectMetricsCommand:
         post.assert_not_called()
 
     def test_backfill_posts_history_to_victoriametrics(self, settings, mocker):
-        settings.OTEL_METRICS_IMPORT_URL = "http://vm:8428"
+        settings.OTEL_METRICS_IMPORT_URL = "https://vm:8428"
         first = timezone.make_aware(timezone.datetime(2025, 1, 1))
         second = timezone.make_aware(timezone.datetime(2025, 1, 2))
         rows = [
@@ -52,7 +52,7 @@ class TestOtelExportProjectMetricsCommand:
         call_command("otel_export_project_metrics", "--all")
 
         post.assert_called_once()
-        assert post.call_args.args[0] == "http://vm:8428/api/v1/import"
+        assert post.call_args.args[0] == "https://vm:8428/api/v1/import"
 
         lines = [json.loads(line) for line in post.call_args.kwargs["data"].splitlines()]
         by_series = {(m["metric"]["__name__"], m["metric"]["project"]): m for m in lines}
@@ -67,7 +67,7 @@ class TestOtelExportProjectMetricsCommand:
         assert by_series[("nest.project.contributors", "nest")]["values"] == [5, 6]
 
     def test_default_mode_exports_latest_day(self, settings, mocker):
-        settings.OTEL_METRICS_IMPORT_URL = "http://vm:8428"
+        settings.OTEL_METRICS_IMPORT_URL = "https://vm:8428"
         latest = timezone.make_aware(timezone.datetime(2025, 1, 2))
         rows = [_row("nest", latest, stars=12, forks=3, contributors=6)]
 
@@ -84,7 +84,7 @@ class TestOtelExportProjectMetricsCommand:
         post.assert_called_once()
 
     def test_warns_when_no_metrics_exist(self, settings, mocker):
-        settings.OTEL_METRICS_IMPORT_URL = "http://vm:8428"
+        settings.OTEL_METRICS_IMPORT_URL = "https://vm:8428"
         objects = mocker.patch(f"{COMMAND_PATH}.ProjectHealthMetrics.objects")
         objects.aggregate.return_value = {"latest": None}
         post = mocker.patch(f"{COMMAND_PATH}.requests.post")
@@ -93,4 +93,14 @@ class TestOtelExportProjectMetricsCommand:
         call_command("otel_export_project_metrics", stdout=stdout)
 
         assert "No project health metrics found" in stdout.getvalue()
+        post.assert_not_called()
+
+    def test_errors_on_invalid_batch_size(self, settings, mocker):
+        settings.OTEL_METRICS_IMPORT_URL = "https://vm:8428"
+        post = mocker.patch(f"{COMMAND_PATH}.requests.post")
+
+        stderr = StringIO()
+        call_command("otel_export_project_metrics", "--batch-size", "0", stderr=stderr)
+
+        assert "--batch-size must be a positive integer" in stderr.getvalue()
         post.assert_not_called()
