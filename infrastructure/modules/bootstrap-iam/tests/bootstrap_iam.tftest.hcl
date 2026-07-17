@@ -108,6 +108,20 @@ run "test_environment_scoped_resources" {
   }
 }
 
+run "test_elb_and_ecs_tagging_are_staging_scoped" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "*"),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:160885282306:loadbalancer/app/${var.project_name}-staging-*/*"),
+      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:160885282306:task-definition/${var.project_name}-staging-*:*",
+      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSGlobal"]).Action, "ecs:TagResource"),
+    ])
+    error_message = "ELB management and ECS task-definition tagging must be limited to staging resources."
+  }
+}
+
 run "test_production_environment_scoped_resources" {
   command = plan
 
@@ -121,6 +135,8 @@ run "test_production_environment_scoped_resources" {
       can(regex("TargetTracking-service/${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_two.json)),
       !can(regex("${var.project_name}-staging-", data.aws_iam_policy_document.part_one.json)),
       !can(regex("${var.project_name}-staging-", data.aws_iam_policy_document.part_two.json)),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:160885282306:loadbalancer/app/${var.project_name}-production-*/*"),
+      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:160885282306:task-definition/${var.project_name}-production-*:*",
     ])
     error_message = "Production policy documents must only reference production resources."
   }
