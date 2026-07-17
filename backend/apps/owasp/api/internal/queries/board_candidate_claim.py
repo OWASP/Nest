@@ -7,6 +7,7 @@ from django.db.models import Exists, OuterRef
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
+from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 
 @strawberry.type
@@ -34,6 +35,10 @@ class BoardCandidateClaimQuery:
             and user.github_user is not None
             and user.github_user.login == login
         )
+        is_reviewer = (
+            user.is_authenticated
+            and BoardOfDirectors.objects.filter(year=year, reviewers=user).exists()
+        )
         claims = (
             BoardCandidateClaim.objects.filter(
                 board__year=year,
@@ -49,8 +54,15 @@ class BoardCandidateClaimQuery:
             .order_by("order", "nest_created_at")
         )
 
-        if not is_self:
+        if not is_self and not is_reviewer:
             claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
+        if is_reviewer and not is_self:
+            claims = claims.filter(
+                status__in=[
+                    BoardCandidateClaim.Status.SUBMITTED,
+                    BoardCandidateClaim.Status.APPROVED,
+                ]
+            )
 
         return claims
 
@@ -91,5 +103,14 @@ class BoardCandidateClaimQuery:
             and user.github_user is not None
             and user.github_user == claim.candidate.member
         )
+        is_reviewer = user.is_authenticated and claim.board.reviewers.filter(id=user.id).exists()
 
-        return claim if is_self or claim.status == BoardCandidateClaim.Status.APPROVED else None
+        return (
+            claim
+            if (
+                is_self
+                or (is_reviewer and claim.status == BoardCandidateClaim.Status.SUBMITTED)
+                or claim.status == BoardCandidateClaim.Status.APPROVED
+            )
+            else None
+        )

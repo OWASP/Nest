@@ -43,10 +43,17 @@ def get_claim_evidence(
         and evidence.claim.candidate.member is not None
         and user.github_user == evidence.claim.candidate.member
     )
+    is_reviewer = (
+        user.is_authenticated and evidence.claim.board.reviewers.filter(id=user.id).exists()
+    )
 
     return (
         evidence
-        if is_self or evidence.claim.status == BoardCandidateClaim.Status.APPROVED
+        if (
+            is_self
+            or (is_reviewer and evidence.claim.status == BoardCandidateClaim.Status.SUBMITTED)
+            or evidence.claim.status == BoardCandidateClaim.Status.APPROVED
+        )
         else None
     )
 
@@ -85,10 +92,15 @@ class BoardCandidateClaimEvidenceQuery:
             and claim.candidate.member is not None
             and user.github_user == claim.candidate.member
         )
+        is_reviewer = user.is_authenticated and claim.board.reviewers.filter(id=user.id).exists()
 
         return (
             claim.evidences.filter(is_removed=False)
-            if is_self or claim.status == BoardCandidateClaim.Status.APPROVED
+            if (
+                is_self
+                or (is_reviewer and claim.status == BoardCandidateClaim.Status.SUBMITTED)
+                or claim.status == BoardCandidateClaim.Status.APPROVED
+            )
             else []
         )
 
