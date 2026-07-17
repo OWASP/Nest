@@ -1,8 +1,12 @@
 # Bootstrap IAM Module
 
 Reusable Terraform module that creates environment-scoped IAM resources for CI/CD
-bootstrap. Each invocation manages a **single** environment (staging or production),
-eliminating cross-environment blast radius.
+bootstrap. Each invocation manages a **single** environment (staging or production).
+Most IAM policy resources are scoped to `${project_name}-${environment}-*` ARNs or
+environment-specific aliases, reducing the blast radius compared to the deprecated
+shared bootstrap root. Some AWS services (EC2 networking, ELB, Application Auto
+Scaling) require wildcard resource ARNs per AWS API constraints and remain
+unscoped at the account level.
 
 ## Usage
 
@@ -28,13 +32,15 @@ module "bootstrap_iam" {
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.14.0 |
 
 ## Providers
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.53.0 |
 
 ## Modules
 
@@ -68,6 +74,9 @@ No modules.
 | Name | Description |
 | ---- | ----------- |
 | <a name="output_part_one_policy_arn"></a> [part\_one\_policy\_arn](#output\_part\_one\_policy\_arn) | The ARN of the part one IAM policy. |
+| <a name="output_part_one_policy_name"></a> [part\_one\_policy\_name](#output\_part\_one\_policy\_name) | The name of the part one IAM policy. |
 | <a name="output_part_two_policy_arn"></a> [part\_two\_policy\_arn](#output\_part\_two\_policy\_arn) | The ARN of the part two IAM policy. |
+| <a name="output_part_two_policy_name"></a> [part\_two\_policy\_name](#output\_part\_two\_policy\_name) | The name of the part two IAM policy. |
 | <a name="output_terraform_role_arn"></a> [terraform\_role\_arn](#output\_terraform\_role\_arn) | The ARN of the Terraform IAM role. |
+| <a name="output_terraform_role_name"></a> [terraform\_role\_name](#output\_terraform\_role\_name) | The name of the Terraform IAM role. |
 <!-- END_TF_DOCS -->

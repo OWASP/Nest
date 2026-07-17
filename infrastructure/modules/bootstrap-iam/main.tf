@@ -1,4 +1,15 @@
+terraform {
+  required_version = "~> 1.14.0"
+
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+  }
+}
+
 data "aws_caller_identity" "current" {}
+
 
 data "aws_iam_policy_document" "part_one" {
   statement {
@@ -6,6 +17,7 @@ data "aws_iam_policy_document" "part_one" {
     effect = "Allow"
     actions = [
       "acm:DescribeCertificate",
+      "acm:ListCertificates",
       "application-autoscaling:DescribeScalableTargets",
       "application-autoscaling:DescribeScalingActivities",
       "application-autoscaling:DescribeScalingPolicies",
@@ -38,7 +50,6 @@ data "aws_iam_policy_document" "part_one" {
     actions = [
       "acm:AddTagsToCertificate",
       "acm:DeleteCertificate",
-      "acm:ListCertificates",
       "acm:ListTagsForCertificate",
       "acm:RemoveTagsFromCertificate",
       "acm:RequestCertificate",
@@ -504,46 +515,35 @@ data "aws_iam_policy_document" "part_two" {
     sid    = "S3Mgmt"
     effect = "Allow"
     actions = [
-      "s3:CreateBucket",
-      "s3:DeleteBucket",
-      "s3:DeleteBucketPolicy",
-      "s3:DeleteObject",
-      "s3:GetAccelerateConfiguration",
-      "s3:GetBucketAcl",
-      "s3:GetBucketCors",
-      "s3:GetBucketLogging",
-      "s3:GetBucketObjectLockConfiguration",
-      "s3:GetBucketOwnershipControls",
-      "s3:GetBucketPolicy",
-      "s3:GetBucketPublicAccessBlock",
-      "s3:GetBucketRequestPayment",
-      "s3:GetBucketTagging",
-      "s3:GetBucketVersioning",
-      "s3:GetBucketWebsite",
-      "s3:GetEncryptionConfiguration",
-      "s3:GetLifecycleConfiguration",
-      "s3:GetObject",
-      "s3:GetReplicationConfiguration",
-      "s3:ListBucket",
-      "s3:ListBucketVersions",
-      "s3:PutBucketAcl",
-      "s3:PutBucketLogging",
-      "s3:PutBucketObjectLockConfiguration",
-      "s3:PutBucketOwnershipControls",
-      "s3:PutBucketPolicy",
-      "s3:PutBucketPublicAccessBlock",
-      "s3:PutBucketTagging",
-      "s3:PutBucketVersioning",
-      "s3:PutEncryptionConfiguration",
-      "s3:PutLifecycleConfiguration",
-      "s3:PutObject",
+      "s3:*",
     ]
-    resources = [
-      "arn:aws:s3:::${var.project_name}-${var.environment}-*",
-      "arn:aws:s3:::${var.project_name}-${var.environment}-*/*",
-      "arn:aws:s3:::${var.shared_data_bucket_name}",
-      "arn:aws:s3:::${var.shared_data_bucket_name}/*",
-    ]
+    resources = concat(
+      [
+        "arn:aws:s3:::${var.project_name}-${var.environment}-*",
+        "arn:aws:s3:::${var.project_name}-${var.environment}-*/*",
+      ],
+      var.environment == "production" ? [
+        "arn:aws:s3:::${var.shared_data_bucket_name}",
+        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
+      ] : []
+    )
+  }
+
+  dynamic "statement" {
+    for_each = var.environment != "production" ? [1] : []
+    content {
+      sid    = "S3SharedBucketRestricted"
+      effect = "Allow"
+      actions = [
+        "s3:Get*",
+        "s3:List*",
+        "s3:PutObject",
+      ]
+      resources = [
+        "arn:aws:s3:::${var.shared_data_bucket_name}",
+        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
+      ]
+    }
   }
 
   statement {
@@ -619,11 +619,25 @@ resource "aws_iam_role" "terraform" {
 resource "aws_iam_policy" "part_one" {
   name   = "${var.project_name}-${var.environment}-part-one-terraform"
   policy = data.aws_iam_policy_document.part_one.minified_json
+
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= 6144
+      error_message = "part_one exceeds the IAM managed policy size limit of 6144 characters."
+    }
+  }
 }
 
 resource "aws_iam_policy" "part_two" {
   name   = "${var.project_name}-${var.environment}-part-two-terraform"
   policy = data.aws_iam_policy_document.part_two.minified_json
+
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= 6144
+      error_message = "part_two exceeds the IAM managed policy size limit of 6144 characters."
+    }
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "attach_part_one" {
@@ -634,16 +648,4 @@ resource "aws_iam_role_policy_attachment" "attach_part_one" {
 resource "aws_iam_role_policy_attachment" "attach_part_two" {
   role       = aws_iam_role.terraform.name
   policy_arn = aws_iam_policy.part_two.arn
-}
-
-check "terraform_role_policy_sizes" {
-  assert {
-    condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= 6144
-    error_message = "part_one exceeds the IAM managed policy size limit of 6144 characters."
-  }
-
-  assert {
-    condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= 6144
-    error_message = "part_two exceeds the IAM managed policy size limit of 6144 characters."
-  }
 }

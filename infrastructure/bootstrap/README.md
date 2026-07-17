@@ -1,12 +1,20 @@
-> **⚠️ DEPRECATED**: This shared bootstrap root is deprecated.
-> Use the per-environment roots instead:
+> [!CAUTION]
+> **DEPRECATED — DO NOT INITIALIZE, PLAN, OR APPLY FROM THIS DIRECTORY.**
+> Running `terraform init`, `terraform plan`, or `terraform apply` here is disabled and unsupported.
+> This shared bootstrap root is superseded by the per-environment roots:
 >
-> - [bootstrap-staging](../bootstrap-staging/README.md) — staging IAM resources
-> - [bootstrap-production](../bootstrap-production/README.md) — production IAM resources
+> - [`bootstrap-staging/`](../bootstrap-staging/README.md) — manages `nest-staging-terraform` only
+> - [`bootstrap-production/`](../bootstrap-production/README.md) — manages `nest-production-terraform` only
 >
-> See [Issue #5077](https://github.com/OWASP/Nest/issues/5077) for details.
+> Applying from this directory would manage **both** environments from a single shared state file,
+> defeating the environment isolation introduced by [Issue #5077](https://github.com/OWASP/Nest/issues/5077).
+> Use the per-environment roots for all bootstrap operations.
 
-## Users
+## Legacy Multi-Environment Documentation
+
+The sections below are preserved for historical reference only. Do not use this legacy configuration.
+
+### Users
 
 `bootstrap` creates a role for each environment that IAM users can assume.
 These users are listed in the `var.environments` variable.

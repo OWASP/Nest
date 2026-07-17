@@ -32,7 +32,7 @@ run "test_production_policy_names" {
   }
 }
 
-run "test_production_terraform_role_name" {
+run "test_production_terraform_role_creation" {
   command = plan
 
   assert {

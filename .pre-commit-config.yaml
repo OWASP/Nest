@@ -161,4 +161,5 @@ repos:
     hooks:
       - id: zizmor
         args:
+          - --offline
           - --min-severity=low

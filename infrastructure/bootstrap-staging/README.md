@@ -4,8 +4,24 @@ Per-environment Terraform root for the **staging** bootstrap IAM resources.
 
 This root manages only `nest-staging-terraform` IAM role and its policies,
 using the shared `bootstrap-iam` module. It has its own Terraform state file
-(`staging/bootstrap/terraform.tfstate`), ensuring staging deploys cannot
-modify production IAM resources.
+(`staging/bootstrap/terraform.tfstate`), preventing Terraform state collisions
+with the production root. IAM access isolation (ensuring the staging role cannot
+modify production resources) is enforced by the environment-scoped policies
+defined in the shared `bootstrap-iam` module.
+
+## Setup
+
+Before initializing, copy and configure the example files:
+
+```bash
+# 1. Configure backend (set the S3 bucket name)
+cp terraform.tfbackend.example terraform.tfbackend
+# Edit terraform.tfbackend and replace REPLACE_WITH_TF_STATE_BUCKET_NAME
+
+# 2. Configure variables (set aws_role_external_id)
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars and replace AWS_ROLE_EXTERNAL_ID
+```
 
 ## Usage
 
@@ -23,7 +39,7 @@ terraform apply
 ## State
 
 | Key | Value |
-|-----|-------|
+| --- | --- |
 | Backend | S3 |
 | State key | `staging/bootstrap/terraform.tfstate` |
 

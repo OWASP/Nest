@@ -32,7 +32,7 @@ run "test_staging_policy_names" {
   }
 }
 
-run "test_staging_terraform_role_name" {
+run "test_staging_terraform_role_creation" {
   command = plan
 
   assert {
