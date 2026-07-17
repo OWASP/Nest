@@ -5,6 +5,9 @@ from datetime import datetime
 import strawberry
 import strawberry_django
 
+from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
+    BoardCandidateClaimReviewNode,
+)
 from apps.owasp.api.internal.nodes.enum import ClaimStatusEnum
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 
@@ -28,6 +31,30 @@ class BoardCandidateClaimNode(strawberry.relay.Node):
     def created_at(self, root: BoardCandidateClaim) -> datetime:
         """Resolve claim creation date."""
         return root.nest_created_at
+
+    @strawberry_django.field
+    def reviews(
+        self, root: BoardCandidateClaim, info: strawberry.Info
+    ) -> list[BoardCandidateClaimReviewNode]:
+        """Resolve claim reviews."""
+        user = info.context.request.user
+        is_self = (
+            user.is_authenticated
+            and user.github_user is not None
+            and root.candidate.member is not None
+            and user.github_user == root.candidate.member
+        )
+        if is_self or root.status == BoardCandidateClaim.Status.APPROVED:
+            return root.reviews.all()
+
+        is_reviewer = (
+            user.is_authenticated
+            and root.board is not None
+            and root.board.reviewers.filter(id=user.id).exists()
+        )
+        if is_reviewer:
+            return root.reviews.filter(reviewer=user)
+        return []
 
     @strawberry_django.field
     def status(self, root: BoardCandidateClaim) -> ClaimStatusEnum:
