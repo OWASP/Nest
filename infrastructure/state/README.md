@@ -1,3 +1,14 @@
+## Bootstrap State Layout
+
+The bootstrap state bucket uses one environment-specific object key per bootstrap
+root:
+
+- `staging/bootstrap/terraform.tfstate`
+- `production/bootstrap/terraform.tfstate`
+
+The staging and production bootstrap workflows must use these separate keys;
+the deprecated shared bootstrap root must not be used for new applies.
+
 ## Inline Permissions
 
 Use the following inline permissions for the `nest-state` IAM User
