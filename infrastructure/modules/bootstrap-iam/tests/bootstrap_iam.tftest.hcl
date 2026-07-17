@@ -74,10 +74,10 @@ run "test_autoscaling_permissions_in_part_two" {
 
   assert {
     condition = alltrue([
-      can(regex("application-autoscaling:PutScalingPolicy", data.aws_iam_policy_document.part_two.json)),
-      can(regex("cloudwatch:PutMetricAlarm", data.aws_iam_policy_document.part_two.json)),
-      can(regex("iam:CreateServiceLinkedRole", data.aws_iam_policy_document.part_two.json)),
-      can(regex("TargetTracking-service/${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_two.json)),
+      strcontains(data.aws_iam_policy_document.part_two.json, "application-autoscaling:PutScalingPolicy"),
+      strcontains(data.aws_iam_policy_document.part_two.json, "cloudwatch:PutMetricAlarm"),
+      strcontains(data.aws_iam_policy_document.part_two.json, "iam:CreateServiceLinkedRole"),
+      strcontains(data.aws_iam_policy_document.part_two.json, "TargetTracking-service/${var.project_name}-${var.environment}-"),
     ])
     error_message = "part_two must include environment-scoped ECS auto-scaling permissions."
   }
@@ -88,9 +88,9 @@ run "test_autoscaling_permissions_not_in_part_one" {
 
   assert {
     condition = alltrue([
-      can(regex("application-autoscaling:DescribeScalingActivities", data.aws_iam_policy_document.part_one.json)),
-      !can(regex("application-autoscaling:PutScalingPolicy", data.aws_iam_policy_document.part_one.json)),
-      !can(regex("cloudwatch:PutMetricAlarm", data.aws_iam_policy_document.part_one.json)),
+      strcontains(data.aws_iam_policy_document.part_one.json, "application-autoscaling:DescribeScalingActivities"),
+      !strcontains(data.aws_iam_policy_document.part_one.json, "application-autoscaling:PutScalingPolicy"),
+      !strcontains(data.aws_iam_policy_document.part_one.json, "cloudwatch:PutMetricAlarm"),
     ])
     error_message = "part_one must include DescribeScalingActivities discovery and exclude ECS auto-scaling management permissions."
   }
