@@ -1,61 +1,79 @@
+"""Tests for MentorNode GraphQL node."""
+
 from unittest.mock import MagicMock
 
 import pytest
 
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
-
-
-@pytest.fixture
-def mock_github_user():
-    """Fixture for a mock GithubUser."""
-    mock = MagicMock()
-    mock.avatar_url = "https://example.com/mentor_avatar.jpg"
-    mock.name = "Mentor Name"
-    mock.login = "mentor_login"
-    return mock
-
-
-@pytest.fixture
-def mock_mentor_node(mock_github_user):
-    """Fixture for a mock MentorNode instance."""
-    mentor_node = MentorNode(id="1")
-    mentor_node.github_user = mock_github_user
-    return mentor_node
-
-
-@pytest.fixture
-def mock_mentor_node_no_github_user():
-    """Fixture for a mock MentorNode instance without a GitHub user."""
-    mentor_node = MentorNode(id="2")
-    mentor_node.github_user = None
-    return mentor_node
+from apps.mentorship.models.mentor import Mentor
 
 
 class TestMentorNode:
-    def test_mentor_node_id(self, mock_mentor_node):
+    """Tests for MentorNode fields."""
+
+    @pytest.mark.asyncio
+    async def test_avatar_url_with_github_user(self):
+        """Test avatar_url returns GitHub avatar URL when user exists."""
+        root = MagicMock(spec=Mentor)
+        root.github_user = MagicMock(avatar_url="https://example.com/avatar.png")
+
+        result = await MentorNode.avatar_url(MagicMock(spec=MentorNode), root)
+
+        assert result == "https://example.com/avatar.png"
+
+    @pytest.mark.asyncio
+    async def test_avatar_url_without_github_user(self):
+        """Test avatar_url returns empty string when no GitHub user."""
+        root = MagicMock(spec=Mentor)
+        root.github_user = None
+
+        result = await MentorNode.avatar_url(MagicMock(spec=MentorNode), root)
+
+        assert result == ""
+
+    @pytest.mark.asyncio
+    async def test_name_with_github_user(self):
+        """Test name returns GitHub name when user exists."""
+        root = MagicMock(spec=Mentor)
+        github_user = MagicMock()
+        github_user.configure_mock(name="Mentor Name")
+        root.github_user = github_user
+
+        result = await MentorNode.name(MagicMock(spec=MentorNode), root)
+
+        assert result == "Mentor Name"
+
+    @pytest.mark.asyncio
+    async def test_name_without_github_user(self):
+        """Test name returns empty string when no GitHub user."""
+        root = MagicMock(spec=Mentor)
+        root.github_user = None
+
+        result = await MentorNode.name(MagicMock(spec=MentorNode), root)
+
+        assert result == ""
+
+    @pytest.mark.asyncio
+    async def test_login_with_github_user(self):
+        """Test login returns GitHub login when user exists."""
+        root = MagicMock(spec=Mentor)
+        root.github_user = MagicMock(login="mentor-login")
+
+        result = await MentorNode.login(MagicMock(spec=MentorNode), root)
+
+        assert result == "mentor-login"
+
+    @pytest.mark.asyncio
+    async def test_login_without_github_user(self):
+        """Test login returns empty string when no GitHub user."""
+        root = MagicMock(spec=Mentor)
+        root.github_user = None
+
+        result = await MentorNode.login(MagicMock(spec=MentorNode), root)
+
+        assert result == ""
+
+    def test_mentor_node_id(self):
         """Test that MentorNode id is correctly assigned."""
-        assert str(mock_mentor_node.id) == "1"
-
-    def test_mentor_node_avatar_url(self, mock_mentor_node):
-        """Test the avatar_url field resolver."""
-        assert mock_mentor_node.avatar_url() == "https://example.com/mentor_avatar.jpg"
-
-    def test_mentor_node_avatar_url_no_github_user(self, mock_mentor_node_no_github_user):
-        """Test avatar_url when no github_user is associated."""
-        assert mock_mentor_node_no_github_user.avatar_url() == ""
-
-    def test_mentor_node_name(self, mock_mentor_node):
-        """Test the name field resolver."""
-        assert mock_mentor_node.name() == "Mentor Name"
-
-    def test_mentor_node_name_no_github_user(self, mock_mentor_node_no_github_user):
-        """Test name when no github_user is associated."""
-        assert mock_mentor_node_no_github_user.name() == ""
-
-    def test_mentor_node_login(self, mock_mentor_node):
-        """Test the login field resolver."""
-        assert mock_mentor_node.login() == "mentor_login"
-
-    def test_mentor_node_login_no_github_user(self, mock_mentor_node_no_github_user):
-        """Test login when no github_user is associated."""
-        assert mock_mentor_node_no_github_user.login() == ""
+        node = MentorNode(id="1")
+        assert str(node.id) == "1"

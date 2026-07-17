@@ -19,3 +19,17 @@ class IsAuthenticated(BasePermission):
     def on_unauthorized(self) -> Any:
         """Handle unauthorized access."""
         return GraphQLError(self.message, extensions={"code": "UNAUTHORIZED"})
+
+
+class IsAuthenticatedAsync(BasePermission):
+    """Permission class to check if the user is authenticated."""
+
+    message = "You must be logged in to perform this action."
+
+    async def has_permission(self, source, info: Info, **kwargs) -> bool:
+        """Check if the user is authenticated."""
+        return (await info.context.request.auser()).is_authenticated
+
+    def on_unauthorized(self) -> Any:
+        """Handle unauthorized access."""
+        return GraphQLError(self.message, extensions={"code": "UNAUTHORIZED"})

@@ -3,6 +3,7 @@
 from datetime import datetime
 
 import strawberry
+from asgiref.sync import sync_to_async
 from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
@@ -42,9 +43,9 @@ class ModuleNode:
     tags: list[str] | None = None
 
     @strawberry.field
-    def mentors(self) -> list[MentorNode]:
+    async def mentors(self) -> list[MentorNode]:
         """Get the list of mentors for this module."""
-        return self.mentors.all()
+        return [mentor async for mentor in self.mentors.all()]
 
     @strawberry.field
     async def mentees(self) -> list[UserNode]:
@@ -55,63 +56,72 @@ class ModuleNode:
             .values_list("mentee__github_user", flat=True)
         )
 
-        return list(
-            User.objects.filter(id__in=[user async for user in mentee_users]).order_by("login")
-        )
+        mentee_user_ids = [user_id async for user_id in mentee_users]
+        return [
+            user async for user in User.objects.filter(id__in=mentee_user_ids).order_by("login")
+        ]
 
     @strawberry.field
-    def issue_mentees(self, issue_number: int) -> list[UserNode]:
+    async def issue_mentees(self, issue_number: int) -> list[UserNode]:
         """Return mentees assigned to this module's issue identified by its number."""
-        issue_ids = list(self.issues.filter(number=issue_number).values_list("id", flat=True))
+        issue_ids = [
+            issue_id
+            async for issue_id in self.issues.filter(number=issue_number).values_list(
+                "id", flat=True
+            )
+        ]
         if not issue_ids:
             return []
 
-        # Get mentees assigned to tasks for this issue
-        mentee_users = (
-            Task.objects.filter(module=self, issue_id__in=issue_ids, assignee__isnull=False)
-            .select_related("assignee")
-            .values_list("assignee", flat=True)
-            .distinct()
-        )
+        mentee_users = [
+            mentee_user
+            async for mentee_user in (
+                Task.objects.filter(module=self, issue_id__in=issue_ids, assignee__isnull=False)
+                .select_related("assignee")
+                .values_list("assignee", flat=True)
+                .distinct()
+            )
+        ]
 
-        return list(User.objects.filter(id__in=mentee_users).order_by("login"))
+        return [user async for user in User.objects.filter(id__in=mentee_users).order_by("login")]
 
     @strawberry.field
-    def project_name(self) -> str | None:
+    async def project_name(self) -> str | None:
         """Get the project name for this module."""
-        return self.project.name if self.project else None
+        project = await sync_to_async(lambda: self.project)()
+        return project.name if project else None
 
     @strawberry.field
-    def issues(
+    async def issues(
         self, info: Info, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
-        user = info.context.request.user
-        if not self.program or (not self.program.has_admin(user) and not self.has_mentor(user)):
+        user = await info.context.request.auser()
+        if not self.program or (
+            not await sync_to_async(self.program.has_admin)(user)
+            and not await sync_to_async(self.has_mentor)(user)
+        ):
             return []
 
         info.context.current_module = self
 
-        # BULK load data
-        deadline_rows = (
-            Task.objects.filter(module=self, deadline_at__isnull=False)
-            .order_by("issue__number", "-assigned_at")
-            .values("issue__number", "deadline_at")
-        )
-        assigned_rows = (
-            Task.objects.filter(module=self, assigned_at__isnull=False)
-            .order_by("issue__number", "-assigned_at")
-            .values("issue__number", "assigned_at")
-        )
-
         deadline_map = {}
         assigned_map = {}
 
-        for row in deadline_rows:
+        async for row in (
+            Task.objects.filter(module=self, deadline_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "deadline_at")
+        ):
             num = row["issue__number"]
             if num not in deadline_map:
                 deadline_map[num] = row["deadline_at"]
-        for row in assigned_rows:
+
+        async for row in (
+            Task.objects.filter(module=self, assigned_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "assigned_at")
+        ):
             num = row["issue__number"]
             if num not in assigned_map:
                 assigned_map[num] = row["assigned_at"]
@@ -130,64 +140,81 @@ class ModuleNode:
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
 
-        return list(queryset.order_by("-updated_at")[offset : offset + normalized_limit])
+        return [
+            issue
+            async for issue in queryset.order_by("-updated_at")[offset : offset + normalized_limit]
+        ]
 
     @strawberry.field
-    def issues_count(self, label: str | None = None) -> int:
+    async def issues_count(self, label: str | None = None) -> int:
         """Return total count of issues linked to this module, optionally filtered by label."""
         queryset = self.issues
 
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
 
-        return queryset.count()
+        return await queryset.acount()
 
     @strawberry.field
-    def available_labels(self) -> list[str]:
+    async def available_labels(self) -> list[str]:
         """Return all unique labels from issues linked to this module."""
-        label_names = (
-            Label.objects.filter(issue__mentorship_modules=self)
-            .values_list("name", flat=True)
-            .distinct()
+        return sorted(
+            [
+                name
+                async for name in (
+                    Label.objects.filter(issue__mentorship_modules=self)
+                    .values_list("name", flat=True)
+                    .distinct()
+                )
+            ]
         )
 
-        return sorted(label_names)
-
     @strawberry.field
-    def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
+    async def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
-        user = info.context.request.user
-        if not self.program or (not self.program.has_admin(user) and not self.has_mentor(user)):
+        user = await info.context.request.auser()
+        if not self.program or (
+            not await sync_to_async(self.program.has_admin)(user)
+            and not await sync_to_async(self.has_mentor)(user)
+        ):
             return None
 
         info.context.current_module = self
 
         return (
-            self.issues.select_related("repository", "author")
+            await self.issues.select_related("repository", "author")
             .prefetch_related(
                 "assignees",
                 "labels",
                 MERGED_PULL_REQUESTS_PREFETCH,
             )
             .filter(number=number)
-            .first()
+            .afirst()
         )
 
     @strawberry.field
-    def interested_users(self, issue_number: int) -> list[UserNode]:
+    async def interested_users(self, issue_number: int) -> list[UserNode]:
         """Return users interested in this module's issue identified by its number."""
-        issue_ids = list(self.issues.filter(number=issue_number).values_list("id", flat=True))
-        if not issue_ids:
+        issue_id_list = [
+            issue_id
+            async for issue_id in self.issues.filter(number=issue_number).values_list(
+                "id", flat=True
+            )
+        ]
+        if not issue_id_list:
             return []
-        interests = (
-            IssueUserInterest.objects.select_related("user")
-            .filter(module=self, issue_id__in=issue_ids)
-            .order_by("user__login")
-        )
-        return [i.user for i in interests]
+
+        return [
+            interest.user
+            async for interest in (
+                IssueUserInterest.objects.select_related("user")
+                .filter(module=self, issue_id__in=issue_id_list)
+                .order_by("user__login")
+            )
+        ]
 
     @strawberry.field
-    def task_deadline(self, info: Info, issue_number: int) -> datetime | None:
+    async def task_deadline(self, info: Info, issue_number: int) -> datetime | None:
         """Return the deadline for the latest assigned task linked to this module and issue."""
         mapping = getattr(info.context, "task_deadlines_by_issue", None)
         if mapping is not None:
@@ -195,49 +222,52 @@ class ModuleNode:
 
         # fallback (single issue query)
         return (
-            Task.objects.filter(
+            await Task.objects.filter(
                 module=self,
                 issue__number=issue_number,
                 deadline_at__isnull=False,
             )
             .order_by("-assigned_at")
             .values_list("deadline_at", flat=True)
-            .first()
+            .afirst()
         )
 
     @strawberry.field
-    def task_assigned_at(self, info: Info, issue_number: int) -> datetime | None:
+    async def task_assigned_at(self, info: Info, issue_number: int) -> datetime | None:
         """Return the latest assignment time for tasks linked to this module and issue."""
         mapping = getattr(info.context, "task_assigned_at_by_issue", None)
         if mapping is not None:
             return mapping.get(issue_number)
 
         return (
-            Task.objects.filter(
+            await Task.objects.filter(
                 module=self,
                 issue__number=issue_number,
                 assigned_at__isnull=False,
             )
             .order_by("-assigned_at")
             .values_list("assigned_at", flat=True)
-            .first()
+            .afirst()
         )
 
     @strawberry.field
-    def recent_pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
+    async def recent_pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
         """Return recent pull requests linked to issues in this module."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
         offset = max(0, offset)
 
-        issue_ids = self.issues.values_list("id", flat=True)
-        return list(
-            PullRequest.objects.filter(related_issues__id__in=issue_ids)
-            .select_related("author")
-            .distinct()
-            .order_by("-created_at")[offset : offset + normalized_limit]
-        )
+        issue_ids = [issue_id async for issue_id in self.issues.values_list("id", flat=True)]
+        return [
+            pr
+            async for pr in (
+                PullRequest.objects.filter(related_issues__id__in=issue_ids)
+                .select_related("author")
+                .distinct()
+                .order_by("-created_at")[offset : offset + normalized_limit]
+            )
+        ]
 
 
 @strawberry.input

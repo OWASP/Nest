@@ -3,9 +3,10 @@
 import logging
 
 import strawberry
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
@@ -18,24 +19,24 @@ from apps.mentorship.api.internal.nodes.program import (
 )
 from apps.mentorship.models import Admin, Program
 from apps.mentorship.models.program_admin import ProgramAdmin
-from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.nest.api.internal.permissions import IsAuthenticatedAsync
 
 logger = logging.getLogger(__name__)
 
 
-def resolve_admins_from_logins(logins: list[str]) -> set:
+async def resolve_admins_from_logins(logins: list[str]) -> set:
     """Resolve a list of GitHub logins to a set of Admin objects."""
     admins = set()
     user_model = get_user_model()
     for login in logins:
         try:
-            github_user = GithubUser.objects.get(login__iexact=login.lower())
-            admin, _ = Admin.objects.get_or_create(github_user=github_user)
-            if not admin.nest_user:
+            github_user = await GithubUser.objects.aget(login__iexact=login.lower())
+            admin, _ = await Admin.objects.aget_or_create(github_user=github_user)
+            if not await sync_to_async(lambda admin=admin: admin.nest_user)():
                 try:
-                    nest_user = user_model.objects.get(github_user=github_user)
+                    nest_user = await user_model.objects.aget(github_user=github_user)
                     admin.nest_user = nest_user
-                    admin.save(update_fields=["nest_user"])
+                    await admin.asave(update_fields=["nest_user"])
                 except user_model.DoesNotExist:
                     logger.info(
                         "No Nest user found for GitHub user '%s'; leaving admin.nest_user unset.",
@@ -80,13 +81,15 @@ def _handle_program_save_integrity_error(exc: IntegrityError) -> None:
 class ProgramMutation:
     """GraphQL mutations related to program."""
 
-    @strawberry.mutation(permission_classes=[IsAuthenticated])
-    @transaction.atomic
-    def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
+    @strawberry.mutation(permission_classes=[IsAuthenticatedAsync])
+    async def create_program(
+        self, info: strawberry.Info, input_data: CreateProgramInput
+    ) -> ProgramNode:
         """Create a new mentorship program."""
-        user = info.context.request.user
+        user = await info.context.request.auser()
 
-        if not user.github_user or not user.github_user.is_project_leader:
+        github_user = await sync_to_async(lambda: user.github_user)()
+        if not github_user or not await sync_to_async(lambda: github_user.is_project_leader)():
             msg = "You must be a project leader to create a program."
             logger.warning(
                 "Permission denied for user '%s' to create program '%s'.",
@@ -106,7 +109,7 @@ class ProgramMutation:
             raise ValidationError(msg)
 
         try:
-            program = Program.objects.create(
+            program = await Program.objects.acreate(
                 name=input_data.name,
                 description=input_data.description,
                 mentees_limit=input_data.mentees_limit,
@@ -119,11 +122,11 @@ class ProgramMutation:
         except IntegrityError as e:
             _handle_program_save_integrity_error(e)
 
-        admin, _ = Admin.objects.get_or_create(github_user=user.github_user)
-        if not admin.nest_user:
+        admin, _ = await Admin.objects.aget_or_create(github_user=github_user)
+        if not await sync_to_async(lambda: admin.nest_user)():
             admin.nest_user = user
-            admin.save(update_fields=["nest_user"])
-        ProgramAdmin.objects.create(
+            await admin.asave(update_fields=["nest_user"])
+        await ProgramAdmin.objects.acreate(
             program=program, admin=admin, role=ProgramAdmin.AdminRole.OWNER
         )
 
@@ -136,20 +139,21 @@ class ProgramMutation:
 
         return program
 
-    @strawberry.mutation(permission_classes=[IsAuthenticated])
-    @transaction.atomic
-    def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
+    @strawberry.mutation(permission_classes=[IsAuthenticatedAsync])
+    async def update_program(
+        self, info: strawberry.Info, input_data: UpdateProgramInput
+    ) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
-        user = info.context.request.user
+        user = await info.context.request.auser()
 
         try:
-            program = Program.objects.select_for_update().get(key=input_data.key)
+            program = await Program.objects.aget(key=input_data.key)
         except Program.DoesNotExist as err:
             msg = f"Program with key '{input_data.key}' not found."
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
 
-        if not program.has_admin(user):
+        if not await sync_to_async(program.has_admin)(user):
             msg = "You must be an admin of this program to update it."
             logger.warning(
                 "Permission denied for user '%s' to update program '%s'.",
@@ -185,34 +189,33 @@ class ProgramMutation:
             program.status = input_data.status.value
 
         try:
-            program.save()
+            await program.asave()
         except IntegrityError as e:
             _handle_program_save_integrity_error(e)
 
         if input_data.admin_logins is not None:
-            program.admins.set(resolve_admins_from_logins(input_data.admin_logins))
+            await program.admins.aset(await resolve_admins_from_logins(input_data.admin_logins))
 
         return program
 
-    @strawberry.mutation(permission_classes=[IsAuthenticated])
-    @transaction.atomic
-    def update_program_status(
+    @strawberry.mutation(permission_classes=[IsAuthenticatedAsync])
+    async def update_program_status(
         self, info: strawberry.Info, input_data: UpdateProgramStatusInput
     ) -> ProgramNode:
         """Update only the status of a program."""
-        user = info.context.request.user
+        user = await info.context.request.auser()
 
         try:
-            program = Program.objects.select_for_update().get(key=input_data.key)
+            program = await Program.objects.aget(key=input_data.key)
         except Program.DoesNotExist as e:
             msg = f"Program with key '{input_data.key}' not found."
             raise ObjectDoesNotExist(msg) from e
 
-        if not program.has_admin(user):
+        if not await sync_to_async(program.has_admin)(user):
             raise PermissionDenied
 
         program.status = input_data.status.value
-        program.save()
+        await program.asave()
 
         logger.info("Updated status of program '%s' to '%s'", program.key, program.status)
 

@@ -1,7 +1,7 @@
 """Tests for mentorship module mutations."""
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
@@ -15,53 +15,47 @@ from apps.mentorship.api.internal.mutations.module import (
 from apps.mentorship.models.task import Task
 
 
-@pytest.fixture(autouse=True)
-def _mock_transaction_atomic():
-    """Disable transaction.atomic decorator for all tests."""
-    with (
-        patch("django.db.transaction.Atomic.__enter__", return_value=None),
-        patch("django.db.transaction.Atomic.__exit__", return_value=False),
-    ):
-        yield
-
-
 class TestResolveMentorsFromLogins:
     """Tests for resolve_mentors_from_logins."""
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
-    def test_resolve_mentors_success(self, mock_github_user, mock_mentor):
+    @pytest.mark.asyncio
+    async def test_resolve_mentors_success(self, mock_github_user, mock_mentor):
         """Test successful resolution of mentor logins."""
         mock_gh_user = MagicMock()
-        mock_github_user.objects.get.return_value = mock_gh_user
+        mock_github_user.objects.aget = AsyncMock(return_value=mock_gh_user)
         mock_mentor_obj1 = MagicMock()
         mock_mentor_obj2 = MagicMock()
-        mock_mentor.objects.get_or_create.side_effect = [
-            (mock_mentor_obj1, True),
-            (mock_mentor_obj2, True),
-        ]
+        mock_mentor.objects.aget_or_create = AsyncMock(
+            side_effect=[
+                (mock_mentor_obj1, True),
+                (mock_mentor_obj2, True),
+            ]
+        )
 
-        result = resolve_mentors_from_logins(["user1", "user2"])
+        result = await resolve_mentors_from_logins(["user1", "user2"])
 
         assert len(result) == 2
         assert mock_mentor_obj1 in result
         assert mock_mentor_obj2 in result
-        assert mock_github_user.objects.get.call_count == 2
+        assert mock_github_user.objects.aget.call_count == 2
 
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
-    def test_resolve_mentors_user_not_found(self, mock_github_user):
+    @pytest.mark.asyncio
+    async def test_resolve_mentors_user_not_found(self, mock_github_user):
         """Test ValueError when GitHub user not found."""
-        mock_github_user.DoesNotExist = Exception
-        mock_github_user.objects.get.side_effect = mock_github_user.DoesNotExist
+        mock_github_user.DoesNotExist = type("DoesNotExist", (Exception,), {})
+        mock_github_user.objects.aget = AsyncMock(side_effect=mock_github_user.DoesNotExist)
 
         with pytest.raises(ValueError, match="GitHub user 'bad_user' not found"):
-            resolve_mentors_from_logins(["bad_user"])
+            await resolve_mentors_from_logins(["bad_user"])
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
-    def test_resolve_mentors_empty_list(self, mock_github_user, mock_mentor):
+    async def test_resolve_mentors_empty_list(self, mock_github_user, mock_mentor):
         """Test with empty list returns empty set."""
-        result = resolve_mentors_from_logins([])
+        result = await resolve_mentors_from_logins([])
         assert result == set()
 
 
@@ -161,7 +155,7 @@ class TestModuleMutationCreateModule:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     def _make_input_data(self, **overrides):
@@ -188,7 +182,7 @@ class TestModuleMutationCreateModule:
     @patch("apps.mentorship.api.internal.mutations.module.Program")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
-    def test_create_module_success(
+    async def test_create_module_success(
         self,
         mock_validate,
         mock_mentor,
@@ -206,33 +200,36 @@ class TestModuleMutationCreateModule:
         mock_prog.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_prog.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_prog.experience_levels = []
-        mock_program.objects.get.return_value = mock_prog
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
 
         mock_proj = MagicMock()
-        mock_project.objects.get.return_value = mock_proj
+        mock_project.objects.aget = AsyncMock(return_value=mock_proj)
 
         mock_creator = MagicMock()
-        mock_mentor.objects.get.return_value = mock_creator
+        mock_mentor.objects.aget = AsyncMock(return_value=mock_creator)
         mock_prog.has_admin.return_value = True
 
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "intermediate"
-        mock_module.objects.create.return_value = mock_mod
+        mock_mod.mentors.aset = AsyncMock()
+        mock_module.objects.acreate = AsyncMock(return_value=mock_mod)
 
         mock_resolve.return_value = set()
 
+        mock_prog.asave = AsyncMock()
+
         mutation = ModuleMutation()
-        result = mutation.create_module(info, input_data)
+        result = await mutation.create_module(info, input_data)
 
         assert result == mock_mod
-        mock_module.objects.create.assert_called_once()
-        mock_mod.mentors.set.assert_called_once()
+        mock_module.objects.acreate.assert_called_once()
+        mock_mod.mentors.aset.assert_called_once()
 
     @patch("apps.mentorship.api.internal.mutations.module.Project")
     @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_create_module_program_not_found(self, mock_program, mock_project):
+    async def test_create_module_program_not_found(self, mock_program, mock_project):
         """Test ObjectDoesNotExist when program not found."""
         user = MagicMock()
         info = self._make_info(user)
@@ -240,31 +237,31 @@ class TestModuleMutationCreateModule:
 
         mock_program.DoesNotExist = ObjectDoesNotExist
         mock_project.DoesNotExist = ObjectDoesNotExist
-        mock_program.objects.get.side_effect = ObjectDoesNotExist("not found")
+        mock_program.objects.aget = AsyncMock(side_effect=ObjectDoesNotExist("not found"))
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist):
-            mutation.create_module(info, input_data)
+            await mutation.create_module(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Project")
     @patch("apps.mentorship.api.internal.mutations.module.Program")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    def test_create_module_not_admin(self, mock_mentor, mock_program, mock_project):
+    async def test_create_module_not_admin(self, mock_mentor, mock_program, mock_project):
         """Test PermissionDenied when mentor is not program admin."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data()
 
         mock_prog = MagicMock()
-        mock_program.objects.get.return_value = mock_prog
-        mock_project.objects.get.return_value = MagicMock()
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
+        mock_project.objects.aget = AsyncMock(return_value=MagicMock())
         mock_creator = MagicMock()
-        mock_mentor.objects.get.return_value = mock_creator
+        mock_mentor.objects.aget = AsyncMock(return_value=mock_creator)
         mock_prog.has_admin.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
-            mutation.create_module(info, input_data)
+            await mutation.create_module(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.resolve_mentors_from_logins")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -272,7 +269,7 @@ class TestModuleMutationCreateModule:
     @patch("apps.mentorship.api.internal.mutations.module.Program")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
-    def test_create_module_adds_experience_level_to_program(
+    async def test_create_module_adds_experience_level_to_program(
         self,
         mock_validate,
         mock_mentor,
@@ -290,26 +287,29 @@ class TestModuleMutationCreateModule:
         mock_prog.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_prog.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_prog.experience_levels = ["beginner"]
-        mock_program.objects.get.return_value = mock_prog
-        mock_project.objects.get.return_value = MagicMock()
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
+        mock_project.objects.aget = AsyncMock(return_value=MagicMock())
 
         mock_creator = MagicMock()
-        mock_mentor.objects.get.return_value = mock_creator
+        mock_mentor.objects.aget = AsyncMock(return_value=mock_creator)
         mock_prog.admins.filter.return_value.exists.return_value = True
 
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "advanced"
-        mock_module.objects.create.return_value = mock_mod
+        mock_mod.mentors.aset = AsyncMock()
+        mock_module.objects.acreate = AsyncMock(return_value=mock_mod)
 
         mock_resolve.return_value = set()
 
+        mock_prog.asave = AsyncMock()
+
         mutation = ModuleMutation()
-        mutation.create_module(info, input_data)
+        await mutation.create_module(info, input_data)
 
         assert "advanced" in mock_prog.experience_levels
-        mock_prog.save.assert_called_once_with(update_fields=["experience_levels"])
+        mock_prog.asave.assert_called_once_with(update_fields=["experience_levels"])
 
     @patch("apps.mentorship.api.internal.mutations.module.resolve_mentors_from_logins")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -317,7 +317,7 @@ class TestModuleMutationCreateModule:
     @patch("apps.mentorship.api.internal.mutations.module.Program")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
-    def test_create_module_experience_level_already_in_program(
+    async def test_create_module_experience_level_already_in_program(
         self,
         mock_validate,
         mock_mentor,
@@ -335,26 +335,27 @@ class TestModuleMutationCreateModule:
         mock_prog.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_prog.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_prog.experience_levels = ["intermediate", "beginner"]
-        mock_program.objects.get.return_value = mock_prog
-        mock_project.objects.get.return_value = MagicMock()
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
+        mock_project.objects.aget = AsyncMock(return_value=MagicMock())
 
         mock_creator = MagicMock()
-        mock_mentor.objects.get.return_value = mock_creator
+        mock_mentor.objects.aget = AsyncMock(return_value=mock_creator)
         mock_prog.admins.filter.return_value.exists.return_value = True
 
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
 
         mock_mod = MagicMock()
         mock_mod.experience_level = "intermediate"
-        mock_module.objects.create.return_value = mock_mod
+        mock_mod.mentors.aset = AsyncMock()
+        mock_module.objects.acreate = AsyncMock(return_value=mock_mod)
 
         mock_resolve.return_value = set()
 
         mutation = ModuleMutation()
-        result = mutation.create_module(info, input_data)
+        result = await mutation.create_module(info, input_data)
 
         assert result == mock_mod
-        mock_prog.save.assert_not_called()
+        mock_prog.asave.assert_not_called()
 
 
 class TestModuleMutationAssignIssue:
@@ -362,34 +363,39 @@ class TestModuleMutationAssignIssue:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     @patch("apps.mentorship.api.internal.mutations.module.IssueUserInterest")
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_assign_issue_success(self, mock_module, mock_mentor, mock_gh_user, mock_interest):
+    async def test_assign_issue_success(
+        self, mock_module, mock_mentor, mock_gh_user, mock_interest
+    ):
         """Test successful issue assignment."""
         user = MagicMock()
         info = self._make_info(user)
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
 
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_gh = MagicMock()
-        mock_gh_user.objects.filter.return_value.first.return_value = mock_gh
+        mock_gh_user.objects.filter.return_value.afirst = AsyncMock(return_value=mock_gh)
 
         mock_issue = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = mock_issue
+        mock_issue.assignees.aadd = AsyncMock()
+        mock_mod.issues.filter.return_value.afirst = AsyncMock(return_value=mock_issue)
+
+        mock_interest.objects.filter.return_value.adelete = AsyncMock()
 
         mutation = ModuleMutation()
-        result = mutation.assign_issue_to_user(
+        result = await mutation.assign_issue_to_user(
             info,
             module_key="mod-1",
             program_key="prog-1",
@@ -398,21 +404,21 @@ class TestModuleMutationAssignIssue:
         )
 
         assert result == mock_mod
-        mock_issue.assignees.add.assert_called_once_with(mock_gh)
-        mock_interest.objects.filter.return_value.delete.assert_called_once()
+        mock_issue.assignees.aadd.assert_called_once_with(mock_gh)
+        mock_interest.objects.filter.return_value.adelete.assert_called_once()
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_assign_issue_module_not_found(self, mock_module):
+    async def test_assign_issue_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module not found."""
         user = MagicMock()
         info = self._make_info(user)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            None
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=None
         )
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
-            mutation.assign_issue_to_user(
+            await mutation.assign_issue_to_user(
                 info,
                 module_key="bad",
                 program_key="bad",
@@ -422,19 +428,19 @@ class TestModuleMutationAssignIssue:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_assign_issue_not_mentor(self, mock_module, mock_mentor):
+    async def test_assign_issue_not_mentor(self, mock_module, mock_mentor):
         """Test PermissionDenied when user is not a mentor."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can assign"):
-            mutation.assign_issue_to_user(
+            await mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -445,21 +451,21 @@ class TestModuleMutationAssignIssue:
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_assign_issue_user_not_found(self, mock_module, mock_mentor, mock_gh):
+    async def test_assign_issue_user_not_found(self, mock_module, mock_mentor, mock_gh):
         """Test ObjectDoesNotExist when assignee not found."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
-        mock_gh.objects.filter.return_value.first.return_value = None
+        mock_gh.objects.filter.return_value.afirst = AsyncMock(return_value=None)
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Assignee not found"):
-            mutation.assign_issue_to_user(
+            await mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -470,22 +476,22 @@ class TestModuleMutationAssignIssue:
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_assign_issue_issue_not_found(self, mock_module, mock_mentor, mock_gh):
+    async def test_assign_issue_issue_not_found(self, mock_module, mock_mentor, mock_gh):
         """Test ObjectDoesNotExist when issue not found."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
-        mock_gh.objects.filter.return_value.first.return_value = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = None
+        mock_gh.objects.filter.return_value.afirst = AsyncMock(return_value=MagicMock())
+        mock_mod.issues.filter.return_value.afirst = AsyncMock(return_value=None)
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
-            mutation.assign_issue_to_user(
+            await mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -499,30 +505,31 @@ class TestModuleMutationUnassignIssue:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_unassign_issue_success(self, mock_module, mock_mentor, mock_gh_user):
+    async def test_unassign_issue_success(self, mock_module, mock_mentor, mock_gh_user):
         """Test successful issue un-assignment."""
         user = MagicMock()
         info = self._make_info(user)
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh = MagicMock()
-        mock_gh_user.objects.filter.return_value.first.return_value = mock_gh
+        mock_gh_user.objects.filter.return_value.afirst = AsyncMock(return_value=mock_gh)
         mock_issue = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = mock_issue
+        mock_issue.assignees.aremove = AsyncMock()
+        mock_mod.issues.filter.return_value.afirst = AsyncMock(return_value=mock_issue)
 
         mutation = ModuleMutation()
-        result = mutation.unassign_issue_from_user(
+        result = await mutation.unassign_issue_from_user(
             info,
             module_key="mod-1",
             program_key="prog-1",
@@ -531,20 +538,20 @@ class TestModuleMutationUnassignIssue:
         )
 
         assert result == mock_mod
-        mock_issue.assignees.remove.assert_called_once_with(mock_gh)
+        mock_issue.assignees.aremove.assert_called_once_with(mock_gh)
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_unassign_module_not_found(self, mock_module):
+    async def test_unassign_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module not found."""
         user = MagicMock()
         info = self._make_info(user)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            None
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=None
         )
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
-            mutation.unassign_issue_from_user(
+            await mutation.unassign_issue_from_user(
                 info,
                 module_key="bad",
                 program_key="bad",
@@ -554,19 +561,19 @@ class TestModuleMutationUnassignIssue:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_unassign_not_mentor(self, mock_module, mock_mentor):
+    async def test_unassign_not_mentor(self, mock_module, mock_mentor):
         """Test PermissionDenied when user is not a mentor."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
-            mutation.unassign_issue_from_user(
+            await mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -577,21 +584,21 @@ class TestModuleMutationUnassignIssue:
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_unassign_user_not_found(self, mock_module, mock_mentor, mock_gh):
+    async def test_unassign_user_not_found(self, mock_module, mock_mentor, mock_gh):
         """Test ObjectDoesNotExist when user not found."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
-        mock_gh.objects.filter.return_value.first.return_value = None
+        mock_gh.objects.filter.return_value.afirst = AsyncMock(return_value=None)
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Assignee not found"):
-            mutation.unassign_issue_from_user(
+            await mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -602,22 +609,22 @@ class TestModuleMutationUnassignIssue:
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_unassign_issue_not_found(self, mock_module, mock_mentor, mock_gh):
+    async def test_unassign_issue_not_found(self, mock_module, mock_mentor, mock_gh):
         """Test ObjectDoesNotExist when issue not found."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
-        mock_gh.objects.filter.return_value.first.return_value = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = None
+        mock_gh.objects.filter.return_value.afirst = AsyncMock(return_value=MagicMock())
+        mock_mod.issues.filter.return_value.afirst = AsyncMock(return_value=None)
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match=r"Issue .* not found in this module"):
-            mutation.unassign_issue_from_user(
+            await mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -631,14 +638,14 @@ class TestModuleMutationSetTaskDeadline:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_task_deadline_success(self, mock_tz, mock_module, mock_mentor, mock_task):
+    async def test_set_task_deadline_success(self, mock_tz, mock_module, mock_mentor, mock_task):
         """Test successful deadline setting."""
         user = MagicMock()
         info = self._make_info(user)
@@ -648,19 +655,18 @@ class TestModuleMutationSetTaskDeadline:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        assignees_qs = MagicMock()
-        assignees_qs.exists.return_value = True
-        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
-        mock_issue.assignees.all.return_value = assignees_qs
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         deadline = datetime(2025, 12, 1, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
@@ -668,10 +674,10 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_task_obj = MagicMock()
         mock_task_obj.assigned_at = None
-        mock_task.objects.get_or_create.return_value = (mock_task_obj, True)
+        mock_task.objects.aget_or_create = AsyncMock(return_value=(mock_task_obj, True))
 
         mutation = ModuleMutation()
-        result = mutation.set_task_deadline(
+        result = await mutation.set_task_deadline(
             info,
             module_key="mod-1",
             program_key="prog-1",
@@ -683,17 +689,17 @@ class TestModuleMutationSetTaskDeadline:
         mock_task.objects.bulk_update.assert_called_once()
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_set_deadline_module_not_found(self, mock_module):
+    async def test_set_deadline_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module not found."""
         user = MagicMock()
         info = self._make_info(user)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            None
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=None
         )
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
-            mutation.set_task_deadline(
+            await mutation.set_task_deadline(
                 info,
                 module_key="bad",
                 program_key="bad",
@@ -703,19 +709,19 @@ class TestModuleMutationSetTaskDeadline:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_set_deadline_not_mentor(self, mock_module, mock_mentor):
+    async def test_set_deadline_not_mentor(self, mock_module, mock_mentor):
         """Test PermissionDenied when user is not a mentor."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
-            mutation.set_task_deadline(
+            await mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -725,22 +731,24 @@ class TestModuleMutationSetTaskDeadline:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_set_deadline_issue_not_found(self, mock_module, mock_mentor):
+    async def test_set_deadline_issue_not_found(self, mock_module, mock_mentor):
         """Test ObjectDoesNotExist when issue not found."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=None
+        )
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
-            mutation.set_task_deadline(
+            await mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -750,25 +758,27 @@ class TestModuleMutationSetTaskDeadline:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_set_deadline_no_assignees(self, mock_module, mock_mentor):
+    async def test_set_deadline_no_assignees(self, mock_module, mock_mentor):
         """Test ValidationError when issue has no assignees."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.all.return_value.exists.return_value = False
+        mock_issue.assignees.all = MagicMock(return_value=[])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match="Cannot set deadline: issue has no assignees"):
-            mutation.set_task_deadline(
+            await mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -780,7 +790,7 @@ class TestModuleMutationSetTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_naive_deadline(self, mock_tz, mock_module, mock_mentor, mock_task):
+    async def test_set_deadline_naive_deadline(self, mock_tz, mock_module, mock_mentor, mock_task):
         """Test naive deadline is made aware."""
         user = MagicMock()
         info = self._make_info(user)
@@ -789,19 +799,18 @@ class TestModuleMutationSetTaskDeadline:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        assignees_qs = MagicMock()
-        assignees_qs.exists.return_value = True
-        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
-        mock_issue.assignees.all.return_value = assignees_qs
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         naive_deadline = datetime(2025, 12, 1)  # noqa: DTZ001
         aware_deadline = datetime(2025, 12, 1, tzinfo=UTC)
@@ -812,10 +821,10 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_task_obj = MagicMock()
         mock_task_obj.assigned_at = datetime(2025, 5, 1, tzinfo=UTC)
-        mock_task.objects.get_or_create.return_value = (mock_task_obj, False)
+        mock_task.objects.aget_or_create = AsyncMock(return_value=(mock_task_obj, False))
 
         mutation = ModuleMutation()
-        result = mutation.set_task_deadline(
+        result = await mutation.set_task_deadline(
             info,
             module_key="mod-1",
             program_key="prog-1",
@@ -830,7 +839,9 @@ class TestModuleMutationSetTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_past_within_range(self, mock_tz, mock_module, mock_mentor, mock_task):
+    async def test_set_deadline_past_within_range(
+        self, mock_tz, mock_module, mock_mentor, mock_task
+    ):
         """Test a past deadline succeeds when it falls within the module's range."""
         user = MagicMock()
         info = self._make_info(user)
@@ -840,19 +851,18 @@ class TestModuleMutationSetTaskDeadline:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        assignees_qs = MagicMock()
-        assignees_qs.exists.return_value = True
-        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
-        mock_issue.assignees.all.return_value = assignees_qs
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         # Deadline is in the past relative to "now" but still inside the module window.
         past_deadline = datetime(2025, 3, 1, tzinfo=UTC)
@@ -861,10 +871,10 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_task_obj = MagicMock()
         mock_task_obj.assigned_at = None
-        mock_task.objects.get_or_create.return_value = (mock_task_obj, True)
+        mock_task.objects.aget_or_create = AsyncMock(return_value=(mock_task_obj, True))
 
         mutation = ModuleMutation()
-        result = mutation.set_task_deadline(
+        result = await mutation.set_task_deadline(
             info,
             module_key="mod-1",
             program_key="prog-1",
@@ -878,7 +888,7 @@ class TestModuleMutationSetTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_before_module_start(self, mock_tz, mock_module, mock_mentor):
+    async def test_set_deadline_before_module_start(self, mock_tz, mock_module, mock_mentor):
         """Test ValidationError when deadline is before the module's start date."""
         user = MagicMock()
         info = self._make_info(user)
@@ -886,15 +896,17 @@ class TestModuleMutationSetTaskDeadline:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.all.return_value.exists.return_value = True
+        mock_issue.assignees.all = MagicMock(return_value=[MagicMock()])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         early_deadline = datetime(2024, 12, 31, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
@@ -902,7 +914,7 @@ class TestModuleMutationSetTaskDeadline:
 
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match="within the module's start and end dates"):
-            mutation.set_task_deadline(
+            await mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -913,7 +925,7 @@ class TestModuleMutationSetTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_after_module_end(self, mock_tz, mock_module, mock_mentor):
+    async def test_set_deadline_after_module_end(self, mock_tz, mock_module, mock_mentor):
         """Test ValidationError when deadline is after the module's end date."""
         user = MagicMock()
         info = self._make_info(user)
@@ -921,15 +933,17 @@ class TestModuleMutationSetTaskDeadline:
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.all.return_value.exists.return_value = True
+        mock_issue.assignees.all = MagicMock(return_value=[MagicMock()])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         late_deadline = datetime(2026, 1, 1, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
@@ -937,7 +951,7 @@ class TestModuleMutationSetTaskDeadline:
 
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match="within the module's start and end dates"):
-            mutation.set_task_deadline(
+            await mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
@@ -951,79 +965,78 @@ class TestModuleMutationClearTaskDeadline:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_single_task(self, mock_module, mock_mentor, mock_task):
+    async def test_clear_deadline_single_task(self, mock_module, mock_mentor, mock_task):
         """Test clearing deadline for a single task."""
         user = MagicMock()
         info = self._make_info(user)
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        assignees_qs = MagicMock()
-        assignees_qs.exists.return_value = True
-        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
-        mock_issue.assignees.all.return_value = assignees_qs
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         task_obj = MagicMock()
         task_obj.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
-        mock_task.objects.filter.return_value.first.return_value = task_obj
+        task_obj.asave = AsyncMock()
+        mock_task.objects.filter.return_value.afirst = AsyncMock(return_value=task_obj)
 
         mutation = ModuleMutation()
-        result = mutation.clear_task_deadline(
+        result = await mutation.clear_task_deadline(
             info, module_key="mod-1", program_key="prog-1", issue_number=1
         )
 
         assert result == mock_mod
         assert task_obj.deadline_at is None
-        task_obj.save.assert_called_once_with(update_fields=["deadline_at"])
+        task_obj.asave.assert_called_once_with(update_fields=["deadline_at"])
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_multiple_tasks(self, mock_module, mock_mentor, mock_task):
+    async def test_clear_deadline_multiple_tasks(self, mock_module, mock_mentor, mock_task):
         """Test clearing deadline for multiple tasks uses bulk_update."""
         user = MagicMock()
         info = self._make_info(user)
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee1 = MagicMock()
         assignee2 = MagicMock()
-        assignees_qs = MagicMock()
-        assignees_qs.exists.return_value = True
-        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee1, assignee2]))
-        mock_issue.assignees.all.return_value = assignees_qs
+        mock_issue.assignees.all = MagicMock(return_value=[assignee1, assignee2])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         task1 = MagicMock()
         task1.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
         task2 = MagicMock()
         task2.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
-        mock_task.objects.filter.return_value.first.side_effect = [task1, task2]
+        mock_task.objects.filter.return_value.afirst = AsyncMock(side_effect=[task1, task2])
 
         mutation = ModuleMutation()
-        result = mutation.clear_task_deadline(
+        result = await mutation.clear_task_deadline(
             info, module_key="mod-1", program_key="prog-1", issue_number=1
         )
 
@@ -1033,33 +1046,34 @@ class TestModuleMutationClearTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_no_tasks_with_deadline(self, mock_module, mock_mentor, mock_task):
+    async def test_clear_deadline_no_tasks_with_deadline(
+        self, mock_module, mock_mentor, mock_task
+    ):
         """Test when no tasks have deadlines."""
         user = MagicMock()
         info = self._make_info(user)
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        assignees_qs = MagicMock()
-        assignees_qs.exists.return_value = True
-        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
-        mock_issue.assignees.all.return_value = assignees_qs
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         task_obj = MagicMock()
         task_obj.deadline_at = None
-        mock_task.objects.filter.return_value.first.return_value = task_obj
+        mock_task.objects.filter.return_value.afirst = AsyncMock(return_value=task_obj)
 
         mutation = ModuleMutation()
-        result = mutation.clear_task_deadline(
+        result = await mutation.clear_task_deadline(
             info, module_key="mod-1", program_key="prog-1", issue_number=1
         )
 
@@ -1069,109 +1083,114 @@ class TestModuleMutationClearTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_task_not_found(self, mock_module, mock_mentor, mock_task):
+    async def test_clear_deadline_task_not_found(self, mock_module, mock_mentor, mock_task):
         """Test when task object is None (no task exists for assignee)."""
         user = MagicMock()
         info = self._make_info(user)
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
-        assignees_qs = MagicMock()
-        assignees_qs.exists.return_value = True
-        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
-        mock_issue.assignees.all.return_value = assignees_qs
+        mock_issue.assignees.all = MagicMock(return_value=[assignee])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
-        mock_task.objects.filter.return_value.first.return_value = None
+        mock_task.objects.filter.return_value.afirst = AsyncMock(return_value=None)
 
         mutation = ModuleMutation()
-        result = mutation.clear_task_deadline(
+        result = await mutation.clear_task_deadline(
             info, module_key="mod-1", program_key="prog-1", issue_number=1
         )
 
         assert result == mock_mod
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_module_not_found(self, mock_module):
+    async def test_clear_deadline_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module not found."""
         user = MagicMock()
         info = self._make_info(user)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            None
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=None
         )
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
-            mutation.clear_task_deadline(info, module_key="bad", program_key="bad", issue_number=1)
+            await mutation.clear_task_deadline(
+                info, module_key="bad", program_key="bad", issue_number=1
+            )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_not_mentor(self, mock_module, mock_mentor):
+    async def test_clear_deadline_not_mentor(self, mock_module, mock_mentor):
         """Test PermissionDenied when user is not a mentor."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
-            mutation.clear_task_deadline(
+            await mutation.clear_task_deadline(
                 info, module_key="mod-1", program_key="prog-1", issue_number=1
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_issue_not_found(self, mock_module, mock_mentor):
+    async def test_clear_deadline_issue_not_found(self, mock_module, mock_mentor):
         """Test ObjectDoesNotExist when issue not found."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=None
+        )
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
-            mutation.clear_task_deadline(
+            await mutation.clear_task_deadline(
                 info, module_key="mod-1", program_key="prog-1", issue_number=1
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_no_assignees(self, mock_module, mock_mentor):
+    async def test_clear_deadline_no_assignees(self, mock_module, mock_mentor):
         """Test ValidationError when issue has no assignees."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
+        mock_module.objects.select_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
-        mock_issue.assignees.all.return_value.exists.return_value = False
+        mock_issue.assignees.all = MagicMock(return_value=[])
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.return_value.afirst = AsyncMock(
+            return_value=mock_issue
+        )
 
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match="Cannot clear deadline: issue has no assignees"):
-            mutation.clear_task_deadline(
+            await mutation.clear_task_deadline(
                 info, module_key="mod-1", program_key="prog-1", issue_number=1
             )
 
@@ -1181,7 +1200,7 @@ class TestModuleMutationUpdateModule:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     def _make_input_data(self, **overrides):
@@ -1208,7 +1227,7 @@ class TestModuleMutationUpdateModule:
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
-    def test_update_module_success(
+    async def test_update_module_success(
         self, mock_validate, mock_mentor, mock_module, mock_resolve, mock_project
     ):
         """Test successful module update."""
@@ -1223,40 +1242,46 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.experience_levels = ["intermediate"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mod_qs = mock_module.objects.select_related.return_value
-        mod_qs.select_for_update.return_value.get.return_value = mock_mod
-        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
+        mod_qs.aget = AsyncMock(return_value=mock_mod)
+        mock_module.objects.filter.return_value.exclude.return_value.aexists = AsyncMock(
+            return_value=False
+        )
 
         mock_creator = MagicMock()
-        mock_mentor.objects.get.return_value = mock_creator
+        mock_mentor.objects.aget = AsyncMock(return_value=mock_creator)
 
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
-        mock_project.objects.get.return_value = MagicMock()
+        mock_project.objects.aget = AsyncMock(return_value=MagicMock())
         mock_resolve.return_value = {MagicMock()}
 
+        mock_mod.asave = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
+        mock_mod.mentors.aset = AsyncMock()
+
         mutation = ModuleMutation()
-        result = mutation.update_module(info, input_data)
+        result = await mutation.update_module(info, input_data)
 
         assert result == mock_mod
-        mock_mod.save.assert_called_once()
-        mock_mod.mentors.set.assert_called_once()
+        mock_mod.asave.assert_called_once()
+        mock_mod.mentors.aset.assert_called_once()
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_update_module_not_found(self, mock_module):
+    async def test_update_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module not found."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data()
         mock_module.DoesNotExist = type("DoesNotExist", (Exception,), {})
         mod_qs = mock_module.objects.select_related.return_value
-        mod_qs.select_for_update.return_value.get.side_effect = mock_module.DoesNotExist
+        mod_qs.aget = AsyncMock(side_effect=mock_module.DoesNotExist)
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
-            mutation.update_module(info, input_data)
+            await mutation.update_module(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    def test_update_module_not_admin_nor_mentor(self, mock_mentor, mock_module):
+    async def test_update_module_not_admin_nor_mentor(self, mock_mentor, mock_module):
         """Test PermissionDenied when user is neither admin nor mentor."""
         user = MagicMock()
         user.username = "testuser"
@@ -1265,7 +1290,7 @@ class TestModuleMutationUpdateModule:
         mock_mod = MagicMock()
         mock_mod.program.has_admin.return_value = False
         mod_qs = mock_module.objects.select_related.return_value
-        mod_qs.select_for_update.return_value.get.return_value = mock_mod
+        mod_qs.aget = AsyncMock(return_value=mock_mod)
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
@@ -1273,13 +1298,13 @@ class TestModuleMutationUpdateModule:
             PermissionDenied,
             match="Only admins of the program or mentors of this module can edit",
         ):
-            mutation.update_module(info, input_data)
+            await mutation.update_module(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Project")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
-    def test_update_module_project_not_found(
+    async def test_update_module_project_not_found(
         self, mock_validate, mock_mentor, mock_module, mock_project
     ):
         """Test ObjectDoesNotExist when project not found."""
@@ -1294,21 +1319,21 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.experience_levels = ["intermediate"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mod_qs = mock_module.objects.select_related.return_value
-        mod_qs.select_for_update.return_value.get.return_value = mock_mod
-        mock_mentor.objects.get.return_value = MagicMock()
+        mod_qs.aget = AsyncMock(return_value=mock_mod)
+        mock_mentor.objects.aget = AsyncMock(return_value=MagicMock())
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
         mock_project.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_project.objects.get.side_effect = mock_project.DoesNotExist
+        mock_project.objects.aget = AsyncMock(side_effect=mock_project.DoesNotExist)
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match=r"Project with id .* not found"):
-            mutation.update_module(info, input_data)
+            await mutation.update_module(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Project")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
-    def test_update_module_no_mentor_logins(
+    async def test_update_module_no_mentor_logins(
         self, mock_validate, mock_mentor, mock_module, mock_project
     ):
         """Test update without updating mentor logins."""
@@ -1323,24 +1348,29 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.experience_levels = ["intermediate", "advanced"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mod_qs = mock_module.objects.select_related.return_value
-        mod_qs.select_for_update.return_value.get.return_value = mock_mod
-        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = True
+        mod_qs.aget = AsyncMock(return_value=mock_mod)
+        mock_module.objects.filter.return_value.exclude.return_value.aexists = AsyncMock(
+            return_value=True
+        )
 
-        mock_mentor.objects.get.return_value = MagicMock()
+        mock_mentor.objects.aget = AsyncMock(return_value=MagicMock())
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
-        mock_project.objects.get.return_value = MagicMock()
+        mock_project.objects.aget = AsyncMock(return_value=MagicMock())
+
+        mock_mod.asave = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
 
         mutation = ModuleMutation()
-        result = mutation.update_module(info, input_data)
+        result = await mutation.update_module(info, input_data)
 
         assert result == mock_mod
-        mock_mod.mentors.set.assert_not_called()
+        mock_mod.mentors.aset.assert_not_called()
 
     @patch("apps.mentorship.api.internal.mutations.module.Project")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module._validate_module_dates")
-    def test_update_module_removes_old_experience_level(
+    async def test_update_module_removes_old_experience_level(
         self, mock_validate, mock_mentor, mock_module, mock_project
     ):
         """Test old experience level removed when no other module uses it."""
@@ -1356,18 +1386,23 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.experience_levels = ["intermediate"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
         mod_qs = mock_module.objects.select_related.return_value
-        mod_qs.select_for_update.return_value.get.return_value = mock_mod
-        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
+        mod_qs.aget = AsyncMock(return_value=mock_mod)
+        mock_module.objects.filter.return_value.exclude.return_value.aexists = AsyncMock(
+            return_value=False
+        )
 
-        mock_mentor.objects.get.return_value = MagicMock()
+        mock_mentor.objects.aget = AsyncMock(return_value=MagicMock())
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
-        mock_project.objects.get.return_value = MagicMock()
+        mock_project.objects.aget = AsyncMock(return_value=MagicMock())
+
+        mock_mod.asave = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
 
         mutation = ModuleMutation()
-        mutation.update_module(info, input_data)
+        await mutation.update_module(info, input_data)
 
         assert "advanced" in mock_mod.program.experience_levels
-        mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
+        mock_mod.program.asave.assert_called_once_with(update_fields=["experience_levels"])
 
 
 class TestModuleMutationDeleteModule:
@@ -1375,11 +1410,11 @@ class TestModuleMutationDeleteModule:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_delete_module_success_removes_unique_experience_level(self, mock_module):
+    async def test_delete_module_success_removes_unique_experience_level(self, mock_module):
         """Test successful deletion removes experience level when no other module uses it."""
         user = MagicMock()
         info = self._make_info(user)
@@ -1387,23 +1422,34 @@ class TestModuleMutationDeleteModule:
         mock_mod = MagicMock()
         mock_mod.name = "Test Module"
         mock_mod.experience_level = "intermediate"
-        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.has_admin.return_value = True
         mock_mod.program.experience_levels = ["beginner", "intermediate"]
 
-        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_mod.adelete = AsyncMock()
+        mock_mod.program.asave = AsyncMock()
+
+        mock_module.objects.select_related.return_value.aget = AsyncMock(return_value=mock_mod)
         mock_module.DoesNotExist = ObjectDoesNotExist
-        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
+
+        other_mod = MagicMock()
+        other_mod.experience_level = "beginner"
+
+        async def _other_modules_aiter():
+            yield other_mod
+
+        mock_exclude = mock_module.objects.filter.return_value.exclude.return_value
+        mock_exclude.aexists = AsyncMock(return_value=False)
 
         mutation = ModuleMutation()
-        result = mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+        result = await mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
 
         assert result == "Module 'Test Module' has been deleted successfully."
-        mock_mod.delete.assert_called_once()
-        mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
+        mock_mod.adelete.assert_called_once()
+        mock_mod.program.asave.assert_called_once_with(update_fields=["experience_levels"])
         assert "intermediate" not in mock_mod.program.experience_levels
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_delete_module_success_keeps_shared_experience_level(self, mock_module):
+    async def test_delete_module_success_keeps_shared_experience_level(self, mock_module):
         """Test successful deletion keeps experience level when other modules use it."""
         user = MagicMock()
         info = self._make_info(user)
@@ -1411,37 +1457,41 @@ class TestModuleMutationDeleteModule:
         mock_mod = MagicMock()
         mock_mod.name = "Test Module"
         mock_mod.experience_level = "beginner"
-        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.has_admin.return_value = True
         mock_mod.program.experience_levels = ["beginner", "advanced"]
 
-        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_mod.adelete = AsyncMock()
+
+        mock_module.objects.select_related.return_value.aget = AsyncMock(return_value=mock_mod)
         mock_module.DoesNotExist = ObjectDoesNotExist
-        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = True
+
+        mock_exclude = mock_module.objects.filter.return_value.exclude.return_value
+        mock_exclude.aexists = AsyncMock(return_value=True)
 
         mutation = ModuleMutation()
-        result = mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+        result = await mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
 
         assert result == "Module 'Test Module' has been deleted successfully."
-        mock_mod.delete.assert_called_once()
+        mock_mod.adelete.assert_called_once()
         assert "beginner" in mock_mod.program.experience_levels
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_delete_module_not_found(self, mock_module):
+    async def test_delete_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module is not found."""
         user = MagicMock()
         info = self._make_info(user)
 
         mock_module.DoesNotExist = ObjectDoesNotExist
-        mock_module.objects.select_related.return_value.get.side_effect = ObjectDoesNotExist(
-            "not found"
+        mock_module.objects.select_related.return_value.aget = AsyncMock(
+            side_effect=ObjectDoesNotExist("not found")
         )
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist):
-            mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+            await mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_delete_module_not_admin(self, mock_module):
+    async def test_delete_module_not_admin(self, mock_module):
         """Test PermissionDenied when user is not a program admin."""
         user = MagicMock()
         info = self._make_info(user)
@@ -1449,12 +1499,12 @@ class TestModuleMutationDeleteModule:
         mock_mod = MagicMock()
         mock_mod.program.has_admin.return_value = False
 
-        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_module.objects.select_related.return_value.aget = AsyncMock(return_value=mock_mod)
         mock_module.DoesNotExist = ObjectDoesNotExist
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
-            mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+            await mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
 
 
 class TestModuleMutationReorderModules:
@@ -1462,7 +1512,7 @@ class TestModuleMutationReorderModules:
 
     def _make_info(self, user):
         info = MagicMock()
-        info.context.request.user = user
+        info.context.request.auser = AsyncMock(return_value=user)
         return info
 
     def _make_input_data(self, **overrides):
@@ -1475,15 +1525,15 @@ class TestModuleMutationReorderModules:
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_reorder_modules_success(self, mock_program, mock_module):
+    @pytest.mark.asyncio
+    async def test_reorder_modules_success(self, mock_program, mock_module):
         """Test successful module reordering by admin."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data()
 
         mock_prog = MagicMock()
-        mock_program.objects.get.return_value = mock_prog
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
 
         mod_a = MagicMock()
         mod_a.key = "mod-a"
@@ -1492,19 +1542,35 @@ class TestModuleMutationReorderModules:
         mod_c = MagicMock()
         mod_c.key = "mod-c"
 
-        mock_module.objects.filter.return_value.count.return_value = 3
-        mock_module.objects.filter.return_value.select_for_update.return_value = [
-            mod_a,
-            mod_b,
-            mod_c,
-        ]
+        class _AsyncIterableQS:
+            def __init__(self, items):
+                self._items = items
 
-        mock_result_qs = MagicMock()
-        mock_qs = mock_module.objects.filter.return_value.select_related.return_value
-        mock_qs.prefetch_related.return_value.order_by.return_value = mock_result_qs
+            def __aiter__(self):
+                return self._agen()
+
+            async def _agen(self):
+                for item in self._items:
+                    yield item
+
+            def select_related(self, *args, **kwargs):
+                return self
+
+            def prefetch_related(self, *args, **kwargs):
+                return self
+
+            def order_by(self, *args, **kwargs):
+                return self
+
+            @property
+            def select_for_update(self):
+                return self
+
+        mock_filter = _AsyncIterableQS([mod_a, mod_b, mod_c])
+        mock_module.objects.filter.return_value = mock_filter
 
         mutation = ModuleMutation()
-        mutation.reorder_modules(info, input_data)
+        await mutation.reorder_modules(info, input_data)
 
         assert mod_b.order == 0
         assert mod_a.order == 1
@@ -1512,67 +1578,67 @@ class TestModuleMutationReorderModules:
         mock_module.objects.bulk_update.assert_called_once()
 
     @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_reorder_modules_not_admin(self, mock_program):
+    async def test_reorder_modules_not_admin(self, mock_program):
         """Test PermissionDenied when user is not a program admin."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data()
 
         mock_prog = MagicMock()
-        mock_program.objects.get.return_value = mock_prog
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
         mock_prog.has_admin.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
-            mutation.reorder_modules(info, input_data)
+            await mutation.reorder_modules(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_reorder_modules_program_not_found(self, mock_program):
+    async def test_reorder_modules_program_not_found(self, mock_program):
         """Test ObjectDoesNotExist when program not found."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data()
 
         mock_program.DoesNotExist = ObjectDoesNotExist
-        mock_program.objects.get.side_effect = ObjectDoesNotExist("not found")
+        mock_program.objects.aget = AsyncMock(side_effect=ObjectDoesNotExist("not found"))
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist):
-            mutation.reorder_modules(info, input_data)
+            await mutation.reorder_modules(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_reorder_modules_duplicate_keys(self, mock_program):
+    async def test_reorder_modules_duplicate_keys(self, mock_program):
         """Test ValidationError when duplicate module keys are provided."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data(module_keys=["key-a", "key-a", "key-c"])
 
         mock_prog = MagicMock()
-        mock_program.objects.get.return_value = mock_prog
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
         mock_prog.has_admin.return_value = True
 
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match=r"Duplicate module keys are not allowed."):
-            mutation.reorder_modules(info, input_data)
+            await mutation.reorder_modules(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_reorder_modules_mismatched_keys(self, mock_program, mock_module):
+    async def test_reorder_modules_mismatched_keys(self, mock_program, mock_module):
         """Test ValidationError when provided keys do not match the program's modules."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data(module_keys=["key-a", "key-b"])
 
         mock_prog = MagicMock()
-        mock_program.objects.get.return_value = mock_prog
+        mock_program.objects.aget = AsyncMock(return_value=mock_prog)
         mock_prog.admins.filter.return_value.exists.return_value = True
 
         mod_a = MagicMock(key="key-a")
-        mock_module.objects.filter.return_value.count.return_value = 1
+        mock_module.objects.filter.return_value.acount = AsyncMock(return_value=1)
         mock_module.objects.filter.return_value.select_for_update.return_value = [mod_a]
 
         mutation = ModuleMutation()
         with pytest.raises(
             ValidationError, match=r"Provided module keys do not match the program's modules."
         ):
-            mutation.reorder_modules(info, input_data)
+            await mutation.reorder_modules(info, input_data)
