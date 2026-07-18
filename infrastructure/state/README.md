@@ -7,7 +7,7 @@ root:
 - `production/bootstrap/terraform.tfstate`
 
 The staging and production bootstrap workflows must use these separate keys;
-the deprecated shared bootstrap root must not be used for new applies.
+the single `infrastructure/bootstrap/` root is used with these separate keys.
 
 ## Inline Permissions
 

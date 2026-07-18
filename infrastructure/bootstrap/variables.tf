@@ -10,10 +10,14 @@ variable "aws_role_external_id" {
   type        = string
 }
 
-variable "environments" {
-  description = "The environments to create Terraform roles for."
-  type        = list(string)
-  default     = ["staging", "production"]
+variable "environment" {
+  description = "The environment name (staging or production)."
+  type        = string
+
+  validation {
+    condition     = contains(["staging", "production"], var.environment)
+    error_message = "environment must be \"staging\" or \"production\"."
+  }
 }
 
 variable "project_name" {

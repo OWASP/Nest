@@ -54,18 +54,16 @@ Follow these steps to set up the infrastructure:
 
 1. **Bootstrap IAM Role**:
 
-- Prerequisite: Create a `nest-bootstrap` IAM user with the policies defined in `infrastructure/modules/bootstrap-iam/README.md`.
+- Prerequisite: Create a `nest-bootstrap` IAM user with the policies defined in `infrastructure/bootstrap/README.md`.
 
-- This walkthrough configures **staging**. Navigate to its bootstrap directory:
+- Navigate to the bootstrap directory:
 
     ```bash
-    cd infrastructure/bootstrap-staging/
+    cd infrastructure/bootstrap/
     ```
 
   > [!NOTE]
-  > To bootstrap production, use [`bootstrap-production/`](bootstrap-production/README.md)
-  > and configure a separate `AWS_ROLE_EXTERNAL_ID`. Its AWS profile must assume
-  > `nest-production-terraform`; do not reuse the staging profile shown below.
+  > This walkthrough shows how to configure staging. To bootstrap production, use the same directory but configure the production values (e.g., `environment = "production"` and `key = "production/bootstrap/terraform.tfstate"`). Make sure to align them correctly.
 
 - Copy the example files into your new local configuration files:
 

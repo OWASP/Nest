@@ -1,33 +1,64 @@
-> [!CAUTION]
-> **DEPRECATED — DO NOT INITIALIZE, PLAN, OR APPLY FROM THIS DIRECTORY.**
-> Running `terraform init`, `terraform plan`, or `terraform apply` here is prohibited and unsupported. This legacy root remains runnable for historical compatibility, so Terraform does not technically prevent those commands.
-> This shared bootstrap root is superseded by the per-environment roots:
->
-> - [`bootstrap-staging/`](../bootstrap-staging/README.md) — manages `nest-staging-terraform` only
-> - [`bootstrap-production/`](../bootstrap-production/README.md) — manages `nest-production-terraform` only
->
-> Applying from this directory would manage **both** environments from a single shared state file,
-> defeating the environment isolation introduced by [Issue #5077](https://github.com/OWASP/Nest/issues/5077).
-> Use the per-environment roots for all bootstrap operations.
+# Bootstrap IAM Infrastructure
 
-## Legacy Multi-Environment Documentation
+This is the single Terraform root directory used to bootstrap the IAM resources for the OWASP Nest project. It configures the IAM roles and policies that allow Terraform and CI/CD pipelines to manage AWS resources for staging and production environments.
 
-The sections below are preserved for historical reference only. Do not use this legacy configuration.
+## Multi-Environment Single-Root Design
 
-### Users
+Unlike normal environment infrastructure directories, this single root is shared to deploy both `staging` and `production` resources. The specific target environment is injected via the `environment` Terraform variable.
 
-`bootstrap` creates a role for each environment that IAM users can assume.
-These users are listed in the `var.environments` variable.
-Ensure your IAM Users follow the naming convention:
+### Alignment of Environment and State Key
 
-- nest-${var.environment}
+It is critical that you match the `environment` variable with the correct S3 backend `key` in the state bucket.
 
-Example: `nest-staging`, `nest-bootstrap`, etc.
+- **Staging**:
+  - `environment = "staging"`
+  - state key: `staging/bootstrap/terraform.tfstate`
+- **Production**:
+  - `environment = "production"`
+  - state key: `production/bootstrap/terraform.tfstate`
+
+> [!WARNING]
+> Terraform itself cannot prevent an operator from pairing the wrong environment variable with the wrong state key (e.g., setting `environment = "staging"` while using the `production` state file). You must ensure these two inputs are kept aligned.
+
+---
+
+## Local Usage Instructions
+
+To run plans or apply changes locally:
+
+1. Copy the example variable and backend configuration files:
+
+   ```bash
+   cp terraform.tfbackend.example terraform.tfbackend
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+
+2. Edit `terraform.tfbackend`:
+   - Replace `REPLACE_WITH_TF_STATE_BUCKET_NAME` with your actual bootstrap state bucket name.
+   - Align the `key` parameter to target the desired environment (`staging/bootstrap/terraform.tfstate` or `production/bootstrap/terraform.tfstate`).
+
+3. Edit `terraform.tfvars`:
+   - Set `environment` to matching environment (`staging` or `production`).
+   - Set `aws_role_external_id` to the external ID used for role assumption.
+
+4. Initialize the Terraform backend:
+
+   ```bash
+   terraform init -backend-config=terraform.tfbackend
+   ```
+
+5. Run Plan or Apply:
+
+   ```bash
+   terraform plan
+   terraform apply
+   ```
+
+---
 
 ## Inline Permissions
 
-Use the following inline permissions for the `nest-bootstrap` IAM User
-*Note*: replace the placeholders with appropriate values.
+Ensure your `nest-bootstrap` IAM User has the following inline permissions attached before running bootstrap operations. Replace the placeholders with appropriate values.
 
 ```json
 {
@@ -130,7 +161,7 @@ No modules.
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | `"us-east-2"` | no |
 | <a name="input_aws_role_external_id"></a> [aws\_role\_external\_id](#input\_aws\_role\_external\_id) | The external ID for role assumption. | `string` | n/a | yes |
-| <a name="input_environments"></a> [environments](#input\_environments) | The environments to create Terraform roles for. | `list(string)` | <pre>[<br/>  "staging",<br/>  "production"<br/>]</pre> | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | The environment name (staging or production). | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | `"nest"` | no |
 | <a name="input_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#input\_shared\_data\_bucket\_name) | Global S3 bucket for shared public data (e.g. nest.dump) | `string` | `"owasp-nest-shared-data"` | no |
 
@@ -138,5 +169,7 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_terraform_role_arns"></a> [terraform\_role\_arns](#output\_terraform\_role\_arns) | The ARNs of the Terraform IAM roles, keyed by environment. |
+| <a name="output_part_one_policy_arn"></a> [part\_one\_policy\_arn](#output\_part\_one\_policy\_arn) | The ARN of the part one IAM policy. |
+| <a name="output_part_two_policy_arn"></a> [part\_two\_policy\_arn](#output\_part\_two\_policy\_arn) | The ARN of the part two IAM policy. |
+| <a name="output_terraform_role_arn"></a> [terraform\_role\_arn](#output\_terraform\_role\_arn) | The ARN of the Terraform IAM role. |
 <!-- END_TF_DOCS -->
