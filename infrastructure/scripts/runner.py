@@ -1,4 +1,4 @@
-"""Orchestrate infrastructure unit and integration test runs."""
+"""Infrastructure test orchestration utilities."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class InfrastructureTestRunner:
-    """Orchestrate infrastructure unit and integration test runs."""
+    """Infrastructure test runner orchestrator."""
 
     def __init__(
         self,
@@ -26,7 +26,16 @@ class InfrastructureTestRunner:
         overrides: OverrideManager | None = None,
         terraform_tests: TerraformTests | None = None,
     ) -> None:
-        """Wire collaborators for a repository root."""
+        """Initialize the infrastructure test runner.
+
+        Args:
+            root_dir (Path, optional): The root directory of the project.
+            commands (CommandRunner, optional): Command runner instance.
+            localstack (LocalStack, optional): LocalStack manager instance.
+            overrides (OverrideManager, optional): Terraform override manager instance.
+            terraform_tests (TerraformTests, optional): Terraform test discovery and execution instance.
+
+        """
         self.root_dir = root_dir or Path(__file__).resolve().parent.parent.parent
         self.commands = commands or CommandRunner()
         self.localstack = localstack or LocalStack(self.commands)
