@@ -94,7 +94,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --port 3000 --turbo",
-    "graphql-codegen": "graphql-codegen --config graphql-codegen.ts",
+    "graphql-codegen": "graphql-codegen --config graphql-codegen-config.ts",
     "lighthouse-ci": "lhci autorun",
     "lighthouse-ci:desktop": "lhci autorun --collect.settings.preset=desktop",
     "start": "next start",

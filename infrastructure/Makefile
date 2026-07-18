@@ -1,13 +1,17 @@
-##@ Infrastructure
+.PHONY: test-infrastructure
 
 test-infrastructure: ## Run infrastructure tests
-	@find infrastructure/bootstrap infrastructure/modules \
-		-name "tests" \
-		-type d \
-		-not -path "*/.terraform/*" | \
-	while IFS= read -r test_dir; do \
-		module_dir=$$(dirname "$$test_dir"); \
-		echo "Testing $$module_dir..."; \
-		terraform -chdir="$$module_dir" init -backend=false -input=false && \
-		terraform -chdir="$$module_dir" test || exit 1; \
-	done
+	@if [ -n "$$CI" ]; then \
+		sh infrastructure/scripts/run-tests.sh; \
+	else \
+		docker run \
+		--rm \
+		--entrypoint /bin/sh \
+		-e HOME=/tmp \
+		-e TF_PLUGIN_CACHE_DIR=/tmp/terraform-plugin-cache \
+		-v "$(CURDIR):/work" \
+		--mount type=volume,src=nest-infrastructure-terraform-plugin-cache,dst=/tmp/terraform-plugin-cache \
+		-w /work \
+		$$(grep -E '^FROM hashicorp/terraform:' docker/code-checks/Dockerfile | sed 's/^FROM //; s/ AS .*//') \
+		infrastructure/scripts/run-tests.sh; \
+	fi

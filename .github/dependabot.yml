@@ -54,6 +54,7 @@ updates:
     cooldown:
       default-days: 21
     directories:
+      - /
       - cspell
       - e2e
       - frontend

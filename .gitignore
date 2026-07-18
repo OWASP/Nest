@@ -70,7 +70,7 @@ frontend/dist
 frontend/out
 frontend/test-results/
 logs
-node_modules/
+node_modules
 semgrep-security-report.txt
 site/
 TODO

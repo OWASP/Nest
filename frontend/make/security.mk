@@ -1,0 +1,22 @@
+.PHONY: frontend-dependency-audit frontend-security-image-scan
+
+IMAGE_SCANNERS ?= misconfig,secret,vuln
+
+frontend-dependency-audit:
+	@echo "Auditing frontend npm dependencies..."
+	@$(MAKE) code-checks CMD='cd frontend && pnpm audit --audit-level=high'
+
+frontend-security-image-scan:
+	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
+		$(MAKE) frontend-image-build; \
+	fi
+	@echo "Scanning image: $(FRONTEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image --config /.trivy.yaml $(FRONTEND_IMAGE_NAME)
