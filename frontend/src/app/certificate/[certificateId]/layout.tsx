@@ -24,8 +24,9 @@ export async function generateMetadata({
         title: `${displayName}'s Certificate Verification`,
       })
     }
-  } catch {
-    // Fallback to generic metadata on query error
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error generating metadata for certificate verification:', error)
   }
 
   return generateSeoMetadata({

@@ -4,15 +4,15 @@ export const GET_CERTIFICATE = gql`
   query GetCertificate($id: String!) {
     certificate(certificateId: $id) {
       id
-      tier
-      issuedAt
-      score
-      isVerified
       githubUser {
-        name
-        login
         avatarUrl
+        login
+        name
       }
+      issuedAt
+      isVerified
+      score
+      tier
     }
   }
 `
@@ -21,15 +21,15 @@ export const GET_MY_CERTIFICATE = gql`
   query GetMyCertificate {
     myCertificates {
       id
-      tier
-      issuedAt
-      score
-      isVerified
       githubUser {
+        avatarUrl
         login
         name
-        avatarUrl
       }
+      issuedAt
+      isVerified
+      score
+      tier
     }
   }
 `
