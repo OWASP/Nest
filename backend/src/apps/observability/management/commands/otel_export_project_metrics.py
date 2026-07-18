@@ -1,8 +1,9 @@
-"""Export OWASP project health metrics history to VictoriaMetrics.
+"""Export OWASP Nest project health metrics history to VictoriaMetrics.
 
 `ProjectHealthMetrics` stores a daily snapshot per project (stars, forks,
-contributors). This command copies that history into VictoriaMetrics using each
-row's date as the sample timestamp, so the metrics show changes over time.
+contributors). This command copies the Nest project's history into
+VictoriaMetrics using each row's date as the sample timestamp, so the metrics
+show changes over time.
 
 It writes directly to VictoriaMetrics' JSON import API rather than through the
 OpenTelemetry pipeline, because OTel stamps every sample with the current time
@@ -14,7 +15,6 @@ Modes:
 """
 
 import json
-from collections import defaultdict
 
 import requests
 from django.conf import settings
@@ -22,6 +22,9 @@ from django.core.management.base import BaseCommand
 from django.db.models import Max
 
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
+
+NEST_PROJECT_KEY = "www-project-nest"
+NEST_PROJECT_LABEL = "nest"
 
 # VM metric name -> ProjectHealthMetrics field
 METRIC_FIELDS = {
@@ -34,7 +37,7 @@ REQUEST_TIMEOUT = 30
 
 
 class Command(BaseCommand):
-    help = "Export project health metrics history to VictoriaMetrics."
+    help = "Export the Nest project health metrics history to VictoriaMetrics."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -60,38 +63,38 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR("--batch-size must be a positive integer."))
             return
 
-        queryset = ProjectHealthMetrics.objects.select_related("project").order_by(
-            "project_id", "nest_created_at"
+        metrics = ProjectHealthMetrics.objects.filter(project__key=NEST_PROJECT_KEY).order_by(
+            "nest_created_at"
         )
         if not options["all"]:
-            latest = ProjectHealthMetrics.objects.aggregate(latest=Max("nest_created_at"))[
-                "latest"
-            ]
+            latest = metrics.aggregate(latest=Max("nest_created_at"))["latest"]
             if latest is None:
-                self.stdout.write(self.style.WARNING("No project health metrics found."))
+                self.stdout.write(self.style.WARNING("No Nest project health metrics found."))
                 return
-            queryset = queryset.filter(nest_created_at__date=latest.date())
+            metrics = metrics.filter(nest_created_at__date=latest.date())
 
-        # Group values and timestamps per metric/project series.
-        series = defaultdict(lambda: {"values": [], "timestamps": []})
-        for row in queryset.iterator():
-            project_key = row.project.nest_key
+        # Build one series per metric (the project is always Nest).
+        series = {name: {"values": [], "timestamps": []} for name in METRIC_FIELDS}
+        for row in metrics.iterator():
             timestamp_ms = int(row.nest_created_at.timestamp() * 1000)
             for metric_name, field in METRIC_FIELDS.items():
-                point = series[(metric_name, project_key)]
-                point["values"].append(getattr(row, field))
-                point["timestamps"].append(timestamp_ms)
+                series[metric_name]["values"].append(getattr(row, field))
+                series[metric_name]["timestamps"].append(timestamp_ms)
 
         lines = [
             json.dumps(
                 {
-                    "metric": {"__name__": metric_name, "project": project_key},
+                    "metric": {"__name__": metric_name, "project": NEST_PROJECT_LABEL},
                     "values": point["values"],
                     "timestamps": point["timestamps"],
                 }
             )
-            for (metric_name, project_key), point in series.items()
+            for metric_name, point in series.items()
+            if point["values"]
         ]
+        if not lines:
+            self.stdout.write(self.style.WARNING("No Nest project health metrics found."))
+            return
 
         import_url = f"{base_url.rstrip('/')}/api/v1/import"
         for start in range(0, len(lines), batch_size):
