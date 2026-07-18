@@ -1,4 +1,4 @@
-"""LocalStack lifecycle and Terraform override helpers for integration tests."""
+"""LocalStack and Terraform override utilities."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ _FROM_LOCALSTACK_TAG_RE = re.compile(r"^FROM\s+localstack/localstack(?:-pro)?:\s
 
 
 class LocalStack:
-    """Manage LocalStack health checks and container lifecycle."""
+    """LocalStack container manager."""
 
     def __init__(
         self,
@@ -45,9 +45,15 @@ class LocalStack:
         host: str | None = None,
         port: int = LOCALSTACK_PORT,
     ) -> None:
-        """Initialize LocalStack helpers.
+        """Initialize the LocalStack container manager.
 
-        ``host`` defaults to ``LOCALSTACK_HOST`` from the environment, else localhost.
+        Args:
+            commands (CommandRunner, optional): Command runner instance.
+            container_name (str): The name for the LocalStack Docker container.
+            host (str, optional): The host address for LocalStack. Defaults to
+                the LOCALSTACK_HOST environment variable or localhost.
+            port (int): The port for LocalStack.
+
         """
         self.commands = commands or CommandRunner()
         self.container_name = container_name
@@ -67,7 +73,15 @@ class LocalStack:
         return result.returncode == 0
 
     def info(self, *, log_error: bool = False) -> dict | None:
-        """Return LocalStack info JSON, or ``None`` if unreachable."""
+        """Return LocalStack info JSON.
+
+        Args:
+            log_error (bool, optional): Whether to log a warning if the request fails. Defaults to False.
+
+        Returns:
+            dict | None: The info JSON payload, or None if unreachable.
+
+        """
         connection = HTTPConnection(self.host, self.port, timeout=2)
         try:
             connection.request("GET", LOCALSTACK_INFO_PATH)
@@ -83,18 +97,45 @@ class LocalStack:
             connection.close()
 
     def healthy(self, *, log_error: bool = False) -> bool:
-        """Return whether the LocalStack health endpoint responds successfully."""
+        """Return whether the LocalStack health endpoint responds successfully.
+
+        Args:
+            log_error (bool, optional): Whether to log a warning if the request fails. Defaults to False.
+
+        Returns:
+            bool: True if the endpoint responds successfully, False otherwise.
+
+        """
         return self.info(log_error=log_error) is not None
 
     def license_activated(self, *, log_error: bool = False) -> bool:
-        """Return whether LocalStack reports an activated license."""
+        """Return whether LocalStack reports an activated license.
+
+        Args:
+            log_error (bool, optional): Whether to log a warning if the request fails. Defaults to False.
+
+        Returns:
+            bool: True if the license is activated, False otherwise.
+
+        """
         info = self.info(log_error=log_error)
         if info is None:
             return False
         return info.get("is_license_activated") is True
 
     def image_info(self, root_dir: str | Path) -> tuple[str, str]:
-        """Return ``(full_image, tag)`` parsed from the LocalStack Dockerfile."""
+        """Return image info parsed from the LocalStack Dockerfile.
+
+        Args:
+            root_dir (str | Path): The root directory of the project.
+
+        Returns:
+            tuple[str, str]: A tuple containing the full image reference and the tag.
+
+        Raises:
+            TestRunnerError: If the Dockerfile cannot be read or the image cannot be determined.
+
+        """
         dockerfile_path = Path(root_dir) / "docker" / "localstack" / "Dockerfile"
         if not dockerfile_path.exists():
             message = f"Dockerfile not found at {dockerfile_path}"
@@ -120,7 +161,16 @@ class LocalStack:
         return full_image, match_tag.group(1)
 
     def start(self, image: str) -> None:
-        """Start a LocalStack container for integration tests."""
+        """Start a LocalStack container.
+
+        Args:
+            image (str): The Docker image reference to start.
+
+        Raises:
+            MissingAuthTokenError: If the LOCALSTACK_AUTH_TOKEN is not set.
+            TestRunnerError: If the container fails to start.
+
+        """
         if not os.environ.get("LOCALSTACK_AUTH_TOKEN"):
             raise MissingAuthTokenError
 
@@ -156,7 +206,12 @@ class LocalStack:
         self.commands.run("docker", "rm", self.container_name, check=False)
 
     def wait_ready(self) -> None:
-        """Block until LocalStack is healthy and its license is activated."""
+        """Block until LocalStack is healthy and its license is activated.
+
+        Raises:
+            TestRunnerError: If LocalStack fails to become healthy or activate its license within the timeout.
+
+        """
         logger.info("Waiting for LocalStack to become healthy...")
         for attempt in range(1, HEALTH_MAX_ATTEMPTS + 1):
             if self.healthy():
@@ -193,7 +248,7 @@ class LocalStack:
 
 
 class OverrideManager:
-    """Create and remove temporary Terraform override files."""
+    """Terraform override manager."""
 
     # Temporary Terraform overrides that disable prevent_destroy during integration tests.
     OVERRIDES: list[tuple[str, str]] = [
@@ -208,17 +263,33 @@ class OverrideManager:
     ]
 
     def __init__(self, overrides: list[tuple[str, str]] | None = None) -> None:
-        """Initialize with the override file mapping."""
+        """Initialize the override manager.
+
+        Args:
+            overrides (list[tuple[str, str]], optional): A list of (filepath, resource_address)
+                tuples. Defaults to the standard OVERRIDES mapping.
+
+        """
         self.overrides = overrides if overrides is not None else self.OVERRIDES
 
     def check_absent(self) -> None:
-        """Raise if any override file already exists on disk."""
+        """Ensure no override files already exist on disk.
+
+        Raises:
+            OverrideExistsError: If any override file is found.
+
+        """
         for filepath, _ in self.overrides:
             if Path(filepath).exists():
                 raise OverrideExistsError(filepath)
 
     def write(self) -> None:
-        """Write temporary Terraform override files for integration tests."""
+        """Write temporary Terraform override files.
+
+        Raises:
+            TestRunnerError: If an override file cannot be written.
+
+        """
         logger.info("Writing override files...")
         for filepath, resource in self.overrides:
             resource_type, _, resource_name = resource.partition(".")
@@ -238,7 +309,7 @@ class OverrideManager:
                 raise TestRunnerError(message) from exc
 
     def cleanup(self) -> None:
-        """Remove override files if they exist."""
+        """Clean up temporary override files."""
         logger.info("Cleaning up override files...")
         for filepath, _ in self.overrides:
             path = Path(filepath)
