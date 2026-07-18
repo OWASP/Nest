@@ -269,4 +269,3 @@ run "test_shared_bucket_permissions_production" {
     error_message = "Production must manage the shared data bucket via S3Mgmt and not use S3SharedBucketRestricted."
   }
 }
-
