@@ -1705,7 +1705,7 @@ class TestModuleMutationMenteeDeadline:
         mock_issue = MagicMock()
         assignees_qs = MagicMock()
         assignees_qs.exists.return_value = True
-        assignees_qs.filter.return_value.exists.return_value = False
+        assignees_qs.filter.return_value.aexists = AsyncMock(return_value=False)
         mock_issue.assignees.all.return_value = assignees_qs
         (
             mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.afirst
@@ -1749,7 +1749,7 @@ class TestModuleMutationMenteeDeadline:
         mock_issue = MagicMock()
         assignees_qs = MagicMock()
         assignees_qs.exists.return_value = True
-        assignees_qs.filter.return_value.exists.return_value = True
+        assignees_qs.filter.return_value.aexists = AsyncMock(return_value=True)
         mock_issue.assignees.all.return_value = assignees_qs
         (
             mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.afirst

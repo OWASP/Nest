@@ -266,8 +266,8 @@ class ModuleMutation:
             raise ValidationError(message="Cannot set deadline: issue has no assignees.")
 
         if is_mentee and not is_mentor and not is_admin:
-            github_user = getattr(user, "github_user", None)
-            if github_user is None or not assignees.filter(id=github_user.id).exists():
+            github_user = await sync_to_async(getattr)(user, "github_user", None)  # type: ignore[call-arg]
+            if github_user is None or not await assignees.filter(id=github_user.id).aexists():
                 raise PermissionDenied(NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG)
 
         normalized_deadline = deadline_at
