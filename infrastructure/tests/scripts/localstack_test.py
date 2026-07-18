@@ -106,7 +106,7 @@ class TestLocalStack:
         mock_read_text.return_value = "FROM alpine:3.20\n"
         localstack = LocalStack()
         with pytest.raises(TestRunnerError, match="could not determine LocalStack image"):
-            localstack.image_info("/dummy/root")
+            localstack.image_info("/dummy/root-1")
 
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.read_text")
@@ -119,7 +119,7 @@ class TestLocalStack:
         mock_read_text.return_value = "FROM localstack/localstack:\n"
         localstack = LocalStack()
         with pytest.raises(TestRunnerError, match="could not determine LocalStack image tag"):
-            localstack.image_info("/dummy/root")
+            localstack.image_info("/dummy/root-1")
 
     @patch("os.environ.get")
     def test_start_success(self, mock_env: MagicMock) -> None:
@@ -152,7 +152,7 @@ class TestLocalStack:
         host_port = 4567
         localstack = LocalStack(commands, port=host_port)
 
-        localstack.start("localstack/localstack:latest")
+        localstack.start("localstack/localstack:latest-alt")
 
         commands.run.assert_any_call(
             "docker",
@@ -166,7 +166,7 @@ class TestLocalStack:
             "ECR_ENDPOINT_STRATEGY=off",
             "-e",
             "LOCALSTACK_AUTH_TOKEN",
-            "localstack/localstack:latest",
+            "localstack/localstack:latest-alt",
             check=True,
         )
 
@@ -187,7 +187,7 @@ class TestLocalStack:
         ]
         localstack = LocalStack(commands)
         with pytest.raises(TestRunnerError, match="Error starting LocalStack container"):
-            localstack.start("localstack/localstack:latest")
+            localstack.start("localstack/localstack:latest-alt")
 
     def test_wait_ready_healthy_timeout(self) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner))
@@ -248,8 +248,9 @@ class TestOverrideManager:
     @patch("pathlib.Path.exists")
     def test_check_absent_when_exists(self, mock_exists: MagicMock) -> None:
         mock_exists.return_value = True
+        manager = OverrideManager()
         with pytest.raises(OverrideExistsError):
-            OverrideManager().check_absent()
+            manager.check_absent()
 
     @patch("pathlib.Path.exists")
     def test_check_absent_when_none(self, mock_exists: MagicMock) -> None:

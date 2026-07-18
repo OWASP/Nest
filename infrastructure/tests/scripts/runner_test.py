@@ -94,13 +94,13 @@ class TestInfrastructureTestRunner:
         localstack.api_url = f"http://localhost:{LOCALSTACK_PORT}"
         localstack.can_start_container = True
         localstack.healthy.return_value = False
-        localstack.image_info.return_value = ("localstack/localstack:1.0", "1.0")
+        localstack.image_info.return_value = ("localstack/localstack:1.0-alt", "1.0")
         overrides = MagicMock(spec=OverrideManager)
         overrides.cleanup.side_effect = RuntimeError("cleanup failed")
         terraform_tests = MagicMock(spec=TerraformTests)
 
         runner = InfrastructureTestRunner(
-            root_dir=Path("/repo"),
+            root_dir=Path("/repo-alt"),
             commands=commands,
             localstack=localstack,
             overrides=overrides,
@@ -125,7 +125,7 @@ class TestInfrastructureTestRunner:
         terraform_tests = MagicMock(spec=TerraformTests)
 
         runner = InfrastructureTestRunner(
-            root_dir=Path("/repo"),
+            root_dir=Path("/repo-alt"),
             commands=commands,
             localstack=localstack,
             overrides=overrides,

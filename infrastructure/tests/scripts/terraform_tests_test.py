@@ -74,8 +74,9 @@ class TestTerraformTests:
     @patch("pathlib.Path.iterdir")
     def test_find_test_files_error(self, mock_iterdir: MagicMock) -> None:
         mock_iterdir.side_effect = OSError("Permission denied")
+        terraform_tests = TerraformTests()
         with pytest.raises(TestRunnerError, match="could not read /dummy/dir"):
-            TerraformTests().find_test_files("/dummy/dir", ExecutionMode.UNIT)
+            terraform_tests.find_test_files("/dummy/dir", ExecutionMode.UNIT)
 
     @pytest.mark.parametrize(
         ("filename", "mode", "expected"),
