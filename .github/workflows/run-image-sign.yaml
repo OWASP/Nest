@@ -68,7 +68,7 @@ jobs:
           persist-credentials: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b  # v6.2.0
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b  # v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -144,14 +144,14 @@ jobs:
 
       - name: Attest backend SBOM
         id: attest-backend-sbom
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26  # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763  # v4.1.1
         with:
           sbom-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
           subject-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
 
       - name: Attest frontend SBOM
         id: attest-frontend-sbom
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26  # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763  # v4.1.1
         with:
           sbom-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
           subject-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
