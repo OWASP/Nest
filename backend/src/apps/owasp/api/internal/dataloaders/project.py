@@ -1,11 +1,26 @@
 """DataLoaders for projects."""
 
+from django.db.models import Count, F, Q, Window
+from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
-from apps.common.api.internal.dataloaders.utils import get_m2m_results_by_keys
+from apps.common.api.internal.dataloaders.utils import (
+    get_m2m_results_by_keys,
+    get_result_by_keys,
+    get_results_by_keys,
+)
+from apps.github.models.issue import Issue
 from apps.owasp.models.project import Project
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 PROJECT_BY_REPOSITORY_ID_LOADER = "project_by_repository_id"
+HEALTH_METRICS_LIST_BY_PROJECT_ID = "health_metrics_list_by_project_id"
+HEALTH_METRICS_LATEST_BY_PROJECT_ID = "health_metrics_latest_by_project_id"
+ISSUES_COUNT_BY_PROJECT_ID = "issues_count_by_project_id"
+OPEN_ISSUES_COUNT_BY_PROJECT_ID = "open_issues_count_by_project_id"
+REPOSITORIES_COUNT_BY_PROJECT_ID = "repositories_count_by_project_id"
+
+ISSUES_COUNT_FILTER = Q(repositories__issues__state=Issue.IssueState.OPEN)
 
 
 async def load_projects_by_repository_id(
@@ -26,10 +41,105 @@ async def load_projects_by_repository_id(
     return [result[0] if result else None for result in results]
 
 
-def get_project_loaders() -> dict[str, DataLoader[int, Project | None]]:
+async def load_health_metrics_list_by_project_id(
+    keys: list[tuple[int, int]],
+) -> list[list[ProjectHealthMetrics]]:
+    """Batch-load the N most recent health metrics per project in a single query.
+
+    Returns each project's metrics in chronological order (oldest to newest)
+    so charts display correctly from left to right.
+    """
+    if not keys:
+        return []
+
+    project_ids = [key[0] for key in keys]
+    limit = keys[0][1]
+
+    metrics = (
+        ProjectHealthMetrics.objects.filter(project_id__in=project_ids)
+        .annotate(
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("project_id")],
+                order_by=F("nest_created_at").desc(),
+            )
+        )
+        .filter(row_number__lte=limit)
+        .order_by("project_id", "nest_created_at")
+    )
+
+    return await get_results_by_keys(metrics, project_ids, key_field="project_id")
+
+
+async def load_health_metrics_latest_by_project_id(
+    project_ids: list[int],
+) -> list[ProjectHealthMetrics | None]:
+    """Batch-load the latest health metrics per project in a single query."""
+    metrics = (
+        ProjectHealthMetrics.objects.filter(project_id__in=project_ids)
+        .distinct("project_id")
+        .order_by("project_id", "-nest_created_at")
+    )
+
+    return await get_result_by_keys(metrics, project_ids, key_field="project_id")
+
+
+async def load_open_issues_count_by_project_id(project_ids: list[int]) -> list[int]:
+    """Batch-load open issues count for the given project IDs in a single query."""
+    projects = Project.objects.filter(pk__in=project_ids).only("pk", "open_issues_count")
+    return [
+        result or 0
+        for result in await get_result_by_keys(
+            projects, project_ids, key_field="pk", value_field="open_issues_count"
+        )
+    ]
+
+
+async def load_issues_count_by_project_id(project_ids: list[int]) -> list[int]:
+    """Batch-load open issues count for the given project IDs in a single query."""
+    projects = Project.objects.filter(pk__in=project_ids).annotate(
+        items_count=Count("repositories__issues", filter=ISSUES_COUNT_FILTER),
+    )
+    return [
+        result or 0
+        for result in await get_result_by_keys(
+            projects, project_ids, key_field="pk", value_field="items_count"
+        )
+    ]
+
+
+async def load_repositories_count_by_project_id(project_ids: list[int]) -> list[int]:
+    """Batch-load repositories count for the given project IDs in a single query."""
+    projects = Project.objects.filter(pk__in=project_ids).annotate(
+        items_count=Count("repositories"),
+    )
+    return [
+        result or 0
+        for result in await get_result_by_keys(
+            projects, project_ids, key_field="pk", value_field="items_count"
+        )
+    ]
+
+
+def get_project_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
         PROJECT_BY_REPOSITORY_ID_LOADER: DataLoader[int, Project | None](
             load_fn=load_projects_by_repository_id,
+        ),
+        HEALTH_METRICS_LIST_BY_PROJECT_ID: DataLoader[tuple[int, int], list[ProjectHealthMetrics]](
+            load_fn=load_health_metrics_list_by_project_id
+        ),
+        HEALTH_METRICS_LATEST_BY_PROJECT_ID: DataLoader[int, ProjectHealthMetrics | None](
+            load_fn=load_health_metrics_latest_by_project_id,
+        ),
+        OPEN_ISSUES_COUNT_BY_PROJECT_ID: DataLoader[int, int](
+            load_fn=load_open_issues_count_by_project_id,
+        ),
+        ISSUES_COUNT_BY_PROJECT_ID: DataLoader[int, int](
+            load_fn=load_issues_count_by_project_id,
+        ),
+        REPOSITORIES_COUNT_BY_PROJECT_ID: DataLoader[int, int](
+            load_fn=load_repositories_count_by_project_id,
         ),
     }

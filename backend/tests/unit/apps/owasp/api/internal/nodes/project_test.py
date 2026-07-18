@@ -1,13 +1,34 @@
 """Test cases for ProjectNode."""
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from apps.github.api.internal.dataloaders.issue import RECENT_ISSUES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.pull_request import (
+    RECENT_PULL_REQUESTS_BY_PROJECT_ID,
+)
+from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.repository import REPOSITORIES_BY_PROJECT_ID
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
-from apps.owasp.api.internal.nodes.project import ProjectNode
+from apps.owasp.api.internal.dataloaders.project import (
+    HEALTH_METRICS_LATEST_BY_PROJECT_ID,
+    HEALTH_METRICS_LIST_BY_PROJECT_ID,
+    ISSUES_COUNT_BY_PROJECT_ID,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
+    REPOSITORIES_COUNT_BY_PROJECT_ID,
+)
+from apps.owasp.api.internal.nodes.project import (
+    RECENT_ISSUES_LIMIT,
+    RECENT_PULL_REQUESTS_LIMIT,
+    RECENT_RELEASES_LIMIT,
+    ProjectNode,
+)
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -68,6 +89,11 @@ class TestProjectNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("languages", ProjectNode)
         assert field is not None
         assert field.type == list[str]
+
+    def test_resolve_open_issues_count(self):
+        field = self._get_field_by_name("open_issues_count", ProjectNode)
+        assert field is not None
+        assert field.type is int
 
     def test_resolve_recent_issues(self):
         field = self._get_field_by_name("recent_issues", ProjectNode)
@@ -150,75 +176,33 @@ class TestProjectNodeResolvers:
                 return field.base_resolver.wrapped_func if field.base_resolver else None
         return None
 
-    def test_health_metrics_list_with_invalid_limit(self):
-        """Test health_metrics_list returns empty list for invalid limit."""
-        resolver = self._get_resolver("health_metrics_list")
-        mock_project = MagicMock()
+    def _build_info(self, *, github=None, owasp=None):
+        """Build a mock Info with dataloader mappings."""
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = github or {}
+        mock_info.context.owasp_dataloaders = owasp or {}
+        return mock_info
 
-        result = resolver(None, mock_project, limit=0)
-        assert result == []
+    @pytest.mark.asyncio
+    async def test_issues_count(self):
+        """Test issues_count resolver delegates to the dataloader with pk."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=42)
+        mock_info = self._build_info(owasp={ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
 
-        result = resolver(None, mock_project, limit=-5)
-        assert result == []
+        mock_project = Mock()
+        mock_project.pk = 8
 
-    def test_health_metrics_list_with_valid_limit(self):
-        """Test health_metrics_list returns metrics with valid limit."""
-        resolver = self._get_resolver("health_metrics_list")
-        mock_project = MagicMock()
-        mock_metrics = [MagicMock(), MagicMock()]
-        mock_sliced = MagicMock()
-        mock_sliced.__reversed__ = lambda _: iter(mock_metrics)
-        mock_project.health_metrics.order_by.return_value.__getitem__.return_value = mock_sliced
-
-        result = resolver(None, mock_project, limit=10)
-
-        mock_project.health_metrics.order_by.assert_called_once_with("-nest_created_at")
-        assert result == mock_metrics
-
-    def test_health_metrics_latest(self):
-        """Test health_metrics_latest returns latest metric."""
-        resolver = self._get_resolver("health_metrics_latest")
-        mock_project = MagicMock()
-        mock_latest = MagicMock()
-        mock_project.health_metrics.order_by.return_value.first.return_value = mock_latest
-
-        result = resolver(None, mock_project)
-
-        mock_project.health_metrics.order_by.assert_called_once_with("-nest_created_at")
-        assert result == mock_latest
-
-    def test_health_metrics_latest_none(self):
-        """Test health_metrics_latest returns None when no metrics."""
-        resolver = self._get_resolver("health_metrics_latest")
-        mock_project = MagicMock()
-        mock_project.health_metrics.order_by.return_value.first.return_value = None
-
-        result = resolver(None, mock_project)
-
-        assert result is None
-
-    def test_recent_milestones_with_invalid_limit(self):
-        """Test recent_milestones returns empty list for invalid limit."""
-        resolver = self._get_resolver("recent_milestones")
-        mock_project = MagicMock()
-
-        result = resolver(None, mock_project, limit=0)
-        assert result == []
-
-    def test_issues_count(self):
-        """Test issues_count resolver returns idx_issues_count."""
         resolver = self._get_resolver("issues_count")
-        mock_project = MagicMock()
-        mock_project.idx_issues_count = 42
-
-        result = resolver(None, mock_project)
+        result = await resolver(None, mock_project, mock_info)
 
         assert result == 42
+        mock_loader.load.assert_awaited_once_with(8)
 
     def test_key(self):
         """Test key resolver returns idx_key."""
         resolver = self._get_resolver("key")
-        mock_project = MagicMock()
+        mock_project = Mock()
         mock_project.idx_key = "test-project"
 
         result = resolver(None, mock_project)
@@ -228,108 +212,208 @@ class TestProjectNodeResolvers:
     def test_languages(self):
         """Test languages resolver returns idx_languages."""
         resolver = self._get_resolver("languages")
-        mock_project = MagicMock()
+        mock_project = Mock()
         mock_project.idx_languages = ["Python", "JavaScript"]
 
         result = resolver(None, mock_project)
 
         assert result == ["Python", "JavaScript"]
 
-    def test_repositories_count(self):
-        """Test repositories_count resolver returns idx_repositories_count."""
-        resolver = self._get_resolver("repositories_count")
-        mock_project = MagicMock()
-        mock_project.idx_repositories_count = 5
-
-        result = resolver(None, mock_project)
-
-        assert result == 5
-
     def test_topics(self):
         """Test topics resolver returns idx_topics."""
         resolver = self._get_resolver("topics")
-        mock_project = MagicMock()
+        mock_project = Mock()
         mock_project.idx_topics = ["security", "owasp"]
 
         result = resolver(None, mock_project)
 
         assert result == ["security", "owasp"]
 
-    def test_recent_pull_requests(self):
-        """Test recent_pull_requests resolver."""
-        resolver = self._get_resolver("recent_pull_requests")
-        mock_project = MagicMock()
-        mock_prs = [MagicMock(), MagicMock()]
-        mock_project.pull_requests.order_by.return_value.__getitem__.return_value = mock_prs
+    @pytest.mark.asyncio
+    async def test_health_metrics_list_invalid_limit(self):
+        """health_metrics_list returns empty list for invalid limit (no loader call)."""
+        resolver = self._get_resolver("health_metrics_list")
+        mock_project = Mock()
+        mock_info = self._build_info()
 
-        result = resolver(None, mock_project)
+        result = await resolver(None, mock_project, mock_info, limit=0)
+        assert result == []
 
-        mock_project.pull_requests.order_by.assert_called_once_with("-created_at")
-        assert result == mock_prs
+        result = await resolver(None, mock_project, mock_info, limit=-5)
+        assert result == []
 
-    def test_recent_releases(self):
-        """Test recent_releases resolver."""
-        resolver = self._get_resolver("recent_releases")
-        mock_project = MagicMock()
-        mock_releases = [MagicMock(), MagicMock()]
-        mock_project.published_releases.order_by.return_value.__getitem__.return_value = (
-            mock_releases
-        )
+    @pytest.mark.asyncio
+    async def test_health_metrics_list_loads_via_dataloader(self):
+        """health_metrics_list delegates to the dataloader with (pk, limit)."""
+        mock_metrics = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_metrics)
+        mock_info = self._build_info(owasp={HEALTH_METRICS_LIST_BY_PROJECT_ID: mock_loader})
 
-        result = resolver(None, mock_project)
+        mock_project = Mock()
+        mock_project.pk = 7
 
-        mock_project.published_releases.order_by.assert_called_once_with("-published_at")
-        assert result == mock_releases
+        resolver = self._get_resolver("health_metrics_list")
+        result = await resolver(None, mock_project, mock_info, limit=10)
 
-    def test_repositories(self):
-        """Test repositories resolver."""
-        resolver = self._get_resolver("repositories")
-        mock_project = MagicMock()
-        mock_repos = [MagicMock(), MagicMock()]
-        mock_filtered = MagicMock()
-        mock_filtered.order_by.return_value = mock_repos
-        mock_project.repositories.filter.return_value = mock_filtered
+        assert result == mock_metrics
+        mock_loader.load.assert_awaited_once_with((7, 10))
 
-        result = resolver(None, mock_project)
+    @pytest.mark.asyncio
+    async def test_health_metrics_latest_loads_via_dataloader(self):
+        """health_metrics_latest delegates to the dataloader with pk."""
+        mock_metric = Mock()
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_metric)
+        mock_info = self._build_info(owasp={HEALTH_METRICS_LATEST_BY_PROJECT_ID: mock_loader})
 
-        mock_project.repositories.filter.assert_called_once_with(organization__isnull=False)
-        mock_filtered.order_by.assert_called_once_with("-pushed_at", "-updated_at")
-        assert result == mock_repos
+        mock_project = Mock()
+        mock_project.pk = 9
 
-    def test_recent_issues(self):
-        """Test recent_issues resolver."""
+        resolver = self._get_resolver("health_metrics_latest")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == mock_metric
+        mock_loader.load.assert_awaited_once_with(9)
+
+    @pytest.mark.asyncio
+    async def test_health_metrics_latest_none(self):
+        """health_metrics_latest passes through None from the loader."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=None)
+        mock_info = self._build_info(owasp={HEALTH_METRICS_LATEST_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 11
+
+        resolver = self._get_resolver("health_metrics_latest")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_open_issues_count_loads_via_dataloader(self):
+        """open_issues_count delegates to the dataloader with pk."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=37)
+        mock_info = self._build_info(owasp={OPEN_ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 3
+
+        resolver = self._get_resolver("open_issues_count")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == 37
+        mock_loader.load.assert_awaited_once_with(3)
+
+    @pytest.mark.asyncio
+    async def test_repositories_count_loads_via_dataloader(self):
+        """repositories_count delegates to the dataloader with pk."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=5)
+        mock_info = self._build_info(owasp={REPOSITORIES_COUNT_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 4
+
+        resolver = self._get_resolver("repositories_count")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == 5
+        mock_loader.load.assert_awaited_once_with(4)
+
+    @pytest.mark.asyncio
+    async def test_recent_issues_loads_via_dataloader(self):
+        """Recent issues delegate to the dataloader with (pk, RECENT_ISSUES_LIMIT)."""
+        mock_issues = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_issues)
+        mock_info = self._build_info(github={RECENT_ISSUES_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
         resolver = self._get_resolver("recent_issues")
-        mock_project = MagicMock()
-        mock_issues = [MagicMock(), MagicMock()]
-        mock_project.issues.order_by.return_value.__getitem__.return_value = mock_issues
+        result = await resolver(None, mock_project, mock_info)
 
-        result = resolver(None, mock_project)
-
-        mock_project.issues.order_by.assert_called_once_with("-created_at")
         assert result == mock_issues
+        mock_loader.load.assert_awaited_once_with((1, RECENT_ISSUES_LIMIT))
 
-    def test_recent_milestones_with_valid_limit(self):
-        """Test recent_milestones returns milestones with valid limit."""
+    @pytest.mark.asyncio
+    async def test_recent_milestones_invalid_limit(self):
+        """recent_milestones returns empty list for invalid limit (no loader call)."""
         resolver = self._get_resolver("recent_milestones")
-        mock_project = MagicMock()
-        mock_repos = [MagicMock()]
-        mock_project.repositories.all.return_value = mock_repos
+        mock_project = Mock()
+        mock_info = self._build_info()
 
-        mock_milestones = [MagicMock(), MagicMock()]
+        result = await resolver(None, mock_project, mock_info, limit=0)
+        assert result == []
 
-        with patch("apps.owasp.api.internal.nodes.project.Milestone") as mock_milestone_cls:
-            mock_filter = MagicMock()
-            mock_select = MagicMock()
-            mock_prefetch = MagicMock()
-            mock_order = MagicMock()
-            mock_order.__getitem__.return_value = mock_milestones
+    @pytest.mark.asyncio
+    async def test_recent_milestones_loads_via_dataloader(self):
+        """recent_milestones delegates to the dataloader with (pk, limit)."""
+        mock_milestones = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_milestones)
+        mock_info = self._build_info(github={RECENT_MILESTONES_BY_PROJECT_ID: mock_loader})
 
-            mock_milestone_cls.objects.filter.return_value = mock_filter
-            mock_filter.select_related.return_value = mock_select
-            mock_select.prefetch_related.return_value = mock_prefetch
-            mock_prefetch.order_by.return_value = mock_order
+        mock_project = Mock()
+        mock_project.pk = 1
 
-            result = resolver(None, mock_project, limit=5)
+        resolver = self._get_resolver("recent_milestones")
+        result = await resolver(None, mock_project, mock_info, limit=5)
 
-            mock_milestone_cls.objects.filter.assert_called_once()
-            assert result == mock_milestones
+        assert result == mock_milestones
+        mock_loader.load.assert_awaited_once_with((1, 5))
+
+    @pytest.mark.asyncio
+    async def test_recent_pull_requests_loads_via_dataloader(self):
+        """Recent pull requests delegate to the dataloader with (pk, limit)."""
+        mock_prs = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_prs)
+        mock_info = self._build_info(github={RECENT_PULL_REQUESTS_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
+        resolver = self._get_resolver("recent_pull_requests")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == mock_prs
+        mock_loader.load.assert_awaited_once_with((1, RECENT_PULL_REQUESTS_LIMIT))
+
+    @pytest.mark.asyncio
+    async def test_recent_releases_loads_via_dataloader(self):
+        """Recent releases delegate to the dataloader with (pk, limit)."""
+        mock_releases = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_releases)
+        mock_info = self._build_info(github={RECENT_RELEASES_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
+        resolver = self._get_resolver("recent_releases")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == mock_releases
+        mock_loader.load.assert_awaited_once_with((1, RECENT_RELEASES_LIMIT))
+
+    @pytest.mark.asyncio
+    async def test_repositories_loads_via_dataloader(self):
+        """Repositories delegates to the dataloader with pk."""
+        mock_repos = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_repos)
+        mock_info = self._build_info(github={REPOSITORIES_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
+        resolver = self._get_resolver("repositories")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == mock_repos
+        mock_loader.load.assert_awaited_once_with(1)

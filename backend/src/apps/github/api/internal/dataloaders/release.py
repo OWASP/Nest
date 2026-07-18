@@ -1,16 +1,61 @@
 """DataLoaders for releases."""
 
-from django.db.models import F, Window
+from collections import defaultdict
+
+from django.db.models import F, Prefetch, Window
 from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
 from apps.common.api.internal.dataloaders.utils import get_result_by_keys, get_results_by_keys
 from apps.github.models.release import Release
+from apps.owasp.models.project import Project
 
 RECENT_RELEASES_LIMIT = 5
 RELEASE_URL_BY_ID_LOADER = "release_url_by_id"
 LATEST_RELEASE_BY_REPOSITORY_ID_LOADER = "latest_release_by_repository_id"
 RECENT_RELEASES_BY_REPOSITORY_ID_LOADER = "recent_releases_by_repository_id"
+RECENT_RELEASES_BY_PROJECT_ID = "recent_releases_by_project_id"
+
+
+async def load_recent_releases_by_project_id(
+    keys: list[tuple[int, int]],
+) -> list[list[Release]]:
+    """Batch-load recent published releases across the given projects' repositories."""
+    if not keys:
+        return []
+
+    project_ids = [key[0] for key in keys]
+    limit = keys[0][1]
+
+    releases = (
+        Release.objects.filter(
+            is_draft=False,
+            published_at__isnull=False,
+            repository__project__in=project_ids,
+        )
+        .select_related(
+            "author",
+            "repository",
+            "repository__organization",
+        )
+        .prefetch_related(
+            Prefetch(
+                "repository__project_set",
+                queryset=Project.objects.filter(pk__in=project_ids).only("pk"),
+                to_attr="prefetched_projects",
+            ),
+        )
+        .order_by("-published_at")
+        .distinct()
+    )
+
+    mapping: dict[int, list[Release]] = defaultdict(list)
+    async for release in releases:
+        for project in release.repository.prefetched_projects:
+            if len(mapping[project.pk]) < limit:
+                mapping[project.pk].append(release)
+
+    return [mapping.get(project_id, []) for project_id in project_ids]
 
 
 async def load_release_urls_by_id(release_ids: list[int]) -> list[str]:
@@ -90,5 +135,8 @@ def get_release_loaders() -> dict[str, object]:
         ),
         RELEASE_URL_BY_ID_LOADER: DataLoader[int, str](
             load_fn=load_release_urls_by_id,
+        ),
+        RECENT_RELEASES_BY_PROJECT_ID: DataLoader[tuple[int, int], list[Release]](
+            load_fn=load_recent_releases_by_project_id,
         ),
     }

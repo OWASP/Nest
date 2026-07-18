@@ -7,9 +7,11 @@ from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.milestone import (
     RECENT_MILESTONES_BY_PROGRAM_ID,
+    RECENT_MILESTONES_BY_PROJECT_ID,
     RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
     get_milestone_loaders,
     load_recent_milestones_by_program_id,
+    load_recent_milestones_by_project_id,
     load_recent_milestones_by_repository_id,
 )
 
@@ -308,17 +310,24 @@ class TestGetMilestoneLoaders:
     def test_returns_mapping(self):
         """Factory always returns a Mapping."""
         loaders = get_milestone_loaders()
-        assert RECENT_MILESTONES_BY_PROGRAM_ID in loaders
-        assert isinstance(loaders[RECENT_MILESTONES_BY_PROGRAM_ID], DataLoader)
-        assert RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER in loaders
-        assert isinstance(loaders[RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER], DataLoader)
+        for key in [
+            RECENT_MILESTONES_BY_PROGRAM_ID,
+            RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
+            RECENT_MILESTONES_BY_PROJECT_ID,
+        ]:
+            assert key in loaders
+            assert isinstance(loaders[key], DataLoader)
 
     def test_returns_new_instances_on_each_call(self):
         """Each call produces distinct DataLoader instances for per-request isolation."""
         loaders1 = get_milestone_loaders()
         loaders2 = get_milestone_loaders()
         assert loaders1 is not loaders2
-        for key in [RECENT_MILESTONES_BY_PROGRAM_ID, RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER]:
+        for key in [
+            RECENT_MILESTONES_BY_PROGRAM_ID,
+            RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
+            RECENT_MILESTONES_BY_PROJECT_ID,
+        ]:
             assert loaders1[key] is not loaders2[key]
 
     def test_load_fn_is_load_recent_milestones_by_program_id(self):
@@ -332,3 +341,129 @@ class TestGetMilestoneLoaders:
         loaders = get_milestone_loaders()
         loader = loaders[RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER]
         assert loader.load_fn is load_recent_milestones_by_repository_id
+
+    def test_load_fn_is_load_recent_milestones_by_project_id(self):
+        """The project milestone loader is wired to load_recent_milestones_by_project_id."""
+        loaders = get_milestone_loaders()
+        loader = loaders[RECENT_MILESTONES_BY_PROJECT_ID]
+        assert loader.load_fn is load_recent_milestones_by_project_id
+
+
+class TestLoadRecentMilestonesByProjectId:
+    """Tests for load_recent_milestones_by_project_id."""
+
+    @staticmethod
+    def _ordered_qs(mock_milestone):
+        """Return the mock queryset at the end of the milestones chain."""
+        call = mock_milestone.objects.filter.return_value
+        return call.select_related.return_value.prefetch_related.return_value.order_by.return_value
+
+    @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
+    @pytest.mark.asyncio
+    async def test_builds_queryset_with_correct_chain(self, mock_milestone):
+        """Queryset is built with filter, select_related, prefetch_related, order_by, distinct."""
+        mock_filter_result = mock_milestone.objects.filter.return_value
+        mock_select = mock_filter_result.select_related.return_value
+        mock_ordered = self._ordered_qs(mock_milestone)
+        mock_ordered.distinct.return_value = MagicMock()
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+
+        await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
+
+        mock_milestone.objects.filter.assert_called_once_with(repository__project__in=[1, 2])
+        mock_filter_result.select_related.assert_called_once_with(
+            "repository__organization",
+            "author__owasp_profile",
+        )
+        mock_select.prefetch_related.assert_called_once()
+        mock_select.prefetch_related.return_value.order_by.assert_called_once_with("-created_at")
+        mock_ordered.distinct.assert_called_once()
+
+    @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
+    @pytest.mark.asyncio
+    async def test_maps_milestones_to_project_ids(self, mock_milestone):
+        """Milestones are mapped to the projects that own the milestone's repository."""
+        project_1 = MagicMock(pk=1)
+        project_2 = MagicMock(pk=2)
+        milestone_a = MagicMock()
+        milestone_a.repository.prefetched_projects = [project_1]
+        milestone_b = MagicMock()
+        milestone_b.repository.prefetched_projects = [project_2]
+
+        mock_ordered = self._ordered_qs(mock_milestone)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter(
+            [milestone_a, milestone_b]
+        )
+
+        result = await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
+
+        assert result == [[milestone_a], [milestone_b]]
+
+    @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
+    @pytest.mark.asyncio
+    async def test_limit_enforced_per_project(self, mock_milestone):
+        """Each project list is truncated to the configured limit."""
+        project = MagicMock(pk=1)
+        milestones = [MagicMock() for _ in range(5)]
+        for milestone in milestones:
+            milestone.repository.prefetched_projects = [project]
+
+        mock_ordered = self._ordered_qs(mock_milestone)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter(milestones)
+
+        result = await load_recent_milestones_by_project_id([(1, 3)])
+
+        assert result == [[milestones[0], milestones[1], milestones[2]]]
+
+    @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
+    @pytest.mark.asyncio
+    async def test_order_matches_keys_not_queryset(self, mock_milestone):
+        """The output order follows project_ids, not the queryset iteration order."""
+        project_1 = MagicMock(pk=1)
+        project_2 = MagicMock(pk=2)
+        milestone_b = MagicMock()
+        milestone_b.repository.prefetched_projects = [project_2]
+        milestone_a = MagicMock()
+        milestone_a.repository.prefetched_projects = [project_1]
+
+        mock_ordered = self._ordered_qs(mock_milestone)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter(
+            [milestone_b, milestone_a]
+        )
+
+        result = await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
+
+        assert result == [[milestone_a], [milestone_b]]
+
+    @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
+    @pytest.mark.asyncio
+    async def test_shared_repository_appears_in_each_project(self, mock_milestone):
+        """A repo shared between projects contributes the milestone to each project."""
+        project_1 = MagicMock(pk=1)
+        project_2 = MagicMock(pk=2)
+        milestone = MagicMock()
+        milestone.repository.prefetched_projects = [project_1, project_2]
+
+        mock_ordered = self._ordered_qs(mock_milestone)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([milestone])
+
+        result = await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
+
+        assert result == [[milestone], [milestone]]
+
+    @pytest.mark.asyncio
+    async def test_empty_keys(self):
+        """An empty keys list returns an empty list."""
+        result = await load_recent_milestones_by_project_id([])
+        assert result == []
+
+    @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
+    @pytest.mark.asyncio
+    async def test_missing_project_returns_empty_list(self, mock_milestone):
+        """A project ID with no matching milestones gets an empty list."""
+        mock_ordered = self._ordered_qs(mock_milestone)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+
+        result = await load_recent_milestones_by_project_id([(99, 5)])
+
+        assert result == [[]]

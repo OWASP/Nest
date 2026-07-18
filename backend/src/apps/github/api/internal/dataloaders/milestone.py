@@ -9,10 +9,49 @@ from strawberry.dataloader import DataLoader
 from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 from apps.github.models.milestone import Milestone
 from apps.mentorship.models.program import Program
+from apps.owasp.models.project import Project
 
 RECENT_MILESTONES_BY_PROGRAM_ID = "recent_milestones_by_program_id"
 RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER = "recent_milestones_by_repository_id"
+RECENT_MILESTONES_BY_PROJECT_ID = "recent_milestones_by_project_id"
 RECENT_MILESTONES_LIMIT = 5
+
+
+async def load_recent_milestones_by_project_id(
+    keys: list[tuple[int, int]],
+) -> list[list[Milestone]]:
+    """Batch-load recent milestones across the given projects' repositories."""
+    if not keys:
+        return []
+
+    project_ids = [key[0] for key in keys]
+    limit = keys[0][1]
+
+    milestones = (
+        Milestone.objects.filter(repository__project__in=project_ids)
+        .select_related(
+            "repository__organization",
+            "author__owasp_profile",
+        )
+        .prefetch_related(
+            "labels",
+            Prefetch(
+                "repository__project_set",
+                queryset=Project.objects.filter(pk__in=project_ids).only("pk"),
+                to_attr="prefetched_projects",
+            ),
+        )
+        .order_by("-created_at")
+        .distinct()
+    )
+
+    mapping: dict[int, list[Milestone]] = defaultdict(list)
+    async for milestone in milestones:
+        for project in milestone.repository.prefetched_projects:
+            if len(mapping[project.pk]) < limit:
+                mapping[project.pk].append(milestone)
+
+    return [mapping.get(project_id, []) for project_id in project_ids]
 
 
 async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[list[Milestone]]:
@@ -84,5 +123,8 @@ def get_milestone_loaders() -> dict[str, object]:
         ),
         RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER: DataLoader[tuple[int, int], list[Milestone]](
             load_fn=load_recent_milestones_by_repository_id,
+        ),
+        RECENT_MILESTONES_BY_PROJECT_ID: DataLoader[tuple[int, int], list[Milestone]](
+            load_fn=load_recent_milestones_by_project_id,
         ),
     }

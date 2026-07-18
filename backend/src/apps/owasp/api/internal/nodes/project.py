@@ -5,12 +5,25 @@ import strawberry_django
 
 from apps.common.utils import normalize_limit
 from apps.core.utils.index import deep_camelize
+from apps.github.api.internal.dataloaders.issue import RECENT_ISSUES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.pull_request import (
+    RECENT_PULL_REQUESTS_BY_PROJECT_ID,
+)
+from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.repository import REPOSITORIES_BY_PROJECT_ID
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
-from apps.github.models.milestone import Milestone
+from apps.owasp.api.internal.dataloaders.project import (
+    HEALTH_METRICS_LATEST_BY_PROJECT_ID,
+    HEALTH_METRICS_LIST_BY_PROJECT_ID,
+    ISSUES_COUNT_BY_PROJECT_ID,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
+    REPOSITORIES_COUNT_BY_PROJECT_ID,
+)
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
@@ -35,7 +48,6 @@ MAX_LIMIT = 1000
         "is_active",
         "level",
         "name",
-        "open_issues_count",
         "stars_count",
         "summary",
         "type",
@@ -44,14 +56,14 @@ MAX_LIMIT = 1000
 class ProjectNode(GenericEntityNode):
     """Project node."""
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["contribution_stats"])
     def contribution_stats(self, root: Project) -> strawberry.scalars.JSON | None:
         """Resolve contribution stats with camelCase keys."""
         return deep_camelize(root.contribution_stats)
 
-    @strawberry_django.field(prefetch_related=["health_metrics"])
-    def health_metrics_list(
-        self, root: Project, limit: int = 30
+    @strawberry_django.field
+    async def health_metrics_list(
+        self, root: Project, info: strawberry.Info, limit: int = 30
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics for chart display.
 
@@ -61,77 +73,85 @@ class ProjectNode(GenericEntityNode):
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return list(reversed(root.health_metrics.order_by("-nest_created_at")[:normalized_limit]))
+        return await info.context.owasp_dataloaders[HEALTH_METRICS_LIST_BY_PROJECT_ID].load(
+            (root.pk, normalized_limit)
+        )
 
-    @strawberry_django.field(prefetch_related=["health_metrics"])
-    def health_metrics_latest(self, root: Project) -> ProjectHealthMetricsNode | None:
+    @strawberry_django.field
+    async def health_metrics_latest(
+        self, root: Project, info: strawberry.Info
+    ) -> ProjectHealthMetricsNode | None:
         """Resolve latest project health metrics."""
-        return root.health_metrics.order_by("-nest_created_at").first()
+        return await info.context.owasp_dataloaders[HEALTH_METRICS_LATEST_BY_PROJECT_ID].load(
+            root.pk
+        )
 
     @strawberry_django.field
-    def issues_count(self, root: Project) -> int:
+    async def issues_count(self, root: Project, info: strawberry.Info) -> int:
         """Resolve issues count."""
-        return root.idx_issues_count
+        return await info.context.owasp_dataloaders[ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["key"])
     def key(self, root: Project) -> str:
         """Resolve key."""
         return root.idx_key
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["languages"])
     def languages(self, root: Project) -> list[str]:
         """Resolve languages."""
         return root.idx_languages
 
     @strawberry_django.field
-    def recent_issues(self, root: Project) -> list[IssueNode]:
-        """Resolve recent issues."""
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+    async def open_issues_count(self, root: Project, info: strawberry.Info) -> int:
+        """Resolve open issues count."""
+        return await info.context.owasp_dataloaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
 
     @strawberry_django.field
-    def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
+    async def recent_issues(self, root: Project, info: strawberry.Info) -> list[IssueNode]:
+        """Resolve recent issues."""
+        return await info.context.github_dataloaders[RECENT_ISSUES_BY_PROJECT_ID].load(
+            (root.pk, RECENT_ISSUES_LIMIT)
+        )
+
+    @strawberry_django.field
+    async def recent_milestones(
+        self, root: Project, info: strawberry.Info, limit: int = 5
+    ) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return (
-            Milestone.objects.filter(
-                repository__in=root.repositories.all(),
-            )
-            .select_related(
-                "repository__organization",
-                "author__owasp_profile",
-            )
-            .prefetch_related("labels")
-            .order_by("-created_at")[:normalized_limit]
+        return await info.context.github_dataloaders[RECENT_MILESTONES_BY_PROJECT_ID].load(
+            (root.pk, normalized_limit)
         )
 
     @strawberry_django.field
-    def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
+    async def recent_pull_requests(
+        self, root: Project, info: strawberry.Info
+    ) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
-        return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
-
-    @strawberry_django.field
-    def recent_releases(self, root: Project) -> list[ReleaseNode]:
-        """Resolve recent releases."""
-        return root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
-
-    @strawberry_django.field(prefetch_related=["repositories"])
-    def repositories(self, root: Project) -> list[RepositoryNode]:
-        """Resolve repositories."""
-        return root.repositories.filter(
-            organization__isnull=False,
-        ).order_by(
-            "-pushed_at",
-            "-updated_at",
+        return await info.context.github_dataloaders[RECENT_PULL_REQUESTS_BY_PROJECT_ID].load(
+            (root.pk, RECENT_PULL_REQUESTS_LIMIT)
         )
 
     @strawberry_django.field
-    def repositories_count(self, root: Project) -> int:
-        """Resolve repositories count."""
-        return root.idx_repositories_count
+    async def recent_releases(self, root: Project, info: strawberry.Info) -> list[ReleaseNode]:
+        """Resolve recent releases."""
+        return await info.context.github_dataloaders[RECENT_RELEASES_BY_PROJECT_ID].load(
+            (root.pk, RECENT_RELEASES_LIMIT)
+        )
 
     @strawberry_django.field
+    async def repositories(self, root: Project, info: strawberry.Info) -> list[RepositoryNode]:
+        """Resolve repositories."""
+        return await info.context.github_dataloaders[REPOSITORIES_BY_PROJECT_ID].load(root.pk)
+
+    @strawberry_django.field
+    async def repositories_count(self, root: Project, info: strawberry.Info) -> int:
+        """Resolve repositories count."""
+        return await info.context.owasp_dataloaders[REPOSITORIES_COUNT_BY_PROJECT_ID].load(root.pk)
+
+    @strawberry_django.field(only=["topics"])
     def topics(self, root: Project) -> list[str]:
         """Resolve topics."""
         return root.idx_topics

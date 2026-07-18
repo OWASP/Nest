@@ -1,5 +1,7 @@
 """DataLoaders for repositories."""
 
+from collections import defaultdict
+
 from django.db.models import Prefetch
 from strawberry.dataloader import DataLoader
 
@@ -11,6 +13,40 @@ from apps.owasp.models.project import Project
 
 REPOSITORY_BY_RELEASE_ID_LOADER = "repository_by_release_id"
 REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER = "repository_project_name_by_release_id"
+REPOSITORIES_BY_PROJECT_ID = "repositories_by_project_id"
+
+
+async def load_repositories_by_project_id(
+    project_ids: list[int],
+) -> list[list[Repository]]:
+    """Batch-load repositories for the given project IDs in a single query.
+
+    Repositories without an organization (filtered out by the M2M resolver) are
+    excluded, mirroring the original ProjectNode resolver.
+    """
+    if not project_ids:
+        return []
+
+    repositories = (
+        Repository.objects.filter(project__in=project_ids, organization__isnull=False)
+        .select_related("organization")
+        .prefetch_related(
+            Prefetch(
+                "project_set",
+                queryset=Project.objects.filter(pk__in=project_ids).only("pk"),
+                to_attr="prefetched_projects",
+            ),
+        )
+        .order_by("-pushed_at", "-updated_at")
+        .distinct()
+    )
+
+    mapping: dict[int, list[Repository]] = defaultdict(list)
+    async for repository in repositories:
+        for project in repository.prefetched_projects:
+            mapping[project.pk].append(repository)
+
+    return [mapping.get(project_id, []) for project_id in project_ids]
 
 
 async def load_repositories_by_release_id(
@@ -62,5 +98,8 @@ def get_repository_loaders() -> dict[str, object]:
         ),
         REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER: DataLoader[int, str | None](
             load_fn=load_repository_project_names_by_release_id,
+        ),
+        REPOSITORIES_BY_PROJECT_ID: DataLoader[int, list[Repository]](
+            load_fn=load_repositories_by_project_id,
         ),
     }

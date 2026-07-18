@@ -6,9 +6,11 @@ import pytest
 from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.repository import (
+    REPOSITORIES_BY_PROJECT_ID,
     REPOSITORY_BY_RELEASE_ID_LOADER,
     REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER,
     get_repository_loaders,
+    load_repositories_by_project_id,
     load_repositories_by_release_id,
     load_repository_project_names_by_release_id,
 )
@@ -202,6 +204,107 @@ class TestLoadRepositoryProjectNamesByReleaseId:
         assert result == [None]
 
 
+class TestLoadRepositoriesByProjectId:
+    """Tests for load_repositories_by_project_id."""
+
+    @staticmethod
+    def _ordered_qs(mock_repository):
+        """Return the mock queryset at the end of the repositories chain."""
+        call = mock_repository.objects.filter.return_value
+        return call.select_related.return_value.prefetch_related.return_value.order_by.return_value
+
+    @patch("apps.github.api.internal.dataloaders.repository.Repository")
+    @pytest.mark.asyncio
+    async def test_builds_queryset_with_correct_chain(self, mock_repository):
+        """Queryset filters by project + organization, orders by pushed/updated, distincts."""
+        mock_filter_result = mock_repository.objects.filter.return_value
+        mock_select = mock_filter_result.select_related.return_value
+        mock_ordered = self._ordered_qs(mock_repository)
+        mock_ordered.distinct.return_value = MagicMock()
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+
+        await load_repositories_by_project_id([1, 2])
+
+        mock_repository.objects.filter.assert_called_once_with(
+            project__in=[1, 2], organization__isnull=False
+        )
+        mock_filter_result.select_related.assert_called_once_with("organization")
+        mock_select.prefetch_related.assert_called_once()
+        mock_select.prefetch_related.return_value.order_by.assert_called_once_with(
+            "-pushed_at", "-updated_at"
+        )
+        mock_ordered.distinct.assert_called_once()
+
+    @patch("apps.github.api.internal.dataloaders.repository.Repository")
+    @pytest.mark.asyncio
+    async def test_maps_repositories_to_project_ids(self, mock_repository):
+        """Repositories are mapped to the projects they belong to."""
+        project_1 = MagicMock(pk=1)
+        project_2 = MagicMock(pk=2)
+        repo_a = MagicMock()
+        repo_a.prefetched_projects = [project_1]
+        repo_b = MagicMock()
+        repo_b.prefetched_projects = [project_2]
+
+        mock_ordered = self._ordered_qs(mock_repository)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([repo_a, repo_b])
+
+        result = await load_repositories_by_project_id([1, 2])
+
+        assert result == [[repo_a], [repo_b]]
+
+    @patch("apps.github.api.internal.dataloaders.repository.Repository")
+    @pytest.mark.asyncio
+    async def test_shared_repository_appears_in_each_project(self, mock_repository):
+        """A repo shared between projects is returned for each project."""
+        project_1 = MagicMock(pk=1)
+        project_2 = MagicMock(pk=2)
+        repo = MagicMock()
+        repo.prefetched_projects = [project_1, project_2]
+
+        mock_ordered = self._ordered_qs(mock_repository)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([repo])
+
+        result = await load_repositories_by_project_id([1, 2])
+
+        assert result == [[repo], [repo]]
+
+    @patch("apps.github.api.internal.dataloaders.repository.Repository")
+    @pytest.mark.asyncio
+    async def test_order_matches_keys_not_queryset(self, mock_repository):
+        """The output order follows project_ids, not the queryset iteration order."""
+        project_1 = MagicMock(pk=1)
+        project_2 = MagicMock(pk=2)
+        repo_b = MagicMock()
+        repo_b.prefetched_projects = [project_2]
+        repo_a = MagicMock()
+        repo_a.prefetched_projects = [project_1]
+
+        mock_ordered = self._ordered_qs(mock_repository)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([repo_b, repo_a])
+
+        result = await load_repositories_by_project_id([1, 2])
+
+        assert result == [[repo_a], [repo_b]]
+
+    @pytest.mark.asyncio
+    async def test_empty_project_ids(self):
+        """An empty project_ids list returns an empty list."""
+        result = await load_repositories_by_project_id([])
+        assert result == []
+
+    @patch("apps.github.api.internal.dataloaders.repository.Repository")
+    @pytest.mark.asyncio
+    async def test_missing_project_returns_empty_list(self, mock_repository):
+        """A project ID with no matching repositories gets an empty list."""
+        mock_ordered = self._ordered_qs(mock_repository)
+        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+
+        result = await load_repositories_by_project_id([99])
+
+        assert result == [[]]
+
+
 class TestGetRepositoryLoaders:
     """Tests for get_repository_loaders."""
 
@@ -247,3 +350,21 @@ class TestGetRepositoryLoaders:
         loaders = get_repository_loaders()
         loader = loaders[REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER]
         assert loader.load_fn is load_repository_project_names_by_release_id
+
+    def test_returns_mapping_with_repositories_by_project_loader(self):
+        """Factory returns a mapping with the repositories-by-project loader."""
+        loaders = get_repository_loaders()
+        assert REPOSITORIES_BY_PROJECT_ID in loaders
+        assert isinstance(loaders[REPOSITORIES_BY_PROJECT_ID], DataLoader)
+
+    def test_repositories_by_project_loader_is_distinct_instance(self):
+        """Each call produces distinct DataLoader instances."""
+        loaders1 = get_repository_loaders()
+        loaders2 = get_repository_loaders()
+        assert loaders1[REPOSITORIES_BY_PROJECT_ID] is not loaders2[REPOSITORIES_BY_PROJECT_ID]
+
+    def test_load_fn_is_load_repositories_by_project_id(self):
+        """The repositories-by-project loader is wired to load_repositories_by_project_id."""
+        loaders = get_repository_loaders()
+        loader = loaders[REPOSITORIES_BY_PROJECT_ID]
+        assert loader.load_fn is load_repositories_by_project_id
