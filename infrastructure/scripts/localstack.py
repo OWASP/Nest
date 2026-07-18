@@ -67,6 +67,7 @@ class LocalStack:
             host if host is not None else os.environ.get("LOCALSTACK_HOST", LOCALSTACK_HOST)
         )
         self.port = port
+        self.api_url = f"http://{self.host}:{self.port}"  # NOSONAR
 
     @property
     def can_start_container(self) -> bool:

@@ -37,6 +37,10 @@ def mock_info_response(
 class TestLocalStack:
     """Tests for ``LocalStack``."""
 
+    def test_init_api_url(self) -> None:
+        localstack = LocalStack(host="custom-host", port=9999)
+        assert localstack.api_url == "http://custom-host:9999"
+
     @patch("scripts.localstack.HTTPConnection")
     def test_healthy_success(self, mock_connection_cls: MagicMock) -> None:
         connection = mock_connection_cls.return_value

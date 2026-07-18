@@ -69,9 +69,8 @@ class InfrastructureTestRunner:
         try:
             if self.localstack.healthy():
                 logger.info(
-                    "Using already running LocalStack instance at %s:%s.",
-                    self.localstack.host,
-                    self.localstack.port,
+                    "Using already running LocalStack instance at %s.",
+                    self.localstack.api_url,
                 )
             elif self.localstack.can_start_container:
                 logger.info(
@@ -83,13 +82,14 @@ class InfrastructureTestRunner:
                 localstack_started = True
             else:
                 logger.info(
-                    "Waiting for external LocalStack at %s:%s...",
-                    self.localstack.host,
-                    self.localstack.port,
+                    "Waiting for external LocalStack at %s...",
+                    self.localstack.api_url,
                 )
 
             # Always wait: /_localstack/info can succeed before the Pro license activates.
             self.localstack.wait_ready()
+            # Inject LocalStack API for all Terraform tests.
+            os.environ["AWS_ENDPOINT_URL"] = self.localstack.api_url
 
             self.overrides.write()
             self.terraform_tests.discover_and_run("integration")

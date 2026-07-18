@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
 from unittest.mock import MagicMock
 
 import pytest
@@ -34,6 +35,7 @@ class TestInfrastructureTestRunner:
         localstack = MagicMock(spec=LocalStack)
         localstack.port = LOCALSTACK_PORT
         localstack.host = "localhost"
+        localstack.api_url = f"http://localhost:{LOCALSTACK_PORT}"
         localstack.can_start_container = True
         localstack.healthy.return_value = True
         localstack.image_info.return_value = ("localstack/localstack:1.0", "1.0")
@@ -55,12 +57,14 @@ class TestInfrastructureTestRunner:
         terraform_tests.discover_and_run.assert_called_once_with("integration")
         overrides.cleanup.assert_called_once()
         localstack.stop.assert_not_called()
+        assert os.environ["AWS_ENDPOINT_URL"] == f"http://localhost:{LOCALSTACK_PORT}"
 
     def test_run_integration_starts_localstack_when_docker_available(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         localstack = MagicMock(spec=LocalStack)
         localstack.port = LOCALSTACK_PORT
         localstack.host = "localhost"
+        localstack.api_url = f"http://localhost:{LOCALSTACK_PORT}"
         localstack.can_start_container = True
         localstack.healthy.return_value = False
         localstack.image_info.return_value = ("localstack/localstack:1.0", "1.0")
@@ -80,12 +84,14 @@ class TestInfrastructureTestRunner:
         localstack.wait_ready.assert_called_once()
         localstack.stop.assert_called_once()
         terraform_tests.discover_and_run.assert_called_once_with("integration")
+        assert os.environ["AWS_ENDPOINT_URL"] == f"http://localhost:{LOCALSTACK_PORT}"
 
     def test_run_integration_stops_localstack_when_cleanup_fails(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         localstack = MagicMock(spec=LocalStack)
         localstack.port = LOCALSTACK_PORT
         localstack.host = "localhost"
+        localstack.api_url = f"http://localhost:{LOCALSTACK_PORT}"
         localstack.can_start_container = True
         localstack.healthy.return_value = False
         localstack.image_info.return_value = ("localstack/localstack:1.0", "1.0")
@@ -105,12 +111,14 @@ class TestInfrastructureTestRunner:
 
         overrides.cleanup.assert_called_once()
         localstack.stop.assert_called_once()
+        assert os.environ["AWS_ENDPOINT_URL"] == f"http://localhost:{LOCALSTACK_PORT}"
 
     def test_run_integration_waits_for_external_localstack(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         localstack = MagicMock(spec=LocalStack)
         localstack.port = LOCALSTACK_PORT
         localstack.host = "localstack"
+        localstack.api_url = f"http://localstack:{LOCALSTACK_PORT}"
         localstack.can_start_container = False
         localstack.healthy.return_value = False
         overrides = MagicMock(spec=OverrideManager)
@@ -130,3 +138,4 @@ class TestInfrastructureTestRunner:
         localstack.wait_ready.assert_called_once()
         localstack.stop.assert_not_called()
         terraform_tests.discover_and_run.assert_called_once_with("integration")
+        assert os.environ["AWS_ENDPOINT_URL"] == f"http://localstack:{LOCALSTACK_PORT}"
