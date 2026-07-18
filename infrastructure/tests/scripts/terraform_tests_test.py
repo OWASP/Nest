@@ -7,7 +7,17 @@ from unittest.mock import MagicMock, patch
 import pytest
 from scripts.commands import CommandRunner
 from scripts.errors import TestRunnerError
-from scripts.terraform_tests import TerraformTests
+from scripts.terraform_tests import ExecutionMode, TerraformTests
+
+
+class TestExecutionMode:
+    """Tests for ``ExecutionMode``."""
+
+    def test_execution_mode_members(self) -> None:
+        """Verify the ExecutionMode enum only contains the expected execution modes."""
+        expected = {ExecutionMode.UNIT, ExecutionMode.INTEGRATION}
+        actual = set(ExecutionMode)
+        assert actual == expected
 
 
 class TestTerraformTests:
@@ -41,7 +51,7 @@ class TestTerraformTests:
 
         commands = MagicMock(spec=CommandRunner)
         commands.run.return_value = MagicMock(returncode=0, stdout="", stderr="")
-        TerraformTests(commands).discover_and_run("unit")
+        TerraformTests(commands).discover_and_run(ExecutionMode.UNIT)
 
         commands.run.assert_any_call(
             "terraform",
@@ -65,7 +75,27 @@ class TestTerraformTests:
     def test_find_test_files_error(self, mock_iterdir: MagicMock) -> None:
         mock_iterdir.side_effect = OSError("Permission denied")
         with pytest.raises(TestRunnerError, match="could not read /dummy/dir"):
-            TerraformTests().find_test_files("/dummy/dir", "unit")
+            TerraformTests().find_test_files("/dummy/dir", ExecutionMode.UNIT)
+
+    @pytest.mark.parametrize(
+        ("filename", "mode", "expected"),
+        [
+            ("unit.tftest.hcl", ExecutionMode.UNIT, True),
+            ("foo.unit.tftest.hcl", ExecutionMode.UNIT, True),
+            ("integration.tftest.hcl", ExecutionMode.UNIT, False),
+            ("foo.integration.tftest.hcl", ExecutionMode.UNIT, False),
+            ("random.tftest.hcl", ExecutionMode.UNIT, False),
+            ("integration.tftest.hcl", ExecutionMode.INTEGRATION, True),
+            ("foo.integration.tftest.hcl", ExecutionMode.INTEGRATION, True),
+            ("unit.tftest.hcl", ExecutionMode.INTEGRATION, False),
+            ("foo.unit.tftest.hcl", ExecutionMode.INTEGRATION, False),
+            ("random.tftest.hcl", ExecutionMode.INTEGRATION, False),
+            ("not_a_test.hcl", ExecutionMode.UNIT, False),
+            ("unit.tftest.json", ExecutionMode.UNIT, False),
+        ],
+    )
+    def test_match_test_mode(self, filename: str, mode: ExecutionMode, expected: bool) -> None:
+        assert TerraformTests.match_test_mode(filename, mode) is expected
 
     def test_run_module_tests_init_failure(self) -> None:
         commands = MagicMock(spec=CommandRunner)

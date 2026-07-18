@@ -10,7 +10,7 @@ import pytest
 from scripts.commands import CommandRunner
 from scripts.localstack import LOCALSTACK_PORT, LocalStack, OverrideManager
 from scripts.runner import InfrastructureTestRunner
-from scripts.terraform_tests import TerraformTests
+from scripts.terraform_tests import TerraformTests, ExecutionMode
 
 
 class TestInfrastructureTestRunner:
@@ -28,7 +28,7 @@ class TestInfrastructureTestRunner:
         runner.run_unit()
 
         commands.require.assert_called_once_with("terraform")
-        terraform_tests.discover_and_run.assert_called_once_with("unit")
+        terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.UNIT)
 
     def test_run_integration_uses_existing_localstack(self) -> None:
         commands = MagicMock(spec=CommandRunner)
@@ -54,7 +54,7 @@ class TestInfrastructureTestRunner:
         localstack.start.assert_not_called()
         localstack.wait_ready.assert_called_once()
         overrides.write.assert_called_once()
-        terraform_tests.discover_and_run.assert_called_once_with("integration")
+        terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.INTEGRATION)
         overrides.cleanup.assert_called_once()
         localstack.stop.assert_not_called()
         assert os.environ["AWS_ENDPOINT_URL"] == f"http://localhost:{LOCALSTACK_PORT}"
@@ -83,7 +83,7 @@ class TestInfrastructureTestRunner:
         localstack.start.assert_called_once_with("localstack/localstack:1.0")
         localstack.wait_ready.assert_called_once()
         localstack.stop.assert_called_once()
-        terraform_tests.discover_and_run.assert_called_once_with("integration")
+        terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.INTEGRATION)
         assert os.environ["AWS_ENDPOINT_URL"] == f"http://localhost:{LOCALSTACK_PORT}"
 
     def test_run_integration_stops_localstack_when_cleanup_fails(self) -> None:
@@ -137,5 +137,5 @@ class TestInfrastructureTestRunner:
         localstack.start.assert_not_called()
         localstack.wait_ready.assert_called_once()
         localstack.stop.assert_not_called()
-        terraform_tests.discover_and_run.assert_called_once_with("integration")
+        terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.INTEGRATION)
         assert os.environ["AWS_ENDPOINT_URL"] == f"http://localstack:{LOCALSTACK_PORT}"

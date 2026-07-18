@@ -9,7 +9,7 @@ from pathlib import Path
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack, OverrideManager
-from scripts.terraform_tests import TerraformTests
+from scripts.terraform_tests import TerraformTests, ExecutionMode
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class InfrastructureTestRunner:
     def run_unit(self) -> None:
         """Run Terraform unit tests."""
         self.commands.require("terraform")
-        self.terraform_tests.discover_and_run("unit")
+        self.terraform_tests.discover_and_run(ExecutionMode.UNIT)
         logger.info("All unit tests executed successfully!")
 
     def run_integration(self) -> None:
@@ -92,7 +92,7 @@ class InfrastructureTestRunner:
             os.environ["AWS_ENDPOINT_URL"] = self.localstack.api_url
 
             self.overrides.write()
-            self.terraform_tests.discover_and_run("integration")
+            self.terraform_tests.discover_and_run(ExecutionMode.INTEGRATION)
             logger.info("All integration tests executed successfully!")
         finally:
             try:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from enum import StrEnum
 from pathlib import Path
 from subprocess import CompletedProcess
 
@@ -14,6 +15,13 @@ from scripts.errors import TestRunnerError
 logger = logging.getLogger(__name__)
 
 SEARCH_PATHS = ("infrastructure/bootstrap", "infrastructure/modules")
+
+
+class ExecutionMode(StrEnum):
+    """Terraform test execution modes."""
+
+    UNIT = "unit"
+    INTEGRATION = "integration"
 
 
 class TerraformTests:
@@ -29,7 +37,7 @@ class TerraformTests:
         self.commands = commands or CommandRunner()
         self.search_paths = search_paths
 
-    def discover_and_run(self, mode: str) -> None:
+    def discover_and_run(self, mode: ExecutionMode) -> None:
         """Discover and run Terraform tests for the given mode."""
         test_dirs = self.find_test_dirs()
         test_count = 0
@@ -40,8 +48,7 @@ class TerraformTests:
                 continue
 
             module_dir = str(Path(test_dir).parent)
-            label = "integration" if mode == "integration" else "unit"
-            logger.info("Testing %s for %s...", label, module_dir)
+            logger.info("Testing %s for %s...", mode, module_dir)
             self.run_module_tests(module_dir, test_files)
             test_count += 1
 
@@ -62,11 +69,11 @@ class TerraformTests:
         return sorted(test_dirs)
 
     @staticmethod
-    def match_test_mode(entry: str, mode: str) -> bool:
+    def match_test_mode(entry: str, mode: ExecutionMode) -> bool:
         """Return whether a ``.tftest.hcl`` file belongs to the requested mode."""
         return entry == f"{mode}.tftest.hcl" or entry.endswith(f".{mode}.tftest.hcl")
 
-    def find_test_files(self, test_dir: str, mode: str) -> list[str]:
+    def find_test_files(self, test_dir: str, mode: ExecutionMode) -> list[str]:
         """Return sorted test filenames in ``test_dir`` for the given mode."""
         try:
             return sorted(
