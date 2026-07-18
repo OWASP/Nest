@@ -30,18 +30,6 @@ HEALTH_MAX_ATTEMPTS = 30
 HEALTH_POLL_INTERVAL = 2
 LICENSE_MAX_ATTEMPTS = 15
 
-# Temporary Terraform overrides that disable prevent_destroy during integration tests.
-OVERRIDES: list[tuple[str, str]] = [
-    (
-        "infrastructure/modules/storage/modules/s3-bucket/test_override.tf",
-        "aws_s3_bucket.this",
-    ),
-    (
-        "infrastructure/modules/storage/modules/shared-data-bucket/test_override.tf",
-        "aws_s3_bucket.nest_shared_data",
-    ),
-]
-
 _FROM_LOCALSTACK_RE = re.compile(r"^FROM\s+localstack/localstack(?:-pro)?:")
 _FROM_LOCALSTACK_TAG_RE = re.compile(r"^FROM\s+localstack/localstack(?:-pro)?:\s*([^\s@]+)")
 
@@ -207,9 +195,21 @@ class LocalStack:
 class OverrideManager:
     """Create and remove temporary Terraform override files."""
 
+    # Temporary Terraform overrides that disable prevent_destroy during integration tests.
+    OVERRIDES: list[tuple[str, str]] = [
+        (
+            "infrastructure/modules/storage/modules/s3-bucket/test_override.tf",
+            "aws_s3_bucket.this",
+        ),
+        (
+            "infrastructure/modules/storage/modules/shared-data-bucket/test_override.tf",
+            "aws_s3_bucket.nest_shared_data",
+        ),
+    ]
+
     def __init__(self, overrides: list[tuple[str, str]] | None = None) -> None:
         """Initialize with the override file mapping."""
-        self.overrides = overrides if overrides is not None else OVERRIDES
+        self.overrides = overrides if overrides is not None else self.OVERRIDES
 
     def check_absent(self) -> None:
         """Raise if any override file already exists on disk."""

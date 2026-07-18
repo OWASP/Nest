@@ -17,7 +17,6 @@ from scripts.errors import (
 from scripts.localstack import (
     LOCALSTACK_CONTAINER_NAME,
     LOCALSTACK_PORT,
-    OVERRIDES,
     LocalStack,
     OverrideManager,
 )
@@ -261,7 +260,7 @@ class TestOverrideManager:
     @patch("pathlib.Path.mkdir")
     def test_write(self, mock_mkdir: MagicMock, mock_write_text: MagicMock) -> None:
         OverrideManager().write()
-        assert mock_write_text.call_count == len(OVERRIDES)
+        assert mock_write_text.call_count == len(OverrideManager.OVERRIDES)
         mock_mkdir.assert_called()
 
     @patch("pathlib.Path.exists")
@@ -269,4 +268,4 @@ class TestOverrideManager:
     def test_cleanup(self, mock_unlink: MagicMock, mock_exists: MagicMock) -> None:
         mock_exists.return_value = True
         OverrideManager().cleanup()
-        assert mock_unlink.call_count == len(OVERRIDES)
+        assert mock_unlink.call_count == len(OverrideManager.OVERRIDES)
