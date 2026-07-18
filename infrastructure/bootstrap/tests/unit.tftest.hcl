@@ -240,3 +240,33 @@ run "test_invalid_environment_rejected" {
     var.environment
   ]
 }
+
+run "test_shared_bucket_permissions" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
+      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action, "s3:PutObject"),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action, "s3:Get*"),
+    ])
+    error_message = "Staging/non-production environments must have read-only access to the shared data bucket (no PutObject permission)."
+  }
+}
+
+run "test_shared_bucket_permissions_production" {
+  command = plan
+
+  variables {
+    environment = "production"
+  }
+
+  assert {
+    condition = alltrue([
+      !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Mgmt"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
+    ])
+    error_message = "Production must manage the shared data bucket via S3Mgmt and not use S3SharedBucketRestricted."
+  }
+}
+
