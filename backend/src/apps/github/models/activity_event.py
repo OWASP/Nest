@@ -5,13 +5,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-
-
 from apps.github.models.enums.activity_event import ActivityType
 
 
 class ActivityEvent(BulkSaveModel, TimestampedModel):
-    """Represents a discrete GitHub activity event linked to a single source object via a polymorphic GenericForeignKey."""
+    """Represents a discrete GitHub activity event linked to a single source object.
+
+    Uses a polymorphic GenericForeignKey to reference the source object.
+    """
 
     class Meta:
         """Model options."""
@@ -25,6 +26,7 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
                     "activity_type",
                     "content_type",
                     "object_id",
+                    "occurred_at",
                 ],
                 name="unique_activity_event",
             ),
