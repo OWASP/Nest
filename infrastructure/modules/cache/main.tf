@@ -84,9 +84,27 @@ resource "aws_elasticache_replication_group" "main" {
 }
 
 resource "aws_ssm_parameter" "django_redis_password" {
+  count       = var.runtime_secrets_mode == "prepare" ? 1 : 0
   description = "The password of Redis cache (Required by Django)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
   tags        = var.common_tags
   type        = "SecureString"
   value       = local.redis_auth_token
+}
+moved {
+  from = aws_ssm_parameter.django_redis_password
+  to   = aws_ssm_parameter.django_redis_password[0]
+}
+
+resource "aws_secretsmanager_secret" "django_redis_password" {
+  description             = "Redis authentication token used by Django."
+  kms_key_id              = var.kms_key_arn
+  name                    = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
+  recovery_window_in_days = var.secret_recovery_window_in_days
+  tags                    = var.common_tags
+}
+
+resource "aws_secretsmanager_secret_version" "django_redis_password" {
+  secret_id     = aws_secretsmanager_secret.django_redis_password.id
+  secret_string = local.redis_auth_token
 }

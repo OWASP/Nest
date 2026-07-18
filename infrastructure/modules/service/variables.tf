@@ -143,10 +143,16 @@ variable "min_count" {
   }
 }
 
-variable "parameters_arns" {
-  description = "Map of environment variable names to the ARNs of SSM parameters."
+variable "container_secrets" {
+  description = "Environment variable names mapped to SSM or Secrets Manager valueFrom references."
   type        = map(string)
   default     = {}
+}
+
+variable "secretsmanager_secret_arns" {
+  description = "Bare secrets manager ARNs that the ECS execution role may read"
+  type        = set(string)
+  default     = []
 }
 
 variable "project_name" {

@@ -54,11 +54,11 @@ resource "aws_iam_role" "ecs_tasks_execution_role" {
 
 
 resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
-  description = "Allow ECS tasks to read SSM parameters"
+  description = "Allow ECS tasks to read SSM parameters and Secrets Manager secrets"
   name        = "${var.project_name}-${var.environment}-ecs-tasks-ssm-policy"
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Action = [
           "ssm:GetParameters"
@@ -66,7 +66,24 @@ resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
         Effect   = "Allow"
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
       }
-    ]
+      ], length(var.secretsmanager_secret_arns) > 0 ? [
+      {
+        Action   = ["secretsmanager:GetSecretValue"]
+        Effect   = "Allow"
+        Resource = var.secretsmanager_secret_arns
+      }
+      ] : [], length(var.secretsmanager_secret_arns) > 0 ? [
+      {
+        Action = ["kms:Decrypt"]
+        Condition = {
+          StringEquals = {
+            "kms:ViaService" = "secretsmanager.${var.aws_region}.amazonaws.com"
+          }
+        }
+        Effect   = "Allow"
+        Resource = var.kms_key_arn
+      }
+    ] : [])
   })
   tags = var.common_tags
 }
@@ -225,7 +242,7 @@ module "sync_data_task" {
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make sync-data"]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.sync_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -258,7 +275,7 @@ module "slack_sync_data_task" {
     EOT
   ]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.slack_sync_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -290,7 +307,7 @@ module "owasp_update_project_health_metrics_task" {
     EOT
   ]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.update_project_health_metrics_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -314,7 +331,7 @@ module "owasp_update_project_health_scores_task" {
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make owasp-update-project-health-scores"]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.update_project_health_scores_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -346,7 +363,7 @@ module "mentorship_sync_modules_data" {
     EOT
   ]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.mentorship_sync_modules_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -370,7 +387,7 @@ module "migrate_task" {
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make migrate"]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.migrate_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -413,7 +430,7 @@ module "load_data_task" {
     EOT
   ]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.load_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -436,7 +453,7 @@ module "index_data_task" {
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make index-data"]
   common_tags                  = var.common_tags
-  container_parameters_arns    = var.container_parameters_arns
+  container_secrets            = var.container_secrets
   cpu                          = var.index_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn

@@ -15,8 +15,8 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "container_parameters_arns" {
-  description = "Map of environment variable names to the ARNs of all SSM parameters."
+variable "container_secrets" {
+  description = "Environment variable names mapped to SSM or Secrets Manager valueFrom references."
   type        = map(string)
   default     = {}
 }
@@ -112,6 +112,12 @@ variable "migrate_task_memory" {
   description = "The memory for the migrate task."
   type        = string
   default     = "1024"
+}
+
+variable "secretsmanager_secret_arns" {
+  description = "Bare Secrets Manager ARNs that the ECS execution role may read."
+  type        = set(string)
+  default     = []
 }
 
 variable "subnet_ids" {

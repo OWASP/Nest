@@ -3,7 +3,7 @@ mock_provider "aws" {}
 variables {
   aws_region                    = "us-east-2"
   common_tags                   = { Environment = "test", Project = "nest" }
-  container_parameters_arns     = {}
+  container_secrets             = {}
   ecr_repository_arn            = "arn:aws:ecr:us-east-2:123456789012:repository/nest-test-backend"
   ecr_repository_url            = "123456789012.dkr.ecr.us-east-2.amazonaws.com/nest-test-backend"
   ecs_sg_id                     = "sg-12345678"
@@ -14,7 +14,10 @@ variables {
   image_tag                     = "test-tag"
   kms_key_arn                   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name                  = "nest"
-  subnet_ids                    = ["subnet-12345678"]
+  secretsmanager_secret_arns = [
+    "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/EXAMPLE"
+  ]
+  subnet_ids = ["subnet-12345678"]
 }
 
 run "test_cron_tasks_disabled_removes_schedules" {
@@ -42,6 +45,62 @@ run "test_cron_tasks_disabled_removes_schedules" {
   assert {
     condition     = local.update_project_health_scores_schedule_expression == null
     error_message = "update_project_health_scores_schedule_expression must be null when enable_cron_tasks is false."
+  }
+}
+
+run "test_empty_secretsmanager_arns_omit_policy_statement" {
+  command = plan
+
+  variables {
+    secretsmanager_secret_arns = []
+  }
+
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "secretsmanager:GetSecretValue")
+    ]) == 0
+    error_message = "The tasks execution policy must omit Secrets Manager access when no secret ARNs are supplied."
+  }
+
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]) == 0
+    error_message = "The tasks execution policy must omit KMS decrypt access when no secret ARNs are supplied."
+  }
+}
+
+run "test_kms_decrypt_is_limited_to_secretsmanager" {
+  command = plan
+
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]).Condition.StringEquals["kms:ViaService"] == "secretsmanager.${var.aws_region}.amazonaws.com"
+    error_message = "KMS decrypt access must be limited to requests from Secrets Manager."
+  }
+
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]).Resource == var.kms_key_arn
+    error_message = "KMS decrypt access must be limited to the configured key."
+  }
+}
+
+run "test_secretsmanager_policy_uses_supplied_arns" {
+  command = plan
+
+  assert {
+    condition = toset(one([
+      for statement in jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "secretsmanager:GetSecretValue")
+    ]).Resource) == var.secretsmanager_secret_arns
+    error_message = "Secrets Manager access must be limited to the supplied secret ARNs."
   }
 }
 
