@@ -78,7 +78,7 @@ class ProgramQuery:
     ) -> PaginatedPrograms:
         """Get paginated programs where the current user is admin, mentor, or mentee."""
         user = await info.context.request.auser()
-        github_user = getattr(user, "github_user", None)
+        github_user = await sync_to_async(getattr)(user, "github_user", None)  # type: ignore[call-arg]
 
         admin_program_ids = ProgramAdmin.objects.filter(admin__nest_user=user).values_list(
             "program_id", flat=True
@@ -114,19 +114,19 @@ class ProgramQuery:
         page = max(1, min(page, total_pages))
         offset = (page - 1) * normalized_limit
 
-        paginated_programs = list(
+        paginated_programs: list[Program] = await sync_to_async(list)(
             queryset.order_by("-nest_created_at")[offset : offset + normalized_limit]
-        )
+        )  # type: ignore[call-arg]
 
         page_ids = [program.id for program in paginated_programs]
-        admin_ids = set(
+        admin_ids: set[int] = await sync_to_async(set)(
             ProgramAdmin.objects.filter(
                 admin__nest_user=user, program_id__in=page_ids
             ).values_list("program_id", flat=True)
-        )
-        mentor_ids = set(
+        )  # type: ignore[call-arg]
+        mentor_ids: set[int] = await sync_to_async(set)(
             Program.objects.filter(mentor_q, id__in=page_ids).values_list("id", flat=True)
-        )
+        )  # type: ignore[call-arg]
 
         results = []
         for program in paginated_programs:
@@ -140,6 +140,6 @@ class ProgramQuery:
 
         return PaginatedPrograms(
             current_page=page,
-            programs=results,
+            programs=results,  # type: ignore[arg-type]
             total_pages=total_pages,
         )
