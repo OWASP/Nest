@@ -61,6 +61,16 @@ export type BoardOfDirectorsNode = Node & {
   year: Scalars['Int']['output'];
 };
 
+export type CertificateNode = {
+  __typename?: 'CertificateNode';
+  githubUser: UserNode;
+  id: Scalars['String']['output'];
+  isVerified: Scalars['Boolean']['output'];
+  issuedAt: Scalars['DateTime']['output'];
+  score: Scalars['Int']['output'];
+  tier: Scalars['String']['output'];
+};
+
 export type ChapterNode = Node & {
   __typename?: 'ChapterNode';
   contributionData: Scalars['JSON']['output'];
@@ -713,6 +723,7 @@ export type Query = {
   apiKeys: Array<ApiKeyNode>;
   boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
+  certificate?: Maybe<CertificateNode>;
   chapter?: Maybe<ChapterNode>;
   chapterCountries: Array<Scalars['String']['output']>;
   committee?: Maybe<CommitteeNode>;
@@ -729,6 +740,7 @@ export type Query = {
   managementProgramModules: Array<ModuleNode>;
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
+  myCertificates: Array<CertificateNode>;
   myPrograms: PaginatedPrograms;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
@@ -764,6 +776,11 @@ export type QueryBoardOfDirectorsArgs = {
 
 export type QueryBoardsOfDirectorsArgs = {
   limit?: Scalars['Int']['input'];
+};
+
+
+export type QueryCertificateArgs = {
+  certificateId: Scalars['String']['input'];
 };
 
 
@@ -1137,6 +1154,7 @@ export type UserNode = {
   contributionScore: Scalars['Int']['output'];
   contributionsCount: Scalars['Int']['output'];
   createdAt: Scalars['String']['output'];
+  currentCertificate?: Maybe<CertificateNode>;
   email: Scalars['String']['output'];
   firstOwaspContributionAt?: Maybe<Scalars['String']['output']>;
   followersCount: Scalars['Int']['output'];

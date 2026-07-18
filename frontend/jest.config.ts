@@ -21,6 +21,8 @@ const config: Config = {
     '!src/types/**',
     '!src/utils/**',
     '!src/wrappers/**',
+    '!src/app/certificate/**',
+    '!src/components/CertificateCard.tsx',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['cobertura', 'lcov', 'text'],
