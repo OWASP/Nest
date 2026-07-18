@@ -1,4 +1,4 @@
-"""Discover and execute Terraform module tests."""
+"""Terraform test runner utilities."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class ExecutionMode(StrEnum):
 
 
 class TerraformTests:
-    """Discover and execute Terraform module tests."""
+    """Terraform module test runner."""
 
     def __init__(
         self,
@@ -33,12 +33,26 @@ class TerraformTests:
         *,
         search_paths: tuple[str, ...] = SEARCH_PATHS,
     ) -> None:
-        """Initialize with command runner and search roots."""
+        """Initialize the Terraform test runner.
+
+        Args:
+            commands (CommandRunner, optional): Command runner instance.
+            search_paths (tuple[str, ...], optional): A tuple of directory paths to search for tests.
+
+        """
         self.commands = commands or CommandRunner()
         self.search_paths = search_paths
 
     def discover_and_run(self, mode: ExecutionMode) -> None:
-        """Discover and run Terraform tests for the given mode."""
+        """Discover and run Terraform tests for the given mode.
+
+        Args:
+            mode (ExecutionMode): The test execution mode.
+
+        Raises:
+            TestRunnerError: If no tests were found or executed for the given mode.
+
+        """
         test_dirs = self.find_test_dirs()
         test_count = 0
 
@@ -57,7 +71,12 @@ class TerraformTests:
             raise TestRunnerError(message)
 
     def find_test_dirs(self) -> list[str]:
-        """Return sorted ``tests`` directories under the search roots."""
+        """Return sorted ``tests`` directories under the search roots.
+
+        Returns:
+            list[str]: A sorted list of absolute paths to test directories.
+
+        """
         test_dirs: list[str] = []
         for path in self.search_paths:
             root_path = Path(path)
@@ -70,11 +89,29 @@ class TerraformTests:
 
     @staticmethod
     def match_test_mode(entry: str, mode: ExecutionMode) -> bool:
-        """Return whether a ``.tftest.hcl`` file belongs to the requested mode."""
+        """Return whether a ``.tftest.hcl`` file belongs to the requested mode.
+
+        Args:
+            entry (str): The filename of the test file.
+            mode (ExecutionMode): The execution mode to match against.
+
+        """
         return entry == f"{mode}.tftest.hcl" or entry.endswith(f".{mode}.tftest.hcl")
 
     def find_test_files(self, test_dir: str, mode: ExecutionMode) -> list[str]:
-        """Return sorted test filenames in ``test_dir`` for the given mode."""
+        """Return sorted test filenames in a directory for the given mode.
+
+        Args:
+            test_dir (str): The directory path to search within.
+            mode (ExecutionMode): The execution mode to filter files by.
+
+        Returns:
+            list[str]: A sorted list of matching test filenames.
+
+        Raises:
+            TestRunnerError: If the directory cannot be read.
+
+        """
         try:
             return sorted(
                 entry.name
@@ -87,7 +124,12 @@ class TerraformTests:
 
     @staticmethod
     def emit_output(result: CompletedProcess[str]) -> None:
-        """Write captured Terraform output to the parent streams."""
+        """Write captured Terraform output to the parent streams.
+
+        Args:
+            result (CompletedProcess[str]): The completed process containing stdout and stderr.
+
+        """
         if result.stdout:
             sys.stdout.write(result.stdout)
         if result.stderr:
@@ -95,7 +137,17 @@ class TerraformTests:
 
     @staticmethod
     def failure_message(action: str, module_dir: str, result: CompletedProcess[str]) -> str:
-        """Build a self-documenting failure message with Terraform diagnostics."""
+        """Build a self-documenting failure message with Terraform diagnostics.
+
+        Args:
+            action (str): The Terraform action that failed.
+            module_dir (str): The directory of the Terraform module.
+            result (CompletedProcess[str]): The completed process containing the failure output.
+
+        Returns:
+            str: A formatted failure message including stdout and stderr diagnostics.
+
+        """
         message = f"terraform {action} failed in {module_dir}"
         details = "\n".join(
             part.rstrip() for part in (result.stdout, result.stderr) if part and part.strip()
@@ -105,7 +157,16 @@ class TerraformTests:
         return message
 
     def run_module_tests(self, module_dir: str, test_files: list[str]) -> None:
-        """Initialize and test a Terraform module with the given filters."""
+        """Initialize and test a Terraform module with the given filters.
+
+        Args:
+            module_dir (str): The directory of the Terraform module to test.
+            test_files (list[str]): A list of test filenames to pass as filters.
+
+        Raises:
+            TestRunnerError: If Terraform fails to initialize or if any tests fail.
+
+        """
         init_result = self.commands.run(
             "terraform",
             f"-chdir={module_dir}",
