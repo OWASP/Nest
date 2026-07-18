@@ -22,7 +22,9 @@ class Prompt(TimestampedModel):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True, blank=True)
-    text = models.TextField(verbose_name="Text", max_length=3000, default="", blank=True)
+    text = models.TextField(
+        verbose_name="Text", max_length=3000, default="", blank=True
+    )
 
     def __str__(self):
         """Prompt human readable representation."""
@@ -181,3 +183,15 @@ class Prompt(TimestampedModel):
 
         """
         return Prompt.get_text("slack-question-detector-system-prompt")
+
+    @staticmethod
+    def get_nestbot_slack_system_prompt() -> str:
+        """Return NestBot Slack-specific system prompt.
+
+        Returns
+            str: The NestBot Slack system prompt text, or falls back to
+            the generic RAG system prompt if the key is not yet in the DB.
+
+        """
+        prompt = Prompt.get_text("nestbot-slack-system-prompt")
+        return prompt if prompt else Prompt.get_rag_system_prompt()
