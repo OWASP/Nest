@@ -36,6 +36,7 @@ class ModuleNode:
     ended_at: datetime
     experience_level: ExperienceLevelEnum
     labels: list[str] | None = None
+    mentee_can_manage_deadlines: bool = False
     order: int = 0
     program: ProgramNode | None = None
     project_id: strawberry.ID | None = None
@@ -43,9 +44,14 @@ class ModuleNode:
     tags: list[str] | None = None
 
     @strawberry.field
+    def user_role(self) -> str | None:
+        """Return the caller's role on this module when a resolver assigned one."""
+        return getattr(self, "user_role", None)
+
+    @strawberry.field
     async def mentors(self) -> list[MentorNode]:
         """Get the list of mentors for this module."""
-        return [mentor async for mentor in self.mentors.all()]
+        return [mentor async for mentor in self.mentors.order_by("github_user__login")]
 
     @strawberry.field
     async def mentees(self) -> list[UserNode]:
@@ -97,10 +103,12 @@ class ModuleNode:
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
         user = await info.context.request.auser()
-        if not self.program or (
-            not await sync_to_async(self.program.has_admin)(user)
-            and not await sync_to_async(self.has_mentor)(user)
-        ):
+        is_admin_or_mentor = self.program and (
+            await sync_to_async(self.program.has_admin)(user)
+            or await sync_to_async(self.has_mentor)(user)
+        )
+        is_mentee = await sync_to_async(self.has_mentee)(user)
+        if not is_admin_or_mentor and not is_mentee:
             return []
 
         info.context.current_module = self
@@ -137,6 +145,12 @@ class ModuleNode:
             MERGED_PULL_REQUESTS_PREFETCH,
         )
 
+        if is_mentee and not is_admin_or_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None:
+                return []
+            queryset = queryset.filter(assignees=github_user)
+
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
 
@@ -146,9 +160,23 @@ class ModuleNode:
         ]
 
     @strawberry.field
-    async def issues_count(self, label: str | None = None) -> int:
-        """Return total count of issues linked to this module, optionally filtered by label."""
+    async def issues_count(self, info: Info, label: str | None = None) -> int:
+        """Return the count of issues visible to the caller, optionally filtered by label."""
+        user = await info.context.request.auser()
+        is_admin_or_mentor = self.program and (
+            await sync_to_async(self.program.has_admin)(user)
+            or await sync_to_async(self.has_mentor)(user)
+        )
+        is_mentee = await sync_to_async(self.has_mentee)(user)
+        if not is_admin_or_mentor and not is_mentee:
+            return 0
         queryset = self.issues
+
+        if is_mentee and not is_admin_or_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None:
+                return 0
+            queryset = queryset.filter(assignees=github_user)
 
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
@@ -173,16 +201,18 @@ class ModuleNode:
     async def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
         user = await info.context.request.auser()
-        if not self.program or (
-            not await sync_to_async(self.program.has_admin)(user)
-            and not await sync_to_async(self.has_mentor)(user)
-        ):
+        is_admin_or_mentor = self.program and (
+            await sync_to_async(self.program.has_admin)(user)
+            or await sync_to_async(self.has_mentor)(user)
+        )
+        is_mentee = await sync_to_async(self.has_mentee)(user)
+        if not is_admin_or_mentor and not is_mentee:
             return None
 
         info.context.current_module = self
 
-        return (
-            await self.issues.select_related("repository", "author")
+        issue = await (
+            self.issues.select_related("repository", "author")
             .prefetch_related(
                 "assignees",
                 "labels",
@@ -191,6 +221,15 @@ class ModuleNode:
             .filter(number=number)
             .afirst()
         )
+
+        if issue is not None and is_mentee and not is_admin_or_mentor:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None:
+                return None
+            if not await sync_to_async(issue.assignees.filter(id=github_user.id).exists)():
+                return None
+
+        return issue
 
     @strawberry.field
     async def interested_users(self, issue_number: int) -> list[UserNode]:
@@ -286,6 +325,7 @@ class CreateModuleInput:
     project_id: strawberry.ID
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+    mentee_can_manage_deadlines: bool = False
 
 
 @strawberry.input
@@ -305,6 +345,7 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+    mentee_can_manage_deadlines: bool | None = None
 
 
 @strawberry.input

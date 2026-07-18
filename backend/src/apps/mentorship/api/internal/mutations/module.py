@@ -31,6 +31,7 @@ NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
 NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines."
 NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
 NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
+NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG = "You can only set deadlines for issues assigned to you."
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,7 @@ class ModuleMutation:
                 domains=input_data.domains,
                 labels=input_data.labels,
                 tags=input_data.tags,
+                mentee_can_manage_deadlines=input_data.mentee_can_manage_deadlines,
                 program=program,
                 project=project,
             )
@@ -239,7 +241,15 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not await sync_to_async(module.has_mentor)(user):
+        is_admin = module.program and await sync_to_async(module.program.has_admin)(user)
+        is_mentor = await sync_to_async(module.has_mentor)(user)
+        is_mentee = await sync_to_async(module.has_mentee)(user)
+
+        if (
+            not is_admin
+            and not is_mentor
+            and not (is_mentee and module.mentee_can_manage_deadlines)
+        ):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = await (
@@ -254,6 +264,11 @@ class ModuleMutation:
         assignees = issue.assignees.all()
         if not assignees:
             raise ValidationError(message="Cannot set deadline: issue has no assignees.")
+
+        if is_mentee and not is_mentor and not is_admin:
+            github_user = getattr(user, "github_user", None)
+            if github_user is None or not assignees.filter(id=github_user.id).exists():
+                raise PermissionDenied(NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG)
 
         normalized_deadline = deadline_at
         if timezone.is_naive(normalized_deadline):
@@ -376,6 +391,11 @@ class ModuleMutation:
             "domains": input_data.domains,
             "labels": input_data.labels,
             "tags": input_data.tags,
+            **(
+                {"mentee_can_manage_deadlines": input_data.mentee_can_manage_deadlines}
+                if input_data.mentee_can_manage_deadlines is not None
+                else {}
+            ),
         }
 
         for field, value in field_mapping.items():

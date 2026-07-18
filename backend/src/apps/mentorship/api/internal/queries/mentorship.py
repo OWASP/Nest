@@ -52,6 +52,21 @@ class MentorshipQuery:
         return await Mentor.objects.filter(github_user=github_user).aexists()
 
     @strawberry.field
+    async def is_mentee(self, login: str) -> bool:
+        """Check if a GitHub login is a mentee."""
+        if not login or not login.strip():
+            return False
+
+        login = login.strip()
+
+        try:
+            github_user = await GithubUser.objects.aget(login=login)
+        except GithubUser.DoesNotExist:
+            return False
+
+        return await Mentee.objects.filter(github_user=github_user).aexists()
+
+    @strawberry.field
     async def get_mentee_details(
         self, program_key: str, module_key: str, mentee_key: str
     ) -> MenteeNode | None:

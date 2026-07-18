@@ -49,6 +49,7 @@ class FakeModuleNode:
         self.project = MagicMock()
         self.project.name = "Test Project"
         self.has_mentor = MagicMock(return_value=True)
+        self.has_mentee = MagicMock(return_value=False)
 
     async def mock_mentors(self):
         return await _call_module_resolver(self, "mentors")
@@ -72,7 +73,9 @@ class FakeModuleNode:
         )
 
     async def mock_issues_count(self, label: str | None = None):
-        return await _call_module_resolver(self, "issues_count", label=label)
+        info = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=MagicMock())
+        return await _call_module_resolver(self, "issues_count", info, label=label)
 
     async def mock_available_labels(self):
         return await _call_module_resolver(self, "available_labels")
@@ -104,12 +107,14 @@ class FakeModuleNode:
 def mock_module_node():
     """Fixture for a mock ModuleNode instance."""
     m = FakeModuleNode()
+    mentor1 = MagicMock()
+    mentor2 = MagicMock()
 
     async def _mentors_async_iter():
-        yield MagicMock()
-        yield MagicMock()
+        yield mentor1
+        yield mentor2
 
-    m.mentors.all.return_value = _mentors_async_iter()
+    m.mentors.order_by.return_value = _mentors_async_iter()
 
     async def _values_list_async_iter():
         for item in ["github_user_id_1", "github_user_id_2"]:
@@ -157,7 +162,7 @@ class TestModuleNodeResolvers:
         """Test the mentors resolver."""
         mentors = await mock_module_node.mock_mentors()
         assert len(mentors) == 2
-        mock_module_node.mentors.all.assert_called_once()
+        mock_module_node.mentors.order_by.assert_called_once_with("github_user__login")
 
     @pytest.mark.asyncio
     async def test_module_node_mentees(self, mock_module_node):
@@ -686,3 +691,112 @@ class TestModuleNodeInput:
         assert update_input.domains == []
         assert update_input.labels == []
         assert update_input.tags == []
+
+
+class TestModuleNodeMenteeAccess:
+    """Tests for mentee-specific access in ModuleNode resolvers."""
+
+    @pytest.mark.asyncio
+    async def test_issues_mentee_sees_only_assigned_issues(self):
+        """Mentee can only see issues assigned to them."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        github_user = MagicMock()
+        user = MagicMock()
+        user.github_user = github_user
+
+        info = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=user)
+        info.context.task_deadlines_by_issue = {}
+        info.context.task_assigned_at_by_issue = {}
+
+        async def _empty_iter():
+            if False:
+                yield
+
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task:
+            mock_task.objects.filter.return_value.order_by.return_value.values.return_value = (
+                _empty_iter()
+            )
+            result = await _call_module_resolver(m, "issues", info, limit=20, offset=0, label=None)
+
+        assert isinstance(result, list)
+
+    @pytest.mark.asyncio
+    async def test_issues_mentee_no_github_user_returns_empty(self):
+        """Mentee with no github_user gets empty list."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        user = MagicMock()
+        user.github_user = None
+
+        info = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=user)
+        info.context.task_deadlines_by_issue = {}
+        info.context.task_assigned_at_by_issue = {}
+
+        async def _empty_iter():
+            if False:
+                yield
+
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task:
+            mock_task.objects.filter.return_value.order_by.return_value.values.return_value = (
+                _empty_iter()
+            )
+            result = await _call_module_resolver(m, "issues", info, limit=20, offset=0, label=None)
+
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_issue_by_number_mentee_sees_only_assigned(self):
+        """Mentee can only see issue_by_number when assigned to that issue."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        github_user = MagicMock()
+        user = MagicMock()
+        user.github_user = github_user
+
+        info = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=user)
+        info.context.current_module = m
+
+        mock_issue = MagicMock()
+        mock_issue.assignees.filter.return_value.exists.return_value = True
+        mock_qs = m.issues.select_related.return_value.prefetch_related.return_value
+        mock_qs.filter.return_value.afirst = AsyncMock(return_value=mock_issue)
+
+        result = await _call_module_resolver(m, "issue_by_number", info, number=42)
+
+        assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_issue_by_number_mentee_no_github_user_returns_none(self):
+        """Mentee with no github_user gets None from issue_by_number."""
+        m = FakeModuleNode()
+        m.program.has_admin.return_value = False
+        m.has_mentor.return_value = False
+        m.has_mentee.return_value = True
+
+        user = MagicMock()
+        user.github_user = None
+
+        info = MagicMock()
+        info.context.request.auser = AsyncMock(return_value=user)
+        info.context.current_module = m
+
+        mock_issue = MagicMock()
+        mock_qs = m.issues.select_related.return_value.prefetch_related.return_value
+        mock_qs.filter.return_value.afirst = AsyncMock(return_value=mock_issue)
+
+        result = await _call_module_resolver(m, "issue_by_number", info, number=42)
+
+        assert result is None

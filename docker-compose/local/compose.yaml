@@ -46,7 +46,7 @@ services:
   db:
     container_name: nest-db
     env_file: ../../backend/.env
-    image: pgvector/pgvector:pg16@sha256:131dcf7ff6a900545df8e7e092c270aa8c6db2f2c818e408cb45ec21316b74e6
+    image: pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
     healthcheck:
       interval: 5s
       retries: 5
@@ -55,7 +55,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data-5079:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -129,7 +129,7 @@ networks:
 volumes:
   backend-venv:
   cache-data:
-  db-data:
+  db-data-5079:
   docs-venv:
   frontend-next:
   frontend-node-modules:

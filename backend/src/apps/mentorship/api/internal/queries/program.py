@@ -46,7 +46,11 @@ class ProgramQuery:
     async def get_management_program(
         self, info: strawberry.Info, program_key: str
     ) -> ProgramNode | None:
-        """Return program details for admins or mentors."""
+        """Return program details for admins, mentors, or mentees.
+
+        Sets ``user_role`` so the client can tailor the view without probing for
+        access-denied errors.
+        """
         user = await info.context.request.auser()
         try:
             program = await Program.objects.prefetch_related(
@@ -57,9 +61,11 @@ class ProgramQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if not await sync_to_async(program.user_has_access)(user):
+        role = await sync_to_async(program.get_user_role)(user)
+        if role is None:
             raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
+        program.user_role = role
         return program
 
     @strawberry_django.field(permission_classes=[IsAuthenticatedAsync])
@@ -70,19 +76,21 @@ class ProgramQuery:
         page: int = 1,
         limit: int = 24,
     ) -> PaginatedPrograms:
-        """Get paginated programs where the current user is admin or mentor."""
+        """Get paginated programs where the current user is admin, mentor, or mentee."""
         user = await info.context.request.auser()
+        github_user = getattr(user, "github_user", None)
 
         admin_program_ids = ProgramAdmin.objects.filter(admin__nest_user=user).values_list(
             "program_id", flat=True
         )
 
-        query = Q(id__in=admin_program_ids)
         mentor_q = Q(modules__mentors__nest_user=user)
-        github_user = await sync_to_async(getattr)(user, "github_user", None)  # type: ignore[call-arg]
+        mentee_q = Q(modules__menteemodule__mentee__nest_user=user)
         if github_user is not None:
             mentor_q |= Q(modules__mentors__github_user=github_user)
-        query |= mentor_q
+            mentee_q |= Q(modules__menteemodule__mentee__github_user=github_user)
+
+        query = Q(id__in=admin_program_ids) | mentor_q | mentee_q
 
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             normalized_limit = PAGE_SIZE
@@ -106,14 +114,28 @@ class ProgramQuery:
         page = max(1, min(page, total_pages))
         offset = (page - 1) * normalized_limit
 
-        paginated_programs = queryset.order_by("-nest_created_at")[
-            offset : offset + normalized_limit
-        ]
+        paginated_programs = list(
+            queryset.order_by("-nest_created_at")[offset : offset + normalized_limit]
+        )
+
+        page_ids = [program.id for program in paginated_programs]
+        admin_ids = set(
+            ProgramAdmin.objects.filter(
+                admin__nest_user=user, program_id__in=page_ids
+            ).values_list("program_id", flat=True)
+        )
+        mentor_ids = set(
+            Program.objects.filter(mentor_q, id__in=page_ids).values_list("id", flat=True)
+        )
 
         results = []
-        async for program in paginated_programs:
-            is_admin = any(admin.nest_user_id == user.id for admin in program.admins.all())
-            program.user_role = "admin" if is_admin else "mentor"
+        for program in paginated_programs:
+            if program.id in admin_ids:
+                program.user_role = "admin"
+            elif program.id in mentor_ids:
+                program.user_role = "mentor"
+            else:
+                program.user_role = "mentee"
             results.append(program)
 
         return PaginatedPrograms(
