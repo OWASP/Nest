@@ -131,32 +131,33 @@ class TestManagementProgram:
     async def test_management_program_success(
         self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
     ) -> None:
-        """Authenticated admin or mentor receives the program (including when published)."""
+        """A user with a role receives the program, with user_role populated."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.PUBLISHED
         mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
-        mock_program.user_has_access.return_value = True
+        mock_program.get_user_role.return_value = "mentor"
 
         result = await api_program_queries.get_management_program(
             info=mock_info, program_key="program1"
         )
 
         assert result == mock_program
-        mock_program.user_has_access.assert_called_once_with(mock_info.context.request.user)
+        assert mock_program.user_role == "mentor"
+        mock_program.get_user_role.assert_called_once_with(mock_info.context.request.user)
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
-    async def test_management_program_forbidden_when_not_staff_on_published(
+    async def test_management_program_forbidden_when_no_role(
         self,
         mock_program_prefetch_related: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
-        """Published programs still require admin or mentor for get_management_program."""
+        """A user with no role in the program is forbidden from the management view."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.PUBLISHED
         mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
-        mock_program.user_has_access.return_value = False
+        mock_program.get_user_role.return_value = None
 
         with pytest.raises(GraphQLError) as exc_info:
             await api_program_queries.get_management_program(
@@ -197,9 +198,36 @@ class TestManagementProgram:
         assert result is None
 
 
+def _wire_role_lookups(
+    mock_program_admin_filter: MagicMock,
+    mock_program_objects_filter: MagicMock,
+    *,
+    admin_program_ids=(),
+    admin_ids=(),
+    mentor_ids=(),
+    mentee_ids=(),
+) -> None:
+    """Wire the bulk per-page role lookups used by my_programs.
+
+    ProgramAdmin.objects.filter(...).values_list is called twice: first for the
+    admin program ids used in the OR filter, then for the page-scoped admin ids.
+    Program.objects.filter(...).values_list is called for mentor ids, then mentee ids.
+    """
+    mock_program_admin_filter.return_value.values_list.side_effect = [
+        list(admin_program_ids),
+        list(admin_ids),
+    ]
+    mentor_qs = MagicMock()
+    mentor_qs.values_list.return_value = list(mentor_ids)
+    mentee_qs = MagicMock()
+    mentee_qs.values_list.return_value = list(mentee_ids)
+    mock_program_objects_filter.side_effect = [mentor_qs, mentee_qs]
+
+
 class TestMyPrograms:
     """Tests for the my_programs query."""
 
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
@@ -207,30 +235,28 @@ class TestMyPrograms:
         self,
         mock_program_prefetch: MagicMock,
         mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test successful retrieval of user's programs as admin and mentor."""
-        mock_program_admin_filter.return_value.values_list.return_value = [1, 2]
-
-        mock_admin = MagicMock(nest_user_id=1)
-        mock_mentor_admin = MagicMock(nest_user_id=999)
+        _wire_role_lookups(
+            mock_program_admin_filter,
+            mock_program_objects_filter,
+            admin_program_ids=[1, 2],
+            admin_ids=[1],
+            mentor_ids=[2],
+        )
 
         mock_admin_program = MagicMock(spec=Program, nest_created_at="2023-01-01", id=1)
-        mock_admin_program.admins.all.return_value = [mock_admin]
-        mock_admin_program.modules.return_value.mentors.return_value.github_user.return_value = []
-
         mock_mentor_program = MagicMock(spec=Program, nest_created_at="2023-01-02", id=2)
-        mock_mentor_program.admins.all.return_value = []
-        mock_mentor_program.modules.return_value.mentors.return_value = [mock_mentor_admin]
-
-        async def _programs_async_iter():
-            yield mock_mentor_program
-            yield mock_admin_program
 
         mock_queryset = MagicMock()
         mock_queryset.acount = AsyncMock(return_value=2)
-        mock_queryset.order_by.return_value.__getitem__.return_value = _programs_async_iter()
+        mock_queryset.order_by.return_value.__getitem__.return_value = [
+            mock_mentor_program,
+            mock_admin_program,
+        ]
         mock_queryset.filter.return_value = mock_queryset
 
         mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
@@ -246,7 +272,6 @@ class TestMyPrograms:
         assert result.programs[0].user_role == "mentor"
         assert result.programs[1].user_role == "admin"
 
-        mock_program_admin_filter.assert_called_once()
         mock_program_prefetch.assert_called_once_with(
             "admins__github_user",
             "admins__nest_user",
@@ -256,6 +281,44 @@ class TestMyPrograms:
         mock_program_prefetch.return_value.filter.assert_called_once()
         mock_queryset.order_by.assert_called_once_with("-nest_created_at")
 
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
+    @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    @pytest.mark.asyncio
+    async def test_my_programs_includes_mentee_role(
+        self,
+        mock_program_prefetch: MagicMock,
+        mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
+        mock_info: MagicMock,
+        api_program_queries,
+    ) -> None:
+        """A program the user is only enrolled in as a mentee is labeled 'mentee'."""
+        _wire_role_lookups(
+            mock_program_admin_filter,
+            mock_program_objects_filter,
+            admin_program_ids=[],
+            admin_ids=[],
+            mentor_ids=[],
+            mentee_ids=[5],
+        )
+
+        mock_mentee_program = MagicMock(spec=Program, nest_created_at="2023-01-01", id=5)
+
+        mock_queryset = MagicMock()
+        mock_queryset.acount = AsyncMock(return_value=1)
+        mock_queryset.order_by.return_value.__getitem__.return_value = [mock_mentee_program]
+        mock_queryset.filter.return_value = mock_queryset
+        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
+            mock_queryset
+        )
+
+        result = await api_program_queries.my_programs(info=mock_info)
+
+        assert len(result.programs) == 1
+        assert result.programs[0].user_role == "mentee"
+
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
@@ -263,19 +326,16 @@ class TestMyPrograms:
         self,
         mock_program_prefetch: MagicMock,
         mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test when the current user is not an admin of any program."""
-        mock_program_admin_filter.return_value.values_list.return_value = []
-
-        async def _empty_iter():
-            if False:
-                yield
+        _wire_role_lookups(mock_program_admin_filter, mock_program_objects_filter)
 
         mock_queryset = MagicMock()
         mock_queryset.acount = AsyncMock(return_value=0)
-        mock_queryset.order_by.return_value.__getitem__.return_value = _empty_iter()
+        mock_queryset.order_by.return_value.__getitem__.return_value = []
         mock_queryset.filter.return_value = mock_queryset
 
         mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
@@ -289,6 +349,7 @@ class TestMyPrograms:
         assert result.total_pages == 1
         assert result.current_page == 1
 
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
@@ -296,19 +357,18 @@ class TestMyPrograms:
         self,
         mock_program_prefetch: MagicMock,
         mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test when no programs are found for the user."""
-        mock_program_admin_filter.return_value.values_list.return_value = [1, 2]
-
-        async def _empty_iter():
-            if False:
-                yield
+        _wire_role_lookups(
+            mock_program_admin_filter, mock_program_objects_filter, admin_program_ids=[1, 2]
+        )
 
         mock_queryset = MagicMock()
         mock_queryset.acount = AsyncMock(return_value=0)
-        mock_queryset.order_by.return_value.__getitem__.return_value = _empty_iter()
+        mock_queryset.order_by.return_value.__getitem__.return_value = []
         mock_queryset.filter.return_value = mock_queryset
 
         mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
@@ -322,6 +382,7 @@ class TestMyPrograms:
         assert result.total_pages == 1
         assert result.current_page == 1
 
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
@@ -329,25 +390,23 @@ class TestMyPrograms:
         self,
         mock_program_prefetch: MagicMock,
         mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test my_programs with a search query."""
-        mock_program_admin_filter.return_value.values_list.return_value = [1]
+        _wire_role_lookups(
+            mock_program_admin_filter,
+            mock_program_objects_filter,
+            admin_program_ids=[1],
+            admin_ids=[1],
+        )
 
-        mock_admin = MagicMock(nest_user_id=1)
         mock_program = MagicMock(spec=Program, nest_created_at="2023-01-01", id=1)
-        mock_program.admins.all.return_value = [mock_admin]
-        mock_program.modules.return_value.mentors.return_value.github_user.return_value = []
-
-        async def _programs_async_iter():
-            yield mock_program
 
         mock_queryset_filtered = MagicMock()
         mock_queryset_filtered.acount = AsyncMock(return_value=1)
-        mock_queryset_filtered.order_by.return_value.__getitem__.return_value = (
-            _programs_async_iter()
-        )
+        mock_queryset_filtered.order_by.return_value.__getitem__.return_value = [mock_program]
 
         mock_queryset_initial = MagicMock()
         mock_queryset_initial.filter.return_value.distinct.return_value.filter.return_value = (
@@ -363,6 +422,7 @@ class TestMyPrograms:
             name__icontains="test"
         )
 
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
@@ -370,31 +430,23 @@ class TestMyPrograms:
         self,
         mock_program_prefetch: MagicMock,
         mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test pagination for my_programs query."""
-        mock_program_admin_filter.return_value.values_list.return_value = [1, 2, 3]
-
-        mock_admin = MagicMock(nest_user_id=1)
-        mock_program1 = MagicMock(spec=Program, nest_created_at="2023-01-03", id=1)
-        mock_program1.admins.all.return_value = [mock_admin]
-        mock_program1.modules.return_value.mentors.return_value.github_user.return_value = []
+        _wire_role_lookups(
+            mock_program_admin_filter,
+            mock_program_objects_filter,
+            admin_program_ids=[1, 2, 3],
+            mentor_ids=[2],
+        )
 
         mock_program2 = MagicMock(spec=Program, nest_created_at="2023-01-02", id=2)
-        mock_program2.admins.all.return_value = []
-        mock_program2.modules.return_value.mentors.return_value = [mock_admin]
-
-        mock_program3 = MagicMock(spec=Program, nest_created_at="2023-01-01", id=3)
-        mock_program3.admins.all.return_value = [mock_admin]
-        mock_program3.modules.return_value.mentors.return_value.github_user.return_value = []
-
-        async def _programs_async_iter():
-            yield mock_program2
 
         mock_queryset = MagicMock()
         mock_queryset.acount = AsyncMock(return_value=3)
-        mock_queryset.order_by.return_value.__getitem__.return_value = _programs_async_iter()
+        mock_queryset.order_by.return_value.__getitem__.return_value = [mock_program2]
         mock_queryset.filter.return_value = mock_queryset
 
         mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
@@ -405,9 +457,11 @@ class TestMyPrograms:
 
         assert len(result.programs) == 1
         assert result.programs[0].id == 2
+        assert result.programs[0].user_role == "mentor"
         assert result.total_pages == 3
         assert result.current_page == 2
 
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
@@ -415,22 +469,23 @@ class TestMyPrograms:
         self,
         mock_program_prefetch: MagicMock,
         mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
         """Test that invalid limit (0) falls back to PAGE_SIZE default."""
-        mock_program_admin_filter.return_value.values_list.return_value = [1]
+        _wire_role_lookups(
+            mock_program_admin_filter,
+            mock_program_objects_filter,
+            admin_program_ids=[1],
+            admin_ids=[1],
+        )
 
-        mock_admin = MagicMock(nest_user_id=1)
         mock_program = MagicMock(spec=Program, nest_created_at="2023-01-01", id=1)
-        mock_program.admins.all.return_value = [mock_admin]
-
-        async def _programs_async_iter():
-            yield mock_program
 
         mock_queryset = MagicMock()
         mock_queryset.acount = AsyncMock(return_value=26)
-        mock_queryset.order_by.return_value.__getitem__.return_value = _programs_async_iter()
+        mock_queryset.order_by.return_value.__getitem__.return_value = [mock_program]
         mock_queryset.filter.return_value = mock_queryset
 
         mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
@@ -442,6 +497,7 @@ class TestMyPrograms:
         assert isinstance(result, PaginatedPrograms)
         assert result.total_pages == 2
 
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     @pytest.mark.asyncio
@@ -449,6 +505,7 @@ class TestMyPrograms:
         self,
         mock_program_prefetch: MagicMock,
         mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
         api_program_queries,
     ) -> None:
         """Nest user without GitHub FK still sees admin programs; mentor OR uses nest_user too."""
@@ -459,18 +516,18 @@ class TestMyPrograms:
         mock_info_obj.context.request.user = mock_user
         mock_info_obj.context.request.auser = AsyncMock(return_value=mock_user)
 
-        mock_program_admin_filter.return_value.values_list.return_value = [1]
+        _wire_role_lookups(
+            mock_program_admin_filter,
+            mock_program_objects_filter,
+            admin_program_ids=[1],
+            admin_ids=[1],
+        )
 
-        mock_admin = MagicMock(nest_user_id=1)
         mock_program = MagicMock(spec=Program, nest_created_at="2023-01-01", id=1)
-        mock_program.admins.all.return_value = [mock_admin]
-
-        async def _programs_async_iter():
-            yield mock_program
 
         mock_queryset = MagicMock()
         mock_queryset.acount = AsyncMock(return_value=1)
-        mock_queryset.order_by.return_value.__getitem__.return_value = _programs_async_iter()
+        mock_queryset.order_by.return_value.__getitem__.return_value = [mock_program]
         mock_queryset.filter.return_value = mock_queryset
 
         mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (

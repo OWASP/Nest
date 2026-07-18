@@ -91,6 +91,82 @@ class TestIsMentor:
         assert not result
 
 
+class TestIsMentee:
+    """Tests for the is_mentee query."""
+
+    @patch(
+        "apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.aget",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.mentorship.api.internal.queries.mentorship.Mentee.objects.filter")
+    @pytest.mark.asyncio
+    async def test_is_mentee_true(
+        self,
+        mock_mentee_filter: MagicMock,
+        mock_github_user_aget: AsyncMock,
+        api_mentorship_queries,
+    ) -> None:
+        """Test that is_mentee returns True when the user is a mentee."""
+        mock_github_user_aget.return_value = MagicMock(spec=GithubUser)
+        mock_mentee_filter.return_value.aexists = AsyncMock(return_value=True)
+
+        result = await api_mentorship_queries.is_mentee(login="testuser")
+
+        assert result
+        mock_github_user_aget.assert_called_once_with(login="testuser")
+        mock_mentee_filter.assert_called_once()
+        mock_mentee_filter.return_value.aexists.assert_called_once()
+
+    @patch(
+        "apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.aget",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.mentorship.api.internal.queries.mentorship.Mentee.objects.filter")
+    @pytest.mark.asyncio
+    async def test_is_mentee_false_not_mentee(
+        self,
+        mock_mentee_filter: MagicMock,
+        mock_github_user_aget: AsyncMock,
+        api_mentorship_queries,
+    ) -> None:
+        """Test that is_mentee returns False when the user is not a mentee."""
+        mock_github_user_aget.return_value = MagicMock(spec=GithubUser)
+        mock_mentee_filter.return_value.aexists = AsyncMock(return_value=False)
+
+        result = await api_mentorship_queries.is_mentee(login="testuser")
+
+        assert not result
+        mock_github_user_aget.assert_called_once_with(login="testuser")
+        mock_mentee_filter.assert_called_once()
+        mock_mentee_filter.return_value.aexists.assert_called_once()
+
+    @patch(
+        "apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.aget",
+        new_callable=AsyncMock,
+    )
+    @pytest.mark.asyncio
+    async def test_is_mentee_false_no_github_user(
+        self, mock_github_user_aget: AsyncMock, api_mentorship_queries
+    ) -> None:
+        """Test that is_mentee returns False when the GitHub user does not exist."""
+        mock_github_user_aget.side_effect = GithubUser.DoesNotExist
+
+        result = await api_mentorship_queries.is_mentee(login="non_existent_user")
+
+        assert not result
+        mock_github_user_aget.assert_called_once_with(login="non_existent_user")
+
+    @pytest.mark.parametrize("login", ["", "   ", None])
+    @pytest.mark.asyncio
+    async def test_is_mentee_false_empty_login(
+        self, login: str | None, api_mentorship_queries
+    ) -> None:
+        """Test that is_mentee returns False for empty or whitespace login."""
+        result = await api_mentorship_queries.is_mentee(login=login)
+
+        assert not result
+
+
 class TestGetMenteeDetails:
     """Tests for the get_mentee_details query."""
 

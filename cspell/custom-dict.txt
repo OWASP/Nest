@@ -186,6 +186,7 @@ notab
 nspname
 numfmt
 openblas
+opencre
 openstreetmap
 owasppcitoolkit
 owtf

@@ -19,6 +19,7 @@ export interface HeaderProps {
   accessLevel?: string
   admins?: Array<{ login: string }>
   mentors?: Array<{ login: string }>
+  isMentee?: boolean
   isActive?: boolean
   isArchived?: boolean
   healthMetricsData?: Array<{ score?: number }>
@@ -40,6 +41,7 @@ const Header = ({
   accessLevel,
   admins,
   mentors,
+  isMentee = false,
   isActive = true,
   isArchived = false,
   healthMetricsData,
@@ -72,13 +74,14 @@ const Header = ({
                   accessLevel === 'admin' &&
                   admins?.some((admin) => admin.login === currentUserLogin)
                 const isMentor = mentors?.some((mentor) => mentor.login === currentUserLogin)
-                return isAdmin || isMentor ? (
+                return isAdmin || isMentor || isMentee ? (
                   <EntityActions
                     type="module"
                     programKey={programKey}
                     moduleKey={moduleKey}
                     isAdmin={isAdmin ? true : undefined}
                     isMentor={isMentor ? true : undefined}
+                    isMentee={isMentee ? true : undefined}
                   />
                 ) : null
               })()}

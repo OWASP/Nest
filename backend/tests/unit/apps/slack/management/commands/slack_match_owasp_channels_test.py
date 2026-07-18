@@ -3,11 +3,11 @@ from unittest.mock import Mock
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
-from apps.slack.management.commands.owasp_match_channels import Command
+from apps.slack.management.commands.slack_match_owasp_channels import Command
 from apps.slack.models import Conversation
 
 
-class TestOwaspMatchChannels:
+class TestSlackMatchOwaspChannels:
     def test_handle_dry_run(self, mocker):
         mock_chapter = mocker.Mock(spec=Chapter, id=1)
         mock_chapter.name = "OWASP Chapter One"
@@ -17,9 +17,9 @@ class TestOwaspMatchChannels:
         mock_conv.name = "chapter-one"
 
         mock_conv_qs = mocker.Mock()
-        mock_conv_qs.only.return_value.iterator.return_value = [mock_conv]
+        mock_conv_qs.only.return_value = [mock_conv]
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.Conversation.objects",
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
             mock_conv_qs,
         )
 
@@ -44,7 +44,7 @@ class TestOwaspMatchChannels:
 
         mock_ct = mocker.Mock()
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.ContentType.objects.get_for_model",
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
             return_value=mock_ct,
         )
 
@@ -61,9 +61,9 @@ class TestOwaspMatchChannels:
         mock_conv.name = "project-juice-shop"
 
         mock_conv_qs = mocker.Mock()
-        mock_conv_qs.only.return_value.iterator.return_value = [mock_conv]
+        mock_conv_qs.only.return_value = [mock_conv]
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.Conversation.objects",
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
             mock_conv_qs,
         )
 
@@ -83,7 +83,7 @@ class TestOwaspMatchChannels:
 
         mock_ct = mocker.Mock()
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.ContentType.objects.get_for_model",
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
             return_value=mock_ct,
         )
 
@@ -135,6 +135,92 @@ class TestOwaspMatchChannels:
         matches = cmd.find_fuzzy_matches("OWASP Juice Shop", [mock_conv], threshold=95)
         assert not matches
 
+    def test_handle_skips_bare_prefix_channel_names(self, mocker):
+        """Bare chapter-/proj-/project- channel names are excluded from matching."""
+        mock_project = mocker.Mock(spec=Project, id=2)
+        mock_project.name = "OWASP Proj"
+
+        bare_channels = []
+        for index, bare_name in enumerate(("chapter-", "proj-", "project-", "#proj-"), start=1):
+            channel = mocker.Mock(spec=Conversation, id=index)
+            channel.name = bare_name
+            bare_channels.append(channel)
+
+        mock_conv_qs = mocker.Mock()
+        mock_conv_qs.only.return_value = bare_channels
+        mocker.patch(
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
+            mock_conv_qs,
+        )
+
+        mock_chapter_qs = mocker.Mock()
+        mock_chapter_qs.filter.return_value.only.return_value.iterator.return_value = []
+        mocker.patch("apps.owasp.models.chapter.Chapter.objects", mock_chapter_qs)
+
+        mock_committee_qs = mocker.Mock()
+        mock_committee_qs.filter.return_value.only.return_value.iterator.return_value = []
+        mocker.patch("apps.owasp.models.committee.Committee.objects", mock_committee_qs)
+
+        mock_project_qs = mocker.Mock()
+        mock_project_qs.filter.return_value.only.return_value.iterator.return_value = [
+            mock_project
+        ]
+        mocker.patch("apps.owasp.models.project.Project.objects", mock_project_qs)
+
+        mock_ec_qs = mocker.Mock()
+        mocker.patch("apps.owasp.models.entity_channel.EntityChannel.objects", mock_ec_qs)
+
+        mocker.patch(
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
+            return_value=mocker.Mock(),
+        )
+
+        command = Command()
+        command.stdout = mocker.Mock()
+        command.handle(dry_run=False, threshold=50)
+
+        mock_ec_qs.get_or_create.assert_not_called()
+        command.stdout.write.assert_any_call("Found 0 chapter-specific channels")
+        command.stdout.write.assert_any_call("Found 0 project-specific channels")
+
+    def test_handle_skips_conversation_without_name(self, mocker):
+        """Conversations with empty or missing names are excluded from matching."""
+        unnamed = mocker.Mock(spec=Conversation, id=1)
+        unnamed.name = ""
+        none_named = mocker.Mock(spec=Conversation, id=2)
+        none_named.name = None
+
+        mock_conv_qs = mocker.Mock()
+        mock_conv_qs.only.return_value = [unnamed, none_named]
+        mocker.patch(
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
+            mock_conv_qs,
+        )
+
+        for model_path in (
+            "apps.owasp.models.chapter.Chapter.objects",
+            "apps.owasp.models.committee.Committee.objects",
+            "apps.owasp.models.project.Project.objects",
+        ):
+            mock_qs = mocker.Mock()
+            mock_qs.filter.return_value.only.return_value.iterator.return_value = []
+            mocker.patch(model_path, mock_qs)
+
+        mock_ec_qs = mocker.Mock()
+        mocker.patch("apps.owasp.models.entity_channel.EntityChannel.objects", mock_ec_qs)
+        mocker.patch(
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
+            return_value=mocker.Mock(),
+        )
+
+        command = Command()
+        command.stdout = mocker.Mock()
+        command.handle(dry_run=False, threshold=50)
+
+        mock_ec_qs.get_or_create.assert_not_called()
+        command.stdout.write.assert_any_call("Found 0 chapter-specific channels")
+        command.stdout.write.assert_any_call("Found 0 project-specific channels")
+
     def test_handle_skips_entity_without_name(self, mocker):
         """Test that entities with empty name are skipped."""
         mock_committee = mocker.Mock(spec=Committee, id=1)
@@ -144,9 +230,9 @@ class TestOwaspMatchChannels:
         mock_conv.name = "committee-test"
 
         mock_conv_qs = mocker.Mock()
-        mock_conv_qs.only.return_value.iterator.return_value = [mock_conv]
+        mock_conv_qs.only.return_value = [mock_conv]
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.Conversation.objects",
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
             mock_conv_qs,
         )
 
@@ -169,7 +255,7 @@ class TestOwaspMatchChannels:
 
         mock_ct = mocker.Mock()
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.ContentType.objects.get_for_model",
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
             return_value=mock_ct,
         )
 
@@ -186,9 +272,9 @@ class TestOwaspMatchChannels:
         mock_conv.name = "education-committee"
 
         mock_conv_qs = mocker.Mock()
-        mock_conv_qs.only.return_value.iterator.return_value = [mock_conv]
+        mock_conv_qs.only.return_value = [mock_conv]
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.Conversation.objects",
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
             mock_conv_qs,
         )
 
@@ -212,7 +298,7 @@ class TestOwaspMatchChannels:
 
         mock_ct = mocker.Mock()
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.ContentType.objects.get_for_model",
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
             return_value=mock_ct,
         )
 
@@ -237,9 +323,9 @@ class TestOwaspMatchChannels:
         mock_conv.name = "chapter-test"
 
         mock_conv_qs = mocker.Mock()
-        mock_conv_qs.only.return_value.iterator.return_value = [mock_conv]
+        mock_conv_qs.only.return_value = [mock_conv]
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.Conversation.objects",
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
             mock_conv_qs,
         )
 
@@ -263,7 +349,7 @@ class TestOwaspMatchChannels:
 
         mock_ct = mocker.Mock()
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.ContentType.objects.get_for_model",
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
             return_value=mock_ct,
         )
 
@@ -282,9 +368,9 @@ class TestOwaspMatchChannels:
         mock_conv.name = "project-test"
 
         mock_conv_qs = mocker.Mock()
-        mock_conv_qs.only.return_value.iterator.return_value = [mock_conv]
+        mock_conv_qs.only.return_value = [mock_conv]
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.Conversation.objects",
+            "apps.slack.management.commands.slack_match_owasp_channels.Conversation.objects",
             mock_conv_qs,
         )
 
@@ -304,7 +390,7 @@ class TestOwaspMatchChannels:
 
         mock_ct = mocker.Mock()
         mocker.patch(
-            "apps.slack.management.commands.owasp_match_channels.ContentType.objects.get_for_model",
+            "apps.slack.management.commands.slack_match_owasp_channels.ContentType.objects.get_for_model",
             return_value=mock_ct,
         )
 
