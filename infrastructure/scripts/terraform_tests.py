@@ -64,14 +64,7 @@ class TerraformTests:
     @staticmethod
     def match_test_mode(entry: str, mode: str) -> bool:
         """Return whether a ``.tftest.hcl`` file belongs to the requested mode."""
-        if not entry.endswith(".tftest.hcl"):
-            return False
-        is_integration = entry == "integration.tftest.hcl" or entry.endswith(
-            ".integration.tftest.hcl"
-        )
-        return (mode == "integration" and is_integration) or (
-            mode == "unit" and not is_integration
-        )
+        return entry == f"{mode}.tftest.hcl" or entry.endswith(f".{mode}.tftest.hcl")
 
     def find_test_files(self, test_dir: str, mode: str) -> list[str]:
         """Return sorted test filenames in ``test_dir`` for the given mode."""

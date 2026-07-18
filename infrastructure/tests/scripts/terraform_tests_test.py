@@ -36,7 +36,7 @@ class TestTerraformTests:
 
         mock_iterdir.return_value = [
             fake_file("integration.tftest.hcl"),
-            fake_file("storage.tftest.hcl"),
+            fake_file("unit.tftest.hcl"),
         ]
 
         commands = MagicMock(spec=CommandRunner)
@@ -56,7 +56,7 @@ class TestTerraformTests:
             "terraform",
             "-chdir=infrastructure/modules/storage",
             "test",
-            "-filter=tests/storage.tftest.hcl",
+            "-filter=tests/unit.tftest.hcl",
             check=False,
             capture_output=True,
         )
@@ -78,7 +78,7 @@ class TestTerraformTests:
         with pytest.raises(
             TestRunnerError, match="terraform init failed in dummy_dir"
         ) as exc_info:
-            terraform_tests.run_module_tests("dummy_dir", ["test.tftest.hcl"])
+            terraform_tests.run_module_tests("dummy_dir", ["unit.tftest.hcl"])
         assert "Failed to query available provider packages" in str(exc_info.value)
 
     def test_run_module_tests_test_failure(self) -> None:
@@ -87,7 +87,7 @@ class TestTerraformTests:
             MagicMock(returncode=0, stdout="Terraform initialized!\n", stderr=""),
             MagicMock(
                 returncode=1,
-                stdout="tests/test.tftest.hcl... fail\n",
+                stdout="tests/unit.tftest.hcl... fail\n",
                 stderr="Error: test failed\n",
             ),
         ]
@@ -95,6 +95,6 @@ class TestTerraformTests:
         with pytest.raises(
             TestRunnerError, match="terraform test failed in dummy_dir"
         ) as exc_info:
-            terraform_tests.run_module_tests("dummy_dir", ["test.tftest.hcl"])
-        assert "tests/test.tftest.hcl... fail" in str(exc_info.value)
+            terraform_tests.run_module_tests("dummy_dir", ["unit.tftest.hcl"])
+        assert "tests/unit.tftest.hcl... fail" in str(exc_info.value)
         assert "Error: test failed" in str(exc_info.value)
