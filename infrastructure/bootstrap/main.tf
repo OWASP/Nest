@@ -548,7 +548,6 @@ data "aws_iam_policy_document" "part_two" {
       actions = [
         "s3:Get*",
         "s3:List*",
-        "s3:PutObject",
       ]
       resources = [
         "arn:aws:s3:::${var.shared_data_bucket_name}",
@@ -602,6 +601,9 @@ locals {
   }
 }
 
+# WARNING: When applying this consolidated configuration to existing infrastructure, you MUST migrate the state first.
+# Failing to move 'aws_iam_role.terraform["staging"]' (or "production") to 'aws_iam_role.terraform' in the state
+# before the first apply will result in name conflicts or policy detachment.
 resource "aws_iam_role" "terraform" {
   name = "${var.project_name}-${var.environment}-terraform"
   tags = merge(local.common_tags, {
