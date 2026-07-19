@@ -26,19 +26,17 @@ It is critical that you match the `environment` variable with the correct S3 bac
 
 To run plans or apply changes locally:
 
-1. Copy the example variable and backend configuration files:
+1. Copy the environment-specific example variable and backend configuration files (e.g., for staging):
 
    ```bash
-   cp terraform.tfbackend.example terraform.tfbackend
-   cp terraform.tfvars.example terraform.tfvars
+   cp terraform.staging.tfbackend.example terraform.tfbackend
+   cp terraform.staging.tfvars.example terraform.tfvars
    ```
 
 2. Edit `terraform.tfbackend`:
    - Replace `REPLACE_WITH_TF_STATE_BUCKET_NAME` with your actual bootstrap state bucket name.
-   - Align the `key` parameter to target the desired environment (`staging/bootstrap/terraform.tfstate` or `production/bootstrap/terraform.tfstate`).
 
 3. Edit `terraform.tfvars`:
-   - Set `environment` to matching environment (`staging` or `production`).
    - Set `aws_role_external_id` to the external ID used for role assumption.
 
 4. Initialize the Terraform backend:
