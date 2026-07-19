@@ -1,4 +1,4 @@
-"""Orchestrate infrastructure unit and integration test runs."""
+"""Infrastructure test orchestration utilities."""
 
 from __future__ import annotations
 
@@ -9,13 +9,13 @@ from pathlib import Path
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack, OverrideManager
-from scripts.terraform_tests import TerraformTests
+from scripts.terraform_tests import TerraformTests, ExecutionMode
 
 logger = logging.getLogger(__name__)
 
 
 class InfrastructureTestRunner:
-    """Orchestrate infrastructure unit and integration test runs."""
+    """Infrastructure test runner orchestrator."""
 
     def __init__(
         self,
@@ -26,7 +26,16 @@ class InfrastructureTestRunner:
         overrides: OverrideManager | None = None,
         terraform_tests: TerraformTests | None = None,
     ) -> None:
-        """Wire collaborators for a repository root."""
+        """Initialize the infrastructure test runner.
+
+        Args:
+            root_dir (Path, optional): The root directory of the project.
+            commands (CommandRunner, optional): Command runner instance.
+            localstack (LocalStack, optional): LocalStack manager instance.
+            overrides (OverrideManager, optional): Terraform override manager instance.
+            terraform_tests (TerraformTests, optional): Terraform test discovery and execution instance.
+
+        """
         self.root_dir = root_dir or Path(__file__).resolve().parent.parent.parent
         self.commands = commands or CommandRunner()
         self.localstack = localstack or LocalStack(self.commands)
@@ -57,7 +66,7 @@ class InfrastructureTestRunner:
     def run_unit(self) -> None:
         """Run Terraform unit tests."""
         self.commands.require("terraform")
-        self.terraform_tests.discover_and_run("unit")
+        self.terraform_tests.discover_and_run(ExecutionMode.UNIT)
         logger.info("All unit tests executed successfully!")
 
     def run_integration(self) -> None:
@@ -69,9 +78,8 @@ class InfrastructureTestRunner:
         try:
             if self.localstack.healthy():
                 logger.info(
-                    "Using already running LocalStack instance at %s:%s.",
-                    self.localstack.host,
-                    self.localstack.port,
+                    "Using already running LocalStack instance at %s.",
+                    self.localstack.api_url,
                 )
             elif self.localstack.can_start_container:
                 logger.info(
@@ -83,16 +91,17 @@ class InfrastructureTestRunner:
                 localstack_started = True
             else:
                 logger.info(
-                    "Waiting for external LocalStack at %s:%s...",
-                    self.localstack.host,
-                    self.localstack.port,
+                    "Waiting for external LocalStack at %s...",
+                    self.localstack.api_url,
                 )
 
             # Always wait: /_localstack/info can succeed before the Pro license activates.
             self.localstack.wait_ready()
+            # Inject LocalStack API for all Terraform tests.
+            os.environ["AWS_ENDPOINT_URL"] = self.localstack.api_url
 
             self.overrides.write()
-            self.terraform_tests.discover_and_run("integration")
+            self.terraform_tests.discover_and_run(ExecutionMode.INTEGRATION)
             logger.info("All integration tests executed successfully!")
         finally:
             try:

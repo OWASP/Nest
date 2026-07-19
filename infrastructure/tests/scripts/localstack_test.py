@@ -17,7 +17,6 @@ from scripts.errors import (
 from scripts.localstack import (
     LOCALSTACK_CONTAINER_NAME,
     LOCALSTACK_PORT,
-    OVERRIDES,
     LocalStack,
     OverrideManager,
 )
@@ -36,6 +35,36 @@ def mock_info_response(
 
 class TestLocalStack:
     """Tests for ``LocalStack``."""
+
+    def test_init_api_url(self) -> None:
+        localstack = LocalStack(host="custom-host", port=9999)
+        assert localstack.api_url == "http://custom-host:9999"
+
+    @patch("scripts.localstack.HTTPConnection")
+    def test_info_success(self, mock_connection_cls: MagicMock) -> None:
+        connection = mock_connection_cls.return_value
+        connection.getresponse.return_value = mock_info_response(
+            payload={"version": "1.0", "is_license_activated": True}
+        )
+        info = LocalStack().info()
+        assert info == {"version": "1.0", "is_license_activated": True}
+        connection.request.assert_called_once_with("GET", "/_localstack/info")
+
+    @patch("scripts.localstack.HTTPConnection")
+    def test_info_failure(self, mock_connection_cls: MagicMock) -> None:
+        connection = mock_connection_cls.return_value
+        connection.getresponse.return_value = mock_info_response(status=HTTPStatus.NOT_FOUND)
+        assert LocalStack().info() is None
+
+    @patch("scripts.localstack.logger")
+    @patch("scripts.localstack.HTTPConnection")
+    def test_info_exception_with_log_error(
+        self, mock_connection_cls: MagicMock, mock_logger: MagicMock
+    ) -> None:
+        mock_connection_cls.return_value.request.side_effect = OSError("Connection failed")
+
+        assert LocalStack().info(log_error=True) is None
+        mock_logger.warning.assert_called_once()
 
     @patch("scripts.localstack.HTTPConnection")
     def test_healthy_success(self, mock_connection_cls: MagicMock) -> None:
@@ -102,7 +131,7 @@ class TestLocalStack:
         mock_read_text.return_value = "FROM alpine:3.20\n"
         localstack = LocalStack()
         with pytest.raises(TestRunnerError, match="could not determine LocalStack image"):
-            localstack.image_info("/dummy/root")
+            localstack.image_info("/dummy/root-1")
 
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.read_text")
@@ -115,7 +144,7 @@ class TestLocalStack:
         mock_read_text.return_value = "FROM localstack/localstack:\n"
         localstack = LocalStack()
         with pytest.raises(TestRunnerError, match="could not determine LocalStack image tag"):
-            localstack.image_info("/dummy/root")
+            localstack.image_info("/dummy/root-1")
 
     @patch("os.environ.get")
     def test_start_success(self, mock_env: MagicMock) -> None:
@@ -148,7 +177,7 @@ class TestLocalStack:
         host_port = 4567
         localstack = LocalStack(commands, port=host_port)
 
-        localstack.start("localstack/localstack:latest")
+        localstack.start("localstack/localstack:latest-alt")
 
         commands.run.assert_any_call(
             "docker",
@@ -162,7 +191,7 @@ class TestLocalStack:
             "ECR_ENDPOINT_STRATEGY=off",
             "-e",
             "LOCALSTACK_AUTH_TOKEN",
-            "localstack/localstack:latest",
+            "localstack/localstack:latest-alt",
             check=True,
         )
 
@@ -184,6 +213,15 @@ class TestLocalStack:
         localstack = LocalStack(commands)
         with pytest.raises(TestRunnerError, match="Error starting LocalStack container"):
             localstack.start("localstack/localstack:latest")
+
+    def test_stop(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = LocalStack(commands)
+        localstack.stop()
+
+        assert commands.run.call_count == 2
+        commands.run.assert_any_call("docker", "stop", LOCALSTACK_CONTAINER_NAME, check=False)
+        commands.run.assert_any_call("docker", "rm", LOCALSTACK_CONTAINER_NAME, check=False)
 
     def test_wait_ready_healthy_timeout(self) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner))
@@ -244,8 +282,9 @@ class TestOverrideManager:
     @patch("pathlib.Path.exists")
     def test_check_absent_when_exists(self, mock_exists: MagicMock) -> None:
         mock_exists.return_value = True
+        manager = OverrideManager()
         with pytest.raises(OverrideExistsError):
-            OverrideManager().check_absent()
+            manager.check_absent()
 
     @patch("pathlib.Path.exists")
     def test_check_absent_when_none(self, mock_exists: MagicMock) -> None:
@@ -256,7 +295,7 @@ class TestOverrideManager:
     @patch("pathlib.Path.mkdir")
     def test_write(self, mock_mkdir: MagicMock, mock_write_text: MagicMock) -> None:
         OverrideManager().write()
-        assert mock_write_text.call_count == len(OVERRIDES)
+        assert mock_write_text.call_count == len(OverrideManager.OVERRIDES)
         mock_mkdir.assert_called()
 
     @patch("pathlib.Path.exists")
@@ -264,4 +303,4 @@ class TestOverrideManager:
     def test_cleanup(self, mock_unlink: MagicMock, mock_exists: MagicMock) -> None:
         mock_exists.return_value = True
         OverrideManager().cleanup()
-        assert mock_unlink.call_count == len(OVERRIDES)
+        assert mock_unlink.call_count == len(OverrideManager.OVERRIDES)

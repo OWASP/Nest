@@ -20,8 +20,9 @@ class TestCommandRunner:
     @patch("shutil.which")
     def test_require_missing(self, mock_which: MagicMock) -> None:
         mock_which.return_value = None
+        runner = CommandRunner()
         with pytest.raises(CommandNotFoundError):
-            CommandRunner().require("nonexistent-cmd")
+            runner.require("nonexistent-cmd")
 
     @patch("subprocess.run")
     @patch("shutil.which")
@@ -30,7 +31,7 @@ class TestCommandRunner:
         mock_which: MagicMock,
         mock_run: MagicMock,
     ) -> None:
-        mock_which.return_value = "/usr/bin/terraform"
+        mock_which.return_value = "/usr/bin/terraform-run"
         completed = MagicMock()
         mock_run.return_value = completed
 
@@ -38,7 +39,7 @@ class TestCommandRunner:
 
         assert result is completed
         mock_run.assert_called_once_with(
-            ["/usr/bin/terraform", "init", "-backend=false"],
+            ["/usr/bin/terraform-run", "init", "-backend=false"],
             check=False,
             capture_output=False,
             text=True,

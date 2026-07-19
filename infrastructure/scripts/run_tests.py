@@ -1,4 +1,4 @@
-"""CLI for infrastructure unit and integration Terraform tests."""
+"""Infrastructure test runner CLI."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from scripts.runner import InfrastructureTestRunner
 
 
 def main() -> None:
-    """Run infrastructure unit or integration tests."""
+    """Execute the infrastructure test runner."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     parser = argparse.ArgumentParser(description="Infrastructure unit and integration test runner")
