@@ -29,12 +29,7 @@ async def load_recent_milestones_by_project_id(
 
     milestones = (
         Milestone.objects.filter(repository__project__in=project_ids)
-        .select_related(
-            "repository__organization",
-            "author__owasp_profile",
-        )
         .prefetch_related(
-            "labels",
             Prefetch(
                 "repository__project_set",
                 queryset=Project.objects.filter(pk__in=project_ids).only("pk"),

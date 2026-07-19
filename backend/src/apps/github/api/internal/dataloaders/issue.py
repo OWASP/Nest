@@ -27,15 +27,7 @@ async def load_recent_issues_by_project_id(
 
     issues = (
         Issue.objects.filter(repository__project__in=project_ids)
-        .select_related(
-            "author",
-            "level",
-            "milestone",
-            "repository",
-        )
         .prefetch_related(
-            "assignees",
-            "labels",
             Prefetch(
                 "repository__project_set",
                 queryset=Project.objects.filter(pk__in=project_ids).only("pk"),

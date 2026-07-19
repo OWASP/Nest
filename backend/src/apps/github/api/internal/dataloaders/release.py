@@ -33,11 +33,6 @@ async def load_recent_releases_by_project_id(
             published_at__isnull=False,
             repository__project__in=project_ids,
         )
-        .select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        )
         .prefetch_related(
             Prefetch(
                 "repository__project_set",

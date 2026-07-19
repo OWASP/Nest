@@ -29,7 +29,6 @@ async def load_repositories_by_project_id(
 
     repositories = (
         Repository.objects.filter(project__in=project_ids, organization__isnull=False)
-        .select_related("organization")
         .prefetch_related(
             Prefetch(
                 "project_set",

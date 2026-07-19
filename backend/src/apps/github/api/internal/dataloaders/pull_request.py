@@ -23,15 +23,7 @@ async def load_recent_pull_requests_by_project_id(
 
     pull_requests = (
         PullRequest.objects.filter(repository__project__in=project_ids)
-        .select_related(
-            "author",
-            "milestone",
-            "repository__organization",
-            "repository",
-        )
         .prefetch_related(
-            "assignees",
-            "labels",
             Prefetch(
                 "repository__project_set",
                 queryset=Project.objects.filter(pk__in=project_ids).only("pk"),
