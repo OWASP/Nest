@@ -1,6 +1,7 @@
 import { CodegenConfig } from '@graphql-codegen/cli'
 
-const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://backend:8000'  // NOSONAR
+// NOSONAR: a reasonable default for development environment runs.
+const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://backend:8000'
 
 let response: Response
 
