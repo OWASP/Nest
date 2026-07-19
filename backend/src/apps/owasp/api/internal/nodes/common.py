@@ -22,12 +22,12 @@ class GenericEntityNode(strawberry.relay.Node):
         """Resolve entity leaders."""
         return root.entity_leaders
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["leaders_raw"])
     def leaders(self, root) -> list[str]:
         """Resolve leaders."""
         return root.idx_leaders
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["related_urls"])
     def related_urls(self, root) -> list[str]:
         """Resolve related URLs."""
         return root.related_urls
@@ -37,12 +37,12 @@ class GenericEntityNode(strawberry.relay.Node):
         """Resolve top contributors."""
         return [RepositoryContributorNode(**tc) for tc in root.idx_top_contributors]
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["updated_at"])
     def updated_at(self, root) -> str:
         """Resolve updated at."""
         return root.idx_updated_at
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["key"])
     def url(self, root) -> str:
         """Resolve URL."""
         return root.idx_url
