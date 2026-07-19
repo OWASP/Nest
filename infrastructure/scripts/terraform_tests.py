@@ -27,6 +27,51 @@ class ExecutionMode(StrEnum):
 class TerraformTests:
     """Terraform module test runner."""
 
+    @staticmethod
+    def emit_output(result: CompletedProcess[str]) -> None:
+        """Write captured Terraform output to the parent streams.
+
+        Args:
+            result (CompletedProcess[str]): The completed process containing stdout and stderr.
+
+        """
+        if result.stdout:
+            sys.stdout.write(result.stdout)
+        if result.stderr:
+            sys.stderr.write(result.stderr)
+
+    @staticmethod
+    def failure_message(action: str, module_dir: str, result: CompletedProcess[str]) -> str:
+        """Build a self-documenting failure message with Terraform diagnostics.
+
+        Args:
+            action (str): The Terraform action that failed.
+            module_dir (str): The directory of the Terraform module.
+            result (CompletedProcess[str]): The completed process containing the failure output.
+
+        Returns:
+            str: A formatted failure message including stdout and stderr diagnostics.
+
+        """
+        message = f"terraform {action} failed in {module_dir}"
+        details = "\n".join(
+            part.rstrip() for part in (result.stdout, result.stderr) if part and part.strip()
+        )
+        if details:
+            return f"{message}\n{details}"
+        return message
+
+    @staticmethod
+    def match_test_mode(entry: str, mode: ExecutionMode) -> bool:
+        """Return whether a ``.tftest.hcl`` file belongs to the requested mode.
+
+        Args:
+            entry (str): The filename of the test file.
+            mode (ExecutionMode): The execution mode to match against.
+
+        """
+        return entry == f"{mode}.tftest.hcl" or entry.endswith(f".{mode}.tftest.hcl")
+
     def __init__(
         self,
         commands: CommandRunner | None = None,
@@ -87,17 +132,6 @@ class TerraformTests:
                     test_dirs.append(str(Path(root) / "tests"))
         return sorted(test_dirs)
 
-    @staticmethod
-    def match_test_mode(entry: str, mode: ExecutionMode) -> bool:
-        """Return whether a ``.tftest.hcl`` file belongs to the requested mode.
-
-        Args:
-            entry (str): The filename of the test file.
-            mode (ExecutionMode): The execution mode to match against.
-
-        """
-        return entry == f"{mode}.tftest.hcl" or entry.endswith(f".{mode}.tftest.hcl")
-
     def find_test_files(self, test_dir: str, mode: ExecutionMode) -> list[str]:
         """Return sorted test filenames in a directory for the given mode.
 
@@ -121,40 +155,6 @@ class TerraformTests:
         except OSError as exc:
             message = f"could not read {test_dir}: {exc}"
             raise TestRunnerError(message) from exc
-
-    @staticmethod
-    def emit_output(result: CompletedProcess[str]) -> None:
-        """Write captured Terraform output to the parent streams.
-
-        Args:
-            result (CompletedProcess[str]): The completed process containing stdout and stderr.
-
-        """
-        if result.stdout:
-            sys.stdout.write(result.stdout)
-        if result.stderr:
-            sys.stderr.write(result.stderr)
-
-    @staticmethod
-    def failure_message(action: str, module_dir: str, result: CompletedProcess[str]) -> str:
-        """Build a self-documenting failure message with Terraform diagnostics.
-
-        Args:
-            action (str): The Terraform action that failed.
-            module_dir (str): The directory of the Terraform module.
-            result (CompletedProcess[str]): The completed process containing the failure output.
-
-        Returns:
-            str: A formatted failure message including stdout and stderr diagnostics.
-
-        """
-        message = f"terraform {action} failed in {module_dir}"
-        details = "\n".join(
-            part.rstrip() for part in (result.stdout, result.stderr) if part and part.strip()
-        )
-        if details:
-            return f"{message}\n{details}"
-        return message
 
     def run_module_tests(self, module_dir: str, test_files: list[str]) -> None:
         """Initialize and test a Terraform module with the given filters.
