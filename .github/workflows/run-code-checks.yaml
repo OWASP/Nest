@@ -38,8 +38,7 @@ jobs:
         working-directory: cspell
 
       - name: Run CSpell
-        run: pnpm exec cspell --config cspell.json --no-progress -r ..
-        working-directory: cspell
+        run: make cspell
     timeout-minutes: 5
 
   run-eslint-checks:
@@ -132,7 +131,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make pre-commit
-    timeout-minutes: 10
+    timeout-minutes: 5
 
   run-prettier-checks:
     name: Prettier
