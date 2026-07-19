@@ -61,7 +61,7 @@ group.test.dependencies.pytest-xdist = "3.8.0"
 group.test.dependencies.python-dotenv = "1.2.2"
 group.video.dependencies.elevenlabs = "2.45.0"
 group.video.dependencies.ffmpeg-python = "0.2.0"
-group.video.dependencies.pillow = "12.2.0"
+group.video.dependencies.pillow = "12.3.0"
 group.video.dependencies.pypdfium2 = "5.7.1"
 group.video.dependencies.weasyprint = "68.1"
 
