@@ -84,7 +84,7 @@ security-scan-zap:
 		zap-baseline.py \
 		-a \
 		-c .zapconfig \
-		-t $(ZAP_TARGET)
+		-t "$(ZAP_TARGET)"
 
 tooling-dependency-audit:
 	@echo "Auditing root tooling npm dependencies..."

@@ -4,16 +4,16 @@
 	eslint-fix pre-commit
 
 check: ## Run code quality checks
-	@echo "================================== pre-commit =================================="
+	@echo "================================== Pre-commit =================================="
 	@$(MAKE) pre-commit
 	@echo ""
-	@echo "=================================== prettier ==================================="
+	@echo "=================================== Prettier ==================================="
 	@$(MAKE) prettier
 	@echo ""
-	@echo "==================================== eslint ===================================="
+	@echo "==================================== ESLint ===================================="
 	@$(MAKE) eslint
 	@echo ""
-	@echo "==================================== cspell ===================================="
+	@echo "==================================== CSpell ===================================="
 	@$(MAKE) cspell
 	@echo ""
 
@@ -31,12 +31,11 @@ code-checks-install:
 code-checks:
 	@$(MAKE) code-checks-install
 	@docker run --rm \
-		--env CI=true \
 		--mount type=bind,src="$(CURDIR)",dst=/nest \
 		--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
-		--mount type=volume,dst=/nest/node_modules \
-		--mount type=volume,dst=/nest/frontend/node_modules \
 		--mount type=volume,dst=/nest/cspell/node_modules \
+		--mount type=volume,dst=/nest/frontend/node_modules \
+		--mount type=volume,dst=/nest/node_modules \
 		--mount type=volume,src=nest-code-checks-pre-commit,dst=/tmp/pre-commit \
 		--mount type=volume,src=nest-code-checks-terraform-plugin-cache,dst=/tmp/terraform-plugin-cache \
 		--mount type=volume,src=nest-code-checks-tflint,dst=/tmp/tflint/plugins \

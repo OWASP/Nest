@@ -40,8 +40,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     TFLINT_PLUGIN_DIR="/tmp/tflint/plugins" \
     UV_PYTHON_INSTALL_DIR="/usr/local"
 
-RUN apk --no-cache update && \
-    apk --no-cache upgrade && \
+RUN apk --no-cache upgrade && \
     apk --no-cache add \
         bash \
         docker-cli \

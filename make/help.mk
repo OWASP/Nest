@@ -13,7 +13,7 @@ HELP_MAKEFILES := make/help.mk make/run.mk make/check.mk make/test.mk \
 help: ## Display this help
 	@[ -t 1 ] && c='\033[36m' r='\033[0m' b='\033[1m' || c='' r='' b=''; \
 	awk -v c="$$c" -v r="$$r" -v b="$$b" ' \
-	function flush_section(   n, i, j, keys, tmp) { \
+	function flush_section(n, i, j, keys, tmp) { \
 		if (section == "") return; \
 		printf "\n" b "%s" r "\n", section; \
 		n = 0; \
@@ -23,8 +23,8 @@ help: ## Display this help
 					if (keys[j] < keys[i]) { \
 						tmp = keys[i]; keys[i] = keys[j]; keys[j] = tmp; \
 						} \
-			} \
-		} \
+			    } \
+	    	} \
 		for (i = 1; i <= n; i++) { \
 			printf "  " c "%-30s" r " %s\n", keys[i], targets[keys[i]]; \
 			} \
