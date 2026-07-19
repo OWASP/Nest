@@ -23,9 +23,9 @@ export async function GET() {
         excludedUsernames: leaders,
         hasFullName: true,
         limit: 24,
-        leader1: 'leaders[0]',
-        leader2: 'leaders[1]',
-        leader3: 'leaders[2]',
+        leader1: leaders[0],
+        leader2: leaders[1],
+        leader3: leaders[2],
       },
     })
 
