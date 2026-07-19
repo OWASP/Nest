@@ -5,13 +5,32 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from contextlib import contextmanager
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack, OverrideManager
-from scripts.terraform_tests import TerraformTests, ExecutionMode
+from scripts.terraform_tests import ExecutionMode, TerraformTests
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def temporary_env(name: str, value: str) -> Iterator[None]:
+    """Set an environment variable for the duration of the context."""
+    previous = os.environ.get(name, None)
+    os.environ[name] = value
+    try:
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop(name, None)
+        else:
+            os.environ[name] = previous
 
 
 class InfrastructureTestRunner:
@@ -33,7 +52,8 @@ class InfrastructureTestRunner:
             commands (CommandRunner, optional): Command runner instance.
             localstack (LocalStack, optional): LocalStack manager instance.
             overrides (OverrideManager, optional): Terraform override manager instance.
-            terraform_tests (TerraformTests, optional): Terraform test discovery and execution instance.
+            terraform_tests (TerraformTests, optional): Terraform test discovery and
+                execution instance.
 
         """
         self.root_dir = root_dir or Path(__file__).resolve().parent.parent.parent
@@ -97,12 +117,10 @@ class InfrastructureTestRunner:
 
             # Always wait: /_localstack/info can succeed before the Pro license activates.
             self.localstack.wait_ready()
-            # Inject LocalStack API for all Terraform tests.
-            os.environ["AWS_ENDPOINT_URL"] = self.localstack.api_url
-
-            self.overrides.write()
-            self.terraform_tests.discover_and_run(ExecutionMode.INTEGRATION)
-            logger.info("All integration tests executed successfully!")
+            with temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url):
+                self.overrides.write()
+                self.terraform_tests.discover_and_run(ExecutionMode.INTEGRATION)
+                logger.info("All integration tests executed successfully!")
         finally:
             try:
                 self.overrides.cleanup()

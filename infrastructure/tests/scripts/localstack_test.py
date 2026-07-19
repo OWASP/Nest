@@ -33,12 +33,15 @@ def mock_info_response(
     return response
 
 
+CUSTOM_HOST_API_URL = "http://custom-host:9999"  # NOSONAR: Test-only LocalStack HTTP.
+
+
 class TestLocalStack:
     """Tests for ``LocalStack``."""
 
     def test_init_api_url(self) -> None:
         localstack = LocalStack(host="custom-host", port=9999)
-        assert localstack.api_url == "http://custom-host:9999"
+        assert localstack.api_url == CUSTOM_HOST_API_URL
 
     @patch("scripts.localstack.HTTPConnection")
     def test_info_success(self, mock_connection_cls: MagicMock) -> None:
