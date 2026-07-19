@@ -41,6 +41,32 @@ class TestLocalStack:
         assert localstack.api_url == "http://custom-host:9999"
 
     @patch("scripts.localstack.HTTPConnection")
+    def test_info_success(self, mock_connection_cls: MagicMock) -> None:
+        connection = mock_connection_cls.return_value
+        connection.getresponse.return_value = mock_info_response(
+            payload={"version": "1.0", "is_license_activated": True}
+        )
+        info = LocalStack().info()
+        assert info == {"version": "1.0", "is_license_activated": True}
+        connection.request.assert_called_once_with("GET", "/_localstack/info")
+
+    @patch("scripts.localstack.HTTPConnection")
+    def test_info_failure(self, mock_connection_cls: MagicMock) -> None:
+        connection = mock_connection_cls.return_value
+        connection.getresponse.return_value = mock_info_response(status=HTTPStatus.NOT_FOUND)
+        assert LocalStack().info() is None
+
+    @patch("scripts.localstack.logger")
+    @patch("scripts.localstack.HTTPConnection")
+    def test_info_exception_with_log_error(
+        self, mock_connection_cls: MagicMock, mock_logger: MagicMock
+    ) -> None:
+        mock_connection_cls.return_value.request.side_effect = OSError("Connection failed")
+
+        assert LocalStack().info(log_error=True) is None
+        mock_logger.warning.assert_called_once()
+
+    @patch("scripts.localstack.HTTPConnection")
     def test_healthy_success(self, mock_connection_cls: MagicMock) -> None:
         connection = mock_connection_cls.return_value
         connection.getresponse.return_value = mock_info_response()
@@ -186,7 +212,16 @@ class TestLocalStack:
         ]
         localstack = LocalStack(commands)
         with pytest.raises(TestRunnerError, match="Error starting LocalStack container"):
-            localstack.start("localstack/localstack:latest-alt")
+            localstack.start("localstack/localstack:latest")
+
+    def test_stop(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = LocalStack(commands)
+        localstack.stop()
+
+        assert commands.run.call_count == 2
+        commands.run.assert_any_call("docker", "stop", LOCALSTACK_CONTAINER_NAME, check=False)
+        commands.run.assert_any_call("docker", "rm", LOCALSTACK_CONTAINER_NAME, check=False)
 
     def test_wait_ready_healthy_timeout(self) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner))

@@ -71,6 +71,26 @@ class TestTerraformTests:
             capture_output=True,
         )
 
+    @patch("pathlib.Path.exists")
+    @patch("os.walk")
+    @patch("pathlib.Path.iterdir")
+    def test_discover_and_run_empty(
+        self,
+        mock_iterdir: MagicMock,
+        mock_walk: MagicMock,
+        mock_exists: MagicMock,
+    ) -> None:
+        mock_exists.return_value = True
+        mock_walk.return_value = [
+            ("infrastructure/modules/storage", ["tests"], []),
+        ]
+        # Return no matching files
+        mock_iterdir.return_value = []
+
+        commands = MagicMock(spec=CommandRunner)
+        with pytest.raises(TestRunnerError, match="No unit tests were found"):
+            TerraformTests(commands).discover_and_run(ExecutionMode.UNIT)
+
     @patch("pathlib.Path.iterdir")
     def test_find_test_files_error(self, mock_iterdir: MagicMock) -> None:
         mock_iterdir.side_effect = OSError("Permission denied")

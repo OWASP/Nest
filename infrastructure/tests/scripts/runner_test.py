@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import os
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from scripts.commands import CommandRunner
@@ -15,6 +15,42 @@ from scripts.terraform_tests import TerraformTests, ExecutionMode
 
 class TestInfrastructureTestRunner:
     """Tests for ``InfrastructureTestRunner`` orchestration."""
+
+    @patch.dict(os.environ, {}, clear=True)
+    @patch("pathlib.Path.mkdir")
+    def test_configure_environment(self, mock_mkdir: MagicMock) -> None:
+        runner = InfrastructureTestRunner(root_dir=Path("/repo"))
+
+        with patch("os.chdir") as mock_chdir:
+            runner.configure_environment()
+
+            mock_chdir.assert_called_once_with(Path("/repo"))
+            mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
+
+            expected_dir = str(Path.home() / ".terraform.d" / "plugin-cache")
+            assert os.environ["TF_PLUGIN_CACHE_DIR"] == expected_dir
+
+    @patch("sys.stdout.write")
+    def test_print_localstack_tag(self, mock_write: MagicMock) -> None:
+        localstack = MagicMock(spec=LocalStack)
+        localstack.image_info.return_value = ("localstack/localstack:1.0", "1.0")
+        runner = InfrastructureTestRunner(root_dir=Path("/repo"), localstack=localstack)
+
+        runner.print_localstack_tag()
+
+        localstack.image_info.assert_called_once_with(Path("/repo"))
+        mock_write.assert_called_once_with("1.0\n")
+
+    @patch("sys.stdout.write")
+    def test_print_localstack_image(self, mock_write: MagicMock) -> None:
+        localstack = MagicMock(spec=LocalStack)
+        localstack.image_info.return_value = ("localstack/localstack:1.0", "1.0")
+        runner = InfrastructureTestRunner(root_dir=Path("/repo"), localstack=localstack)
+
+        runner.print_localstack_image()
+
+        localstack.image_info.assert_called_once_with(Path("/repo"))
+        mock_write.assert_called_once_with("localstack/localstack:1.0\n")
 
     def test_run_unit(self) -> None:
         commands = MagicMock(spec=CommandRunner)
