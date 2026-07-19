@@ -29,22 +29,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install Terraform
-      uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
-      with:
-        terraform_version: 1.14
-
-    - name: Create plugin cache directory
+    - name: Setup Terraform environment
+      uses: ./.github/actions/setup-terraform-environment
       env:
         TF_PLUGIN_CACHE_DIR: ${{ inputs.plugin-cache-dir }}
-      run: mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-      shell: bash
-
-    - name: Cache Terraform plugins
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-      with:
-        key: ${{ runner.os }}-${{ runner.arch }}-infrastructure-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
-        path: ${{ inputs.plugin-cache-dir }}
 
     - name: Prepare Terraform backend
       env:
