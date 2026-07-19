@@ -3,38 +3,23 @@
 .PHONY: check check-fix code-checks-install code-checks cspell prettier prettier-fix eslint \
 	eslint-fix pre-commit
 
-CODE_CHECKS_MOUNT_ROOT := --mount type=volume,dst=/nest/node_modules
-CODE_CHECKS_MOUNT_FRONTEND := --mount type=volume,dst=/nest/frontend/node_modules
-CODE_CHECKS_MOUNT_CSPELL := --mount type=volume,dst=/nest/cspell/node_modules
-CODE_CHECKS_MOUNT_PRECOMMIT := \
-	--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
-	--mount type=volume,src=nest-code-checks-pre-commit,dst=/tmp/pre-commit \
-	--mount type=volume,src=nest-code-checks-terraform-plugin-cache,dst=/tmp/terraform-plugin-cache \
-	--mount type=volume,src=nest-code-checks-tflint,dst=/tmp/tflint/plugins
-
 check: ## Run code quality checks
-ifneq ($(CI),true)
-	@$(MAKE) code-checks-install
-endif
 	@echo "================================== Pre-commit =================================="
-	@$(MAKE) pre-commit CODE_CHECKS_SKIP_INSTALL=1
+	@$(MAKE) pre-commit
 	@echo ""
 	@echo "=================================== Prettier ==================================="
-	@$(MAKE) prettier CODE_CHECKS_SKIP_INSTALL=1
+	@$(MAKE) prettier
 	@echo ""
 	@echo "==================================== ESLint ===================================="
-	@$(MAKE) eslint CODE_CHECKS_SKIP_INSTALL=1
+	@$(MAKE) eslint
 	@echo ""
 	@echo "==================================== CSpell ===================================="
-	@$(MAKE) cspell CODE_CHECKS_SKIP_INSTALL=1
+	@$(MAKE) cspell
 	@echo ""
 
 check-fix: ## Auto-fix Prettier and ESLint issues
-ifneq ($(CI),true)
-	@$(MAKE) code-checks-install
-endif
-	@$(MAKE) prettier-fix CODE_CHECKS_SKIP_INSTALL=1
-	@$(MAKE) eslint-fix CODE_CHECKS_SKIP_INSTALL=1
+	@$(MAKE) prettier-fix
+	@$(MAKE) eslint-fix
 
 code-checks-install:
 	@DOCKER_BUILDKIT=1 docker build -q \
@@ -43,16 +28,21 @@ code-checks-install:
 		-t nest-code-checks \
 		. 1>/dev/null
 
+# Named node_modules volumes are keyed by lockfile hash so they seed once and refresh on lockfile change.
 code-checks:
 ifeq ($(CI),true)
 	@PATH="$(CURDIR)/node_modules/.bin:$(PATH)" $(CMD)
 else
-ifndef CODE_CHECKS_SKIP_INSTALL
 	@$(MAKE) code-checks-install
-endif
-	@docker run --rm \
+	@docker run --rm -t \
 		--mount type=bind,src="$(CURDIR)",dst=/nest \
-		$(CODE_CHECKS_MOUNTS) \
+		--mount type=volume,src=nest-code-checks-node-modules-$(shell shasum -a 256 pnpm-lock.yaml | cut -c1-12),dst=/nest/node_modules,readonly \
+		--mount type=volume,src=nest-code-checks-frontend-node-modules-$(shell shasum -a 256 frontend/pnpm-lock.yaml | cut -c1-12),dst=/nest/frontend/node_modules,readonly \
+		--mount type=volume,src=nest-code-checks-cspell-node-modules-$(shell shasum -a 256 cspell/pnpm-lock.yaml | cut -c1-12),dst=/nest/cspell/node_modules,readonly \
+		--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+		--mount type=volume,src=nest-code-checks-pre-commit,dst=/tmp/pre-commit \
+		--mount type=volume,src=nest-code-checks-terraform-plugin-cache,dst=/tmp/terraform-plugin-cache \
+		--mount type=volume,src=nest-code-checks-tflint,dst=/tmp/tflint/plugins \
 		--workdir=/nest \
 		nest-code-checks \
 		sh -c '$(CMD)'
@@ -62,28 +52,18 @@ cspell: ## Run spell checker
 	@$(MAKE) cspell-check
 
 prettier: ## Verify Prettier formatting
-	@$(MAKE) code-checks \
-		CODE_CHECKS_MOUNTS='$(CODE_CHECKS_MOUNT_ROOT) $(CODE_CHECKS_MOUNT_FRONTEND)' \
-		CMD='prettier --check --log-level warn .'
+	@$(MAKE) code-checks CMD='prettier --check --log-level warn .'
 	@echo "Prettier: all matched files use Prettier code style."
 
 prettier-fix: ## Auto-fix Prettier formatting
-	@$(MAKE) code-checks \
-		CODE_CHECKS_MOUNTS='$(CODE_CHECKS_MOUNT_ROOT) $(CODE_CHECKS_MOUNT_FRONTEND)' \
-		CMD='prettier --log-level warn --write .'
+	@$(MAKE) code-checks CMD='prettier --log-level warn --write .'
 
 eslint: ## Verify ESLint for e2e and frontend
-	@$(MAKE) code-checks \
-		CODE_CHECKS_MOUNTS='$(CODE_CHECKS_MOUNT_ROOT) $(CODE_CHECKS_MOUNT_FRONTEND)' \
-		CMD='eslint --max-warnings=0 e2e frontend'
+	@$(MAKE) code-checks CMD='eslint --max-warnings=0 e2e frontend'
 	@echo "ESLint: no issues found."
 
 eslint-fix: ## Auto-fix ESLint issues
-	@$(MAKE) code-checks \
-		CODE_CHECKS_MOUNTS='$(CODE_CHECKS_MOUNT_ROOT) $(CODE_CHECKS_MOUNT_FRONTEND)' \
-		CMD='eslint --fix --max-warnings=0 e2e frontend'
+	@$(MAKE) code-checks CMD='eslint --fix --max-warnings=0 e2e frontend'
 
 pre-commit: ## Run pre-commit hooks
-	@$(MAKE) code-checks \
-		CODE_CHECKS_MOUNTS='$(CODE_CHECKS_MOUNT_PRECOMMIT)' \
-		CMD='pre-commit run --all-files --color=always --show-diff-on-failure'
+	@$(MAKE) code-checks CMD='pre-commit run --all-files --color=always --show-diff-on-failure'
