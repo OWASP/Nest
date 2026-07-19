@@ -3,6 +3,7 @@
 from configurations import values
 
 from settings.base import Base
+from settings.values import OptionalSecretValue
 
 
 class Local(Base):
@@ -10,9 +11,12 @@ class Local(Base):
 
     APP_NAME = "OWASP Nest Local"
 
-    ALLOWED_ORIGINS = (
-        "http://127.0.0.1:3000",
-        "http://localhost:3000",
+    ALLOWED_ORIGINS = values.ListValue(
+        environ_name="ALLOWED_ORIGINS",
+        default=[
+            "http://127.0.0.1:3000",
+            "http://localhost:3000",
+        ],
     )
     CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
@@ -30,5 +34,7 @@ class Local(Base):
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
 
-    SLACK_COMMANDS_ENABLED = True
-    SLACK_EVENTS_ENABLED = True
+    SLACK_BOT_TOKEN = OptionalSecretValue(environ=False)
+    SLACK_COMMANDS_ENABLED = False
+    SLACK_EVENTS_ENABLED = False
+    SLACK_SIGNING_SECRET = OptionalSecretValue(environ=False)

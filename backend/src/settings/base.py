@@ -143,6 +143,7 @@ class Base(Configuration):
     NINJA_PAGINATION_PER_PAGE = API_PAGE_SIZE
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
+    REDIS_PORT = values.IntegerValue(environ_name="REDIS_PORT", default=6379)
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
     REDIS_AUTH_ENABLED = values.BooleanValue(environ_name="REDIS_AUTH_ENABLED", default=True)
     REDIS_USE_TLS = values.BooleanValue(environ_name="REDIS_USE_TLS", default=False)
@@ -159,7 +160,7 @@ class Base(Configuration):
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"{'rediss' if REDIS_USE_TLS else 'redis'}://{REDIS_HOST}:6379",
+            "LOCATION": f"{'rediss' if REDIS_USE_TLS else 'redis'}://{REDIS_HOST}:{REDIS_PORT}",
             "OPTIONS": REDIS_CACHE_OPTIONS,
             "TIMEOUT": 300,
         }
@@ -168,7 +169,7 @@ class Base(Configuration):
     RQ_QUEUES = {
         "ai": {
             "HOST": REDIS_HOST,
-            "PORT": 6379,
+            "PORT": REDIS_PORT,
             "PASSWORD": REDIS_PASSWORD,
             "DB": 1,
             "DEFAULT_TIMEOUT": 300,

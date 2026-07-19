@@ -95,6 +95,9 @@ No resources.
 | <a name="input_db_storage_type"></a> [db\_storage\_type](#input\_db\_storage\_type) | The storage type for the RDS database. | `string` | `"gp3"` | no |
 | <a name="input_db_user"></a> [db\_user](#input\_db\_user) | The username for the RDS database. | `string` | `"nest_db_user"` | no |
 | <a name="input_django_configuration"></a> [django\_configuration](#input\_django\_configuration) | The name of the Django configuration to use (e.g., Staging, Production). | `string` | n/a | yes |
+| <a name="input_django_redis_auth_enabled"></a> [django\_redis\_auth\_enabled](#input\_django\_redis\_auth\_enabled) | Whether Redis authentication is enabled. | `bool` | `true` | no |
+| <a name="input_django_redis_port"></a> [django\_redis\_port](#input\_django\_redis\_port) | The port of the Redis cache. | `string` | `"6379"` | no |
+| <a name="input_django_redis_use_tls"></a> [django\_redis\_use\_tls](#input\_django\_redis\_use\_tls) | Whether Redis connections should use TLS. | `bool` | `true` | no |
 | <a name="input_django_release_version"></a> [django\_release\_version](#input\_django\_release\_version) | The Django release version. | `string` | `"0.0.0"` | no |
 | <a name="input_django_settings_module"></a> [django\_settings\_module](#input\_django\_settings\_module) | The location of the Django settings module to use (e.g., settings.staging, settings.production). | `string` | n/a | yes |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name for the site. | `string` | n/a | yes |
@@ -110,6 +113,7 @@ No resources.
 | <a name="input_enable_vpc_ssm_endpoint"></a> [enable\_vpc\_ssm\_endpoint](#input\_enable\_vpc\_ssm\_endpoint) | Whether to create SSM VPC endpoint. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
 | <a name="input_fixtures_bucket_name"></a> [fixtures\_bucket\_name](#input\_fixtures\_bucket\_name) | The name of the S3 bucket for fixtures. | `string` | `null` | no |
+| <a name="input_force_new_deployment"></a> [force\_new\_deployment](#input\_force\_new\_deployment) | Whether to force a new deployment on each apply. | `bool` | `false` | no |
 | <a name="input_frontend_desired_count"></a> [frontend\_desired\_count](#input\_frontend\_desired\_count) | The desired number of frontend tasks. | `number` | `1` | no |
 | <a name="input_frontend_enable_auto_scaling"></a> [frontend\_enable\_auto\_scaling](#input\_frontend\_enable\_auto\_scaling) | Whether to enable auto scaling for frontend. | `bool` | `false` | no |
 | <a name="input_frontend_image_tag"></a> [frontend\_image\_tag](#input\_frontend\_image\_tag) | The Docker frontend image tag. | `string` | n/a | yes |
@@ -138,10 +142,12 @@ No resources.
 | <a name="output_backend_cluster_name"></a> [backend\_cluster\_name](#output\_backend\_cluster\_name) | The name of the ECS backend cluster. |
 | <a name="output_backend_ecr_repository_url"></a> [backend\_ecr\_repository\_url](#output\_backend\_ecr\_repository\_url) | The URL of the backend ECR repository. |
 | <a name="output_backend_service_name"></a> [backend\_service\_name](#output\_backend\_service\_name) | The name of the ECS backend service. |
+| <a name="output_backend_target_group_arn"></a> [backend\_target\_group\_arn](#output\_backend\_target\_group\_arn) | The ARN of the backend target group. |
 | <a name="output_fixtures_bucket_name"></a> [fixtures\_bucket\_name](#output\_fixtures\_bucket\_name) | The name of the S3 bucket for database fixtures. |
 | <a name="output_frontend_cluster_name"></a> [frontend\_cluster\_name](#output\_frontend\_cluster\_name) | The name of the ECS frontend cluster. |
 | <a name="output_frontend_ecr_repository_url"></a> [frontend\_ecr\_repository\_url](#output\_frontend\_ecr\_repository\_url) | The URL of the frontend ECR repository. |
 | <a name="output_frontend_service_name"></a> [frontend\_service\_name](#output\_frontend\_service\_name) | The name of the ECS frontend service. |
+| <a name="output_frontend_target_group_arn"></a> [frontend\_target\_group\_arn](#output\_frontend\_target\_group\_arn) | The ARN of the frontend target group. |
 | <a name="output_frontend_url"></a> [frontend\_url](#output\_frontend\_url) | The URL to access the frontend. |
 | <a name="output_nat_gateway_enabled"></a> [nat\_gateway\_enabled](#output\_nat\_gateway\_enabled) | Whether a NAT Gateway is enabled. |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | A list of private subnet IDs. |

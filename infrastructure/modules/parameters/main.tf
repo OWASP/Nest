@@ -40,7 +40,7 @@ resource "aws_ssm_parameter" "django_allowed_hosts" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_HOSTS"
   tags        = var.common_tags
   type        = "String"
-  value       = var.django_allowed_hosts
+  value       = var.alb_dns_name != "" ? "${var.django_allowed_hosts},${var.alb_dns_name}" : var.django_allowed_hosts
 
   lifecycle {
     ignore_changes = [value]
@@ -52,7 +52,7 @@ resource "aws_ssm_parameter" "django_allowed_origins" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_ORIGINS"
   tags        = var.common_tags
   type        = "String"
-  value       = var.django_allowed_origins
+  value       = var.alb_dns_name != "" ? "${var.django_allowed_origins},https://${var.alb_dns_name}" : var.django_allowed_origins
 
   lifecycle {
     ignore_changes = [value]
@@ -165,12 +165,28 @@ resource "aws_ssm_parameter" "django_redis_host" {
   value       = var.django_redis_host
 }
 
+resource "aws_ssm_parameter" "django_redis_port" {
+  description = "The port of the Redis cache."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PORT"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.django_redis_port
+}
+
 resource "aws_ssm_parameter" "django_redis_use_tls" {
   description = "Whether Redis connections should use TLS (required for ElastiCache with transit encryption)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_USE_TLS"
   tags        = var.common_tags
   type        = "String"
   value       = tostring(var.django_redis_use_tls)
+}
+
+resource "aws_ssm_parameter" "django_redis_auth_enabled" {
+  description = "Whether Redis authentication is enabled."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_AUTH_ENABLED"
+  tags        = var.common_tags
+  type        = "String"
+  value       = tostring(var.django_redis_auth_enabled)
 }
 
 resource "aws_ssm_parameter" "django_secret_key" {
@@ -260,7 +276,7 @@ resource "aws_ssm_parameter" "next_server_csrf_url" {
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_CSRF_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = var.next_server_csrf_url
+  value       = var.alb_dns_name != "" && var.environment == "local" ? "http://${var.alb_dns_name}/csrf/" : var.next_server_csrf_url
 }
 
 resource "aws_ssm_parameter" "next_server_disable_ssr" {
@@ -304,7 +320,7 @@ resource "aws_ssm_parameter" "next_server_graphql_url" {
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_GRAPHQL_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = var.next_server_graphql_url
+  value       = var.alb_dns_name != "" && var.environment == "local" ? "http://${var.alb_dns_name}/graphql/" : var.next_server_graphql_url
 }
 
 resource "aws_ssm_parameter" "nextauth_secret" {
@@ -320,7 +336,7 @@ resource "aws_ssm_parameter" "nextauth_url" {
   name        = "/${var.project_name}/${var.environment}/NEXTAUTH_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = var.nextauth_url
+  value       = var.alb_dns_name != "" && var.environment == "local" ? "http://${var.alb_dns_name}/" : var.nextauth_url
 
   lifecycle {
     ignore_changes = [value]

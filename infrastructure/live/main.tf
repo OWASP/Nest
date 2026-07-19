@@ -54,6 +54,7 @@ module "backend" {
   desired_count                   = var.backend_desired_count
   enable_auto_scaling             = var.backend_enable_auto_scaling
   environment                     = var.environment
+  force_new_deployment            = var.force_new_deployment
   health_check_path               = "/status/"
   image_tag                       = var.backend_image_tag
   kms_key_arn                     = module.kms.key_arn
@@ -121,6 +122,7 @@ module "frontend" {
   desired_count                   = var.frontend_desired_count
   enable_auto_scaling             = var.frontend_enable_auto_scaling
   environment                     = var.environment
+  force_new_deployment            = var.force_new_deployment
   health_check_path               = "/api/health"
   image_tag                       = var.frontend_image_tag
   kms_key_arn                     = module.kms.key_arn
@@ -182,6 +184,7 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
+  alb_dns_name                  = module.alb.alb_dns_name
   common_tags                   = local.common_tags
   db_password_arn               = module.database.db_password_arn
   django_configuration          = var.django_configuration
@@ -190,9 +193,12 @@ module "parameters" {
   django_aws_static_bucket_name = module.storage.static_s3_bucket_name
   django_db_host                = module.database.db_proxy_endpoint
   django_db_name                = var.db_name
-  django_db_port                = var.db_port
+  django_db_port                = module.database.db_port
   django_db_user                = var.db_user
+  django_redis_auth_enabled     = var.django_redis_auth_enabled
   django_redis_host             = module.cache.redis_primary_endpoint
+  django_redis_port             = var.django_redis_port
+  django_redis_use_tls          = var.django_redis_use_tls
   django_release_version        = var.django_release_version
   django_settings_module        = var.django_settings_module
   enable_additional_parameters  = var.enable_additional_parameters

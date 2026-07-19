@@ -28,6 +28,11 @@ output "backend_service_name" {
   value       = module.backend.ecs_service_name
 }
 
+output "backend_target_group_arn" {
+  description = "The ARN of the backend target group."
+  value       = module.alb.backend_target_group_arn
+}
+
 output "fixtures_bucket_name" {
   description = "The name of the S3 bucket for database fixtures."
   value       = module.storage.fixtures_s3_bucket_name
@@ -46,6 +51,11 @@ output "frontend_ecr_repository_url" {
 output "frontend_service_name" {
   description = "The name of the ECS frontend service."
   value       = module.frontend.ecs_service_name
+}
+
+output "frontend_target_group_arn" {
+  description = "The ARN of the frontend target group."
+  value       = module.alb.frontend_target_group_arn
 }
 
 output "frontend_url" {
