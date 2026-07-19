@@ -37,7 +37,9 @@ class GenericEntityNode(strawberry.relay.Node):
         """Resolve top contributors."""
         return [RepositoryContributorNode(**tc) for tc in root.idx_top_contributors]
 
-    @strawberry_django.field(only=["updated_at"])
+    @strawberry_django.field(
+        only=["updated_at", "owasp_repository__updated_at"], select_related=["owasp_repository"]
+    )
     def updated_at(self, root) -> str:
         """Resolve updated at."""
         return root.idx_updated_at
