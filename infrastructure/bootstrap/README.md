@@ -47,8 +47,7 @@ To run plans or apply changes locally:
    terraform init -reconfigure -backend-config=terraform.tfbackend
    ```
 
-
-1. Run Plan or Apply:
+5. Run Plan or Apply:
 
    ```bash
    terraform plan
@@ -174,5 +173,3 @@ No modules.
 | ---- | ----------- |
 | <a name="output_terraform_role_arn"></a> [terraform\_role\_arn](#output\_terraform\_role\_arn) | The ARN of the Terraform IAM role. |
 <!-- END_TF_DOCS -->
-
-
