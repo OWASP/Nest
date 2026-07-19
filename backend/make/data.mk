@@ -154,5 +154,6 @@ backend-data-update:
 	@$(MAKE) owasp-update-sponsors
 	@$(MAKE) slack-sync-data
 
+# TODO(arkid15r): Dockerize this command.
 backend-data-upload-nest-dump:
 	@cd backend && poetry run python -m scripts.upload_nest_dump

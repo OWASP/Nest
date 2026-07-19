@@ -15,7 +15,8 @@ Use short, unprefixed names for high-level operations:
 - `test`
 
 Use a descriptive suffix only when a repository-wide operation has meaningful
-variants, such as `security-code-scan` and `security-image-scan`.
+variants, such as `security-sast-scan`, `security-repository-scan`,
+`security-dast-scan`, and `security-image-scan`.
 
 Do not add `backend-` or `frontend-` prefixes here. Component-specific targets
 belong in their component's `make/` directory.

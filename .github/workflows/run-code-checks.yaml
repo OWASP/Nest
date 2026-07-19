@@ -166,7 +166,7 @@ jobs:
           persist-credentials: false
 
       - name: Run Semgrep security scan
-        run: make security-code-scan-semgrep
+        run: make security-sast-scan-semgrep
     timeout-minutes: 5
 
   run-trivy-checks:
@@ -183,5 +183,5 @@ jobs:
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          command: make security-code-scan-trivy
+          command: make security-repository-scan-trivy
     timeout-minutes: 5

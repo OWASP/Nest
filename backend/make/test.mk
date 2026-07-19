@@ -3,7 +3,7 @@
 include backend/make/clusterfuzz.mk
 
 test-backend: ## Run backend tests
-	@$(MAKE) backend-test
+	@$(MAKE) backend-test-unit
 
 test-backend-fuzz: ## Run REST API and GraphQL fuzz tests
 	@$(MAKE) backend-test-fuzz
@@ -12,7 +12,7 @@ test-backend-fuzz: ## Run REST API and GraphQL fuzz tests
 
 BACKEND_TEST_WORKERS := $(shell echo $$(( ($(shell getconf _NPROCESSORS_ONLN) + 1) / 2 )))
 
-backend-test:
+backend-test-unit:
 	@DOCKER_BUILDKIT=1 docker build -q \
 		--cache-from nest-test-backend \
 		-f docker/backend/Dockerfile.unit-tests backend \

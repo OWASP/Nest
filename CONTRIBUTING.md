@@ -424,16 +424,20 @@ This command runs tests and checks that coverage threshold requirements are sati
 
 ### Running Security Scan
 
-Run the security scans for vulnerabilities and anti-patterns with the following command:
+Run local SAST, container image, and DAST scans with:
 
 ```bash
 make security-scan
 ```
 
-This command automatically:
+This command runs:
 
-- Performs local Semgrep and Trivy scans
-- Outputs findings to the terminal for immediate review
+- SAST (Semgrep)
+- Repository scanning for vulnerable dependencies, secrets, and misconfigurations (Trivy)
+- Container image scans for backend and frontend
+- DAST (ZAP baseline scan against the running frontend)
+
+Findings are printed to the terminal for immediate review.
 
 For addressing findings:
 
@@ -441,17 +445,35 @@ For addressing findings:
 - Follow the documentation links provided in the output for remediation guidance
 - Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
 
-#### Running Code Scans Only
-
-You can run code scan part separately via
+#### Running SAST Scans Only
 
 ```bash
-make security-code-scan
+make security-sast-scan
+```
+
+#### Running Repository Scans Only
+
+```bash
+make security-repository-scan
+```
+
+#### Running DAST Scan
+
+Run ZAP against a live target. By default, the ZAP container reaches the
+frontend running on the host at `http://localhost:3000` through
+`http://host.docker.internal:3000`:
+
+```bash
+make security-dast-scan
+```
+
+Override the target with `ZAP_TARGET`, for example:
+
+```bash
+make security-dast-scan ZAP_TARGET=https://nest.owasp.dev
 ```
 
 #### Running Image Scans Only
-
-You can run image scan part separately via
 
 ```bash
 make security-image-scan

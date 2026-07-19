@@ -1,9 +1,10 @@
 ##@ Security
 
-.PHONY: security-dependency-audit security-scan security-code-scan security-image-scan \
-	security-code-scan-semgrep security-code-scan-trivy security-scan-zap tooling-dependency-audit
+.PHONY: security-dependency-audit security-scan security-sast-scan security-dast-scan \
+	security-image-scan security-repository-scan security-sast-scan-semgrep \
+	security-repository-scan-trivy security-dast-scan-zap tooling-dependency-audit
 
-security-dependency-audit: ## Audit all project dependencies for known vulnerabilities
+security-dependency-audit: ## Audit dependencies for known vulnerabilities
 	@$(MAKE) backend-dependency-audit
 	@$(MAKE) cspell-dependency-audit
 	@$(MAKE) docs-dependency-audit
@@ -11,19 +12,26 @@ security-dependency-audit: ## Audit all project dependencies for known vulnerabi
 	@$(MAKE) frontend-dependency-audit
 	@$(MAKE) tooling-dependency-audit
 
-security-scan: ## Run code and image security scans
-	@$(MAKE) security-code-scan
+security-scan: ## Run security scans
+	@$(MAKE) security-sast-scan
+	@$(MAKE) security-repository-scan
 	@$(MAKE) security-image-scan
+	@$(MAKE) security-dast-scan
 
-security-code-scan: ## Run code security scans only
-	@$(MAKE) security-code-scan-semgrep
-	@$(MAKE) security-code-scan-trivy
+security-dast-scan: ## Run DAST security scan
+	@$(MAKE) security-dast-scan-zap
 
-security-image-scan: ## Run image security scans only
+security-image-scan: ## Run image security scan
 	@$(MAKE) backend-security-image-scan
 	@$(MAKE) frontend-security-image-scan
 
-security-code-scan-semgrep:
+security-sast-scan: ## Run SAST security scan
+	@$(MAKE) security-sast-scan-semgrep
+
+security-repository-scan: ## Scan the repository for vulnerabilities and security issues
+	@$(MAKE) security-repository-scan-trivy
+
+security-sast-scan-semgrep:
 	@echo "Running Semgrep security scan..."
 	@docker run \
 		--rm \
@@ -62,7 +70,7 @@ security-code-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-security-code-scan-trivy:
+security-repository-scan-trivy:
 	@echo "Running Trivy security scan..."
 	@docker run \
 		--rm \
@@ -73,11 +81,12 @@ security-code-scan-trivy:
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs --config /.trivy.yaml /src
 
-ZAP_TARGET ?= https://nest.owasp.dev
+ZAP_TARGET ?= http://host.docker.internal:3000
 
-security-scan-zap:
+security-dast-scan-zap:
 	@echo "Running ZAP baseline scan against $(ZAP_TARGET)..."
 	@docker run \
+		--add-host host.docker.internal:host-gateway \
 		--rm \
 		-v "$(CURDIR):/zap/wrk:rw" \
 		$$(grep -E '^FROM zaproxy/zap-stable:' docker/zap/Dockerfile | sed 's/^FROM //') \
