@@ -176,8 +176,6 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_part_one_policy_arn"></a> [part\_one\_policy\_arn](#output\_part\_one\_policy\_arn) | The ARN of the part one IAM policy. |
-| <a name="output_part_two_policy_arn"></a> [part\_two\_policy\_arn](#output\_part\_two\_policy\_arn) | The ARN of the part two IAM policy. |
 | <a name="output_terraform_role_arn"></a> [terraform\_role\_arn](#output\_terraform\_role\_arn) | The ARN of the Terraform IAM role. |
 <!-- END_TF_DOCS -->
 
