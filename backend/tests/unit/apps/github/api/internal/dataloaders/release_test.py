@@ -343,6 +343,7 @@ class TestLoadRecentReleasesByProjectId:
 
         mock_release.objects.filter.assert_called_once_with(
             is_draft=False,
+            is_pre_release=False,
             published_at__isnull=False,
             repository__project__in=[1, 2],
         )

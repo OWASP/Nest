@@ -7,9 +7,13 @@ from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.issue import (
     ISSUES_BY_REPOSITORY_ID_LOADER,
+    ISSUES_COUNT_BY_PROJECT_ID,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
     RECENT_ISSUES_BY_PROJECT_ID,
     get_issue_loaders,
     load_issues_by_repository_id,
+    load_issues_count_by_project_id,
+    load_open_issues_count_by_project_id,
     load_recent_issues_by_project_id,
 )
 
@@ -116,6 +120,156 @@ class TestLoadIssuesByRepositoryId:
         assert len(result[0]) == 3
 
 
+class TestLoadOpenIssuesCountByProjectId:
+    """Tests for load_open_issues_count_by_project_id."""
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_builds_queryset_with_correct_chain(self, mock_project, mock_get_result_by_keys):
+        """Queryset is built with filter and only(pk, open_issues_count)."""
+        project_ids = [1, 2, 3]
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.only.return_value = mock_qs
+        mock_get_result_by_keys.return_value = [0, 0, 0]
+
+        await load_open_issues_count_by_project_id(project_ids)
+
+        mock_project.objects.filter.assert_called_once_with(pk__in=project_ids)
+        mock_project.objects.filter.return_value.only.assert_called_once_with(
+            "pk", "open_issues_count"
+        )
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_delegates_to_get_result_by_keys(self, mock_project, mock_get_result_by_keys):
+        """get_result_by_keys receives the queryset, ids, and correct value_field."""
+        project_ids = [10, 20]
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.only.return_value = mock_qs
+        mock_get_result_by_keys.return_value = [3, 7]
+
+        result = await load_open_issues_count_by_project_id(project_ids)
+
+        mock_get_result_by_keys.assert_called_once_with(
+            mock_qs, project_ids, key_field="pk", value_field="open_issues_count"
+        )
+        assert result == [3, 7]
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_zero_replaces_none(self, mock_project, mock_get_result_by_keys):
+        """A None result is coerced to 0."""
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.only.return_value = mock_qs
+        mock_get_result_by_keys.return_value = [None]
+
+        result = await load_open_issues_count_by_project_id([99])
+
+        assert result == [0]
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_empty_project_ids(self, mock_project, mock_get_result_by_keys):
+        """An empty project_ids list returns an empty list."""
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.only.return_value = mock_qs
+        mock_get_result_by_keys.return_value = []
+
+        result = await load_open_issues_count_by_project_id([])
+
+        assert result == []
+
+
+class TestLoadIssuesCountByProjectId:
+    """Tests for load_issues_count_by_project_id."""
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_builds_queryset_with_correct_chain(self, mock_project, mock_get_result_by_keys):
+        """Queryset is built with filter and annotate(Count)."""
+        project_ids = [1, 2, 3]
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
+        mock_get_result_by_keys.return_value = [0, 0, 0]
+
+        await load_issues_count_by_project_id(project_ids)
+
+        mock_project.objects.filter.assert_called_once_with(pk__in=project_ids)
+        mock_project.objects.filter.return_value.annotate.assert_called_once()
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_delegates_to_get_result_by_keys(self, mock_project, mock_get_result_by_keys):
+        """get_result_by_keys receives the queryset, ids, and correct value_field."""
+        project_ids = [10, 20]
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
+        mock_get_result_by_keys.return_value = [4, 8]
+
+        result = await load_issues_count_by_project_id(project_ids)
+
+        mock_get_result_by_keys.assert_called_once_with(
+            mock_qs, project_ids, key_field="pk", value_field="items_count"
+        )
+        assert result == [4, 8]
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_zero_replaces_none(self, mock_project, mock_get_result_by_keys):
+        """A None result is coerced to 0."""
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
+        mock_get_result_by_keys.return_value = [None]
+
+        result = await load_issues_count_by_project_id([99])
+
+        assert result == [0]
+
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
+        new_callable=AsyncMock,
+    )
+    @patch("apps.github.api.internal.dataloaders.issue.Project")
+    @pytest.mark.asyncio
+    async def test_empty_project_ids(self, mock_project, mock_get_result_by_keys):
+        """An empty project_ids list returns an empty list."""
+        mock_qs = MagicMock()
+        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
+        mock_get_result_by_keys.return_value = []
+
+        result = await load_issues_count_by_project_id([])
+
+        assert result == []
+
+
 class TestGetIssueLoaders:
     """Tests for get_issue_loaders."""
 
@@ -124,6 +278,10 @@ class TestGetIssueLoaders:
         loaders = get_issue_loaders()
         assert ISSUES_BY_REPOSITORY_ID_LOADER in loaders
         assert isinstance(loaders[ISSUES_BY_REPOSITORY_ID_LOADER], DataLoader)
+        assert ISSUES_COUNT_BY_PROJECT_ID in loaders
+        assert isinstance(loaders[ISSUES_COUNT_BY_PROJECT_ID], DataLoader)
+        assert OPEN_ISSUES_COUNT_BY_PROJECT_ID in loaders
+        assert isinstance(loaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID], DataLoader)
         assert RECENT_ISSUES_BY_PROJECT_ID in loaders
         assert isinstance(loaders[RECENT_ISSUES_BY_PROJECT_ID], DataLoader)
 
@@ -132,6 +290,19 @@ class TestGetIssueLoaders:
         loaders = get_issue_loaders()
         loader = loaders[ISSUES_BY_REPOSITORY_ID_LOADER]
         assert loader.load_fn is load_issues_by_repository_id
+
+    def test_load_fn_is_load_issues_count_by_project_id(self):
+        """The issues count loader is wired to load_issues_count_by_project_id."""
+        loaders = get_issue_loaders()
+        assert loaders[ISSUES_COUNT_BY_PROJECT_ID].load_fn is load_issues_count_by_project_id
+
+    def test_load_fn_is_load_open_issues_count_by_project_id(self):
+        """The open issues count loader is wired to load_open_issues_count_by_project_id."""
+        loaders = get_issue_loaders()
+        assert (
+            loaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID].load_fn
+            is load_open_issues_count_by_project_id
+        )
 
     def test_load_fn_is_load_recent_issues_by_project_id(self):
         """The loader is wired to load_recent_issues_by_project_id."""
@@ -144,7 +315,12 @@ class TestGetIssueLoaders:
         loaders1 = get_issue_loaders()
         loaders2 = get_issue_loaders()
         assert loaders1 is not loaders2
-        for key in [ISSUES_BY_REPOSITORY_ID_LOADER, RECENT_ISSUES_BY_PROJECT_ID]:
+        for key in [
+            ISSUES_BY_REPOSITORY_ID_LOADER,
+            ISSUES_COUNT_BY_PROJECT_ID,
+            OPEN_ISSUES_COUNT_BY_PROJECT_ID,
+            RECENT_ISSUES_BY_PROJECT_ID,
+        ]:
             assert loaders1[key] is not loaders2[key]
 
 

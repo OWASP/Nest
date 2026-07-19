@@ -5,13 +5,20 @@ import strawberry_django
 
 from apps.common.utils import normalize_limit
 from apps.core.utils.index import deep_camelize
-from apps.github.api.internal.dataloaders.issue import RECENT_ISSUES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.issue import (
+    ISSUES_COUNT_BY_PROJECT_ID,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
+    RECENT_ISSUES_BY_PROJECT_ID,
+)
 from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID
 from apps.github.api.internal.dataloaders.pull_request import (
     RECENT_PULL_REQUESTS_BY_PROJECT_ID,
 )
 from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID
-from apps.github.api.internal.dataloaders.repository import REPOSITORIES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.repository import (
+    REPOSITORIES_BY_PROJECT_ID,
+    REPOSITORIES_COUNT_BY_PROJECT_ID,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
@@ -20,9 +27,6 @@ from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.dataloaders.project import (
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
-    ISSUES_COUNT_BY_PROJECT_ID,
-    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-    REPOSITORIES_COUNT_BY_PROJECT_ID,
 )
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
@@ -89,7 +93,7 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     async def issues_count(self, root: Project, info: strawberry.Info) -> int:
         """Resolve issues count."""
-        return await info.context.owasp_dataloaders[ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
+        return await info.context.github_dataloaders[ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
 
     @strawberry_django.field(only=["key"])
     def key(self, root: Project) -> str:
@@ -104,7 +108,7 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     async def open_issues_count(self, root: Project, info: strawberry.Info) -> int:
         """Resolve open issues count."""
-        return await info.context.owasp_dataloaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
+        return await info.context.github_dataloaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
 
     @strawberry_django.field
     async def recent_issues(self, root: Project, info: strawberry.Info) -> list[IssueNode]:
@@ -149,7 +153,9 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     async def repositories_count(self, root: Project, info: strawberry.Info) -> int:
         """Resolve repositories count."""
-        return await info.context.owasp_dataloaders[REPOSITORIES_COUNT_BY_PROJECT_ID].load(root.pk)
+        return await info.context.github_dataloaders[REPOSITORIES_COUNT_BY_PROJECT_ID].load(
+            root.pk
+        )
 
     @strawberry_django.field(only=["topics"])
     def topics(self, root: Project) -> list[str]:

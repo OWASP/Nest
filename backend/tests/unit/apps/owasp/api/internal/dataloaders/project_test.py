@@ -8,17 +8,11 @@ from strawberry.dataloader import DataLoader
 from apps.owasp.api.internal.dataloaders.project import (
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
-    ISSUES_COUNT_BY_PROJECT_ID,
-    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
     PROJECT_BY_REPOSITORY_ID_LOADER,
-    REPOSITORIES_COUNT_BY_PROJECT_ID,
     get_project_loaders,
     load_health_metrics_latest_by_project_id,
     load_health_metrics_list_by_project_id,
-    load_issues_count_by_project_id,
-    load_open_issues_count_by_project_id,
     load_projects_by_repository_id,
-    load_repositories_count_by_project_id,
 )
 
 
@@ -316,253 +310,6 @@ class TestLoadHealthMetricsLatestByProjectId:
         assert result == []
 
 
-class TestLoadOpenIssuesCountByProjectId:
-    """Tests for load_open_issues_count_by_project_id."""
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_project, mock_get_result_by_keys):
-        """Queryset is built with filter and only(pk, open_issues_count)."""
-        project_ids = [1, 2, 3]
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.only.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [0, 0, 0]
-
-        await load_open_issues_count_by_project_id(project_ids)
-
-        mock_project.objects.filter.assert_called_once_with(pk__in=project_ids)
-        mock_project.objects.filter.return_value.only.assert_called_once_with(
-            "pk", "open_issues_count"
-        )
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_delegates_to_get_result_by_keys(self, mock_project, mock_get_result_by_keys):
-        """get_result_by_keys receives the queryset, ids, and correct value_field."""
-        project_ids = [10, 20]
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.only.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [3, 7]
-
-        result = await load_open_issues_count_by_project_id(project_ids)
-
-        mock_get_result_by_keys.assert_called_once_with(
-            mock_qs, project_ids, key_field="pk", value_field="open_issues_count"
-        )
-        assert result == [3, 7]
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_zero_replaces_none(self, mock_project, mock_get_result_by_keys):
-        """A None result is coerced to 0."""
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.only.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [None]
-
-        result = await load_open_issues_count_by_project_id([99])
-
-        assert result == [0]
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_empty_project_ids(self, mock_project, mock_get_result_by_keys):
-        """An empty project_ids list returns an empty list."""
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.only.return_value = mock_qs
-        mock_get_result_by_keys.return_value = []
-
-        result = await load_open_issues_count_by_project_id([])
-
-        assert result == []
-
-
-class TestLoadIssuesCountByProjectId:
-    """Tests for load_issues_count_by_project_id."""
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_project, mock_get_result_by_keys):
-        """Queryset is built with filter and annotate(Count with filter)."""
-        project_ids = [1, 2, 3]
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [0, 0, 0]
-
-        await load_issues_count_by_project_id(project_ids)
-
-        mock_project.objects.filter.assert_called_once_with(pk__in=project_ids)
-        mock_project.objects.filter.return_value.annotate.assert_called_once()
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.ISSUES_COUNT_FILTER")
-    @patch("apps.owasp.api.internal.dataloaders.project.Count")
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_uses_filtered_count(
-        self, mock_project, mock_count, mock_filter, mock_get_result_by_keys
-    ):
-        """Count is called with the open-issues filter for repositories__issues."""
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [0]
-
-        await load_issues_count_by_project_id([1])
-
-        mock_count.assert_called_once_with("repositories__issues", filter=mock_filter)
-        mock_project.objects.filter.return_value.annotate.assert_called_once_with(
-            items_count=mock_count.return_value,
-        )
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_delegates_to_get_result_by_keys(self, mock_project, mock_get_result_by_keys):
-        """get_result_by_keys receives the queryset, ids, and correct value_field."""
-        project_ids = [10, 20]
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [4, 8]
-
-        result = await load_issues_count_by_project_id(project_ids)
-
-        mock_get_result_by_keys.assert_called_once_with(
-            mock_qs, project_ids, key_field="pk", value_field="items_count"
-        )
-        assert result == [4, 8]
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_zero_replaces_none(self, mock_project, mock_get_result_by_keys):
-        """A None result is coerced to 0."""
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [None]
-
-        result = await load_issues_count_by_project_id([99])
-
-        assert result == [0]
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_empty_project_ids(self, mock_project, mock_get_result_by_keys):
-        """An empty project_ids list returns an empty list."""
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = []
-
-        result = await load_issues_count_by_project_id([])
-
-        assert result == []
-
-
-class TestLoadRepositoriesCountByProjectId:
-    """Tests for load_repositories_count_by_project_id."""
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_project, mock_get_result_by_keys):
-        """Queryset is built with filter and annotate(Count)."""
-        project_ids = [1, 2, 3]
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [0, 0, 0]
-
-        await load_repositories_count_by_project_id(project_ids)
-
-        mock_project.objects.filter.assert_called_once_with(pk__in=project_ids)
-        mock_project.objects.filter.return_value.annotate.assert_called_once()
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_delegates_to_get_result_by_keys(self, mock_project, mock_get_result_by_keys):
-        """get_result_by_keys receives the queryset, ids, and correct value_field."""
-        project_ids = [10, 20]
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [4, 8]
-
-        result = await load_repositories_count_by_project_id(project_ids)
-
-        mock_get_result_by_keys.assert_called_once_with(
-            mock_qs, project_ids, key_field="pk", value_field="items_count"
-        )
-        assert result == [4, 8]
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_zero_replaces_none(self, mock_project, mock_get_result_by_keys):
-        """A None result is coerced to 0."""
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = [None]
-
-        result = await load_repositories_count_by_project_id([99])
-
-        assert result == [0]
-
-    @patch(
-        "apps.owasp.api.internal.dataloaders.project.get_result_by_keys",
-        new_callable=AsyncMock,
-    )
-    @patch("apps.owasp.api.internal.dataloaders.project.Project")
-    @pytest.mark.asyncio
-    async def test_empty_project_ids(self, mock_project, mock_get_result_by_keys):
-        """An empty project_ids list returns an empty list."""
-        mock_qs = MagicMock()
-        mock_project.objects.filter.return_value.annotate.return_value = mock_qs
-        mock_get_result_by_keys.return_value = []
-
-        result = await load_repositories_count_by_project_id([])
-
-        assert result == []
-
-
 class TestGetProjectLoaders:
     """Tests for get_project_loaders."""
 
@@ -572,9 +319,6 @@ class TestGetProjectLoaders:
             PROJECT_BY_REPOSITORY_ID_LOADER,
             HEALTH_METRICS_LIST_BY_PROJECT_ID,
             HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-            ISSUES_COUNT_BY_PROJECT_ID,
-            OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-            REPOSITORIES_COUNT_BY_PROJECT_ID,
         ],
     )
     def test_returns_mapping(self, loader_key):
@@ -604,36 +348,12 @@ class TestGetProjectLoaders:
             is load_health_metrics_latest_by_project_id
         )
 
-    def test_load_fn_is_load_issues_count_by_project_id(self):
-        """The issues count loader is wired to load_issues_count_by_project_id."""
-        loaders = get_project_loaders()
-        assert loaders[ISSUES_COUNT_BY_PROJECT_ID].load_fn is load_issues_count_by_project_id
-
-    def test_load_fn_is_load_open_issues_count_by_project_id(self):
-        """The open issues count loader is wired to load_open_issues_count_by_project_id."""
-        loaders = get_project_loaders()
-        assert (
-            loaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID].load_fn
-            is load_open_issues_count_by_project_id
-        )
-
-    def test_load_fn_is_load_repositories_count_by_project_id(self):
-        """The repositories count loader is wired to load_repositories_count_by_project_id."""
-        loaders = get_project_loaders()
-        assert (
-            loaders[REPOSITORIES_COUNT_BY_PROJECT_ID].load_fn
-            is load_repositories_count_by_project_id
-        )
-
     @pytest.mark.parametrize(
         "loader_key",
         [
             PROJECT_BY_REPOSITORY_ID_LOADER,
             HEALTH_METRICS_LIST_BY_PROJECT_ID,
             HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-            ISSUES_COUNT_BY_PROJECT_ID,
-            OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-            REPOSITORIES_COUNT_BY_PROJECT_ID,
         ],
     )
     def test_returns_new_instances_on_each_call(self, loader_key):

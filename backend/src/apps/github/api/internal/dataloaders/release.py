@@ -30,6 +30,7 @@ async def load_recent_releases_by_project_id(
     releases = (
         Release.objects.filter(
             is_draft=False,
+            is_pre_release=False,
             published_at__isnull=False,
             repository__project__in=project_ids,
         )

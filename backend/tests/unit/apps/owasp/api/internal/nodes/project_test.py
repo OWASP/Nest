@@ -4,13 +4,20 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from apps.github.api.internal.dataloaders.issue import RECENT_ISSUES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.issue import (
+    ISSUES_COUNT_BY_PROJECT_ID,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
+    RECENT_ISSUES_BY_PROJECT_ID,
+)
 from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID
 from apps.github.api.internal.dataloaders.pull_request import (
     RECENT_PULL_REQUESTS_BY_PROJECT_ID,
 )
 from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID
-from apps.github.api.internal.dataloaders.repository import REPOSITORIES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.repository import (
+    REPOSITORIES_BY_PROJECT_ID,
+    REPOSITORIES_COUNT_BY_PROJECT_ID,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
@@ -19,9 +26,6 @@ from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.dataloaders.project import (
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
-    ISSUES_COUNT_BY_PROJECT_ID,
-    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-    REPOSITORIES_COUNT_BY_PROJECT_ID,
 )
 from apps.owasp.api.internal.nodes.project import (
     RECENT_ISSUES_LIMIT,
@@ -188,7 +192,7 @@ class TestProjectNodeResolvers:
         """Test issues_count resolver delegates to the dataloader with pk."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=42)
-        mock_info = self._build_info(owasp={ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 8
@@ -296,7 +300,7 @@ class TestProjectNodeResolvers:
         """open_issues_count delegates to the dataloader with pk."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=37)
-        mock_info = self._build_info(owasp={OPEN_ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={OPEN_ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 3
@@ -312,7 +316,7 @@ class TestProjectNodeResolvers:
         """repositories_count delegates to the dataloader with pk."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=5)
-        mock_info = self._build_info(owasp={REPOSITORIES_COUNT_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={REPOSITORIES_COUNT_BY_PROJECT_ID: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 4
