@@ -327,17 +327,18 @@ class TestLoadRecentReleasesByProjectId:
     @staticmethod
     def _ordered_qs(mock_release):
         """Return the mock queryset at the end of the releases chain."""
-        call = mock_release.objects.filter.return_value
-        return call.prefetch_related.return_value.order_by.return_value
+        return mock_release.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.return_value
 
+    @patch(
+        "apps.github.api.internal.dataloaders.release.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.release.Release")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_release):
-        """Queryset is built with filter, prefetch_related, order_by, distinct."""
-        mock_filter_result = mock_release.objects.filter.return_value
+    async def test_builds_queryset_with_correct_chain(self, mock_release, mock_get_results):
+        """Queryset is built with filter, annotate, filter(row_number__lte), order_by."""
         mock_ordered = self._ordered_qs(mock_release)
-        mock_ordered.distinct.return_value = MagicMock()
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+        mock_get_results.return_value = [[], []]
 
         await load_recent_releases_by_project_id([(1, 5), (2, 5)])
 
@@ -347,75 +348,72 @@ class TestLoadRecentReleasesByProjectId:
             published_at__isnull=False,
             repository__project__in=[1, 2],
         )
-        mock_filter_result.prefetch_related.assert_called_once()
-        mock_filter_result.prefetch_related.return_value.order_by.assert_called_once_with(
-            "-published_at"
+        mock_release.objects.filter.return_value.annotate.assert_called_once()
+        mock_release.objects.filter.return_value.annotate.return_value.filter.assert_called_once_with(
+            row_number__lte=5
         )
-        mock_ordered.distinct.assert_called_once()
+        mock_release.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.assert_called_once_with(
+            "project_id", "-published_at"
+        )
+        mock_get_results.assert_called_once_with(mock_ordered, [1, 2], key_field="project_id")
 
+    @patch(
+        "apps.github.api.internal.dataloaders.release.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.release.Release")
     @pytest.mark.asyncio
-    async def test_maps_releases_to_project_ids(self, mock_release):
+    async def test_maps_releases_to_project_ids(self, mock_release, mock_get_results):
         """Releases are mapped to the projects that own the release's repository."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
         release_a = MagicMock()
-        release_a.repository.prefetched_projects = [project_1]
         release_b = MagicMock()
-        release_b.repository.prefetched_projects = [project_2]
-
-        mock_ordered = self._ordered_qs(mock_release)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([release_a, release_b])
+        mock_get_results.return_value = [[release_a], [release_b]]
 
         result = await load_recent_releases_by_project_id([(1, 5), (2, 5)])
 
         assert result == [[release_a], [release_b]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.release.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.release.Release")
     @pytest.mark.asyncio
-    async def test_limit_enforced_per_project(self, mock_release):
+    async def test_limit_enforced_per_project(self, mock_release, mock_get_results):
         """Each project list is truncated to the configured limit."""
-        project = MagicMock(pk=1)
         releases = [MagicMock() for _ in range(5)]
-        for release in releases:
-            release.repository.prefetched_projects = [project]
-
-        mock_ordered = self._ordered_qs(mock_release)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter(releases)
+        mock_get_results.return_value = [releases[:3]]
 
         result = await load_recent_releases_by_project_id([(1, 3)])
 
-        assert result == [[releases[0], releases[1], releases[2]]]
+        assert result == [releases[:3]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.release.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.release.Release")
     @pytest.mark.asyncio
-    async def test_order_matches_keys_not_queryset(self, mock_release):
+    async def test_order_matches_keys_not_queryset(self, mock_release, mock_get_results):
         """The output order follows project_ids, not the queryset iteration order."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
-        release_b = MagicMock()
-        release_b.repository.prefetched_projects = [project_2]
         release_a = MagicMock()
-        release_a.repository.prefetched_projects = [project_1]
-
-        mock_ordered = self._ordered_qs(mock_release)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([release_b, release_a])
+        release_b = MagicMock()
+        mock_get_results.return_value = [[release_a], [release_b]]
 
         result = await load_recent_releases_by_project_id([(1, 5), (2, 5)])
 
         assert result == [[release_a], [release_b]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.release.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.release.Release")
     @pytest.mark.asyncio
-    async def test_shared_repository_appears_in_each_project(self, mock_release):
+    async def test_shared_repository_appears_in_each_project(self, mock_release, mock_get_results):
         """A repo shared between projects contributes the release to each project."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
         release = MagicMock()
-        release.repository.prefetched_projects = [project_1, project_2]
-
-        mock_ordered = self._ordered_qs(mock_release)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([release])
+        mock_get_results.return_value = [[release], [release]]
 
         result = await load_recent_releases_by_project_id([(1, 5), (2, 5)])
 
@@ -427,12 +425,15 @@ class TestLoadRecentReleasesByProjectId:
         result = await load_recent_releases_by_project_id([])
         assert result == []
 
+    @patch(
+        "apps.github.api.internal.dataloaders.release.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.release.Release")
     @pytest.mark.asyncio
-    async def test_missing_project_returns_empty_list(self, mock_release):
+    async def test_missing_project_returns_empty_list(self, mock_release, mock_get_results):
         """A project ID with no matching releases gets an empty list."""
-        mock_ordered = self._ordered_qs(mock_release)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+        mock_get_results.return_value = [[]]
 
         result = await load_recent_releases_by_project_id([(99, 5)])
 

@@ -330,91 +330,88 @@ class TestLoadRecentIssuesByProjectId:
     @staticmethod
     def _ordered_qs(mock_issue):
         """Return the mock queryset at the end of the issues chain."""
-        call = mock_issue.objects.filter.return_value
-        return call.prefetch_related.return_value.order_by.return_value
+        return mock_issue.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.return_value
 
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.issue.Issue")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_issue):
-        """Queryset is built with filter, prefetch_related, order_by, distinct."""
-        mock_filter_result = mock_issue.objects.filter.return_value
+    async def test_builds_queryset_with_correct_chain(self, mock_issue, mock_get_results):
+        """Queryset is built with filter, annotate, filter(row_number__lte), order_by."""
         mock_ordered = self._ordered_qs(mock_issue)
-        mock_ordered.distinct.return_value = MagicMock()
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+        mock_get_results.return_value = [[], []]
 
         await load_recent_issues_by_project_id([(1, 5), (2, 5)])
 
         mock_issue.objects.filter.assert_called_once_with(repository__project__in=[1, 2])
-        mock_filter_result.prefetch_related.assert_called_once()
-        mock_filter_result.prefetch_related.return_value.order_by.assert_called_once_with(
-            "-created_at"
+        mock_issue.objects.filter.return_value.annotate.assert_called_once()
+        mock_issue.objects.filter.return_value.annotate.return_value.filter.assert_called_once_with(
+            row_number__lte=5
         )
-        mock_ordered.distinct.assert_called_once()
+        mock_issue.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.assert_called_once_with(
+            "project_id", "-created_at"
+        )
+        mock_get_results.assert_called_once_with(mock_ordered, [1, 2], key_field="project_id")
 
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.issue.Issue")
     @pytest.mark.asyncio
-    async def test_maps_issues_to_project_ids(self, mock_issue):
+    async def test_maps_issues_to_project_ids(self, mock_issue, mock_get_results):
         """Issues are mapped to the projects that own the issue's repository."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
-
         issue_a = MagicMock()
-        issue_a.repository.prefetched_projects = [project_1]
         issue_b = MagicMock()
-        issue_b.repository.prefetched_projects = [project_2]
-
-        mock_qs = self._ordered_qs(mock_issue).distinct.return_value
-        mock_qs.__aiter__.return_value = iter([issue_a, issue_b])
+        mock_get_results.return_value = [[issue_a], [issue_b]]
 
         result = await load_recent_issues_by_project_id([(1, 5), (2, 5)])
 
         assert result == [[issue_a], [issue_b]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.issue.Issue")
     @pytest.mark.asyncio
-    async def test_limit_enforced_per_project(self, mock_issue):
+    async def test_limit_enforced_per_project(self, mock_issue, mock_get_results):
         """Each project list is truncated to the configured limit."""
-        project = MagicMock(pk=1)
         issues = [MagicMock() for _ in range(5)]
-        for issue in issues:
-            issue.repository.prefetched_projects = [project]
-
-        mock_qs = self._ordered_qs(mock_issue).distinct.return_value
-        mock_qs.__aiter__.return_value = iter(issues)
+        mock_get_results.return_value = [issues[:3]]
 
         result = await load_recent_issues_by_project_id([(1, 3)])
 
-        assert result == [[issues[0], issues[1], issues[2]]]
+        assert result == [issues[:3]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.issue.Issue")
     @pytest.mark.asyncio
-    async def test_order_matches_keys_not_queryset(self, mock_issue):
+    async def test_order_matches_keys_not_queryset(self, mock_issue, mock_get_results):
         """The output order follows project_ids, not the queryset iteration order."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
-        issue_b = MagicMock()
-        issue_b.repository.prefetched_projects = [project_2]
         issue_a = MagicMock()
-        issue_a.repository.prefetched_projects = [project_1]
-
-        mock_qs = self._ordered_qs(mock_issue).distinct.return_value
-        mock_qs.__aiter__.return_value = iter([issue_b, issue_a])
+        issue_b = MagicMock()
+        mock_get_results.return_value = [[issue_a], [issue_b]]
 
         result = await load_recent_issues_by_project_id([(1, 5), (2, 5)])
 
         assert result == [[issue_a], [issue_b]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.issue.Issue")
     @pytest.mark.asyncio
-    async def test_shared_repository_appears_in_each_project(self, mock_issue):
+    async def test_shared_repository_appears_in_each_project(self, mock_issue, mock_get_results):
         """A repo shared between projects contributes the issue to each project."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
         issue = MagicMock()
-        issue.repository.prefetched_projects = [project_1, project_2]
-
-        mock_qs = self._ordered_qs(mock_issue).distinct.return_value
-        mock_qs.__aiter__.return_value = iter([issue])
+        mock_get_results.return_value = [[issue], [issue]]
 
         result = await load_recent_issues_by_project_id([(1, 5), (2, 5)])
 
@@ -426,12 +423,15 @@ class TestLoadRecentIssuesByProjectId:
         result = await load_recent_issues_by_project_id([])
         assert result == []
 
+    @patch(
+        "apps.github.api.internal.dataloaders.issue.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.issue.Issue")
     @pytest.mark.asyncio
-    async def test_missing_project_returns_empty_list(self, mock_issue):
+    async def test_missing_project_returns_empty_list(self, mock_issue, mock_get_results):
         """A project ID with no matching issues gets an empty list."""
-        mock_qs = self._ordered_qs(mock_issue).distinct.return_value
-        mock_qs.__aiter__.return_value = iter([])
+        mock_get_results.return_value = [[]]
 
         result = await load_recent_issues_by_project_id([(99, 5)])
 

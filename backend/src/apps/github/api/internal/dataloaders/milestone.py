@@ -9,7 +9,6 @@ from strawberry.dataloader import DataLoader
 from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 from apps.github.models.milestone import Milestone
 from apps.mentorship.models.program import Program
-from apps.owasp.models.project import Project
 
 RECENT_MILESTONES_BY_PROGRAM_ID = "recent_milestones_by_program_id"
 RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER = "recent_milestones_by_repository_id"
@@ -29,24 +28,19 @@ async def load_recent_milestones_by_project_id(
 
     milestones = (
         Milestone.objects.filter(repository__project__in=project_ids)
-        .prefetch_related(
-            Prefetch(
-                "repository__project_set",
-                queryset=Project.objects.filter(pk__in=project_ids).only("pk"),
-                to_attr="prefetched_projects",
+        .annotate(
+            project_id=F("repository__project"),
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("project_id")],
+                order_by=F("created_at").desc(),
             ),
         )
-        .order_by("-created_at")
-        .distinct()
+        .filter(row_number__lte=limit)
+        .order_by("project_id", "-created_at")
     )
 
-    mapping: dict[int, list[Milestone]] = defaultdict(list)
-    async for milestone in milestones:
-        for project in milestone.repository.prefetched_projects:
-            if len(mapping[project.pk]) < limit:
-                mapping[project.pk].append(milestone)
-
-    return [mapping.get(project_id, []) for project_id in project_ids]
+    return await get_results_by_keys(milestones, project_ids, key_field="project_id")
 
 
 async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[list[Milestone]]:

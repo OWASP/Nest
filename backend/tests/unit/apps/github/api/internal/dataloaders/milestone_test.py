@@ -355,94 +355,90 @@ class TestLoadRecentMilestonesByProjectId:
     @staticmethod
     def _ordered_qs(mock_milestone):
         """Return the mock queryset at the end of the milestones chain."""
-        call = mock_milestone.objects.filter.return_value
-        return call.prefetch_related.return_value.order_by.return_value
+        return mock_milestone.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.return_value
 
+    @patch(
+        "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_milestone):
-        """Queryset is built with filter, prefetch_related, order_by, distinct."""
-        mock_filter_result = mock_milestone.objects.filter.return_value
+    async def test_builds_queryset_with_correct_chain(self, mock_milestone, mock_get_results):
+        """Queryset is built with filter, annotate, filter(row_number__lte), order_by."""
         mock_ordered = self._ordered_qs(mock_milestone)
-        mock_ordered.distinct.return_value = MagicMock()
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+        mock_get_results.return_value = [[], []]
 
         await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
 
         mock_milestone.objects.filter.assert_called_once_with(repository__project__in=[1, 2])
-        mock_filter_result.prefetch_related.assert_called_once()
-        mock_filter_result.prefetch_related.return_value.order_by.assert_called_once_with(
-            "-created_at"
+        mock_milestone.objects.filter.return_value.annotate.assert_called_once()
+        mock_milestone.objects.filter.return_value.annotate.return_value.filter.assert_called_once_with(
+            row_number__lte=5
         )
-        mock_ordered.distinct.assert_called_once()
+        mock_milestone.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.assert_called_once_with(
+            "project_id", "-created_at"
+        )
+        mock_get_results.assert_called_once_with(mock_ordered, [1, 2], key_field="project_id")
 
+    @patch(
+        "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_maps_milestones_to_project_ids(self, mock_milestone):
+    async def test_maps_milestones_to_project_ids(self, mock_milestone, mock_get_results):
         """Milestones are mapped to the projects that own the milestone's repository."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
         milestone_a = MagicMock()
-        milestone_a.repository.prefetched_projects = [project_1]
         milestone_b = MagicMock()
-        milestone_b.repository.prefetched_projects = [project_2]
-
-        mock_ordered = self._ordered_qs(mock_milestone)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter(
-            [milestone_a, milestone_b]
-        )
+        mock_get_results.return_value = [[milestone_a], [milestone_b]]
 
         result = await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
 
         assert result == [[milestone_a], [milestone_b]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_limit_enforced_per_project(self, mock_milestone):
+    async def test_limit_enforced_per_project(self, mock_milestone, mock_get_results):
         """Each project list is truncated to the configured limit."""
-        project = MagicMock(pk=1)
         milestones = [MagicMock() for _ in range(5)]
-        for milestone in milestones:
-            milestone.repository.prefetched_projects = [project]
-
-        mock_ordered = self._ordered_qs(mock_milestone)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter(milestones)
+        mock_get_results.return_value = [milestones[:3]]
 
         result = await load_recent_milestones_by_project_id([(1, 3)])
 
-        assert result == [[milestones[0], milestones[1], milestones[2]]]
+        assert result == [milestones[:3]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_order_matches_keys_not_queryset(self, mock_milestone):
+    async def test_order_matches_keys_not_queryset(self, mock_milestone, mock_get_results):
         """The output order follows project_ids, not the queryset iteration order."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
-        milestone_b = MagicMock()
-        milestone_b.repository.prefetched_projects = [project_2]
         milestone_a = MagicMock()
-        milestone_a.repository.prefetched_projects = [project_1]
-
-        mock_ordered = self._ordered_qs(mock_milestone)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter(
-            [milestone_b, milestone_a]
-        )
+        milestone_b = MagicMock()
+        mock_get_results.return_value = [[milestone_a], [milestone_b]]
 
         result = await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
 
         assert result == [[milestone_a], [milestone_b]]
 
+    @patch(
+        "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_shared_repository_appears_in_each_project(self, mock_milestone):
+    async def test_shared_repository_appears_in_each_project(
+        self, mock_milestone, mock_get_results
+    ):
         """A repo shared between projects contributes the milestone to each project."""
-        project_1 = MagicMock(pk=1)
-        project_2 = MagicMock(pk=2)
         milestone = MagicMock()
-        milestone.repository.prefetched_projects = [project_1, project_2]
-
-        mock_ordered = self._ordered_qs(mock_milestone)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([milestone])
+        mock_get_results.return_value = [[milestone], [milestone]]
 
         result = await load_recent_milestones_by_project_id([(1, 5), (2, 5)])
 
@@ -454,12 +450,15 @@ class TestLoadRecentMilestonesByProjectId:
         result = await load_recent_milestones_by_project_id([])
         assert result == []
 
+    @patch(
+        "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",
+        new_callable=AsyncMock,
+    )
     @patch("apps.github.api.internal.dataloaders.milestone.Milestone")
     @pytest.mark.asyncio
-    async def test_missing_project_returns_empty_list(self, mock_milestone):
+    async def test_missing_project_returns_empty_list(self, mock_milestone, mock_get_results):
         """A project ID with no matching milestones gets an empty list."""
-        mock_ordered = self._ordered_qs(mock_milestone)
-        mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
+        mock_get_results.return_value = [[]]
 
         result = await load_recent_milestones_by_project_id([(99, 5)])
 

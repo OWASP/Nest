@@ -1,12 +1,11 @@
 """Dataloaders for pull requests."""
 
-from collections import defaultdict
-
-from django.db.models import Prefetch
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
+from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 from apps.github.models.pull_request import PullRequest
-from apps.owasp.models.project import Project
 
 RECENT_PULL_REQUESTS_BY_PROJECT_ID = "recent_pull_requests_by_project_id"
 
@@ -23,24 +22,19 @@ async def load_recent_pull_requests_by_project_id(
 
     pull_requests = (
         PullRequest.objects.filter(repository__project__in=project_ids)
-        .prefetch_related(
-            Prefetch(
-                "repository__project_set",
-                queryset=Project.objects.filter(pk__in=project_ids).only("pk"),
-                to_attr="prefetched_projects",
+        .annotate(
+            project_id=F("repository__project"),
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("project_id")],
+                order_by=F("created_at").desc(),
             ),
         )
-        .order_by("-created_at")
-        .distinct()
+        .filter(row_number__lte=limit)
+        .order_by("project_id", "-created_at")
     )
 
-    mapping: dict[int, list[PullRequest]] = defaultdict(list)
-    async for pull_request in pull_requests:
-        for project in pull_request.repository.prefetched_projects:
-            if len(mapping[project.pk]) < limit:
-                mapping[project.pk].append(pull_request)
-
-    return [mapping.get(project_id, []) for project_id in project_ids]
+    return await get_results_by_keys(pull_requests, project_ids, key_field="project_id")
 
 
 def get_pull_request_loaders() -> dict[str, object]:
