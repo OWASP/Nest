@@ -10,6 +10,7 @@ security-dependency-audit: ## Audit dependencies for known vulnerabilities
 	@$(MAKE) docs-dependency-audit
 	@$(MAKE) e2e-dependency-audit
 	@$(MAKE) frontend-dependency-audit
+	@$(MAKE) infrastructure-dependency-audit
 	@$(MAKE) tooling-dependency-audit
 
 security-scan: ## Run security scans

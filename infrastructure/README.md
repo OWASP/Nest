@@ -377,6 +377,47 @@ aws ecs run-task \
         --region AWS_REGION
     ```
 
+## Testing
+
+Local Make targets use Docker (like backend). CI runs Poetry + Terraform directly on the runner for speed (cached plugins/venv, no image build).
+
+### Unit Testing
+
+These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.
+
+Locally, `make test-infrastructure-unit` builds the shared `nest-test-infrastructure` image from `docker/infrastructure/Dockerfile.tests` (Poetry + Terraform), mounts `scripts`, `tests`, `bootstrap`, and `modules` from the host, and runs:
+
+1. The runner's pytest suite
+2. Terraform unit tests via `python -m scripts.run_tests --unit`
+
+```bash
+make test-infrastructure-unit
+```
+
+Rebuild the image when `infrastructure/poetry.lock` (or Terraform version) changes; source edits do not require a rebuild.
+
+### Integration Testing (with LocalStack)
+
+Integration tests deploy resources against LocalStack to verify IAM policies, SSM/KMS interactions, and resource wiring. Locally, `make test-infrastructure-integration` reuses `nest-test-infrastructure`, starts LocalStack via Compose, and runs `--integration`.
+
+#### Prerequisite
+
+- Docker running locally
+- `LOCALSTACK_AUTH_TOKEN` set (if unset, the Make target skips integration tests)
+
+```bash
+export LOCALSTACK_AUTH_TOKEN="<your_auth_token>"
+make test-infrastructure-integration
+```
+
+### Run All Infrastructure Tests
+
+`make test-infrastructure` runs unit tests, then integration tests when `LOCALSTACK_AUTH_TOKEN` is set.
+
+```bash
+make test-infrastructure
+```
+
 ## Cleaning Up
 
 - Ensure all buckets and ECR repositories are empty.

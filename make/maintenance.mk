@@ -27,6 +27,7 @@ clean-docker:
 	@$(MAKE) backend-clean-docker
 	@$(MAKE) docs-clean-docker
 	@$(MAKE) frontend-clean-docker
+	@$(MAKE) infrastructure-clean-docker
 
 clean-trivy-cache:
 	@rm -rf $(CURDIR)/.trivy-cache
