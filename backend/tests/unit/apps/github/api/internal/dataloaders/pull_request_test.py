@@ -15,8 +15,7 @@ from apps.github.api.internal.dataloaders.pull_request import (
 def _build_queryset_mock(mock_pull_request):
     """Wire up the chained mock queryset ending at order_by()."""
     mock_filter_result = mock_pull_request.objects.filter.return_value
-    call = mock_filter_result.select_related.return_value
-    return call.prefetch_related.return_value.order_by.return_value
+    return mock_filter_result.prefetch_related.return_value.order_by.return_value
 
 
 class TestLoadRecentPullRequestsByProjectId:
@@ -25,23 +24,18 @@ class TestLoadRecentPullRequestsByProjectId:
     @patch("apps.github.api.internal.dataloaders.pull_request.PullRequest")
     @pytest.mark.asyncio
     async def test_builds_queryset_with_correct_chain(self, mock_pull_request):
-        """Queryset is built with filter, select_related, prefetch_related, order_by, distinct."""
+        """Queryset is built with filter, prefetch_related, order_by, distinct."""
+        mock_filter_result = mock_pull_request.objects.filter.return_value
         mock_ordered = _build_queryset_mock(mock_pull_request)
         mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
 
         await load_recent_pull_requests_by_project_id([(1, 5), (2, 5)])
 
         mock_pull_request.objects.filter.assert_called_once_with(repository__project__in=[1, 2])
-        mock_filter_result = mock_pull_request.objects.filter.return_value
-        mock_filter_result.select_related.assert_called_once_with(
-            "author",
-            "milestone",
-            "repository__organization",
-            "repository",
+        mock_filter_result.prefetch_related.assert_called_once()
+        mock_filter_result.prefetch_related.return_value.order_by.assert_called_once_with(
+            "-created_at"
         )
-        mock_select = mock_filter_result.select_related.return_value
-        mock_select.prefetch_related.assert_called_once()
-        mock_select.prefetch_related.return_value.order_by.assert_called_once_with("-created_at")
         mock_ordered.distinct.assert_called_once()
 
     @patch("apps.github.api.internal.dataloaders.pull_request.PullRequest")

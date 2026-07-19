@@ -155,13 +155,13 @@ class TestLoadRecentIssuesByProjectId:
     def _ordered_qs(mock_issue):
         """Return the mock queryset at the end of the issues chain."""
         call = mock_issue.objects.filter.return_value
-        return call.select_related.return_value.prefetch_related.return_value.order_by.return_value
+        return call.prefetch_related.return_value.order_by.return_value
 
     @patch("apps.github.api.internal.dataloaders.issue.Issue")
     @pytest.mark.asyncio
     async def test_builds_queryset_with_correct_chain(self, mock_issue):
-        """Queryset is built with filter, select_related, prefetch_related, order_by, distinct."""
-        mock_prefetch_call = mock_issue.objects.filter.return_value
+        """Queryset is built with filter, prefetch_related, order_by, distinct."""
+        mock_filter_result = mock_issue.objects.filter.return_value
         mock_ordered = self._ordered_qs(mock_issue)
         mock_ordered.distinct.return_value = MagicMock()
         mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
@@ -169,17 +169,10 @@ class TestLoadRecentIssuesByProjectId:
         await load_recent_issues_by_project_id([(1, 5), (2, 5)])
 
         mock_issue.objects.filter.assert_called_once_with(repository__project__in=[1, 2])
-        mock_prefetch_call.select_related.assert_called_once_with(
-            "author",
-            "level",
-            "milestone",
-            "repository",
+        mock_filter_result.prefetch_related.assert_called_once()
+        mock_filter_result.prefetch_related.return_value.order_by.assert_called_once_with(
+            "-created_at"
         )
-        mock_prefetch_call.select_related.return_value.prefetch_related.assert_called_once()
-        mock_prefetch = (
-            mock_prefetch_call.select_related.return_value.prefetch_related.return_value
-        )
-        mock_prefetch.order_by.assert_called_once_with("-created_at")
         mock_ordered.distinct.assert_called_once()
 
     @patch("apps.github.api.internal.dataloaders.issue.Issue")

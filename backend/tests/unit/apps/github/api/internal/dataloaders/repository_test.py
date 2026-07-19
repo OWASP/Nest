@@ -211,14 +211,13 @@ class TestLoadRepositoriesByProjectId:
     def _ordered_qs(mock_repository):
         """Return the mock queryset at the end of the repositories chain."""
         call = mock_repository.objects.filter.return_value
-        return call.select_related.return_value.prefetch_related.return_value.order_by.return_value
+        return call.prefetch_related.return_value.order_by.return_value
 
     @patch("apps.github.api.internal.dataloaders.repository.Repository")
     @pytest.mark.asyncio
     async def test_builds_queryset_with_correct_chain(self, mock_repository):
         """Queryset filters by project + organization, orders by pushed/updated, distincts."""
         mock_filter_result = mock_repository.objects.filter.return_value
-        mock_select = mock_filter_result.select_related.return_value
         mock_ordered = self._ordered_qs(mock_repository)
         mock_ordered.distinct.return_value = MagicMock()
         mock_ordered.distinct.return_value.__aiter__.return_value = iter([])
@@ -228,9 +227,8 @@ class TestLoadRepositoriesByProjectId:
         mock_repository.objects.filter.assert_called_once_with(
             project__in=[1, 2], organization__isnull=False
         )
-        mock_filter_result.select_related.assert_called_once_with("organization")
-        mock_select.prefetch_related.assert_called_once()
-        mock_select.prefetch_related.return_value.order_by.assert_called_once_with(
+        mock_filter_result.prefetch_related.assert_called_once()
+        mock_filter_result.prefetch_related.return_value.order_by.assert_called_once_with(
             "-pushed_at", "-updated_at"
         )
         mock_ordered.distinct.assert_called_once()
