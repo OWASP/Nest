@@ -126,29 +126,31 @@ const SearchPageLayout = ({
             ))}
         </div>
       )}
-      {isLoaded ? (
-        <>
-          <div>
-            {!inlineSort && totalPages !== 0 && (
-              <div className="flex justify-end" data-testid="sort-below">
-                {sortChildren}
-              </div>
+      <div className={`w-full ${filterChildren || (inlineSort && sortChildren) ? '' : 'mt-4 md:mt-0'}`}>
+        {isLoaded ? (
+          <>
+            <div>
+              {!inlineSort && totalPages !== 0 && (
+                <div className="flex justify-end" data-testid="sort-below">
+                  {sortChildren}
+                </div>
+              )}
+              {totalPages === 0 && <div className="text m-4 text-xl dark:text-white">{empty}</div>}
+              {children}
+            </div>
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={onPageChange}
+                isLoaded={isLoaded}
+              />
             )}
-            {totalPages === 0 && <div className="text m-4 text-xl dark:text-white">{empty}</div>}
-            {children}
-          </div>
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={onPageChange}
-              isLoaded={isLoaded}
-            />
-          )}
-        </>
-      ) : (
-        <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
-      )}
+          </>
+        ) : (
+          <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
+        )}
+      </div>
     </div>
   )
 }
