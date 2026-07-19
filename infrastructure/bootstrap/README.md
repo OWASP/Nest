@@ -49,10 +49,6 @@ To run plans or apply changes locally:
    terraform init -reconfigure -backend-config=terraform.tfbackend
    ```
 
-> [!IMPORTANT]
-> **State Migration Prerequisite**: If applying this refactored configuration to an existing environment, you **must not** run `terraform plan` or `terraform apply` before migrating the legacy shared state. Running them before migrating will make Terraform attempt to recreate already-existing roles and policies, causing name conflicts and rollout failures.
->
-> Please follow the [State Migration Instructions](#state-migration-one-time-post-merge) below to split the legacy state first.
 
 1. Run Plan or Apply:
 
@@ -65,7 +61,9 @@ To run plans or apply changes locally:
 
 ## Inline Permissions
 
-Ensure your `nest-bootstrap` IAM User has the following inline permissions attached before running bootstrap operations. Replace the placeholders with appropriate values.
+Use the following inline permissions for the `nest-bootstrap` IAM User:
+
+*Note*: replace the placeholders with appropriate values.
 
 ```json
 {
@@ -179,131 +177,4 @@ No modules.
 | <a name="output_terraform_role_arn"></a> [terraform\_role\_arn](#output\_terraform\_role\_arn) | The ARN of the Terraform IAM role. |
 <!-- END_TF_DOCS -->
 
----
 
-## State Migration (One-Time, Post-Merge)
-
-Existing shared bootstrap state requires maintainer-led migration to split the old shared state into staging and production state files. The resources must be renamed from their old map keys (e.g. `aws_iam_role.terraform["staging"]` / `aws_iam_role.terraform["production"]`) to their direct single-root equivalents (e.g. `aws_iam_role.terraform`) before the new root is used against AWS.
-
-### Step 1. Back up the old shared state
-
-Initialize the backend for the old shared state and pull a backup:
-
-```bash
-terraform -chdir=infrastructure/bootstrap init -reconfigure \
-  -backend-config="bucket=<REAL_BUCKET>" \
-  -backend-config="region=us-east-2" \
-  -backend-config="key=<OLD_SHARED_KEY>"
-
-terraform -chdir=infrastructure/bootstrap state pull > shared_bootstrap_backup.tfstate
-```
-
-### Step 2. Migrate Staging State
-
-Extract and rename the staging resources into the new staging state file:
-
-1. Create a copy of the backup:
-
-   ```bash
-   cp shared_bootstrap_backup.tfstate staging_bootstrap.tfstate
-   ```
-
-2. Rename the staging resources to their direct, non-loop addresses inside the state copy:
-
-   ```bash
-   terraform state mv -state=staging_bootstrap.tfstate 'aws_iam_role.terraform["staging"]' aws_iam_role.terraform
-   terraform state mv -state=staging_bootstrap.tfstate 'aws_iam_policy.part_one["staging"]' aws_iam_policy.part_one
-   terraform state mv -state=staging_bootstrap.tfstate 'aws_iam_policy.part_two["staging"]' aws_iam_policy.part_two
-   terraform state mv -state=staging_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_one["staging"]' aws_iam_role_policy_attachment.attach_part_one
-   terraform state mv -state=staging_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_two["staging"]' aws_iam_role_policy_attachment.attach_part_two
-   ```
-
-3. Remove the untracked production resources from the staging state file:
-
-   ```bash
-   terraform state rm -state=staging_bootstrap.tfstate 'aws_iam_role.terraform["production"]'
-   terraform state rm -state=staging_bootstrap.tfstate 'aws_iam_policy.part_one["production"]'
-   terraform state rm -state=staging_bootstrap.tfstate 'aws_iam_policy.part_two["production"]'
-   terraform state rm -state=staging_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_one["production"]'
-   terraform state rm -state=staging_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_two["production"]'
-   ```
-
-4. Push the staging state to its new per-environment S3 location:
-
-   ```bash
-   terraform -chdir=infrastructure/bootstrap init -reconfigure \
-     -backend-config="bucket=<REAL_BUCKET>" \
-     -backend-config="region=us-east-2" \
-     -backend-config="key=staging/bootstrap/terraform.tfstate"
-
-   terraform -chdir=infrastructure/bootstrap state push staging_bootstrap.tfstate
-   ```
-
-### Step 3. Migrate Production State
-
-Extract and rename the production resources into the new production state file:
-
-1. Create a copy of the backup:
-
-   ```bash
-   cp shared_bootstrap_backup.tfstate production_bootstrap.tfstate
-   ```
-
-2. Rename the production resources to their direct, non-loop addresses inside the state copy:
-
-   ```bash
-   terraform state mv -state=production_bootstrap.tfstate 'aws_iam_role.terraform["production"]' aws_iam_role.terraform
-   terraform state mv -state=production_bootstrap.tfstate 'aws_iam_policy.part_one["production"]' aws_iam_policy.part_one
-   terraform state mv -state=production_bootstrap.tfstate 'aws_iam_policy.part_two["production"]' aws_iam_policy.part_two
-   terraform state mv -state=production_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_one["production"]' aws_iam_role_policy_attachment.attach_part_one
-   terraform state mv -state=production_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_two["production"]' aws_iam_role_policy_attachment.attach_part_two
-   ```
-
-3. Remove the untracked staging resources from the production state file:
-
-   ```bash
-   terraform state rm -state=production_bootstrap.tfstate 'aws_iam_role.terraform["staging"]'
-   terraform state rm -state=production_bootstrap.tfstate 'aws_iam_policy.part_one["staging"]'
-   terraform state rm -state=production_bootstrap.tfstate 'aws_iam_policy.part_two["staging"]'
-   terraform state rm -state=production_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_one["staging"]'
-   terraform state rm -state=production_bootstrap.tfstate 'aws_iam_role_policy_attachment.attach_part_two["staging"]'
-   ```
-
-4. Push the production state to its new per-environment S3 location:
-
-   ```bash
-   terraform -chdir=infrastructure/bootstrap init -reconfigure \
-     -backend-config="bucket=<REAL_BUCKET>" \
-     -backend-config="region=us-east-2" \
-     -backend-config="key=production/bootstrap/terraform.tfstate"
-
-   terraform -chdir=infrastructure/bootstrap state push production_bootstrap.tfstate
-   ```
-
-### Step 4. Verify Both Migrations
-
-Run a plan on each environment config to verify no resources are changed or destroyed:
-
-- Run plan for staging:
-
-  ```bash
-  terraform -chdir=infrastructure/bootstrap init -reconfigure \
-    -backend-config="bucket=<REAL_BUCKET>" \
-    -backend-config="region=us-east-2" \
-    -backend-config="key=staging/bootstrap/terraform.tfstate"
-
-  terraform -chdir=infrastructure/bootstrap plan -var="environment=staging"
-  ```
-
-- Run plan for production:
-
-  ```bash
-  terraform -chdir=infrastructure/bootstrap init -reconfigure \
-    -backend-config="bucket=<REAL_BUCKET>" \
-    -backend-config="region=us-east-2" \
-    -backend-config="key=production/bootstrap/terraform.tfstate"
-
-  terraform -chdir=infrastructure/bootstrap plan -var="environment=production"
-  ```
-
-Both plans must return `No changes. Your infrastructure matches the configuration.`, indicating the migration was 100% successful and clean.
