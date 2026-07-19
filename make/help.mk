@@ -2,11 +2,13 @@
 
 .PHONY: help
 
+# Keep this list explicit so only public targets appear in help. Its order matters because
+# each ##@ header starts the section for the files that follow it.
 HELP_MAKEFILES := make/help.mk make/run.mk make/check.mk make/test.mk \
 	backend/make/test.mk backend/make/clusterfuzz.mk frontend/make/test.mk \
 	e2e/make/test.mk infrastructure/Makefile \
-	make/check-test.mk make/maintenance.mk backend/make/django.mk \
-	backend/make/maintenance.mk backend/make/data.mk make/shell.mk make/security.mk
+	make/check-test.mk backend/make/django.mk \
+	backend/make/data.mk make/maintenance.mk backend/make/maintenance.mk make/shell.mk make/security.mk
 
 help: ## Display this help
 	@[ -t 1 ] && c='\033[36m' r='\033[0m' b='\033[1m' || c='' r='' b=''; \

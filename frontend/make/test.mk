@@ -8,8 +8,8 @@ test-frontend: ## Run frontend tests
 
 LHCI_BASE_URL ?= http://nest-frontend:3000
 LHCI_NETWORK ?= nest-local_nest-network
-JEST_MAX_WORKERS ?= $(if $(CI),,50%)
-JEST_WORKER_ARGS := $(if $(JEST_MAX_WORKERS),-- --maxWorkers=$(JEST_MAX_WORKERS))
+JEST_MAX_WORKERS ?= 50%
+JEST_WORKER_ARGS := -- --maxWorkers=$(JEST_MAX_WORKERS)
 
 frontend-test:
 	@$(MAKE) frontend-test-unit

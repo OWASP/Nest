@@ -134,7 +134,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
    ```bash
-   make backend-data-load
+   make load-data
    ```
 
 1. **Index Data**:
@@ -142,7 +142,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    - In the same terminal session, run the following command to index the data:
 
      ```bash
-     make backend-data-index
+     make index-data
      ```
 
 1. **Verify API Endpoints**:
@@ -196,7 +196,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
    - Run the following command to create a super user for accessing the admin interface:
 
      ```bash
-     make backend-django-create-superuser
+     make create-superuser
      ```
 
 1. **Generate a GitHub Personal Access Token**:
@@ -216,7 +216,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
    - Now you should be able to run the following command to sync your local database data with GitHub:
 
      ```bash
-     make backend-data-sync
+     make sync-data
      ```
 
 #### NestBot Development
@@ -350,12 +350,12 @@ Nest enforces code quality standards to ensure consistency and maintainability. 
 make check
 ```
 
-This command runs static analysis only (no tests, no running application). Checks run inside the `nest-code-checks` Docker image (built on first use), so host Node, Python, pre-commit, Terraform, and TFLint installs are not required. It runs, in order:
+This command runs static analysis only (no tests, no running application). Checks run inside the `nest-code-checks` Docker image (built on first use), so host Node, Python, pre-commit, Terraform, and TFLint installs are not required. It runs:
 
 1. **Pre-commit** — repository hooks (formatting, linting, and other configured checks)
 2. **Prettier** — formatting for repository source files covered by `.prettierignore` (read-only; see [Prettier](#prettier))
 3. **ESLint** — lint for `e2e/` and `frontend/` (read-only; see [ESLint](#eslint))
-4. **Spelling** — cspell over the repository
+4. **CSpell** — checks spelling over the repository
 
 We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address (mark as resolved) all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project maintainer(s) you're working with for further guidance.
 
@@ -404,7 +404,7 @@ Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. 
 
 #### Requirements
 
-1. Start the local stack (`make run`) so both `nest-backend` and `nest-frontend` are running.
+1. Start the Nest application (`make run`) so both `nest-backend` and `nest-frontend` are running.
 2. Ensure GraphQL introspection is enabled on that backend.
 3. Run commands from the repository root.
 4. Optional: set `PUBLIC_API_URL` in the environment if the backend is not at `http://backend:8000` from the frontend container (for example `docker exec -e PUBLIC_API_URL=http://backend:9000 nest-frontend pnpm run graphql-codegen`).
@@ -481,13 +481,13 @@ make e2e-test-no-db-init
 For debugging, you can run the e2e backend separately:
 
 ```bash
-make backend-test-run-e2e
+make e2e-test-run-backend
 ```
 
 Then load data manually in another terminal:
 
 ```bash
-make backend-data-load-e2e
+make e2e-load-data
 ```
 
 For Playwright UI mode:
@@ -539,7 +539,7 @@ make backend-data-load-fuzz
 ClusterFuzzLite runs on pull requests for 5 minutes and on a nightly schedule for 15 minutes; fuzz targets run in parallel during that window. Build integration lives in `.clusterfuzzlite/`; the workflow sets `language: python` (a `project.yaml` is not required for CI). ClusterFuzzLite dependencies are pinned in `backend/requirements/cluster-fuzz-lite.txt`, generated from `backend/requirements/cluster-fuzz-lite.in`. Regenerate the lockfile after changing them:
 
 ```bash
-make backend-dependency-compile-requirements
+make compile-backend-requirements
 ```
 
 ### Test Coverage
@@ -687,7 +687,7 @@ git checkout -b feature/my-feature-name
   make check-test
   ```
 
-  If you changed the GraphQL schema or frontend GraphQL operations, also run `make graphql-codegen` with the local stack running (see [GraphQL types](#graphql-types)).
+  If you changed the GraphQL schema or frontend GraphQL operations, also run `make graphql-codegen` with Nest application running (see [GraphQL types](#graphql-types)).
 
 - Write meaningful commit messages:
 

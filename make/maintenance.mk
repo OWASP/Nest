@@ -1,7 +1,7 @@
 ##@ Maintenance
 
-.PHONY: clean graphql-codegen prune clean-dependencies tooling-clean-dependencies clean-docker \
-	clean-trivy-cache
+.PHONY: clean graphql-codegen prune clean-dependencies clean-docker clean-trivy-cache \
+	tooling-clean-dependencies
 
 clean: ## Remove all generated files and containers
 	@$(MAKE) clean-dependencies
@@ -23,9 +23,6 @@ clean-dependencies:
 	@$(MAKE) frontend-clean-dependencies
 	@$(MAKE) tooling-clean-dependencies
 
-tooling-clean-dependencies:
-	@rm -rf node_modules
-
 clean-docker:
 	@$(MAKE) backend-clean-docker
 	@$(MAKE) docs-clean-docker
@@ -33,3 +30,6 @@ clean-docker:
 
 clean-trivy-cache:
 	@rm -rf $(CURDIR)/.trivy-cache
+
+tooling-clean-dependencies:
+	@rm -rf node_modules

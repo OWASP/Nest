@@ -1,5 +1,4 @@
-.PHONY: test-backend test-backend-fuzz backend-test backend-test-fuzz backend-test-run-e2e \
-	backend-test-run-fuzz
+.PHONY: test-backend test-backend-fuzz backend-test backend-test-fuzz backend-test-run-fuzz
 
 include backend/make/clusterfuzz.mk
 
@@ -28,18 +27,14 @@ backend-test-fuzz:
 	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-fuzz_fuzz-db-data >/dev/null 2>&1 || true
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend cache data-loader db
 	@echo "Running REST API fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db backend rest
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db rest
 	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
-
-backend-test-run-e2e:
-	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend cache db graphql
 
 backend-test-run-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend cache db

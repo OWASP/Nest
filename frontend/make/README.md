@@ -10,7 +10,7 @@ Name targets using:
 frontend-<group>-<action>
 ```
 
-Use a singular group name that matches the owning file:
+Use a singular group name that describes the operation:
 
 - `frontend-clean-dependencies`
 - `frontend-dependency-audit`
@@ -18,6 +18,10 @@ Use a singular group name that matches the owning file:
 - `frontend-image-build`
 - `frontend-security-image-scan`
 - `frontend-test-unit`
+
+Goal-based files can own closely related groups: `maintenance.mk` contains the
+`clean` group, while `security.mk` contains the `dependency` and `security`
+groups.
 
 The group-level target may omit the action, as in `frontend-test`.
 

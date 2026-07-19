@@ -132,7 +132,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make pre-commit
-    timeout-minutes: 5
+    timeout-minutes: 10
 
   run-prettier-checks:
     name: Prettier
@@ -184,5 +184,5 @@ jobs:
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          command: make security-code-scan-trivy SCANNERS=misconfig,secret,vuln
+          command: make security-code-scan-trivy
     timeout-minutes: 5

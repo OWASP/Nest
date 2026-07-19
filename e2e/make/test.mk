@@ -1,4 +1,5 @@
-.PHONY: test-e2e e2e-db-init e2e-test e2e-test-no-db-init e2e-test-ui e2e-test-ui-no-db-init
+.PHONY: test-e2e e2e-load-data e2e-db-init e2e-test e2e-test-no-db-init \
+	e2e-test-run-backend e2e-test-ui e2e-test-ui-no-db-init
 
 test-e2e: ## Run e2e tests
 	@$(MAKE) e2e-test
@@ -23,6 +24,9 @@ e2e-db-init:
 		backend cache db data-loader \
 		--remove-orphans
 
+e2e-load-data:
+	@$(MAKE) backend-data-load-e2e
+
 e2e-test:
 	@$(MAKE) e2e-db-init
 	@$(MAKE) e2e-test-no-db-init
@@ -41,6 +45,10 @@ e2e-test-no-db-init:
 		--quiet-pull \
 		backend cache db frontend e2e-tests \
 		--remove-orphans
+
+e2e-test-run-backend:
+	@DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
 
 e2e-test-ui:
 	@$(MAKE) e2e-db-init

@@ -1,6 +1,6 @@
-.PHONY: create-superuser migrate migration clear-cache collect-static generate-sitemap \
+.PHONY: create-superuser migrate migration clear-cache collect-static \
 	merge-migrations migrations migrations-empty backend-django-clear-cache \
-	backend-django-collect-static backend-django-create-superuser backend-django-generate-sitemap \
+	backend-django-collect-static backend-django-create-superuser \
 	backend-django-merge-migrations backend-django-migrate backend-django-migrations \
 	backend-django-migrations-empty backend-django-shell
 
@@ -18,9 +18,6 @@ clear-cache:
 
 collect-static:
 	@$(MAKE) backend-django-collect-static
-
-generate-sitemap:
-	@$(MAKE) backend-django-generate-sitemap
 
 merge-migrations:
 	@$(MAKE) backend-django-merge-migrations
@@ -41,9 +38,6 @@ backend-django-collect-static:
 
 backend-django-create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) backend-exec-command-it
-
-backend-django-generate-sitemap:
-	@CMD="python manage.py generate_sitemap" $(MAKE) backend-exec-command
 
 backend-django-merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) backend-exec-command

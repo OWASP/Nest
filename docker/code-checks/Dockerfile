@@ -1,6 +1,6 @@
 FROM hashicorp/terraform:1.14.9@sha256:1d10ec4073f4ddbdf34a28540a3b9250852ab500cb1c53f68c8bd17d82f474d8 AS terraform
 FROM node:24.18-alpine3.23@sha256:595398b0081eacda8e1c4c5b97b76cd1020e4d58a8ebcb4843b9bca1e79e7436 AS node
-FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76 AS python
+FROM ghcr.io/astral-sh/uv:0.9.26@sha256:9a23023be68b2ed09750ae636228e903a54a05ea56ed03a934d00fe9fbeded4b AS uv
 FROM ghcr.io/terraform-linters/tflint:v0.60.0@sha256:cef181224b4a9cea521d8f785d50957ea3215b449e2d97e7793f222e2808d188 AS tflint
 
 FROM node AS node-deps
@@ -31,16 +31,16 @@ FROM node AS code-checks
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
-    PATH="/nest/node_modules/.bin:/nest/cspell/node_modules/.bin:/usr/local/bin:$PATH" \
+    PATH="/opt/pre-commit/bin:/nest/node_modules/.bin:/nest/cspell/node_modules/.bin:/usr/local/bin:$PATH" \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PNPM_HOME="/pnpm" \
     PRE_COMMIT_HOME="/tmp/pre-commit" \
     PYTHONUNBUFFERED=1 \
     TF_PLUGIN_CACHE_DIR="/tmp/terraform-plugin-cache" \
-    TFLINT_PLUGIN_DIR="/tmp/tflint/plugins"
+    TFLINT_PLUGIN_DIR="/tmp/tflint/plugins" \
+    UV_PYTHON_INSTALL_DIR="/usr/local"
 
-RUN --mount=type=cache,target=/var/cache/apk \
-    apk --no-cache update && \
+RUN apk --no-cache update && \
     apk --no-cache upgrade && \
     apk --no-cache add \
         bash \
@@ -57,17 +57,10 @@ RUN --mount=type=cache,target=/var/cache/apk \
         /nest/frontend \
         /nest/cspell
 
-# Python 3.13 from the official Alpine image (same major as CI).
-COPY --from=python /usr/local/bin/python3.13 /usr/local/bin/python3.13
-COPY --from=python /usr/local/bin/python3 /usr/local/bin/python3
-COPY --from=python /usr/local/bin/python /usr/local/bin/python
-COPY --from=python /usr/local/bin/pip3.13 /usr/local/bin/pip3.13
-COPY --from=python /usr/local/bin/pip3 /usr/local/bin/pip3
-COPY --from=python /usr/local/bin/pip /usr/local/bin/pip
-COPY --from=python /usr/local/lib/python3.13 /usr/local/lib/python3.13
-COPY --from=python /usr/local/lib/libpython3.13.so.1.0 /usr/local/lib/libpython3.13.so.1.0
-COPY --from=python /usr/local/lib/libpython3.13.so /usr/local/lib/libpython3.13.so
-COPY --from=python /usr/local/lib/libpython3.so /usr/local/lib/libpython3.so
+COPY --from=uv /uv /usr/local/bin/uv
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv python install 3.13 && \
+    uv venv /opt/pre-commit --python 3.13
 
 COPY package.json /tmp/package.json
 WORKDIR /tmp
@@ -81,9 +74,9 @@ COPY --from=terraform --chmod=555 /bin/terraform /usr/local/bin/terraform
 COPY --from=tflint --chmod=555 /usr/local/bin/tflint /usr/local/bin/tflint
 
 COPY --chmod=444 backend/requirements/pre-commit.txt /tmp/pre-commit.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    python -m pip install --require-hashes --requirement /tmp/pre-commit.txt && \
-    rm -f /tmp/pre-commit.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --python /opt/pre-commit --require-hashes --requirement /tmp/pre-commit.txt && \
+    rm -f /tmp/pre-commit.txt /usr/local/bin/uv
 
 COPY --chmod=555 docker/code-checks/entrypoint.sh /entrypoint.sh
 

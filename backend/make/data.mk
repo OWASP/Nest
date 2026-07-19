@@ -100,7 +100,7 @@ backend-data-load-fuzz: backend-data-fetch-nest-dump
 
 backend-data-load-staging: backend-data-fetch-nest-dump
 	@echo "Loading Nest staging data"
-	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) backend-exec-db-command-fuzz
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) backend-exec-db-command-staging
 
 backend-data-purge:
 	@CMD="python manage.py purge_data" $(MAKE) backend-exec-command
@@ -114,8 +114,8 @@ backend-data-purge-fuzz:
 backend-data-recreate-schema:
 	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
-		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
-		$(MAKE) backend-exec-db-command-it 2>/dev/null
+		'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
+		$(MAKE) backend-exec-db-command-it
 	@$(MAKE) backend-django-migrate
 
 backend-data-restore-backup:

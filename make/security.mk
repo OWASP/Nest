@@ -66,7 +66,6 @@ security-code-scan-trivy:
 	@echo "Running Trivy security scan..."
 	@docker run \
 		--rm \
-		-e TRIVY_SCANNERS="$(if $(SCANNERS),$(SCANNERS),misconfig,vuln)" \
 		-v $(CURDIR):/src \
 		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
@@ -74,8 +73,10 @@ security-code-scan-trivy:
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs --config /.trivy.yaml /src
 
+ZAP_TARGET ?= https://nest.owasp.dev
+
 security-scan-zap:
-	@echo "Running ZAP baseline scan against https://nest.owasp.dev..."
+	@echo "Running ZAP baseline scan against $(ZAP_TARGET)..."
 	@docker run \
 		--rm \
 		-v "$(CURDIR):/zap/wrk:rw" \
@@ -83,7 +84,7 @@ security-scan-zap:
 		zap-baseline.py \
 		-a \
 		-c .zapconfig \
-		-t https://nest.owasp.dev
+		-t $(ZAP_TARGET)
 
 tooling-dependency-audit:
 	@echo "Auditing root tooling npm dependencies..."

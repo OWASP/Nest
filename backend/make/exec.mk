@@ -1,11 +1,12 @@
 .PHONY: exec-backend-command exec-backend-command-e2e exec-backend-command-e2e-it \
 	exec-backend-command-fuzz exec-backend-command-fuzz-it exec-backend-command-it exec-db-command \
 	exec-db-command-e2e exec-db-command-e2e-it exec-db-command-fuzz exec-db-command-fuzz-it \
-	exec-db-command-it backend-exec-command backend-exec-command-e2e \
-	backend-exec-command-e2e-it backend-exec-command-fuzz backend-exec-command-fuzz-it \
-	backend-exec-command-it backend-exec-db-command backend-exec-db-command-e2e \
-	backend-exec-db-command-e2e-it backend-exec-db-command-fuzz backend-exec-db-command-fuzz-it \
-	backend-exec-db-command-it backend-exec-db-shell backend-exec-shell
+	exec-db-command-it exec-db-command-staging exec-db-command-staging-it backend-exec-command \
+	backend-exec-command-e2e backend-exec-command-e2e-it backend-exec-command-fuzz \
+	backend-exec-command-fuzz-it backend-exec-command-it backend-exec-db-command \
+	backend-exec-db-command-e2e backend-exec-db-command-e2e-it backend-exec-db-command-fuzz \
+	backend-exec-db-command-fuzz-it backend-exec-db-command-it backend-exec-db-command-staging \
+	backend-exec-db-command-staging-it backend-exec-db-shell backend-exec-shell
 
 exec-backend-command: ## Run a command in the backend container
 	@$(MAKE) backend-exec-command
@@ -43,6 +44,12 @@ exec-db-command-fuzz-it: ## Run an interactive command in the fuzz database cont
 exec-db-command-it: ## Run an interactive command in the database container
 	@$(MAKE) backend-exec-db-command-it
 
+exec-db-command-staging: ## Run a command in the staging database container
+	@$(MAKE) backend-exec-db-command-staging
+
+exec-db-command-staging-it: ## Run an interactive command in the staging database container
+	@$(MAKE) backend-exec-db-command-staging-it
+
 # Implementation targets.
 
 backend-exec-command:
@@ -68,7 +75,7 @@ backend-exec-command-it:
 ifeq ($(EXEC_MODE),direct)
 	@$(CMD)
 else
-	@docker exec -it nest-backend $(CMD) 2>/dev/null
+	@docker exec -i$(shell [ -t 0 ] && printf t) nest-backend $(CMD)
 endif
 
 backend-exec-db-command:
@@ -88,6 +95,12 @@ backend-exec-db-command-fuzz-it:
 
 backend-exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
+
+backend-exec-db-command-staging:
+	@docker exec -i staging-nest-db $(CMD)
+
+backend-exec-db-command-staging-it:
+	@docker exec -it staging-nest-db $(CMD)
 
 backend-exec-db-shell:
 	@CMD="/bin/sh" $(MAKE) backend-exec-db-command-it
