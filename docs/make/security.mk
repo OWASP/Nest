@@ -12,5 +12,5 @@ docs-dependency-audit:
 		$$(grep -E '^FROM python:' docker/docs/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
 		sh -c 'python -m pip install --no-warn-script-location --quiet poetry poetry-plugin-export pip-audit && \
 		export PATH="$$HOME/.local/bin:$$PATH" && \
-		poetry export -f requirements.txt --without-hashes --only main | \
-		pip-audit -r /dev/stdin'
+		poetry export -f requirements.txt --without-hashes --only main -o /tmp/requirements.txt && \
+		pip-audit -r /tmp/requirements.txt'

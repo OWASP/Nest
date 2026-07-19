@@ -12,8 +12,8 @@ backend-dependency-audit:
 		$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
 		sh -c 'python -m pip install --user --no-warn-script-location --quiet poetry poetry-plugin-export pip-audit && \
 		export PATH="$$HOME/.local/bin:$$PATH" && \
-		poetry export -f requirements.txt --without-hashes --all-groups | \
-		pip-audit -r /dev/stdin'
+		poetry export -f requirements.txt --without-hashes --all-groups -o /tmp/requirements.txt && \
+		pip-audit -r /tmp/requirements.txt'
 
 backend-security-image-scan:
 	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
