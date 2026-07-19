@@ -21,33 +21,16 @@ variables {
   project_name         = "nest"
 }
 
-run "test_staging_resource_names" {
+run "test_resource_names" {
   command = plan
 
   assert {
     condition = alltrue([
-      aws_iam_role.terraform.name == "nest-staging-terraform",
-      aws_iam_policy.part_one.name == "nest-staging-part-one-terraform",
-      aws_iam_policy.part_two.name == "nest-staging-part-two-terraform",
+      aws_iam_role.terraform.name == "${var.project_name}-${var.environment}-terraform",
+      aws_iam_policy.part_one.name == "${var.project_name}-${var.environment}-part-one-terraform",
+      aws_iam_policy.part_two.name == "${var.project_name}-${var.environment}-part-two-terraform",
     ])
-    error_message = "Staging bootstrap must only create staging resources."
-  }
-}
-
-run "test_production_resource_names" {
-  command = plan
-
-  variables {
-    environment = "production"
-  }
-
-  assert {
-    condition = alltrue([
-      aws_iam_role.terraform.name == "nest-production-terraform",
-      aws_iam_policy.part_one.name == "nest-production-part-one-terraform",
-      aws_iam_policy.part_two.name == "nest-production-part-two-terraform",
-    ])
-    error_message = "Production bootstrap must only create production resources."
+    error_message = "Bootstrap resource names must follow the '<project_name>-<environment>-<resource>' format."
   }
 }
 
@@ -55,8 +38,8 @@ run "test_part_one_policy_size" {
   command = plan
 
   assert {
-    condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= 6144
-    error_message = "part_one staging policy exceeds the IAM managed policy size limit of 6144 characters."
+    condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= local.iam_policy_size_limit
+    error_message = "part_one policy exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
   }
 }
 
@@ -64,43 +47,13 @@ run "test_part_two_policy_size" {
   command = plan
 
   assert {
-    condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= 6144
-    error_message = "part_two staging policy exceeds the IAM managed policy size limit of 6144 characters."
-  }
-}
-
-run "test_part_one_policy_size_production" {
-  command = plan
-
-  variables {
-    environment = "production"
-  }
-
-  assert {
-    condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= 6144
-    error_message = "part_one production policy exceeds the IAM managed policy size limit of 6144 characters."
-  }
-}
-
-run "test_part_two_policy_size_production" {
-  command = plan
-
-  variables {
-    environment = "production"
-  }
-
-  assert {
-    condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= 6144
-    error_message = "part_two production policy exceeds the IAM managed policy size limit of 6144 characters."
+    condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= local.iam_policy_size_limit
+    error_message = "part_two policy exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
   }
 }
 
 run "test_minified_json_is_smaller_than_pretty_json" {
   command = plan
-
-  variables {
-    environment = "production"
-  }
 
   assert {
     condition = alltrue([
@@ -111,7 +64,7 @@ run "test_minified_json_is_smaller_than_pretty_json" {
   }
 }
 
-run "test_pretty_json_exceeds_limit_for_part_one_production" {
+run "test_pretty_json_exceeds_limit_for_part_one" {
   command = plan
 
   variables {
@@ -119,8 +72,8 @@ run "test_pretty_json_exceeds_limit_for_part_one_production" {
   }
 
   assert {
-    condition     = length(data.aws_iam_policy_document.part_one.json) > 6144
-    error_message = "Expected part_one production pretty JSON to exceed the IAM size limit, proving minified_json is required."
+    condition     = length(data.aws_iam_policy_document.part_one.json) > local.iam_policy_size_limit
+    error_message = "Expected part_one pretty JSON to exceed the IAM size limit for the configured environment, proving minified_json is required."
   }
 }
 
@@ -158,56 +111,44 @@ run "test_secrets_manager_namespace" {
     condition = alltrue([
       strcontains(
         data.aws_iam_policy_document.part_two.json,
-        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:${var.project_name}-${var.environment}-*",
+        "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${var.environment}-*",
       ),
       strcontains(
         data.aws_iam_policy_document.part_two.json,
-        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:/${var.project_name}/${var.environment}/*",
+        "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:/${var.project_name}/${var.environment}/*",
       ),
     ])
     error_message = "The Terraform policy must allow management of the environment Secrets Manager namespace."
   }
 }
 
-run "test_environment_scoped_resources_staging" {
+run "test_environment_scoped_resources" {
   command = plan
 
   assert {
     condition = alltrue([
       can(regex("${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_one.json)),
-      !can(regex("${var.project_name}-production-", data.aws_iam_policy_document.part_one.json)),
+      !can(regex("${var.project_name}-${var.environment == "staging" ? "production" : "staging"}-", data.aws_iam_policy_document.part_one.json)),
     ])
     error_message = "Policy documents must only reference the configured environment."
   }
 }
 
-run "test_staging_policy_names_reference_staging" {
-  command = plan
-
-  assert {
-    condition = alltrue([
-      strcontains(aws_iam_policy.part_one.name, "nest-staging-part-one-terraform"),
-      strcontains(aws_iam_policy.part_two.name, "nest-staging-part-two-terraform"),
-    ])
-    error_message = "Staging policy names must contain staging namespaces."
-  }
-}
-
-run "test_elb_and_ecs_tagging_staging" {
+run "test_elb_and_ecs_tagging" {
   command = plan
 
   assert {
     condition = alltrue([
       !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "*"),
-      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:160885282306:loadbalancer/app/${var.project_name}-staging-*/*"),
-      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:160885282306:task-definition/${var.project_name}-staging-*:*",
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*"),
+      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
       !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSGlobal"]).Action, "ecs:TagResource"),
     ])
-    error_message = "ELB management and ECS task-definition tagging must be limited to staging resources."
+    error_message = "ELB management and ECS task-definition tagging must be limited to the active environment resources."
   }
 }
 
-run "test_production_environment_scoped_resources" {
+run "test_environment_scoped_resources_with_env_override" {
   command = plan
 
   variables {
@@ -218,14 +159,14 @@ run "test_production_environment_scoped_resources" {
     condition = alltrue([
       can(regex("${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_one.json)),
       can(regex("TargetTracking-service/${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_two.json)),
-      !can(regex("${var.project_name}-staging-", data.aws_iam_policy_document.part_one.json)),
-      !can(regex("${var.project_name}-staging-", data.aws_iam_policy_document.part_two.json)),
-      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:160885282306:loadbalancer/app/${var.project_name}-production-*/*"),
-      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:160885282306:task-definition/${var.project_name}-production-*:*",
-      strcontains(aws_iam_policy.part_one.name, "nest-production-part-one-terraform"),
-      strcontains(aws_iam_policy.part_two.name, "nest-production-part-two-terraform"),
+      !can(regex("${var.project_name}-${var.environment == "production" ? "staging" : "production"}-", data.aws_iam_policy_document.part_one.json)),
+      !can(regex("${var.project_name}-${var.environment == "production" ? "staging" : "production"}-", data.aws_iam_policy_document.part_two.json)),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*"),
+      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
+      strcontains(aws_iam_policy.part_one.name, "${var.project_name}-${var.environment}-part-one-terraform"),
+      strcontains(aws_iam_policy.part_two.name, "${var.project_name}-${var.environment}-part-two-terraform"),
     ])
-    error_message = "Production policy documents must only reference production resources."
+    error_message = "Policy documents must only reference the active environment resources."
   }
 }
 
@@ -254,7 +195,7 @@ run "test_shared_bucket_permissions" {
   }
 }
 
-run "test_shared_bucket_permissions_production" {
+run "test_shared_bucket_permissions_with_env_override" {
   command = plan
 
   variables {
@@ -266,6 +207,6 @@ run "test_shared_bucket_permissions_production" {
       !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
       contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Mgmt"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
     ])
-    error_message = "Production must manage the shared data bucket via S3Mgmt and not use S3SharedBucketRestricted."
+    error_message = "The environment with management privileges must manage the shared data bucket via S3Mgmt and not use S3SharedBucketRestricted."
   }
 }

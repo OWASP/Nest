@@ -599,6 +599,9 @@ locals {
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
+
+  # IAM managed policy size limit in characters
+  iam_policy_size_limit = 6144
 }
 
 resource "aws_iam_role" "terraform" {
@@ -632,8 +635,8 @@ resource "aws_iam_policy" "part_one" {
 
   lifecycle {
     precondition {
-      condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= 6144
-      error_message = "part_one exceeds the IAM managed policy size limit of 6144 characters."
+      condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= local.iam_policy_size_limit
+      error_message = "part_one exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
     }
   }
 }
@@ -644,8 +647,8 @@ resource "aws_iam_policy" "part_two" {
 
   lifecycle {
     precondition {
-      condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= 6144
-      error_message = "part_two exceeds the IAM managed policy size limit of 6144 characters."
+      condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= local.iam_policy_size_limit
+      error_message = "part_two exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
     }
   }
 }
