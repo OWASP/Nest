@@ -203,29 +203,42 @@ class TestLoadIssuesCountByProjectId:
         "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
         new_callable=AsyncMock,
     )
+    @patch("apps.github.api.internal.dataloaders.issue.Repository")
     @patch("apps.github.api.internal.dataloaders.issue.Project")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_project, mock_get_result_by_keys):
-        """Queryset is built with filter and annotate(Count)."""
+    async def test_builds_queryset_with_correct_chain(
+        self, mock_project, mock_repository, mock_get_result_by_keys
+    ):
+        """Queryset filters by pk__in and repositories__in subquery, then annotates."""
         project_ids = [1, 2, 3]
+        mock_subq = MagicMock()
+        mock_repository.objects.filter.return_value = mock_subq
         mock_qs = MagicMock()
         mock_project.objects.filter.return_value.annotate.return_value = mock_qs
         mock_get_result_by_keys.return_value = [0, 0, 0]
 
         await load_issues_count_by_project_id(project_ids)
 
-        mock_project.objects.filter.assert_called_once_with(pk__in=project_ids)
+        mock_repository.objects.filter.assert_called_once_with(organization__isnull=False)
+        mock_project.objects.filter.assert_called_once_with(
+            pk__in=project_ids, repositories__in=mock_subq
+        )
         mock_project.objects.filter.return_value.annotate.assert_called_once()
 
     @patch(
         "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
         new_callable=AsyncMock,
     )
+    @patch("apps.github.api.internal.dataloaders.issue.Repository")
     @patch("apps.github.api.internal.dataloaders.issue.Project")
     @pytest.mark.asyncio
-    async def test_delegates_to_get_result_by_keys(self, mock_project, mock_get_result_by_keys):
+    async def test_delegates_to_get_result_by_keys(
+        self, mock_project, mock_repository, mock_get_result_by_keys
+    ):
         """get_result_by_keys receives the queryset, ids, and correct value_field."""
         project_ids = [10, 20]
+        mock_subq = MagicMock()
+        mock_repository.objects.filter.return_value = mock_subq
         mock_qs = MagicMock()
         mock_project.objects.filter.return_value.annotate.return_value = mock_qs
         mock_get_result_by_keys.return_value = [4, 8]
@@ -241,10 +254,15 @@ class TestLoadIssuesCountByProjectId:
         "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
         new_callable=AsyncMock,
     )
+    @patch("apps.github.api.internal.dataloaders.issue.Repository")
     @patch("apps.github.api.internal.dataloaders.issue.Project")
     @pytest.mark.asyncio
-    async def test_zero_replaces_none(self, mock_project, mock_get_result_by_keys):
+    async def test_zero_replaces_none(
+        self, mock_project, mock_repository, mock_get_result_by_keys
+    ):
         """A None result is coerced to 0."""
+        mock_subq = MagicMock()
+        mock_repository.objects.filter.return_value = mock_subq
         mock_qs = MagicMock()
         mock_project.objects.filter.return_value.annotate.return_value = mock_qs
         mock_get_result_by_keys.return_value = [None]
@@ -257,10 +275,13 @@ class TestLoadIssuesCountByProjectId:
         "apps.github.api.internal.dataloaders.issue.get_result_by_keys",
         new_callable=AsyncMock,
     )
+    @patch("apps.github.api.internal.dataloaders.issue.Repository")
     @patch("apps.github.api.internal.dataloaders.issue.Project")
     @pytest.mark.asyncio
-    async def test_empty_project_ids(self, mock_project, mock_get_result_by_keys):
+    async def test_empty_project_ids(self, mock_project, mock_repository, mock_get_result_by_keys):
         """An empty project_ids list returns an empty list."""
+        mock_subq = MagicMock()
+        mock_repository.objects.filter.return_value = mock_subq
         mock_qs = MagicMock()
         mock_project.objects.filter.return_value.annotate.return_value = mock_qs
         mock_get_result_by_keys.return_value = []
@@ -330,7 +351,8 @@ class TestLoadRecentIssuesByProjectId:
     @staticmethod
     def _ordered_qs(mock_issue):
         """Return the mock queryset at the end of the issues chain."""
-        return mock_issue.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.return_value
+        call = mock_issue.objects.filter.return_value
+        return call.annotate.return_value.filter.return_value.order_by.return_value
 
     @patch(
         "apps.github.api.internal.dataloaders.issue.get_results_by_keys",

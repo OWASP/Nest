@@ -14,7 +14,8 @@ from apps.github.api.internal.dataloaders.pull_request import (
 
 def _build_queryset_mock(mock_pull_request):
     """Wire up the chained mock queryset ending at order_by()."""
-    return mock_pull_request.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.return_value
+    call = mock_pull_request.objects.filter.return_value
+    return call.annotate.return_value.filter.return_value.order_by.return_value
 
 
 class TestLoadRecentPullRequestsByProjectId:

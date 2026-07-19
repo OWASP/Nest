@@ -6,6 +6,7 @@ from strawberry.dataloader import DataLoader
 
 from apps.common.api.internal.dataloaders.utils import get_result_by_keys, get_results_by_keys
 from apps.github.models.issue import Issue
+from apps.github.models.repository import Repository
 from apps.owasp.models.project import Project
 
 RECENT_ISSUES_LIMIT = 5
@@ -80,8 +81,11 @@ async def load_open_issues_count_by_project_id(project_ids: list[int]) -> list[i
 
 
 async def load_issues_count_by_project_id(project_ids: list[int]) -> list[int]:
-    """Batch-load open issues count for the given project IDs in a single query."""
-    projects = Project.objects.filter(pk__in=project_ids).annotate(
+    """Batch-load total issues count for the given project IDs in a single query."""
+    projects = Project.objects.filter(
+        pk__in=project_ids,
+        repositories__in=Repository.objects.filter(organization__isnull=False),
+    ).annotate(
         items_count=Count("repositories__issues"),
     )
     return [

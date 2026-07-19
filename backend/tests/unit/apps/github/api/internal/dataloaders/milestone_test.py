@@ -355,7 +355,8 @@ class TestLoadRecentMilestonesByProjectId:
     @staticmethod
     def _ordered_qs(mock_milestone):
         """Return the mock queryset at the end of the milestones chain."""
-        return mock_milestone.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.return_value
+        call = mock_milestone.objects.filter.return_value
+        return call.annotate.return_value.filter.return_value.order_by.return_value
 
     @patch(
         "apps.github.api.internal.dataloaders.milestone.get_results_by_keys",

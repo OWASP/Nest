@@ -327,7 +327,8 @@ class TestLoadRecentReleasesByProjectId:
     @staticmethod
     def _ordered_qs(mock_release):
         """Return the mock queryset at the end of the releases chain."""
-        return mock_release.objects.filter.return_value.annotate.return_value.filter.return_value.order_by.return_value
+        call = mock_release.objects.filter.return_value
+        return call.annotate.return_value.filter.return_value.order_by.return_value
 
     @patch(
         "apps.github.api.internal.dataloaders.release.get_results_by_keys",
