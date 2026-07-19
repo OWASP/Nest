@@ -5,12 +5,7 @@ import { GetAboutPageDataDocument } from 'types/__generated__/aboutQueries.gener
 export const revalidate = 86400
 
 const projectKey = 'nest'
-const leaders = {
-  arkid15r: 'CCSP, CISSP, CSSLP',
-  kasya: 'CC',
-  mamicidal: 'CISSP',
-}
-
+const leaders = ['arkid15r', 'kasya', 'mamicidal']
 function formatPerson(person?: { name?: string | null; login?: string | null } | null): string {
   if (!person) return ''
   if (person.name && person.login) return `${person.name} (@${person.login})`
@@ -25,7 +20,7 @@ export async function GET() {
       query: GetAboutPageDataDocument,
       variables: {
         projectKey,
-        excludedUsernames: Object.keys(leaders),
+        excludedUsernames: leaders,
         hasFullName: true,
         limit: 24,
         leader1: 'arkid15r',
