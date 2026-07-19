@@ -16,7 +16,7 @@ variables {
   name = "nest-test-backend-cache"
 }
 
-run "integration_apply" {
+run "ecr_cache_integration_apply" {
   command = apply
 
   assert {

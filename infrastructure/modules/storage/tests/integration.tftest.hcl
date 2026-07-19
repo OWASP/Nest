@@ -16,7 +16,7 @@ variables {
   project_name         = "nest"
 }
 
-run "integration_apply" {
+run "storage_integration_apply" {
   command = apply
 
   assert {

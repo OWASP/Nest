@@ -15,7 +15,7 @@ variables {
   project_name = "nest"
 }
 
-run "integration_apply" {
+run "kms_integration_apply" {
   command = apply
 
   assert {

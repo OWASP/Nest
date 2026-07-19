@@ -31,7 +31,7 @@ variables {
   slack_bot_token_suffix        = "T04T40NHX"
 }
 
-run "integration_apply" {
+run "parameters_integration_apply" {
   command = apply
 
   assert {
