@@ -30,6 +30,7 @@ infrastructure-test:
 
 infrastructure-test-image-build:
 	@DOCKER_BUILDKIT=1 docker build -q \
+		--build-context terraform=docker-image://$(TERRAFORM_IMAGE) \
 		--cache-from $(INFRASTRUCTURE_TEST_IMAGE) \
 		-f docker/infrastructure/Dockerfile.tests . \
 		-t $(INFRASTRUCTURE_TEST_IMAGE) 1>/dev/null
