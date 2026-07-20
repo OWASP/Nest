@@ -27,6 +27,7 @@ permissions: {}
 jobs:
   run-coverage-upload:
     name: Coverage upload
+    continue-on-error: true
     permissions:
       actions: read
       contents: read
