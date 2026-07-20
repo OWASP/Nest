@@ -18,7 +18,7 @@ async def load_count_by_snapshot_id(snapshot_ids: list[int], field: str) -> list
     """Batch-load a related M2M count for the given member snapshot IDs."""
     snapshots = (
         MemberSnapshot.objects.filter(pk__in=snapshot_ids)
-        .annotate(count=Count(field, distinct=True))
+        .annotate(count=Count(field))
         .values_list("pk", "count")
     )
     return await get_values_by_keys(snapshots, snapshot_ids, default=0)
