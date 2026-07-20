@@ -22,4 +22,4 @@ from apps.owasp.models.entity_member import EntityMember
 class EntityMemberNode(strawberry.relay.Node):
     """Entity member node."""
 
-    member: UserNode | None
+    member: UserNode | None = strawberry_django.field()
