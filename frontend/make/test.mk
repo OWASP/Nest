@@ -16,7 +16,7 @@ frontend-test:
 	@$(MAKE) frontend-test-a11y
 
 frontend-test-a11y:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build -q \
+	@DOCKER_BUILDKIT=1 docker build -q \
 		--cache-from nest-test-frontend-a11y \
 		-f docker/frontend/Dockerfile.a11y-tests frontend \
 		-t nest-test-frontend-a11y 1>/dev/null
@@ -46,7 +46,7 @@ frontend-test-lighthouse-ci-desktop:
 		pnpm run lighthouse-ci:desktop
 
 frontend-test-unit:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build -q \
+	@DOCKER_BUILDKIT=1 docker build -q \
 		--cache-from nest-test-frontend-unit \
 		-f docker/frontend/Dockerfile.unit-tests frontend \
 		-t nest-test-frontend-unit 1>/dev/null

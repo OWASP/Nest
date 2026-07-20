@@ -54,6 +54,7 @@ infrastructure-test-integration:
 	fi; \
 	$(MAKE) infrastructure-test-image-build || exit $$?; \
 	status=0; \
+	trap '$(INFRASTRUCTURE_COMPOSE) down --volumes --remove-orphans >/dev/null 2>&1 || true; rm -f $(INFRASTRUCTURE_TEST_OVERRIDES)' EXIT; \
 	rm -f $(INFRASTRUCTURE_TEST_OVERRIDES); \
 	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 		$(INFRASTRUCTURE_COMPOSE) up \
@@ -61,6 +62,4 @@ infrastructure-test-integration:
 			--build \
 			--exit-code-from tests \
 		|| status=$$?; \
-	$(INFRASTRUCTURE_COMPOSE) down --volumes --remove-orphans >/dev/null 2>&1 || true; \
-	rm -f $(INFRASTRUCTURE_TEST_OVERRIDES); \
 	exit $$status
