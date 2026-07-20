@@ -381,6 +381,8 @@ aws ecs run-task \
 
 Local Make targets use Docker (like backend). CI runs Poetry + Terraform directly on the runner for speed (cached plugins/venv, no image build).
 
+The Terraform CLI version is pinned in `docker/terraform/Dockerfile` (Dependabot-tracked). Local test/code-check images inherit that pin; CI installs the same tag via `setup-terraform-environment`. Run `make check-terraform-version` to verify module `required_version` constraints match the pin.
+
 ### Unit Testing
 
 These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.

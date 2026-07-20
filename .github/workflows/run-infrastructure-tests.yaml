@@ -25,6 +25,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Check Terraform version drift
+        run: make check-terraform-version
+
       - name: Setup Terraform environment
         uses: ./.github/actions/setup-terraform-environment
 

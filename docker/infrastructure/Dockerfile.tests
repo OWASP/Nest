@@ -1,8 +1,9 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM hashicorp/terraform:1.14.9 AS terraform
-
+# Version pin lives in docker/terraform/Dockerfile.
+# hadolint ignore=DL3006
+FROM terraform AS terraform
 FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76 AS builder
 
 ARG OWASP_GID

@@ -23,6 +23,7 @@ check-fix: ## Auto-fix Prettier and ESLint issues
 
 code-checks-install:
 	@DOCKER_BUILDKIT=1 docker build -q \
+		--build-context terraform=docker-image://$(TERRAFORM_IMAGE) \
 		--cache-from nest-code-checks \
 		-f docker/code-checks/Dockerfile \
 		-t nest-code-checks \
