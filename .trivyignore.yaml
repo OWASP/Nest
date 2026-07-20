@@ -8,6 +8,7 @@ misconfigurations:
   - id: DS-0002  # Specify at least 1 USER command in Dockerfile with non-root user as argument.
     paths:
       - .clusterfuzzlite/Dockerfile
+      - docker/code-checks/Dockerfile
       - docker/e2e/Dockerfile
       - docker/localstack/Dockerfile
       - docker/semgrep/Dockerfile

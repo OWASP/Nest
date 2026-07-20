@@ -38,8 +38,7 @@ jobs:
         working-directory: cspell
 
       - name: Run CSpell
-        run: pnpm exec cspell --config cspell.json --no-progress -r ..
-        working-directory: cspell
+        run: make cspell
     timeout-minutes: 5
 
   run-eslint-checks:
@@ -156,7 +155,7 @@ jobs:
           persist-credentials: false
 
       - name: Run Semgrep security scan
-        run: make security-scan-code-semgrep
+        run: make security-sast-scan-semgrep
     timeout-minutes: 5
 
   run-trivy-checks:
@@ -173,5 +172,5 @@ jobs:
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
+          command: make security-repository-scan-trivy
     timeout-minutes: 5

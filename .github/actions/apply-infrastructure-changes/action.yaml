@@ -29,7 +29,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup Terraform environment
+    - name: Set up Terraform environment
       uses: ./.github/actions/setup-terraform-environment
       env:
         TF_PLUGIN_CACHE_DIR: ${{ inputs.plugin-cache-dir }}

@@ -72,7 +72,7 @@ frontend/dist
 frontend/out
 frontend/test-results/
 logs
-node_modules/
+node_modules
 override.tf
 override.tf.json
 semgrep-security-report.txt
