@@ -2,8 +2,16 @@
 
 import strawberry
 import strawberry_django
+from strawberry.types import Info
 
 from apps.github.api.internal.nodes.user import UserNode
+from apps.owasp.api.internal.dataloaders.member_snapshot import (
+    COMMITS_COUNT_BY_SNAPSHOT_ID_LOADER,
+    ISSUES_COUNT_BY_SNAPSHOT_ID_LOADER,
+    MESSAGES_COUNT_BY_SNAPSHOT_ID_LOADER,
+    PULL_REQUESTS_COUNT_BY_SNAPSHOT_ID_LOADER,
+    TOTAL_CONTRIBUTIONS_BY_SNAPSHOT_ID_LOADER,
+)
 from apps.owasp.models.member_snapshot import MemberSnapshot
 
 
@@ -24,9 +32,11 @@ class MemberSnapshotNode(strawberry.relay.Node):
     """Member snapshot node."""
 
     @strawberry_django.field
-    def commits_count(self, root: MemberSnapshot) -> int:
+    async def commits_count(self, root: MemberSnapshot, info: Info) -> int:
         """Resolve commits count."""
-        return root.commits_count
+        return await info.context.owasp_dataloaders[COMMITS_COUNT_BY_SNAPSHOT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field(select_related=["github_user"])
     def github_user(self, root: MemberSnapshot) -> UserNode:
@@ -34,21 +44,29 @@ class MemberSnapshotNode(strawberry.relay.Node):
         return root.github_user
 
     @strawberry_django.field
-    def issues_count(self, root: MemberSnapshot) -> int:
+    async def issues_count(self, root: MemberSnapshot, info: Info) -> int:
         """Resolve issues count."""
-        return root.issues_count
+        return await info.context.owasp_dataloaders[ISSUES_COUNT_BY_SNAPSHOT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
-    def pull_requests_count(self, root: MemberSnapshot) -> int:
+    async def pull_requests_count(self, root: MemberSnapshot, info: Info) -> int:
         """Resolve pull requests count."""
-        return root.pull_requests_count
+        return await info.context.owasp_dataloaders[
+            PULL_REQUESTS_COUNT_BY_SNAPSHOT_ID_LOADER
+        ].load(root.pk)
 
     @strawberry_django.field
-    def messages_count(self, root: MemberSnapshot) -> int:
+    async def messages_count(self, root: MemberSnapshot, info: Info) -> int:
         """Resolve Slack messages count."""
-        return root.messages_count
+        return await info.context.owasp_dataloaders[MESSAGES_COUNT_BY_SNAPSHOT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
-    def total_contributions(self, root: MemberSnapshot) -> int:
+    async def total_contributions(self, root: MemberSnapshot, info: Info) -> int:
         """Resolve total contributions."""
-        return root.total_contributions
+        return await info.context.owasp_dataloaders[
+            TOTAL_CONTRIBUTIONS_BY_SNAPSHOT_ID_LOADER
+        ].load(root.pk)
