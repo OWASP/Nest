@@ -60,7 +60,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: 36d5c17806dbe418e108cb3a3718b453ea613465  # v1.39.4
+    rev: 9d343c049133931777dfa92e578cc54db0e1058e  # v1.39.5
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
