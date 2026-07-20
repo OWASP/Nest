@@ -1,4 +1,4 @@
-# NOSONAR: Version pin lives in docker/terraform/Dockerfile.
+# Version pin lives in docker/terraform/Dockerfile.
 # hadolint ignore=DL3006
 FROM terraform AS terraform
 FROM ghcr.io/astral-sh/uv:0.9.26@sha256:9a23023be68b2ed09750ae636228e903a54a05ea56ed03a934d00fe9fbeded4b AS uv
