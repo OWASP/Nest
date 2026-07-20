@@ -30,7 +30,9 @@ class TestLoadCountBySnapshotId:
     )
     @patch("apps.owasp.api.internal.dataloaders.member_snapshot.MemberSnapshot")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_snapshot, mock_get_values_by_keys):
+    async def test_builds_queryset_with_correct_chain(
+        self, mock_snapshot, mock_get_values_by_keys
+    ):
         """Queryset is built with filter, annotate, and values_list."""
         snapshot_ids = [1, 2, 3]
         mock_qs = MagicMock()
@@ -191,7 +193,9 @@ class TestLoadTotalContributionsBySnapshotId:
     )
     @patch("apps.owasp.api.internal.dataloaders.member_snapshot.MemberSnapshot")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(self, mock_snapshot, mock_get_values_by_keys):
+    async def test_builds_queryset_with_correct_chain(
+        self, mock_snapshot, mock_get_values_by_keys
+    ):
         """Outer queryset filters by pk__in, annotates total, and uses values_list."""
         snapshot_ids = [1, 2]
         mock_qs = MagicMock()
