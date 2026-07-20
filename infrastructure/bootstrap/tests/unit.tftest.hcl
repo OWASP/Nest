@@ -32,6 +32,14 @@ run "test_resource_names" {
     ])
     error_message = "Bootstrap resource names must follow the '<project_name>-<environment>-<resource>' format."
   }
+
+  assert {
+    condition = alltrue([
+      jsondecode(aws_iam_role.terraform.assume_role_policy).Statement[0].Condition.StringEquals["sts:ExternalId"] == var.aws_role_external_id,
+      strcontains(jsondecode(aws_iam_role.terraform.assume_role_policy).Statement[0].Principal.AWS, "/${var.project_name}-${var.environment}"),
+    ])
+    error_message = "IAM role assume role policy must verify the trusted principal is scoped to the environment and the external ID is correct."
+  }
 }
 
 run "test_part_one_policy_size" {

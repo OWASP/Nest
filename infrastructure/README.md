@@ -68,8 +68,8 @@ Follow these steps to set up the infrastructure:
 - Copy the example files into your new local configuration files:
 
     ```bash
-    cp terraform.tfbackend.example terraform.tfbackend
-    cp terraform.tfvars.example terraform.tfvars
+    cp terraform.staging.tfbackend.example terraform.tfbackend
+    cp terraform.staging.tfvars.example terraform.tfvars
     ```
 
   > [!NOTE]

@@ -22,9 +22,8 @@ data "aws_iam_policy_document" "part_one" {
       "application-autoscaling:DescribeScalingActivities",
       "application-autoscaling:DescribeScalingPolicies",
       "ec2:Describe*",
-      "ec2:DescribeFlowLogs",
-      "ec2:DescribeNetworkAcls",
       "ecr:DescribeRepositories",
+      "ecr:GetAuthorizationToken",
       "ecs:DescribeTaskDefinition",
       "elasticache:DescribeCacheClusters",
       "elasticache:DescribeCacheSubnetGroups",
@@ -109,7 +108,7 @@ data "aws_iam_policy_document" "part_one" {
     ]
     resources = [
       "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster:${var.project_name}-${var.environment}-*",
-      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parametergroup:*",
+      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parametergroup:${var.project_name}-${var.environment}-*",
       "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:replicationgroup:${var.project_name}-${var.environment}-*",
       "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subnetgroup:${var.project_name}-${var.environment}-*",
     ]
@@ -166,14 +165,7 @@ data "aws_iam_policy_document" "part_one" {
     resources = ["*"]
   }
 
-  statement {
-    sid    = "ECRAuth"
-    effect = "Allow"
-    actions = [
-      "ecr:GetAuthorizationToken",
-    ]
-    resources = ["*"]
-  }
+
 
   statement {
     sid    = "ECRManagement"
@@ -287,7 +279,7 @@ data "aws_iam_policy_document" "part_one" {
       "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:*",
       "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${var.environment}-*",
       "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${var.environment}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:target-group:*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:target-group:${var.project_name}-${var.environment}-*",
     ]
   }
 }
