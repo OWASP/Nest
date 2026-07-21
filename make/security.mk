@@ -1,8 +1,14 @@
 ##@ Security
 
 .PHONY: security-dependency-audit security-scan security-sast-scan security-dast-scan \
-	security-image-scan security-repository-scan security-sast-scan-semgrep \
-	security-repository-scan-trivy security-dast-scan-zap tooling-dependency-audit
+	security-image-scan security-filesystem-scan security-sast-scan-semgrep \
+	security-filesystem-scan-trivy security-dast-scan-zap tooling-dependency-audit
+
+security-scan: ## Run security scans
+	@$(MAKE) security-sast-scan
+	@$(MAKE) security-filesystem-scan
+	@$(MAKE) security-image-scan
+	@$(MAKE) security-dast-scan
 
 security-dependency-audit: ## Audit dependencies for known vulnerabilities
 	@$(MAKE) backend-dependency-audit
@@ -13,11 +19,8 @@ security-dependency-audit: ## Audit dependencies for known vulnerabilities
 	@$(MAKE) infrastructure-dependency-audit
 	@$(MAKE) tooling-dependency-audit
 
-security-scan: ## Run security scans
-	@$(MAKE) security-sast-scan
-	@$(MAKE) security-repository-scan
-	@$(MAKE) security-image-scan
-	@$(MAKE) security-dast-scan
+security-filesystem-scan: ## Scan the filesystem for vulnerabilities and security issues
+	@$(MAKE) security-filesystem-scan-trivy
 
 security-dast-scan: ## Run DAST security scan
 	@$(MAKE) security-dast-scan-zap
@@ -28,9 +31,6 @@ security-image-scan: ## Run image security scan
 
 security-sast-scan: ## Run SAST security scan
 	@$(MAKE) security-sast-scan-semgrep
-
-security-repository-scan: ## Scan the repository for vulnerabilities and security issues
-	@$(MAKE) security-repository-scan-trivy
 
 security-sast-scan-semgrep:
 	@echo "Running Semgrep security scan..."
@@ -71,10 +71,14 @@ security-sast-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-security-repository-scan-trivy:
-	@echo "Running Trivy security scan..."
+FS_SCANNERS ?= misconfig,vuln
+IMAGE_SCANNERS ?= secret,vuln
+
+security-filesystem-scan-trivy:
+	@echo "Running Trivy filesystem scan..."
 	@docker run \
 		--rm \
+		-e TRIVY_SCANNERS="$(FS_SCANNERS)" \
 		-v $(CURDIR):/src \
 		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \

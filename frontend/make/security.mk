@@ -11,9 +11,12 @@ frontend-security-image-scan:
 	@echo "Scanning image: $(FRONTEND_IMAGE_NAME)..."
 	@docker run \
 		--rm \
+		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
 		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		image --config /.trivy.yaml $(FRONTEND_IMAGE_NAME)
+		image --config /.trivy.yaml \
+		--image-config-scanners misconfig,secret \
+		$(FRONTEND_IMAGE_NAME)

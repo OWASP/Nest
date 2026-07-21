@@ -172,5 +172,5 @@ jobs:
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          command: make security-repository-scan-trivy
+          command: make security-filesystem-scan-trivy FS_SCANNERS=misconfig,secret,vuln
     timeout-minutes: 5
