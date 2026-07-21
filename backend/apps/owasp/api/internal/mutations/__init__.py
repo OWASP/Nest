@@ -2,9 +2,10 @@
 
 import strawberry
 
+from .entity_subscription import EntitySubscriptionMutations
 from .snapshot_subscription import SnapshotSubscriptionMutations
 
 
 @strawberry.type
-class OwaspMutations(SnapshotSubscriptionMutations):
+class OwaspMutations(EntitySubscriptionMutations, SnapshotSubscriptionMutations):
     """OWASP mutations."""

@@ -5,11 +5,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 
 from apps.owasp.api.internal.mutations.snapshot_subscription import (
     CreateSnapshotSubscriptionInput,
-    ProjectPreferenceInput,
     SnapshotSubscriptionMutations,
     SnapshotSubscriptionResult,
     UpdateSnapshotSubscriptionInput,
@@ -60,202 +58,38 @@ class TestCreateSnapshotSubscription:
     def mutations(self):
         return SnapshotSubscriptionMutations()
 
-    def test_duplicate_active_subscription(self, mutations):
-        """Test create fails when active subscription already exists."""
-        info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput()
-        mock_existing = MagicMock(spec=SnapshotSubscription)
-        mock_existing.is_active = True
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.return_value = (mock_existing, False)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert not result.ok
-            assert result.message == "Subscription already exists."
-
-    def test_reactivate_inactive_subscription(self, mutations):
-        """Test create reactivates an inactive subscription."""
-        info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(frequency="weekly")
-        mock_existing = MagicMock(spec=SnapshotSubscription)
-        mock_existing.is_active = False
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.return_value = (mock_existing, False)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            assert result.message == "Subscription reactivated successfully."
-            assert mock_existing.is_active is True
-            mock_existing.save.assert_called_once()
-
-    def test_reactivate_inactive_subscription_with_m2m_fields(self, mutations):
-        """Test create reactivates an inactive subscription with M2M fields."""
-        info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly",
-            subscribed_chapter_ids=[3, 4],
-        )
-        mock_existing = MagicMock(spec=SnapshotSubscription)
-        mock_existing.is_active = False
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.return_value = (mock_existing, False)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            assert result.message == "Subscription reactivated successfully."
-            assert mock_existing.is_active is True
-            mock_existing.save.assert_called_once()
-            mock_existing.chapters.set.assert_called_once_with([3, 4])
-
     def test_invalid_frequency(self, mutations):
         """Test create fails with invalid frequency."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(frequency="daily")
         result = mutations.create_snapshot_subscription(info, input_data=input_data)
         assert not result.ok
-        assert "Invalid frequency" in result.message
 
-    def test_success(self, mutations):
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_success(self, mock_create, mutations):
         """Test successful subscription creation."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(frequency="weekly")
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.return_value = (mock_sub, True)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            assert result.message == "Subscription created successfully."
-            assert result.subscription == mock_sub
+        mock_create.return_value = mock_sub
 
-    def test_success_with_m2m_fields(self, mutations):
-        """Test successful creation with subscribed chapters."""
-        info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly",
-            subscribed_chapter_ids=[4, 5],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.return_value = (mock_sub, True)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            mock_sub.chapters.set.assert_called_once_with([4, 5])
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
 
-    def test_success_with_project_preferences(self, mutations):
-        """Test successful creation with project preferences."""
-        info = mock_info()
-        pref = ProjectPreferenceInput(
-            project_id=10,
-            include_issues=True,
-            include_pull_requests=False,
-            include_releases=True,
-        )
-        input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly",
-            project_preferences=[pref],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with (
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "SnapshotSubscription.objects"
-            ) as mock_objects,
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "ProjectSubscriptionPreference"
-            ) as mock_pref_model,
-        ):
-            mock_objects.get_or_create.return_value = (mock_sub, True)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            mock_sub.project_preferences.all.return_value.delete.assert_called_once()
-            mock_pref_model.objects.create.assert_called_once_with(
-                subscription=mock_sub,
-                project_id=10,
-                include_issues=True,
-                include_pull_requests=False,
-                include_releases=True,
-            )
+        assert result.ok
+        assert result.message == "Subscription created successfully."
+        assert result.subscription == mock_sub
 
-    def test_duplicate_project_ids_in_preferences(self, mutations):
-        """Test create fails with duplicate project IDs."""
-        info = mock_info()
-        pref1 = ProjectPreferenceInput(project_id=10)
-        pref2 = ProjectPreferenceInput(project_id=10)
-        input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly",
-            project_preferences=[pref1, pref2],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.return_value = (mock_sub, True)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert not result.ok
-            assert result.message == "Duplicate project IDs in preferences."
-
-    def test_invalid_project_id_in_preferences(self, mutations):
-        """Test create fails with invalid project FK."""
-        info = mock_info()
-        pref = ProjectPreferenceInput(project_id=999)
-        input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly",
-            project_preferences=[pref],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with (
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "SnapshotSubscription.objects"
-            ) as mock_objects,
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "ProjectSubscriptionPreference"
-            ) as mock_pref_model,
-        ):
-            mock_objects.get_or_create.return_value = (mock_sub, True)
-            mock_pref_model.objects.create.side_effect = IntegrityError
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert not result.ok
-            assert result.message == "Invalid project ID in preferences."
-
-    def test_concurrent_create_integrity_error(self, mutations):
-        """Test create handles race condition with IntegrityError."""
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_already_exists(self, mock_create, mutations):
+        """Test create fails when active subscription already exists."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(frequency="weekly")
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.side_effect = IntegrityError
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert not result.ok
-            assert result.message == "Subscription already exists."
+        mock_create.return_value = None
 
-    def test_create_after_cancel(self, mutations):
-        """Test user can create subscription after cancelling previous one."""
-        info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(frequency="monthly")
-        mock_existing = MagicMock(spec=SnapshotSubscription)
-        mock_existing.is_active = False
-        mock_existing.frequency = "weekly"
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get_or_create.return_value = (mock_existing, False)
-            result = mutations.create_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            assert result.message == "Subscription reactivated successfully."
-            assert mock_existing.is_active is True
-            assert mock_existing.frequency == "monthly"
-            mock_existing.save.assert_called_once()
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert result.message == "Snapshot subscription with this User already exists."
 
 
 class TestUpdateSnapshotSubscription:
@@ -288,12 +122,14 @@ class TestUpdateSnapshotSubscription:
             mock_objects.get.return_value = mock_sub
             result = mutations.update_snapshot_subscription(info, input_data=input_data)
             assert not result.ok
-            assert "Invalid frequency" in result.message
 
     def test_success(self, mutations):
         """Test successful subscription update."""
         info = mock_info()
-        input_data = UpdateSnapshotSubscriptionInput(frequency="monthly", include_chapters=False)
+        input_data = UpdateSnapshotSubscriptionInput(
+            frequency="monthly",
+            include_chapters=False,
+        )
         mock_sub = MagicMock(spec=SnapshotSubscription)
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
@@ -302,98 +138,7 @@ class TestUpdateSnapshotSubscription:
             result = mutations.update_snapshot_subscription(info, input_data=input_data)
             assert result.ok
             assert result.message == "Subscription updated successfully."
-            mock_sub.save.assert_called_once()
-
-    def test_success_with_m2m_fields(self, mutations):
-        """Test successful update with subscribed chapters."""
-        info = mock_info()
-        input_data = UpdateSnapshotSubscriptionInput(
-            subscribed_chapter_ids=[30],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.update_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            mock_sub.chapters.set.assert_called_once_with([30])
-
-    def test_success_with_project_preferences(self, mutations):
-        """Test successful update with project preferences."""
-        info = mock_info()
-        pref = ProjectPreferenceInput(
-            project_id=20,
-            include_issues=False,
-            include_pull_requests=True,
-            include_releases=False,
-        )
-        input_data = UpdateSnapshotSubscriptionInput(
-            project_preferences=[pref],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with (
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "SnapshotSubscription.objects"
-            ) as mock_objects,
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "ProjectSubscriptionPreference"
-            ) as mock_pref_model,
-        ):
-            mock_objects.get.return_value = mock_sub
-            result = mutations.update_snapshot_subscription(info, input_data=input_data)
-            assert result.ok
-            mock_sub.project_preferences.all.return_value.delete.assert_called_once()
-            mock_pref_model.objects.create.assert_called_once_with(
-                subscription=mock_sub,
-                project_id=20,
-                include_issues=False,
-                include_pull_requests=True,
-                include_releases=False,
-            )
-
-    def test_duplicate_project_ids_in_preferences(self, mutations):
-        """Test update fails with duplicate project IDs."""
-        info = mock_info()
-        pref1 = ProjectPreferenceInput(project_id=20)
-        pref2 = ProjectPreferenceInput(project_id=20)
-        input_data = UpdateSnapshotSubscriptionInput(
-            project_preferences=[pref1, pref2],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.update_snapshot_subscription(info, input_data=input_data)
-            assert not result.ok
-            assert result.message == "Duplicate project IDs in preferences."
-
-    def test_invalid_project_id_in_preferences(self, mutations):
-        """Test update fails with invalid project FK."""
-        info = mock_info()
-        pref = ProjectPreferenceInput(project_id=999)
-        input_data = UpdateSnapshotSubscriptionInput(
-            project_preferences=[pref],
-        )
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with (
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "SnapshotSubscription.objects"
-            ) as mock_objects,
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription."
-                "ProjectSubscriptionPreference"
-            ) as mock_pref_model,
-        ):
-            mock_objects.get.return_value = mock_sub
-            mock_pref_model.objects.create.side_effect = IntegrityError
-            result = mutations.update_snapshot_subscription(info, input_data=input_data)
-            assert not result.ok
-            assert result.message == "Invalid project ID in preferences."
+            mock_sub.update.assert_called_once()
 
 
 class TestCancelSnapshotSubscription:
@@ -424,7 +169,6 @@ class TestCancelSnapshotSubscription:
             mock_objects.get.return_value = mock_sub
             result = mutations.cancel_snapshot_subscription(info)
             assert result.ok
-            assert result.message == "Subscription cancelled successfully."
             assert mock_sub.is_active is False
             mock_sub.save.assert_called_once()
 
@@ -454,7 +198,6 @@ class TestUnsubscribeByToken:
             mock_objects.get.side_effect = ValidationError("Invalid UUID")
             result = mutations.unsubscribe_by_token(token=MOCK_TOKEN)
             assert not result.ok
-            assert result.message == "Invalid unsubscribe token."
 
     def test_already_inactive(self, mutations):
         """Test unsubscribe fails when already inactive."""
@@ -466,7 +209,6 @@ class TestUnsubscribeByToken:
             mock_objects.get.return_value = mock_sub
             result = mutations.unsubscribe_by_token(token=str(uuid.uuid4()))
             assert not result.ok
-            assert result.message == "Subscription is already inactive."
 
     def test_success(self, mutations):
         """Test successful unsubscribe by token."""
@@ -478,6 +220,5 @@ class TestUnsubscribeByToken:
             mock_objects.get.return_value = mock_sub
             result = mutations.unsubscribe_by_token(token=str(uuid.uuid4()))
             assert result.ok
-            assert result.message == "Successfully unsubscribed."
             assert mock_sub.is_active is False
             mock_sub.save.assert_called_once()

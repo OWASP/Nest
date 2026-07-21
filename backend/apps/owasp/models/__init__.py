@@ -3,6 +3,8 @@ from .chapter import Chapter
 from .committee import Committee
 from .entity_channel import EntityChannel
 from .entity_member import EntityMember
+from .entity_subscription import EntitySubscription
+from .entity_subscription_preference import EntitySubscriptionPreference
 from .event import Event
 from .member_profile import MemberProfile
 from .member_snapshot import MemberSnapshot
@@ -10,7 +12,6 @@ from .post import Post
 from .project import Project
 from .project_health_metrics import ProjectHealthMetrics
 from .project_health_requirements import ProjectHealthRequirements
-from .project_subscription_preference import ProjectSubscriptionPreference
 from .snapshot import Snapshot
 from .snapshot_subscription import SnapshotSubscription
 from .sponsor import Sponsor

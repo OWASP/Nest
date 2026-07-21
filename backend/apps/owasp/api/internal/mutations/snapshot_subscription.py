@@ -2,23 +2,13 @@
 
 import strawberry
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
 from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
-from apps.owasp.models.project_subscription_preference import ProjectSubscriptionPreference
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
-
-@strawberry.input
-class ProjectPreferenceInput:
-    """Input for per-project content preferences."""
-
-    project_id: int
-    include_issues: bool = True
-    include_pull_requests: bool = True
-    include_releases: bool = True
+VALID_FREQUENCIES = frozenset(("monthly", "weekly"))
 
 
 @strawberry.input
@@ -28,10 +18,12 @@ class CreateSnapshotSubscriptionInput:
     frequency: str = "weekly"
     include_chapters: bool = True
     include_events: bool = True
+    include_issues: bool = True
     include_posts: bool = True
+    include_projects: bool = True
+    include_pull_requests: bool = True
+    include_releases: bool = True
     include_users: bool = True
-    subscribed_chapter_ids: list[int] | None = None
-    project_preferences: list[ProjectPreferenceInput] | None = None
 
 
 @strawberry.input
@@ -41,10 +33,12 @@ class UpdateSnapshotSubscriptionInput:
     frequency: str | None = None
     include_chapters: bool | None = None
     include_events: bool | None = None
+    include_issues: bool | None = None
     include_posts: bool | None = None
+    include_projects: bool | None = None
+    include_pull_requests: bool | None = None
+    include_releases: bool | None = None
     include_users: bool | None = None
-    subscribed_chapter_ids: list[int] | None = None
-    project_preferences: list[ProjectPreferenceInput] | None = None
 
 
 @strawberry.type
@@ -56,70 +50,11 @@ class SnapshotSubscriptionResult:
     subscription: SnapshotSubscriptionNode | None = None
 
 
-def _sync_project_preferences(
-    subscription: SnapshotSubscription,
-    preferences: list[ProjectPreferenceInput],
-) -> None:
-    """Sync per-project preferences for a subscription.
-
-    Replaces all existing project preferences with the provided ones.
-    Wrapped in a transaction to prevent partial preference sets.
-
-    Args:
-        subscription: The snapshot subscription instance.
-        preferences: List of per-project preference inputs.
-
-    Raises:
-        ValueError: If duplicate project IDs or invalid project references.
-
-    """
-    project_ids = [pref.project_id for pref in preferences]
-    if len(project_ids) != len(set(project_ids)):
-        msg = "Duplicate project IDs in preferences."
-        raise ValueError(msg)
-
-    try:
-        with transaction.atomic():
-            subscription.project_preferences.all().delete()
-
-            for pref in preferences:
-                ProjectSubscriptionPreference.objects.create(
-                    subscription=subscription,
-                    project_id=pref.project_id,
-                    include_issues=pref.include_issues,
-                    include_pull_requests=pref.include_pull_requests,
-                    include_releases=pref.include_releases,
-                )
-    except IntegrityError:
-        msg = "Invalid project ID in preferences."
-        raise ValueError(msg) from None
-
-
-def _apply_subscription_preferences(
-    subscription: SnapshotSubscription,
-    input_data: CreateSnapshotSubscriptionInput,
-) -> None:
-    """Apply preferences from input data to a subscription instance.
-
-    Args:
-        subscription: The snapshot subscription instance to update.
-        input_data: The input data containing preference values.
-
-    """
-    with transaction.atomic():
-        subscription.is_active = True
-        subscription.frequency = input_data.frequency
-        subscription.include_chapters = input_data.include_chapters
-        subscription.include_events = input_data.include_events
-        subscription.include_posts = input_data.include_posts
-        subscription.include_users = input_data.include_users
-        subscription.save()
-
-        if input_data.subscribed_chapter_ids is not None:
-            subscription.chapters.set(input_data.subscribed_chapter_ids)
-
-        if input_data.project_preferences is not None:
-            _sync_project_preferences(subscription, input_data.project_preferences)
+def _validate_frequency(frequency):
+    """Validate frequency value. Returns error message or None."""
+    if frequency is not None and frequency not in VALID_FREQUENCIES:
+        return f"Frequency must be one of: {', '.join(sorted(VALID_FREQUENCIES))}."
+    return None
 
 
 @strawberry.type
@@ -135,56 +70,31 @@ class SnapshotSubscriptionMutations:
         """Create a new snapshot subscription for the logged-in user."""
         user = info.context.request.user
 
-        if input_data.frequency not in dict(SnapshotSubscription.Frequency.choices):
-            return SnapshotSubscriptionResult(
-                ok=False,
-                message="Invalid frequency. Must be 'weekly' or 'monthly'.",
-            )
+        error = _validate_frequency(input_data.frequency)
+        if error:
+            return SnapshotSubscriptionResult(ok=False, message=error)
 
-        defaults = {
-            "frequency": input_data.frequency,
+        kwargs = {
             "include_chapters": input_data.include_chapters,
             "include_events": input_data.include_events,
+            "include_issues": input_data.include_issues,
             "include_posts": input_data.include_posts,
+            "include_projects": input_data.include_projects,
+            "include_pull_requests": input_data.include_pull_requests,
+            "include_releases": input_data.include_releases,
             "include_users": input_data.include_users,
-            "is_active": True,
         }
 
-        try:
-            with transaction.atomic():
-                subscription, created = SnapshotSubscription.objects.get_or_create(
-                    user=user,
-                    defaults=defaults,
-                )
+        subscription = SnapshotSubscription.create(
+            user=user,
+            frequency=input_data.frequency,
+            **kwargs,
+        )
 
-                if not created:
-                    if subscription.is_active:
-                        return SnapshotSubscriptionResult(
-                            ok=False,
-                            message="Subscription already exists.",
-                        )
-                    _apply_subscription_preferences(subscription, input_data)
-                    return SnapshotSubscriptionResult(
-                        ok=True,
-                        message="Subscription reactivated successfully.",
-                        subscription=subscription,
-                    )
-
-                if input_data.subscribed_chapter_ids is not None:
-                    subscription.chapters.set(input_data.subscribed_chapter_ids)
-
-                if input_data.project_preferences is not None:
-                    _sync_project_preferences(subscription, input_data.project_preferences)
-
-        except IntegrityError:
+        if subscription is None:
             return SnapshotSubscriptionResult(
                 ok=False,
-                message="Subscription already exists.",
-            )
-        except ValueError as err:
-            return SnapshotSubscriptionResult(
-                ok=False,
-                message=str(err),
+                message="Snapshot subscription with this User already exists.",
             )
 
         return SnapshotSubscriptionResult(
@@ -199,7 +109,7 @@ class SnapshotSubscriptionMutations:
         info: Info,
         input_data: UpdateSnapshotSubscriptionInput,
     ) -> SnapshotSubscriptionResult:
-        """Update the logged-in user's snapshot subscription."""
+        """Update the user's snapshot subscription."""
         user = info.context.request.user
 
         try:
@@ -210,39 +120,26 @@ class SnapshotSubscriptionMutations:
                 message="Subscription not found.",
             )
 
-        if input_data.frequency is not None:
-            if input_data.frequency not in dict(SnapshotSubscription.Frequency.choices):
-                return SnapshotSubscriptionResult(
-                    ok=False,
-                    message="Invalid frequency. Must be 'weekly' or 'monthly'.",
-                )
-            subscription.frequency = input_data.frequency
+        error = _validate_frequency(input_data.frequency)
+        if error:
+            return SnapshotSubscriptionResult(ok=False, message=error)
 
-        fields = {
-            "include_chapters": input_data.include_chapters,
-            "include_events": input_data.include_events,
-            "include_posts": input_data.include_posts,
-            "include_users": input_data.include_users,
-        }
-
-        for field_name, value in fields.items():
+        update_kwargs = {}
+        for field in (
+            "include_chapters",
+            "include_events",
+            "include_issues",
+            "include_posts",
+            "include_projects",
+            "include_pull_requests",
+            "include_releases",
+            "include_users",
+        ):
+            value = getattr(input_data, field)
             if value is not None:
-                setattr(subscription, field_name, value)
+                update_kwargs[field] = value
 
-        try:
-            with transaction.atomic():
-                subscription.save()
-
-                if input_data.subscribed_chapter_ids is not None:
-                    subscription.chapters.set(input_data.subscribed_chapter_ids)
-
-                if input_data.project_preferences is not None:
-                    _sync_project_preferences(subscription, input_data.project_preferences)
-        except ValueError as err:
-            return SnapshotSubscriptionResult(
-                ok=False,
-                message=str(err),
-            )
+        subscription.update(frequency=input_data.frequency, **update_kwargs)
 
         return SnapshotSubscriptionResult(
             ok=True,
@@ -251,8 +148,11 @@ class SnapshotSubscriptionMutations:
         )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def cancel_snapshot_subscription(self, info: Info) -> SnapshotSubscriptionResult:
-        """Cancel the logged-in user's snapshot subscription."""
+    def cancel_snapshot_subscription(
+        self,
+        info: Info,
+    ) -> SnapshotSubscriptionResult:
+        """Cancel the user's snapshot subscription."""
         user = info.context.request.user
 
         try:

@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 from apps.owasp.api.internal.queries.snapshot_subscription import SnapshotSubscriptionQuery
-from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
 
 def mock_info(*, authenticated=True):
@@ -29,36 +28,27 @@ class TestSnapshotSubscriptionQuery:
         field_names = [
             field.name for field in SnapshotSubscriptionQuery.__strawberry_definition__.fields
         ]
-        assert "my_subscription" in field_names
+        assert "my_subscriptions" in field_names
 
-    def _resolve_my_subscription(self, info):
-        """Invoke the underlying resolver for my_subscription."""
-        field = SnapshotSubscriptionQuery.__dict__["my_subscription"]
+    def _resolve_my_subscriptions(self, info):
+        """Invoke the underlying resolver for my_subscriptions."""
+        field = SnapshotSubscriptionQuery.__dict__["my_subscriptions"]
         return field(self.query, info=info)
 
-    def test_my_subscription_unauthenticated(self):
-        """Test mySubscription returns None for unauthenticated user."""
+    def test_my_subscriptions_unauthenticated(self):
+        """Test mySubscriptions returns empty list for unauthenticated user."""
         info = mock_info(authenticated=False)
-        result = self._resolve_my_subscription(info)
-        assert result is None
+        result = self._resolve_my_subscriptions(info)
+        assert result == []
 
-    def test_my_subscription_not_found(self):
-        """Test mySubscription returns None when no subscription exists."""
+    def test_my_subscriptions_found(self):
+        """Test mySubscriptions returns subscriptions when they exist."""
         info = mock_info()
+        mock_queryset = MagicMock()
         with patch(
             "apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
-            mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
-            result = self._resolve_my_subscription(info)
-            assert result is None
-
-    def test_my_subscription_found(self):
-        """Test mySubscription returns subscription when it exists."""
-        info = mock_info()
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = self._resolve_my_subscription(info)
-            assert result == mock_sub
+            mock_objects.filter.return_value = mock_queryset
+            result = self._resolve_my_subscriptions(info)
+            assert result == mock_queryset
+            mock_objects.filter.assert_called_once_with(user=info.context.request.user)
