@@ -17,6 +17,7 @@ env:
 jobs:
   run-ci-cd:
     name: Run staging CI/CD
+    if: github.event.repository.fork == false
     permissions:
       actions: write
       attestations: write
@@ -30,6 +31,7 @@ jobs:
       BOOTSTRAP_AWS_ACCESS_KEY_ID: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
       BOOTSTRAP_AWS_SECRET_ACCESS_KEY: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
       BOOTSTRAP_TF_STATE_BUCKET_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
       NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
       NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}

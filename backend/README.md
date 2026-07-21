@@ -18,8 +18,8 @@ The OWASP Nest backend is a Python-based API server built with the [Django](http
 
 The backend code lives in this directory. Key directories include:
 
-- `apps/` - Contains all Django applications (e.g., `owasp`, `github`, `api`).
-- `settings/` - Django configuration files.
+- `src/apps/` - Contains all Django applications (e.g., `owasp`, `github`, `api`).
+- `src/settings/` - Django configuration files.
 - `tests/` - Automated tests.
 - `data/` - Database dumps and backup files.
 
@@ -34,18 +34,19 @@ docker compose -f docker-compose/local/compose.yaml up
 
 For common tasks, use the provided `Makefile` targets:
 
-| Task                    | Command                 |
-| ----------------------- | ----------------------- |
-| Run database migrations | `make migrate`          |
-| Create a superuser      | `make create-superuser` |
-| Run backend tests       | `make test-backend`     |
-| Access Django shell     | `make django-shell`     |
+| Task                       | Command                 |
+| -------------------------- | ----------------------- |
+| Create database migrations | `make migration`        |
+| Run database migrations    | `make migrate`          |
+| Create a superuser         | `make create-superuser` |
+| Run backend tests          | `make test-backend`     |
+| Access Django shell        | `make shell-django`     |
 
 See the root `Makefile` and the local `Makefile` for more targets.
 
 ## Key APIs
 
-- **REST API (v0)**: Served at `/api/v0/`. See [API v0 README](https://github.com/OWASP/Nest/blob/main/backend/apps/api/rest/v0/README.md) for SDK-related constraints.
+- **REST API (v0)**: Served at `/api/v0/`. See [API v0 README](https://github.com/OWASP/Nest/blob/main/backend/src/apps/api/rest/v0/README.md) for SDK-related constraints.
 - **GraphQL API**: Served at `/graphql/`.
 
 ## Dependencies

@@ -1,0 +1,21 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [ "poetry-core" ]
+
+[tool.poetry]
+name = "owasp-nest-infrastructure"
+version = "0.1.0"
+description = "OWASP Nest infrastructure tooling"
+license = "MIT"
+authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
+packages = [ { include = "scripts" } ]
+dependencies.python = "^3.13"
+group.test.dependencies.pytest = "9.0.3"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 99
+src = [ "scripts", "tests" ]
+
+[tool.pytest]
+ini_options.testpaths = [ "tests" ]

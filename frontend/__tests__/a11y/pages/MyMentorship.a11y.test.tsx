@@ -32,6 +32,14 @@ jest.mock('hooks/useUpdateProgramStatus', () => ({
   useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
 }))
 
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: () => ({
+    isSyncing: false,
+    session: { user: { login: 'test-user', isLeader: true } },
+    status: 'authenticated',
+  }),
+}))
+
 describe.each([
   { theme: 'light', name: 'light' },
   { theme: 'dark', name: 'dark' },

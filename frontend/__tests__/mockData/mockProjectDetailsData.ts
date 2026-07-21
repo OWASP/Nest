@@ -13,6 +13,13 @@ export const mockProjectDetailsData = {
         },
       },
     ],
+    entityChannels: [
+      {
+        name: 'project-security',
+        externalId: 'C456DEF',
+        platform: 'slack',
+      },
+    ],
     forksCount: 10,
     healthMetricsList: [
       {

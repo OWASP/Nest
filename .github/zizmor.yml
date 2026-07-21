@@ -1,5 +1,7 @@
 rules:
   dangerous-triggers:
     ignore:
+      # Enforces contribution policy on fork PRs; does not checkout PR code.
+      - check-contribution.yaml
       # Labels PRs from configuration; does not checkout PR code.
       - pr-labeler.yaml

@@ -40,7 +40,7 @@ export default function ScrollToTop() {
       type="button"
       onClick={scrollToTop}
       aria-label="Scroll to top"
-      className={`bg-owasp-blue/70 hover:bg-owasp-blue dark:bg-owasp-blue/30 hover:dark:bg-owasp-blue/50 fixed right-4 bottom-4 z-50 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-lg transition-all duration-400 hover:scale-105 active:scale-100 dark:text-slate-300 ${isVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} `}
+      className={`dark:bg-owasp-blue/30 hover:dark:bg-owasp-blue/50 fixed right-4 bottom-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-slate-500/70 text-white shadow-lg transition-all duration-400 hover:scale-105 hover:bg-slate-500/90 active:scale-100 dark:text-slate-300 ${isVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} `}
     >
       <FaArrowUp className="text-xl" />
     </button>

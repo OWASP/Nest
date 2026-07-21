@@ -7,10 +7,10 @@ on:
     paths:
       - .clusterfuzzlite/**
       - .github/workflows/cluster-fuzz-lite.yaml
-      - backend/apps/common/search/**
-      - backend/apps/slack/apps.py
-      - backend/apps/slack/common/**
-      - backend/apps/slack/utils/format.py
+      - backend/src/apps/common/search/**
+      - backend/src/apps/slack/apps.py
+      - backend/src/apps/slack/common/**
+      - backend/src/apps/slack/utils/format.py
       - backend/requirements/cluster-fuzz-lite.in
       - backend/requirements/cluster-fuzz-lite.txt
       - backend/tests/cluster-fuzz-lite/**
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           persist-credentials: false
 
