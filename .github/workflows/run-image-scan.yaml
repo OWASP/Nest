@@ -58,12 +58,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           persist-credentials: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b  # v6.2.0
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b  # v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -75,7 +75,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ inputs.aws_role_name }}
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419  # v2.1.5
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
 
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
@@ -83,11 +83,11 @@ jobs:
           command: |
             docker pull "$BACKEND_IMAGE"
             docker pull "$FRONTEND_IMAGE"
-            make security-scan-images \
+            make security-image-scan \
               BACKEND_IMAGE_NAME="$BACKEND_IMAGE" \
               FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
-            make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-            make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+            make backend-image-sbom BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
+            make frontend-image-sbom FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
 
       - name: Upload unsigned SBOM as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1

@@ -13,8 +13,7 @@ import ModuleCard, { getSimpleDuration } from 'components/ModuleCard'
 
 // Mock @dnd-kit
 let capturedOnDragEnd:
-  | ((event: { active: { id: string }; over: { id: string } | null }) => void)
-  | null = null
+  ((event: { active: { id: string }; over: { id: string } | null }) => void) | null = null
 jest.mock('@dnd-kit/core', () => ({
   DndContext: ({
     children,

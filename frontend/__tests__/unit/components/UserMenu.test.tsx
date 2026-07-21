@@ -850,6 +850,65 @@ describe('UserMenu Component', () => {
       })
     })
 
+    it.each([
+      { role: 'mentor', flags: { isMentor: true } },
+      { role: 'mentee', flags: { isMentee: true } },
+    ])('shows My Mentorship for a $role who is not a project leader', async ({ flags }) => {
+      const roleSession: ExtendedSession = {
+        user: {
+          name: 'Role User',
+          email: 'role@example.com',
+          image: 'https://example.com/avatar.jpg',
+          isLeader: false,
+          isOwaspStaff: false,
+          ...flags,
+        },
+        expires: '2024-12-31',
+      }
+
+      mockUseSession.mockReturnValue({
+        session: roleSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+      fireEvent.click(screen.getByRole('button'))
+
+      await waitFor(() => {
+        expect(screen.getByText('My Mentorship')).toBeInTheDocument()
+      })
+    })
+
+    it('hides My Mentorship for a user with no mentorship role', async () => {
+      const plainSession: ExtendedSession = {
+        user: {
+          name: 'Plain User',
+          email: 'plain@example.com',
+          image: 'https://example.com/avatar.jpg',
+          isLeader: false,
+          isMentor: false,
+          isMentee: false,
+          isOwaspStaff: false,
+        },
+        expires: '2024-12-31',
+      }
+
+      mockUseSession.mockReturnValue({
+        session: plainSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+      fireEvent.click(screen.getByRole('button'))
+
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument()
+      })
+      expect(screen.queryByText('My Mentorship')).not.toBeInTheDocument()
+    })
+
     it('closes dropdown when Project Health Dashboard link is clicked', async () => {
       const staffSession: ExtendedSession = {
         user: {

@@ -152,3 +152,24 @@ describe('CommunityPage', () => {
     )
   })
 })
+
+describe('Community engagement links', () => {
+  it('renders internal links without rel or target attributes', () => {
+    render(<CommunityPage />)
+    const internalLink = screen.getByRole('link', { name: /contributing to a project/i })
+    expect(internalLink).not.toHaveAttribute('rel')
+    expect(internalLink).not.toHaveAttribute('target')
+  })
+
+  it('renders external links with rel and target attributes', () => {
+    render(<CommunityPage />)
+    const externalLinks = screen.getAllByRole('link').filter((l) => {
+      const href = l.getAttribute('href') ?? ''
+      return href.startsWith('https')
+    })
+    externalLinks.forEach((link) => {
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(link).toHaveAttribute('target', '_blank')
+    })
+  })
+})
