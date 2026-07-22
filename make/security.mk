@@ -71,14 +71,10 @@ security-sast-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-FS_SCANNERS ?= misconfig,vuln
-IMAGE_SCANNERS ?= secret,vuln
-
 security-filesystem-scan-trivy:
 	@echo "Running Trivy filesystem scan..."
 	@docker run \
 		--rm \
-		-e TRIVY_SCANNERS="$(FS_SCANNERS)" \
 		-v $(CURDIR):/src \
 		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
