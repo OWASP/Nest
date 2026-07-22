@@ -5,7 +5,6 @@ from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
 from apps.common.api.internal.dataloaders.utils import (
-    get_m2m_results_by_keys,
     get_result_by_keys,
     get_results_by_keys,
 )
@@ -23,13 +22,12 @@ async def load_projects_by_repository_id(
     """Batch-load the first project for the given repository IDs in a single query."""
     projects = (
         Project.objects.filter(repositories__in=repository_ids)
-        .prefetch_related("repositories")
+        .annotate(repository_id=F("repositories__pk"))
         .order_by("pk")
-        .distinct()
     )
 
-    results: list[list[Project | None]] = await get_m2m_results_by_keys(
-        projects, repository_ids, m2m_field="repositories", key_field="pk"
+    results: list[list[Project]] = await get_results_by_keys(
+        projects, repository_ids, key_field="repository_id"
     )
 
     return [result[0] if result else None for result in results]

@@ -1,8 +1,19 @@
 """Test cases for SnapshotNode."""
 
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+import strawberry
+
+from apps.owasp.api.internal.dataloaders.snapshot import (
+    NEW_CHAPTERS_BY_SNAPSHOT_ID,
+    NEW_ISSUES_BY_SNAPSHOT_ID,
+    NEW_PROJECTS_BY_SNAPSHOT_ID,
+    NEW_RELEASES_BY_SNAPSHOT_ID,
+    NEW_USERS_BY_SNAPSHOT_ID,
+)
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
+from apps.owasp.models.snapshot import Snapshot
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -51,50 +62,92 @@ class TestSnapshotNodeResolvers:
 
         assert result == "2025-02"
 
-    def test_new_issues_resolver(self):
-        """Test new_issues resolver returns ordered issues."""
+    @pytest.mark.asyncio
+    async def test_new_chapters_resolver_uses_dataloader(self):
+        """Test new_chapters resolver delegates to the new_chapters dataloader."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_chapter1 = MagicMock()
+        mock_chapter2 = MagicMock()
+
+        resolver = self._get_resolver("new_chapters")
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[mock_chapter1, mock_chapter2])
+        info.context.owasp_dataloaders = {NEW_CHAPTERS_BY_SNAPSHOT_ID: mock_dataloader}
+
+        result = await resolver(None, mock_snapshot, info)
+
+        mock_dataloader.load.assert_called_once_with(mock_snapshot.pk)
+        assert result == [mock_chapter1, mock_chapter2]
+
+    @pytest.mark.asyncio
+    async def test_new_issues_resolver_uses_dataloader(self):
+        """Test new_issues resolver delegates to the new_issues dataloader."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_issue1 = MagicMock()
+        mock_issue2 = MagicMock()
+
         resolver = self._get_resolver("new_issues")
-        mock_snapshot = MagicMock()
-        mock_issues = [MagicMock(), MagicMock()]
-        mock_snapshot.new_issues.order_by.return_value.__getitem__.return_value = mock_issues
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[mock_issue1, mock_issue2])
+        info.context.owasp_dataloaders = {NEW_ISSUES_BY_SNAPSHOT_ID: mock_dataloader}
 
-        result = resolver(None, mock_snapshot)
+        result = await resolver(None, mock_snapshot, info)
 
-        mock_snapshot.new_issues.order_by.assert_called_once_with("-created_at")
-        assert result == mock_issues
+        mock_dataloader.load.assert_called_once_with(mock_snapshot.pk)
+        assert result == [mock_issue1, mock_issue2]
 
-    def test_new_projects_resolver(self):
-        """Test new_projects resolver returns ordered projects."""
+    @pytest.mark.asyncio
+    async def test_new_projects_resolver_uses_dataloader(self):
+        """Test new_projects resolver delegates to the new_projects dataloader."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_project1 = MagicMock()
+        mock_project2 = MagicMock()
+
         resolver = self._get_resolver("new_projects")
-        mock_snapshot = MagicMock()
-        mock_projects = [MagicMock(), MagicMock()]
-        mock_snapshot.new_projects.order_by.return_value = mock_projects
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[mock_project1, mock_project2])
+        info.context.owasp_dataloaders = {NEW_PROJECTS_BY_SNAPSHOT_ID: mock_dataloader}
 
-        result = resolver(None, mock_snapshot)
+        result = await resolver(None, mock_snapshot, info)
 
-        mock_snapshot.new_projects.order_by.assert_called_once_with("-created_at")
-        assert result == mock_projects
+        mock_dataloader.load.assert_called_once_with(mock_snapshot.pk)
+        assert result == [mock_project1, mock_project2]
 
-    def test_new_releases_resolver(self):
-        """Test new_releases resolver returns ordered releases."""
+    @pytest.mark.asyncio
+    async def test_new_releases_resolver_uses_dataloader(self):
+        """Test new_releases resolver delegates to the new_releases dataloader."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_release1 = MagicMock()
+        mock_release2 = MagicMock()
+
         resolver = self._get_resolver("new_releases")
-        mock_snapshot = MagicMock()
-        mock_releases = [MagicMock(), MagicMock()]
-        mock_snapshot.new_releases.order_by.return_value = mock_releases
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[mock_release1, mock_release2])
+        info.context.owasp_dataloaders = {NEW_RELEASES_BY_SNAPSHOT_ID: mock_dataloader}
 
-        result = resolver(None, mock_snapshot)
+        result = await resolver(None, mock_snapshot, info)
 
-        mock_snapshot.new_releases.order_by.assert_called_once_with("-published_at")
-        assert result == mock_releases
+        mock_dataloader.load.assert_called_once_with(mock_snapshot.pk)
+        assert result == [mock_release1, mock_release2]
 
-    def test_new_users_resolver(self):
-        """Test new_users resolver returns ordered users."""
+    @pytest.mark.asyncio
+    async def test_new_users_resolver_uses_dataloader(self):
+        """Test new_users resolver delegates to the new_users dataloader."""
+        mock_snapshot = MagicMock(spec=Snapshot)
+        mock_user1 = MagicMock()
+        mock_user2 = MagicMock()
+
         resolver = self._get_resolver("new_users")
-        mock_snapshot = MagicMock()
-        mock_users = [MagicMock(), MagicMock()]
-        mock_snapshot.new_users.order_by.return_value = mock_users
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[mock_user1, mock_user2])
+        info.context.owasp_dataloaders = {NEW_USERS_BY_SNAPSHOT_ID: mock_dataloader}
 
-        result = resolver(None, mock_snapshot)
+        result = await resolver(None, mock_snapshot, info)
 
-        mock_snapshot.new_users.order_by.assert_called_once_with("-created_at")
-        assert result == mock_users
+        mock_dataloader.load.assert_called_once_with(mock_snapshot.pk)
+        assert result == [mock_user1, mock_user2]

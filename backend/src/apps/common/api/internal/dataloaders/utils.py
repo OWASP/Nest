@@ -58,36 +58,3 @@ async def get_result_by_keys[K, V](
         mapping[key] = cast("V", item if value_field is None else getattr(item, value_field))
 
     return [mapping.get(key) for key in keys]
-
-
-async def get_m2m_results_by_keys[K, V](
-    queryset: QuerySet[Model],
-    keys: list[K],
-    m2m_field: str,
-    key_field: str,
-    value_field: str | None = None,
-) -> list[list[V]]:
-    """Map M2M-related results back to an ordered list matching ``keys``.
-
-    Args:
-        queryset: The queryset of source objects to iterate over.
-        keys: A list of keys to map the results to, in the desired order.
-        m2m_field: The name of the M2M field on each source object.
-        key_field: The name of the attribute on each related object that contains the key.
-        value_field: The name of the attribute on each source object that contains the value.
-            When ``None``, the source object itself is used as the value.
-
-    Returns:
-        A list of result-lists, one per key, in the same order as ``keys``.
-
-    """
-    mapping: dict[K, list[V]] = defaultdict(list)
-    async for item in queryset:
-        related_manager = getattr(item, m2m_field)
-        async for related in related_manager.all():
-            key: K = cast("K", getattr(related, key_field))
-            mapping[key].append(
-                cast("V", item if value_field is None else getattr(item, value_field))
-            )
-
-    return [mapping.get(key, []) for key in keys]
