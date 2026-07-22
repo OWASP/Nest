@@ -14,7 +14,7 @@ PULL_REQUESTS_COUNT_BY_SNAPSHOT_ID_LOADER = "pull_requests_count_by_snapshot_id"
 TOTAL_CONTRIBUTIONS_BY_SNAPSHOT_ID_LOADER = "total_contributions_by_snapshot_id"
 
 
-async def load_count_by_snapshot_id(snapshot_ids: list[int], field: str) -> list[int]:
+async def load_count_by_snapshot_id(snapshot_ids: list[int], field: str) -> tuple[int]:
     """Batch-load a related M2M count for the given member snapshot IDs."""
     snapshots = (
         MemberSnapshot.objects.filter(pk__in=snapshot_ids)
@@ -24,27 +24,27 @@ async def load_count_by_snapshot_id(snapshot_ids: list[int], field: str) -> list
     return await get_values_by_keys(snapshots, snapshot_ids, default=0)
 
 
-async def load_commits_count_by_snapshot_id(snapshot_ids: list[int]) -> list[int]:
+async def load_commits_count_by_snapshot_id(snapshot_ids: list[int]) -> tuple[int]:
     """Batch-load commits count for the given member snapshot IDs."""
     return await load_count_by_snapshot_id(snapshot_ids, "commits")
 
 
-async def load_issues_count_by_snapshot_id(snapshot_ids: list[int]) -> list[int]:
+async def load_issues_count_by_snapshot_id(snapshot_ids: list[int]) -> tuple[int]:
     """Batch-load issues count for the given member snapshot IDs."""
     return await load_count_by_snapshot_id(snapshot_ids, "issues")
 
 
-async def load_messages_count_by_snapshot_id(snapshot_ids: list[int]) -> list[int]:
+async def load_messages_count_by_snapshot_id(snapshot_ids: list[int]) -> tuple[int]:
     """Batch-load Slack messages count for the given member snapshot IDs."""
     return await load_count_by_snapshot_id(snapshot_ids, "messages")
 
 
-async def load_pull_requests_count_by_snapshot_id(snapshot_ids: list[int]) -> list[int]:
+async def load_pull_requests_count_by_snapshot_id(snapshot_ids: list[int]) -> tuple[int]:
     """Batch-load pull requests count for the given member snapshot IDs."""
     return await load_count_by_snapshot_id(snapshot_ids, "pull_requests")
 
 
-async def load_total_contributions_by_snapshot_id(snapshot_ids: list[int]) -> list[int]:
+async def load_total_contributions_by_snapshot_id(snapshot_ids: list[int]) -> tuple[int]:
     """Batch-load total contributions for the given member snapshot IDs."""
     snapshots = (
         MemberSnapshot.objects.filter(pk__in=snapshot_ids)

@@ -38,7 +38,7 @@ async def get_values_by_keys[K, V](
     pairs: AsyncIterable[tuple[K, V]],
     keys: list[K],
     default: V,
-) -> list[V]:
+) -> tuple[V, ...]:
     """Map async-iterated key/value pairs to an ordered list matching ``keys``.
 
     Args:
@@ -47,12 +47,12 @@ async def get_values_by_keys[K, V](
         default: The value to use for keys that have no match.
 
     Returns:
-        A list of ``V``, one per key, in the same order as ``keys``.
+        A tuple of ``V``, one per key, in the same order as ``keys``.
 
     """
-    mapping = dict([pair async for pair in pairs])
+    mapping = {key: value async for key, value in pairs}
 
-    return [mapping.get(key, default) for key in keys]
+    return tuple(mapping.get(key, default) for key in keys)
 
 
 async def get_result_by_keys[K, V](
