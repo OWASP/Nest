@@ -10,6 +10,7 @@ from apps.common.api.internal.dataloaders.utils import (
     get_m2m_results_by_keys,
     get_result_by_keys,
     get_results_by_keys,
+    get_values_by_keys,
 )
 
 
@@ -162,6 +163,106 @@ class TestResultsByKeys:
     async def test_parametrized_scenarios(self, items, keys, key_field, value_field, expected):
         """Parametrized spot-checks covering single value, empty, and multi-value cases."""
         result = await get_results_by_keys(make_qs(items), keys, key_field, value_field)
+        assert result == expected
+
+
+class TestValuesByKeys:
+    """Tests for get_values_by_keys."""
+
+    @pytest.mark.asyncio
+    async def test_basic_mapping(self):
+        """Each key maps to exactly one value."""
+        pairs = async_gen([(1, "a"), (2, "b")])
+        result = await get_values_by_keys(pairs, [1, 2], default="")
+        assert result == ("a", "b")
+
+    @pytest.mark.asyncio
+    async def test_empty_pairs(self):
+        """Empty pairs returns the default for every key."""
+        result = await get_values_by_keys(async_gen([]), [1, 2, 3], default=0)
+        assert result == (0, 0, 0)
+
+    @pytest.mark.asyncio
+    async def test_empty_keys(self):
+        """Empty keys returns an empty tuple."""
+        result = await get_values_by_keys(async_gen([(1, "a")]), [], default="")
+        assert result == ()
+
+    @pytest.mark.asyncio
+    async def test_key_absent_from_pairs(self):
+        """A key with no matching pair gets the default."""
+        pairs = async_gen([(1, "a")])
+        result = await get_values_by_keys(pairs, [1, 2], default="none")
+        assert result == ("a", "none")
+
+    @pytest.mark.asyncio
+    async def test_order_matches_keys_not_pairs(self):
+        """The output order follows ``keys``, not the pairs iteration order."""
+        pairs = async_gen([(3, "c"), (1, "a"), (2, "b")])
+        result = await get_values_by_keys(pairs, [1, 2, 3], default="")
+        assert result == ("a", "b", "c")
+
+    @pytest.mark.asyncio
+    async def test_pairs_not_in_keys_are_ignored(self):
+        """Pairs whose key is not present in ``keys`` are silently discarded."""
+        pairs = async_gen([(1, "a"), (99, "orphan")])
+        result = await get_values_by_keys(pairs, [1], default="")
+        assert result == ("a",)
+
+    @pytest.mark.asyncio
+    async def test_duplicate_keys_in_keys_list(self):
+        """A key appearing multiple times in ``keys`` produces one entry per occurrence."""
+        pairs = async_gen([(1, "a")])
+        result = await get_values_by_keys(pairs, [1, 1], default="")
+        assert result == ("a", "a")
+
+    @pytest.mark.asyncio
+    async def test_later_value_overwrites_earlier(self):
+        """When the same key appears twice, the last value wins."""
+        pairs = async_gen([(1, "a"), (1, "b")])
+        result = await get_values_by_keys(pairs, [1], default="")
+        assert result == ("b",)
+
+    @pytest.mark.asyncio
+    async def test_default_is_used_for_missing_keys(self):
+        """The default value is used for any key without a matching pair."""
+        pairs = async_gen([(1, 100)])
+        result = await get_values_by_keys(pairs, [1, 2, 3], default=-1)
+        assert result == (100, -1, -1)
+
+    @pytest.mark.parametrize(
+        ("pairs", "keys", "default", "expected"),
+        [
+            (
+                [(10, "alpha")],
+                [10],
+                "",
+                ("alpha",),
+            ),
+            (
+                [],
+                [10, 20],
+                "none",
+                ("none", "none"),
+            ),
+            (
+                [(2, "y"), (1, "x")],
+                [2, 1],
+                "",
+                ("y", "x"),
+            ),
+            (
+                [(1, 5), (1, 9)],
+                [1],
+                0,
+                (9,),
+            ),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_parametrized_scenarios(self, pairs, keys, default, expected):
+        """Parametrized spot-checks covering single value, empty, ordered, and overwrite cases."""
+        result = await get_values_by_keys(async_gen(pairs), keys, default=default)
         assert result == expected
 
 

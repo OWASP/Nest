@@ -1,7 +1,16 @@
 """Tests for MemberSnapshot GraphQL node."""
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from apps.owasp.api.internal.dataloaders.member_snapshot import (
+    COMMITS_COUNT_BY_SNAPSHOT_ID_LOADER,
+    ISSUES_COUNT_BY_SNAPSHOT_ID_LOADER,
+    MESSAGES_COUNT_BY_SNAPSHOT_ID_LOADER,
+    PULL_REQUESTS_COUNT_BY_SNAPSHOT_ID_LOADER,
+    TOTAL_CONTRIBUTIONS_BY_SNAPSHOT_ID_LOADER,
+)
 from apps.owasp.api.internal.nodes.member_snapshot import MemberSnapshotNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -27,15 +36,22 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         assert "messages_count" in field_names
         assert "total_contributions" in field_names
 
-    def test_commits_count_resolver(self):
-        """Test commits_count returns count from snapshot."""
+    @pytest.mark.asyncio
+    async def test_commits_count_resolver(self):
+        """Test commits_count returns count from dataloader."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=42)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {COMMITS_COUNT_BY_SNAPSHOT_ID_LOADER: mock_loader}
+
         mock_snapshot = Mock()
-        mock_snapshot.commits_count = 42
+        mock_snapshot.pk = 1
 
         field = self._get_field_by_name("commits_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(None, mock_snapshot)
+        result = await field.base_resolver.wrapped_func(None, mock_snapshot, mock_info)
 
         assert result == 42
+        mock_loader.load.assert_awaited_once_with(1)
 
     def test_github_user_resolver(self):
         """Test github_user returns user from snapshot."""
@@ -48,42 +64,74 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
 
         assert result == mock_user
 
-    def test_issues_count_resolver(self):
-        """Test issues_count returns count from snapshot."""
+    @pytest.mark.asyncio
+    async def test_issues_count_resolver(self):
+        """Test issues_count returns count from dataloader."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=15)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {ISSUES_COUNT_BY_SNAPSHOT_ID_LOADER: mock_loader}
+
         mock_snapshot = Mock()
-        mock_snapshot.issues_count = 15
+        mock_snapshot.pk = 1
 
         field = self._get_field_by_name("issues_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(None, mock_snapshot)
+        result = await field.base_resolver.wrapped_func(None, mock_snapshot, mock_info)
 
         assert result == 15
+        mock_loader.load.assert_awaited_once_with(1)
 
-    def test_pull_requests_count_resolver(self):
-        """Test pull_requests_count returns count from snapshot."""
+    @pytest.mark.asyncio
+    async def test_pull_requests_count_resolver(self):
+        """Test pull_requests_count returns count from dataloader."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=23)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {
+            PULL_REQUESTS_COUNT_BY_SNAPSHOT_ID_LOADER: mock_loader
+        }
+
         mock_snapshot = Mock()
-        mock_snapshot.pull_requests_count = 23
+        mock_snapshot.pk = 1
 
         field = self._get_field_by_name("pull_requests_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(None, mock_snapshot)
+        result = await field.base_resolver.wrapped_func(None, mock_snapshot, mock_info)
 
         assert result == 23
+        mock_loader.load.assert_awaited_once_with(1)
 
-    def test_messages_count_resolver(self):
-        """Test messages_count returns count from snapshot."""
+    @pytest.mark.asyncio
+    async def test_messages_count_resolver(self):
+        """Test messages_count returns count from dataloader."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=100)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {MESSAGES_COUNT_BY_SNAPSHOT_ID_LOADER: mock_loader}
+
         mock_snapshot = Mock()
-        mock_snapshot.messages_count = 100
+        mock_snapshot.pk = 1
 
         field = self._get_field_by_name("messages_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(None, mock_snapshot)
+        result = await field.base_resolver.wrapped_func(None, mock_snapshot, mock_info)
 
         assert result == 100
+        mock_loader.load.assert_awaited_once_with(1)
 
-    def test_total_contributions_resolver(self):
-        """Test total_contributions returns total from snapshot."""
+    @pytest.mark.asyncio
+    async def test_total_contributions_resolver(self):
+        """Test total_contributions returns total from dataloader."""
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=80)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {
+            TOTAL_CONTRIBUTIONS_BY_SNAPSHOT_ID_LOADER: mock_loader
+        }
+
         mock_snapshot = Mock()
-        mock_snapshot.total_contributions = 80
+        mock_snapshot.pk = 1
 
         field = self._get_field_by_name("total_contributions", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(None, mock_snapshot)
+        result = await field.base_resolver.wrapped_func(None, mock_snapshot, mock_info)
 
         assert result == 80
+        mock_loader.load.assert_awaited_once_with(1)
