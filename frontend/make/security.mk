@@ -16,4 +16,6 @@ frontend-security-image-scan:
 		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		image --config /.trivy.yaml $(FRONTEND_IMAGE_NAME)
+		image --config /.trivy.yaml \
+		--image-config-scanners misconfig,secret \
+		$(FRONTEND_IMAGE_NAME)

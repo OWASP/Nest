@@ -26,7 +26,7 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-arm64-msvc@16.2.6'
   - '@next/swc-win32-x64-msvc@16.2.6'
   - '@opentelemetry/core@2.8.0'
-  - brace-expansion@5.0.6
+  - brace-expansion@5.0.7
   - dompurify@3.4.11
   - fast-uri@3.1.2
   - js-yaml@4.2.0
@@ -44,7 +44,7 @@ minimumReleaseAgeExclude:
 
 overrides:
   '@opentelemetry/core': 2.8.0
-  brace-expansion@5: 5.0.6
+  brace-expansion@5: 5.0.7
   dompurify: 3.4.11
   fast-uri: 3.1.2
   glob: 11.1.0

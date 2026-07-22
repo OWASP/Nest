@@ -27,4 +27,6 @@ backend-security-image-scan:
 		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //; s/ AS .*//' | head -1) \
-		image --config /.trivy.yaml $(BACKEND_IMAGE_NAME)
+		image --config /.trivy.yaml \
+		--image-config-scanners misconfig,secret \
+		$(BACKEND_IMAGE_NAME)
