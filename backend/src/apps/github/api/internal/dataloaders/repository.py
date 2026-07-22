@@ -1,6 +1,8 @@
 """DataLoaders for repositories."""
 
-from django.db.models import Prefetch
+from collections import defaultdict
+
+from django.db.models import Count, Prefetch
 from strawberry.dataloader import DataLoader
 
 from apps.common.api.internal.dataloaders.utils import get_result_by_keys
@@ -9,8 +11,42 @@ from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.project import Project
 
+REPOSITORIES_BY_PROJECT_ID = "repositories_by_project_id"
+REPOSITORIES_COUNT_BY_PROJECT_ID = "repositories_count_by_project_id"
 REPOSITORY_BY_RELEASE_ID_LOADER = "repository_by_release_id"
 REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER = "repository_project_name_by_release_id"
+
+
+async def load_repositories_by_project_id(
+    project_ids: list[int],
+) -> list[list[Repository]]:
+    """Batch-load repositories for the given project IDs in a single query.
+
+    Repositories without an organization (filtered out by the M2M resolver) are
+    excluded, mirroring the original ProjectNode resolver.
+    """
+    if not project_ids:
+        return []
+
+    repositories = (
+        Repository.objects.filter(project__in=project_ids, organization__isnull=False)
+        .prefetch_related(
+            Prefetch(
+                "project_set",
+                queryset=Project.objects.filter(pk__in=project_ids).only("pk"),
+                to_attr="prefetched_projects",
+            ),
+        )
+        .order_by("-pushed_at", "-updated_at")
+        .distinct()
+    )
+
+    mapping: dict[int, list[Repository]] = defaultdict(list)
+    async for repository in repositories:
+        for project in repository.prefetched_projects:
+            mapping[project.pk].append(repository)
+
+    return [mapping.get(project_id, []) for project_id in project_ids]
 
 
 async def load_repositories_by_release_id(
@@ -54,9 +90,30 @@ async def load_repository_project_names_by_release_id(
     return [mapping.get(release_id) for release_id in release_ids]
 
 
+async def load_repositories_count_by_project_id(project_ids: list[int]) -> list[int]:
+    """Batch-load repositories count for the given project IDs in a single query."""
+    projects = Project.objects.filter(
+        pk__in=project_ids, repositories__in=Repository.objects.filter(organization__isnull=False)
+    ).annotate(
+        items_count=Count("repositories"),
+    )
+    return [
+        result or 0
+        for result in await get_result_by_keys(
+            projects, project_ids, key_field="pk", value_field="items_count"
+        )
+    ]
+
+
 def get_repository_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
+        REPOSITORIES_BY_PROJECT_ID: DataLoader[int, list[Repository]](
+            load_fn=load_repositories_by_project_id,
+        ),
+        REPOSITORIES_COUNT_BY_PROJECT_ID: DataLoader[int, int](
+            load_fn=load_repositories_count_by_project_id,
+        ),
         REPOSITORY_BY_RELEASE_ID_LOADER: DataLoader[int, Repository | None](
             load_fn=load_repositories_by_release_id,
         ),

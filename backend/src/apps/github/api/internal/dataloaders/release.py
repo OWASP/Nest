@@ -11,6 +11,39 @@ RECENT_RELEASES_LIMIT = 5
 RELEASE_URL_BY_ID_LOADER = "release_url_by_id"
 LATEST_RELEASE_BY_REPOSITORY_ID_LOADER = "latest_release_by_repository_id"
 RECENT_RELEASES_BY_REPOSITORY_ID_LOADER = "recent_releases_by_repository_id"
+RECENT_RELEASES_BY_PROJECT_ID = "recent_releases_by_project_id"
+
+
+async def load_recent_releases_by_project_id(
+    keys: list[tuple[int, int]],
+) -> list[list[Release]]:
+    """Batch-load recent published releases across the given projects' repositories."""
+    if not keys:
+        return []
+
+    project_ids = [key[0] for key in keys]
+    limit = keys[0][1]
+
+    releases = (
+        Release.objects.filter(
+            is_draft=False,
+            is_pre_release=False,
+            published_at__isnull=False,
+            repository__project__in=project_ids,
+        )
+        .annotate(
+            project_id=F("repository__project"),
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("project_id")],
+                order_by=F("published_at").desc(),
+            ),
+        )
+        .filter(row_number__lte=limit)
+        .order_by("project_id", "-published_at")
+    )
+
+    return await get_results_by_keys(releases, project_ids, key_field="project_id")
 
 
 async def load_release_urls_by_id(release_ids: list[int]) -> list[str]:
@@ -90,5 +123,8 @@ def get_release_loaders() -> dict[str, object]:
         ),
         RELEASE_URL_BY_ID_LOADER: DataLoader[int, str](
             load_fn=load_release_urls_by_id,
+        ),
+        RECENT_RELEASES_BY_PROJECT_ID: DataLoader[tuple[int, int], list[Release]](
+            load_fn=load_recent_releases_by_project_id,
         ),
     }
