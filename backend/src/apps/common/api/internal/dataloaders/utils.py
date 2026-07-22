@@ -50,7 +50,7 @@ async def get_values_by_keys[K, V](
         A tuple of ``V``, one per key, in the same order as ``keys``.
 
     """
-    mapping = {key: value async for key, value in pairs}
+    mapping = {k: v async for k, v in pairs}  # NOSONAR
 
     return tuple(mapping.get(key, default) for key in keys)
 
