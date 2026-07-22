@@ -26,7 +26,7 @@ async def load_projects_by_repository_id(
         .order_by("pk")
     )
 
-    results = await get_results_by_keys(
+    results: list[list[Project]] = await get_results_by_keys(
         projects, repository_ids, key_field="repository_id"
     )
 

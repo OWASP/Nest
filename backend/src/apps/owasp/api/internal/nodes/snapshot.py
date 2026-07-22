@@ -31,9 +31,7 @@ class SnapshotNode(strawberry.relay.Node):
     """Snapshot node."""
 
     @strawberry_django.field
-    async def new_chapters(
-        self, root: Snapshot, info: strawberry.Info
-    ) -> list[ChapterNode]:
+    async def new_chapters(self, root: Snapshot, info: strawberry.Info) -> list[ChapterNode]:
         """Resolve new chapters."""
         return await info.context.owasp_dataloaders[NEW_CHAPTERS_BY_SNAPSHOT_ID].load(root.pk)
 

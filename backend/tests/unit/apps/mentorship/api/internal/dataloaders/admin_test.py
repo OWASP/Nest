@@ -21,16 +21,12 @@ class TestLoadAdminsByProgramId:
     )
     @patch("apps.mentorship.api.internal.dataloaders.admin.Admin")
     @pytest.mark.asyncio
-    async def test_builds_queryset_with_correct_chain(
-        self, mock_admin, mock_get_results_by_keys
-    ):
+    async def test_builds_queryset_with_correct_chain(self, mock_admin, mock_get_results_by_keys):
         """Queryset is built with select_related, filter, annotate, and order_by."""
         program_ids = [1, 2, 3]
         mock_queryset = MagicMock()
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = (
-            mock_queryset
-        )
+        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = mock_queryset
         mock_get_results_by_keys.return_value = [[], [], []]
 
         await load_admins_by_program_id(program_ids)
@@ -56,9 +52,7 @@ class TestLoadAdminsByProgramId:
         program_ids = [10, 20]
         mock_queryset = MagicMock()
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = (
-            mock_queryset
-        )
+        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = mock_queryset
         mock_get_results_by_keys.return_value = [[], []]
 
         await load_admins_by_program_id(program_ids)

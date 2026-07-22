@@ -38,7 +38,9 @@ async def load_new_issues_by_snapshot_id(snapshot_ids: list[int]) -> list[list[I
         .order_by("-created_at")
     )
 
-    results = await get_results_by_keys(issues, snapshot_ids, key_field="snapshot_id")
+    results: list[list[Issue]] = await get_results_by_keys(
+        issues, snapshot_ids, key_field="snapshot_id"
+    )
 
     return [result[:RECENT_ISSUES_LIMIT] for result in results]
 
