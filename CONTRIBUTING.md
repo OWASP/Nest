@@ -433,7 +433,7 @@ make security-scan
 This command runs:
 
 - SAST (Semgrep)
-- Repository scanning for vulnerable dependencies, secrets, and misconfigurations (Trivy)
+- Filesystem scanning for vulnerable dependencies, secrets, and misconfigurations (Trivy)
 - Container image scans for backend and frontend
 - DAST (ZAP baseline scan against the running frontend)
 
@@ -451,10 +451,10 @@ For addressing findings:
 make security-sast-scan
 ```
 
-#### Running Repository Scans Only
+#### Running Filesystem Scans Only
 
 ```bash
-make security-repository-scan
+make security-filesystem-scan
 ```
 
 #### Running DAST Scan
