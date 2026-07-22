@@ -3,13 +3,14 @@ import { useQuery, useApolloClient } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { useDjangoSession } from 'hooks/useDjangoSession'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaCode, FaExclamationCircle } from 'react-icons/fa'
-import { FaLinkedin, FaCodeBranch, FaCodeMerge } from 'react-icons/fa6'
+import { FaLinkedin, FaCodeBranch, FaCodeMerge, FaPenToSquare } from 'react-icons/fa6'
 
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import {
@@ -87,10 +88,11 @@ type CandidateWithSnapshot = Candidate & {
 
 interface CandidateCardProps {
   candidate: CandidateWithSnapshot
+  isOwnProfile: boolean
   year: string
 }
 
-const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
+const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) => {
   const client = useApolloClient()
   const [snapshot, setSnapshot] = useState<MemberSnapshot | null>(null)
   const [ledChapters, setLedChapters] = useState<Chapter[]>([])
@@ -328,6 +330,16 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
               >
                 <FaLinkedin className="h-5 w-5" />
               </a>
+            )}
+            {isOwnProfile && (
+              <Link
+                href={`/board/${year}/candidates/${candidate.member?.login}/claims`}
+                onClick={(e) => e.stopPropagation()}
+                className="ml-auto rounded-md p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                aria-label="Manage claims"
+              >
+                <FaPenToSquare className="h-4 w-4" />
+              </Link>
             )}
           </h3>
           {candidate.member?.login && (
@@ -661,6 +673,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
 }
 
 const BoardCandidatesPage = () => {
+  const { session } = useDjangoSession()
   const { year } = useParams<{ year: string }>()
   const {
     data: graphQLData,
@@ -750,7 +763,14 @@ const BoardCandidatesPage = () => {
       ) : (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           {candidates.map((candidate) => (
-            <CandidateCard key={candidate.id} candidate={candidate} year={year} />
+            <CandidateCard
+              key={candidate.id}
+              candidate={candidate}
+              isOwnProfile={
+                !!session?.user?.login && session.user.login === candidate.member?.login
+              }
+              year={year}
+            />
           ))}
         </div>
       )}

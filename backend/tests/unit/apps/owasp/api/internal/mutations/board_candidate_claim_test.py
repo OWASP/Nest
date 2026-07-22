@@ -57,6 +57,7 @@ class TestDiscardBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.DISCARDED
         claim.save.assert_called_once()
 
@@ -130,6 +131,7 @@ class TestSubmitBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.SUBMITTED
         claim.save.assert_called_once()
 
@@ -210,6 +212,7 @@ class TestWithdrawBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.WITHDRAWN
         assert claim.withdrawn_reason == "No longer relevant"
         assert claim.withdrawn_at == now
@@ -238,6 +241,7 @@ class TestWithdrawBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.status == BoardCandidateClaim.Status.WITHDRAWN
         assert claim.withdrawn_reason == "No longer relevant"
         assert claim.withdrawn_at == now
@@ -336,15 +340,15 @@ class TestReorderBoardCandidateClaims:
         info = _make_info(user)
         input_data = self._make_input_data(["k2", "k1", "k3"])
 
-        claim_a = MagicMock(id=1, key="k1", status=BoardCandidateClaim.Status.DRAFT)
+        claim_a = MagicMock(id=1, key="k1", status=BoardCandidateClaim.Status.APPROVED)
         claim_a.candidate.member = mock_github_user
         claim_a.candidate_id = 10
         claim_a.board_id = 20
-        claim_b = MagicMock(id=2, key="k2", status=BoardCandidateClaim.Status.DRAFT)
+        claim_b = MagicMock(id=2, key="k2", status=BoardCandidateClaim.Status.APPROVED)
         claim_b.candidate.member = mock_github_user
         claim_b.candidate_id = 10
         claim_b.board_id = 20
-        claim_c = MagicMock(id=3, key="k3", status=BoardCandidateClaim.Status.DRAFT)
+        claim_c = MagicMock(id=3, key="k3", status=BoardCandidateClaim.Status.APPROVED)
         claim_c.candidate.member = mock_github_user
         claim_c.candidate_id = 10
         claim_c.board_id = 20
@@ -458,11 +462,11 @@ class TestReorderBoardCandidateClaims:
         info = _make_info(user)
         input_data = self._make_input_data(["k1", "k2"])
 
-        claim_a = MagicMock(id=1, key="k1", status=BoardCandidateClaim.Status.SUBMITTED)
+        claim_a = MagicMock(id=1, key="k1", status=BoardCandidateClaim.Status.DRAFT)
         claim_a.candidate.member = mock_github_user
         claim_a.candidate_id = 10
         claim_a.board_id = 20
-        claim_b = MagicMock(id=2, key="k2", status=BoardCandidateClaim.Status.SUBMITTED)
+        claim_b = MagicMock(id=2, key="k2", status=BoardCandidateClaim.Status.DRAFT)
         claim_b.candidate.member = mock_github_user
         claim_b.candidate_id = 10
         claim_b.board_id = 20
@@ -548,6 +552,7 @@ class TestCreateBoardCandidateClaim:
         )
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is not None
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
     def test_create_claim_board_not_found(self, mock_board_model):
@@ -688,6 +693,7 @@ class TestUpdateBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.name == input_data.name
         assert claim.description == input_data.description
         claim.save.assert_called_once()
@@ -713,6 +719,7 @@ class TestUpdateBoardCandidateClaim:
 
         assert result.ok
         assert result.code == "SUCCESS"
+        assert result.claim is claim
         assert claim.name == "Updated Name"
         claim.save.assert_called_once_with(update_fields=["name", "key"])
 

@@ -118,6 +118,89 @@ describe('useBreadcrumbs', () => {
     })
   })
 
+  describe('Hidden breadcrumb items', () => {
+    test('skips registered items with hidden: true', () => {
+      ;(usePathname as jest.Mock).mockReturnValue('/board/2026/candidates/johndoe/claims')
+
+      const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
+
+      let unregisterYear: () => void
+      let unregisterCandidates: () => void
+      let unregisterLogin: () => void
+
+      act(() => {
+        unregisterYear = registerBreadcrumb({
+          title: '2026',
+          path: '/board/2026',
+          hidden: true,
+        })
+        unregisterCandidates = registerBreadcrumb({
+          title: '2026 Board Candidates',
+          path: '/board/2026/candidates',
+        })
+        unregisterLogin = registerBreadcrumb({
+          title: 'johndoe',
+          path: '/board/2026/candidates/johndoe',
+          hidden: true,
+        })
+      })
+
+      const titles = result.current.map((item) => item.title)
+      expect(titles).not.toContain('Johndoe')
+      expect(titles).not.toContain('johndoe')
+      expect(titles).not.toContain('2026')
+      expect(result.current).toEqual([
+        { title: 'Home', path: '/' },
+        { title: '2026 Board Candidates', path: '/board/2026/candidates' },
+        { title: 'Claims', path: '/board/2026/candidates/johndoe/claims' },
+      ])
+
+      act(() => {
+        unregisterYear()
+        unregisterCandidates()
+        unregisterLogin()
+      })
+    })
+
+    test('shows registered items without hidden flag', () => {
+      ;(usePathname as jest.Mock).mockReturnValue('/board/2026/candidates/johndoe')
+
+      const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
+
+      let unregisterYear: () => void
+      let unregisterCandidates: () => void
+      let unregisterLogin: () => void
+
+      act(() => {
+        unregisterYear = registerBreadcrumb({
+          title: '2026',
+          path: '/board/2026',
+          hidden: true,
+        })
+        unregisterCandidates = registerBreadcrumb({
+          title: '2026 Board Candidates',
+          path: '/board/2026/candidates',
+        })
+        unregisterLogin = registerBreadcrumb({
+          title: 'John Doe',
+          path: '/board/2026/candidates/johndoe',
+        })
+      })
+
+      expect(result.current).toEqual([
+        { title: 'Home', path: '/' },
+        { title: '2026 Board Candidates', path: '/board/2026/candidates' },
+        { title: 'John Doe', path: '/board/2026/candidates/johndoe' },
+      ])
+
+      act(() => {
+        unregisterYear()
+        unregisterCandidates()
+        unregisterLogin()
+      })
+    })
+  })
+
   describe('Edge cases', () => {
     test('handles null pathname', () => {
       ;(usePathname as jest.Mock).mockReturnValue(null)

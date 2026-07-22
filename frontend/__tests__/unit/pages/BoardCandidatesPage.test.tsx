@@ -36,6 +36,14 @@ jest.mock('next/image', () => ({
   ),
 }))
 
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: jest.fn(() => ({
+    isSyncing: false,
+    session: { user: { login: 'testuser' } },
+    status: 'authenticated',
+  })),
+}))
+
 jest.mock('components/ContributionHeatmap', () => ({
   __esModule: true,
   default: () => <div data-testid="contribution-heatmap" />,
@@ -174,6 +182,48 @@ describe('BoardCandidatesPage', () => {
       expect(screen.getByText('Alice Smith')).toBeInTheDocument()
     })
     expect(screen.getByText(/Platform and security experience/)).toBeInTheDocument()
+  })
+
+  test('renders manage claims link for own profile', async () => {
+    const ownProfileBoardData = {
+      ...mockBoardData,
+      boardOfDirectors: {
+        ...mockBoardData.boardOfDirectors,
+        candidates: [
+          {
+            ...mockBoardData.boardOfDirectors.candidates[0],
+            member: {
+              ...mockBoardData.boardOfDirectors.candidates[0].member,
+              login: 'testuser',
+            },
+          },
+        ],
+      },
+    }
+
+    mockUseQuery.mockImplementation((document: unknown) => {
+      if (document === GetBoardCandidatesDocument) {
+        return { data: ownProfileBoardData, loading: false, error: null }
+      }
+      if (document === GetMemberSnapshotDocument) {
+        return { data: { memberSnapshot: null }, loading: false, error: null }
+      }
+      return { data: null, loading: false, error: null }
+    })
+
+    render(<BoardCandidatesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Manage claims')).toBeInTheDocument()
+    })
+  })
+
+  test('does not render manage claims link for other profiles', async () => {
+    render(<BoardCandidatesPage />)
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Manage claims')).not.toBeInTheDocument()
+    })
   })
 
   test('calls handleAppError when board query errors', async () => {
