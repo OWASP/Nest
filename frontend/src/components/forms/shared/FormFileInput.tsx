@@ -2,29 +2,27 @@
 
 import type React from 'react'
 
-interface FormTextareaProps {
+interface FormFileInputProps {
   id: string
   label: string
-  placeholder: string
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  accept?: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   error?: string
   touched?: boolean
-  rows?: number
   required?: boolean
+  selectedFile?: File | null
 }
 
-export const FormTextarea = ({
+export const FormFileInput = ({
   id,
   label,
-  placeholder,
-  value,
+  accept,
   onChange,
   error,
   touched,
-  rows = 4,
   required = false,
-}: FormTextareaProps) => {
+  selectedFile,
+}: FormFileInputProps) => {
   const hasError = touched && !!error
 
   return (
@@ -33,19 +31,17 @@ export const FormTextarea = ({
         <label htmlFor={id} className="text-sm font-semibold text-gray-600 dark:text-gray-300">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
-        <textarea
+        <input
           id={id}
-          placeholder={placeholder}
-          value={value}
+          type="file"
           onChange={onChange}
-          rows={rows}
+          accept={accept}
           required={required}
           aria-invalid={hasError}
           aria-describedby={hasError ? `${id}-error` : undefined}
-          className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
-            hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
-          }`}
+          className="w-full text-sm text-gray-700 file:mr-3 file:rounded file:border-0 file:bg-[#1D7BD7] file:px-3 file:py-1 file:text-sm file:text-white hover:file:bg-[#1a6ebd] dark:text-gray-200"
         />
+        {selectedFile && <p className="truncate text-sm text-gray-500">{selectedFile.name}</p>}
         {hasError && (
           <p
             id={`${id}-error`}
