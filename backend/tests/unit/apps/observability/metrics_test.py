@@ -24,7 +24,7 @@ class TestTrackJob:
         )
         assert duration.record.call_args.args[1] == {"job": "generate_ai_reply", "queue": "ai"}
 
-    def test_records_failure_and_reraises(self, mocker):
+    def test_records_failure_and_propagates_exception(self, mocker):
         runs = mocker.patch(f"{METRICS_PATH}._job_runs")
         duration = mocker.patch(f"{METRICS_PATH}._job_duration")
 
