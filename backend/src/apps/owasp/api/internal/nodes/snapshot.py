@@ -27,7 +27,7 @@ class SnapshotNode(strawberry.relay.Node):
 
     new_chapters: list[ChapterNode] = strawberry_django.field()
 
-    @strawberry_django.field
+    @strawberry_django.field(only=["key"])
     def key(self, root: Snapshot) -> str:
         """Resolve key."""
         return root.key
