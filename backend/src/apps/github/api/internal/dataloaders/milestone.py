@@ -12,7 +12,35 @@ from apps.mentorship.models.program import Program
 
 RECENT_MILESTONES_BY_PROGRAM_ID = "recent_milestones_by_program_id"
 RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER = "recent_milestones_by_repository_id"
+RECENT_MILESTONES_BY_PROJECT_ID = "recent_milestones_by_project_id"
 RECENT_MILESTONES_LIMIT = 5
+
+
+async def load_recent_milestones_by_project_id(
+    keys: list[tuple[int, int]],
+) -> list[list[Milestone]]:
+    """Batch-load recent milestones across the given projects' repositories."""
+    if not keys:
+        return []
+
+    project_ids = [key[0] for key in keys]
+    limit = keys[0][1]
+
+    milestones = (
+        Milestone.objects.filter(repository__project__in=project_ids)
+        .annotate(
+            project_id=F("repository__project"),
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("project_id")],
+                order_by=F("created_at").desc(),
+            ),
+        )
+        .filter(row_number__lte=limit)
+        .order_by("project_id", "-created_at")
+    )
+
+    return await get_results_by_keys(milestones, project_ids, key_field="project_id")
 
 
 async def load_recent_milestones_by_program_id(program_ids: list[int]) -> list[list[Milestone]]:
@@ -84,5 +112,8 @@ def get_milestone_loaders() -> dict[str, object]:
         ),
         RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER: DataLoader[tuple[int, int], list[Milestone]](
             load_fn=load_recent_milestones_by_repository_id,
+        ),
+        RECENT_MILESTONES_BY_PROJECT_ID: DataLoader[tuple[int, int], list[Milestone]](
+            load_fn=load_recent_milestones_by_project_id,
         ),
     }
