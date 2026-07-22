@@ -2,7 +2,7 @@
 
 import uuid
 
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 
 from apps.nest.models import User
 
@@ -110,11 +110,14 @@ class SnapshotSubscription(models.Model):
             existing.save()
             return existing
 
-        return cls.objects.create(
-            user=user,
-            frequency=frequency,
-            **kwargs,
-        )
+        try:
+            return cls.objects.create(
+                user=user,
+                frequency=frequency,
+                **kwargs,
+            )
+        except IntegrityError:
+            return None
 
     def update(self, *, frequency=None, **kwargs):
         """Update subscription fields.

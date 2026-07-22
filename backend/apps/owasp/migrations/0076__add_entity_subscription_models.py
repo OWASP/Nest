@@ -7,6 +7,36 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+def migrate_existing_subscriptions(apps, schema_editor):
+    """Migrate existing SnapshotSubscription targets to EntitySubscription models."""
+    SnapshotSubscription = apps.get_model("owasp", "SnapshotSubscription")
+    EntitySubscription = apps.get_model("owasp", "EntitySubscription")
+    EntitySubscriptionPreference = apps.get_model("owasp", "EntitySubscriptionPreference")
+
+    for sub in SnapshotSubscription.objects.all():
+        chapters = list(sub.subscribed_chapters.all())
+        projects = list(sub.subscribed_projects.all())
+        if not chapters and not projects:
+            continue
+
+        entity_sub = EntitySubscription.objects.create(
+            user=sub.user,
+            frequency=sub.frequency,
+            is_active=sub.is_active,
+            name="Migrated Subscription",
+        )
+        for chapter in chapters:
+            EntitySubscriptionPreference.objects.create(
+                subscription=entity_sub,
+                chapter=chapter,
+            )
+        for project in projects:
+            EntitySubscriptionPreference.objects.create(
+                subscription=entity_sub,
+                project=project,
+            )
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("owasp", "0075_snapshotsubscription"),
@@ -14,14 +44,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="snapshotsubscription",
-            name="subscribed_chapters",
-        ),
-        migrations.RemoveField(
-            model_name="snapshotsubscription",
-            name="subscribed_projects",
-        ),
         migrations.CreateModel(
             name="EntitySubscription",
             fields=[
@@ -170,5 +192,17 @@ class Migration(migrations.Migration):
                 fields=("subscription", "committee"),
                 name="unique_subscription_committee",
             ),
+        ),
+        migrations.RunPython(
+            migrate_existing_subscriptions,
+            reverse_code=migrations.RunPython.noop,
+        ),
+        migrations.RemoveField(
+            model_name="snapshotsubscription",
+            name="subscribed_chapters",
+        ),
+        migrations.RemoveField(
+            model_name="snapshotsubscription",
+            name="subscribed_projects",
         ),
     ]

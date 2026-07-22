@@ -13,10 +13,10 @@ class SnapshotSubscriptionQuery:
     """Snapshot subscription queries."""
 
     @strawberry_django.field
-    def my_subscriptions(self, info: Info) -> list[SnapshotSubscriptionNode]:
-        """Resolve the current user's snapshot subscriptions."""
+    def my_snapshot_subscription(self, info: Info) -> SnapshotSubscriptionNode | None:
+        """Resolve the current user's snapshot subscription."""
         user = info.context.request.user
         if not user.is_authenticated:
-            return []
+            return None
 
-        return SnapshotSubscription.objects.filter(user=user)
+        return SnapshotSubscription.objects.filter(user=user).first()

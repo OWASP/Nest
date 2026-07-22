@@ -831,7 +831,7 @@ export type Query = {
   memberSnapshots: Array<MemberSnapshotNode>;
   myEntitySubscriptions: Array<EntitySubscriptionNode>;
   myPrograms: PaginatedPrograms;
-  mySubscriptions: Array<SnapshotSubscriptionNode>;
+  mySnapshotSubscription?: Maybe<SnapshotSubscriptionNode>;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
   /** List of project health metrics. */
@@ -1214,10 +1214,12 @@ export type SnapshotNodeUsersArgs = {
   offset?: Scalars['Int']['input'];
 };
 
-export type SnapshotSubscriptionNode = {
+export type SnapshotSubscriptionNode = Node & {
   __typename?: 'SnapshotSubscriptionNode';
   createdAt: Scalars['DateTime']['output'];
   frequency: Scalars['String']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
   includeChapters: Scalars['Boolean']['output'];
   includeEvents: Scalars['Boolean']['output'];
   includeIssues: Scalars['Boolean']['output'];

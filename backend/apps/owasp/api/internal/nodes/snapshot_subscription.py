@@ -1,5 +1,6 @@
 """OWASP snapshot subscription GraphQL node."""
 
+import strawberry
 import strawberry_django
 
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
@@ -22,5 +23,5 @@ from apps.owasp.models.snapshot_subscription import SnapshotSubscription
         "updated_at",
     ],
 )
-class SnapshotSubscriptionNode:
+class SnapshotSubscriptionNode(strawberry.relay.Node):
     """Snapshot subscription node."""

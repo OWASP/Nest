@@ -8,7 +8,7 @@ from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
-VALID_FREQUENCIES = frozenset(("monthly", "weekly"))
+VALID_FREQUENCIES = frozenset(dict(SnapshotSubscription.Frequency.choices))
 
 
 @strawberry.input

@@ -28,27 +28,29 @@ class TestSnapshotSubscriptionQuery:
         field_names = [
             field.name for field in SnapshotSubscriptionQuery.__strawberry_definition__.fields
         ]
-        assert "my_subscriptions" in field_names
+        assert "my_snapshot_subscription" in field_names
 
-    def _resolve_my_subscriptions(self, info):
-        """Invoke the underlying resolver for my_subscriptions."""
-        field = SnapshotSubscriptionQuery.__dict__["my_subscriptions"]
+    def _resolve_my_snapshot_subscription(self, info):
+        """Invoke the underlying resolver for my_snapshot_subscription."""
+        field = SnapshotSubscriptionQuery.__dict__["my_snapshot_subscription"]
         return field(self.query, info=info)
 
-    def test_my_subscriptions_unauthenticated(self):
-        """Test mySubscriptions returns empty list for unauthenticated user."""
+    def test_my_snapshot_subscription_unauthenticated(self):
+        """Test my_snapshot_subscription returns None for unauthenticated user."""
         info = mock_info(authenticated=False)
-        result = self._resolve_my_subscriptions(info)
-        assert result == []
+        result = self._resolve_my_snapshot_subscription(info)
+        assert result is None
 
-    def test_my_subscriptions_found(self):
-        """Test mySubscriptions returns subscriptions when they exist."""
+    def test_my_snapshot_subscription_found(self):
+        """Test my_snapshot_subscription returns subscription when it exists."""
         info = mock_info()
-        mock_queryset = MagicMock()
+        mock_qs = MagicMock()
+        mock_sub = MagicMock()
+        mock_qs.first.return_value = mock_sub
         with patch(
             "apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
-            mock_objects.filter.return_value = mock_queryset
-            result = self._resolve_my_subscriptions(info)
-            assert result == mock_queryset
+            mock_objects.filter.return_value = mock_qs
+            result = self._resolve_my_snapshot_subscription(info)
+            assert result == mock_sub
             mock_objects.filter.assert_called_once_with(user=info.context.request.user)

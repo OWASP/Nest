@@ -2,6 +2,7 @@
 
 import strawberry
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
@@ -9,8 +10,11 @@ from apps.owasp.api.internal.nodes.entity_subscription import EntitySubscription
 from apps.owasp.models.entity_subscription import EntitySubscription
 
 ENTITY_TYPES = frozenset(("chapter", "committee", "project"))
-VALID_FREQUENCIES = frozenset(("monthly", "weekly"))
+VALID_FREQUENCIES = frozenset(dict(EntitySubscription.Frequency.choices))
 MAX_NAME_LENGTH = 100
+
+
+MAX_ENTITY_PREFERENCES_PER_SUBSCRIPTION = 50
 
 
 @strawberry.input
@@ -63,6 +67,12 @@ def _validate_entity_preferences(preferences):
     if not preferences:
         return "Entity subscriptions must have at least one entity preference."
 
+    if len(preferences) > MAX_ENTITY_PREFERENCES_PER_SUBSCRIPTION:
+        return (
+            f"Entity subscriptions can have at most "
+            f"{MAX_ENTITY_PREFERENCES_PER_SUBSCRIPTION} preferences."
+        )
+
     seen = set()
     for pref in preferences:
         if pref.entity_type not in ENTITY_TYPES:
@@ -109,30 +119,42 @@ class EntitySubscriptionMutations:
         if error:
             return EntitySubscriptionResult(ok=False, message=error)
 
-        subscription = EntitySubscription.create(
-            user=user,
-            frequency=input_data.frequency,
-            name=input_data.name.strip(),
-        )
+        try:
+            with transaction.atomic():
+                subscription = EntitySubscription.create(
+                    user=user,
+                    frequency=input_data.frequency,
+                    name=input_data.name.strip(),
+                )
 
-        if subscription is None:
+                if subscription is None:
+                    return EntitySubscriptionResult(
+                        ok=False,
+                        message="Maximum number of entity subscriptions reached.",
+                    )
+
+                subscription.sync_preferences(
+                    [
+                        {
+                            "entity_type": p.entity_type,
+                            "entity_id": p.entity_id,
+                            "include_issues": p.include_issues,
+                            "include_pull_requests": p.include_pull_requests,
+                            "include_releases": p.include_releases,
+                        }
+                        for p in input_data.entity_preferences
+                    ]
+                )
+        except (IntegrityError, ValidationError) as exc:
+            msg = (
+                str(exc)
+                if isinstance(exc, ValidationError)
+                else "Failed to create subscription preferences."
+            )
             return EntitySubscriptionResult(
                 ok=False,
-                message="Maximum number of entity subscriptions reached.",
+                message=msg,
             )
-
-        subscription.sync_preferences(
-            [
-                {
-                    "entity_type": p.entity_type,
-                    "entity_id": p.entity_id,
-                    "include_issues": p.include_issues,
-                    "include_pull_requests": p.include_pull_requests,
-                    "include_releases": p.include_releases,
-                }
-                for p in input_data.entity_preferences
-            ]
-        )
 
         return EntitySubscriptionResult(
             ok=True,
@@ -178,20 +200,32 @@ class EntitySubscriptionMutations:
         if input_data.name is not None:
             update_kwargs["name"] = input_data.name.strip()
 
-        subscription.update(frequency=input_data.frequency, **update_kwargs)
+        try:
+            with transaction.atomic():
+                subscription.update(frequency=input_data.frequency, **update_kwargs)
 
-        if input_data.entity_preferences is not None:
-            subscription.sync_preferences(
-                [
-                    {
-                        "entity_type": p.entity_type,
-                        "entity_id": p.entity_id,
-                        "include_issues": p.include_issues,
-                        "include_pull_requests": p.include_pull_requests,
-                        "include_releases": p.include_releases,
-                    }
-                    for p in input_data.entity_preferences
-                ]
+                if input_data.entity_preferences is not None:
+                    subscription.sync_preferences(
+                        [
+                            {
+                                "entity_type": p.entity_type,
+                                "entity_id": p.entity_id,
+                                "include_issues": p.include_issues,
+                                "include_pull_requests": p.include_pull_requests,
+                                "include_releases": p.include_releases,
+                            }
+                            for p in input_data.entity_preferences
+                        ]
+                    )
+        except (IntegrityError, ValidationError) as exc:
+            msg = (
+                str(exc)
+                if isinstance(exc, ValidationError)
+                else "Failed to update subscription preferences."
+            )
+            return EntitySubscriptionResult(
+                ok=False,
+                message=msg,
             )
 
         return EntitySubscriptionResult(

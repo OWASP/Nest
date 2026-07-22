@@ -94,6 +94,21 @@ class TestEntitySubscriptionClean:
         sub.clean()
         mock_objects.filter.assert_not_called()
 
+    @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
+    def test_clean_existing_subscription_at_limit(self, mock_objects):
+        """Test clean succeeds for existing subscription when at limit."""
+        mock_objects.filter.return_value.exclude.return_value.count.return_value = (
+            MAX_ENTITY_SUBSCRIPTIONS - 1
+        )
+        sub = MagicMock(spec=EntitySubscription)
+        sub.user_id = 1
+        sub.is_active = True
+        sub.pk = 42
+        sub.clean = EntitySubscription.clean.__get__(sub)
+
+        # Should not raise — existing active sub at limit should exclude itself
+        sub.clean()
+
 
 class TestEntitySubscriptionCreate:
     """Test EntitySubscription.create class method."""
@@ -107,10 +122,12 @@ class TestEntitySubscriptionCreate:
         ):
             yield
 
+    @patch("apps.owasp.models.entity_subscription.User.objects")
     @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
-    def test_create_success(self, mock_objects):
+    def test_create_success(self, mock_objects, mock_user_objects):
         """Test successful entity subscription creation."""
         user = MagicMock()
+        user.pk = 1
         mock_sub = MagicMock(spec=EntitySubscription)
         mock_objects.filter.return_value.count.return_value = 3
         mock_objects.create.return_value = mock_sub
@@ -123,10 +140,12 @@ class TestEntitySubscriptionCreate:
 
         assert result == mock_sub
 
+    @patch("apps.owasp.models.entity_subscription.User.objects")
     @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
-    def test_create_limit_reached(self, mock_objects):
+    def test_create_limit_reached(self, mock_objects, mock_user_objects):
         """Test create returns None when entity limit reached."""
         user = MagicMock()
+        user.pk = 1
         mock_objects.filter.return_value.count.return_value = MAX_ENTITY_SUBSCRIPTIONS
 
         result = EntitySubscription.create(
@@ -176,9 +195,39 @@ class TestEntitySubscriptionUpdate:
         assert not hasattr(sub, "nonexistent_field")
         sub.save.assert_called_once()
 
+    def test_update_calls_full_clean(self):
+        """Test update calls full_clean before saving."""
+        sub = MagicMock(spec=EntitySubscription)
+        EntitySubscription.update(sub, frequency="monthly")
+
+        sub.full_clean.assert_called_once()
+        sub.save.assert_called_once()
+
+    def test_update_reactivation_triggers_validation(self):
+        """Test that reactivating via update triggers full_clean validation."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.is_active = False
+        sub.full_clean.side_effect = ValidationError(
+            "Maximum number of entity subscriptions reached."
+        )
+
+        with pytest.raises(ValidationError, match=r"Maximum number"):
+            EntitySubscription.update(sub, is_active=True)
+
+        sub.save.assert_not_called()
+
 
 class TestEntitySubscriptionSyncPreferences:
     """Test sync_preferences method."""
+
+    @pytest.fixture(autouse=True)
+    def _mock_transaction(self):
+        """Disable transaction.atomic for tests."""
+        with (
+            patch("django.db.transaction.Atomic.__enter__", return_value=None),
+            patch("django.db.transaction.Atomic.__exit__", return_value=False),
+        ):
+            yield
 
     def test_sync_creates_new_preferences(self):
         """Test sync creates new preferences when none exist."""

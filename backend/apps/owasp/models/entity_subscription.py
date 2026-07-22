@@ -92,6 +92,9 @@ class EntitySubscription(models.Model):
             The created subscription instance, or None if limit reached.
 
         """
+        if getattr(user, "pk", None):
+            User.objects.select_for_update().filter(pk=user.pk).exists()
+
         active_count = cls.objects.filter(
             user=user,
             is_active=True,
@@ -120,8 +123,10 @@ class EntitySubscription(models.Model):
             if hasattr(self, field) and value is not None:
                 setattr(self, field, value)
 
+        self.full_clean()
         self.save()
 
+    @transaction.atomic
     def sync_preferences(self, preferences_data):
         """Sync entity preferences using a diff-based approach.
 
