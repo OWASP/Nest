@@ -6,49 +6,27 @@ from apps.owasp.models.entity_subscription import EntitySubscription
 from apps.owasp.models.entity_subscription_preference import EntitySubscriptionPreference
 
 
-class ProjectPreferenceInline(admin.StackedInline):
-    """Inline for project entity preferences."""
+def get_preference_inline(entity_field: str, entity_name: str) -> type[admin.StackedInline]:
+    """Create an inline class for a specific entity preference."""
 
-    model = EntitySubscriptionPreference
-    verbose_name = "Project Preference"
-    verbose_name_plural = "Project Preferences"
-    extra = 0
-    fields = ("project", "include_issues", "include_pull_requests", "include_releases")
-    autocomplete_fields = ("project",)
+    class BasePreferenceInline(admin.StackedInline):
+        model = EntitySubscriptionPreference
+        verbose_name = f"{entity_name} Preference"
+        verbose_name_plural = f"{entity_name} Preferences"
+        extra = 0
+        fields = (entity_field, "include_issues", "include_pull_requests", "include_releases")
+        autocomplete_fields = (entity_field,)
 
-    def get_queryset(self, request):
-        """Filter to only show project preferences."""
-        return super().get_queryset(request).filter(project__isnull=False)
+        def get_queryset(self, request):
+            """Filter to only show preferences for this entity type."""
+            return super().get_queryset(request).filter(**{f"{entity_field}__isnull": False})
 
-
-class ChapterPreferenceInline(admin.StackedInline):
-    """Inline for chapter entity preferences."""
-
-    model = EntitySubscriptionPreference
-    verbose_name = "Chapter Preference"
-    verbose_name_plural = "Chapter Preferences"
-    extra = 0
-    fields = ("chapter", "include_issues", "include_pull_requests", "include_releases")
-    autocomplete_fields = ("chapter",)
-
-    def get_queryset(self, request):
-        """Filter to only show chapter preferences."""
-        return super().get_queryset(request).filter(chapter__isnull=False)
+    return BasePreferenceInline
 
 
-class CommitteePreferenceInline(admin.StackedInline):
-    """Inline for committee entity preferences."""
-
-    model = EntitySubscriptionPreference
-    verbose_name = "Committee Preference"
-    verbose_name_plural = "Committee Preferences"
-    extra = 0
-    fields = ("committee", "include_issues", "include_pull_requests", "include_releases")
-    autocomplete_fields = ("committee",)
-
-    def get_queryset(self, request):
-        """Filter to only show committee preferences."""
-        return super().get_queryset(request).filter(committee__isnull=False)
+ProjectPreferenceInline = get_preference_inline("project", "Project")
+ChapterPreferenceInline = get_preference_inline("chapter", "Chapter")
+CommitteePreferenceInline = get_preference_inline("committee", "Committee")
 
 
 class EntitySubscriptionAdmin(admin.ModelAdmin):

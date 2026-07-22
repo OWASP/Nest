@@ -24,16 +24,23 @@ def migrate_existing_subscriptions(apps, schema_editor):
             frequency=sub.frequency,
             is_active=sub.is_active,
             name="Migrated Subscription",
+            unsubscribe_token=sub.unsubscribe_token,
         )
         for chapter in chapters:
             EntitySubscriptionPreference.objects.create(
                 subscription=entity_sub,
                 chapter=chapter,
+                include_issues=sub.include_issues,
+                include_pull_requests=sub.include_pull_requests,
+                include_releases=sub.include_releases,
             )
         for project in projects:
             EntitySubscriptionPreference.objects.create(
                 subscription=entity_sub,
                 project=project,
+                include_issues=sub.include_issues,
+                include_pull_requests=sub.include_pull_requests,
+                include_releases=sub.include_releases,
             )
 
 
