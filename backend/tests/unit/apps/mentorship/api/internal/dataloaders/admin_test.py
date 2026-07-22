@@ -16,89 +16,89 @@ class TestLoadAdminsByProgramId:
     """Tests for load_admins_by_program_id."""
 
     @patch(
-        "apps.mentorship.api.internal.dataloaders.admin.get_m2m_results_by_keys",
+        "apps.mentorship.api.internal.dataloaders.admin.get_results_by_keys",
         new_callable=AsyncMock,
     )
     @patch("apps.mentorship.api.internal.dataloaders.admin.Admin")
     @pytest.mark.asyncio
     async def test_builds_queryset_with_correct_chain(
-        self, mock_admin, mock_get_m2m_results_by_keys
+        self, mock_admin, mock_get_results_by_keys
     ):
-        """Queryset is built with select_related, filter, prefetch_related, and order_by."""
+        """Queryset is built with select_related, filter, annotate, and order_by."""
         program_ids = [1, 2, 3]
         mock_queryset = MagicMock()
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
-        mock_order_by.return_value.distinct.return_value = mock_queryset
-        mock_get_m2m_results_by_keys.return_value = [[], [], []]
+        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = (
+            mock_queryset
+        )
+        mock_get_results_by_keys.return_value = [[], [], []]
 
         await load_admins_by_program_id(program_ids)
 
         mock_admin.objects.select_related.assert_called_once_with("github_user")
         mock_filter = mock_admin.objects.select_related.return_value.filter
         mock_filter.assert_called_once_with(admin_programs__in=program_ids)
-        mock_filter.return_value.prefetch_related.assert_called_once_with("admin_programs")
-        mock_filter.return_value.prefetch_related.return_value.order_by.assert_called_once_with(
+        mock_filter.return_value.annotate.assert_called_once()
+        mock_filter.return_value.annotate.return_value.order_by.assert_called_once_with(
             "github_user__login"
         )
 
     @patch(
-        "apps.mentorship.api.internal.dataloaders.admin.get_m2m_results_by_keys",
+        "apps.mentorship.api.internal.dataloaders.admin.get_results_by_keys",
         new_callable=AsyncMock,
     )
     @patch("apps.mentorship.api.internal.dataloaders.admin.Admin")
     @pytest.mark.asyncio
-    async def test_delegates_to_get_m2m_results_by_keys_correct_args(
-        self, mock_admin, mock_get_m2m_results_by_keys
+    async def test_delegates_to_get_results_by_keys_correct_args(
+        self, mock_admin, mock_get_results_by_keys
     ):
-        """get_m2m_results_by_keys receives the queryset, program_ids, and correct field names."""
+        """get_results_by_keys receives the queryset, program_ids, and correct key_field."""
         program_ids = [10, 20]
         mock_queryset = MagicMock()
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
-        mock_order_by.return_value.distinct.return_value = mock_queryset
-        mock_get_m2m_results_by_keys.return_value = [[], []]
+        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = (
+            mock_queryset
+        )
+        mock_get_results_by_keys.return_value = [[], []]
 
         await load_admins_by_program_id(program_ids)
 
-        mock_get_m2m_results_by_keys.assert_called_once_with(
-            mock_queryset, program_ids, "admin_programs", "pk"
+        mock_get_results_by_keys.assert_called_once_with(
+            mock_queryset, program_ids, key_field="program_id"
         )
 
     @patch(
-        "apps.mentorship.api.internal.dataloaders.admin.get_m2m_results_by_keys",
+        "apps.mentorship.api.internal.dataloaders.admin.get_results_by_keys",
         new_callable=AsyncMock,
     )
     @patch("apps.mentorship.api.internal.dataloaders.admin.Admin")
     @pytest.mark.asyncio
-    async def test_returns_result_from_get_m2m_results_by_keys(
-        self, mock_admin, mock_get_m2m_results_by_keys
+    async def test_returns_result_from_get_results_by_keys(
+        self, mock_admin, mock_get_results_by_keys
     ):
-        """The return value is exactly what get_m2m_results_by_keys resolves to."""
+        """The return value is exactly what get_results_by_keys resolves to."""
         mock_admin_a = MagicMock()
         mock_admin_b = MagicMock()
         expected = [[mock_admin_a, mock_admin_b], [], [mock_admin_a]]
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
-        mock_order_by.return_value.distinct.return_value = MagicMock()
-        mock_get_m2m_results_by_keys.return_value = expected
+        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = MagicMock()
+        mock_get_results_by_keys.return_value = expected
 
         result = await load_admins_by_program_id([1, 2, 3])
 
         assert result is expected
 
     @patch(
-        "apps.mentorship.api.internal.dataloaders.admin.get_m2m_results_by_keys",
+        "apps.mentorship.api.internal.dataloaders.admin.get_results_by_keys",
         new_callable=AsyncMock,
     )
     @patch("apps.mentorship.api.internal.dataloaders.admin.Admin")
     @pytest.mark.asyncio
-    async def test_empty_program_ids(self, mock_admin, mock_get_m2m_results_by_keys):
+    async def test_empty_program_ids(self, mock_admin, mock_get_results_by_keys):
         """An empty program_ids list results in an empty filter and empty return."""
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
-        mock_order_by.return_value.distinct.return_value = MagicMock()
-        mock_get_m2m_results_by_keys.return_value = []
+        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = MagicMock()
+        mock_get_results_by_keys.return_value = []
 
         result = await load_admins_by_program_id([])
 
@@ -108,18 +108,17 @@ class TestLoadAdminsByProgramId:
         assert result == []
 
     @patch(
-        "apps.mentorship.api.internal.dataloaders.admin.get_m2m_results_by_keys",
+        "apps.mentorship.api.internal.dataloaders.admin.get_results_by_keys",
         new_callable=AsyncMock,
     )
     @patch("apps.mentorship.api.internal.dataloaders.admin.Admin")
     @pytest.mark.asyncio
-    async def test_single_program_id(self, mock_admin, mock_get_m2m_results_by_keys):
+    async def test_single_program_id(self, mock_admin, mock_get_results_by_keys):
         """A single-element list is handled correctly end-to-end."""
         mock_admin_obj = MagicMock()
         mock_admin_filter = mock_admin.objects.select_related.return_value.filter
-        mock_order_by = mock_admin_filter.return_value.prefetch_related.return_value.order_by
-        mock_order_by.return_value.distinct.return_value = MagicMock()
-        mock_get_m2m_results_by_keys.return_value = [[mock_admin_obj]]
+        mock_admin_filter.return_value.annotate.return_value.order_by.return_value = MagicMock()
+        mock_get_results_by_keys.return_value = [[mock_admin_obj]]
 
         result = await load_admins_by_program_id([42])
 
