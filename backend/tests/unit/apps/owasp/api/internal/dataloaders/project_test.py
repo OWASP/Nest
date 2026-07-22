@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from django.db.models import F
 from strawberry.dataloader import DataLoader
 
 from apps.owasp.api.internal.dataloaders.project import (
@@ -38,7 +39,7 @@ class TestLoadProjectsByRepositoryId:
         await load_projects_by_repository_id(repository_ids)
 
         mock_project.objects.filter.assert_called_once_with(repositories__in=repository_ids)
-        mock_filter.annotate.assert_called_once()
+        mock_filter.annotate.assert_called_once_with(repository_id=F("repositories__pk"))
         mock_filter.annotate.return_value.order_by.assert_called_once_with("pk")
 
     @patch(

@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from django.db.models import F
 from strawberry.dataloader import DataLoader
 
 from apps.mentorship.api.internal.dataloaders.admin import (
@@ -34,7 +35,9 @@ class TestLoadAdminsByProgramId:
         mock_admin.objects.select_related.assert_called_once_with("github_user")
         mock_filter = mock_admin.objects.select_related.return_value.filter
         mock_filter.assert_called_once_with(admin_programs__in=program_ids)
-        mock_filter.return_value.annotate.assert_called_once()
+        mock_filter.return_value.annotate.assert_called_once_with(
+            program_id=F("admin_programs__pk")
+        )
         mock_filter.return_value.annotate.return_value.order_by.assert_called_once_with(
             "github_user__login"
         )

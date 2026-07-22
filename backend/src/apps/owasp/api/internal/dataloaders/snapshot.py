@@ -1,6 +1,7 @@
 """DataLoaders for snapshots."""
 
-from django.db.models import F
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
 from apps.common.api.internal.dataloaders.utils import get_results_by_keys
@@ -34,15 +35,19 @@ async def load_new_issues_by_snapshot_id(snapshot_ids: list[int]) -> list[list[I
     """Batch-load new issues for the given snapshot IDs in a single query."""
     issues = (
         Issue.objects.filter(snapshots__in=snapshot_ids)
-        .annotate(snapshot_id=F("snapshots__pk"))
-        .order_by("-created_at")
+        .annotate(
+            snapshot_id=F("snapshots__pk"),
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("snapshot_id")],
+                order_by=F("created_at").desc(),
+            ),
+        )
+        .filter(row_number__lte=RECENT_ISSUES_LIMIT)
+        .order_by("snapshot_id", "-created_at")
     )
 
-    results: list[list[Issue]] = await get_results_by_keys(
-        issues, snapshot_ids, key_field="snapshot_id"
-    )
-
-    return [result[:RECENT_ISSUES_LIMIT] for result in results]
+    return await get_results_by_keys(issues, snapshot_ids, key_field="snapshot_id")
 
 
 async def load_new_projects_by_snapshot_id(snapshot_ids: list[int]) -> list[list[Project]]:
