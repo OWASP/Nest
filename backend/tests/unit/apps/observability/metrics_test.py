@@ -40,6 +40,7 @@ class TestTrackJob:
             1, {"job": "generate_ai_reply", "queue": "ai", "status": "failure"}
         )
         duration.record.assert_called_once()
+        assert duration.record.call_args.args[1] == {"job": "generate_ai_reply", "queue": "ai"}
 
     def test_defaults_to_default_queue(self, mocker):
         runs = mocker.patch(f"{METRICS_PATH}._job_runs")

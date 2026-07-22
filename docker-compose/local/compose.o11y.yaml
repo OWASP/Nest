@@ -14,7 +14,6 @@ services:
 
   worker:
     # Info ------ need to confirm this approach...
-    
     # RQ's default worker forks a process per job, and metrics recorded in that
     # short-lived child are never exported (the exporter lives in the parent).
     # SimpleWorker runs jobs in the main process so job metrics are collected.
@@ -22,6 +21,9 @@ services:
       sh -c '
         python manage.py rqworker ai --with-scheduler --worker-class rq.SimpleWorker
       '
+    depends_on:
+      o11y-metrics:
+        condition: service_healthy
     environment:
       - DJANGO_OTEL_METRICS_ENABLED=true
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://o11y-metrics:8428/opentelemetry
