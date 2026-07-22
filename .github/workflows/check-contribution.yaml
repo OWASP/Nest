@@ -1,38 +1,27 @@
 name: Check contribution
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - edited
       - opened
       - reopened
       - synchronize
 
-permissions: {}
-
 jobs:
   check-contribution:
-    if: github.event.repository.fork == false
+    if: github.event.pull_request.base.repo.full_name == github.repository
     permissions:
       contents: read
       issues: read
       pull-requests: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
-        with:
-          persist-credentials: false
-
       - name: Check contribution requirements
-        uses: arkid15r/check-contribution-action@e30b8f992da76cc4ae9a157f1667dcff2787d1ad  # v0.1.2
+        uses: arkid15r/check-contribution-action@8d461a5dce23432339eaa12ce3c8d35013b038ab  # v0.1.6
         with:
-          check_commit_signature: 'true'
-          check_issue_reference: 'true'
-          check_sign_off: 'true'
-          close_pr_on_assignee_mismatch: 'true'
+          check_for: commit_sign_off, commit_signature, issue_assignee, issue_reference
+          close_on: issue_assignee, issue_reference
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          no_assignee_message: The linked issue must be assigned to the PR author.
-          no_issue_message: The PR must be linked to an issue assigned to the PR author.
-          require_assignee: 'true'
           skip_users_file_path: .github/check-contribution-skip-usernames.txt
     timeout-minutes: 5

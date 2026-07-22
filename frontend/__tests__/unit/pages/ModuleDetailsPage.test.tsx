@@ -11,6 +11,13 @@ jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn().mockReturnValue({
+    data: { user: { login: 'test-user', isLeader: true, isMentor: true } },
+    status: 'authenticated',
+  }),
+}))
+
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
@@ -274,5 +281,72 @@ describe('ModuleDetailsPage', () => {
     render(<ModuleDetailsPage />)
 
     expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
+  })
+  it('renders the module for a mentee (read-only view)', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        managementModule: { ...mockModuleData, userRole: 'mentee' },
+        managementProgram: { admins },
+      },
+    })
+    render(<ModuleDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByTestId('header')).toHaveTextContent('Intro to Web')
+    })
+  })
+})
+
+describe('Mentee view', () => {
+  const mockUseQueryLocal = useQuery as unknown as jest.Mock
+  const admins = [{ login: 'admin1' }]
+
+  beforeEach(() => {
+    ;(useParams as jest.Mock).mockReturnValue({
+      programKey: 'program-1',
+      moduleKey: 'module-1',
+    })
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('shows loading spinner while the module is loading', () => {
+    mockUseQueryLocal.mockReturnValue({ data: undefined, loading: true, error: undefined })
+    const { container } = render(<ModuleDetailsPage />)
+    expect(container.innerHTML).toContain('LoadingSpinner')
+  })
+
+  it('shows module not found when the module is null', async () => {
+    mockUseQueryLocal.mockReturnValue({
+      data: { managementModule: null, managementProgram: { admins } },
+      loading: false,
+      error: undefined,
+    })
+    render(<ModuleDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Module Not Found')).toBeInTheDocument()
+    })
+  })
+
+  it('renders mentee module details when data is available', async () => {
+    mockUseQueryLocal.mockReturnValue({
+      data: {
+        managementModule: {
+          ...mockModuleData,
+          userRole: 'mentee',
+          name: 'Mentee Module',
+          description: 'Mentee module description',
+        },
+        managementProgram: { admins },
+      },
+      loading: false,
+      error: undefined,
+    })
+    render(<ModuleDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Mentee Module')).toBeInTheDocument()
+    })
   })
 })

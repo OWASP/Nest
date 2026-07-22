@@ -45,9 +45,11 @@ NETTACKER
 NOASSERTION
 NOSEMGREP
 NOSONAR
+NPROCESSORS
 Nadu
 Nagori
 Nominatim
+ONLN
 OSSF
 OWHF
 Obmondo
@@ -133,6 +135,7 @@ graphiql
 graphqler
 gunicorn
 hackathon
+harfbuzz
 hcl
 heroui
 hsl
@@ -157,6 +160,7 @@ libpango
 libpangoft
 libx
 lighthouseci
+lighthouserc
 linkify
 lte
 lxml
@@ -185,6 +189,7 @@ notab
 nspname
 numfmt
 openblas
+opencre
 openstreetmap
 owasppcitoolkit
 owtf
@@ -231,6 +236,8 @@ speakerdeck
 subgrp
 superfences
 tfbackend
+tfdata
+tftest
 tgz
 tiktok
 trailofbits

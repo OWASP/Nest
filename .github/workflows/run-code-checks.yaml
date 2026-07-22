@@ -9,6 +9,38 @@ env:
 permissions: {}
 
 jobs:
+  run-cspell-checks:
+    name: CSpell
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271  # v6.0.9
+        with:
+          run_install: false
+          version: 11.7.0
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          cache: pnpm
+          cache-dependency-path: cspell/pnpm-lock.yaml
+          node-version: 24
+
+      - name: Install CSpell dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+        working-directory: cspell
+
+      - name: Run CSpell
+        run: make cspell
+    timeout-minutes: 5
+
   run-eslint-checks:
     name: ESLint
     permissions:
@@ -16,7 +48,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           persist-credentials: false
 
@@ -40,25 +72,25 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           cache: pip
           cache-dependency-path: backend/requirements/pre-commit.txt
           python-version: '3.13'
 
       - name: Cache pre-commit environments
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
         with:
           key: pre-commit-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.pre-commit-config.yaml') }}
           path: ~/.cache/pre-commit
 
       - name: Cache mypy
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
         with:
           key: mypy-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.pre-commit-config.yaml', 'backend/pyproject.toml', 'backend/poetry.lock') }}
           path: ${{ env.MYPY_CACHE_DIR }}
@@ -68,13 +100,11 @@ jobs:
       - name: Install pre-commit
         run: python -m pip install --require-hashes --requirement backend/requirements/pre-commit.txt
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
-        with:
-          terraform_version: 1.14
+      - name: Setup Terraform environment
+        uses: ./.github/actions/setup-terraform-environment
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93  # v6.2.2
+        uses: terraform-linters/setup-tflint@6e1e0642c0289bd619021bf6b34e3c08ed1e005a  # v6.3.0
         env:
           RUNNER_OS: ${{ runner.os }}-${{ runner.arch }}
         with:
@@ -82,15 +112,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_config_path: infrastructure/.tflint.hcl
           tflint_version: v0.60.0
-
-      - name: Cache Terraform plugins
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          key: ${{ runner.os }}-${{ runner.arch }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
-          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-
-      - name: Ensure Terraform plugin cache directory exists
-        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
 
       - name: Ensure mypy cache directory exists
         run: mkdir -p "$MYPY_CACHE_DIR"
@@ -108,7 +129,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           persist-credentials: false
 
@@ -129,45 +150,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           persist-credentials: false
 
       - name: Run Semgrep security scan
-        run: make security-scan-code-semgrep
-    timeout-minutes: 5
-
-  run-spelling-checks:
-    name: Spelling
-    permissions:
-      contents: read
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
-        with:
-          persist-credentials: false
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093  # v6.0.8
-        with:
-          run_install: false
-          version: 11.7.0
-
-      - name: Set up Node
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
-        with:
-          cache-dependency-path: cspell/pnpm-lock.yaml
-          cache: pnpm
-          node-version: 24
-
-      - name: Install cspell dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
-        working-directory: cspell
-
-      - name: Run cspell
-        run: pnpm exec cspell --config cspell.json --no-progress -r ..
-        working-directory: cspell
+        run: make security-sast-scan-semgrep
     timeout-minutes: 5
 
   run-trivy-checks:
@@ -177,12 +165,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           persist-credentials: false
 
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
+          command: make security-repository-scan-trivy
     timeout-minutes: 5

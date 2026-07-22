@@ -1,0 +1,40 @@
+services:
+  localstack:
+    build:
+      context: ../..
+      dockerfile: docker/localstack/Dockerfile
+    environment:
+      # https://docs.localstack.cloud/aws/services/ecr/#endpoint-strategy
+      - ECR_ENDPOINT_STRATEGY=off
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+    healthcheck:
+      interval: 5s
+      retries: 10
+      start_period: 15s
+      test: [CMD, curl, -f, http://localhost:4566/_localstack/info]
+      timeout: 5s
+    networks:
+      - infrastructure-tests
+    volumes:
+      # Host Docker socket so LocalStack can start sibling containers (Lambda, ECS, etc.).
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  tests:
+    command: [python, -m, scripts.run_tests, --integration]
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+      LOCALSTACK_HOST: localhost
+    image: nest-test-infrastructure
+    network_mode: service:localstack
+    pull_policy: never
+    volumes:
+      - ../../infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap
+      - ../../infrastructure/modules:/home/owasp/infrastructure/modules
+      - ../../infrastructure/scripts:/home/owasp/infrastructure/scripts:ro
+      - ../../infrastructure/tests:/home/owasp/infrastructure/tests:ro
+
+networks:
+  infrastructure-tests:
