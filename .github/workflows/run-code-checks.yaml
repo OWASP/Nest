@@ -38,8 +38,7 @@ jobs:
         working-directory: cspell
 
       - name: Run CSpell
-        run: pnpm exec cspell --config cspell.json --no-progress -r ..
-        working-directory: cspell
+        run: make cspell
     timeout-minutes: 5
 
   run-eslint-checks:
@@ -101,13 +100,11 @@ jobs:
       - name: Install pre-commit
         run: python -m pip install --require-hashes --requirement backend/requirements/pre-commit.txt
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
-        with:
-          terraform_version: 1.14
+      - name: Setup Terraform environment
+        uses: ./.github/actions/setup-terraform-environment
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93  # v6.2.2
+        uses: terraform-linters/setup-tflint@6e1e0642c0289bd619021bf6b34e3c08ed1e005a  # v6.3.0
         env:
           RUNNER_OS: ${{ runner.os }}-${{ runner.arch }}
         with:
@@ -115,15 +112,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_config_path: infrastructure/.tflint.hcl
           tflint_version: v0.60.0
-
-      - name: Cache Terraform plugins
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          key: ${{ runner.os }}-${{ runner.arch }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
-          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-
-      - name: Ensure Terraform plugin cache directory exists
-        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
 
       - name: Ensure mypy cache directory exists
         run: mkdir -p "$MYPY_CACHE_DIR"
@@ -167,7 +155,7 @@ jobs:
           persist-credentials: false
 
       - name: Run Semgrep security scan
-        run: make security-scan-code-semgrep
+        run: make security-sast-scan-semgrep
     timeout-minutes: 5
 
   run-trivy-checks:
@@ -184,5 +172,5 @@ jobs:
       - name: Run trivy scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          command: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
+          command: make security-filesystem-scan-trivy
     timeout-minutes: 5

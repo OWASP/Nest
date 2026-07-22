@@ -83,11 +83,11 @@ jobs:
           command: |
             docker pull "$BACKEND_IMAGE"
             docker pull "$FRONTEND_IMAGE"
-            make security-scan-images \
+            make security-image-scan \
               BACKEND_IMAGE_NAME="$BACKEND_IMAGE" \
               FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
-            make sbom-backend-image BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
-            make sbom-frontend-image FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+            make backend-image-sbom BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
+            make frontend-image-sbom FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
 
       - name: Upload unsigned SBOM as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1

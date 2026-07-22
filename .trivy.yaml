@@ -8,10 +8,31 @@ ignorefile: /.trivyignore.yaml
 report: all
 
 scan:
+  scanners:
+    - misconfig
+    - secret
+    - vuln
   show-suppressed: true
   skip-dirs:
-    - .cache
+    - '**/__pycache__'
+    - '**/.cache'
+    - '**/.lighthouseci'
+    - '**/.local'
+    - '**/.mypy_cache'
+    - '**/.next'
+    - '**/.pnpm-store'
+    - '**/.pytest_cache'
+    - '**/.ruff_cache'
+    - '**/.semgrep-cache'
+    - '**/.terraform'
+    - '**/.trivy-cache'
+    - '**/.venv'
+    - '**/coverage'
+    - '**/node_modules'
+    - '**/staticfiles'
   skip-files:
+    - '**/.env'
+    - '**/*.pem'
 
 severity:
   - CRITICAL
