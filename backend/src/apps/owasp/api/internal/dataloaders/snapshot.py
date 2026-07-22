@@ -35,8 +35,8 @@ async def load_new_issues_by_snapshot_id(snapshot_ids: list[int]) -> list[list[I
     """Batch-load new issues for the given snapshot IDs in a single query."""
     issues = (
         Issue.objects.filter(snapshots__in=snapshot_ids)
+        .annotate(snapshot_id=F("snapshots__pk"))
         .annotate(
-            snapshot_id=F("snapshots__pk"),
             row_number=Window(
                 expression=RowNumber(),
                 partition_by=[F("snapshot_id")],

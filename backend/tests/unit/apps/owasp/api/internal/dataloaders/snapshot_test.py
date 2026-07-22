@@ -136,22 +136,22 @@ class TestLoadNewIssuesBySnapshotId:
     @patch("apps.owasp.api.internal.dataloaders.snapshot.Issue")
     @pytest.mark.asyncio
     async def test_builds_queryset_with_correct_chain(self, mock_issue, mock_get_results_by_keys):
-        """Queryset is built with filter, annotate, filter(row_number), order_by."""
+        """Queryset is built with filter, annotate, annotate(row_number), filter, order_by."""
         snapshot_ids = [1, 2, 3]
         mock_qs = MagicMock()
         mock_filter = mock_issue.objects.filter.return_value
-        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
+        mock_windowed = mock_filter.annotate.return_value.annotate.return_value
+        mock_windowed.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], [], []]
 
         await load_new_issues_by_snapshot_id(snapshot_ids)
 
         mock_issue.objects.filter.assert_called_once_with(snapshots__in=snapshot_ids)
-        mock_filter.annotate.assert_called_once()
-        assert mock_filter.annotate.call_args.kwargs["snapshot_id"] == F("snapshots__pk")
-        mock_filter.annotate.return_value.filter.assert_called_once_with(
-            row_number__lte=RECENT_ISSUES_LIMIT
-        )
-        mock_filter.annotate.return_value.filter.return_value.order_by.assert_called_once_with(
+        mock_filter.annotate.assert_called_once_with(snapshot_id=F("snapshots__pk"))
+        mock_filter.annotate.return_value.annotate.assert_called_once()
+        assert "row_number" in mock_filter.annotate.return_value.annotate.call_args.kwargs
+        mock_windowed.filter.assert_called_once_with(row_number__lte=RECENT_ISSUES_LIMIT)
+        mock_windowed.filter.return_value.order_by.assert_called_once_with(
             "snapshot_id", "-created_at"
         )
 
@@ -168,7 +168,8 @@ class TestLoadNewIssuesBySnapshotId:
         snapshot_ids = [10, 20]
         mock_qs = MagicMock()
         mock_filter = mock_issue.objects.filter.return_value
-        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
+        mock_windowed = mock_filter.annotate.return_value.annotate.return_value
+        mock_windowed.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], []]
 
         await load_new_issues_by_snapshot_id(snapshot_ids)
@@ -187,14 +188,13 @@ class TestLoadNewIssuesBySnapshotId:
         """The window function filter enforces the RECENT_ISSUES_LIMIT."""
         mock_qs = MagicMock()
         mock_filter = mock_issue.objects.filter.return_value
-        mock_filter.annotate.return_value.filter.return_value.order_by.return_value = mock_qs
+        mock_windowed = mock_filter.annotate.return_value.annotate.return_value
+        mock_windowed.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[MagicMock() for _ in range(RECENT_ISSUES_LIMIT)]]
 
         result = await load_new_issues_by_snapshot_id([1])
 
-        mock_filter.annotate.return_value.filter.assert_called_once_with(
-            row_number__lte=RECENT_ISSUES_LIMIT
-        )
+        mock_windowed.filter.assert_called_once_with(row_number__lte=RECENT_ISSUES_LIMIT)
         assert len(result[0]) == RECENT_ISSUES_LIMIT
 
     @patch(
