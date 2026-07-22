@@ -18,7 +18,10 @@ repos:
         args:
           - --config
           - .bake.toml
-        exclude: ^backend/
+        # Component Makefiles use root-relative includes and call shared targets; mbake
+        # validates each file in isolation from its own directory, so only the root
+        # Makefile can be checked.
+        exclude: ^(backend|cspell|docs|e2e|frontend|infrastructure|make)/
 
   - repo: https://github.com/adrienverge/yamllint.git
     rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # v1.38.0
@@ -57,7 +60,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: 36d5c17806dbe418e108cb3a3718b453ea613465  # v1.39.4
+    rev: 9d343c049133931777dfa92e578cc54db0e1058e  # v1.39.5
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -89,7 +92,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.319.0
+          - strawberry-graphql==0.320.0
           - strawberry-graphql-django==0.86.4
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
@@ -147,7 +150,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: f073523dfd27b01ec7997cc970a2a7b36c303460  # v2.25.0
+    rev: 0c8c15d8fe996493035be407c5cf4a288cf6bf8e  # v2.25.1
     hooks:
       - id: pyproject-fmt
         additional_dependencies:

@@ -27,6 +27,8 @@ __pycache__
 .trivy-cache
 .venv/
 .vscode
+*_override.tf
+*_override.tf.json
 *.bak
 *.code-workspace
 *.key
@@ -70,7 +72,9 @@ frontend/dist
 frontend/out
 frontend/test-results/
 logs
-node_modules/
+node_modules
+override.tf
+override.tf.json
 semgrep-security-report.txt
 site/
 TODO

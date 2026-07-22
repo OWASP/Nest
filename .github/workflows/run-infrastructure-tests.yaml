@@ -2,6 +2,9 @@ name: Infrastructure tests
 
 on:
   workflow_call:
+    secrets:
+      LOCALSTACK_AUTH_TOKEN:
+        required: false
 
 env:
   FORCE_COLOR: 1
@@ -10,8 +13,9 @@ env:
 permissions: {}
 
 jobs:
-  run-infrastructure-tests:
-    name: Infrastructure tests
+
+  run-infrastructure-unit-tests:
+    name: Infrastructure unit tests
     permissions:
       contents: read
     runs-on: ubuntu-24.04-arm
@@ -21,20 +25,82 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
-        with:
-          terraform_version: 1.14
+      - name: Check Terraform version drift
+        run: make check-terraform-version
 
-      - name: Create plugin cache directory
-        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+      - name: Setup Terraform environment
+        uses: ./.github/actions/setup-terraform-environment
 
-      - name: Cache Terraform plugins
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          key: ${{ runner.os }}-${{ runner.arch }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
-          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+      - name: Install infrastructure dependencies
+        uses: ./.github/actions/install-infrastructure-dependencies
 
-      - name: Run tests
-        run: make test-infrastructure
+      - name: Run unit tests
+        run: |
+          poetry run pytest
+          poetry run python -m scripts.run_tests --unit
+        working-directory: infrastructure
     timeout-minutes: 10
+
+  check-localstack:
+    name: Check LocalStack availability
+    outputs:
+      is_available: ${{ steps.check.outputs.is_available }}
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - id: check
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          if [ -n "$LOCALSTACK_AUTH_TOKEN" ]; then
+            echo "is_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  run-infrastructure-integration-tests:
+    name: Infrastructure integration tests
+    needs: check-localstack
+    if: ${{ needs.check-localstack.outputs.is_available == 'true' }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform environment
+        uses: ./.github/actions/setup-terraform-environment
+
+      - name: Install infrastructure dependencies
+        uses: ./.github/actions/install-infrastructure-dependencies
+
+      - name: Read LocalStack image from Dockerfile
+        id: localstack-image
+        run: |
+          image=$(poetry run python -m scripts.run_tests --get-image)
+          tag=$(poetry run python -m scripts.run_tests --get-tag)
+          if [[ -z "$image" || -z "$tag" ]]; then
+            echo "Error: could not determine LocalStack image from Dockerfile." >&2
+            exit 1
+          fi
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        working-directory: infrastructure
+
+      - name: Start LocalStack
+        env:
+          # Prefer the digest-pinned image from docker/localstack/Dockerfile over the
+          # action default (unpinned localstack/localstack-pro:${tag}).
+          IMAGE_NAME: ${{ steps.localstack-image.outputs.image }}
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        uses: localstack/setup-localstack@7c8a0cb3405bc58be4c8f763f812aa000bc46303  # v0.3.2
+        with:
+          configuration: ECR_ENDPOINT_STRATEGY=off
+          image-tag: ${{ steps.localstack-image.outputs.tag }}
+
+      - name: Run integration tests
+        run: poetry run python -m scripts.run_tests --integration
+        working-directory: infrastructure
+    timeout-minutes: 15
