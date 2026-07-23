@@ -2,16 +2,7 @@
 
 backend-dependency-audit:
 	@echo "Auditing backend Python dependencies..."
-	@docker run \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		-e HOME=/tmp \
-		-e PIP_ROOT_USER_ACTION=ignore \
-		-v "$(CURDIR):/work" \
-		-w /work/backend \
-		$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
-		sh -c 'python -m pip install --user --no-warn-script-location --quiet poetry poetry-plugin-export pip-audit && \
-		export PATH="$$HOME/.local/bin:$$PATH" && \
+	@$(MAKE) code-checks CMD='cd backend && \
 		poetry export -f requirements.txt --without-hashes --all-groups -o /tmp/requirements.txt && \
 		pip-audit -r /tmp/requirements.txt'
 

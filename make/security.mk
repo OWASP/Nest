@@ -3,7 +3,7 @@
 .PHONY: security-dependency-audit security-dependency-scan security-scan \
 	security-sast-scan security-dast-scan security-image-scan \
 	security-repository-scan security-sast-scan-semgrep \
-	security-dependency-scan-trivy security-repository-scan-trivy \
+	security-vulnerability-scan-trivy security-repository-scan-trivy \
 	security-dast-scan-zap tooling-dependency-audit
 
 security-scan: ## Run security scans
@@ -38,7 +38,7 @@ security-dependency-audit: ## Audit dependencies for known vulnerabilities
 
 security-dependency-scan: ## Scan dependencies for known vulnerabilities
 	@$(MAKE) security-dependency-audit
-	@$(MAKE) security-dependency-scan-trivy
+	@$(MAKE) security-vulnerability-scan-trivy
 
 security-repository-scan: ## Scan the repository for misconfigurations and secrets
 	@$(MAKE) security-repository-scan-trivy
@@ -92,8 +92,8 @@ security-sast-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-security-dependency-scan-trivy:
-	@echo "Running Trivy dependency scan..."
+security-vulnerability-scan-trivy:
+	@echo "Running Trivy vulnerability scan..."
 	@docker run \
 		--rm \
 		-v $(CURDIR):/src \
@@ -130,4 +130,4 @@ security-dast-scan-zap:
 
 tooling-dependency-audit:
 	@echo "Auditing root tooling npm dependencies..."
-	@$(MAKE) code-checks CMD='pnpm audit --audit-level=high'
+	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate'
