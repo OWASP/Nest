@@ -14,27 +14,29 @@ security-scan: ## Run security scans
 	@$(MAKE) security-dast-scan
 
 security-dependency-audit: ## Audit dependencies for known vulnerabilities
-	@echo "============================= Backend dependency audit ============================="
-	-@$(MAKE) backend-dependency-audit
-	@echo ""
-	@echo "============================= CSpell dependency audit =============================="
-	-@$(MAKE) cspell-dependency-audit
-	@echo ""
-	@echo "============================== Docs dependency audit ==============================="
-	-@$(MAKE) docs-dependency-audit
-	@echo ""
-	@echo "=============================== E2E dependency audit ==============================="
-	-@$(MAKE) e2e-dependency-audit
-	@echo ""
-	@echo "============================ Frontend dependency audit ============================="
-	-@$(MAKE) frontend-dependency-audit
-	@echo ""
-	@echo "========================= Infrastructure dependency audit =========================="
-	-@$(MAKE) infrastructure-dependency-audit
-	@echo ""
-	@echo "============================ Tooling dependency audit =============================="
-	-@$(MAKE) tooling-dependency-audit
-	@echo ""
+	@exit_code=0; \
+	echo "============================= Backend dependency audit ============================="; \
+	$(MAKE) backend-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================= CSpell dependency audit =============================="; \
+	$(MAKE) cspell-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================== Docs dependency audit ==============================="; \
+	$(MAKE) docs-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "=============================== E2E dependency audit ==============================="; \
+	$(MAKE) e2e-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================ Frontend dependency audit ============================="; \
+	$(MAKE) frontend-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "========================= Infrastructure dependency audit =========================="; \
+	$(MAKE) infrastructure-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================ Tooling dependency audit =============================="; \
+	$(MAKE) tooling-dependency-audit || exit_code=1; \
+	echo ""; \
+	exit $$exit_code
 
 security-dependency-scan: ## Scan dependencies for known vulnerabilities
 	@$(MAKE) security-dependency-audit
