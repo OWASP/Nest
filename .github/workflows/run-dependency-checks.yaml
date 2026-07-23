@@ -9,8 +9,8 @@ env:
 permissions: {}
 
 jobs:
-  run-dependency-scan:
-    name: Dependency scan
+  run-dependency-audit:
+    name: Dependency audit
     continue-on-error: true
     permissions:
       contents: read
@@ -36,12 +36,23 @@ jobs:
         run: python -m pip install --require-hashes -r backend/requirements/build.txt
 
       - name: Audit dependencies
-        continue-on-error: true
         run: make security-dependency-audit
+    timeout-minutes: 5
+
+  run-dependency-scan:
+    name: Dependency scan
+    continue-on-error: true
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Run Trivy dependency scan
-        continue-on-error: true
         uses: ./.github/actions/run-trivy-scan
         with:
           command: make security-dependency-scan-trivy
-    timeout-minutes: 10
+    timeout-minutes: 5
