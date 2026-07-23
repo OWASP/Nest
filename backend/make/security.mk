@@ -2,7 +2,7 @@
 
 backend-dependency-audit:
 	@echo "Auditing backend Python dependencies..."
-	@$(MAKE) code-checks CMD='cd backend && \
+	@$(MAKE) run-cmd CMD='cd backend && \
 		poetry export -f requirements.txt --without-hashes --all-groups -o /tmp/requirements.txt && \
 		pip-audit -r /tmp/requirements.txt'
 

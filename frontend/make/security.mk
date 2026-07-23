@@ -2,7 +2,7 @@
 
 frontend-dependency-audit:
 	@echo "Auditing frontend npm dependencies..."
-	@$(MAKE) code-checks CMD='cd frontend && pnpm audit --audit-level=moderate'
+	@$(MAKE) run-cmd CMD='cd frontend && pnpm audit --audit-level=moderate'
 
 frontend-security-image-scan:
 	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \

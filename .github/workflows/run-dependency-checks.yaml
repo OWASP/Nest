@@ -21,9 +21,49 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          cache: pip
+          cache-dependency-path: backend/requirements/build.txt
+          python-version: '3.13'
+
+      - name: Install Poetry and pip-audit
+        uses: ./.github/actions/install-poetry
+
+      - name: Install tooling dependencies
+        uses: ./.github/actions/install-tooling-dependencies
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Cache CSpell node_modules
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: cspell-node-modules-${{ runner.os }}-${{ runner.arch }}-node-24-${{ hashFiles('cspell/pnpm-lock.yaml') }}
+          path: cspell/node_modules
+          restore-keys: |
+            cspell-node-modules-${{ runner.os }}-${{ runner.arch }}-node-24-
+
+      - name: Install CSpell dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+        working-directory: cspell
+
+      - name: Cache e2e node_modules
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: e2e-node-modules-${{ runner.os }}-${{ runner.arch }}-node-24-${{ hashFiles('e2e/pnpm-lock.yaml') }}
+          path: e2e/node_modules
+          restore-keys: |
+            e2e-node-modules-${{ runner.os }}-${{ runner.arch }}-node-24-
+
+      - name: Install e2e dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+        working-directory: e2e
+
       - name: Audit dependencies
         run: make security-dependency-audit
-    timeout-minutes: 5
+    timeout-minutes: 10
 
   run-dependency-scan:
     name: Dependency scan
