@@ -5,6 +5,9 @@ filesystem:
 
 ignorefile: /.trivyignore.yaml
 
+pkg:
+  include-dev-deps: true
+
 report: all
 
 scan:

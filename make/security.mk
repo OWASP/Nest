@@ -1,26 +1,46 @@
 ##@ Security
 
-.PHONY: security-dependency-audit security-scan security-sast-scan security-dast-scan \
-	security-image-scan security-filesystem-scan security-sast-scan-semgrep \
-	security-filesystem-scan-trivy security-dast-scan-zap tooling-dependency-audit
+.PHONY: security-dependency-audit security-dependency-scan security-scan \
+	security-sast-scan security-dast-scan security-image-scan \
+	security-repository-scan security-sast-scan-semgrep \
+	security-dependency-scan-trivy security-repository-scan-trivy \
+	security-dast-scan-zap tooling-dependency-audit
 
 security-scan: ## Run security scans
 	@$(MAKE) security-sast-scan
-	@$(MAKE) security-filesystem-scan
+	@$(MAKE) security-repository-scan
 	@$(MAKE) security-image-scan
 	@$(MAKE) security-dast-scan
 
 security-dependency-audit: ## Audit dependencies for known vulnerabilities
-	@$(MAKE) backend-dependency-audit
-	@$(MAKE) cspell-dependency-audit
-	@$(MAKE) docs-dependency-audit
-	@$(MAKE) e2e-dependency-audit
-	@$(MAKE) frontend-dependency-audit
-	@$(MAKE) infrastructure-dependency-audit
-	@$(MAKE) tooling-dependency-audit
+	@echo "============================= Backend dependency audit ============================="
+	-@$(MAKE) backend-dependency-audit
+	@echo ""
+	@echo "============================= CSpell dependency audit =============================="
+	-@$(MAKE) cspell-dependency-audit
+	@echo ""
+	@echo "============================== Docs dependency audit ==============================="
+	-@$(MAKE) docs-dependency-audit
+	@echo ""
+	@echo "=============================== E2E dependency audit ==============================="
+	-@$(MAKE) e2e-dependency-audit
+	@echo ""
+	@echo "============================ Frontend dependency audit ============================="
+	-@$(MAKE) frontend-dependency-audit
+	@echo ""
+	@echo "========================= Infrastructure dependency audit =========================="
+	-@$(MAKE) infrastructure-dependency-audit
+	@echo ""
+	@echo "============================ Tooling dependency audit =============================="
+	-@$(MAKE) tooling-dependency-audit
+	@echo ""
 
-security-filesystem-scan: ## Scan the filesystem for vulnerabilities and security issues
-	@$(MAKE) security-filesystem-scan-trivy
+security-dependency-scan: ## Scan dependencies for known vulnerabilities
+	@$(MAKE) security-dependency-audit
+	@$(MAKE) security-dependency-scan-trivy
+
+security-repository-scan: ## Scan the repository for misconfigurations and secrets
+	@$(MAKE) security-repository-scan-trivy
 
 security-dast-scan: ## Run DAST security scan
 	@$(MAKE) security-dast-scan-zap
@@ -71,8 +91,8 @@ security-sast-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-security-filesystem-scan-trivy:
-	@echo "Running Trivy filesystem scan..."
+security-dependency-scan-trivy:
+	@echo "Running Trivy dependency scan..."
 	@docker run \
 		--rm \
 		-v $(CURDIR):/src \
@@ -80,7 +100,18 @@ security-filesystem-scan-trivy:
 		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		fs --config /.trivy.yaml /src
+		fs --config /.trivy.yaml --scanners vuln /src
+
+security-repository-scan-trivy:
+	@echo "Running Trivy repository scan..."
+	@docker run \
+		--rm \
+		-v $(CURDIR):/src \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		fs --config /.trivy.yaml --scanners misconfig,secret /src
 
 ZAP_TARGET ?= http://host.docker.internal:3000
 

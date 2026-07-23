@@ -454,7 +454,7 @@ make security-sast-scan
 #### Running Filesystem Scans Only
 
 ```bash
-make security-filesystem-scan
+make security-repository-scan
 ```
 
 #### Running DAST Scan
