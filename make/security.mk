@@ -9,6 +9,7 @@
 security-scan: ## Run security scans
 	@$(MAKE) security-sast-scan
 	@$(MAKE) security-repository-scan
+	@$(MAKE) security-dependency-scan
 	@$(MAKE) security-image-scan
 	@$(MAKE) security-dast-scan
 
