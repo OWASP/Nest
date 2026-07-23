@@ -9,17 +9,17 @@ from django.db import migrations, models
 
 def migrate_existing_subscriptions(apps, schema_editor):
     """Migrate existing SnapshotSubscription targets to EntitySubscription models."""
-    SnapshotSubscription = apps.get_model("owasp", "SnapshotSubscription")
-    EntitySubscription = apps.get_model("owasp", "EntitySubscription")
-    EntitySubscriptionPreference = apps.get_model("owasp", "EntitySubscriptionPreference")
+    snapshot_subscription_model = apps.get_model("owasp", "SnapshotSubscription")
+    entity_subscription_model = apps.get_model("owasp", "EntitySubscription")
+    entity_subscription_preference_model = apps.get_model("owasp", "EntitySubscriptionPreference")
 
-    for sub in SnapshotSubscription.objects.all():
+    for sub in snapshot_subscription_model.objects.all():
         chapters = list(sub.subscribed_chapters.all())
         projects = list(sub.subscribed_projects.all())
         if not chapters and not projects:
             continue
 
-        entity_sub = EntitySubscription.objects.create(
+        entity_sub = entity_subscription_model.objects.create(
             user=sub.user,
             frequency=sub.frequency,
             is_active=sub.is_active,
@@ -27,7 +27,7 @@ def migrate_existing_subscriptions(apps, schema_editor):
             unsubscribe_token=sub.unsubscribe_token,
         )
         for chapter in chapters:
-            EntitySubscriptionPreference.objects.create(
+            entity_subscription_preference_model.objects.create(
                 subscription=entity_sub,
                 chapter=chapter,
                 include_issues=sub.include_issues,
@@ -35,7 +35,7 @@ def migrate_existing_subscriptions(apps, schema_editor):
                 include_releases=sub.include_releases,
             )
         for project in projects:
-            EntitySubscriptionPreference.objects.create(
+            entity_subscription_preference_model.objects.create(
                 subscription=entity_sub,
                 project=project,
                 include_issues=sub.include_issues,
