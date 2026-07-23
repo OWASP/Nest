@@ -4,7 +4,13 @@ import strawberry
 import strawberry_django
 
 from apps.core.utils.index import deep_camelize
+from apps.owasp.api.internal.dataloaders.chapter import (
+    ENTITY_CHANNELS_BY_CHAPTER_ID_LOADER,
+    ENTITY_LEADERS_BY_CHAPTER_ID_LOADER,
+)
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
+from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
+from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 from apps.owasp.models.chapter import Chapter
 
 
@@ -52,6 +58,22 @@ class ChapterNode(GenericEntityNode):
             GeoLocationType(lat=root.latitude, lng=root.longitude)
             if root.latitude is not None and root.longitude is not None
             else None
+        )
+
+    @strawberry_django.field
+    async def entity_channels(
+        self, root: Chapter, info: strawberry.Info
+    ) -> list[EntityChannelNode]:
+        """Resolve entity channels."""
+        return await info.context.owasp_dataloaders[ENTITY_CHANNELS_BY_CHAPTER_ID_LOADER].load(
+            root.pk
+        )
+
+    @strawberry_django.field
+    async def entity_leaders(self, root: Chapter, info: strawberry.Info) -> list[EntityMemberNode]:
+        """Resolve entity leaders."""
+        return await info.context.owasp_dataloaders[ENTITY_LEADERS_BY_CHAPTER_ID_LOADER].load(
+            root.pk
         )
 
     @strawberry_django.field(only=["key"])
