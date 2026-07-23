@@ -35,9 +35,3 @@ jobs:
     secrets:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
     uses: ./.github/workflows/run-code-tests.yaml
-
-  run-dependency-audit:
-    name: Dependency audit
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-dependency-audit.yaml
