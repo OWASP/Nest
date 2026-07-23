@@ -38,6 +38,8 @@ async def load_entity_leaders_by_chapter_id(
             entity_type=chapter_content_type,
             entity_id__in=chapter_ids,
             role=EntityMember.Role.LEADER,
+            is_active=True,
+            is_reviewed=True,
         )
         .order_by("order")
     )
