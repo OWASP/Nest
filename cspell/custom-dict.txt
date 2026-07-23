@@ -51,6 +51,7 @@ Nagori
 Nominatim
 ONLN
 OSSF
+OSV
 OWHF
 Obmondo
 Oleksiuk
