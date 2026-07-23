@@ -7,6 +7,7 @@ settings:
 overrides:
   brace-expansion@1: 1.1.16
   brace-expansion@5: 5.0.7
+  immutable@5: 5.1.8
 
 importers:
 
