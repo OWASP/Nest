@@ -2,9 +2,10 @@
 
 backend-dependency-audit:
 	@echo "Auditing backend Python dependencies..."
-	@$(MAKE) run-cmd CMD='cd backend && \
-		poetry export -f requirements.txt --all-groups -o /tmp/backend-requirements.txt && \
-		pip-audit --disable-pip -r /tmp/backend-requirements.txt'
+	@$(MAKE) code-checks CMD='cd backend && \
+		req=$$(mktemp) && trap "rm -f \"$$req\"" EXIT && \
+		poetry export -f requirements.txt --all-groups -o "$$req" && \
+		pip-audit --disable-pip -r "$$req"'
 
 backend-security-image-scan:
 	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \

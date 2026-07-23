@@ -1,7 +1,7 @@
 ##@ Checks
 
 .PHONY: check check-fix code-checks code-checks-install cspell eslint eslint-fix \
-	pre-commit prettier prettier-fix run-cmd
+	pre-commit prettier prettier-fix
 
 check: ## Run code quality checks
 	@echo "================================== Pre-commit =================================="
@@ -51,15 +51,6 @@ else
 		--workdir=/nest \
 		nest-code-checks \
 		sh -c '$(CMD)'
-endif
-
-# Run $(CMD) on the host in CI; via nest-code-checks locally. Use for dependency audits
-# so CI never enters the code-checks Docker path.
-run-cmd:
-ifeq ($(CI),true)
-	@PATH="$(CURDIR)/node_modules/.bin:$(PATH)" $(CMD)
-else
-	@$(MAKE) code-checks CMD='$(CMD)'
 endif
 
 cspell: ## Run spell checker

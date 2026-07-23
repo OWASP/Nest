@@ -72,7 +72,7 @@ COPY --from=uv /uv /usr/local/bin/uv
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv python install 3.13 && \
     uv venv /opt/pre-commit --python 3.13 && \
-    uv venv /opt/dependency-audit --python 3.13
+    uv venv /opt/dependency-audit --python 3.13 --seed
 
 COPY package.json /tmp/package.json
 WORKDIR /tmp
@@ -87,13 +87,12 @@ COPY --from=terraform --chmod=555 /bin/terraform /usr/local/bin/terraform
 COPY --from=tflint --chmod=555 /usr/local/bin/tflint /usr/local/bin/tflint
 
 COPY --chmod=444 backend/requirements/pre-commit.txt /tmp/pre-commit.txt
+COPY --chmod=444 backend/requirements/build.txt /tmp/build.txt
 RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=cache,target=/root/.cache/pip \
     uv pip install --python /opt/pre-commit --require-hashes --requirement /tmp/pre-commit.txt && \
-    uv pip install --python /opt/dependency-audit \
-        pip-audit==2.10.1 \
-        poetry==2.4.1 \
-        poetry-plugin-export==1.10.0 && \
-    rm -f /tmp/pre-commit.txt /usr/local/bin/uv
+    /opt/dependency-audit/bin/pip install --require-hashes --requirement /tmp/build.txt && \
+    rm -f /tmp/pre-commit.txt /tmp/build.txt /usr/local/bin/uv
 
 COPY --chmod=555 docker/code-checks/entrypoint.sh /entrypoint.sh
 

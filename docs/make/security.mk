@@ -2,6 +2,7 @@
 
 docs-dependency-audit:
 	@echo "Auditing docs Python dependencies..."
-	@$(MAKE) run-cmd CMD='cd docs && \
-		poetry export -f requirements.txt --only main -o /tmp/docs-requirements.txt && \
-		pip-audit --disable-pip -r /tmp/docs-requirements.txt'
+	@$(MAKE) code-checks CMD='cd docs && \
+		req=$$(mktemp) && trap "rm -f \"$$req\"" EXIT && \
+		poetry export -f requirements.txt --only main -o "$$req" && \
+		pip-audit --disable-pip -r "$$req"'
