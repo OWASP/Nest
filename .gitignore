@@ -25,6 +25,7 @@ __pycache__
 .python-version
 .ruff_cache
 .trivy-cache
+.osv-scanner-cache
 .venv/
 .vscode
 *_override.tf

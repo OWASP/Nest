@@ -3,8 +3,8 @@
 .PHONY: security-dependency-audit security-dependency-scan security-scan \
 	security-sast-scan security-dast-scan security-image-scan \
 	security-repository-scan security-sast-scan-semgrep \
-	security-vulnerability-scan-trivy security-repository-scan-trivy \
-	security-dast-scan-zap tooling-dependency-audit
+	security-dependency-scan-osv security-dependency-scan-trivy \
+	security-repository-scan-trivy security-dast-scan-zap tooling-dependency-audit
 
 security-scan: ## Run security scans
 	@$(MAKE) security-sast-scan
@@ -39,8 +39,11 @@ security-dependency-audit: ## Audit dependencies for known vulnerabilities
 	exit $$exit_code
 
 security-dependency-scan: ## Scan dependencies for known vulnerabilities
-	@$(MAKE) security-dependency-audit
-	@$(MAKE) security-vulnerability-scan-trivy
+	@exit_code=0; \
+	$(MAKE) security-dependency-audit || exit_code=1; \
+	$(MAKE) security-dependency-scan-osv || exit_code=1; \
+	$(MAKE) security-dependency-scan-trivy || exit_code=1; \
+	exit $$exit_code
 
 security-repository-scan: ## Scan the repository for misconfigurations and secrets
 	@$(MAKE) security-repository-scan-trivy
@@ -94,7 +97,7 @@ security-sast-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-security-vulnerability-scan-trivy:
+security-dependency-scan-trivy:
 	@echo "Running Trivy vulnerability scan..."
 	@docker run \
 		--rm \
@@ -104,6 +107,15 @@ security-vulnerability-scan-trivy:
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs --config /.trivy.yaml --scanners vuln /src
+
+security-dependency-scan-osv:
+	@echo "Running OSV vulnerability scan..."
+	@docker run \
+		--rm \
+		-v $(CURDIR):/src \
+		-v $(CURDIR)/.osv-scanner-cache:/root/.cache/osv-scanner \
+		$$(grep -E '^FROM ghcr.io/google/osv-scanner:' docker/osv-scanner/Dockerfile | sed 's/^FROM //') \
+		scan source --recursive /src
 
 security-repository-scan-trivy:
 	@echo "Running Trivy repository scan..."

@@ -11,6 +11,7 @@ misconfigurations:
       - docker/code-checks/Dockerfile
       - docker/e2e/Dockerfile
       - docker/localstack/Dockerfile
+      - docker/osv-scanner/Dockerfile
       - docker/semgrep/Dockerfile
       - docker/terraform/Dockerfile
       - docker/trivy/Dockerfile

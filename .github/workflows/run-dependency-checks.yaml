@@ -55,8 +55,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Run OSV vulnerability scan
+        uses: ./.github/actions/run-osv-scan
+        with:
+          command: make security-dependency-scan-osv
+
       - name: Run Trivy vulnerability scan
         uses: ./.github/actions/run-trivy-scan
         with:
-          command: make security-vulnerability-scan-trivy
+          command: make security-dependency-scan-trivy
     timeout-minutes: 5

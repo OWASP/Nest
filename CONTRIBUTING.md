@@ -434,7 +434,7 @@ This command runs:
 
 - SAST (Semgrep)
 - Repository scanning for secrets and misconfigurations (Trivy)
-- Dependency scanning for known vulnerabilities (package audits and Trivy)
+- Dependency scanning for known vulnerabilities (package audits, Trivy, and OSV-Scanner)
 - Container image scans for backend and frontend
 - DAST (ZAP baseline scan against the running frontend)
 
