@@ -1,0 +1,32 @@
+name: Run OSV scan
+description: Configure OSV-Scanner cache and run OSV scan
+
+inputs:
+  command:
+    description: Command to run the OSV scan
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set OSV-Scanner cache key
+      id: osv-cache-key
+      env:
+        DOCKERFILE_HASH: ${{ hashFiles('docker/osv-scanner/Dockerfile') }}
+        RUNNER_ARCH: ${{ runner.arch }}
+        RUNNER_OS: ${{ runner.os }}
+      run: echo "value=osv-scanner-${RUNNER_OS}-${RUNNER_ARCH}-${DOCKERFILE_HASH}" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Cache OSV-Scanner
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+      with:
+        key: ${{ steps.osv-cache-key.outputs.value }}
+        path: .osv-scanner-cache
+        restore-keys: osv-scanner-${{ runner.os }}-${{ runner.arch }}-
+
+    - name: Run OSV scan
+      env:
+        OSV_RUN_COMMAND: ${{ inputs.command }}
+      run: bash -c "$OSV_RUN_COMMAND"
+      shell: bash
