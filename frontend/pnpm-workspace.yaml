@@ -16,21 +16,23 @@ minimumReleaseAgeExclude:
   - '@graphql-codegen/typescript@6.1.0'
   - '@graphql-codegen/visitor-plugin-common@7.2.0'
   - '@graphql-tools/utils@11.2.0'
-  - '@next/env@16.2.6'
-  - '@next/swc-darwin-arm64@16.2.6'
-  - '@next/swc-darwin-x64@16.2.6'
-  - '@next/swc-linux-arm64-gnu@16.2.6'
-  - '@next/swc-linux-arm64-musl@16.2.6'
-  - '@next/swc-linux-x64-gnu@16.2.6'
-  - '@next/swc-linux-x64-musl@16.2.6'
-  - '@next/swc-win32-arm64-msvc@16.2.6'
-  - '@next/swc-win32-x64-msvc@16.2.6'
+  - '@next/env@16.2.11'
+  - '@next/swc-darwin-arm64@16.2.11'
+  - '@next/swc-darwin-x64@16.2.11'
+  - '@next/swc-linux-arm64-gnu@16.2.11'
+  - '@next/swc-linux-arm64-musl@16.2.11'
+  - '@next/swc-linux-x64-gnu@16.2.11'
+  - '@next/swc-linux-x64-musl@16.2.11'
+  - '@next/swc-win32-arm64-msvc@16.2.11'
+  - '@next/swc-win32-x64-msvc@16.2.11'
+  - '@next/third-parties@16.2.11'
   - '@opentelemetry/core@2.8.0'
   - brace-expansion@5.0.7
   - dompurify@3.4.11
   - fast-uri@3.1.2
   - js-yaml@4.2.0
-  - next@16.2.6
+  - next@16.2.11
+  - next-auth@4.24.15
   - postcss@8.5.10
   - protobufjs@7.6.4
   - qs@6.15.2
