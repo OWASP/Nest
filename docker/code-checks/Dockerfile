@@ -17,22 +17,22 @@ WORKDIR /opt/code-checks
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN corepack install && corepack enable pnpm
 RUN --mount=type=cache,id=pnpm-code-checks-root,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /opt/code-checks/frontend
 COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-code-checks-frontend,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /opt/code-checks/cspell
 COPY cspell/package.json cspell/pnpm-lock.yaml cspell/pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-code-checks-cspell,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /opt/code-checks/e2e
 COPY e2e/package.json e2e/pnpm-lock.yaml e2e/pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-code-checks-e2e,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 FROM node AS code-checks
 
