@@ -197,7 +197,7 @@ run "test_shared_bucket_permissions" {
     condition = alltrue([
       contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
       !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action, "s3:PutObject"),
-      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action, "s3:Get*"),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action, "s3:GetObject"),
     ])
     error_message = "Staging/non-production environments must have read-only access to the shared data bucket (no PutObject permission)."
   }
