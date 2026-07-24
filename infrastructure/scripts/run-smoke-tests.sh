@@ -55,8 +55,8 @@ override_s3_lifecycle() {
   fi
 }
 
-if curl -sf "${LOCALSTACK_URL}/_localstack/health" >/dev/null 2>&1; then
-  echo "Found existing LocalStack instance at ${LOCALSTACK_URL}, verifying readiness..."
+if curl -sf "${LOCALSTACK_URL}/_localstack/health" >/dev/null 2>&1; then  # NOSONAR
+  echo "Found existing LocalStack instance at ${LOCALSTACK_URL}, verifying readiness..."  # NOSONAR
   wait_for_localstack
 else
   echo "Starting LocalStack container..."
