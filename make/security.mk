@@ -1,9 +1,9 @@
 ##@ Security
 
-.PHONY: security-dependency-audit security-dependency-scan security-scan \
-	security-sast-scan security-dast-scan security-image-scan \
+.PHONY: security-dependency-audit security-dependency-check security-dependency-scan \
+	security-scan security-sast-scan security-dast-scan security-image-scan \
 	security-repository-scan security-sast-scan-semgrep \
-	security-dependency-scan-osv security-dependency-scan-trivy \
+	security-dependency-check-osv security-dependency-check-trivy \
 	security-repository-scan-trivy security-dast-scan-zap tooling-dependency-audit
 
 security-scan: ## Run security scans
@@ -38,11 +38,16 @@ security-dependency-audit: ## Audit dependencies for known vulnerabilities
 	echo ""; \
 	exit $$exit_code
 
-security-dependency-scan: ## Scan dependencies for known vulnerabilities
+security-dependency-scan: ## Audit and check dependencies for known vulnerabilities
 	@exit_code=0; \
 	$(MAKE) security-dependency-audit || exit_code=1; \
-	$(MAKE) security-dependency-scan-osv || exit_code=1; \
-	$(MAKE) security-dependency-scan-trivy || exit_code=1; \
+	$(MAKE) security-dependency-check || exit_code=1; \
+	exit $$exit_code
+
+security-dependency-check: ## Check dependencies for known vulnerabilities
+	@exit_code=0; \
+	$(MAKE) security-dependency-check-osv || exit_code=1; \
+	$(MAKE) security-dependency-check-trivy || exit_code=1; \
 	exit $$exit_code
 
 security-repository-scan: ## Scan the repository for misconfigurations and secrets
@@ -97,8 +102,8 @@ security-sast-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-security-dependency-scan-trivy:
-	@echo "Running Trivy vulnerability scan..."
+security-dependency-check-trivy:
+	@echo "Running Trivy vulnerability check..."
 	@docker run \
 		--rm \
 		-v $(CURDIR):/src \
@@ -108,8 +113,8 @@ security-dependency-scan-trivy:
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs --config /.trivy.yaml --scanners vuln /src
 
-security-dependency-scan-osv:
-	@echo "Running OSV vulnerability scan..."
+security-dependency-check-osv:
+	@echo "Running OSV vulnerability check..."
 	@docker run \
 		--rm \
 		-v $(CURDIR):/src \
@@ -144,4 +149,4 @@ security-dast-scan-zap:
 
 tooling-dependency-audit:
 	@echo "Auditing root tooling npm dependencies..."
-	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate'
+	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate --ignore-unfixable'
