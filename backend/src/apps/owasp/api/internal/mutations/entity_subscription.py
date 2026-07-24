@@ -7,7 +7,7 @@ from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.entity_subscription import EntitySubscriptionNode
-from apps.owasp.models.entity_subscription import EntitySubscription
+from apps.owasp.models.entity_subscription import MAX_ENTITY_SUBSCRIPTIONS, EntitySubscription
 
 ENTITY_TYPES = frozenset(("chapter", "committee", "project"))
 VALID_FREQUENCIES = frozenset(dict(EntitySubscription.Frequency.choices))
@@ -240,7 +240,7 @@ class EntitySubscriptionMutations:
         info: Info,
         subscription_id: int,
     ) -> EntitySubscriptionResult:
-        """Cancel a specific entity subscription."""
+        """Deactivate a specific entity subscription."""
         user = info.context.request.user
 
         try:
@@ -260,6 +260,78 @@ class EntitySubscriptionMutations:
         return EntitySubscriptionResult(
             ok=True,
             message="Subscription cancelled successfully.",
+            subscription=subscription,
+        )
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    def delete_entity_subscription(
+        self,
+        info: Info,
+        subscription_id: int,
+    ) -> EntitySubscriptionResult:
+        """Permanently delete a specific entity subscription."""
+        user = info.context.request.user
+
+        try:
+            subscription = EntitySubscription.objects.get(
+                id=subscription_id,
+                user=user,
+            )
+        except EntitySubscription.DoesNotExist:
+            return EntitySubscriptionResult(
+                ok=False,
+                message="Subscription not found.",
+            )
+
+        subscription.delete()
+
+        return EntitySubscriptionResult(
+            ok=True,
+            message="Subscription deleted successfully.",
+        )
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    def reactivate_entity_subscription(
+        self,
+        info: Info,
+        subscription_id: int,
+    ) -> EntitySubscriptionResult:
+        """Reactivate an inactive entity subscription."""
+        user = info.context.request.user
+
+        try:
+            subscription = EntitySubscription.objects.get(
+                id=subscription_id,
+                user=user,
+            )
+        except EntitySubscription.DoesNotExist:
+            return EntitySubscriptionResult(
+                ok=False,
+                message="Subscription not found.",
+            )
+
+        if subscription.is_active:
+            return EntitySubscriptionResult(
+                ok=False,
+                message="Subscription is already active.",
+            )
+
+        active_count = EntitySubscription.objects.filter(
+            user=user,
+            is_active=True,
+        ).count()
+        if active_count >= MAX_ENTITY_SUBSCRIPTIONS:
+            return EntitySubscriptionResult(
+                ok=False,
+                message="Maximum number of active entity subscriptions reached.",
+            )
+
+        subscription.is_active = True
+        subscription.save()
+
+        return EntitySubscriptionResult(
+            ok=True,
+            message="Subscription reactivated successfully.",
             subscription=subscription,
         )
 

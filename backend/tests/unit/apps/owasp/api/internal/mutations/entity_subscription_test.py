@@ -337,7 +337,7 @@ class TestCancelEntitySubscription:
             assert not result.ok
 
     def test_success(self, mutations):
-        """Test successful subscription cancellation."""
+        """Test successful subscription cancellation (soft deactivate)."""
         info = mock_info()
         mock_sub = MagicMock(spec=EntitySubscription)
         with patch(
@@ -347,6 +347,81 @@ class TestCancelEntitySubscription:
             result = mutations.cancel_entity_subscription(info, subscription_id=1)
             assert result.ok
             assert mock_sub.is_active is False
+            mock_sub.save.assert_called_once()
+
+
+class TestDeleteEntitySubscription:
+    """Test cases for deleteEntitySubscription mutation."""
+
+    @pytest.fixture
+    def mutations(self):
+        return EntitySubscriptionMutations()
+
+    def test_not_found(self, mutations):
+        """Test delete fails when subscription doesn't exist."""
+        info = mock_info()
+        with patch(
+            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.side_effect = EntitySubscription.DoesNotExist
+            result = mutations.delete_entity_subscription(info, subscription_id=999)
+            assert not result.ok
+
+    def test_success(self, mutations):
+        """Test successful subscription hard delete."""
+        info = mock_info()
+        mock_sub = MagicMock(spec=EntitySubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.delete_entity_subscription(info, subscription_id=1)
+            assert result.ok
+            mock_sub.delete.assert_called_once()
+
+
+class TestReactivateEntitySubscription:
+    """Test cases for reactivateEntitySubscription mutation."""
+
+    @pytest.fixture
+    def mutations(self):
+        return EntitySubscriptionMutations()
+
+    def test_not_found(self, mutations):
+        """Test reactivate fails when subscription doesn't exist."""
+        info = mock_info()
+        with patch(
+            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.side_effect = EntitySubscription.DoesNotExist
+            result = mutations.reactivate_entity_subscription(info, subscription_id=999)
+            assert not result.ok
+
+    def test_already_active(self, mutations):
+        """Test reactivate fails when subscription is already active."""
+        info = mock_info()
+        mock_sub = MagicMock(spec=EntitySubscription)
+        mock_sub.is_active = True
+        with patch(
+            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.reactivate_entity_subscription(info, subscription_id=1)
+            assert not result.ok
+
+    def test_success(self, mutations):
+        """Test successful subscription reactivation."""
+        info = mock_info()
+        mock_sub = MagicMock(spec=EntitySubscription)
+        mock_sub.is_active = False
+        with patch(
+            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            mock_objects.filter.return_value.count.return_value = 0
+            result = mutations.reactivate_entity_subscription(info, subscription_id=1)
+            assert result.ok
+            assert mock_sub.is_active is True
             mock_sub.save.assert_called_once()
 
 
