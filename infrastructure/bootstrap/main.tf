@@ -518,7 +518,35 @@ data "aws_iam_policy_document" "part_two" {
     sid    = "S3Mgmt"
     effect = "Allow"
     actions = [
-      "s3:*",
+      "s3:CreateBucket",
+      "s3:DeleteBucket",
+      "s3:DeleteBucketPolicy",
+      "s3:DeleteObject",
+      "s3:GetAccelerateConfiguration",
+      "s3:GetBucketAcl",
+      "s3:GetBucketCors",
+      "s3:GetBucketLogging",
+      "s3:GetBucketObjectLockConfiguration",
+      "s3:GetBucketPolicy",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:GetBucketRequestPayment",
+      "s3:GetBucketTagging",
+      "s3:GetBucketVersioning",
+      "s3:GetBucketWebsite",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetLifecycleConfiguration",
+      "s3:GetObject",
+      "s3:GetReplicationConfiguration",
+      "s3:ListBucket",
+      "s3:PutBucketLogging",
+      "s3:PutBucketObjectLockConfiguration",
+      "s3:PutBucketPolicy",
+      "s3:PutBucketPublicAccessBlock",
+      "s3:PutBucketTagging",
+      "s3:PutBucketVersioning",
+      "s3:PutEncryptionConfiguration",
+      "s3:PutLifecycleConfiguration",
+      "s3:PutObject",
     ]
     resources = concat(
       [
@@ -538,8 +566,10 @@ data "aws_iam_policy_document" "part_two" {
       sid    = "S3SharedBucketRestricted"
       effect = "Allow"
       actions = [
-        "s3:Get*",
-        "s3:List*",
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:ListBucket",
       ]
       resources = [
         "arn:aws:s3:::${var.shared_data_bucket_name}",
