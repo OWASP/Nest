@@ -46,4 +46,18 @@ def strip_markdown(text: str) -> str:
         str: The text with markdown formatting removed.
 
     """
-    return SLACK_LINK_PATTERN.sub(r"\2 (\1)", text).replace("*", "")
+    text = SLACK_LINK_PATTERN.sub(r"\2 (\1)", text)
+
+    # Remove Slack formatting markers (bold, italic, strikethrough and code).
+    # Only strip a marker pair when it sits at a word boundary surrounded by
+    # spaces or sentence punctuation, so underscores that are part of words or
+    # URLs (e.g. snake_case or https://example.com/_docs_/) are left untouched.
+    markers = ["*", "_", "~", "`"]
+    for marker in markers:
+        escaped = re.escape(marker)
+        marker_pattern = re.compile(
+            rf"(?:^|(?<=[\s(])){escaped}(\S(?:.*?\S)?){escaped}(?:$|(?=[\s.,!?:;)]))"
+        )
+        text = marker_pattern.sub(r"\1", text)
+
+    return text
