@@ -465,6 +465,7 @@ data "aws_iam_policy_document" "part_two" {
     effect = "Allow"
     actions = [
       "kms:CreateKey",
+      "kms:DescribeKey",
       "kms:DisableKeyRotation",
       "kms:EnableKeyRotation",
       "kms:GetKeyPolicy",
@@ -484,6 +485,8 @@ data "aws_iam_policy_document" "part_two" {
     effect = "Allow"
     actions = [
       "kms:Decrypt",
+      "kms:DescribeKey",
+      "kms:Encrypt",
       "kms:GenerateDataKey",
       "kms:UpdateKeyDescription",
     ]
