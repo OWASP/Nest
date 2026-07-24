@@ -14,7 +14,7 @@ wait_for_localstack() {
   echo "Waiting for LocalStack to be ready..."
   for i in $(seq 1 30); do
     local health
-    health=$(curl -sf "${LOCALSTACK_URL}/_localstack/health") || health=""
+    health=$(curl -sf "${LOCALSTACK_URL}/_localstack/health") || health=""  # NOSONAR
     if echo "${health}" | grep -q '"ecr".*"available"' && \
        echo "${health}" | grep -q '"iam".*"available"' && \
        echo "${health}" | grep -q '"kms".*"available"' && \
