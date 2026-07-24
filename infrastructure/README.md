@@ -442,7 +442,7 @@ Documentation is generated using [terraform-docs](https://github.com/terraform-d
 - To run mock-based unit tests (no external dependencies):
 
 ```bash
-  make test-infrastructure
+  make test-infrastructure-unit
 ```
 
 - To run smoke tests against LocalStack (requires `LOCALSTACK_AUTH_TOKEN`):
