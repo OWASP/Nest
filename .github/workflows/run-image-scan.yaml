@@ -78,7 +78,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
 
       - name: Run trivy scan
-        uses: ./.github/actions/run-trivy-scan
+        uses: ./.github/actions/run-trivy-check
         with:
           command: |
             docker pull "$BACKEND_IMAGE"

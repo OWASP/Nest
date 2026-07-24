@@ -1,9 +1,9 @@
-name: Run OSV scan
-description: Configure OSV-Scanner cache and run OSV scan
+name: Run OSV check
+description: Configure OSV-Scanner cache and run OSV check
 
 inputs:
   command:
-    description: Command to run the OSV scan
+    description: Command to run the OSV check
     required: true
 
 runs:
@@ -25,7 +25,7 @@ runs:
         path: .osv-scanner-cache
         restore-keys: osv-scanner-${{ runner.os }}-${{ runner.arch }}-
 
-    - name: Run OSV scan
+    - name: Run OSV check
       env:
         OSV_RUN_COMMAND: ${{ inputs.command }}
       run: bash -c "$OSV_RUN_COMMAND"
