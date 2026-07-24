@@ -162,3 +162,12 @@ repos:
       - id: zizmor
         args:
           - --min-severity=low
+
+  - repo: local
+    hooks:
+      - id: check-compose-volumes
+        name: Check Docker Compose volume names
+        entry: .github/scripts/check-compose-volumes.py
+        language: python
+        files: docker-compose/.*compose\.yaml
+        pass_filenames: false
