@@ -3,6 +3,8 @@ from .chapter import Chapter
 from .committee import Committee
 from .entity_channel import EntityChannel
 from .entity_member import EntityMember
+from .entity_subscription import EntitySubscription
+from .entity_subscription_preference import EntitySubscriptionPreference
 from .event import Event
 from .member_profile import MemberProfile
 from .member_snapshot import MemberSnapshot

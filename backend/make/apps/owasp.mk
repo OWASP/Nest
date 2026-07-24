@@ -27,6 +27,12 @@ owasp-create-project-metadata-file:
 	@echo "Generating metadata"
 	@CMD="python manage.py owasp_create_project_metadata_file $(entity_key)" $(MAKE) backend-exec-command
 
+SNAPSHOT_FREQUENCY ?= weekly
+
+owasp-create-snapshot:
+	@echo "Creating OWASP community snapshot"
+	@CMD="python manage.py owasp_create_snapshot --frequency $(SNAPSHOT_FREQUENCY)" $(MAKE) exec-backend-command
+
 owasp-enrich-chapters:
 	@echo "Enriching OWASP chapters"
 	@CMD="python manage.py owasp_enrich_chapters" $(MAKE) backend-exec-command
@@ -57,12 +63,6 @@ owasp-generate-community-snapshot-video:
 		--rm \
 		nest-snapshot-video \
 		python manage.py owasp_generate_community_snapshot_video $(snapshot_key) /home/owasp/generated_videos
-
-SNAPSHOT_FREQUENCY ?= weekly
-
-owasp-create-snapshot:
-	@echo "Creating OWASP community snapshot"
-	@CMD="python manage.py owasp_create_snapshot --frequency $(SNAPSHOT_FREQUENCY)" $(MAKE) exec-backend-command
 
 owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
