@@ -1,6 +1,7 @@
 .PHONY: test-infrastructure test-infrastructure-integration test-infrastructure-unit \
 	infrastructure-test infrastructure-test-image-build \
-	infrastructure-test-integration infrastructure-test-unit
+	infrastructure-test-integration infrastructure-test-unit \
+	test-infrastructure-smoke
 
 test-infrastructure: ## Run infrastructure tests
 	@$(MAKE) infrastructure-test
@@ -9,7 +10,8 @@ test-infrastructure-integration:
 	@$(MAKE) infrastructure-test-integration
 
 test-infrastructure-unit:
-	@$(MAKE) infrastructure-test-unit
+	@$(MAKE) infrastructure-test-unit \
+	test-infrastructure-smoke
 
 # Implementation targets.
 
@@ -25,7 +27,8 @@ INFRASTRUCTURE_TEST_OVERRIDES = \
 	infrastructure/modules/storage/modules/shared-data-bucket/test_override.tf
 
 infrastructure-test:
-	@$(MAKE) infrastructure-test-unit
+	@$(MAKE) infrastructure-test-unit \
+	test-infrastructure-smoke
 	@$(MAKE) infrastructure-test-integration
 
 infrastructure-test-image-build:
@@ -64,3 +67,6 @@ infrastructure-test-integration:
 			--exit-code-from tests \
 		|| status=$$?; \
 	exit $$status
+
+test-infrastructure-smoke: ## Run infrastructure smoke tests against LocalStack
+	@bash infrastructure/scripts/run-smoke-tests.sh

@@ -436,3 +436,23 @@ make test-infrastructure
 ## Documentation
 
 Documentation is generated using [terraform-docs](https://github.com/terraform-docs/terraform-docs).
+
+## Testing
+
+- To run mock-based unit tests (no external dependencies):
+
+```bash
+  make test-infrastructure-unit
+```
+
+- To run smoke tests against LocalStack (requires `LOCALSTACK_AUTH_TOKEN`):
+
+```bash
+  export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
+  make test-infrastructure-smoke
+```
+
+  The script auto-starts a LocalStack container if one isn't already running on port 4566 and tears it down on exit.
+
+> [!NOTE]
+> ECR smoke tests require a paid LocalStack plan (Base or above). S3 smoke tests require LocalStack >= 4.13 due to a known compatibility issue with `terraform-provider-aws` >= 6.23 ([localstack/localstack#13426](https://github.com/localstack/localstack/issues/13426)).
