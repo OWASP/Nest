@@ -13,7 +13,6 @@ services:
       - OTEL_SERVICE_NAME=nest-frontend
 
   worker:
-    # Info ------ need to confirm this approach...
     # RQ's default worker forks a process per job, and metrics recorded in that
     # short-lived child are never exported (the exporter lives in the parent).
     # SimpleWorker runs jobs in the main process so job metrics are collected.
