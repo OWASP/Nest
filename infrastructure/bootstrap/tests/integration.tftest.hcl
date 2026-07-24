@@ -33,6 +33,11 @@ run "bootstrap_integration_apply_staging" {
   }
 
   assert {
+    condition     = aws_iam_policy.part_three.name == "${var.project_name}-${var.environment}-part-three-terraform"
+    error_message = "IAM policy part-three name format is incorrect for staging."
+  }
+
+  assert {
     condition     = aws_iam_role_policy_attachment.attach_part_one.role == aws_iam_role.terraform.name
     error_message = "IAM policy part-one is not attached to the role in staging."
   }
@@ -40,6 +45,11 @@ run "bootstrap_integration_apply_staging" {
   assert {
     condition     = aws_iam_role_policy_attachment.attach_part_two.role == aws_iam_role.terraform.name
     error_message = "IAM policy part-two is not attached to the role in staging."
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.attach_part_three.role == aws_iam_role.terraform.name
+    error_message = "IAM policy part-three is not attached to the role in staging."
   }
 
   assert {
@@ -72,6 +82,11 @@ run "bootstrap_integration_apply_production" {
   }
 
   assert {
+    condition     = aws_iam_policy.part_three.name == "${var.project_name}-${var.environment}-part-three-terraform"
+    error_message = "IAM policy part-three name format is incorrect for production."
+  }
+
+  assert {
     condition     = aws_iam_role_policy_attachment.attach_part_one.role == aws_iam_role.terraform.name
     error_message = "IAM policy part-one is not attached to the role in production."
   }
@@ -79,6 +94,11 @@ run "bootstrap_integration_apply_production" {
   assert {
     condition     = aws_iam_role_policy_attachment.attach_part_two.role == aws_iam_role.terraform.name
     error_message = "IAM policy part-two is not attached to the role in production."
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.attach_part_three.role == aws_iam_role.terraform.name
+    error_message = "IAM policy part-three is not attached to the role in production."
   }
 
   assert {

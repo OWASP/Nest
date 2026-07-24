@@ -184,6 +184,7 @@ run "test_environment_scoped_resources_with_env_override" {
       one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
       strcontains(aws_iam_policy.part_one.name, "${var.project_name}-${var.environment}-part-one-terraform"),
       strcontains(aws_iam_policy.part_two.name, "${var.project_name}-${var.environment}-part-two-terraform"),
+      strcontains(aws_iam_policy.part_three.name, "${var.project_name}-${var.environment}-part-three-terraform"),
     ])
     error_message = "Policy documents must only reference the active environment resources."
   }
