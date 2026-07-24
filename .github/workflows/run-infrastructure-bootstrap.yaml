@@ -54,13 +54,13 @@ jobs:
           tfbackend-path: infrastructure/bootstrap/terraform.tfbackend
           tfbackend-content: |
             bucket="${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}"
-            region="${{ vars.AWS_REGION }}"
             key="${{ inputs.environment }}/bootstrap/terraform.tfstate"
+            region="${{ vars.AWS_REGION }}"
           tfvars-path: infrastructure/bootstrap/terraform.tfvars
           tfvars-content: |
             aws_region="${{ vars.AWS_REGION }}"
-            project_name="nest"
-            environment="${{ inputs.environment }}"
             aws_role_external_id="${{ secrets.AWS_ROLE_EXTERNAL_ID }}"
+            environment="${{ inputs.environment }}"
+            project_name="nest"
           working-directory: infrastructure/bootstrap
     timeout-minutes: 10
