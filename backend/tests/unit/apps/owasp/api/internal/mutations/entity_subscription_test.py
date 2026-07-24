@@ -414,9 +414,16 @@ class TestReactivateEntitySubscription:
         info = mock_info()
         mock_sub = MagicMock(spec=EntitySubscription)
         mock_sub.is_active = False
-        with patch(
-            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
-        ) as mock_objects:
+        with (
+            patch(
+                "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
+            ) as mock_objects,
+            patch(
+                "apps.owasp.api.internal.mutations.entity_subscription.User.objects"
+            ) as mock_user_objects,
+        ):
+            mock_chain = mock_user_objects.select_for_update.return_value.filter.return_value
+            mock_chain.exists.return_value = True
             mock_objects.get.return_value = mock_sub
             mock_objects.filter.return_value.count.return_value = 0
             result = mutations.reactivate_entity_subscription(info, subscription_id=1)

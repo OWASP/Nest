@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from strawberry.types import Info
 
+from apps.github.models.user import User
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.entity_subscription import EntitySubscriptionNode
 from apps.owasp.models.entity_subscription import MAX_ENTITY_SUBSCRIPTIONS, EntitySubscription
@@ -316,18 +317,22 @@ class EntitySubscriptionMutations:
                 message="Subscription is already active.",
             )
 
-        active_count = EntitySubscription.objects.filter(
-            user=user,
-            is_active=True,
-        ).count()
-        if active_count >= MAX_ENTITY_SUBSCRIPTIONS:
-            return EntitySubscriptionResult(
-                ok=False,
-                message="Maximum number of active entity subscriptions reached.",
-            )
+        with transaction.atomic():
+            if getattr(user, "pk", None):
+                User.objects.select_for_update().filter(pk=user.pk).exists()
 
-        subscription.is_active = True
-        subscription.save()
+            active_count = EntitySubscription.objects.filter(
+                user=user,
+                is_active=True,
+            ).count()
+            if active_count >= MAX_ENTITY_SUBSCRIPTIONS:
+                return EntitySubscriptionResult(
+                    ok=False,
+                    message="Maximum number of active entity subscriptions reached.",
+                )
+
+            subscription.is_active = True
+            subscription.save()
 
         return EntitySubscriptionResult(
             ok=True,
