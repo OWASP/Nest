@@ -7,9 +7,8 @@ This root directory bootstraps IAM resources for OWASP Nest:
 
 ## IAM Roles & Users
 
-- **Roles Created**:
-  - `nest-staging-terraform`: Assumed by staging CI/CD pipelines.
-  - `nest-production-terraform`: Assumed by production CI/CD pipelines.
+- **Role Created (per apply)**:
+  - `nest-${var.environment}-terraform`: Created for the active environment (`nest-staging-terraform` or `nest-production-terraform`).
 - **IAM User Access**:
   - IAM users (e.g. `nest-bootstrap`, `nest-staging`, `nest-production`) assume these roles to execute deployment tasks.
 
@@ -100,7 +99,10 @@ Use the following inline permissions for the `nest-bootstrap` IAM User:
    "Sid": "KMSManagement",
    "Effect": "Allow",
    "Action": [
-    "kms:Decrypt"
+    "kms:Decrypt",
+    "kms:DescribeKey",
+    "kms:Encrypt",
+    "kms:GenerateDataKey"
    ],
    "Resource": "AWS_BACKEND_KMS_KEY_ARN"
   }

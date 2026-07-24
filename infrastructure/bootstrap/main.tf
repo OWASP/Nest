@@ -378,7 +378,7 @@ data "aws_iam_policy_document" "part_two" {
       "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*",
       "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:targetgroup/${var.project_name}-${var.environment}-*/*",
       "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener/app/${var.project_name}-${var.environment}-*/*/*",
-      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener-rule/app/${var.project_name}-${var.environment}-*/*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener-rule/app/${var.project_name}-${var.environment}-*/*/*/*",
     ]
   }
 
@@ -567,7 +567,6 @@ data "aws_iam_policy_document" "part_three" {
     effect = "Allow"
     actions = [
       "kms:CreateKey",
-      "kms:DescribeKey",
       "kms:DisableKeyRotation",
       "kms:EnableKeyRotation",
       "kms:GetKeyPolicy",
@@ -587,7 +586,6 @@ data "aws_iam_policy_document" "part_three" {
     effect = "Allow"
     actions = [
       "kms:Decrypt",
-      "kms:DescribeKey",
       "kms:Encrypt",
       "kms:GenerateDataKey",
       "kms:UpdateKeyDescription",
