@@ -1,7 +1,7 @@
 .PHONY: test-infrastructure test-infrastructure-integration test-infrastructure-unit \
 	infrastructure-test infrastructure-test-image-build \
 	infrastructure-test-integration infrastructure-test-unit \
-        test-infrastructure-smoke
+	test-infrastructure-smoke
 
 test-infrastructure: ## Run infrastructure tests
 	@$(MAKE) infrastructure-test
@@ -11,7 +11,7 @@ test-infrastructure-integration:
 
 test-infrastructure-unit:
 	@$(MAKE) infrastructure-test-unit \
-        test-infrastructure-smoke
+	test-infrastructure-smoke
 
 # Implementation targets.
 
@@ -28,7 +28,7 @@ INFRASTRUCTURE_TEST_OVERRIDES = \
 
 infrastructure-test:
 	@$(MAKE) infrastructure-test-unit \
-        test-infrastructure-smoke
+	test-infrastructure-smoke
 	@$(MAKE) infrastructure-test-integration
 
 infrastructure-test-image-build:

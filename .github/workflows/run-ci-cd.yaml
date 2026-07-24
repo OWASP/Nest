@@ -142,8 +142,6 @@ on:
         required: true
       VITE_GRAPHQL_URL:
         required: true
-      LOCALSTACK_AUTH_TOKEN:
-        required: false
       VITE_IDX_URL:
         required: true
       VITE_SENTRY_DSN:
