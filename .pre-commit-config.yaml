@@ -60,7 +60,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: a2e60a0d2b9caf0eb769c9f3ac8214d5560dfa4f  # v1.40.1
+    rev: 30c5d8351e4a50d6279784d4773eded140355084  # v1.40.2
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -92,7 +92,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.320.0
+          - strawberry-graphql==0.320.1
           - strawberry-graphql-django==0.86.4
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
