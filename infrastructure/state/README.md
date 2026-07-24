@@ -1,13 +1,6 @@
-## Bootstrap State Layout
+## Bootstrap State Bucket
 
-The bootstrap state bucket uses one environment-specific object key per bootstrap
-root:
-
-- `staging/bootstrap/terraform.tfstate`
-- `production/bootstrap/terraform.tfstate`
-
-The staging and production bootstrap workflows must use these separate keys;
-the single `infrastructure/bootstrap/` root is used with these separate keys.
+A single state bucket is used for both staging and production bootstrap resources. For object key layout and usage instructions, see [infrastructure/bootstrap/README.md](../bootstrap/README.md).
 
 ## Inline Permissions
 

@@ -3,8 +3,9 @@
 Before the first **staging** CI/CD run you must:
 
 1. **IAM role `nest-staging-terraform` (lifecycle)**
-   The staging pipeline assumes this role (see the "STSStateManagement" resource below). The role is created by the bootstrap workflow, which applies `infrastructure/bootstrap` (with `environment = "staging"`). Because the main CI/CD deployment pipeline runs image build, scan, and sign jobs (which assume this role) before running the bootstrap step, **the bootstrap configuration must be applied manually first** from a local CLI using the matching environment variable and S3 state key backend config (see the instructions in [infrastructure/bootstrap/README.md](../bootstrap/README.md)) to create the role before the first full CI/CD deployment pipeline can run. Subsequent bootstrap runs update the staging role and policies.
-   **Manual intervention** may still be needed if you delete the role in AWS, remove it from Terraform state, or need to change the ExternalId (e.g. in the role trust policy or in the staging pipeline configuration).
+   - The staging pipeline assumes this role (see the "STSStateManagement" resource below).
+   - For the initial run, manual creation may be required before running the CI/CD deployment pipeline (see [infrastructure/bootstrap/README.md](../bootstrap/README.md)).
+   - Subsequent automated bootstrap runs update the existing role and policies.
 
 2. **Create the `nest-staging` IAM user** and attach the inline permissions documented below. This user is used to assume the `nest-staging-terraform` role.
 

@@ -1,58 +1,40 @@
 # Bootstrap IAM Infrastructure
 
-This is the single Terraform root directory used to bootstrap the IAM resources for the OWASP Nest project. It configures the IAM roles and policies that allow Terraform and CI/CD pipelines to manage AWS resources for staging and production environments.
+This root directory bootstraps IAM resources for OWASP Nest:
+
+- Provisions environment-scoped IAM roles (`nest-${var.environment}-terraform`) assumed by CI/CD pipelines.
+- Configures IAM policies for managing environment AWS resources.
+
+## IAM Roles & Users
+
+- **Roles Created**:
+  - `nest-staging-terraform`: Assumed by staging CI/CD pipelines.
+  - `nest-production-terraform`: Assumed by production CI/CD pipelines.
+- **IAM User Access**:
+  - IAM users (e.g. `nest-bootstrap`, `nest-staging`, `nest-production`) assume these roles to execute deployment tasks.
 
 ## Multi-Environment Single-Root Design
 
-Unlike normal environment infrastructure directories, this single root is shared to deploy both `staging` and `production` resources. The specific target environment is injected via the `environment` Terraform variable.
+- A single root directory is used to deploy both `staging` and `production` resources.
+- The target environment is injected via the `environment` Terraform variable.
 
-### Alignment of Environment and State Key
+### Environment & State Key Alignment
 
-It is critical that you match the `environment` variable with the correct S3 backend `key` in the state bucket.
+Always align the `environment` variable with the matching S3 backend state key:
 
 - **Staging**:
   - `environment = "staging"`
-  - state key: `staging/bootstrap/terraform.tfstate`
+  - State key: `staging/bootstrap/terraform.tfstate`
 - **Production**:
   - `environment = "production"`
-  - state key: `production/bootstrap/terraform.tfstate`
+  - State key: `production/bootstrap/terraform.tfstate`
 
 > [!WARNING]
-> Terraform itself cannot prevent an operator from pairing the wrong environment variable with the wrong state key (e.g., setting `environment = "staging"` while using the `production` state file). You must ensure these two inputs are kept aligned.
+> Ensure the `environment` variable matches the backend state key to prevent state cross-contamination.
 
----
+## Local Execution
 
-## Local Usage Instructions
-
-To run plans or apply changes locally:
-
-1. Copy the environment-specific example variable and backend configuration files (e.g., for staging):
-
-   ```bash
-   cp terraform.staging.tfbackend.example terraform.tfbackend
-   cp terraform.staging.tfvars.example terraform.tfvars
-   ```
-
-2. Edit `terraform.tfbackend`:
-   - Replace `REPLACE_WITH_TF_STATE_BUCKET_NAME` with your actual bootstrap state bucket name.
-
-3. Edit `terraform.tfvars`:
-   - Set `aws_role_external_id` to the external ID used for role assumption.
-
-4. Initialize the Terraform backend:
-
-   Using `-reconfigure` is required to safely switch between environment keys without migrating the previous environment's state:
-
-   ```bash
-   terraform init -reconfigure -backend-config=terraform.tfbackend
-   ```
-
-5. Run Plan or Apply:
-
-   ```bash
-   terraform plan
-   terraform apply
-   ```
+For local execution instructions and walkthroughs, see [infrastructure/README.md](../README.md).
 
 ---
 

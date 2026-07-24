@@ -63,9 +63,9 @@ Follow these steps to set up the infrastructure:
     ```
 
   > [!NOTE]
-  > This walkthrough shows how to configure staging. To bootstrap production, use the same directory but configure the production values (e.g., `environment = "production"` and `key = "production/bootstrap/terraform.tfstate"`). Make sure to align them correctly.
+  > The following steps demonstrate bootstrapping the **staging** environment. Bootstrapping **production** requires identical steps using the production configuration files (`terraform.production.tfbackend.example` and `terraform.production.tfvars.example`).
 
-- Copy the example files into your new local configuration files:
+- Copy the example files into your local configuration files (for staging):
 
     ```bash
     cp terraform.staging.tfbackend.example terraform.tfbackend
