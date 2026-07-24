@@ -5,6 +5,7 @@ import logging
 from django_rq import job
 from slack_sdk.errors import SlackApiError
 
+from apps.observability.metrics import track_job
 from apps.slack.apps import SlackConfig
 from apps.slack.common.handlers.ai import get_blocks, process_ai_query
 from apps.slack.models import Message
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @job("ai")
+@track_job("generate_ai_reply", queue="ai")
 def generate_ai_reply_if_unanswered(message_id: int):
     """Check if a message is still unanswered and generate AI reply."""
     try:
