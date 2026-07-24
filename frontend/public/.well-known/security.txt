@@ -1,0 +1,5 @@
+Contact: https://github.com/OWASP/Nest/security/advisories/new
+Preferred-Languages: en
+Canonical: https://nest.owasp.org/.well-known/security.txt
+Policy: https://github.com/OWASP/Nest/blob/main/SECURITY.md
+Expires: 2027-07-16T09:13:42.000Z
