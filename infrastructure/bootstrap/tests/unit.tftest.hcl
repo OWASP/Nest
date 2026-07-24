@@ -29,6 +29,7 @@ run "test_resource_names" {
       aws_iam_role.terraform.name == "${var.project_name}-${var.environment}-terraform",
       aws_iam_policy.part_one.name == "${var.project_name}-${var.environment}-part-one-terraform",
       aws_iam_policy.part_two.name == "${var.project_name}-${var.environment}-part-two-terraform",
+      aws_iam_policy.part_three.name == "${var.project_name}-${var.environment}-part-three-terraform",
     ])
     error_message = "Bootstrap resource names must follow the '<project_name>-<environment>-<resource>' format."
   }
@@ -60,6 +61,15 @@ run "test_part_two_policy_size" {
   }
 }
 
+run "test_part_three_policy_size" {
+  command = plan
+
+  assert {
+    condition     = length(data.aws_iam_policy_document.part_three.minified_json) <= local.iam_policy_size_limit
+    error_message = "part_three policy exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+  }
+}
+
 run "test_minified_json_is_smaller_than_pretty_json" {
   command = plan
 
@@ -67,6 +77,7 @@ run "test_minified_json_is_smaller_than_pretty_json" {
     condition = alltrue([
       length(data.aws_iam_policy_document.part_one.minified_json) < length(data.aws_iam_policy_document.part_one.json),
       length(data.aws_iam_policy_document.part_two.minified_json) < length(data.aws_iam_policy_document.part_two.json),
+      length(data.aws_iam_policy_document.part_three.minified_json) < length(data.aws_iam_policy_document.part_three.json),
     ])
     error_message = "IAM policies must use minified_json because pretty JSON exceeds the AWS size limit."
   }

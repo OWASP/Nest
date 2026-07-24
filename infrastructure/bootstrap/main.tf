@@ -383,6 +383,108 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
+    sid    = "S3Mgmt"
+    effect = "Allow"
+    actions = [
+      "s3:CreateBucket",
+      "s3:DeleteBucket",
+      "s3:DeleteBucketPolicy",
+      "s3:DeleteObject",
+      "s3:GetAccelerateConfiguration",
+      "s3:GetBucketAcl",
+      "s3:GetBucketCors",
+      "s3:GetBucketLogging",
+      "s3:GetBucketObjectLockConfiguration",
+      "s3:GetBucketPolicy",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:GetBucketRequestPayment",
+      "s3:GetBucketTagging",
+      "s3:GetBucketVersioning",
+      "s3:GetBucketWebsite",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetLifecycleConfiguration",
+      "s3:GetObject",
+      "s3:GetReplicationConfiguration",
+      "s3:ListBucket",
+      "s3:PutBucketLogging",
+      "s3:PutBucketObjectLockConfiguration",
+      "s3:PutBucketPolicy",
+      "s3:PutBucketPublicAccessBlock",
+      "s3:PutBucketTagging",
+      "s3:PutBucketVersioning",
+      "s3:PutEncryptionConfiguration",
+      "s3:PutLifecycleConfiguration",
+      "s3:PutObject",
+    ]
+    resources = concat(
+      [
+        "arn:aws:s3:::${var.project_name}-${var.environment}-*",
+        "arn:aws:s3:::${var.project_name}-${var.environment}-*/*",
+      ],
+      var.environment == "production" ? [
+        "arn:aws:s3:::${var.shared_data_bucket_name}",
+        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
+      ] : []
+    )
+  }
+
+  dynamic "statement" {
+    for_each = var.environment != "production" ? [1] : []
+    content {
+      sid    = "S3SharedBucketRestricted"
+      effect = "Allow"
+      actions = [
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:ListBucket",
+      ]
+      resources = [
+        "arn:aws:s3:::${var.shared_data_bucket_name}",
+        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
+      ]
+    }
+  }
+
+  statement {
+    sid    = "SecretsManagerMgmt"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:CreateSecret",
+      "secretsmanager:DeleteSecret",
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:PutSecretValue",
+      "secretsmanager:RestoreSecret",
+      "secretsmanager:RotateSecret",
+      "secretsmanager:TagResource",
+      "secretsmanager:UntagResource",
+      "secretsmanager:UpdateSecret",
+    ]
+    resources = [
+      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${var.environment}-*",
+      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:/${var.project_name}/${var.environment}/*",
+    ]
+  }
+
+  statement {
+    sid    = "SSMMgmt"
+    effect = "Allow"
+    actions = [
+      "ssm:AddTagsToResource",
+      "ssm:DeleteParameter",
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:ListTagsForResource",
+      "ssm:PutParameter",
+      "ssm:RemoveTagsFromResource",
+    ]
+    resources = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"]
+  }
+}
+
+data "aws_iam_policy_document" "part_three" {
+  statement {
     sid    = "EventBridgeMgmt"
     effect = "Allow"
     actions = [
@@ -516,106 +618,6 @@ data "aws_iam_policy_document" "part_two" {
       "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:key/*"
     ]
   }
-
-  statement {
-    sid    = "S3Mgmt"
-    effect = "Allow"
-    actions = [
-      "s3:CreateBucket",
-      "s3:DeleteBucket",
-      "s3:DeleteBucketPolicy",
-      "s3:DeleteObject",
-      "s3:GetAccelerateConfiguration",
-      "s3:GetBucketAcl",
-      "s3:GetBucketCors",
-      "s3:GetBucketLogging",
-      "s3:GetBucketObjectLockConfiguration",
-      "s3:GetBucketPolicy",
-      "s3:GetBucketPublicAccessBlock",
-      "s3:GetBucketRequestPayment",
-      "s3:GetBucketTagging",
-      "s3:GetBucketVersioning",
-      "s3:GetBucketWebsite",
-      "s3:GetEncryptionConfiguration",
-      "s3:GetLifecycleConfiguration",
-      "s3:GetObject",
-      "s3:GetReplicationConfiguration",
-      "s3:ListBucket",
-      "s3:PutBucketLogging",
-      "s3:PutBucketObjectLockConfiguration",
-      "s3:PutBucketPolicy",
-      "s3:PutBucketPublicAccessBlock",
-      "s3:PutBucketTagging",
-      "s3:PutBucketVersioning",
-      "s3:PutEncryptionConfiguration",
-      "s3:PutLifecycleConfiguration",
-      "s3:PutObject",
-    ]
-    resources = concat(
-      [
-        "arn:aws:s3:::${var.project_name}-${var.environment}-*",
-        "arn:aws:s3:::${var.project_name}-${var.environment}-*/*",
-      ],
-      var.environment == "production" ? [
-        "arn:aws:s3:::${var.shared_data_bucket_name}",
-        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
-      ] : []
-    )
-  }
-
-  dynamic "statement" {
-    for_each = var.environment != "production" ? [1] : []
-    content {
-      sid    = "S3SharedBucketRestricted"
-      effect = "Allow"
-      actions = [
-        "s3:GetBucketLocation",
-        "s3:GetObject",
-        "s3:GetObjectVersion",
-        "s3:ListBucket",
-      ]
-      resources = [
-        "arn:aws:s3:::${var.shared_data_bucket_name}",
-        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
-      ]
-    }
-  }
-
-  statement {
-    sid    = "SecretsManagerMgmt"
-    effect = "Allow"
-    actions = [
-      "secretsmanager:CreateSecret",
-      "secretsmanager:DeleteSecret",
-      "secretsmanager:GetResourcePolicy",
-      "secretsmanager:GetSecretValue",
-      "secretsmanager:PutSecretValue",
-      "secretsmanager:RestoreSecret",
-      "secretsmanager:RotateSecret",
-      "secretsmanager:TagResource",
-      "secretsmanager:UntagResource",
-      "secretsmanager:UpdateSecret",
-    ]
-    resources = [
-      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${var.environment}-*",
-      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:/${var.project_name}/${var.environment}/*",
-    ]
-  }
-
-  statement {
-    sid    = "SSMMgmt"
-    effect = "Allow"
-    actions = [
-      "ssm:AddTagsToResource",
-      "ssm:DeleteParameter",
-      "ssm:GetParameter",
-      "ssm:GetParameters",
-      "ssm:ListTagsForResource",
-      "ssm:PutParameter",
-      "ssm:RemoveTagsFromResource",
-    ]
-    resources = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"]
-  }
 }
 
 locals {
@@ -678,6 +680,18 @@ resource "aws_iam_policy" "part_two" {
   }
 }
 
+resource "aws_iam_policy" "part_three" {
+  name   = "${var.project_name}-${var.environment}-part-three-terraform"
+  policy = data.aws_iam_policy_document.part_three.minified_json
+
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_iam_policy_document.part_three.minified_json) <= local.iam_policy_size_limit
+      error_message = "part_three exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+    }
+  }
+}
+
 resource "aws_iam_role_policy_attachment" "attach_part_one" {
   role       = aws_iam_role.terraform.name
   policy_arn = aws_iam_policy.part_one.arn
@@ -686,4 +700,9 @@ resource "aws_iam_role_policy_attachment" "attach_part_one" {
 resource "aws_iam_role_policy_attachment" "attach_part_two" {
   role       = aws_iam_role.terraform.name
   policy_arn = aws_iam_policy.part_two.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_part_three" {
+  role       = aws_iam_role.terraform.name
+  policy_arn = aws_iam_policy.part_three.arn
 }
