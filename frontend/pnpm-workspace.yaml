@@ -29,23 +29,35 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.2.11'
   - '@next/third-parties@16.2.11'
   - '@opentelemetry/core@2.8.0'
+  - '@opentelemetry/semantic-conventions@1.43.0'
+  - baseline-browser-mapping@2.11.1
   - body-parser@1.20.6
   - brace-expansion@5.0.7
+  - browserslist@4.28.7
+  - caniuse-lite@1.0.30001806
   - dompurify@3.4.12
+  - electron-to-chromium@1.5.396
+  - enhanced-resolve@5.24.3
+  - es-module-lexer@2.3.1
   - fast-uri@3.1.4
   - immutable@5.1.8
   - js-yaml@4.3.0
-  - next@16.2.11
+  - nanoid@3.3.16
   - next-auth@4.24.15
-  - postcss@8.5.16
+  - next@16.2.11
+  - node-releases@2.0.51
+  - postcss@8.5.18
   - protobufjs@7.6.4
   - qs@6.15.2
+  - react-is@19.2.8
   - rxjs@7.8.2
   - sharp@0.35.0
   - shell-quote@1.9.0
+  - terser@5.49.0
   - tmp@0.2.7
   - undici@7.28.0
   - uuid@11.1.1
+  - webpack-sources@3.5.1
   - webpack@5.104.1
   - ws@8.21.0
 
@@ -58,7 +70,7 @@ overrides:
   glob: 11.1.0
   immutable: 5.1.8
   js-yaml: 4.3.0
-  postcss: 8.5.16
+  postcss: 8.5.18
   protobufjs: 7.6.4
   qs: 6.15.2
   rxjs: 7.8.2
