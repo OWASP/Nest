@@ -162,3 +162,11 @@ repos:
       - id: zizmor
         args:
           - --min-severity=low
+
+  - repo: local
+    hooks:
+      - id: check-docker-volume-names
+        name: Check Docker volume names
+        entry: .github/scripts/check-docker-volume-names.sh
+        language: unsupported_script
+        pass_filenames: false
