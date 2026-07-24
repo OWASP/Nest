@@ -24,7 +24,7 @@
     "core-js": "3.49.0",
     "date-fns": "4.4.0",
     "dayjs": "1.11.21",
-    "dompurify": "3.4.11",
+    "dompurify": "3.4.12",
     "framer-motion": "12.42.2",
     "graphql": "17.0.1",
     "ics": "3.12.0",
