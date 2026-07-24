@@ -50,15 +50,18 @@ jobs:
         uses: ./.github/actions/apply-infrastructure-changes
         with:
           plugin-cache-dir: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          summary-title: Bootstrap Terraform Plan Output
+          summary-title: Bootstrap Terraform Plan Output (${{ inputs.environment }})
           tfbackend-path: infrastructure/bootstrap/terraform.tfbackend
           tfbackend-content: |
             bucket="${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}"
+            key="${{ inputs.environment }}/bootstrap/terraform.tfstate"
+            kms_key_id="alias/nest-${{ inputs.environment }}-state"
             region="${{ vars.AWS_REGION }}"
           tfvars-path: infrastructure/bootstrap/terraform.tfvars
           tfvars-content: |
             aws_region="${{ vars.AWS_REGION }}"
-            project_name="nest"
             aws_role_external_id="${{ secrets.AWS_ROLE_EXTERNAL_ID }}"
+            environment="${{ inputs.environment }}"
+            project_name="nest"
           working-directory: infrastructure/bootstrap
     timeout-minutes: 10

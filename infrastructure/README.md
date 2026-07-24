@@ -62,32 +62,28 @@ Follow these steps to set up the infrastructure:
     cd infrastructure/bootstrap/
     ```
 
-- Copy the contents from the template file into your new local terraform variables file:
+  > [!NOTE]
+  > The following steps demonstrate bootstrapping the **staging** environment. Bootstrapping **production** requires identical steps using the production configuration files (`terraform.production.tfbackend.example` and `terraform.production.tfvars.example`).
+
+- Copy the example files into your local configuration files (for staging):
 
     ```bash
-    cp terraform.tfvars.example terraform.tfvars
+    cp terraform.staging.tfbackend.example terraform.tfbackend
+    cp terraform.staging.tfvars.example terraform.tfvars
     ```
 
   > [!NOTE]
-  > Update `AWS_ROLE_EXTERNAL_ID` in `terraform.tfvars` with a randomly generated ID of your choice.
-  > This ID is required in the next step.
+  > - Update `REPLACE_WITH_TF_STATE_BUCKET_NAME` in `terraform.tfbackend` with the name of the state bucket (`state_bucket_names["bootstrap"]`) created in the state creation step.
+  > - Update `AWS_ROLE_EXTERNAL_ID` in `terraform.tfvars` with a randomly generated ID of your choice.
+  > - This ID is required when configuring the main infrastructure profile in the next step.
 
-- Copy the contents from the template file into your new terraform backend file:
-
-    ```bash
-    cp terraform.tfbackend.example terraform.tfbackend
-    ```
-
-  > [!NOTE]
-  > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (`state_bucket_names["bootstrap"]`) created in the state creation step.
-
-- Initialize Terraform if needed:
+- Initialize Terraform with the backend configuration:
 
     ```bash
     terraform init -backend-config=terraform.tfbackend
     ```
 
-- Apply the changes to create the bootstrap resources:
+- Apply the changes to create the environment-scoped bootstrap resources:
 
     ```bash
     terraform apply

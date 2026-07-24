@@ -1,4 +1,4 @@
-output "terraform_role_arns" {
-  description = "The ARNs of the Terraform IAM roles, keyed by environment."
-  value       = { for env in local.environments : env => aws_iam_role.terraform[env].arn }
+output "terraform_role_arn" {
+  description = "The ARN of the Terraform IAM role."
+  value       = aws_iam_role.terraform.arn
 }

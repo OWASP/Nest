@@ -1,4 +1,4 @@
 bucket     = "REPLACE_WITH_TF_STATE_BUCKET_NAME"
-key        = "production/terraform.tfstate"
+key        = "production/bootstrap/terraform.tfstate"
 kms_key_id = "alias/nest-production-state"
 region     = "us-east-2"

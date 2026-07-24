@@ -1,16 +1,46 @@
-## Users
+# Bootstrap IAM Infrastructure
 
-`bootstrap` creates a role for each environment that IAM users can assume.
-These users are listed in the `var.environments` variable.
-Ensure your IAM Users follow the naming convention:
+This root directory bootstraps IAM resources for OWASP Nest:
 
-- nest-${var.environment}
+- Provisions environment-scoped IAM roles (`nest-${var.environment}-terraform`) assumed by CI/CD pipelines.
+- Configures IAM policies for managing environment AWS resources.
 
-Example: `nest-staging`, `nest-bootstrap`, etc.
+## IAM Roles & Users
+
+- **Role Created (per apply)**:
+  - `nest-${var.environment}-terraform`: Created for the active environment (`nest-staging-terraform` or `nest-production-terraform`).
+- **IAM User Access**:
+  - IAM users (e.g. `nest-bootstrap`, `nest-staging`, `nest-production`) assume these roles to execute deployment tasks.
+
+## Multi-Environment Single-Root Design
+
+- A single root directory is used to deploy both `staging` and `production` resources.
+- The target environment is injected via the `environment` Terraform variable.
+
+### Environment & State Key Alignment
+
+Always align the `environment` variable with the matching S3 backend state key:
+
+- **Staging**:
+  - `environment = "staging"`
+  - State key: `staging/bootstrap/terraform.tfstate`
+- **Production**:
+  - `environment = "production"`
+  - State key: `production/bootstrap/terraform.tfstate`
+
+> [!WARNING]
+> Ensure the `environment` variable matches the backend state key to prevent state cross-contamination.
+
+## Local Execution
+
+For local execution instructions and walkthroughs, see [infrastructure/README.md](../README.md).
+
+---
 
 ## Inline Permissions
 
-Use the following inline permissions for the `nest-bootstrap` IAM User
+Use the following inline permissions for the `nest-bootstrap` IAM User:
+
 *Note*: replace the placeholders with appropriate values.
 
 ```json
@@ -69,7 +99,10 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
    "Sid": "KMSManagement",
    "Effect": "Allow",
    "Action": [
-    "kms:Decrypt"
+    "kms:Decrypt",
+    "kms:DescribeKey",
+    "kms:Encrypt",
+    "kms:GenerateDataKey"
    ],
    "Resource": "AWS_BACKEND_KMS_KEY_ARN"
   }
@@ -100,12 +133,15 @@ No modules.
 | Name | Type |
 | ---- | ---- |
 | [aws_iam_policy.part_one](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.part_three](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.part_two](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.attach_part_one](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.attach_part_three](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.attach_part_two](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.part_one](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.part_three](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.part_two](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 
 ## Inputs
@@ -114,7 +150,7 @@ No modules.
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | `"us-east-2"` | no |
 | <a name="input_aws_role_external_id"></a> [aws\_role\_external\_id](#input\_aws\_role\_external\_id) | The external ID for role assumption. | `string` | n/a | yes |
-| <a name="input_environments"></a> [environments](#input\_environments) | The environments to create Terraform roles for. | `list(string)` | <pre>[<br/>  "staging",<br/>  "production"<br/>]</pre> | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | The environment name (staging or production). | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | `"nest"` | no |
 | <a name="input_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#input\_shared\_data\_bucket\_name) | Global S3 bucket for shared public data (e.g. nest.dump) | `string` | `"owasp-nest-shared-data"` | no |
 
@@ -122,5 +158,5 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_terraform_role_arns"></a> [terraform\_role\_arns](#output\_terraform\_role\_arns) | The ARNs of the Terraform IAM roles, keyed by environment. |
+| <a name="output_terraform_role_arn"></a> [terraform\_role\_arn](#output\_terraform\_role\_arn) | The ARN of the Terraform IAM role. |
 <!-- END_TF_DOCS -->

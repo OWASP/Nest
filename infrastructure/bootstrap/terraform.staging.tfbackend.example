@@ -1,4 +1,4 @@
 bucket     = "REPLACE_WITH_TF_STATE_BUCKET_NAME"
-key        = "staging/terraform.tfstate"
+key        = "staging/bootstrap/terraform.tfstate"
 kms_key_id = "alias/nest-staging-state"
 region     = "us-east-2"
