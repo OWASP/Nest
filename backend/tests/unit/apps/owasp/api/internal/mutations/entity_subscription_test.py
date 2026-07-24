@@ -430,6 +430,7 @@ class TestReactivateEntitySubscription:
             assert result.ok
             assert mock_sub.is_active is True
             mock_sub.save.assert_called_once()
+            mock_chain.exists.assert_called_once()
 
 
 class TestUnsubscribeEntityByToken:

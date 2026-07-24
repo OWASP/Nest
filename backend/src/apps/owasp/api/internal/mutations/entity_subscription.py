@@ -5,8 +5,8 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from strawberry.types import Info
 
-from apps.github.models.user import User
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.nest.models import User
 from apps.owasp.api.internal.nodes.entity_subscription import EntitySubscriptionNode
 from apps.owasp.models.entity_subscription import MAX_ENTITY_SUBSCRIPTIONS, EntitySubscription
 
