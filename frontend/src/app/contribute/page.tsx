@@ -51,6 +51,7 @@ const ContributePage = () => {
           labels={issue.labels}
           projectLink={issue.projectUrl}
           projectName={issue.projectName}
+          pullRequestCount={issue.pullRequests?.length}
           summary={issue.summary ?? ''}
           title={issue.title}
           url={issue.url}
