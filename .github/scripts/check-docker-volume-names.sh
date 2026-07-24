@@ -3,7 +3,9 @@
 
 set -euo pipefail
 
-if grep -rn 'db-data[^:]' docker-compose/; then
+if grep -rnE --include='*.yml' --include='*.yaml' \
+    '^[[:space:]]*(-[[:space:]]*)?db-data-[^:[:space:]]*:' \
+    docker-compose/; then
   echo "" >&2
   echo "Error: The db volume must be 'db-data'." >&2
   exit 1
