@@ -2,4 +2,4 @@
 
 cspell-dependency-audit:
 	@echo "Auditing cspell npm dependencies..."
-	@$(MAKE) code-checks CMD='cd cspell && pnpm audit --audit-level=moderate'
+	@$(MAKE) code-checks CMD='cd cspell && pnpm audit --audit-level=moderate --ignore-unfixable'

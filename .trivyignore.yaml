@@ -13,7 +13,6 @@ misconfigurations:
       - docker/localstack/Dockerfile
       - docker/osv-scanner/Dockerfile
       - docker/semgrep/Dockerfile
-      - docker/terraform/Dockerfile
       - docker/trivy/Dockerfile
       - docker/zap/Dockerfile
   - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
