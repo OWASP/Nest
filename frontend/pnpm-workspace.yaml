@@ -27,17 +27,20 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.2.11'
   - '@next/third-parties@16.2.11'
   - '@opentelemetry/core@2.8.0'
+  - body-parser@1.20.6
   - brace-expansion@5.0.7
-  - dompurify@3.4.11
-  - fast-uri@3.1.2
-  - js-yaml@4.2.0
+  - dompurify@3.4.12
+  - fast-uri@3.1.4
+  - immutable@5.1.8
+  - js-yaml@4.3.0
   - next@16.2.11
   - next-auth@4.24.15
-  - postcss@8.5.10
+  - postcss@8.5.16
   - protobufjs@7.6.4
   - qs@6.15.2
   - rxjs@7.8.2
-  - shell-quote@1.8.4
+  - sharp@0.35.0
+  - shell-quote@1.9.0
   - tmp@0.2.7
   - undici@7.28.0
   - uuid@11.1.1
@@ -46,17 +49,20 @@ minimumReleaseAgeExclude:
 
 overrides:
   '@opentelemetry/core': 2.8.0
+  body-parser: 1.20.6
   brace-expansion@5: 5.0.7
-  dompurify: 3.4.11
-  fast-uri: 3.1.2
+  dompurify: 3.4.12
+  fast-uri: 3.1.4
   glob: 11.1.0
-  js-yaml: 4.2.0
-  postcss: 8.5.10
+  immutable: 5.1.8
+  js-yaml: 4.3.0
+  postcss: 8.5.16
   protobufjs: 7.6.4
   qs: 6.15.2
   rxjs: 7.8.2
   serialize-javascript: 7.0.5
-  shell-quote: 1.8.4
+  sharp: 0.35.0
+  shell-quote: 1.9.0
   test-exclude: 7.0.2
   tmp: 0.2.7
   undici: 7.28.0
