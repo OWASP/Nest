@@ -3,6 +3,7 @@ export const fetchCsrfTokenServer = async (): Promise<string> => {
     throw new Error('NEXT_SERVER_CSRF_URL is not configured')
   }
   const response = await fetch(process.env.NEXT_SERVER_CSRF_URL, {
+    cache: 'no-store',
     credentials: 'include',
     method: 'GET',
   })
