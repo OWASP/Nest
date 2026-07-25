@@ -52,7 +52,12 @@ export const GET_CANDIDATE_AND_CLAIMS = gql`
 `
 
 export const GET_CLAIM_AND_EVIDENCES = gql`
-  query GetClaimAndEvidences($login: String!, $key: String!, $year: Int!) {
+  query GetClaimAndEvidences(
+    $login: String!
+    $key: String!
+    $year: Int!
+    $currentUserLogin: String!
+  ) {
     boardCandidateClaim(login: $login, key: $key, year: $year) {
       id
       createdAt
@@ -61,6 +66,15 @@ export const GET_CLAIM_AND_EVIDENCES = gql`
       name
       status
       updatedAt
+      reviews {
+        id
+        createdAt
+        notes
+        status
+        reviewer {
+          login
+        }
+      }
     }
     boardCandidateClaimEvidences(login: $login, claimKey: $key, year: $year) {
       id
@@ -71,6 +85,11 @@ export const GET_CLAIM_AND_EVIDENCES = gql`
       name
       sourceUrl
       updatedAt
+    }
+    boardOfDirectors(year: $year) {
+      reviewer(login: $currentUserLogin) {
+        id
+      }
     }
   }
 `

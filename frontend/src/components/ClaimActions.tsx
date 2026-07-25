@@ -21,11 +21,12 @@ import DropdownActions from 'components/DropdownActions'
 
 interface ClaimActionsProps {
   claim: { key: string; status: ClaimStatusEnum }
+  isReviewer: boolean | undefined
   login: string
   year: string
 }
 
-type ClaimAction = 'submit' | 'discard' | 'withdraw'
+type ClaimAction = 'submit' | 'discard' | 'withdraw' | 'approve' | 'reject'
 
 const ACTIONS_BY_STATUS: Record<ClaimStatusEnum, ClaimAction[]> = {
   DRAFT: ['submit', 'discard'],
@@ -36,7 +37,7 @@ const ACTIONS_BY_STATUS: Record<ClaimStatusEnum, ClaimAction[]> = {
   WITHDRAWN: [],
 }
 
-const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
+const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, isReviewer, login, year }) => {
   const router = useRouter()
   const [confirmAction, setConfirmAction] = useState<ClaimAction | null>(null)
   const [reason, setReason] = useState<string | null>(null)
@@ -72,6 +73,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
     submit: () => setConfirmAction('submit'),
     discard: () => setConfirmAction('discard'),
     withdraw: () => setConfirmAction('withdraw'),
+    approve: () => setConfirmAction('approve'),
+    reject: () => setConfirmAction('reject'),
   }
 
   const resetConfirm = () => {
@@ -86,6 +89,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
       submit: 'Claim submitted successfully.',
       discard: 'Claim discarded successfully.',
       withdraw: 'Claim withdrawn successfully.',
+      approve: 'Claim approved successfully.',
+      reject: 'Claim rejected successfully.',
     }
 
     try {
@@ -158,11 +163,27 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
           },
         ]
       : []),
-    ...(ACTIONS_BY_STATUS[claim.status] ?? []).map((key) => ({
-      key,
-      label: `${upperFirst(key)} Claim`,
-      onAction: ACTION_HANDLERS[key],
-    })),
+    ...(!isReviewer
+      ? (ACTIONS_BY_STATUS[claim.status] ?? []).map((key) => ({
+          key,
+          label: `${upperFirst(key)} Claim`,
+          onAction: ACTION_HANDLERS[key],
+        }))
+      : []),
+    ...(isReviewer
+      ? [
+          {
+            key: 'approve',
+            label: 'Approve Claim',
+            onAction: ACTION_HANDLERS['approve'],
+          },
+          {
+            key: 'reject',
+            label: 'Reject Claim',
+            onAction: ACTION_HANDLERS['reject'],
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -183,13 +204,13 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
               Are you sure you want to {confirmAction} this claim? This action cannot be undone.
             </p>
           </ModalBody>
-          {confirmAction == 'withdraw' && (
+          {['withdraw', 'approve', 'reject'].includes(confirmAction ?? '') && (
             <ModalBody>
               <textarea
-                aria-label="Reason for withdrawal"
+                aria-label="Reason/Notes"
                 className="mt-2 w-full rounded border p-2"
                 rows={3}
-                placeholder="Reason for withdrawal..."
+                placeholder="Reason/Notes..."
                 value={reason ?? ''}
                 onChange={(e) => setReason(e.target.value)}
               />

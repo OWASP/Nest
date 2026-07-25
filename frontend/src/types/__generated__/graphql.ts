@@ -65,6 +65,7 @@ export type BoardCandidateClaimEvidenceNode = Node & {
 
 export type BoardCandidateClaimNode = Node & {
   __typename?: 'BoardCandidateClaimNode';
+  candidate: EntityMemberNode;
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   hasEvidence: Scalars['Boolean']['output'];
@@ -74,10 +75,21 @@ export type BoardCandidateClaimNode = Node & {
   key: Scalars['String']['output'];
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
+  reviews: Array<BoardCandidateClaimReviewNode>;
   status: ClaimStatusEnum;
   updatedAt: Scalars['DateTime']['output'];
   withdrawnAt?: Maybe<Scalars['DateTime']['output']>;
   withdrawnReason: Scalars['String']['output'];
+};
+
+export type BoardCandidateClaimReviewNode = Node & {
+  __typename?: 'BoardCandidateClaimReviewNode';
+  createdAt: Scalars['DateTime']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  notes: Scalars['String']['output'];
+  reviewer?: Maybe<UserNode>;
+  status: ReviewStatusEnum;
 };
 
 export type BoardOfDirectorsNode = Node & {
@@ -89,12 +101,18 @@ export type BoardOfDirectorsNode = Node & {
   id: Scalars['ID']['output'];
   members: Array<EntityMemberNode>;
   owaspUrl: Scalars['String']['output'];
+  reviewer?: Maybe<AuthUserNode>;
   updatedAt: Scalars['DateTime']['output'];
   year: Scalars['Int']['output'];
 };
 
 
 export type BoardOfDirectorsNodeCandidateArgs = {
+  login: Scalars['String']['input'];
+};
+
+
+export type BoardOfDirectorsNodeReviewerArgs = {
   login: Scalars['String']['input'];
 };
 
@@ -208,6 +226,14 @@ export type CreateProgramInput = {
   name: Scalars['String']['input'];
   startedAt: Scalars['DateTime']['input'];
   tags?: Array<Scalars['String']['input']>;
+};
+
+export type CreateReviewInput = {
+  claimKey: Scalars['String']['input'];
+  claimMemberLogin: Scalars['String']['input'];
+  notes?: Scalars['String']['input'];
+  status: ReviewStatusEnum;
+  year: Scalars['Int']['input'];
 };
 
 export type DiscardClaimInput = {
@@ -471,6 +497,7 @@ export type Mutation = {
   createApiKey: CreateApiKeyResult;
   createBoardCandidateClaim: ClaimResult;
   createBoardCandidateClaimEvidence: EvidenceResult;
+  createBoardCandidateClaimReview: ReviewResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
   deleteModule: Scalars['String']['output'];
@@ -521,6 +548,11 @@ export type MutationCreateBoardCandidateClaimArgs = {
 
 export type MutationCreateBoardCandidateClaimEvidenceArgs = {
   inputData: CreateEvidenceInput;
+};
+
+
+export type MutationCreateBoardCandidateClaimReviewArgs = {
+  inputData: CreateReviewInput;
 };
 
 
@@ -929,7 +961,7 @@ export type QueryBoardCandidateClaimEvidencesArgs = {
 
 
 export type QueryBoardCandidateClaimsArgs = {
-  login: Scalars['String']['input'];
+  login?: InputMaybe<Scalars['String']['input']>;
   year: Scalars['Int']['input'];
 };
 
@@ -1246,6 +1278,19 @@ export type RepositoryNode = Node & {
 export type RepositoryNodeRecentMilestonesArgs = {
   limit?: Scalars['Int']['input'];
 };
+
+export type ReviewResult = {
+  __typename?: 'ReviewResult';
+  code?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+  review?: Maybe<BoardCandidateClaimReviewNode>;
+};
+
+export enum ReviewStatusEnum {
+  Approved = 'APPROVED',
+  Rejected = 'REJECTED'
+}
 
 export type RevokeApiKeyResult = {
   __typename?: 'RevokeApiKeyResult';

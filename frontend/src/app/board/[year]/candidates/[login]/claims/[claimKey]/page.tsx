@@ -14,7 +14,6 @@ import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.g
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
@@ -32,12 +31,18 @@ const ClaimDetailsPage = () => {
     error: graphQLRequestError,
   } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey || session?.user?.login !== login,
-    variables: { key: claimKey, login, year: Number.parseInt(year) },
+    skip: !claimKey,
+    variables: {
+      key: claimKey,
+      login,
+      year: Number.parseInt(year),
+      currentUserLogin: session?.user?.login ?? '',
+    },
   })
 
   const claim = graphQLData?.boardCandidateClaim
   const evidences = graphQLData?.boardCandidateClaimEvidences ?? []
+  const isReviewer = graphQLData?.boardOfDirectors?.reviewer != null
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -55,12 +60,6 @@ const ClaimDetailsPage = () => {
   }, [claim, claimKey, login, year])
 
   if (isLoading || isSyncing) return <LoadingSpinner />
-
-  if (session?.user?.login !== login) {
-    return (
-      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
-    )
-  }
 
   if (graphQLRequestError) {
     return (
@@ -101,16 +100,15 @@ const ClaimDetailsPage = () => {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Claim</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">@{login}</p>
           </div>
-          <div className="flex items-center gap-2">
-            {claim.status == ClaimStatusEnum.Draft && (
+          <div className="flex items-center">
+            {claim.status == ClaimStatusEnum.Draft && session?.user?.login == login && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
                 {'Add Evidence'}
               </ActionButton>
             )}
-            <ClaimActions claim={claim} login={login} year={year} />
+            <ClaimActions claim={claim} isReviewer={isReviewer} login={login} year={year} />
           </div>
         </div>
         <Metadata details={claimDetails} detailsTitle="Claim Details" />
