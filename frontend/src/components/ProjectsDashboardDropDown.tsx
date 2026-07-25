@@ -40,10 +40,7 @@ const ProjectsDashboardDropDown: FC<{
   return (
     <Dropdown>
       <DropdownTrigger>
-        <button
-          type="button"
-          className="flex cursor-pointer items-center gap-2 bg-transparent"
-        >
+        <button type="button" className="flex cursor-pointer items-center gap-2 bg-transparent">
           <IconWrapper
             icon={
               isOrdering
