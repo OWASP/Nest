@@ -1,8 +1,15 @@
 """Tests for Committee GraphQL node."""
 
+import inspect
 import math
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from apps.owasp.api.internal.dataloaders.committee import (
+    ENTITY_CHANNELS_BY_COMMITTEE_ID,
+    ENTITY_LEADERS_BY_COMMITTEE_ID,
+)
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -78,3 +85,60 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 100
+
+
+class TestCommitteeNodeResolvers:
+    """Test CommitteeNode resolver execution."""
+
+    def _get_resolver(self, field_name):
+        """Get the resolver function for a field."""
+        for field in CommitteeNode.__strawberry_definition__.fields:
+            if field.name == field_name:
+                return field.base_resolver.wrapped_func if field.base_resolver else None
+        return None
+
+    def _build_info(self, *, owasp=None):
+        """Build a mock Info with dataloader mappings."""
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = owasp or {}
+        return mock_info
+
+    @pytest.mark.asyncio
+    async def test_entity_channels_loads_via_dataloader(self):
+        """entity_channels delegates to the dataloader with pk."""
+        mock_channels = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_channels)
+        mock_info = self._build_info(owasp={ENTITY_CHANNELS_BY_COMMITTEE_ID: mock_loader})
+
+        mock_committee = Mock()
+        mock_committee.pk = 1
+
+        resolver = self._get_resolver("entity_channels")
+        result = await resolver(None, mock_committee, mock_info)
+
+        assert result == mock_channels
+        mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_entity_channels_overrides_generic_entity_node(self):
+        """CommitteeNode.entity_channels is the async dataloader resolver, not the sync base."""
+        resolver = self._get_resolver("entity_channels")
+        assert inspect.iscoroutinefunction(resolver)
+
+    @pytest.mark.asyncio
+    async def test_entity_leaders_loads_via_dataloader(self):
+        """entity_leaders delegates to the dataloader with pk."""
+        mock_leaders = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_leaders)
+        mock_info = self._build_info(owasp={ENTITY_LEADERS_BY_COMMITTEE_ID: mock_loader})
+
+        mock_committee = Mock()
+        mock_committee.pk = 1
+
+        resolver = self._get_resolver("entity_leaders")
+        result = await resolver(None, mock_committee, mock_info)
+
+        assert result == mock_leaders
+        mock_loader.load.assert_awaited_once_with(1)
