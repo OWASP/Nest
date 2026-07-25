@@ -2,7 +2,7 @@ name: Setup Terraform Environment
 description: >
   Installs Terraform and configures the provider cache.
   The CLI version is taken from the hashicorp/terraform image tag in
-  docker/terraform/Dockerfile unless terraform_version is set.
+  docker/code-checks/Dockerfile unless terraform_version is set.
   NOTE: The calling job must check out the repository before using this
   action - local composite actions can only be resolved by the runner
   after checkout, so an internal checkout here would be unreachable.
@@ -12,7 +12,7 @@ description: >
 
 inputs:
   dockerfile:
-    default: docker/terraform/Dockerfile
+    default: docker/code-checks/Dockerfile
     description: Dockerfile whose hashicorp/terraform image tag pins the CLI version
     required: false
   terraform_version:

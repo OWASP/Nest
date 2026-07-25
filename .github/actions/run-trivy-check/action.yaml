@@ -1,9 +1,9 @@
-name: Run Trivy scan
-description: Configure Trivy cache and run Trivy scan
+name: Run Trivy check
+description: Configure Trivy cache and run Trivy check
 
 inputs:
   command:
-    description: Command to run the Trivy scan
+    description: Command to run the Trivy check
     required: true
 
 runs:
@@ -25,7 +25,7 @@ runs:
         path: .trivy-cache
         restore-keys: trivy-${{ runner.os }}-${{ runner.arch }}-
 
-    - name: Run Trivy scan
+    - name: Run Trivy check
       env:
         TRIVY_RUN_COMMAND: ${{ inputs.command }}
       run: bash -c "$TRIVY_RUN_COMMAND"

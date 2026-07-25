@@ -28,6 +28,7 @@ GPG
 GRC
 GSOC
 GTM
+Ghsas
 Golovanova
 Hackbright
 Héllo
@@ -51,6 +52,7 @@ Nagori
 Nominatim
 ONLN
 OSSF
+OSV
 OWHF
 Obmondo
 Oleksiuk

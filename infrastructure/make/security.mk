@@ -2,15 +2,7 @@
 
 infrastructure-dependency-audit:
 	@echo "Auditing infrastructure Python dependencies..."
-	@docker run \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		-e HOME=/tmp \
-		-e PIP_ROOT_USER_ACTION=ignore \
-		-v "$(CURDIR):/work" \
-		-w /work/infrastructure \
-		$$(grep -E '^FROM python:' docker/infrastructure/Dockerfile.tests | sed 's/^FROM //; s/ AS .*//' | head -1) \
-		sh -c 'python -m pip install --no-warn-script-location --quiet poetry poetry-plugin-export pip-audit && \
-		export PATH="$$HOME/.local/bin:$$PATH" && \
-		poetry export -f requirements.txt --without-hashes --with test -o /tmp/requirements.txt && \
-		pip-audit -r /tmp/requirements.txt'
+	@$(MAKE) code-checks CMD='cd infrastructure && \
+		req=$$(mktemp) && trap "rm -f \"$$req\"" EXIT && \
+		poetry export -f requirements.txt --with test -o "$$req" && \
+		pip-audit --disable-pip -r "$$req"'
