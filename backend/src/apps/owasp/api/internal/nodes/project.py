@@ -25,10 +25,14 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.dataloaders.project import (
+    ENTITY_CHANNELS_BY_PROJECT_ID,
+    ENTITY_LEADERS_BY_PROJECT_ID,
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
 )
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
+from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
+from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
 )
@@ -64,6 +68,18 @@ class ProjectNode(GenericEntityNode):
     def contribution_stats(self, root: Project) -> strawberry.scalars.JSON | None:
         """Resolve contribution stats with camelCase keys."""
         return deep_camelize(root.contribution_stats)
+
+    @strawberry_django.field
+    async def entity_channels(
+        self, root: Project, info: strawberry.Info
+    ) -> list[EntityChannelNode]:
+        """Resolve entity channels."""
+        return await info.context.owasp_dataloaders[ENTITY_CHANNELS_BY_PROJECT_ID].load(root.pk)
+
+    @strawberry_django.field
+    async def entity_leaders(self, root: Project, info: strawberry.Info) -> list[EntityMemberNode]:
+        """Resolve entity leaders."""
+        return await info.context.owasp_dataloaders[ENTITY_LEADERS_BY_PROJECT_ID].load(root.pk)
 
     @strawberry_django.field
     async def health_metrics_list(
