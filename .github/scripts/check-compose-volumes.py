@@ -66,7 +66,7 @@ def check_compose_file(filepath: Path) -> list[str]:
             vol_name = None
             if isinstance(mount, str):
                 vol_name = extract_volume_name(mount)
-            elif isinstance(mount, dict):
+            elif isinstance(mount, dict) and mount.get("type") == "volume":
                 source = mount.get("source")
                 if isinstance(source, str):
                     vol_name = source
