@@ -286,7 +286,7 @@ data "aws_iam_policy_document" "part_one" {
 
 data "aws_iam_policy_document" "part_two" {
   statement {
-    sid    = "AppAutoscalingMgmt"
+    sid    = "AppAutoscalingManagement"
     effect = "Allow"
     actions = [
       "application-autoscaling:DeleteScalingPolicy",
