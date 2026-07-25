@@ -40,10 +40,10 @@ function decodeRelayId(globalId: string): number {
   try {
     const decoded = atob(globalId)
     const parts = decoded.split(':')
-    return Number.parseInt(parts[parts.length - 1], 10)
+    return Number.parseInt(parts.at(-1)!, 10)
   } catch {
     // Fallback: extract any number from the string
-    const match = globalId.match(/\d+/)
+    const match = /\d+/.exec(globalId)
     return match ? Number.parseInt(match[0], 10) : 0
   }
 }
@@ -838,6 +838,7 @@ function EntitySubscriptionCard({
 
   const destructiveButtonStyles =
     'flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white'
+  const saveButtonLabel = subscription.isNew ? 'Create Subscription' : 'Save Changes'
 
   return (
     <SecondaryCard>
@@ -967,11 +968,7 @@ function EntitySubscriptionCard({
                 isDisabled={isSaving || localSub.preferences.length === 0}
               >
                 <FaFloppyDisk />
-                {isSaving
-                  ? 'Saving...'
-                  : subscription.isNew
-                    ? 'Create Subscription'
-                    : 'Save Changes'}
+                {isSaving ? 'Saving...' : saveButtonLabel}
               </ActionButton>
             </>
           ) : (
