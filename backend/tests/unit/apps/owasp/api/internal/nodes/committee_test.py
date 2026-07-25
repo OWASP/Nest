@@ -138,6 +138,7 @@ class TestCommitteeNodeResolvers:
         mock_committee.pk = 1
 
         resolver = self._get_resolver("entity_leaders")
+        assert inspect.iscoroutinefunction(resolver)
         result = await resolver(None, mock_committee, mock_info)
 
         assert result == mock_leaders
