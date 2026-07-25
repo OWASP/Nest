@@ -169,5 +169,6 @@ repos:
         name: Check Docker Compose volume names
         entry: .github/scripts/check-compose-volumes.py
         language: python
-        files: docker-compose/.*compose\.yaml
+        additional_dependencies: [pyyaml]
+        files: docker-compose/.*compose\.ya?ml
         pass_filenames: false

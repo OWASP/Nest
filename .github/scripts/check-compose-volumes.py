@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
-"""Ensures no Docker Compose volume is named with a temporary PR suffix (e.g. db-data-5079).
-Runs as a pre-commit hook and in CI via `make pre-commit`."""
+"""Check that no Docker Compose volume name has a numeric PR suffix.
+
+Runs as a pre-commit hook and in CI via ``make pre-commit``.
+Scans every ``docker-compose/*/compose.yaml`` (and ``*.yml``) for named
+volumes whose key or mount source ends with ``-<digits>`` — a pattern that
+indicates a PR-number-suffixed rename that should never be merged.
+"""
 
 import re
 import sys
@@ -8,66 +13,105 @@ from pathlib import Path
 
 import yaml
 
+VOLUME_SUFFIX_RE = re.compile(r"^([a-zA-Z0-9_./-]+)-\d+$")
 
-def check_compose_file(file_path: Path) -> bool:
-    """Check a single compose file for volume names with numeric suffixes."""
+
+def get_repo_root() -> Path:
+    """Return the Git repository root, exiting on failure."""
+    path = Path(__file__).resolve().parent
+    for parent in [path, *path.parents]:
+        if (parent / ".git").exists():
+            return parent
+    print("Error: not inside a git repository.", file=sys.stderr)
+    sys.exit(1)
+
+
+def find_compose_files(root: Path) -> list[Path]:
+    """Discover all compose manifests under docker-compose/."""
+    files = list(root.glob("docker-compose/*/compose.yaml"))
+    files += list(root.glob("docker-compose/*/compose.yml"))
+    return files
+
+
+def extract_volume_name(mount: str) -> str | None:
+    """Extract volume name from a short-syntax mount string.
+
+    Short syntax: ``name:/path`` or ``name:/path:ro``.
+    Bind mounts (``../../path:/container``) and absolute paths
+    (``/var/run/docker.sock:/...``) are ignored.
+    """
+    first_part = mount.split(":")[0]
+    if first_part.startswith(("/", ".", "../../")):
+        return None
+    if "/" in first_part:
+        return None
+    return first_part
+
+
+def check_compose_file(filepath: Path) -> list[str]:
+    """Return a list of error strings for one compose file."""
     try:
-        with open(file_path, 'r') as f:
+        with open(filepath) as f:
             data = yaml.safe_load(f)
-        
-        if not data or 'volumes' not in data:
-            return True
-        
-        volumes = data['volumes']
-        if not isinstance(volumes, dict):
-            return True
-        
-        # Check each top-level volume key for numeric suffix pattern
-        for vol_name in volumes.keys():
-            if isinstance(vol_name, str) and re.search(r'-[0-9]+$', vol_name):
-                print(f'ERROR: {file_path}:0: temporary volume name detected: {vol_name}')
-                print('       Volume names must not end with a numeric PR suffix (e.g. db-data-5079).')
-                print('       Rename it back to its canonical name (e.g. db-data).')
-                return False
-        
-        return True
-    except Exception as e:
-        # If YAML parsing fails, fail closed to ensure issues are caught
-        print(f'ERROR: Could not parse {file_path} as YAML: {e}', file=sys.stderr)
-        return False
+    except yaml.YAMLError as exc:
+        print(f"Error: failed to parse {filepath}:\n  {exc}", file=sys.stderr)
+        sys.exit(1)
 
+    if not isinstance(data, dict):
+        return []
 
-def main() -> int:
-    """Main entry point."""
-    # Get compose files from git
-    import subprocess
-    try:
-        result = subprocess.run(
-            ['git', 'ls-files', 'docker-compose/*/compose.yaml'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        compose_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
-    except Exception as e:
-        # If git ls-files fails, fail closed to ensure issues are caught
-        print(f'ERROR: Could not enumerate compose files: {e}', file=sys.stderr)
-        return 1
-    
-    if not compose_files:
-        return 0
-    
-    failed = 0
-    for file_str in compose_files:
-        file_path = Path(file_str)
-        if not file_path.is_file():
+    errors: list[str] = []
+
+    # ── Top-level volumes block ──────────────────────────────────────
+    top_volumes = data.get("volumes")
+    if isinstance(top_volumes, dict):
+        for key in top_volumes:
+            if VOLUME_SUFFIX_RE.match(str(key)):
+                errors.append(str(key))
+
+    # ── Service-level volume mounts ──────────────────────────────────
+    for service_name, service in data.get("services", {}).items():
+        if not isinstance(service, dict):
             continue
-        
-        if not check_compose_file(file_path):
-            failed = 1
-    
-    return failed
+        for mount in service.get("volumes", []):
+            vol_name = None
+            if isinstance(mount, str):
+                vol_name = extract_volume_name(mount)
+            elif isinstance(mount, dict) and mount.get("type") == "volume":
+                source = mount.get("source")
+                if isinstance(source, str):
+                    vol_name = source
+            if vol_name and VOLUME_SUFFIX_RE.match(vol_name):
+                errors.append(f"{vol_name} (in service '{service_name}')")
+
+    return errors
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+def main() -> None:
+    root = get_repo_root()
+    compose_files = find_compose_files(root)
+
+    if not compose_files:
+        print(
+            "Error: no Docker Compose files found under docker-compose/.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    found = False
+    for filepath in sorted(compose_files):
+        bad = check_compose_file(filepath)
+        if bad:
+            found = True
+            for entry in bad:
+                print(
+                    f"Error: volume '{entry}' in {filepath.relative_to(root)} "
+                    "has a numeric PR suffix. Use a plain name instead."
+                )
+
+    if found:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
