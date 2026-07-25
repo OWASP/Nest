@@ -63,9 +63,13 @@ def check_compose_file(filepath: Path) -> list[str]:
         if not isinstance(service, dict):
             continue
         for mount in service.get("volumes", []):
-            if not isinstance(mount, str):
-                continue
-            vol_name = extract_volume_name(mount)
+            vol_name = None
+            if isinstance(mount, str):
+                vol_name = extract_volume_name(mount)
+            elif isinstance(mount, dict):
+                source = mount.get("source")
+                if isinstance(source, str):
+                    vol_name = source
             if vol_name and VOLUME_SUFFIX_RE.match(vol_name):
                 errors.append(f"{vol_name} (in service '{service_name}')")
 
@@ -77,7 +81,11 @@ def main() -> None:
     compose_files = find_compose_files(root)
 
     if not compose_files:
-        return
+        print(
+            "Error: no Docker Compose files found under docker-compose/.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     found = False
     for filepath in compose_files:
