@@ -1,6 +1,5 @@
 'use client'
-
-import { Button } from '@heroui/button'
+import { Button } from '@heroui/react'
 import { useRouter } from 'next/navigation'
 
 interface FormButtonsProps {
@@ -23,10 +22,19 @@ export const FormButtons = ({ loading, submitText = 'Save', onCancel }: FormButt
   return (
     <div className="border-t border-gray-200 pt-8 text-gray-600 dark:border-gray-700 dark:text-gray-300">
       <div className="flex flex-col justify-end gap-4 sm:flex-row">
-        <Button type="button" variant="bordered" onPress={handleCancel} className="font-medium">
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="rounded-md border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+        >
           Cancel
-        </Button>
-        <Button type="submit" isDisabled={loading} color="primary" className="font-medium">
+        </button>
+        <Button
+          type="submit"
+          isDisabled={loading}
+          variant="solid"
+          className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        >
           {loading ? 'Saving...' : submitText}
         </Button>
       </div>
