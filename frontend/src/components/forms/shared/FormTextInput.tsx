@@ -43,18 +43,16 @@ export const FormTextInput = ({
         <Label htmlFor={id} className="text-sm font-semibold text-gray-600 dark:text-gray-300">
           {label}
         </Label>
-        <Input.Root className="w-full bg-gray-50 dark:bg-gray-800">
-          <Input
-            id={id}
-            type={type}
-            placeholder={placeholder}
-            onBlur={onBlur}
-            min={min}
-            className="text-gray-800 dark:text-gray-200"
-          />
-        </Input.Root>
+        <Input
+          id={id}
+          type={type}
+          placeholder={placeholder}
+          onBlur={onBlur}
+          min={min}
+          className="w-full min-w-0 bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+        />
         {touched && error && (
-          <FieldError className="w-full max-w-full break-words text-sm text-red-500">
+          <FieldError className="w-full max-w-full text-sm break-words text-red-500">
             {error}
           </FieldError>
         )}

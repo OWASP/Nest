@@ -322,13 +322,7 @@ const ModuleForm = ({
                     onChange={(value) =>
                       setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
                     }
-                  >
-                    <Switch.Content>
-                      <Switch.Control>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                    </Switch.Content>
-                  </Switch>
+                  />
                   <div>
                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                       Mentees can manage deadlines

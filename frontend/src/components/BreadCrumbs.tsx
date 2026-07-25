@@ -15,13 +15,12 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
         <Breadcrumbs
           aria-label="breadcrumb"
           separator={<FaChevronRight className="mx-1 text-xs text-gray-400 dark:text-gray-500" />}
-          className="text-gray-800 dark:text-gray-200"
+          className="text-sm font-medium text-gray-800 dark:text-gray-200"
         >
           {items.map((item, index) => {
             const isLast = index === items.length - 1
-
             return (
-              <HeroUIBreadcrumbItem key={item.path}>
+              <HeroUIBreadcrumbItem key={item.path} className="transition-colors duration-200">
                 {isLast ? (
                   <span
                     className="cursor-default font-semibold text-gray-600 dark:text-gray-300"

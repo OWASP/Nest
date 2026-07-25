@@ -7,7 +7,6 @@ import {
   Header,
 } from '@heroui/react'
 import type { Key } from 'react'
-
 import { FC } from 'react'
 import type { IconType } from 'react-icons'
 import { FaArrowDownWideShort, FaArrowUpShortWide } from 'react-icons/fa6'
@@ -41,7 +40,10 @@ const ProjectsDashboardDropDown: FC<{
   return (
     <Dropdown>
       <DropdownTrigger>
-        <div className="flex cursor-pointer items-center gap-2">
+        <button
+          type="button"
+          className="flex cursor-pointer items-center gap-2 bg-transparent"
+        >
           <IconWrapper
             icon={
               isOrdering
@@ -58,7 +60,7 @@ const ProjectsDashboardDropDown: FC<{
               </span>
             )}
           </div>
-        </div>
+        </button>
       </DropdownTrigger>
       <DropdownMenu onAction={onAction} selectedKeys={selectedKeys} selectionMode={selectionMode}>
         {sections.map((section) => (
