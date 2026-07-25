@@ -17,25 +17,32 @@ WORKDIR /opt/code-checks
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN corepack install && corepack enable pnpm
 RUN --mount=type=cache,id=pnpm-code-checks-root,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /opt/code-checks/frontend
 COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-code-checks-frontend,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /opt/code-checks/cspell
 COPY cspell/package.json cspell/pnpm-lock.yaml cspell/pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-code-checks-cspell,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
+
+WORKDIR /opt/code-checks/e2e
+COPY e2e/package.json e2e/pnpm-lock.yaml e2e/pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm-code-checks-e2e,target=/pnpm/store \
+    pnpm install --frozen-lockfile --ignore-scripts
 
 FROM node AS code-checks
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
-    PATH="/opt/pre-commit/bin:/nest/node_modules/.bin:/nest/cspell/node_modules/.bin:/usr/local/bin:$PATH" \
+    PATH="/opt/dependency-audit/bin:/opt/pre-commit/bin:/nest/node_modules/.bin:/nest/cspell/node_modules/.bin:/usr/local/bin:$PATH" \
+    PIP_CACHE_DIR="/tmp/pip-cache" \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PNPM_HOME="/pnpm" \
+    POETRY_CACHE_DIR="/tmp/poetry-cache" \
     PRE_COMMIT_HOME="/tmp/pre-commit" \
     PYTHONUNBUFFERED=1 \
     TF_PLUGIN_CACHE_DIR="/tmp/terraform-plugin-cache" \
@@ -52,16 +59,20 @@ RUN apk --no-cache upgrade && \
         libstdc++ \
         sqlite-libs && \
     mkdir -p \
+        "${PIP_CACHE_DIR}" \
+        "${POETRY_CACHE_DIR}" \
         "${PRE_COMMIT_HOME}" \
         "${TF_PLUGIN_CACHE_DIR}" \
         "${TFLINT_PLUGIN_DIR}" \
         /nest/frontend \
-        /nest/cspell
+        /nest/cspell \
+        /nest/e2e
 
 COPY --from=uv /uv /usr/local/bin/uv
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv python install 3.13 && \
-    uv venv /opt/pre-commit --python 3.13
+    uv venv /opt/pre-commit --python 3.13 && \
+    uv venv /opt/dependency-audit --python 3.13 --seed
 
 COPY package.json /tmp/package.json
 WORKDIR /tmp
@@ -71,13 +82,17 @@ WORKDIR /
 COPY --from=node-deps /opt/code-checks/node_modules /nest/node_modules
 COPY --from=node-deps /opt/code-checks/frontend/node_modules /nest/frontend/node_modules
 COPY --from=node-deps /opt/code-checks/cspell/node_modules /nest/cspell/node_modules
+COPY --from=node-deps /opt/code-checks/e2e/node_modules /nest/e2e/node_modules
 COPY --from=terraform --chmod=555 /bin/terraform /usr/local/bin/terraform
 COPY --from=tflint --chmod=555 /usr/local/bin/tflint /usr/local/bin/tflint
 
 COPY --chmod=444 backend/requirements/pre-commit.txt /tmp/pre-commit.txt
+COPY --chmod=444 backend/requirements/build.txt /tmp/build.txt
 RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=cache,target=/root/.cache/pip \
     uv pip install --python /opt/pre-commit --require-hashes --requirement /tmp/pre-commit.txt && \
-    rm -f /tmp/pre-commit.txt /usr/local/bin/uv
+    /opt/dependency-audit/bin/pip install --require-hashes --requirement /tmp/build.txt && \
+    rm -f /tmp/pre-commit.txt /tmp/build.txt /usr/local/bin/uv
 
 COPY --chmod=555 docker/code-checks/entrypoint.sh /entrypoint.sh
 

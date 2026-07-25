@@ -41,6 +41,12 @@ jobs:
         run: make cspell
     timeout-minutes: 5
 
+  run-dependency-checks:
+    name: Dependency
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-dependency-checks.yaml
+
   run-eslint-checks:
     name: ESLint
     permissions:
@@ -143,6 +149,23 @@ jobs:
         run: make prettier
     timeout-minutes: 5
 
+  run-repository-checks:
+    name: Repository
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run Trivy repository scan
+        uses: ./.github/actions/run-trivy-scan
+        with:
+          command: make security-repository-scan-trivy
+    timeout-minutes: 5
+
   run-semgrep-checks:
     name: Semgrep
     permissions:
@@ -156,21 +179,4 @@ jobs:
 
       - name: Run Semgrep security scan
         run: make security-sast-scan-semgrep
-    timeout-minutes: 5
-
-  run-trivy-checks:
-    name: Trivy
-    permissions:
-      contents: read
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
-        with:
-          persist-credentials: false
-
-      - name: Run trivy scan
-        uses: ./.github/actions/run-trivy-scan
-        with:
-          command: make security-filesystem-scan-trivy
     timeout-minutes: 5

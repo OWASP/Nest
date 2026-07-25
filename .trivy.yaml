@@ -5,6 +5,9 @@ filesystem:
 
 ignorefile: /.trivyignore.yaml
 
+pkg:
+  include-dev-deps: true
+
 report: all
 
 scan:
@@ -37,6 +40,7 @@ scan:
 severity:
   - CRITICAL
   - HIGH
+  - MEDIUM
   - UNKNOWN
 
 timeout: 10m
