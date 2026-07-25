@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Check that no Docker Compose volume name has a numeric PR suffix.
 
 Runs as a pre-commit hook and in CI via ``make pre-commit``.
@@ -17,13 +16,12 @@ VOLUME_SUFFIX_RE = re.compile(r"^([a-zA-Z0-9_./-]+)-\d+$")
 
 
 def get_repo_root() -> Path:
-    """Return the Git repository root, exiting on failure."""
-    path = Path(__file__).resolve().parent
-    for parent in [path, *path.parents]:
-        if (parent / ".git").exists():
-            return parent
-    print("Error: not inside a git repository.", file=sys.stderr)
-    sys.exit(1)
+    """Return the Git repository root."""
+    root = Path(__file__).resolve().parent.parent.parent
+    if not (root / ".git").exists():
+        print("Error: not inside a git repository.", file=sys.stderr)
+        sys.exit(1)
+    return root
 
 
 def find_compose_files(root: Path) -> list[Path]:
@@ -49,7 +47,7 @@ def extract_volume_name(mount: str) -> str | None:
 
 
 def check_compose_file(filepath: Path) -> list[str]:
-    """Return a list of error strings for one compose file."""
+    """Return invalid volume names found in one compose file."""
     try:
         with open(filepath) as f:
             data = yaml.safe_load(f)
@@ -60,16 +58,14 @@ def check_compose_file(filepath: Path) -> list[str]:
     if not isinstance(data, dict):
         return []
 
-    errors: list[str] = []
+    violations: list[str] = []
 
-    # ── Top-level volumes block ──────────────────────────────────────
     top_volumes = data.get("volumes")
     if isinstance(top_volumes, dict):
         for key in top_volumes:
             if VOLUME_SUFFIX_RE.match(str(key)):
-                errors.append(str(key))
+                violations.append(str(key))
 
-    # ── Service-level volume mounts ──────────────────────────────────
     for service_name, service in data.get("services", {}).items():
         if not isinstance(service, dict):
             continue
@@ -82,9 +78,9 @@ def check_compose_file(filepath: Path) -> list[str]:
                 if isinstance(source, str):
                     vol_name = source
             if vol_name and VOLUME_SUFFIX_RE.match(vol_name):
-                errors.append(f"{vol_name} (in service '{service_name}')")
+                violations.append(f"{vol_name} (in service '{service_name}')")
 
-    return errors
+    return violations
 
 
 def main() -> None:
@@ -98,18 +94,16 @@ def main() -> None:
         )
         sys.exit(1)
 
-    found = False
+    has_violations = False
     for filepath in sorted(compose_files):
-        bad = check_compose_file(filepath)
-        if bad:
-            found = True
-            for entry in bad:
-                print(
-                    f"Error: volume '{entry}' in {filepath.relative_to(root)} "
-                    "has a numeric PR suffix. Use a plain name instead."
-                )
+        for vol in check_compose_file(filepath):
+            has_violations = True
+            print(
+                f"Error: volume '{vol}' in {filepath.relative_to(root)} "
+                "has a numeric PR suffix. Use a plain name instead."
+            )
 
-    if found:
+    if has_violations:
         sys.exit(1)
 
 
