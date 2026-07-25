@@ -7,77 +7,144 @@ import { addToast } from '@heroui/toast'
 import debounce from 'lodash/debounce'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { FaBell, FaBellSlash, FaFloppyDisk, FaXmark } from 'react-icons/fa6'
+import { FaBell, FaBellSlash, FaFloppyDisk, FaPlus, FaTrash, FaXmark } from 'react-icons/fa6'
 
 import { SEARCH_CHAPTERS } from 'server/queries/chapterQueries'
+import { SEARCH_COMMITTEES } from 'server/queries/committeeQueries'
 import { SEARCH_PROJECTS } from 'server/queries/projectQueries'
 import {
+  CANCEL_ENTITY_SUBSCRIPTION,
   CANCEL_SNAPSHOT_SUBSCRIPTION,
+  CREATE_ENTITY_SUBSCRIPTION,
   CREATE_SNAPSHOT_SUBSCRIPTION,
-  GET_MY_SUBSCRIPTION,
+  DELETE_ENTITY_SUBSCRIPTION,
+  GET_MY_ENTITY_SUBSCRIPTIONS,
+  GET_MY_SNAPSHOT_SUBSCRIPTION,
+  REACTIVATE_ENTITY_SUBSCRIPTION,
+  UPDATE_ENTITY_SUBSCRIPTION,
   UPDATE_SNAPSHOT_SUBSCRIPTION,
 } from 'server/queries/subscriptionQueries'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
-const GLOBAL_CONTENT_FIELDS = [
+const MAX_ENTITY_SUBSCRIPTIONS = 5
+
+function decodeRelayId(globalId: string): number {
+  // Try parsing as plain integer first
+  const asInt = Number.parseInt(globalId, 10)
+  if (!Number.isNaN(asInt)) {
+    return asInt
+  }
+  // Try base64 decoding (relay global ID format: base64("TypeName:id"))
+  try {
+    const decoded = atob(globalId)
+    const parts = decoded.split(':')
+    return Number.parseInt(parts[parts.length - 1], 10)
+  } catch {
+    // Fallback: extract any number from the string
+    const match = globalId.match(/\d+/)
+    return match ? Number.parseInt(match[0], 10) : 0
+  }
+}
+
+const SNAPSHOT_CONTENT_FIELDS = [
   { key: 'includeChapters', label: 'Chapters' },
   { key: 'includeEvents', label: 'Events' },
+  { key: 'includeIssues', label: 'Issues' },
   { key: 'includePosts', label: 'Posts' },
+  { key: 'includeProjects', label: 'Projects' },
+  { key: 'includePullRequests', label: 'Pull Requests' },
+  { key: 'includeReleases', label: 'Releases' },
   { key: 'includeUsers', label: 'Users' },
 ] as const
 
-type GlobalContentKey = (typeof GLOBAL_CONTENT_FIELDS)[number]['key']
+type SnapshotContentKey = (typeof SNAPSHOT_CONTENT_FIELDS)[number]['key']
 
-const PROJECT_CONTENT_FIELDS = [
+const ENTITY_CONTENT_FIELDS = [
   { key: 'includeIssues', label: 'Issues' },
   { key: 'includePullRequests', label: 'Pull Requests' },
   { key: 'includeReleases', label: 'Releases' },
 ] as const
 
-type ProjectContentKey = (typeof PROJECT_CONTENT_FIELDS)[number]['key']
+type EntityContentKey = (typeof ENTITY_CONTENT_FIELDS)[number]['key']
+
+const ENTITY_TYPE_OPTIONS = [
+  {
+    key: 'project',
+    label: 'Projects',
+    searchQuery: SEARCH_PROJECTS,
+    searchResultKey: 'searchProjects',
+  },
+  {
+    key: 'chapter',
+    label: 'Chapters',
+    searchQuery: SEARCH_CHAPTERS,
+    searchResultKey: 'searchChapters',
+  },
+  {
+    key: 'committee',
+    label: 'Committees',
+    searchQuery: SEARCH_COMMITTEES,
+    searchResultKey: 'searchCommittees',
+  },
+] as const
 
 interface EntityItem {
   id: string
   name: string
 }
 
-interface ProjectPreference {
-  project: EntityItem
-  includeIssues: boolean
-  includePullRequests: boolean
-  includeReleases: boolean
-}
-
-interface SubscriptionData {
+interface SnapshotSubscriptionData {
   id: string
   frequency: string
   isActive: boolean
   includeChapters: boolean
   includeEvents: boolean
+  includeIssues: boolean
   includePosts: boolean
+  includeProjects: boolean
+  includePullRequests: boolean
+  includeReleases: boolean
   includeUsers: boolean
-  projectPreferences: ProjectPreference[]
-  chapters: EntityItem[]
   createdAt: string
   updatedAt: string
 }
 
-interface GetSubscriptionResponse {
-  mySubscription?: SubscriptionData | null
+interface EntityPreferenceData {
+  id: string
+  chapter: EntityItem | null
+  committee: EntityItem | null
+  project: EntityItem | null
+  includeIssues: boolean
+  includePullRequests: boolean
+  includeReleases: boolean
+}
+
+interface EntitySubscriptionData {
+  id: string
+  name: string
+  frequency: string
+  isActive: boolean
+  entityPreferences: EntityPreferenceData[]
+  createdAt: string
+  updatedAt: string
 }
 
 interface MutationResponse {
   ok: boolean
   message: string
-  subscription?: SubscriptionData | null
+  subscription?: unknown
 }
 
-const DEFAULT_GLOBAL_PREFERENCES: Record<GlobalContentKey, boolean> = {
+const DEFAULT_SNAPSHOT_PREFERENCES: Record<SnapshotContentKey, boolean> = {
   includeChapters: true,
   includeEvents: true,
+  includeIssues: true,
   includePosts: true,
+  includeProjects: true,
+  includePullRequests: true,
+  includeReleases: true,
   includeUsers: true,
 }
 
@@ -241,64 +308,6 @@ function EntityPicker({
   )
 }
 
-function ProjectPreferenceCard({
-  preference,
-  onToggle,
-  onRemove,
-}: Readonly<{
-  preference: ProjectPreference
-  onToggle: (key: ProjectContentKey) => void
-  onRemove: () => void
-}>) {
-  return (
-    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-      <div className="mb-3 flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-          {preference.project.name}
-        </h4>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="cursor-pointer rounded-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-red-400"
-          aria-label={`Remove ${preference.project.name}`}
-        >
-          <FaXmark className="h-3.5 w-3.5" />
-        </button>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {PROJECT_CONTENT_FIELDS.map(({ key, label }) => {
-          const isOn = preference[key]
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => onToggle(key)}
-              className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-all ${
-                isOn
-                  ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
-                  : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-              }`}
-            >
-              <span>{label}</span>
-              <div
-                className={`flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-                  isOn ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
-                }`}
-              >
-                <div
-                  className={`h-2.5 w-2.5 rounded-full bg-white shadow-sm transition-transform ${
-                    isOn ? 'translate-x-2.5' : 'translate-x-0'
-                  }`}
-                />
-              </div>
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 function FrequencySelector({
   hasActiveSubscription,
   frequency,
@@ -340,156 +349,76 @@ function FrequencySelector({
   )
 }
 
-function GlobalContentPreferences({
-  globalPreferences,
-  toggleGlobalPreference,
+function ContentToggleGrid<K extends string>({
+  fields,
+  preferences,
+  onToggle,
 }: Readonly<{
-  globalPreferences: Record<GlobalContentKey, boolean>
-  toggleGlobalPreference: (key: GlobalContentKey) => void
+  fields: readonly { key: K; label: string }[]
+  preferences: Record<K, boolean>
+  onToggle: (key: K) => void
 }>) {
   return (
-    <SecondaryCard>
-      <h2 className="mb-4 text-xl font-semibold">General Subscriptions</h2>
-      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Manage your general OWASP subscriptions.
-      </p>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {GLOBAL_CONTENT_FIELDS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => toggleGlobalPreference(key)}
-            className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
-              globalPreferences[key]
-                ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
-                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {fields.map(({ key, label }) => (
+        <button
+          key={key}
+          type="button"
+          onClick={() => onToggle(key)}
+          className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
+            preferences[key]
+              ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+              : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+          }`}
+        >
+          <span className="truncate">{label}</span>
+          <div
+            className={`flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+              preferences[key] ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
             }`}
           >
-            <span className="truncate">{label}</span>
             <div
-              className={`flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-                globalPreferences[key] ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
+              className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+                preferences[key] ? 'translate-x-3' : 'translate-x-0'
               }`}
-            >
-              <div
-                className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
-                  globalPreferences[key] ? 'translate-x-3' : 'translate-x-0'
-                }`}
-              />
-            </div>
-          </button>
-        ))}
-      </div>
-    </SecondaryCard>
-  )
-}
-
-function ProjectSubscriptions({
-  projectPreferences,
-  handleAddProject,
-  handleRemoveProject,
-  handleToggleProjectContent,
-}: Readonly<{
-  projectPreferences: ProjectPreference[]
-  handleAddProject: (item: EntityItem) => void
-  handleRemoveProject: (projectId: string) => void
-  handleToggleProjectContent: (projectId: string, key: ProjectContentKey) => void
-}>) {
-  const selectedProjectItems = projectPreferences.map((p) => p.project)
-
-  return (
-    <SecondaryCard>
-      <h2 className="mb-2 text-xl font-semibold">Project Subscriptions</h2>
-      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Select projects and choose which updates you would like to receive (Issues, Pull Requests,
-        Releases). Leave this empty if you don't want project-specific updates.
-      </p>
-
-      <EntityPicker
-        label="Projects"
-        selectedItems={selectedProjectItems}
-        onAdd={handleAddProject}
-        onRemove={handleRemoveProject}
-        searchQuery={SEARCH_PROJECTS}
-        searchResultKey="searchProjects"
-      />
-
-      {projectPreferences.length > 0 && (
-        <div className="mt-4 flex flex-col gap-3">
-          {projectPreferences.map((pref) => (
-            <ProjectPreferenceCard
-              key={pref.project.id}
-              preference={pref}
-              onToggle={(key) => handleToggleProjectContent(pref.project.id, key)}
-              onRemove={() => handleRemoveProject(pref.project.id)}
             />
-          ))}
-        </div>
-      )}
-    </SecondaryCard>
+          </div>
+        </button>
+      ))}
+    </div>
   )
 }
 
-function ChapterFilters({
-  includeChapters,
-  selectedChapters,
-  handleAddChapter,
-  handleRemoveChapter,
-}: Readonly<{
-  includeChapters: boolean
-  selectedChapters: EntityItem[]
-  handleAddChapter: (item: EntityItem) => void
-  handleRemoveChapter: (id: string) => void
-}>) {
-  if (!includeChapters) return null
-
-  return (
-    <SecondaryCard>
-      <h2 className="mb-2 text-xl font-semibold">Chapter Subscriptions</h2>
-      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Optionally select specific chapters to follow. Leave empty to receive updates about all
-        chapters.
-      </p>
-      <EntityPicker
-        label="Chapters"
-        selectedItems={selectedChapters}
-        onAdd={handleAddChapter}
-        onRemove={handleRemoveChapter}
-        searchQuery={SEARCH_CHAPTERS}
-        searchResultKey="searchChapters"
-      />
-    </SecondaryCard>
-  )
-}
-
-function SubscriptionContent() {
+function SnapshotSubscriptionContent() {
   const { status } = useSession()
   const [frequency, setFrequency] = useState<'weekly' | 'monthly'>('weekly')
-  const [globalPreferences, setGlobalPreferences] = useState<Record<GlobalContentKey, boolean>>(
-    DEFAULT_GLOBAL_PREFERENCES
+  const [preferences, setPreferences] = useState<Record<SnapshotContentKey, boolean>>(
+    DEFAULT_SNAPSHOT_PREFERENCES
   )
-  const [projectPreferences, setProjectPreferences] = useState<ProjectPreference[]>([])
-  const [selectedChapters, setSelectedChapters] = useState<EntityItem[]>([])
 
-  const { data, loading, error, refetch } = useQuery<GetSubscriptionResponse>(GET_MY_SUBSCRIPTION, {
+  const { data, loading, error, refetch } = useQuery<{
+    mySnapshotSubscription?: SnapshotSubscriptionData | null
+  }>(GET_MY_SNAPSHOT_SUBSCRIPTION, {
     skip: status !== 'authenticated',
     errorPolicy: 'all',
   })
 
-  const subscription = data?.mySubscription
+  const subscription = data?.mySnapshotSubscription
   const hasActiveSubscription = subscription?.isActive === true
 
   useEffect(() => {
     if (subscription?.isActive) {
       setFrequency(subscription.frequency as 'weekly' | 'monthly')
-      setGlobalPreferences({
+      setPreferences({
         includeChapters: subscription.includeChapters,
         includeEvents: subscription.includeEvents,
+        includeIssues: subscription.includeIssues,
         includePosts: subscription.includePosts,
+        includeProjects: subscription.includeProjects,
+        includePullRequests: subscription.includePullRequests,
+        includeReleases: subscription.includeReleases,
         includeUsers: subscription.includeUsers,
       })
-      setProjectPreferences(subscription.projectPreferences || [])
-      setSelectedChapters(subscription.chapters || [])
     }
   }, [subscription])
 
@@ -550,10 +479,8 @@ function SubscriptionContent() {
           description: 'You will no longer receive digest emails.',
           color: 'success',
         })
-        setGlobalPreferences(DEFAULT_GLOBAL_PREFERENCES)
+        setPreferences(DEFAULT_SNAPSHOT_PREFERENCES)
         setFrequency('weekly')
-        setProjectPreferences([])
-        setSelectedChapters([])
         refetch()
       } else {
         addToast({ title: 'Error', description: result.message, color: 'danger' })
@@ -568,60 +495,14 @@ function SubscriptionContent() {
     },
   })
 
-  const toggleGlobalPreference = useCallback((key: GlobalContentKey) => {
-    setGlobalPreferences((prev) => {
-      const next = { ...prev, [key]: !prev[key] }
-      if (key === 'includeChapters' && !next.includeChapters) {
-        setSelectedChapters([])
-      }
-      return next
-    })
-  }, [])
-
-  const handleAddProject = useCallback((item: EntityItem) => {
-    setProjectPreferences((prev) => {
-      if (prev.some((p) => p.project.id === item.id)) return prev
-      return [
-        ...prev,
-        {
-          project: item,
-          includeIssues: true,
-          includePullRequests: true,
-          includeReleases: true,
-        },
-      ]
-    })
-  }, [])
-
-  const handleRemoveProject = useCallback((projectId: string) => {
-    setProjectPreferences((prev) => prev.filter((p) => p.project.id !== projectId))
-  }, [])
-
-  const handleToggleProjectContent = useCallback((projectId: string, key: ProjectContentKey) => {
-    setProjectPreferences((prev) =>
-      prev.map((p) => (p.project.id === projectId ? { ...p, [key]: !p[key] } : p))
-    )
-  }, [])
-
-  const handleAddChapter = useCallback((item: EntityItem) => {
-    setSelectedChapters((prev) => [...prev, item])
-  }, [])
-
-  const handleRemoveChapter = useCallback((id: string) => {
-    setSelectedChapters((prev) => prev.filter((c) => c.id !== id))
+  const togglePreference = useCallback((key: SnapshotContentKey) => {
+    setPreferences((prev) => ({ ...prev, [key]: !prev[key] }))
   }, [])
 
   const getMutationVariables = () => ({
     inputData: {
       frequency,
-      ...globalPreferences,
-      subscribedChapterIds: selectedChapters.map((c) => Number.parseInt(c.id, 10)),
-      projectPreferences: projectPreferences.map((p) => ({
-        projectId: Number.parseInt(p.project.id, 10),
-        includeIssues: p.includeIssues,
-        includePullRequests: p.includePullRequests,
-        includeReleases: p.includeReleases,
-      })),
+      ...preferences,
     },
   })
 
@@ -699,22 +580,18 @@ function SubscriptionContent() {
         frequency={frequency}
         setFrequency={setFrequency}
       />
-      <GlobalContentPreferences
-        globalPreferences={globalPreferences}
-        toggleGlobalPreference={toggleGlobalPreference}
-      />
-      <ProjectSubscriptions
-        projectPreferences={projectPreferences}
-        handleAddProject={handleAddProject}
-        handleRemoveProject={handleRemoveProject}
-        handleToggleProjectContent={handleToggleProjectContent}
-      />
-      <ChapterFilters
-        includeChapters={globalPreferences.includeChapters}
-        selectedChapters={selectedChapters}
-        handleAddChapter={handleAddChapter}
-        handleRemoveChapter={handleRemoveChapter}
-      />
+
+      <SecondaryCard>
+        <h2 className="mb-4 text-xl font-semibold">Content Preferences</h2>
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          Choose which types of OWASP content to include in your snapshot digests.
+        </p>
+        <ContentToggleGrid
+          fields={SNAPSHOT_CONTENT_FIELDS}
+          preferences={preferences}
+          onToggle={togglePreference}
+        />
+      </SecondaryCard>
 
       <div className="flex justify-end gap-3">
         {hasActiveSubscription && (
@@ -750,12 +627,12 @@ function SubscriptionContent() {
           </ModalHeader>
           <ModalBody className="px-5 py-4">
             <p className="text-gray-600 dark:text-gray-300">
-              Are you sure you want to unsubscribe? All your preferences including selected
-              projects, content types, and chapter filters will be lost.
+              Are you sure you want to unsubscribe? You will no longer receive snapshot digest
+              emails.
             </p>
           </ModalBody>
           <ModalFooter className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-gray-700">
-            <ActionButton onClick={() => setShowCancelModal(false)}>Keep Subscription</ActionButton>
+            <ActionButton onClick={() => setShowCancelModal(false)}>Cancel</ActionButton>
             <Button
               onPress={handleConfirmCancel}
               isDisabled={cancelling}
@@ -771,13 +648,753 @@ function SubscriptionContent() {
   )
 }
 
+interface LocalEntityPreference {
+  entityType: 'project' | 'chapter' | 'committee'
+  entity: EntityItem
+  includeIssues: boolean
+  includePullRequests: boolean
+  includeReleases: boolean
+}
+
+interface LocalEntitySubscription {
+  id: string | null
+  name: string
+  frequency: 'weekly' | 'monthly'
+  preferences: LocalEntityPreference[]
+  isNew: boolean
+}
+
+function entityPreferenceFromServer(pref: EntityPreferenceData): LocalEntityPreference | null {
+  if (pref.project) {
+    return {
+      entityType: 'project',
+      entity: pref.project,
+      includeIssues: pref.includeIssues,
+      includePullRequests: pref.includePullRequests,
+      includeReleases: pref.includeReleases,
+    }
+  }
+  if (pref.chapter) {
+    return {
+      entityType: 'chapter',
+      entity: pref.chapter,
+      includeIssues: pref.includeIssues,
+      includePullRequests: pref.includePullRequests,
+      includeReleases: pref.includeReleases,
+    }
+  }
+  if (pref.committee) {
+    return {
+      entityType: 'committee',
+      entity: pref.committee,
+      includeIssues: pref.includeIssues,
+      includePullRequests: pref.includePullRequests,
+      includeReleases: pref.includeReleases,
+    }
+  }
+  return null
+}
+
+function EntityPreferenceCard({
+  preference,
+  onToggle,
+  onRemove,
+}: Readonly<{
+  preference: LocalEntityPreference
+  onToggle: (key: EntityContentKey) => void
+  onRemove: () => void
+}>) {
+  const typeLabel = preference.entityType.charAt(0).toUpperCase() + preference.entityType.slice(1)
+  return (
+    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            {preference.entity.name}
+          </h4>
+          <span className="text-xs text-gray-400">{typeLabel}</span>
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="cursor-pointer rounded-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-red-400"
+          aria-label={`Remove ${preference.entity.name}`}
+        >
+          <FaXmark className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {ENTITY_CONTENT_FIELDS.map(({ key, label }) => {
+          const isOn = preference[key]
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onToggle(key)}
+              className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-all ${
+                isOn
+                  ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+                  : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+              }`}
+            >
+              <span>{label}</span>
+              <div
+                className={`flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+                  isOn ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+              >
+                <div
+                  className={`h-2.5 w-2.5 rounded-full bg-white shadow-sm transition-transform ${
+                    isOn ? 'translate-x-2.5' : 'translate-x-0'
+                  }`}
+                />
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function EntitySubscriptionCard({
+  subscription,
+  onSave,
+  onUnsubscribe,
+  onTrashDelete,
+  onReactivate,
+  isSaving,
+  isActive = true,
+}: Readonly<{
+  subscription: LocalEntitySubscription
+  onSave: (sub: LocalEntitySubscription) => void
+  onUnsubscribe?: (sub: LocalEntitySubscription) => void
+  onTrashDelete?: (sub: LocalEntitySubscription) => void
+  onReactivate?: (sub: LocalEntitySubscription) => void
+  isSaving: boolean
+  isActive?: boolean
+}>) {
+  const [localSub, setLocalSub] = useState(subscription)
+  const [activeEntityType, setActiveEntityType] = useState<'project' | 'chapter' | 'committee'>(
+    'project'
+  )
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showUnsubscribeModal, setShowUnsubscribeModal] = useState(false)
+
+  useEffect(() => {
+    setLocalSub(subscription)
+  }, [subscription])
+
+  const handleNameChange = (name: string) => {
+    setLocalSub((prev) => ({ ...prev, name }))
+  }
+
+  const handleFrequencyChange = (frequency: 'weekly' | 'monthly') => {
+    setLocalSub((prev) => ({ ...prev, frequency }))
+  }
+
+  const handleAddEntity = (item: EntityItem) => {
+    setLocalSub((prev) => {
+      if (
+        prev.preferences.some((p) => p.entity.id === item.id && p.entityType === activeEntityType)
+      )
+        return prev
+      return {
+        ...prev,
+        preferences: [
+          ...prev.preferences,
+          {
+            entityType: activeEntityType,
+            entity: item,
+            includeIssues: true,
+            includePullRequests: true,
+            includeReleases: true,
+          },
+        ],
+      }
+    })
+  }
+
+  const handleRemoveEntity = (entityId: string) => {
+    setLocalSub((prev) => ({
+      ...prev,
+      preferences: prev.preferences.filter((p) => p.entity.id !== entityId),
+    }))
+  }
+
+  const handleToggleContent = (entityId: string, key: EntityContentKey) => {
+    setLocalSub((prev) => ({
+      ...prev,
+      preferences: prev.preferences.map((p) =>
+        p.entity.id === entityId ? { ...p, [key]: !p[key] } : p
+      ),
+    }))
+  }
+
+  const currentEntityTypeConfig = ENTITY_TYPE_OPTIONS.find((o) => o.key === activeEntityType)!
+  const selectedItemsForPicker = localSub.preferences
+    .filter((p) => p.entityType === activeEntityType)
+    .map((p) => p.entity)
+
+  const destructiveButtonStyles =
+    'flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white'
+
+  return (
+    <SecondaryCard>
+      <div>
+        {/* Card header with trash icon */}
+        <div className="mb-4 flex items-start justify-between">
+          <div className="flex-1">
+            <label
+              htmlFor={`sub-name-${subscription.id || 'new'}`}
+              className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300"
+            >
+              Subscription Name
+            </label>
+            <input
+              id={`sub-name-${subscription.id || 'new'}`}
+              type="text"
+              value={localSub.name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="e.g. My OWASP Projects"
+              className="w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#1D7BD7] dark:border-gray-600 dark:text-gray-200"
+              maxLength={100}
+              disabled={!isActive}
+            />
+          </div>
+          {!subscription.isNew && onTrashDelete && (
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              className="mt-1 ml-3 cursor-pointer rounded p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+              aria-label="Delete subscription permanently"
+            >
+              <FaTrash className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <h3 className="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">Frequency</h3>
+          <div className="flex gap-3">
+            {(['weekly', 'monthly'] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => handleFrequencyChange(option)}
+                className={`flex cursor-pointer items-center gap-3 rounded-md border px-5 py-3 text-sm font-medium transition-all ${
+                  localSub.frequency === option
+                    ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+                }`}
+              >
+                <div
+                  className={`flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors ${
+                    localSub.frequency === option
+                      ? 'border-[#1D7BD7]'
+                      : 'border-gray-300 dark:border-gray-600'
+                  }`}
+                >
+                  {localSub.frequency === option && (
+                    <div className="h-2 w-2 rounded-full bg-[#1D7BD7]" />
+                  )}
+                </div>
+                {option.charAt(0).toUpperCase() + option.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <h3 className="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
+            Add Entities
+          </h3>
+          <div className="mb-3 flex gap-2">
+            {ENTITY_TYPE_OPTIONS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveEntityType(key)}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                  activeEntityType === key
+                    ? 'bg-[#1D7BD7] text-white'
+                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <EntityPicker
+            label={currentEntityTypeConfig.label}
+            selectedItems={selectedItemsForPicker}
+            onAdd={handleAddEntity}
+            onRemove={handleRemoveEntity}
+            searchQuery={currentEntityTypeConfig.searchQuery}
+            searchResultKey={currentEntityTypeConfig.searchResultKey}
+          />
+        </div>
+
+        {localSub.preferences.length > 0 && (
+          <div className="mb-4 flex flex-col gap-3">
+            {localSub.preferences.map((pref) => (
+              <EntityPreferenceCard
+                key={`${pref.entityType}-${pref.entity.id}`}
+                preference={pref}
+                onToggle={(key) => handleToggleContent(pref.entity.id, key)}
+                onRemove={() => handleRemoveEntity(pref.entity.id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Card footer buttons */}
+        <div className="flex justify-end gap-3">
+          {isActive ? (
+            <>
+              {!subscription.isNew && onUnsubscribe && (
+                <Button
+                  variant="bordered"
+                  onPress={() => setShowUnsubscribeModal(true)}
+                  className={destructiveButtonStyles}
+                >
+                  <FaBellSlash />
+                  Unsubscribe
+                </Button>
+              )}
+              <ActionButton
+                onClick={() => onSave(localSub)}
+                isDisabled={isSaving || localSub.preferences.length === 0}
+              >
+                <FaFloppyDisk />
+                {isSaving
+                  ? 'Saving...'
+                  : subscription.isNew
+                    ? 'Create Subscription'
+                    : 'Save Changes'}
+              </ActionButton>
+            </>
+          ) : (
+            onReactivate && (
+              <ActionButton onClick={() => onReactivate(subscription)} isDisabled={isSaving}>
+                <FaBell />
+                {isSaving ? 'Subscribing...' : 'Subscribe'}
+              </ActionButton>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} size="md">
+        <ModalContent className="rounded-lg bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-[#212529]">
+          <ModalHeader className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Confirm Delete</h2>
+          </ModalHeader>
+          <ModalBody className="px-5 py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to permanently delete &quot;
+              {localSub.name || 'this subscription'}&quot;? All entity preferences will be removed
+              and this cannot be undone.
+            </p>
+          </ModalBody>
+          <ModalFooter className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-gray-700">
+            <ActionButton onClick={() => setShowDeleteModal(false)}>Cancel</ActionButton>
+            <Button
+              onPress={() => {
+                setShowDeleteModal(false)
+                onTrashDelete?.(subscription)
+              }}
+              className={destructiveButtonStyles}
+            >
+              <FaTrash />
+              Yes, Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Unsubscribe confirmation modal */}
+      <Modal isOpen={showUnsubscribeModal} onClose={() => setShowUnsubscribeModal(false)} size="md">
+        <ModalContent className="rounded-lg bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-[#212529]">
+          <ModalHeader className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Confirm Unsubscribe</h2>
+          </ModalHeader>
+          <ModalBody className="px-5 py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to unsubscribe? You will no longer receive snapshot digest
+              emails.
+            </p>
+          </ModalBody>
+          <ModalFooter className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-gray-700">
+            <ActionButton onClick={() => setShowUnsubscribeModal(false)}>Cancel</ActionButton>
+            <Button
+              onPress={() => {
+                setShowUnsubscribeModal(false)
+                onUnsubscribe?.(subscription)
+              }}
+              className={destructiveButtonStyles}
+            >
+              <FaBellSlash />
+              Yes, Unsubscribe
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </SecondaryCard>
+  )
+}
+
+function EntitySubscriptionContent() {
+  const { status } = useSession()
+  const [showCreateForm, setShowCreateForm] = useState(false)
+
+  const { data, loading, error, refetch } = useQuery<{
+    myEntitySubscriptions?: EntitySubscriptionData[]
+  }>(GET_MY_ENTITY_SUBSCRIPTIONS, {
+    skip: status !== 'authenticated',
+    errorPolicy: 'all',
+  })
+
+  const subscriptions = data?.myEntitySubscriptions ?? []
+  const activeCount = subscriptions.filter((s) => s.isActive).length
+  const canCreateMore = activeCount < MAX_ENTITY_SUBSCRIPTIONS
+
+  const [createEntitySubscription, { loading: creating }] = useMutation<{
+    createEntitySubscription: MutationResponse
+  }>(CREATE_ENTITY_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.createEntitySubscription
+      if (result.ok) {
+        addToast({
+          title: 'Created!',
+          description: 'Entity subscription created successfully.',
+          color: 'success',
+        })
+        setShowCreateForm(false)
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({
+        title: 'Error',
+        description: 'Failed to create entity subscription.',
+        color: 'danger',
+      })
+    },
+  })
+
+  const [updateEntitySubscription, { loading: updating }] = useMutation<{
+    updateEntitySubscription: MutationResponse
+  }>(UPDATE_ENTITY_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.updateEntitySubscription
+      if (result.ok) {
+        addToast({
+          title: 'Updated',
+          description: 'Entity subscription updated successfully.',
+          color: 'success',
+        })
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({
+        title: 'Error',
+        description: 'Failed to update entity subscription.',
+        color: 'danger',
+      })
+    },
+  })
+
+  const [cancelEntitySubscription, { loading: cancelling }] = useMutation<{
+    cancelEntitySubscription: MutationResponse
+  }>(CANCEL_ENTITY_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.cancelEntitySubscription
+      if (result.ok) {
+        addToast({
+          title: 'Unsubscribed',
+          description: 'Entity subscription deactivated.',
+          color: 'success',
+        })
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({
+        title: 'Error',
+        description: 'Failed to unsubscribe.',
+        color: 'danger',
+      })
+    },
+  })
+
+  const [deleteEntitySubscription, { loading: deleting }] = useMutation<{
+    deleteEntitySubscription: MutationResponse
+  }>(DELETE_ENTITY_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.deleteEntitySubscription
+      if (result.ok) {
+        addToast({
+          title: 'Deleted',
+          description: 'Entity subscription permanently deleted.',
+          color: 'success',
+        })
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({
+        title: 'Error',
+        description: 'Failed to delete entity subscription.',
+        color: 'danger',
+      })
+    },
+  })
+
+  const [reactivateEntitySubscription, { loading: reactivating }] = useMutation<{
+    reactivateEntitySubscription: MutationResponse
+  }>(REACTIVATE_ENTITY_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      const result = data.reactivateEntitySubscription
+      if (result.ok) {
+        addToast({
+          title: 'Reactivated',
+          description: 'Entity subscription reactivated.',
+          color: 'success',
+        })
+        refetch()
+      } else {
+        addToast({ title: 'Error', description: result.message, color: 'danger' })
+      }
+    },
+    onError: () => {
+      addToast({
+        title: 'Error',
+        description: 'Failed to reactivate entity subscription.',
+        color: 'danger',
+      })
+    },
+  })
+
+  const isMutating = creating || updating || cancelling || deleting || reactivating
+
+  const handleSave = (sub: LocalEntitySubscription) => {
+    const entityPreferences = sub.preferences.map((p) => ({
+      entityType: p.entityType,
+      entityId: decodeRelayId(p.entity.id),
+      includeIssues: p.includeIssues,
+      includePullRequests: p.includePullRequests,
+      includeReleases: p.includeReleases,
+    }))
+
+    if (sub.isNew) {
+      createEntitySubscription({
+        variables: {
+          inputData: {
+            name: sub.name.trim(),
+            frequency: sub.frequency,
+            entityPreferences,
+          },
+        },
+      })
+    } else {
+      updateEntitySubscription({
+        variables: {
+          subscriptionId: decodeRelayId(sub.id!),
+          inputData: {
+            name: sub.name.trim(),
+            frequency: sub.frequency,
+            entityPreferences,
+          },
+        },
+      })
+    }
+  }
+
+  const handleUnsubscribe = (sub: LocalEntitySubscription) => {
+    if (sub.id) {
+      cancelEntitySubscription({
+        variables: { subscriptionId: decodeRelayId(sub.id) },
+      })
+    }
+  }
+
+  const handleTrashDelete = (sub: LocalEntitySubscription) => {
+    if (sub.id) {
+      deleteEntitySubscription({
+        variables: { subscriptionId: decodeRelayId(sub.id) },
+      })
+    }
+  }
+
+  const handleReactivate = (sub: LocalEntitySubscription) => {
+    if (sub.id) {
+      reactivateEntitySubscription({
+        variables: { subscriptionId: decodeRelayId(sub.id) },
+      })
+    }
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
+  if (error && subscriptions.length === 0) {
+    return (
+      <SecondaryCard>
+        <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+          Failed to load entity subscriptions. Please try again later.
+        </div>
+      </SecondaryCard>
+    )
+  }
+
+  const newSubscription: LocalEntitySubscription = {
+    id: null,
+    name: '',
+    frequency: 'weekly',
+    preferences: [],
+    isNew: true,
+  }
+
+  return (
+    <>
+      <SecondaryCard>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold">Entity Subscriptions</h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Subscribe to specific projects, chapters, or committees.{' '}
+              <span className="font-medium">
+                {activeCount}/{MAX_ENTITY_SUBSCRIPTIONS} subscriptions used.
+              </span>
+            </p>
+          </div>
+          {!showCreateForm && (
+            <ActionButton
+              onClick={() => setShowCreateForm(true)}
+              isDisabled={!canCreateMore}
+              tooltipLabel={
+                canCreateMore ? 'Create new subscription' : 'Maximum subscriptions reached'
+              }
+            >
+              <FaPlus />
+              New
+            </ActionButton>
+          )}
+        </div>
+      </SecondaryCard>
+
+      {showCreateForm && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">New Entity Subscription</h3>
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(false)}
+              className="cursor-pointer rounded-sm p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              aria-label="Cancel creation"
+            >
+              <FaXmark className="h-4 w-4" />
+            </button>
+          </div>
+          <EntitySubscriptionCard
+            subscription={newSubscription}
+            onSave={handleSave}
+            isSaving={creating}
+          />
+        </div>
+      )}
+
+      {/* Active subscriptions */}
+      {subscriptions
+        .filter((s) => s.isActive)
+        .map((sub) => {
+          const localSub: LocalEntitySubscription = {
+            id: sub.id,
+            name: sub.name,
+            frequency: sub.frequency as 'weekly' | 'monthly',
+            preferences: sub.entityPreferences
+              .map(entityPreferenceFromServer)
+              .filter((p): p is LocalEntityPreference => p !== null),
+            isNew: false,
+          }
+          return (
+            <EntitySubscriptionCard
+              key={sub.id}
+              subscription={localSub}
+              onSave={handleSave}
+              onUnsubscribe={handleUnsubscribe}
+              onTrashDelete={handleTrashDelete}
+              isSaving={isMutating}
+              isActive
+            />
+          )
+        })}
+
+      {/* Inactive subscriptions */}
+      {subscriptions
+        .filter((s) => !s.isActive)
+        .map((sub) => {
+          const localSub: LocalEntitySubscription = {
+            id: sub.id,
+            name: sub.name,
+            frequency: sub.frequency as 'weekly' | 'monthly',
+            preferences: sub.entityPreferences
+              .map(entityPreferenceFromServer)
+              .filter((p): p is LocalEntityPreference => p !== null),
+            isNew: false,
+          }
+          return (
+            <EntitySubscriptionCard
+              key={sub.id}
+              subscription={localSub}
+              onSave={handleSave}
+              onReactivate={handleReactivate}
+              onTrashDelete={handleTrashDelete}
+              isSaving={isMutating}
+              isActive={false}
+            />
+          )
+        })}
+
+      {subscriptions.length === 0 && !showCreateForm && (
+        <SecondaryCard>
+          <div className="py-4 text-center text-gray-500 dark:text-gray-400">
+            <p>No entity subscriptions yet.</p>
+            <p className="mt-1 text-sm">Click &quot;New&quot; to create your first subscription.</p>
+          </div>
+        </SecondaryCard>
+      )}
+    </>
+  )
+}
+
 const SETTINGS_TABS = [{ key: 'subscriptions', label: 'Subscriptions' }] as const
 
 type SettingsTabKey = (typeof SETTINGS_TABS)[number]['key']
 
+const SUB_TABS = [
+  { key: 'snapshot', label: 'Snapshot' },
+  { key: 'entity', label: 'Entity' },
+] as const
+
+type SubTabKey = (typeof SUB_TABS)[number]['key']
+
 export default function SettingsPage() {
   const { status } = useSession()
   const [activeTab, setActiveTab] = useState<SettingsTabKey>('subscriptions')
+  const [activeSubTab, setActiveSubTab] = useState<SubTabKey>('snapshot')
 
   if (status === 'loading') {
     return <LoadingSpinner />
@@ -822,7 +1439,28 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        {activeTab === 'subscriptions' && <SubscriptionContent />}
+        {activeTab === 'subscriptions' && (
+          <>
+            <div className="mb-6 flex gap-2">
+              {SUB_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveSubTab(tab.key)}
+                  className={`rounded-md border border-[#1D7BD7] px-4 py-2 text-sm font-medium transition-all ${
+                    activeSubTab === tab.key
+                      ? 'bg-[#1D7BD7] text-white'
+                      : 'bg-transparent text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            {activeSubTab === 'snapshot' && <SnapshotSubscriptionContent />}
+            {activeSubTab === 'entity' && <EntitySubscriptionContent />}
+          </>
+        )}
       </div>
     </div>
   )

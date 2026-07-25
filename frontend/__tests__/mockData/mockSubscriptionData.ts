@@ -1,45 +1,41 @@
 export const mockActiveSubscription = {
-  mySubscription: {
+  mySnapshotSubscription: {
     id: '1',
     frequency: 'weekly',
     isActive: true,
     includeChapters: true,
     includeEvents: true,
+    includeIssues: true,
     includePosts: true,
+    includeProjects: true,
+    includePullRequests: true,
+    includeReleases: true,
     includeUsers: true,
-    projectPreferences: [
-      {
-        id: '10',
-        project: { id: '100', name: 'OWASP Nest' },
-        includeIssues: true,
-        includePullRequests: true,
-        includeReleases: false,
-      },
-    ],
-    chapters: [{ id: '200', name: 'OWASP Aarhus' }],
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-06-01T00:00:00Z',
   },
 }
 
 export const mockInactiveSubscription = {
-  mySubscription: {
+  mySnapshotSubscription: {
     id: '2',
     frequency: 'monthly',
     isActive: false,
     includeChapters: true,
     includeEvents: true,
+    includeIssues: true,
     includePosts: true,
+    includeProjects: true,
+    includePullRequests: true,
+    includeReleases: true,
     includeUsers: true,
-    projectPreferences: [],
-    chapters: [],
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-06-01T00:00:00Z',
   },
 }
 
 export const mockNoSubscription = {
-  mySubscription: null,
+  mySnapshotSubscription: null,
 }
 
 export const mockCreateSubscriptionResult = {
@@ -47,7 +43,7 @@ export const mockCreateSubscriptionResult = {
     createSnapshotSubscription: {
       ok: true,
       message: 'Subscription created successfully.',
-      subscription: mockActiveSubscription.mySubscription,
+      subscription: mockActiveSubscription.mySnapshotSubscription,
     },
   },
 }
@@ -57,7 +53,7 @@ export const mockUpdateSubscriptionResult = {
     updateSnapshotSubscription: {
       ok: true,
       message: 'Subscription updated successfully.',
-      subscription: mockActiveSubscription.mySubscription,
+      subscription: mockActiveSubscription.mySnapshotSubscription,
     },
   },
 }
@@ -67,7 +63,117 @@ export const mockCancelSubscriptionResult = {
     cancelSnapshotSubscription: {
       ok: true,
       message: 'Subscription cancelled successfully.',
-      subscription: { ...mockActiveSubscription.mySubscription, isActive: false },
+      subscription: { ...mockActiveSubscription.mySnapshotSubscription, isActive: false },
+    },
+  },
+}
+
+export const mockEntitySubscriptions = {
+  myEntitySubscriptions: [
+    {
+      id: '10',
+      name: 'My OWASP Projects',
+      frequency: 'weekly',
+      isActive: true,
+      entityPreferences: [
+        {
+          id: '100',
+          chapter: null,
+          committee: null,
+          project: { id: '1', name: 'OWASP Nest' },
+          includeIssues: true,
+          includePullRequests: true,
+          includeReleases: false,
+        },
+        {
+          id: '101',
+          chapter: { id: '2', name: 'OWASP Aarhus' },
+          committee: null,
+          project: null,
+          includeIssues: true,
+          includePullRequests: false,
+          includeReleases: false,
+        },
+      ],
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-06-01T00:00:00Z',
+    },
+  ],
+}
+
+export const mockInactiveEntitySubscriptions = {
+  myEntitySubscriptions: [
+    {
+      id: '11',
+      name: 'Paused Subscription',
+      frequency: 'monthly',
+      isActive: false,
+      entityPreferences: [
+        {
+          id: '102',
+          chapter: null,
+          committee: null,
+          project: { id: '3', name: 'OWASP ZAP' },
+          includeIssues: true,
+          includePullRequests: true,
+          includeReleases: true,
+        },
+      ],
+      createdAt: '2025-02-01T00:00:00Z',
+      updatedAt: '2025-06-01T00:00:00Z',
+    },
+  ],
+}
+
+export const mockNoEntitySubscriptions = {
+  myEntitySubscriptions: [],
+}
+
+export const mockCancelEntitySubscriptionResult = {
+  data: {
+    cancelEntitySubscription: {
+      ok: true,
+      message: 'Subscription cancelled successfully.',
+      subscription: { id: '10', isActive: false },
+    },
+  },
+}
+
+export const mockDeleteEntitySubscriptionResult = {
+  data: {
+    deleteEntitySubscription: {
+      ok: true,
+      message: 'Subscription deleted successfully.',
+    },
+  },
+}
+
+export const mockReactivateEntitySubscriptionResult = {
+  data: {
+    reactivateEntitySubscription: {
+      ok: true,
+      message: 'Subscription reactivated successfully.',
+      subscription: { id: '11', isActive: true },
+    },
+  },
+}
+
+export const mockCreateEntitySubscriptionResult = {
+  data: {
+    createEntitySubscription: {
+      ok: true,
+      message: 'Entity subscription created successfully.',
+      subscription: mockEntitySubscriptions.myEntitySubscriptions[0],
+    },
+  },
+}
+
+export const mockUpdateEntitySubscriptionResult = {
+  data: {
+    updateEntitySubscription: {
+      ok: true,
+      message: 'Entity subscription updated successfully.',
+      subscription: mockEntitySubscriptions.myEntitySubscriptions[0],
     },
   },
 }

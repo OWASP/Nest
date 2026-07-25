@@ -94,7 +94,7 @@ describe.each([
       status: 'authenticated',
     })
     mockUseQuery.mockReturnValue({
-      data: mockNoSubscription,
+      data: { mySnapshotSubscription: null, myEntitySubscriptions: [] },
       loading: false,
       error: null,
       refetch: jest.fn(),
@@ -110,6 +110,10 @@ describe.each([
     ;(useApolloClient as jest.Mock).mockReturnValue({ query: mockClientQuery })
 
     const { container } = render(<SettingsPage />)
+
+    fireEvent.click(screen.getByText('Entity'))
+    fireEvent.click(screen.getByText('New'))
+
     const projectInput = screen.getByLabelText('Search projects...')
     fireEvent.change(projectInput, { target: { value: 'OWASP' } })
     fireEvent.focus(projectInput)
