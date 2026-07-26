@@ -60,7 +60,7 @@ describe('BreadCrumbRenderer', () => {
   test('renders chevron separators between items', () => {
     const { container } = render(<BreadCrumbRenderer items={mockItems} />)
 
-    const separators = container.querySelectorAll('svg[data-testid="chevron-separator"], ol li svg')
+    const separators = container.querySelectorAll('ol li svg')
     expect(separators.length).toBeGreaterThan(0)
   })
 

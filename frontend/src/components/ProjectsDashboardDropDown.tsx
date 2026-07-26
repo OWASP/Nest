@@ -40,17 +40,7 @@ const ProjectsDashboardDropDown: FC<{
   return (
     <Dropdown>
       <DropdownTrigger>
-        <div
-          role="button"
-          tabIndex={0}
-          className="flex cursor-pointer items-center gap-2"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              e.currentTarget.click()
-            }
-          }}
-        >
+        <div className="flex cursor-pointer items-center gap-2">
           <IconWrapper
             icon={
               isOrdering
