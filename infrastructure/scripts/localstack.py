@@ -76,7 +76,8 @@ class LocalStack:
         """Return LocalStack info JSON.
 
         Args:
-            log_error (bool, optional): Whether to log a warning if the request fails. Defaults to False.
+            log_error (bool, optional): Whether to log a warning if the request fails.
+                Defaults to False.
 
         Returns:
             dict | None: The info JSON payload, or None if unreachable.
@@ -100,7 +101,8 @@ class LocalStack:
         """Return whether the LocalStack health endpoint responds successfully.
 
         Args:
-            log_error (bool, optional): Whether to log a warning if the request fails. Defaults to False.
+            log_error (bool, optional): Whether to log a warning if the request fails.
+                Defaults to False.
 
         Returns:
             bool: True if the endpoint responds successfully, False otherwise.
@@ -112,7 +114,8 @@ class LocalStack:
         """Return whether LocalStack reports an activated license.
 
         Args:
-            log_error (bool, optional): Whether to log a warning if the request fails. Defaults to False.
+            log_error (bool, optional): Whether to log a warning if the request fails.
+                Defaults to False.
 
         Returns:
             bool: True if the license is activated, False otherwise.
@@ -209,7 +212,8 @@ class LocalStack:
         """Block until LocalStack is healthy and its license is activated.
 
         Raises:
-            TestRunnerError: If LocalStack fails to become healthy or activate its license within the timeout.
+            TestRunnerError: If LocalStack fails to become healthy or activate its
+                license within the timeout.
 
         """
         logger.info("Waiting for LocalStack to become healthy...")

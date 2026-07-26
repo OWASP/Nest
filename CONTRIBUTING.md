@@ -43,8 +43,8 @@ Optional steps for Windows:
 
 For detailed descriptions of all environment variables, see:
 
-- **Backend**: [backend/README.md](backend/README.md#environment-variables)
-- **Frontend**: [frontend/README.md](frontend/README.md#environment-variables)
+- **Backend**: [backend/README.md](https://github.com/OWASP/Nest/blob/main/backend/README.md#environment-variables)
+- **Frontend**: [frontend/README.md](https://github.com/OWASP/Nest/blob/main/frontend/README.md#environment-variables)
 
 ## Setting up the Project
 

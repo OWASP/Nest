@@ -56,8 +56,13 @@ repos:
     hooks:
       - id: ruff-check
         args:
+          - --config
+          - ruff.toml
           - --fix
       - id: ruff-format
+        args:
+          - --config
+          - ruff.toml
 
   - repo: https://github.com/djlint/djLint
     rev: 30c5d8351e4a50d6279784d4773eded140355084  # v1.40.2
