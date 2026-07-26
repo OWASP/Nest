@@ -27,7 +27,7 @@ export default function BreadCrumbsWrapper() {
             const isLast = index === items.length - 1
 
             return (
-              <HeroUIBreadcrumbItem key={item.path} isDisabled={isLast}>
+              <HeroUIBreadcrumbItem key={item.path}>
                 {isLast ? (
                   <span className="cursor-default font-semibold text-gray-800 dark:text-gray-100">
                     <TruncatedText

@@ -183,7 +183,8 @@ describe('ProjectsDashboardDropDown Component', () => {
       }).not.toThrow()
 
       expect(screen.getByTestId('dropdown')).toBeInTheDocument()
-      expect(screen.getByTestId('dropdown-trigger')).toBeInTheDocument()
+      const trigger = screen.getByTestId('dropdown-trigger')
+      expect(trigger).toBeInTheDocument()
       expect(screen.getByText('Filter')).toBeInTheDocument()
     })
 

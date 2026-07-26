@@ -46,6 +46,7 @@ const ProjectsDashboardDropDown: FC<{
           className="flex cursor-pointer items-center gap-2"
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
               e.currentTarget.click()
             }
           }}

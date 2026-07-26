@@ -27,12 +27,11 @@ export const FormDateInput = ({
   return (
     <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <TextField
-        id={id}
         isRequired={required}
         isInvalid={touched && !!error}
         value={value}
         onChange={onValueChange}
-        className="w-full min-w-0"
+        className="flex w-full min-w-0 flex-col gap-1.5"
       >
         <Label htmlFor={id} className="text-sm font-semibold text-gray-600 dark:text-gray-300">
           {label}
