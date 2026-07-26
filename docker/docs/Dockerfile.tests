@@ -48,7 +48,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
-    mkdir -p /home/owasp/.cache/pycache /home/owasp/docs && \
+    mkdir -p /home/owasp/.cache/pycache /home/owasp/docs/tests && \
     chown -R owasp:owasp /home/owasp
 
 ENV FORCE_COLOR=1 \
@@ -62,6 +62,6 @@ WORKDIR /home/owasp/docs
 
 COPY --from=builder --chown=owasp:owasp /home/owasp/docs /home/owasp/docs
 COPY --chmod=444 --chown=owasp:owasp docs/serve.py ./
-COPY --chown=owasp:owasp docs/tests/serve_test.py tests/
+COPY --chmod=444 --chown=owasp:owasp docs/tests/serve_test.py tests/serve_test.py
 
 CMD ["pytest"]
