@@ -46,6 +46,7 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
 
 # Less likely to cause cache invalidation items go first.
 COPY entrypoint.sh manage.py Makefile ./
+COPY make make
 COPY scripts scripts
 COPY templates templates
 COPY static static
@@ -96,11 +97,13 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --only main --only video
 
 COPY entrypoint.sh manage.py Makefile ./
+COPY make make
 COPY scripts scripts
 COPY src src
 COPY templates templates
 COPY static static
 
+# Required to run make targets.
 RUN ln -s . backend
 
 RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + && \
