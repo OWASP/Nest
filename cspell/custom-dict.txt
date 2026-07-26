@@ -75,6 +75,7 @@ Truncator
 Turbopack
 Twitterbot
 VCALENDAR
+VCS
 VEVENT
 WSL
 Wandji
