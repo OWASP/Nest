@@ -199,7 +199,9 @@ class ProgramMutation:
     def update_program_status(
         self, info: strawberry.Info, input_data: UpdateProgramStatusInput
     ) -> ProgramNode:
-        """Update only the status of a program."""
+        """Update only the status of a program. Validates transitions:
+        DRAFT -> PUBLISHED, PUBLISHED -> DRAFT, PUBLISHED -> COMPLETED.
+        """
         user = info.context.request.user
 
         try:
@@ -211,9 +213,35 @@ class ProgramMutation:
         if not program.has_admin(user):
             raise PermissionDenied
 
-        program.status = input_data.status.value
+        current_status = program.status
+        new_status = input_data.status.value
+
+        valid_transitions = {
+            Program.ProgramStatus.DRAFT: [Program.ProgramStatus.PUBLISHED],
+            Program.ProgramStatus.PUBLISHED: [
+                Program.ProgramStatus.DRAFT,
+                Program.ProgramStatus.COMPLETED,
+            ],
+            Program.ProgramStatus.COMPLETED: [],
+        }
+
+        allowed = valid_transitions.get(current_status, [])
+        if new_status not in allowed:
+            msg = (
+                f"Invalid status transition from '{current_status}' to '{new_status}'. "
+                f"Allowed transitions from '{current_status}': {allowed}."
+            )
+            logger.warning("Status transition denied for program '%s': %s", program.key, msg)
+            raise ValidationError(msg)
+
+        program.status = new_status
         program.save()
 
-        logger.info("Updated status of program '%s' to '%s'", program.key, program.status)
+        logger.info(
+            "Updated status of program '%s' from '%s' to '%s'",
+            program.key,
+            current_status,
+            new_status,
+        )
 
         return program
