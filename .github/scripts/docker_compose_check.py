@@ -1,10 +1,13 @@
 """Docker Compose volume allowlist check for merge queue.
 
-Canonical volume names are derived from top-level ``volumes`` keys in base
-``docker-compose/*/compose.yaml`` (and ``.yml``) files. Overrides and Compose
+Canonical volume names are the fixed ``CANONICAL_VOLUMES`` baseline below — not
+whatever keys happen to appear in the merge-group revision. Overrides and Compose
 ``name:`` values must use those names. Custom Docker volume names are fine on
 PR branches for local isolation and review; this check runs on ``merge_group``
 so they do not land on main (see ``docker-compose/README.md``).
+
+When adding a legitimate new named volume, update ``CANONICAL_VOLUMES`` in the
+same PR as the compose change so the expansion is reviewable.
 """
 
 from __future__ import annotations
@@ -23,6 +26,23 @@ OVERRIDE_COMPOSE_GLOBS = (
     "docker-compose/*/compose.override.yml",
 )
 
+# Baseline allowlist independent of the revision under test. Do not derive this
+# from compose files in the merge group.
+CANONICAL_VOLUMES = frozenset(
+    {
+        "backend-venv",
+        "cache-data",
+        "db-data",
+        "docs-venv",
+        "e2e-cache-data",
+        "e2e-db-data",
+        "frontend-next",
+        "frontend-node-modules",
+        "fuzz-cache-data",
+        "fuzz-db-data",
+    }
+)
+
 
 class ComposeCheckError(Exception):
     """Raised when a compose manifest cannot be parsed or checked."""
@@ -39,8 +59,7 @@ class ComposeVolumeChecker:
     ) -> None:
         """Create a checker for compose files under ``root``.
 
-        If ``allowed_volumes`` is omitted, names are derived from base compose
-        manifests under ``root``.
+        If ``allowed_volumes`` is omitted, ``CANONICAL_VOLUMES`` is used.
         """
         self.root = root
         self.allowed_volumes = allowed_volumes
@@ -76,23 +95,11 @@ class ComposeVolumeChecker:
             files.extend(self.root.glob(pattern))
         return files
 
-    def derive_allowed_volumes(self) -> frozenset[str]:
-        """Return volume names declared in base compose manifests."""
-        allowed: set[str] = set()
-        for filepath in self.find_base_compose_files():
-            data = self.load_compose_file(filepath)
-            if not isinstance(data, dict):
-                continue
-            top_volumes = data.get("volumes")
-            if isinstance(top_volumes, dict):
-                allowed.update(str(key) for key in top_volumes)
-        return frozenset(allowed)
-
     def resolve_allowed_volumes(self) -> frozenset[str]:
-        """Return the effective allowlist (explicit or derived)."""
+        """Return the effective allowlist (explicit or ``CANONICAL_VOLUMES``)."""
         if self.allowed_volumes is not None:
             return self.allowed_volumes
-        return self.derive_allowed_volumes()
+        return CANONICAL_VOLUMES
 
     def is_allowed(self, name: str, *, allowed_volumes: frozenset[str] | None = None) -> bool:
         """Return whether ``name`` is in the effective allowlist."""
@@ -181,7 +188,8 @@ class ComposeVolumeChecker:
         for service_name, service in services.items():
             if not isinstance(service, dict):
                 continue
-            for mount in service.get("volumes", []):
+            mounts = service.get("volumes") or []
+            for mount in mounts:
                 volume_name = self.volume_name_from_mount(mount)
                 if volume_name and not self.is_allowed(
                     volume_name,

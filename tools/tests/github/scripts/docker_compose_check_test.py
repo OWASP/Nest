@@ -7,9 +7,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from docker_compose_check import ComposeCheckError, ComposeVolumeChecker
+from docker_compose_check import CANONICAL_VOLUMES, ComposeCheckError, ComposeVolumeChecker
 
-CANONICAL_VOLUMES = frozenset(
+TEST_ALLOWED_VOLUMES = frozenset(
     {
         "backend-venv",
         "cache-data",
@@ -24,7 +24,7 @@ class TestComposeVolumeChecker:
 
     @pytest.fixture
     def checker(self, tmp_path: Path) -> ComposeVolumeChecker:
-        return ComposeVolumeChecker(tmp_path, allowed_volumes=CANONICAL_VOLUMES)
+        return ComposeVolumeChecker(tmp_path, allowed_volumes=TEST_ALLOWED_VOLUMES)
 
     def test_extract_volume_name_accepts_named_volume(self) -> None:
         assert (
@@ -85,22 +85,21 @@ class TestComposeVolumeChecker:
 
         assert found == {"compose.yaml", "compose.yml", "compose.override.yaml"}
 
-    def test_derive_allowed_volumes_from_base_compose_only(
+    def test_resolve_allowed_volumes_defaults_to_canonical_baseline(
         self,
         tmp_path: Path,
     ) -> None:
         local = tmp_path / "docker-compose" / "local"
         local.mkdir(parents=True)
+        # A personal key in the revision under test must not expand the allowlist.
         (local / "compose.yaml").write_text(
-            yaml.dump({"volumes": {"db-data": None, "cache-data": None}})
-        )
-        (local / "compose.override.yaml").write_text(
-            yaml.dump({"volumes": {"db-data": {"name": "db-data-local"}}})
+            yaml.dump({"volumes": {"db-data": None, "db-data-5079": None}})
         )
 
         checker = ComposeVolumeChecker(tmp_path)
 
-        assert checker.derive_allowed_volumes() == frozenset({"db-data", "cache-data"})
+        assert checker.resolve_allowed_volumes() == CANONICAL_VOLUMES
+        assert "db-data-5079" not in checker.resolve_allowed_volumes()
 
     def test_check_file_allows_comment_only_override(
         self,
@@ -164,6 +163,26 @@ class TestComposeVolumeChecker:
                     "services": {},
                     "volumes": {
                         "db-data": {"name": "db-data"},
+                    },
+                }
+            )
+        )
+
+        assert checker.check_file(compose) == []
+
+    def test_check_file_allows_service_with_null_volumes(
+        self,
+        checker: ComposeVolumeChecker,
+        tmp_path: Path,
+    ) -> None:
+        compose = tmp_path / "compose.yaml"
+        compose.write_text(
+            yaml.dump(
+                {
+                    "services": {
+                        "api": {
+                            "volumes": None,
+                        },
                     },
                 }
             )
@@ -323,7 +342,7 @@ class TestComposeVolumeChecker:
         with pytest.raises(ComposeCheckError, match="failed to parse"):
             checker.check_file(compose)
 
-    def test_violations_flags_override_custom_name_using_derived_allowlist(
+    def test_violations_flags_custom_name_using_baseline_allowlist(
         self,
         tmp_path: Path,
     ) -> None:
@@ -343,9 +362,25 @@ class TestComposeVolumeChecker:
             ),
         ]
 
+    def test_violations_flags_personal_key_added_to_base_compose(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Personal keys in base manifests must not become canonical by declaration."""
+        local = tmp_path / "docker-compose" / "local"
+        local.mkdir(parents=True)
+        (local / "compose.yaml").write_text(
+            yaml.dump({"volumes": {"db-data": None, "db-data-5079": None}})
+        )
+
+        findings = ComposeVolumeChecker(tmp_path).violations()
+
+        assert findings == [(local / "compose.yaml", "db-data-5079")]
+
     def test_violations_raises_when_no_compose_files(self, tmp_path: Path) -> None:
+        checker = ComposeVolumeChecker(tmp_path)
         with pytest.raises(ComposeCheckError, match="no Docker Compose files"):
-            ComposeVolumeChecker(tmp_path).violations()
+            checker.violations()
 
     def test_find_repository_root_walks_parents(self, tmp_path: Path) -> None:
         (tmp_path / ".git").mkdir()

@@ -4,10 +4,13 @@ Committed manifests live under `docker-compose/<stack>/compose.yaml`.
 
 ## Volume names on main
 
-Canonical volume names are the top-level `volumes` keys in committed
-`docker-compose/*/compose.yaml` files. `.github/scripts/docker_compose_check.py`
-derives that allowlist and rejects non-canonical keys, Compose `name:` values,
-and service mounts.
+Canonical volume names are the fixed `CANONICAL_VOLUMES` set in
+`.github/scripts/docker_compose_check.py` (not whatever keys appear in the
+merge-group revision). The check rejects non-canonical keys, Compose `name:`
+values, and service mounts.
+
+When adding a legitimate new named volume, update `CANONICAL_VOLUMES` in the
+same PR as the compose change so the allowlist expansion is reviewable.
 
 The check runs only on GitHub’s `merge_group` event (merge queue), not on
 ordinary `pull_request` CI or local pre-commit / `make check`. Temporary custom
@@ -35,7 +38,7 @@ it when multiple `-f` files are used. Prefer the Compose project name
 
 Custom volume names are fine on feature branches. Edit the override and set
 Compose `name:` on volume keys you need to isolate (keys stay canonical). Merge
-queue rejects custom names that are not declared on the base local compose file.
+queue rejects names that are not in `CANONICAL_VOLUMES`.
 
 Example:
 
