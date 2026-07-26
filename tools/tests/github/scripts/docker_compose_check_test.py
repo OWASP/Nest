@@ -377,6 +377,70 @@ class TestComposeVolumeChecker:
 
         assert findings == [(local / "compose.yaml", "db-data-5079")]
 
+    def test_canonical_baseline_rejects_unknown_key_name_and_service_mount(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Default CANONICAL_VOLUMES rejects keys, name:, and mounts not in the set."""
+        local = tmp_path / "docker-compose" / "local"
+        local.mkdir(parents=True)
+        (local / "compose.yaml").write_text(
+            yaml.dump(
+                {
+                    "services": {
+                        "db": {
+                            "volumes": ["db-data-5079:/var/lib/postgresql/data"],
+                        },
+                    },
+                    "volumes": {
+                        "db-data": {"name": "db-data-local"},
+                        "personal-vol": None,
+                    },
+                }
+            )
+        )
+
+        findings = {volume for _, volume in ComposeVolumeChecker(tmp_path).violations()}
+
+        assert findings == {
+            "personal-vol",
+            "db-data-local (name for 'db-data')",
+            "db-data-5079 (in service 'db')",
+        }
+
+    def test_canonical_baseline_allows_canonical_volumes(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        local = tmp_path / "docker-compose" / "local"
+        local.mkdir(parents=True)
+        (local / "compose.yaml").write_text(
+            yaml.dump(
+                {
+                    "services": {
+                        "db": {
+                            "volumes": ["db-data:/var/lib/postgresql/data"],
+                        },
+                        "cache": {
+                            "volumes": [
+                                {
+                                    "type": "volume",
+                                    "source": "cache-data",
+                                    "target": "/data",
+                                },
+                            ],
+                        },
+                    },
+                    "volumes": {
+                        "cache-data": None,
+                        "db-data": {"name": "db-data"},
+                    },
+                }
+            )
+        )
+
+        assert ComposeVolumeChecker(tmp_path).violations() == []
+
     def test_violations_raises_when_no_compose_files(self, tmp_path: Path) -> None:
         checker = ComposeVolumeChecker(tmp_path)
         with pytest.raises(ComposeCheckError, match="no Docker Compose files"):
