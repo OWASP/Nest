@@ -23,6 +23,8 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/run-code-checks.yaml
+    with:
+      check_docker_compose: ${{ github.event_name == 'merge_group' }}
 
   run-code-tests:
     name: Code tests

@@ -8,8 +8,10 @@ src = [
   "backend/src",
   "backend/tests",
   "docs",
+  ".github/scripts",
   "infrastructure/scripts",
   "infrastructure/tests",
+  "tools/tests",
 ]
 
 [lint]
@@ -81,7 +83,11 @@ ignore = [
 "backend/tests/cluster-fuzz-lite/**/*.py" = [
   "INP001", # Atheris fuzz harnesses mirror production paths; not importable packages.
 ]
+".github/scripts/*.py" = [
+  "INP001", # Standalone CI scripts; not importable packages.
+]
 
 [lint.isort]
 detect-same-package = false
-known-first-party = ["apps", "scripts", "serve", "tests"]
+known-first-party = ["apps", "docker_compose_check", "scripts", "serve", "tests"]
+known-third-party = ["github"]
