@@ -13,6 +13,7 @@ from apps.mentorship.api.internal.mutations.program import (
     resolve_admins_from_logins,
 )
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
+from apps.mentorship.models.program import Program
 
 
 @pytest.fixture(autouse=True)
@@ -460,8 +461,8 @@ class TestUpdateProgramStatus:
     """Tests for ProgramMutation.update_program_status."""
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
-    def test_update_status_success(self, mock_program, mutation):
-        """Test successful status update."""
+    def test_update_status_draft_to_published(self, mock_program, mutation):
+        """Test successful status update from DRAFT to PUBLISHED."""
         user = MagicMock()
         info = _make_info(user)
 
@@ -471,6 +472,7 @@ class TestUpdateProgramStatus:
 
         mock_prog = MagicMock()
         mock_prog.has_admin.return_value = True
+        mock_prog.status = Program.ProgramStatus.DRAFT
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         result = mutation.update_program_status(info, input_data)
@@ -478,6 +480,24 @@ class TestUpdateProgramStatus:
         assert result == mock_prog
         assert mock_prog.status == ProgramStatusEnum.PUBLISHED.value
         mock_prog.save.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_update_status_invalid_transition(self, mock_program, mutation):
+        """Test ValidationError for invalid transition (DRAFT to COMPLETED)."""
+        user = MagicMock()
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.key = "prog-1"
+        input_data.status = ProgramStatusEnum.COMPLETED
+
+        mock_prog = MagicMock()
+        mock_prog.has_admin.return_value = True
+        mock_prog.status = Program.ProgramStatus.DRAFT
+        mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            mutation.update_program_status(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_status_program_not_found(self, mock_program, mutation):
