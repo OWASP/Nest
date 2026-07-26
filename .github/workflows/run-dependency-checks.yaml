@@ -43,8 +43,8 @@ jobs:
         run: make security-dependency-audit
     timeout-minutes: 10
 
-  run-dependency-scan:
-    name: Dependency scan
+  run-dependency-check:
+    name: Dependency check
     continue-on-error: true
     permissions:
       contents: read
@@ -55,13 +55,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run OSV vulnerability scan
-        uses: ./.github/actions/run-osv-scan
+      - name: Run OSV vulnerability check
+        uses: ./.github/actions/run-osv-check
         with:
-          command: make security-dependency-scan-osv
+          command: make security-dependency-check-osv
 
-      - name: Run Trivy vulnerability scan
-        uses: ./.github/actions/run-trivy-scan
+      - name: Run Trivy vulnerability check
+        if: always()
+        uses: ./.github/actions/run-trivy-check
         with:
-          command: make security-dependency-scan-trivy
+          command: make security-dependency-check-trivy
     timeout-minutes: 5

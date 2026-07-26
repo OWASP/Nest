@@ -8,11 +8,11 @@ check-test: ## Run code quality checks and tests
 
 check-test-backend: ## Run code quality checks and backend tests
 	@$(MAKE) check
-	@$(MAKE) backend-test
+	@$(MAKE) test-backend
 
 check-test-frontend: ## Run code quality checks and frontend tests
 	@$(MAKE) check
-	@$(MAKE) frontend-test
+	@$(MAKE) test-frontend
 
 check-test-e2e: ## Run code quality checks and e2e tests
 	@$(MAKE) check

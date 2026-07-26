@@ -43,7 +43,7 @@ pnpm run dev
 
 ### Prettier
 
-Runs from the **repository root**. See [CONTRIBUTING.md — Prettier](../CONTRIBUTING.md#prettier) for scope.
+Runs from the **repository root**. See [CONTRIBUTING.md — Prettier](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md#prettier) for scope.
 
 | Task | Command |
 | ---- | ------- |
@@ -54,7 +54,7 @@ Equivalent `pnpm` commands: `pnpm run format:check` (verify) and `pnpm run forma
 
 ### ESLint
 
-Runs from the **repository root**. See [CONTRIBUTING.md — ESLint](../CONTRIBUTING.md#eslint) for scope.
+Runs from the **repository root**. See [CONTRIBUTING.md — ESLint](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md#eslint) for scope.
 
 | Task | Command |
 | ---- | ------- |
@@ -87,7 +87,7 @@ From the **repository root** (with `make run` so `nest-frontend` and the backend
 make graphql-codegen
 ```
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md#graphql-types) for when to run this command.
+See [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md#graphql-types) for when to run this command.
 
 ## Dependencies
 

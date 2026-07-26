@@ -160,8 +160,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run Trivy repository scan
-        uses: ./.github/actions/run-trivy-scan
+      - name: Run Trivy repository check
+        uses: ./.github/actions/run-trivy-check
         with:
           command: make security-repository-scan-trivy
     timeout-minutes: 5
