@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: 30c5d8351e4a50d6279784d4773eded140355084  # v1.40.2
+    rev: df39c89b663e0ef6292e461bb5fb283ddd0680dd  # v1.40.3
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
