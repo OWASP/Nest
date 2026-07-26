@@ -106,6 +106,34 @@ def test_fingerprint_changes_when_snippet_include_changes(
     assert first != second
 
 
+def test_fingerprint_changes_when_non_markdown_snippet_include_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = tmp_path
+    docs_src = root / "docs" / "src"
+    docs_src.mkdir(parents=True)
+    included = root / "backend" / "src" / "example.py"
+    included.parent.mkdir(parents=True)
+    included.write_text("VALUE = 1\n", encoding="utf-8")
+    (docs_src / "example.md").write_text(
+        '--8<-- "backend/src/example.py"\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(serve, "ROOT", root)
+    monkeypatch.setattr(serve, "DOCS_SRC", docs_src)
+    monkeypatch.setattr(serve, "WATCH_PATHS", (docs_src,))
+
+    assert serve.iter_files(included) == [included]
+
+    first = serve.fingerprint()
+    included.write_text("VALUE = 2\n", encoding="utf-8")
+    second = serve.fingerprint()
+
+    assert first != second
+
+
 def test_fingerprint_changes_when_asset_changes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

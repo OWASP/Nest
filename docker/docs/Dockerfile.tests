@@ -60,8 +60,8 @@ ENV FORCE_COLOR=1 \
 USER owasp
 WORKDIR /home/owasp/docs
 
-COPY --from=builder --chown=owasp:owasp /home/owasp/docs /home/owasp/docs
-COPY --chmod=444 --chown=owasp:owasp docs/serve.py ./
-COPY --chmod=444 --chown=owasp:owasp docs/tests/serve_test.py tests/serve_test.py
+COPY --from=builder --chmod=555 --chown=root:root /home/owasp/docs /home/owasp/docs
+COPY --chmod=444 --chown=root:root docs/serve.py ./
+COPY --chmod=444 --chown=root:root docs/tests/serve_test.py tests/serve_test.py
 
 CMD ["pytest"]

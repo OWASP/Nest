@@ -77,9 +77,13 @@ WATCH_PATHS = (
 
 
 def iter_files(path: Path) -> list[Path]:
-    """Return sorted documentation source files under path."""
+    """Return sorted documentation source files under path.
+
+    Explicit file paths (MkDocs config and snippet includes) are always
+    included. Directory walks still filter by ``is_watched_file``.
+    """
     if path.is_file():
-        return [path] if is_watched_file(path) else []
+        return [path]
     if not path.is_dir():
         return []
 
