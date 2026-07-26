@@ -10,6 +10,7 @@ nav:
   - Frontend: frontend/README.md
   - NestBot: nestbot/README.md
   - Schema: schema/README.md
+  - Maintenance: maintenance/README.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material
