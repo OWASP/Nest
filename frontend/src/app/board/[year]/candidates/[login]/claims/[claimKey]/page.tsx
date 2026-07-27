@@ -163,7 +163,7 @@ const ClaimDetailsPage = () => {
           {claim.reviews.length === 0 ? (
             <p> No reviews. </p>
           ) : (
-            <div className="grid overflow-hidden min-w-0">
+            <div className="grid min-w-0 overflow-hidden">
               {claim.reviews.map((review) => (
                 <div
                   key={review.id}

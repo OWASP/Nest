@@ -43,11 +43,20 @@ const ClaimReviewsPage = () => {
     return <LoadingSpinner />
   }
 
-  if (!isReviewer || isCandidate) {
+  if (!isReviewer) {
     return (
       <AccessDeniedDisplay
         title="Access Denied"
         message="You must be a reviewer to view this page."
+      />
+    )
+  }
+
+  if (isCandidate) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Reviewers who are also candidates cannot access this page."
       />
     )
   }
