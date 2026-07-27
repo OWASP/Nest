@@ -6,7 +6,7 @@ ignoreScripts: true
 minimumReleaseAge: 30240
 
 minimumReleaseAgeExclude:
-  - brace-expansion # 1.1.16, 5.0.8
+  - brace-expansion  # 1.1.16, 5.0.8
 
 overrides:
   brace-expansion@1: 1.1.16
