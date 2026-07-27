@@ -1,47 +1,35 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type ClaimStatusEnum =
-  | 'APPROVED'
-  | 'DISCARDED'
-  | 'DRAFT'
-  | 'REJECTED'
-  | 'SUBMITTED'
-  | 'WITHDRAWN';
-
-export type GetBoardCandidateClaimQueryVariables = Exact<{
-  login: string;
-  key: string;
-  year: number;
+export type GetBoardCandidateClaimQueryVariables = Types.Exact<{
+  login: Types.Scalars['String']['input'];
+  key: Types.Scalars['String']['input'];
+  year: Types.Scalars['Int']['input'];
 }>;
 
 
 export type GetBoardCandidateClaimQuery = { boardCandidateClaim: { __typename: 'BoardCandidateClaimNode', id: string, createdAt: any, description: string, key: string, name: string, status: Types.ClaimStatusEnum, updatedAt: any } | null };
 
-export type GetBoardCandidateClaimsQueryVariables = Exact<{
-  login: string;
-  year: number;
+export type GetBoardCandidateClaimsQueryVariables = Types.Exact<{
+  login: Types.Scalars['String']['input'];
+  year: Types.Scalars['Int']['input'];
 }>;
 
 
 export type GetBoardCandidateClaimsQuery = { boardCandidateClaims: Array<{ __typename: 'BoardCandidateClaimNode', id: string, createdAt: any, description: string, hasEvidence: boolean, key: string, name: string, order: number, status: Types.ClaimStatusEnum, updatedAt: any }> };
 
-export type GetBoardCandidateAndClaimsQueryVariables = Exact<{
-  login: string;
-  year: number;
+export type GetBoardCandidateAndClaimsQueryVariables = Types.Exact<{
+  login: Types.Scalars['String']['input'];
+  year: Types.Scalars['Int']['input'];
 }>;
 
 
 export type GetBoardCandidateAndClaimsQuery = { boardCandidateClaims: Array<{ __typename: 'BoardCandidateClaimNode', id: string, createdAt: any, description: string, hasEvidence: boolean, key: string, name: string, order: number, status: Types.ClaimStatusEnum, updatedAt: any }>, boardOfDirectors: { __typename: 'BoardOfDirectorsNode', candidate: { __typename: 'EntityMemberNode', id: string } | null } | null };
 
-export type GetClaimAndEvidencesQueryVariables = Exact<{
-  login: string;
-  key: string;
-  year: number;
+export type GetClaimAndEvidencesQueryVariables = Types.Exact<{
+  login: Types.Scalars['String']['input'];
+  key: Types.Scalars['String']['input'];
+  year: Types.Scalars['Int']['input'];
 }>;
 
 

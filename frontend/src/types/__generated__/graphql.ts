@@ -1,5 +1,10 @@
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -10,8 +15,8 @@ export type Scalars = {
   Date: { input: string | number; output: string | number; }
   DateTime: { input: string | number; output: string | number; }
   JSON: { input: Record<string, unknown>; output: Record<string, unknown>; }
-  UUID: { input: unknown; output: unknown; }
-  Upload: { input: unknown; output: unknown; }
+  UUID: { input: any; output: any; }
+  Upload: { input: any; output: any; }
 };
 
 export type AdminNode = {
@@ -74,10 +79,21 @@ export type BoardCandidateClaimNode = Node & {
   key: Scalars['String']['output'];
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
+  reviews: Array<BoardCandidateClaimReviewNode>;
   status: ClaimStatusEnum;
   updatedAt: Scalars['DateTime']['output'];
   withdrawnAt?: Maybe<Scalars['DateTime']['output']>;
   withdrawnReason: Scalars['String']['output'];
+};
+
+export type BoardCandidateClaimReviewNode = Node & {
+  __typename?: 'BoardCandidateClaimReviewNode';
+  createdAt: Scalars['DateTime']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  notes: Scalars['String']['output'];
+  reviewer?: Maybe<UserNode>;
+  status: ReviewStatusEnum;
 };
 
 export type BoardOfDirectorsNode = Node & {
@@ -104,6 +120,7 @@ export type ChapterNode = Node & {
   contributionStats?: Maybe<Scalars['JSON']['output']>;
   country: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
+  entityChannels: Array<EntityChannelNode>;
   entityLeaders: Array<EntityMemberNode>;
   geoLocation?: Maybe<GeoLocationType>;
   /** The Globally Unique ID of this object */
@@ -145,6 +162,7 @@ export type CommitteeNode = Node & {
   __typename?: 'CommitteeNode';
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['String']['output']>;
+  entityChannels: Array<EntityChannelNode>;
   entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
@@ -191,6 +209,7 @@ export type CreateModuleInput = {
   endedAt: Scalars['DateTime']['input'];
   experienceLevel: ExperienceLevelEnum;
   labels?: Array<Scalars['String']['input']>;
+  menteeCanManageDeadlines?: Scalars['Boolean']['input'];
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
@@ -210,9 +229,29 @@ export type CreateProgramInput = {
   tags?: Array<Scalars['String']['input']>;
 };
 
+export type CreateReviewInput = {
+  claimKey: Scalars['String']['input'];
+  claimMemberLogin: Scalars['String']['input'];
+  notes?: Scalars['String']['input'];
+  status: ReviewStatusEnum;
+  year: Scalars['Int']['input'];
+};
+
 export type DiscardClaimInput = {
   key: Scalars['String']['input'];
   year: Scalars['Int']['input'];
+};
+
+export type EntityChannelNode = Node & {
+  __typename?: 'EntityChannelNode';
+  externalId?: Maybe<Scalars['String']['output']>;
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  isDefault: Scalars['Boolean']['output'];
+  isReviewed: Scalars['Boolean']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  platform: Scalars['String']['output'];
 };
 
 export type EntityMemberNode = Node & {
@@ -407,6 +446,7 @@ export type ModuleNode = {
   issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
+  menteeCanManageDeadlines: Scalars['Boolean']['output'];
   mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
@@ -419,6 +459,7 @@ export type ModuleNode = {
   tags?: Maybe<Array<Scalars['String']['output']>>;
   taskAssignedAt?: Maybe<Scalars['DateTime']['output']>;
   taskDeadline?: Maybe<Scalars['DateTime']['output']>;
+  userRole?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -471,6 +512,7 @@ export type Mutation = {
   createApiKey: CreateApiKeyResult;
   createBoardCandidateClaim: ClaimResult;
   createBoardCandidateClaimEvidence: EvidenceResult;
+  createBoardCandidateClaimReview: ReviewResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
   deleteModule: Scalars['String']['output'];
@@ -521,6 +563,11 @@ export type MutationCreateBoardCandidateClaimArgs = {
 
 export type MutationCreateBoardCandidateClaimEvidenceArgs = {
   inputData: CreateEvidenceInput;
+};
+
+
+export type MutationCreateBoardCandidateClaimReviewArgs = {
+  inputData: CreateReviewInput;
 };
 
 
@@ -790,6 +837,7 @@ export type ProjectNode = Node & {
   contributionStats?: Maybe<Scalars['JSON']['output']>;
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['DateTime']['output']>;
+  entityChannels: Array<EntityChannelNode>;
   entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   healthMetricsLatest?: Maybe<ProjectHealthMetricsNode>;
@@ -863,6 +911,7 @@ export type Query = {
   getProgram?: Maybe<ProgramNode>;
   getProgramModules: Array<ModuleNode>;
   getProjectModules: Array<ModuleNode>;
+  isMentee: Scalars['Boolean']['output'];
   isMentor: Scalars['Boolean']['output'];
   isProjectLeader: Scalars['Boolean']['output'];
   managementModule?: Maybe<ModuleNode>;
@@ -988,6 +1037,11 @@ export type QueryGetProgramModulesArgs = {
 
 export type QueryGetProjectModulesArgs = {
   projectKey: Scalars['String']['input'];
+};
+
+
+export type QueryIsMenteeArgs = {
+  login: Scalars['String']['input'];
 };
 
 
@@ -1247,6 +1301,19 @@ export type RepositoryNodeRecentMilestonesArgs = {
   limit?: Scalars['Int']['input'];
 };
 
+export type ReviewResult = {
+  __typename?: 'ReviewResult';
+  code?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+  review?: Maybe<BoardCandidateClaimReviewNode>;
+};
+
+export enum ReviewStatusEnum {
+  Approved = 'APPROVED',
+  Rejected = 'REJECTED'
+}
+
 export type RevokeApiKeyResult = {
   __typename?: 'RevokeApiKeyResult';
   code?: Maybe<Scalars['String']['output']>;
@@ -1318,6 +1385,7 @@ export type UpdateModuleInput = {
   experienceLevel: ExperienceLevelEnum;
   key: Scalars['String']['input'];
   labels?: Array<Scalars['String']['input']>;
+  menteeCanManageDeadlines?: InputMaybe<Scalars['Boolean']['input']>;
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];

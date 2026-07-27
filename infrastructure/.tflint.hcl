@@ -34,6 +34,9 @@ rule "terraform_naming_convention" {
 
 rule "terraform_required_providers" {
   enabled = true
+  source  = true
+  # Child modules declare provider source only; roots pin versions in live/state/bootstrap.
+  version = false
 }
 
 rule "terraform_required_version" {

@@ -1,67 +1,21 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type CreateModuleInput = {
-  description: string;
-  domains?: Array<string>;
-  endedAt: any;
-  experienceLevel: ExperienceLevelEnum;
-  labels?: Array<string>;
-  mentorLogins?: Array<string> | null | undefined;
-  name: string;
-  programKey: string;
-  projectId: string | number;
-  projectName: string;
-  startedAt: any;
-  tags?: Array<string>;
-};
-
-export type ExperienceLevelEnum =
-  | 'ADVANCED'
-  | 'BEGINNER'
-  | 'EXPERT'
-  | 'INTERMEDIATE';
-
-export type ReorderModulesInput = {
-  moduleKeys: Array<string>;
-  programKey: string;
-};
-
-export type UpdateModuleInput = {
-  description: string;
-  domains?: Array<string>;
-  endedAt: any;
-  experienceLevel: ExperienceLevelEnum;
-  key: string;
-  labels?: Array<string>;
-  mentorLogins?: Array<string> | null | undefined;
-  name: string;
-  programKey: string;
-  projectId: string | number;
-  projectName: string;
-  startedAt: any;
-  tags?: Array<string>;
-};
-
-export type UpdateModuleMutationVariables = Exact<{
+export type UpdateModuleMutationVariables = Types.Exact<{
   input: Types.UpdateModuleInput;
 }>;
 
 
 export type UpdateModuleMutation = { updateModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: Types.ExperienceLevelEnum, startedAt: any, endedAt: any, tags: Array<string> | null, domains: Array<string> | null, labels: Array<string> | null, projectId: string | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
 
-export type CreateModuleMutationVariables = Exact<{
+export type CreateModuleMutationVariables = Types.Exact<{
   input: Types.CreateModuleInput;
 }>;
 
 
 export type CreateModuleMutation = { createModule: { __typename: 'ModuleNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevel: Types.ExperienceLevelEnum, id: string, key: string, labels: Array<string> | null, name: string, projectId: string | null, startedAt: any, tags: Array<string> | null, mentors: Array<{ __typename: 'MentorNode', avatarUrl: string, id: string, login: string, name: string }>, mentees: Array<{ __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string }> } };
 
-export type ReorderModulesMutationVariables = Exact<{
+export type ReorderModulesMutationVariables = Types.Exact<{
   input: Types.ReorderModulesInput;
 }>;
 
