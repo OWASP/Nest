@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04 AS builder
+FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -36,16 +36,14 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --only main --only test --only video
 
 # Less likely to cause cache invalidation items go first.
-COPY manage.py wsgi.py ./
-COPY tests/__init__.py tests/__init__.py
+COPY manage.py ./
 COPY scripts scripts
-COPY settings settings
 COPY static static
 COPY templates templates
-COPY apps apps
+COPY src src
 COPY tests/unit tests/unit
 
-FROM python:3.13.14-alpine3.23@sha256:b0513989fa9be54569cac73f48a60320b74bb0f9ffa886568eea7e48a2432c04
+FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -57,6 +55,7 @@ RUN addgroup -S -g ${OWASP_GID} owasp && \
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONPATH="/home/owasp/src" \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp

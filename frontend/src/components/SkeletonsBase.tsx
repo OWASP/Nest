@@ -38,7 +38,7 @@ const SkeletonBase = ({
   indexName: string
   loadingImageUrl: string
 }) => {
-  let componentProps: CardSkeletonProps = {}
+  let componentProps: CardSkeletonProps
 
   switch (indexName) {
     case 'chapters':

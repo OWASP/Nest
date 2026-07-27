@@ -42,12 +42,17 @@ const ModuleDetailsPage = () => {
   const mentorshipModule: Module | null | undefined = data?.managementModule
   const admins = data?.managementProgram?.admins
 
+  // Role comes straight from the backend; admins and mentors get the full
+  // management view, mentees a read-only one.
+  const isPrivileged =
+    mentorshipModule?.userRole === 'admin' || mentorshipModule?.userRole === 'mentor'
+
   if (error && isForbiddenGraphQLError(error)) {
     return (
       <ErrorDisplay
         statusCode={403}
         title="Access Denied"
-        message="You do not have permission to manage this module."
+        message="You do not have permission to view this module."
       />
     )
   }
@@ -85,9 +90,10 @@ const ModuleDetailsPage = () => {
           programKey={programKey}
           moduleKey={moduleKey}
           entityKey={moduleKey}
-          accessLevel="admin"
+          accessLevel={isPrivileged ? 'admin' : 'user'}
           admins={admins ?? undefined}
           mentors={mentorshipModule.mentors ?? undefined}
+          isMentee={mentorshipModule.userRole === 'mentee'}
           isActive={true}
           isArchived={false}
           showModuleActions={true}
@@ -101,7 +107,7 @@ const ModuleDetailsPage = () => {
           entityKey={moduleKey}
           tags={mentorshipModule.tags ?? undefined}
           domains={mentorshipModule.domains ?? undefined}
-          labels={mentorshipModule.labels ?? undefined}
+          labels={isPrivileged ? (mentorshipModule.labels ?? undefined) : undefined}
         />
 
         <Contributors

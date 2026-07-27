@@ -1,6 +1,11 @@
 import { authCookies } from './mockAuthCookies'
 
-export const mockClaimAuth = async (page, mockData, login = 'testuser', operationNames?: string[]) => {
+export const mockClaimAuth = async (
+  page,
+  mockData,
+  login = 'testuser',
+  operationNames?: string[]
+) => {
   await page.route('**/api/auth/session', async (route) => {
     await route.fulfill({
       status: 200,
@@ -29,7 +34,11 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser', operatio
           },
         },
       })
-    } else if (operationNames && postData.operationName && !operationNames.includes(postData.operationName)) {
+    } else if (
+      operationNames &&
+      postData.operationName &&
+      !operationNames.includes(postData.operationName)
+    ) {
       await route.abort('aborted')
     } else {
       await route.fulfill({

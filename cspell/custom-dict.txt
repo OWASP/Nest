@@ -12,6 +12,7 @@ Balbin
 Balbin's
 Birda
 CCSP
+CFL
 CISSP
 CSSLP
 Cañón
@@ -27,6 +28,7 @@ GPG
 GRC
 GSOC
 GTM
+Ghsas
 Golovanova
 Hackbright
 Héllo
@@ -44,10 +46,13 @@ NETTACKER
 NOASSERTION
 NOSEMGREP
 NOSONAR
+NPROCESSORS
 Nadu
 Nagori
 Nominatim
+ONLN
 OSSF
+OSV
 OWHF
 Obmondo
 Oleksiuk
@@ -70,6 +75,7 @@ Truncator
 Turbopack
 Twitterbot
 VCALENDAR
+VCS
 VEVENT
 WSL
 Wandji
@@ -90,6 +96,7 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+atheris
 attisdropped
 bangbang
 boardofdirectors
@@ -119,6 +126,7 @@ envsubst
 ephemerals
 euo
 facebookexternalhit
+fdp
 gamesec
 geocoders
 geoloc
@@ -129,6 +137,7 @@ graphiql
 graphqler
 gunicorn
 hackathon
+harfbuzz
 hcl
 heroui
 hsl
@@ -146,12 +155,14 @@ kasya
 langgraph
 lhci
 libexpat
+libfuzzer
 libgobject
 libharfbuzz
 libpango
 libpangoft
 libx
 lighthouseci
+lighthouserc
 linkify
 lte
 lxml
@@ -180,6 +191,7 @@ notab
 nspname
 numfmt
 openblas
+opencre
 openstreetmap
 owasppcitoolkit
 owtf
@@ -226,6 +238,8 @@ speakerdeck
 subgrp
 superfences
 tfbackend
+tfdata
+tftest
 tgz
 tiktok
 trailofbits

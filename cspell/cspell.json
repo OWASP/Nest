@@ -40,17 +40,14 @@
   "enabled": true,
   "files": ["**/*", ".github/**/*"],
   "ignorePaths": [
-    ".github/workflows/check-pr-issue-skip-usernames.txt",
+    ".github/check-contribution-skip-usernames.txt",
     "backend/**/migrations/*.py",
     "backend/data/project-custom-tags/*.json",
     "backend/static/**",
     "design/**",
     "pnpm-lock.yaml"
   ],
-  "ignoreRegExpList": [
-    "#\\w+",
-    "<@\\w+>"
-  ],
+  "ignoreRegExpList": ["#\\w+", "<@\\w+>"],
   "import": [
     "@cspell/dict-aws/cspell-ext.json",
     "@cspell/dict-companies/cspell-ext.json",

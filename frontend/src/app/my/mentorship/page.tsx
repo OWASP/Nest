@@ -2,17 +2,15 @@
 
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { useDjangoSession } from 'hooks/useDjangoSession'
 import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
-import { hasExtendedUser } from 'types/auth'
 
 import type { Program } from 'types/mentorship'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
@@ -22,9 +20,11 @@ const MyMentorshipPage: React.FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const { data: session } = useSession()
+  const { isSyncing, session } = useDjangoSession()
 
-  const userName = hasExtendedUser(session) ? session.user.login : undefined
+  const userName = session?.user?.login
+  // Only project leaders create programs; everyone else just browses their list.
+  const isProjectLeader = session?.user?.isLeader
 
   const initialQuery = searchParams.get('q') || ''
   const initialPage = Number.parseInt(searchParams.get('page') || '1', 10)
@@ -52,6 +52,9 @@ const MyMentorshipPage: React.FC = () => {
     }
   }, [searchQuery, page, router])
 
+  // One query returns every program the user is associated with (admin, mentor, or
+  // mentee), each carrying its own `userRole`. Wait for the backend session sync,
+  // otherwise a first-login request would be unauthenticated and return nothing.
   const {
     data: programData,
     loading: loadingPrograms,
@@ -60,9 +63,8 @@ const MyMentorshipPage: React.FC = () => {
     variables: { search: debouncedQuery, page, limit: 24 },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
+    skip: isSyncing,
   })
-
-  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
 
   useEffect(() => {
     if (programData?.myPrograms) {
@@ -85,17 +87,8 @@ const MyMentorshipPage: React.FC = () => {
 
   const handleCreate = () => router.push('/my/mentorship/programs/create')
 
-  if (!userName) {
+  if (isSyncing || !userName) {
     return <LoadingSpinner />
-  }
-
-  if (!isProjectLeader) {
-    return (
-      <AccessDeniedDisplay
-        title="Access Denied"
-        message="Only project leaders can access this page."
-      />
-    )
   }
 
   return (
@@ -103,12 +96,14 @@ const MyMentorshipPage: React.FC = () => {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-600 dark:text-white">My Mentorship</h1>
-          <p className="text-gray-600 dark:text-gray-400">Programs you've created or joined</p>
+          <p className="text-gray-600 dark:text-gray-400">Programs you're part of</p>
         </div>
-        <ActionButton onClick={handleCreate}>
-          <FaPlus className="mr-2" />
-          {'Create Program'}
-        </ActionButton>
+        {isProjectLeader && (
+          <ActionButton onClick={handleCreate}>
+            <FaPlus className="mr-2" />
+            {'Create Program'}
+          </ActionButton>
+        )}
       </div>
 
       <SearchPageLayout
@@ -130,12 +125,12 @@ const MyMentorshipPage: React.FC = () => {
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {programs.length === 0 ? (
             <div className="col-span-full flex min-h-[40vh] flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
-              <p className="text-lg font-semibold">Program not found</p>
+              <p className="text-lg font-semibold">No programs found</p>
             </div>
           ) : (
             programs.map((p) => (
               <ProgramCard
-                accessLevel="admin"
+                accessLevel={p?.userRole === 'admin' ? 'admin' : 'user'}
                 isAdmin={p?.userRole === 'admin'}
                 key={p.id}
                 href={`/my/mentorship/programs/${p.key}`}

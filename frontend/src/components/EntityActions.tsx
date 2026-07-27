@@ -30,6 +30,7 @@ interface EntityActionsProps {
   setStatus?: (newStatus: ProgramStatusEnum) => void | Promise<void>
   isAdmin?: boolean
   isMentor?: boolean
+  isMentee?: boolean
 }
 
 const EntityActions: React.FC<EntityActionsProps> = ({
@@ -40,6 +41,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   setStatus,
   isAdmin = false,
   isMentor = false,
+  isMentee = false,
 }) => {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -164,8 +166,10 @@ const EntityActions: React.FC<EntityActionsProps> = ({
             : []),
         ]
       : [
-          { key: 'edit_module', label: 'Edit' },
-          ...(isAdmin || isMentor ? [{ key: 'view_issues', label: 'View Issues' }] : []),
+          ...(isAdmin || isMentor ? [{ key: 'edit_module', label: 'Edit' }] : []),
+          ...(isAdmin || isMentor || isMentee
+            ? [{ key: 'view_issues', label: 'View Issues' }]
+            : []),
           ...(isAdmin
             ? [{ key: 'delete_module', label: 'Delete', className: 'text-red-500' }]
             : []),
