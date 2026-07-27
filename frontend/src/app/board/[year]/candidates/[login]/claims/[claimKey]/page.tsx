@@ -33,7 +33,7 @@ const ClaimDetailsPage = () => {
     error: graphQLRequestError,
   } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey || !year || !session?.user?.login,
+    skip: isSyncing || !claimKey || !year || !session?.user?.login,
     variables: {
       key: claimKey,
       login,
@@ -110,8 +110,9 @@ const ClaimDetailsPage = () => {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Claim</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">@{login}</p>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {claim.status === ClaimStatusEnum.Draft && session?.user?.login === login && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
@@ -162,11 +163,11 @@ const ClaimDetailsPage = () => {
           {claim.reviews.length === 0 ? (
             <p> No reviews. </p>
           ) : (
-            <div className="grid gap-2">
+            <div className="grid overflow-hidden min-w-0">
               {claim.reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="h-24 w-full flex-row justify-between bg-transparent"
+                  className="flex h-24 w-full flex-row justify-between bg-transparent"
                 >
                   <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
                     <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">

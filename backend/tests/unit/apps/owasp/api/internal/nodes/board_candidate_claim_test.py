@@ -21,6 +21,7 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         }
         expected_field_names = {
             "_id",
+            "candidate",
             "created_at",
             "description",
             "has_evidence",

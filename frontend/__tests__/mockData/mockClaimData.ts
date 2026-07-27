@@ -77,6 +77,7 @@ export const mockSingleClaim = {
   hasEvidence: true,
   createdAt: '2025-01-15T10:00:00Z',
   updatedAt: '2025-01-15T10:00:00Z',
+  reviews: [],
 }
 
 export const mockEvidences = [

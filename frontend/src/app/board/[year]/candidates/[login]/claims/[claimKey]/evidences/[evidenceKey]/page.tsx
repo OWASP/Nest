@@ -30,7 +30,7 @@ const EvidenceDetailsPage = () => {
   const { isSyncing, session } = useDjangoSession()
   const { data, loading, error } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey || !login || !year || !session?.user?.login,
+    skip: isSyncing || !claimKey || !login || !year || !session?.user?.login,
     variables: {
       key: claimKey,
       login,
@@ -128,7 +128,7 @@ const EvidenceDetailsPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Evidence</h1>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {evidence.hasFile && (
               <ActionButton onClick={handleDownloadEvidence}>
                 <FaDownload className="mr-2" />

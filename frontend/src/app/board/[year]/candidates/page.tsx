@@ -1,6 +1,5 @@
 'use client'
 import { useQuery, useApolloClient } from '@apollo/client/react'
-import { Button } from '@heroui/button'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useDjangoSession } from 'hooks/useDjangoSession'
@@ -299,9 +298,14 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
   const leadsFlagshipProject = ledProjects.some((project) => project.level === 'flagship')
 
   return (
-    <Button
-      onPress={handleCardClick}
-      className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') handleCardClick()
+      }}
+      className="group flex h-full w-full cursor-pointer flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full items-start gap-4">
         {candidate.member?.avatarUrl && (
@@ -696,7 +700,7 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
           </div>
         </div>
       )}
-    </Button>
+    </div>
   )
 }
 

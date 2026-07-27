@@ -73,11 +73,17 @@ class BoardCandidateClaimQuery:
         else:
             claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
 
-        return claims.annotate(
-            evidence_exists=Exists(
-                BoardCandidateClaimEvidence.objects.filter(claim=OuterRef("pk"), is_removed=False)
-            ),
-        ).order_by("order", "nest_created_at")
+        return (
+            claims.annotate(
+                evidence_exists=Exists(
+                    BoardCandidateClaimEvidence.objects.filter(
+                        claim=OuterRef("pk"), is_removed=False
+                    )
+                ),
+            )
+            .select_related("candidate__member")
+            .order_by("order", "nest_created_at")
+        )
 
     @strawberry_django.field
     def board_candidate_claim(
@@ -96,16 +102,20 @@ class BoardCandidateClaimQuery:
 
         """
         try:
-            claim = BoardCandidateClaim.objects.annotate(
-                evidence_exists=Exists(
-                    BoardCandidateClaimEvidence.objects.filter(
-                        claim=OuterRef("pk"), is_removed=False
-                    )
-                ),
-            ).get(
-                board__year=year,
-                candidate__member__login=login,
-                key=key,
+            claim = (
+                BoardCandidateClaim.objects.select_related("candidate__member", "board")
+                .annotate(
+                    evidence_exists=Exists(
+                        BoardCandidateClaimEvidence.objects.filter(
+                            claim=OuterRef("pk"), is_removed=False
+                        )
+                    ),
+                )
+                .get(
+                    board__year=year,
+                    candidate__member__login=login,
+                    key=key,
+                )
             )
         except BoardCandidateClaim.DoesNotExist:
             return None

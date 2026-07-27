@@ -256,7 +256,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
           onAction: ACTION_HANDLERS[key],
         }))
       : []),
-    ...(isReviewer && !hasReviewed
+    ...(isReviewer && !hasReviewed && claim.status === ClaimStatusEnum.Submitted
       ? [
           {
             key: 'approve',
@@ -293,10 +293,10 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
           {['withdraw', 'approve', 'reject'].includes(confirmAction ?? '') && (
             <ModalBody>
               <textarea
-                aria-label="Reason/Notes"
+                aria-label={confirmAction === 'withdraw' ? 'Reason for withdrawal' : 'Notes'}
                 className="mt-2 w-full rounded border p-2"
                 rows={3}
-                placeholder="Reason/Notes..."
+                placeholder={confirmAction === 'withdraw' ? 'Reason for withdrawal...' : 'Notes...'}
                 value={reason ?? ''}
                 onChange={(e) => setReason(e.target.value)}
               />
