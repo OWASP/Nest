@@ -138,17 +138,21 @@ const ClaimDetailsPage = () => {
                   disableAnimation
                   key={evidence.key}
                   onPress={() => handleEvidenceClick(evidence.key)}
-                  className="h-28 flex-col items-start justify-start bg-transparent p-4 dark:hover:bg-gray-900"
+                  className="h-24 w-full flex-row justify-between bg-transparent dark:hover:bg-gray-900"
                 >
-                  <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
-                    {evidence.name}
-                  </h3>
-                  <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
-                    {evidence.description}
-                  </p>
-                  <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
-                    {formatDate(evidence.createdAt)}
-                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
+                    <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
+                      {evidence.name}
+                    </h3>
+                    <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
+                      {evidence.description}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
+                        {formatDate(evidence.createdAt)}
+                      </span>
+                    </div>
+                  </div>
                 </Button>
               ))}
             </div>
