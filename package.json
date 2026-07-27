@@ -20,7 +20,7 @@
     "node": "^24.0.0"
   },
   "name": "owasp-nest",
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.17.0",
   "prettier": {
     "arrowParens": "always",
     "endOfLine": "lf",
