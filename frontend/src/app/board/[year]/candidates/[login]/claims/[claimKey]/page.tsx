@@ -112,7 +112,7 @@ const ClaimDetailsPage = () => {
             <h1 className="text-3xl font-bold text-gray-600 dark:text-white">Claim</h1>
           </div>
           <div className="flex items-center">
-            {claim.status == ClaimStatusEnum.Draft && session?.user?.login == login && (
+            {claim.status === ClaimStatusEnum.Draft && session?.user?.login === login && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
                 {'Add Evidence'}
@@ -129,10 +129,10 @@ const ClaimDetailsPage = () => {
         </div>
         <Metadata details={claimDetails} detailsTitle="Claim Details" />
         <SecondaryCard title="Evidences">
-          {evidences.length == 0 ? (
+          {evidences.length === 0 ? (
             <p> No evidences. </p>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-2">
               {evidences.map((evidence) => (
                 <Button
                   disableAnimation
@@ -162,31 +162,33 @@ const ClaimDetailsPage = () => {
           {claim.reviews.length === 0 ? (
             <p> No reviews. </p>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-2">
               {claim.reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="h-28 flex-col items-start justify-start rounded-xl border border-gray-200 bg-transparent p-4 dark:border-gray-800"
+                  className="h-24 w-full flex-row justify-between bg-transparent"
                 >
-                  <div className="flex items-center gap-2">
-                    <h3 className="min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
+                  <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
+                    <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
                       {review.reviewer?.login ?? 'Unknown Reviewer'}
                     </h3>
+                    <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
+                      {review.notes || 'No notes provided.'}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
+                        {formatDate(review.createdAt)}
+                      </span>
+                      <Chip
+                        size="sm"
+                        variant="flat"
+                        color={review.status === ReviewStatusEnum.Approved ? 'success' : 'danger'}
+                        className="text-tiny h-5 shrink-0"
+                      >
+                        {upperFirst(toLower(review.status))}
+                      </Chip>
+                    </div>
                   </div>
-                  <p className="mt-2 flex-1 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
-                    {review.notes || 'No notes provided.'}
-                  </p>
-                  <span className="mt-2 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                    {formatDate(review.createdAt)}
-                    <Chip
-                      size="sm"
-                      variant="flat"
-                      color={review.status === ReviewStatusEnum.Approved ? 'success' : 'danger'}
-                      className="text-tiny h-5 shrink-0"
-                    >
-                      {upperFirst(toLower(review.status))}
-                    </Chip>
-                  </span>
                 </div>
               ))}
             </div>

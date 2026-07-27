@@ -155,7 +155,7 @@ const EditEvidencePage = () => {
       onSubmit={handleSubmit}
       loading={loading}
       title="Edit Evidence"
-      submitText="Update Evidence"
+      submitText="Edit Evidence"
     />
   )
 }

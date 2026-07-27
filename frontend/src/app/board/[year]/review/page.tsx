@@ -44,7 +44,12 @@ const ClaimReviewsPage = () => {
   }
 
   if (!isReviewer || isCandidate) {
-    return <AccessDeniedDisplay title="Access Denied" message="Cannot view this page." />
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="You must be a reviewer to view this page."
+      />
+    )
   }
 
   const claimsToReview = claims.filter(
