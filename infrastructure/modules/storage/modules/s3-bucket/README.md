@@ -3,7 +3,7 @@
 
 | Name | Version |
 | ---- | ------- |
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.14.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
 
 ## Providers
 
@@ -43,4 +43,5 @@ No modules.
 | ---- | ----------- |
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the S3 bucket. |
 | <a name="output_bucket"></a> [bucket](#output\_bucket) | The S3 bucket resource. |
+| <a name="output_server_side_encryption_configuration"></a> [server\_side\_encryption\_configuration](#output\_server\_side\_encryption\_configuration) | The server-side encryption configuration. |
 <!-- END_TF_DOCS -->
