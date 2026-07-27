@@ -48,7 +48,7 @@ class BoardCandidateClaimQuery:
 
             if not is_self and not is_reviewer:
                 claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
-            if is_reviewer and not is_self:
+            elif is_reviewer and not is_self:
                 claims = claims.filter(
                     status__in=[
                         BoardCandidateClaim.Status.SUBMITTED,
