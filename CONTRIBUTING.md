@@ -422,6 +422,10 @@ make test
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
 
+Docker Compose volume-name enforcement runs only on the merge queue
+(`merge_group`), not on ordinary pull-request CI. See
+[docker-compose/README.md](https://github.com/OWASP/Nest/blob/main/docker-compose/README.md).
+
 ### Running Security Scan
 
 Run local SAST, container image, and DAST scans with:
@@ -559,10 +563,10 @@ Then load data manually in another terminal:
 make backend-data-load-fuzz
 ```
 
-ClusterFuzzLite runs on pull requests for 5 minutes and on a nightly schedule for 15 minutes; fuzz targets run in parallel during that window. Build integration lives in `.clusterfuzzlite/`; the workflow sets `language: python` (a `project.yaml` is not required for CI). ClusterFuzzLite dependencies are pinned in `backend/requirements/cluster-fuzz-lite.txt`, generated from `backend/requirements/cluster-fuzz-lite.in`. Regenerate the lockfile after changing them:
+ClusterFuzzLite runs on pull requests for 5 minutes and on a nightly schedule for 15 minutes; fuzz targets run in parallel during that window. Build integration lives in `.clusterfuzzlite/`; the workflow sets `language: python` (a `project.yaml` is not required for CI). ClusterFuzzLite dependencies are pinned in `backend/requirements/cluster-fuzz-lite.txt`, generated from `backend/requirements/cluster-fuzz-lite.in`. Regenerate hashed pip lockfiles after changing them:
 
 ```bash
-make compile-backend-requirements
+make compile-requirements
 ```
 
 ### Test Coverage

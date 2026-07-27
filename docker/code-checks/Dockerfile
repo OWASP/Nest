@@ -70,8 +70,8 @@ RUN apk --no-cache upgrade && \
 COPY --from=uv /uv /usr/local/bin/uv
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv python install 3.13 && \
-    uv venv /opt/pre-commit --python 3.13 && \
-    uv venv /opt/dependency-audit --python 3.13 --seed
+    uv venv /opt/dependency-audit --python 3.13 --seed && \
+    uv venv /opt/pre-commit --python 3.13
 
 COPY package.json /tmp/package.json
 WORKDIR /tmp
@@ -85,8 +85,8 @@ COPY --from=node-deps /opt/code-checks/e2e/node_modules /nest/e2e/node_modules
 COPY --from=terraform --chmod=555 /bin/terraform /usr/local/bin/terraform
 COPY --from=tflint --chmod=555 /usr/local/bin/tflint /usr/local/bin/tflint
 
-COPY --chmod=444 backend/requirements/pre-commit.txt /tmp/pre-commit.txt
 COPY --chmod=444 backend/requirements/build.txt /tmp/build.txt
+COPY --chmod=444 tools/requirements/pre-commit.txt /tmp/pre-commit.txt
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=cache,target=/root/.cache/pip \
     uv pip install --python /opt/pre-commit --require-hashes --requirement /tmp/pre-commit.txt && \
