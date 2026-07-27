@@ -14,11 +14,11 @@ from apps.owasp.api.internal.dataloaders.project import (
     PROJECT_BY_REPOSITORY_ID_LOADER,
 )
 from apps.owasp.api.internal.dataloaders.snapshot import (
-    NEW_CHAPTERS_BY_SNAPSHOT_ID,
-    NEW_ISSUES_BY_SNAPSHOT_ID,
-    NEW_PROJECTS_BY_SNAPSHOT_ID,
-    NEW_RELEASES_BY_SNAPSHOT_ID,
-    NEW_USERS_BY_SNAPSHOT_ID,
+    CHAPTERS_BY_SNAPSHOT_ID,
+    ISSUES_BY_SNAPSHOT_ID,
+    PROJECTS_BY_SNAPSHOT_ID,
+    RELEASES_BY_SNAPSHOT_ID,
+    USERS_BY_SNAPSHOT_ID,
 )
 
 EXPECTED_LOADER_KEYS = (
@@ -27,11 +27,11 @@ EXPECTED_LOADER_KEYS = (
     PROJECT_BY_REPOSITORY_ID_LOADER,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-    NEW_CHAPTERS_BY_SNAPSHOT_ID,
-    NEW_ISSUES_BY_SNAPSHOT_ID,
-    NEW_PROJECTS_BY_SNAPSHOT_ID,
-    NEW_RELEASES_BY_SNAPSHOT_ID,
-    NEW_USERS_BY_SNAPSHOT_ID,
+    CHAPTERS_BY_SNAPSHOT_ID,
+    ISSUES_BY_SNAPSHOT_ID,
+    PROJECTS_BY_SNAPSHOT_ID,
+    RELEASES_BY_SNAPSHOT_ID,
+    USERS_BY_SNAPSHOT_ID,
 )
 
 
@@ -49,7 +49,7 @@ class TestGetOwaspDataloaders:
         loaders = get_owasp_dataloaders()
         assert isinstance(loaders[loader_key], DataLoader)
 
-    def test_returns_new_instances_on_each_call(self):
+    def test_returns_instances_on_each_call(self):
         """Each call produces distinct DataLoader instances for per-request isolation."""
         loaders1 = get_owasp_dataloaders()
         loaders2 = get_owasp_dataloaders()

@@ -6,11 +6,11 @@ import pytest
 import strawberry
 
 from apps.owasp.api.internal.dataloaders.snapshot import (
-    NEW_CHAPTERS_BY_SNAPSHOT_ID,
-    NEW_ISSUES_BY_SNAPSHOT_ID,
-    NEW_PROJECTS_BY_SNAPSHOT_ID,
-    NEW_RELEASES_BY_SNAPSHOT_ID,
-    NEW_USERS_BY_SNAPSHOT_ID,
+    CHAPTERS_BY_SNAPSHOT_ID,
+    ISSUES_BY_SNAPSHOT_ID,
+    PROJECTS_BY_SNAPSHOT_ID,
+    RELEASES_BY_SNAPSHOT_ID,
+    USERS_BY_SNAPSHOT_ID,
 )
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
 from apps.owasp.models.snapshot import Snapshot
@@ -73,7 +73,7 @@ class TestSnapshotNodeResolvers:
         info = MagicMock(spec=strawberry.Info)
         mock_dataloader = AsyncMock()
         mock_dataloader.load = AsyncMock(return_value=[mock_chapter1, mock_chapter2])
-        info.context.owasp_dataloaders = {NEW_CHAPTERS_BY_SNAPSHOT_ID: mock_dataloader}
+        info.context.owasp_dataloaders = {CHAPTERS_BY_SNAPSHOT_ID: mock_dataloader}
 
         result = await resolver(None, mock_snapshot, info)
 
@@ -91,7 +91,7 @@ class TestSnapshotNodeResolvers:
         info = MagicMock(spec=strawberry.Info)
         mock_dataloader = AsyncMock()
         mock_dataloader.load = AsyncMock(return_value=[mock_issue1, mock_issue2])
-        info.context.owasp_dataloaders = {NEW_ISSUES_BY_SNAPSHOT_ID: mock_dataloader}
+        info.context.owasp_dataloaders = {ISSUES_BY_SNAPSHOT_ID: mock_dataloader}
 
         result = await resolver(None, mock_snapshot, info)
 
@@ -109,7 +109,7 @@ class TestSnapshotNodeResolvers:
         info = MagicMock(spec=strawberry.Info)
         mock_dataloader = AsyncMock()
         mock_dataloader.load = AsyncMock(return_value=[mock_project1, mock_project2])
-        info.context.owasp_dataloaders = {NEW_PROJECTS_BY_SNAPSHOT_ID: mock_dataloader}
+        info.context.owasp_dataloaders = {PROJECTS_BY_SNAPSHOT_ID: mock_dataloader}
 
         result = await resolver(None, mock_snapshot, info)
 
@@ -127,7 +127,7 @@ class TestSnapshotNodeResolvers:
         info = MagicMock(spec=strawberry.Info)
         mock_dataloader = AsyncMock()
         mock_dataloader.load = AsyncMock(return_value=[mock_release1, mock_release2])
-        info.context.owasp_dataloaders = {NEW_RELEASES_BY_SNAPSHOT_ID: mock_dataloader}
+        info.context.owasp_dataloaders = {RELEASES_BY_SNAPSHOT_ID: mock_dataloader}
 
         result = await resolver(None, mock_snapshot, info)
 
@@ -145,7 +145,7 @@ class TestSnapshotNodeResolvers:
         info = MagicMock(spec=strawberry.Info)
         mock_dataloader = AsyncMock()
         mock_dataloader.load = AsyncMock(return_value=[mock_user1, mock_user2])
-        info.context.owasp_dataloaders = {NEW_USERS_BY_SNAPSHOT_ID: mock_dataloader}
+        info.context.owasp_dataloaders = {USERS_BY_SNAPSHOT_ID: mock_dataloader}
 
         result = await resolver(None, mock_snapshot, info)
 

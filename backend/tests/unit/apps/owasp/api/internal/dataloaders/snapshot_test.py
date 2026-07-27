@@ -7,23 +7,23 @@ from django.db.models import F
 from strawberry.dataloader import DataLoader
 
 from apps.owasp.api.internal.dataloaders.snapshot import (
-    NEW_CHAPTERS_BY_SNAPSHOT_ID,
-    NEW_ISSUES_BY_SNAPSHOT_ID,
-    NEW_PROJECTS_BY_SNAPSHOT_ID,
-    NEW_RELEASES_BY_SNAPSHOT_ID,
-    NEW_USERS_BY_SNAPSHOT_ID,
+    CHAPTERS_BY_SNAPSHOT_ID,
+    ISSUES_BY_SNAPSHOT_ID,
+    PROJECTS_BY_SNAPSHOT_ID,
     RECENT_ISSUES_LIMIT,
+    RELEASES_BY_SNAPSHOT_ID,
+    USERS_BY_SNAPSHOT_ID,
     get_snapshot_loaders,
-    load_new_chapters_by_snapshot_id,
-    load_new_issues_by_snapshot_id,
-    load_new_projects_by_snapshot_id,
-    load_new_releases_by_snapshot_id,
-    load_new_users_by_snapshot_id,
+    load_chapters_by_snapshot_id,
+    load_issues_by_snapshot_id,
+    load_projects_by_snapshot_id,
+    load_releases_by_snapshot_id,
+    load_users_by_snapshot_id,
 )
 
 
 class TestLoadNewChaptersBySnapshotId:
-    """Tests for load_new_chapters_by_snapshot_id."""
+    """Tests for load_chapters_by_snapshot_id."""
 
     @patch(
         "apps.owasp.api.internal.dataloaders.snapshot.get_results_by_keys",
@@ -41,7 +41,7 @@ class TestLoadNewChaptersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], [], []]
 
-        await load_new_chapters_by_snapshot_id(snapshot_ids)
+        await load_chapters_by_snapshot_id(snapshot_ids)
 
         mock_chapter.objects.filter.assert_called_once_with(snapshots__in=snapshot_ids)
         mock_filter.annotate.assert_called_once_with(snapshot_id=F("snapshots__pk"))
@@ -63,7 +63,7 @@ class TestLoadNewChaptersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], []]
 
-        await load_new_chapters_by_snapshot_id(snapshot_ids)
+        await load_chapters_by_snapshot_id(snapshot_ids)
 
         mock_get_results_by_keys.assert_called_once_with(
             mock_qs, snapshot_ids, key_field="snapshot_id"
@@ -86,7 +86,7 @@ class TestLoadNewChaptersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = expected
 
-        result = await load_new_chapters_by_snapshot_id([1, 2, 3])
+        result = await load_chapters_by_snapshot_id([1, 2, 3])
 
         assert result is expected
 
@@ -102,7 +102,7 @@ class TestLoadNewChaptersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = []
 
-        result = await load_new_chapters_by_snapshot_id([])
+        result = await load_chapters_by_snapshot_id([])
 
         mock_chapter.objects.filter.assert_called_once_with(snapshots__in=[])
         assert result == []
@@ -120,14 +120,14 @@ class TestLoadNewChaptersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = [[mock_chapter_obj]]
 
-        result = await load_new_chapters_by_snapshot_id([42])
+        result = await load_chapters_by_snapshot_id([42])
 
         mock_chapter.objects.filter.assert_called_once_with(snapshots__in=[42])
         assert result == [[mock_chapter_obj]]
 
 
 class TestLoadNewIssuesBySnapshotId:
-    """Tests for load_new_issues_by_snapshot_id."""
+    """Tests for load_issues_by_snapshot_id."""
 
     @patch(
         "apps.owasp.api.internal.dataloaders.snapshot.get_results_by_keys",
@@ -144,7 +144,7 @@ class TestLoadNewIssuesBySnapshotId:
         mock_windowed.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], [], []]
 
-        await load_new_issues_by_snapshot_id(snapshot_ids)
+        await load_issues_by_snapshot_id(snapshot_ids)
 
         mock_issue.objects.filter.assert_called_once_with(snapshots__in=snapshot_ids)
         mock_filter.annotate.assert_called_once_with(snapshot_id=F("snapshots__pk"))
@@ -172,7 +172,7 @@ class TestLoadNewIssuesBySnapshotId:
         mock_windowed.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], []]
 
-        await load_new_issues_by_snapshot_id(snapshot_ids)
+        await load_issues_by_snapshot_id(snapshot_ids)
 
         mock_get_results_by_keys.assert_called_once_with(
             mock_qs, snapshot_ids, key_field="snapshot_id"
@@ -192,7 +192,7 @@ class TestLoadNewIssuesBySnapshotId:
         mock_windowed.filter.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[MagicMock() for _ in range(RECENT_ISSUES_LIMIT)]]
 
-        result = await load_new_issues_by_snapshot_id([1])
+        result = await load_issues_by_snapshot_id([1])
 
         mock_windowed.filter.assert_called_once_with(row_number__lte=RECENT_ISSUES_LIMIT)
         assert len(result[0]) == RECENT_ISSUES_LIMIT
@@ -214,7 +214,7 @@ class TestLoadNewIssuesBySnapshotId:
         mock_filter.annotate.return_value.filter.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = expected
 
-        result = await load_new_issues_by_snapshot_id([1, 2, 3])
+        result = await load_issues_by_snapshot_id([1, 2, 3])
 
         assert result is expected
 
@@ -230,14 +230,14 @@ class TestLoadNewIssuesBySnapshotId:
         mock_filter.annotate.return_value.filter.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = []
 
-        result = await load_new_issues_by_snapshot_id([])
+        result = await load_issues_by_snapshot_id([])
 
         mock_issue.objects.filter.assert_called_once_with(snapshots__in=[])
         assert result == []
 
 
 class TestLoadNewProjectsBySnapshotId:
-    """Tests for load_new_projects_by_snapshot_id."""
+    """Tests for load_projects_by_snapshot_id."""
 
     @patch(
         "apps.owasp.api.internal.dataloaders.snapshot.get_results_by_keys",
@@ -255,7 +255,7 @@ class TestLoadNewProjectsBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], [], []]
 
-        await load_new_projects_by_snapshot_id(snapshot_ids)
+        await load_projects_by_snapshot_id(snapshot_ids)
 
         mock_project.objects.filter.assert_called_once_with(snapshots__in=snapshot_ids)
         mock_filter.annotate.assert_called_once_with(snapshot_id=F("snapshots__pk"))
@@ -277,7 +277,7 @@ class TestLoadNewProjectsBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], []]
 
-        await load_new_projects_by_snapshot_id(snapshot_ids)
+        await load_projects_by_snapshot_id(snapshot_ids)
 
         mock_get_results_by_keys.assert_called_once_with(
             mock_qs, snapshot_ids, key_field="snapshot_id"
@@ -300,7 +300,7 @@ class TestLoadNewProjectsBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = expected
 
-        result = await load_new_projects_by_snapshot_id([1, 2, 3])
+        result = await load_projects_by_snapshot_id([1, 2, 3])
 
         assert result is expected
 
@@ -316,14 +316,14 @@ class TestLoadNewProjectsBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = []
 
-        result = await load_new_projects_by_snapshot_id([])
+        result = await load_projects_by_snapshot_id([])
 
         mock_project.objects.filter.assert_called_once_with(snapshots__in=[])
         assert result == []
 
 
 class TestLoadNewReleasesBySnapshotId:
-    """Tests for load_new_releases_by_snapshot_id."""
+    """Tests for load_releases_by_snapshot_id."""
 
     @patch(
         "apps.owasp.api.internal.dataloaders.snapshot.get_results_by_keys",
@@ -341,7 +341,7 @@ class TestLoadNewReleasesBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], [], []]
 
-        await load_new_releases_by_snapshot_id(snapshot_ids)
+        await load_releases_by_snapshot_id(snapshot_ids)
 
         mock_release.objects.filter.assert_called_once_with(snapshots__in=snapshot_ids)
         mock_filter.annotate.assert_called_once_with(snapshot_id=F("snapshots__pk"))
@@ -363,7 +363,7 @@ class TestLoadNewReleasesBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], []]
 
-        await load_new_releases_by_snapshot_id(snapshot_ids)
+        await load_releases_by_snapshot_id(snapshot_ids)
 
         mock_get_results_by_keys.assert_called_once_with(
             mock_qs, snapshot_ids, key_field="snapshot_id"
@@ -386,7 +386,7 @@ class TestLoadNewReleasesBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = expected
 
-        result = await load_new_releases_by_snapshot_id([1, 2, 3])
+        result = await load_releases_by_snapshot_id([1, 2, 3])
 
         assert result is expected
 
@@ -402,14 +402,14 @@ class TestLoadNewReleasesBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = []
 
-        result = await load_new_releases_by_snapshot_id([])
+        result = await load_releases_by_snapshot_id([])
 
         mock_release.objects.filter.assert_called_once_with(snapshots__in=[])
         assert result == []
 
 
 class TestLoadNewUsersBySnapshotId:
-    """Tests for load_new_users_by_snapshot_id."""
+    """Tests for load_users_by_snapshot_id."""
 
     @patch(
         "apps.owasp.api.internal.dataloaders.snapshot.get_results_by_keys",
@@ -425,7 +425,7 @@ class TestLoadNewUsersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], [], []]
 
-        await load_new_users_by_snapshot_id(snapshot_ids)
+        await load_users_by_snapshot_id(snapshot_ids)
 
         mock_user.objects.filter.assert_called_once_with(snapshots__in=snapshot_ids)
         mock_filter.annotate.assert_called_once_with(snapshot_id=F("snapshots__pk"))
@@ -447,7 +447,7 @@ class TestLoadNewUsersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = mock_qs
         mock_get_results_by_keys.return_value = [[], []]
 
-        await load_new_users_by_snapshot_id(snapshot_ids)
+        await load_users_by_snapshot_id(snapshot_ids)
 
         mock_get_results_by_keys.assert_called_once_with(
             mock_qs, snapshot_ids, key_field="snapshot_id"
@@ -470,7 +470,7 @@ class TestLoadNewUsersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = expected
 
-        result = await load_new_users_by_snapshot_id([1, 2, 3])
+        result = await load_users_by_snapshot_id([1, 2, 3])
 
         assert result is expected
 
@@ -486,7 +486,7 @@ class TestLoadNewUsersBySnapshotId:
         mock_filter.annotate.return_value.order_by.return_value = MagicMock()
         mock_get_results_by_keys.return_value = []
 
-        result = await load_new_users_by_snapshot_id([])
+        result = await load_users_by_snapshot_id([])
 
         mock_user.objects.filter.assert_called_once_with(snapshots__in=[])
         assert result == []
@@ -498,11 +498,11 @@ class TestGetSnapshotLoaders:
     @pytest.mark.parametrize(
         "loader_key",
         [
-            NEW_CHAPTERS_BY_SNAPSHOT_ID,
-            NEW_ISSUES_BY_SNAPSHOT_ID,
-            NEW_PROJECTS_BY_SNAPSHOT_ID,
-            NEW_RELEASES_BY_SNAPSHOT_ID,
-            NEW_USERS_BY_SNAPSHOT_ID,
+            CHAPTERS_BY_SNAPSHOT_ID,
+            ISSUES_BY_SNAPSHOT_ID,
+            PROJECTS_BY_SNAPSHOT_ID,
+            RELEASES_BY_SNAPSHOT_ID,
+            USERS_BY_SNAPSHOT_ID,
         ],
     )
     def test_returns_mapping(self, loader_key):
@@ -511,39 +511,39 @@ class TestGetSnapshotLoaders:
         assert loader_key in loaders
         assert isinstance(loaders[loader_key], DataLoader)
 
-    def test_load_fn_is_load_new_chapters_by_snapshot_id(self):
-        """The new_chapters loader is wired to load_new_chapters_by_snapshot_id."""
+    def test_load_fn_is_load_chapters_by_snapshot_id(self):
+        """The new_chapters loader is wired to load_chapters_by_snapshot_id."""
         loaders = get_snapshot_loaders()
-        assert loaders[NEW_CHAPTERS_BY_SNAPSHOT_ID].load_fn is load_new_chapters_by_snapshot_id
+        assert loaders[CHAPTERS_BY_SNAPSHOT_ID].load_fn is load_chapters_by_snapshot_id
 
-    def test_load_fn_is_load_new_issues_by_snapshot_id(self):
-        """The new_issues loader is wired to load_new_issues_by_snapshot_id."""
+    def test_load_fn_is_load_issues_by_snapshot_id(self):
+        """The new_issues loader is wired to load_issues_by_snapshot_id."""
         loaders = get_snapshot_loaders()
-        assert loaders[NEW_ISSUES_BY_SNAPSHOT_ID].load_fn is load_new_issues_by_snapshot_id
+        assert loaders[ISSUES_BY_SNAPSHOT_ID].load_fn is load_issues_by_snapshot_id
 
-    def test_load_fn_is_load_new_projects_by_snapshot_id(self):
-        """The new_projects loader is wired to load_new_projects_by_snapshot_id."""
+    def test_load_fn_is_load_projects_by_snapshot_id(self):
+        """The new_projects loader is wired to load_projects_by_snapshot_id."""
         loaders = get_snapshot_loaders()
-        assert loaders[NEW_PROJECTS_BY_SNAPSHOT_ID].load_fn is load_new_projects_by_snapshot_id
+        assert loaders[PROJECTS_BY_SNAPSHOT_ID].load_fn is load_projects_by_snapshot_id
 
-    def test_load_fn_is_load_new_releases_by_snapshot_id(self):
-        """The new_releases loader is wired to load_new_releases_by_snapshot_id."""
+    def test_load_fn_is_load_releases_by_snapshot_id(self):
+        """The new_releases loader is wired to load_releases_by_snapshot_id."""
         loaders = get_snapshot_loaders()
-        assert loaders[NEW_RELEASES_BY_SNAPSHOT_ID].load_fn is load_new_releases_by_snapshot_id
+        assert loaders[RELEASES_BY_SNAPSHOT_ID].load_fn is load_releases_by_snapshot_id
 
-    def test_load_fn_is_load_new_users_by_snapshot_id(self):
-        """The new_users loader is wired to load_new_users_by_snapshot_id."""
+    def test_load_fn_is_load_users_by_snapshot_id(self):
+        """The new_users loader is wired to load_users_by_snapshot_id."""
         loaders = get_snapshot_loaders()
-        assert loaders[NEW_USERS_BY_SNAPSHOT_ID].load_fn is load_new_users_by_snapshot_id
+        assert loaders[USERS_BY_SNAPSHOT_ID].load_fn is load_users_by_snapshot_id
 
     @pytest.mark.parametrize(
         "loader_key",
         [
-            NEW_CHAPTERS_BY_SNAPSHOT_ID,
-            NEW_ISSUES_BY_SNAPSHOT_ID,
-            NEW_PROJECTS_BY_SNAPSHOT_ID,
-            NEW_RELEASES_BY_SNAPSHOT_ID,
-            NEW_USERS_BY_SNAPSHOT_ID,
+            CHAPTERS_BY_SNAPSHOT_ID,
+            ISSUES_BY_SNAPSHOT_ID,
+            PROJECTS_BY_SNAPSHOT_ID,
+            RELEASES_BY_SNAPSHOT_ID,
+            USERS_BY_SNAPSHOT_ID,
         ],
     )
     def test_returns_new_instances_on_each_call(self, loader_key):
