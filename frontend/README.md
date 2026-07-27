@@ -48,7 +48,7 @@ Runs from the **repository root**. See [CONTRIBUTING.md — Prettier](../CONTRIB
 | Task | Command |
 | ---- | ------- |
 | Verify formatting (read-only; part of `make check`) | `make prettier` |
-| Auto-fix formatting issues | `make fix-prettier` |
+| Auto-fix formatting issues | `make prettier-fix` |
 
 Equivalent `pnpm` commands: `pnpm run format:check` (verify) and `pnpm run format` (fix).
 
@@ -59,7 +59,7 @@ Runs from the **repository root**. See [CONTRIBUTING.md — ESLint](../CONTRIBUT
 | Task | Command |
 | ---- | ------- |
 | Verify lint (read-only; part of `make check`) | `make eslint` |
-| Auto-fix lint issues | `make fix-eslint` |
+| Auto-fix lint issues | `make eslint-fix` |
 
 Equivalent `pnpm` commands: `pnpm run lint:check` (verify) and `pnpm run lint` (fix).
 
@@ -77,20 +77,17 @@ See the root and `frontend/` Makefiles for Docker-based convenience targets.
 
 TypeScript types for GraphQL operations are auto-generated from the backend schema.
 
-- Configuration: `graphql-codegen.ts`
+- Configuration: `graphql-codegen-config.ts`
 - Output: `src/types/__generated__/`
 
-From the **repository root** (with the backend running on `PUBLIC_API_URL`, default `http://localhost:8000`):
+From the **repository root** (with `make run` so `nest-frontend` and the backend are up). Codegen runs in the frontend container and defaults to `http://backend:8000`:
 
 ```bash
 # Regenerate types after schema or operation changes
 make graphql-codegen
-
-# Verify committed types match the live schema
-make check-graphql
 ```
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md#graphql-types) for when to run each command.
+See [CONTRIBUTING.md](../CONTRIBUTING.md#graphql-types) for when to run this command.
 
 ## Dependencies
 
