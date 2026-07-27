@@ -1,4 +1,4 @@
-auditConfig: {ignoreGhsas: []}
+auditConfig: {}
 
 ignoreScripts: true
 
@@ -32,7 +32,7 @@ minimumReleaseAgeExclude:
   - '@opentelemetry/semantic-conventions@1.43.0'
   - baseline-browser-mapping@2.11.1
   - body-parser@1.20.6
-  - brace-expansion@5.0.7
+  - brace-expansion@5.0.8
   - browserslist@4.28.7
   - caniuse-lite@1.0.30001806
   - dompurify@3.4.12
@@ -64,7 +64,7 @@ minimumReleaseAgeExclude:
 overrides:
   '@opentelemetry/core': 2.8.0
   body-parser: 1.20.6
-  brace-expansion@5: 5.0.7
+  brace-expansion@5: 5.0.8
   dompurify: 3.4.12
   fast-uri: 3.1.4
   glob: 11.1.0
