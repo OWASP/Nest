@@ -24,6 +24,8 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.dataloaders.project import (
+    ENTITY_CHANNELS_BY_PROJECT_ID,
+    ENTITY_LEADERS_BY_PROJECT_ID,
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
 )
@@ -48,6 +50,8 @@ class TestProjectNode(GraphQLNodeBaseTest):
             "contribution_stats",
             "contributors_count",
             "created_at",
+            "entity_channels",
+            "entity_leaders",
             "forks_count",
             "is_active",
             "issues_count",
@@ -420,4 +424,38 @@ class TestProjectNodeResolvers:
         result = await resolver(None, mock_project, mock_info)
 
         assert result == mock_repos
+        mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_entity_channels_loads_via_dataloader(self):
+        """entity_channels delegates to the dataloader with pk."""
+        mock_channels = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_channels)
+        mock_info = self._build_info(owasp={ENTITY_CHANNELS_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
+        resolver = self._get_resolver("entity_channels")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == mock_channels
+        mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_entity_leaders_loads_via_dataloader(self):
+        """entity_leaders delegates to the dataloader with pk."""
+        mock_leaders = [Mock(), Mock()]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_leaders)
+        mock_info = self._build_info(owasp={ENTITY_LEADERS_BY_PROJECT_ID: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
+        resolver = self._get_resolver("entity_leaders")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert result == mock_leaders
         mock_loader.load.assert_awaited_once_with(1)
