@@ -85,7 +85,7 @@ describe('CreateModulePage', () => {
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
     await user.type(screen.getByLabelText(/Domains/i), 'AI, ML')
     await user.type(screen.getByLabelText(/Tags/i), 'react, graphql')
-
+    await user.type(screen.getByLabelText(/Mentor GitHub Usernames/i), 'alice, bob')
     const projectInput = await waitFor(() => {
       return screen.getByPlaceholderText('Start typing project name...')
     })
@@ -121,6 +121,8 @@ describe('CreateModulePage', () => {
     await waitFor(
       () => {
         expect(mockCreateModule).toHaveBeenCalled()
+        const variables = mockCreateModule.mock.calls[0][0].variables
+        expect(variables.input.mentorLogins).toEqual(['alice', 'bob'])
         expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
       },
       { timeout: 10000 }

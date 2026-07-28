@@ -44,7 +44,9 @@ test.describe('Board Candidate Claim Evidence Create Page', () => {
     await page.getByLabel(/description/i).fill('New evidence description')
     await page.getByLabel(/source url/i).fill('https://example.com/evidence')
     await page.getByRole('button', { name: /add evidence/i }).click()
-    await expect(page).toHaveURL(/\/board\/2025\/candidates\/testuser\/claims\/experience-leadership$/)
+    await expect(page).toHaveURL(
+      /\/board\/2025\/candidates\/testuser\/claims\/experience-leadership$/
+    )
   })
 
   test('shows validation error when source url and file are both empty', async ({ page }) => {

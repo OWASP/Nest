@@ -305,7 +305,7 @@ class TestUpdateProgram:
         input_data.admin_logins = ["admin1"]
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
         mock_resolve.return_value = {MagicMock()}
 
@@ -341,7 +341,7 @@ class TestUpdateProgram:
         input_data.key = "prog-1"
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = False
+        mock_prog.has_admin.return_value = False
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         with pytest.raises(
@@ -362,7 +362,7 @@ class TestUpdateProgram:
         input_data.ended_at = datetime(2025, 1, 1, tzinfo=UTC)
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         with pytest.raises(ValidationError, match="End date must be after start date"):
@@ -387,7 +387,7 @@ class TestUpdateProgram:
         input_data.admin_logins = None
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
         mock_prog.save.side_effect = IntegrityError(
             'duplicate key value violates unique constraint "mentorship_programs_name_key"'
@@ -419,7 +419,7 @@ class TestUpdateProgram:
         input_data.admin_logins = None
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         result = mutation.update_program(info, input_data)
@@ -447,7 +447,7 @@ class TestUpdateProgram:
         input_data.admin_logins = None
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         result = mutation.update_program(info, input_data)
@@ -470,7 +470,7 @@ class TestUpdateProgramStatus:
         input_data.status = ProgramStatusEnum.PUBLISHED
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         result = mutation.update_program_status(info, input_data)
@@ -504,7 +504,7 @@ class TestUpdateProgramStatus:
         input_data.key = "prog-1"
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = False
+        mock_prog.has_admin.return_value = False
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         with pytest.raises(PermissionDenied):

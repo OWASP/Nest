@@ -3,7 +3,11 @@ import { mockSingleClaim, mockEvidences } from '@mockData/mockClaimData'
 import { test, expect } from '@playwright/test'
 
 const mockData = {
-  boardCandidateClaim: { __typename: 'BoardCandidateClaimNode', id: mockSingleClaim.key, ...mockSingleClaim },
+  boardCandidateClaim: {
+    __typename: 'BoardCandidateClaimNode',
+    id: mockSingleClaim.key,
+    ...mockSingleClaim,
+  },
   boardCandidateClaimEvidences: mockEvidences.map((e) => ({
     __typename: 'BoardCandidateClaimEvidenceNode',
     id: e.key,
@@ -31,7 +35,11 @@ test.describe('Board Candidate Claim Evidence Details Page', () => {
 
   test('does not render download button when evidence has no file', async ({ page }) => {
     const noFileMockData = {
-      boardCandidateClaim: { __typename: 'BoardCandidateClaimNode', id: mockSingleClaim.key, ...mockSingleClaim },
+      boardCandidateClaim: {
+        __typename: 'BoardCandidateClaimNode',
+        id: mockSingleClaim.key,
+        ...mockSingleClaim,
+      },
       boardCandidateClaimEvidences: [
         {
           __typename: 'BoardCandidateClaimEvidenceNode',
@@ -41,13 +49,19 @@ test.describe('Board Candidate Claim Evidence Details Page', () => {
       ],
     }
     await mockClaimAuth(page, noFileMockData, 'testuser', ['GetClaimAndEvidences'])
-    await page.goto('/board/2025/candidates/testuser/claims/experience-leadership/evidences/reference-letter')
-    await expect(page.getByRole('button', { name: /download evidence/i })).not.toBeVisible()
+    await page.goto(
+      '/board/2025/candidates/testuser/claims/experience-leadership/evidences/reference-letter'
+    )
+    await expect(page.getByRole('button', { name: /download evidence/i })).toBeHidden()
   })
 
   test('shows 404 when evidence is not found', async ({ page }) => {
     const notFoundData = {
-      boardCandidateClaim: { __typename: 'BoardCandidateClaimNode', id: mockSingleClaim.key, ...mockSingleClaim },
+      boardCandidateClaim: {
+        __typename: 'BoardCandidateClaimNode',
+        id: mockSingleClaim.key,
+        ...mockSingleClaim,
+      },
       boardCandidateClaimEvidences: [],
     }
     await mockClaimAuth(page, notFoundData, 'testuser', ['GetClaimAndEvidences'])

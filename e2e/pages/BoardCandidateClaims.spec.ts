@@ -4,7 +4,11 @@ import { mockClaims, mockCandidateData } from '@mockData/mockClaimData'
 import { test, expect } from '@playwright/test'
 
 const mockData = {
-  boardCandidateClaims: mockClaims.map((c) => ({ __typename: 'BoardCandidateClaimNode', id: c.key, ...c })),
+  boardCandidateClaims: mockClaims.map((c) => ({
+    __typename: 'BoardCandidateClaimNode',
+    id: c.key,
+    ...c,
+  })),
   ...mockCandidateData,
 }
 const baseUrl = '/board/2025/candidates/testuser/claims'

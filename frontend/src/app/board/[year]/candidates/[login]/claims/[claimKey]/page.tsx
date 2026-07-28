@@ -159,7 +159,7 @@ const ClaimDetailsPage = () => {
             </div>
           )}
         </SecondaryCard>
-        <SecondaryCard title="Reviews">
+        <SecondaryCard title="Reviews" className="overflow-hidden">
           {claim.reviews.length === 0 ? (
             <p> No reviews. </p>
           ) : (
@@ -167,7 +167,7 @@ const ClaimDetailsPage = () => {
               {claim.reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="flex h-24 w-full flex-row justify-between bg-transparent"
+                  className="flex h-24 w-full min-w-0 flex-row justify-between bg-transparent px-4"
                 >
                   <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
                     <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">

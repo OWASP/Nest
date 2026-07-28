@@ -16,9 +16,7 @@ The project uses a **containerized approach** for both development and productio
 
 Before contributing, ensure you have the following installed:
 
-1. [Docker](https://docs.docker.com/engine/install/) for running the Nest containers.
-1. [pre-commit](https://pre-commit.com/#install) for automated code checks.
-1. [terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform) and [tflint](https://github.com/terraform-linters/tflint?tab=readme-ov-file#installation) for IaC.
+1. [Docker](https://docs.docker.com/engine/install/) for running the Nest containers and local code quality checks and tests (e.g. `make check`, `make test`).
 
 Optional steps for Windows:
 
@@ -45,8 +43,8 @@ Optional steps for Windows:
 
 For detailed descriptions of all environment variables, see:
 
-- **Backend**: [backend/README.md](backend/README.md#environment-variables)
-- **Frontend**: [frontend/README.md](frontend/README.md#environment-variables)
+- **Backend**: [backend/README.md](https://github.com/OWASP/Nest/blob/main/backend/README.md#environment-variables)
+- **Frontend**: [frontend/README.md](https://github.com/OWASP/Nest/blob/main/frontend/README.md#environment-variables)
 
 ## Setting up the Project
 
@@ -269,7 +267,7 @@ To set up the NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/src/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
 ##### Testing NestBot Locally
@@ -352,11 +350,66 @@ Nest enforces code quality standards to ensure consistency and maintainability. 
 make check
 ```
 
-This command runs linters and other static analysis tools for both the frontend and backend.
+This command runs static analysis only (no tests, no running application). Checks run inside the `nest-code-checks` Docker image (built on first use), so host Node, Python, pre-commit, Terraform, and TFLint installs are not required. It runs:
+
+1. **Pre-commit** — repository hooks (formatting, linting, and other configured checks)
+2. **Prettier** — formatting for repository source files covered by `.prettierignore` (read-only; see [Prettier](#prettier))
+3. **ESLint** — lint for `e2e/` and `frontend/` (read-only; see [ESLint](#eslint))
+4. **CSpell** — checks spelling over the repository
 
 We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address (mark as resolved) all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project maintainer(s) you're working with for further guidance.
 
 **Please note that your pull request will not be reviewed until all code quality checks pass and all automated suggestions have been addressed or resolved.**
+
+### Prettier
+
+Prettier runs from the **repository root**. `make prettier` is read-only — it fails if formatting is wrong and does not modify your working tree.
+
+It formats JS/TS/JSON/CSS/HTML and similar files across the repository, excluding paths in `.prettierignore` (generated artifacts, caches, lockfiles, Markdown, YAML, `backend/static/`, `backend/templates/`, and other listed paths). Markdown and YAML are handled by pre-commit hooks instead.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify formatting before pushing (included in `make check`) | `make prettier` |
+| Auto-fix formatting issues | `make prettier-fix` |
+
+Equivalent `pnpm` commands (what CI runs on the host): `pnpm run format:check` (verify) and `pnpm run format` (fix). Locally, prefer `make prettier` / `make prettier-fix` so tooling comes from the code-checks image.
+
+If `make prettier` fails, run `make prettier-fix` (or `make check-fix` for Prettier and ESLint together), review the diff, then run `make check` again.
+
+### ESLint
+
+ESLint runs from the **repository root**. `make eslint` is read-only — it fails if lint issues are found and does not modify your working tree.
+
+It lints JavaScript and TypeScript in `frontend/` and `e2e/`. It loads `eslint.config.mjs` from the repository root automatically; that file is not linted.
+
+| Situation | Command |
+| --------- | ------- |
+| Verify lint before pushing (included in `make check`) | `make eslint` |
+| Auto-fix lint issues | `make eslint-fix` |
+
+Equivalent `pnpm` commands (what CI runs on the host): `pnpm run lint:check` (verify) and `pnpm run lint` (fix). Locally, prefer `make eslint` / `make eslint-fix` so tooling comes from the code-checks image.
+
+If `make eslint` fails, run `make eslint-fix` (or `make check-fix` for Prettier and ESLint together), review the diff, then run `make check` again.
+
+### GraphQL types
+
+Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. They are **not** part of `make check`, `make test`, or CI because codegen introspects a **running backend** with GraphQL introspection enabled.
+
+#### When to run
+
+| Situation | Command |
+| --------- | ------- |
+| You changed the backend GraphQL schema or frontend operations | `make graphql-codegen` then commit generated files |
+| You want to confirm committed types are current before opening a PR | `make graphql-codegen` then check `git status` / `git diff` under `frontend/src/types/__generated__/` |
+
+#### Requirements
+
+1. Start the Nest application (`make run`) so both `nest-backend` and `nest-frontend` are running.
+2. Ensure GraphQL introspection is enabled on that backend.
+3. Run commands from the repository root.
+4. Optional: set `PUBLIC_API_URL` in the environment if the backend is not at `http://backend:8000` from the frontend container (for example `docker exec -e PUBLIC_API_URL=http://backend:9000 nest-frontend pnpm run graphql-codegen`).
+
+Codegen runs inside `nest-frontend` (no host Node/pnpm install). Generated files are written to the bind-mounted `frontend/` tree on the host.
 
 ## Testing
 
@@ -369,18 +422,27 @@ make test
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
 
+Docker Compose volume-name enforcement runs only on the merge queue
+(`merge_group`), not on ordinary pull-request CI. See
+[docker-compose/README.md](https://github.com/OWASP/Nest/blob/main/docker-compose/README.md).
+
 ### Running Security Scan
 
-Run the security scans for vulnerabilities and anti-patterns with the following command:
+Run local SAST, container image, and DAST scans with:
 
 ```bash
 make security-scan
 ```
 
-This command automatically:
+This command runs:
 
-- Performs local Semgrep and Trivy scans
-- Outputs findings to the terminal for immediate review
+- SAST (Semgrep)
+- Repository scanning for secrets and misconfigurations (Trivy)
+- Dependency scanning for known vulnerabilities (package audits, Trivy, and OSV-Scanner)
+- Container image scans for backend and frontend
+- DAST (ZAP baseline scan against the running frontend)
+
+Findings are printed to the terminal for immediate review.
 
 For addressing findings:
 
@@ -388,25 +450,43 @@ For addressing findings:
 - Follow the documentation links provided in the output for remediation guidance
 - Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
 
-#### Running Code Scans Only
-
-You can run code scan part separately via
+#### Running SAST Scans Only
 
 ```bash
-make security-scan-code
+make security-sast-scan
+```
+
+#### Running Repository Scans Only
+
+```bash
+make security-repository-scan
+```
+
+#### Running DAST Scan
+
+Run ZAP against a live target. By default, the ZAP container reaches the
+frontend running on the host at `http://localhost:3000` through
+`http://host.docker.internal:3000`:
+
+```bash
+make security-dast-scan
+```
+
+Override the target with `ZAP_TARGET`, for example:
+
+```bash
+make security-dast-scan ZAP_TARGET=https://nest.owasp.dev
 ```
 
 #### Running Image Scans Only
 
-You can run image scan part separately via
-
 ```bash
-make security-scan-images
+make security-image-scan
 ```
 
 ### Running e2e Tests
 
-Playwright specs and their package live in the repository `e2e/` directory at the project root. Make targets for the stack are defined in `e2e/Makefile` (included from the repository root). Run the e2e suite with:
+Playwright specs and their package live in the repository `e2e/` directory at the project root. Make targets for the stack are defined in `e2e/make/test.mk` (included from the repository root). Run the e2e suite with:
 
 ```bash
 make test-e2e
@@ -422,41 +502,46 @@ This command automatically:
 To run e2e tests without initializing the database, use:
 
 ```bash
-make test-e2e-no-db-init
+make e2e-test-no-db-init
 ```
 
 For debugging, you can run the e2e backend separately:
 
 ```bash
-make run-backend-e2e
+make e2e-test-run-backend
 ```
 
 Then load data manually in another terminal:
 
 ```bash
-make load-data-e2e
+make e2e-load-data
 ```
 
 For Playwright UI mode:
 
 ```bash
-make test-e2e-ui
+make e2e-test-ui
 ```
 
 To run UI mode without the database initialized:
 
 ```bash
-make test-e2e-ui-no-db-init
+make e2e-test-ui-no-db-init
 ```
 
 You can access the UI at [http://localhost:3800](http://localhost:3800).
 
 ### Running Fuzz Tests
 
-Run the fuzz tests with the following command:
+Nest uses two complementary fuzzing layers:
+
+- **API fuzz tests** (`make test-backend-fuzz`) run [Schemathesis](https://schemathesis.readthedocs.io/) against the REST and GraphQL APIs with a live backend, database, and cache.
+- **ClusterFuzzLite** (`.github/workflows/cluster-fuzz-lite.yaml`) runs [Atheris](https://github.com/google/atheris) targets in CI from `backend/tests/cluster-fuzz-lite/apps/`, mirroring the production `src/apps/` layout (for example `slack/common/text.py` and `common/search/query_parser.py`). Seed inputs live in `.clusterfuzzlite/seed_corpora/` with the same layout.
+
+Run the API fuzz tests with the following command:
 
 ```bash
-make test-fuzz
+make test-backend-fuzz
 ```
 
 This command automatically:
@@ -469,13 +554,19 @@ This command automatically:
 For debugging, you can run the fuzz backend separately:
 
 ```bash
-make run-backend-fuzz
+make backend-test-run-fuzz
 ```
 
 Then load data manually in another terminal:
 
 ```bash
-make load-data-fuzz
+make backend-data-load-fuzz
+```
+
+ClusterFuzzLite runs on pull requests for 5 minutes and on a nightly schedule for 15 minutes; fuzz targets run in parallel during that window. Build integration lives in `.clusterfuzzlite/`; the workflow sets `language: python` (a `project.yaml` is not required for CI). ClusterFuzzLite dependencies are pinned in `backend/requirements/cluster-fuzz-lite.txt`, generated from `backend/requirements/cluster-fuzz-lite.in`. Regenerate hashed pip lockfiles after changing them:
+
+```bash
+make compile-requirements
 ```
 
 ### Test Coverage
@@ -622,6 +713,8 @@ git checkout -b feature/my-feature-name
   ```bash
   make check-test
   ```
+
+  If you changed the GraphQL schema or frontend GraphQL operations, also run `make graphql-codegen` with Nest application running (see [GraphQL types](#graphql-types)).
 
 - Write meaningful commit messages:
 

@@ -4,7 +4,7 @@ backend:
           - any-glob-to-any-file:
               - backend/**
           - all-globs-to-all-files:
-              - '!backend/apps/slack/**'
+              - '!backend/src/apps/slack/**'
               - '!backend/tests/unit/apps/slack/**'
 
 backend-tests:
@@ -54,7 +54,7 @@ makefile:
 nestbot:
   - changed-files:
       - any-glob-to-any-file:
-          - backend/apps/slack/**
+          - backend/src/apps/slack/**
 
 nestbot-tests:
   - changed-files:

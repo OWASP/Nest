@@ -18,8 +18,8 @@ The OWASP Nest backend is a Python-based API server built with the [Django](http
 
 The backend code lives in this directory. Key directories include:
 
-- `apps/` - Contains all Django applications (e.g., `owasp`, `github`, `api`).
-- `settings/` - Django configuration files.
+- `src/apps/` - Contains all Django applications (e.g., `owasp`, `github`, `api`).
+- `src/settings/` - Django configuration files.
 - `tests/` - Automated tests.
 - `data/` - Database dumps and backup files.
 
@@ -28,24 +28,37 @@ The backend code lives in this directory. Key directories include:
 The project uses **Docker** for local development. From the project root:
 
 ```bash
-# Start all services (backend, db, cache)
+# Start all services (backend, db, cache, …)
+make run
+```
+
+Or with Compose directly (add
+`-f docker-compose/local/compose.override.yaml` if you use local overrides):
+
+```bash
 docker compose -f docker-compose/local/compose.yaml up
 ```
 
+For local-only volume name customization on a feature branch (parallel
+checkouts / PR work), edit `docker-compose/local/compose.override.yaml` and see
+[docker-compose/README.md](../docker-compose/README.md). Merge queue (not PR CI)
+rejects non-canonical volume names before they reach `main`.
+
 For common tasks, use the provided `Makefile` targets:
 
-| Task                    | Command                 |
-| ----------------------- | ----------------------- |
-| Run database migrations | `make migrate`          |
-| Create a superuser      | `make create-superuser` |
-| Run backend tests       | `make test-backend`     |
-| Access Django shell     | `make django-shell`     |
+| Task                       | Command                 |
+| -------------------------- | ----------------------- |
+| Create database migrations | `make migration`        |
+| Run database migrations    | `make migrate`          |
+| Create a superuser         | `make create-superuser` |
+| Run backend tests          | `make test-backend`     |
+| Access Django shell        | `make shell-django`     |
 
 See the root `Makefile` and the local `Makefile` for more targets.
 
 ## Key APIs
 
-- **REST API (v0)**: Served at `/api/v0/`. See [API v0 README](https://github.com/OWASP/Nest/blob/main/backend/apps/api/rest/v0/README.md) for SDK-related constraints.
+- **REST API (v0)**: Served at `/api/v0/`. See [API v0 README](https://github.com/OWASP/Nest/blob/main/backend/src/apps/api/rest/v0/README.md) for SDK-related constraints.
 - **GraphQL API**: Served at `/graphql/`.
 
 ## Dependencies

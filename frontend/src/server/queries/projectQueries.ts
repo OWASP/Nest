@@ -6,6 +6,12 @@ export const GET_PROJECT_DATA = gql`
       contributionData
       contributionStats
       contributorsCount
+      entityChannels {
+        id
+        name
+        externalId
+        platform
+      }
       entityLeaders {
         description
         id

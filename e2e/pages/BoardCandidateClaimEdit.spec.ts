@@ -47,14 +47,10 @@ test.describe('Board Candidate Claim Edit Page', () => {
   })
 
   test('shows 404 when claim is not found', async ({ page }) => {
-    await mockClaimAuth(page, { boardCandidateClaim: null }, 'testuser', [
-      'GetBoardCandidateClaim',
-    ])
+    await mockClaimAuth(page, { boardCandidateClaim: null }, 'testuser', ['GetBoardCandidateClaim'])
     await page.goto(baseUrl)
     await expect(page.getByRole('heading', { level: 2, name: 'Claim Not Found' })).toBeVisible()
-    await expect(
-      page.getByText("Sorry, the claim you're looking for doesn't exist.")
-    ).toBeVisible()
+    await expect(page.getByText("Sorry, the claim you're looking for doesn't exist.")).toBeVisible()
   })
 
   test('submits form and redirects to claim details page', async ({ page }) => {

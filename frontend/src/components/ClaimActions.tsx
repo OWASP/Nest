@@ -86,9 +86,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
   const updateReviewsCache = (
     cache: ApolloCache,
     mutationData:
-      | CreateBoardCandidateClaimReviewMutation['createBoardCandidateClaimReview']
-      | null
-      | undefined
+      CreateBoardCandidateClaimReviewMutation['createBoardCandidateClaimReview'] | null | undefined
   ) => {
     const newReview = mutationData?.review
     if (!newReview || !sessionLogin) return

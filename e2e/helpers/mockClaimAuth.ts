@@ -1,6 +1,11 @@
 import { authCookies } from './mockAuthCookies'
 
-export const mockClaimAuth = async (page, mockData, login = 'testuser', operationNames?: string[]) => {
+export const mockClaimAuth = async (
+  page,
+  mockData,
+  login = 'testuser',
+  operationNames?: string[]
+) => {
   await page.route('**/api/auth/session', async (route) => {
     await route.fulfill({
       status: 200,
@@ -15,20 +20,8 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser', operatio
     })
   })
   await page.route('**/graphql/', async (route, request) => {
-    const headers = request.headers()
-    const contentType = headers['content-type'] || ''
-    let operationName: string | undefined
-
-    if (contentType.includes('application/json')) {
-      const postData = request.postDataJSON()
-      operationName = postData.operationName
-    } else {
-      const body = (await request.body()).toString()
-      const match = body.match(/"operationName"\s*:\s*"([^"]+)"/)
-      operationName = match?.[1] ?? undefined
-    }
-
-    if (operationName === 'SyncDjangoSession') {
+    const postData = request.postDataJSON()
+    if (postData.operationName === 'SyncDjangoSession') {
       await route.fulfill({
         status: 200,
         json: {
@@ -41,7 +34,11 @@ export const mockClaimAuth = async (page, mockData, login = 'testuser', operatio
           },
         },
       })
-    } else if (operationNames && operationName && !operationNames.includes(operationName)) {
+    } else if (
+      operationNames &&
+      postData.operationName &&
+      !operationNames.includes(postData.operationName)
+    ) {
       await route.abort('aborted')
     } else {
       await route.fulfill({

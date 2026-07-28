@@ -8,7 +8,8 @@ const certificateEvidence = {
   ...mockEvidences[0],
 }
 
-const baseUrl = '/board/2025/candidates/testuser/claims/experience-leadership/evidences/certificate/edit'
+const baseUrl =
+  '/board/2025/candidates/testuser/claims/experience-leadership/evidences/certificate/edit'
 
 const mockData = {
   boardCandidateClaimEvidence: certificateEvidence,

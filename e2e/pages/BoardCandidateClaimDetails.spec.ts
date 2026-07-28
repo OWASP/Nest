@@ -4,7 +4,11 @@ import { mockSingleClaim, mockEvidences } from '@mockData/mockClaimData'
 import { test, expect } from '@playwright/test'
 
 const mockData = {
-  boardCandidateClaim: { __typename: 'BoardCandidateClaimNode', id: mockSingleClaim.key, ...mockSingleClaim },
+  boardCandidateClaim: {
+    __typename: 'BoardCandidateClaimNode',
+    id: mockSingleClaim.key,
+    ...mockSingleClaim,
+  },
   boardCandidateClaimEvidences: mockEvidences.map((e) => ({
     __typename: 'BoardCandidateClaimEvidenceNode',
     id: e.key,
@@ -54,9 +58,7 @@ test.describe('Board Candidate Claim Details Page', () => {
     await mockClaimAuth(page, notFoundData, 'testuser', ['GetClaimAndEvidences'])
     await page.goto(baseUrl)
     await expect(page.getByRole('heading', { level: 2, name: 'Claim Not Found' })).toBeVisible()
-    await expect(
-      page.getByText("Sorry, the claim you're looking for doesn't exist.")
-    ).toBeVisible()
+    await expect(page.getByText("Sorry, the claim you're looking for doesn't exist.")).toBeVisible()
   })
 
   test('shows access denied when viewing another user profile', async ({ page }) => {
