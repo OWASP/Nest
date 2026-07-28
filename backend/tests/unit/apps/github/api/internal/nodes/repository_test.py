@@ -18,7 +18,7 @@ from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
-from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID_LOADER
+from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -168,7 +168,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_project)
         mock_info = Mock()
-        mock_info.context.owasp_dataloaders = {PROJECT_BY_REPOSITORY_ID_LOADER: mock_loader}
+        mock_info.context.owasp_dataloaders = {PROJECT_BY_REPOSITORY_ID: mock_loader}
 
         mock_repository = Mock()
         mock_repository.pk = 1

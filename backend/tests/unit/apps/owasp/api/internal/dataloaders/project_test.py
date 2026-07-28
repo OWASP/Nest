@@ -10,7 +10,7 @@ from apps.owasp.api.internal.dataloaders.project import (
     ENTITY_LEADERS_BY_PROJECT_ID,
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
-    PROJECT_BY_REPOSITORY_ID_LOADER,
+    PROJECT_BY_REPOSITORY_ID,
     Project,
     get_project_loaders,
     load_entity_channels_by_project_id,
@@ -680,7 +680,7 @@ class TestGetProjectLoaders:
     @pytest.mark.parametrize(
         "loader_key",
         [
-            PROJECT_BY_REPOSITORY_ID_LOADER,
+            PROJECT_BY_REPOSITORY_ID,
             HEALTH_METRICS_LIST_BY_PROJECT_ID,
             HEALTH_METRICS_LATEST_BY_PROJECT_ID,
             ENTITY_CHANNELS_BY_PROJECT_ID,
@@ -696,7 +696,7 @@ class TestGetProjectLoaders:
     def test_load_fn_is_load_projects_by_repository_id(self):
         """The project_by_repository_id loader is wired to load_projects_by_repository_id."""
         loaders = get_project_loaders()
-        assert loaders[PROJECT_BY_REPOSITORY_ID_LOADER].load_fn is load_projects_by_repository_id
+        assert loaders[PROJECT_BY_REPOSITORY_ID].load_fn is load_projects_by_repository_id
 
     def test_load_fn_is_load_health_metrics_list_by_project_id(self):
         """The list loader is wired to load_health_metrics_list_by_project_id."""
@@ -727,7 +727,7 @@ class TestGetProjectLoaders:
     @pytest.mark.parametrize(
         "loader_key",
         [
-            PROJECT_BY_REPOSITORY_ID_LOADER,
+            PROJECT_BY_REPOSITORY_ID,
             HEALTH_METRICS_LIST_BY_PROJECT_ID,
             HEALTH_METRICS_LATEST_BY_PROJECT_ID,
             ENTITY_CHANNELS_BY_PROJECT_ID,
