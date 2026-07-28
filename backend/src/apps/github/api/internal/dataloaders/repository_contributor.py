@@ -22,17 +22,9 @@ if TYPE_CHECKING:
 async def load_top_contributors_by_repository_id(
     repository_ids: list[int],
 ) -> list[list[dict[str, str | int]]]:
-    """Batch-load top contributors for the given repository IDs in a single query.
+    """Batch-load top contributors per repository (humans only, community repos).
 
-    Mirrors the per-repository slice of RepositoryContributor.get_top_contributors
-    (humans only, community repositories), ranked by contributions and capped at
-    TOP_CONTRIBUTORS_LIMIT per repository.
-
-    ``RepositoryContributor`` has ``unique_together = ("repository", "user")``, so each
-    user has exactly one row per repository and ``contributions_count`` is already the
-    user's total for that repository. Ranking by ``contributions_count`` therefore
-    matches the original aggregate (``Sum``+``GROUP BY``) without a window-on-aggregate
-    query, which Postgres forbids.
+    Capped at ``TOP_CONTRIBUTORS_LIMIT`` per repository.
     """
     if not repository_ids:
         return []
