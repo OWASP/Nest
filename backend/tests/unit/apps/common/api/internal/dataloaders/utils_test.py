@@ -10,6 +10,7 @@ from apps.common.api.internal.dataloaders.utils import (
     get_m2m_results_by_keys,
     get_result_by_keys,
     get_results_by_keys,
+    get_top_contributors_by_keys,
 )
 
 
@@ -415,3 +416,204 @@ class TestM2mResultsByKeys:
             make_qs(items), keys, m2m_field, key_field, value_field
         )
         assert result == expected
+
+
+class TestTopContributorsByKeys:
+    """Tests for get_top_contributors_by_keys."""
+
+    @staticmethod
+    def _make_contrib_item(key_field_value, **user_kw):
+        """Create a mock item with user and contributions_count."""
+        return make_item(
+            **{key_field_value[0]: key_field_value[1]},
+            user=SimpleNamespace(
+                avatar_url=user_kw.get("avatar_url", ""),
+                login=user_kw.get("login", ""),
+                name=user_kw.get("name", ""),
+            ),
+            contributions_count=user_kw.get("contributions_count", 0),
+        )
+
+    @pytest.mark.asyncio
+    async def test_basic_mapping(self):
+        """Each key maps to a list of contributor dicts."""
+        items = [
+            self._make_contrib_item(
+                ("repo_id", 1),
+                login="user1",
+                name="User 1",
+                contributions_count=100,
+                avatar_url="url1",
+            ),
+            self._make_contrib_item(
+                ("repo_id", 2),
+                login="user2",
+                name="User 2",
+                contributions_count=50,
+                avatar_url="url2",
+            ),
+        ]
+        result = await get_top_contributors_by_keys(make_qs(items), [1, 2], "repo_id")
+        assert result == [
+            [
+                {
+                    "avatar_url": "url1",
+                    "contributions_count": 100,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "User 1",
+                }
+            ],
+            [
+                {
+                    "avatar_url": "url2",
+                    "contributions_count": 50,
+                    "id": "user2",
+                    "login": "user2",
+                    "name": "User 2",
+                }
+            ],
+        ]
+
+    @pytest.mark.asyncio
+    async def test_empty_queryset(self):
+        """Empty queryset returns empty list for every key."""
+        result = await get_top_contributors_by_keys(make_qs([]), [1, 2], "repo_id")
+        assert result == [[], []]
+
+    @pytest.mark.asyncio
+    async def test_empty_keys(self):
+        """Empty keys list returns an empty list."""
+        items = [self._make_contrib_item(("repo_id", 1), login="user1")]
+        result = await get_top_contributors_by_keys(make_qs(items), [], "repo_id")
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_key_absent_from_results(self):
+        """A key with no matching items gets an empty list."""
+        items = [self._make_contrib_item(("repo_id", 1), login="user1")]
+        result = await get_top_contributors_by_keys(make_qs(items), [1, 2], "repo_id")
+        assert result == [
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 0,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                }
+            ],
+            [],
+        ]
+
+    @pytest.mark.asyncio
+    async def test_multiple_contributors_per_key(self):
+        """Multiple contributors for the same key are collected into one list."""
+        items = [
+            self._make_contrib_item(("repo_id", 1), login="user1", contributions_count=100),
+            self._make_contrib_item(("repo_id", 1), login="user2", contributions_count=50),
+            self._make_contrib_item(("repo_id", 2), login="user3", contributions_count=25),
+        ]
+        result = await get_top_contributors_by_keys(make_qs(items), [1, 2], "repo_id")
+        assert result == [
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 100,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                },
+                {
+                    "avatar_url": "",
+                    "contributions_count": 50,
+                    "id": "user2",
+                    "login": "user2",
+                    "name": "",
+                },
+            ],
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 25,
+                    "id": "user3",
+                    "login": "user3",
+                    "name": "",
+                },
+            ],
+        ]
+
+    @pytest.mark.asyncio
+    async def test_order_matches_keys_not_queryset(self):
+        """Output order follows keys, not queryset iteration order."""
+        items = [
+            self._make_contrib_item(("repo_id", 2), login="user2"),
+            self._make_contrib_item(("repo_id", 1), login="user1"),
+        ]
+        result = await get_top_contributors_by_keys(make_qs(items), [1, 2], "repo_id")
+        assert result == [
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 0,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                }
+            ],
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 0,
+                    "id": "user2",
+                    "login": "user2",
+                    "name": "",
+                }
+            ],
+        ]
+
+    @pytest.mark.asyncio
+    async def test_items_not_in_keys_are_ignored(self):
+        """Items whose key is not in keys are silently discarded."""
+        items = [
+            self._make_contrib_item(("repo_id", 1), login="user1"),
+            self._make_contrib_item(("repo_id", 99), login="orphan"),
+        ]
+        result = await get_top_contributors_by_keys(make_qs(items), [1], "repo_id")
+        assert result == [
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 0,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                }
+            ],
+        ]
+
+    @pytest.mark.asyncio
+    async def test_duplicate_keys_in_keys_list(self):
+        """A key appearing multiple times in keys produces one entry per occurrence."""
+        items = [self._make_contrib_item(("repo_id", 1), login="user1")]
+        result = await get_top_contributors_by_keys(make_qs(items), [1, 1], "repo_id")
+        assert result == [
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 0,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                }
+            ],
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 0,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                }
+            ],
+        ]
