@@ -4,6 +4,7 @@ from apps.owasp.api.internal.dataloaders.board_of_directors import (
     get_board_of_directors_loaders,
 )
 from apps.owasp.api.internal.dataloaders.chapter import get_chapter_loaders
+from apps.owasp.api.internal.dataloaders.committee import get_committee_loaders
 from apps.owasp.api.internal.dataloaders.project import get_project_loaders
 
 
@@ -12,5 +13,6 @@ def get_owasp_dataloaders() -> dict[str, object]:
     loaders: dict[str, object] = {}
     loaders.update(get_board_of_directors_loaders())
     loaders.update(get_chapter_loaders())
+    loaders.update(get_committee_loaders())
     loaders.update(get_project_loaders())
     return loaders
