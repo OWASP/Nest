@@ -21,7 +21,7 @@ from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository import Repository
-from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID_LOADER
+from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID
 
 if TYPE_CHECKING:
     from apps.owasp.api.internal.nodes.project import ProjectNode
@@ -79,7 +79,7 @@ class RepositoryNode(strawberry.relay.Node):
         self, root: Repository, info: Info
     ) -> Annotated["ProjectNode", strawberry.lazy("apps.owasp.api.internal.nodes.project")] | None:
         """Resolve project."""
-        return await info.context.owasp_dataloaders[PROJECT_BY_REPOSITORY_ID_LOADER].load(root.pk)
+        return await info.context.owasp_dataloaders[PROJECT_BY_REPOSITORY_ID].load(root.pk)
 
     @strawberry_django.field
     async def recent_milestones(
