@@ -15,6 +15,9 @@ from apps.github.api.internal.dataloaders.release import (
     LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
     RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
 )
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
@@ -102,9 +105,14 @@ class RepositoryNode(strawberry.relay.Node):
         )
 
     @strawberry_django.field
-    def top_contributors(self, root: Repository) -> list[RepositoryContributorNode]:
+    async def top_contributors(
+        self, root: Repository, info: Info
+    ) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
-        return [RepositoryContributorNode(**tc) for tc in root.idx_top_contributors]
+        top_contributors = await info.context.github_dataloaders[
+            TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER
+        ].load(root.pk)
+        return [RepositoryContributorNode(**tc) for tc in top_contributors]
 
     @strawberry_django.field(only=["topics"])
     def topics(self, root: Repository) -> list[str]:
