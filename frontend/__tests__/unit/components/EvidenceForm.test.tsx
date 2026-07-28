@@ -47,12 +47,10 @@ describe('EvidenceForm', () => {
 
       fireEvent.change(fileInput, { target: { files: [file] } })
 
-      await waitFor(() => {
-        const nameInput = screen.getByPlaceholderText('Enter evidence name')
-        fireEvent.change(nameInput, { target: { value: 'Valid Name' } })
-        const descInput = screen.getByPlaceholderText('Enter evidence description')
-        fireEvent.change(descInput, { target: { value: 'Valid desc' } })
-      })
+      const nameInput = screen.getByPlaceholderText('Enter evidence name')
+      fireEvent.change(nameInput, { target: { value: 'Valid Name' } })
+      const descInput = screen.getByPlaceholderText('Enter evidence description')
+      fireEvent.change(descInput, { target: { value: 'Valid desc' } })
 
       const submitButton = screen.getByRole('button', { name: /add evidence/i })
       fireEvent.click(submitButton)

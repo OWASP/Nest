@@ -20,6 +20,25 @@ const ClaimReviewsPage = () => {
   const { isSyncing, session } = useDjangoSession()
   const { year } = useParams<{ year: string }>()
 
+  const renderReviewChip = (claim: (typeof claims)[number]) => {
+    const myReview = claim.reviews.find((r) => r.reviewer?.login === session?.user?.login)
+    if (!myReview) return null
+    return (
+      <Chip
+        size="sm"
+        variant="flat"
+        color={myReview.status === ReviewStatusEnum.Approved ? 'success' : 'danger'}
+        className="text-tiny h-5 shrink-0"
+      >
+        {myReview.status === ReviewStatusEnum.Approved ? 'Approved' : 'Rejected'}
+      </Chip>
+    )
+  }
+
+  const handleClaimNavigation = (claimKey: string, candidateLogin: string) => {
+    router.push(`/board/${year}/candidates/${candidateLogin}/claims/${claimKey}`)
+  }
+
   const {
     data: graphQLData,
     loading: isLoading,
@@ -64,10 +83,10 @@ const ClaimReviewsPage = () => {
   const claimsToReview = claims.filter(
     (c) =>
       c.status === ClaimStatusEnum.Submitted &&
-      !c.reviews.some((review) => review.reviewer.login === session?.user?.login)
+      !c.reviews.some((review) => review.reviewer?.login === session?.user?.login)
   )
   const reviewedClaims = claims.filter((c) =>
-    c.reviews.some((review) => review.reviewer.login === session?.user?.login)
+    c.reviews.some((review) => review.reviewer?.login === session?.user?.login)
   )
 
   const groupedClaimsToReview = groupBy(
@@ -114,9 +133,7 @@ const ClaimReviewsPage = () => {
                       <Button
                         disableAnimation
                         key={claim.key}
-                        onPress={() =>
-                          router.push(`/board/${year}/candidates/${login}/claims/${claim.key}`)
-                        }
+                        onPress={() => handleClaimNavigation(claim.key, login)}
                         className="h-24 flex-row justify-between bg-transparent dark:hover:bg-gray-900"
                       >
                         <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
@@ -130,28 +147,7 @@ const ClaimReviewsPage = () => {
                             <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
                               {formatDate(claim.createdAt)}
                             </span>
-                            {(() => {
-                              const myReview = claim.reviews.find(
-                                (r) => r.reviewer.login === session?.user?.login
-                              )
-                              if (!myReview) return null
-                              return (
-                                <Chip
-                                  size="sm"
-                                  variant="flat"
-                                  color={
-                                    myReview.status === ReviewStatusEnum.Approved
-                                      ? 'success'
-                                      : 'danger'
-                                  }
-                                  className="text-tiny h-5 shrink-0"
-                                >
-                                  {myReview.status === ReviewStatusEnum.Approved
-                                    ? 'Approved'
-                                    : 'Rejected'}
-                                </Chip>
-                              )
-                            })()}
+                            {renderReviewChip(claim)}
                           </div>
                         </div>
                       </Button>
