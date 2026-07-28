@@ -58,3 +58,40 @@ async def get_result_by_keys[K, V](
         mapping[key] = cast("V", item if value_field is None else getattr(item, value_field))
 
     return [mapping.get(key) for key in keys]
+
+
+async def get_top_contributors_by_keys[K](
+    queryset: QuerySet[Model],
+    keys: list[K],
+    key_field: str,
+) -> list[list[dict[str, str | int]]]:
+    """Map top-contributor rows back to an ordered list of dicts matching ``keys``.
+
+    Each queryset item is expected to expose ``user`` (with ``avatar_url``,
+    ``login`` and ``name``) and ``contributions_count``. The produced dict
+    structure is fixed across all top-contributor resolvers (repositories,
+    projects, chapters, committees, organizations).
+
+    Args:
+        queryset: The queryset of repository contributors to iterate over.
+        keys: A list of keys to map the results to, in the desired order.
+        key_field: The name of the attribute on each item that contains the key.
+
+    Returns:
+        A list of contributor-dict lists, one per key, in the same order as ``keys``.
+
+    """
+    mapping: dict[K, list[dict[str, str | int]]] = defaultdict(list)
+    async for item in queryset:
+        key: K = cast("K", getattr(item, key_field))
+        mapping[key].append(
+            {
+                "avatar_url": item.user.avatar_url,
+                "contributions_count": item.contributions_count,
+                "id": item.user.login,
+                "login": item.user.login,
+                "name": item.user.name,
+            }
+        )
+
+    return [mapping.get(key, []) for key in keys]

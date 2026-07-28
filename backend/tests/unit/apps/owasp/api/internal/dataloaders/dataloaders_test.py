@@ -11,7 +11,7 @@ from apps.owasp.api.internal.dataloaders.board_of_directors import (
 from apps.owasp.api.internal.dataloaders.project import (
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
-    PROJECT_BY_REPOSITORY_ID_LOADER,
+    PROJECT_BY_REPOSITORY_ID,
 )
 from apps.owasp.api.internal.dataloaders.snapshot import (
     CHAPTERS_BY_SNAPSHOT_ID,
@@ -24,7 +24,7 @@ from apps.owasp.api.internal.dataloaders.snapshot import (
 EXPECTED_LOADER_KEYS = (
     CANDIDATES_BY_BOARD_ID_LOADER,
     MEMBERS_BY_BOARD_ID_LOADER,
-    PROJECT_BY_REPOSITORY_ID_LOADER,
+    PROJECT_BY_REPOSITORY_ID,
     HEALTH_METRICS_LIST_BY_PROJECT_ID,
     HEALTH_METRICS_LATEST_BY_PROJECT_ID,
     CHAPTERS_BY_SNAPSHOT_ID,

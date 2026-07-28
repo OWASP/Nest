@@ -12,13 +12,16 @@ from apps.github.api.internal.dataloaders.release import (
     LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
     RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
 )
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
-from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID_LOADER
+from apps.owasp.api.internal.dataloaders.project import PROJECT_BY_REPOSITORY_ID
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -168,7 +171,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_project)
         mock_info = Mock()
-        mock_info.context.owasp_dataloaders = {PROJECT_BY_REPOSITORY_ID_LOADER: mock_loader}
+        mock_info.context.owasp_dataloaders = {PROJECT_BY_REPOSITORY_ID: mock_loader}
 
         mock_repository = Mock()
         mock_repository.pk = 1
@@ -243,10 +246,10 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
 
         assert result == []
 
-    def test_top_contributors_method(self):
-        """Test top_contributors method resolution."""
-        mock_repository = Mock()
-        mock_repository.idx_top_contributors = [
+    @pytest.mark.asyncio
+    async def test_top_contributors_method(self):
+        """Test top_contributors async resolution via dataloader."""
+        mock_contributors = [
             {
                 "avatar_url": "url1",
                 "contributions_count": 100,
@@ -262,11 +265,24 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
                 "name": "User 2",
             },
         ]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_contributors)
+        mock_info = Mock()
+        mock_info.context.github_dataloaders = {
+            TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER: mock_loader
+        }
+
+        mock_repository = Mock()
+        mock_repository.pk = 1
 
         field = self._get_field_by_name("top_contributors", RepositoryNode)
-        result = field.base_resolver.wrapped_func(None, mock_repository)
+        result = await field.base_resolver.wrapped_func(None, mock_repository, mock_info)
+
         assert len(result) == 2
         assert all(isinstance(c, RepositoryContributorNode) for c in result)
+        assert result[0].login == "user1"
+        assert result[1].login == "user2"
+        mock_loader.load.assert_awaited_once_with(1)
 
     def test_topics_method(self):
         """Test topics method resolution."""
