@@ -1,0 +1,68 @@
+name: Dependency checks
+
+on:
+  workflow_call:
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-dependency-audit:
+    name: Dependency audit
+    continue-on-error: true
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry and pip-audit
+        uses: ./.github/actions/install-poetry
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271  # v6.0.9
+        with:
+          version: 11.7.0
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Audit dependencies
+        run: make security-dependency-audit
+    timeout-minutes: 10
+
+  run-dependency-check:
+    name: Dependency check
+    continue-on-error: true
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run OSV vulnerability check
+        uses: ./.github/actions/run-osv-check
+        with:
+          command: make security-dependency-check-osv
+
+      - name: Run Trivy vulnerability check
+        if: always()
+        uses: ./.github/actions/run-trivy-check
+        with:
+          command: make security-dependency-check-trivy
+    timeout-minutes: 5
