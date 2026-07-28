@@ -1,9 +1,17 @@
 """Test cases for ChapterNode."""
 
 import math
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
+import pytest
+import strawberry
+
+from apps.owasp.api.internal.dataloaders.chapter import (
+    ENTITY_CHANNELS_BY_CHAPTER_ID_LOADER,
+    ENTITY_LEADERS_BY_CHAPTER_ID_LOADER,
+)
 from apps.owasp.api.internal.nodes.chapter import ChapterNode, GeoLocationType
+from apps.owasp.models.chapter import Chapter
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -149,3 +157,45 @@ class TestChapterNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_chapter)
 
         assert result is None
+
+    def test_meta_configuration_includes_entity_fields(self):
+        """ChapterNode exposes the entity_channels and entity_leaders fields."""
+        field_names = {field.name for field in ChapterNode.__strawberry_definition__.fields}
+        assert "entity_channels" in field_names
+        assert "entity_leaders" in field_names
+
+    @pytest.mark.asyncio
+    async def test_entity_channels_resolver_uses_dataloader(self):
+        """Test entity_channels resolver delegates to the entity_channels dataloader."""
+        mock_chapter = MagicMock(spec=Chapter)
+        mock_channel1 = MagicMock()
+        mock_channel2 = MagicMock()
+
+        field = self._get_field_by_name("entity_channels", ChapterNode)
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[mock_channel1, mock_channel2])
+        info.context.owasp_dataloaders = {ENTITY_CHANNELS_BY_CHAPTER_ID_LOADER: mock_dataloader}
+
+        result = await field.base_resolver.wrapped_func(mock_chapter, mock_chapter, info)
+
+        mock_dataloader.load.assert_called_once_with(mock_chapter.pk)
+        assert result == [mock_channel1, mock_channel2]
+
+    @pytest.mark.asyncio
+    async def test_entity_leaders_resolver_uses_dataloader(self):
+        """Test entity_leaders resolver delegates to the entity_leaders dataloader."""
+        mock_chapter = MagicMock(spec=Chapter)
+        mock_leader1 = MagicMock()
+        mock_leader2 = MagicMock()
+
+        field = self._get_field_by_name("entity_leaders", ChapterNode)
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=[mock_leader1, mock_leader2])
+        info.context.owasp_dataloaders = {ENTITY_LEADERS_BY_CHAPTER_ID_LOADER: mock_dataloader}
+
+        result = await field.base_resolver.wrapped_func(mock_chapter, mock_chapter, info)
+
+        mock_dataloader.load.assert_called_once_with(mock_chapter.pk)
+        assert result == [mock_leader1, mock_leader2]
