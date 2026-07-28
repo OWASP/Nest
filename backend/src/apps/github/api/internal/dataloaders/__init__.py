@@ -18,7 +18,7 @@ def get_github_dataloaders() -> dict[str, object]:
     loaders.update(get_milestone_loaders())
     loaders.update(get_pull_request_loaders())
     loaders.update(get_release_loaders())
-    loaders.update(get_repository_loaders())
     loaders.update(get_repository_contributor_loaders())
+    loaders.update(get_repository_loaders())
     loaders.update(get_user_loaders())
     return loaders
