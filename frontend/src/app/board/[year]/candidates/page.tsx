@@ -298,9 +298,8 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
   const leadsFlagshipProject = ledProjects.some((project) => project.level === 'flagship')
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={handleCardClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -703,7 +702,7 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
           </div>
         </div>
       )}
-    </div>
+    </button>
   )
 }
 

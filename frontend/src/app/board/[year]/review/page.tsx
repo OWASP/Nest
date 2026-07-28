@@ -15,13 +15,21 @@ import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
-const ClaimReviewsPage = () => {
+const CandidatesGroup = ({
+  login,
+  claims,
+  year,
+  sessionLogin,
+}: {
+  login: string
+  claims: NonNullable<ReturnType<typeof groupBy>>[string]
+  year: string
+  sessionLogin: string
+}) => {
   const router = useRouter()
-  const { isSyncing, session } = useDjangoSession()
-  const { year } = useParams<{ year: string }>()
 
   const renderReviewChip = (claim: (typeof claims)[number]) => {
-    const myReview = claim.reviews.find((r) => r.reviewer?.login === session?.user?.login)
+    const myReview = claim.reviews.find((r) => r.reviewer?.login === sessionLogin)
     if (!myReview) return null
     return (
       <Chip
@@ -35,9 +43,46 @@ const ClaimReviewsPage = () => {
     )
   }
 
-  const handleClaimNavigation = (claimKey: string, candidateLogin: string) => {
-    router.push(`/board/${year}/candidates/${candidateLogin}/claims/${claimKey}`)
-  }
+  return (
+    <div key={login}>
+      <h4 className="mb-3 text-sm font-semibold text-gray-600 dark:text-gray-400">
+        @{login}
+        {claims[0].candidate.member?.name && (
+          <span className="font-normal"> — {claims[0].candidate.member.name}</span>
+        )}
+      </h4>
+      <div className="grid gap-2">
+        {claims.map((claim) => (
+          <Button
+            disableAnimation
+            key={claim.key}
+            onPress={() => router.push(`/board/${year}/candidates/${login}/claims/${claim.key}`)}
+            className="h-24 flex-row justify-between bg-transparent dark:hover:bg-gray-900"
+          >
+            <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
+              <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
+                {claim.name}
+              </h3>
+              <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
+                {claim.description}
+              </p>
+              <div className="mt-1 flex items-center gap-2">
+                <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
+                  {formatDate(claim.createdAt)}
+                </span>
+                {renderReviewChip(claim)}
+              </div>
+            </div>
+          </Button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const ClaimReviewsPage = () => {
+  const { isSyncing, session } = useDjangoSession()
+  const { year } = useParams<{ year: string }>()
 
   const {
     data: graphQLData,
@@ -98,11 +143,6 @@ const ClaimReviewsPage = () => {
     (c) => c.candidate.member?.login ?? 'unknown'
   )
 
-  const groupedSections = [
-    { title: 'Claims to Review', group: groupedClaimsToReview },
-    { title: 'Reviewed Claims', group: groupedReviewedClaims },
-  ]
-
   return (
     <div className="container mx-auto px-4 py-8 dark:bg-[#212529]">
       <div className="mb-6 flex items-center justify-between">
@@ -111,54 +151,40 @@ const ClaimReviewsPage = () => {
           <p className="text-gray-600 dark:text-gray-400">Candidate claims for {year} elections.</p>
         </div>
       </div>
-      {groupedSections.map(({ title, group }) => (
-        <SecondaryCard key={title} title={title}>
-          {Object.keys(group).length === 0 ? (
-            <p> No {title.toLowerCase()}. </p>
-          ) : (
-            <div className="space-y-6">
-              {Object.entries(group).map(([login, candidateClaims]) => (
-                <div key={login}>
-                  <h4 className="mb-3 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    @{login}
-                    {candidateClaims[0].candidate.member?.name && (
-                      <span className="font-normal">
-                        {' '}
-                        — {candidateClaims[0].candidate.member.name}
-                      </span>
-                    )}
-                  </h4>
-                  <div className="grid gap-2">
-                    {candidateClaims.map((claim) => (
-                      <Button
-                        disableAnimation
-                        key={claim.key}
-                        onPress={() => handleClaimNavigation(claim.key, login)}
-                        className="h-24 flex-row justify-between bg-transparent dark:hover:bg-gray-900"
-                      >
-                        <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
-                          <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
-                            {claim.name}
-                          </h3>
-                          <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
-                            {claim.description}
-                          </p>
-                          <div className="mt-1 flex items-center gap-2">
-                            <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
-                              {formatDate(claim.createdAt)}
-                            </span>
-                            {renderReviewChip(claim)}
-                          </div>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </SecondaryCard>
-      ))}
+      <SecondaryCard key="Claims to Review" title="Claims to Review">
+        {Object.keys(groupedClaimsToReview).length === 0 ? (
+          <p> No claims to review. </p>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(groupedClaimsToReview).map(([login, claims]) => (
+              <CandidatesGroup
+                key={login}
+                login={login}
+                claims={claims}
+                year={year}
+                sessionLogin={session?.user?.login ?? ''}
+              />
+            ))}
+          </div>
+        )}
+      </SecondaryCard>
+      <SecondaryCard key="Reviewed Claims" title="Reviewed Claims">
+        {Object.keys(groupedReviewedClaims).length === 0 ? (
+          <p> No reviewed claims. </p>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(groupedReviewedClaims).map(([login, claims]) => (
+              <CandidatesGroup
+                key={login}
+                login={login}
+                claims={claims}
+                year={year}
+                sessionLogin={session?.user?.login ?? ''}
+              />
+            ))}
+          </div>
+        )}
+      </SecondaryCard>
     </div>
   )
 }
