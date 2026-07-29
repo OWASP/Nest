@@ -6,7 +6,7 @@ const baseUrl = '/board/2025/candidates/testuser/claims/create'
 const mockData = {
   ...mockCandidateData,
   createBoardCandidateClaim: {
-    __typename: 'CreateBoardCandidateClaimResult',
+    __typename: 'ClaimResult',
     ok: true,
     message: 'Claim created successfully!',
     claim: {

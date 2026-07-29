@@ -38,7 +38,15 @@ const baseClaim: Claim = {
 }
 
 const renderClaimActions = (claim: Claim) =>
-  render(<ClaimActions claim={claim} login="testuser" year="2025" />)
+  render(
+    <ClaimActions
+      claim={claim}
+      login="testuser"
+      year="2025"
+      hasReviewed={false}
+      isReviewer={undefined}
+    />
+  )
 
 const openDropdown = (label: string) => {
   fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))

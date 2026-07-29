@@ -73,11 +73,11 @@ export const mockSingleClaim = {
   key: 'experience-leadership',
   name: 'Leadership Experience',
   description: 'Experience in leadership.',
+  reviews: [],
   status: 'DRAFT',
   hasEvidence: true,
   createdAt: '2025-01-15T10:00:00Z',
   updatedAt: '2025-01-15T10:00:00Z',
-  reviews: [],
 }
 
 export const mockEvidences = [

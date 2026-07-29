@@ -35,9 +35,9 @@ test.describe('Board Candidate Claim Evidence Edit Page', () => {
     await page.goto(baseUrl)
   })
 
-  test('renders pre-filled form with heading and update button', async ({ page }) => {
+  test('renders pre-filled form with heading and edit button', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /^Edit Evidence$/ })).toBeVisible()
-    await expect(page.getByRole('button', { name: /update evidence/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /edit evidence/i })).toBeVisible()
     await expect(page.getByLabel(/name/i)).toHaveValue('Certificate')
     await expect(page.getByLabel(/description/i)).toHaveValue('Certificate of completion.')
   })
@@ -65,7 +65,7 @@ test.describe('Board Candidate Claim Evidence Edit Page', () => {
   test('submits form and redirects to evidence details page', async ({ page }) => {
     await page.getByLabel(/name/i).fill('Updated Certificate')
     await page.getByLabel(/source url/i).fill('https://example.com/updated')
-    await page.getByRole('button', { name: /update evidence/i }).click()
+    await page.getByRole('button', { name: /edit evidence/i }).click()
     await expect(page).toHaveURL(
       /\/board\/2025\/candidates\/testuser\/claims\/experience-leadership\/evidences\/certificate$/
     )
@@ -73,7 +73,7 @@ test.describe('Board Candidate Claim Evidence Edit Page', () => {
 
   test('shows validation error when name is empty', async ({ page }) => {
     await page.getByLabel(/name/i).fill('')
-    await page.getByRole('button', { name: /update evidence/i }).click()
+    await page.getByRole('button', { name: /edit evidence/i }).click()
     await expect(page.getByText('Name is required')).toBeVisible()
   })
 })

@@ -155,7 +155,7 @@ describe('EditEvidencePage', () => {
       ' Updated description'
     )
 
-    await userEvent.click(screen.getByRole('button', { name: /update evidence/i }))
+    await userEvent.click(screen.getByRole('button', { name: /edit evidence/i }))
 
     await waitFor(() => {
       expect(mockUpdateFn).toHaveBeenCalled()
@@ -174,7 +174,7 @@ describe('EditEvidencePage', () => {
       expect(screen.getByDisplayValue('Certificate')).toBeInTheDocument()
     })
 
-    await userEvent.click(screen.getByRole('button', { name: /update evidence/i }))
+    await userEvent.click(screen.getByRole('button', { name: /edit evidence/i }))
 
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith(
@@ -196,7 +196,7 @@ describe('EditEvidencePage', () => {
     await userEvent.clear(screen.getByPlaceholderText('Enter evidence name'))
     await userEvent.clear(screen.getByPlaceholderText('Enter evidence description'))
 
-    await userEvent.click(screen.getByRole('button', { name: /update evidence/i }))
+    await userEvent.click(screen.getByRole('button', { name: /edit evidence/i }))
 
     expect(mockUpdateFn).not.toHaveBeenCalled()
   })
@@ -218,7 +218,7 @@ describe('EditEvidencePage', () => {
       expect(screen.getByDisplayValue('Certificate')).toBeInTheDocument()
     })
 
-    await userEvent.click(screen.getByRole('button', { name: /update evidence/i }))
+    await userEvent.click(screen.getByRole('button', { name: /edit evidence/i }))
 
     await waitFor(() => {
       expect(mockUpdateFn).toHaveBeenCalled()
@@ -246,7 +246,7 @@ describe('EditEvidencePage', () => {
       expect(screen.getByDisplayValue('Certificate')).toBeInTheDocument()
     })
 
-    await userEvent.click(screen.getByRole('button', { name: /update evidence/i }))
+    await userEvent.click(screen.getByRole('button', { name: /edit evidence/i }))
 
     await waitFor(() => {
       expect(mockUpdateFn).toHaveBeenCalled()

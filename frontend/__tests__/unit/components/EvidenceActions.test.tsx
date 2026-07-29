@@ -39,7 +39,16 @@ const baseEvidence = {
 const renderEvidenceActions = (
   claim: typeof baseClaim = baseClaim,
   evidence: typeof baseEvidence = baseEvidence
-) => render(<EvidenceActions claim={claim} evidence={evidence} login="testuser" year="2025" />)
+) =>
+  render(
+    <EvidenceActions
+      claim={claim}
+      evidence={evidence}
+      login="testuser"
+      sessionLogin="testuser"
+      year="2025"
+    />
+  )
 
 const openDropdown = (label: string) => {
   fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
@@ -304,7 +313,7 @@ describe('EvidenceActions', () => {
       await waitFor(() => {
         expect(mockCache.readQuery).toHaveBeenCalledWith({
           query: GetClaimAndEvidencesDocument,
-          variables: { key: 'test-claim', login: 'testuser', year: 2025 },
+          variables: { key: 'test-claim', login: 'testuser', sessionLogin: 'testuser', year: 2025 },
         })
         expect(mockCache.writeQuery).toHaveBeenCalledWith(
           expect.objectContaining({
