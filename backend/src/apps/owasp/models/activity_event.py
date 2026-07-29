@@ -131,7 +131,8 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
                 "ActivityEvent.update_data received unsupported model type: %s",
                 type(obj).__name__,
             )
-            raise TypeError(f"Unsupported model type: {type(obj)}")
+            message = f"Unsupported model type: {type(obj)}"
+            raise TypeError(message)
 
         handler = getattr(ActivityEvent, handler_name)
         events = handler(obj)
