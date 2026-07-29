@@ -14,9 +14,9 @@ class ActivityEventAdmin(admin.ModelAdmin):
     )
     list_display = (
         "activity_type",
+        "github_repository",
         "github_user",
         "occurred_at",
-        "github_repository",
     )
     list_filter = (
         "activity_type",
@@ -24,8 +24,8 @@ class ActivityEventAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "activity_type",
-        "github_user__login",
         "github_repository__name",
+        "github_user__login",
     )
 
 
