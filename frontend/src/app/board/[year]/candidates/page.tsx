@@ -1,5 +1,6 @@
 'use client'
 import { useQuery, useApolloClient } from '@apollo/client/react'
+import { Button } from '@heroui/button'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useDjangoSession } from 'hooks/useDjangoSession'
@@ -18,7 +19,6 @@ import {
   GetChapterByKeyDocument,
   GetProjectByKeyDocument,
 } from 'types/__generated__/boardQueries.generated'
-import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -216,13 +216,6 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
     skip: !candidate.member?.login,
   })
 
-  const { data: claimsData } = useQuery(GetBoardCandidateClaimsDocument, {
-    variables: { login: candidate.member?.login ?? '', year: Number.parseInt(year) },
-    skip: !candidate.member?.login,
-  })
-  const approvedClaims =
-    claimsData?.boardCandidateClaims?.filter((c) => c.status === 'APPROVED') ?? []
-
   useEffect(() => {
     if (snapshotData?.memberSnapshot) {
       setSnapshot(snapshotData.memberSnapshot)
@@ -298,16 +291,9 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
   const leadsFlagshipProject = ledProjects.some((project) => project.level === 'flagship')
 
   return (
-    <button
-      type="button"
-      onClick={handleCardClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleCardClick()
-        }
-      }}
-      className="group flex h-full w-full cursor-pointer flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+    <Button
+      onPress={handleCardClick}
+      className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full items-start gap-4">
         {candidate.member?.avatarUrl && (
@@ -682,27 +668,7 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
           )}
         </div>
       )}
-
-      {approvedClaims.length > 0 && candidate.member?.login && (
-        <div className="mt-4 w-full border-t border-gray-200 pt-4 dark:border-gray-700">
-          <h4 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Approved Claims
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {approvedClaims.map((claim) => (
-              <Link
-                key={claim.key}
-                href={`/board/${year}/candidates/${candidate.member?.login}/claims/${claim.key}`}
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
-              >
-                {claim.name}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-    </button>
+    </Button>
   )
 }
 
