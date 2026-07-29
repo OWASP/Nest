@@ -1,23 +1,22 @@
-"""GitHub app ActivityEvent model admin."""
+"""OWASP app ActivityEvent model admin."""
 
 from django.contrib import admin
 
-from apps.github.models.activity_event import ActivityEvent
+from apps.owasp.models.activity_event import ActivityEvent
 
 
 class ActivityEventAdmin(admin.ModelAdmin):
     """Admin for ActivityEvent model."""
 
     autocomplete_fields = (
-        "actor",
-        "repository",
+        "github_user",
+        "github_repository",
     )
     list_display = (
         "activity_type",
-        "actor",
-        "nest_created_at",
+        "github_user",
         "occurred_at",
-        "repository",
+        "github_repository",
     )
     list_filter = (
         "activity_type",
@@ -25,8 +24,8 @@ class ActivityEventAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "activity_type",
-        "actor__login",
-        "repository__name",
+        "github_user__login",
+        "github_repository__name",
     )
 
 

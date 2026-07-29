@@ -1,6 +1,5 @@
 """Github app admin."""
 
-from .activity_event import ActivityEventAdmin
 from .comment import CommentAdmin
 from .commit import CommitAdmin
 from .issue import IssueAdmin

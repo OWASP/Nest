@@ -1,6 +1,5 @@
 """Github app."""
 
-from .activity_event import ActivityEvent
 from .comment import Comment
 from .commit import Commit
 from .issue import Issue
