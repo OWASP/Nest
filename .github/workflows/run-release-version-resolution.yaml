@@ -27,7 +27,7 @@ jobs:
           if [ -n "$RELEASE_TAG" ]; then
             release_version="$RELEASE_TAG"
           else
-            release_version="$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}"
+            release_version="$(date '+%Y.%m.%d')-${GITHUB_SHA::7}"
           fi
 
           if [[ ! "$release_version" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
