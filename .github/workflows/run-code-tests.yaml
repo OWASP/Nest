@@ -2,6 +2,9 @@ name: Code tests
 
 on:
   workflow_call:
+    secrets:
+      LOCALSTACK_AUTH_TOKEN:
+        required: false
 
 permissions: {}
 
@@ -74,4 +77,21 @@ jobs:
     name: Infrastructure tests
     permissions:
       contents: read
+    secrets:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
     uses: ./.github/workflows/run-infrastructure-tests.yaml
+
+  run-tools-tests:
+    name: Tools tests
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run tools tests
+        run: make test-tools
+    timeout-minutes: 10
