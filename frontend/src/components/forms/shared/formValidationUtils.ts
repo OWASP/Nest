@@ -33,7 +33,7 @@ export const validateEndDate = (value: string, startDate?: string): string | und
 }
 
 export const validateUrl = (value: string, fieldName: string): string | undefined => {
-  if (!value || !value.trim()) return undefined
+  if (!value?.trim()) return undefined
   try {
     new URL(value)
     return undefined
