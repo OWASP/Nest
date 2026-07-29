@@ -9,7 +9,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { ClaimStatusEnum, ReviewStatusEnum } from 'types/__generated__/graphql'
-import { GetClaimsAndReviewsDocument } from 'types/__generated__/reviewQueries.generated'
+import { GetClaimsAndReviewsDocument, GetClaimsAndReviewsQuery } from 'types/__generated__/reviewQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -22,7 +22,7 @@ const CandidatesGroup = ({
   sessionLogin,
 }: {
   login: string
-  claims: NonNullable<ReturnType<typeof groupBy>>[string]
+  claims: GetClaimsAndReviewsQuery['boardCandidateClaims']
   year: string
   sessionLogin: string
 }) => {
