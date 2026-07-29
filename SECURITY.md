@@ -11,7 +11,11 @@ If you discover a security vulnerability in OWASP Nest, please report it respons
 
 ### How to Report
 
-Please use this [form](https://github.com/OWASP/Nest/security/advisories/new) to report a security vulnerability.
+Please report security vulnerabilities using either:
+
+- GitHub [private vulnerability reporting form](https://github.com/OWASP/Nest/security/advisories/new) (preferred)
+- Email: [nest@owasp.org](mailto:nest@owasp.org)
+
 Please **do not** create public GitHub issues for security-related reports.
 
 ### What to Include
