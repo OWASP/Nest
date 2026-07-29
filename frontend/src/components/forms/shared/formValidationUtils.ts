@@ -32,6 +32,16 @@ export const validateEndDate = (value: string, startDate?: string): string | und
   return undefined
 }
 
+export const validateUrl = (value: string, fieldName: string): string | undefined => {
+  if (!value || !value.trim()) return undefined
+  try {
+    new URL(value)
+    return undefined
+  } catch {
+    return `${fieldName} must be a valid URL`
+  }
+}
+
 export const validateFileExtension = (
   file: File,
   allowedExtensions: string[]

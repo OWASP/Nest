@@ -13,6 +13,7 @@ import {
   validateFileExtension,
   validateFileSize,
   validateName,
+  validateUrl,
 } from 'components/forms/shared/formValidationUtils'
 import { useFormValidation } from 'components/forms/shared/useFormValidation'
 
@@ -101,6 +102,12 @@ const EvidenceForm = ({
         shouldValidate: touched.name ?? false,
         validator: () => validateName(formData.name),
       },
+      {
+        field: 'sourceUrl',
+        shouldValidate: touched.sourceUrl ?? false,
+        validator: () =>
+          formData.sourceUrl.trim() ? validateUrl(formData.sourceUrl, 'Source URL') : undefined,
+      },
     ],
     [formData, touched, backendErrors]
   )
@@ -179,7 +186,7 @@ const EvidenceForm = ({
               handleInputChange('sourceUrl', value)
               setTouched((prev) => ({ ...prev, sourceUrl: true }))
             }}
-            error={backendErrors.sourceUrl}
+            error={errors.sourceUrl ?? backendErrors.sourceUrl}
             touched={touched.sourceUrl}
             className="w-full min-w-0 lg:col-span-2"
           />

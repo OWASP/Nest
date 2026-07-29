@@ -111,6 +111,7 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({
         description: error instanceof Error ? error.message : 'Evidence remove failed.',
         color: 'danger',
       })
+      resetConfirm()
     } finally {
       setIsLoading(false)
     }
