@@ -37,6 +37,9 @@ or highly overlapping claims.
 4. Phrase the statements in third person.
 5. Include impressive achievements, statements, and quantifiable information.
 6. Avoid using the name or any pronouns.
+7. Descriptions must be strictly factual.
+8. Write descriptions in simple past tense.
+Avoid present perfect constructions such as "has done", "has been", "has contributed", etc.
 
 Return ONLY a valid JSON array of objects.
 Each object must have exactly two keys:
