@@ -150,6 +150,32 @@ class TestGenerateBoardCandidatesClaimsCommand:
         claims = command.generate_claims("markdown content", candidate, board)
         assert claims == []
 
+    def test_generate_claims_strips_html(self, command, mocker):
+        mock_openai_cls = mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
+        )
+        mock_openai_inst = mock_openai_cls.return_value
+        mock_openai_inst.set_prompt.return_value = mock_openai_inst
+        mock_openai_inst.set_input.return_value = mock_openai_inst
+        mock_openai_inst.complete.return_value = json.dumps(
+            [{"name": "Test Claim", "description": "Test description"}]
+        )
+
+        candidate = EntityMember()
+        board = BoardOfDirectors()
+
+        html_content = "<div style='color:red'><p>Hello <b>World</b></p></div>"
+        claims = command.generate_claims(html_content, candidate, board)
+
+        actual_input = mock_openai_inst.set_input.call_args[0][0]
+        assert "<div" not in actual_input
+        assert "<p>" not in actual_input
+        assert "<b>" not in actual_input
+        assert "Hello World" in actual_input
+
+        assert len(claims) == 1
+        assert claims[0].name == "Test Claim"
+
     @pytest.fixture
     def handle_mocks(self, mocker):
         mocks = {}

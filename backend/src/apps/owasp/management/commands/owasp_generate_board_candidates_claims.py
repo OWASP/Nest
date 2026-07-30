@@ -1,6 +1,7 @@
 """A command to generate board candidates' claims using www-board-candidates repository."""
 
 import json
+import re
 import unicodedata
 
 from django.contrib.contenttypes.models import ContentType
@@ -125,6 +126,9 @@ class Command(BaseCommand):
             list[BoardCandidateClaim]: A list of unsaved draft claim objects.
 
         """
+        # Strip HTML tags to reduce token usage and noise.
+        markdown_content = re.sub(r"<[^>]+>", "", markdown_content)
+
         open_ai = OpenAi(max_tokens=AI_MAX_TOKENS)
         response = open_ai.set_prompt(PROMPT_EXTRACT_CLAIMS).set_input(markdown_content).complete()
 
