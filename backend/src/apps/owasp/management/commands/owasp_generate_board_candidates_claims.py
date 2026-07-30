@@ -254,6 +254,8 @@ class Command(BaseCommand):
                         unique_claims.append(claim)
                 claims = unique_claims
 
+                saved_count = 0
+                failed_count = 0
                 for claim in claims:
                     if dry_run:
                         self.stdout.write(
@@ -263,6 +265,7 @@ class Command(BaseCommand):
                     else:
                         try:
                             claim.save()
+                            saved_count += 1
                         except (IntegrityError, ValidationError) as e:
                             self.stderr.write(
                                 self.style.ERROR(
@@ -270,6 +273,7 @@ class Command(BaseCommand):
                                     f"{candidate.member_name}: {e}"
                                 )
                             )
+                            failed_count += 1
                         except Exception as e:  # noqa: BLE001
                             self.stderr.write(
                                 self.style.ERROR(
@@ -277,20 +281,21 @@ class Command(BaseCommand):
                                     f"{candidate.member_name}: {e}"
                                 )
                             )
+                            failed_count += 1
 
                 processed_count += 1
+                failed_suffix = f", {failed_count} failed" if failed_count else ""
+                msg = f"Saved {saved_count} claims for {candidate.member_name}{failed_suffix}"
                 if dry_run:
                     self.stdout.write(
                         self.style.SUCCESS(
                             f"[DRY RUN] Would have saved claims for {candidate.member_name}"
                         )
                     )
+                elif saved_count:
+                    self.stdout.write(self.style.SUCCESS(msg))
                 else:
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Successfully generated claims for {candidate.member_name}"
-                        )
-                    )
+                    self.stderr.write(self.style.ERROR(msg))
             except Exception as e:  # noqa: BLE001
                 self.stderr.write(
                     self.style.ERROR(f"Failed to process candidate {candidate.member_name}: {e}")

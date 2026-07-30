@@ -217,7 +217,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
 
         mock_claim.save.assert_called_once()
-        command.stdout.write.assert_any_call("Successfully generated claims for John Doe")
+        command.stdout.write.assert_any_call("Saved 1 claims for John Doe")
         command.stdout.write.assert_any_call("Finished generating claims for 1 candidates.")
 
     def test_handle_dry_run(self, command, handle_mocks):
