@@ -29,6 +29,9 @@ or things the candidate "plans to do" (e.g., ignore "Finish OWASP Nest API",
 3. You may receive multiple statements from different years for the same candidate.
 You MUST synthesize this information and ensure you do not extract duplicate
 or highly overlapping claims.
+4. Phrase the statements in third person.
+5. Include impressive achievements, statements, and quantifiable information.
+6. Avoid using the name or any pronouns.
 
 Return ONLY a valid JSON array of objects.
 Each object must have exactly two keys:
