@@ -11,9 +11,9 @@ from apps.owasp.models.project import Project
 
 RECENT_ISSUES_LIMIT = 5
 ISSUES_BY_REPOSITORY_ID_LOADER = "issues_by_repository_id"
-ISSUES_COUNT_BY_PROJECT_ID = "issues_count_by_project_id"
-OPEN_ISSUES_COUNT_BY_PROJECT_ID = "open_issues_count_by_project_id"
-RECENT_ISSUES_BY_PROJECT_ID = "recent_issues_by_project_id"
+ISSUES_COUNT_BY_PROJECT_ID_LOADER = "issues_count_by_project_id"
+OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER = "open_issues_count_by_project_id"
+RECENT_ISSUES_BY_PROJECT_ID_LOADER = "recent_issues_by_project_id"
 
 
 async def load_recent_issues_by_project_id(
@@ -102,13 +102,13 @@ def get_issue_loaders() -> dict[str, object]:
         ISSUES_BY_REPOSITORY_ID_LOADER: DataLoader[tuple[int, int], list[Issue]](
             load_fn=load_issues_by_repository_id,
         ),
-        ISSUES_COUNT_BY_PROJECT_ID: DataLoader[int, int](
+        ISSUES_COUNT_BY_PROJECT_ID_LOADER: DataLoader[int, int](
             load_fn=load_issues_count_by_project_id,
         ),
-        OPEN_ISSUES_COUNT_BY_PROJECT_ID: DataLoader[int, int](
+        OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER: DataLoader[int, int](
             load_fn=load_open_issues_count_by_project_id,
         ),
-        RECENT_ISSUES_BY_PROJECT_ID: DataLoader[tuple[int, int], list[Issue]](
+        RECENT_ISSUES_BY_PROJECT_ID_LOADER: DataLoader[tuple[int, int], list[Issue]](
             load_fn=load_recent_issues_by_project_id,
         ),
     }

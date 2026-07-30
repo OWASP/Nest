@@ -6,8 +6,8 @@ import pytest
 from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.milestone import (
-    RECENT_MILESTONES_BY_PROGRAM_ID,
-    RECENT_MILESTONES_BY_PROJECT_ID,
+    RECENT_MILESTONES_BY_PROGRAM_ID_LOADER,
+    RECENT_MILESTONES_BY_PROJECT_ID_LOADER,
     RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
     get_milestone_loaders,
     load_recent_milestones_by_program_id,
@@ -311,9 +311,9 @@ class TestGetMilestoneLoaders:
         """Factory always returns a Mapping."""
         loaders = get_milestone_loaders()
         for key in [
-            RECENT_MILESTONES_BY_PROGRAM_ID,
+            RECENT_MILESTONES_BY_PROGRAM_ID_LOADER,
             RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
-            RECENT_MILESTONES_BY_PROJECT_ID,
+            RECENT_MILESTONES_BY_PROJECT_ID_LOADER,
         ]:
             assert key in loaders
             assert isinstance(loaders[key], DataLoader)
@@ -324,16 +324,16 @@ class TestGetMilestoneLoaders:
         loaders2 = get_milestone_loaders()
         assert loaders1 is not loaders2
         for key in [
-            RECENT_MILESTONES_BY_PROGRAM_ID,
+            RECENT_MILESTONES_BY_PROGRAM_ID_LOADER,
             RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
-            RECENT_MILESTONES_BY_PROJECT_ID,
+            RECENT_MILESTONES_BY_PROJECT_ID_LOADER,
         ]:
             assert loaders1[key] is not loaders2[key]
 
     def test_load_fn_is_load_recent_milestones_by_program_id(self):
         """The milestone loader is wired to load_recent_milestones_by_program_id."""
         loaders = get_milestone_loaders()
-        loader = loaders[RECENT_MILESTONES_BY_PROGRAM_ID]
+        loader = loaders[RECENT_MILESTONES_BY_PROGRAM_ID_LOADER]
         assert loader.load_fn is load_recent_milestones_by_program_id
 
     def test_load_fn_is_load_recent_milestones_by_repository_id(self):
@@ -345,7 +345,7 @@ class TestGetMilestoneLoaders:
     def test_load_fn_is_load_recent_milestones_by_project_id(self):
         """The project milestone loader is wired to load_recent_milestones_by_project_id."""
         loaders = get_milestone_loaders()
-        loader = loaders[RECENT_MILESTONES_BY_PROJECT_ID]
+        loader = loaders[RECENT_MILESTONES_BY_PROJECT_ID_LOADER]
         assert loader.load_fn is load_recent_milestones_by_project_id
 
 

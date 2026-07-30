@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Annotated
 import strawberry
 import strawberry_django
 
-from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROGRAM_ID
+from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROGRAM_ID_LOADER
 from apps.github.api.internal.nodes.milestone import MilestoneNode  # noqa: TC001
 from apps.mentorship.api.internal.dataloaders.admin import ADMINS_BY_PROGRAM_ID_LOADER
 from apps.mentorship.api.internal.nodes.enum import (
@@ -58,7 +58,9 @@ class ProgramNode:
     @strawberry_django.field
     async def recent_milestones(self, root: Program, info: strawberry.Info) -> list[MilestoneNode]:
         """Get the list of recent milestones for the program."""
-        return await info.context.github_dataloaders[RECENT_MILESTONES_BY_PROGRAM_ID].load(root.pk)
+        return await info.context.github_dataloaders[RECENT_MILESTONES_BY_PROGRAM_ID_LOADER].load(
+            root.pk
+        )
 
 
 @strawberry.type

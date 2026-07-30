@@ -4,8 +4,8 @@ import strawberry
 import strawberry_django
 
 from apps.owasp.api.internal.dataloaders.committee import (
-    ENTITY_CHANNELS_BY_COMMITTEE_ID,
-    ENTITY_LEADERS_BY_COMMITTEE_ID,
+    ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER,
+    ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER,
 )
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
@@ -32,14 +32,18 @@ class CommitteeNode(GenericEntityNode):
         self, root: Committee, info: strawberry.Info
     ) -> list[EntityChannelNode]:
         """Resolve entity channels."""
-        return await info.context.owasp_dataloaders[ENTITY_CHANNELS_BY_COMMITTEE_ID].load(root.pk)
+        return await info.context.owasp_dataloaders[ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
     async def entity_leaders(
         self, root: Committee, info: strawberry.Info
     ) -> list[EntityMemberNode]:
         """Resolve entity leaders."""
-        return await info.context.owasp_dataloaders[ENTITY_LEADERS_BY_COMMITTEE_ID].load(root.pk)
+        return await info.context.owasp_dataloaders[ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field(select_related=["owasp_repository"])
     def forks_count(self, root: Committee) -> int:

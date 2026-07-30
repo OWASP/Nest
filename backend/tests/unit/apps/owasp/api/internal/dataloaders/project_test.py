@@ -6,11 +6,11 @@ import pytest
 from strawberry.dataloader import DataLoader
 
 from apps.owasp.api.internal.dataloaders.project import (
-    ENTITY_CHANNELS_BY_PROJECT_ID,
-    ENTITY_LEADERS_BY_PROJECT_ID,
-    HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-    HEALTH_METRICS_LIST_BY_PROJECT_ID,
-    PROJECT_BY_REPOSITORY_ID,
+    ENTITY_CHANNELS_BY_PROJECT_ID_LOADER,
+    ENTITY_LEADERS_BY_PROJECT_ID_LOADER,
+    HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER,
+    HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER,
+    PROJECT_BY_REPOSITORY_ID_LOADER,
     Project,
     get_project_loaders,
     load_entity_channels_by_project_id,
@@ -680,11 +680,11 @@ class TestGetProjectLoaders:
     @pytest.mark.parametrize(
         "loader_key",
         [
-            PROJECT_BY_REPOSITORY_ID,
-            HEALTH_METRICS_LIST_BY_PROJECT_ID,
-            HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-            ENTITY_CHANNELS_BY_PROJECT_ID,
-            ENTITY_LEADERS_BY_PROJECT_ID,
+            PROJECT_BY_REPOSITORY_ID_LOADER,
+            HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER,
+            HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER,
+            ENTITY_CHANNELS_BY_PROJECT_ID_LOADER,
+            ENTITY_LEADERS_BY_PROJECT_ID_LOADER,
         ],
     )
     def test_returns_mapping(self, loader_key):
@@ -696,13 +696,13 @@ class TestGetProjectLoaders:
     def test_load_fn_is_load_projects_by_repository_id(self):
         """The project_by_repository_id loader is wired to load_projects_by_repository_id."""
         loaders = get_project_loaders()
-        assert loaders[PROJECT_BY_REPOSITORY_ID].load_fn is load_projects_by_repository_id
+        assert loaders[PROJECT_BY_REPOSITORY_ID_LOADER].load_fn is load_projects_by_repository_id
 
     def test_load_fn_is_load_health_metrics_list_by_project_id(self):
         """The list loader is wired to load_health_metrics_list_by_project_id."""
         loaders = get_project_loaders()
         assert (
-            loaders[HEALTH_METRICS_LIST_BY_PROJECT_ID].load_fn
+            loaders[HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER].load_fn
             is load_health_metrics_list_by_project_id
         )
 
@@ -710,28 +710,34 @@ class TestGetProjectLoaders:
         """The latest loader is wired to load_health_metrics_latest_by_project_id."""
         loaders = get_project_loaders()
         assert (
-            loaders[HEALTH_METRICS_LATEST_BY_PROJECT_ID].load_fn
+            loaders[HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER].load_fn
             is load_health_metrics_latest_by_project_id
         )
 
     def test_load_fn_is_load_entity_channels_by_project_id(self):
         """The channels loader is wired to load_entity_channels_by_project_id."""
         loaders = get_project_loaders()
-        assert loaders[ENTITY_CHANNELS_BY_PROJECT_ID].load_fn is load_entity_channels_by_project_id
+        assert (
+            loaders[ENTITY_CHANNELS_BY_PROJECT_ID_LOADER].load_fn
+            is load_entity_channels_by_project_id
+        )
 
     def test_load_fn_is_load_entity_leaders_by_project_id(self):
         """The leaders loader is wired to load_entity_leaders_by_project_id."""
         loaders = get_project_loaders()
-        assert loaders[ENTITY_LEADERS_BY_PROJECT_ID].load_fn is load_entity_leaders_by_project_id
+        assert (
+            loaders[ENTITY_LEADERS_BY_PROJECT_ID_LOADER].load_fn
+            is load_entity_leaders_by_project_id
+        )
 
     @pytest.mark.parametrize(
         "loader_key",
         [
-            PROJECT_BY_REPOSITORY_ID,
-            HEALTH_METRICS_LIST_BY_PROJECT_ID,
-            HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-            ENTITY_CHANNELS_BY_PROJECT_ID,
-            ENTITY_LEADERS_BY_PROJECT_ID,
+            PROJECT_BY_REPOSITORY_ID_LOADER,
+            HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER,
+            HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER,
+            ENTITY_CHANNELS_BY_PROJECT_ID_LOADER,
+            ENTITY_LEADERS_BY_PROJECT_ID_LOADER,
         ],
     )
     def test_returns_new_instances_on_each_call(self, loader_key):

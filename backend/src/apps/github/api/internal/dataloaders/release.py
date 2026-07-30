@@ -11,7 +11,7 @@ RECENT_RELEASES_LIMIT = 5
 RELEASE_URL_BY_ID_LOADER = "release_url_by_id"
 LATEST_RELEASE_BY_REPOSITORY_ID_LOADER = "latest_release_by_repository_id"
 RECENT_RELEASES_BY_REPOSITORY_ID_LOADER = "recent_releases_by_repository_id"
-RECENT_RELEASES_BY_PROJECT_ID = "recent_releases_by_project_id"
+RECENT_RELEASES_BY_PROJECT_ID_LOADER = "recent_releases_by_project_id"
 
 
 async def load_recent_releases_by_project_id(
@@ -124,7 +124,7 @@ def get_release_loaders() -> dict[str, object]:
         RELEASE_URL_BY_ID_LOADER: DataLoader[int, str](
             load_fn=load_release_urls_by_id,
         ),
-        RECENT_RELEASES_BY_PROJECT_ID: DataLoader[tuple[int, int], list[Release]](
+        RECENT_RELEASES_BY_PROJECT_ID_LOADER: DataLoader[tuple[int, int], list[Release]](
             load_fn=load_recent_releases_by_project_id,
         ),
     }

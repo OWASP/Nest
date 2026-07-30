@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from apps.owasp.api.internal.dataloaders.committee import (
-    ENTITY_CHANNELS_BY_COMMITTEE_ID,
-    ENTITY_LEADERS_BY_COMMITTEE_ID,
+    ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER,
+    ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER,
 )
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -109,7 +109,7 @@ class TestCommitteeNodeResolvers:
         mock_channels = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_channels)
-        mock_info = self._build_info(owasp={ENTITY_CHANNELS_BY_COMMITTEE_ID: mock_loader})
+        mock_info = self._build_info(owasp={ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER: mock_loader})
 
         mock_committee = Mock()
         mock_committee.pk = 1
@@ -132,7 +132,7 @@ class TestCommitteeNodeResolvers:
         mock_leaders = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_leaders)
-        mock_info = self._build_info(owasp={ENTITY_LEADERS_BY_COMMITTEE_ID: mock_loader})
+        mock_info = self._build_info(owasp={ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER: mock_loader})
 
         mock_committee = Mock()
         mock_committee.pk = 1

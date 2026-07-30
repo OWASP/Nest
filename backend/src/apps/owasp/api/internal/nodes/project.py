@@ -6,18 +6,18 @@ import strawberry_django
 from apps.common.utils import normalize_limit
 from apps.core.utils.index import deep_camelize
 from apps.github.api.internal.dataloaders.issue import (
-    ISSUES_COUNT_BY_PROJECT_ID,
-    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-    RECENT_ISSUES_BY_PROJECT_ID,
+    ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+    RECENT_ISSUES_BY_PROJECT_ID_LOADER,
 )
-from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID_LOADER
 from apps.github.api.internal.dataloaders.pull_request import (
-    RECENT_PULL_REQUESTS_BY_PROJECT_ID,
+    RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER,
 )
-from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID_LOADER
 from apps.github.api.internal.dataloaders.repository import (
-    REPOSITORIES_BY_PROJECT_ID,
-    REPOSITORIES_COUNT_BY_PROJECT_ID,
+    REPOSITORIES_BY_PROJECT_ID_LOADER,
+    REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER,
 )
 from apps.github.api.internal.dataloaders.repository_contributor import (
     TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER,
@@ -29,10 +29,10 @@ from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.project import (
-    ENTITY_CHANNELS_BY_PROJECT_ID,
-    ENTITY_LEADERS_BY_PROJECT_ID,
-    HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-    HEALTH_METRICS_LIST_BY_PROJECT_ID,
+    ENTITY_CHANNELS_BY_PROJECT_ID_LOADER,
+    ENTITY_LEADERS_BY_PROJECT_ID_LOADER,
+    HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER,
+    HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER,
 )
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
@@ -78,12 +78,16 @@ class ProjectNode(GenericEntityNode):
         self, root: Project, info: strawberry.Info
     ) -> list[EntityChannelNode]:
         """Resolve entity channels."""
-        return await info.context.owasp_dataloaders[ENTITY_CHANNELS_BY_PROJECT_ID].load(root.pk)
+        return await info.context.owasp_dataloaders[ENTITY_CHANNELS_BY_PROJECT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
     async def entity_leaders(self, root: Project, info: strawberry.Info) -> list[EntityMemberNode]:
         """Resolve entity leaders."""
-        return await info.context.owasp_dataloaders[ENTITY_LEADERS_BY_PROJECT_ID].load(root.pk)
+        return await info.context.owasp_dataloaders[ENTITY_LEADERS_BY_PROJECT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
     async def health_metrics_list(
@@ -97,7 +101,7 @@ class ProjectNode(GenericEntityNode):
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return await info.context.owasp_dataloaders[HEALTH_METRICS_LIST_BY_PROJECT_ID].load(
+        return await info.context.owasp_dataloaders[HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER].load(
             (root.pk, normalized_limit)
         )
 
@@ -106,14 +110,16 @@ class ProjectNode(GenericEntityNode):
         self, root: Project, info: strawberry.Info
     ) -> ProjectHealthMetricsNode | None:
         """Resolve latest project health metrics."""
-        return await info.context.owasp_dataloaders[HEALTH_METRICS_LATEST_BY_PROJECT_ID].load(
-            root.pk
-        )
+        return await info.context.owasp_dataloaders[
+            HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER
+        ].load(root.pk)
 
     @strawberry_django.field
     async def issues_count(self, root: Project, info: strawberry.Info) -> int:
         """Resolve issues count."""
-        return await info.context.github_dataloaders[ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
+        return await info.context.github_dataloaders[ISSUES_COUNT_BY_PROJECT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field(only=["key"])
     def key(self, root: Project) -> str:
@@ -128,12 +134,14 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     async def open_issues_count(self, root: Project, info: strawberry.Info) -> int:
         """Resolve open issues count."""
-        return await info.context.github_dataloaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID].load(root.pk)
+        return await info.context.github_dataloaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
     async def recent_issues(self, root: Project, info: strawberry.Info) -> list[IssueNode]:
         """Resolve recent issues."""
-        return await info.context.github_dataloaders[RECENT_ISSUES_BY_PROJECT_ID].load(
+        return await info.context.github_dataloaders[RECENT_ISSUES_BY_PROJECT_ID_LOADER].load(
             (root.pk, RECENT_ISSUES_LIMIT)
         )
 
@@ -145,7 +153,7 @@ class ProjectNode(GenericEntityNode):
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return await info.context.github_dataloaders[RECENT_MILESTONES_BY_PROJECT_ID].load(
+        return await info.context.github_dataloaders[RECENT_MILESTONES_BY_PROJECT_ID_LOADER].load(
             (root.pk, normalized_limit)
         )
 
@@ -154,26 +162,28 @@ class ProjectNode(GenericEntityNode):
         self, root: Project, info: strawberry.Info
     ) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
-        return await info.context.github_dataloaders[RECENT_PULL_REQUESTS_BY_PROJECT_ID].load(
-            (root.pk, RECENT_PULL_REQUESTS_LIMIT)
-        )
+        return await info.context.github_dataloaders[
+            RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER
+        ].load((root.pk, RECENT_PULL_REQUESTS_LIMIT))
 
     @strawberry_django.field
     async def recent_releases(self, root: Project, info: strawberry.Info) -> list[ReleaseNode]:
         """Resolve recent releases."""
-        return await info.context.github_dataloaders[RECENT_RELEASES_BY_PROJECT_ID].load(
+        return await info.context.github_dataloaders[RECENT_RELEASES_BY_PROJECT_ID_LOADER].load(
             (root.pk, RECENT_RELEASES_LIMIT)
         )
 
     @strawberry_django.field
     async def repositories(self, root: Project, info: strawberry.Info) -> list[RepositoryNode]:
         """Resolve repositories."""
-        return await info.context.github_dataloaders[REPOSITORIES_BY_PROJECT_ID].load(root.pk)
+        return await info.context.github_dataloaders[REPOSITORIES_BY_PROJECT_ID_LOADER].load(
+            root.pk
+        )
 
     @strawberry_django.field
     async def repositories_count(self, root: Project, info: strawberry.Info) -> int:
         """Resolve repositories count."""
-        return await info.context.github_dataloaders[REPOSITORIES_COUNT_BY_PROJECT_ID].load(
+        return await info.context.github_dataloaders[REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER].load(
             root.pk
         )
 

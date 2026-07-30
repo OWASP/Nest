@@ -10,9 +10,9 @@ from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 from apps.github.models.milestone import Milestone
 from apps.mentorship.models.program import Program
 
-RECENT_MILESTONES_BY_PROGRAM_ID = "recent_milestones_by_program_id"
+RECENT_MILESTONES_BY_PROGRAM_ID_LOADER = "recent_milestones_by_program_id"
 RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER = "recent_milestones_by_repository_id"
-RECENT_MILESTONES_BY_PROJECT_ID = "recent_milestones_by_project_id"
+RECENT_MILESTONES_BY_PROJECT_ID_LOADER = "recent_milestones_by_project_id"
 RECENT_MILESTONES_LIMIT = 5
 
 
@@ -107,13 +107,13 @@ async def load_recent_milestones_by_repository_id(
 def get_milestone_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
-        RECENT_MILESTONES_BY_PROGRAM_ID: DataLoader[int, list[Milestone]](
+        RECENT_MILESTONES_BY_PROGRAM_ID_LOADER: DataLoader[int, list[Milestone]](
             load_fn=load_recent_milestones_by_program_id,
         ),
         RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER: DataLoader[tuple[int, int], list[Milestone]](
             load_fn=load_recent_milestones_by_repository_id,
         ),
-        RECENT_MILESTONES_BY_PROJECT_ID: DataLoader[tuple[int, int], list[Milestone]](
+        RECENT_MILESTONES_BY_PROJECT_ID_LOADER: DataLoader[tuple[int, int], list[Milestone]](
             load_fn=load_recent_milestones_by_project_id,
         ),
     }

@@ -11,8 +11,8 @@ from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.project import Project
 
-REPOSITORIES_BY_PROJECT_ID = "repositories_by_project_id"
-REPOSITORIES_COUNT_BY_PROJECT_ID = "repositories_count_by_project_id"
+REPOSITORIES_BY_PROJECT_ID_LOADER = "repositories_by_project_id"
+REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER = "repositories_count_by_project_id"
 REPOSITORY_BY_RELEASE_ID_LOADER = "repository_by_release_id"
 REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER = "repository_project_name_by_release_id"
 
@@ -108,10 +108,10 @@ async def load_repositories_count_by_project_id(project_ids: list[int]) -> list[
 def get_repository_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
-        REPOSITORIES_BY_PROJECT_ID: DataLoader[int, list[Repository]](
+        REPOSITORIES_BY_PROJECT_ID_LOADER: DataLoader[int, list[Repository]](
             load_fn=load_repositories_by_project_id,
         ),
-        REPOSITORIES_COUNT_BY_PROJECT_ID: DataLoader[int, int](
+        REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER: DataLoader[int, int](
             load_fn=load_repositories_count_by_project_id,
         ),
         REPOSITORY_BY_RELEASE_ID_LOADER: DataLoader[int, Repository | None](

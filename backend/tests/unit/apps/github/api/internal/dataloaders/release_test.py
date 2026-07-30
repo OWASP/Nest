@@ -7,7 +7,7 @@ from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.release import (
     LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
-    RECENT_RELEASES_BY_PROJECT_ID,
+    RECENT_RELEASES_BY_PROJECT_ID_LOADER,
     RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
     RELEASE_URL_BY_ID_LOADER,
     get_release_loaders,
@@ -451,7 +451,7 @@ class TestGetReleaseLoaders:
             RELEASE_URL_BY_ID_LOADER,
             LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
             RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
-            RECENT_RELEASES_BY_PROJECT_ID,
+            RECENT_RELEASES_BY_PROJECT_ID_LOADER,
         ]:
             assert key in loaders
             assert isinstance(loaders[key], DataLoader)
@@ -465,7 +465,7 @@ class TestGetReleaseLoaders:
             RELEASE_URL_BY_ID_LOADER,
             LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
             RECENT_RELEASES_BY_REPOSITORY_ID_LOADER,
-            RECENT_RELEASES_BY_PROJECT_ID,
+            RECENT_RELEASES_BY_PROJECT_ID_LOADER,
         ]:
             assert loaders1[key] is not loaders2[key]
 
@@ -490,5 +490,5 @@ class TestGetReleaseLoaders:
     def test_load_fn_is_load_recent_releases_by_project_id(self):
         """The project releases loader is wired to load_recent_releases_by_project_id."""
         loaders = get_release_loaders()
-        loader = loaders[RECENT_RELEASES_BY_PROJECT_ID]
+        loader = loaders[RECENT_RELEASES_BY_PROJECT_ID_LOADER]
         assert loader.load_fn is load_recent_releases_by_project_id

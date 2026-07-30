@@ -7,9 +7,9 @@ from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.issue import (
     ISSUES_BY_REPOSITORY_ID_LOADER,
-    ISSUES_COUNT_BY_PROJECT_ID,
-    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-    RECENT_ISSUES_BY_PROJECT_ID,
+    ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+    RECENT_ISSUES_BY_PROJECT_ID_LOADER,
     get_issue_loaders,
     load_issues_by_repository_id,
     load_issues_count_by_project_id,
@@ -299,12 +299,12 @@ class TestGetIssueLoaders:
         loaders = get_issue_loaders()
         assert ISSUES_BY_REPOSITORY_ID_LOADER in loaders
         assert isinstance(loaders[ISSUES_BY_REPOSITORY_ID_LOADER], DataLoader)
-        assert ISSUES_COUNT_BY_PROJECT_ID in loaders
-        assert isinstance(loaders[ISSUES_COUNT_BY_PROJECT_ID], DataLoader)
-        assert OPEN_ISSUES_COUNT_BY_PROJECT_ID in loaders
-        assert isinstance(loaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID], DataLoader)
-        assert RECENT_ISSUES_BY_PROJECT_ID in loaders
-        assert isinstance(loaders[RECENT_ISSUES_BY_PROJECT_ID], DataLoader)
+        assert ISSUES_COUNT_BY_PROJECT_ID_LOADER in loaders
+        assert isinstance(loaders[ISSUES_COUNT_BY_PROJECT_ID_LOADER], DataLoader)
+        assert OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER in loaders
+        assert isinstance(loaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER], DataLoader)
+        assert RECENT_ISSUES_BY_PROJECT_ID_LOADER in loaders
+        assert isinstance(loaders[RECENT_ISSUES_BY_PROJECT_ID_LOADER], DataLoader)
 
     def test_load_fn_is_load_issues_by_repository_id(self):
         """The loader is wired to load_issues_by_repository_id."""
@@ -315,20 +315,22 @@ class TestGetIssueLoaders:
     def test_load_fn_is_load_issues_count_by_project_id(self):
         """The issues count loader is wired to load_issues_count_by_project_id."""
         loaders = get_issue_loaders()
-        assert loaders[ISSUES_COUNT_BY_PROJECT_ID].load_fn is load_issues_count_by_project_id
+        assert (
+            loaders[ISSUES_COUNT_BY_PROJECT_ID_LOADER].load_fn is load_issues_count_by_project_id
+        )
 
     def test_load_fn_is_load_open_issues_count_by_project_id(self):
         """The open issues count loader is wired to load_open_issues_count_by_project_id."""
         loaders = get_issue_loaders()
         assert (
-            loaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID].load_fn
+            loaders[OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER].load_fn
             is load_open_issues_count_by_project_id
         )
 
     def test_load_fn_is_load_recent_issues_by_project_id(self):
         """The loader is wired to load_recent_issues_by_project_id."""
         loaders = get_issue_loaders()
-        loader = loaders[RECENT_ISSUES_BY_PROJECT_ID]
+        loader = loaders[RECENT_ISSUES_BY_PROJECT_ID_LOADER]
         assert loader.load_fn is load_recent_issues_by_project_id
 
     def test_returns_new_instances_on_each_call(self):
@@ -338,9 +340,9 @@ class TestGetIssueLoaders:
         assert loaders1 is not loaders2
         for key in [
             ISSUES_BY_REPOSITORY_ID_LOADER,
-            ISSUES_COUNT_BY_PROJECT_ID,
-            OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-            RECENT_ISSUES_BY_PROJECT_ID,
+            ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+            OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+            RECENT_ISSUES_BY_PROJECT_ID_LOADER,
         ]:
             assert loaders1[key] is not loaders2[key]
 
