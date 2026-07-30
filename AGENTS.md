@@ -24,7 +24,7 @@ contribution opportunities. MIT license.
 
 ## Repository layout
 
-```
+```text
 backend/             Django project
   src/apps/           Django applications
     ai/              LLM agent, embeddings, text splitting
@@ -185,7 +185,7 @@ Entities: chapter, committee, event, project, repository, slack-message.
 - `slack-match-owasp-channels` -- link Slack channels to OWASP entities
 - `slack-check-invite-link` -- audit invite link usage
 
-**Data pipeline** (`make sync-data` runs all of them in order):
+**Data pipeline** (`make sync-data` runs the core update stages in order):
 1. `github-update-owasp-organization` -- seed org from GitHub
 2. `owasp-scrape-{chapters,committees,projects}` -- scrape OWASP site
 3. `github-add-related-repositories` -- discover related repos
@@ -228,6 +228,7 @@ Jest. Coverage config in `frontend/jest.config.ts`.
 The canonical path is Docker. For quick iteration you can run tools directly:
 
 **Backend:**
+
 ```bash
 cd backend
 poetry install
@@ -237,6 +238,7 @@ poetry run python manage.py runserver 0.0.0.0:8000
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 pnpm install
@@ -248,6 +250,7 @@ pnpm run format:check
 ```
 
 **Pre-commit (host):**
+
 ```bash
 pip install -r tools/requirements/pre-commit.txt
 pre-commit run --all-files
