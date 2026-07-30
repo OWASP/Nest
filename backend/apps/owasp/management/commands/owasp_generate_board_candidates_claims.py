@@ -1,9 +1,12 @@
 """A command to generate board candidates' claims using www-board-candidates repository."""
 
 import json
+import unicodedata
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
+from django.db import IntegrityError
 
 from apps.ai.common.utils import extract_json_from_markdown
 from apps.common.open_ai import OpenAi
@@ -80,7 +83,16 @@ class Command(BaseCommand):
             str: The derived markdown filename.
 
         """
-        base_name = candidate_name.lower().replace(" ", "_").replace("-", "_")
+        base_name = (
+            unicodedata.normalize("NFKD", candidate_name)
+            .encode("ascii", "ignore")
+            .decode("ascii")
+            .lower()
+            .replace("'", "")
+            .replace(".", "")
+            .replace(" ", "_")
+            .replace("-", "_")
+        )
 
         # Year 2022 markdown files have a "_2022" suffix.
         exception_year = 2022
@@ -135,16 +147,18 @@ class Command(BaseCommand):
             if not isinstance(claim_data, dict):
                 continue
 
-            name = str(claim_data.get("name", "")).strip()[:200]
-            description = str(claim_data.get("description", "")).strip()
+            name = str(claim_data.get("name") or "").strip()[
+                : BoardCandidateClaim._meta.get_field("name").max_length
+            ]
+            description = str(claim_data.get("description") or "").strip()
 
             if name:
                 claims.append(
                     BoardCandidateClaim(
                         board=board,
+                        description=description,
                         candidate=candidate,
                         name=name,
-                        description=description,
                         status=BoardCandidateClaim.Status.DRAFT,
                     )
                 )
@@ -181,69 +195,99 @@ class Command(BaseCommand):
             candidates = candidates.filter(member_name__iexact=name)
 
         if not candidates.exists():
-            self.stdout.write(self.style.WARNING("No candidates found matching the criteria."))
+            self.stderr.write(self.style.WARNING("No candidates found matching the criteria."))
             return
 
         processed_count = 0
         for candidate in candidates:
-            if BoardCandidateClaim.objects.filter(candidate=candidate).exists():
-                self.stdout.write(f"Claims already exist for {candidate.member_name}, skipping...")
-                continue
-
-            aggregated_texts = []
-            for source_year in source_years:
-                filename = self.get_filename_from_candidate_name(
-                    candidate.member_name, source_year
-                )
-                url = (
-                    "https://raw.githubusercontent.com/OWASP/www-board-candidates/"
-                    f"master/{source_year}/{filename}"
-                )
-
-                content = get_repository_file_content(url)
-                if content and "404: Not Found" not in content[:30]:
-                    aggregated_texts.append(content)
-
-            if not aggregated_texts:
-                self.stderr.write(
-                    self.style.WARNING(
-                        f"Could not find any markdown files for {candidate.member_name} "
-                        f"in source years {source_years}"
+            try:
+                if BoardCandidateClaim.objects.filter(candidate=candidate).exists():
+                    self.stdout.write(
+                        f"Claims already exist for {candidate.member_name}, skipping..."
                     )
-                )
-                continue
+                    continue
 
-            self.stdout.write(f"Generating claims for {candidate.member_name}...")
-            file_content = "\n\n--- Next Statement ---\n\n".join(aggregated_texts)
+                aggregated_texts = []
+                for source_year in source_years:
+                    filename = self.get_filename_from_candidate_name(
+                        candidate.member_name, source_year
+                    )
+                    url = (
+                        "https://raw.githubusercontent.com/OWASP/www-board-candidates/"
+                        f"master/{source_year}/{filename}"
+                    )
 
-            claims = self.generate_claims(file_content, candidate, board)
-            if not claims:
-                self.stderr.write(
-                    self.style.ERROR(f"Failed to generate claims for {candidate.member_name}.")
-                )
-                continue
+                    content = get_repository_file_content(url)
+                    if content and "404: Not Found" not in content[:30]:
+                        aggregated_texts.append(content)
 
-            for claim in claims:
+                if not aggregated_texts:
+                    self.stderr.write(
+                        self.style.WARNING(
+                            f"Could not find any markdown files for {candidate.member_name} "
+                            f"in source years {source_years}"
+                        )
+                    )
+                    continue
+
+                self.stdout.write(f"Generating claims for {candidate.member_name}...")
+                file_content = "\n\n--- Next Statement ---\n\n".join(aggregated_texts)
+
+                claims = self.generate_claims(file_content, candidate, board)
+                if not claims:
+                    self.stderr.write(
+                        self.style.ERROR(f"Failed to generate claims for {candidate.member_name}.")
+                    )
+                    continue
+
+                seen_names = set()
+                unique_claims = []
+                for claim in claims:
+                    if claim.name not in seen_names:
+                        seen_names.add(claim.name)
+                        unique_claims.append(claim)
+                claims = unique_claims
+
+                for claim in claims:
+                    if dry_run:
+                        self.stdout.write(
+                            f"[DRY RUN] Generated Claim:\n  "
+                            f"Name: {claim.name}\n  Desc: {claim.description}\n"
+                        )
+                    else:
+                        try:
+                            claim.save()
+                        except (IntegrityError, ValidationError) as e:
+                            self.stderr.write(
+                                self.style.ERROR(
+                                    f"Failed to save claim '{claim.name}' for "
+                                    f"{candidate.member_name}: {e}"
+                                )
+                            )
+                        except Exception as e:  # noqa: BLE001
+                            self.stderr.write(
+                                self.style.ERROR(
+                                    f"Unexpected error saving claim '{claim.name}' for "
+                                    f"{candidate.member_name}: {e}"
+                                )
+                            )
+
+                processed_count += 1
                 if dry_run:
                     self.stdout.write(
-                        f"[DRY RUN] Generated Claim:\n  "
-                        f"Name: {claim.name}\n  Desc: {claim.description}\n"
+                        self.style.SUCCESS(
+                            f"[DRY RUN] Would have saved claims for {candidate.member_name}"
+                        )
                     )
                 else:
-                    claim.save()
-
-            processed_count += 1
-            if dry_run:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"[DRY RUN] Would have saved claims for {candidate.member_name}"
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Successfully generated claims for {candidate.member_name}"
+                        )
                     )
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"Successfully generated claims for {candidate.member_name}"
-                    )
+            except Exception as e:  # noqa: BLE001
+                self.stderr.write(
+                    self.style.ERROR(f"Failed to process candidate {candidate.member_name}: {e}")
                 )
 
         if dry_run:
