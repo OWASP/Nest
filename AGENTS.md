@@ -315,7 +315,7 @@ CSRF token endpoint, health check. Not part of the public API surface.
 
 Separate Django app at `apps/slack/`. Architecture:
 
-- **Commands** (23 files in `apps/slack/commands/`): slash command handlers
+- **Commands** (22 files in `apps/slack/commands/`): slash command handlers
   (ai, board, chapters, committees, community, contact, contribute, donate,
   events, gsoc, jobs, leaders, news, owasp, policies, projects, sponsor,
   sponsors, staff, users). Base class in `command.py`.
