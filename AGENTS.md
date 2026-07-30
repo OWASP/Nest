@@ -74,13 +74,13 @@ make/                Shared Makefile fragments
 Settings use `django-configurations`. Each class in `backend/src/settings/`
 inherits from `Base` and overrides only what differs:
 
-| Class        | File        | Key differences                                         |
-| ------------ | ----------- | ------------------------------------------------------- |
-| `Base`       | `base.py`   | All apps, middleware, DB, cache, Algolia, Redis config  |
-| `Local`      | `local.py`  | Debug on, CSRF/Session Secure off, CORS localhost:3000  |
-| `Test`       | `test.py`   | LocMemCache, CSRF/Session Secure off, no SSL redirect   |
-| `Staging`    | `staging.py`| S3 storage, Sentry, NestBot disabled, site=nest.owasp.dev|
-| `Production` | `production.py`| S3 storage, Sentry, GitHub App auth, site=nest.owasp.org|
+| Class        | File             | Key differences                                                              |
+| ------------ | ---------------- | ---------------------------------------------------------------------------- |
+| `Base`       | `base.py`        | All apps, middleware, DB, cache, Algolia, Redis config                       |
+| `Local`      | `local.py`       | Debug on, CSRF/Session Secure off, CORS localhost:3000                       |
+| `Test`       | `test.py`        | LocMemCache, CSRF/Session Secure off, no SSL redirect                        |
+| `Staging`    | `staging.py`     | S3 storage, Sentry, NestBot disabled, site=nest.owasp.dev                    |
+| `Production` | `production.py`  | S3 storage, Sentry, GitHub App auth, site=nest.owasp.org                     |
 
 The active class is selected by `DJANGO_CONFIGURATION` env var. The
 `DJANGO_SETTINGS_MODULE` is always `settings.<name>` (e.g. `settings.test`).
@@ -102,43 +102,42 @@ run inside containers.
 
 ### App lifecycle
 
-| Task                       | Command               |
-| -------------------------- | --------------------- |
-| Start all services         | `make run`            |
-| Create superuser           | `make create-superuser`|
-| Run DB migrations          | `make migrate`        |
-| Create migrations          | `make migration`      |
-| Load fixture data          | `make load-data`      |
-| Index data in Algolia      | `make index-data`     |
-| Recreate local DB schema   | `make recreate-schema`|
-| Sync data from GitHub      | `make sync-data`      |
-| Django shell               | `make shell-django`   |
-| Backend container shell    | `make exec-backend-command-it CMD=/bin/sh` |
+| Task                       | Command                                      |
+| -------------------------- | -------------------------------------------- |
+| Start all services         | `make run`                                   |
+| Create superuser           | `make create-superuser`                      |
+| Run DB migrations          | `make migrate`                               |
+| Create migrations          | `make migration`                             |
+| Index data in Algolia      | `make index-data`                            |
+| Recreate local DB schema   | `make recreate-schema`                       |
+| Sync data from GitHub      | `make sync-data`                             |
+| Django shell               | `make shell-django`                          |
+| Backend container shell    | `make exec-backend-command-it CMD=/bin/sh`   |
 
 ### App management
 
-| Task                       | Command                  |
-| -------------------------- | ------------------------ |
-| Execute Django command     | `make exec-backend-command CMD="python manage.py <command>"` |
-| Interactive backend shell  | `make exec-backend-command-it CMD=/bin/sh`                    |
-| Django shell               | `make shell-django`                                           |
-| Backend container shell    | `make shell-backend`                                          |
-| DB shell                   | `make shell-db`                                               |
+| Task                       | Command                                                           |
+| -------------------------- | ----------------------------------------------------------------- |
+| Execute Django command     | `make exec-backend-command CMD="python manage.py <command>"`      |
+| Interactive backend shell  | `make exec-backend-command-it CMD=/bin/sh`                        |
+| Django shell               | `make shell-django`                                               |
+| Backend container shell    | `make shell-backend`                                              |
+| DB shell                   | `make shell-db`                                                   |
 
 ### Quality checks
 
-| Task                       | Command               |
-| -------------------------- | --------------------- |
-| All checks + tests         | `make check-test`     |
-| All checks (no tests)      | `make check`          |
-| Pre-commit (ruff, mypy, etc)| `make pre-commit`    |
-| Prettier (verify)          | `make prettier`       |
-| Prettier (auto-fix)        | `make prettier-fix`   |
-| ESLint (verify)            | `make eslint`         |
-| ESLint (auto-fix)          | `make eslint-fix`     |
-| CSpell                     | `make cspell`         |
-| Fix prettier + eslint      | `make check-fix`      |
-| GraphQL type codegen       | `make graphql-codegen`|
+| Task                            | Command               |
+| ------------------------------- | --------------------- |
+| All checks + tests              | `make check-test`     |
+| All checks (no tests)           | `make check`          |
+| Pre-commit (ruff, mypy, etc)    | `make pre-commit`     |
+| Prettier (verify)               | `make prettier`       |
+| Prettier (auto-fix)             | `make prettier-fix`   |
+| ESLint (verify)                 | `make eslint`         |
+| ESLint (auto-fix)               | `make eslint-fix`     |
+| CSpell                          | `make cspell`         |
+| Fix prettier + eslint           | `make check-fix`      |
+| GraphQL type codegen            | `make graphql-codegen`|
 
 Checks run in the `nest-code-checks` Docker image (auto-built). No host Node,
 Python, or Terraform install required.
@@ -149,6 +148,7 @@ Data sync and enrichment commands grouped by app. All are Docker-based and run
 via `make`:
 
 **GitHub sync** (`backend/make/apps/github.mk`):
+
 - `github-update-owasp-organization` -- fetch OWASP org from GitHub API
 - `github-update-users` -- sync GitHub user profiles
 - `github-update-related-organizations` -- fetch related orgs
@@ -157,6 +157,7 @@ via `make`:
 - `github-update-pull-requests` -- link PRs to issues via closing keywords
 
 **OWASP data** (`backend/make/apps/owasp.mk`):
+
 - `owasp-scrape-{projects,chapters,committees}` -- scrape OWASP site
 - `owasp-enrich-{projects,chapters,committees,events}` -- enrich from GitHub
 - `owasp-aggregate-projects` -- consolidate project data
@@ -169,6 +170,7 @@ via `make`:
 - `owasp-process-snapshots` -- generate community snapshots
 
 **AI/LLM** (`backend/make/apps/ai.mk`):
+
 - `ai-update-{entity}-chunks` -- split entity content into chunks
 - `ai-update-{entity}-context` -- generate embeddings and context
 - `ai-run-agentic-rag` -- run the agentic RAG pipeline
@@ -176,17 +178,20 @@ via `make`:
 Entities: chapter, committee, event, project, repository, slack-message.
 
 **Mentorship** (`backend/make/apps/mentorship.mk`):
+
 - `mentorship-sync-issue-levels` -- sync issue difficulty levels
 - `mentorship-sync-module-issues` -- sync issues to modules
 - `mentorship-update-comments` -- update issue comments
 
 **Slack** (`backend/make/apps/slack.mk`):
+
 - `slack-sync-data` -- sync workspace, members, conversations
 - `slack-sync-messages` -- sync channel messages
 - `slack-match-owasp-channels` -- link Slack channels to OWASP entities
 - `slack-check-invite-link` -- audit invite link usage
 
 **Data pipeline** (`make sync-data` runs the core update stages in order):
+
 1. `github-update-owasp-organization` -- seed org from GitHub
 2. `owasp-scrape-{chapters,committees,projects}` -- scrape OWASP site
 3. `github-add-related-repositories` -- discover related repos
@@ -202,17 +207,17 @@ Entities: chapter, committee, event, project, repository, slack-message.
 
 ### Testing
 
-| Task                       | Command                  |
-| -------------------------- | ------------------------ |
-| All tests                  | `make test`              |
-| Backend tests (pytest)     | `make test-backend`      |
-| Frontend unit tests (Jest) | `make test-frontend`     |
-| E2E tests (Playwright)     | `make test-e2e`          |
-| Backend fuzz (Schemathesis)| `make test-backend-fuzz` |
-| Security scans (all)       | `make security-scan`     |
-| SAST (Semgrep)             | `make security-sast-scan`|
-| DAST (ZAP)                 | `make security-dast-scan`|
-| Infrastructure tests       | `make test-infrastructure`|
+| Task                       | Command                            |
+| -------------------------- | ---------------------------------- |
+| All tests                  | `make test`                        |
+| Backend tests (pytest)     | `make test-backend`                |
+| Frontend unit tests (Jest) | `make test-frontend`               |
+| E2E tests (Playwright)     | `make test-e2e`                    |
+| Backend fuzz (Schemathesis)| `make test-backend-fuzz`           |
+| Security scans (all)       | `make security-scan`               |
+| SAST (Semgrep)             | `make security-sast-scan`          |
+| DAST (ZAP)                 | `make security-dast-scan`          |
+| Infrastructure tests       | `make test-infrastructure`         |
 
 Backend tests use pytest with `--numprocesses=auto` (pytest-xdist), 95%
 coverage minimum (`--cov-fail-under=95`). Configuration in `pyproject.toml`
@@ -351,6 +356,7 @@ App Router pages in `frontend/src/app/`:
 | `/api/health`      | Health check endpoint          |
 
 Data fetching:
+
 - Server components use GraphQL via `server/queries/` (18 query files)
 - Client components use Apollo Client (`utils/helpers/apolloClient.ts`)
 - REST v0 endpoints used for Algolia-backed searches
@@ -392,11 +398,11 @@ Path aliases (from tsconfig.json):
 
 ## Environment files
 
-| File                  | Purpose                              |
-| --------------------- | ------------------------------------ |
-| `backend/.env`        | Backend local config (from .example) |
-| `frontend/.env`       | Frontend local config (from .example)|
-| `backend/.env.unit-tests` | Backend unit test overrides      |
+| File                       | Purpose                              |
+| -------------------------- | ------------------------------------ |
+| `backend/.env`             | Backend local config (from .example) |
+| `frontend/.env`            | Frontend local config (from .example)|
+| `backend/.env.unit-tests`  | Backend unit test overrides          |
 
 Key vars: `DJANGO_SECRET_KEY` (backend, required), `GITHUB_TOKEN` (data sync),
 `NEXTAUTH_SECRET` + `NEXT_SERVER_GITHUB_CLIENT_*` (GitHub OAuth).
