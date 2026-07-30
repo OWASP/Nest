@@ -93,6 +93,48 @@ class TestGenerateBoardCandidatesClaimsCommand:
         assert claims == []
         command.stderr.write.assert_called()
 
+    def test_generate_claims_invalid_claim_data(self, command, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
+        )
+        mock_extract = mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.extract_json_from_markdown"
+        )
+        mock_extract.return_value = json.dumps(
+            [
+                {"name": "Valid Claim", "description": "Valid desc"},
+                "not_a_dict",
+                42,
+            ]
+        )
+
+        candidate = EntityMember()
+        board = BoardOfDirectors()
+
+        claims = command.generate_claims("markdown content", candidate, board)
+        assert len(claims) == 1
+        assert claims[0].name == "Valid Claim"
+
+    def test_generate_claims_empty_name(self, command, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
+        )
+        mock_extract = mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.extract_json_from_markdown"
+        )
+        mock_extract.return_value = json.dumps(
+            [
+                {"name": "", "description": "Empty name claim"},
+                {"name": "   ", "description": "Whitespace name claim"},
+            ]
+        )
+
+        candidate = EntityMember()
+        board = BoardOfDirectors()
+
+        claims = command.generate_claims("markdown content", candidate, board)
+        assert len(claims) == 0
+
     def test_generate_claims_empty_response(self, command, mocker):
         mock_openai_cls = mocker.patch(
             "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
@@ -363,6 +405,37 @@ class TestGenerateBoardCandidatesClaimsCommand:
         command.stderr.write.assert_any_call(
             "Unexpected error saving claim 'Claim 1' for John Doe: Unexpected"
         )
+
+    def test_handle_duplicate_claim_names(self, command, handle_mocks):
+        mock_board = Mock()
+        handle_mocks["board_get"].return_value = mock_board
+
+        mock_candidate = Mock(spec=EntityMember)
+        mock_candidate.member_name = "John Doe"
+
+        mock_qs = Mock()
+        mock_qs.exists.return_value = True
+        mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
+        handle_mocks["entity_member_filter"].return_value = mock_qs
+
+        mock_claim_qs = Mock()
+        mock_claim_qs.exists.return_value = False
+        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
+
+        handle_mocks["get_repo_file"].return_value = "markdown content"
+
+        mock_claim_1 = Mock(spec=BoardCandidateClaim)
+        mock_claim_1.name = "Same Claim"
+        mock_claim_1.description = "First"
+        mock_claim_2 = Mock(spec=BoardCandidateClaim)
+        mock_claim_2.name = "Same Claim"
+        mock_claim_2.description = "Second"
+        handle_mocks["generate_claims"].return_value = [mock_claim_1, mock_claim_2]
+
+        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+
+        mock_claim_1.save.assert_called_once()
+        mock_claim_2.save.assert_not_called()
 
     def test_handle_process_candidate_error(self, command, handle_mocks):
         mock_board = Mock()
