@@ -79,28 +79,28 @@ services:
       - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
       - docs-venv:/home/owasp/.venv
 
-  # frontend:
-  #   container_name: nest-frontend
-  #   command: >
-  #     sh -c '
-  #       pnpm run dev
-  #     '
-  #   build:
-  #     context: ../../frontend
-  #     dockerfile: ../docker/frontend/Dockerfile.local
-  #   depends_on:
-  #     - backend
-  #   environment:
-  #     - NEXT_TELEMETRY_DISABLED=1
-  #     - NODE_ENV=development
-  #   networks:
-  #     - nest-network
-  #   ports:
-  #     - 3000:3000
-  #   volumes:
-  #     - ../../frontend:/home/owasp
-  #     - frontend-next:/home/owasp/.next
-  #     - frontend-node-modules:/home/owasp/node_modules
+  frontend:
+    container_name: nest-frontend
+    command: >
+      sh -c '
+        pnpm run dev
+      '
+    build:
+      context: ../../frontend
+      dockerfile: ../docker/frontend/Dockerfile.local
+    depends_on:
+      - backend
+    environment:
+      - NEXT_TELEMETRY_DISABLED=1
+      - NODE_ENV=development
+    networks:
+      - nest-network
+    ports:
+      - 3000:3000
+    volumes:
+      - ../../frontend:/home/owasp
+      - frontend-next:/home/owasp/.next
+      - frontend-node-modules:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
