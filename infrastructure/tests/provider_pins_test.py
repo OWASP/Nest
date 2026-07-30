@@ -45,7 +45,12 @@ class TestProviderVersionPins:
 
                 depth += stripped.count("{") - stripped.count("}")
                 if stripped.startswith("version") and "=" in stripped:
-                    version = stripped.split("=", maxsplit=1)[1].strip().strip('"')
+                    rhs = stripped.split("=", maxsplit=1)[1].strip()
+                    # Drop HCL inline comments before reading the quoted pin.
+                    for marker in ("#", "//"):
+                        if marker in rhs:
+                            rhs = rhs.split(marker, maxsplit=1)[0].strip()
+                    version = rhs.strip('"').strip("'")
                     relative = str(main_tf.relative_to(root))
                     pins.setdefault(version, set()).add(relative)
 
