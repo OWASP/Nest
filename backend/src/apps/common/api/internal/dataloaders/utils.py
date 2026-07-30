@@ -97,8 +97,6 @@ async def get_top_contributors_by_keys[K](
     queryset: QuerySet[Model, dict[str, str | int]],
     keys: list[K],
     key_field: str,
-    *,
-    limit: int | None = None,
 ) -> list[list[dict[str, str | int]]]:
     """Map top-contributor rows back to an ordered list of dicts matching ``keys``.
 
@@ -115,9 +113,6 @@ async def get_top_contributors_by_keys[K](
         keys: A list of keys to map the results to, in the desired order.
         key_field: The name of the attribute (or dict key) on each item that
             contains the key.
-        limit: When provided, cap each key's contributor list at this many
-            entries. Items beyond the cap are ignored; the queryset should be
-            ordered so the top contributors for each key come first.
 
     Returns:
         A list of contributor-dict lists, one per key, in the same order as
@@ -127,10 +122,7 @@ async def get_top_contributors_by_keys[K](
     mapping: dict[K, list[dict[str, str | int]]] = defaultdict(list)
     async for item in queryset:
         key: K = cast("K", item[key_field])
-        bucket = mapping[key]
-        if limit is not None and len(bucket) >= limit:
-            continue
-        bucket.append(
+        mapping[key].append(
             {
                 "avatar_url": item["avatar_url"],
                 "contributions_count": item["contributions_count"],

@@ -84,14 +84,20 @@ async def load_top_contributors_by_project_id(
             project_id=F("repository__project__id"),
         )
         .annotate(contributions_count=Sum("contributions_count"))
+        .annotate(
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("project_id")],
+                order_by=F("contributions_count").desc(),
+            ),
+        )
+        .filter(row_number__lte=TOP_CONTRIBUTORS_LIMIT)
         .order_by("project_id", "-contributions_count")
     )
-
     return await get_top_contributors_by_keys(
         queryset=top_contributors,
         keys=project_ids,
         key_field="project_id",
-        limit=TOP_CONTRIBUTORS_LIMIT,
     )
 
 

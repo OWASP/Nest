@@ -1,8 +1,10 @@
 """Tests for repository contributor dataloaders."""
 
-from unittest.mock import ANY, AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from django.db.models import F, Sum, Window
+from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.repository_contributor import (
@@ -166,8 +168,10 @@ class TestLoadTopContributorsByProjectId:
         """Return the mock queryset at the end of the project contributors chain."""
         filtered = mock_qs.filter.return_value
         values = filtered.values.return_value
-        annotated = values.annotate.return_value
-        return annotated.order_by.return_value
+        summed = values.annotate.return_value
+        ranked = summed.annotate.return_value
+        windowed = ranked.filter.return_value
+        return windowed.order_by.return_value
 
     @patch(
         "apps.github.api.internal.dataloaders.repository_contributor.get_top_contributors_by_keys",
@@ -180,7 +184,7 @@ class TestLoadTopContributorsByProjectId:
     async def test_builds_queryset_with_correct_chain(
         self, mock_sync_to_async, mock_get_top_contributors
     ):
-        """Queryset is built with filter, values, annotate, and order_by."""
+        """Queryset is built with filter, values, annotate Sum/Window, filter, order_by."""
         project_ids = [1, 2, 3]
         mock_qs = MagicMock()
         self._setup_sync_to_async(mock_sync_to_async, mock_qs)
@@ -189,11 +193,26 @@ class TestLoadTopContributorsByProjectId:
         await load_top_contributors_by_project_id(project_ids)
 
         mock_qs.filter.assert_called_once_with(repository__project__in=project_ids)
-        mock_qs.filter.return_value.values.assert_called_once()
-        mock_qs.filter.return_value.values.return_value.annotate.assert_called_once_with(
-            contributions_count=ANY
+        mock_qs.filter.return_value.values.assert_called_once_with(
+            avatar_url=F("user__avatar_url"),
+            login=F("user__login"),
+            name=F("user__name"),
+            project_id=F("repository__project__id"),
         )
-        mock_qs.filter.return_value.values.return_value.annotate.return_value.order_by.assert_called_once_with(
+        mock_qs.filter.return_value.values.return_value.annotate.assert_called_once_with(
+            contributions_count=Sum("contributions_count")
+        )
+        mock_qs.filter.return_value.values.return_value.annotate.return_value.annotate.assert_called_once_with(
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("project_id")],
+                order_by=F("contributions_count").desc(),
+            )
+        )
+        mock_qs.filter.return_value.values.return_value.annotate.return_value.annotate.return_value.filter.assert_called_once_with(
+            row_number__lte=TOP_CONTRIBUTORS_LIMIT
+        )
+        mock_qs.filter.return_value.values.return_value.annotate.return_value.annotate.return_value.filter.return_value.order_by.assert_called_once_with(
             "project_id", "-contributions_count"
         )
 
@@ -208,7 +227,7 @@ class TestLoadTopContributorsByProjectId:
     async def test_delegates_to_get_top_contributors_by_keys(
         self, mock_sync_to_async, mock_get_top_contributors
     ):
-        """Delegates to get_top_contributors_by_keys with correct args including limit."""
+        """Delegates to get_top_contributors_by_keys with correct args."""
         project_ids = [10, 20]
         mock_qs = MagicMock()
         self._setup_sync_to_async(mock_sync_to_async, mock_qs)
@@ -220,7 +239,6 @@ class TestLoadTopContributorsByProjectId:
             queryset=self._ordered_qs(mock_qs),
             keys=project_ids,
             key_field="project_id",
-            limit=TOP_CONTRIBUTORS_LIMIT,
         )
 
     @patch(
