@@ -229,6 +229,35 @@ class TestGenerateBoardCandidatesClaimsCommand:
         command.stdout.write.assert_any_call("Claims already exist for John Doe, skipping...")
         handle_mocks["get_repo_file"].assert_not_called()
 
+    def test_handle_claims_exist_dry_run(self, command, handle_mocks):
+        mock_board = Mock()
+        handle_mocks["board_get"].return_value = mock_board
+
+        mock_candidate = Mock(spec=EntityMember)
+        mock_candidate.member_name = "John Doe"
+
+        mock_qs = Mock()
+        mock_qs.exists.return_value = True
+        mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
+        handle_mocks["entity_member_filter"].return_value = mock_qs
+
+        mock_claim_qs = Mock()
+        mock_claim_qs.exists.return_value = True
+        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
+
+        handle_mocks["get_repo_file"].return_value = "markdown content"
+
+        mock_claim = Mock(spec=BoardCandidateClaim)
+        mock_claim.name = "Claim 1"
+        mock_claim.description = "Desc 1"
+        handle_mocks["generate_claims"].return_value = [mock_claim]
+
+        command.handle(source_years=[2023], year=2024, name=None, dry_run=True)
+
+        handle_mocks["get_repo_file"].assert_called()
+        mock_claim.save.assert_not_called()
+        command.stdout.write.assert_any_call("[DRY RUN] Would have saved claims for John Doe")
+
     def test_handle_no_markdown_content(self, command, handle_mocks):
         mock_board = Mock()
         handle_mocks["board_get"].return_value = mock_board

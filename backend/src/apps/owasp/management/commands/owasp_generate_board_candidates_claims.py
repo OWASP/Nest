@@ -201,7 +201,10 @@ class Command(BaseCommand):
         processed_count = 0
         for candidate in candidates:
             try:
-                if BoardCandidateClaim.objects.filter(candidate=candidate).exists():
+                if (
+                    not dry_run
+                    and BoardCandidateClaim.objects.filter(candidate=candidate).exists()
+                ):
                     self.stdout.write(
                         f"Claims already exist for {candidate.member_name}, skipping..."
                     )
