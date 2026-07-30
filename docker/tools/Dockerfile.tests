@@ -50,10 +50,16 @@ ENV FORCE_COLOR=1 \
 
 COPY --from=builder /usr/local /usr/local
 
+# hadolint ignore=DL3018
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk --no-cache add gnupg
+
 USER owasp
 WORKDIR /home/owasp/nest
 
 COPY --chown=root:root .github/scripts .github/scripts
+COPY --chown=root:root frontend/public/.well-known frontend/public/.well-known
+COPY --chown=root:root tools/security tools/security
 COPY --chown=root:root tools/tests tools/tests
 
 CMD ["pytest", "tools/tests"]
