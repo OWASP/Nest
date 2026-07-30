@@ -23,6 +23,10 @@ owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) backend-exec-command
 
+owasp-backfill-activity-events:
+	@echo "Backfilling activity events for existing pull requests, issues, and releases"
+	@CMD="python manage.py owasp_backfill_activity_events" $(MAKE) backend-exec-command
+
 owasp-create-project-metadata-file:
 	@echo "Generating metadata"
 	@CMD="python manage.py owasp_create_project_metadata_file $(entity_key)" $(MAKE) backend-exec-command
