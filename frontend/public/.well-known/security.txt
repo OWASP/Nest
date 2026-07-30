@@ -1,6 +1,7 @@
 Canonical: https://nest.owasp.org/.well-known/security.txt
 Contact: https://github.com/OWASP/Nest/security/advisories/new
-Contact: mailto:nest@owasp.org
+Contact: mailto:nest+security@owasp.org
+Encryption: https://nest.owasp.org/.well-known/pgp-key.txt
 Expires: 2027-07-01T00:00:00-07:00
 Policy: https://github.com/OWASP/Nest/blob/main/SECURITY.md
 Preferred-Languages: en

@@ -122,6 +122,8 @@ repos:
       - id: check-yaml
         exclude: pnpm-lock\.yaml$
       - id: detect-private-key
+        # Armor markers appear in the renewer/export helpers and test fixtures.
+        exclude: ^tools/(security/renew_security_txt\.py|tests/security/renew_security_txt_test\.py)$
       - id: end-of-file-fixer
         exclude: frontend/src/types/__generated__
         exclude_types:

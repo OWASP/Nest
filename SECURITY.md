@@ -13,8 +13,9 @@ If you discover a security vulnerability in OWASP Nest, please report it respons
 
 Please report security vulnerabilities using either:
 
+- Email: [nest+security@owasp.org](mailto:nest+security@owasp.org) (encrypt with the key published at
+  [/.well-known/pgp-key.txt](https://nest.owasp.org/.well-known/pgp-key.txt))
 - GitHub [private vulnerability reporting form](https://github.com/OWASP/Nest/security/advisories/new) (preferred)
-- Email: [nest@owasp.org](mailto:nest@owasp.org)
 
 Please **do not** create public GitHub issues for security-related reports.
 
