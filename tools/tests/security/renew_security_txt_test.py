@@ -102,6 +102,20 @@ class TestSecurityTxtRenewerHelpers:
         with pytest.raises(RuntimeError, match="NEST_SECURITY_PGP_PASSPHRASE"):
             SecurityTxtRenewer.resolve_passphrase()
 
+    def test_resolve_within_root_allows_nested_path(self, tmp_path: Path) -> None:
+        nested = tmp_path / "tools" / "security" / "private" / "key.asc"
+        assert SecurityTxtRenewer.resolve_within_root(tmp_path, nested) == nested.resolve()
+
+    def test_resolve_within_root_rejects_escape(self, tmp_path: Path) -> None:
+        outside = tmp_path.parent / "outside.asc"
+        with pytest.raises(ValueError, match="escapes repository root"):
+            SecurityTxtRenewer.resolve_within_root(tmp_path, outside)
+
+    def test_resolve_within_root_rejects_parent_traversal(self, tmp_path: Path) -> None:
+        traversal = tmp_path / "tools" / ".." / ".." / "outside.asc"
+        with pytest.raises(ValueError, match="escapes repository root"):
+            SecurityTxtRenewer.resolve_within_root(tmp_path, traversal)
+
 
 class TestSecurityTxtRenewer:
     def test_renew_writes_artifacts_with_injected_generator(self, tmp_path: Path) -> None:
@@ -146,6 +160,18 @@ class TestSecurityTxtRenewer:
 
         assert private_key_out.read_text(encoding="utf-8") == FAKE_PRIVATE_KEY
         assert not renewer.paths.private_key(2026).exists()
+
+    def test_renew_rejects_private_key_out_outside_root(self, tmp_path: Path) -> None:
+        renewer = SecurityTxtRenewer(tmp_path, key_generator=FakeKeyGenerator())
+        outside = tmp_path.parent / "escaped-key.asc"
+        with pytest.raises(ValueError, match="escapes repository root"):
+            renewer.renew(
+                expires="2027-07-01T00:00:00-07:00",
+                private_key_out=outside,
+                passphrase=TEST_PASSPHRASE,
+                now=datetime(2026, 7, 29, tzinfo=PACIFIC),
+            )
+        assert not outside.exists()
 
     def test_renew_requires_passphrase(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch

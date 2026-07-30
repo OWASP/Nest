@@ -388,11 +388,25 @@ class SecurityTxtRenewer:
         return value
 
     @staticmethod
-    def write_text(path: Path, content: str) -> None:
-        """Create parent directories and write UTF-8 text."""
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8")
-        logger.info("Wrote %s", path)
+    def resolve_within_root(root: Path, path: Path) -> Path:
+        """Resolve ``path`` and require it to stay under ``root``.
+
+        Prevents CLI / caller path arguments from escaping the repository via
+        ``..`` segments or absolute paths outside the tree.
+        """
+        root_resolved = root.resolve()
+        path_resolved = path.expanduser().resolve()
+        if not path_resolved.is_relative_to(root_resolved):
+            msg = f"path {path} escapes repository root {root_resolved}"
+            raise ValueError(msg)
+        return path_resolved
+
+    def write_text(self, path: Path, content: str) -> None:
+        """Create parent directories and write UTF-8 text under the repository root."""
+        safe_path = self.resolve_within_root(self.paths.root, path)
+        safe_path.parent.mkdir(parents=True, exist_ok=True)
+        safe_path.write_text(content, encoding="utf-8")
+        logger.info("Wrote %s", safe_path)
 
     def renew(
         self,
@@ -415,7 +429,11 @@ class SecurityTxtRenewer:
         expires_value = expires or self.next_july_first_expires(now=current)
         expire_date = gpg_expire_date(expires_value)
         passphrase_value = passphrase if passphrase is not None else self.resolve_passphrase()
-        private_key_path = private_key_out or self.paths.private_key(current.year)
+        private_key_path = (
+            self.resolve_within_root(self.paths.root, private_key_out)
+            if private_key_out is not None
+            else self.paths.private_key(current.year)
+        )
         key = self.key_generator.generate(
             expire_date=expire_date,
             passphrase=passphrase_value,
