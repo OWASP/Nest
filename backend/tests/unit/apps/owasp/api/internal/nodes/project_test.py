@@ -73,6 +73,7 @@ class TestProjectNode(GraphQLNodeBaseTest):
             "stars_count",
             "summary",
             "topics",
+            "top_contributors",
             "type",
         }
         assert expected_field_names.issubset(field_names)
