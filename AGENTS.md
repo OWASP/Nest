@@ -161,6 +161,7 @@ via `make`:
 - `owasp-enrich-{projects,chapters,committees,events}` -- enrich from GitHub
 - `owasp-aggregate-projects` -- consolidate project data
 - `owasp-aggregate-entity-contributions` -- aggregate contributors by entity
+- `owasp-aggregate-member-contributions` -- tally member activity
 - `owasp-update-events` -- fetch events data
 - `owasp-update-sponsors` -- fetch sponsors data
 - `owasp-sync-posts` -- sync blog posts
