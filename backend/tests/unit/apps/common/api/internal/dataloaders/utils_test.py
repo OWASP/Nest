@@ -422,17 +422,16 @@ class TestTopContributorsByKeys:
     """Tests for get_top_contributors_by_keys."""
 
     @staticmethod
-    def _make_contrib_item(key_field_value, **user_kw):
-        """Create a mock item with user and contributions_count."""
-        return make_item(
-            **{key_field_value[0]: key_field_value[1]},
-            user=SimpleNamespace(
-                avatar_url=user_kw.get("avatar_url", ""),
-                login=user_kw.get("login", ""),
-                name=user_kw.get("name", ""),
-            ),
-            contributions_count=user_kw.get("contributions_count", 0),
-        )
+    def _make_contrib_item(key_field_value, **kwargs):
+        """Create a flat dict row as produced by .values()."""
+        key_field, key_value = key_field_value
+        return {
+            key_field: key_value,
+            "avatar_url": kwargs.get("avatar_url", ""),
+            "login": kwargs.get("login", ""),
+            "name": kwargs.get("name", ""),
+            "contributions_count": kwargs.get("contributions_count", 0),
+        }
 
     @pytest.mark.asyncio
     async def test_basic_mapping(self):
@@ -613,6 +612,63 @@ class TestTopContributorsByKeys:
                     "contributions_count": 0,
                     "id": "user1",
                     "login": "user1",
+                    "name": "",
+                }
+            ],
+        ]
+
+    @pytest.mark.asyncio
+    async def test_limit_caps_results(self):
+        """The limit parameter caps the number of contributors per key."""
+        items = [
+            self._make_contrib_item(("repo_id", 1), login="user1", contributions_count=100),
+            self._make_contrib_item(("repo_id", 1), login="user2", contributions_count=50),
+            self._make_contrib_item(("repo_id", 1), login="user3", contributions_count=25),
+        ]
+        result = await get_top_contributors_by_keys(make_qs(items), [1], "repo_id", limit=2)
+        assert result == [
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 100,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                },
+                {
+                    "avatar_url": "",
+                    "contributions_count": 50,
+                    "id": "user2",
+                    "login": "user2",
+                    "name": "",
+                },
+            ]
+        ]
+
+    @pytest.mark.asyncio
+    async def test_limit_per_key_independent(self):
+        """The limit is applied independently for each key."""
+        items = [
+            self._make_contrib_item(("repo_id", 1), login="user1", contributions_count=100),
+            self._make_contrib_item(("repo_id", 2), login="user2", contributions_count=50),
+        ]
+        result = await get_top_contributors_by_keys(make_qs(items), [1, 2], "repo_id", limit=1)
+        assert result == [
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 100,
+                    "id": "user1",
+                    "login": "user1",
+                    "name": "",
+                }
+            ],
+            [
+                {
+                    "avatar_url": "",
+                    "contributions_count": 50,
+                    "id": "user2",
+                    "login": "user2",
                     "name": "",
                 }
             ],

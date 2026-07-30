@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 from asgiref.sync import sync_to_async
-from django.db.models import F, Sum, Window
+from django.db.models import F, QuerySet, Sum, Window
 from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
@@ -34,7 +34,7 @@ async def load_top_contributors_by_repository_id(
         lambda: RepositoryContributor.objects.by_humans().to_community_repositories()
     )()
 
-    top_contributors = (
+    top_contributors: QuerySet[RepositoryContributor, dict[str, str | int]] = (
         queryset.filter(repository_id__in=repository_ids)
         .annotate(
             row_number=Window(
@@ -75,7 +75,7 @@ async def load_top_contributors_by_project_id(
         lambda: RepositoryContributor.objects.by_humans().to_community_repositories()
     )()
 
-    top_contributors = (
+    top_contributors: QuerySet[RepositoryContributor, dict[str, str | int]] = (
         queryset.filter(repository__project__in=project_ids)
         .values(
             avatar_url=F("user__avatar_url"),

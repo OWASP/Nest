@@ -1,7 +1,7 @@
 """Shared utilities for GraphQL dataloaders."""
 
 from collections import defaultdict
-from typing import Any, cast
+from typing import cast
 
 from django.db.models import Model, QuerySet
 
@@ -93,8 +93,8 @@ async def get_m2m_results_by_keys[K, V](
     return [mapping.get(key, []) for key in keys]
 
 
-async def get_top_contributors_by_keys[K, V](
-    queryset: dict[str, V],
+async def get_top_contributors_by_keys[K](
+    queryset: QuerySet[Model, dict[str, str | int]],
     keys: list[K],
     key_field: str,
     *,
@@ -102,15 +102,13 @@ async def get_top_contributors_by_keys[K, V](
 ) -> list[list[dict[str, str | int]]]:
     """Map top-contributor rows back to an ordered list of dicts matching ``keys``.
 
-    Each queryset item is expected to expose either:
-    - a ``user`` attribute with ``avatar_url``, ``login`` and ``name`` plus a
-      ``contributions_count`` attribute (model-instance items), or
-    - the flat dict keys ``avatar_url``, ``login``, ``name`` and
-      ``contributions_count`` (``.values()`` grouped rows, e.g. project-level
-      contributors where contributions are summed across repositories).
+    Each queryset item is expected to expose the flat dict keys ``avatar_url``,
+    ``login``, ``name`` and ``contributions_count`` (``.values()`` grouped rows,
+    e.g. project-level contributors where contributions are summed across
+    repositories).
 
     The produced dict structure is fixed across all top-contributor resolvers
-    (repositories, projects, chapters, committees, organizations).
+    (repositories, projects, chapters, committees).
 
     Args:
         queryset: The queryset of (repository) contributors to iterate over.
