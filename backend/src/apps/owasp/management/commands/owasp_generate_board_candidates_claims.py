@@ -15,6 +15,11 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
+AI_MAX_TOKENS = 2000
+BOARD_CANDIDATES_RAW_BASE_URL = "https://raw.githubusercontent.com/OWASP/www-board-candidates"
+CONTENT_PREVIEW_LENGTH = 30
+_2022_SUFFIX_YEAR = 2022
+
 PROMPT_EXTRACT_CLAIMS = """
 You are an expert at extracting verifiable, actionable claims from board candidate statements.
 Analyze the provided markdown content of a candidate's statement.
@@ -43,7 +48,7 @@ Each object must have exactly two keys:
 class Command(BaseCommand):
     help = "Generate board election candidates' claims from www-board-candidates repository"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
 
         Args:
@@ -67,7 +72,7 @@ class Command(BaseCommand):
             "--name",
             type=str,
             required=False,
-            help="Optional full name to filter for a specific candidate (e.g. 'John Doe'.",
+            help="Optional full name to filter for a specific candidate (e.g. 'John Doe').",
         )
         parser.add_argument(
             "--dry-run",
@@ -98,9 +103,8 @@ class Command(BaseCommand):
         )
 
         # Year 2022 markdown files have a "_2022" suffix.
-        exception_year = 2022
-        if source_year == exception_year:
-            return f"{base_name}_{exception_year}.md"
+        if source_year == _2022_SUFFIX_YEAR:
+            return f"{base_name}_{_2022_SUFFIX_YEAR}.md"
 
         return f"{base_name}.md"
 
@@ -118,16 +122,14 @@ class Command(BaseCommand):
             list[BoardCandidateClaim]: A list of unsaved draft claim objects.
 
         """
-        open_ai = OpenAi(max_tokens=2000)
+        open_ai = OpenAi(max_tokens=AI_MAX_TOKENS)
         response = open_ai.set_prompt(PROMPT_EXTRACT_CLAIMS).set_input(markdown_content).complete()
 
         if not response:
             return []
 
-        cleaned_response = extract_json_from_markdown(response)
-
         try:
-            claims_data = json.loads(cleaned_response)
+            claims_data = json.loads(extract_json_from_markdown(response))
         except json.JSONDecodeError as e:
             self.stderr.write(
                 self.style.ERROR(
@@ -168,7 +170,7 @@ class Command(BaseCommand):
 
         return claims
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         """Handle the command execution.
 
         Args:
@@ -218,13 +220,10 @@ class Command(BaseCommand):
                     filename = self.get_filename_from_candidate_name(
                         candidate.member_name, source_year
                     )
-                    url = (
-                        "https://raw.githubusercontent.com/OWASP/www-board-candidates/"
-                        f"master/{source_year}/{filename}"
+                    content = get_repository_file_content(
+                        f"{BOARD_CANDIDATES_RAW_BASE_URL}/master/{source_year}/{filename}"
                     )
-
-                    content = get_repository_file_content(url)
-                    if content and "404: Not Found" not in content[:30]:
+                    if content and "404: Not Found" not in content[:CONTENT_PREVIEW_LENGTH]:
                         aggregated_texts.append(content)
 
                 if not aggregated_texts:
