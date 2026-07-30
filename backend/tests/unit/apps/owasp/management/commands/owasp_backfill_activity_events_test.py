@@ -131,8 +131,7 @@ class TestOwaspBackfillActivityEventsCommand:
 
         assert mock_activity_event_class.update_data.call_count == 2
 
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
-    def test_backfill_objects_respects_offset(self, mock_activity_event_class):
+    def test_backfill_objects_respects_offset(self):
         """Test that backfill_objects slices the queryset with the given offset."""
         mock_qs = MagicMock()
         mock_qs.count.return_value = 5
