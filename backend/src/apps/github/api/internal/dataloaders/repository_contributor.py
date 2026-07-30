@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 from asgiref.sync import sync_to_async
-from django.db.models import F, Window
+from django.db.models import F, Sum, Window
 from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
 
@@ -12,6 +12,7 @@ from apps.github.models.repository_contributor import RepositoryContributor
 
 TOP_CONTRIBUTORS_LIMIT = 15
 TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER = "top_contributors_by_repository_id"
+TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER = "top_contributors_by_project_id"
 
 if TYPE_CHECKING:
     from apps.github.models.managers.repository_contributor import (
@@ -33,7 +34,7 @@ async def load_top_contributors_by_repository_id(
         lambda: RepositoryContributor.objects.by_humans().to_community_repositories()
     )()
 
-    top_contributors: RepositoryContributorQuerySet = (
+    top_contributors = (
         queryset.filter(repository_id__in=repository_ids)
         .annotate(
             row_number=Window(
@@ -43,6 +44,13 @@ async def load_top_contributors_by_repository_id(
             ),
         )
         .filter(row_number__lte=TOP_CONTRIBUTORS_LIMIT)
+        .values(
+            "repository_id",
+            "contributions_count",
+            avatar_url=F("user__avatar_url"),
+            login=F("user__login"),
+            name=F("user__name"),
+        )
         .order_by("repository_id", "-contributions_count")
     )
 
@@ -51,9 +59,48 @@ async def load_top_contributors_by_repository_id(
     )
 
 
+async def load_top_contributors_by_project_id(
+    project_ids: list[int],
+) -> list[list[dict[str, str | int]]]:
+    """Batch-load top contributors per project (humans only, community repos).
+
+    A single user's ``contributions_count`` is summed across every repository
+    linked to a project via ``annotate(Sum(...))``, and the result is capped at
+    ``TOP_CONTRIBUTORS_LIMIT`` per project.
+    """
+    if not project_ids:
+        return []
+
+    queryset: RepositoryContributorQuerySet = await sync_to_async(
+        lambda: RepositoryContributor.objects.by_humans().to_community_repositories()
+    )()
+
+    top_contributors = (
+        queryset.filter(repository__project__in=project_ids)
+        .values(
+            avatar_url=F("user__avatar_url"),
+            login=F("user__login"),
+            name=F("user__name"),
+            project_id=F("repository__project__id"),
+        )
+        .annotate(contributions_count=Sum("contributions_count"))
+        .order_by("project_id", "-contributions_count")
+    )
+
+    return await get_top_contributors_by_keys(
+        queryset=top_contributors,
+        keys=project_ids,
+        key_field="project_id",
+        limit=TOP_CONTRIBUTORS_LIMIT,
+    )
+
+
 def get_repository_contributor_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
+        TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
+            load_fn=load_top_contributors_by_project_id
+        ),
         TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
             load_fn=load_top_contributors_by_repository_id
         ),

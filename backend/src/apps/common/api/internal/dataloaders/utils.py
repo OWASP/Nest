@@ -1,7 +1,7 @@
 """Shared utilities for GraphQL dataloaders."""
 
 from collections import defaultdict
-from typing import cast
+from typing import Any, cast
 
 from django.db.models import Model, QuerySet
 
@@ -93,37 +93,52 @@ async def get_m2m_results_by_keys[K, V](
     return [mapping.get(key, []) for key in keys]
 
 
-async def get_top_contributors_by_keys[K](
-    queryset: QuerySet[Model],
+async def get_top_contributors_by_keys[K, V](
+    queryset: dict[str, V],
     keys: list[K],
     key_field: str,
+    *,
+    limit: int | None = None,
 ) -> list[list[dict[str, str | int]]]:
     """Map top-contributor rows back to an ordered list of dicts matching ``keys``.
 
-    Each queryset item is expected to expose ``user`` (with ``avatar_url``,
-    ``login`` and ``name``) and ``contributions_count``. The produced dict
-    structure is fixed across all top-contributor resolvers (repositories,
-    projects, chapters, committees, organizations).
+    Each queryset item is expected to expose either:
+    - a ``user`` attribute with ``avatar_url``, ``login`` and ``name`` plus a
+      ``contributions_count`` attribute (model-instance items), or
+    - the flat dict keys ``avatar_url``, ``login``, ``name`` and
+      ``contributions_count`` (``.values()`` grouped rows, e.g. project-level
+      contributors where contributions are summed across repositories).
+
+    The produced dict structure is fixed across all top-contributor resolvers
+    (repositories, projects, chapters, committees, organizations).
 
     Args:
-        queryset: The queryset of repository contributors to iterate over.
+        queryset: The queryset of (repository) contributors to iterate over.
         keys: A list of keys to map the results to, in the desired order.
-        key_field: The name of the attribute on each item that contains the key.
+        key_field: The name of the attribute (or dict key) on each item that
+            contains the key.
+        limit: When provided, cap each key's contributor list at this many
+            entries. Items beyond the cap are ignored; the queryset should be
+            ordered so the top contributors for each key come first.
 
     Returns:
-        A list of contributor-dict lists, one per key, in the same order as ``keys``.
+        A list of contributor-dict lists, one per key, in the same order as
+        ``keys``.
 
     """
     mapping: dict[K, list[dict[str, str | int]]] = defaultdict(list)
     async for item in queryset:
-        key: K = cast("K", getattr(item, key_field))
-        mapping[key].append(
+        key: K = cast("K", item[key_field])
+        bucket = mapping[key]
+        if limit is not None and len(bucket) >= limit:
+            continue
+        bucket.append(
             {
-                "avatar_url": item.user.avatar_url,
-                "contributions_count": item.contributions_count,
-                "id": item.user.login,
-                "login": item.user.login,
-                "name": item.user.name,
+                "avatar_url": item["avatar_url"],
+                "contributions_count": item["contributions_count"],
+                "id": item["login"],
+                "login": item["login"],
+                "name": item["name"],
             }
         )
 

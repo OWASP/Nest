@@ -19,11 +19,15 @@ from apps.github.api.internal.dataloaders.repository import (
     REPOSITORIES_BY_PROJECT_ID,
     REPOSITORIES_COUNT_BY_PROJECT_ID,
 )
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.project import (
     ENTITY_CHANNELS_BY_PROJECT_ID,
     ENTITY_LEADERS_BY_PROJECT_ID,
@@ -172,6 +176,16 @@ class ProjectNode(GenericEntityNode):
         return await info.context.github_dataloaders[REPOSITORIES_COUNT_BY_PROJECT_ID].load(
             root.pk
         )
+
+    @strawberry_django.field
+    async def top_contributors(
+        self, root: Project, info: strawberry.Info
+    ) -> list[RepositoryContributorNode]:
+        """Resolve top contributors."""
+        top_contributors = await info.context.github_dataloaders[
+            TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER
+        ].load(root.pk)
+        return [RepositoryContributorNode(**tc) for tc in top_contributors]
 
     @strawberry_django.field(only=["topics"])
     def topics(self, root: Project) -> list[str]:
