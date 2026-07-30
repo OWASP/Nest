@@ -149,10 +149,11 @@ and:
 1. Generates a passphrase-protected Ed25519 OpenPGP key for
    `OWASP Nest Security <nest+security@owasp.org>` whose GnuPG expiry matches
    `security.txt` `Expires`
-2. Writes the public key to `frontend/public/.well-known/pgp-key.txt`
-3. Rewrites `frontend/public/.well-known/security.txt` with fields in
-   alphabetical order and next 1 July Pacific `Expires`
-4. Exports the private key to `tools/security/private/`
+2. Clearsigns `security.txt` with that key (RFC 9116 §2.3). Any existing
+   clearsign wrapper is stripped first so the file is never double-signed.
+3. Writes the public key to `frontend/public/.well-known/pgp-key.txt`
+4. Writes the clearsigned `frontend/public/.well-known/security.txt`
+5. Exports the private key to `tools/security/private/`
 
 ### After renewing
 

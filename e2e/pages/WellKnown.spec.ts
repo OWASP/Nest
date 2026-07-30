@@ -8,6 +8,8 @@ test.describe('Well-known security disclosure files', () => {
     expect(response.headers()['content-type'] ?? '').toMatch(/text\/plain/)
 
     const body = await response.text()
+    expect(body).toContain('-----BEGIN PGP SIGNED MESSAGE-----')
+    expect(body).toContain('-----BEGIN PGP SIGNATURE-----')
     expect(body).toContain('Canonical: https://nest.owasp.org/.well-known/security.txt')
     expect(body).toContain('Contact: https://github.com/OWASP/Nest/security/advisories/new')
     expect(body).toContain('Contact: mailto:nest+security@owasp.org')

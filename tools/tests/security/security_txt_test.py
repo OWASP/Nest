@@ -8,7 +8,14 @@ from pathlib import Path
 
 import pytest
 
-from renew_security_txt import GpgKeyGenerator, SecurityTxtConfig, gpg_expire_date
+from renew_security_txt import (
+    SIGNATURE_BEGIN,
+    SIGNED_MESSAGE_BEGIN,
+    GpgKeyGenerator,
+    SecurityTxtConfig,
+    gpg_expire_date,
+    unsigned_security_txt_body,
+)
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 WELL_KNOWN_DIRECTORY = REPOSITORY_ROOT / "frontend" / "public" / ".well-known"
@@ -23,7 +30,7 @@ EXPIRATION_WARNING_WINDOW = timedelta(days=30)
 def parse_security_txt(text: str) -> dict[str, list[str]]:
     """Parse security.txt field names to one or more values."""
     fields: dict[str, list[str]] = {}
-    for raw_line in text.splitlines():
+    for raw_line in unsigned_security_txt_body(text).splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
@@ -92,21 +99,30 @@ class TestSecurityTxt:
 
     def test_contacts_and_encryption(self) -> None:
         text = SECURITY_TXT_PATH.read_text(encoding="utf-8")
+        body = unsigned_security_txt_body(text)
         fields = parse_security_txt(text)
         assert CONFIG.github_contact in fields.get("contact", [])
         assert CONFIG.mailto_contact in fields.get("contact", [])
         assert fields.get("encryption") == [CONFIG.encryption_url]
-        assert text.index(f"Contact: {CONFIG.github_contact}") < text.index(
+        assert body.index(f"Contact: {CONFIG.github_contact}") < body.index(
             f"Contact: {CONFIG.mailto_contact}"
         )
 
     def test_fields_are_alphabetical(self) -> None:
+        body = unsigned_security_txt_body(SECURITY_TXT_PATH.read_text(encoding="utf-8"))
         names = [
             line.split(":", 1)[0]
-            for line in SECURITY_TXT_PATH.read_text(encoding="utf-8").splitlines()
+            for line in body.splitlines()
             if line.strip() and not line.startswith("#")
         ]
         assert names == sorted(names)
+
+    def test_file_is_clearsigned(self) -> None:
+        text = SECURITY_TXT_PATH.read_text(encoding="utf-8")
+        assert SIGNED_MESSAGE_BEGIN in text
+        assert SIGNATURE_BEGIN in text
+        assert text.count(SIGNED_MESSAGE_BEGIN) == 1
+        assert text.count(SIGNATURE_BEGIN) == 1
 
     def test_pgp_public_key_exists(self) -> None:
         assert PGP_KEY_PATH.is_file(), f"missing pgp-key.txt at {PGP_KEY_PATH}"

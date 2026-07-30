@@ -17,11 +17,49 @@ logger = logging.getLogger(__name__)
 
 PACIFIC = ZoneInfo("America/Los_Angeles")
 PASSPHRASE_ENV = "NEST_SECURITY_PGP_PASSPHRASE"  # noqa: S105
+SIGNED_MESSAGE_BEGIN = "-----BEGIN PGP SIGNED MESSAGE-----"
+SIGNATURE_BEGIN = "-----BEGIN PGP SIGNATURE-----"
 
 
 def private_key_filename(year: int) -> str:
     """Return the year-scoped private key export filename."""
     return f"nest-security-private-key-{year}.asc"
+
+
+def unsigned_security_txt_body(content: str) -> str:
+    """Return unsigned security.txt cleartext, stripping a clearsign wrapper if present.
+
+    Raises ``ValueError`` if the cleartext still looks signed (would double-sign).
+    """
+    text = content.replace("\r\n", "\n")
+    if SIGNED_MESSAGE_BEGIN not in text:
+        return text if text.endswith("\n") else f"{text}\n"
+
+    after_header = text.split(SIGNED_MESSAGE_BEGIN, 1)[1].lstrip("\n")
+    lines = after_header.split("\n")
+    index = 0
+    while index < len(lines) and lines[index].strip():
+        index += 1
+    if index < len(lines) and lines[index].strip() == "":
+        index += 1
+
+    body_lines: list[str] = []
+    while index < len(lines):
+        if lines[index].startswith(SIGNATURE_BEGIN):
+            break
+        line = lines[index]
+        # Undo RFC 4880 dash-escaping ("- " prefix).
+        line = line.removeprefix("- ")
+        body_lines.append(line)
+        index += 1
+
+    body = "\n".join(body_lines)
+    if not body.endswith("\n"):
+        body = f"{body}\n"
+    if SIGNED_MESSAGE_BEGIN in body or SIGNATURE_BEGIN in body:
+        msg = "security.txt cleartext still contains PGP armor (refusing to double-sign)"
+        raise ValueError(msg)
+    return body
 
 
 def gpg_expire_date(expires: str) -> str:
@@ -33,7 +71,8 @@ def normalize_expires(expires: str) -> str:
     """Parse ``expires`` and rebuild a trusted Pacific ISO-8601 string.
 
     Reconstructs the value from datetime fields so untrusted CLI input cannot
-    flow into written ``security.txt`` content.
+    flow into written ``security.txt`` content. Preserves ``fold`` so times in
+    the repeated DST fall-back hour keep their original offset/instant.
     """
     expires_at = datetime.fromisoformat(expires)
     if expires_at.tzinfo is None:
@@ -47,6 +86,7 @@ def normalize_expires(expires: str) -> str:
         expires_at.minute,
         expires_at.second,
         tzinfo=PACIFIC,
+        fold=expires_at.fold,
     ).isoformat(timespec="seconds")
 
 
@@ -66,11 +106,12 @@ class SecurityTxtConfig:
 
 @dataclass(frozen=True)
 class GeneratedKey:
-    """ASCII-armored OpenPGP key material."""
+    """ASCII-armored OpenPGP key material and signed security.txt."""
 
     fingerprint: str
     public_key: str
     private_key: str
+    signed_security_txt: str
 
 
 class RepositoryPaths:
@@ -146,15 +187,18 @@ class GpgKeyGenerator:
                 message = f"{message}: {detail}"
             raise RuntimeError(message) from error
 
-    def generate(self, *, expire_date: str, passphrase: str) -> GeneratedKey:
-        """Generate a passphrase-protected Ed25519 keypair.
+    def generate(self, *, expire_date: str, passphrase: str, cleartext: str) -> GeneratedKey:
+        """Generate a passphrase-protected Ed25519 keypair and clearsign ``cleartext``.
 
         ``expire_date`` must be ``YYYY-MM-DD`` and should match security.txt
-        ``Expires`` (Pacific calendar date).
+        ``Expires`` (Pacific calendar date). ``cleartext`` is normalized to an
+        unsigned body first so an already-signed input is never double-signed.
         """
         if not passphrase:
             msg = "passphrase must not be empty"
             raise ValueError(msg)
+
+        unsigned = unsigned_security_txt_body(cleartext)
 
         with tempfile.TemporaryDirectory(prefix="nest-security-gpg-") as temp_home:
             gnupg_home = Path(temp_home)
@@ -167,6 +211,12 @@ class GpgKeyGenerator:
                 expire_date=expire_date,
                 passphrase_file=passphrase_path,
             )
+            signed = self.clearsign(
+                gnupg_home,
+                fingerprint,
+                unsigned,
+                passphrase_file=passphrase_path,
+            )
             return GeneratedKey(
                 fingerprint=fingerprint,
                 public_key=self.export_public_key(gnupg_home, fingerprint),
@@ -175,7 +225,40 @@ class GpgKeyGenerator:
                     fingerprint,
                     passphrase_file=passphrase_path,
                 ),
+                signed_security_txt=signed,
             )
+
+    def clearsign(
+        self,
+        gnupg_home: Path,
+        fingerprint: str,
+        cleartext: str,
+        *,
+        passphrase_file: Path,
+    ) -> str:
+        """Create an OpenPGP cleartext signature of unsigned ``cleartext``."""
+        unsigned = unsigned_security_txt_body(cleartext)
+        logger.info("Clearsigning security.txt with key %s", fingerprint)
+        result = self.run_gpg(
+            gnupg_home,
+            "--clearsign",
+            "--digest-algo",
+            "SHA256",
+            "--local-user",
+            fingerprint,
+            stdin_data=unsigned,
+            passphrase_file=passphrase_file,
+        )
+        signed = result.stdout if result.stdout.endswith("\n") else f"{result.stdout}\n"
+        if SIGNED_MESSAGE_BEGIN not in signed or SIGNATURE_BEGIN not in signed:
+            msg = "gpg --clearsign did not return a signed message"
+            raise RuntimeError(msg)
+        # Ensure the signed document embeds unsigned cleartext only once.
+        embedded = unsigned_security_txt_body(signed)
+        if embedded != unsigned:
+            msg = "gpg --clearsign produced unexpected cleartext (possible double-sign)"
+            raise RuntimeError(msg)
+        return signed
 
     def generate_keypair(
         self,
@@ -443,9 +526,14 @@ class SecurityTxtRenewer:
         safe_path.write_text(content, encoding="utf-8")
         logger.info("Wrote %s", safe_path)
 
-    def write_security_txt(self, expires: str) -> None:
-        """Write ``security.txt`` using only trusted path segments under the repo root."""
-        expires_value = normalize_expires(expires)
+    def write_security_txt(self, signed_content: str) -> None:
+        """Write clearsigned ``security.txt`` using trusted path segments under the repo root."""
+        if SIGNED_MESSAGE_BEGIN not in signed_content or SIGNATURE_BEGIN not in signed_content:
+            msg = "security.txt content must be an OpenPGP clearsigned message"
+            raise ValueError(msg)
+        # Reject nested signatures before writing.
+        unsigned_security_txt_body(signed_content)
+
         root_real = os.path.realpath(self.paths.root)
         # Literal path segments — do not accept a caller-supplied path for this artifact.
         target = os.path.realpath(
@@ -456,7 +544,7 @@ class SecurityTxtRenewer:
             msg = f"security.txt path escapes repository root {root_real}"
             raise ValueError(msg)
         Path(target).parent.mkdir(parents=True, exist_ok=True)
-        Path(target).write_text(self.renderer.render(expires_value), encoding="utf-8")
+        Path(target).write_text(signed_content, encoding="utf-8")
         logger.info("Wrote %s", target)
 
     def renew(
@@ -467,7 +555,7 @@ class SecurityTxtRenewer:
         passphrase: str | None = None,
         now: datetime | None = None,
     ) -> GeneratedKey:
-        """Generate a new keypair and refresh security.txt artifacts.
+        """Generate a new keypair, clearsign security.txt, and refresh artifacts.
 
         ``passphrase`` overrides the environment for tests; CLI renewal always
         reads ``NEST_SECURITY_PGP_PASSPHRASE``.
@@ -489,14 +577,16 @@ class SecurityTxtRenewer:
             if private_key_out is not None
             else self.paths.private_key(current.year)
         )
+        unsigned = self.renderer.render(expires_value)
         key = self.key_generator.generate(
             expire_date=expire_date,
             passphrase=passphrase_value,
+            cleartext=unsigned,
         )
 
         self.write_text(self.paths.pgp_key, key.public_key)
         self.write_text(private_key_path, key.private_key)
-        self.write_security_txt(expires_value)
+        self.write_security_txt(key.signed_security_txt)
 
         logger.info("Renewal complete.")
         logger.info("Public key:   %s", self.paths.pgp_key)
