@@ -554,7 +554,7 @@ describe('MovingLogos (LogoCarousel)', () => {
 
       const images = screen.getAllByTestId('sponsor-image')
       for (const image of images) {
-        expect(image).toHaveClass('h-full', 'w-full', 'object-contain')
+        expect(image).toHaveClass('object-contain', 'px-3', 'py-1')
       }
     })
 

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@playwright/test": "1.61.0",
+    "@playwright/test": "1.61.1",
     "dayjs": "1.11.21",
     "millify": "6.1.0"
   },
@@ -8,7 +8,7 @@
     "node": "^24.0.0"
   },
   "name": "e2e",
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.17.0",
   "private": true,
   "scripts": {
     "test:e2e": "playwright test",

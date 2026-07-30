@@ -111,4 +111,15 @@ describe('ActionButton', () => {
     expect(button).toBeInTheDocument()
     expect(button).toHaveTextContent('Test Button')
   })
+
+  it('renders tooltip when URL and tooltipLabel are both provided', () => {
+    render(
+      <ActionButton url="https://example.com" tooltipLabel="Visit Example">
+        Visit Site
+      </ActionButton>
+    )
+    const link = screen.getByRole('link')
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('aria-label', 'Visit Example')
+  })
 })

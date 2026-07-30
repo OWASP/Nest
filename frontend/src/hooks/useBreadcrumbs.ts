@@ -5,7 +5,7 @@ import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 
 export type { BreadcrumbItem } from 'types/breadcrumb'
 
-const HIDDEN_SEGMENTS = new Set(['mentees', 'modules', 'programs', 'repositories'])
+const HIDDEN_SEGMENTS = new Set(['board', 'mentees', 'modules', 'programs', 'repositories'])
 
 function buildBreadcrumbItems(
   pathname: string | null,
@@ -33,6 +33,10 @@ function buildBreadcrumbItems(
     }
 
     const registeredItem = registeredMap.get(currentPath)
+    if (registeredItem?.hidden) {
+      continue
+    }
+
     if (registeredItem) {
       items.push(registeredItem)
     } else {

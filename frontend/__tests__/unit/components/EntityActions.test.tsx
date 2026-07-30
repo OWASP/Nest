@@ -55,7 +55,14 @@ describe('EntityActions', () => {
 
   describe('Module Actions - Edit Module', () => {
     it('navigates to edit module page when Edit is clicked with moduleKey', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -68,7 +75,7 @@ describe('EntityActions', () => {
     })
 
     it('does not navigate when moduleKey is missing for edit action', () => {
-      render(<EntityActions type="module" programKey="test-program" />)
+      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -79,7 +86,14 @@ describe('EntityActions', () => {
     })
 
     it('closes dropdown after clicking Edit', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')

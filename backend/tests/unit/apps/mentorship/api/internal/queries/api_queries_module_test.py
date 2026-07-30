@@ -305,18 +305,44 @@ class TestModuleQuery:
         assert result == mock_module
 
     @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
+    def test_management_module_enrolled_mentee_success(
+        self,
+        mock_module_select_related: MagicMock,
+        mock_info: MagicMock,
+        api_module_queries,
+    ) -> None:
+        """A mentee enrolled in the module receives it (read-only) with user_role set."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.has_admin.return_value = False
+        mock_module = MagicMock(spec=Module)
+        mock_module.program = mock_program
+        mock_module.has_mentor.return_value = False
+        mock_module.has_mentee.return_value = True
+        mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = (
+            mock_module
+        )
+
+        result = api_module_queries.get_management_module(
+            info=mock_info, module_key="module1", program_key="program1"
+        )
+
+        assert result == mock_module
+        assert result.user_role == "mentee"
+
+    @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
     def test_management_module_unassigned_mentor_forbidden(
         self,
         mock_module_select_related: MagicMock,
         mock_info: MagicMock,
         api_module_queries,
     ) -> None:
-        """A mentor not assigned to this module cannot load it, even with program access."""
+        """A user who is neither admin, mentor, nor mentee of this module is forbidden."""
         mock_program = MagicMock(spec=Program)
         mock_program.has_admin.return_value = False
         mock_module = MagicMock(spec=Module)
         mock_module.program = mock_program
         mock_module.has_mentor.return_value = False
+        mock_module.has_mentee.return_value = False
         mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = (
             mock_module
         )
