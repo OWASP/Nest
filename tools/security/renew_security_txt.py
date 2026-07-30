@@ -26,10 +26,28 @@ def private_key_filename(year: int) -> str:
 
 def gpg_expire_date(expires: str) -> str:
     """Convert a security.txt Expires value to a GnuPG ``Expire-Date`` (YYYY-MM-DD)."""
+    return normalize_expires(expires)[:10]
+
+
+def normalize_expires(expires: str) -> str:
+    """Parse ``expires`` and rebuild a trusted Pacific ISO-8601 string.
+
+    Reconstructs the value from datetime fields so untrusted CLI input cannot
+    flow into written ``security.txt`` content.
+    """
     expires_at = datetime.fromisoformat(expires)
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=PACIFIC)
-    return expires_at.astimezone(PACIFIC).date().isoformat()
+    expires_at = expires_at.astimezone(PACIFIC)
+    return datetime(
+        expires_at.year,
+        expires_at.month,
+        expires_at.day,
+        expires_at.hour,
+        expires_at.minute,
+        expires_at.second,
+        tzinfo=PACIFIC,
+    ).isoformat(timespec="seconds")
 
 
 @dataclass(frozen=True)
@@ -425,6 +443,22 @@ class SecurityTxtRenewer:
         safe_path.write_text(content, encoding="utf-8")
         logger.info("Wrote %s", safe_path)
 
+    def write_security_txt(self, expires: str) -> None:
+        """Write ``security.txt`` using only trusted path segments under the repo root."""
+        expires_value = normalize_expires(expires)
+        root_real = os.path.realpath(self.paths.root)
+        # Literal path segments — do not accept a caller-supplied path for this artifact.
+        target = os.path.realpath(
+            os.path.join(root_real, "frontend", "public", ".well-known", "security.txt")  # noqa: PTH118
+        )
+        root_prefix = root_real if root_real.endswith(os.sep) else f"{root_real}{os.sep}"
+        if not target.startswith(root_prefix):
+            msg = f"security.txt path escapes repository root {root_real}"
+            raise ValueError(msg)
+        Path(target).parent.mkdir(parents=True, exist_ok=True)
+        Path(target).write_text(self.renderer.render(expires_value), encoding="utf-8")
+        logger.info("Wrote %s", target)
+
     def renew(
         self,
         *,
@@ -443,7 +477,11 @@ class SecurityTxtRenewer:
             current = current.replace(tzinfo=PACIFIC)
         current = current.astimezone(PACIFIC)
 
-        expires_value = expires or self.next_july_first_expires(now=current)
+        expires_value = (
+            normalize_expires(expires)
+            if expires is not None
+            else self.next_july_first_expires(now=current)
+        )
         expire_date = gpg_expire_date(expires_value)
         passphrase_value = passphrase if passphrase is not None else self.resolve_passphrase()
         private_key_path = (
@@ -458,7 +496,7 @@ class SecurityTxtRenewer:
 
         self.write_text(self.paths.pgp_key, key.public_key)
         self.write_text(private_key_path, key.private_key)
-        self.write_text(self.paths.security_txt, self.renderer.render(expires_value))
+        self.write_security_txt(expires_value)
 
         logger.info("Renewal complete.")
         logger.info("Public key:   %s", self.paths.pgp_key)
@@ -483,6 +521,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--expires",
+        type=normalize_expires,
         help="ISO-8601 Expires value (default: next 1 July midnight Pacific)",
     )
     parser.add_argument(

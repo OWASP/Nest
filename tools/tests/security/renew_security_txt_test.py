@@ -17,6 +17,7 @@ from renew_security_txt import (
     SecurityTxtRenderer,
     SecurityTxtRenewer,
     gpg_expire_date,
+    normalize_expires,
 )
 
 PACIFIC = ZoneInfo("America/Los_Angeles")
@@ -75,6 +76,10 @@ class TestSecurityTxtRenderer:
 class TestSecurityTxtRenewerHelpers:
     def test_gpg_expire_date_uses_pacific_calendar_date(self) -> None:
         assert gpg_expire_date("2027-07-01T00:00:00-07:00") == "2027-07-01"
+
+    def test_normalize_expires_rebuilds_from_datetime_fields(self) -> None:
+        assert normalize_expires("2027-07-01T00:00:00-07:00") == "2027-07-01T00:00:00-07:00"
+        assert normalize_expires("2027-07-01T07:00:00+00:00") == "2027-07-01T00:00:00-07:00"
 
     def test_next_july_first_expires_uses_current_year_before_july(self) -> None:
         now = datetime(2026, 3, 15, 12, 0, 0, tzinfo=PACIFIC)
