@@ -18,11 +18,15 @@ from apps.github.api.internal.dataloaders.repository import (
     REPOSITORIES_BY_PROJECT_ID,
     REPOSITORIES_COUNT_BY_PROJECT_ID,
 )
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER,
+)
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.project import (
     ENTITY_CHANNELS_BY_PROJECT_ID,
     ENTITY_LEADERS_BY_PROJECT_ID,
@@ -127,6 +131,11 @@ class TestProjectNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("repositories", ProjectNode)
         assert field is not None
         assert field.type.of_type is RepositoryNode
+
+    def test_resolve_top_contributors(self):
+        field = self._get_field_by_name("top_contributors", ProjectNode)
+        assert field is not None
+        assert field.type.of_type is RepositoryContributorNode
 
     def test_resolve_repositories_count(self):
         field = self._get_field_by_name("repositories_count", ProjectNode)
@@ -458,4 +467,39 @@ class TestProjectNodeResolvers:
         result = await resolver(None, mock_project, mock_info)
 
         assert result == mock_leaders
+        mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_top_contributors_loads_via_dataloader(self):
+        """top_contributors delegates to the dataloader and returns nodes."""
+        mock_contributors = [
+            {
+                "avatar_url": "url1",
+                "contributions_count": 100,
+                "id": "user1",
+                "login": "user1",
+                "name": "User 1",
+            },
+            {
+                "avatar_url": "url2",
+                "contributions_count": 50,
+                "id": "user2",
+                "login": "user2",
+                "name": "User 2",
+            },
+        ]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_contributors)
+        mock_info = self._build_info(github={TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
+        resolver = self._get_resolver("top_contributors")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert len(result) == 2
+        assert all(isinstance(c, RepositoryContributorNode) for c in result)
+        assert result[0].login == "user1"
+        assert result[1].login == "user2"
         mock_loader.load.assert_awaited_once_with(1)
