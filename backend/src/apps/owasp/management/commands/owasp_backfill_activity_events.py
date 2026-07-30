@@ -1,8 +1,11 @@
 """A command to backfill activity events for existing pull requests, issues, and releases."""
 
 import logging
+from collections.abc import Callable
+from typing import Any
 
 from django.core.management.base import BaseCommand
+from django.db.models import QuerySet
 
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
@@ -46,76 +49,52 @@ class Command(BaseCommand):
         if model in ("all", "release"):
             self.backfill_releases(offset)
 
-    def backfill_issues(self, offset: int) -> None:
-        """Backfill ActivityEvent records for existing issues."""
-        issues = Issue.objects.select_related("author", "repository").order_by("created_at")
-        issues_count = issues.count()
-        self.stdout.write(f"Backfilling activity events for {issues_count} issues...\n")
+    def backfill_objects(
+        self,
+        queryset: QuerySet,
+        offset: int,
+        noun: str,
+        get_label: Callable[[Any], str],
+    ) -> None:
+        """Backfill ActivityEvent records for a queryset of GitHub objects."""
+        count = queryset.count()
+        self.stdout.write(f"Backfilling activity events for {count} {noun}...\n")
 
         created_count = 0
-        for issue in issues[offset:]:
-
-            if not issue.repository:
-                logger.warning("Skipping issue #%s: no repository", issue.number)
+        for obj in queryset[offset:].iterator(chunk_size=2000):
+            if not obj.repository:
+                logger.warning("Skipping %s %s: no repository", noun.rstrip("s"), get_label(obj))
                 continue
 
             try:
-                ActivityEvent.update_data(issue)
+                ActivityEvent.update_data(obj)
                 created_count += 1
             except Exception:
-                logger.exception("Error backfilling activity events for issue #%s", issue.number)
+                logger.exception(
+                    "Error backfilling activity events for %s %s",
+                    noun.rstrip("s"),
+                    get_label(obj),
+                )
 
-        self.stdout.write(f"Issues processed: {created_count}\n")
+        self.stdout.write(f"{noun.capitalize()} processed: {created_count}\n")
+
+    def backfill_issues(self, offset: int) -> None:
+        """Backfill ActivityEvent records for existing issues."""
+        queryset = Issue.objects.select_related("author", "repository").order_by(
+            "created_at", "pk"
+        )
+        self.backfill_objects(queryset, offset, "issues", lambda obj: f"#{obj.number}")
 
     def backfill_pull_requests(self, offset: int) -> None:
         """Backfill ActivityEvent records for existing pull requests."""
-        pull_requests = PullRequest.objects.select_related("author", "repository").order_by(
-            "created_at"
+        queryset = PullRequest.objects.select_related("author", "repository").order_by(
+            "created_at", "pk"
         )
-        pull_requests_count = pull_requests.count()
-        self.stdout.write(
-            f"Backfilling activity events for {pull_requests_count} pull requests...\n"
-        )
-
-        created_count = 0
-        for pull_request in pull_requests[offset:]:
-
-            if not pull_request.repository:
-                logger.warning(
-                    "Skipping pull request #%s: no repository", pull_request.number
-                )
-                continue
-
-            try:
-                ActivityEvent.update_data(pull_request)
-                created_count += 1
-            except Exception:
-                logger.exception(
-                    "Error backfilling activity events for pull request #%s",
-                    pull_request.number,
-                )
-
-        self.stdout.write(f"Pull requests processed: {created_count}\n")
+        self.backfill_objects(queryset, offset, "pull requests", lambda obj: f"#{obj.number}")
 
     def backfill_releases(self, offset: int) -> None:
         """Backfill ActivityEvent records for existing releases."""
-        releases = Release.objects.select_related("author", "repository").order_by("created_at")
-        releases_count = releases.count()
-        self.stdout.write(f"Backfilling activity events for {releases_count} releases...\n")
-
-        created_count = 0
-        for release in releases[offset:]:
-
-            if not release.repository:
-                logger.warning("Skipping release %s: no repository", release.tag_name)
-                continue
-
-            try:
-                ActivityEvent.update_data(release)
-                created_count += 1
-            except Exception:
-                logger.exception(
-                    "Error backfilling activity events for release %s", release.tag_name
-                )
-
-        self.stdout.write(f"Releases processed: {created_count}\n")
+        queryset = Release.objects.select_related("author", "repository").order_by(
+            "created_at", "pk"
+        )
+        self.backfill_objects(queryset, offset, "releases", lambda obj: obj.tag_name)

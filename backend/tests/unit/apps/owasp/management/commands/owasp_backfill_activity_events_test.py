@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from django.core.management.base import BaseCommand
 
 from apps.owasp.management.commands.owasp_backfill_activity_events import Command
@@ -82,172 +81,157 @@ class TestOwaspBackfillActivityEventsCommand:
             mock_backfill_releases.assert_not_called()
 
     @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.Issue")
-    def test_backfill_issues_processes_all(self, mock_issue_class, mock_activity_event_class):
-        """Test that backfill_issues processes each issue and calls update_data."""
-        mock_issue1 = MagicMock(id=1, number=1, title="Issue 1")
-        mock_issue1.repository = MagicMock()
-        mock_issue2 = MagicMock(id=2, number=2, title="Issue 2")
-        mock_issue2.repository = MagicMock()
+    def test_backfill_objects_processes_all(self, mock_activity_event_class):
+        """Test that backfill_objects calls update_data for every object."""
+        mock_obj1 = MagicMock(repository=MagicMock())
+        mock_obj2 = MagicMock(repository=MagicMock())
 
         mock_qs = MagicMock()
         mock_qs.count.return_value = 2
-        mock_qs.__getitem__.return_value = [mock_issue1, mock_issue2]
-        mock_issue_class.objects.select_related.return_value.order_by.return_value = mock_qs
+        mock_qs.__getitem__.return_value.iterator.return_value = iter([mock_obj1, mock_obj2])
 
         command = Command()
         command.stdout = MagicMock()
-        command.backfill_issues(offset=0)
+        command.backfill_objects(mock_qs, 0, "issues", str)
 
-        mock_activity_event_class.update_data.assert_any_call(mock_issue1)
-        mock_activity_event_class.update_data.assert_any_call(mock_issue2)
+        mock_activity_event_class.update_data.assert_any_call(mock_obj1)
+        mock_activity_event_class.update_data.assert_any_call(mock_obj2)
         assert mock_activity_event_class.update_data.call_count == 2
 
     @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.Issue")
-    def test_backfill_issues_skips_without_repository(
-        self, mock_issue_class, mock_activity_event_class
-    ):
-        """Test that backfill_issues skips issues that have no repository."""
-        mock_issue = MagicMock(id=1, number=1, title="Issue No Repo")
-        mock_issue.repository = None
+    def test_backfill_objects_skips_without_repository(self, mock_activity_event_class):
+        """Test that backfill_objects skips objects that have no repository."""
+        mock_obj = MagicMock(repository=None)
 
         mock_qs = MagicMock()
         mock_qs.count.return_value = 1
-        mock_qs.__getitem__.return_value = [mock_issue]
-        mock_issue_class.objects.select_related.return_value.order_by.return_value = mock_qs
+        mock_qs.__getitem__.return_value.iterator.return_value = iter([mock_obj])
 
         command = Command()
         command.stdout = MagicMock()
-        command.backfill_issues(offset=0)
+        command.backfill_objects(mock_qs, 0, "issues", str)
 
         mock_activity_event_class.update_data.assert_not_called()
 
     @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.Issue")
-    def test_backfill_issues_continues_on_error(
-        self, mock_issue_class, mock_activity_event_class
-    ):
-        """Test that backfill_issues continues processing when one issue raises an exception."""
-        mock_issue1 = MagicMock(id=1, number=1, title="Issue 1")
-        mock_issue1.repository = MagicMock()
-        mock_issue2 = MagicMock(id=2, number=2, title="Issue 2")
-        mock_issue2.repository = MagicMock()
+    def test_backfill_objects_continues_on_error(self, mock_activity_event_class):
+        """Test that backfill_objects continues when one object raises an exception."""
+        mock_obj1 = MagicMock(repository=MagicMock())
+        mock_obj2 = MagicMock(repository=MagicMock())
 
         mock_activity_event_class.update_data.side_effect = [Exception("DB error"), None]
 
         mock_qs = MagicMock()
         mock_qs.count.return_value = 2
-        mock_qs.__getitem__.return_value = [mock_issue1, mock_issue2]
+        mock_qs.__getitem__.return_value.iterator.return_value = iter([mock_obj1, mock_obj2])
+
+        command = Command()
+        command.stdout = MagicMock()
+        command.backfill_objects(mock_qs, 0, "issues", str)
+
+        assert mock_activity_event_class.update_data.call_count == 2
+
+    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
+    def test_backfill_objects_respects_offset(self, mock_activity_event_class):
+        """Test that backfill_objects slices the queryset with the given offset."""
+        mock_qs = MagicMock()
+        mock_qs.count.return_value = 5
+        mock_qs.__getitem__.return_value.iterator.return_value = iter([])
+
+        command = Command()
+        command.stdout = MagicMock()
+        command.backfill_objects(mock_qs, 3, "issues", str)
+
+        mock_qs.__getitem__.assert_called_once_with(slice(3, None))
+
+    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.Issue")
+    def test_backfill_issues_passes_correct_queryset(self, mock_issue_class, mocker):
+        """Test that backfill_issues builds the right queryset and delegates."""
+        mock_qs = MagicMock()
+        mock_qs.__getitem__.return_value = mock_qs
         mock_issue_class.objects.select_related.return_value.order_by.return_value = mock_qs
 
         command = Command()
         command.stdout = MagicMock()
+        mock_backfill_objects = mocker.patch.object(command, "backfill_objects")
+
         command.backfill_issues(offset=0)
 
-        assert mock_activity_event_class.update_data.call_count == 2
+        mock_issue_class.objects.select_related.assert_called_once_with("author", "repository")
+        mock_issue_class.objects.select_related.return_value.order_by.assert_called_once_with(
+            "created_at", "pk"
+        )
+        assert mock_backfill_objects.call_count == 1
+        assert mock_backfill_objects.call_args[0][2] == "issues"
 
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
     @patch("apps.owasp.management.commands.owasp_backfill_activity_events.PullRequest")
-    def test_backfill_pull_requests_processes_all(
-        self, mock_pr_class, mock_activity_event_class
-    ):
-        """Test that backfill_pull_requests processes each PR and calls update_data."""
-        mock_pr1 = MagicMock(id=1, number=1, title="PR 1")
-        mock_pr1.repository = MagicMock()
-        mock_pr2 = MagicMock(id=2, number=2, title="PR 2")
-        mock_pr2.repository = MagicMock()
-
+    def test_backfill_pull_requests_passes_correct_queryset(self, mock_pr_class, mocker):
+        """Test that backfill_pull_requests builds the right queryset and delegates."""
         mock_qs = MagicMock()
-        mock_qs.count.return_value = 2
-        mock_qs.__getitem__.return_value = [mock_pr1, mock_pr2]
+        mock_qs.__getitem__.return_value = mock_qs
         mock_pr_class.objects.select_related.return_value.order_by.return_value = mock_qs
 
         command = Command()
         command.stdout = MagicMock()
+        mock_backfill_objects = mocker.patch.object(command, "backfill_objects")
+
         command.backfill_pull_requests(offset=0)
 
-        mock_activity_event_class.update_data.assert_any_call(mock_pr1)
-        mock_activity_event_class.update_data.assert_any_call(mock_pr2)
-        assert mock_activity_event_class.update_data.call_count == 2
+        mock_pr_class.objects.select_related.assert_called_once_with("author", "repository")
+        mock_pr_class.objects.select_related.return_value.order_by.assert_called_once_with(
+            "created_at", "pk"
+        )
+        assert mock_backfill_objects.call_count == 1
+        assert mock_backfill_objects.call_args[0][2] == "pull requests"
 
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.PullRequest")
-    def test_backfill_pull_requests_skips_without_repository(
-        self, mock_pr_class, mock_activity_event_class
-    ):
-        """Test that backfill_pull_requests skips PRs that have no repository."""
-        mock_pr = MagicMock(id=1, number=1, title="PR No Repo")
-        mock_pr.repository = None
-
-        mock_qs = MagicMock()
-        mock_qs.count.return_value = 1
-        mock_qs.__getitem__.return_value = [mock_pr]
-        mock_pr_class.objects.select_related.return_value.order_by.return_value = mock_qs
-
-        command = Command()
-        command.stdout = MagicMock()
-        command.backfill_pull_requests(offset=0)
-
-        mock_activity_event_class.update_data.assert_not_called()
-
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
     @patch("apps.owasp.management.commands.owasp_backfill_activity_events.Release")
-    def test_backfill_releases_processes_all(self, mock_release_class, mock_activity_event_class):
-        """Test that backfill_releases processes each release and calls update_data."""
-        mock_release1 = MagicMock(id=1, tag_name="v1.0.0", name="Release 1.0.0")
-        mock_release1.repository = MagicMock()
-        mock_release2 = MagicMock(id=2, tag_name="v2.0.0", name="Release 2.0.0")
-        mock_release2.repository = MagicMock()
-
+    def test_backfill_releases_passes_correct_queryset(self, mock_release_class, mocker):
+        """Test that backfill_releases builds the right queryset and delegates."""
         mock_qs = MagicMock()
-        mock_qs.count.return_value = 2
-        mock_qs.__getitem__.return_value = [mock_release1, mock_release2]
+        mock_qs.__getitem__.return_value = mock_qs
         mock_release_class.objects.select_related.return_value.order_by.return_value = mock_qs
 
         command = Command()
         command.stdout = MagicMock()
+        mock_backfill_objects = mocker.patch.object(command, "backfill_objects")
+
         command.backfill_releases(offset=0)
 
-        mock_activity_event_class.update_data.assert_any_call(mock_release1)
-        mock_activity_event_class.update_data.assert_any_call(mock_release2)
-        assert mock_activity_event_class.update_data.call_count == 2
+        mock_release_class.objects.select_related.assert_called_once_with("author", "repository")
+        mock_release_class.objects.select_related.return_value.order_by.assert_called_once_with(
+            "created_at", "pk"
+        )
+        assert mock_backfill_objects.call_count == 1
+        assert mock_backfill_objects.call_args[0][2] == "releases"
 
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.Release")
-    def test_backfill_releases_skips_without_repository(
-        self, mock_release_class, mock_activity_event_class
-    ):
-        """Test that backfill_releases skips releases that have no repository."""
-        mock_release = MagicMock(id=1, tag_name="v1.0.0", name="Release 1.0.0")
-        mock_release.repository = None
-
+    @pytest.mark.parametrize(
+        ("method_name", "model_patch_path"),
+        [
+            (
+                "backfill_issues",
+                "apps.owasp.management.commands.owasp_backfill_activity_events.Issue",
+            ),
+            (
+                "backfill_pull_requests",
+                "apps.owasp.management.commands.owasp_backfill_activity_events.PullRequest",
+            ),
+            (
+                "backfill_releases",
+                "apps.owasp.management.commands.owasp_backfill_activity_events.Release",
+            ),
+        ],
+    )
+    def test_backfill_wrapper_methods_pass_offset(self, method_name, model_patch_path, mocker):
+        """Test that wrapper methods forward the offset argument to backfill_objects."""
+        mock_model_class = mocker.patch(model_patch_path)
         mock_qs = MagicMock()
-        mock_qs.count.return_value = 1
-        mock_qs.__getitem__.return_value = [mock_release]
-        mock_release_class.objects.select_related.return_value.order_by.return_value = mock_qs
+        mock_model_class.objects.select_related.return_value.order_by.return_value = mock_qs
 
         command = Command()
         command.stdout = MagicMock()
-        command.backfill_releases(offset=0)
+        mock_backfill_objects = mocker.patch.object(command, "backfill_objects")
 
-        mock_activity_event_class.update_data.assert_not_called()
+        getattr(command, method_name)(offset=7)
 
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.ActivityEvent")
-    @patch("apps.owasp.management.commands.owasp_backfill_activity_events.Issue")
-    def test_backfill_issues_respects_offset(self, mock_issue_class, mock_activity_event_class):
-        """Test that backfill_issues respects the offset argument."""
-        mock_issue1 = MagicMock(id=3, number=3, title="Issue 3")
-        mock_issue1.repository = MagicMock()
-
-        mock_qs = MagicMock()
-        mock_qs.count.return_value = 3
-        mock_qs.__getitem__.return_value = [mock_issue1]
-        mock_issue_class.objects.select_related.return_value.order_by.return_value = mock_qs
-
-        command = Command()
-        command.stdout = MagicMock()
-        command.backfill_issues(offset=2)
-
-        mock_qs.__getitem__.assert_called_once_with(slice(2, None))
-        mock_activity_event_class.update_data.assert_called_once_with(mock_issue1)
+        mock_backfill_objects.assert_called_once()
+        assert mock_backfill_objects.call_args[0][1] == 7

@@ -1,5 +1,5 @@
 .PHONY: owasp-add-project-custom-tags owasp-aggregate-entity-contributions \
-	owasp-aggregate-member-contributions owasp-aggregate-projects owasp-create-project-metadata-file \
+	owasp-aggregate-member-contributions owasp-aggregate-projects owasp-backfill-activity-events owasp-create-project-metadata-file \
 	owasp-enrich-chapters owasp-enrich-committees owasp-enrich-events owasp-enrich-projects \
 	owasp-generate-community-snapshot-video owasp-process-snapshots owasp-scrape-chapters \
 	owasp-scrape-committees owasp-scrape-projects owasp-sync-posts owasp-update-events \
