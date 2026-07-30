@@ -60,11 +60,11 @@ class RepositoryPaths:
 
     def __init__(self, root: Path) -> None:
         """Bind paths under the repository ``root``."""
-        self.root = root
-        self.well_known = root / "frontend" / "public" / ".well-known"
+        self.root = root.resolve()
+        self.well_known = self.root / "frontend" / "public" / ".well-known"
         self.security_txt = self.well_known / "security.txt"
         self.pgp_key = self.well_known / "pgp-key.txt"
-        self.private_key_directory = root / "tools" / "security" / "private"
+        self.private_key_directory = self.root / "tools" / "security" / "private"
 
     def private_key(self, year: int) -> Path:
         """Return the year-scoped private key export path."""
@@ -388,23 +388,40 @@ class SecurityTxtRenewer:
         return value
 
     @staticmethod
+    def validate_repository_root(root: Path) -> Path:
+        """Resolve ``root`` and require Nest repository layout markers."""
+        root_resolved = Path(os.path.realpath(root.expanduser()))
+        required = (
+            root_resolved / ".git",
+            root_resolved / "frontend" / "public",
+            root_resolved / "tools" / "security",
+        )
+        missing = [str(path.relative_to(root_resolved)) for path in required if not path.exists()]
+        if missing:
+            msg = f"path {root} is not a Nest repository root (missing: {', '.join(missing)})"
+            raise ValueError(msg)
+        return root_resolved
+
+    @staticmethod
     def resolve_within_root(root: Path, path: Path) -> Path:
         """Resolve ``path`` and require it to stay under ``root``.
 
-        Prevents CLI / caller path arguments from escaping the repository via
-        ``..`` segments or absolute paths outside the tree.
+        Uses ``os.path.realpath`` + prefix check so path-escape sanitizers
+        (including Sonar S8707) recognize the validation before any write.
         """
-        root_resolved = root.resolve()
-        path_resolved = path.expanduser().resolve()
-        if not path_resolved.is_relative_to(root_resolved):
-            msg = f"path {path} escapes repository root {root_resolved}"
+        root_real = os.path.realpath(root.expanduser())
+        path_real = os.path.realpath(path.expanduser())
+        root_prefix = root_real if root_real.endswith(os.sep) else f"{root_real}{os.sep}"
+        if path_real != root_real and not path_real.startswith(root_prefix):
+            msg = f"path {path} escapes repository root {root_real}"
             raise ValueError(msg)
-        return path_resolved
+        return Path(path_real)
 
     def write_text(self, path: Path, content: str) -> None:
         """Create parent directories and write UTF-8 text under the repository root."""
         safe_path = self.resolve_within_root(self.paths.root, path)
-        safe_path.parent.mkdir(parents=True, exist_ok=True)
+        safe_parent = self.resolve_within_root(self.paths.root, safe_path.parent)
+        safe_parent.mkdir(parents=True, exist_ok=True)
         safe_path.write_text(content, encoding="utf-8")
         logger.info("Wrote %s", safe_path)
 
@@ -490,7 +507,7 @@ def main() -> None:
         format="%(levelname)s %(message)s",
     )
     root = (
-        args.repository_root.resolve()
+        SecurityTxtRenewer.validate_repository_root(args.repository_root)
         if args.repository_root is not None
         else SecurityTxtRenewer.find_repository_root()
     )

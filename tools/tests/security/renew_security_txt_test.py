@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -116,6 +117,19 @@ class TestSecurityTxtRenewerHelpers:
         with pytest.raises(ValueError, match="escapes repository root"):
             SecurityTxtRenewer.resolve_within_root(tmp_path, traversal)
 
+    def test_validate_repository_root_requires_nest_layout(self, tmp_path: Path) -> None:
+        (tmp_path / ".git").mkdir()
+        with pytest.raises(ValueError, match="not a Nest repository root"):
+            SecurityTxtRenewer.validate_repository_root(tmp_path)
+
+    def test_validate_repository_root_accepts_nest_layout(self, tmp_path: Path) -> None:
+        (tmp_path / ".git").mkdir()
+        (tmp_path / "frontend" / "public").mkdir(parents=True)
+        (tmp_path / "tools" / "security").mkdir(parents=True)
+        assert SecurityTxtRenewer.validate_repository_root(tmp_path) == Path(
+            os.path.realpath(tmp_path)
+        )
+
 
 class TestSecurityTxtRenewer:
     def test_renew_writes_artifacts_with_injected_generator(self, tmp_path: Path) -> None:
@@ -164,12 +178,13 @@ class TestSecurityTxtRenewer:
     def test_renew_rejects_private_key_out_outside_root(self, tmp_path: Path) -> None:
         renewer = SecurityTxtRenewer(tmp_path, key_generator=FakeKeyGenerator())
         outside = tmp_path.parent / "escaped-key.asc"
+        now = datetime(2026, 7, 29, tzinfo=PACIFIC)
         with pytest.raises(ValueError, match="escapes repository root"):
             renewer.renew(
                 expires="2027-07-01T00:00:00-07:00",
                 private_key_out=outside,
                 passphrase=TEST_PASSPHRASE,
-                now=datetime(2026, 7, 29, tzinfo=PACIFIC),
+                now=now,
             )
         assert not outside.exists()
 
