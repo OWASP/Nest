@@ -244,24 +244,59 @@ poetry run python manage.py migrate
 poetry run python manage.py runserver 0.0.0.0:8000
 ```
 
-**Frontend:**
+Unit tests use `settings.test` (LocMemCache, no DB/Redis); the CI backend
+job runs the same command without any database service. DB-backed flows
+(`migrate`, `runserver`) need a reachable PostgreSQL.
+
+**Frontend tests:**
 
 ```bash
 cd frontend
 pnpm install
-pnpm run dev
 pnpm run test:unit
 pnpm run test:a11y
-pnpm run lint:check
-pnpm run format:check
+pnpm run dev
 ```
 
-**Pre-commit (host):**
+**Lint and format** -- the `lint`/`format` scripts live in the root
+`package.json`, so run them from the repo root:
 
 ```bash
-pip install -r tools/requirements/pre-commit.txt
-pre-commit run --all-files
+pnpm install
+pnpm run lint:check      # eslint --max-warnings=0 e2e frontend
+pnpm run format:check    # prettier --check
+pnpm run lint            # eslint --fix, same scope
+pnpm run format          # prettier --write
 ```
+
+**CSpell** -- needs the `cspell/` workspace deps, then the binary on PATH:
+
+```bash
+cd cspell && pnpm install
+cd ..
+PATH="$(pwd)/cspell/node_modules/.bin:$PATH" cspell --config cspell/cspell.json --no-progress -r .
+```
+
+**Pre-commit (host, partial):**
+
+```bash
+python -m pip install --require-hashes -r tools/requirements/pre-commit.txt
+SKIP=actionlint-docker,terraform_providers_lock,terraform_fmt,terraform_tflint,terraform-docs-go pre-commit run --all-files
+```
+
+The `actionlint-docker` hook needs a Docker daemon and the `terraform_*`
+hooks need `terraform`/`tflint`/`terraform-docs` binaries; `SKIP` those when
+unavailable. Ruff, mypy, yamllint, markdownlint, djlint, and the other hooks
+run fine on the host.
+
+**Requires Docker -- cannot run outside the containers:**
+
+- `make test-e2e` (Playwright needs the full stack)
+- `make test-backend-fuzz` (Schemathesis/Atheris)
+- `make security-scan` and friends (Semgrep, Trivy, OSV, ZAP)
+- `make cspell` / `make prettier` / `make eslint` / `make pre-commit` --
+  these targets shell into the `nest-code-checks` image unless `CI=true`
+- `make run` and the DB/Redis-backed data sync commands
 
 Host commands bypass Docker networking (no DB, cache, or backend available
 unless those services are running separately). Tests that need PostgreSQL,
