@@ -4,6 +4,7 @@ import {
   validateDescription,
   validateStartDate,
   validateEndDate,
+  validateUrl,
   getCommonValidationRules,
 } from 'components/forms/shared/formValidationUtils'
 
@@ -129,6 +130,54 @@ describe('formValidationUtils', () => {
 
     it('returns undefined when start date is empty string', () => {
       expect(validateEndDate('2024-01-01', '')).toBeUndefined()
+    })
+  })
+
+  describe('validateUrl', () => {
+    it('returns undefined when value is empty string', () => {
+      expect(validateUrl('', 'Source URL')).toBeUndefined()
+    })
+
+    it('returns undefined when value is only whitespace', () => {
+      expect(validateUrl('   ', 'Source URL')).toBeUndefined()
+    })
+
+    it('returns undefined for valid https URL', () => {
+      expect(validateUrl('https://example.com', 'Source URL')).toBeUndefined()
+    })
+
+    it('returns undefined for valid URL with path', () => {
+      expect(validateUrl('https://example.com/document.pdf', 'Source URL')).toBeUndefined()
+    })
+
+    it('returns undefined for valid URL with query parameters', () => {
+      expect(
+        validateUrl('https://example.com/doc?version=2&type=pdf', 'Source URL')
+      ).toBeUndefined()
+    })
+
+    it('returns undefined for valid http URL', () => {
+      expect(validateUrl('http://example.com', 'Source URL')).toBeUndefined()
+    })
+
+    it('returns undefined for valid ftp URL', () => {
+      expect(validateUrl('ftp://files.example.com', 'Source URL')).toBeUndefined()
+    })
+
+    it('returns error for string without scheme', () => {
+      expect(validateUrl('not-a-url', 'Source URL')).toBe('Source URL must be a valid URL')
+    })
+
+    it('returns error for random text', () => {
+      expect(validateUrl('hello world', 'Source URL')).toBe('Source URL must be a valid URL')
+    })
+
+    it('returns error for URL with no host', () => {
+      expect(validateUrl('http://', 'Source URL')).toBe('Source URL must be a valid URL')
+    })
+
+    it('uses the provided field name in the error message', () => {
+      expect(validateUrl('invalid', 'Custom Field')).toBe('Custom Field must be a valid URL')
     })
   })
 

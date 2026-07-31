@@ -3,6 +3,7 @@
 import { useQuery } from '@apollo/client/react'
 
 import { Button } from '@heroui/button'
+import { Chip } from '@heroui/react'
 import { BreadcrumbStyleProvider, registerBreadcrumb } from 'contexts/BreadcrumbContext'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { toLower, upperFirst } from 'lodash'
@@ -11,7 +12,7 @@ import { useEffect } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
-import { ClaimStatusEnum } from 'types/__generated__/graphql'
+import { ClaimStatusEnum, ReviewStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -32,12 +33,20 @@ const ClaimDetailsPage = () => {
     error: graphQLRequestError,
   } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: !claimKey || session?.user?.login !== login,
-    variables: { key: claimKey, login, year: Number.parseInt(year) },
+    skip: isSyncing || !claimKey || !year || !session?.user?.login,
+    variables: {
+      key: claimKey,
+      login,
+      sessionLogin: session?.user?.login ?? '',
+      year: Number.parseInt(year),
+    },
   })
 
+  const isReviewer = graphQLData?.boardOfDirectors?.reviewer != null
   const claim = graphQLData?.boardCandidateClaim
   const evidences = graphQLData?.boardCandidateClaimEvidences ?? []
+  const hasReviewed =
+    claim?.reviews?.some((r) => r.reviewer?.login === session?.user?.login) ?? false
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -56,7 +65,7 @@ const ClaimDetailsPage = () => {
 
   if (isLoading || isSyncing) return <LoadingSpinner />
 
-  if (session?.user?.login !== login) {
+  if (session?.user?.login !== login && !isReviewer) {
     return (
       <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
     )
@@ -104,38 +113,84 @@ const ClaimDetailsPage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">@{login}</p>
           </div>
           <div className="flex items-center gap-2">
-            {claim.status == ClaimStatusEnum.Draft && (
+            {claim.status === ClaimStatusEnum.Draft && session?.user?.login === login && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
                 {'Add Evidence'}
               </ActionButton>
             )}
-            <ClaimActions claim={claim} login={login} year={year} />
+            <ClaimActions
+              claim={claim}
+              hasReviewed={hasReviewed}
+              isReviewer={isReviewer}
+              login={login}
+              year={year}
+            />
           </div>
         </div>
         <Metadata details={claimDetails} detailsTitle="Claim Details" />
         <SecondaryCard title="Evidences">
-          {evidences.length == 0 ? (
+          {evidences.length === 0 ? (
             <p> No evidences. </p>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-2">
               {evidences.map((evidence) => (
                 <Button
                   disableAnimation
                   key={evidence.key}
                   onPress={() => handleEvidenceClick(evidence.key)}
-                  className="h-28 flex-col items-start justify-start bg-transparent p-4 dark:hover:bg-gray-900"
+                  className="h-24 w-full flex-row justify-between bg-transparent dark:hover:bg-gray-900"
                 >
-                  <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
-                    {evidence.name}
-                  </h3>
-                  <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
-                    {evidence.description}
-                  </p>
-                  <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
-                    {formatDate(evidence.createdAt)}
-                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
+                    <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
+                      {evidence.name}
+                    </h3>
+                    <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
+                      {evidence.description}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
+                        {formatDate(evidence.createdAt)}
+                      </span>
+                    </div>
+                  </div>
                 </Button>
+              ))}
+            </div>
+          )}
+        </SecondaryCard>
+        <SecondaryCard title="Reviews" className="overflow-hidden">
+          {claim.reviews.length === 0 ? (
+            <p> No reviews. </p>
+          ) : (
+            <div className="grid min-w-0 overflow-hidden">
+              {claim.reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="flex h-24 w-full min-w-0 flex-row justify-between bg-transparent px-4"
+                >
+                  <div className="flex min-w-0 flex-1 flex-col items-start justify-start p-1">
+                    <h3 className="w-full min-w-0 truncate text-left text-xl leading-tight font-semibold dark:text-gray-300">
+                      {review.reviewer?.login ?? 'Unknown Reviewer'}
+                    </h3>
+                    <p className="w-full min-w-0 truncate text-left leading-tight text-gray-600 dark:text-gray-300">
+                      {review.notes || 'No notes provided.'}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="shrink-0 text-xs text-gray-600 dark:text-gray-400">
+                        {formatDate(review.createdAt)}
+                      </span>
+                      <Chip
+                        size="sm"
+                        variant="flat"
+                        color={review.status === ReviewStatusEnum.Approved ? 'success' : 'danger'}
+                        className="text-tiny h-5 shrink-0"
+                      >
+                        {upperFirst(toLower(review.status))}
+                      </Chip>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}

@@ -70,6 +70,7 @@ export type BoardCandidateClaimEvidenceNode = Node & {
 
 export type BoardCandidateClaimNode = Node & {
   __typename?: 'BoardCandidateClaimNode';
+  candidate: EntityMemberNode;
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   hasEvidence: Scalars['Boolean']['output'];
@@ -105,12 +106,18 @@ export type BoardOfDirectorsNode = Node & {
   id: Scalars['ID']['output'];
   members: Array<EntityMemberNode>;
   owaspUrl: Scalars['String']['output'];
+  reviewer?: Maybe<UserNode>;
   updatedAt: Scalars['DateTime']['output'];
   year: Scalars['Int']['output'];
 };
 
 
 export type BoardOfDirectorsNodeCandidateArgs = {
+  login: Scalars['String']['input'];
+};
+
+
+export type BoardOfDirectorsNodeReviewerArgs = {
   login: Scalars['String']['input'];
 };
 
@@ -978,7 +985,7 @@ export type QueryBoardCandidateClaimEvidencesArgs = {
 
 
 export type QueryBoardCandidateClaimsArgs = {
-  login: Scalars['String']['input'];
+  login?: InputMaybe<Scalars['String']['input']>;
   year: Scalars['Int']['input'];
 };
 

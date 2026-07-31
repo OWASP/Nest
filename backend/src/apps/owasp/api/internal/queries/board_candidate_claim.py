@@ -2,7 +2,7 @@
 
 import strawberry
 import strawberry_django
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
 
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
@@ -16,13 +16,13 @@ class BoardCandidateClaimQuery:
 
     @strawberry_django.field
     def board_candidate_claims(
-        self, info: strawberry.Info, login: str, year: int
+        self, info: strawberry.Info, year: int, login: str | None = None
     ) -> list[BoardCandidateClaimNode]:
         """Resolve Board Candidate Claims for a given candidate and year.
 
         Args:
             info (Info): Strawberry Info.
-            login (str): The login of the candidate.
+            login (str, optional): The login of the candidate.
             year (int): The year of the elections.
 
         Returns:
@@ -30,41 +30,60 @@ class BoardCandidateClaimQuery:
 
         """
         user = info.context.request.user
-        is_self = (
-            user.is_authenticated
-            and user.github_user is not None
-            and user.github_user.login == login
-        )
         is_reviewer = (
             user.is_authenticated
             and BoardOfDirectors.objects.filter(year=year, reviewers=user).exists()
         )
-        claims = (
-            BoardCandidateClaim.objects.filter(
-                board__year=year,
-                candidate__member__login=login,
+        claims = BoardCandidateClaim.objects.filter(
+            board__year=year,
+        )
+
+        if login is not None:
+            is_self = (
+                user.is_authenticated
+                and user.github_user is not None
+                and user.github_user.login == login
             )
-            .annotate(
+            claims = claims.filter(candidate__member__login=login)
+
+            if not is_self and not is_reviewer:
+                claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
+            elif is_reviewer and not is_self:
+                claims = claims.filter(
+                    status__in=[
+                        BoardCandidateClaim.Status.SUBMITTED,
+                        BoardCandidateClaim.Status.APPROVED,
+                    ]
+                )
+        elif is_reviewer:
+            claims = claims.filter(
+                Q(candidate__member=user.github_user)
+                | Q(
+                    status__in=[
+                        BoardCandidateClaim.Status.SUBMITTED,
+                        BoardCandidateClaim.Status.APPROVED,
+                    ]
+                )
+            )
+        elif user.is_authenticated and user.github_user:
+            claims = claims.filter(
+                Q(candidate__member=user.github_user)
+                | Q(status=BoardCandidateClaim.Status.APPROVED)
+            )
+        else:
+            claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
+
+        return (
+            claims.annotate(
                 evidence_exists=Exists(
                     BoardCandidateClaimEvidence.objects.filter(
                         claim=OuterRef("pk"), is_removed=False
                     )
                 ),
             )
+            .select_related("candidate__member")
             .order_by("order", "nest_created_at")
         )
-
-        if not is_self and not is_reviewer:
-            claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
-        if is_reviewer and not is_self:
-            claims = claims.filter(
-                status__in=[
-                    BoardCandidateClaim.Status.SUBMITTED,
-                    BoardCandidateClaim.Status.APPROVED,
-                ]
-            )
-
-        return claims
 
     @strawberry_django.field
     def board_candidate_claim(
@@ -83,16 +102,20 @@ class BoardCandidateClaimQuery:
 
         """
         try:
-            claim = BoardCandidateClaim.objects.annotate(
-                evidence_exists=Exists(
-                    BoardCandidateClaimEvidence.objects.filter(
-                        claim=OuterRef("pk"), is_removed=False
-                    )
-                ),
-            ).get(
-                board__year=year,
-                candidate__member__login=login,
-                key=key,
+            claim = (
+                BoardCandidateClaim.objects.select_related("candidate__member", "board")
+                .annotate(
+                    evidence_exists=Exists(
+                        BoardCandidateClaimEvidence.objects.filter(
+                            claim=OuterRef("pk"), is_removed=False
+                        )
+                    ),
+                )
+                .get(
+                    board__year=year,
+                    candidate__member__login=login,
+                    key=key,
+                )
             )
         except BoardCandidateClaim.DoesNotExist:
             return None

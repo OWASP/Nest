@@ -27,18 +27,19 @@ class TestBoardCandidateClaimQuery:
         info = _make_info(user)
 
         claims = [MagicMock(), MagicMock()]
-        mock_qs = MagicMock()
-        mock_qs.annotate.return_value = mock_qs
-        mock_qs.order_by.return_value = claims
-        mock_claim_model.objects.filter.return_value = mock_qs
+        login_filtered_qs = MagicMock()
+        (
+            login_filtered_qs.annotate.return_value.select_related.return_value.order_by
+        ).return_value = claims
+        base_qs = MagicMock()
+        base_qs.filter.return_value = login_filtered_qs
+        mock_claim_model.objects.filter.return_value = base_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
-        mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login="alice",
-            board__year=2025,
-        )
+        mock_claim_model.objects.filter.assert_called_once_with(board__year=2025)
+        base_qs.filter.assert_called_once_with(candidate__member__login="alice")
         assert result == claims
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardOfDirectors")
@@ -54,18 +55,21 @@ class TestBoardCandidateClaimQuery:
         user.github_user.login = "bob"
         info = _make_info(user)
 
-        base_qs = MagicMock()
-        base_qs.annotate.return_value = base_qs
-        ordered_qs = MagicMock()
         filtered_qs = MagicMock()
-        ordered_qs.filter.return_value = filtered_qs
-        base_qs.order_by.return_value = ordered_qs
+        filtered_qs.annotate.return_value.select_related.return_value.order_by.return_value = (
+            filtered_qs
+        )
+        login_qs = MagicMock()
+        login_qs.filter.return_value = filtered_qs
+        base_qs = MagicMock()
+        base_qs.filter.return_value = login_qs
         mock_claim_model.objects.filter.return_value = base_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
-        ordered_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
+        base_qs.filter.assert_called_once_with(candidate__member__login="alice")
+        login_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
         assert result == filtered_qs
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardOfDirectors")
@@ -79,18 +83,21 @@ class TestBoardCandidateClaimQuery:
         user.is_authenticated = False
         info = _make_info(user)
 
-        base_qs = MagicMock()
-        base_qs.annotate.return_value = base_qs
-        ordered_qs = MagicMock()
         filtered_qs = MagicMock()
-        ordered_qs.filter.return_value = filtered_qs
-        base_qs.order_by.return_value = ordered_qs
+        filtered_qs.annotate.return_value.select_related.return_value.order_by.return_value = (
+            filtered_qs
+        )
+        login_qs = MagicMock()
+        login_qs.filter.return_value = filtered_qs
+        base_qs = MagicMock()
+        base_qs.filter.return_value = login_qs
         mock_claim_model.objects.filter.return_value = base_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
-        ordered_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
+        base_qs.filter.assert_called_once_with(candidate__member__login="alice")
+        login_qs.filter.assert_called_once_with(status=BoardCandidateClaim.Status.APPROVED)
         assert result == filtered_qs
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardOfDirectors")
@@ -102,21 +109,25 @@ class TestBoardCandidateClaimQuery:
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
+        user.github_user.login = "bob"
         mock_board_model.objects.filter.return_value.exists.return_value = True
         info = _make_info(user)
 
-        base_qs = MagicMock()
-        base_qs.annotate.return_value = base_qs
-        ordered_qs = MagicMock()
         filtered_qs = MagicMock()
-        ordered_qs.filter.return_value = filtered_qs
-        base_qs.order_by.return_value = ordered_qs
+        filtered_qs.annotate.return_value.select_related.return_value.order_by.return_value = (
+            filtered_qs
+        )
+        login_qs = MagicMock()
+        login_qs.filter.return_value = filtered_qs
+        base_qs = MagicMock()
+        base_qs.filter.return_value = login_qs
         mock_claim_model.objects.filter.return_value = base_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
-        ordered_qs.filter.assert_called_once_with(
+        base_qs.filter.assert_called_once_with(candidate__member__login="alice")
+        login_qs.filter.assert_called_once_with(
             status__in=[BoardCandidateClaim.Status.SUBMITTED, BoardCandidateClaim.Status.APPROVED]
         )
         assert result == filtered_qs
@@ -140,12 +151,15 @@ class TestBoardCandidateClaimSingleQuery:
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
-        mock_claim_model.objects.annotate.return_value = mock_qs
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
 
-        mock_claim_model.objects.annotate.assert_called_once()
+        mock_claim_model.objects.select_related.assert_called_once_with(
+            "candidate__member", "board"
+        )
+        mock_claim_model.objects.select_related.return_value.annotate.assert_called_once()
         mock_qs.get.assert_called_once_with(
             candidate__member__login="alice", key="test-key", board__year=2025
         )
@@ -166,12 +180,12 @@ class TestBoardCandidateClaimSingleQuery:
         claim.status = BoardCandidateClaim.Status.APPROVED
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
-        mock_claim_model.objects.annotate.return_value = mock_qs
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
 
-        mock_claim_model.objects.annotate.assert_called_once()
+        mock_claim_model.objects.select_related.return_value.annotate.assert_called_once()
         assert result == claim
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
@@ -189,7 +203,7 @@ class TestBoardCandidateClaimSingleQuery:
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
-        mock_claim_model.objects.annotate.return_value = mock_qs
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
@@ -207,7 +221,7 @@ class TestBoardCandidateClaimSingleQuery:
 
         mock_qs = MagicMock()
         mock_qs.get.side_effect = BoardCandidateClaim.DoesNotExist
-        mock_claim_model.objects.annotate.return_value = mock_qs
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
@@ -226,12 +240,12 @@ class TestBoardCandidateClaimSingleQuery:
         claim.status = BoardCandidateClaim.Status.APPROVED
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
-        mock_claim_model.objects.annotate.return_value = mock_qs
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
 
-        mock_claim_model.objects.annotate.assert_called_once()
+        mock_claim_model.objects.select_related.return_value.annotate.assert_called_once()
         assert result == claim
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
@@ -249,7 +263,7 @@ class TestBoardCandidateClaimSingleQuery:
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
-        mock_claim_model.objects.annotate.return_value = mock_qs
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
@@ -271,7 +285,7 @@ class TestBoardCandidateClaimSingleQuery:
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
-        mock_claim_model.objects.annotate.return_value = mock_qs
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
 
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)

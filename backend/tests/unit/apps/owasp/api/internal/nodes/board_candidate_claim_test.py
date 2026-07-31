@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, Mock
 
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
+from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -21,6 +22,7 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         }
         expected_field_names = {
             "_id",
+            "candidate",
             "created_at",
             "description",
             "has_evidence",
@@ -64,6 +66,17 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
 
         mock_claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result
+
+    def test_candidate_resolver(self):
+        """Test candidate returns EntityMemberNode."""
+        mock_claim = Mock()
+        mock_candidate = MagicMock(spec=EntityMemberNode)
+        mock_claim.candidate = mock_candidate
+
+        field = self._get_field_by_name("candidate", BoardCandidateClaimNode)
+        result = field.base_resolver.wrapped_func(None, mock_claim)
+
+        assert result is mock_candidate
 
     def test_reviews_self_sees_all(self):
         mock_github_user = Mock()

@@ -8,6 +8,7 @@ import strawberry_django
 from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
     BoardCandidateClaimReviewNode,
 )
+from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 from apps.owasp.api.internal.nodes.enum import ClaimStatusEnum
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 
@@ -26,6 +27,11 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 )
 class BoardCandidateClaimNode(strawberry.relay.Node):
     """Board Candidate Claim node."""
+
+    @strawberry_django.field
+    def candidate(self, root: BoardCandidateClaim) -> EntityMemberNode:
+        """Resolve candidate."""
+        return root.candidate
 
     @strawberry_django.field
     def created_at(self, root: BoardCandidateClaim) -> datetime:
