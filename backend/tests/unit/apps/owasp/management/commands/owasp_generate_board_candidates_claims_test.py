@@ -29,7 +29,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         args = parser.parse_args(["--source-years", "2022", "2023", "--year", "2024"])
         assert args.source_years == [2022, 2023]
         assert args.year == 2024
-        assert not args.dry_run
+        assert not args.force_preview
 
     def test_get_filename_from_candidate_name(self, command):
         assert command.get_filename_from_candidate_name("John Doe", 2025) == "john_doe.md"
@@ -199,7 +199,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
 
     def test_handle_board_not_found(self, command, handle_mocks):
         handle_mocks["board_get"].side_effect = BoardOfDirectors.DoesNotExist
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
         command.stderr.write.assert_called_with("Board of Directors for year 2024 not found.")
 
     def test_handle_no_candidates(self, command, handle_mocks):
@@ -213,7 +213,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.filter.return_value = if_name_qs
         handle_mocks["entity_member_filter"].return_value = mock_qs
 
-        command.handle(source_years=[2023], year=2024, name="John Doe", dry_run=False)
+        command.handle(source_years=[2023], year=2024, name="John Doe", force_preview=False)
         command.stderr.write.assert_called_with("No candidates found matching the criteria.")
 
     def test_handle_success(self, command, handle_mocks):
@@ -240,13 +240,13 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim.description = "Desc 1"
         handle_mocks["generate_claims"].return_value = [mock_claim]
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         mock_claim.save.assert_called_once()
         command.stdout.write.assert_any_call("Saved 1 claims for John Doe")
         command.stdout.write.assert_any_call("Finished generating claims for 1 candidates.")
 
-    def test_handle_dry_run(self, command, handle_mocks):
+    def test_handle_force_preview(self, command, handle_mocks):
         mock_board = Mock()
         mock_board.id = 1
         handle_mocks["board_get"].return_value = mock_board
@@ -270,11 +270,11 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim.description = "Desc 1"
         handle_mocks["generate_claims"].return_value = [mock_claim]
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=True)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=True)
 
         mock_claim.save.assert_not_called()
-        command.stdout.write.assert_any_call("[DRY RUN] Would have saved claims for John Doe")
-        command.stdout.write.assert_any_call("[DRY RUN] Finished processing 1 candidates.")
+        command.stdout.write.assert_any_call("Would have saved claims for John Doe")
+        command.stdout.write.assert_any_call("Finished processing 1 candidates.")
 
     def test_handle_claims_exist(self, command, handle_mocks):
         mock_board = Mock()
@@ -292,12 +292,12 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim_qs.exists.return_value = True
         handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         command.stdout.write.assert_any_call("Claims already exist for John Doe, skipping...")
         handle_mocks["get_repo_file"].assert_not_called()
 
-    def test_handle_claims_exist_dry_run(self, command, handle_mocks):
+    def test_handle_claims_exist_force_preview(self, command, handle_mocks):
         mock_board = Mock()
         handle_mocks["board_get"].return_value = mock_board
 
@@ -320,11 +320,11 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim.description = "Desc 1"
         handle_mocks["generate_claims"].return_value = [mock_claim]
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=True)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=True)
 
         handle_mocks["get_repo_file"].assert_called()
         mock_claim.save.assert_not_called()
-        command.stdout.write.assert_any_call("[DRY RUN] Would have saved claims for John Doe")
+        command.stdout.write.assert_any_call("Would have saved claims for John Doe")
 
     def test_handle_no_markdown_content(self, command, handle_mocks):
         mock_board = Mock()
@@ -344,7 +344,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
 
         handle_mocks["get_repo_file"].return_value = "404: Not Found"
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         command.stderr.write.assert_called_with(
             "Could not find any markdown files for John Doe in source years [2023]"
@@ -370,7 +370,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
 
         handle_mocks["generate_claims"].return_value = []
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         command.stderr.write.assert_called_with("Failed to generate claims for John Doe.")
 
@@ -397,7 +397,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim.save.side_effect = IntegrityError("Integrity Error")
         handle_mocks["generate_claims"].return_value = [mock_claim]
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         command.stderr.write.assert_any_call(
             "Failed to save claim 'Claim 1' for John Doe: Integrity Error"
@@ -426,7 +426,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim.save.side_effect = Exception("Unexpected")
         handle_mocks["generate_claims"].return_value = [mock_claim]
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         command.stderr.write.assert_any_call(
             "Unexpected error saving claim 'Claim 1' for John Doe: Unexpected"
@@ -458,7 +458,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim_2.description = "Second"
         handle_mocks["generate_claims"].return_value = [mock_claim_1, mock_claim_2]
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         mock_claim_1.save.assert_called_once()
         mock_claim_2.save.assert_not_called()
@@ -477,7 +477,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
 
         handle_mocks["board_candidate_claim_filter"].side_effect = Exception("Processing Error")
 
-        command.handle(source_years=[2023], year=2024, name=None, dry_run=False)
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
         command.stderr.write.assert_any_call(
             "Failed to process candidate John Doe: Processing Error"

@@ -1,13 +1,13 @@
 """A command to generate board candidates' claims using www-board-candidates repository."""
 
 import json
-import re
 import unicodedata
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
+from django.utils.html import strip_tags
 
 from apps.ai.common.utils import extract_json_from_markdown
 from apps.common.open_ai import OpenAi
@@ -39,7 +39,8 @@ or highly overlapping claims.
 5. Include impressive achievements, statements, and quantifiable information.
 6. Avoid using the name or any pronouns.
 7. Descriptions must be strictly factual.
-8. Write descriptions in simple past tense.
+8. Write descriptions in simple past tense for completed achievements,
+but permit simple present for roles that remain current.
 Avoid present perfect constructions such as "has done", "has been", "has contributed", etc.
 
 Return ONLY a valid JSON array of objects.
@@ -61,27 +62,27 @@ class Command(BaseCommand):
         """
         parser.add_argument(
             "--source-years",
-            type=int,
+            help="List of years to fetch candidate's markdown files for (e.g., 2025).",
             nargs="+",
             required=True,
-            help="List of years to fetch candidate's markdown files for (e.g., 2025).",
+            type=int,
         )
         parser.add_argument(
             "--year",
-            type=int,
-            required=True,
             help="Target election year in the database to assign the claims to.",
+            required=True,
+            type=int,
+        )
+        parser.add_argument(
+            "--force-preview",
+            action="store_true",
+            help="Generate and print claims for all candidates without saving to the database.",
         )
         parser.add_argument(
             "--name",
-            type=str,
-            required=False,
             help="Optional full name to filter for a specific candidate (e.g. 'John Doe').",
-        )
-        parser.add_argument(
-            "--dry-run",
-            action="store_true",
-            help="Generate claims and print them to the console without saving to the database.",
+            required=False,
+            type=str,
         )
 
     def get_filename_from_candidate_name(self, candidate_name: str, source_year: int) -> str:
@@ -127,7 +128,7 @@ class Command(BaseCommand):
 
         """
         # Strip HTML tags to reduce token usage and noise.
-        markdown_content = re.sub(r"<[^>]+>", "", markdown_content)
+        markdown_content = strip_tags(markdown_content)
 
         open_ai = OpenAi(max_tokens=AI_MAX_TOKENS)
         response = open_ai.set_prompt(PROMPT_EXTRACT_CLAIMS).set_input(markdown_content).complete()
@@ -188,7 +189,7 @@ class Command(BaseCommand):
         source_years = options["source_years"]
         year = options["year"]
         name = options.get("name")
-        dry_run = options.get("dry_run", False)
+        force_preview = options.get("force_preview", False)
 
         try:
             board = BoardOfDirectors.objects.get(year=year)
@@ -214,7 +215,7 @@ class Command(BaseCommand):
         for candidate in candidates:
             try:
                 if (
-                    not dry_run
+                    not force_preview
                     and BoardCandidateClaim.objects.filter(candidate=candidate).exists()
                 ):
                     self.stdout.write(
@@ -263,9 +264,9 @@ class Command(BaseCommand):
                 saved_count = 0
                 failed_count = 0
                 for claim in claims:
-                    if dry_run:
+                    if force_preview:
                         self.stdout.write(
-                            f"[DRY RUN] Generated Claim:\n  "
+                            f"Generated Claim:\n  "
                             f"Name: {claim.name}\n  Desc: {claim.description}\n"
                         )
                     else:
@@ -292,11 +293,9 @@ class Command(BaseCommand):
                 processed_count += 1
                 failed_suffix = f", {failed_count} failed" if failed_count else ""
                 msg = f"Saved {saved_count} claims for {candidate.member_name}{failed_suffix}"
-                if dry_run:
+                if force_preview:
                     self.stdout.write(
-                        self.style.SUCCESS(
-                            f"[DRY RUN] Would have saved claims for {candidate.member_name}"
-                        )
+                        self.style.SUCCESS(f"Would have saved claims for {candidate.member_name}")
                     )
                 elif saved_count:
                     self.stdout.write(self.style.SUCCESS(msg))
@@ -307,9 +306,9 @@ class Command(BaseCommand):
                     self.style.ERROR(f"Failed to process candidate {candidate.member_name}: {e}")
                 )
 
-        if dry_run:
+        if force_preview:
             self.stdout.write(
-                self.style.SUCCESS(f"[DRY RUN] Finished processing {processed_count} candidates.")
+                self.style.SUCCESS(f"Finished processing {processed_count} candidates.")
             )
         else:
             self.stdout.write(
