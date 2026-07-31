@@ -374,17 +374,16 @@ class TestTopContributorsByKeys:
     """Tests for get_top_contributors_by_keys."""
 
     @staticmethod
-    def _make_contrib_item(key_field_value, **user_kw):
-        """Create a mock item with user and contributions_count."""
-        return make_item(
-            **{key_field_value[0]: key_field_value[1]},
-            user=SimpleNamespace(
-                avatar_url=user_kw.get("avatar_url", ""),
-                login=user_kw.get("login", ""),
-                name=user_kw.get("name", ""),
-            ),
-            contributions_count=user_kw.get("contributions_count", 0),
-        )
+    def _make_contrib_item(key_field_value, **kwargs):
+        """Create a flat dict row as produced by .values()."""
+        key_field, key_value = key_field_value
+        return {
+            key_field: key_value,
+            "avatar_url": kwargs.get("avatar_url", ""),
+            "login": kwargs.get("login", ""),
+            "name": kwargs.get("name", ""),
+            "contributions_count": kwargs.get("contributions_count", 0),
+        }
 
     @pytest.mark.asyncio
     async def test_basic_mapping(self):

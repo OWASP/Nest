@@ -6,7 +6,7 @@ import pytest
 from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.pull_request import (
-    RECENT_PULL_REQUESTS_BY_PROJECT_ID,
+    RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER,
     get_pull_request_loaders,
     load_recent_pull_requests_by_project_id,
 )
@@ -135,13 +135,13 @@ class TestGetPullRequestLoaders:
     def test_returns_mapping(self):
         """Factory always returns a Mapping."""
         loaders = get_pull_request_loaders()
-        assert RECENT_PULL_REQUESTS_BY_PROJECT_ID in loaders
-        assert isinstance(loaders[RECENT_PULL_REQUESTS_BY_PROJECT_ID], DataLoader)
+        assert RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER in loaders
+        assert isinstance(loaders[RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER], DataLoader)
 
     def test_load_fn_is_load_recent_pull_requests_by_project_id(self):
         """The loader is wired to load_recent_pull_requests_by_project_id."""
         loaders = get_pull_request_loaders()
-        loader = loaders[RECENT_PULL_REQUESTS_BY_PROJECT_ID]
+        loader = loaders[RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER]
         assert loader.load_fn is load_recent_pull_requests_by_project_id
 
     def test_returns_new_instances_on_each_call(self):
@@ -150,6 +150,6 @@ class TestGetPullRequestLoaders:
         loaders2 = get_pull_request_loaders()
         assert loaders1 is not loaders2
         assert (
-            loaders1[RECENT_PULL_REQUESTS_BY_PROJECT_ID]
-            is not loaders2[RECENT_PULL_REQUESTS_BY_PROJECT_ID]
+            loaders1[RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER]
+            is not loaders2[RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER]
         )

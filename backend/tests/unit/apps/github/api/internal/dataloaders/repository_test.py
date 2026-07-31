@@ -6,8 +6,8 @@ import pytest
 from strawberry.dataloader import DataLoader
 
 from apps.github.api.internal.dataloaders.repository import (
-    REPOSITORIES_BY_PROJECT_ID,
-    REPOSITORIES_COUNT_BY_PROJECT_ID,
+    REPOSITORIES_BY_PROJECT_ID_LOADER,
+    REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER,
     REPOSITORY_BY_RELEASE_ID_LOADER,
     REPOSITORY_PROJECT_NAME_BY_RELEASE_ID_LOADER,
     get_repository_loaders,
@@ -449,40 +449,43 @@ class TestGetRepositoryLoaders:
     def test_returns_mapping_with_repositories_by_project_loader(self):
         """Factory returns a mapping with the repositories-by-project loader."""
         loaders = get_repository_loaders()
-        assert REPOSITORIES_BY_PROJECT_ID in loaders
-        assert isinstance(loaders[REPOSITORIES_BY_PROJECT_ID], DataLoader)
+        assert REPOSITORIES_BY_PROJECT_ID_LOADER in loaders
+        assert isinstance(loaders[REPOSITORIES_BY_PROJECT_ID_LOADER], DataLoader)
 
     def test_repositories_by_project_loader_is_distinct_instance(self):
         """Each call produces distinct DataLoader instances."""
         loaders1 = get_repository_loaders()
         loaders2 = get_repository_loaders()
-        assert loaders1[REPOSITORIES_BY_PROJECT_ID] is not loaders2[REPOSITORIES_BY_PROJECT_ID]
+        assert (
+            loaders1[REPOSITORIES_BY_PROJECT_ID_LOADER]
+            is not loaders2[REPOSITORIES_BY_PROJECT_ID_LOADER]
+        )
 
     def test_load_fn_is_load_repositories_by_project_id(self):
         """The repositories-by-project loader is wired to load_repositories_by_project_id."""
         loaders = get_repository_loaders()
-        loader = loaders[REPOSITORIES_BY_PROJECT_ID]
+        loader = loaders[REPOSITORIES_BY_PROJECT_ID_LOADER]
         assert loader.load_fn is load_repositories_by_project_id
 
     def test_returns_mapping_with_repositories_count_loader(self):
         """Factory returns a mapping with the repositories count loader."""
         loaders = get_repository_loaders()
-        assert REPOSITORIES_COUNT_BY_PROJECT_ID in loaders
-        assert isinstance(loaders[REPOSITORIES_COUNT_BY_PROJECT_ID], DataLoader)
+        assert REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER in loaders
+        assert isinstance(loaders[REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER], DataLoader)
 
     def test_repositories_count_loader_is_distinct_instance(self):
         """Each call produces distinct DataLoader instances."""
         loaders1 = get_repository_loaders()
         loaders2 = get_repository_loaders()
         assert (
-            loaders1[REPOSITORIES_COUNT_BY_PROJECT_ID]
-            is not loaders2[REPOSITORIES_COUNT_BY_PROJECT_ID]
+            loaders1[REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER]
+            is not loaders2[REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER]
         )
 
     def test_load_fn_is_load_repositories_count_by_project_id(self):
         """The repositories count loader is wired to load_repositories_count_by_project_id."""
         loaders = get_repository_loaders()
         assert (
-            loaders[REPOSITORIES_COUNT_BY_PROJECT_ID].load_fn
+            loaders[REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER].load_fn
             is load_repositories_count_by_project_id
         )

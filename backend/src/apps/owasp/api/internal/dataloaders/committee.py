@@ -9,8 +9,8 @@ from apps.owasp.models.committee import Committee
 from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.entity_member import EntityMember
 
-ENTITY_CHANNELS_BY_COMMITTEE_ID = "entity_channels_by_committee_id"
-ENTITY_LEADERS_BY_COMMITTEE_ID = "entity_leaders_by_committee_id"
+ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER = "entity_channels_by_committee_id"
+ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER = "entity_leaders_by_committee_id"
 
 
 async def load_entity_channels_by_committee_id(
@@ -49,10 +49,10 @@ async def load_entity_leaders_by_committee_id(
 def get_committee_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
-        ENTITY_CHANNELS_BY_COMMITTEE_ID: DataLoader[int, list[EntityChannel]](
+        ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER: DataLoader[int, list[EntityChannel]](
             load_fn=load_entity_channels_by_committee_id,
         ),
-        ENTITY_LEADERS_BY_COMMITTEE_ID: DataLoader[int, list[EntityMember]](
+        ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER: DataLoader[int, list[EntityMember]](
             load_fn=load_entity_leaders_by_committee_id,
         ),
     }

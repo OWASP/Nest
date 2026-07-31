@@ -5,29 +5,33 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from apps.github.api.internal.dataloaders.issue import (
-    ISSUES_COUNT_BY_PROJECT_ID,
-    OPEN_ISSUES_COUNT_BY_PROJECT_ID,
-    RECENT_ISSUES_BY_PROJECT_ID,
+    ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+    OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+    RECENT_ISSUES_BY_PROJECT_ID_LOADER,
 )
-from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.milestone import RECENT_MILESTONES_BY_PROJECT_ID_LOADER
 from apps.github.api.internal.dataloaders.pull_request import (
-    RECENT_PULL_REQUESTS_BY_PROJECT_ID,
+    RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER,
 )
-from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID
+from apps.github.api.internal.dataloaders.release import RECENT_RELEASES_BY_PROJECT_ID_LOADER
 from apps.github.api.internal.dataloaders.repository import (
-    REPOSITORIES_BY_PROJECT_ID,
-    REPOSITORIES_COUNT_BY_PROJECT_ID,
+    REPOSITORIES_BY_PROJECT_ID_LOADER,
+    REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER,
+)
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER,
 )
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.project import (
-    ENTITY_CHANNELS_BY_PROJECT_ID,
-    ENTITY_LEADERS_BY_PROJECT_ID,
-    HEALTH_METRICS_LATEST_BY_PROJECT_ID,
-    HEALTH_METRICS_LIST_BY_PROJECT_ID,
+    ENTITY_CHANNELS_BY_PROJECT_ID_LOADER,
+    ENTITY_LEADERS_BY_PROJECT_ID_LOADER,
+    HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER,
+    HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER,
 )
 from apps.owasp.api.internal.nodes.project import (
     RECENT_ISSUES_LIMIT,
@@ -69,6 +73,7 @@ class TestProjectNode(GraphQLNodeBaseTest):
             "stars_count",
             "summary",
             "topics",
+            "top_contributors",
             "type",
         }
         assert expected_field_names.issubset(field_names)
@@ -127,6 +132,11 @@ class TestProjectNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("repositories", ProjectNode)
         assert field is not None
         assert field.type.of_type is RepositoryNode
+
+    def test_resolve_top_contributors(self):
+        field = self._get_field_by_name("top_contributors", ProjectNode)
+        assert field is not None
+        assert field.type.of_type is RepositoryContributorNode
 
     def test_resolve_repositories_count(self):
         field = self._get_field_by_name("repositories_count", ProjectNode)
@@ -196,7 +206,7 @@ class TestProjectNodeResolvers:
         """Test issues_count resolver delegates to the dataloader with pk."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=42)
-        mock_info = self._build_info(github={ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={ISSUES_COUNT_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 8
@@ -256,7 +266,7 @@ class TestProjectNodeResolvers:
         mock_metrics = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_metrics)
-        mock_info = self._build_info(owasp={HEALTH_METRICS_LIST_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(owasp={HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 7
@@ -273,7 +283,9 @@ class TestProjectNodeResolvers:
         mock_metric = Mock()
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_metric)
-        mock_info = self._build_info(owasp={HEALTH_METRICS_LATEST_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(
+            owasp={HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER: mock_loader}
+        )
 
         mock_project = Mock()
         mock_project.pk = 9
@@ -289,7 +301,9 @@ class TestProjectNodeResolvers:
         """health_metrics_latest passes through None from the loader."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=None)
-        mock_info = self._build_info(owasp={HEALTH_METRICS_LATEST_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(
+            owasp={HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER: mock_loader}
+        )
 
         mock_project = Mock()
         mock_project.pk = 11
@@ -304,7 +318,7 @@ class TestProjectNodeResolvers:
         """open_issues_count delegates to the dataloader with pk."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=37)
-        mock_info = self._build_info(github={OPEN_ISSUES_COUNT_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 3
@@ -320,7 +334,7 @@ class TestProjectNodeResolvers:
         """repositories_count delegates to the dataloader with pk."""
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=5)
-        mock_info = self._build_info(github={REPOSITORIES_COUNT_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={REPOSITORIES_COUNT_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 4
@@ -337,7 +351,7 @@ class TestProjectNodeResolvers:
         mock_issues = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_issues)
-        mock_info = self._build_info(github={RECENT_ISSUES_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={RECENT_ISSUES_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 1
@@ -364,7 +378,7 @@ class TestProjectNodeResolvers:
         mock_milestones = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_milestones)
-        mock_info = self._build_info(github={RECENT_MILESTONES_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={RECENT_MILESTONES_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 1
@@ -381,7 +395,9 @@ class TestProjectNodeResolvers:
         mock_prs = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_prs)
-        mock_info = self._build_info(github={RECENT_PULL_REQUESTS_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(
+            github={RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER: mock_loader}
+        )
 
         mock_project = Mock()
         mock_project.pk = 1
@@ -398,7 +414,7 @@ class TestProjectNodeResolvers:
         mock_releases = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_releases)
-        mock_info = self._build_info(github={RECENT_RELEASES_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={RECENT_RELEASES_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 1
@@ -415,7 +431,7 @@ class TestProjectNodeResolvers:
         mock_repos = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_repos)
-        mock_info = self._build_info(github={REPOSITORIES_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(github={REPOSITORIES_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 1
@@ -432,7 +448,7 @@ class TestProjectNodeResolvers:
         mock_channels = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_channels)
-        mock_info = self._build_info(owasp={ENTITY_CHANNELS_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(owasp={ENTITY_CHANNELS_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 1
@@ -449,7 +465,7 @@ class TestProjectNodeResolvers:
         mock_leaders = [Mock(), Mock()]
         mock_loader = Mock()
         mock_loader.load = AsyncMock(return_value=mock_leaders)
-        mock_info = self._build_info(owasp={ENTITY_LEADERS_BY_PROJECT_ID: mock_loader})
+        mock_info = self._build_info(owasp={ENTITY_LEADERS_BY_PROJECT_ID_LOADER: mock_loader})
 
         mock_project = Mock()
         mock_project.pk = 1
@@ -458,4 +474,39 @@ class TestProjectNodeResolvers:
         result = await resolver(None, mock_project, mock_info)
 
         assert result == mock_leaders
+        mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_top_contributors_loads_via_dataloader(self):
+        """top_contributors delegates to the dataloader and returns nodes."""
+        mock_contributors = [
+            {
+                "avatar_url": "url1",
+                "contributions_count": 100,
+                "id": "user1",
+                "login": "user1",
+                "name": "User 1",
+            },
+            {
+                "avatar_url": "url2",
+                "contributions_count": 50,
+                "id": "user2",
+                "login": "user2",
+                "name": "User 2",
+            },
+        ]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_contributors)
+        mock_info = self._build_info(github={TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER: mock_loader})
+
+        mock_project = Mock()
+        mock_project.pk = 1
+
+        resolver = self._get_resolver("top_contributors")
+        result = await resolver(None, mock_project, mock_info)
+
+        assert len(result) == 2
+        assert all(isinstance(c, RepositoryContributorNode) for c in result)
+        assert result[0].login == "user1"
+        assert result[1].login == "user2"
         mock_loader.load.assert_awaited_once_with(1)

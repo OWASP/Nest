@@ -15,11 +15,11 @@ from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
-ENTITY_CHANNELS_BY_PROJECT_ID = "entity_channels_by_project_id"
-ENTITY_LEADERS_BY_PROJECT_ID = "entity_leaders_by_project_id"
-HEALTH_METRICS_LATEST_BY_PROJECT_ID = "health_metrics_latest_by_project_id"
-HEALTH_METRICS_LIST_BY_PROJECT_ID = "health_metrics_list_by_project_id"
-PROJECT_BY_REPOSITORY_ID = "project_by_repository_id"
+ENTITY_CHANNELS_BY_PROJECT_ID_LOADER = "entity_channels_by_project_id"
+ENTITY_LEADERS_BY_PROJECT_ID_LOADER = "entity_leaders_by_project_id"
+HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER = "health_metrics_latest_by_project_id"
+HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER = "health_metrics_list_by_project_id"
+PROJECT_BY_REPOSITORY_ID_LOADER = "project_by_repository_id"
 
 
 async def load_projects_by_repository_id(
@@ -118,19 +118,19 @@ async def load_entity_leaders_by_project_id(
 def get_project_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
-        ENTITY_CHANNELS_BY_PROJECT_ID: DataLoader[int, list[EntityChannel]](
+        ENTITY_CHANNELS_BY_PROJECT_ID_LOADER: DataLoader[int, list[EntityChannel]](
             load_fn=load_entity_channels_by_project_id,
         ),
-        ENTITY_LEADERS_BY_PROJECT_ID: DataLoader[int, list[EntityMember]](
+        ENTITY_LEADERS_BY_PROJECT_ID_LOADER: DataLoader[int, list[EntityMember]](
             load_fn=load_entity_leaders_by_project_id,
         ),
-        HEALTH_METRICS_LATEST_BY_PROJECT_ID: DataLoader[int, ProjectHealthMetrics | None](
+        HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER: DataLoader[int, ProjectHealthMetrics | None](
             load_fn=load_health_metrics_latest_by_project_id,
         ),
-        HEALTH_METRICS_LIST_BY_PROJECT_ID: DataLoader[tuple[int, int], list[ProjectHealthMetrics]](
-            load_fn=load_health_metrics_list_by_project_id
-        ),
-        PROJECT_BY_REPOSITORY_ID: DataLoader[int, Project | None](
+        HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER: DataLoader[
+            tuple[int, int], list[ProjectHealthMetrics]
+        ](load_fn=load_health_metrics_list_by_project_id),
+        PROJECT_BY_REPOSITORY_ID_LOADER: DataLoader[int, Project | None](
             load_fn=load_projects_by_repository_id,
         ),
     }

@@ -6,8 +6,8 @@ import pytest
 from strawberry.dataloader import DataLoader
 
 from apps.owasp.api.internal.dataloaders.committee import (
-    ENTITY_CHANNELS_BY_COMMITTEE_ID,
-    ENTITY_LEADERS_BY_COMMITTEE_ID,
+    ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER,
+    ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER,
     Committee,
     get_committee_loaders,
     load_entity_channels_by_committee_id,
@@ -380,8 +380,8 @@ class TestGetCommitteeLoaders:
     @pytest.mark.parametrize(
         "loader_key",
         [
-            ENTITY_CHANNELS_BY_COMMITTEE_ID,
-            ENTITY_LEADERS_BY_COMMITTEE_ID,
+            ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER,
+            ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER,
         ],
     )
     def test_returns_mapping(self, loader_key):
@@ -394,7 +394,7 @@ class TestGetCommitteeLoaders:
         """The channels loader is wired to load_entity_channels_by_committee_id."""
         loaders = get_committee_loaders()
         assert (
-            loaders[ENTITY_CHANNELS_BY_COMMITTEE_ID].load_fn
+            loaders[ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER].load_fn
             is load_entity_channels_by_committee_id
         )
 
@@ -402,14 +402,15 @@ class TestGetCommitteeLoaders:
         """The leaders loader is wired to load_entity_leaders_by_committee_id."""
         loaders = get_committee_loaders()
         assert (
-            loaders[ENTITY_LEADERS_BY_COMMITTEE_ID].load_fn is load_entity_leaders_by_committee_id
+            loaders[ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER].load_fn
+            is load_entity_leaders_by_committee_id
         )
 
     @pytest.mark.parametrize(
         "loader_key",
         [
-            ENTITY_CHANNELS_BY_COMMITTEE_ID,
-            ENTITY_LEADERS_BY_COMMITTEE_ID,
+            ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER,
+            ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER,
         ],
     )
     def test_returns_new_instances_on_each_call(self, loader_key):
