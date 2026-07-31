@@ -1,6 +1,7 @@
 """Shared utilities for GraphQL dataloaders."""
 
 from collections import defaultdict
+from collections.abc import AsyncIterable
 from typing import cast
 
 from django.db.models import Model, QuerySet
@@ -31,6 +32,27 @@ async def get_results_by_keys[K, V](
         mapping[key].append(cast("V", item if value_field is None else getattr(item, value_field)))
 
     return [mapping.get(key, []) for key in keys]
+
+
+async def get_values_by_keys[K, V](
+    pairs: AsyncIterable[tuple[K, V]],
+    keys: list[K],
+    default: V,
+) -> tuple[V, ...]:
+    """Map async-iterated key/value pairs to an ordered list matching ``keys``.
+
+    Args:
+        pairs: An async iterable yielding (key, value) tuples.
+        keys: A list of keys to map the results to, in the desired order.
+        default: The value to use for keys that have no match.
+
+    Returns:
+        A tuple of ``V``, one per key, in the same order as ``keys``.
+
+    """
+    mapping = {k: v async for k, v in pairs}  # NOSONAR
+
+    return tuple(mapping.get(key, default) for key in keys)
 
 
 async def get_result_by_keys[K, V](
