@@ -193,6 +193,12 @@ variable "enable_nat_gateway" {
   default     = true
 }
 
+variable "enable_observability" {
+  description = "Whether to create the observability stack (VictoriaMetrics)."
+  type        = bool
+  default     = false
+}
+
 variable "enable_rds_proxy" {
   description = "Whether to create an RDS proxy."
   type        = bool
@@ -283,6 +289,12 @@ variable "frontend_use_fargate_spot" {
   description = "Whether to use Fargate Spot for frontend tasks."
   type        = bool
   default     = true
+}
+
+variable "observability_vm_image" {
+  description = "The VictoriaMetrics container image (including digest)."
+  type        = string
+  default     = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
 }
 
 variable "private_subnet_cidrs" {
