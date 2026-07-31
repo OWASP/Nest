@@ -45,7 +45,7 @@ class TestCertificateModel:
     def test_issue_certificate_already_exists(
         self, mock_user_objects, mock_cert_objects, mock_exit, mock_enter
     ):
-        """Test issue_certificate returns early if active certificate for tier already exists."""
+        """Test issue_certificate returns early if active certificate already exists."""
         user = User(id=1, login="john_doe")
         mock_user_objects.select_for_update.return_value.get.return_value = user
         mock_cert_objects.filter.return_value.exists.return_value = True
@@ -64,7 +64,7 @@ class TestCertificateModel:
     def test_issue_certificate_provider_resolution_error(
         self, mock_user_objects, mock_factory, mock_cert_objects, mock_exit, mock_enter
     ):
-        """Test issue_certificate raises CertificateIssuanceError when provider resolution fails."""
+        """Test issue_certificate raises on provider resolution error."""
         user = User(id=1, login="john_doe")
         mock_user_objects.select_for_update.return_value.get.return_value = user
         mock_cert_objects.filter.return_value.exists.return_value = False
@@ -81,7 +81,7 @@ class TestCertificateModel:
     def test_issue_certificate_provider_issuance_exception(
         self, mock_user_objects, mock_factory, mock_cert_objects, mock_exit, mock_enter
     ):
-        """Test issue_certificate raises CertificateIssuanceError when provider issuance throws."""
+        """Test issue_certificate raises when provider issuance fails."""
         user = User(id=1, login="test_user")
         mock_user_objects.select_for_update.return_value.get.return_value = user
         mock_cert_objects.filter.return_value.exists.return_value = False

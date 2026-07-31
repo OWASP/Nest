@@ -18,4 +18,7 @@ class TestLeaderboardSnapshotModel:
             snapshot_date=date(2026, 8, 1),
         )
 
-        assert str(snapshot) == "bob_coder - Global Rank: 5, Project Rank: 2, Chapter Rank: 1 (2026-08-01)"
+        assert (
+            str(snapshot)
+            == "bob_coder - Global Rank: 5, Project Rank: 2, Chapter Rank: 1 (2026-08-01)"
+        )

@@ -6,6 +6,7 @@ import pytest
 from apps.github.models.user import User
 from apps.owasp.exceptions import CertificateIssuanceError
 from apps.owasp.models.crp.contribution_score import ContributionScore
+from apps.owasp.models.crp.recognition_enums import TierChoices
 from apps.owasp.utils.score_calculator import ContributionScoreCalculator
 
 CALCULATOR_PATH = "apps.owasp.utils.score_calculator"
@@ -23,6 +24,21 @@ class TestContributionScoreCalculator:
             "issue_completed": 10,
         }
 
+    def _mock_recalculate_all_querysets(self, mock_user_class, mock_pr, mock_issue, users):
+        """Set up mock querysets for User, PullRequest, and Issue for recalculate_all tests."""
+        mock_users_qs = MagicMock()
+        mock_users_qs.count.return_value = len(users)
+        mock_users_qs.__iter__.return_value = iter(users)
+        mock_users_qs.distinct.return_value.prefetch_related.return_value = mock_users_qs
+        mock_user_class.objects.filter.return_value = mock_users_qs
+
+        pr_chain = mock_pr.objects.filter.return_value.values.return_value.annotate.return_value
+        pr_chain.values_list.return_value = []
+        issue_chain = (
+            mock_issue.objects.filter.return_value.values.return_value.annotate.return_value
+        )
+        issue_chain.values_list.return_value = []
+
     @patch(f"{CALCULATOR_PATH}.ScoringWeight")
     def test_load_scoring_weights(self, mock_scoring_weight, mock_weights):
         """Test load_scoring_weights retrieves active scoring weights from database."""
@@ -35,7 +51,11 @@ class TestContributionScoreCalculator:
         mock_scoring_weight.objects.filter.assert_called_once_with(is_active=True)
         assert calc.scoring_weights == {"pr_merged": 20, "pr_opened": 5}
 
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 20, "pr_opened": 5})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 20, "pr_opened": 5},
+    )
     def test_calculate_score(self, mock_load):
         """Test calculate_score correctly computes breakdown and total score."""
         calc = ContributionScoreCalculator()
@@ -46,7 +66,11 @@ class TestContributionScoreCalculator:
         assert total_score == 70  # (3 * 20) + (2 * 5) + (5 * 0)
         assert breakdown == {"pr_merged": 60, "pr_opened": 10, "unknown_event": 0}
 
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 20})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 20},
+    )
     @patch.object(ContributionScoreCalculator, "get_contribution_breakdown")
     def test_calculate(self, mock_breakdown, mock_load):
         """Test calculate delegates to get_contribution_breakdown and sums the result."""
@@ -163,7 +187,11 @@ class TestContributionScoreCalculator:
     @patch.object(ContributionScoreCalculator, "count_merged_pull_requests", return_value=2)
     @patch.object(ContributionScoreCalculator, "count_opened_pull_requests", return_value=1)
     @patch.object(ContributionScoreCalculator, "count_completed_issues", return_value=3)
-    @patch.object(ContributionScoreCalculator, "calculate_score", return_value=(100, {"pr_merged": 40}))
+    @patch.object(
+        ContributionScoreCalculator,
+        "calculate_score",
+        return_value=(100, {"pr_merged": 40}),
+    )
     def test_get_contribution_breakdown(
         self, mock_calc_score, mock_issues, mock_opened, mock_merged, mock_load
     ):
@@ -180,7 +208,11 @@ class TestContributionScoreCalculator:
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 50})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
     @patch(f"{CALCULATOR_PATH}.Certificate")
     @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
     @patch(f"{CALCULATOR_PATH}.User")
@@ -197,21 +229,13 @@ class TestContributionScoreCalculator:
         mock_exit,
         mock_enter,
     ):
-        """Test recalculate_all processes users, updates/creates scores, and issues certificates."""
+        """Test recalculate_all processes users, updates/creates scores, and issues certs."""
         user1 = User(login="user1")
         existing_score = ContributionScore(github_user=user1, value=10, tier="level_1")
         user1.contribution_score = existing_score
-
         user2 = User(login="user2")
 
-        mock_users_qs = MagicMock()
-        mock_users_qs.count.return_value = 2
-        mock_users_qs.__iter__.return_value = iter([user1, user2])
-        mock_users_qs.distinct.return_value.prefetch_related.return_value = mock_users_qs
-        mock_user_class.objects.filter.return_value = mock_users_qs
-
-        mock_pr.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
-        mock_issue.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
+        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [user1, user2])
 
         calc = ContributionScoreCalculator()
         res = calc.recalculate_all()
@@ -226,7 +250,11 @@ class TestContributionScoreCalculator:
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 50})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
     @patch(f"{CALCULATOR_PATH}.Certificate")
     @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
     @patch(f"{CALCULATOR_PATH}.User")
@@ -243,18 +271,11 @@ class TestContributionScoreCalculator:
         mock_exit,
         mock_enter,
     ):
-        """Test recalculate_all bulk saves and issues certificates when batch size limit is reached."""
+        """Test recalculate_all bulk saves when batch size limit is reached."""
         user1 = User(login="batch_user1")
         user2 = User(login="batch_user2")
 
-        mock_users_qs = MagicMock()
-        mock_users_qs.count.return_value = 2
-        mock_users_qs.__iter__.return_value = iter([user1, user2])
-        mock_users_qs.distinct.return_value.prefetch_related.return_value = mock_users_qs
-        mock_user_class.objects.filter.return_value = mock_users_qs
-
-        mock_pr.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
-        mock_issue.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
+        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [user1, user2])
 
         calc = ContributionScoreCalculator()
         calc.BATCH_SIZE = 2
@@ -267,7 +288,11 @@ class TestContributionScoreCalculator:
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 50})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
     @patch(f"{CALCULATOR_PATH}.Certificate")
     @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
     @patch(f"{CALCULATOR_PATH}.User")
@@ -288,14 +313,7 @@ class TestContributionScoreCalculator:
         user1 = User(login="batch_fail1")
         user2 = User(login="batch_fail2")
 
-        mock_users_qs = MagicMock()
-        mock_users_qs.count.return_value = 2
-        mock_users_qs.__iter__.return_value = iter([user1, user2])
-        mock_users_qs.distinct.return_value.prefetch_related.return_value = mock_users_qs
-        mock_user_class.objects.filter.return_value = mock_users_qs
-
-        mock_pr.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
-        mock_issue.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
+        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [user1, user2])
 
         mock_cert_class.issue_certificate.side_effect = [
             CertificateIssuanceError("Batch issue 1"),
@@ -311,7 +329,11 @@ class TestContributionScoreCalculator:
         assert res["failures"][0][0] == "batch_fail1"
         assert res["failures"][1][0] == "batch_fail2"
 
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 50})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
     @patch(f"{CALCULATOR_PATH}.Certificate")
     @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
     @patch(f"{CALCULATOR_PATH}.User")
@@ -327,14 +349,7 @@ class TestContributionScoreCalculator:
         mock_load,
     ):
         """Test recalculate_all when no users have contributions."""
-        mock_users_qs = MagicMock()
-        mock_users_qs.count.return_value = 0
-        mock_users_qs.__iter__.return_value = iter([])
-        mock_users_qs.distinct.return_value.prefetch_related.return_value = mock_users_qs
-        mock_user_class.objects.filter.return_value = mock_users_qs
-
-        mock_pr.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
-        mock_issue.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
+        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [])
 
         calc = ContributionScoreCalculator()
         res = calc.recalculate_all()
@@ -347,7 +362,11 @@ class TestContributionScoreCalculator:
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 50})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
     @patch(f"{CALCULATOR_PATH}.Certificate")
     @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
     @patch(f"{CALCULATOR_PATH}.User")
@@ -369,14 +388,7 @@ class TestContributionScoreCalculator:
         existing_score = ContributionScore(github_user=user1, value=10, tier="level_1")
         user1.contribution_score = existing_score
 
-        mock_users_qs = MagicMock()
-        mock_users_qs.count.return_value = 1
-        mock_users_qs.__iter__.return_value = iter([user1])
-        mock_users_qs.distinct.return_value.prefetch_related.return_value = mock_users_qs
-        mock_user_class.objects.filter.return_value = mock_users_qs
-
-        mock_pr.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
-        mock_issue.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
+        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [user1])
 
         mock_cert_class.issue_certificate.side_effect = CertificateIssuanceError("Issuance failed")
 
@@ -389,7 +401,11 @@ class TestContributionScoreCalculator:
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 50})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
     @patch(f"{CALCULATOR_PATH}.Certificate")
     @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
     @patch(f"{CALCULATOR_PATH}.User")
@@ -406,19 +422,12 @@ class TestContributionScoreCalculator:
         mock_exit,
         mock_enter,
     ):
-        """Test recalculate_all records unexpected non-CertificateIssuanceError exceptions."""
+        """Test recalculate_all records non-CertificateIssuanceError exceptions."""
         user1 = User(login="unexpected_error_user")
         existing_score = ContributionScore(github_user=user1, value=10, tier="level_1")
         user1.contribution_score = existing_score
 
-        mock_users_qs = MagicMock()
-        mock_users_qs.count.return_value = 1
-        mock_users_qs.__iter__.return_value = iter([user1])
-        mock_users_qs.distinct.return_value.prefetch_related.return_value = mock_users_qs
-        mock_user_class.objects.filter.return_value = mock_users_qs
-
-        mock_pr.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
-        mock_issue.objects.filter.return_value.values.return_value.annotate.return_value.values_list.return_value = []
+        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [user1])
 
         mock_cert_class.issue_certificate.side_effect = RuntimeError("Unexpected DB issue")
 
@@ -431,7 +440,11 @@ class TestContributionScoreCalculator:
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
-    @patch.object(ContributionScoreCalculator, "load_scoring_weights", return_value={"pr_merged": 50})
+    @patch.object(
+        ContributionScoreCalculator,
+        "load_scoring_weights",
+        return_value={"pr_merged": 50},
+    )
     @patch(f"{CALCULATOR_PATH}.Certificate")
     @patch(f"{CALCULATOR_PATH}.ContributionScore.objects")
     def test_recalculate_user(
@@ -456,5 +469,5 @@ class TestContributionScoreCalculator:
                 defaults={"value": 150, "tier": "level_2"},
             )
             mock_cert_class.issue_certificate.assert_called_once_with(
-                user, 150, "level_2"
+                user, 150, TierChoices.LEVEL_2
             )

@@ -51,9 +51,7 @@ class TestOwaspCrpRecalculateScores:
         mock_calculator_class.return_value = mock_calculator
 
         out = StringIO()
-        with pytest.raises(
-            CommandError, match=r"Failed to issue certificates for 2 user\(s\)"
-        ):
+        with pytest.raises(CommandError, match=r"Failed to issue certificates for 2 user\(s\)"):
             call_command("owasp_crp_recalculate_scores", stdout=out)
 
         output = out.getvalue()
@@ -72,9 +70,7 @@ class TestOwaspCrpRecalculateScores:
         mock_calculator_class.return_value = mock_calculator
 
         out = StringIO()
-        with pytest.raises(
-            CommandError, match=r"Failed to issue certificates for 1 user\(s\)"
-        ):
+        with pytest.raises(CommandError, match=r"Failed to issue certificates for 1 user\(s\)"):
             call_command("owasp_crp_recalculate_scores", stdout=out)
 
         output = out.getvalue()

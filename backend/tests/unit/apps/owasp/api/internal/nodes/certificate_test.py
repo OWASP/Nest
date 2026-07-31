@@ -11,9 +11,7 @@ class TestCertificateNode(GraphQLNodeBaseTest):
 
     def test_node_fields(self):
         """Test node has expected fields."""
-        field_names = {
-            field.name for field in CertificateNode.__strawberry_definition__.fields
-        }
+        field_names = {field.name for field in CertificateNode.__strawberry_definition__.fields}
         expected_field_names = {
             "github_user",
             "id",
