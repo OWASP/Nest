@@ -301,18 +301,73 @@ hooks need `terraform`/`tflint`/`terraform-docs` binaries; `SKIP` those when
 unavailable. Ruff, mypy, yamllint, markdownlint, djlint, and the other hooks
 run fine on the host.
 
-**Requires Docker -- cannot run outside the containers:**
+**Full-stack tests -- possible on host, but Docker is the canonical path:**
+The Docker `make` targets are the supported route. They are *not* impossible
+without Docker, but they need a running stack. The prerequisite stack is the
+same for e2e and fuzz: PostgreSQL 16 + pgvector, Redis, a synced `nest.dump`,
+and a reachable backend. The remaining items (`make cspell` / `prettier` /
+`eslint` / `pre-commit`) are **not Docker-only** -- those targets only shell
+into the `nest-code-checks` image when `CI=true` is unset; run them directly
+with the host commands above instead.
 
-- `make test-e2e` (Playwright needs the full stack)
-- `make test-backend-fuzz` (Schemathesis/Atheris)
-- `make security-scan` and friends (Semgrep, Trivy, OSV, ZAP)
-- `make cspell` / `make prettier` / `make eslint` / `make pre-commit` --
-  these targets shell into the `nest-code-checks` image unless `CI=true`
+**E2E tests (Playwright)** -- needs the full stack, then runs from `e2e/`:
+
+```bash
+# 1. Prerequisites: local PostgreSQL 16 + pgvector, Redis, Node 24, and:
+#    backend/.env.e2e-tests, frontend/.env.e2e, backend/data/nest.dump
+cd backend && poetry install
+cd ../frontend && pnpm install
+cd ../e2e && pnpm install && pnpm exec playwright install chromium
+
+# 2. Start a backend: source backend/.env.e2e-tests (point DJANGO_DB_HOST and
+#    DJANGO_REDIS_HOST at localhost), run migrations, then:
+poetry run python manage.py migrate
+poetry run gunicorn wsgi:application --bind 0.0.0.0:9000
+
+# 3. Start the frontend with frontend/.env.e2e (NEXT_PUBLIC_* and
+#    NEXT_SERVER_* URLs at http://localhost:9000), then:
+pnpm run dev
+
+# 4. Run the tests (FRONTEND_URL defaults to http://localhost:3000):
+FRONTEND_URL=http://localhost:3000 pnpm run test:e2e
+```
+
+**Backend fuzz (Schemathesis)** -- needs a running backend with a populated
+DB, plus the `fuzz` Poetry extra; Atheris/ClusterFuzzLite fuzz targets still
+need their Docker image:
+
+```bash
+# 1. Start the stack as above (backend/.env.fuzz-tests, gunicorn on :9500).
+# 2. Install the fuzz extra and run the Schemathesis tests:
+cd backend
+poetry install --only fuzz
+BASE_URL=http://localhost:9500 REST_URL=http://localhost:9500/api/v0 \
+CSRF_TOKEN=$(curl -fsSL "$BASE_URL/csrf" | jq -r '.csrftoken') \
+  poetry run pytest tests/fuzz/rest_test.py tests/fuzz/graphql_test.py
+```
+
+**Security scans** -- each tool has a standalone binary; the `make` targets
+just wrap them in Docker:
+
+- Semgrep: `pip install semgrep` (or the release binary), then
+  `semgrep --config p/ci --config p/security-audit --error .`
+- Trivy: install the `trivy` binary, then
+  `trivy fs --config .trivy.yaml --scanners vuln .` and
+  `trivy fs --config .trivy.yaml --scanners misconfig,secret .`
+- OSV-scanner: install the `osv-scanner` binary, then
+  `osv-scanner scan source --recursive .`
+- ZAP (DAST): needs Java + the ZAP baseline script and a running target, e.g.
+  `zap-baseline.py -a -c .zapconfig -t http://localhost:3000`
+
+**Genuinely Docker-bound:**
+
 - `make run` and the DB/Redis-backed data sync commands
+- Atheris/ClusterFuzzLite fuzz targets (`test-backend-cluster-fuzz-lite`)
+- `make test-e2e` as a one-liner (it orchestrates the stack in compose)
 
 Host commands bypass Docker networking (no DB, cache, or backend available
 unless those services are running separately). Tests that need PostgreSQL,
-Redis, or the full stack must use Docker.
+Redis, or the full stack must be pointed at a running local stack.
 
 ## Dependency management
 
