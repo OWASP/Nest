@@ -214,15 +214,6 @@ class Command(BaseCommand):
         processed_count = 0
         for candidate in candidates:
             try:
-                if (
-                    not force_preview
-                    and BoardCandidateClaim.objects.filter(candidate=candidate).exists()
-                ):
-                    self.stdout.write(
-                        f"Claims already exist for {candidate.member_name}, skipping..."
-                    )
-                    continue
-
                 aggregated_texts = []
                 for source_year in source_years:
                     filename = self.get_filename_from_candidate_name(
@@ -259,6 +250,22 @@ class Command(BaseCommand):
                     if claim.name not in seen_names:
                         seen_names.add(claim.name)
                         unique_claims.append(claim)
+
+                if not force_preview:
+                    existing_names = set(
+                        BoardCandidateClaim.objects.filter(candidate=candidate).values_list(
+                            "name", flat=True
+                        )
+                    )
+                    unique_claims = [
+                        claim for claim in unique_claims if claim.name not in existing_names
+                    ]
+                    if not unique_claims:
+                        self.stdout.write(
+                            f"No new claims for {candidate.member_name}, skipping..."
+                        )
+                        continue
+
                 claims = unique_claims
 
                 saved_count = 0

@@ -191,6 +191,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mocks["board_candidate_claim_filter"] = mocker.patch(
             "apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects.filter"
         )
+        mocks["board_candidate_claim_filter"].return_value.values_list.return_value = []
         mocks["get_repo_file"] = mocker.patch(
             "apps.owasp.management.commands.owasp_generate_board_candidates_claims.get_repository_file_content"
         )
@@ -229,10 +230,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
         handle_mocks["entity_member_filter"].return_value = mock_qs
 
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = False
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
-
         handle_mocks["get_repo_file"].return_value = "markdown content"
 
         mock_claim = Mock(spec=BoardCandidateClaim)
@@ -259,10 +256,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
         handle_mocks["entity_member_filter"].return_value = mock_qs
 
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = False
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
-
         handle_mocks["get_repo_file"].return_value = "markdown content"
 
         mock_claim = Mock(spec=BoardCandidateClaim)
@@ -276,56 +269,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         command.stdout.write.assert_any_call("Would have saved claims for John Doe")
         command.stdout.write.assert_any_call("Finished processing 1 candidates.")
 
-    def test_handle_claims_exist(self, command, handle_mocks):
-        mock_board = Mock()
-        handle_mocks["board_get"].return_value = mock_board
-
-        mock_candidate = Mock(spec=EntityMember)
-        mock_candidate.member_name = "John Doe"
-
-        mock_qs = Mock()
-        mock_qs.exists.return_value = True
-        mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
-        handle_mocks["entity_member_filter"].return_value = mock_qs
-
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = True
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
-
-        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
-
-        command.stdout.write.assert_any_call("Claims already exist for John Doe, skipping...")
-        handle_mocks["get_repo_file"].assert_not_called()
-
-    def test_handle_claims_exist_force_preview(self, command, handle_mocks):
-        mock_board = Mock()
-        handle_mocks["board_get"].return_value = mock_board
-
-        mock_candidate = Mock(spec=EntityMember)
-        mock_candidate.member_name = "John Doe"
-
-        mock_qs = Mock()
-        mock_qs.exists.return_value = True
-        mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
-        handle_mocks["entity_member_filter"].return_value = mock_qs
-
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = True
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
-
-        handle_mocks["get_repo_file"].return_value = "markdown content"
-
-        mock_claim = Mock(spec=BoardCandidateClaim)
-        mock_claim.name = "Claim 1"
-        mock_claim.description = "Desc 1"
-        handle_mocks["generate_claims"].return_value = [mock_claim]
-
-        command.handle(source_years=[2023], year=2024, name=None, force_preview=True)
-
-        handle_mocks["get_repo_file"].assert_called()
-        mock_claim.save.assert_not_called()
-        command.stdout.write.assert_any_call("Would have saved claims for John Doe")
-
     def test_handle_no_markdown_content(self, command, handle_mocks):
         mock_board = Mock()
         handle_mocks["board_get"].return_value = mock_board
@@ -337,10 +280,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.exists.return_value = True
         mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
         handle_mocks["entity_member_filter"].return_value = mock_qs
-
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = False
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
 
         handle_mocks["get_repo_file"].return_value = "404: Not Found"
 
@@ -362,10 +301,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
         handle_mocks["entity_member_filter"].return_value = mock_qs
 
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = False
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
-
         handle_mocks["get_repo_file"].return_value = "markdown content"
 
         handle_mocks["generate_claims"].return_value = []
@@ -385,10 +320,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.exists.return_value = True
         mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
         handle_mocks["entity_member_filter"].return_value = mock_qs
-
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = False
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
 
         handle_mocks["get_repo_file"].return_value = "markdown content"
 
@@ -415,10 +346,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
         handle_mocks["entity_member_filter"].return_value = mock_qs
 
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = False
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
-
         handle_mocks["get_repo_file"].return_value = "markdown content"
 
         mock_claim = Mock(spec=BoardCandidateClaim)
@@ -444,10 +371,6 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
         handle_mocks["entity_member_filter"].return_value = mock_qs
 
-        mock_claim_qs = Mock()
-        mock_claim_qs.exists.return_value = False
-        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
-
         handle_mocks["get_repo_file"].return_value = "markdown content"
 
         mock_claim_1 = Mock(spec=BoardCandidateClaim)
@@ -463,6 +386,56 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim_1.save.assert_called_once()
         mock_claim_2.save.assert_not_called()
 
+    def test_handle_partial_save_failure_retries_missing_claims(self, command, handle_mocks):
+        mock_board = Mock()
+        mock_board.id = 1
+        handle_mocks["board_get"].return_value = mock_board
+
+        mock_candidate = Mock(spec=EntityMember)
+        mock_candidate.member_name = "John Doe"
+
+        mock_qs = Mock()
+        mock_qs.exists.return_value = True
+        mock_qs.__iter__ = Mock(side_effect=lambda: iter([mock_candidate]))
+        handle_mocks["entity_member_filter"].return_value = mock_qs
+
+        stored_claims = []
+        mock_claim_qs = Mock()
+        mock_claim_qs.values_list.side_effect = lambda *_, **__: [
+            claim.name for claim in stored_claims
+        ]
+        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
+
+        handle_mocks["get_repo_file"].return_value = "markdown content"
+
+        claim_1 = Mock(spec=BoardCandidateClaim)
+        claim_1.name = "Claim 1"
+        claim_1.save.side_effect = lambda: stored_claims.append(claim_1)
+        claim_2 = Mock(spec=BoardCandidateClaim)
+        claim_2.name = "Claim 2"
+        claim_2.save.side_effect = IntegrityError("Integrity Error")
+        handle_mocks["generate_claims"].return_value = [claim_1, claim_2]
+
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
+
+        assert [claim.name for claim in stored_claims] == ["Claim 1"]
+        command.stderr.write.assert_any_call(
+            "Failed to save claim 'Claim 2' for John Doe: Integrity Error"
+        )
+
+        claim_1_retry = Mock(spec=BoardCandidateClaim)
+        claim_1_retry.name = "Claim 1"
+        claim_2_retry = Mock(spec=BoardCandidateClaim)
+        claim_2_retry.name = "Claim 2"
+        claim_2_retry.save.side_effect = lambda: stored_claims.append(claim_2_retry)
+        handle_mocks["generate_claims"].return_value = [claim_1_retry, claim_2_retry]
+
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
+
+        claim_1_retry.save.assert_not_called()
+        claim_2_retry.save.assert_called_once()
+        assert [claim.name for claim in stored_claims] == ["Claim 1", "Claim 2"]
+
     def test_handle_process_candidate_error(self, command, handle_mocks):
         mock_board = Mock()
         handle_mocks["board_get"].return_value = mock_board
@@ -476,6 +449,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         handle_mocks["entity_member_filter"].return_value = mock_qs
 
         handle_mocks["board_candidate_claim_filter"].side_effect = Exception("Processing Error")
+        handle_mocks["get_repo_file"].return_value = "markdown content"
 
         command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
 
