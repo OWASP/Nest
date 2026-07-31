@@ -1,8 +1,9 @@
 """Dataloaders for Admin."""
 
+from django.db.models import F
 from strawberry.dataloader import DataLoader
 
-from apps.common.api.internal.dataloaders.utils import get_m2m_results_by_keys
+from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 from apps.mentorship.models.admin import Admin
 
 ADMINS_BY_PROGRAM_ID_LOADER = "admins_by_program_id"
@@ -13,11 +14,10 @@ async def load_admins_by_program_id(program_ids: list[int]) -> list[list[Admin]]
     admins = (
         Admin.objects.select_related("github_user")
         .filter(admin_programs__in=program_ids)
-        .prefetch_related("admin_programs")
+        .annotate(program_id=F("admin_programs__pk"))
         .order_by("github_user__login")
-        .distinct()
     )
-    return await get_m2m_results_by_keys(admins, program_ids, "admin_programs", "pk")
+    return await get_results_by_keys(admins, program_ids, key_field="program_id")
 
 
 def get_admin_loaders() -> dict[str, DataLoader[int, list[Admin]]]:

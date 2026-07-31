@@ -9,6 +9,7 @@ from apps.owasp.api.internal.dataloaders.member_snapshot import (
     get_member_snapshot_loaders,
 )
 from apps.owasp.api.internal.dataloaders.project import get_project_loaders
+from apps.owasp.api.internal.dataloaders.snapshot import get_snapshot_loaders
 
 
 def get_owasp_dataloaders() -> dict[str, object]:
@@ -19,4 +20,5 @@ def get_owasp_dataloaders() -> dict[str, object]:
     loaders.update(get_committee_loaders())
     loaders.update(get_member_snapshot_loaders())
     loaders.update(get_project_loaders())
+    loaders.update(get_snapshot_loaders())
     return loaders
