@@ -238,7 +238,8 @@ The canonical path is Docker. For quick iteration you can run tools directly:
 ```bash
 cd backend
 poetry install
-poetry run pytest tests/unit/apps/<app>/ -xvs
+set -a && source .env.unit-tests && set +a
+poetry run pytest tests/unit
 poetry run python manage.py migrate
 poetry run python manage.py runserver 0.0.0.0:8000
 ```
