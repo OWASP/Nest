@@ -21,6 +21,7 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
             "created_at",
             "members",
             "owasp_url",
+            "reviewer",
             "updated_at",
             "year",
         }
@@ -85,4 +86,40 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_board, login="unknown")
 
         mock_board.get_candidate.assert_called_once_with("unknown")
+        assert result is None
+
+    def test_reviewer_resolver_found(self):
+        """Test reviewer returns github UserNode when reviewer is found."""
+        mock_github_user = Mock()
+        mock_nest_user = Mock()
+        mock_nest_user.github_user = mock_github_user
+
+        mock_board = Mock()
+        mock_board.reviewers.select_related.return_value.filter.return_value.first.return_value = (
+            mock_nest_user
+        )
+
+        field = self._get_field_by_name("reviewer", BoardOfDirectorsNode)
+        result = field.base_resolver.wrapped_func(None, mock_board, login="alice")
+
+        mock_board.reviewers.select_related.assert_called_once_with("github_user")
+        mock_board.reviewers.select_related.return_value.filter.assert_called_once_with(
+            github_user__login="alice"
+        )
+        assert result is mock_github_user
+
+    def test_reviewer_resolver_not_found(self):
+        """Test reviewer returns None when no reviewer matches the login."""
+        mock_board = Mock()
+        mock_board.reviewers.select_related.return_value.filter.return_value.first.return_value = (
+            None
+        )
+
+        field = self._get_field_by_name("reviewer", BoardOfDirectorsNode)
+        result = field.base_resolver.wrapped_func(None, mock_board, login="unknown")
+
+        mock_board.reviewers.select_related.assert_called_once_with("github_user")
+        mock_board.reviewers.select_related.return_value.filter.assert_called_once_with(
+            github_user__login="unknown"
+        )
         assert result is None

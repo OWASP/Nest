@@ -14,6 +14,7 @@ const mockData = {
     id: e.key,
     ...e,
   })),
+  boardOfDirectors: { id: 'bod-2025', reviewer: null },
 }
 const baseUrl = '/board/2025/candidates/testuser/claims/experience-leadership'
 

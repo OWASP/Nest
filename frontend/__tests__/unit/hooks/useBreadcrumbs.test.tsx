@@ -162,6 +162,59 @@ describe('useBreadcrumbs', () => {
       })
     })
 
+    test('skips evidences segment when registered with hidden: true', () => {
+      ;(usePathname as jest.Mock).mockReturnValue(
+        '/board/2026/candidates/johndoe/claims/leadership/evidences'
+      )
+
+      const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
+
+      let unregisterYear: () => void
+      let unregisterCandidates: () => void
+      let unregisterLogin: () => void
+      let unregisterEvidences: () => void
+
+      act(() => {
+        unregisterYear = registerBreadcrumb({
+          title: '2026',
+          path: '/board/2026',
+          hidden: true,
+        })
+        unregisterCandidates = registerBreadcrumb({
+          title: '2026 Board Candidates',
+          path: '/board/2026/candidates',
+        })
+        unregisterLogin = registerBreadcrumb({
+          title: 'johndoe',
+          path: '/board/2026/candidates/johndoe',
+          hidden: true,
+        })
+        unregisterEvidences = registerBreadcrumb({
+          title: 'Evidences',
+          path: '/board/2026/candidates/johndoe/claims/leadership/evidences',
+          hidden: true,
+        })
+      })
+
+      const titles = result.current.map((item) => item.title)
+      expect(titles).not.toContain('Evidences')
+      expect(titles).not.toContain('2026')
+      expect(titles).not.toContain('johndoe')
+      expect(result.current).toEqual([
+        { title: 'Home', path: '/' },
+        { title: '2026 Board Candidates', path: '/board/2026/candidates' },
+        { title: 'Claims', path: '/board/2026/candidates/johndoe/claims' },
+        { title: 'Leadership', path: '/board/2026/candidates/johndoe/claims/leadership' },
+      ])
+
+      act(() => {
+        unregisterYear()
+        unregisterCandidates()
+        unregisterLogin()
+        unregisterEvidences()
+      })
+    })
+
     test('shows registered items without hidden flag', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/board/2026/candidates/johndoe')
 

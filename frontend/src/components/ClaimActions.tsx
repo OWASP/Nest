@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import { addToast } from '@heroui/toast'
+import { useDjangoSession } from 'hooks/useDjangoSession'
 import { upperFirst } from 'lodash'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -15,17 +16,22 @@ import {
   WithdrawBoardCandidateClaimDocument,
 } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
-import { ClaimStatusEnum } from 'types/__generated__/graphql'
+import { ClaimStatusEnum, ReviewStatusEnum } from 'types/__generated__/graphql'
+import { CreateBoardCandidateClaimReviewDocument } from 'types/__generated__/reviewMutations.generated'
+import type { CreateBoardCandidateClaimReviewMutation } from 'types/__generated__/reviewMutations.generated'
+import { GetClaimsAndReviewsDocument } from 'types/__generated__/reviewQueries.generated'
 import type { Claim } from 'types/claim'
 import DropdownActions from 'components/DropdownActions'
 
 interface ClaimActionsProps {
   claim: { key: string; status: ClaimStatusEnum }
+  hasReviewed: boolean
+  isReviewer: boolean | undefined
   login: string
   year: string
 }
 
-type ClaimAction = 'submit' | 'discard' | 'withdraw'
+type ClaimAction = 'submit' | 'discard' | 'withdraw' | 'approve' | 'reject'
 
 const ACTIONS_BY_STATUS: Record<ClaimStatusEnum, ClaimAction[]> = {
   DRAFT: ['submit', 'discard'],
@@ -36,14 +42,23 @@ const ACTIONS_BY_STATUS: Record<ClaimStatusEnum, ClaimAction[]> = {
   WITHDRAWN: [],
 }
 
-const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
+const ClaimActions: React.FC<ClaimActionsProps> = ({
+  claim,
+  hasReviewed,
+  isReviewer,
+  login,
+  year,
+}) => {
   const router = useRouter()
+  const { session } = useDjangoSession()
+  const sessionLogin = session?.user?.login ?? ''
   const [confirmAction, setConfirmAction] = useState<ClaimAction | null>(null)
   const [reason, setReason] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [submitClaim] = useMutation(SubmitBoardCandidateClaimDocument)
   const [discardClaim] = useMutation(DiscardBoardCandidateClaimDocument)
   const [withdrawClaim] = useMutation(WithdrawBoardCandidateClaimDocument)
+  const [createReview] = useMutation(CreateBoardCandidateClaimReviewDocument)
 
   const updateClaimsCache = (
     cache: ApolloCache,
@@ -68,10 +83,53 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
     }
   }
 
+  const updateReviewsCache = (
+    cache: ApolloCache,
+    mutationData:
+      CreateBoardCandidateClaimReviewMutation['createBoardCandidateClaimReview'] | null | undefined
+  ) => {
+    const newReview = mutationData?.review
+    if (!newReview || !sessionLogin) return
+
+    const existing = cache.readQuery({
+      query: GetClaimsAndReviewsDocument,
+      variables: { sessionLogin, year: Number.parseInt(year) },
+    })
+
+    if (existing) {
+      cache.writeQuery({
+        query: GetClaimsAndReviewsDocument,
+        variables: { sessionLogin, year: Number.parseInt(year) },
+        data: {
+          ...existing,
+          boardCandidateClaims: existing.boardCandidateClaims.map((c) =>
+            c.key === claim.key
+              ? {
+                  ...c,
+                  reviews: [
+                    ...c.reviews,
+                    {
+                      __typename: 'BoardCandidateClaimReviewNode' as const,
+                      id: newReview.id,
+                      createdAt: newReview.createdAt,
+                      status: newReview.status,
+                      reviewer: { __typename: 'UserNode' as const, login: sessionLogin },
+                    },
+                  ],
+                }
+              : c
+          ),
+        },
+      })
+    }
+  }
+
   const ACTION_HANDLERS: Record<ClaimAction, () => void> = {
     submit: () => setConfirmAction('submit'),
     discard: () => setConfirmAction('discard'),
     withdraw: () => setConfirmAction('withdraw'),
+    approve: () => setConfirmAction('approve'),
+    reject: () => setConfirmAction('reject'),
   }
 
   const resetConfirm = () => {
@@ -86,6 +144,8 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
       submit: 'Claim submitted successfully.',
       discard: 'Claim discarded successfully.',
       withdraw: 'Claim withdrawn successfully.',
+      approve: 'Claim approved successfully.',
+      reject: 'Claim rejected successfully.',
     }
 
     try {
@@ -122,6 +182,31 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
             throw new Error(result.data?.withdrawBoardCandidateClaim?.message ?? 'Withdraw failed.')
           }
           break
+        case 'approve':
+        case 'reject':
+          result = await createReview({
+            variables: {
+              input: {
+                claimKey: claim.key,
+                claimMemberLogin: login,
+                notes: reason ?? '',
+                status:
+                  confirmAction === 'approve'
+                    ? ReviewStatusEnum.Approved
+                    : ReviewStatusEnum.Rejected,
+                year: Number.parseInt(year),
+              },
+            },
+            update: (cache, { data }) =>
+              updateReviewsCache(cache, data?.createBoardCandidateClaimReview),
+          })
+          if (!result.data?.createBoardCandidateClaimReview?.ok) {
+            throw new Error(
+              result.data?.createBoardCandidateClaimReview?.message ??
+                `${upperFirst(confirmAction)} failed.`
+            )
+          }
+          break
       }
       addToast({
         title: 'Success',
@@ -132,7 +217,11 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
       })
 
       resetConfirm()
-      router.push(`/board/${year}/candidates/${login}/claims`)
+      if (confirmAction === 'approve' || confirmAction === 'reject') {
+        router.push(`/board/${year}/review`)
+      } else {
+        router.push(`/board/${year}/candidates/${login}/claims`)
+      }
     } catch (error) {
       addToast({
         title: 'Error',
@@ -158,11 +247,27 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
           },
         ]
       : []),
-    ...(ACTIONS_BY_STATUS[claim.status] ?? []).map((key) => ({
-      key,
-      label: `${upperFirst(key)} Claim`,
-      onAction: ACTION_HANDLERS[key],
-    })),
+    ...(!isReviewer
+      ? (ACTIONS_BY_STATUS[claim.status] ?? []).map((key) => ({
+          key,
+          label: `${upperFirst(key)} Claim`,
+          onAction: ACTION_HANDLERS[key],
+        }))
+      : []),
+    ...(isReviewer && !hasReviewed && claim.status === ClaimStatusEnum.Submitted
+      ? [
+          {
+            key: 'approve',
+            label: 'Approve Claim',
+            onAction: ACTION_HANDLERS['approve'],
+          },
+          {
+            key: 'reject',
+            label: 'Reject Claim',
+            onAction: ACTION_HANDLERS['reject'],
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -183,13 +288,13 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({ claim, login, year }) => {
               Are you sure you want to {confirmAction} this claim? This action cannot be undone.
             </p>
           </ModalBody>
-          {confirmAction == 'withdraw' && (
+          {['withdraw', 'approve', 'reject'].includes(confirmAction ?? '') && (
             <ModalBody>
               <textarea
-                aria-label="Reason for withdrawal"
+                aria-label={confirmAction === 'withdraw' ? 'Reason for withdrawal' : 'Notes'}
                 className="mt-2 w-full rounded border p-2"
                 rows={3}
-                placeholder="Reason for withdrawal..."
+                placeholder={confirmAction === 'withdraw' ? 'Reason for withdrawal...' : 'Notes...'}
                 value={reason ?? ''}
                 onChange={(e) => setReason(e.target.value)}
               />

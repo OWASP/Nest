@@ -68,6 +68,7 @@ overrides:
   dompurify: 3.4.12
   fast-uri: 3.1.4
   glob: 11.1.0
+  graphql: 17.0.2
   immutable: 5.1.8
   js-yaml: 4.3.0
   postcss: 8.5.18

@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.github.api.internal.nodes.user import UserNode
 from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 
@@ -37,3 +38,11 @@ class BoardOfDirectorsNode(strawberry.relay.Node):
     def owasp_url(self, root: BoardOfDirectors) -> str:
         """Resolve OWASP board election URL."""
         return root.owasp_url
+
+    @strawberry_django.field
+    def reviewer(self, root: BoardOfDirectors, login: str) -> UserNode | None:
+        """Resolve board election reviewer."""
+        user = (
+            root.reviewers.select_related("github_user").filter(github_user__login=login).first()
+        )
+        return user.github_user if user else None

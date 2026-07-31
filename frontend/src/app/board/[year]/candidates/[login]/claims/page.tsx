@@ -313,7 +313,7 @@ const CandidateClaimsPage = () => {
       </div>
       {sectionConfig.map(({ type: statusType, title, items }) => (
         <SecondaryCard key={title} title={title}>
-          {items.length == 0 ? (
+          {items.length === 0 ? (
             <p> No {title.toLowerCase()}. </p>
           ) : (
             <div className="grid gap-2">
