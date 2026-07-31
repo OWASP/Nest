@@ -231,7 +231,12 @@ Jest. Coverage config in `frontend/jest.config.ts`.
 
 ### Running outside Docker
 
-The canonical path is Docker. For quick iteration you can run tools directly:
+The canonical path is Docker. For quick iteration you can run tools directly.
+The commands below are bash syntax; on Windows use Git Bash or WSL. Match the
+toolchain versions from CI (see `engines` in root `package.json` and
+`backend/pyproject.toml`): Node 24 + pnpm 11 for JS tooling, Python 3.13 +
+Poetry for the backend. Older Node (e.g. 22) breaks CSpell (needs >=22.18)
+and can fail frontend tests; older Python fails mypy/ruff pins.
 
 **Backend:**
 
