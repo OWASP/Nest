@@ -236,7 +236,14 @@ The commands below are bash syntax; on Windows use Git Bash or WSL. Match the
 toolchain versions from CI (see `engines` in root `package.json` and
 `backend/pyproject.toml`): Node 24 + pnpm 11 for JS tooling, Python 3.13 +
 Poetry for the backend. Older Node (e.g. 22) breaks CSpell (needs >=22.18)
-and can fail frontend tests; older Python fails mypy/ruff pins.
+and can fail frontend tests; older Python fails mypy/ruff pins. These host
+commands are the CI path and are validated on Linux; on native Windows three
+repo quirks surface (all absent under WSL): Jinja2 Slack templates resolve
+backslash paths (`commands\board.jinja`) and fail in backend tests, the
+frontend `test:unit`/`test:a11y` scripts use bash-style inline `NODE_OPTIONS`
+env vars that cmd.exe rejects, and Prettier flags `.mjs`/`.css` files checked
+out with CRLF since `.gitattributes` only forces `lf` for `.js`/`.ts`/`.tsx`.
+Use WSL for a Linux-equivalent host.
 
 **Backend:**
 
