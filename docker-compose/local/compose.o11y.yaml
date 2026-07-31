@@ -2,6 +2,7 @@ services:
   backend:
     environment:
       - DJANGO_OTEL_METRICS_ENABLED=true
+      - DJANGO_OTEL_METRICS_IMPORT_URL=http://o11y-metrics:8428
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://o11y-metrics:8428/opentelemetry
       - OTEL_METRIC_EXPORT_INTERVAL=15000
       - OTEL_SERVICE_NAME=nest-backend
@@ -15,7 +16,7 @@ services:
   o11y-metrics:
     container_name: nest-o11y-metrics
     command:
-      - -retentionPeriod=7d
+      - -retentionPeriod=5y
       - -storageDataPath=/data
     image: victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70
     healthcheck:
