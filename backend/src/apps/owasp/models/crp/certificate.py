@@ -85,6 +85,11 @@ class Certificate(TimestampedModel):
         help_text="Whether the certificate has been revoked",
     )
 
+    @property
+    def is_verified(self) -> bool:
+        """Return whether the certificate is active/verified (not revoked)."""
+        return not self.is_revoked
+
     def __str__(self) -> str:
         """Return human-readable representation."""
         status = "Revoked" if self.is_revoked else "Active"
