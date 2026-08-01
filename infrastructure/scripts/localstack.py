@@ -15,9 +15,9 @@ from pathlib import Path
 from scripts.commands import CommandRunner
 from scripts.errors import (
     CommandNotFoundError,
+    InfrastructureError,
     MissingAuthTokenError,
     OverrideExistsError,
-    TestRunnerError,
 )
 
 logger = logging.getLogger(__name__)
@@ -136,13 +136,14 @@ class LocalStack:
             tuple[str, str]: A tuple containing the full image reference and the tag.
 
         Raises:
-            TestRunnerError: If the Dockerfile cannot be read or the image cannot be determined.
+            InfrastructureError: If the Dockerfile cannot be read or the image
+                cannot be determined.
 
         """
         dockerfile_path = Path(root_dir) / "docker" / "localstack" / "Dockerfile"
         if not dockerfile_path.exists():
             message = f"Dockerfile not found at {dockerfile_path}"
-            raise TestRunnerError(message)
+            raise InfrastructureError(message)
 
         content = dockerfile_path.read_text(encoding="utf-8")
 
@@ -153,13 +154,13 @@ class LocalStack:
         )
         if match_line is None:
             message = f"could not determine LocalStack image from {dockerfile_path}."
-            raise TestRunnerError(message)
+            raise InfrastructureError(message)
 
         full_image = re.sub(r"^FROM\s+", "", match_line).strip()
         match_tag = _FROM_LOCALSTACK_TAG_RE.search(match_line)
         if match_tag is None:
             message = f"could not determine LocalStack image tag from {dockerfile_path}."
-            raise TestRunnerError(message)
+            raise InfrastructureError(message)
 
         return full_image, match_tag.group(1)
 
@@ -171,7 +172,7 @@ class LocalStack:
 
         Raises:
             MissingAuthTokenError: If the LOCALSTACK_AUTH_TOKEN is not set.
-            TestRunnerError: If the container fails to start.
+            InfrastructureError: If the container fails to start.
 
         """
         if not os.environ.get("LOCALSTACK_AUTH_TOKEN"):
@@ -200,7 +201,7 @@ class LocalStack:
             )
         except (CommandNotFoundError, subprocess.CalledProcessError) as exc:
             message = f"Error starting LocalStack container: {exc}"
-            raise TestRunnerError(message) from exc
+            raise InfrastructureError(message) from exc
 
     def stop(self) -> None:
         """Stop and remove the LocalStack container (best-effort)."""
@@ -212,7 +213,7 @@ class LocalStack:
         """Block until LocalStack is healthy and its license is activated.
 
         Raises:
-            TestRunnerError: If LocalStack fails to become healthy or activate its
+            InfrastructureError: If LocalStack fails to become healthy or activate its
                 license within the timeout.
 
         """
@@ -224,7 +225,7 @@ class LocalStack:
                 self.healthy(log_error=True)
                 timeout = HEALTH_MAX_ATTEMPTS * HEALTH_POLL_INTERVAL
                 message = f"LocalStack failed to become healthy within {timeout} seconds."
-                raise TestRunnerError(message)
+                raise InfrastructureError(message)
             logger.info("Waiting... (attempt %s/%s)", attempt, HEALTH_MAX_ATTEMPTS)
             time.sleep(HEALTH_POLL_INTERVAL)
 
@@ -245,7 +246,7 @@ class LocalStack:
                     )
                 timeout = LICENSE_MAX_ATTEMPTS * HEALTH_POLL_INTERVAL
                 message = f"LocalStack license failed to activate within {timeout} seconds."
-                raise TestRunnerError(message)
+                raise InfrastructureError(message)
             time.sleep(HEALTH_POLL_INTERVAL)
 
         logger.info("LocalStack is ready!")
@@ -291,7 +292,7 @@ class OverrideManager:
         """Write temporary Terraform override files.
 
         Raises:
-            TestRunnerError: If an override file cannot be written.
+            InfrastructureError: If an override file cannot be written.
 
         """
         logger.info("Writing override files...")
@@ -310,7 +311,7 @@ class OverrideManager:
                 path.write_text(content, encoding="utf-8")
             except OSError as exc:
                 message = f"Error writing override file {filepath}: {exc}"
-                raise TestRunnerError(message) from exc
+                raise InfrastructureError(message) from exc
 
     def cleanup(self) -> None:
         """Clean up temporary override files."""
