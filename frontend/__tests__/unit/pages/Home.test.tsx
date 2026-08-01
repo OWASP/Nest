@@ -104,6 +104,7 @@ describe('Home', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: { message: 'GraphQL error' },
+      loading: false,
     })
 
     render(<Home />)
@@ -117,6 +118,7 @@ describe('Home', () => {
         color: 'danger',
         variant: 'solid',
       })
+      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
     })
   })
 

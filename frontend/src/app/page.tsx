@@ -91,6 +91,10 @@ export default function Home() {
     fetchData()
   }, [])
 
+  if (graphQLRequestError) {
+    return null
+  }
+
   if (isLoading || !graphQLData || !geoLocData) {
     return <LoadingSpinner />
   }
