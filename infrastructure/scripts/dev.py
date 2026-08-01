@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from scripts.localstack import LocalStack
 
 
@@ -11,6 +13,8 @@ class LocalInfrastructureRunner:
     def __init__(self) -> None:
         """Initialize the local infrastructure runner."""
         self.root_dir = Path(__file__).resolve().parent.parent.parent
+        self.env_path = Path(__file__).resolve().parent.parent / ".env"
+        load_dotenv(self.env_path)
         self.localstack = LocalStack()
 
     def start_localstack(self) -> None:
@@ -23,3 +27,13 @@ class LocalInfrastructureRunner:
         full_image, _ = self.localstack.image_info(self.root_dir)
         self.localstack.start(full_image)
         self.localstack.wait_ready()
+
+
+def main():
+    """Bootstrap and run local infrastructure workflows."""
+    runner = LocalInfrastructureRunner()
+    runner.start_localstack()
+
+
+if __name__ == "__main__":
+    main()
