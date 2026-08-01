@@ -28,6 +28,15 @@ class LocalInfrastructureRunner:
         self.localstack.start(full_image)
         self.localstack.wait_ready()
 
+    def stop_localstack(self) -> None:
+        """Stop LocalStack for local development.
+
+        Raises:
+            InfrastructureError: If LocalStack fails to start or become ready.
+
+        """
+        self.localstack.stop()
+
 
 def main():
     """Bootstrap and run local infrastructure workflows."""
