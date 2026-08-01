@@ -1,5 +1,5 @@
 AWS_REGION := us-east-2
-LIVE_DIR := $(MAKEFILE_DIR)live
+LIVE_DIR := infrastructure/live
 
 define RUN_ECS_TASK
 	@cd $(LIVE_DIR) && \
@@ -40,5 +40,5 @@ ecs-task: ## Run an ECS task (set TASK=name, e.g. make ecs-task TASK=migrate)
 
 deploy-on-localstack: ## Full LocalStack provision: infra + images + SSM params + deploy services
 	@infrastructure/scripts/provision-infra.sh && \
-	$infrastructure/scripts/load-env-params.sh --overwrite && \
-	$infrastructure/scripts/deploy-services.sh
+	infrastructure/scripts/load-env-params.sh --overwrite && \
+	infrastructure/scripts/deploy-services.sh
