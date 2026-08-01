@@ -15,7 +15,10 @@ define RUN_ECS_TASK
 endef
 
 start-localstack: ## Start LocalStack (requires .env with LOCALSTACK_AUTH_TOKEN)
-	@infrastructure/scripts/start-localstack.sh
+	@cd infrastructure && python -m scripts.dev start-localstack
+
+stop-localstack: ## Stop and remove LocalStack
+	@cd infrastructure && python -m scripts.dev stop-localstack
 
 provision-infra: ## Create resource on localstack and push images
 	@infrastructure/scripts/provision-infra.sh
