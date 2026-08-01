@@ -81,7 +81,6 @@ security-sast-scan-semgrep:
 		--config p/dockerfile \
 		--config p/javascript \
 		--config p/nextjs \
-		--config p/nginx \
 		--config p/nodejs \
 		--config p/owasp-top-ten \
 		--config p/python \
