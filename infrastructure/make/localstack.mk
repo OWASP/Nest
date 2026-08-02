@@ -15,13 +15,13 @@ define RUN_ECS_TASK
 endef
 
 start-localstack: ## Start LocalStack (requires .env with LOCALSTACK_AUTH_TOKEN)
-	@cd infrastructure && python -m scripts.dev start-localstack
+	@cd infrastructure && poetry run python -m scripts.dev start-localstack
 
 stop-localstack: ## Stop and remove LocalStack
-	@cd infrastructure && python -m scripts.dev stop-localstack
+	@cd infrastructure && poetry run python -m scripts.dev stop-localstack
 
 provision-infra: ## Create resource on localstack and push images
-	@infrastructure/scripts/provision-infra.sh
+	@cd infrastructure && poetry run python -m scripts.dev provision-infra
 
 load-env-params: ## Upload local .env variables to LocalStack SSM Parameter Store
 	@infrastructure/scripts/load-env-params.sh $(ARGS)
@@ -42,6 +42,6 @@ ecs-task: ## Run an ECS task (set TASK=name, e.g. make ecs-task TASK=migrate)
 	$(call RUN_ECS_TASK,$(TASK))
 
 deploy-on-localstack: ## Full LocalStack provision: infra + images + SSM params + deploy services
-	@infrastructure/scripts/provision-infra.sh && \
+	@cd infrastructure && poetry run python -m scripts.dev provision-infra && \
 	infrastructure/scripts/load-env-params.sh --overwrite && \
 	infrastructure/scripts/deploy-services.sh

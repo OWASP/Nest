@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 LOCALSTACK_CONTAINER_NAME = "nest-localstack"
 LOCALSTACK_HOST = "localhost"
 LOCALSTACK_PORT = 4566
+LOCALSTACK_ECR_PORT = 4510
 LOCALSTACK_INFO_PATH = "/_localstack/info"
 HEALTH_MAX_ATTEMPTS = 30
 HEALTH_POLL_INTERVAL = 2
@@ -182,7 +183,8 @@ class LocalStack:
 
         logger.info("Starting LocalStack container...")
         # Forward the token via the process environment (-e NAME) rather than argv.
-        # ECR_ENDPOINT_STRATEGY=off avoids *.localhost.localstack.cloud DNS during teardown.
+        # ECR_ENDPOINT_STRATEGY=off avoids *.localhost.localstack.cloud DNS during teardown
+        # but points the ECR registry at port 4510, so publish it for docker login/push.
         try:
             self.commands.run(
                 "docker",
@@ -192,6 +194,8 @@ class LocalStack:
                 self.container_name,
                 "-p",
                 f"{self.port}:{LOCALSTACK_PORT}",
+                "-p",
+                f"{LOCALSTACK_ECR_PORT}:{LOCALSTACK_ECR_PORT}",
                 "-e",
                 "ECR_ENDPOINT_STRATEGY=off",
                 "-e",

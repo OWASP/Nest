@@ -17,6 +17,7 @@ from scripts.errors import (
 )
 from scripts.localstack import (
     LOCALSTACK_CONTAINER_NAME,
+    LOCALSTACK_ECR_PORT,
     LOCALSTACK_PORT,
     LocalStack,
     OverrideManager,
@@ -166,6 +167,8 @@ class TestLocalStack:
             LOCALSTACK_CONTAINER_NAME,
             "-p",
             f"{LOCALSTACK_PORT}:{LOCALSTACK_PORT}",
+            "-p",
+            f"{LOCALSTACK_ECR_PORT}:{LOCALSTACK_ECR_PORT}",
             "-e",
             "ECR_ENDPOINT_STRATEGY=off",
             "-e",
@@ -191,6 +194,8 @@ class TestLocalStack:
             LOCALSTACK_CONTAINER_NAME,
             "-p",
             f"{host_port}:{LOCALSTACK_PORT}",
+            "-p",
+            f"{LOCALSTACK_ECR_PORT}:{LOCALSTACK_ECR_PORT}",
             "-e",
             "ECR_ENDPOINT_STRATEGY=off",
             "-e",

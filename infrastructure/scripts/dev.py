@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from scripts.commands import CommandRunner
 from scripts.errors import InfrastructureError, MissingEnvVarError
 from scripts.localstack import LocalStack
+from scripts.provision import ProvisionInfra
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ class LocalInfrastructureRunner:
         load_dotenv(self.env_path)
         self.commands = commands or CommandRunner()
         self.localstack = localstack or LocalStack(self.commands)
+        self.provisioner = ProvisionInfra(self.commands, localstack=self.localstack)
 
     def start_localstack(self) -> None:
         """Start LocalStack for local development.
@@ -60,6 +62,10 @@ class LocalInfrastructureRunner:
         """Stop and remove the LocalStack container."""
         self.localstack.stop()
 
+    def provision_infra(self) -> None:
+        """Create resources on LocalStack and push the backend/frontend images."""
+        self.provisioner.run()
+
 
 def main() -> None:
     """Bootstrap and run local infrastructure workflows."""
@@ -70,6 +76,10 @@ def main() -> None:
 
     subparsers.add_parser("start-localstack", help="Start LocalStack")
     subparsers.add_parser("stop-localstack", help="Stop and remove LocalStack")
+    subparsers.add_parser(
+        "provision-infra",
+        help="Create resources on LocalStack and push images",
+    )
 
     args = parser.parse_args()
     runner = LocalInfrastructureRunner()
@@ -77,6 +87,7 @@ def main() -> None:
     commands = {
         "start-localstack": runner.start_localstack,
         "stop-localstack": runner.stop_localstack,
+        "provision-infra": runner.provision_infra,
     }
 
     try:

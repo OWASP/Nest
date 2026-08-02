@@ -65,6 +65,15 @@ class TestLocalInfrastructureRunner:
 
         localstack.stop.assert_called_once()
 
+    def test_provision_infra(self) -> None:
+        localstack = MagicMock(spec=LocalStack)
+        runner = self.build_runner(localstack)
+        runner.provisioner = MagicMock()
+
+        runner.provision_infra()
+
+        runner.provisioner.run.assert_called_once()
+
 
 class TestMain:
     """Tests for the ``main`` command dispatcher."""
@@ -82,6 +91,13 @@ class TestMain:
         main()
 
         mock_runner_class.return_value.stop_localstack.assert_called_once()
+
+    @patch("sys.argv", ["scripts.dev", "provision-infra"])
+    @patch("scripts.dev.LocalInfrastructureRunner")
+    def test_dispatches_provision_infra(self, mock_runner_class: MagicMock) -> None:
+        main()
+
+        mock_runner_class.return_value.provision_infra.assert_called_once()
 
     @patch("sys.argv", ["scripts.dev", "start-localstack"])
     @patch("scripts.dev.LocalInfrastructureRunner")
