@@ -8,40 +8,41 @@ from django.db import migrations, models
 
 
 def migrate_existing_subscriptions(apps, schema_editor):
-    """Migrate existing SnapshotSubscription targets to EntitySubscription models."""
+    """Migrate existing SnapshotSubscription entity targets to EntitySubscription."""
     snapshot_subscription_model = apps.get_model("owasp", "SnapshotSubscription")
     entity_subscription_model = apps.get_model("owasp", "EntitySubscription")
-    entity_subscription_preference_model = apps.get_model("owasp", "EntitySubscriptionPreference")
+    max_active = 5
 
     for sub in snapshot_subscription_model.objects.all():
         chapters = list(sub.subscribed_chapters.all())
         projects = list(sub.subscribed_projects.all())
-        if not chapters and not projects:
-            continue
+        active_count = 0
 
-        entity_sub = entity_subscription_model.objects.create(
-            user=sub.user,
-            frequency=sub.frequency,
-            is_active=sub.is_active,
-            name="Migrated Subscription",
-            unsubscribe_token=sub.unsubscribe_token,
-        )
         for chapter in chapters:
-            entity_subscription_preference_model.objects.create(
-                subscription=entity_sub,
+            entity_subscription_model.objects.create(
+                user=sub.user,
+                frequency=sub.frequency,
+                is_active=sub.is_active and active_count < max_active,
                 chapter=chapter,
                 include_issues=sub.include_issues,
                 include_pull_requests=sub.include_pull_requests,
                 include_releases=sub.include_releases,
             )
+            if sub.is_active:
+                active_count += 1
+
         for project in projects:
-            entity_subscription_preference_model.objects.create(
-                subscription=entity_sub,
+            entity_subscription_model.objects.create(
+                user=sub.user,
+                frequency=sub.frequency,
+                is_active=sub.is_active and active_count < max_active,
                 project=project,
                 include_issues=sub.include_issues,
                 include_pull_requests=sub.include_pull_requests,
                 include_releases=sub.include_releases,
             )
+            if sub.is_active:
+                active_count += 1
 
 
 class Migration(migrations.Migration):
@@ -60,7 +61,6 @@ class Migration(migrations.Migration):
                         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ("name", models.CharField(blank=True, default="", max_length=100)),
                 (
                     "frequency",
                     models.CharField(
@@ -74,6 +74,9 @@ class Migration(migrations.Migration):
                     "unsubscribe_token",
                     models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
                 ),
+                ("include_issues", models.BooleanField(default=True)),
+                ("include_pull_requests", models.BooleanField(default=True)),
+                ("include_releases", models.BooleanField(default=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -84,33 +87,13 @@ class Migration(migrations.Migration):
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-            ],
-            options={
-                "verbose_name_plural": "Entity Subscriptions",
-                "db_table": "owasp_entity_subscriptions",
-            },
-        ),
-        migrations.CreateModel(
-            name="EntitySubscriptionPreference",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-                    ),
-                ),
-                ("include_issues", models.BooleanField(default=True)),
-                ("include_pull_requests", models.BooleanField(default=True)),
-                ("include_releases", models.BooleanField(default=True)),
-                ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "chapter",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="entity_subscription_preferences",
+                        related_name="entity_subscriptions",
                         to="owasp.chapter",
                     ),
                 ),
@@ -120,7 +103,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="entity_subscription_preferences",
+                        related_name="entity_subscriptions",
                         to="owasp.committee",
                     ),
                 ),
@@ -130,22 +113,14 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="entity_subscription_preferences",
+                        related_name="entity_subscriptions",
                         to="owasp.project",
-                    ),
-                ),
-                (
-                    "subscription",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="entity_preferences",
-                        to="owasp.entitysubscription",
                     ),
                 ),
             ],
             options={
-                "verbose_name_plural": "Entity Subscription Preferences",
-                "db_table": "owasp_entity_subscription_preferences",
+                "verbose_name_plural": "Entity Subscriptions",
+                "db_table": "owasp_entity_subscriptions",
             },
         ),
         migrations.AddIndex(
@@ -153,7 +128,7 @@ class Migration(migrations.Migration):
             index=models.Index(fields=["is_active"], name="owasp_entity_sub_active_idx"),
         ),
         migrations.AddConstraint(
-            model_name="entitysubscriptionpreference",
+            model_name="entitysubscription",
             constraint=models.CheckConstraint(
                 condition=models.Q(
                     models.Q(
@@ -173,31 +148,31 @@ class Migration(migrations.Migration):
                     ),
                     _connector="OR",
                 ),
-                name="exactly_one_entity_set",
+                name="entity_sub_exactly_one_entity",
             ),
         ),
         migrations.AddConstraint(
-            model_name="entitysubscriptionpreference",
+            model_name="entitysubscription",
             constraint=models.UniqueConstraint(
                 condition=models.Q(("project__isnull", False)),
-                fields=("subscription", "project"),
-                name="unique_subscription_project",
+                fields=("user", "project"),
+                name="unique_user_project_subscription",
             ),
         ),
         migrations.AddConstraint(
-            model_name="entitysubscriptionpreference",
+            model_name="entitysubscription",
             constraint=models.UniqueConstraint(
                 condition=models.Q(("chapter__isnull", False)),
-                fields=("subscription", "chapter"),
-                name="unique_subscription_chapter",
+                fields=("user", "chapter"),
+                name="unique_user_chapter_subscription",
             ),
         ),
         migrations.AddConstraint(
-            model_name="entitysubscriptionpreference",
+            model_name="entitysubscription",
             constraint=models.UniqueConstraint(
                 condition=models.Q(("committee__isnull", False)),
-                fields=("subscription", "committee"),
-                name="unique_subscription_committee",
+                fields=("user", "committee"),
+                name="unique_user_committee_subscription",
             ),
         ),
         migrations.RunPython(

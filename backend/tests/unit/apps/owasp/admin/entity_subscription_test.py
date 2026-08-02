@@ -1,16 +1,11 @@
 """Tests for entity subscription admin."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 
-from apps.owasp.admin.entity_subscription import (
-    ChapterPreferenceInline,
-    CommitteePreferenceInline,
-    EntitySubscriptionAdmin,
-    ProjectPreferenceInline,
-)
+from apps.owasp.admin.entity_subscription import EntitySubscriptionAdmin
 from apps.owasp.models.entity_subscription import EntitySubscription
 
 
@@ -30,86 +25,58 @@ class TestEntitySubscriptionAdmin:
         site = AdminSite()
         admin_instance = EntitySubscriptionAdmin(EntitySubscription, site)
 
-        assert admin_instance.list_display == (
-            "user",
-            "name",
-            "frequency",
-            "is_active",
-            "created_at",
-            "updated_at",
-        )
+        assert "get_entity" in admin_instance.list_display
+        assert "frequency" in admin_instance.list_display
+        assert "is_active" in admin_instance.list_display
         assert admin_instance.list_filter == ("frequency", "is_active", "created_at")
-        assert admin_instance.search_fields == ("user__email", "user__username", "name")
+        assert admin_instance.search_fields == ("user__email", "user__username")
         assert admin_instance.raw_id_fields == ("user",)
         assert admin_instance.readonly_fields == ("unsubscribe_token", "created_at", "updated_at")
+        assert admin_instance.autocomplete_fields == ("chapter", "committee", "project")
 
-        assert len(admin_instance.fieldsets) == 2
+    def test_fieldsets_structure(self):
+        """Test fieldset structure has entity fields and content toggles."""
+        site = AdminSite()
+        admin_instance = EntitySubscriptionAdmin(EntitySubscription, site)
 
-        system_fieldset = admin_instance.fieldsets[1]
+        assert len(admin_instance.fieldsets) == 3
+
+        main_fields = admin_instance.fieldsets[0][1]["fields"]
+        assert "chapter" in main_fields
+        assert "committee" in main_fields
+        assert "project" in main_fields
+
+        toggle_fields = admin_instance.fieldsets[1][1]["fields"]
+        assert "include_issues" in toggle_fields
+        assert "include_pull_requests" in toggle_fields
+        assert "include_releases" in toggle_fields
+
+        system_fieldset = admin_instance.fieldsets[2]
         assert system_fieldset[0] == "System"
 
-        assert len(admin_instance.inlines) == 3
-
-
-class TestPreferenceInlines:
-    """Test inline admin classes for entity preferences."""
-
-    def test_project_inline_get_queryset(self):
-        """Test ProjectPreferenceInline filters by project."""
+    def test_get_entity_with_project(self):
+        """Test get_entity returns entity name."""
         site = AdminSite()
-        inline = ProjectPreferenceInline(EntitySubscription, site)
-        request = MagicMock()
+        admin_instance = EntitySubscriptionAdmin(EntitySubscription, site)
 
-        with patch.object(
-            admin.StackedInline, "get_queryset", return_value=MagicMock()
-        ) as mock_super_qs:
-            inline.get_queryset(request)
-            mock_super_qs.return_value.filter.assert_called_once_with(project__isnull=False)
+        obj = MagicMock(spec=EntitySubscription)
+        obj.entity = "OWASP ZAP"
 
-    def test_chapter_inline_get_queryset(self):
-        """Test ChapterPreferenceInline filters by chapter."""
+        assert admin_instance.get_entity(obj) == "OWASP ZAP"
+
+    def test_get_entity_without_entity(self):
+        """Test get_entity returns dash when no entity."""
         site = AdminSite()
-        inline = ChapterPreferenceInline(EntitySubscription, site)
-        request = MagicMock()
+        admin_instance = EntitySubscriptionAdmin(EntitySubscription, site)
 
-        with patch.object(
-            admin.StackedInline, "get_queryset", return_value=MagicMock()
-        ) as mock_super_qs:
-            inline.get_queryset(request)
-            mock_super_qs.return_value.filter.assert_called_once_with(chapter__isnull=False)
+        obj = MagicMock(spec=EntitySubscription)
+        obj.entity = None
 
-    def test_committee_inline_get_queryset(self):
-        """Test CommitteePreferenceInline filters by committee."""
+        assert admin_instance.get_entity(obj) == "—"
+
+    def test_no_inlines(self):
+        """Test admin has no inlines after flattening."""
         site = AdminSite()
-        inline = CommitteePreferenceInline(EntitySubscription, site)
-        request = MagicMock()
+        admin_instance = EntitySubscriptionAdmin(EntitySubscription, site)
 
-        with patch.object(
-            admin.StackedInline, "get_queryset", return_value=MagicMock()
-        ) as mock_super_qs:
-            inline.get_queryset(request)
-            mock_super_qs.return_value.filter.assert_called_once_with(committee__isnull=False)
-
-    def test_project_inline_configuration(self):
-        """Test ProjectPreferenceInline config."""
-        site = AdminSite()
-        inline = ProjectPreferenceInline(EntitySubscription, site)
-        assert inline.verbose_name == "Project Preference"
-        assert inline.extra == 0
-        assert "project" in inline.fields
-
-    def test_chapter_inline_configuration(self):
-        """Test ChapterPreferenceInline config."""
-        site = AdminSite()
-        inline = ChapterPreferenceInline(EntitySubscription, site)
-        assert inline.verbose_name == "Chapter Preference"
-        assert inline.extra == 0
-        assert "chapter" in inline.fields
-
-    def test_committee_inline_configuration(self):
-        """Test CommitteePreferenceInline config."""
-        site = AdminSite()
-        inline = CommitteePreferenceInline(EntitySubscription, site)
-        assert inline.verbose_name == "Committee Preference"
-        assert inline.extra == 0
-        assert "committee" in inline.fields
+        assert not admin_instance.inlines

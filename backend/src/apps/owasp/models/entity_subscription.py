@@ -6,13 +6,16 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 
 from apps.nest.models import User
-from apps.owasp.models.entity_subscription_preference import EntitySubscriptionPreference
 
 MAX_ENTITY_SUBSCRIPTIONS = 5
 
 
 class EntitySubscription(models.Model):
-    """Model representing a user's entity-specific subscription to snapshot digest emails."""
+    """Model representing a user's subscription to a single entity's digest emails.
+
+    Each subscription maps to exactly one entity (project, chapter, or committee)
+    with its own frequency and content toggles.
+    """
 
     class Meta:
         """Model options."""
@@ -21,6 +24,43 @@ class EntitySubscription(models.Model):
         verbose_name_plural = "Entity Subscriptions"
         indexes = [
             models.Index(fields=["is_active"], name="owasp_entity_sub_active_idx"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        project__isnull=False,
+                        chapter__isnull=True,
+                        committee__isnull=True,
+                    )
+                    | models.Q(
+                        project__isnull=True,
+                        chapter__isnull=False,
+                        committee__isnull=True,
+                    )
+                    | models.Q(
+                        project__isnull=True,
+                        chapter__isnull=True,
+                        committee__isnull=False,
+                    )
+                ),
+                name="entity_sub_exactly_one_entity",
+            ),
+            models.UniqueConstraint(
+                fields=("user", "project"),
+                condition=models.Q(project__isnull=False),
+                name="unique_user_project_subscription",
+            ),
+            models.UniqueConstraint(
+                fields=("user", "chapter"),
+                condition=models.Q(chapter__isnull=False),
+                name="unique_user_chapter_subscription",
+            ),
+            models.UniqueConstraint(
+                fields=("user", "committee"),
+                condition=models.Q(committee__isnull=False),
+                name="unique_user_committee_subscription",
+            ),
         ]
 
     class Frequency(models.TextChoices):
@@ -40,7 +80,6 @@ class EntitySubscription(models.Model):
         on_delete=models.CASCADE,
         related_name="entity_subscriptions",
     )
-    name = models.CharField(max_length=100, blank=True, default="")
     frequency = models.CharField(
         max_length=10,
         choices=Frequency.choices,
@@ -53,6 +92,32 @@ class EntitySubscription(models.Model):
         editable=False,
     )
 
+    chapter = models.ForeignKey(
+        "owasp.Chapter",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="entity_subscriptions",
+    )
+    committee = models.ForeignKey(
+        "owasp.Committee",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="entity_subscriptions",
+    )
+    project = models.ForeignKey(
+        "owasp.Project",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="entity_subscriptions",
+    )
+
+    include_issues = models.BooleanField(default=True)
+    include_pull_requests = models.BooleanField(default=True)
+    include_releases = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -63,11 +128,57 @@ class EntitySubscription(models.Model):
             if self.is_active
             else EntitySubscription.Status.INACTIVE
         )
-        return f"{self.user} ({self.name}, {self.frequency}, {status})"
+        return f"{self.user} → {self.entity} ({self.frequency}, {status})"
+
+    @property
+    def entity(self):
+        """Return the associated entity (project, chapter, or committee)."""
+        return self.chapter or self.committee or self.project
+
+    @property
+    def entity_type(self):
+        """Return the entity type string."""
+        if self.chapter_id:
+            return "chapter"
+        if self.committee_id:
+            return "committee"
+        if self.project_id:
+            return "project"
+        return None
 
     def clean(self):
         """Validate the model before saving."""
         super().clean()
+
+        entity_count = sum(
+            [
+                self.project_id is not None,
+                self.chapter_id is not None,
+                self.committee_id is not None,
+            ]
+        )
+        if entity_count == 0:
+            msg = "You must select exactly one project, chapter, or committee."
+            raise ValidationError(msg)
+        if entity_count > 1:
+            msg = (
+                "You can only subscribe to one entity per subscription."
+                " Please select only one project, chapter, or committee."
+            )
+            raise ValidationError(msg)
+
+        if getattr(self, "user_id", None):
+            for field in ("chapter", "committee", "project"):
+                entity_id = getattr(self, f"{field}_id", None)
+                if entity_id is not None:
+                    query = EntitySubscription.objects.filter(
+                        user=self.user, **{f"{field}_id": entity_id}
+                    )
+                    if self.pk:
+                        query = query.exclude(pk=self.pk)
+                    if query.exists():
+                        msg = "You are already subscribed to this entity."
+                        raise ValidationError(msg)
 
         if self.is_active and getattr(self, "user_id", None):
             query = EntitySubscription.objects.filter(user=self.user, is_active=True)
@@ -78,15 +189,24 @@ class EntitySubscription(models.Model):
                 msg = "Maximum number of entity subscriptions reached."
                 raise ValidationError(msg)
 
+    def validate_constraints(self, exclude=None):
+        """Skip DB-level constraint validation.
+
+        The entity-count and uniqueness checks are already handled in clean()
+        with user-friendly messages, so we suppress the raw constraint errors.
+        """
+
     @classmethod
     @transaction.atomic
-    def create(cls, *, user, frequency, **kwargs):
+    def create(cls, *, user, frequency, entity_type, entity_id, **kwargs):
         """Create a new entity subscription with limit enforcement.
 
         Args:
             user: The user creating the subscription.
             frequency: "weekly" or "monthly".
-            **kwargs: Additional fields (name).
+            entity_type: "project", "chapter", or "committee".
+            entity_id: The ID of the entity.
+            **kwargs: Additional fields (include_issues, etc.).
 
         Returns:
             The created subscription instance, or None if limit reached.
@@ -102,9 +222,11 @@ class EntitySubscription(models.Model):
         if active_count >= MAX_ENTITY_SUBSCRIPTIONS:
             return None
 
+        fk_kwargs = {f"{entity_type}_id": entity_id}
         return cls.objects.create(
             user=user,
             frequency=frequency,
+            **fk_kwargs,
             **kwargs,
         )
 
@@ -113,7 +235,7 @@ class EntitySubscription(models.Model):
 
         Args:
             frequency: New frequency value, if changing.
-            **kwargs: Additional fields to update.
+            **kwargs: Additional fields to update (include_issues, etc.).
 
         """
         if frequency is not None:
@@ -125,65 +247,3 @@ class EntitySubscription(models.Model):
 
         self.full_clean()
         self.save()
-
-    @transaction.atomic
-    def sync_preferences(self, preferences_data):
-        """Sync entity preferences using a diff-based approach.
-
-        Instead of delete-all-and-recreate, this method:
-        - Creates new preferences that don't exist yet.
-        - Updates existing preferences that changed.
-        - Removes preferences no longer in the input.
-
-        Args:
-            preferences_data: List of dicts with entity info and toggles.
-                Each dict must have: entity_type, entity_id,
-                include_issues, include_pull_requests, include_releases.
-
-        """
-        existing = {self._preference_key(pref): pref for pref in self.entity_preferences.all()}
-
-        incoming_keys = set()
-        for data in preferences_data:
-            key = (data["entity_type"], data["entity_id"])
-            incoming_keys.add(key)
-
-            fk_field = data["entity_type"]
-            fk_kwargs = {f"{fk_field}_id": data["entity_id"]}
-            toggle_fields = {
-                "include_issues": data.get("include_issues", True),
-                "include_pull_requests": data.get("include_pull_requests", True),
-                "include_releases": data.get("include_releases", True),
-            }
-
-            if key in existing:
-                pref = existing[key]
-                changed = False
-                for field, value in toggle_fields.items():
-                    if getattr(pref, field) != value:
-                        setattr(pref, field, value)
-                        changed = True
-                if changed:
-                    pref.save()
-            else:
-                EntitySubscriptionPreference.objects.create(
-                    subscription=self,
-                    **fk_kwargs,
-                    **toggle_fields,
-                )
-
-        # Remove preferences no longer in the input.
-        for key, pref in existing.items():
-            if key not in incoming_keys:
-                pref.delete()
-
-    @staticmethod
-    def _preference_key(pref):
-        """Return a (entity_type, entity_id) tuple for a preference."""
-        if pref.project_id:
-            return ("project", pref.project_id)
-        if pref.chapter_id:
-            return ("chapter", pref.chapter_id)
-        if pref.committee_id:
-            return ("committee", pref.committee_id)
-        return (None, None)
