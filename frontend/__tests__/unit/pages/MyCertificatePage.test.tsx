@@ -6,10 +6,14 @@ import {
   mockMyCertificatesMultipleData,
 } from '@mockData/mockCertificateData'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import { toPng } from 'html-to-image'
+import { jsPDF } from 'jspdf'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import MyCertificatePage from 'app/certificate/page'
+import { CertificateCard } from 'components/CertificateCard'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -328,8 +332,6 @@ describe('MyCertificatePage', () => {
 
     it('handles error when saving certificate as image fails', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { toPng } = require('html-to-image')
       ;(toPng as jest.Mock).mockRejectedValueOnce(new Error('Canvas error'))
 
       render(<MyCertificatePage />)
@@ -364,9 +366,7 @@ describe('MyCertificatePage', () => {
 
     it('handles error when saving certificate as PDF fails', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { jsPDF } = require('jspdf')
-      ;(jsPDF as jest.Mock).mockImplementationOnce(() => {
+      ;(jsPDF as unknown as jest.Mock).mockImplementationOnce(() => {
         throw new Error('PDF Generation error')
       })
 
@@ -387,9 +387,9 @@ describe('MyCertificatePage', () => {
 
     it('handles error when cardRef.current is null during save as image', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { CertificateCard } = require('components/CertificateCard')
-      CertificateCard.mockImplementationOnce(() => <div data-testid="certificate-card" />)
+      ;(CertificateCard as jest.Mock).mockImplementationOnce(() => (
+        <div data-testid="certificate-card" />
+      ))
 
       render(<MyCertificatePage />)
 
@@ -469,8 +469,6 @@ describe('MyCertificatePage', () => {
   describe('Multiple Certificates and Navigation', () => {
     it('redirects to /contribute when Start Contributing button is clicked in empty state', async () => {
       const mockPush = jest.fn()
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { useRouter } = require('next/navigation')
       ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
 
       mockUseQuery.mockReturnValue({
@@ -527,8 +525,6 @@ describe('MyCertificatePage', () => {
         error: null,
       })
 
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { toPng } = require('html-to-image')
       let resolveImg: ((v: string) => void) | null = null
       ;(toPng as jest.Mock).mockImplementationOnce(
         () =>

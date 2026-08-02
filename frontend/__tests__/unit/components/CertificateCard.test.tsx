@@ -316,20 +316,22 @@ describe('CertificateCard', () => {
     })
 
     it('handles resize callback when containerRef.current is null', () => {
-      expect.assertions(0)
       let resizeHandler: (() => void) | null = null
       const spy = jest.spyOn(window, 'addEventListener').mockImplementation((event, handler) => {
         if (event === 'resize') resizeHandler = handler as () => void
       })
 
       const { unmount } = render(<CertificateCard certificate={mockCertificate} />)
+      expect(resizeHandler).not.toBeNull()
       unmount()
 
-      if (resizeHandler) {
-        act(() => {
-          ;(resizeHandler as () => void)()
-        })
-      }
+      expect(() => {
+        if (resizeHandler) {
+          act(() => {
+            ;(resizeHandler as () => void)()
+          })
+        }
+      }).not.toThrow()
       spy.mockRestore()
     })
   })

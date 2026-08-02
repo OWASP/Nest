@@ -250,7 +250,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
     handleResize()
 
     let resizeObserver: ResizeObserver | null = null
-    if (containerRef.current && typeof globalThis.ResizeObserver !== 'undefined') {
+    if (containerRef.current && globalThis.ResizeObserver !== undefined) {
       resizeObserver = new globalThis.ResizeObserver(() => {
         handleResize()
       })

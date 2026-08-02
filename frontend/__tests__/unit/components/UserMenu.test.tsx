@@ -52,6 +52,7 @@ describe('UserMenu Component', () => {
   const mockUseSession = useDjangoSession as jest.MockedFunction<typeof useDjangoSession>
   const mockSignIn = signIn as jest.MockedFunction<typeof signIn>
   const mockUseLogout = useLogout as jest.MockedFunction<typeof useLogout>
+  const mockUseLazyQuery = useLazyQuery as unknown as jest.Mock
 
   const mockLogout = jest.fn()
   const defaultLogoutReturn = {
@@ -73,6 +74,10 @@ describe('UserMenu Component', () => {
     jest.clearAllMocks()
     mockUseLogout.mockReturnValue(defaultLogoutReturn)
     mockSignIn.mockResolvedValue(undefined)
+    mockUseLazyQuery.mockReturnValue([
+      jest.fn().mockResolvedValue({ data: {} }),
+      { data: null, loading: false },
+    ])
   })
 
   describe('Renders successfully with minimal required props', () => {
