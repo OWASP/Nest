@@ -9,7 +9,6 @@ from django.db import IntegrityError
 
 from apps.owasp.api.internal.mutations.entity_subscription import (
     CreateEntitySubscriptionInput,
-    EntityPreferenceInput,
     EntitySubscriptionMutations,
     EntitySubscriptionResult,
     UpdateEntitySubscriptionInput,
@@ -65,9 +64,8 @@ class TestCreateEntitySubscription:
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             frequency="daily",
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=10),
-            ],
+            entity_type="project",
+            entity_id=10,
         )
         result = mutations.create_entity_subscription(info, input_data=input_data)
         assert not result.ok
@@ -76,91 +74,43 @@ class TestCreateEntitySubscription:
         """Test create fails with invalid entity type."""
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="invalid", entity_id=10),
-            ],
+            entity_type="invalid",
+            entity_id=10,
         )
         result = mutations.create_entity_subscription(info, input_data=input_data)
         assert not result.ok
-
-    def test_empty_preferences(self, mutations):
-        """Test create fails with empty preferences."""
-        info = mock_info()
-        input_data = CreateEntitySubscriptionInput(entity_preferences=[])
-        result = mutations.create_entity_subscription(info, input_data=input_data)
-        assert not result.ok
-
-    def test_duplicate_entities(self, mutations):
-        """Test create fails with duplicate entities."""
-        info = mock_info()
-        input_data = CreateEntitySubscriptionInput(
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=10),
-                EntityPreferenceInput(entity_type="project", entity_id=10),
-            ],
-        )
-        result = mutations.create_entity_subscription(info, input_data=input_data)
-        assert not result.ok
-
-    def test_too_many_preferences(self, mutations):
-        """Test create fails with more than 50 preferences."""
-        info = mock_info()
-        input_data = CreateEntitySubscriptionInput(
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=i) for i in range(1, 52)
-            ],
-        )
-        result = mutations.create_entity_subscription(info, input_data=input_data)
-        assert not result.ok
-        assert "at most 50 preferences" in result.message
 
     def test_invalid_entity_id(self, mutations):
         """Test create fails with invalid entity ID."""
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=-1),
-            ],
+            entity_type="project",
+            entity_id=-1,
         )
         result = mutations.create_entity_subscription(info, input_data=input_data)
         assert not result.ok
         assert "positive integer" in result.message
 
-    def test_invalid_name(self, mutations):
-        """Test create fails with too long name."""
-        info = mock_info()
-        input_data = CreateEntitySubscriptionInput(
-            name="a" * 101,
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=1),
-            ],
-        )
-        result = mutations.create_entity_subscription(info, input_data=input_data)
-        assert not result.ok
-        assert "100 characters or fewer" in result.message
-
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
     def test_create_integrity_error(self, mock_create, mutations):
-        """Test create handles IntegrityError."""
+        """Test create handles IntegrityError (duplicate subscription)."""
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=10),
-            ],
+            entity_type="project",
+            entity_id=10,
         )
         mock_create.side_effect = IntegrityError("Database error")
         result = mutations.create_entity_subscription(info, input_data=input_data)
         assert not result.ok
-        assert "Failed to create subscription" in result.message
+        assert "already subscribed" in result.message
 
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
     def test_create_validation_error(self, mock_create, mutations):
         """Test create handles ValidationError."""
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=10),
-            ],
+            entity_type="project",
+            entity_id=10,
         )
         mock_create.side_effect = ValidationError("Custom validation error")
         result = mutations.create_entity_subscription(info, input_data=input_data)
@@ -173,9 +123,8 @@ class TestCreateEntitySubscription:
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             frequency="weekly",
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=10),
-            ],
+            entity_type="project",
+            entity_id=10,
         )
         mock_sub = MagicMock(spec=EntitySubscription)
         mock_create.return_value = mock_sub
@@ -183,7 +132,35 @@ class TestCreateEntitySubscription:
         result = mutations.create_entity_subscription(info, input_data=input_data)
 
         assert result.ok
-        mock_sub.sync_preferences.assert_called_once()
+        mock_create.assert_called_once()
+
+    @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
+    def test_create_with_toggles(self, mock_create, mutations):
+        """Test creating subscription with custom toggles."""
+        info = mock_info()
+        input_data = CreateEntitySubscriptionInput(
+            entity_type="chapter",
+            entity_id=5,
+            frequency="monthly",
+            include_issues=False,
+            include_pull_requests=True,
+            include_releases=False,
+        )
+        mock_sub = MagicMock(spec=EntitySubscription)
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_entity_subscription(info, input_data=input_data)
+
+        assert result.ok
+        mock_create.assert_called_once_with(
+            user=info.context.request.user,
+            frequency="monthly",
+            entity_type="chapter",
+            entity_id=5,
+            include_issues=False,
+            include_pull_requests=True,
+            include_releases=False,
+        )
 
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
     def test_create_limit_reached(self, mock_create, mutations):
@@ -191,9 +168,8 @@ class TestCreateEntitySubscription:
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             frequency="weekly",
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="project", entity_id=10),
-            ],
+            entity_type="project",
+            entity_id=10,
         )
         mock_create.return_value = None
 
@@ -238,45 +214,12 @@ class TestUpdateEntitySubscription:
             )
             assert not result.ok
 
-    def test_invalid_name(self, mutations):
-        """Test update fails with too long name."""
-        info = mock_info()
-        input_data = UpdateEntitySubscriptionInput(name="a" * 101)
-        mock_sub = MagicMock(spec=EntitySubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.update_entity_subscription(
-                info, subscription_id=1, input_data=input_data
-            )
-            assert not result.ok
-            assert "100 characters or fewer" in result.message
-
-    def test_invalid_entity_preferences(self, mutations):
-        """Test update fails with invalid preferences."""
-        info = mock_info()
-        input_data = UpdateEntitySubscriptionInput(
-            entity_preferences=[
-                EntityPreferenceInput(entity_type="invalid", entity_id=10),
-            ],
-        )
-        mock_sub = MagicMock(spec=EntitySubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.update_entity_subscription(
-                info, subscription_id=1, input_data=input_data
-            )
-            assert not result.ok
-
-    def test_update_integrity_error(self, mutations):
-        """Test update handles IntegrityError."""
+    def test_update_validation_error(self, mutations):
+        """Test update handles ValidationError."""
         info = mock_info()
         input_data = UpdateEntitySubscriptionInput(frequency="monthly")
         mock_sub = MagicMock(spec=EntitySubscription)
-        mock_sub.update.side_effect = IntegrityError("Database error")
+        mock_sub.update.side_effect = ValidationError("Validation error")
         with patch(
             "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
         ) as mock_objects:
@@ -285,7 +228,6 @@ class TestUpdateEntitySubscription:
                 info, subscription_id=1, input_data=input_data
             )
             assert not result.ok
-            assert "Failed to update subscription" in result.message
 
     def test_success(self, mutations):
         """Test successful subscription update."""
@@ -302,11 +244,13 @@ class TestUpdateEntitySubscription:
             assert result.ok
             mock_sub.update.assert_called_once()
 
-    def test_success_with_entity_preferences(self, mutations):
-        """Test successful update with entity preferences."""
+    def test_success_with_toggles(self, mutations):
+        """Test successful update with toggle changes."""
         info = mock_info()
-        pref = EntityPreferenceInput(entity_type="project", entity_id=20)
-        input_data = UpdateEntitySubscriptionInput(entity_preferences=[pref])
+        input_data = UpdateEntitySubscriptionInput(
+            include_issues=False,
+            include_releases=False,
+        )
         mock_sub = MagicMock(spec=EntitySubscription)
         with patch(
             "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
@@ -316,7 +260,11 @@ class TestUpdateEntitySubscription:
                 info, subscription_id=1, input_data=input_data
             )
             assert result.ok
-            mock_sub.sync_preferences.assert_called_once()
+            mock_sub.update.assert_called_once_with(
+                frequency=None,
+                include_issues=False,
+                include_releases=False,
+            )
 
 
 class TestCancelEntitySubscription:

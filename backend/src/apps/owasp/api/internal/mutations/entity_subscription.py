@@ -12,39 +12,28 @@ from apps.owasp.models.entity_subscription import MAX_ENTITY_SUBSCRIPTIONS, Enti
 
 ENTITY_TYPES = frozenset(("chapter", "committee", "project"))
 VALID_FREQUENCIES = frozenset(dict(EntitySubscription.Frequency.choices))
-MAX_NAME_LENGTH = 100
-
-
-MAX_ENTITY_PREFERENCES_PER_SUBSCRIPTION = 50
 
 
 @strawberry.input
-class EntityPreferenceInput:
-    """Input for per-entity content preferences."""
+class CreateEntitySubscriptionInput:
+    """Input for subscribing to a single entity."""
 
     entity_id: int
     entity_type: str
+    frequency: str = "weekly"
     include_issues: bool = True
     include_pull_requests: bool = True
     include_releases: bool = True
 
 
 @strawberry.input
-class CreateEntitySubscriptionInput:
-    """Input for creating an entity subscription."""
-
-    entity_preferences: list[EntityPreferenceInput]
-    frequency: str = "weekly"
-    name: str = ""
-
-
-@strawberry.input
 class UpdateEntitySubscriptionInput:
     """Input for updating an entity subscription."""
 
-    entity_preferences: list[EntityPreferenceInput] | None = None
     frequency: str | None = None
-    name: str | None = None
+    include_issues: bool | None = None
+    include_pull_requests: bool | None = None
+    include_releases: bool | None = None
 
 
 @strawberry.type
@@ -54,45 +43,6 @@ class EntitySubscriptionResult:
     ok: bool
     message: str
     subscription: EntitySubscriptionNode | None = None
-
-
-def _validate_frequency(frequency):
-    """Validate frequency value. Returns error message or None."""
-    if frequency is not None and frequency not in VALID_FREQUENCIES:
-        return f"Frequency must be one of: {', '.join(sorted(VALID_FREQUENCIES))}."
-    return None
-
-
-def _validate_entity_preferences(preferences):
-    """Validate entity preferences. Returns error message or None."""
-    if not preferences:
-        return "Entity subscriptions must have at least one entity preference."
-
-    if len(preferences) > MAX_ENTITY_PREFERENCES_PER_SUBSCRIPTION:
-        return (
-            f"Entity subscriptions can have at most "
-            f"{MAX_ENTITY_PREFERENCES_PER_SUBSCRIPTION} preferences."
-        )
-
-    seen = set()
-    for pref in preferences:
-        if pref.entity_type not in ENTITY_TYPES:
-            return f"Entity type must be one of: {', '.join(sorted(ENTITY_TYPES))}."
-        if pref.entity_id <= 0:
-            return "Entity ID must be a positive integer."
-        key = (pref.entity_type, pref.entity_id)
-        if key in seen:
-            return f"Duplicate entity: {pref.entity_type} with ID {pref.entity_id}."
-        seen.add(key)
-
-    return None
-
-
-def _validate_name(name):
-    """Validate name field. Returns error message or None."""
-    if name is not None and len(name.strip()) > MAX_NAME_LENGTH:
-        return f"Name must be {MAX_NAME_LENGTH} characters or fewer."
-    return None
 
 
 @strawberry.type
@@ -108,53 +58,42 @@ class EntitySubscriptionMutations:
         """Create a new entity subscription for the logged-in user."""
         user = info.context.request.user
 
-        error = _validate_frequency(input_data.frequency)
-        if error:
-            return EntitySubscriptionResult(ok=False, message=error)
+        error = None
+        if input_data.frequency not in VALID_FREQUENCIES:
+            error = f"Frequency must be one of: {', '.join(sorted(VALID_FREQUENCIES))}."
+        elif input_data.entity_type not in ENTITY_TYPES:
+            error = f"Entity type must be one of: {', '.join(sorted(ENTITY_TYPES))}."
+        elif input_data.entity_id <= 0:
+            error = "Entity ID must be a positive integer."
 
-        error = _validate_name(input_data.name)
-        if error:
-            return EntitySubscriptionResult(ok=False, message=error)
-
-        error = _validate_entity_preferences(input_data.entity_preferences)
         if error:
             return EntitySubscriptionResult(ok=False, message=error)
 
         try:
-            with transaction.atomic():
-                subscription = EntitySubscription.create(
-                    user=user,
-                    frequency=input_data.frequency,
-                    name=input_data.name.strip(),
-                )
-
-                if subscription is None:
-                    return EntitySubscriptionResult(
-                        ok=False,
-                        message="Maximum number of entity subscriptions reached.",
-                    )
-
-                subscription.sync_preferences(
-                    [
-                        {
-                            "entity_type": p.entity_type,
-                            "entity_id": p.entity_id,
-                            "include_issues": p.include_issues,
-                            "include_pull_requests": p.include_pull_requests,
-                            "include_releases": p.include_releases,
-                        }
-                        for p in input_data.entity_preferences
-                    ]
-                )
-        except (IntegrityError, ValidationError) as exc:
-            msg = (
-                str(exc)
-                if isinstance(exc, ValidationError)
-                else "Failed to create subscription preferences."
+            subscription = EntitySubscription.create(
+                user=user,
+                frequency=input_data.frequency,
+                entity_type=input_data.entity_type,
+                entity_id=input_data.entity_id,
+                include_issues=input_data.include_issues,
+                include_pull_requests=input_data.include_pull_requests,
+                include_releases=input_data.include_releases,
             )
+
+            if subscription is None:
+                return EntitySubscriptionResult(
+                    ok=False,
+                    message="Maximum number of entity subscriptions reached.",
+                )
+        except IntegrityError:
             return EntitySubscriptionResult(
                 ok=False,
-                message=msg,
+                message="You are already subscribed to this entity.",
+            )
+        except ValidationError as exc:
+            return EntitySubscriptionResult(
+                ok=False,
+                message=str(exc),
             )
 
         return EntitySubscriptionResult(
@@ -184,49 +123,26 @@ class EntitySubscriptionMutations:
                 message="Subscription not found.",
             )
 
-        error = _validate_frequency(input_data.frequency)
-        if error:
-            return EntitySubscriptionResult(ok=False, message=error)
-
-        error = _validate_name(input_data.name)
-        if error:
-            return EntitySubscriptionResult(ok=False, message=error)
-
-        if input_data.entity_preferences is not None:
-            error = _validate_entity_preferences(input_data.entity_preferences)
-            if error:
-                return EntitySubscriptionResult(ok=False, message=error)
-
-        update_kwargs = {}
-        if input_data.name is not None:
-            update_kwargs["name"] = input_data.name.strip()
-
-        try:
-            with transaction.atomic():
-                subscription.update(frequency=input_data.frequency, **update_kwargs)
-
-                if input_data.entity_preferences is not None:
-                    subscription.sync_preferences(
-                        [
-                            {
-                                "entity_type": p.entity_type,
-                                "entity_id": p.entity_id,
-                                "include_issues": p.include_issues,
-                                "include_pull_requests": p.include_pull_requests,
-                                "include_releases": p.include_releases,
-                            }
-                            for p in input_data.entity_preferences
-                        ]
-                    )
-        except (IntegrityError, ValidationError) as exc:
-            msg = (
-                str(exc)
-                if isinstance(exc, ValidationError)
-                else "Failed to update subscription preferences."
-            )
+        if input_data.frequency is not None and input_data.frequency not in VALID_FREQUENCIES:
             return EntitySubscriptionResult(
                 ok=False,
-                message=msg,
+                message=f"Frequency must be one of: {', '.join(sorted(VALID_FREQUENCIES))}.",
+            )
+
+        update_kwargs = {}
+        if input_data.include_issues is not None:
+            update_kwargs["include_issues"] = input_data.include_issues
+        if input_data.include_pull_requests is not None:
+            update_kwargs["include_pull_requests"] = input_data.include_pull_requests
+        if input_data.include_releases is not None:
+            update_kwargs["include_releases"] = input_data.include_releases
+
+        try:
+            subscription.update(frequency=input_data.frequency, **update_kwargs)
+        except ValidationError as exc:
+            return EntitySubscriptionResult(
+                ok=False,
+                message=str(exc),
             )
 
         return EntitySubscriptionResult(

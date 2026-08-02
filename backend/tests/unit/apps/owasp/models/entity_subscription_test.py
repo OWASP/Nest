@@ -15,24 +15,24 @@ class TestEntitySubscription:
     def test_str_representation_active(self):
         """Test string representation for active subscription."""
         sub = MagicMock(spec=EntitySubscription)
-        sub.user = MagicMock()
-        sub.name = "My Bundle"
+        sub.entity = MagicMock()
         sub.frequency = EntitySubscription.Frequency.WEEKLY
         sub.is_active = True
 
         result = EntitySubscription.__str__(sub)
-        assert result == f"{sub.user} (My Bundle, weekly, active)"
+        assert "weekly" in result
+        assert "active" in result
 
     def test_str_representation_inactive(self):
         """Test string representation for inactive subscription."""
         sub = MagicMock(spec=EntitySubscription)
-        sub.user = MagicMock()
-        sub.name = "Test"
+        sub.entity = MagicMock()
         sub.frequency = EntitySubscription.Frequency.MONTHLY
         sub.is_active = False
 
         result = EntitySubscription.__str__(sub)
-        assert result == f"{sub.user} (Test, monthly, inactive)"
+        assert "monthly" in result
+        assert "inactive" in result
 
     def test_frequency_choices(self):
         """Test frequency choices are correctly defined."""
@@ -53,29 +53,113 @@ class TestEntitySubscription:
         assert MAX_ENTITY_SUBSCRIPTIONS == 5
 
 
+class TestEntitySubscriptionEntity:
+    """Test entity property and entity_type property."""
+
+    def test_entity_returns_chapter(self):
+        """Test entity property returns chapter when set."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.chapter = MagicMock()
+        sub.committee = None
+        sub.project = None
+
+        result = EntitySubscription.entity.fget(sub)
+        assert result == sub.chapter
+
+    def test_entity_returns_committee(self):
+        """Test entity property returns committee when set."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.chapter = None
+        sub.committee = MagicMock()
+        sub.project = None
+
+        result = EntitySubscription.entity.fget(sub)
+        assert result == sub.committee
+
+    def test_entity_returns_project(self):
+        """Test entity property returns project when set."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.chapter = None
+        sub.committee = None
+        sub.project = MagicMock()
+
+        result = EntitySubscription.entity.fget(sub)
+        assert result == sub.project
+
+    def test_entity_type_chapter(self):
+        """Test entity_type returns chapter."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.chapter_id = 1
+        sub.committee_id = None
+        sub.project_id = None
+
+        result = EntitySubscription.entity_type.fget(sub)
+        assert result == "chapter"
+
+    def test_entity_type_committee(self):
+        """Test entity_type returns committee."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.chapter_id = None
+        sub.committee_id = 2
+        sub.project_id = None
+
+        result = EntitySubscription.entity_type.fget(sub)
+        assert result == "committee"
+
+    def test_entity_type_project(self):
+        """Test entity_type returns project."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.chapter_id = None
+        sub.committee_id = None
+        sub.project_id = 3
+
+        result = EntitySubscription.entity_type.fget(sub)
+        assert result == "project"
+
+    def test_entity_type_none(self):
+        """Test entity_type returns None when no entity set."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.chapter_id = None
+        sub.committee_id = None
+        sub.project_id = None
+
+        result = EntitySubscription.entity_type.fget(sub)
+        assert result is None
+
+
 class TestEntitySubscriptionClean:
     """Test EntitySubscription.clean method."""
 
     @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
     def test_clean_success(self, mock_objects):
         """Test clean succeeds when under limit."""
-        mock_objects.filter.return_value.count.return_value = 3
+        filter_mock = MagicMock()
+        filter_mock.exists.return_value = False
+        filter_mock.count.return_value = 3
+        mock_objects.filter.return_value = filter_mock
         sub = MagicMock(spec=EntitySubscription)
         sub.user_id = 1
         sub.is_active = True
         sub.pk = None
+        sub.project_id = 10
+        sub.chapter_id = None
+        sub.committee_id = None
         sub.clean = EntitySubscription.clean.__get__(sub)
-
-        # Should not raise exception
         sub.clean()
 
     @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
     def test_clean_limit_reached(self, mock_objects):
-        mock_objects.filter.return_value.count.return_value = MAX_ENTITY_SUBSCRIPTIONS
+        filter_mock = MagicMock()
+        filter_mock.exists.return_value = False
+        filter_mock.count.return_value = MAX_ENTITY_SUBSCRIPTIONS
+        mock_objects.filter.return_value = filter_mock
         sub = MagicMock(spec=EntitySubscription)
         sub.user_id = 1
         sub.is_active = True
         sub.pk = None
+        sub.project_id = 10
+        sub.chapter_id = None
+        sub.committee_id = None
         sub.clean = EntitySubscription.clean.__get__(sub)
 
         error_msg = r"Maximum number of entity subscriptions reached\."
@@ -85,29 +169,76 @@ class TestEntitySubscriptionClean:
     @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
     def test_clean_skips_inactive(self, mock_objects):
         """Test clean skips limit check for inactive subscriptions."""
+        filter_mock = MagicMock()
+        filter_mock.exists.return_value = False
+        mock_objects.filter.return_value = filter_mock
         sub = MagicMock(spec=EntitySubscription)
         sub.user_id = 1
         sub.is_active = False
+        sub.pk = None
+        sub.project_id = 10
+        sub.chapter_id = None
+        sub.committee_id = None
         sub.clean = EntitySubscription.clean.__get__(sub)
-
-        # Should not raise exception
         sub.clean()
-        mock_objects.filter.assert_not_called()
 
     @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
     def test_clean_existing_subscription_at_limit(self, mock_objects):
         """Test clean succeeds for existing subscription when at limit."""
-        mock_objects.filter.return_value.exclude.return_value.count.return_value = (
-            MAX_ENTITY_SUBSCRIPTIONS - 1
-        )
+        filter_mock = MagicMock()
+        filter_mock.exists.return_value = False
+        filter_mock.exclude.return_value.exists.return_value = False
+        filter_mock.exclude.return_value.count.return_value = MAX_ENTITY_SUBSCRIPTIONS - 1
+        mock_objects.filter.return_value = filter_mock
         sub = MagicMock(spec=EntitySubscription)
         sub.user_id = 1
         sub.is_active = True
         sub.pk = 42
+        sub.project_id = 10
+        sub.chapter_id = None
+        sub.committee_id = None
+        sub.clean = EntitySubscription.clean.__get__(sub)
+        sub.clean()
+
+    @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
+    def test_clean_duplicate_subscription(self, mock_objects):
+        """Test clean fails when duplicate entity subscription exists."""
+        filter_mock = MagicMock()
+        filter_mock.exists.return_value = True
+        mock_objects.filter.return_value = filter_mock
+        sub = MagicMock(spec=EntitySubscription)
+        sub.user_id = 1
+        sub.is_active = True
+        sub.pk = None
+        sub.project_id = 10
+        sub.chapter_id = None
+        sub.committee_id = None
         sub.clean = EntitySubscription.clean.__get__(sub)
 
-        # Should not raise — existing active sub at limit should exclude itself
-        sub.clean()
+        with pytest.raises(ValidationError, match=r"already subscribed"):
+            sub.clean()
+
+    def test_clean_no_entity_set(self):
+        """Test clean fails when no entity is set."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.project_id = None
+        sub.chapter_id = None
+        sub.committee_id = None
+        sub.clean = EntitySubscription.clean.__get__(sub)
+
+        with pytest.raises(ValidationError, match=r"must select exactly one"):
+            sub.clean()
+
+    def test_clean_multiple_entities_set(self):
+        """Test clean fails when multiple entities are set."""
+        sub = MagicMock(spec=EntitySubscription)
+        sub.project_id = 10
+        sub.chapter_id = 20
+        sub.committee_id = None
+        sub.clean = EntitySubscription.clean.__get__(sub)
+
+        with pytest.raises(ValidationError, match=r"only subscribe to one entity"):
+            sub.clean()
 
 
 class TestEntitySubscriptionCreate:
@@ -135,10 +266,42 @@ class TestEntitySubscriptionCreate:
         result = EntitySubscription.create(
             user=user,
             frequency="weekly",
-            name="My bundle",
+            entity_type="project",
+            entity_id=10,
         )
 
         assert result == mock_sub
+        mock_objects.create.assert_called_once_with(
+            user=user,
+            frequency="weekly",
+            project_id=10,
+        )
+
+    @patch("apps.owasp.models.entity_subscription.User.objects")
+    @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
+    def test_create_chapter(self, mock_objects, mock_user_objects):
+        """Test creating a chapter subscription."""
+        user = MagicMock()
+        user.pk = 1
+        mock_sub = MagicMock(spec=EntitySubscription)
+        mock_objects.filter.return_value.count.return_value = 0
+        mock_objects.create.return_value = mock_sub
+
+        result = EntitySubscription.create(
+            user=user,
+            frequency="monthly",
+            entity_type="chapter",
+            entity_id=5,
+            include_releases=False,
+        )
+
+        assert result == mock_sub
+        mock_objects.create.assert_called_once_with(
+            user=user,
+            frequency="monthly",
+            chapter_id=5,
+            include_releases=False,
+        )
 
     @patch("apps.owasp.models.entity_subscription.User.objects")
     @patch("apps.owasp.models.entity_subscription.EntitySubscription.objects")
@@ -151,6 +314,8 @@ class TestEntitySubscriptionCreate:
         result = EntitySubscription.create(
             user=user,
             frequency="weekly",
+            entity_type="project",
+            entity_id=1,
         )
 
         assert result is None
@@ -170,10 +335,10 @@ class TestEntitySubscriptionUpdate:
     def test_update_with_kwargs(self):
         """Test updating additional fields."""
         sub = MagicMock(spec=EntitySubscription)
-        sub.name = "old"
-        EntitySubscription.update(sub, name="new name")
+        sub.include_issues = True
+        EntitySubscription.update(sub, include_issues=False)
 
-        assert sub.name == "new name"
+        assert sub.include_issues is False
         sub.save.assert_called_once()
 
     def test_update_skips_none_values(self):
@@ -217,190 +382,17 @@ class TestEntitySubscriptionUpdate:
         sub.save.assert_not_called()
 
 
-class TestEntitySubscriptionSyncPreferences:
-    """Test sync_preferences method."""
+class TestEntitySubscriptionMeta:
+    """Test EntitySubscription Meta configuration."""
 
-    @pytest.fixture(autouse=True)
-    def _mock_transaction(self):
-        """Disable transaction.atomic for tests."""
-        with (
-            patch("django.db.transaction.Atomic.__enter__", return_value=None),
-            patch("django.db.transaction.Atomic.__exit__", return_value=False),
-        ):
-            yield
+    def test_constraints_exist(self):
+        """Test constraints are defined on the model."""
+        constraint_names = {c.name for c in EntitySubscription._meta.constraints}
+        assert "entity_sub_exactly_one_entity" in constraint_names
+        assert "unique_user_project_subscription" in constraint_names
+        assert "unique_user_chapter_subscription" in constraint_names
+        assert "unique_user_committee_subscription" in constraint_names
 
-    def test_sync_creates_new_preferences(self):
-        """Test sync creates new preferences when none exist."""
-        sub = MagicMock(spec=EntitySubscription)
-        sub.entity_preferences.all.return_value = []
-
-        with patch(
-            "apps.owasp.models.entity_subscription.EntitySubscriptionPreference",
-        ) as mock_pref_cls:
-            mock_pref_cls.objects.create.return_value = MagicMock()
-            EntitySubscription.sync_preferences(
-                sub,
-                [
-                    {
-                        "entity_type": "project",
-                        "entity_id": 1,
-                        "include_issues": True,
-                        "include_pull_requests": False,
-                        "include_releases": True,
-                    },
-                ],
-            )
-
-            mock_pref_cls.objects.create.assert_called_once_with(
-                subscription=sub,
-                project_id=1,
-                include_issues=True,
-                include_pull_requests=False,
-                include_releases=True,
-            )
-
-    def test_sync_updates_existing_preferences(self):
-        """Test sync updates existing preferences when toggles change."""
-        existing_pref = MagicMock()
-        existing_pref.project_id = 1
-        existing_pref.chapter_id = None
-        existing_pref.committee_id = None
-        existing_pref.include_issues = True
-        existing_pref.include_pull_requests = True
-        existing_pref.include_releases = True
-
-        sub = MagicMock(spec=EntitySubscription)
-        sub._preference_key = EntitySubscription._preference_key
-        sub.entity_preferences.all.return_value = [existing_pref]
-
-        EntitySubscription.sync_preferences(
-            sub,
-            [
-                {
-                    "entity_type": "project",
-                    "entity_id": 1,
-                    "include_issues": False,
-                    "include_pull_requests": True,
-                    "include_releases": True,
-                },
-            ],
-        )
-
-        assert existing_pref.include_issues is False
-        existing_pref.save.assert_called_once()
-
-    def test_sync_no_save_when_unchanged(self):
-        """Test sync does not save when toggles are unchanged."""
-        existing_pref = MagicMock()
-        existing_pref.project_id = 1
-        existing_pref.chapter_id = None
-        existing_pref.committee_id = None
-        existing_pref.include_issues = True
-        existing_pref.include_pull_requests = True
-        existing_pref.include_releases = True
-
-        sub = MagicMock(spec=EntitySubscription)
-        sub._preference_key = EntitySubscription._preference_key
-        sub.entity_preferences.all.return_value = [existing_pref]
-
-        EntitySubscription.sync_preferences(
-            sub,
-            [
-                {
-                    "entity_type": "project",
-                    "entity_id": 1,
-                    "include_issues": True,
-                    "include_pull_requests": True,
-                    "include_releases": True,
-                },
-            ],
-        )
-
-        existing_pref.save.assert_not_called()
-
-    def test_sync_removes_old_preferences(self):
-        """Test sync removes preferences no longer in input."""
-        old_pref = MagicMock()
-        old_pref.project_id = 99
-        old_pref.chapter_id = None
-        old_pref.committee_id = None
-
-        sub = MagicMock(spec=EntitySubscription)
-        sub.entity_preferences.all.return_value = [old_pref]
-
-        EntitySubscription.sync_preferences(sub, [])
-
-        old_pref.delete.assert_called_once()
-
-    def test_sync_handles_chapter_entity(self):
-        """Test sync creates chapter entity preference."""
-        sub = MagicMock(spec=EntitySubscription)
-        sub.entity_preferences.all.return_value = []
-
-        with patch(
-            "apps.owasp.models.entity_subscription.EntitySubscriptionPreference",
-        ) as mock_pref_cls:
-            EntitySubscription.sync_preferences(
-                sub,
-                [
-                    {
-                        "entity_type": "chapter",
-                        "entity_id": 5,
-                        "include_issues": True,
-                        "include_pull_requests": True,
-                        "include_releases": False,
-                    },
-                ],
-            )
-
-            mock_pref_cls.objects.create.assert_called_once_with(
-                subscription=sub,
-                chapter_id=5,
-                include_issues=True,
-                include_pull_requests=True,
-                include_releases=False,
-            )
-
-
-class TestEntitySubscriptionPreferenceKey:
-    """Test _preference_key static method."""
-
-    def test_preference_key_project(self):
-        """Test preference key for project."""
-        pref = MagicMock()
-        pref.project_id = 10
-        pref.chapter_id = None
-        pref.committee_id = None
-
-        result = EntitySubscription._preference_key(pref)
-        assert result == ("project", 10)
-
-    def test_preference_key_chapter(self):
-        """Test preference key for chapter."""
-        pref = MagicMock()
-        pref.project_id = None
-        pref.chapter_id = 20
-        pref.committee_id = None
-
-        result = EntitySubscription._preference_key(pref)
-        assert result == ("chapter", 20)
-
-    def test_preference_key_committee(self):
-        """Test preference key for committee."""
-        pref = MagicMock()
-        pref.project_id = None
-        pref.chapter_id = None
-        pref.committee_id = 30
-
-        result = EntitySubscription._preference_key(pref)
-        assert result == ("committee", 30)
-
-    def test_preference_key_none_fallback(self):
-        """Test preference key returns (None, None) when no entity set."""
-        pref = MagicMock()
-        pref.project_id = None
-        pref.chapter_id = None
-        pref.committee_id = None
-
-        result = EntitySubscription._preference_key(pref)
-        assert result == (None, None)
+    def test_db_table(self):
+        """Test database table name."""
+        assert EntitySubscription._meta.db_table == "owasp_entity_subscriptions"

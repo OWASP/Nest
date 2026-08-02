@@ -19,4 +19,6 @@ class EntitySubscriptionQuery:
         if not user.is_authenticated:
             return []
 
-        return EntitySubscription.objects.filter(user=user)
+        return EntitySubscription.objects.filter(user=user).select_related(
+            "chapter", "committee", "project"
+        )

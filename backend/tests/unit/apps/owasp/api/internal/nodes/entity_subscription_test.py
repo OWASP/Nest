@@ -19,22 +19,48 @@ class TestEntitySubscriptionNode(GraphQLNodeBaseTest):
             field.name for field in EntitySubscriptionNode.__strawberry_definition__.fields
         }
         expected_field_names = {
+            "chapter",
+            "committee",
             "created_at",
-            "entity_preferences",
             "frequency",
+            "include_issues",
+            "include_pull_requests",
+            "include_releases",
             "is_active",
-            "name",
+            "project",
             "updated_at",
         }
         assert expected_field_names.issubset(field_names)
 
-    def test_entity_preferences_resolver(self):
-        """Test resolving entity preferences."""
+    def test_chapter_resolver(self):
+        """Test resolving chapter."""
         mock_sub = Mock()
-        mock_prefs = [Mock(), Mock()]
-        mock_sub.entity_preferences.all.return_value = mock_prefs
+        mock_chapter = Mock()
+        mock_sub.chapter = mock_chapter
 
-        field = self._get_field_by_name("entity_preferences", EntitySubscriptionNode)
+        field = self._get_field_by_name("chapter", EntitySubscriptionNode)
         result = field.base_resolver.wrapped_func(None, mock_sub)
 
-        assert result == mock_prefs
+        assert result == mock_chapter
+
+    def test_committee_resolver(self):
+        """Test resolving committee."""
+        mock_sub = Mock()
+        mock_committee = Mock()
+        mock_sub.committee = mock_committee
+
+        field = self._get_field_by_name("committee", EntitySubscriptionNode)
+        result = field.base_resolver.wrapped_func(None, mock_sub)
+
+        assert result == mock_committee
+
+    def test_project_resolver(self):
+        """Test resolving project."""
+        mock_sub = Mock()
+        mock_project = Mock()
+        mock_sub.project = mock_project
+
+        field = self._get_field_by_name("project", EntitySubscriptionNode)
+        result = field.base_resolver.wrapped_func(None, mock_sub)
+
+        assert result == mock_project
