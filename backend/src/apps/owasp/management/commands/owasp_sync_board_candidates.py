@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 from apps.github.utils import get_repository_file_content
+from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
@@ -65,6 +66,23 @@ class Command(BaseCommand):
             return {}
 
         return {}
+
+    def parse_candidate_profile(self, content: str) -> str:
+        """Parse profile raw text content without YAML frontmatter from candidate markdown file.
+
+        Args:
+            content (str): The markdown file content.
+
+        Returns:
+            str: Parsed profile raw text.
+
+        """
+        yaml_pattern = re.compile(r"^---\s*\n((?:(?!^---\s*$).*\n)+)^---\s*$", re.MULTILINE)
+
+        if not content.startswith("---"):
+            return content.strip()
+
+        return yaml_pattern.sub("", content, count=1).strip()
 
     def sync_year_candidates(self, year: int) -> int:
         """Sync candidates for a specific year.
@@ -128,7 +146,13 @@ class Command(BaseCommand):
                 "order": 0,
             }
 
-            EntityMember.update_data(data, save=True)
+            member = EntityMember.update_data(data, save=True)
+            raw_markdown = self.parse_candidate_profile(file_content)
+            BoardCandidateProfile.objects.update_or_create(
+                candidate=member,
+                defaults={"raw_markdown": raw_markdown},
+            )
+
             synced_count += 1
 
         return synced_count

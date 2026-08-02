@@ -75,6 +75,12 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
         verbose_name="Order",
         help_text="Display order of the claim within the candidate profile.",
     )
+    source_text = models.TextField(
+        blank=True,
+        default="",
+        help_text="The exact text string from the candidate's profile this claim refers to.",
+        verbose_name="Source text",
+    )
     status = models.CharField(
         choices=Status.choices,
         default=Status.DRAFT,

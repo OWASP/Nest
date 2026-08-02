@@ -2,7 +2,7 @@
 	owasp-aggregate-member-contributions owasp-aggregate-projects owasp-create-project-metadata-file \
 	owasp-enrich-chapters owasp-enrich-committees owasp-enrich-events owasp-enrich-projects \
 	owasp-generate-community-snapshot-video owasp-process-snapshots owasp-scrape-chapters \
-	owasp-scrape-committees owasp-scrape-projects owasp-sync-posts owasp-update-events \
+	owasp-scrape-committees owasp-scrape-projects owasp-sync-posts owasp-sync-board-candidates owasp-update-events \
 	owasp-update-leaders owasp-update-project-health-metrics owasp-update-project-health-requirements \
 	owasp-update-project-health-scores owasp-update-sponsors
 
@@ -76,6 +76,10 @@ owasp-scrape-projects:
 
 owasp-sync-posts:
 	@CMD="python manage.py owasp_sync_posts" $(MAKE) backend-exec-command
+
+owasp-sync-board-candidates:
+	@echo "Sync OWASP board candidates"
+	@CMD="python manage.py owasp_sync_board_candidates $(ARGS)" $(MAKE) exec-backend-command
 
 owasp-update-events:
 	@echo "Getting OWASP events data"

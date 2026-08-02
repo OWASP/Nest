@@ -516,11 +516,14 @@ class TestReorderBoardCandidateClaims:
 class TestCreateBoardCandidateClaim:
     """Tests for create_board_candidate_claim mutation."""
 
-    def _make_input_data(self, name="Test Claim", description="Test description", year=2025):
+    def _make_input_data(
+        self, name="Test Claim", description="Test description", year=2025, source_text=""
+    ):
         data = MagicMock()
         data.name = name
         data.description = description
         data.year = year
+        data.source_text = source_text
         return data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
@@ -549,6 +552,7 @@ class TestCreateBoardCandidateClaim:
             candidate=mock_candidate,
             description=input_data.description,
             name=input_data.name,
+            source_text=input_data.source_text,
         )
         assert result.ok
         assert result.code == "SUCCESS"
@@ -706,7 +710,7 @@ class TestUpdateBoardCandidateClaim:
         mock_github_user = MagicMock()
         user.github_user = mock_github_user
         info = _make_info(user)
-        input_data = MagicMock(key="test-key", description=None, year=2025)
+        input_data = MagicMock(key="test-key", description=None, year=2025, source_text=None)
         input_data.name = "Updated Name"
 
         claim = MagicMock()
