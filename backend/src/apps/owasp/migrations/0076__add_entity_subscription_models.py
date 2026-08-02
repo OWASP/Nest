@@ -11,32 +11,38 @@ def migrate_existing_subscriptions(apps, schema_editor):
     """Migrate existing SnapshotSubscription entity targets to EntitySubscription."""
     snapshot_subscription_model = apps.get_model("owasp", "SnapshotSubscription")
     entity_subscription_model = apps.get_model("owasp", "EntitySubscription")
+    max_active = 5
 
     for sub in snapshot_subscription_model.objects.all():
         chapters = list(sub.subscribed_chapters.all())
         projects = list(sub.subscribed_projects.all())
+        active_count = 0
 
         for chapter in chapters:
             entity_subscription_model.objects.create(
                 user=sub.user,
                 frequency=sub.frequency,
-                is_active=sub.is_active,
+                is_active=sub.is_active and active_count < max_active,
                 chapter=chapter,
                 include_issues=sub.include_issues,
                 include_pull_requests=sub.include_pull_requests,
                 include_releases=sub.include_releases,
             )
+            if sub.is_active:
+                active_count += 1
 
         for project in projects:
             entity_subscription_model.objects.create(
                 user=sub.user,
                 frequency=sub.frequency,
-                is_active=sub.is_active,
+                is_active=sub.is_active and active_count < max_active,
                 project=project,
                 include_issues=sub.include_issues,
                 include_pull_requests=sub.include_pull_requests,
                 include_releases=sub.include_releases,
             )
+            if sub.is_active:
+                active_count += 1
 
 
 class Migration(migrations.Migration):

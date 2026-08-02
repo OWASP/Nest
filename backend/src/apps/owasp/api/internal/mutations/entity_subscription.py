@@ -8,9 +8,16 @@ from strawberry.types import Info
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.nest.models import User
 from apps.owasp.api.internal.nodes.entity_subscription import EntitySubscriptionNode
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.committee import Committee
 from apps.owasp.models.entity_subscription import MAX_ENTITY_SUBSCRIPTIONS, EntitySubscription
+from apps.owasp.models.project import Project
 
-ENTITY_TYPES = frozenset(("chapter", "committee", "project"))
+ENTITY_MODELS = {
+    "chapter": Chapter,
+    "committee": Committee,
+    "project": Project,
+}
 VALID_FREQUENCIES = frozenset(dict(EntitySubscription.Frequency.choices))
 
 
@@ -61,13 +68,20 @@ class EntitySubscriptionMutations:
         error = None
         if input_data.frequency not in VALID_FREQUENCIES:
             error = f"Frequency must be one of: {', '.join(sorted(VALID_FREQUENCIES))}."
-        elif input_data.entity_type not in ENTITY_TYPES:
-            error = f"Entity type must be one of: {', '.join(sorted(ENTITY_TYPES))}."
+        elif input_data.entity_type not in ENTITY_MODELS:
+            error = f"Entity type must be one of: {', '.join(sorted(ENTITY_MODELS))}."
         elif input_data.entity_id <= 0:
             error = "Entity ID must be a positive integer."
 
         if error:
             return EntitySubscriptionResult(ok=False, message=error)
+
+        entity_model = ENTITY_MODELS[input_data.entity_type]
+        if not entity_model.objects.filter(pk=input_data.entity_id).exists():
+            return EntitySubscriptionResult(
+                ok=False,
+                message=f"{input_data.entity_type.capitalize()} not found.",
+            )
 
         try:
             subscription = EntitySubscription.create(

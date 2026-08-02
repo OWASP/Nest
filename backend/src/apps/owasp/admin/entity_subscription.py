@@ -10,6 +10,7 @@ class EntitySubscriptionAdmin(admin.ModelAdmin):
 
     list_display = ("user", "get_entity", "frequency", "is_active", "created_at")
     list_filter = ("frequency", "is_active", "created_at")
+    list_select_related = ("chapter", "committee", "project", "user")
     search_fields = ("user__email", "user__username")
     raw_id_fields = ("user",)
     autocomplete_fields = ("chapter", "committee", "project")

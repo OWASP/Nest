@@ -91,9 +91,24 @@ class TestCreateEntitySubscription:
         assert not result.ok
         assert "positive integer" in result.message
 
+    @patch("apps.owasp.models.project.Project.objects")
+    def test_create_entity_not_found(self, mock_project_objects, mutations):
+        """Test create fails when entity does not exist."""
+        mock_project_objects.filter.return_value.exists.return_value = False
+        info = mock_info()
+        input_data = CreateEntitySubscriptionInput(
+            entity_type="project",
+            entity_id=999,
+        )
+        result = mutations.create_entity_subscription(info, input_data=input_data)
+        assert not result.ok
+        assert "not found" in result.message
+
+    @patch("apps.owasp.models.project.Project.objects")
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
-    def test_create_integrity_error(self, mock_create, mutations):
+    def test_create_integrity_error(self, mock_create, mock_project_objects, mutations):
         """Test create handles IntegrityError (duplicate subscription)."""
+        mock_project_objects.filter.return_value.exists.return_value = True
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             entity_type="project",
@@ -104,9 +119,11 @@ class TestCreateEntitySubscription:
         assert not result.ok
         assert "already subscribed" in result.message
 
+    @patch("apps.owasp.models.project.Project.objects")
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
-    def test_create_validation_error(self, mock_create, mutations):
+    def test_create_validation_error(self, mock_create, mock_project_objects, mutations):
         """Test create handles ValidationError."""
+        mock_project_objects.filter.return_value.exists.return_value = True
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             entity_type="project",
@@ -117,9 +134,11 @@ class TestCreateEntitySubscription:
         assert not result.ok
         assert "Custom validation error" in result.message
 
+    @patch("apps.owasp.models.project.Project.objects")
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
-    def test_create_success(self, mock_create, mutations):
+    def test_create_success(self, mock_create, mock_project_objects, mutations):
         """Test successful entity subscription creation."""
+        mock_project_objects.filter.return_value.exists.return_value = True
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             frequency="weekly",
@@ -134,9 +153,11 @@ class TestCreateEntitySubscription:
         assert result.ok
         mock_create.assert_called_once()
 
+    @patch("apps.owasp.models.chapter.Chapter.objects")
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
-    def test_create_with_toggles(self, mock_create, mutations):
+    def test_create_with_toggles(self, mock_create, mock_chapter_objects, mutations):
         """Test creating subscription with custom toggles."""
+        mock_chapter_objects.filter.return_value.exists.return_value = True
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             entity_type="chapter",
@@ -162,9 +183,11 @@ class TestCreateEntitySubscription:
             include_releases=False,
         )
 
+    @patch("apps.owasp.models.project.Project.objects")
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
-    def test_create_limit_reached(self, mock_create, mutations):
+    def test_create_limit_reached(self, mock_create, mock_project_objects, mutations):
         """Test create fails when entity limit reached."""
+        mock_project_objects.filter.return_value.exists.return_value = True
         info = mock_info()
         input_data = CreateEntitySubscriptionInput(
             frequency="weekly",
