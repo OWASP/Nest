@@ -380,13 +380,19 @@ class TestProvisionInfra:
         )
         mock_summary.assert_called_once_with(outputs, "abc123-20260101")
 
-    def test_run_requires_prerequisites(self, tmp_path: Path) -> None:
+    @pytest.mark.parametrize("missing", ["tflocal", "docker"])
+    def test_run_requires_prerequisites(self, tmp_path: Path, missing: str) -> None:
         commands = MagicMock(spec=CommandRunner)
-        commands.require.side_effect = CommandNotFoundError("docker")
+
+        def missing_command(command: str) -> None:
+            if command == missing:
+                raise CommandNotFoundError(missing)
+
+        commands.require.side_effect = missing_command
         localstack = MagicMock(spec=LocalStack)
         provisioner = ProvisionInfra(commands, localstack=localstack)
 
-        with pytest.raises(CommandNotFoundError, match="docker"):
+        with pytest.raises(CommandNotFoundError, match=missing):
             provisioner.run()
 
         localstack.wait_ready.assert_not_called()
