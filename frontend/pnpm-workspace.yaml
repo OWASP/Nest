@@ -1,4 +1,4 @@
-auditConfig: {ignoreGhsas: null}
+auditConfig: {}
 
 ignoreScripts: true
 
@@ -18,15 +18,15 @@ minimumReleaseAgeExclude:
   - '@graphql-codegen/typescript@6.1.0'
   - '@graphql-codegen/visitor-plugin-common@7.2.0'
   - '@graphql-tools/utils@11.2.0'
-  - '@next/env@16.2.11'
-  - '@next/swc-darwin-arm64@16.2.11'
-  - '@next/swc-darwin-x64@16.2.11'
-  - '@next/swc-linux-arm64-gnu@16.2.11'
-  - '@next/swc-linux-arm64-musl@16.2.11'
-  - '@next/swc-linux-x64-gnu@16.2.11'
-  - '@next/swc-linux-x64-musl@16.2.11'
-  - '@next/swc-win32-arm64-msvc@16.2.11'
-  - '@next/swc-win32-x64-msvc@16.2.11'
+  - '@next/env@16.2.11 || 16.2.12'
+  - '@next/swc-darwin-arm64@16.2.11 || 16.2.12'
+  - '@next/swc-darwin-x64@16.2.11 || 16.2.12'
+  - '@next/swc-linux-arm64-gnu@16.2.11 || 16.2.12'
+  - '@next/swc-linux-arm64-musl@16.2.11 || 16.2.12'
+  - '@next/swc-linux-x64-gnu@16.2.11 || 16.2.12'
+  - '@next/swc-linux-x64-musl@16.2.11 || 16.2.12'
+  - '@next/swc-win32-arm64-msvc@16.2.11 || 16.2.12'
+  - '@next/swc-win32-x64-msvc@16.2.11 || 16.2.12'
   - '@next/third-parties@16.2.11'
   - '@opentelemetry/core@2.8.0'
   - '@opentelemetry/semantic-conventions@1.43.0'
@@ -44,7 +44,7 @@ minimumReleaseAgeExclude:
   - js-yaml@4.3.0
   - nanoid@3.3.16
   - next-auth@4.24.15
-  - next@16.2.11
+  - next@16.2.11 || 16.2.12
   - node-releases@2.0.51
   - postcss@8.5.18
   - protobufjs@7.6.4
