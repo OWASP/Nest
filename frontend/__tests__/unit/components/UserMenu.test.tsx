@@ -1,3 +1,4 @@
+import { useLazyQuery } from '@apollo/client/react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
@@ -883,6 +884,95 @@ describe('UserMenu Component', () => {
       await waitFor(() => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
       })
+    })
+  })
+
+  describe('Certificate link', () => {
+    it('calls getMyCertificate query when opening dropdown menu', async () => {
+      const mockGetMyCertificate = jest.fn()
+      ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+        mockGetMyCertificate,
+        { data: null, loading: false },
+      ])
+
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      expect(mockGetMyCertificate).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders My Certificate link when user has certificates and closes dropdown when clicked', async () => {
+      const mockGetMyCertificate = jest.fn()
+      ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+        mockGetMyCertificate,
+        {
+          data: {
+            myCertificates: [
+              { id: 'F9DD2BJ9ZYXW', tier: 'level 1', issuedAt: '2024-01-01', score: 100 },
+            ],
+          },
+          loading: false,
+        },
+      ])
+
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('My Certificate')).toBeInTheDocument()
+      })
+
+      const certificateLink = screen.getByText('My Certificate')
+      expect(certificateLink).toHaveAttribute('href', '/certificate')
+
+      fireEvent.click(certificateLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+
+    it('does not render My Certificate link when user has no certificates', async () => {
+      ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
+        jest.fn(),
+        {
+          data: { myCertificates: [] },
+          loading: false,
+        },
+      ])
+
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('Sign out')).toBeInTheDocument()
+      })
+
+      expect(screen.queryByText('My Certificate')).not.toBeInTheDocument()
     })
   })
 })

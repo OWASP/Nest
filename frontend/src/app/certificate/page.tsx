@@ -90,7 +90,9 @@ const MyCertificatePage: React.FC = () => {
   const getCertificateImageDataUrl = async (pixelRatio = 2): Promise<string> => {
     const node = cardRef.current
     if (!node) throw new Error('Certificate element not found')
-    const { toPng } = await import('html-to-image')
+    const { toPng } = (await import('html-to-image')) as unknown as {
+      toPng: (node: HTMLElement, options?: Record<string, unknown>) => Promise<string>
+    }
     return toPng(node, {
       cacheBust: true,
       style: { transform: 'scale(1)', transformOrigin: 'top center' },
@@ -99,7 +101,6 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleSaveAsImage = async () => {
-    if (isDownloading) return
     setIsDownloading(true)
     try {
       const dataUrl = await getCertificateImageDataUrl()
@@ -123,12 +124,30 @@ const MyCertificatePage: React.FC = () => {
   }
 
   const handleSaveAsPdf = async () => {
-    if (isSavingPdf) return
     setIsSavingPdf(true)
     try {
       const PDF_PIXEL_RATIO = 4
       const dataUrl = await getCertificateImageDataUrl(PDF_PIXEL_RATIO)
-      const { jsPDF } = await import('jspdf')
+      const { jsPDF } = (await import('jspdf')) as unknown as {
+        jsPDF: new (options?: Record<string, unknown>) => {
+          addImage: (
+            dataUrl: string,
+            format: string,
+            x: number,
+            y: number,
+            w: number,
+            h: number
+          ) => void
+          link: (
+            x: number,
+            y: number,
+            w: number,
+            h: number,
+            options: Record<string, unknown>
+          ) => void
+          save: (filename: string) => void
+        }
+      }
 
       const CSS_PX_PER_INCH = 96
       const PT_PER_INCH = 72
@@ -153,7 +172,7 @@ const MyCertificatePage: React.FC = () => {
       )
 
       const linkEl = cardRef.current?.querySelector('[data-github-link="true"]')
-      if (linkEl && cardRef.current) {
+      if (linkEl) {
         let x = 0
         let y = 0
         let el: HTMLElement | null = linkEl as HTMLElement
@@ -216,7 +235,7 @@ const MyCertificatePage: React.FC = () => {
       certUrl: certificateUrl,
       certId: certificate.id,
     })
-    window.open(
+    globalThis.window?.open(
       `https://www.linkedin.com/profile/add?${params.toString()}`,
       '_blank',
       'noopener,noreferrer'
@@ -225,10 +244,10 @@ const MyCertificatePage: React.FC = () => {
 
   const handleSelectCertificate = (index: number) => {
     setSelectedIndex(index)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const certificateUrl = `${globalThis.location?.origin ?? ''}/certificate/${certificate.id}`
+  const certificateUrl = `${globalThis.location?.origin}/certificate/${certificate.id}`
   const displayName = certificate.githubUser.name || certificate.githubUser.login
 
   const otherCertificates = certificates
