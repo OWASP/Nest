@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: fefa6e957dc4143c20fd42201dec463ec190f847  # v1.40.4
+    rev: 7c313f58296990cb20742f633e104f5941014a66  # v1.40.6
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -102,7 +102,7 @@ repos:
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
           - types-PyYAML==6.0.12.20260518
-          - types-requests==2.33.0.20260518
+          - types-requests==2.33.0.20260712
         entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
