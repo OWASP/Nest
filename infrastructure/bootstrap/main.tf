@@ -588,7 +588,9 @@ data "aws_iam_policy_document" "part_two" {
       ]
     }
   }
+}
 
+data "aws_iam_policy_document" "part_three" {
   statement {
     sid    = "SecretsManagerManagement"
     effect = "Allow"
@@ -626,9 +628,6 @@ data "aws_iam_policy_document" "part_two" {
   }
 }
 
-data "aws_iam_policy_document" "part_three" {
-}
-
 resource "aws_iam_role" "terraform" {
   name = "${var.project_name}-${var.environment}-terraform"
   tags = merge(local.common_tags, {
@@ -661,7 +660,7 @@ resource "aws_iam_policy" "part_one" {
   lifecycle {
     precondition {
       condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= local.iam_policy_size_limit
-      error_message = "part_one exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+      error_message = "part_one minified policy is ${length(data.aws_iam_policy_document.part_one.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
     }
   }
 }
@@ -673,7 +672,7 @@ resource "aws_iam_policy" "part_two" {
   lifecycle {
     precondition {
       condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= local.iam_policy_size_limit
-      error_message = "part_two exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+      error_message = "part_two minified policy is ${length(data.aws_iam_policy_document.part_two.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
     }
   }
 }
@@ -685,7 +684,7 @@ resource "aws_iam_policy" "part_three" {
   lifecycle {
     precondition {
       condition     = length(data.aws_iam_policy_document.part_three.minified_json) <= local.iam_policy_size_limit
-      error_message = "part_three exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+      error_message = "part_three minified policy is ${length(data.aws_iam_policy_document.part_three.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
     }
   }
 }

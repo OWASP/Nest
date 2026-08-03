@@ -48,7 +48,7 @@ run "test_part_one_policy_size" {
 
   assert {
     condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= local.iam_policy_size_limit
-    error_message = "part_one policy exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+    error_message = "part_one policy is ${length(data.aws_iam_policy_document.part_one.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
   }
 }
 
@@ -57,7 +57,7 @@ run "test_part_two_policy_size" {
 
   assert {
     condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= local.iam_policy_size_limit
-    error_message = "part_two policy exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+    error_message = "part_two policy is ${length(data.aws_iam_policy_document.part_two.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
   }
 }
 
@@ -66,7 +66,7 @@ run "test_part_three_policy_size" {
 
   assert {
     condition     = length(data.aws_iam_policy_document.part_three.minified_json) <= local.iam_policy_size_limit
-    error_message = "part_three policy exceeds the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+    error_message = "part_three policy is ${length(data.aws_iam_policy_document.part_three.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
   }
 }
 
