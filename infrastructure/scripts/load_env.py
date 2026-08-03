@@ -19,18 +19,69 @@ SECRET_NAME_HINTS = ("SECRET", "PASSWORD", "TOKEN", "KEY", "DSN")
 SECURE_STRING = "SecureString"
 PLAIN_STRING = "String"
 
+# SSM parameter types designated by Terraform (see
+# infrastructure/modules/parameters/main.tf and modules/cache/main.tf).
+# Terraform owns the shape of these parameters, so local uploads must reuse its
+# type instead of guessing from the name. Names not listed here fall back to the
+# keyword heuristic below.
+TERRAFORM_PARAMETER_TYPES = {
+    # SecureString
+    "DJANGO_ALGOLIA_APPLICATION_ID": SECURE_STRING,
+    "DJANGO_ALGOLIA_WRITE_API_KEY": SECURE_STRING,
+    "DJANGO_OPEN_AI_SECRET_KEY": SECURE_STRING,
+    "DJANGO_REDIS_PASSWORD": SECURE_STRING,
+    "DJANGO_SECRET_KEY": SECURE_STRING,
+    "DJANGO_SENTRY_DSN": SECURE_STRING,
+    "DJANGO_SLACK_BOT_TOKEN": SECURE_STRING,
+    "DJANGO_SLACK_SIGNING_SECRET": SECURE_STRING,
+    "GITHUB_TOKEN": SECURE_STRING,
+    "NEST_GITHUB_APP_PRIVATE_KEY": SECURE_STRING,
+    "NEXT_SERVER_GITHUB_CLIENT_SECRET": SECURE_STRING,
+    "NEXTAUTH_SECRET": SECURE_STRING,
+    # SLACK_BOT_TOKEN_<suffix> is also a SecureString; its name is dynamic so it
+    # is not listed here and is caught by the "TOKEN" hint instead.
+    # String
+    "DJANGO_ALLOWED_HOSTS": PLAIN_STRING,
+    "DJANGO_ALLOWED_ORIGINS": PLAIN_STRING,
+    "DJANGO_AWS_STORAGE_BUCKET_NAME": PLAIN_STRING,
+    "DJANGO_CONFIGURATION": PLAIN_STRING,
+    "DJANGO_DB_HOST": PLAIN_STRING,
+    "DJANGO_DB_NAME": PLAIN_STRING,
+    "DJANGO_DB_PORT": PLAIN_STRING,
+    "DJANGO_DB_USER": PLAIN_STRING,
+    "DJANGO_GITHUB_APP_ID": PLAIN_STRING,
+    "DJANGO_GITHUB_APP_INSTALLATION_ID": PLAIN_STRING,
+    "DJANGO_REDIS_AUTH_ENABLED": PLAIN_STRING,
+    "DJANGO_REDIS_HOST": PLAIN_STRING,
+    "DJANGO_REDIS_PORT": PLAIN_STRING,
+    "DJANGO_REDIS_USE_TLS": PLAIN_STRING,
+    "DJANGO_RELEASE_VERSION": PLAIN_STRING,
+    "DJANGO_SETTINGS_MODULE": PLAIN_STRING,
+    "NEXT_SERVER_CSRF_URL": PLAIN_STRING,
+    "NEXT_SERVER_DISABLE_SSR": PLAIN_STRING,
+    "NEXT_SERVER_GITHUB_CLIENT_ID": PLAIN_STRING,
+    "NEXT_SERVER_GRAPHQL_URL": PLAIN_STRING,
+    "NEXTAUTH_URL": PLAIN_STRING,
+}
+
 
 def parameter_type(name: str) -> str:
     """Return the SSM parameter type for an environment variable name.
+
+    Terraform-designated types are authoritative; other names fall back to a
+    keyword heuristic.
 
     Args:
         name (str): The environment variable name.
 
     Returns:
-        str: ``SecureString`` for secret-like names, ``String`` otherwise.
+        str: ``SecureString`` for Terraform-designated or secret-like names,
+            ``String`` otherwise.
 
     """
     upper = name.upper()
+    if upper in TERRAFORM_PARAMETER_TYPES:
+        return TERRAFORM_PARAMETER_TYPES[upper]
     if any(hint in upper for hint in SECRET_NAME_HINTS):
         return SECURE_STRING
     return PLAIN_STRING

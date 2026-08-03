@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -10,7 +11,7 @@ import pytest
 from botocore.exceptions import ClientError
 
 from scripts.errors import MissingEnvFileError
-from scripts.load_env import LoadEnv, parameter_type
+from scripts.load_env import TERRAFORM_PARAMETER_TYPES, LoadEnv, parameter_type
 
 
 def write_env_file(path: Path, content: str) -> None:
@@ -26,7 +27,7 @@ def ssm_client() -> MagicMock:
 
 
 @pytest.fixture
-def loader(ssm_client: MagicMock, tmp_path: Path) -> LoadEnv:
+def loader(ssm_client: MagicMock, tmp_path: Path) -> Iterator[LoadEnv]:
     """Yield a LoadEnv pointed at the given SSM client and a temp repo root."""
     with patch("scripts.load_env.aws_client", return_value=ssm_client):
         yield LoadEnv(localstack=MagicMock(), root_dir=tmp_path)
@@ -37,16 +38,25 @@ class TestParameterType:
 
     def test_returns_secure_string_for_secret_names(self) -> None:
         for name in (
-            "GITHUB_TOKEN",
+            "DJANGO_ELEVENLABS_API_KEY",
+            "DJANGO_REDIS_PASSWORD",
             "DJANGO_SECRET_KEY",
             "DJANGO_SENTRY_DSN",
-            "DJANGO_REDIS_PASSWORD",
+            "DJANGO_SLACK_CLIENT_SECRET",
+            "GITHUB_TOKEN",
         ):
             assert parameter_type(name) == "SecureString"
 
     def test_returns_string_for_plain_names(self) -> None:
         for name in ("DJANGO_CONFIGURATION", "NEXT_PUBLIC_API_URL"):
             assert parameter_type(name) == "String"
+
+    def test_uses_terraform_type_when_name_lacks_secret_hint(self) -> None:
+        assert parameter_type("DJANGO_ALGOLIA_APPLICATION_ID") == "SecureString"
+
+    def test_terraform_parameter_types_are_authoritative(self) -> None:
+        for name, param_type in TERRAFORM_PARAMETER_TYPES.items():
+            assert parameter_type(name) == param_type
 
 
 class TestGetEnvVars:

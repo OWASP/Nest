@@ -118,13 +118,13 @@ def main() -> None:
         "start-localstack": runner.start_localstack,
         "stop-localstack": runner.stop_localstack,
         "provision-infra": runner.provision_infra,
+        "load-env-params": lambda: runner.load_env_params(
+            dry_run=args.dry_run, overwrite=args.overwrite
+        ),
     }
 
     try:
-        if args.command == "load-env-params":
-            runner.load_env_params(dry_run=args.dry_run, overwrite=args.overwrite)
-        else:
-            commands[args.command]()
+        commands[args.command]()
     except InfrastructureError as exc:
         sys.stderr.write(f"Error: {exc}\n")
         sys.exit(1)
