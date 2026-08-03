@@ -9,13 +9,16 @@ provider "aws" {
 }
 
 variables {
-  aws_role_external_id = "localstack-staging-external-id"
-  environment          = "staging"
-  project_name         = "nest"
+  project_name = "nest"
 }
 
 run "bootstrap_integration_apply_staging" {
   command = apply
+
+  variables {
+    aws_role_external_id = "localstack-staging-external-id"
+    environment          = "staging"
+  }
 
   assert {
     condition     = aws_iam_role.terraform.name == "${var.project_name}-${var.environment}-terraform"
