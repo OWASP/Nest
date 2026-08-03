@@ -1,4 +1,22 @@
-mock_provider "aws" {}
+mock_provider "aws" {
+  mock_resource "aws_iam_role" {
+    defaults = {
+      arn = "arn:aws:iam::123456789012:role/mock-role"
+    }
+  }
+
+  mock_resource "aws_ecs_task_definition" {
+    defaults = {
+      arn = "arn:aws:ecs:us-east-2:123456789012:task-definition/mock:1"
+    }
+  }
+
+  mock_resource "aws_iam_policy" {
+    defaults = {
+      arn = "arn:aws:iam::123456789012:policy/mock-policy"
+    }
+  }
+}
 
 variables {
   app_security_group_ids = ["sg-backend", "sg-frontend", "sg-tasks"]
@@ -8,7 +26,7 @@ variables {
   kms_key_arn            = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name           = "nest"
   subnet_ids             = ["subnet-1", "subnet-2"]
-  vm_image               = "victoriametrics/victoria-metrics:test"
+  vm_image               = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
   vm_port                = 8428
   vpc_id                 = "vpc-12345"
 }
@@ -64,11 +82,16 @@ run "test_vm_ingest_from_source_security_group_only" {
 }
 
 run "test_efs_ingress_from_vm_only" {
-  command = plan
+  command = apply
 
   assert {
     condition     = aws_security_group_rule.efs_from_vm.from_port == 2049 && aws_security_group_rule.efs_from_vm.type == "ingress"
-    error_message = "EFS must only allow NFS ingress from the VictoriaMetrics security group."
+    error_message = "EFS must only allow NFS ingress on port 2049."
+  }
+
+  assert {
+    condition     = aws_security_group_rule.efs_from_vm.source_security_group_id == aws_security_group.vm.id
+    error_message = "EFS ingress must come only from the VictoriaMetrics security group."
   }
 }
 
@@ -109,11 +132,16 @@ run "test_task_uses_arm64" {
 }
 
 run "test_task_mounts_encrypted_efs_volume" {
-  command = plan
+  command = apply
 
   assert {
-    condition     = [for v in aws_ecs_task_definition.vm.volume : v.efs_volume_configuration[0].transit_encryption][0] == "ENABLED"
-    error_message = "The task EFS volume must enable transit encryption."
+    condition     = one([for v in aws_ecs_task_definition.vm.volume : v if v.name == "vm-data"]).efs_volume_configuration[0].transit_encryption == "ENABLED"
+    error_message = "The vm-data volume must enable transit encryption."
+  }
+
+  assert {
+    condition     = one([for v in aws_ecs_task_definition.vm.volume : v if v.name == "vm-data"]).efs_volume_configuration[0].file_system_id == aws_efs_file_system.vm.id
+    error_message = "The vm-data volume must reference the module's EFS file system."
   }
 }
 
@@ -137,5 +165,19 @@ run "test_cluster_name_format" {
   assert {
     condition     = aws_ecs_cluster.vm.name == "${var.project_name}-${var.environment}-observability-cluster"
     error_message = "ECS cluster name must follow the {project}-{environment}-observability-cluster format."
+  }
+}
+
+run "test_common_tags_applied" {
+  command = plan
+
+  assert {
+    condition     = alltrue([for k, v in var.common_tags : lookup(aws_efs_file_system.vm.tags, k, null) == v])
+    error_message = "common_tags must be applied to the EFS file system."
+  }
+
+  assert {
+    condition     = alltrue([for k, v in var.common_tags : lookup(aws_ecs_cluster.vm.tags, k, null) == v])
+    error_message = "common_tags must be applied to the ECS cluster."
   }
 }

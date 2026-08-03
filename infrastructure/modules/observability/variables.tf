@@ -1,6 +1,11 @@
 variable "app_security_group_ids" {
   description = "Security group IDs of the application tasks allowed to send metrics to VictoriaMetrics."
   type        = list(string)
+
+  validation {
+    condition     = length(var.app_security_group_ids) > 0
+    error_message = "app_security_group_ids must contain at least one security group."
+  }
 }
 
 variable "assign_public_ip" {
@@ -44,6 +49,11 @@ variable "project_name" {
 variable "subnet_ids" {
   description = "The private subnet IDs for the EFS mount targets and the VictoriaMetrics task."
   type        = list(string)
+
+  validation {
+    condition     = length(var.subnet_ids) > 0
+    error_message = "subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "vm_cpu" {
@@ -55,6 +65,11 @@ variable "vm_cpu" {
 variable "vm_image" {
   description = "The VictoriaMetrics container image (including digest)."
   type        = string
+
+  validation {
+    condition     = can(regex("@sha256:[0-9a-f]{64}$", var.vm_image))
+    error_message = "vm_image must be pinned to an immutable digest (e.g., repo:tag@sha256:...)."
+  }
 }
 
 variable "vm_memory" {
@@ -67,6 +82,11 @@ variable "vm_port" {
   description = "The port VictoriaMetrics listens on for ingest and queries."
   type        = number
   default     = 8428
+
+  validation {
+    condition     = var.vm_port > 0 && var.vm_port < 65536
+    error_message = "vm_port must be between 1 and 65535."
+  }
 }
 
 variable "vm_retention_period" {

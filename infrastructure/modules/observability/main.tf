@@ -52,8 +52,6 @@ locals {
   }
 }
 
-data "aws_caller_identity" "current" {}
-
 resource "aws_security_group" "vm" {
   description = "Security group for the VictoriaMetrics task"
   name        = "${local.name_prefix}-vm-sg"
@@ -120,6 +118,10 @@ resource "aws_efs_file_system" "vm" {
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-vm"
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_efs_mount_target" "vm" {
@@ -180,28 +182,12 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 }
 
 resource "aws_iam_policy" "ecs_task_execution_policy" {
-  description = "Policy for the VictoriaMetrics ECS task execution - ECR and CloudWatch Logs access."
+  description = "Policy for the VictoriaMetrics ECS task execution - CloudWatch Logs access."
   name        = "${local.name_prefix}-execution-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        # https://docs.aws.amazon.com/AmazonECR/latest/public/public-repository-policies.html#repository-policy-vs-iam-policy
-        # NOSEMGREP: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
-        Action   = "ecr:GetAuthorizationToken"
-        Effect   = "Allow"
-        Resource = "*" # NOSONAR
-      },
-      {
-        Action = [
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:BatchGetImage",
-          "ecr:GetDownloadUrlForLayer"
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:ecr:${var.aws_region}:${data.aws_caller_identity.current.account_id}:repository/*"
-      },
       {
         Action = [
           "logs:CreateLogStream",
@@ -267,4 +253,6 @@ resource "aws_ecs_service" "vm" {
     security_groups  = [aws_security_group.vm.id]
     subnets          = var.subnet_ids
   }
+
+  depends_on = [aws_efs_mount_target.vm]
 }
