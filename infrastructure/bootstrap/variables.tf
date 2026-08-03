@@ -11,7 +11,7 @@ variable "aws_role_external_id" {
 }
 
 variable "environment" {
-  description = "The environment name (staging or production)."
+  description = "The environment to create Terraform roles for."
   type        = string
 
   validation {
