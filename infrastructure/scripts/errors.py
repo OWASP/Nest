@@ -57,3 +57,16 @@ class MissingEnvVarError(InfrastructureError):
 
         """
         super().__init__(f"{env_var} is not set in the .env file.")
+
+
+class MissingEnvFileError(InfrastructureError):
+    """Raised when a required .env file is missing."""
+
+    def __init__(self, path: str) -> None:
+        """Initialize the missing env file error.
+
+        Args:
+            path (str): The path to the missing .env file.
+
+        """
+        super().__init__(f"{path} not found.")

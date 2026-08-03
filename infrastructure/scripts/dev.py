@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from scripts.commands import CommandRunner
 from scripts.errors import InfrastructureError, MissingEnvVarError
+from scripts.load_env import LoadEnv
 from scripts.localstack import LocalStack
 from scripts.provision import ProvisionInfra
 
@@ -40,6 +41,7 @@ class LocalInfrastructureRunner:
         self.commands = commands or CommandRunner()
         self.localstack = localstack or LocalStack(self.commands)
         self.provisioner = ProvisionInfra(self.commands, localstack=self.localstack)
+        self.loadenv = LoadEnv(localstack=self.localstack)
 
     def start_localstack(self) -> None:
         """Start LocalStack for local development.
@@ -66,6 +68,17 @@ class LocalInfrastructureRunner:
         """Create resources on LocalStack and push the backend/frontend images."""
         self.provisioner.run()
 
+    def load_env_params(self, *, dry_run: bool = False, overwrite: bool = False) -> None:
+        """Upload local .env variables to the LocalStack SSM Parameter Store.
+
+        Args:
+            dry_run (bool): Print the parameters that would be uploaded instead of
+                uploading them.
+            overwrite (bool): Overwrite parameters that already exist.
+
+        """
+        self.loadenv.upload(dry_run=dry_run, overwrite=overwrite)
+
 
 def main() -> None:
     """Bootstrap and run local infrastructure workflows."""
@@ -81,6 +94,23 @@ def main() -> None:
         help="Create resources on LocalStack and push images",
     )
 
+    load_env_params_parser = subparsers.add_parser(
+        "load-env-params",
+        help="Upload local .env variables to LocalStack SSM Parameter Store",
+    )
+    load_env_params_parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="Print what would be uploaded without uploading",
+    )
+    load_env_params_parser.add_argument(
+        "-o",
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing parameters",
+    )
+
     args = parser.parse_args()
     runner = LocalInfrastructureRunner()
 
@@ -91,7 +121,10 @@ def main() -> None:
     }
 
     try:
-        commands[args.command]()
+        if args.command == "load-env-params":
+            runner.load_env_params(dry_run=args.dry_run, overwrite=args.overwrite)
+        else:
+            commands[args.command]()
     except InfrastructureError as exc:
         sys.stderr.write(f"Error: {exc}\n")
         sys.exit(1)

@@ -74,6 +74,15 @@ class TestLocalInfrastructureRunner:
 
         runner.provisioner.run.assert_called_once()
 
+    def test_load_env_params(self) -> None:
+        localstack = MagicMock(spec=LocalStack)
+        runner = self.build_runner(localstack)
+        runner.loadenv = MagicMock()
+
+        runner.load_env_params(dry_run=True, overwrite=True)
+
+        runner.loadenv.upload.assert_called_once_with(dry_run=True, overwrite=True)
+
 
 class TestMain:
     """Tests for the ``main`` command dispatcher."""
@@ -98,6 +107,24 @@ class TestMain:
         main()
 
         mock_runner_class.return_value.provision_infra.assert_called_once()
+
+    @patch("sys.argv", ["scripts.dev", "load-env-params"])
+    @patch("scripts.dev.LocalInfrastructureRunner")
+    def test_dispatches_load_env_params(self, mock_runner_class: MagicMock) -> None:
+        main()
+
+        mock_runner_class.return_value.load_env_params.assert_called_once_with(
+            dry_run=False, overwrite=False
+        )
+
+    @patch("sys.argv", ["scripts.dev", "load-env-params", "--dry-run", "--overwrite"])
+    @patch("scripts.dev.LocalInfrastructureRunner")
+    def test_dispatches_load_env_params_with_flags(self, mock_runner_class: MagicMock) -> None:
+        main()
+
+        mock_runner_class.return_value.load_env_params.assert_called_once_with(
+            dry_run=True, overwrite=True
+        )
 
     @patch("sys.argv", ["scripts.dev", "start-localstack"])
     @patch("scripts.dev.LocalInfrastructureRunner")
