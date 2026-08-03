@@ -241,9 +241,9 @@ data "aws_iam_policy_document" "part_one" {
       "ecs:UpdateService"
     ]
     resources = [
-      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
-      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:service/${var.project_name}-${var.environment}-*/*",
       "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster/${var.project_name}-${var.environment}-*",
+      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:service/${var.project_name}-${var.environment}-*/*",
+      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
       "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task/${var.project_name}-${var.environment}-*/*"
     ]
   }
@@ -385,10 +385,10 @@ data "aws_iam_policy_document" "part_two" {
       "elasticloadbalancing:SetSecurityGroups",
     ]
     resources = [
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener-rule/app/${var.project_name}-${var.environment}-*/*/*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener/app/${var.project_name}-${var.environment}-*/*/*",
       "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*",
       "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:targetgroup/${var.project_name}-${var.environment}-*/*",
-      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener/app/${var.project_name}-${var.environment}-*/*/*",
-      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener-rule/app/${var.project_name}-${var.environment}-*/*/*/*",
     ]
   }
 
