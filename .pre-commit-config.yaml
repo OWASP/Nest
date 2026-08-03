@@ -18,7 +18,10 @@ repos:
         args:
           - --config
           - .bake.toml
-        exclude: ^backend/
+        # Component Makefiles use root-relative includes and call shared targets; mbake
+        # validates each file in isolation from its own directory, so only the root
+        # Makefile can be checked.
+        exclude: ^(backend|cspell|docs|e2e|frontend|infrastructure|make|tools)/
 
   - repo: https://github.com/adrienverge/yamllint.git
     rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # v1.38.0
@@ -31,7 +34,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: 60814e259af5e9b712edbd18af333d2650624735  # v1.107.0
+    rev: 05fd71a57a467ccf5598f7e836d3af4cf9225abb  # v1.108.0
     hooks:
       - id: terraform_providers_lock
         args:
@@ -49,15 +52,20 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 3b3f7c3f57fe9925356faf5fe6230835138be230  # v0.15.17
+    rev: 01a675ea018f2fb714478a5ffb83fcea8374bb06  # v0.15.21
     hooks:
       - id: ruff-check
         args:
+          - --config
+          - ruff.toml
           - --fix
       - id: ruff-format
+        args:
+          - --config
+          - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: a8264ddb425b07a8bd1bfd758c4d8d938ed064ad  # v1.39.2
+    rev: fefa6e957dc4143c20fd42201dec463ec190f847  # v1.40.4
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -85,12 +93,12 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # v2.1.0
+    rev: 0cbe8f6e54466b1b48f9d41f44abb4d06c061b5e  # v2.2.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.317.2
-          - strawberry-graphql-django==0.86.3
+          - strawberry-graphql==0.320.4
+          - strawberry-graphql-django==0.86.4
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
           - types-PyYAML==6.0.12.20260518
@@ -114,6 +122,8 @@ repos:
       - id: check-yaml
         exclude: pnpm-lock\.yaml$
       - id: detect-private-key
+        # Armor markers appear in the renewer/export helpers and test fixtures.
+        exclude: ^tools/(security/renew_security_txt\.py|tests/security/renew_security_txt_test\.py)$
       - id: end-of-file-fixer
         exclude: frontend/src/types/__generated__
         exclude_types:
@@ -147,14 +157,14 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: f073523dfd27b01ec7997cc970a2a7b36c303460  # v2.25.0
+    rev: cf78bb920f358be6dea099e6b1fd6f67bccb0955  # v2.25.2
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
           - toml-fmt-common<1.3.3
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # v1.25.2
+    rev: e3eebf65325ccc992422292cb7a4baee967cf815  # v1.26.1
     hooks:
       - id: zizmor
         args:

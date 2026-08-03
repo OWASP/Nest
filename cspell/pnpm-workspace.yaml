@@ -1,3 +1,5 @@
+auditConfig: {ignoreGhsas: null}
+
 ignoreScripts: true
 
 # 21 days (in minutes)
