@@ -124,13 +124,11 @@ run "test_shared_bucket_permissions_non_production" {
 
   assert {
     condition = alltrue([
-      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}/*"),
-      alltrue([
-        for action in one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action :
-        contains(["s3:GetBucketLocation", "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"], action)
-      ]),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}/*"),
+      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3WriteManagement"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}/*"),
+      !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
     ])
-    error_message = "Non-production environments must not have write access to the shared data bucket."
+    error_message = "Non-production environments must have read access to the shared data bucket but no write access."
   }
 }
 
@@ -143,9 +141,10 @@ run "test_shared_bucket_permissions_production" {
 
   assert {
     condition = alltrue([
-      !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
       contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3WriteManagement"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
+      !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
     ])
-    error_message = "The environment with management privileges must manage the shared data bucket via S3Mgmt and not use S3SharedBucketRestricted."
+    error_message = "The environment with management privileges must have full read and write access to the shared data bucket via S3Management and S3WriteManagement."
   }
 }

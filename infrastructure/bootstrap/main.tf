@@ -529,15 +529,13 @@ data "aws_iam_policy_document" "part_two" {
     sid    = "S3Management"
     effect = "Allow"
     actions = [
-      "s3:CreateBucket",
-      "s3:DeleteBucket",
-      "s3:DeleteBucketPolicy",
-      "s3:DeleteObject",
       "s3:GetAccelerateConfiguration",
       "s3:GetBucketAcl",
       "s3:GetBucketCors",
+      "s3:GetBucketLocation",
       "s3:GetBucketLogging",
       "s3:GetBucketObjectLockConfiguration",
+      "s3:GetBucketOwnershipControls",
       "s3:GetBucketPolicy",
       "s3:GetBucketPublicAccessBlock",
       "s3:GetBucketRequestPayment",
@@ -547,10 +545,31 @@ data "aws_iam_policy_document" "part_two" {
       "s3:GetEncryptionConfiguration",
       "s3:GetLifecycleConfiguration",
       "s3:GetObject",
+      "s3:GetObjectVersion",
       "s3:GetReplicationConfiguration",
       "s3:ListBucket",
+      "s3:ListBucketVersions",
+    ]
+    resources = [
+      "arn:aws:s3:::${var.project_name}-${var.environment}-*",
+      "arn:aws:s3:::${var.project_name}-${var.environment}-*/*",
+      "arn:aws:s3:::${var.shared_data_bucket_name}",
+      "arn:aws:s3:::${var.shared_data_bucket_name}/*",
+    ]
+  }
+
+  statement {
+    sid    = "S3WriteManagement"
+    effect = "Allow"
+    actions = [
+      "s3:CreateBucket",
+      "s3:DeleteBucket",
+      "s3:DeleteBucketPolicy",
+      "s3:DeleteObject",
+      "s3:PutBucketAcl",
       "s3:PutBucketLogging",
       "s3:PutBucketObjectLockConfiguration",
+      "s3:PutBucketOwnershipControls",
       "s3:PutBucketPolicy",
       "s3:PutBucketPublicAccessBlock",
       "s3:PutBucketTagging",
@@ -569,24 +588,6 @@ data "aws_iam_policy_document" "part_two" {
         "arn:aws:s3:::${var.shared_data_bucket_name}/*",
       ] : []
     )
-  }
-
-  dynamic "statement" {
-    for_each = var.environment != "production" ? [1] : []
-    content {
-      sid    = "S3SharedBucketRestricted"
-      effect = "Allow"
-      actions = [
-        "s3:GetBucketLocation",
-        "s3:GetObject",
-        "s3:GetObjectVersion",
-        "s3:ListBucket",
-      ]
-      resources = [
-        "arn:aws:s3:::${var.shared_data_bucket_name}",
-        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
-      ]
-    }
   }
 }
 
