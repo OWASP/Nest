@@ -25,7 +25,7 @@ class CertificateQuery:
     @strawberry_django.field
     def certificate(self, certificate_id: str) -> CertificateNode | None:
         """Resolve certificate by ID."""
-        if not CERTIFICATE_ID_RE.match(certificate_id):
+        if not CERTIFICATE_ID_RE.fullmatch(certificate_id):
             return None
 
         try:
