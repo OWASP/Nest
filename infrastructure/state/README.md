@@ -1,6 +1,5 @@
-## Bootstrap State Bucket
-
-A single state bucket is used for both staging and production bootstrap resources. For object key layout and usage instructions, see [infrastructure/bootstrap/README.md](../bootstrap/README.md).
+> [!NOTE]
+> A single state bucket is used for bootstrap resources, see [infrastructure/bootstrap/README.md](../bootstrap/README.md).
 
 ## Inline Permissions
 

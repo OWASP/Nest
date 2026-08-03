@@ -1,41 +1,13 @@
-# Bootstrap IAM Infrastructure
+## Users
 
-This root directory bootstraps IAM resources for OWASP Nest:
+`bootstrap` creates a role for each environment that IAM users can assume.
+The `var.environment` is used to create an environment specific role.
+Only a single role is created per apply, multiple environments require multiple runs.
+Ensure your IAM Users follow the naming convention:
 
-- Provisions environment-scoped IAM roles (`nest-${var.environment}-terraform`) assumed by CI/CD pipelines.
-- Configures IAM policies for managing environment AWS resources.
+- nest-${var.environment}
 
-## IAM Roles & Users
-
-- **Role Created (per apply)**:
-  - `nest-${var.environment}-terraform`: Created for the active environment (`nest-staging-terraform` or `nest-production-terraform`).
-- **IAM User Access**:
-  - IAM users (e.g. `nest-bootstrap`, `nest-staging`, `nest-production`) assume these roles to execute deployment tasks.
-
-## Multi-Environment Single-Root Design
-
-- A single root directory is used to deploy both `staging` and `production` resources.
-- The target environment is injected via the `environment` Terraform variable.
-
-### Environment & State Key Alignment
-
-Always align the `environment` variable with the matching S3 backend state key:
-
-- **Staging**:
-  - `environment = "staging"`
-  - State key: `staging/bootstrap/terraform.tfstate`
-- **Production**:
-  - `environment = "production"`
-  - State key: `production/bootstrap/terraform.tfstate`
-
-> [!WARNING]
-> Ensure the `environment` variable matches the backend state key to prevent state cross-contamination.
-
-## Local Execution
-
-For local execution instructions and walkthroughs, see [infrastructure/README.md](../README.md).
-
----
+Example: `nest-staging`, `nest-bootstrap`, etc.
 
 ## Inline Permissions
 
