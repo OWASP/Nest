@@ -63,7 +63,7 @@ Follow these steps to set up the infrastructure:
     ```
 
   > [!NOTE]
-  > The following steps demonstrate bootstrapping the **staging** environment. Bootstrapping **production** requires identical steps using the production configuration files (`terraform.production.tfbackend.example` and `terraform.production.tfvars.example`).
+  > The following steps bootstrap the **staging** environment's IAM role. Bootstrapping **production** requires identical steps using the production-specific files (`terraform.production.tfbackend.example` and `terraform.production.tfvars.example`).
 
 - Copy the example files into your local configuration files (for staging):
 
@@ -77,13 +77,13 @@ Follow these steps to set up the infrastructure:
   > - Update `AWS_ROLE_EXTERNAL_ID` in `terraform.tfvars` with a randomly generated ID of your choice.
   > - This ID is required when configuring the main infrastructure profile in the next step.
 
-- Initialize Terraform with the backend configuration:
+- Initialize Terraform if needed:
 
     ```bash
     terraform init -backend-config=terraform.tfbackend
     ```
 
-- Apply the changes to create the environment-scoped bootstrap resources:
+- Apply the changes to create the bootstrap resources:
 
     ```bash
     terraform apply
