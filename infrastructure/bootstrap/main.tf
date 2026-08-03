@@ -9,6 +9,17 @@ terraform {
   }
 }
 
+locals {
+  common_tags = {
+    Environment = "bootstrap"
+    ManagedBy   = "Terraform"
+    Project     = var.project_name
+  }
+
+  # IAM managed policy size limit in characters
+  iam_policy_size_limit = 6144
+}
+
 data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "part_one" {
@@ -17,13 +28,11 @@ data "aws_iam_policy_document" "part_one" {
     effect = "Allow"
     actions = [
       "acm:DescribeCertificate",
-      "acm:ListCertificates",
       "application-autoscaling:DescribeScalableTargets",
       "application-autoscaling:DescribeScalingActivities",
       "application-autoscaling:DescribeScalingPolicies",
       "ec2:Describe*",
       "ecr:DescribeRepositories",
-      "ecr:GetAuthorizationToken",
       "ecs:DescribeTaskDefinition",
       "elasticache:DescribeCacheClusters",
       "elasticache:DescribeCacheSubnetGroups",
@@ -49,6 +58,7 @@ data "aws_iam_policy_document" "part_one" {
     actions = [
       "acm:AddTagsToCertificate",
       "acm:DeleteCertificate",
+      "acm:ListCertificates",
       "acm:ListTagsForCertificate",
       "acm:RemoveTagsFromCertificate",
       "acm:RequestCertificate",
@@ -59,7 +69,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "CWLogsMgmt"
+    sid    = "CWLogsManagement"
     effect = "Allow"
     actions = [
       "logs:AssociateKmsKey",
@@ -93,7 +103,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "ElastiCacheMgmt"
+    sid    = "ElastiCacheManagement"
     effect = "Allow"
     actions = [
       "elasticache:AddTagsToResource",
@@ -165,7 +175,14 @@ data "aws_iam_policy_document" "part_one" {
     resources = ["*"]
   }
 
-
+  statement {
+    sid    = "ECRAuth"
+    effect = "Allow"
+    actions = [
+      "ecr:GetAuthorizationToken",
+    ]
+    resources = ["*"]
+  }
 
   statement {
     sid    = "ECRManagement"
@@ -232,7 +249,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "ECSServiceMgmt"
+    sid    = "ECSServiceManagement"
     effect = "Allow"
     actions = [
       "ecs:CreateService",
@@ -343,14 +360,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid       = "ECSTaskDefinitionTagging"
-    effect    = "Allow"
-    actions   = ["ecs:TagResource"]
-    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*"]
-  }
-
-  statement {
-    sid    = "ELBMgmt"
+    sid    = "ELBManagement"
     effect = "Allow"
     actions = [
       "elasticloadbalancing:AddTags",
@@ -383,7 +393,140 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "S3Mgmt"
+    sid    = "EventBridgeManagement"
+    effect = "Allow"
+    actions = [
+      "events:DeleteRule",
+      "events:DescribeRule",
+      "events:ListTagsForResource",
+      "events:ListTargetsByRule",
+      "events:PutRule",
+      "events:PutTargets",
+      "events:RemoveTargets",
+      "events:TagResource",
+      "events:UntagResource",
+    ]
+    resources = [
+      "arn:aws:events:*:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-${var.environment}-*",
+    ]
+  }
+
+  statement {
+    sid    = "IAMManagement"
+    effect = "Allow"
+    actions = [
+      "iam:AttachRolePolicy",
+      "iam:CreatePolicy",
+      "iam:CreatePolicyVersion",
+      "iam:CreateRole",
+      "iam:DeletePolicy",
+      "iam:DeletePolicyVersion",
+      "iam:DeleteRole",
+      "iam:DeleteRolePolicy",
+      "iam:DetachRolePolicy",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:GetRole",
+      "iam:GetRolePolicy",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListInstanceProfilesForRole",
+      "iam:ListPolicyVersions",
+      "iam:ListRolePolicies",
+      "iam:PutRolePolicy",
+      "iam:TagPolicy",
+      "iam:TagRole",
+      "iam:UntagPolicy",
+      "iam:UntagRole",
+      "iam:UpdateAssumeRolePolicy",
+      "iam:UpdateRole",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-*-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${var.environment}-*",
+    ]
+  }
+
+  statement {
+    sid    = "IAMPassRole"
+    effect = "Allow"
+    actions = [
+      "iam:PassRole",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${var.environment}-*",
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values = [
+        "ecs-tasks.amazonaws.com",
+        "events.amazonaws.com",
+        "rds.amazonaws.com",
+        "vpc-flow-logs.amazonaws.com"
+      ]
+    }
+  }
+
+  statement {
+    sid    = "KMSManagement"
+    effect = "Allow"
+    actions = [
+      "kms:CreateKey",
+      "kms:DisableKeyRotation",
+      "kms:EnableKeyRotation",
+      "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus",
+      "kms:ListAliases",
+      "kms:ListResourceTags",
+      "kms:PutKeyPolicy",
+      "kms:ScheduleKeyDeletion",
+      "kms:TagResource",
+      "kms:UntagResource"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "KMSKeyUsageAndPolicy"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:Encrypt",
+      "kms:GenerateDataKey",
+      "kms:UpdateKeyDescription",
+    ]
+    resources = ["*"]
+
+    condition {
+      test     = "ForAnyValue:StringEquals"
+      variable = "kms:ResourceAliases"
+      values = [
+        "alias/${var.project_name}-state",
+        "alias/${var.project_name}-${var.environment}-state",
+        "alias/${var.project_name}-${var.environment}"
+      ]
+    }
+  }
+
+  statement {
+    sid    = "KMSAliasManagement"
+    effect = "Allow"
+    actions = [
+      "kms:CreateAlias",
+      "kms:DeleteAlias",
+      "kms:UpdateAlias"
+    ]
+    resources = [
+      "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:alias/${var.project_name}-*",
+      "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:key/*"
+    ]
+  }
+
+  statement {
+    sid    = "S3Management"
     effect = "Allow"
     actions = [
       "s3:CreateBucket",
@@ -447,7 +590,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "SecretsManagerMgmt"
+    sid    = "SecretsManagerManagement"
     effect = "Allow"
     actions = [
       "secretsmanager:CreateSecret",
@@ -468,7 +611,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "SSMMgmt"
+    sid    = "SSMManagement"
     effect = "Allow"
     actions = [
       "ssm:AddTagsToResource",
@@ -484,149 +627,6 @@ data "aws_iam_policy_document" "part_two" {
 }
 
 data "aws_iam_policy_document" "part_three" {
-  statement {
-    sid    = "EventBridgeMgmt"
-    effect = "Allow"
-    actions = [
-      "events:DeleteRule",
-      "events:DescribeRule",
-      "events:ListTagsForResource",
-      "events:ListTargetsByRule",
-      "events:PutRule",
-      "events:PutTargets",
-      "events:RemoveTargets",
-      "events:TagResource",
-      "events:UntagResource",
-    ]
-    resources = [
-      "arn:aws:events:*:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-${var.environment}-*",
-    ]
-  }
-
-  statement {
-    sid    = "IAMMgmt"
-    effect = "Allow"
-    actions = [
-      "iam:AttachRolePolicy",
-      "iam:CreatePolicy",
-      "iam:CreatePolicyVersion",
-      "iam:CreateRole",
-      "iam:DeletePolicy",
-      "iam:DeletePolicyVersion",
-      "iam:DeleteRole",
-      "iam:DeleteRolePolicy",
-      "iam:DetachRolePolicy",
-      "iam:GetPolicy",
-      "iam:GetPolicyVersion",
-      "iam:GetRole",
-      "iam:GetRolePolicy",
-      "iam:ListAttachedRolePolicies",
-      "iam:ListInstanceProfilesForRole",
-      "iam:ListPolicyVersions",
-      "iam:ListRolePolicies",
-      "iam:PutRolePolicy",
-      "iam:TagPolicy",
-      "iam:TagRole",
-      "iam:UntagPolicy",
-      "iam:UntagRole",
-      "iam:UpdateAssumeRolePolicy",
-      "iam:UpdateRole",
-    ]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-${var.environment}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-*-${var.environment}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${var.environment}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${var.environment}-*",
-    ]
-  }
-
-  statement {
-    sid    = "IAMPassRole"
-    effect = "Allow"
-    actions = [
-      "iam:PassRole",
-    ]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${var.environment}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${var.environment}-*",
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "iam:PassedToService"
-      values = [
-        "ecs-tasks.amazonaws.com",
-        "events.amazonaws.com",
-        "rds.amazonaws.com",
-        "vpc-flow-logs.amazonaws.com"
-      ]
-    }
-  }
-
-  statement {
-    sid    = "KMSMgmt"
-    effect = "Allow"
-    actions = [
-      "kms:CreateKey",
-      "kms:DisableKeyRotation",
-      "kms:EnableKeyRotation",
-      "kms:GetKeyPolicy",
-      "kms:GetKeyRotationStatus",
-      "kms:ListAliases",
-      "kms:ListResourceTags",
-      "kms:PutKeyPolicy",
-      "kms:ScheduleKeyDeletion",
-      "kms:TagResource",
-      "kms:UntagResource"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "KMSKeyUsageAndPolicy"
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt",
-      "kms:Encrypt",
-      "kms:GenerateDataKey",
-      "kms:UpdateKeyDescription",
-    ]
-    resources = ["*"]
-
-    condition {
-      test     = "ForAnyValue:StringEquals"
-      variable = "kms:ResourceAliases"
-      values = [
-        "alias/${var.project_name}-state",
-        "alias/${var.project_name}-${var.environment}-state",
-        "alias/${var.project_name}-${var.environment}"
-      ]
-    }
-  }
-
-  statement {
-    sid    = "KMSAliasManagement"
-    effect = "Allow"
-    actions = [
-      "kms:CreateAlias",
-      "kms:DeleteAlias",
-      "kms:UpdateAlias"
-    ]
-    resources = [
-      "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:alias/${var.project_name}-*",
-      "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:key/*"
-    ]
-  }
-}
-
-locals {
-  common_tags = {
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-    Project     = var.project_name
-  }
-
-  # IAM managed policy size limit in characters
-  iam_policy_size_limit = 6144
 }
 
 resource "aws_iam_role" "terraform" {

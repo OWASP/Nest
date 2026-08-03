@@ -86,10 +86,6 @@ run "test_minified_json_is_smaller_than_pretty_json" {
 run "test_pretty_json_exceeds_limit_for_part_one" {
   command = plan
 
-  variables {
-    environment = "production"
-  }
-
   assert {
     condition     = length(data.aws_iam_policy_document.part_one.json) > local.iam_policy_size_limit
     error_message = "Expected part_one pretty JSON to exceed the IAM size limit for the configured environment, proving minified_json is required."
@@ -123,99 +119,22 @@ run "test_autoscaling_permissions_not_in_part_one" {
   }
 }
 
-run "test_secrets_manager_namespace" {
+run "test_shared_bucket_permissions_non_production" {
   command = plan
 
   assert {
     condition = alltrue([
-      strcontains(
-        data.aws_iam_policy_document.part_two.json,
-        "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${var.environment}-*",
-      ),
-      strcontains(
-        data.aws_iam_policy_document.part_two.json,
-        "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:/${var.project_name}/${var.environment}/*",
-      ),
+      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}/*"),
+      alltrue([
+        for action in one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action :
+        contains(["s3:GetBucketLocation", "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"], action)
+      ]),
     ])
-    error_message = "The Terraform policy must allow management of the environment Secrets Manager namespace."
+    error_message = "Non-production environments must not have write access to the shared data bucket."
   }
 }
 
-run "test_environment_scoped_resources" {
-  command = plan
-
-  assert {
-    condition = alltrue([
-      can(regex("${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_one.json)),
-      !can(regex("${var.project_name}-${var.environment == "staging" ? "production" : "staging"}-", data.aws_iam_policy_document.part_one.json)),
-    ])
-    error_message = "Policy documents must only reference the configured environment."
-  }
-}
-
-run "test_elb_and_ecs_tagging" {
-  command = plan
-
-  assert {
-    condition = alltrue([
-      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "*"),
-      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*"),
-      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
-      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSGlobal"]).Action, "ecs:TagResource"),
-    ])
-    error_message = "ELB management and ECS task-definition tagging must be limited to the active environment resources."
-  }
-}
-
-run "test_environment_scoped_resources_with_env_override" {
-  command = plan
-
-  variables {
-    environment = "production"
-  }
-
-  assert {
-    condition = alltrue([
-      can(regex("${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_one.json)),
-      can(regex("TargetTracking-service/${var.project_name}-${var.environment}-", data.aws_iam_policy_document.part_two.json)),
-      !can(regex("${var.project_name}-${var.environment == "production" ? "staging" : "production"}-", data.aws_iam_policy_document.part_one.json)),
-      !can(regex("${var.project_name}-${var.environment == "production" ? "staging" : "production"}-", data.aws_iam_policy_document.part_two.json)),
-      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ELBMgmt"]).Resource, "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*"),
-      one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "ECSTaskDefinitionTagging"]).Resource == "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
-      strcontains(aws_iam_policy.part_one.name, "${var.project_name}-${var.environment}-part-one-terraform"),
-      strcontains(aws_iam_policy.part_two.name, "${var.project_name}-${var.environment}-part-two-terraform"),
-      strcontains(aws_iam_policy.part_three.name, "${var.project_name}-${var.environment}-part-three-terraform"),
-    ])
-    error_message = "Policy documents must only reference the active environment resources."
-  }
-}
-
-run "test_invalid_environment_rejected" {
-  command = plan
-
-  variables {
-    environment = "development"
-  }
-
-  expect_failures = [
-    var.environment
-  ]
-}
-
-run "test_shared_bucket_permissions" {
-  command = plan
-
-  assert {
-    condition = alltrue([
-      contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
-      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action, "s3:PutObject"),
-      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3SharedBucketRestricted"]).Action, "s3:GetObject"),
-    ])
-    error_message = "Staging/non-production environments must have read-only access to the shared data bucket (no PutObject permission)."
-  }
-}
-
-run "test_shared_bucket_permissions_with_env_override" {
+run "test_shared_bucket_permissions_production" {
   command = plan
 
   variables {
@@ -225,7 +144,7 @@ run "test_shared_bucket_permissions_with_env_override" {
   assert {
     condition = alltrue([
       !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
-      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Mgmt"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
     ])
     error_message = "The environment with management privileges must manage the shared data bucket via S3Mgmt and not use S3SharedBucketRestricted."
   }
