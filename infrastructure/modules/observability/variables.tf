@@ -67,8 +67,8 @@ variable "vm_image" {
   type        = string
 
   validation {
-    condition     = can(regex("@sha256:[0-9a-f]{64}$", var.vm_image))
-    error_message = "vm_image must be pinned to an immutable digest (e.g., repo:tag@sha256:...)."
+    condition     = can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.vm_image))
+    error_message = "vm_image must be an image reference pinned to an immutable digest (e.g., repo:tag@sha256:...)."
   }
 }
 
@@ -84,8 +84,8 @@ variable "vm_port" {
   default     = 8428
 
   validation {
-    condition     = var.vm_port > 0 && var.vm_port < 65536
-    error_message = "vm_port must be between 1 and 65535."
+    condition     = var.vm_port > 0 && var.vm_port < 65536 && floor(var.vm_port) == var.vm_port
+    error_message = "vm_port must be a whole number between 1 and 65535."
   }
 }
 
