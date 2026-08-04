@@ -79,4 +79,3 @@ run "parameters_integration_apply" {
     error_message = "Secrets Manager django_secret_key KMS key ID is incorrect."
   }
 }
-
