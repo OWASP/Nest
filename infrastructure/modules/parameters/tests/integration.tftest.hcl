@@ -78,4 +78,10 @@ run "parameters_integration_apply" {
     condition     = aws_secretsmanager_secret.django_secret_key.kms_key_id == var.kms_key_arn
     error_message = "Secrets Manager django_secret_key KMS key ID is incorrect."
   }
+
+  assert {
+    condition     = aws_secretsmanager_secret.external_runtime["GITHUB_TOKEN"].name == "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
+    error_message = "Secrets Manager GITHUB_TOKEN name format is incorrect."
+  }
 }
+
