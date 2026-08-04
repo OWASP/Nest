@@ -33,8 +33,8 @@ importers:
   .:
     dependencies:
       '@apollo/client':
-        specifier: 4.2.6
-        version: 4.2.6(graphql-ws@6.0.8(graphql@17.0.2)(ws@8.21.0))(graphql@17.0.2)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
+        specifier: 4.2.7
+        version: 4.2.7(graphql-ws@6.0.8(graphql@17.0.2)(ws@8.21.0))(graphql@17.0.2)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
       '@dnd-kit/core':
         specifier: 6.3.1
         version: 6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -147,8 +147,8 @@ importers:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       posthog-js:
-        specifier: 1.399.2
-        version: 1.399.2(preact-render-to-string@5.2.6(preact@10.29.3))
+        specifier: 1.400.0
+        version: 1.400.0(preact-render-to-string@5.2.6(preact@10.29.3))
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -324,8 +324,8 @@ packages:
   '@apm-js-collab/tracing-hooks@0.10.1':
     resolution: {integrity: sha512-w2OWXR7FWrKqSziuE9+QclaZrStxO/8+OwbXM635s/zs0Eez1Qo3ivSPdB2WsaPY/iznKTytONPx/PitD7IXcA==}
 
-  '@apollo/client@4.2.6':
-    resolution: {integrity: sha512-zAkN947OHLLvSaEZvhXmT2YGPuDSJyIlW3+ylvxbRfSQFJW5PiaGs0PvhhMGfyYvO8gtfg+JjI8jjkczQSwt5w==}
+  '@apollo/client@4.2.7':
+    resolution: {integrity: sha512-Z129zR77VP0oWWIXPpHgwbtwhCVBzkw/FhiiymbqwlUniKb5z2KBeuQkpNIz3QfuO7ezHiaxsJ0PPjYBJTSHtg==}
     peerDependencies:
       graphql: ^16.0.0 || ^17.0.0
       graphql-ws: ^5.5.5 || ^6.0.3
@@ -2087,11 +2087,11 @@ packages:
     resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  '@posthog/core@1.40.2':
-    resolution: {integrity: sha512-H12j7O9iHGvpK9t2ko8W4pvfbV1pBDxrsWC1LA6yp2RhzwvC4T3sWhu+AekDQJSRSrJEWlB0t/Ueq9QhPSq7FQ==}
+  '@posthog/core@1.41.0':
+    resolution: {integrity: sha512-grQqFRWBb6B/iysW9FwWFW2mM4f1In8w1ZQBQWOCtYZGJpsAFlobCImb1xN6VUMri1JkwX7j9+fs0LvjDDzwLQ==}
 
-  '@posthog/types@1.393.0':
-    resolution: {integrity: sha512-vzWeEJZ7ERQhFRoQYaP5jzN1JvIu46UJyHXsuv+dTGW2r3sMgREOhNxXLZjmFHwZ8/FOHQoyqqQmXTCXZSfMSg==}
+  '@posthog/types@1.394.0':
+    resolution: {integrity: sha512-ifQ7p8o8hoHErlJmpzCFzHQcuRam0vXk8LBVhBu4BlPYP6S0tog4FSAFItnI/nwN6cHZI0WFQilr7sIqQa7Flg==}
 
   '@puppeteer/browsers@2.13.2':
     resolution: {integrity: sha512-5EUZSUIc37H6aIXyWO0Z4y8NlF8NnjgmqeQgOGiswAU7pY0HOo16ho4+alIWmSfdZnjqBRawMsP3I5YqLSn6kw==}
@@ -6094,8 +6094,8 @@ packages:
     resolution: {integrity: sha512-xdB1oSLHbz1vRWgCDalrCqEFTWzFlhqFC5tIHLMOSUIjhm3XXQ1qrFy8S/ESr1JYRRXqM3c1QFiMZUJdUTqyMQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@1.399.2:
-    resolution: {integrity: sha512-xcvrGEgUYtIVcWPRlVfc/NkMo0IP9nwnM/dzJIAzjDOSewkdDk/9T4Vz1+gooEhXdQCPfG44jSK95mVJsoySqA==}
+  posthog-js@1.400.0:
+    resolution: {integrity: sha512-jeCdqZylMehyt5iYEk2mTYC8djCY2uAPj2iLV+DJAaeXqBuRSlt9vA093SL5QIyHv67+XoHeqKnKFTa/WYy0gA==}
 
   preact-render-to-string@5.2.6:
     resolution: {integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw==}
@@ -7227,7 +7227,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@apollo/client@4.2.6(graphql-ws@6.0.8(graphql@17.0.2)(ws@8.21.0))(graphql@17.0.2)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)':
+  '@apollo/client@4.2.7(graphql-ws@6.0.8(graphql@17.0.2)(ws@8.21.0))(graphql@17.0.2)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@17.0.2)
       '@wry/caches': 1.0.1
@@ -9761,11 +9761,11 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
-  '@posthog/core@1.40.2':
+  '@posthog/core@1.41.0':
     dependencies:
-      '@posthog/types': 1.393.0
+      '@posthog/types': 1.394.0
 
-  '@posthog/types@1.393.0': {}
+  '@posthog/types@1.394.0': {}
 
   '@puppeteer/browsers@2.13.2(supports-color@8.1.1)':
     dependencies:
@@ -14234,10 +14234,10 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  posthog-js@1.399.2(preact-render-to-string@5.2.6(preact@10.29.3)):
+  posthog-js@1.400.0(preact-render-to-string@5.2.6(preact@10.29.3)):
     dependencies:
-      '@posthog/core': 1.40.2
-      '@posthog/types': 1.393.0
+      '@posthog/core': 1.41.0
+      '@posthog/types': 1.394.0
       core-js: 3.49.0
       dompurify: 3.4.12
       fflate: 0.4.8
