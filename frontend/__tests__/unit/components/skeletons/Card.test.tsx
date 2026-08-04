@@ -43,4 +43,25 @@ describe('CardSkeleton', () => {
     const iconSkeletons = skeletons.filter((s) => s.className?.includes('h-8 w-16'))
     expect(iconSkeletons.length).toBe(numIcons)
   })
+
+  it('renders single action button skeleton by default', () => {
+    render(<CardSkeleton />)
+    const skeletons = screen.getAllByTestId('skeleton')
+    const actionSkeletons = skeletons.filter((s) => s.className?.includes('h-9 w-[100px]'))
+    expect(actionSkeletons.length).toBe(1)
+  })
+
+  it('renders two action button skeletons when showExtraActionButton is true', () => {
+    render(<CardSkeleton showExtraActionButton={true} />)
+    const skeletons = screen.getAllByTestId('skeleton')
+    const actionSkeletons = skeletons.filter((s) => s.className?.includes('h-9 w-[100px]'))
+    expect(actionSkeletons.length).toBe(2)
+  })
+
+  it('does not render extra action button skeleton when showExtraActionButton is false', () => {
+    render(<CardSkeleton showExtraActionButton={false} />)
+    const skeletons = screen.getAllByTestId('skeleton')
+    const actionSkeletons = skeletons.filter((s) => s.className?.includes('h-9 w-[100px]'))
+    expect(actionSkeletons.length).toBe(1)
+  })
 })

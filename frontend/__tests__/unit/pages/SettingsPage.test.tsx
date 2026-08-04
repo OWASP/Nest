@@ -48,6 +48,14 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
 }))
 
+const mockSearchParamsGet = jest.fn()
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useSearchParams: jest.fn(() => ({
+    get: mockSearchParamsGet,
+  })),
+}))
+
 describe('SettingsPage Component', () => {
   const mockUseQuery = useQuery as unknown as jest.Mock
   const mockUseMutation = useMutation as unknown as jest.Mock
@@ -167,13 +175,23 @@ describe('SettingsPage Component', () => {
       fireEvent.click(screen.getByText('Entity'))
       expect(screen.getByText('Entity Subscriptions')).toBeInTheDocument()
     })
+
+    test('opens Entity tab directly when ?tab=entity is in URL', () => {
+      mockSearchParamsGet.mockImplementation((key: string) => {
+        if (key === 'tab') return 'entity'
+        return null
+      })
+      setupMocks({ data: mockNoEntitySubscriptions })
+      render(<SettingsPage />)
+      expect(screen.getByText('Entity Subscriptions')).toBeInTheDocument()
+      mockSearchParamsGet.mockReturnValue(null)
+    })
   })
 
   describe('Snapshot Tab - Not Subscribed State', () => {
-    test('shows Not Subscribed status', () => {
+    test('shows not subscribed description', () => {
       setupMocks({ data: mockNoSubscription })
       render(<SettingsPage />)
-      expect(screen.getByText('Not Subscribed')).toBeInTheDocument()
       expect(
         screen.getByText(
           'Subscribe to get curated OWASP community updates delivered to your inbox.'
@@ -181,7 +199,7 @@ describe('SettingsPage Component', () => {
       ).toBeInTheDocument()
     })
 
-    test.each([['Choose Frequency'], ['Subscribe'], ['Content Preferences']])(
+    test.each([['Snapshot Subscription'], ['Subscribe'], ['Content']])(
       'renders %s when not subscribed',
       (text) => {
         setupMocks({ data: mockNoSubscription })
@@ -200,7 +218,7 @@ describe('SettingsPage Component', () => {
     test('renders all 8 content preference toggles', () => {
       setupMocks({ data: mockNoSubscription })
       render(<SettingsPage />)
-      expect(screen.getByText('Content Preferences')).toBeInTheDocument()
+      expect(screen.getByText('Content')).toBeInTheDocument()
       expect(screen.getByText('Chapters')).toBeInTheDocument()
       expect(screen.getByText('Events')).toBeInTheDocument()
       expect(screen.getByText('Issues')).toBeInTheDocument()
@@ -213,14 +231,11 @@ describe('SettingsPage Component', () => {
   })
 
   describe('Snapshot Tab - Active Subscription State', () => {
-    test.each([['Subscription Active'], ['Frequency'], ['weekly']])(
-      'renders %s when subscribed',
-      (text) => {
-        setupMocks({ data: mockActiveSubscription })
-        render(<SettingsPage />)
-        expect(screen.getByText(text)).toBeInTheDocument()
-      }
-    )
+    test.each([['Active'], ['Frequency'], ['Weekly']])('renders %s when subscribed', (text) => {
+      setupMocks({ data: mockActiveSubscription })
+      render(<SettingsPage />)
+      expect(screen.getByText(text)).toBeInTheDocument()
+    })
 
     test('shows Save Changes and Unsubscribe buttons', () => {
       setupMocks({ data: mockActiveSubscription })
@@ -343,13 +358,6 @@ describe('SettingsPage Component', () => {
       fireEvent.click(screen.getByText('Entity'))
       expect(screen.getByText(/0\/5 subscriptions used/)).toBeInTheDocument()
     })
-
-    test('renders New button', () => {
-      setupMocks({ data: mockNoEntitySubscriptions })
-      render(<SettingsPage />)
-      fireEvent.click(screen.getByText('Entity'))
-      expect(screen.getByText('New')).toBeInTheDocument()
-    })
   })
 
   describe('Entity Tab - Active Subscription', () => {
@@ -357,38 +365,41 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      expect(screen.getByDisplayValue('My OWASP Projects')).toBeInTheDocument()
+      expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
     })
 
     test('shows Unsubscribe and Save Changes buttons for active subscriptions', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      expect(screen.getByText('Unsubscribe')).toBeInTheDocument()
-      expect(screen.getByText('Save Changes')).toBeInTheDocument()
+      const unsubscribeButtons = screen.getAllByText('Unsubscribe')
+      expect(unsubscribeButtons.length).toBeGreaterThan(0)
+      const saveButtons = screen.getAllByText('Save Changes')
+      expect(saveButtons.length).toBeGreaterThan(0)
     })
 
     test('shows trash icon for permanent delete', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      expect(screen.getByLabelText('Delete subscription permanently')).toBeInTheDocument()
+      const trashButtons = screen.getAllByLabelText('Delete subscription permanently')
+      expect(trashButtons.length).toBeGreaterThan(0)
     })
 
     test('shows active subscription count', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      expect(screen.getByText(/1\/5 subscriptions used/)).toBeInTheDocument()
+      expect(screen.getByText(/2\/5 subscriptions used/)).toBeInTheDocument()
     })
   })
 
   describe('Entity Tab - Inactive Subscription', () => {
-    test('shows Subscribe button for inactive subscriptions', () => {
+    test('shows Reactivate button for inactive subscriptions', () => {
       setupMocks({ data: mockInactiveEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      expect(screen.getByText('Subscribe')).toBeInTheDocument()
+      expect(screen.getByText('Reactivate')).toBeInTheDocument()
     })
 
     test('shows trash icon for inactive subscriptions', () => {
@@ -411,7 +422,8 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      fireEvent.click(screen.getByText('Unsubscribe'))
+      const unsubscribeButtons = screen.getAllByText('Unsubscribe')
+      fireEvent.click(unsubscribeButtons[0])
 
       expect(screen.getByText('Confirm Unsubscribe')).toBeInTheDocument()
       expect(
@@ -425,7 +437,8 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      fireEvent.click(screen.getByText('Unsubscribe'))
+      const unsubscribeButtons = screen.getAllByText('Unsubscribe')
+      fireEvent.click(unsubscribeButtons[0])
 
       const cancelButtons = screen.getAllByText('Cancel')
       fireEvent.click(cancelButtons[cancelButtons.length - 1])
@@ -437,7 +450,8 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      fireEvent.click(screen.getByText('Unsubscribe'))
+      const unsubscribeButtons = screen.getAllByText('Unsubscribe')
+      fireEvent.click(unsubscribeButtons[0])
       fireEvent.click(screen.getByText('Yes, Unsubscribe'))
 
       await waitFor(() => {
@@ -451,7 +465,8 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      fireEvent.click(screen.getByLabelText('Delete subscription permanently'))
+      const trashButtons = screen.getAllByLabelText('Delete subscription permanently')
+      fireEvent.click(trashButtons[0])
 
       expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
     })
@@ -460,7 +475,8 @@ describe('SettingsPage Component', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
-      fireEvent.click(screen.getByLabelText('Delete subscription permanently'))
+      const trashButtons = screen.getAllByLabelText('Delete subscription permanently')
+      fireEvent.click(trashButtons[0])
       fireEvent.click(screen.getByText('Yes, Delete'))
 
       await waitFor(() => {
@@ -469,45 +485,12 @@ describe('SettingsPage Component', () => {
     })
   })
 
-  describe('Entity Tab - Create Form', () => {
-    test('shows create form when New is clicked', () => {
-      setupMocks({ data: mockNoEntitySubscriptions })
-      render(<SettingsPage />)
-      fireEvent.click(screen.getByText('Entity'))
-      fireEvent.click(screen.getByText('New'))
-
-      expect(screen.getByText('New Entity Subscription')).toBeInTheDocument()
-      expect(screen.getByText('Create Subscription')).toBeInTheDocument()
-    })
-
-    test('hides create form when X is clicked', () => {
-      setupMocks({ data: mockNoEntitySubscriptions })
-      render(<SettingsPage />)
-      fireEvent.click(screen.getByText('Entity'))
-      fireEvent.click(screen.getByText('New'))
-
-      fireEvent.click(screen.getByLabelText('Cancel creation'))
-
-      expect(screen.queryByText('New Entity Subscription')).not.toBeInTheDocument()
-    })
-  })
-
   describe('Loading State', () => {
     test('shows loading spinner when query is loading', () => {
       setupMocks({ loading: true })
       render(<SettingsPage />)
-      expect(screen.queryByText('Not Subscribed')).not.toBeInTheDocument()
-      expect(screen.queryByText('Subscription Active')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('Description Text', () => {
-    test('shows correct description for Content Preferences', () => {
-      setupMocks({ data: mockNoSubscription })
-      render(<SettingsPage />)
-      expect(
-        screen.getByText('Choose which types of OWASP content to include in your snapshot digests.')
-      ).toBeInTheDocument()
+      expect(screen.queryByText('Snapshot Subscription')).not.toBeInTheDocument()
+      expect(screen.queryByText('Active')).not.toBeInTheDocument()
     })
   })
 })
