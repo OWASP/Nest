@@ -168,6 +168,40 @@ describe('SubscribeButton', () => {
     })
   })
 
+  describe('Inactive Subscription State', () => {
+    const inactiveMock = [
+      {
+        id: 'sub-1',
+        frequency: 'weekly',
+        isActive: false,
+        project: { id: '42', name: 'Test Project' },
+        chapter: null,
+        committee: null,
+      },
+    ]
+
+    test('renders Manage link when subscription is inactive', () => {
+      setupMocks({ subscriptions: inactiveMock })
+      render(<SubscribeButton {...defaultProps} />)
+      expect(screen.getByText('Manage')).toBeInTheDocument()
+      expect(screen.queryByText('Subscribe')).not.toBeInTheDocument()
+    })
+
+    test('Manage links to settings page', () => {
+      setupMocks({ subscriptions: inactiveMock })
+      render(<SubscribeButton {...defaultProps} />)
+      const link = screen.getByText('Manage').closest('a')
+      expect(link).toHaveAttribute('href', '/settings?tab=entity')
+    })
+
+    test('Manage has correct aria-label', () => {
+      setupMocks({ subscriptions: inactiveMock })
+      render(<SubscribeButton {...defaultProps} />)
+      const link = screen.getByText('Manage').closest('a')
+      expect(link).toHaveAttribute('aria-label', 'Manage inactive subscription for Test Project')
+    })
+  })
+
   describe('Subscription Limit', () => {
     const maxSubscriptions = Array.from({ length: 5 }, (_, i) => ({
       id: `sub-${i}`,
@@ -213,16 +247,17 @@ describe('SubscribeButton', () => {
 
     test('switches frequency when clicked', () => {
       fireEvent.click(screen.getByText('Monthly'))
-      // Monthly should now be the selected option
       const monthlyButton = screen.getByText('Monthly').closest('button')
-      expect(monthlyButton?.className).toContain('bg-[#1D7BD7]')
+      expect(monthlyButton).toHaveAttribute('aria-pressed', 'true')
+      const weeklyButton = screen.getByText('Weekly').closest('button')
+      expect(weeklyButton).toHaveAttribute('aria-pressed', 'false')
     })
 
     test('toggles content options when clicked', () => {
       const issuesButton = screen.getByText('Issues').closest('button')
+      expect(issuesButton).toHaveAttribute('aria-pressed', 'true')
       fireEvent.click(issuesButton!)
-      // After toggling off, the class should change
-      expect(issuesButton?.className).toContain('border-gray-200')
+      expect(issuesButton).toHaveAttribute('aria-pressed', 'false')
     })
 
     test('closes modal when Cancel is clicked', () => {
@@ -243,7 +278,18 @@ describe('SubscribeButton', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(mockCreateMutation).toHaveBeenCalled()
+        expect(mockCreateMutation).toHaveBeenCalledWith({
+          variables: {
+            inputData: {
+              entityType: 'project',
+              entityId: 42,
+              frequency: 'weekly',
+              includeIssues: true,
+              includePullRequests: true,
+              includeReleases: true,
+            },
+          },
+        })
       })
     })
 
@@ -421,15 +467,6 @@ describe('SubscribeButton', () => {
           })
         )
       })
-    })
-  })
-
-  describe('Modal Interaction', () => {
-    test('modal renders when open', () => {
-      setupMocks()
-      render(<SubscribeButton {...defaultProps} />)
-      fireEvent.click(screen.getByText('Subscribe'))
-      expect(screen.getByText('Subscribe to Test Project')).toBeInTheDocument()
     })
   })
 })

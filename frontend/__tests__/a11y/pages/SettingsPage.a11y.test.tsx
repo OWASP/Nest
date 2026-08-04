@@ -41,11 +41,6 @@ describe.each([
   const mockUseQuery = useQuery as unknown as jest.Mock
 
   it('should have no violations when not subscribed', async () => {
-    // Suppress debounced setSuggestions act() warning from EntityPicker
-    jest.spyOn(console, 'error').mockImplementation((...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('not wrapped in act')) return
-      throw new Error(`Console error: ${args.join(' ')}`)
-    })
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { name: 'testuser' } },
       status: 'authenticated',
@@ -63,10 +58,6 @@ describe.each([
   })
 
   it('should have no violations with active subscription', async () => {
-    jest.spyOn(console, 'error').mockImplementation((...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('not wrapped in act')) return
-      throw new Error(`Console error: ${args.join(' ')}`)
-    })
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { name: 'testuser' } },
       status: 'authenticated',

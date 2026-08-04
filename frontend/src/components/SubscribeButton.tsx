@@ -8,27 +8,15 @@ import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useCallback, useState } from 'react'
-import { FaBell, FaCheck } from 'react-icons/fa6'
+import { FaBell, FaBellSlash, FaCheck } from 'react-icons/fa6'
 
 import {
   CREATE_ENTITY_SUBSCRIPTION,
   GET_MY_ENTITY_SUBSCRIPTIONS,
 } from 'server/queries/subscriptionQueries'
+import { decodeRelayId } from 'utils/decodeRelayId'
 
 const MAX_ENTITY_SUBSCRIPTIONS = 5
-
-function decodeRelayId(globalId: string): number {
-  const asInt = Number.parseInt(globalId, 10)
-  if (!Number.isNaN(asInt)) return asInt
-  try {
-    const decoded = atob(globalId)
-    const parts = decoded.split(':')
-    return Number.parseInt(parts.at(-1)!, 10)
-  } catch {
-    const match = /\d+/.exec(globalId)
-    return match ? Number.parseInt(match[0], 10) : 0
-  }
-}
 
 interface EntitySubscriptionData {
   id: string
@@ -83,6 +71,7 @@ export default function SubscribeButton({
   })
 
   const isSubscribed = existingSub?.isActive === true
+  const hasInactiveSub = existingSub != null && !existingSub.isActive
 
   const [createSubscription, { loading: creating }] = useMutation<{
     createEntitySubscription: { ok: boolean; message: string }
@@ -131,9 +120,9 @@ export default function SubscribeButton({
 
   const canSubscribe = activeCount < MAX_ENTITY_SUBSCRIPTIONS
 
-  return (
-    <>
-      {isSubscribed ? (
+  const renderButton = () => {
+    if (isSubscribed) {
+      return (
         <Link
           href="/settings?tab=entity"
           className="flex h-10 cursor-pointer items-center gap-1.5 rounded-md border border-green-500/40 bg-green-500/10 px-2 py-2 text-sm font-medium text-green-600 transition-all hover:bg-green-500/20 dark:text-green-400"
@@ -142,7 +131,24 @@ export default function SubscribeButton({
           <FaCheck className="h-3 w-3" />
           Subscribed
         </Link>
-      ) : canSubscribe ? (
+      )
+    }
+
+    if (hasInactiveSub) {
+      return (
+        <Link
+          href="/settings?tab=entity"
+          className="flex h-10 cursor-pointer items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-2 text-sm font-medium text-amber-600 transition-all hover:bg-amber-500/20 dark:text-amber-400"
+          aria-label={`Manage inactive subscription for ${entityName}`}
+        >
+          <FaBellSlash className="h-3 w-3" />
+          Manage
+        </Link>
+      )
+    }
+
+    if (canSubscribe) {
+      return (
         <button
           type="button"
           onClick={() => setShowModal(true)}
@@ -152,19 +158,27 @@ export default function SubscribeButton({
           <FaBell className="h-3 w-3" />
           Subscribe
         </button>
-      ) : (
-        <Tooltip content={`Maximum ${MAX_ENTITY_SUBSCRIPTIONS} subscriptions reached`}>
-          <button
-            type="button"
-            disabled
-            className="flex h-10 cursor-not-allowed items-center gap-1.5 rounded-md border border-gray-300 px-2 py-2 text-sm font-medium text-gray-400 opacity-50 dark:border-gray-600"
-            aria-label="Subscription limit reached"
-          >
-            <FaBell className="h-3 w-3" />
-            Subscribe
-          </button>
-        </Tooltip>
-      )}
+      )
+    }
+
+    return (
+      <Tooltip content={`Maximum ${MAX_ENTITY_SUBSCRIPTIONS} subscriptions reached`}>
+        <button
+          type="button"
+          disabled
+          className="flex h-10 cursor-not-allowed items-center gap-1.5 rounded-md border border-gray-300 px-2 py-2 text-sm font-medium text-gray-400 opacity-50 dark:border-gray-600"
+          aria-label="Subscription limit reached"
+        >
+          <FaBell className="h-3 w-3" />
+          Subscribe
+        </button>
+      </Tooltip>
+    )
+  }
+
+  return (
+    <>
+      {renderButton()}
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} size="md">
         <ModalContent className="rounded-lg bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-[#212529]">
@@ -185,6 +199,7 @@ export default function SubscribeButton({
                     key={option}
                     type="button"
                     onClick={() => setFrequency(option)}
+                    aria-pressed={frequency === option}
                     className={`rounded-md px-3 py-1 text-sm font-medium transition-all ${
                       frequency === option
                         ? 'bg-[#1D7BD7] text-white shadow-sm'
@@ -207,6 +222,7 @@ export default function SubscribeButton({
                     key={key}
                     type="button"
                     onClick={() => handleToggle(key)}
+                    aria-pressed={toggles[key]}
                     className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
                       toggles[key]
                         ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'

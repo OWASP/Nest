@@ -20,30 +20,13 @@ import {
   UPDATE_ENTITY_SUBSCRIPTION,
   UPDATE_SNAPSHOT_SUBSCRIPTION,
 } from 'server/queries/subscriptionQueries'
+import { decodeRelayId } from 'utils/decodeRelayId'
 
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
 const MAX_ENTITY_SUBSCRIPTIONS = 5
-
-function decodeRelayId(globalId: string): number {
-  // Try parsing as plain integer first
-  const asInt = Number.parseInt(globalId, 10)
-  if (!Number.isNaN(asInt)) {
-    return asInt
-  }
-  // Try base64 decoding (relay global ID format: base64("TypeName:id"))
-  try {
-    const decoded = atob(globalId)
-    const parts = decoded.split(':')
-    return Number.parseInt(parts.at(-1)!, 10)
-  } catch {
-    // Fallback: extract any number from the string
-    const match = /\d+/.exec(globalId)
-    return match ? Number.parseInt(match[0], 10) : 0
-  }
-}
 
 const SNAPSHOT_CONTENT_FIELDS = [
   { key: 'includeChapters', label: 'Chapters' },
@@ -115,6 +98,7 @@ function ContentToggleGrid<K extends string>({
           key={key}
           type="button"
           onClick={() => onToggle(key)}
+          aria-pressed={preferences[key]}
           className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
             preferences[key]
               ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
@@ -322,6 +306,7 @@ function SnapshotSubscriptionContent() {
                 key={option}
                 type="button"
                 onClick={() => setFrequency(option)}
+                aria-pressed={frequency === option}
                 className={`rounded-md px-3 py-1 text-sm font-medium transition-all ${
                   frequency === option
                     ? 'bg-[#1D7BD7] text-white shadow-sm'
@@ -523,6 +508,7 @@ function EntitySubscriptionCard({
                     key={option}
                     type="button"
                     onClick={() => setFrequency(option)}
+                    aria-pressed={frequency === option}
                     className={`rounded-md px-3 py-1 text-sm font-medium transition-all ${
                       frequency === option
                         ? 'bg-[#1D7BD7] text-white shadow-sm'
@@ -546,6 +532,7 @@ function EntitySubscriptionCard({
                     key={key}
                     type="button"
                     onClick={() => handleToggle(key)}
+                    aria-pressed={toggles[key]}
                     className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-all ${
                       toggles[key]
                         ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'

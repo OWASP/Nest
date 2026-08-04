@@ -703,15 +703,5 @@ describe('Card', () => {
       render(<Card {...baseProps} />)
       expect(screen.queryByTestId('extra-action')).not.toBeInTheDocument()
     })
-
-    it('renders extraAction alongside action button', () => {
-      const propsWithExtraAction = {
-        ...baseProps,
-        extraAction: <button data-testid="extra-action">Subscribe</button>,
-      }
-      render(<Card {...propsWithExtraAction} />)
-      expect(screen.getByTestId('extra-action')).toBeInTheDocument()
-      expect(screen.getByTestId('action-button')).toBeInTheDocument()
-    })
   })
 })

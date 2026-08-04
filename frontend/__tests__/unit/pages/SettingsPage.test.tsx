@@ -361,7 +361,7 @@ describe('SettingsPage Component', () => {
   })
 
   describe('Entity Tab - Active Subscription', () => {
-    test('renders subscription name and entity preferences', () => {
+    test('renders entity name for active subscription', () => {
       setupMocks({ data: mockEntitySubscriptions })
       render(<SettingsPage />)
       fireEvent.click(screen.getByText('Entity'))
