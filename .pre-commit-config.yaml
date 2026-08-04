@@ -93,11 +93,11 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 0cbe8f6e54466b1b48f9d41f44abb4d06c061b5e  # v2.2.0
+    rev: 41e691678310dfd3833f7ab4e180ddb014310356  # v2.3.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.320.4
+          - strawberry-graphql==0.321.0
           - strawberry-graphql-django==0.86.4
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260518
@@ -157,7 +157,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: cf78bb920f358be6dea099e6b1fd6f67bccb0955  # v2.25.2
+    rev: 3632ea90e7641b574983ddf3a11ccedefff3c881  # v2.25.3
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
