@@ -84,4 +84,3 @@ run "parameters_integration_apply" {
     error_message = "Secrets Manager GITHUB_TOKEN name format is incorrect."
   }
 }
-
