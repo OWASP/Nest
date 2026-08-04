@@ -13,6 +13,7 @@ overrides:
   glob: 11.1.0
   immutable: 5.1.8
   js-yaml: 4.3.0
+  nanoid@3: 3.3.17
   postcss: 8.5.18
   protobufjs: 7.6.4
   qs: 6.15.2
@@ -5810,11 +5811,6 @@ packages:
   mute-stream@3.0.0:
     resolution: {integrity: sha512-dkEJPVvun4FryqBmZ5KhDo0K9iDXAwn08tMLDinNdRBNPcYEDiWYysLcc6k3mjTMlbP9KyylvRpd4wFtwrT9rw==}
     engines: {node: ^20.17.0 || >=22.9.0}
-
-  nanoid@3.3.12:
-    resolution: {integrity: sha512-ZB9RH/39qpq5Vu6Y+NmUaFhQR6pp+M2Xt76XBnEwDaGcVAqhlvxrl3B2bKS5D3NH3QR76v3aSrKaF/Kiy7lEtQ==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
 
   nanoid@3.3.17:
     resolution: {integrity: sha512-xQLf0A3HOMlgHq0n247/LRuAOYmB7dXJ/DvAxGvsSBij45XtBSmQycu+F8ODbHwns/XyFZagyL1+J0Offw1E0g==}
@@ -13028,7 +13024,7 @@ snapshots:
 
   ics@3.12.0:
     dependencies:
-      nanoid: 3.3.12
+      nanoid: 3.3.17
       runes2: 1.1.4
       yup: 1.7.1
 
@@ -13983,8 +13979,6 @@ snapshots:
   mute-stream@0.0.7: {}
 
   mute-stream@3.0.0: {}
-
-  nanoid@3.3.12: {}
 
   nanoid@3.3.17: {}
 
