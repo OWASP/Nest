@@ -5,7 +5,7 @@ import { upperFirst, toLower } from 'lodash'
 import markdownit from 'markdown-it'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FaArrowRight } from 'react-icons/fa6'
+import { FaArrowRight, FaPlus } from 'react-icons/fa6'
 
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 
@@ -42,6 +42,16 @@ export function visibleStatuses(isCandidate: boolean, isReviewer: boolean): Clai
     ...(isCandidate || isReviewer ? [ClaimStatusEnum.Submitted] : []),
     ...(isCandidate ? [ClaimStatusEnum.Draft] : []),
   ]
+}
+
+export function overlapsExistingClaim(selectedText: string, claimedTexts: string[]): boolean {
+  const sel = selectedText.trim()
+  if (!sel) return false
+  return claimedTexts.some((raw) => {
+    const claimed = raw.trim()
+    if (!claimed) return false
+    return sel.includes(claimed) || claimed.includes(sel)
+  })
 }
 
 export const STATUS_COLOR: Record<ClaimStatusEnum, string> = {
@@ -191,10 +201,22 @@ const AnnotatedProfile = ({
     y: number
     width: number
   } | null>(null)
+  const [selection, setSelection] = useState<{
+    text: string
+    x: number
+    y: number
+    width: number
+    range: Range
+  } | null>(null)
 
   const filteredClaims = useMemo(
     () => claims.filter((c) => visibleStatuses(isCandidate, isReviewer).includes(c.status)),
     [claims, isCandidate, isReviewer]
+  )
+
+  const claimedTexts = useMemo(
+    () => filteredClaims.map((c) => c.sourceText).filter(Boolean),
+    [filteredClaims]
   )
 
   const html = useMemo(
@@ -223,6 +245,7 @@ const AnnotatedProfile = ({
         return
       }
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+      setSelection(null)
       const rect = mark.getBoundingClientRect()
       setTooltip({
         claimKey: mark.dataset.claimKey ?? '',
@@ -237,18 +260,40 @@ const AnnotatedProfile = ({
     const onScroll = () => {
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
       setTooltip(null)
+      setSelection(null)
+    }
+    const onMouseUp = (e: MouseEvent) => {
+      if (!isCandidate) return
+      const target = e.target as HTMLElement
+      if (target.closest('[data-tooltip]')) return
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed || !sel.rangeCount || sel.toString().trim() === '') {
+        setSelection(null)
+        return
+      }
+      const text = sel.toString().trim()
+      if (!text || overlapsExistingClaim(text, claimedTexts)) {
+        setSelection(null)
+        return
+      }
+      const range = sel.getRangeAt(0)
+      const rect = range.getBoundingClientRect()
+      setTooltip(null)
+      setSelection({ text, x: rect.left, y: rect.top, width: rect.width, range })
     }
 
     el.addEventListener('mouseover', onMouseOver)
     el.addEventListener('mouseleave', onMouseLeave)
+    el.addEventListener('mouseup', onMouseUp)
     window.addEventListener('scroll', onScroll, true)
     return () => {
       el.removeEventListener('mouseover', onMouseOver)
       el.removeEventListener('mouseleave', onMouseLeave)
+      el.removeEventListener('mouseup', onMouseUp)
       window.removeEventListener('scroll', onScroll, true)
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     }
-  }, [html])
+  }, [html, isCandidate, claimedTexts])
 
   const handleTooltipEnter = () => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
@@ -260,12 +305,51 @@ const AnnotatedProfile = ({
     router.push(`/board/${year}/candidates/${login}/claims/${tooltip.claimKey}`)
   }
 
+  const handleCreateClaimClick = () => {
+    if (!selection) return
+    const text = selection.text
+    setSelection(null)
+    router.push(
+      `/board/${year}/candidates/${login}/claims/create?sourceText=${encodeURIComponent(text)}`
+    )
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <div
         className="md-wrapper rounded-xl bg-white p-6 text-gray-600"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      {selection && isCandidate && (
+        <div
+          data-tooltip
+          className="fixed z-50 -translate-x-1/2 -translate-y-full pb-2"
+          style={{
+            left: Math.min(
+              Math.max(selection.x + selection.width / 2, 112),
+              window.innerWidth - 112
+            ),
+            top: selection.y,
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleCreateClaimClick}
+            className="block w-56 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-xs text-gray-800 shadow-xl transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+          >
+            <span className="flex items-center gap-2">
+              <FaPlus className="h-3 w-3" aria-hidden="true" />
+              <span className="truncate font-semibold">Create Claim</span>
+            </span>
+            <span className="mt-1 line-clamp-2 text-gray-500 dark:text-gray-400">
+              "{selection.text}"
+            </span>
+          </button>
+          <div className="flex justify-center">
+            <div className="h-2 w-2 -translate-y-1 rotate-45 border-r border-b border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800" />
+          </div>
+        </div>
+      )}
       {tooltip && (
         <div
           data-tooltip

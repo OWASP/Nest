@@ -5,6 +5,7 @@ import AnnotatedProfile, {
   escapeAttr,
   injectHighlights,
   normalizeIndentedHtml,
+  overlapsExistingClaim,
   renderMarkdown,
   resolveMediaUrls,
   visibleStatuses,
@@ -73,6 +74,36 @@ describe('escapeAttr', () => {
 
   it('leaves plain text unchanged', () => {
     expect(escapeAttr('plain text')).toBe('plain text')
+  })
+})
+
+describe('overlapsExistingClaim', () => {
+  it('returns false when the selection equals a claimed text', () => {
+    expect(overlapsExistingClaim('OWASP projects', ['OWASP projects'])).toBe(true)
+  })
+
+  it('returns true when the selection contains a claimed text', () => {
+    expect(overlapsExistingClaim('I support OWASP projects daily', ['OWASP projects'])).toBe(true)
+  })
+
+  it('returns true when the selection is contained by a claimed text', () => {
+    expect(overlapsExistingClaim('OWASP projects', ['support OWASP projects daily'])).toBe(true)
+  })
+
+  it('returns false when there is no overlap', () => {
+    expect(overlapsExistingClaim('leadership experience', ['OWASP projects'])).toBe(false)
+  })
+
+  it('returns false for an empty selection', () => {
+    expect(overlapsExistingClaim('   ', ['OWASP projects'])).toBe(false)
+  })
+
+  it('ignores empty claimed texts', () => {
+    expect(overlapsExistingClaim('OWASP projects', ['', '   '])).toBe(false)
+  })
+
+  it('trims whitespace on both sides', () => {
+    expect(overlapsExistingClaim('  OWASP projects  ', ['OWASP projects'])).toBe(true)
   })
 })
 
@@ -306,6 +337,7 @@ describe('AnnotatedProfile component', () => {
 
   afterEach(() => {
     cleanup()
+    jest.restoreAllMocks()
     jest.useRealTimers()
   })
 
@@ -400,5 +432,81 @@ describe('AnnotatedProfile component', () => {
     fireEvent.click(button)
     expect(mockPush).toHaveBeenCalledWith('/board/2025/candidates/arkid15r/claims/claim-1')
     expect(container.querySelector('[data-tooltip]')).toBeNull()
+  })
+
+  describe('highlight-to-claim selection popup', () => {
+    const mockSelection = (text: string) => {
+      jest.spyOn(window, 'getSelection').mockReturnValue({
+        isCollapsed: false,
+        rangeCount: 1,
+        removeAllRanges: () => {},
+        addRange: () => {},
+        toString: () => text,
+        getRangeAt: () => ({
+          getBoundingClientRect: () => ({
+            left: 100,
+            right: 300,
+            top: 50,
+            bottom: 70,
+            width: 200,
+            height: 20,
+            x: 100,
+            y: 50,
+            toJSON: () => ({}),
+          }),
+        }),
+      } as unknown as Selection)
+    }
+
+    const mouseUpOnProfile = (container: HTMLElement) => {
+      const wrapper = container.querySelector('.md-wrapper')
+      fireEvent.mouseUp(wrapper as Element)
+    }
+
+    it('shows the Create Claim popup for the owner on a non-overlapping selection', () => {
+      mockSelection('leadership experience')
+      const { container } = renderProfile({ isCandidate: true })
+      mouseUpOnProfile(container)
+      expect(screen.getByText('Create Claim')).toBeInTheDocument()
+    })
+
+    it('does not show the popup for a non-owner', () => {
+      mockSelection('leadership experience')
+      const { container } = renderProfile({ isCandidate: false })
+      mouseUpOnProfile(container)
+      expect(screen.queryByText('Create Claim')).not.toBeInTheDocument()
+    })
+
+    it('does not show the popup when the selection overlaps an existing claim', () => {
+      mockSelection('OWASP projects are great')
+      const { container } = renderProfile({
+        claims: [claim()],
+        isCandidate: true,
+        rawMarkdown: 'OWASP projects are great.',
+      })
+      mouseUpOnProfile(container)
+      expect(screen.queryByText('Create Claim')).not.toBeInTheDocument()
+    })
+
+    it('does not show the popup for an empty selection', () => {
+      mockSelection('   ')
+      const { container } = renderProfile({ isCandidate: true })
+      mouseUpOnProfile(container)
+      expect(screen.queryByText('Create Claim')).not.toBeInTheDocument()
+    })
+
+    it('navigates to the create claim page with the encoded source text', () => {
+      mockSelection('leadership experience')
+      const { container } = renderProfile({
+        isCandidate: true,
+        login: 'arkid15r',
+        year: '2025',
+      })
+      mouseUpOnProfile(container)
+      fireEvent.click(screen.getByText('Create Claim'))
+      expect(mockPush).toHaveBeenCalledWith(
+        '/board/2025/candidates/arkid15r/claims/create?sourceText=leadership%20experience'
+      )
+    })
   })
 })

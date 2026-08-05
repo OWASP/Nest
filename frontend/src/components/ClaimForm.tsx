@@ -14,17 +14,20 @@ interface ClaimFormProps {
   formData: {
     description: string
     name: string
+    sourceText: string
   }
   setFormData: React.Dispatch<
     React.SetStateAction<{
       description: string
       name: string
+      sourceText: string
     }>
   >
   onSubmit: (e: React.FormEvent) => Promise<void>
   loading: boolean
   title: string
   submitText?: string
+  isSourceTextReadOnly?: boolean
 }
 
 const ClaimForm = ({
@@ -34,6 +37,7 @@ const ClaimForm = ({
   loading,
   title,
   submitText = 'Create Claim',
+  isSourceTextReadOnly = false,
 }: ClaimFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
@@ -94,7 +98,7 @@ const ClaimForm = ({
 
   return (
     <FormContainer title={title} onSubmit={handleSubmit} containerClassName="claim-form-container">
-      <section className="flex flex-col gap-6">
+      <section className="flex flex-col gap-2">
         <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
           <FormTextInput
             id="claim-name"
@@ -124,7 +128,29 @@ const ClaimForm = ({
             touched={touched.description}
             required
           />
+
+          <FormTextarea
+            id="claim-source-text"
+            label="Source Text"
+            placeholder={
+              isSourceTextReadOnly
+                ? 'Selected from your profile'
+                : 'Paste the exact text from your profile this claim refers to'
+            }
+            value={formData.sourceText}
+            onChange={(e) => {
+              handleInputChange('sourceText', e.target.value)
+              setTouched((prev) => ({ ...prev, sourceText: true }))
+            }}
+            readOnly={isSourceTextReadOnly}
+          />
         </div>
+
+        {!isSourceTextReadOnly && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            *Must match your profile text exactly to be highlighted.
+          </p>
+        )}
       </section>
       <FormButtons loading={loading} submitText={submitText} />
     </FormContainer>

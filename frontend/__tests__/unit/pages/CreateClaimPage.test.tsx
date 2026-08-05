@@ -3,6 +3,7 @@ import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useDjangoSession } from 'hooks/useDjangoSession'
+import { useSearchParams } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import CreateClaimPage from 'app/board/[year]/candidates/[login]/claims/create/page'
 
@@ -15,6 +16,7 @@ jest.mock('@apollo/client/react', () => ({
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(() => ({ login: 'testuser', year: '2025' })),
   useRouter: jest.fn(() => mockRouter),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
 jest.mock('hooks/useDjangoSession', () => ({
@@ -29,6 +31,7 @@ const mockRouter = { push: jest.fn() }
 
 const mockUseMutation = useMutation as unknown as jest.Mock
 const mockUseQuery = useQuery as unknown as jest.Mock
+const mockUseSearchParams = useSearchParams as jest.Mock
 const mockCreateFn = jest.fn()
 const mockUseDjangoSession = useDjangoSession as jest.Mock
 
@@ -60,6 +63,7 @@ describe('CreateClaimPage', () => {
       },
     })
     mockUseMutation.mockReturnValue([mockCreateFn, { loading: false }])
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
     mockUseQuery.mockReturnValue({
       data: {
         boardOfDirectors: {
@@ -245,5 +249,59 @@ describe('CreateClaimPage', () => {
     await waitFor(() => {
       expect(screen.queryByText('Name is required')).not.toBeInTheDocument()
     })
+  })
+
+  test('shows exact-match hint when no sourceText param is provided', async () => {
+    render(<CreateClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Enter claim name')).toBeInTheDocument()
+    })
+    expect(
+      screen.getByText('*Must match your profile text exactly to be highlighted.')
+    ).toBeInTheDocument()
+  })
+
+  test('prefills and locks source text when sourceText param is provided', async () => {
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams('sourceText=OWASP%20projects%20are%20great')
+    )
+
+    render(<CreateClaimPage />)
+
+    const sourceTextarea = await screen.findByDisplayValue('OWASP projects are great')
+    expect(sourceTextarea).toHaveAttribute('readonly')
+    expect(
+      screen.queryByText('Must match your profile text exactly to be highlighted.')
+    ).not.toBeInTheDocument()
+  })
+
+  test('submits sourceText in the create mutation', async () => {
+    render(<CreateClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Enter claim name')).toBeInTheDocument()
+    })
+
+    await userEvent.type(screen.getByPlaceholderText('Enter claim name'), 'New Claim')
+    await userEvent.type(screen.getByPlaceholderText('Enter claim description'), 'New description')
+    await userEvent.type(
+      screen.getByPlaceholderText(/paste the exact text/i),
+      'OWASP projects are great'
+    )
+    await userEvent.click(screen.getByRole('button', { name: /create claim/i }))
+
+    await waitFor(() => {
+      expect(mockCreateFn).toHaveBeenCalled()
+    })
+    expect(mockCreateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: {
+          input: expect.objectContaining({
+            sourceText: 'OWASP projects are great',
+          }),
+        },
+      })
+    )
   })
 })
