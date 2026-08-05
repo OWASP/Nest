@@ -7,7 +7,7 @@ import { useDjangoSession } from 'hooks/useDjangoSession'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaCode, FaExclamationCircle } from 'react-icons/fa'
 import { FaLinkedin, FaCodeBranch, FaCodeMerge, FaPenToSquare } from 'react-icons/fa6'
@@ -94,6 +94,7 @@ interface CandidateCardProps {
 
 const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) => {
   const client = useApolloClient()
+  const router = useRouter()
   const [snapshot, setSnapshot] = useState<MemberSnapshot | null>(null)
   const [ledChapters, setLedChapters] = useState<Chapter[]>([])
   const [ledProjects, setLedProjects] = useState<Project[]>([])
@@ -281,10 +282,14 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
   }, [client, snapshot?.projectContributions])
 
   const handleCardClick = () => {
-    // Convert name to slug format.
-    const nameSlug = candidate.memberName.toLowerCase().replaceAll(/\s+/g, '_')
-    const candidateUrl = `https://owasp.org/www-board-candidates/${year}/${nameSlug}.html`
-    window.open(candidateUrl, '_blank', 'noopener,noreferrer')
+    if (candidate.member?.login) {
+      router.push(`/board/${year}/candidates/${candidate.member.login}`)
+    } else {
+      // Convert name to slug format.
+      const nameSlug = candidate.memberName.toLowerCase().replaceAll(/\s+/g, '_')
+      const candidateUrl = `https://owasp.org/www-board-candidates/${year}/${nameSlug}.html`
+      window.open(candidateUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   // Check if candidate leads any flagship level projects

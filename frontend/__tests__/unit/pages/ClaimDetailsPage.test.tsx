@@ -147,4 +147,153 @@ describe('ClaimDetailsPage', () => {
       expect(screen.getByTestId('claim-actions')).toBeInTheDocument()
     })
   })
+
+  test('renders approved claim for non-owner, non-reviewer', async () => {
+    mockUseDjangoSession.mockReturnValue({
+      isSyncing: false,
+      session: { user: { login: 'otheruser' } },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        boardCandidateClaim: { ...mockSingleClaim, status: 'APPROVED' },
+        boardCandidateClaimEvidences: mockEvidences,
+      },
+      loading: false,
+      error: null,
+    })
+
+    render(<ClaimDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/Leadership Experience/i)).toBeInTheDocument()
+    })
+  })
+
+  test('renders rejected claim for non-owner, non-reviewer', async () => {
+    mockUseDjangoSession.mockReturnValue({
+      isSyncing: false,
+      session: { user: { login: 'otheruser' } },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        boardCandidateClaim: { ...mockSingleClaim, status: 'REJECTED' },
+        boardCandidateClaimEvidences: mockEvidences,
+      },
+      loading: false,
+      error: null,
+    })
+
+    render(<ClaimDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/Leadership Experience/i)).toBeInTheDocument()
+    })
+  })
+
+  test('renders approved claim for anonymous user', async () => {
+    mockUseDjangoSession.mockReturnValue({
+      isSyncing: false,
+      session: null,
+      status: 'unauthenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        boardCandidateClaim: { ...mockSingleClaim, status: 'APPROVED' },
+        boardCandidateClaimEvidences: mockEvidences,
+      },
+      loading: false,
+      error: null,
+    })
+
+    render(<ClaimDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/Leadership Experience/i)).toBeInTheDocument()
+    })
+  })
+
+  test('denies draft claim for non-owner, non-reviewer', () => {
+    mockUseDjangoSession.mockReturnValue({
+      isSyncing: false,
+      session: { user: { login: 'otheruser' } },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        boardCandidateClaim: { ...mockSingleClaim, status: 'DRAFT' },
+        boardCandidateClaimEvidences: mockEvidences,
+      },
+      loading: false,
+      error: null,
+    })
+
+    render(<ClaimDetailsPage />)
+
+    expect(screen.getByText('Access Denied')).toBeInTheDocument()
+  })
+
+  test('denies submitted claim for non-owner, non-reviewer', () => {
+    mockUseDjangoSession.mockReturnValue({
+      isSyncing: false,
+      session: { user: { login: 'otheruser' } },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        boardCandidateClaim: { ...mockSingleClaim, status: 'SUBMITTED' },
+        boardCandidateClaimEvidences: mockEvidences,
+      },
+      loading: false,
+      error: null,
+    })
+
+    render(<ClaimDetailsPage />)
+
+    expect(screen.getByText('Access Denied')).toBeInTheDocument()
+  })
+
+  test('denies draft claim for anonymous user', () => {
+    mockUseDjangoSession.mockReturnValue({
+      isSyncing: false,
+      session: null,
+      status: 'unauthenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        boardCandidateClaim: { ...mockSingleClaim, status: 'DRAFT' },
+        boardCandidateClaimEvidences: mockEvidences,
+      },
+      loading: false,
+      error: null,
+    })
+
+    render(<ClaimDetailsPage />)
+
+    expect(screen.getByText('Access Denied')).toBeInTheDocument()
+  })
+
+  test('does not render ClaimActions for non-owner, non-reviewer public viewer', async () => {
+    mockUseDjangoSession.mockReturnValue({
+      isSyncing: false,
+      session: { user: { login: 'otheruser' } },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: {
+        boardCandidateClaim: { ...mockSingleClaim, status: 'APPROVED' },
+        boardCandidateClaimEvidences: mockEvidences,
+      },
+      loading: false,
+      error: null,
+    })
+
+    render(<ClaimDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/Leadership Experience/i)).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId('claim-actions')).not.toBeInTheDocument()
+  })
 })

@@ -14,6 +14,7 @@ export const CREATE_CLAIM = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }
@@ -35,6 +36,7 @@ export const UPDATE_CLAIM = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }

@@ -81,6 +81,7 @@ export type BoardCandidateClaimNode = Node & {
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
   reviews: Array<BoardCandidateClaimReviewNode>;
+  sourceText: Scalars['String']['output'];
   status: ClaimStatusEnum;
   updatedAt: Scalars['DateTime']['output'];
   withdrawnAt?: Maybe<Scalars['DateTime']['output']>;
@@ -95,6 +96,16 @@ export type BoardCandidateClaimReviewNode = Node & {
   notes: Scalars['String']['output'];
   reviewer?: Maybe<UserNode>;
   status: ReviewStatusEnum;
+};
+
+export type BoardCandidateProfileNode = Node & {
+  __typename?: 'BoardCandidateProfileNode';
+  candidate: EntityMemberNode;
+  createdAt: Scalars['DateTime']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  rawMarkdown: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type BoardOfDirectorsNode = Node & {
@@ -198,6 +209,7 @@ export type CreateApiKeyResult = {
 export type CreateClaimInput = {
   description: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  sourceText?: Scalars['String']['input'];
   year: Scalars['Int']['input'];
 };
 
@@ -907,6 +919,7 @@ export type Query = {
   boardCandidateClaimEvidenceFileUrl?: Maybe<Scalars['String']['output']>;
   boardCandidateClaimEvidences: Array<BoardCandidateClaimEvidenceNode>;
   boardCandidateClaims: Array<BoardCandidateClaimNode>;
+  boardCandidateProfile?: Maybe<BoardCandidateProfileNode>;
   boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
   chapter?: Maybe<ChapterNode>;
@@ -986,6 +999,12 @@ export type QueryBoardCandidateClaimEvidencesArgs = {
 
 export type QueryBoardCandidateClaimsArgs = {
   login?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryBoardCandidateProfileArgs = {
+  login: Scalars['String']['input'];
   year: Scalars['Int']['input'];
 };
 
@@ -1372,6 +1391,7 @@ export type UpdateClaimInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   key: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
+  sourceText?: InputMaybe<Scalars['String']['input']>;
   year: Scalars['Int']['input'];
 };
 

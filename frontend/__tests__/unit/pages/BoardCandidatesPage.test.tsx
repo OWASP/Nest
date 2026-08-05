@@ -15,6 +15,7 @@ jest.mock('@apollo/client/react', () => ({
 
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(() => ({ year: '2025' })),
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
 }))
 
 jest.mock('app/global-error', () => ({
