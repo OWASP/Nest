@@ -10,7 +10,7 @@ authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
 packages = [ { include = "apps", from = "src" } ]
 dependencies.python = "^3.13"
-dependencies.aiohttp = "3.14.1"
+dependencies.aiohttp = "3.14.3"
 dependencies.algoliasearch = "4.40.0"
 dependencies.algoliasearch-django = "4.0.0"
 dependencies.cryptography = "50.0.0"
