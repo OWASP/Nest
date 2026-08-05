@@ -194,7 +194,7 @@ variable "enable_nat_gateway" {
 }
 
 variable "enable_observability" {
-  description = "Whether to create the observability stack (VictoriaMetrics)."
+  description = "Whether to create the observability stack."
   type        = bool
   default     = false
 }
