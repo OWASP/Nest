@@ -131,7 +131,7 @@ describe('SubscribeButton', () => {
       setupMocks()
       render(<SubscribeButton {...defaultProps} />)
       fireEvent.click(screen.getByText('Subscribe'))
-      expect(screen.getByText('Subscribe to Test Project')).toBeInTheDocument()
+      expect(screen.getByText('Subscribe to updates from Test Project')).toBeInTheDocument()
     })
   })
 
@@ -262,7 +262,7 @@ describe('SubscribeButton', () => {
 
     test('closes modal when Cancel is clicked', () => {
       fireEvent.click(screen.getByText('Cancel'))
-      expect(screen.queryByText('Subscribe to Test Project')).not.toBeInTheDocument()
+      expect(screen.queryByText('Subscribe to updates from Test Project')).not.toBeInTheDocument()
     })
   })
 

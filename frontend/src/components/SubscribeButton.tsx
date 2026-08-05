@@ -1,7 +1,6 @@
 'use client'
 
 import { useMutation, useQuery } from '@apollo/client/react'
-import { Button } from '@heroui/button'
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/modal'
 import { addToast } from '@heroui/toast'
 import { Tooltip } from '@heroui/tooltip'
@@ -15,6 +14,7 @@ import {
   GET_MY_ENTITY_SUBSCRIPTIONS,
 } from 'server/queries/subscriptionQueries'
 import { decodeRelayId } from 'utils/decodeRelayId'
+import ActionButton from 'components/ActionButton'
 
 const MAX_ENTITY_SUBSCRIPTIONS = 5
 
@@ -184,7 +184,7 @@ export default function SubscribeButton({
         <ModalContent className="rounded-lg bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-[#212529]">
           <ModalHeader className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Subscribe to {entityName}
+              Subscribe to updates from {entityName}
             </h2>
           </ModalHeader>
 
@@ -248,21 +248,11 @@ export default function SubscribeButton({
           </ModalBody>
 
           <ModalFooter className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-gray-700">
-            <Button
-              variant="bordered"
-              onPress={() => setShowModal(false)}
-              className="flex items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 text-gray-600 transition-all hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
-            >
-              Cancel
-            </Button>
-            <Button
-              onPress={handleSubscribe}
-              isDisabled={creating}
-              className="flex items-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-3 py-2 text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
-            >
+            <ActionButton onClick={() => setShowModal(false)}>Cancel</ActionButton>
+            <ActionButton onClick={handleSubscribe} isDisabled={creating}>
               <FaBell className="h-3 w-3" />
               {creating ? 'Subscribing...' : 'Subscribe'}
-            </Button>
+            </ActionButton>
           </ModalFooter>
         </ModalContent>
       </Modal>
