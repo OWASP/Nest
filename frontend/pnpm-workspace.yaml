@@ -39,7 +39,7 @@ minimumReleaseAgeExclude:
   - electron-to-chromium@1.5.396
   - enhanced-resolve@5.24.3
   - es-module-lexer@2.3.1
-  - fast-uri@3.1.4
+  - fast-uri@3.1.5
   - immutable@5.1.8
   - js-yaml@4.3.0
   - nanoid@3.3.17
@@ -55,7 +55,7 @@ minimumReleaseAgeExclude:
   - shell-quote@1.9.0
   - terser@5.49.0
   - tmp@0.2.7
-  - undici@7.28.0
+  - undici@7.29.0
   - uuid@11.1.1
   - webpack-sources@3.5.1
   - webpack@5.104.1
@@ -66,7 +66,7 @@ overrides:
   body-parser: 1.20.6
   brace-expansion@5: 5.0.8
   dompurify: 3.4.12
-  fast-uri: 3.1.4
+  fast-uri: 3.1.5
   glob: 11.1.0
   immutable: 5.1.8
   js-yaml: 4.3.0
@@ -80,7 +80,7 @@ overrides:
   shell-quote: 1.9.0
   test-exclude: 7.0.2
   tmp: 0.2.7
-  undici: 7.28.0
+  undici: 7.29.0
   uuid: 11.1.1
   webpack@5: 5.104.1
   ws@8: 8.21.0
