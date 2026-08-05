@@ -5,6 +5,7 @@ from unittest.mock import Mock
 import pytest
 from django.db import IntegrityError
 
+from apps.common.utils import slugify
 from apps.owasp.management.commands.owasp_generate_board_candidates_claims import Command
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
@@ -386,6 +387,62 @@ class TestGenerateBoardCandidatesClaimsCommand:
         mock_claim_1.save.assert_called_once()
         mock_claim_2.save.assert_not_called()
 
+    def test_handle_dedupes_punctuation_variants_within_run(self, command, handle_mocks):
+        mock_board = Mock()
+        mock_board.id = 1
+        handle_mocks["board_get"].return_value = mock_board
+
+        mock_candidate = Mock(spec=EntityMember)
+        mock_candidate.member_name = "John Doe"
+
+        mock_qs = Mock()
+        mock_qs.exists.return_value = True
+        mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
+        handle_mocks["entity_member_filter"].return_value = mock_qs
+
+        handle_mocks["get_repo_file"].return_value = "markdown content"
+
+        mock_claim_1 = Mock(spec=BoardCandidateClaim)
+        mock_claim_1.name = "Founded OWASP Nest"
+        mock_claim_2 = Mock(spec=BoardCandidateClaim)
+        mock_claim_2.name = "Founded OWASP Nest!"
+        handle_mocks["generate_claims"].return_value = [mock_claim_1, mock_claim_2]
+
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
+
+        mock_claim_1.save.assert_called_once()
+        mock_claim_2.save.assert_not_called()
+
+    def test_handle_skips_punctuation_variant_existing_key(self, command, handle_mocks):
+        mock_board = Mock()
+        mock_board.id = 1
+        handle_mocks["board_get"].return_value = mock_board
+
+        mock_candidate = Mock(spec=EntityMember)
+        mock_candidate.member_name = "John Doe"
+
+        mock_qs = Mock()
+        mock_qs.exists.return_value = True
+        mock_qs.__iter__ = Mock(return_value=iter([mock_candidate]))
+        handle_mocks["entity_member_filter"].return_value = mock_qs
+
+        mock_claim_qs = Mock()
+        mock_claim_qs.values_list.side_effect = [
+            ["founded-owasp-nest"],
+        ]
+        handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
+
+        handle_mocks["get_repo_file"].return_value = "markdown content"
+
+        mock_claim = Mock(spec=BoardCandidateClaim)
+        mock_claim.name = "Founded OWASP Nest!"
+        handle_mocks["generate_claims"].return_value = [mock_claim]
+
+        command.handle(source_years=[2023], year=2024, name=None, force_preview=False)
+
+        mock_claim.save.assert_not_called()
+        command.stdout.write.assert_any_call("No new claims for John Doe, skipping...")
+
     def test_handle_partial_save_failure_retries_missing_claims(self, command, handle_mocks):
         mock_board = Mock()
         mock_board.id = 1
@@ -402,7 +459,7 @@ class TestGenerateBoardCandidatesClaimsCommand:
         stored_claims = []
         mock_claim_qs = Mock()
         mock_claim_qs.values_list.side_effect = lambda *_, **__: [
-            claim.name for claim in stored_claims
+            slugify(claim.name) for claim in stored_claims
         ]
         handle_mocks["board_candidate_claim_filter"].return_value = mock_claim_qs
 

@@ -11,6 +11,7 @@ from django.utils.html import strip_tags
 
 from apps.ai.common.utils import extract_json_from_markdown
 from apps.common.open_ai import OpenAi
+from apps.common.utils import slugify
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
@@ -244,21 +245,25 @@ class Command(BaseCommand):
                     )
                     continue
 
-                seen_names = set()
+                seen_keys = set()
                 unique_claims = []
+                key_max_length = BoardCandidateClaim._meta.get_field("key").max_length
                 for claim in claims:
-                    if claim.name not in seen_names:
-                        seen_names.add(claim.name)
+                    key = slugify(claim.name)[:key_max_length]
+                    if key not in seen_keys:
+                        seen_keys.add(key)
                         unique_claims.append(claim)
 
                 if not force_preview:
-                    existing_names = set(
+                    existing_keys = set(
                         BoardCandidateClaim.objects.filter(candidate=candidate).values_list(
-                            "name", flat=True
+                            "key", flat=True
                         )
                     )
                     unique_claims = [
-                        claim for claim in unique_claims if claim.name not in existing_names
+                        claim
+                        for claim in unique_claims
+                        if slugify(claim.name)[:key_max_length] not in existing_keys
                     ]
                     if not unique_claims:
                         self.stdout.write(
