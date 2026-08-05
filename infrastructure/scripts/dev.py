@@ -9,6 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from scripts.commands import CommandRunner
+from scripts.deploy_services import DeployServices
 from scripts.errors import InfrastructureError, MissingEnvVarError
 from scripts.load_env import LoadEnv
 from scripts.localstack import LocalStack
@@ -42,6 +43,7 @@ class LocalInfrastructureRunner:
         self.localstack = localstack or LocalStack(self.commands)
         self.provisioner = ProvisionInfra(self.commands, localstack=self.localstack)
         self.loadenv = LoadEnv(localstack=self.localstack)
+        self.deployer = DeployServices(self.commands, localstack=self.localstack)
 
     def start_localstack(self) -> None:
         """Start LocalStack for local development.
@@ -79,6 +81,10 @@ class LocalInfrastructureRunner:
         """
         self.loadenv.upload(dry_run=dry_run, overwrite=overwrite)
 
+    def deploy_services(self) -> None:
+        """Run services on localstack."""
+        self.deployer.run()
+
 
 def main() -> None:
     """Bootstrap and run local infrastructure workflows."""
@@ -111,6 +117,11 @@ def main() -> None:
         help="Overwrite existing parameters",
     )
 
+    subparsers.add_parser(
+        "deploy-services",
+        help="Run backend/frontend ECS tasks on Fargate and register ALB targets",
+    )
+
     args = parser.parse_args()
     runner = LocalInfrastructureRunner()
 
@@ -121,6 +132,7 @@ def main() -> None:
         "load-env-params": lambda: runner.load_env_params(
             dry_run=args.dry_run, overwrite=args.overwrite
         ),
+        "deploy-services": runner.deploy_services,
     }
 
     try:

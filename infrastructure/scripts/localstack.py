@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 LOCALSTACK_CONTAINER_NAME = "nest-localstack"
 LOCALSTACK_HOST = "localhost"
 LOCALSTACK_PORT = 4566
-LOCALSTACK_ECR_PORT = 4510
+LOCALSTACK_EXTERNAL_PORTS = "4510-4559"
 LOCALSTACK_INFO_PATH = "/_localstack/info"
 HEALTH_MAX_ATTEMPTS = 30
 HEALTH_POLL_INTERVAL = 2
@@ -183,8 +183,14 @@ class LocalStack:
 
         logger.info("Starting LocalStack container...")
         # Forward the token via the process environment (-e NAME) rather than argv.
-        # ECR_ENDPOINT_STRATEGY=off avoids *.localhost.localstack.cloud DNS during teardown
-        # but points the ECR registry at port 4510, so publish it for docker login/push.
+        # ECR_ENDPOINT_STRATEGY=off simplifies ECR repository URIs to
+        # localhost.localstack.cloud:<port>. Publish the whole external service port
+        # range so host-side docker login/push can reach ECR at its bound port (4510).
+        # DISABLE_CORS_CHECKS=1 mirrors the previous start-localstack.sh: LocalStack's
+        # gateway enforces its own CORS/CSRF rules and rejects browser requests (e.g.
+        # GraphQL POSTs) whose Origin is not in LocalStack's allowlist with a 403.
+        # Mount the Docker socket so LocalStack can run sibling containers for ECS
+        # tasks and Lambda functions.
         try:
             self.commands.run(
                 "docker",
@@ -195,9 +201,17 @@ class LocalStack:
                 "-p",
                 f"{self.port}:{LOCALSTACK_PORT}",
                 "-p",
-                f"{LOCALSTACK_ECR_PORT}:{LOCALSTACK_ECR_PORT}",
+                f"{LOCALSTACK_EXTERNAL_PORTS}:{LOCALSTACK_EXTERNAL_PORTS}",
+                "-p",
+                "80:80",
+                "-p",
+                "443:443",
+                "-v",
+                "/var/run/docker.sock:/var/run/docker.sock",
                 "-e",
                 "ECR_ENDPOINT_STRATEGY=off",
+                "-e",
+                "DISABLE_CORS_CHECKS=1",
                 "-e",
                 "LOCALSTACK_AUTH_TOKEN",
                 image,

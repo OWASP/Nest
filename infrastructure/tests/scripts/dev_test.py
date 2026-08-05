@@ -83,6 +83,15 @@ class TestLocalInfrastructureRunner:
 
         runner.loadenv.upload.assert_called_once_with(dry_run=True, overwrite=True)
 
+    def test_deploy_services(self) -> None:
+        localstack = MagicMock(spec=LocalStack)
+        runner = self.build_runner(localstack)
+        runner.deployer = MagicMock()
+
+        runner.deploy_services()
+
+        runner.deployer.run.assert_called_once()
+
 
 class TestMain:
     """Tests for the ``main`` command dispatcher."""
@@ -125,6 +134,13 @@ class TestMain:
         mock_runner_class.return_value.load_env_params.assert_called_once_with(
             dry_run=True, overwrite=True
         )
+
+    @patch("sys.argv", ["scripts.dev", "deploy-services"])
+    @patch("scripts.dev.LocalInfrastructureRunner")
+    def test_dispatches_deploy_services(self, mock_runner_class: MagicMock) -> None:
+        main()
+
+        mock_runner_class.return_value.deploy_services.assert_called_once()
 
     @patch("sys.argv", ["scripts.dev", "start-localstack"])
     @patch("scripts.dev.LocalInfrastructureRunner")

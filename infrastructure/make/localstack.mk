@@ -27,7 +27,7 @@ load-env-params: ## Upload local .env variables to LocalStack SSM Parameter Stor
 	@cd infrastructure && poetry run python -m scripts.dev load-env-params $(ARGS)
 
 deploy-services: ## Run backend/frontend ECS tasks on Fargate and register ALB targets
-	@infrastructure/scripts/deploy-services.sh
+	@cd infrastructure && poetry run python -m scripts.dev deploy-services
 
 ecs-migrate: ## Run database migrations on LocalStack
 	$(call RUN_ECS_TASK,migrate)
@@ -44,4 +44,4 @@ ecs-task: ## Run an ECS task (set TASK=name, e.g. make ecs-task TASK=migrate)
 deploy-on-localstack: ## Full LocalStack provision: infra + images + SSM params + deploy services
 	@cd infrastructure && poetry run python -m scripts.dev provision-infra
 	@cd infrastructure && poetry run python -m scripts.dev load-env-params --overwrite
-	@infrastructure/scripts/deploy-services.sh
+	@cd infrastructure && poetry run python -m scripts.dev deploy-services
