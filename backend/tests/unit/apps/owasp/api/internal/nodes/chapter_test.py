@@ -6,6 +6,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import pytest
 import strawberry
 
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER,
+)
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.chapter import (
     ENTITY_CHANNELS_BY_CHAPTER_ID_LOADER,
     ENTITY_LEADERS_BY_CHAPTER_ID_LOADER,
@@ -36,8 +40,14 @@ class TestChapterNode(GraphQLNodeBaseTest):
             "meetup_group",
             "postal_code",
             "tags",
+            "top_contributors",
         }
         assert expected_field_names.issubset(field_names)
+
+    def test_resolve_top_contributors(self):
+        field = self._get_field_by_name("top_contributors", ChapterNode)
+        assert field is not None
+        assert field.type.of_type is RepositoryContributorNode
 
     def test_resolve_key(self):
         field = self._get_field_by_name("key", ChapterNode)
@@ -199,3 +209,39 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
         mock_dataloader.load.assert_called_once_with(mock_chapter.pk)
         assert result == [mock_leader1, mock_leader2]
+
+    @pytest.mark.asyncio
+    async def test_top_contributors_resolver_uses_dataloader(self):
+        """Test top_contributors resolver delegates to the dataloader and returns nodes."""
+        mock_chapter = MagicMock(spec=Chapter)
+        mock_chapter.pk = 1
+        mock_contributors = [
+            {
+                "avatar_url": "url1",
+                "contributions_count": 100,
+                "id": "user1",
+                "login": "user1",
+                "name": "User 1",
+            },
+            {
+                "avatar_url": "url2",
+                "contributions_count": 50,
+                "id": "user2",
+                "login": "user2",
+                "name": "User 2",
+            },
+        ]
+
+        field = self._get_field_by_name("top_contributors", ChapterNode)
+        info = MagicMock(spec=strawberry.Info)
+        mock_dataloader = AsyncMock()
+        mock_dataloader.load = AsyncMock(return_value=mock_contributors)
+        info.context.github_dataloaders = {TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER: mock_dataloader}
+
+        result = await field.base_resolver.wrapped_func(mock_chapter, mock_chapter, info)
+
+        mock_dataloader.load.assert_called_once_with(mock_chapter.pk)
+        assert len(result) == 2
+        assert all(isinstance(c, RepositoryContributorNode) for c in result)
+        assert result[0].login == "user1"
+        assert result[1].login == "user2"
