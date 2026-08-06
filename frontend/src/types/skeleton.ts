@@ -2,6 +2,7 @@ export type CardSkeletonProps = {
   numIcons?: number
   showActionButton?: boolean
   showContributors?: boolean
+  showExtraActionButton?: boolean
   showIcons?: boolean
   showLevel?: boolean
   showLink?: boolean

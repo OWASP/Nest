@@ -6,6 +6,7 @@ import type { Committee } from 'types/committee'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
+import SubscribeButton from 'components/SubscribeButton'
 
 const CommitteesPage = () => {
   const {
@@ -39,6 +40,15 @@ const CommitteesPage = () => {
       <Card
         button={submitButton}
         cardKey={committee.key}
+        extraAction={
+          committee.objectID ? (
+            <SubscribeButton
+              entityType="committee"
+              entityId={String(committee.objectID)}
+              entityName={committee.name}
+            />
+          ) : undefined
+        }
         icons={filteredIcons}
         key={committee.key}
         social={formattedUrls}

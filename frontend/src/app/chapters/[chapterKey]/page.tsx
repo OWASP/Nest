@@ -20,6 +20,7 @@ import Tags from 'components/cards/Tags'
 import EntityChannelLinks from 'components/EntityChannelLinks'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
+import SubscribeButton from 'components/SubscribeButton'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
@@ -98,7 +99,10 @@ export default function ChapterDetailsPage() {
 
   return (
     <PageWrapper>
-      <Header title={chapter.name} isActive={chapter.isActive} isArchived={false} />
+      <div className="flex items-center justify-between">
+        <Header title={chapter.name} isActive={chapter.isActive} isArchived={false} />
+        <SubscribeButton entityType="chapter" entityId={chapter.id} entityName={chapter.name} />
+      </div>
 
       <Summary summary={chapter.summary} />
 
