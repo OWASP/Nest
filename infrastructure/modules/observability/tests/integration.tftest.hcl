@@ -49,6 +49,11 @@ run "observability_integration_apply" {
   }
 
   assert {
+    condition     = can(aws_efs_access_point.vm.id)
+    error_message = "EFS access point was not created."
+  }
+
+  assert {
     condition     = can(aws_ecs_service.vm.id)
     error_message = "ECS service was not created."
   }

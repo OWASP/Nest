@@ -50,6 +50,7 @@ locals {
         protocol      = "tcp"
       }
     ]
+    user = "65532"
   }
 }
 
@@ -131,6 +132,29 @@ resource "aws_efs_mount_target" "vm" {
   file_system_id  = aws_efs_file_system.vm.id
   security_groups = [aws_security_group.efs.id]
   subnet_id       = each.value
+}
+
+resource "aws_efs_access_point" "vm" {
+  file_system_id = aws_efs_file_system.vm.id
+
+  posix_user {
+    gid = 65532
+    uid = 65532
+  }
+
+  root_directory {
+    path = "/victoriametrics"
+
+    creation_info {
+      owner_gid   = 65532
+      owner_uid   = 65532
+      permissions = "0755"
+    }
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "${local.name_prefix}-vm"
+  })
 }
 
 resource "aws_cloudwatch_log_group" "vm" {
@@ -228,6 +252,10 @@ resource "aws_ecs_task_definition" "vm" {
     efs_volume_configuration {
       file_system_id     = aws_efs_file_system.vm.id
       transit_encryption = "ENABLED"
+
+      authorization_config {
+        access_point_id = aws_efs_access_point.vm.id
+      }
     }
   }
 }

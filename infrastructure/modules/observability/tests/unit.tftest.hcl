@@ -108,6 +108,24 @@ run "test_task_uses_arm64" {
   }
 }
 
+run "test_container_runs_as_non_root" {
+  command = plan
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.vm.container_definitions)[0].user == "65532"
+    error_message = "The VictoriaMetrics container must run as the non-root user 65532."
+  }
+}
+
+run "test_access_point_enforces_non_root_owner" {
+  command = plan
+
+  assert {
+    condition     = aws_efs_access_point.vm.posix_user[0].uid == 65532 && aws_efs_access_point.vm.posix_user[0].gid == 65532
+    error_message = "The EFS access point must enforce the non-root POSIX user 65532."
+  }
+}
+
 run "test_task_mounts_encrypted_efs_volume" {
   command = plan
 
