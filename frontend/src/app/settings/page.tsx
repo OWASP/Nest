@@ -41,14 +41,6 @@ const SNAPSHOT_CONTENT_FIELDS = [
 
 type SnapshotContentKey = (typeof SNAPSHOT_CONTENT_FIELDS)[number]['key']
 
-const ENTITY_CONTENT_FIELDS = [
-  { key: 'includeIssues', label: 'Issues' },
-  { key: 'includePullRequests', label: 'Pull Requests' },
-  { key: 'includeReleases', label: 'Releases' },
-] as const
-
-type EntityContentKey = (typeof ENTITY_CONTENT_FIELDS)[number]['key']
-
 interface SnapshotSubscriptionData {
   id: string
   frequency: string
@@ -391,9 +383,6 @@ interface EntitySubscriptionData {
   chapter?: { id: string; name: string } | null
   committee?: { id: string; name: string } | null
   project?: { id: string; name: string } | null
-  includeIssues: boolean
-  includePullRequests: boolean
-  includeReleases: boolean
   createdAt: string
   updatedAt: string
 }
@@ -418,9 +407,6 @@ function EntitySubscriptionCard({
     id: string,
     data: {
       frequency: string
-      includeIssues: boolean
-      includePullRequests: boolean
-      includeReleases: boolean
     }
   ) => void
   onUnsubscribe?: (id: string) => void
@@ -431,26 +417,12 @@ function EntitySubscriptionCard({
   const [frequency, setFrequency] = useState<'weekly' | 'monthly'>(
     subscription.frequency as 'weekly' | 'monthly'
   )
-  const [toggles, setToggles] = useState({
-    includeIssues: subscription.includeIssues,
-    includePullRequests: subscription.includePullRequests,
-    includeReleases: subscription.includeReleases,
-  })
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showUnsubscribeModal, setShowUnsubscribeModal] = useState(false)
-
   useEffect(() => {
     setFrequency(subscription.frequency as 'weekly' | 'monthly')
-    setToggles({
-      includeIssues: subscription.includeIssues,
-      includePullRequests: subscription.includePullRequests,
-      includeReleases: subscription.includeReleases,
-    })
   }, [subscription])
 
-  const handleToggle = (key: EntityContentKey) => {
-    setToggles((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showUnsubscribeModal, setShowUnsubscribeModal] = useState(false)
 
   const entityInfo = getEntityInfo(subscription)
   const isActive = subscription.isActive
@@ -520,41 +492,6 @@ function EntitySubscriptionCard({
                 ))}
               </div>
             </div>
-
-            {/* Content Toggles */}
-            <div className="mb-4">
-              <h4 className="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
-                Content
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {ENTITY_CONTENT_FIELDS.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => handleToggle(key)}
-                    aria-pressed={toggles[key]}
-                    className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-all ${
-                      toggles[key]
-                        ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <span>{label}</span>
-                    <div
-                      className={`flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-                        toggles[key] ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
-                      }`}
-                    >
-                      <div
-                        className={`h-2.5 w-2.5 rounded-full bg-white shadow-sm transition-transform ${
-                          toggles[key] ? 'translate-x-2.5' : 'translate-x-0'
-                        }`}
-                      />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
           </>
         )}
 
@@ -573,7 +510,7 @@ function EntitySubscriptionCard({
                 </Button>
               )}
               <ActionButton
-                onClick={() => onSave(subscription.id, { frequency, ...toggles })}
+                onClick={() => onSave(subscription.id, { frequency })}
                 isDisabled={isSaving}
               >
                 <FaFloppyDisk />
@@ -769,9 +706,6 @@ function EntitySubscriptionContent() {
     id: string,
     data: {
       frequency: string
-      includeIssues: boolean
-      includePullRequests: boolean
-      includeReleases: boolean
     }
   ) => {
     updateEntitySubscription({

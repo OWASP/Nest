@@ -35,9 +35,6 @@ const ENTITY_SUBSCRIPTION_FIELDS = gql`
       id
       name
     }
-    includeIssues
-    includePullRequests
-    includeReleases
     createdAt
     updatedAt
   }

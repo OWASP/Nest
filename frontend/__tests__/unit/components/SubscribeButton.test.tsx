@@ -239,12 +239,6 @@ describe('SubscribeButton', () => {
       expect(screen.getByText('Monthly')).toBeInTheDocument()
     })
 
-    test('shows content toggles', () => {
-      expect(screen.getByText('Issues')).toBeInTheDocument()
-      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
-      expect(screen.getByText('Releases')).toBeInTheDocument()
-    })
-
     test('switches frequency when clicked', () => {
       fireEvent.click(screen.getByText('Monthly'))
       const monthlyButton = screen.getByText('Monthly').closest('button')
@@ -252,14 +246,6 @@ describe('SubscribeButton', () => {
       const weeklyButton = screen.getByText('Weekly').closest('button')
       expect(weeklyButton).toHaveAttribute('aria-pressed', 'false')
     })
-
-    test('toggles content options when clicked', () => {
-      const issuesButton = screen.getByText('Issues').closest('button')
-      expect(issuesButton).toHaveAttribute('aria-pressed', 'true')
-      fireEvent.click(issuesButton!)
-      expect(issuesButton).toHaveAttribute('aria-pressed', 'false')
-    })
-
     test('closes modal when Cancel is clicked', () => {
       fireEvent.click(screen.getByText('Cancel'))
       expect(screen.queryByText('Subscribe to updates from Test Project')).not.toBeInTheDocument()
@@ -284,9 +270,6 @@ describe('SubscribeButton', () => {
               entityType: 'project',
               entityId: 42,
               frequency: 'weekly',
-              includeIssues: true,
-              includePullRequests: true,
-              includeReleases: true,
             },
           },
         })

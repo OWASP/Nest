@@ -33,12 +33,6 @@ interface SubscribeButtonProps {
   entityName: string
 }
 
-const CONTENT_TOGGLES = [
-  { key: 'includeIssues' as const, label: 'Issues' },
-  { key: 'includePullRequests' as const, label: 'Pull Requests' },
-  { key: 'includeReleases' as const, label: 'Releases' },
-]
-
 export default function SubscribeButton({
   entityType,
   entityId,
@@ -47,11 +41,6 @@ export default function SubscribeButton({
   const { status } = useSession()
   const [showModal, setShowModal] = useState(false)
   const [frequency, setFrequency] = useState<'weekly' | 'monthly'>('weekly')
-  const [toggles, setToggles] = useState({
-    includeIssues: true,
-    includePullRequests: true,
-    includeReleases: true,
-  })
 
   const { data, refetch } = useQuery<{
     myEntitySubscriptions: EntitySubscriptionData[]
@@ -106,15 +95,10 @@ export default function SubscribeButton({
           entityType,
           entityId: decodedEntityId,
           frequency,
-          ...toggles,
         },
       },
     })
-  }, [createSubscription, entityType, decodedEntityId, frequency, toggles])
-
-  const handleToggle = useCallback((key: keyof typeof toggles) => {
-    setToggles((prev) => ({ ...prev, [key]: !prev[key] }))
-  }, [])
+  }, [createSubscription, entityType, decodedEntityId, frequency])
 
   if (status !== 'authenticated') return null
 
@@ -207,40 +191,6 @@ export default function SubscribeButton({
                     }`}
                   >
                     {option.charAt(0).toUpperCase() + option.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
-                Content
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {CONTENT_TOGGLES.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => handleToggle(key)}
-                    aria-pressed={toggles[key]}
-                    className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-all ${
-                      toggles[key]
-                        ? 'border-[#1D7BD7]/40 bg-[#1D7BD7]/10 text-[#1D7BD7]'
-                        : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <span>{label}</span>
-                    <div
-                      className={`flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-                        toggles[key] ? 'bg-[#1D7BD7]' : 'bg-gray-300 dark:bg-gray-600'
-                      }`}
-                    >
-                      <div
-                        className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
-                          toggles[key] ? 'translate-x-3' : 'translate-x-0'
-                        }`}
-                      />
-                    </div>
                   </button>
                 ))}
               </div>
