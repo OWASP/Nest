@@ -118,9 +118,9 @@ export type CreateApiKeyResult = {
 };
 
 export type CreateEntitySubscriptionInput = {
-  entityPreferences: Array<EntityPreferenceInput>;
+  entityId: Scalars['Int']['input'];
+  entityType: Scalars['String']['input'];
   frequency?: Scalars['String']['input'];
-  name?: Scalars['String']['input'];
 };
 
 export type CreateModuleInput = {
@@ -187,36 +187,17 @@ export type EntityMemberNode = Node & {
   role: Scalars['String']['output'];
 };
 
-export type EntityPreferenceInput = {
-  entityId: Scalars['Int']['input'];
-  entityType: Scalars['String']['input'];
-  includeIssues?: Scalars['Boolean']['input'];
-  includePullRequests?: Scalars['Boolean']['input'];
-  includeReleases?: Scalars['Boolean']['input'];
-};
-
 export type EntitySubscriptionNode = Node & {
   __typename?: 'EntitySubscriptionNode';
+  chapter?: Maybe<ChapterNode>;
+  committee?: Maybe<CommitteeNode>;
   createdAt: Scalars['DateTime']['output'];
-  entityPreferences: Array<EntitySubscriptionPreferenceNode>;
   frequency: Scalars['String']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
-  name: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type EntitySubscriptionPreferenceNode = Node & {
-  __typename?: 'EntitySubscriptionPreferenceNode';
-  chapter?: Maybe<ChapterNode>;
-  committee?: Maybe<CommitteeNode>;
-  /** The Globally Unique ID of this object */
-  id: Scalars['ID']['output'];
-  includeIssues: Scalars['Boolean']['output'];
-  includePullRequests: Scalars['Boolean']['output'];
-  includeReleases: Scalars['Boolean']['output'];
   project?: Maybe<ProjectNode>;
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type EntitySubscriptionResult = {
@@ -1301,9 +1282,7 @@ export type StatsNode = {
 };
 
 export type UpdateEntitySubscriptionInput = {
-  entityPreferences?: InputMaybe<Array<EntityPreferenceInput>>;
   frequency?: InputMaybe<Scalars['String']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateModuleInput = {

@@ -21,26 +21,19 @@ const SNAPSHOT_SUBSCRIPTION_FIELDS = gql`
 const ENTITY_SUBSCRIPTION_FIELDS = gql`
   fragment EntitySubscriptionFields on EntitySubscriptionNode {
     id
-    name
     frequency
     isActive
-    entityPreferences {
+    chapter {
       id
-      chapter {
-        id
-        name
-      }
-      committee {
-        id
-        name
-      }
-      project {
-        id
-        name
-      }
-      includeIssues
-      includePullRequests
-      includeReleases
+      name
+    }
+    committee {
+      id
+      name
+    }
+    project {
+      id
+      name
     }
     createdAt
     updatedAt

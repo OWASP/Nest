@@ -48,7 +48,10 @@ class TestEntitySubscriptionQuery:
         with patch(
             "apps.owasp.api.internal.queries.entity_subscription.EntitySubscription.objects"
         ) as mock_objects:
-            mock_objects.filter.return_value = mock_queryset
+            mock_objects.filter.return_value.select_related.return_value = mock_queryset
             result = self._resolve_my_entity_subscriptions(info)
             assert result == mock_queryset
             mock_objects.filter.assert_called_once_with(user=info.context.request.user)
+            mock_objects.filter.return_value.select_related.assert_called_once_with(
+                "chapter", "committee", "project"
+            )
