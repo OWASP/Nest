@@ -291,12 +291,6 @@ variable "frontend_use_fargate_spot" {
   default     = true
 }
 
-variable "observability_vm_image" {
-  description = "The VictoriaMetrics container image (including digest)."
-  type        = string
-  default     = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
-}
-
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets."
   type        = list(string)

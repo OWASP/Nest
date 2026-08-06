@@ -22,6 +22,10 @@ locals {
     Project     = var.project_name
   }
   fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
+  observability_vm_image = trimspace(trimprefix(
+    one([for line in split("\n", file("${path.root}/../../docker/victoriametrics/Dockerfile")) : line if startswith(line, "FROM ")]),
+    "FROM "
+  ))
 }
 
 module "alb" {
@@ -179,6 +183,26 @@ module "networking" {
   vpc_cidr                            = var.vpc_cidr
 }
 
+module "observability" {
+  count  = var.enable_observability ? 1 : 0
+  source = "../modules/observability"
+
+  app_security_group_ids = [
+    module.security.backend_sg_id,
+    module.security.frontend_sg_id,
+    module.security.tasks_sg_id,
+  ]
+  assign_public_ip = local.assign_public_ip
+  aws_region       = var.aws_region
+  common_tags      = local.common_tags
+  environment      = var.environment
+  kms_key_arn      = module.kms.key_arn
+  project_name     = var.project_name
+  subnet_ids       = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  vm_image         = local.observability_vm_image
+  vpc_id           = module.networking.vpc_id
+}
+
 module "parameters" {
   source = "../modules/parameters"
 
@@ -248,24 +272,4 @@ module "tasks" {
   project_name                  = var.project_name
   subnet_ids                    = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   use_fargate_spot              = var.tasks_use_fargate_spot
-}
-
-module "observability" {
-  count  = var.enable_observability ? 1 : 0
-  source = "../modules/observability"
-
-  app_security_group_ids = [
-    module.security.backend_sg_id,
-    module.security.frontend_sg_id,
-    module.security.tasks_sg_id,
-  ]
-  assign_public_ip = local.assign_public_ip
-  aws_region       = var.aws_region
-  common_tags      = local.common_tags
-  environment      = var.environment
-  kms_key_arn      = module.kms.key_arn
-  project_name     = var.project_name
-  subnet_ids       = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  vm_image         = var.observability_vm_image
-  vpc_id           = module.networking.vpc_id
 }

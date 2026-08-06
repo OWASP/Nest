@@ -1,0 +1,55 @@
+provider "aws" {
+  access_key                  = "test"
+  region                      = "us-east-1"
+  s3_use_path_style           = true
+  secret_key                  = "test"
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+}
+
+variables {
+  app_security_group_ids = ["sg-11111111", "sg-22222222", "sg-33333333"]
+  aws_region             = "us-east-1"
+  common_tags            = { Environment = "test", Project = "nest" }
+  environment            = "test"
+  kms_key_arn            = "arn:aws:kms:us-east-1:000000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab"
+  project_name           = "nest"
+  subnet_ids             = ["subnet-11111111", "subnet-22222222"]
+  vm_image               = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
+  vpc_id                 = "vpc-11111111"
+}
+
+run "observability_integration_apply" {
+  command = apply
+
+  assert {
+    condition     = can(aws_efs_file_system.vm.id)
+    error_message = "EFS file system was not created."
+  }
+
+  assert {
+    condition     = aws_efs_file_system.vm.encrypted == true
+    error_message = "EFS must be encrypted at rest."
+  }
+
+  assert {
+    condition     = length(aws_efs_mount_target.vm) == length(var.subnet_ids)
+    error_message = "There must be one EFS mount target per subnet."
+  }
+
+  assert {
+    condition     = aws_security_group_rule.efs_from_vm.source_security_group_id == aws_security_group.vm.id
+    error_message = "EFS ingress must come only from the VictoriaMetrics security group."
+  }
+
+  assert {
+    condition     = one([for v in aws_ecs_task_definition.vm.volume : v if v.name == "vm-data"]).efs_volume_configuration[0].file_system_id == aws_efs_file_system.vm.id
+    error_message = "The vm-data volume must reference the module's EFS file system."
+  }
+
+  assert {
+    condition     = can(aws_ecs_service.vm.id)
+    error_message = "ECS service was not created."
+  }
+}
