@@ -14,9 +14,6 @@ from apps.owasp.models.entity_subscription import EntitySubscription
     fields=[
         "frequency",
         "is_active",
-        "include_issues",
-        "include_pull_requests",
-        "include_releases",
         "created_at",
         "updated_at",
     ],

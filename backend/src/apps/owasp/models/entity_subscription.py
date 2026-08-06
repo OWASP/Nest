@@ -14,7 +14,8 @@ class EntitySubscription(models.Model):
     """Model representing a user's subscription to a single entity's digest emails.
 
     Each subscription maps to exactly one entity (project, chapter, or committee)
-    with its own frequency and content toggles.
+    with its own frequency. Subscribing to an entity means receiving all updates
+    related to it.
     """
 
     class Meta:
@@ -114,10 +115,6 @@ class EntitySubscription(models.Model):
         related_name="entity_subscriptions",
     )
 
-    include_issues = models.BooleanField(default=True)
-    include_pull_requests = models.BooleanField(default=True)
-    include_releases = models.BooleanField(default=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -198,7 +195,7 @@ class EntitySubscription(models.Model):
 
     @classmethod
     @transaction.atomic
-    def create(cls, *, user, frequency, entity_type, entity_id, **kwargs):
+    def create(cls, *, user, frequency, entity_type, entity_id):
         """Create a new entity subscription with limit enforcement.
 
         Args:
@@ -206,7 +203,6 @@ class EntitySubscription(models.Model):
             frequency: "weekly" or "monthly".
             entity_type: "project", "chapter", or "committee".
             entity_id: The ID of the entity.
-            **kwargs: Additional fields (include_issues, etc.).
 
         Returns:
             The created subscription instance, or None if limit reached.
@@ -227,23 +223,17 @@ class EntitySubscription(models.Model):
             user=user,
             frequency=frequency,
             **fk_kwargs,
-            **kwargs,
         )
 
-    def update(self, *, frequency=None, **kwargs):
+    def update(self, *, frequency=None):
         """Update subscription fields.
 
         Args:
             frequency: New frequency value, if changing.
-            **kwargs: Additional fields to update (include_issues, etc.).
 
         """
         if frequency is not None:
             self.frequency = frequency
-
-        for field, value in kwargs.items():
-            if hasattr(self, field) and value is not None:
-                setattr(self, field, value)
 
         self.full_clean()
         self.save()

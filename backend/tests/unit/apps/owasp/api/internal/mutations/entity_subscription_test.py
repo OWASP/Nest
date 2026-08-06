@@ -153,36 +153,6 @@ class TestCreateEntitySubscription:
         assert result.ok
         mock_create.assert_called_once()
 
-    @patch("apps.owasp.models.chapter.Chapter.objects")
-    @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
-    def test_create_with_toggles(self, mock_create, mock_chapter_objects, mutations):
-        """Test creating subscription with custom toggles."""
-        mock_chapter_objects.filter.return_value.exists.return_value = True
-        info = mock_info()
-        input_data = CreateEntitySubscriptionInput(
-            entity_type="chapter",
-            entity_id=5,
-            frequency="monthly",
-            include_issues=False,
-            include_pull_requests=True,
-            include_releases=False,
-        )
-        mock_sub = MagicMock(spec=EntitySubscription)
-        mock_create.return_value = mock_sub
-
-        result = mutations.create_entity_subscription(info, input_data=input_data)
-
-        assert result.ok
-        mock_create.assert_called_once_with(
-            user=info.context.request.user,
-            frequency="monthly",
-            entity_type="chapter",
-            entity_id=5,
-            include_issues=False,
-            include_pull_requests=True,
-            include_releases=False,
-        )
-
     @patch("apps.owasp.models.project.Project.objects")
     @patch("apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.create")
     def test_create_limit_reached(self, mock_create, mock_project_objects, mutations):
@@ -266,28 +236,6 @@ class TestUpdateEntitySubscription:
             )
             assert result.ok
             mock_sub.update.assert_called_once()
-
-    def test_success_with_toggles(self, mutations):
-        """Test successful update with toggle changes."""
-        info = mock_info()
-        input_data = UpdateEntitySubscriptionInput(
-            include_issues=False,
-            include_releases=False,
-        )
-        mock_sub = MagicMock(spec=EntitySubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.entity_subscription.EntitySubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.update_entity_subscription(
-                info, subscription_id=1, input_data=input_data
-            )
-            assert result.ok
-            mock_sub.update.assert_called_once_with(
-                frequency=None,
-                include_issues=False,
-                include_releases=False,
-            )
 
 
 class TestCancelEntitySubscription:

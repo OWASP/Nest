@@ -121,9 +121,6 @@ export type CreateEntitySubscriptionInput = {
   entityId: Scalars['Int']['input'];
   entityType: Scalars['String']['input'];
   frequency?: Scalars['String']['input'];
-  includeIssues?: Scalars['Boolean']['input'];
-  includePullRequests?: Scalars['Boolean']['input'];
-  includeReleases?: Scalars['Boolean']['input'];
 };
 
 export type CreateModuleInput = {
@@ -198,9 +195,6 @@ export type EntitySubscriptionNode = Node & {
   frequency: Scalars['String']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
-  includeIssues: Scalars['Boolean']['output'];
-  includePullRequests: Scalars['Boolean']['output'];
-  includeReleases: Scalars['Boolean']['output'];
   isActive: Scalars['Boolean']['output'];
   project?: Maybe<ProjectNode>;
   updatedAt: Scalars['DateTime']['output'];
@@ -1289,9 +1283,6 @@ export type StatsNode = {
 
 export type UpdateEntitySubscriptionInput = {
   frequency?: InputMaybe<Scalars['String']['input']>;
-  includeIssues?: InputMaybe<Scalars['Boolean']['input']>;
-  includePullRequests?: InputMaybe<Scalars['Boolean']['input']>;
-  includeReleases?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type UpdateModuleInput = {
