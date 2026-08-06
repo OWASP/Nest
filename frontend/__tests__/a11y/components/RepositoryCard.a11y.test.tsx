@@ -47,7 +47,7 @@ describe.each([
   })
 
   it('should not have any accessibility violations when expanded', async () => {
-    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+    const repositories = Array.from({ length: 7 }, (_, i) => createMockRepository(i))
     const { container } = render(<RepositoryCard repositories={repositories} />)
 
     const showMoreButton = screen.getByRole('button', { name: /show more/i })
