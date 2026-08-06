@@ -35,23 +35,18 @@ class TestEntitySubscriptionAdmin:
         assert admin_instance.autocomplete_fields == ("chapter", "committee", "project")
 
     def test_fieldsets_structure(self):
-        """Test fieldset structure has entity fields and content toggles."""
+        """Test fieldset structure has entity fields and system info."""
         site = AdminSite()
         admin_instance = EntitySubscriptionAdmin(EntitySubscription, site)
 
-        assert len(admin_instance.fieldsets) == 3
+        assert len(admin_instance.fieldsets) == 2
 
         main_fields = admin_instance.fieldsets[0][1]["fields"]
         assert "chapter" in main_fields
         assert "committee" in main_fields
         assert "project" in main_fields
 
-        toggle_fields = admin_instance.fieldsets[1][1]["fields"]
-        assert "include_issues" in toggle_fields
-        assert "include_pull_requests" in toggle_fields
-        assert "include_releases" in toggle_fields
-
-        system_fieldset = admin_instance.fieldsets[2]
+        system_fieldset = admin_instance.fieldsets[1]
         assert system_fieldset[0] == "System"
 
     def test_get_entity_with_project(self):

@@ -28,9 +28,6 @@ class CreateEntitySubscriptionInput:
     entity_id: int
     entity_type: str
     frequency: str = "weekly"
-    include_issues: bool = True
-    include_pull_requests: bool = True
-    include_releases: bool = True
 
 
 @strawberry.input
@@ -38,9 +35,6 @@ class UpdateEntitySubscriptionInput:
     """Input for updating an entity subscription."""
 
     frequency: str | None = None
-    include_issues: bool | None = None
-    include_pull_requests: bool | None = None
-    include_releases: bool | None = None
 
 
 @strawberry.type
@@ -89,9 +83,6 @@ class EntitySubscriptionMutations:
                 frequency=input_data.frequency,
                 entity_type=input_data.entity_type,
                 entity_id=input_data.entity_id,
-                include_issues=input_data.include_issues,
-                include_pull_requests=input_data.include_pull_requests,
-                include_releases=input_data.include_releases,
             )
 
             if subscription is None:
@@ -143,16 +134,8 @@ class EntitySubscriptionMutations:
                 message=f"Frequency must be one of: {', '.join(sorted(VALID_FREQUENCIES))}.",
             )
 
-        update_kwargs = {}
-        if input_data.include_issues is not None:
-            update_kwargs["include_issues"] = input_data.include_issues
-        if input_data.include_pull_requests is not None:
-            update_kwargs["include_pull_requests"] = input_data.include_pull_requests
-        if input_data.include_releases is not None:
-            update_kwargs["include_releases"] = input_data.include_releases
-
         try:
-            subscription.update(frequency=input_data.frequency, **update_kwargs)
+            subscription.update(frequency=input_data.frequency)
         except ValidationError as exc:
             return EntitySubscriptionResult(
                 ok=False,

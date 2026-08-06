@@ -24,9 +24,6 @@ def migrate_existing_subscriptions(apps, schema_editor):
                 frequency=sub.frequency,
                 is_active=sub.is_active and active_count < max_active,
                 chapter=chapter,
-                include_issues=sub.include_issues,
-                include_pull_requests=sub.include_pull_requests,
-                include_releases=sub.include_releases,
             )
             if sub.is_active:
                 active_count += 1
@@ -37,9 +34,6 @@ def migrate_existing_subscriptions(apps, schema_editor):
                 frequency=sub.frequency,
                 is_active=sub.is_active and active_count < max_active,
                 project=project,
-                include_issues=sub.include_issues,
-                include_pull_requests=sub.include_pull_requests,
-                include_releases=sub.include_releases,
             )
             if sub.is_active:
                 active_count += 1
@@ -74,9 +68,6 @@ class Migration(migrations.Migration):
                     "unsubscribe_token",
                     models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
                 ),
-                ("include_issues", models.BooleanField(default=True)),
-                ("include_pull_requests", models.BooleanField(default=True)),
-                ("include_releases", models.BooleanField(default=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (

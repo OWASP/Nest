@@ -31,12 +31,6 @@ class EntitySubscriptionAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Content Toggles",
-            {
-                "fields": ("include_issues", "include_pull_requests", "include_releases"),
-            },
-        ),
-        (
             "System",
             {
                 "fields": ("unsubscribe_token", "created_at", "updated_at"),

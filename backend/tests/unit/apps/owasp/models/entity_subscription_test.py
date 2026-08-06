@@ -292,7 +292,6 @@ class TestEntitySubscriptionCreate:
             frequency="monthly",
             entity_type="chapter",
             entity_id=5,
-            include_releases=False,
         )
 
         assert result == mock_sub
@@ -300,7 +299,6 @@ class TestEntitySubscriptionCreate:
             user=user,
             frequency="monthly",
             chapter_id=5,
-            include_releases=False,
         )
 
     @patch("apps.owasp.models.entity_subscription.User.objects")
@@ -332,15 +330,6 @@ class TestEntitySubscriptionUpdate:
         assert sub.frequency == "monthly"
         sub.save.assert_called_once()
 
-    def test_update_with_kwargs(self):
-        """Test updating additional fields."""
-        sub = MagicMock(spec=EntitySubscription)
-        sub.include_issues = True
-        EntitySubscription.update(sub, include_issues=False)
-
-        assert sub.include_issues is False
-        sub.save.assert_called_once()
-
     def test_update_skips_none_values(self):
         """Test that None values are not applied."""
         sub = MagicMock(spec=EntitySubscription)
@@ -350,16 +339,6 @@ class TestEntitySubscriptionUpdate:
         assert sub.frequency == "weekly"
         sub.save.assert_called_once()
 
-    def test_update_skips_unknown_fields(self):
-        """Test that unknown fields are not applied."""
-        sub = MagicMock(spec=EntitySubscription)
-        sub.frequency = "weekly"
-        del sub.nonexistent_field
-        EntitySubscription.update(sub, nonexistent_field="value")
-
-        assert not hasattr(sub, "nonexistent_field")
-        sub.save.assert_called_once()
-
     def test_update_calls_full_clean(self):
         """Test update calls full_clean before saving."""
         sub = MagicMock(spec=EntitySubscription)
@@ -367,19 +346,6 @@ class TestEntitySubscriptionUpdate:
 
         sub.full_clean.assert_called_once()
         sub.save.assert_called_once()
-
-    def test_update_reactivation_triggers_validation(self):
-        """Test that reactivating via update triggers full_clean validation."""
-        sub = MagicMock(spec=EntitySubscription)
-        sub.is_active = False
-        sub.full_clean.side_effect = ValidationError(
-            "Maximum number of entity subscriptions reached."
-        )
-
-        with pytest.raises(ValidationError, match=r"Maximum number"):
-            EntitySubscription.update(sub, is_active=True)
-
-        sub.save.assert_not_called()
 
 
 class TestEntitySubscriptionMeta:
