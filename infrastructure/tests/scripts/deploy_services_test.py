@@ -10,12 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scripts.commands import CommandRunner
-from scripts.deploy_services import (
-    BACKEND_PORT,
-    FRONTEND_PORT,
-    STACK_PREFIX,
-    DeployServices,
-)
+from scripts.deploy_services import DeployServices
 from scripts.errors import CommandNotFoundError, InfrastructureError
 from scripts.localstack import LocalStack
 
@@ -47,6 +42,21 @@ class TestDeployServices:
     def test_prefix_uses_environment(self, tmp_path: Path) -> None:
         deployer = build_deployer(tmp_path)
         assert deployer.prefix == "/nest/dev"
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_stack_prefix_defaults_to_local(self, tmp_path: Path) -> None:
+        deployer = build_deployer(tmp_path)
+        assert deployer.stack_prefix == "nest-local"
+
+    @patch.dict(os.environ, {"ENVIRONMENT": "dev"}, clear=True)
+    def test_stack_prefix_uses_environment(self, tmp_path: Path) -> None:
+        deployer = build_deployer(tmp_path)
+        assert deployer.stack_prefix == "nest-dev"
+
+    @patch.dict(os.environ, {"ENVIRONMENT": "staging", "PROJECT_NAME": "owasp-nest"}, clear=True)
+    def test_stack_prefix_uses_project_name(self, tmp_path: Path) -> None:
+        deployer = build_deployer(tmp_path)
+        assert deployer.stack_prefix == "owasp-nest-staging"
 
     def test_terraform_outputs(self, tmp_path: Path) -> None:
         commands = MagicMock(spec=CommandRunner)
@@ -146,7 +156,7 @@ class TestDeployServices:
 
         mock_aws.assert_called_once_with("elasticache", localstack=deployer.localstack)
         elasticache.describe_replication_groups.assert_called_once_with(
-            ReplicationGroupId=f"{STACK_PREFIX}-cache"
+            ReplicationGroupId=f"{deployer.stack_prefix}-cache"
         )
 
     def test_db_port(self, tmp_path: Path) -> None:
@@ -159,125 +169,58 @@ class TestDeployServices:
 
         mock_aws.assert_called_once_with("rds", localstack=deployer.localstack)
         rds.describe_db_instances.assert_called_once_with(
-            DBInstanceIdentifier=f"{STACK_PREFIX}-db"
+            DBInstanceIdentifier=f"{deployer.stack_prefix}-db"
         )
 
-    def test_security_group_id(self, tmp_path: Path) -> None:
-        ec2 = MagicMock()
-        ec2.describe_security_groups.return_value = {"SecurityGroups": [{"GroupId": "sg-123"}]}
-        deployer = build_deployer(tmp_path)
-
-        with patch("scripts.deploy_services.aws_client", return_value=ec2) as mock_aws:
-            assert deployer._security_group_id("nest-local-backend-sg") == "sg-123"
-
-        mock_aws.assert_called_once_with("ec2", localstack=deployer.localstack)
-        ec2.describe_security_groups.assert_called_once_with(
-            Filters=[{"Name": "group-name", "Values": ["nest-local-backend-sg"]}]
-        )
-
-    def test_run_task(self, tmp_path: Path) -> None:
+    def test_start_service(self, tmp_path: Path) -> None:
         ecs = MagicMock()
-        ecs.run_task.return_value = {"tasks": [{"taskArn": "arn:task"}]}
         deployer = build_deployer(tmp_path)
 
         with patch("scripts.deploy_services.aws_client", return_value=ecs) as mock_aws:
-            arn = deployer._run_task("cluster", "sg-123", f"{STACK_PREFIX}-backend", ["subnet-1"])
+            deployer._start_service("nest-local-backend", "nest-local-backend-service", "Backend")
 
-        assert arn == "arn:task"
         mock_aws.assert_called_once_with("ecs", localstack=deployer.localstack)
-        ecs.run_task.assert_called_once_with(
-            cluster="cluster",
-            launchType="FARGATE",
-            networkConfiguration={
-                "awsvpcConfiguration": {
-                    "subnets": ["subnet-1"],
-                    "securityGroups": ["sg-123"],
-                    "assignPublicIp": "ENABLED",
-                }
-            },
-            taskDefinition=f"{STACK_PREFIX}-backend",
+        ecs.update_service.assert_any_call(
+            cluster="nest-local-backend", service="nest-local-backend-service", desiredCount=0
+        )
+        ecs.update_service.assert_any_call(
+            cluster="nest-local-backend", service="nest-local-backend-service", desiredCount=1
         )
 
-    def test_wait_for_task_running_success(self, tmp_path: Path) -> None:
+    def test_wait_for_service_running(self, tmp_path: Path) -> None:
         ecs = MagicMock()
-        ecs.describe_tasks.return_value = {"tasks": [{"lastStatus": "RUNNING"}]}
+        ecs.describe_services.return_value = {"services": [{"runningCount": 1, "desiredCount": 1}]}
         deployer = build_deployer(tmp_path)
 
         with patch("scripts.deploy_services.aws_client", return_value=ecs) as mock_aws:
-            deployer._wait_for_task_running("cluster", "arn:task", "Backend")
+            deployer._wait_for_service("cluster", "svc", "Backend")
 
         mock_aws.assert_called_once_with("ecs", localstack=deployer.localstack)
-        ecs.describe_tasks.assert_called_once_with(cluster="cluster", tasks=["arn:task"])
+        ecs.describe_services.assert_called_once_with(cluster="cluster", services=["svc"])
 
-    def test_wait_for_task_running_stopped(self, tmp_path: Path) -> None:
+    def test_wait_for_service_timeout(self, tmp_path: Path) -> None:
         ecs = MagicMock()
-        ecs.describe_tasks.return_value = {
-            "tasks": [{"lastStatus": "STOPPED", "stoppedReason": "boom"}]
-        }
-        deployer = build_deployer(tmp_path)
-
-        with (
-            patch("scripts.deploy_services.aws_client", return_value=ecs),
-            pytest.raises(InfrastructureError, match="STOPPED: boom"),
-        ):
-            deployer._wait_for_task_running("cluster", "arn:task", "Backend")
-
-    def test_wait_for_task_running_timeout(self, tmp_path: Path) -> None:
-        ecs = MagicMock()
-        ecs.describe_tasks.return_value = {"tasks": [{"lastStatus": "PENDING"}]}
+        ecs.describe_services.return_value = {"services": [{"runningCount": 0, "desiredCount": 1}]}
         deployer = build_deployer(tmp_path)
 
         with (
             patch("scripts.deploy_services.aws_client", return_value=ecs),
             patch("scripts.deploy_services.time.sleep"),
-            pytest.raises(InfrastructureError, match="did not become RUNNING"),
+            pytest.raises(InfrastructureError, match="did not reach desired count"),
         ):
-            deployer._wait_for_task_running("cluster", "arn:task", "Backend")
+            deployer._wait_for_service("cluster", "svc", "Backend")
 
-    def test_task_docker_ip(self, tmp_path: Path) -> None:
-        commands = MagicMock(spec=CommandRunner)
-        commands.run.side_effect = [
-            subprocess.CompletedProcess([], 0, stdout="nest-abc123\nnest-xyz\n"),
-            subprocess.CompletedProcess([], 0, stdout="172.17.0.7\n"),
-        ]
-        deployer = build_deployer(tmp_path, commands=commands)
-
-        arn = f"arn:aws:ecs:us-east-2:123:task/{STACK_PREFIX}/abc123"
-        assert deployer._task_docker_ip(arn) == "172.17.0.7"
-
-        commands.run.assert_any_call(
-            "docker", "ps", "--format", "{{.Names}}", capture_output=True, check=True
-        )
-        commands.run.assert_any_call(
-            "docker",
-            "inspect",
-            "nest-abc123",
-            "--format",
-            "{{.NetworkSettings.Networks.bridge.IPAddress}}",
-            capture_output=True,
-            check=True,
-        )
-
-    def test_task_docker_ip_not_found(self, tmp_path: Path) -> None:
-        commands = MagicMock(spec=CommandRunner)
-        commands.run.return_value = subprocess.CompletedProcess([], 0, stdout="nest-xyz\n")
-        deployer = build_deployer(tmp_path, commands=commands)
-
-        arn = f"arn:aws:ecs:us-east-2:123:task/{STACK_PREFIX}/abc123"
-        with pytest.raises(InfrastructureError, match="Could not find Docker container"):
-            deployer._task_docker_ip(arn)
-
-    def test_register_target(self, tmp_path: Path) -> None:
-        elbv2 = MagicMock()
+    def test_wait_for_service_missing(self, tmp_path: Path) -> None:
+        ecs = MagicMock()
+        ecs.describe_services.return_value = {"services": []}
         deployer = build_deployer(tmp_path)
 
-        with patch("scripts.deploy_services.aws_client", return_value=elbv2) as mock_aws:
-            deployer._register_target("arn:tg", "172.17.0.7", BACKEND_PORT)
-
-        mock_aws.assert_called_once_with("elbv2", localstack=deployer.localstack)
-        elbv2.register_targets.assert_called_once_with(
-            TargetGroupArn="arn:tg", Targets=[{"Id": "172.17.0.7", "Port": BACKEND_PORT}]
-        )
+        with (
+            patch("scripts.deploy_services.aws_client", return_value=ecs),
+            patch("scripts.deploy_services.time.sleep"),
+            pytest.raises(InfrastructureError, match="did not reach desired count"),
+        ):
+            deployer._wait_for_service("cluster", "svc", "Backend")
 
     def test_check_health_healthy(self, tmp_path: Path) -> None:
         elbv2 = MagicMock()
@@ -303,41 +246,13 @@ class TestDeployServices:
         ):
             deployer._check_health("arn:tg", "Backend")
 
-    def test_deploy_service(self, tmp_path: Path) -> None:
-        deployer = build_deployer(tmp_path)
-
-        with (
-            patch.object(DeployServices, "_security_group_id", return_value="sg-123") as mock_sg,
-            patch.object(DeployServices, "_run_task", return_value="arn:task") as mock_run,
-            patch.object(DeployServices, "_wait_for_task_running") as mock_wait,
-            patch.object(DeployServices, "_task_docker_ip", return_value="172.17.0.7") as mock_ip,
-            patch.object(DeployServices, "_register_target") as mock_register,
-        ):
-            arn = deployer._deploy_service(
-                cluster="nest-local-backend",
-                sg_name="nest-local-backend-sg",
-                tg_arn="arn:tg",
-                task_definition=f"{STACK_PREFIX}-backend",
-                port=BACKEND_PORT,
-                subnets=["subnet-1"],
-                service_name="Backend",
-            )
-
-        assert arn == "arn:task"
-        mock_sg.assert_called_once_with("nest-local-backend-sg")
-        mock_run.assert_called_once_with(
-            "nest-local-backend", "sg-123", f"{STACK_PREFIX}-backend", ["subnet-1"]
-        )
-        mock_wait.assert_called_once_with("nest-local-backend", "arn:task", "Backend")
-        mock_ip.assert_called_once_with("arn:task")
-        mock_register.assert_called_once_with("arn:tg", "172.17.0.7", BACKEND_PORT)
-
     def test_run_executes_workflow(self, tmp_path: Path) -> None:
         outputs = {
-            "tasks_subnet_ids": ["subnet-1", "subnet-2"],
             "backend_cluster_name": "nest-local-backend",
+            "backend_service_name": "nest-local-backend-service",
             "backend_target_group_arn": "arn:tg:backend",
             "frontend_cluster_name": "nest-local-frontend",
+            "frontend_service_name": "nest-local-frontend-service",
             "frontend_target_group_arn": "arn:tg:frontend",
             "alb_dns_name": "nest-alb.localhost.localstack.cloud",
         }
@@ -345,11 +260,8 @@ class TestDeployServices:
         with (
             patch.object(DeployServices, "_terraform_outputs", return_value=outputs),
             patch.object(DeployServices, "_set_runtime_parameters") as mock_runtime,
-            patch.object(
-                DeployServices,
-                "_deploy_service",
-                side_effect=["arn:task:backend", "arn:task:frontend"],
-            ) as mock_deploy,
+            patch.object(DeployServices, "_start_service") as mock_start,
+            patch.object(DeployServices, "_wait_for_service") as mock_wait,
             patch.object(DeployServices, "_check_health") as mock_health,
             patch.object(DeployServices, "_log_summary") as mock_summary,
         ):
@@ -360,29 +272,20 @@ class TestDeployServices:
         commands.require.assert_any_call("tflocal")
         commands.require.assert_any_call("docker")
         mock_runtime.assert_called_once()
-        assert mock_deploy.call_count == 2
-        mock_deploy.assert_any_call(
-            cluster="nest-local-backend",
-            sg_name="nest-local-backend-sg",
-            tg_arn="arn:tg:backend",
-            task_definition=f"{STACK_PREFIX}-backend",
-            port=BACKEND_PORT,
-            subnets=["subnet-1", "subnet-2"],
-            service_name="Backend",
+        assert mock_start.call_count == 2
+        mock_start.assert_any_call("nest-local-backend", "nest-local-backend-service", "Backend")
+        mock_start.assert_any_call(
+            "nest-local-frontend", "nest-local-frontend-service", "Frontend"
         )
-        mock_deploy.assert_any_call(
-            cluster="nest-local-frontend",
-            sg_name="nest-local-frontend-sg",
-            tg_arn="arn:tg:frontend",
-            task_definition=f"{STACK_PREFIX}-frontend",
-            port=FRONTEND_PORT,
-            subnets=["subnet-1", "subnet-2"],
-            service_name="Frontend",
-        )
+        assert mock_wait.call_count == 2
+        mock_wait.assert_any_call("nest-local-backend", "nest-local-backend-service", "Backend")
+        mock_wait.assert_any_call("nest-local-frontend", "nest-local-frontend-service", "Frontend")
         mock_health.assert_any_call("arn:tg:backend", "Backend")
         mock_health.assert_any_call("arn:tg:frontend", "Frontend")
         mock_summary.assert_called_once_with(
-            "nest-alb.localhost.localstack.cloud", "arn:task:backend", "arn:task:frontend"
+            "nest-alb.localhost.localstack.cloud",
+            "nest-local-backend-service",
+            "nest-local-frontend-service",
         )
 
     @pytest.mark.parametrize("missing", ["tflocal", "docker"])

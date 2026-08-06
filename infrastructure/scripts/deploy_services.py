@@ -19,18 +19,16 @@ logger = logging.getLogger(__name__)
 
 TFLOCAL = "tflocal"
 DOCKER = "docker"
-STACK_PREFIX = "nest-local"
 SSM_PARAM_TYPE = "String"
-BACKEND_PORT = 8000
-FRONTEND_PORT = 3000
-TASK_WAIT_ATTEMPTS = 30
-TASK_WAIT_INTERVAL = 5
+SERVICE_DESIRED_COUNT = 1
+SERVICE_WAIT_ATTEMPTS = 30
+SERVICE_WAIT_INTERVAL = 5
 HEALTH_MAX_ATTEMPTS = 36
 HEALTH_POLL_INTERVAL = 10
 
 
 class DeployServices:
-    """Run backend/frontend ECS tasks on LocalStack and register ALB targets."""
+    """Start the backend/frontend ECS services on LocalStack."""
 
     def __init__(
         self,
@@ -52,12 +50,35 @@ class DeployServices:
         self.localstack = localstack or LocalStack(self.commands)
 
     @property
+    def project_name(self) -> str:
+        """Return the project name for the current environment."""
+        return os.environ.get("PROJECT_NAME", "nest")
+
+    @property
+    def environment(self) -> str:
+        """Return the active environment name."""
+        return os.environ.get("ENVIRONMENT", "local")
+
+    @property
+    def stack_prefix(self) -> str:
+        """Return the resource name prefix for the active environment."""
+        return f"{self.project_name}-{self.environment}"
+
+    @property
     def prefix(self) -> str:
         """Return the SSM parameter prefix for the current environment."""
-        return f"/nest/{os.environ.get('ENVIRONMENT', 'local')}"
+        return f"/{self.project_name}/{self.environment}"
 
     def run(self) -> None:
-        """Deploy the backend and frontend services on LocalStack.
+        """Start the backend and frontend ECS services on LocalStack.
+
+        LocalStack only starts a service's tasks when it is created or when its
+        ``desiredCount`` changes; it ignores ``forceNewDeployment``. ``provision-infra``
+        therefore applies the stack with ``desired_count = 0`` so no task fires before
+        the images are pushed. This method overwrites the SSM runtime parameters with
+        the real host and ports, then scales each service up so LocalStack starts a
+        fresh Fargate task that picks up the corrected configuration. LocalStack
+        registers the task with the ALB target group once it is RUNNING.
 
         Raises:
             CommandNotFoundError: If a required executable is missing.
@@ -71,28 +92,23 @@ class DeployServices:
         outputs = self._terraform_outputs()
         self._set_runtime_parameters()
 
-        backend_task = self._deploy_service(
-            cluster=outputs["backend_cluster_name"],
-            sg_name=f"{STACK_PREFIX}-backend-sg",
-            tg_arn=outputs["backend_target_group_arn"],
-            task_definition=f"{STACK_PREFIX}-backend",
-            port=BACKEND_PORT,
-            subnets=outputs["tasks_subnet_ids"],
-            service_name="Backend",
-        )
-        frontend_task = self._deploy_service(
-            cluster=outputs["frontend_cluster_name"],
-            sg_name=f"{STACK_PREFIX}-frontend-sg",
-            tg_arn=outputs["frontend_target_group_arn"],
-            task_definition=f"{STACK_PREFIX}-frontend",
-            port=FRONTEND_PORT,
-            subnets=outputs["tasks_subnet_ids"],
-            service_name="Frontend",
-        )
+        backend_cluster = outputs["backend_cluster_name"]
+        backend_service = outputs["backend_service_name"]
+        logger.info("")
+        logger.info("--- Backend ---")
+        self._start_service(backend_cluster, backend_service, "Backend")
+        self._wait_for_service(backend_cluster, backend_service, "Backend")
+
+        frontend_cluster = outputs["frontend_cluster_name"]
+        frontend_service = outputs["frontend_service_name"]
+        logger.info("")
+        logger.info("--- Frontend ---")
+        self._start_service(frontend_cluster, frontend_service, "Frontend")
+        self._wait_for_service(frontend_cluster, frontend_service, "Frontend")
 
         self._check_health(outputs["backend_target_group_arn"], "Backend")
         self._check_health(outputs["frontend_target_group_arn"], "Frontend")
-        self._log_summary(outputs["alb_dns_name"], backend_task, frontend_task)
+        self._log_summary(outputs["alb_dns_name"], backend_service, frontend_service)
 
     def _terraform_outputs(self) -> dict:
         """Return the Terraform outputs as a dict.
@@ -169,7 +185,7 @@ class DeployServices:
         """
         elasticache = aws_client("elasticache", localstack=self.localstack)
         response = elasticache.describe_replication_groups(
-            ReplicationGroupId=f"{STACK_PREFIX}-cache"
+            ReplicationGroupId=f"{self.stack_prefix}-cache"
         )
         return int(response["ReplicationGroups"][0]["NodeGroups"][0]["PrimaryEndpoint"]["Port"])
 
@@ -181,7 +197,7 @@ class DeployServices:
 
         """
         rds = aws_client("rds", localstack=self.localstack)
-        response = rds.describe_db_instances(DBInstanceIdentifier=f"{STACK_PREFIX}-db")
+        response = rds.describe_db_instances(DBInstanceIdentifier=f"{self.stack_prefix}-db")
         return int(response["DBInstances"][0]["Endpoint"]["Port"])
 
     def _put_ssm(self, name: str, value: str) -> None:
@@ -195,134 +211,62 @@ class DeployServices:
         ssm = aws_client("ssm", localstack=self.localstack)
         ssm.put_parameter(Name=name, Value=value, Type=SSM_PARAM_TYPE, Overwrite=True)
 
-    def _security_group_id(self, name: str) -> str:
-        """Return the security group ID for a group name.
+    def _start_service(self, cluster: str, service: str, service_name: str) -> None:
+        """Scale an ECS service up to its desired task count.
 
-        Args:
-            name (str): The security group name.
-
-        Returns:
-            str: The security group ID.
-
-        """
-        ec2 = aws_client("ec2", localstack=self.localstack)
-        response = ec2.describe_security_groups(Filters=[{"Name": "group-name", "Values": [name]}])
-        return response["SecurityGroups"][0]["GroupId"]
-
-    def _run_task(
-        self,
-        cluster: str,
-        sg_id: str,
-        task_definition: str,
-        subnets: list[str],
-    ) -> str:
-        """Start a Fargate task on LocalStack.
+        The service task reads its SSM-backed environment at container start, so
+        after ``_set_runtime_parameters`` fixes the placeholder values a fresh
+        task is required to pick them up. Scaling down to zero first guarantees a
+        replacement task starts: LocalStack's scheduler reacts to ``desiredCount``
+        changes but ignores ``forceNewDeployment``.
 
         Args:
             cluster (str): The ECS cluster name.
-            sg_id (str): The security group ID.
-            task_definition (str): The ECS task definition family.
-            subnets (list[str]): The subnets for the task.
-
-        Returns:
-            str: The ARN of the started task.
+            service (str): The ECS service name.
+            service_name (str): The human-readable service name for logs.
 
         """
         ecs = aws_client("ecs", localstack=self.localstack)
-        response = ecs.run_task(
-            cluster=cluster,
-            launchType="FARGATE",
-            networkConfiguration={
-                "awsvpcConfiguration": {
-                    "subnets": subnets,
-                    "securityGroups": [sg_id],
-                    "assignPublicIp": "ENABLED",
-                }
-            },
-            taskDefinition=task_definition,
+        logger.info("  Stopping %s service tasks...", service_name)
+        ecs.update_service(cluster=cluster, service=service, desiredCount=0)
+        logger.info(
+            "  Scaling %s service to %s task(s)...",
+            service_name,
+            SERVICE_DESIRED_COUNT,
         )
-        return response["tasks"][0]["taskArn"]
+        ecs.update_service(
+            cluster=cluster,
+            service=service,
+            desiredCount=SERVICE_DESIRED_COUNT,
+        )
 
-    def _wait_for_task_running(self, cluster: str, task_arn: str, service_name: str) -> None:
-        """Block until an ECS task is RUNNING.
+    def _wait_for_service(self, cluster: str, service: str, service_name: str) -> None:
+        """Block until an ECS service runs its desired number of tasks.
 
         Args:
             cluster (str): The ECS cluster name.
-            task_arn (str): The task ARN.
+            service (str): The ECS service name.
             service_name (str): The human-readable service name for logs.
 
         Raises:
-            InfrastructureError: If the task stops or does not become RUNNING.
+            InfrastructureError: If the service never reaches its desired count.
 
         """
         ecs = aws_client("ecs", localstack=self.localstack)
-        logger.info("  Waiting for %s task to be RUNNING...", service_name)
-        for _ in range(TASK_WAIT_ATTEMPTS):
-            response = ecs.describe_tasks(cluster=cluster, tasks=[task_arn])
-            status = response["tasks"][0]["lastStatus"]
-            if status == "RUNNING":
-                logger.info("  %s task is RUNNING.", service_name)
+        logger.info("  Waiting for %s service tasks to be RUNNING...", service_name)
+        for _ in range(SERVICE_WAIT_ATTEMPTS):
+            services = ecs.describe_services(cluster=cluster, services=[service]).get(
+                "services", []
+            )
+            if services and services[0].get("runningCount", 0) >= services[0].get(
+                "desiredCount", 0
+            ):
+                logger.info("  %s service is RUNNING.", service_name)
                 return
-            if status == "STOPPED":
-                reason = response["tasks"][0].get("stoppedReason", "unknown")
-                message = f"{service_name} task STOPPED: {reason}"
-                raise InfrastructureError(message)
-            time.sleep(TASK_WAIT_INTERVAL)
-        timeout = TASK_WAIT_ATTEMPTS * TASK_WAIT_INTERVAL
-        message = f"{service_name} task did not become RUNNING after {timeout} seconds."
+            time.sleep(SERVICE_WAIT_INTERVAL)
+        timeout = SERVICE_WAIT_ATTEMPTS * SERVICE_WAIT_INTERVAL
+        message = f"{service_name} service did not reach desired count after {timeout} seconds."
         raise InfrastructureError(message)
-
-    def _task_docker_ip(self, task_arn: str) -> str:
-        """Return the Docker bridge IP address of an ECS task container.
-
-        Args:
-            task_arn (str): The task ARN.
-
-        Returns:
-            str: The container's bridge IP address.
-
-        Raises:
-            InfrastructureError: If no Docker container matches the task.
-
-        """
-        task_id = task_arn.rsplit("/", 1)[-1]
-        result = self.commands.run(
-            DOCKER,
-            "ps",
-            "--format",
-            "{{.Names}}",
-            capture_output=True,
-            check=True,
-        )
-        container = next(
-            (name for name in result.stdout.splitlines() if task_id in name),
-            None,
-        )
-        if container is None:
-            message = f"Could not find Docker container for task {task_id}"
-            raise InfrastructureError(message)
-        inspect = self.commands.run(
-            DOCKER,
-            "inspect",
-            container,
-            "--format",
-            "{{.NetworkSettings.Networks.bridge.IPAddress}}",
-            capture_output=True,
-            check=True,
-        )
-        return inspect.stdout.strip()
-
-    def _register_target(self, tg_arn: str, ip: str, port: int) -> None:
-        """Register an IP target with an ALB target group.
-
-        Args:
-            tg_arn (str): The target group ARN.
-            ip (str): The target IP address.
-            port (int): The target port.
-
-        """
-        elbv2 = aws_client("elbv2", localstack=self.localstack)
-        elbv2.register_targets(TargetGroupArn=tg_arn, Targets=[{"Id": ip, "Port": port}])
 
     def _check_health(self, tg_arn: str, service_name: str) -> None:
         """Wait until a target group reports a healthy target.
@@ -356,58 +300,13 @@ class DeployServices:
         message = f"{service_name} target did not become healthy."
         raise InfrastructureError(message)
 
-    def _deploy_service(
-        self,
-        *,
-        cluster: str,
-        sg_name: str,
-        tg_arn: str,
-        task_definition: str,
-        port: int,
-        subnets: list[str],
-        service_name: str,
-    ) -> str:
-        """Run a service's ECS task and register its ALB target.
-
-        Args:
-            cluster (str): The ECS cluster name.
-            sg_name (str): The security group name.
-            tg_arn (str): The target group ARN.
-            task_definition (str): The ECS task definition family.
-            port (int): The container port to register with the target group.
-            subnets (list[str]): The subnets for the Fargate task.
-            service_name (str): The human-readable service name for logs.
-
-        Returns:
-            str: The ARN of the started ECS task.
-
-        """
-        logger.info("")
-        logger.info("--- %s ---", service_name)
-        sg_id = self._security_group_id(sg_name)
-        logger.info("  Cluster: %s", cluster)
-        logger.info("  Security Group: %s", sg_id)
-        logger.info("  Target Group ARN: %s", tg_arn)
-
-        task_arn = self._run_task(cluster, sg_id, task_definition, subnets)
-        logger.info("  Task ARN: %s", task_arn)
-
-        self._wait_for_task_running(cluster, task_arn, service_name)
-
-        ip = self._task_docker_ip(task_arn)
-        logger.info("  %s Docker bridge IP: %s", service_name, ip)
-
-        logger.info("  Registering %s target with ALB...", service_name.lower())
-        self._register_target(tg_arn, ip, port)
-        return task_arn
-
-    def _log_summary(self, alb_dns: str, backend_task: str, frontend_task: str) -> None:
+    def _log_summary(self, alb_dns: str, backend_service: str, frontend_service: str) -> None:
         """Log a summary of the deployment.
 
         Args:
             alb_dns (str): The ALB DNS name.
-            backend_task (str): The backend task ARN.
-            frontend_task (str): The frontend task ARN.
+            backend_service (str): The backend ECS service name.
+            frontend_service (str): The frontend ECS service name.
 
         """
         logger.info("")
@@ -416,5 +315,5 @@ class DeployServices:
         logger.info("  Backend: https://%s/status/", alb_dns)
         logger.info("  Frontend: https://%s/", alb_dns)
         logger.info("")
-        logger.info("  Backend task: %s", backend_task)
-        logger.info("  Frontend task: %s", frontend_task)
+        logger.info("  Backend service: %s", backend_service)
+        logger.info("  Frontend service: %s", frontend_service)

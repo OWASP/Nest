@@ -26,6 +26,8 @@ LOCALSTACK_CONTAINER_NAME = "nest-localstack"
 LOCALSTACK_HOST = "localhost"
 LOCALSTACK_PORT = 4566
 LOCALSTACK_EXTERNAL_PORTS = "4510-4559"
+LOCALSTACK_HTTP_PORT = 80
+LOCALSTACK_HTTPS_PORT = 443
 LOCALSTACK_INFO_PATH = "/_localstack/info"
 HEALTH_MAX_ATTEMPTS = 30
 HEALTH_POLL_INTERVAL = 2
@@ -45,6 +47,8 @@ class LocalStack:
         container_name: str = LOCALSTACK_CONTAINER_NAME,
         host: str | None = None,
         port: int = LOCALSTACK_PORT,
+        http_port: int | None = None,
+        https_port: int | None = None,
     ) -> None:
         """Initialize the LocalStack container manager.
 
@@ -54,6 +58,12 @@ class LocalStack:
             host (str, optional): The host address for LocalStack. Defaults to
                 the LOCALSTACK_HOST environment variable or localhost.
             port (int): The port for LocalStack.
+            http_port (int, optional): The host port mapped to the container's
+                HTTP endpoint. Defaults to the LOCALSTACK_HTTP_PORT environment
+                variable or 80.
+            https_port (int, optional): The host port mapped to the container's
+                HTTPS endpoint. Defaults to the LOCALSTACK_HTTPS_PORT
+                environment variable or 443.
 
         """
         self.commands = commands or CommandRunner()
@@ -62,6 +72,16 @@ class LocalStack:
             host if host is not None else os.environ.get("LOCALSTACK_HOST", LOCALSTACK_HOST)
         )
         self.port = port
+        self.http_port = (
+            http_port
+            if http_port is not None
+            else int(os.environ.get("LOCALSTACK_HTTP_PORT", LOCALSTACK_HTTP_PORT))
+        )
+        self.https_port = (
+            https_port
+            if https_port is not None
+            else int(os.environ.get("LOCALSTACK_HTTPS_PORT", LOCALSTACK_HTTPS_PORT))
+        )
         self.api_url = f"http://{self.host}:{self.port}"  # NOSONAR
 
     @property
@@ -190,7 +210,9 @@ class LocalStack:
         # gateway enforces its own CORS/CSRF rules and rejects browser requests (e.g.
         # GraphQL POSTs) whose Origin is not in LocalStack's allowlist with a 403.
         # Mount the Docker socket so LocalStack can run sibling containers for ECS
-        # tasks and Lambda functions.
+        # tasks and Lambda functions. The legacy HTTP/HTTPS host ports are
+        # configurable so startup does not fail when the host already has 80/443
+        # occupied by another process.
         try:
             self.commands.run(
                 "docker",
@@ -203,9 +225,9 @@ class LocalStack:
                 "-p",
                 f"{LOCALSTACK_EXTERNAL_PORTS}:{LOCALSTACK_EXTERNAL_PORTS}",
                 "-p",
-                "80:80",
+                f"{self.http_port}:{LOCALSTACK_HTTP_PORT}",
                 "-p",
-                "443:443",
+                f"{self.https_port}:{LOCALSTACK_HTTPS_PORT}",
                 "-v",
                 "/var/run/docker.sock:/var/run/docker.sock",
                 "-e",

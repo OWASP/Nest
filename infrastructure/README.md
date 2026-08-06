@@ -225,16 +225,16 @@ make deploy-on-localstack
 
 This single command:
 
-- Runs Terraform (VPC, subnets, security groups, ALB, ECS clusters/services, ECR repos, RDS, ElastiCache, ACM cert, S3 buckets, SSM params)
+- Runs Terraform (VPC, subnets, security groups, ALB, ECS clusters/services, ECR repos, RDS, ElastiCache, ACM cert, S3 buckets, SSM params). The ECS services are created with `desired_count = 0` so no task fires before its image is pushed
 - Builds the backend Docker image and pushes it to the local ECR
 - Builds the frontend Docker image (with env vars resolved against the ALB DNS name) and pushes it to the local ECR
 - Uploads local `backend/.env.localstack` and `frontend/.env.localstack` variables to the LocalStack SSM Parameter Store
-- Runs backend and frontend ECS tasks on Fargate and registers them with the ALB target groups
+- Overwrites the SSM runtime parameters with the real LocalStack host/ports, then scales the backend and frontend ECS services up so their tasks start with the corrected SSM values; LocalStack registers each task with the ALB target groups once RUNNING
 - Waits for both target groups to report healthy
 
 > [!NOTE]
 > **Redis overrides for LocalStack compatibility:**
-> LocalStack's ElastiCache mock ignores the configured Redis port and assigns a random one from its internal port range. The Terraform variable `django_redis_port` creates the SSM parameter as a placeholder, but `deploy-services.sh` discovers the actual port at runtime via `awslocal elasticache describe-replication-groups` and overwrites the SSM value.
+> LocalStack's ElastiCache mock ignores the configured Redis port and assigns a random one from its internal port range. The Terraform variable `django_redis_port` creates the SSM parameter as a placeholder, but the deploy step discovers the actual port at runtime via `awslocal elasticache describe-replication-groups` and overwrites the SSM value.
 >
 > Similarly, `DJANGO_REDIS_HOST` is overwritten with the LocalStack container's bridge IP — the default `localhost.localstack.cloud` resolves to loopback inside ECS containers and would be unreachable.
 

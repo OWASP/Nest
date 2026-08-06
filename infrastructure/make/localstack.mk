@@ -26,7 +26,7 @@ provision-infra: ## Create resource on localstack and push images
 load-env-params: ## Upload local .env variables to LocalStack SSM Parameter Store
 	@cd infrastructure && poetry run python -m scripts.dev load-env-params $(ARGS)
 
-deploy-services: ## Run backend/frontend ECS tasks on Fargate and register ALB targets
+deploy-services: ## Fix SSM runtime params and scale up the backend/frontend ECS services
 	@cd infrastructure && poetry run python -m scripts.dev deploy-services
 
 ecs-migrate: ## Run database migrations on LocalStack

@@ -154,6 +154,12 @@ class ProvisionInfra:
             "environment": env.get("ENVIRONMENT", "local"),
             "backend_image_tag": tag,
             "frontend_image_tag": tag,
+            # The images are pushed after ``terraform apply``, and the SSM runtime
+            # parameters are only fixed by ``deploy-services``. Creating the services
+            # with zero desired tasks avoids LocalStack firing a task at apply time
+            # that cannot find its image yet; ``deploy-services`` scales them up.
+            "backend_desired_count": 0,
+            "frontend_desired_count": 0,
             "django_configuration": env.get("DJANGO_CONFIGURATION", "Local"),
             "django_settings_module": env.get("DJANGO_SETTINGS_MODULE", "settings.local"),
             "domain_name": env.get("DOMAIN_NAME", "localhost"),

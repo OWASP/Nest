@@ -82,7 +82,7 @@ class LocalInfrastructureRunner:
         self.loadenv.upload(dry_run=dry_run, overwrite=overwrite)
 
     def deploy_services(self) -> None:
-        """Run services on localstack."""
+        """Fix SSM runtime params and start the ECS services."""
         self.deployer.run()
 
 
@@ -119,7 +119,7 @@ def main() -> None:
 
     subparsers.add_parser(
         "deploy-services",
-        help="Run backend/frontend ECS tasks on Fargate and register ALB targets",
+        help="Fix SSM runtime params and scale up backend/frontend ECS services",
     )
 
     args = parser.parse_args()

@@ -119,6 +119,8 @@ class TestProvisionInfra:
             "environment": "local",
             "backend_image_tag": "tag-1",
             "frontend_image_tag": "tag-1",
+            "backend_desired_count": 0,
+            "frontend_desired_count": 0,
             "django_configuration": "Local",
             "django_settings_module": "settings.local",
             "domain_name": "example.com",
