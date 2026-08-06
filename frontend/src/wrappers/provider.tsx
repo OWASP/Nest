@@ -24,8 +24,17 @@ export function Providers({
 }>) {
   if (!apolloClient) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-red-500">
-        Configuration Error: GraphQL Client failed to initialize
+      <div className="flex min-h-screen items-center justify-center px-4 text-red-500">
+        <div className="max-w-2xl text-center">
+          <h1 className="text-xl font-semibold">GraphQL client is not configured</h1>
+          <p className="mt-2 text-sm text-foreground-700">
+            The frontend could not initialize Apollo because the GraphQL endpoint is unavailable.
+          </p>
+          <p className="mt-2 text-sm text-foreground-700">
+            <strong>Set NEXT_PUBLIC_GRAPHQL_URL in frontend/.env</strong> and ensure the backend GraphQL service
+            is running.
+          </p>
+        </div>
       </div>
     )
   }
