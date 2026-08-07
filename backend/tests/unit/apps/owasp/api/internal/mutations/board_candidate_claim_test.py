@@ -518,7 +518,7 @@ class TestCreateBoardCandidateClaim:
 
     def _make_input_data(
         self, name="Test Claim", description="Test description", year=2025, source_text=""
-    ):
+    ) -> MagicMock:
         data = MagicMock()
         data.name = name
         data.description = description
@@ -669,7 +669,7 @@ class TestUpdateBoardCandidateClaim:
 
     def _make_input_data(
         self, key="test-key", name="Updated Claim", description="Updated description", year=2025
-    ):
+    ) -> MagicMock:
         data = MagicMock()
         data.key = key
         data.name = name
@@ -726,6 +726,58 @@ class TestUpdateBoardCandidateClaim:
         assert result.claim is claim
         assert claim.name == "Updated Name"
         claim.save.assert_called_once_with(update_fields=["name", "key"])
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_source_text_non_empty(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = MagicMock(key="test-key", description=None, year=2024)
+        input_data.name = "Updated Name"
+        input_data.source_text = "Exact text from profile"
+
+        claim = MagicMock()
+        claim.candidate.member = mock_github_user
+        claim.is_locked = False
+        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
+
+        assert result.ok
+        assert result.code == "SUCCESS"
+        assert result.claim is claim
+        assert claim.source_text == "Exact text from profile"
+        claim.save.assert_called_once_with(update_fields=["name", "key", "source_text"])
+
+    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
+    def test_update_claim_source_text_clear_empty(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        user = MagicMock()
+        user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
+        info = _make_info(user)
+        input_data = MagicMock(key="test-key", description=None, year=2024)
+        input_data.name = None
+        input_data.source_text = ""
+
+        claim = MagicMock()
+        claim.candidate.member = mock_github_user
+        claim.is_locked = False
+        mock_claim_model.objects.select_for_update.return_value.get.return_value = claim
+
+        mutation = BoardCandidateClaimMutations()
+        result = mutation.update_board_candidate_claim(info, input_data)
+
+        assert result.ok
+        assert result.code == "SUCCESS"
+        assert result.claim is claim
+        assert claim.source_text == ""
+        claim.save.assert_called_once_with(update_fields=["source_text"])
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_update_claim_not_found(self, mock_claim_model):

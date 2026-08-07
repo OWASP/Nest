@@ -13,6 +13,8 @@ from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
+YAML_FRONTMATTER_PATTERN = r"^---\s*\n((?:(?!^---\s*$).*\n)+)^---\s*$"
+
 
 class Command(BaseCommand):
     help = "Sync board election candidates from www-board-candidates repository"
@@ -53,7 +55,7 @@ class Command(BaseCommand):
             dict: Parsed metadata dictionary.
 
         """
-        yaml_pattern = re.compile(r"^---\s*\n((?:(?!^---\s*$).*\n)+)^---\s*$", re.MULTILINE)
+        yaml_pattern = re.compile(YAML_FRONTMATTER_PATTERN, re.MULTILINE)
 
         if not content.startswith("---"):
             return {}
@@ -77,7 +79,7 @@ class Command(BaseCommand):
             str: Parsed profile raw text.
 
         """
-        yaml_pattern = re.compile(r"^---\s*\n((?:(?!^---\s*$).*\n)+)^---\s*$", re.MULTILINE)
+        yaml_pattern = re.compile(YAML_FRONTMATTER_PATTERN, re.MULTILINE)
 
         if not content.startswith("---"):
             return content.strip()

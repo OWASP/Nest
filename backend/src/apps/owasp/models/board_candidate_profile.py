@@ -18,6 +18,7 @@ class BoardCandidateProfile(TimestampedModel):
     candidate = models.OneToOneField(
         EntityMember,
         help_text="The candidate this profile belongs to.",
+        limit_choices_to={"role": EntityMember.Role.CANDIDATE},
         on_delete=models.CASCADE,
         related_name="board_profile",
     )

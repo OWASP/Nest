@@ -9,6 +9,7 @@ from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 class BoardCandidateProfileAdmin(admin.ModelAdmin):
     """Admin for BoardCandidateProfile model."""
 
+    autocomplete_fields = ("candidate",)
     list_display = (
         "__str__",
         "nest_created_at",

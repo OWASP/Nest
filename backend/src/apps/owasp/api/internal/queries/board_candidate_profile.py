@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from apps.owasp.api.internal.nodes.board_candidate_profile import BoardCandidateProfileNode
 from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 from apps.owasp.models.board_of_directors import BoardOfDirectors
+from apps.owasp.models.entity_member import EntityMember
 
 
 @strawberry.type
@@ -35,6 +36,9 @@ class BoardCandidateProfileQuery:
                 candidate__member__login=login,
                 candidate__entity_type=content_type,
                 candidate__entity_id=board.id,
+                candidate__role=EntityMember.Role.CANDIDATE,
+                candidate__is_active=True,
+                candidate__is_reviewed=True,
             )
         except (BoardOfDirectors.DoesNotExist, BoardCandidateProfile.DoesNotExist):
             return None
