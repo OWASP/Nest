@@ -35,19 +35,3 @@ resource "aws_security_group" "app" {
 resource "aws_kms_key" "main" {
   description = "Test key for the observability integration tests."
 }
-
-output "app_security_group_ids" {
-  value = aws_security_group.app[*].id
-}
-
-output "kms_key_arn" {
-  value = aws_kms_key.main.arn
-}
-
-output "subnet_ids" {
-  value = aws_subnet.main[*].id
-}
-
-output "vpc_id" {
-  value = aws_vpc.main.id
-}
