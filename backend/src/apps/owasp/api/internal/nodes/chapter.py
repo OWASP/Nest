@@ -4,6 +4,10 @@ import strawberry
 import strawberry_django
 
 from apps.core.utils.index import deep_camelize
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER,
+)
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.chapter import (
     ENTITY_CHANNELS_BY_CHAPTER_ID_LOADER,
     ENTITY_LEADERS_BY_CHAPTER_ID_LOADER,
@@ -85,3 +89,13 @@ class ChapterNode(GenericEntityNode):
     def suggested_location(self, root: Chapter) -> str | None:
         """Resolve suggested location."""
         return root.idx_suggested_location
+
+    @strawberry_django.field
+    async def top_contributors(
+        self, root: Chapter, info: strawberry.Info
+    ) -> list[RepositoryContributorNode]:
+        """Resolve top contributors."""
+        top_contributors = await info.context.github_dataloaders[
+            TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER
+        ].load(root.pk)
+        return [RepositoryContributorNode(**tc) for tc in top_contributors]
