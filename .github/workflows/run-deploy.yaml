@@ -190,6 +190,7 @@ jobs:
           tfbackend-content: |
             bucket="${{ secrets.TF_STATE_BUCKET_NAME }}"
             key="${{ inputs.tf_state_key }}"
+            kms_key_id="alias/nest-${{ inputs.environment }}-state"
             region="${{ vars.AWS_REGION }}"
           tfvars-path: infrastructure/live/terraform.tfvars
           tfvars-content: |

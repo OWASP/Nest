@@ -1,3 +1,6 @@
+> [!NOTE]
+> A single state bucket is used for bootstrap resources, see [infrastructure/bootstrap/README.md](../bootstrap/README.md).
+
 ## Inline Permissions
 
 Use the following inline permissions for the `nest-state` IAM User
