@@ -2,15 +2,20 @@
 
 import inspect
 import math
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER,
+)
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.committee import (
     ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER,
     ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER,
 )
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
+from apps.owasp.models.committee import Committee
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -86,6 +91,12 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
 
         assert result == 100
 
+    def test_top_contributors_field_definition(self):
+        """top_contributors field is defined and returns RepositoryContributorNode list."""
+        field = self._get_field_by_name("top_contributors", CommitteeNode)
+        assert field is not None
+        assert field.type.of_type is RepositoryContributorNode
+
 
 class TestCommitteeNodeResolvers:
     """Test CommitteeNode resolver execution."""
@@ -97,10 +108,11 @@ class TestCommitteeNodeResolvers:
                 return field.base_resolver.wrapped_func if field.base_resolver else None
         return None
 
-    def _build_info(self, *, owasp=None):
+    def _build_info(self, *, owasp=None, github=None):
         """Build a mock Info with dataloader mappings."""
         mock_info = Mock()
         mock_info.context.owasp_dataloaders = owasp or {}
+        mock_info.context.github_dataloaders = github or {}
         return mock_info
 
     @pytest.mark.asyncio
@@ -143,3 +155,44 @@ class TestCommitteeNodeResolvers:
 
         assert result == mock_leaders
         mock_loader.load.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_top_contributors_overrides_generic_entity_node(self):
+        """CommitteeNode.top_contributors is the async dataloader resolver, not the sync base."""
+        resolver = self._get_resolver("top_contributors")
+        assert inspect.iscoroutinefunction(resolver)
+
+    @pytest.mark.asyncio
+    async def test_top_contributors_loads_via_dataloader(self):
+        """top_contributors delegates to the dataloader and returns RepositoryContributorNodes."""
+        mock_contributors = [
+            {
+                "avatar_url": "url1",
+                "contributions_count": 100,
+                "id": "user1",
+                "login": "user1",
+                "name": "User 1",
+            },
+            {
+                "avatar_url": "url2",
+                "contributions_count": 50,
+                "id": "user2",
+                "login": "user2",
+                "name": "User 2",
+            },
+        ]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=mock_contributors)
+        mock_info = self._build_info(github={TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER: mock_loader})
+
+        mock_committee = MagicMock(spec=Committee)
+        mock_committee.pk = 7
+
+        resolver = self._get_resolver("top_contributors")
+        result = await resolver(None, mock_committee, mock_info)
+
+        mock_loader.load.assert_awaited_once_with(mock_committee.pk)
+        assert len(result) == 2
+        assert all(isinstance(c, RepositoryContributorNode) for c in result)
+        assert result[0].login == "user1"
+        assert result[1].login == "user2"
