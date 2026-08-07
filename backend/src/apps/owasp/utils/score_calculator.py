@@ -345,6 +345,12 @@ class ContributionScoreCalculator:
                         pending_score.github_user.login,
                     )
                     failed_certificates.append((pending_score.github_user.login, e))
+                except Exception as e:
+                    logger.exception(
+                        "Unexpected certificate processing error for user %s",
+                        pending_score.github_user.login,
+                    )
+                    failed_certificates.append((pending_score.github_user.login, e))
             pending_scores.clear()
             contribution_scores.clear()
 
@@ -383,7 +389,7 @@ class ContributionScoreCalculator:
             },
         )
 
-        Certificate.issue_certificate(user, total_score, tier)
+        Certificate.issue_certificate(user, total_score, TierChoices(tier))
 
         logger.info(
             "Recalculated score for %s: %s points (%s)",
