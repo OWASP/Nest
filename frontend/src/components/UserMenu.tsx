@@ -1,5 +1,6 @@
 'use client'
 
+import { useLazyQuery } from '@apollo/client/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
@@ -7,6 +8,8 @@ import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { FaGithub } from 'react-icons/fa'
+
+import { GetMyCertificateDocument } from 'types/__generated__/certificateQueries.generated'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -24,6 +27,12 @@ export default function UserMenu({
   const isOwaspStaff = session?.user?.isOwaspStaff
   // Anyone involved in mentorship — as a leader, mentor, or mentee — gets the entry point.
   const canAccessMentorship = isProjectLeader || isMentor || isMentee
+
+  const [getMyCertificate, { data: certificateData }] = useLazyQuery(GetMyCertificateDocument, {
+    fetchPolicy: 'cache-first',
+  })
+  const hasCertificate =
+    !!certificateData?.myCertificates && certificateData.myCertificates.length > 0
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -70,7 +79,12 @@ export default function UserMenu({
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (!isOpen && status === 'authenticated') {
+            getMyCertificate()
+          }
+          setIsOpen((prev) => !prev)
+        }}
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
@@ -110,6 +124,16 @@ export default function UserMenu({
               onClick={() => setIsOpen(false)}
             >
               Project Health Dashboard
+            </Link>
+          )}
+
+          {hasCertificate && (
+            <Link
+              href="/certificate"
+              className={userMenuItemClasses}
+              onClick={() => setIsOpen(false)}
+            >
+              My Certificate
             </Link>
           )}
 

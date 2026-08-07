@@ -111,4 +111,51 @@ describe('ActionButton', () => {
     expect(button).toBeInTheDocument()
     expect(button).toHaveTextContent('Test Button')
   })
+
+  describe('Link component branches (when url is provided)', () => {
+    it('renders enabled link with target="_blank" and rel="noopener noreferrer"', () => {
+      render(
+        <ActionButton url="https://example.com" tooltipLabel="Open Site">
+          Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link', { name: 'Open Site' })
+      expect(link).toHaveAttribute('href', 'https://example.com')
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(link).toHaveAttribute('aria-disabled', 'false')
+      expect(link).not.toHaveAttribute('tabindex')
+      expect(link).not.toHaveClass('opacity-50', 'cursor-not-allowed')
+    })
+
+    it('renders disabled link with href="#", no target/rel, tabIndex -1, and aria-disabled="true"', () => {
+      render(
+        <ActionButton url="https://example.com" isDisabled={true} tooltipLabel="Disabled Link">
+          Disabled Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link', { name: 'Disabled Link' })
+      expect(link).toHaveAttribute('href', '#')
+      expect(link).not.toHaveAttribute('target')
+      expect(link).not.toHaveAttribute('rel')
+      expect(link).toHaveAttribute('aria-disabled', 'true')
+      expect(link).toHaveAttribute('tabindex', '-1')
+      expect(link).toHaveClass('opacity-50', 'cursor-not-allowed', 'pointer-events-none')
+    })
+
+    it('triggers onKeyDown handler when key is pressed on link', () => {
+      const mockOnKeyDown = jest.fn()
+      render(
+        <ActionButton url="https://example.com" onKeyDown={mockOnKeyDown}>
+          Link Text
+        </ActionButton>
+      )
+
+      const link = screen.getByRole('link')
+      fireEvent.keyDown(link, { key: 'Enter', code: 'Enter' })
+      expect(mockOnKeyDown).toHaveBeenCalledTimes(1)
+    })
+  })
 })

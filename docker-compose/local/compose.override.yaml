@@ -1,0 +1,13 @@
+volumes:
+  backend-venv:
+    name: backend-venv-crp
+  cache-data:
+    name: cache-data-crp
+  db-data:
+    name: db-data-crp
+  docs-venv:
+    name: docs-venv-crp
+  frontend-next:
+    name: frontend-next-crp
+  frontend-node-modules:
+    name: frontend-node-modules-crp
