@@ -11,10 +11,11 @@ from apps.common.api.internal.dataloaders.utils import get_top_contributors_by_k
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.chapter import Chapter
 
-TOP_CONTRIBUTORS_LIMIT = 15
-TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER = "top_contributors_by_repository_id"
-TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER = "top_contributors_by_project_id"
 TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER = "top_contributors_by_chapter_id"
+TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER = "top_contributors_by_project_id"
+TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER = "top_contributors_by_repository_id"
+
+TOP_CONTRIBUTORS_LIMIT = 15
 
 if TYPE_CHECKING:
     from apps.github.models.managers.repository_contributor import (
