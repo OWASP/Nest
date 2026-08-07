@@ -100,7 +100,7 @@ repos:
           - strawberry-graphql==0.321.0
           - strawberry-graphql-django==0.86.4
           - types-lxml==2026.2.16
-          - types-python-dateutil==2.9.0.20260518
+          - types-python-dateutil==2.9.0.20260716
           - types-PyYAML==6.0.12.20260518
           - types-requests==2.33.0.20260712
         entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
