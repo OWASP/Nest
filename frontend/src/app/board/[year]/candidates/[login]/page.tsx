@@ -14,12 +14,14 @@ const CandidateProfilePage = () => {
   const { login, year } = useParams<{ login: string; year: string }>()
   const { isSyncing, session } = useDjangoSession()
 
+  const parsedYear = Number.parseInt(year)
+
   const { data, error, loading } = useQuery(GetCandidateProfileDocument, {
     skip: isSyncing,
     variables: {
       login,
       sessionLogin: session?.user?.login ?? '',
-      year: Number.parseInt(year),
+      year: parsedYear,
     },
   })
 
@@ -31,6 +33,26 @@ const CandidateProfilePage = () => {
 
   if (isSyncing || loading) {
     return <LoadingSpinner />
+  }
+
+  if (Number.isNaN(parsedYear)) {
+    return (
+      <ErrorDisplay
+        statusCode={404}
+        title="Board Not Found"
+        message={`Sorry, the board information for ${year} doesn't exist`}
+      />
+    )
+  }
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading profile"
+        message="An error occurred while loading the candidate profile"
+      />
+    )
   }
 
   const claims = data?.boardCandidateClaims ?? []

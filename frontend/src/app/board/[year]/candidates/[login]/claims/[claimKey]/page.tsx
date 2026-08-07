@@ -70,15 +70,6 @@ const ClaimDetailsPage = () => {
 
   if (isLoading || isSyncing) return <LoadingSpinner />
 
-  if (!canView) {
-    return (
-      <AccessDeniedDisplay
-        title="Access Denied"
-        message="You do not have permission to view this claim."
-      />
-    )
-  }
-
   if (graphQLRequestError) {
     return (
       <ErrorDisplay
@@ -95,6 +86,15 @@ const ClaimDetailsPage = () => {
         statusCode={404}
         title="Claim Not Found"
         message="Sorry, the claim you're looking for doesn't exist."
+      />
+    )
+  }
+
+  if (!canView) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="You do not have permission to view this claim."
       />
     )
   }

@@ -140,7 +140,6 @@ const ClaimForm = ({
             value={formData.sourceText}
             onChange={(e) => {
               handleInputChange('sourceText', e.target.value)
-              setTouched((prev) => ({ ...prev, sourceText: true }))
             }}
             readOnly={isSourceTextReadOnly}
           />

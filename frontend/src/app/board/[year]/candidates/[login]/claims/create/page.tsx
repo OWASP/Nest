@@ -126,7 +126,7 @@ const CreateClaimContent = () => {
     }
   }
 
-  const isSourceTextReadOnly = searchParams.get('sourceText') != null
+  const isSourceTextReadOnly = Boolean(searchParams.get('sourceText'))
 
   return (
     <ClaimForm

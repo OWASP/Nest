@@ -2,9 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import AnnotatedProfile, {
-  escapeAttr,
   injectHighlights,
-  normalizeIndentedHtml,
   overlapsExistingClaim,
   renderMarkdown,
   resolveMediaUrls,
@@ -12,9 +10,10 @@ import AnnotatedProfile, {
 } from 'components/AnnotatedProfile'
 import type { VisibleClaim } from 'components/AnnotatedProfile'
 
-jest.mock('dompurify', () => ({
-  sanitize: (html: string) => html,
-}))
+jest.mock('isomorphic-dompurify', () => {
+  const createDOMPurify = jest.requireActual('dompurify')
+  return { sanitize: createDOMPurify(window).sanitize }
+})
 
 jest.mock('markdown-it', () => {
   const markdownIt = jest.requireActual<typeof import('markdown-it')>('markdown-it')
@@ -67,18 +66,8 @@ describe('visibleStatuses', () => {
   })
 })
 
-describe('escapeAttr', () => {
-  it('escapes ampersands, quotes, and angle brackets', () => {
-    expect(escapeAttr('a&b"c<d>e')).toBe('a&amp;b&quot;c&lt;d&gt;e')
-  })
-
-  it('leaves plain text unchanged', () => {
-    expect(escapeAttr('plain text')).toBe('plain text')
-  })
-})
-
 describe('overlapsExistingClaim', () => {
-  it('returns false when the selection equals a claimed text', () => {
+  it('returns true when the selection equals a claimed text', () => {
     expect(overlapsExistingClaim('OWASP projects', ['OWASP projects'])).toBe(true)
   })
 
@@ -135,122 +124,110 @@ describe('resolveMediaUrls', () => {
 
 describe('renderMarkdown', () => {
   it('splits paragraphs on blank lines', () => {
-    expect(renderMarkdown('one\n\ntwo', [], '2025')).toBe('<p>one</p>\n<p>two</p>\n')
+    expect(renderMarkdown('one\n\ntwo', '2025')).toBe('<p>one</p>\n<p>two</p>\n')
   })
 
   it('renders headings and emphasis', () => {
-    expect(renderMarkdown('### Title\n\n**bold** text', [], '2025')).toBe(
+    expect(renderMarkdown('### Title\n\n**bold** text', '2025')).toBe(
       '<h3>Title</h3>\n<p><strong>bold</strong> text</p>\n'
     )
   })
 
   it('renders markdown links', () => {
-    expect(renderMarkdown('[OWASP](https://owasp.org)', [], '2025')).toBe(
+    expect(renderMarkdown('[OWASP](https://owasp.org)', '2025')).toBe(
       '<p><a href="https://owasp.org">OWASP</a></p>\n'
     )
   })
 
   it('resolves relative image paths to the board candidates site', () => {
-    expect(renderMarkdown('<img src="../assets/images/photo.png" alt="photo">', [], '2025')).toBe(
+    expect(renderMarkdown('<img src="../assets/images/photo.png" alt="photo">', '2025')).toBe(
       '<img src="https://owasp.org/www-board-candidates/assets/images/photo.png" alt="photo">'
     )
   })
 
   it('renders indented block-level html as markup instead of a code block', () => {
     const markdown = ['    <div>', '      Global Engagement', '    </div>'].join('\n')
-    const result = renderMarkdown(markdown, [], '2025')
+    const result = renderMarkdown(markdown, '2025')
     expect(result).not.toContain('<pre>')
     expect(result).toContain('<div>')
   })
 
-  it('wraps matching source text in a mark tag', () => {
-    const result = renderMarkdown('I support OWASP projects and more.', [claim()], '2025')
-    expect(result).toContain('<mark class="bg-green-200 text-green-950 rounded px-0.5"')
-    expect(result).toContain('data-claim-key="claim-1"')
-    expect(result).toContain('data-claim-name="Claim One"')
-    expect(result).toContain('data-claim-status="APPROVED"')
-  })
-})
-
-describe('normalizeIndentedHtml', () => {
-  it('de-indents only lines that start with a tag', () => {
-    const markdown = ['    <div>', '      nested content', '    </div>', '    plain text'].join(
-      '\n'
-    )
-    expect(normalizeIndentedHtml(markdown)).toBe(
-      ['<div>', '      nested content', '</div>', '    plain text'].join('\n')
-    )
-  })
-
-  it('leaves genuine indented code blocks untouched', () => {
-    const markdown = ['Before.', '', '    def hello():', '        print("hi")', '', 'After.'].join(
-      '\n'
-    )
-    expect(normalizeIndentedHtml(markdown)).toBe(markdown)
-  })
-
-  it('does not de-indent lines indented more than 4 spaces', () => {
-    expect(normalizeIndentedHtml('        <span>deep</span>')).toBe('        <span>deep</span>')
-  })
-
-  it('leaves unindented content and empty strings unchanged', () => {
-    expect(normalizeIndentedHtml('<div>\n  <p>Hello</p>\n</div>')).toBe(
-      '<div>\n  <p>Hello</p>\n</div>'
-    )
-    expect(normalizeIndentedHtml('')).toBe('')
+  it('sanitizes unsafe script tags and event handlers from raw markdown', () => {
+    const markdown = '<img src="/x.png" onerror="alert(1)"><script>alert(1)</script>'
+    const result = renderMarkdown(markdown, '2025')
+    expect(result).not.toContain('onerror')
+    expect(result).not.toContain('<script>')
+    expect(result).toContain('<img src="https://owasp.org/x.png"')
   })
 })
 
 describe('injectHighlights', () => {
-  it('returns the markdown unchanged when there are no claims', () => {
-    const markdown = 'Hi OWASP Community!'
-    expect(injectHighlights(markdown, [])).toBe(markdown)
+  it('returns the html unchanged when there are no claims', () => {
+    const html = '<p>Hi OWASP Community!</p>'
+    expect(injectHighlights(html, [])).toBe(html)
   })
 
-  it('returns the markdown unchanged when no source text matches', () => {
-    const markdown = 'Hi OWASP Community!'
-    expect(injectHighlights(markdown, [claim({ sourceText: 'no match here' })])).toBe(markdown)
+  it('returns the html unchanged when no source text matches', () => {
+    const html = '<p>Hi OWASP Community!</p>'
+    expect(injectHighlights(html, [claim({ sourceText: 'no match here' })])).toBe(html)
   })
 
   it('wraps a matching occurrence in a mark tag with dataset attributes', () => {
-    const markdown = 'I support OWASP projects and more.'
-    expect(injectHighlights(markdown, [claim()])).toBe(
-      'I support <mark class="bg-green-200 text-green-950 rounded px-0.5" data-claim-key="claim-1" ' +
-        'data-claim-name="Claim One" data-claim-status="APPROVED">OWASP projects</mark> and more.'
-    )
+    const html = '<p>I support OWASP projects and more.</p>'
+    const result = injectHighlights(html, [claim()])
+    expect(result).toContain('data-claim-key="claim-1"')
+    expect(result).toContain('data-claim-name="Claim One"')
+    expect(result).toContain('data-claim-status="APPROVED"')
+    expect(result).toContain('<mark')
+    expect(result).toContain('OWASP projects</mark>')
+  })
+
+  it('matches rendered text across markdown structure instead of raw markdown', () => {
+    const html = '<p><strong>OWASP</strong> projects are great.</p>'
+    const result = injectHighlights(html, [claim({ sourceText: 'OWASP projects' })])
+    expect(result).toContain('<mark')
+    expect(result).toContain('data-claim-key="claim-1"')
+  })
+
+  it('matches typographer-transformed curly quotes', () => {
+    const html = '<p>He said \u201CWelcome home\u201D loudly.</p>'
+    const result = injectHighlights(html, [
+      claim({ key: 'quoted', name: 'Quoted', sourceText: 'He said "Welcome home" loudly.' }),
+    ])
+    expect(result).toContain('data-claim-key="quoted"')
   })
 
   it('preserves text before, between, and after highlights', () => {
-    const markdown = 'aaa OWASP projects bbb OWASP projects ccc'
-    const result = injectHighlights(markdown, [claim()])
-    expect(result.startsWith('aaa ')).toBe(true)
-    expect(result.endsWith(' ccc')).toBe(true)
+    const html = '<p>aaa OWASP projects bbb OWASP projects ccc</p>'
+    const result = injectHighlights(html, [claim()])
+    expect(result.startsWith('<p>aaa ')).toBe(true)
+    expect(result.endsWith(' ccc</p>')).toBe(true)
     expect(result.match(/<mark/g)).toHaveLength(2)
   })
 
   it('highlights all occurrences of a source text', () => {
-    const markdown = 'OWASP projects are great. OWASP projects matter.'
-    expect(injectHighlights(markdown, [claim()]).match(/<mark/g)).toHaveLength(2)
+    const html = '<p>OWASP projects are great. OWASP projects matter.</p>'
+    expect(injectHighlights(html, [claim()]).match(/<mark/g)).toHaveLength(2)
   })
 
   it('gives approved higher priority than draft on overlap', () => {
-    const markdown = 'OWASP projects are open source.'
+    const html = '<p>OWASP projects are open source.</p>'
     const draft = claim({ key: 'draft', name: 'Draft', status: ClaimStatusEnum.Draft })
     const approved = claim({ key: 'approved', name: 'Approved', status: ClaimStatusEnum.Approved })
-    const result = injectHighlights(markdown, [draft, approved])
+    const result = injectHighlights(html, [draft, approved])
     expect(result).toContain('data-claim-key="approved"')
     expect(result).not.toContain('data-claim-key="draft"')
   })
 
   it('does not create partially overlapping partial marks', () => {
-    const markdown = 'OWASP projects are great.'
+    const html = '<p>OWASP projects are great.</p>'
     const first = claim({ key: 'first', sourceText: 'OWASP proj' })
     const second = claim({ key: 'second', sourceText: 'projects are' })
-    expect(injectHighlights(markdown, [first, second]).match(/<mark/g)).toHaveLength(1)
+    expect(injectHighlights(html, [first, second]).match(/<mark/g)).toHaveLength(1)
   })
 
   it('keeps a lower-priority draft range over a partial approved overlap', () => {
-    const markdown = 'The officer leads the squad.'
+    const html = '<p>The officer leads the squad.</p>'
     const draft = claim({
       key: 'draft',
       name: 'Draft',
@@ -262,46 +239,38 @@ describe('injectHighlights', () => {
       name: 'Approved',
       sourceText: 'officer leads',
     })
-    const result = injectHighlights(markdown, [draft, approved])
+    const result = injectHighlights(html, [draft, approved])
     expect(result).toContain('data-claim-key="draft"')
     expect(result).not.toContain('data-claim-key="approved"')
     expect(result.match(/<mark/g)).toHaveLength(1)
   })
 
   it('keeps both non-overlapping ranges of different priorities', () => {
-    const markdown = 'OWASP projects and leadership'
+    const html = '<p>OWASP projects and leadership</p>'
     const draft = claim({
       key: 'draft',
       sourceText: 'OWASP projects',
       status: ClaimStatusEnum.Draft,
     })
     const approved = claim({ key: 'approved', sourceText: 'leadership' })
-    const result = injectHighlights(markdown, [draft, approved])
+    const result = injectHighlights(html, [draft, approved])
     expect(result).toContain('data-claim-key="draft"')
     expect(result).toContain('data-claim-key="approved"')
   })
 
   it('skips an inner range fully contained in a previously added one', () => {
-    const markdown = 'OWASP projects matter.'
+    const html = '<p>OWASP projects matter.</p>'
     const outer = claim({ key: 'outer', sourceText: 'OWASP projects' })
     const inner = claim({ key: 'inner', sourceText: 'projects' })
-    const result = injectHighlights(markdown, [outer, inner])
+    const result = injectHighlights(html, [outer, inner])
     expect(result.match(/<mark/g)).toHaveLength(1)
     expect(result).toContain('data-claim-key="outer"')
     expect(result).not.toContain('data-claim-key="inner"')
   })
 
-  it('escapes special characters in attribute values', () => {
-    const special = claim({ key: 'a&b"c', name: 'Name with "quotes"' })
-    const result = injectHighlights('OWASP projects', [special])
-    expect(result).toContain('data-claim-key="a&amp;b&quot;c"')
-    expect(result).toContain('data-claim-name="Name with &quot;quotes&quot;"')
-  })
-
   it('ignores empty source text', () => {
-    expect(injectHighlights('plain text content', [claim({ sourceText: '' })])).toBe(
-      'plain text content'
-    )
+    const html = '<p>plain text content</p>'
+    expect(injectHighlights(html, [claim({ sourceText: '' })])).toBe(html)
   })
 })
 
@@ -436,6 +405,7 @@ describe('AnnotatedProfile component', () => {
 
   describe('highlight-to-claim selection popup', () => {
     const mockSelection = (text: string) => {
+      const wrapperNode = () => document.querySelector('.md-wrapper') as Node | null
       jest.spyOn(window, 'getSelection').mockReturnValue({
         isCollapsed: false,
         rangeCount: 1,
@@ -443,6 +413,8 @@ describe('AnnotatedProfile component', () => {
         addRange: () => {},
         toString: () => text,
         getRangeAt: () => ({
+          startContainer: wrapperNode(),
+          endContainer: wrapperNode(),
           getBoundingClientRect: () => ({
             left: 100,
             right: 300,
