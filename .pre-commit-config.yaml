@@ -52,7 +52,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 01a675ea018f2fb714478a5ffb83fcea8374bb06  # v0.15.21
+    rev: 2700fd5671c633760d912769c041bfcde2b9a01b  # v0.15.22
     hooks:
       - id: ruff-check
         args:
@@ -98,7 +98,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - strawberry-graphql==0.321.0
-          - strawberry-graphql-django==0.86.4
+          - strawberry-graphql-django==0.86.5
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260716
           - types-PyYAML==6.0.12.20260518
