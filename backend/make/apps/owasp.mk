@@ -43,6 +43,10 @@ owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) backend-exec-command
 
+owasp-generate-board-candidates-claims:
+	@echo "Generating OWASP board candidates claims"
+	@CMD="python manage.py owasp_generate_board_candidates_claims $(ARGS)" $(MAKE) exec-backend-command
+
 owasp-generate-community-snapshot-video:
 	@docker build \
 		-f docker/backend/Dockerfile \
