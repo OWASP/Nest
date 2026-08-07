@@ -171,10 +171,15 @@ jest.mock('@apollo/client/react', () => {
     jest.fn().mockResolvedValue({ data: {} }),
     { data: null, loading: false, error: null, called: false },
   ])
+  const mockUseLazyQuery = jest.fn(() => [
+    jest.fn().mockResolvedValue({ data: {} }),
+    { data: null, loading: false, error: null, called: false },
+  ])
 
   return {
     ...actual,
     useMutation: mockUseMutation,
+    useLazyQuery: mockUseLazyQuery,
   }
 })
 

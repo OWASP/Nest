@@ -36,11 +36,11 @@ class CertificateQuery:
             return None
 
     @strawberry_django.field(permission_classes=[IsAuthenticated])
-    def my_certificate(self, info: strawberry.types.Info) -> CertificateNode | None:
-        """Resolve current authenticated user's latest active certificate."""
+    def my_certificates(self, info: strawberry.types.Info) -> list[CertificateNode]:
+        """Resolve current authenticated user's certificates."""
         user = info.context.request.user
         if getattr(user, "github_user", None) is None:
-            return None
+            return []
 
         return (
             Certificate.objects.select_related(
@@ -48,5 +48,4 @@ class CertificateQuery:
             )
             .filter(github_user=user.github_user, is_revoked=False)
             .order_by("-issued_at")
-            .first()
         )
