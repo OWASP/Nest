@@ -1,10 +1,17 @@
 'use client'
 
-import DOMPurify from 'isomorphic-dompurify'
 import { upperFirst, toLower } from 'lodash'
-import markdownit from 'markdown-it'
+import { compiler } from 'markdown-to-jsx/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from 'react'
 import { FaArrowRight, FaPlus } from 'react-icons/fa6'
 
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
@@ -36,13 +43,12 @@ export const PRIORITY_ORDER = [
 ] as const
 
 const CURLY_QUOTE_MAP: Record<string, string> = {
-  '\u2018': "'",
-  '\u2019': "'",
-  '\u201C': '"',
-  '\u201D': '"',
+  '‘': "'",
+  '’': "'",
+  '“': '"',
+  '”': '"',
 }
-
-const CURLY_QUOTE_RE = /[\u2018\u2019\u201C\u201D]/g
+const CURLY_QUOTE_RE = /[‘’“”]/g
 
 export function visibleStatuses(isCandidate: boolean, isReviewer: boolean): ClaimStatusEnum[] {
   return [
@@ -87,133 +93,100 @@ type HighlightRange = {
   claim: VisibleClaim
 }
 
-function addHighlightRange(ranges: HighlightRange[], next: HighlightRange): void {
-  const overlapIndex = ranges.findIndex(
-    (existing) => existing.start < next.end && existing.end > next.start
-  )
-  if (overlapIndex === -1) {
-    ranges.push(next)
-  } else if (ranges[overlapIndex].start === next.start && ranges[overlapIndex].end === next.end) {
-    ranges[overlapIndex] = next
-  }
+function normalizeForMatch(text: string): string {
+  return text.replace(CURLY_QUOTE_RE, (ch) => CURLY_QUOTE_MAP[ch])
 }
 
 function priorityOf(status: ClaimStatusEnum): number {
   return (PRIORITY_ORDER as readonly ClaimStatusEnum[]).indexOf(status)
 }
 
-function normalizeForMatch(text: string): string {
-  return text.replace(CURLY_QUOTE_RE, (ch) => CURLY_QUOTE_MAP[ch])
-}
+export function computeHighlightRanges(text: string, claims: VisibleClaim[]): HighlightRange[] {
+  const normalized = normalizeForMatch(text)
+  const chosen: HighlightRange[] = []
 
-function computeHighlightRanges(text: string, claims: VisibleClaim[]): HighlightRange[] {
-  const normalizedText = normalizeForMatch(text)
-  // Iterate lowest priority first so that a higher-priority claim replaces an
-  // identical range, while a partially overlapping one is skipped entirely.
-  return claims
+  const sortedClaims = claims
     .filter((c) => (PRIORITY_ORDER as readonly ClaimStatusEnum[]).includes(c.status))
     .sort((a, b) => priorityOf(a.status) - priorityOf(b.status))
-    .flatMap((claim) => {
-      const sourceText = normalizeForMatch(claim.sourceText)
-      if (!sourceText) return []
 
-      const ranges: HighlightRange[] = []
-      let searchFrom = 0
-      while (searchFrom < normalizedText.length) {
-        const start = normalizedText.indexOf(sourceText, searchFrom)
-        if (start === -1) break
-        ranges.push({ start, end: start + sourceText.length, claim })
-        searchFrom = start + 1
+  for (const claim of sortedClaims) {
+    const source = normalizeForMatch(claim.sourceText)
+    if (!source) continue
+
+    let from = 0
+    while (true) {
+      const start = normalized.indexOf(source, from)
+      if (start === -1) break
+      const next = { start, end: start + source.length, claim }
+      const overlapIdx = chosen.findIndex((r) => r.start < next.end && r.end > next.start)
+      if (overlapIdx === -1) {
+        chosen.push(next)
+      } else if (chosen[overlapIdx].start === start && chosen[overlapIdx].end === next.end) {
+        chosen[overlapIdx] = next
       }
-      return ranges
-    })
-    .reduce((acc, range) => {
-      addHighlightRange(acc, range)
-      return acc
-    }, [] as HighlightRange[])
-}
-
-function collectTextNodes(root: Node): Text[] {
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
-  const nodes: Text[] = []
-  let node: Node | null
-  while ((node = walker.nextNode())) nodes.push(node as Text)
-  return nodes
-}
-
-function wrapRangeInMark(
-  root: Node,
-  rangeStart: number,
-  rangeEnd: number,
-  claim: VisibleClaim
-): void {
-  let cursor = 0
-  // Re-walk per range: earlier ranges may have split text nodes, and the
-  // total flat text length is unchanged so range offsets stay valid.
-  for (const text of collectTextNodes(root)) {
-    const length = text.length
-    const nodeStart = cursor
-    const nodeEnd = cursor + length
-    cursor = nodeEnd
-    if (nodeEnd <= rangeStart) continue
-    if (nodeStart >= rangeEnd) break
-    const parent = text.parentNode
-    if (!parent) continue
-
-    const middle = text.splitText(Math.max(0, rangeStart - nodeStart))
-    middle.splitText(Math.min(length, rangeEnd - nodeStart) - Math.max(0, rangeStart - nodeStart))
-
-    const mark = text.ownerDocument.createElement('mark')
-    mark.className = `${STATUS_COLOR[claim.status] ?? 'bg-gray-400'} rounded px-0.5`
-    mark.dataset.claimKey = claim.key
-    mark.dataset.claimName = claim.name
-    mark.dataset.claimStatus = claim.status
-    mark.tabIndex = 0
-    parent.replaceChild(mark, middle)
-    mark.appendChild(middle)
-  }
-}
-
-export function injectHighlights(html: string, claims: VisibleClaim[]): string {
-  if (typeof document === 'undefined') return html
-
-  const template = document.createElement('template')
-  template.innerHTML = html
-  const flatText = collectTextNodes(template.content)
-    .map((n) => n.textContent ?? '')
-    .join('')
-  for (const { start, end, claim } of computeHighlightRanges(flatText, claims)) {
-    wrapRangeInMark(template.content, start, end, claim)
-  }
-  return template.innerHTML
-}
-
-export function resolveMediaUrls(html: string, year: string): string {
-  if (typeof DOMParser === 'undefined') return html
-  const baseUrl = `https://owasp.org/www-board-candidates/${year}/`
-  const doc = new DOMParser().parseFromString(html, 'text/html')
-  for (const el of doc.querySelectorAll('[src]')) {
-    try {
-      el.setAttribute('src', new URL(el.getAttribute('src') ?? '', baseUrl).href)
-    } catch {
-      // Leave invalid src values untouched for DOMPurify to handle.
+      from = start + 1
     }
   }
-  return doc.body.innerHTML
+  return chosen.sort((a, b) => a.start - b.start)
 }
 
-export function renderMarkdown(rawMarkdown: string, year: string): string {
-  const md = markdownit({
-    breaks: false,
-    html: true,
-    linkify: true,
-    typographer: true,
-  }).disable('code')
-  const rendered = md.render(rawMarkdown)
-  return DOMPurify.sanitize(resolveMediaUrls(rendered, year), {
-    ADD_ATTR: ['data-claim-key', 'data-claim-name', 'data-claim-status'],
-    ADD_TAGS: ['mark'],
-  })
+export function resolveMediaUrl(src: string, year: string): string {
+  try {
+    return new URL(src, `https://owasp.org/www-board-candidates/${year}/`).href
+  } catch {
+    return src
+  }
+}
+
+function flatTextOf(node: ReactNode): string {
+  if (typeof node === 'string') return node
+  if (typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(flatTextOf).join('')
+  if (React.isValidElement(node)) {
+    const el = node as ReactElement<{ children?: ReactNode }>
+    return el.props?.children != null ? flatTextOf(el.props.children) : ''
+  }
+  return ''
+}
+
+type RenderMark = (claim: VisibleClaim, children: ReactNode, key: string) => ReactElement
+
+function injectMarks(
+  node: ReactNode,
+  ranges: HighlightRange[],
+  cursor: { value: number },
+  renderMark: RenderMark
+): ReactNode {
+  if (typeof node === 'string') {
+    const textStart = cursor.value
+    cursor.value += node.length
+    const inside = ranges.filter((r) => r.start < cursor.value && r.end > textStart)
+    if (!inside.length) return node
+
+    const parts: ReactNode[] = []
+    let idx = 0
+    inside.forEach((r, i) => {
+      const from = Math.max(0, r.start - textStart)
+      const to = Math.min(node.length, r.end - textStart)
+      if (from > idx) parts.push(node.slice(idx, from))
+      parts.push(renderMark(r.claim, node.slice(from, to), `${textStart}-${i}`))
+      idx = to
+    })
+    if (idx < node.length) parts.push(node.slice(idx))
+    return <>{parts}</>
+  }
+  if (Array.isArray(node)) {
+    return node.map((child, i) => (
+      // eslint-disable-next-line react/no-array-index-key
+      <React.Fragment key={i}>{injectMarks(child, ranges, cursor, renderMark)}</React.Fragment>
+    ))
+  }
+  if (React.isValidElement(node)) {
+    const el = node as ReactElement<{ children?: ReactNode }>
+    if (el.props?.children == null) return el
+    return React.cloneElement(el, {}, injectMarks(el.props.children, ranges, cursor, renderMark))
+  }
+  return node
 }
 
 const AnnotatedProfile = ({
@@ -226,11 +199,10 @@ const AnnotatedProfile = ({
 }: AnnotatedProfileProps) => {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const hideTimerRef = useRef<number | null>(null)
   const [tooltip, setTooltip] = useState<{
-    claimKey: string
-    claimName: string
-    claimStatus: string
+    claim: VisibleClaim
     x: number
     y: number
     width: number
@@ -240,7 +212,6 @@ const AnnotatedProfile = ({
     x: number
     y: number
     width: number
-    range: Range
   } | null>(null)
 
   const filteredClaims = useMemo(
@@ -253,118 +224,104 @@ const AnnotatedProfile = ({
     [filteredClaims]
   )
 
-  const html = useMemo(
-    () => injectHighlights(renderMarkdown(rawMarkdown, year), filteredClaims),
-    [rawMarkdown, year, filteredClaims]
-  )
-
-  const scheduleHide = (delay = 400) => {
+  const scheduleHide = useCallback((delay = 400) => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     hideTimerRef.current = window.setTimeout(() => setTooltip(null), delay)
-  }
+  }, [])
+
+  const showTooltip = useCallback((claim: VisibleClaim, el: HTMLElement) => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    setSelection(null)
+    const rect = el.getBoundingClientRect()
+    setTooltip({ claim, x: rect.left, y: rect.top, width: rect.width })
+  }, [])
+
+  const renderMark = useCallback<RenderMark>(
+    (claim, children, key) => (
+      <span
+        key={key}
+        role="button"
+        aria-label={`Claim: ${claim.name} (${toLower(claim.status)})`}
+        className={`${STATUS_COLOR[claim.status] ?? 'bg-gray-400'} rounded px-0.5`}
+        data-claim-key={claim.key}
+        data-claim-name={claim.name}
+        data-claim-status={claim.status}
+        tabIndex={0}
+        onMouseOver={(e) => showTooltip(claim, e.currentTarget)}
+        onFocus={(e) => showTooltip(claim, e.currentTarget)}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter') return
+          e.preventDefault()
+          setTooltip(null)
+          router.push(`/board/${year}/candidates/${login}/claims/${claim.key}`)
+        }}
+      >
+        {children}
+      </span>
+    ),
+    [showTooltip, router, year, login]
+  )
+
+  const content = useMemo(() => {
+    const compiled = compiler(rawMarkdown, {
+      overrides: {
+        img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+          const src = typeof props.src === 'string' ? resolveMediaUrl(props.src, year) : props.src
+          // eslint-disable-next-line @next/next/no-img-element -- candidate markdown may reference arbitrary hosts
+          return <img alt="" {...props} src={src} />
+        },
+        source: (props: React.SourceHTMLAttributes<HTMLSourceElement>) => {
+          const src = typeof props.src === 'string' ? resolveMediaUrl(props.src, year) : props.src
+          return <source {...props} src={src} />
+        },
+      },
+    })
+    const ranges = computeHighlightRanges(flatTextOf(compiled), filteredClaims)
+    return injectMarks(compiled, ranges, { value: 0 }, renderMark)
+  }, [rawMarkdown, year, filteredClaims, renderMark])
+
+  const handleSelectionCheck = useCallback(() => {
+    if (!isCandidate) return
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+    const sel = window.getSelection()
+    if (!sel || sel.isCollapsed || !sel.rangeCount || sel.toString().trim() === '') {
+      setSelection(null)
+      return
+    }
+    const range = sel.getRangeAt(0)
+    if (!wrapper.contains(range.startContainer) || !wrapper.contains(range.endContainer)) return
+    const text = sel.toString().trim()
+    if (!text || overlapsExistingClaim(text, claimedTexts)) {
+      setSelection(null)
+      return
+    }
+    const rect = range.getBoundingClientRect()
+    setTooltip(null)
+    setSelection({ text, x: rect.left, y: rect.top, width: rect.width })
+  }, [isCandidate, claimedTexts])
 
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const wrapper = el.querySelector<HTMLElement>('.md-wrapper')
-
-    const showTooltipForMark = (mark: HTMLElement) => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
-      setSelection(null)
-      const rect = mark.getBoundingClientRect()
-      setTooltip({
-        claimKey: mark.dataset.claimKey ?? '',
-        claimName: mark.dataset.claimName ?? '',
-        claimStatus: mark.dataset.claimStatus ?? '',
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-      })
-    }
-
-    const onMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('[data-tooltip]')) {
-        if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
-        return
-      }
-      const mark = target.closest<HTMLElement>('mark[data-claim-key]')
-      if (!mark) {
-        scheduleHide()
-        return
-      }
-      showTooltipForMark(mark)
-    }
-    const onMouseLeave = () => scheduleHide()
+    const container = containerRef.current
+    const wrapper = wrapperRef.current
     const onScroll = () => {
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
       setTooltip(null)
       setSelection(null)
     }
-    const onMouseUp = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('[data-tooltip]')) return
-      showSelectionPopup()
-    }
-    const onFocusIn = (e: FocusEvent) => {
-      const target = e.target as HTMLElement
-      const mark = target.closest<HTMLElement>('mark[data-claim-key]')
-      if (!mark) return
-      showTooltipForMark(mark)
-    }
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter') return
-      const target = e.target as HTMLElement
-      const mark = target.closest<HTMLElement>('mark[data-claim-key]')
-      if (!mark) return
-      const claimKey = mark.dataset.claimKey
-      if (!claimKey) return
-      e.preventDefault()
-      setTooltip(null)
-      router.push(`/board/${year}/candidates/${login}/claims/${claimKey}`)
-    }
-    const onKeyUp = () => {
-      showSelectionPopup()
-    }
-    const showSelectionPopup = () => {
-      if (!isCandidate || !wrapper) return
-      const sel = window.getSelection()
-      if (!sel || sel.isCollapsed || !sel.rangeCount || sel.toString().trim() === '') {
-        setSelection(null)
-        return
-      }
-      const range = sel.getRangeAt(0)
-      if (!wrapper.contains(range.startContainer) || !wrapper.contains(range.endContainer)) {
-        return
-      }
-      const text = sel.toString().trim()
-      if (!text || overlapsExistingClaim(text, claimedTexts)) {
-        setSelection(null)
-        return
-      }
-      const rect = range.getBoundingClientRect()
-      setTooltip(null)
-      setSelection({ text, x: rect.left, y: rect.top, width: rect.width, range })
-    }
-
-    el.addEventListener('mouseover', onMouseOver)
-    el.addEventListener('mouseleave', onMouseLeave)
-    el.addEventListener('mouseup', onMouseUp)
-    el.addEventListener('focusin', onFocusIn)
-    el.addEventListener('keydown', onKeyDown)
-    el.addEventListener('keyup', onKeyUp)
+    const onMouseLeave = () => scheduleHide()
     window.addEventListener('scroll', onScroll, true)
+    container?.addEventListener('mouseleave', onMouseLeave)
+    wrapper?.addEventListener('mouseup', handleSelectionCheck)
+    wrapper?.addEventListener('keyup', handleSelectionCheck)
     return () => {
-      el.removeEventListener('mouseover', onMouseOver)
-      el.removeEventListener('mouseleave', onMouseLeave)
-      el.removeEventListener('mouseup', onMouseUp)
-      el.removeEventListener('focusin', onFocusIn)
-      el.removeEventListener('keydown', onKeyDown)
-      el.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('scroll', onScroll, true)
+      container?.removeEventListener('mouseleave', onMouseLeave)
+      wrapper?.removeEventListener('mouseup', handleSelectionCheck)
+      wrapper?.removeEventListener('keyup', handleSelectionCheck)
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     }
-  }, [isCandidate, claimedTexts, login, router, year])
+  }, [scheduleHide, handleSelectionCheck])
 
   const handleTooltipEnter = () => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
@@ -373,7 +330,7 @@ const AnnotatedProfile = ({
   const handleTooltipClick = () => {
     if (!tooltip) return
     setTooltip(null)
-    router.push(`/board/${year}/candidates/${login}/claims/${tooltip.claimKey}`)
+    router.push(`/board/${year}/candidates/${login}/claims/${tooltip.claim.key}`)
   }
 
   const handleCreateClaimClick = () => {
@@ -387,10 +344,9 @@ const AnnotatedProfile = ({
 
   return (
     <div ref={containerRef} className="relative">
-      <div
-        className="md-wrapper rounded-xl bg-white p-6 text-gray-600"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <div ref={wrapperRef} className="md-wrapper rounded-xl bg-white p-6 text-gray-600">
+        {content}
+      </div>
       {selection && isCandidate && (
         <AnchoredPopup anchor={selection} onClick={handleCreateClaimClick}>
           <span className="flex items-center gap-2">
@@ -411,12 +367,12 @@ const AnnotatedProfile = ({
         >
           <span className="flex items-center gap-2">
             <span
-              className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[tooltip.claimStatus as ClaimStatusEnum] ?? 'bg-gray-400'}`}
+              className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[tooltip.claim.status] ?? 'bg-gray-400'}`}
             />
-            <span className="truncate font-semibold">{tooltip.claimName || 'Claim'}</span>
+            <span className="truncate font-semibold">{tooltip.claim.name || 'Claim'}</span>
           </span>
           <span className="mt-1 flex items-center gap-1 text-gray-500 dark:text-gray-400">
-            <span>{upperFirst(toLower(tooltip.claimStatus))}</span>
+            <span>{upperFirst(toLower(tooltip.claim.status))}</span>
             <FaArrowRight className="ml-auto h-3 w-3" aria-hidden="true" />
           </span>
         </AnchoredPopup>
@@ -458,13 +414,11 @@ const AnchoredPopup = ({
     <button
       type="button"
       onClick={onClick}
-      className="block w-56 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-xs text-gray-800 shadow-xl transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+      className="peer block w-56 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-xs text-gray-800 shadow-xl transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
     >
       {children}
     </button>
-    <div className="flex justify-center">
-      <div className="h-2 w-2 -translate-y-1 rotate-45 border-r border-b border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800" />
-    </div>
+    <div className="mx-auto h-2 w-2 -translate-y-1 rotate-45 border-r border-b border-gray-300 bg-white transition-colors peer-hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:peer-hover:bg-slate-700" />
   </div>
 )
 

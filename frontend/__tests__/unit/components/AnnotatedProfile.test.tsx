@@ -2,23 +2,12 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import AnnotatedProfile, {
-  injectHighlights,
+  computeHighlightRanges,
   overlapsExistingClaim,
-  renderMarkdown,
-  resolveMediaUrls,
+  resolveMediaUrl,
   visibleStatuses,
 } from 'components/AnnotatedProfile'
 import type { VisibleClaim } from 'components/AnnotatedProfile'
-
-jest.mock('isomorphic-dompurify', () => {
-  const createDOMPurify = jest.requireActual('dompurify')
-  return { sanitize: createDOMPurify(window).sanitize }
-})
-
-jest.mock('markdown-it', () => {
-  const markdownIt = jest.requireActual<typeof import('markdown-it')>('markdown-it')
-  return { __esModule: true, default: markdownIt }
-})
 
 const claim = (overrides: Partial<VisibleClaim> = {}): VisibleClaim => ({
   id: 'claim-1',
@@ -96,181 +85,107 @@ describe('overlapsExistingClaim', () => {
   })
 })
 
-describe('resolveMediaUrls', () => {
+describe('resolveMediaUrl', () => {
   it('resolves a relative src against the board candidates page base', () => {
-    const html = '<img src="../assets/images/arkid15r/photo.jpg" alt="Arkadii Yakovets">'
-    expect(resolveMediaUrls(html, '2025')).toBe(
-      '<img src="https://owasp.org/www-board-candidates/assets/images/arkid15r/photo.jpg" alt="Arkadii Yakovets">'
+    expect(resolveMediaUrl('../assets/images/arkid15r/photo.jpg', '2025')).toBe(
+      'https://owasp.org/www-board-candidates/assets/images/arkid15r/photo.jpg'
     )
   })
 
-  it('resolves every media tag with a src attribute', () => {
-    const html = '<img src="/www-board-candidates/assets/images/a.png"><source src="b.mp4">'
-    const resolved = resolveMediaUrls(html, '2025')
-    expect(resolved).toContain('https://owasp.org/www-board-candidates/assets/images/a.png')
-    expect(resolved).toContain('https://owasp.org/www-board-candidates/2025/b.mp4')
+  it('resolves a root-relative src against the base', () => {
+    expect(resolveMediaUrl('/www-board-candidates/assets/images/a.png', '2025')).toBe(
+      'https://owasp.org/www-board-candidates/assets/images/a.png'
+    )
+  })
+
+  it('resolves a same-directory src into the year subpath', () => {
+    expect(resolveMediaUrl('b.mp4', '2025')).toBe(
+      'https://owasp.org/www-board-candidates/2025/b.mp4'
+    )
   })
 
   it('leaves absolute external URLs untouched', () => {
-    const html = '<img src="https://raw.githubusercontent.com/org/repo/a.png">'
-    expect(resolveMediaUrls(html, '2025')).toBe(html)
+    const src = 'https://raw.githubusercontent.com/org/repo/a.png'
+    expect(resolveMediaUrl(src, '2025')).toBe(src)
   })
 
   it('leaves invalid src values untouched', () => {
-    const html = '<img src="http://[invalid">'
-    expect(resolveMediaUrls(html, '2025')).toBe(html)
+    expect(resolveMediaUrl('http://[invalid', '2025')).toBe('http://[invalid')
   })
 })
 
-describe('renderMarkdown', () => {
-  it('splits paragraphs on blank lines', () => {
-    expect(renderMarkdown('one\n\ntwo', '2025')).toBe('<p>one</p>\n<p>two</p>\n')
-  })
-
-  it('renders headings and emphasis', () => {
-    expect(renderMarkdown('### Title\n\n**bold** text', '2025')).toBe(
-      '<h3>Title</h3>\n<p><strong>bold</strong> text</p>\n'
+describe('computeHighlightRanges', () => {
+  it('returns an empty list when no source text matches', () => {
+    expect(computeHighlightRanges('Hi OWASP Community!', [claim({ sourceText: 'nope' })])).toEqual(
+      []
     )
   })
 
-  it('renders markdown links', () => {
-    expect(renderMarkdown('[OWASP](https://owasp.org)', '2025')).toBe(
-      '<p><a href="https://owasp.org">OWASP</a></p>\n'
-    )
-  })
-
-  it('resolves relative image paths to the board candidates site', () => {
-    expect(renderMarkdown('<img src="../assets/images/photo.png" alt="photo">', '2025')).toBe(
-      '<img src="https://owasp.org/www-board-candidates/assets/images/photo.png" alt="photo">'
-    )
-  })
-
-  it('renders indented block-level html as markup instead of a code block', () => {
-    const markdown = ['    <div>', '      Global Engagement', '    </div>'].join('\n')
-    const result = renderMarkdown(markdown, '2025')
-    expect(result).not.toContain('<pre>')
-    expect(result).toContain('<div>')
-  })
-
-  it('sanitizes unsafe script tags and event handlers from raw markdown', () => {
-    const markdown = '<img src="/x.png" onerror="alert(1)"><script>alert(1)</script>'
-    const result = renderMarkdown(markdown, '2025')
-    expect(result).not.toContain('onerror')
-    expect(result).not.toContain('<script>')
-    expect(result).toContain('<img src="https://owasp.org/x.png"')
-  })
-})
-
-describe('injectHighlights', () => {
-  it('returns the html unchanged when there are no claims', () => {
-    const html = '<p>Hi OWASP Community!</p>'
-    expect(injectHighlights(html, [])).toBe(html)
-  })
-
-  it('returns the html unchanged when no source text matches', () => {
-    const html = '<p>Hi OWASP Community!</p>'
-    expect(injectHighlights(html, [claim({ sourceText: 'no match here' })])).toBe(html)
-  })
-
-  it('wraps a matching occurrence in a mark tag with dataset attributes', () => {
-    const html = '<p>I support OWASP projects and more.</p>'
-    const result = injectHighlights(html, [claim()])
-    expect(result).toContain('data-claim-key="claim-1"')
-    expect(result).toContain('data-claim-name="Claim One"')
-    expect(result).toContain('data-claim-status="APPROVED"')
-    expect(result).toContain('<mark')
-    expect(result).toContain('OWASP projects</mark>')
-  })
-
-  it('matches rendered text across markdown structure instead of raw markdown', () => {
-    const html = '<p><strong>OWASP</strong> projects are great.</p>'
-    const result = injectHighlights(html, [claim({ sourceText: 'OWASP projects' })])
-    expect(result).toContain('<mark')
-    expect(result).toContain('data-claim-key="claim-1"')
-  })
-
-  it('matches typographer-transformed curly quotes', () => {
-    const html = '<p>He said \u201CWelcome home\u201D loudly.</p>'
-    const result = injectHighlights(html, [
-      claim({ key: 'quoted', name: 'Quoted', sourceText: 'He said "Welcome home" loudly.' }),
+  it('finds all occurrences of a source text', () => {
+    const ranges = computeHighlightRanges('OWASP projects are great. OWASP projects matter.', [
+      claim(),
     ])
-    expect(result).toContain('data-claim-key="quoted"')
+    expect(ranges).toHaveLength(2)
   })
 
-  it('preserves text before, between, and after highlights', () => {
-    const html = '<p>aaa OWASP projects bbb OWASP projects ccc</p>'
-    const result = injectHighlights(html, [claim()])
-    expect(result.startsWith('<p>aaa ')).toBe(true)
-    expect(result.endsWith(' ccc</p>')).toBe(true)
-    expect(result.match(/<mark/g)).toHaveLength(2)
+  it('gives approved higher priority than draft on an identical overlap', () => {
+    const draft = claim({ key: 'draft', status: ClaimStatusEnum.Draft })
+    const approved = claim({ key: 'approved', status: ClaimStatusEnum.Approved })
+    const [range] = computeHighlightRanges('OWASP projects are open source.', [draft, approved])
+    expect(range.claim.key).toBe('approved')
   })
 
-  it('highlights all occurrences of a source text', () => {
-    const html = '<p>OWASP projects are great. OWASP projects matter.</p>'
-    expect(injectHighlights(html, [claim()]).match(/<mark/g)).toHaveLength(2)
-  })
-
-  it('gives approved higher priority than draft on overlap', () => {
-    const html = '<p>OWASP projects are open source.</p>'
-    const draft = claim({ key: 'draft', name: 'Draft', status: ClaimStatusEnum.Draft })
-    const approved = claim({ key: 'approved', name: 'Approved', status: ClaimStatusEnum.Approved })
-    const result = injectHighlights(html, [draft, approved])
-    expect(result).toContain('data-claim-key="approved"')
-    expect(result).not.toContain('data-claim-key="draft"')
-  })
-
-  it('does not create partially overlapping partial marks', () => {
-    const html = '<p>OWASP projects are great.</p>'
+  it('drops a partially-overlapping range instead of splitting either', () => {
     const first = claim({ key: 'first', sourceText: 'OWASP proj' })
     const second = claim({ key: 'second', sourceText: 'projects are' })
-    expect(injectHighlights(html, [first, second]).match(/<mark/g)).toHaveLength(1)
+    const ranges = computeHighlightRanges('OWASP projects are great.', [first, second])
+    expect(ranges).toHaveLength(1)
   })
 
   it('keeps a lower-priority draft range over a partial approved overlap', () => {
-    const html = '<p>The officer leads the squad.</p>'
     const draft = claim({
       key: 'draft',
-      name: 'Draft',
       sourceText: 'officer',
       status: ClaimStatusEnum.Draft,
     })
     const approved = claim({
       key: 'approved',
-      name: 'Approved',
       sourceText: 'officer leads',
     })
-    const result = injectHighlights(html, [draft, approved])
-    expect(result).toContain('data-claim-key="draft"')
-    expect(result).not.toContain('data-claim-key="approved"')
-    expect(result.match(/<mark/g)).toHaveLength(1)
+    const ranges = computeHighlightRanges('The officer leads the squad.', [draft, approved])
+    expect(ranges).toHaveLength(1)
+    expect(ranges[0].claim.key).toBe('draft')
   })
 
-  it('keeps both non-overlapping ranges of different priorities', () => {
-    const html = '<p>OWASP projects and leadership</p>'
+  it('keeps both non-overlapping ranges', () => {
     const draft = claim({
       key: 'draft',
       sourceText: 'OWASP projects',
       status: ClaimStatusEnum.Draft,
     })
     const approved = claim({ key: 'approved', sourceText: 'leadership' })
-    const result = injectHighlights(html, [draft, approved])
-    expect(result).toContain('data-claim-key="draft"')
-    expect(result).toContain('data-claim-key="approved"')
+    const ranges = computeHighlightRanges('OWASP projects and leadership', [draft, approved])
+    expect(ranges.map((r) => r.claim.key).sort()).toEqual(['approved', 'draft'])
   })
 
   it('skips an inner range fully contained in a previously added one', () => {
-    const html = '<p>OWASP projects matter.</p>'
     const outer = claim({ key: 'outer', sourceText: 'OWASP projects' })
     const inner = claim({ key: 'inner', sourceText: 'projects' })
-    const result = injectHighlights(html, [outer, inner])
-    expect(result.match(/<mark/g)).toHaveLength(1)
-    expect(result).toContain('data-claim-key="outer"')
-    expect(result).not.toContain('data-claim-key="inner"')
+    const ranges = computeHighlightRanges('OWASP projects matter.', [outer, inner])
+    expect(ranges).toHaveLength(1)
+    expect(ranges[0].claim.key).toBe('outer')
   })
 
-  it('ignores empty source text', () => {
-    const html = '<p>plain text content</p>'
-    expect(injectHighlights(html, [claim({ sourceText: '' })])).toBe(html)
+  it('matches source text that spans typographer-transformed curly quotes', () => {
+    const ranges = computeHighlightRanges('He said “Welcome home” loudly.', [
+      claim({ key: 'quoted', sourceText: 'He said "Welcome home" loudly.' }),
+    ])
+    expect(ranges).toHaveLength(1)
+    expect(ranges[0].claim.key).toBe('quoted')
+  })
+
+  it('ignores claims with empty source text', () => {
+    expect(computeHighlightRanges('plain text', [claim({ sourceText: '' })])).toEqual([])
   })
 })
 
@@ -321,12 +236,22 @@ describe('AnnotatedProfile component', () => {
     expect(container.textContent).toContain('Hi OWASP Community!')
   })
 
+  it('resolves relative image src against the board candidates base', () => {
+    const { container } = renderProfile({
+      rawMarkdown: '![photo](../assets/images/photo.png)',
+    })
+    const img = container.querySelector('img')
+    expect(img?.getAttribute('src')).toBe(
+      'https://owasp.org/www-board-candidates/assets/images/photo.png'
+    )
+  })
+
   it('renders visible claims as mark elements with dataset attributes', () => {
     const { container } = renderProfile({
       claims: [claim()],
       rawMarkdown: 'OWASP projects are great.',
     })
-    const mark = container.querySelector('mark[data-claim-key="claim-1"]')
+    const mark = container.querySelector('[data-claim-key="claim-1"]')
     expect(mark).not.toBeNull()
     expect(mark?.getAttribute('data-claim-name')).toBe('Claim One')
     expect(mark?.getAttribute('data-claim-status')).toBe('APPROVED')
@@ -337,7 +262,7 @@ describe('AnnotatedProfile component', () => {
       claims: [claim({ status: ClaimStatusEnum.Withdrawn })],
       rawMarkdown: 'OWASP projects are great.',
     })
-    expect(container.querySelector('mark[data-claim-key]')).toBeNull()
+    expect(container.querySelector('[data-claim-key]')).toBeNull()
   })
 
   it('does not show the tooltip until a highlight is hovered', () => {
@@ -347,7 +272,7 @@ describe('AnnotatedProfile component', () => {
 
   it('shows the tooltip when hovering a highlight', () => {
     const { container } = renderProfile({ claims: [claim()], rawMarkdown: 'OWASP projects.' })
-    const mark = container.querySelector('mark[data-claim-key]')
+    const mark = container.querySelector('[data-claim-key]')
     expect(mark).not.toBeNull()
     fireEvent.mouseOver(mark as Element)
     expect(screen.getByText('Claim One')).toBeInTheDocument()
@@ -356,11 +281,11 @@ describe('AnnotatedProfile component', () => {
 
   it('keeps the tooltip open while hovering it', () => {
     const { container } = renderProfile({ claims: [claim()], rawMarkdown: 'OWASP projects.' })
-    const mark = container.querySelector('mark[data-claim-key]')
+    const mark = container.querySelector('[data-claim-key]')
     fireEvent.mouseOver(mark as Element)
     const tooltip = container.querySelector('[data-tooltip]')
     expect(tooltip).not.toBeNull()
-    fireEvent.mouseOver(tooltip as Element)
+    fireEvent.mouseEnter(tooltip as Element)
     act(() => {
       jest.advanceTimersByTime(500)
     })
@@ -369,7 +294,7 @@ describe('AnnotatedProfile component', () => {
 
   it('hides the tooltip when the mouse leaves the profile', () => {
     const { container } = renderProfile({ claims: [claim()], rawMarkdown: 'OWASP projects.' })
-    const mark = container.querySelector('mark[data-claim-key]')
+    const mark = container.querySelector('[data-claim-key]')
     fireEvent.mouseOver(mark as Element)
     expect(screen.getByText('Claim One')).toBeInTheDocument()
     fireEvent.mouseLeave(container.querySelector('.relative') as Element)
@@ -381,7 +306,7 @@ describe('AnnotatedProfile component', () => {
 
   it('hides the tooltip when the page is scrolled', () => {
     const { container } = renderProfile({ claims: [claim()], rawMarkdown: 'OWASP projects.' })
-    const mark = container.querySelector('mark[data-claim-key]')
+    const mark = container.querySelector('[data-claim-key]')
     fireEvent.mouseOver(mark as Element)
     expect(screen.getByText('Claim One')).toBeInTheDocument()
     fireEvent.scroll(window)
@@ -395,10 +320,10 @@ describe('AnnotatedProfile component', () => {
       rawMarkdown: 'OWASP projects.',
       year: '2025',
     })
-    const mark = container.querySelector('mark[data-claim-key]')
+    const mark = container.querySelector('[data-claim-key]')
     fireEvent.mouseOver(mark as Element)
-    const button = screen.getByRole('button')
-    fireEvent.click(button)
+    const tooltipButton = container.querySelector('[data-tooltip] button')
+    fireEvent.click(tooltipButton as Element)
     expect(mockPush).toHaveBeenCalledWith('/board/2025/candidates/arkid15r/claims/claim-1')
     expect(container.querySelector('[data-tooltip]')).toBeNull()
   })
