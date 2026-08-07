@@ -10,8 +10,10 @@ from strawberry.dataloader import DataLoader
 from apps.common.api.internal.dataloaders.utils import get_top_contributors_by_keys
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.committee import Committee
 
 TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER = "top_contributors_by_chapter_id"
+TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER = "top_contributors_by_committee_id"
 TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER = "top_contributors_by_project_id"
 TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER = "top_contributors_by_repository_id"
 
@@ -157,11 +159,67 @@ async def load_top_contributors_by_chapter_id(
     )
 
 
+async def load_top_contributors_by_committee_id(
+    committee_ids: list[int],
+) -> list[list[dict[str, str | int]]]:
+    """Batch-load top contributors per committee (humans only, community repos).
+
+    A committee's top contributors are the top contributors of its main OWASP
+    repository (``owasp_repository``). Results are capped at
+    ``TOP_CONTRIBUTORS_LIMIT`` per committee.
+    """
+    if not committee_ids:
+        return []
+
+    queryset: RepositoryContributorQuerySet = await sync_to_async(
+        lambda: RepositoryContributor.objects.by_humans().to_community_repositories()
+    )()
+
+    top_contributors: QuerySet[RepositoryContributor, dict[str, str | int]] = (
+        queryset.filter(
+            repository_id__in=Committee.objects.filter(id__in=committee_ids).values(
+                "owasp_repository_id"
+            )
+        )
+        .annotate(
+            committee_id=Subquery(
+                Committee.objects.filter(
+                    id__in=committee_ids,
+                    owasp_repository_id=OuterRef("repository_id"),
+                ).values("id")[:1]
+            ),
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("committee_id")],
+                order_by=F("contributions_count").desc(),
+            ),
+        )
+        .filter(row_number__lte=TOP_CONTRIBUTORS_LIMIT)
+        .values(
+            "committee_id",
+            "contributions_count",
+            avatar_url=F("user__avatar_url"),
+            login=F("user__login"),
+            name=F("user__name"),
+        )
+        .order_by("committee_id", "-contributions_count")
+    )
+
+    return await get_top_contributors_by_keys(
+        queryset=top_contributors,
+        keys=committee_ids,
+        key_field="committee_id",
+    )
+
+
 def get_repository_contributor_loaders() -> dict[str, object]:
     """Return a mapping of per-request DataLoader instances."""
     return {
         TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
             load_fn=load_top_contributors_by_chapter_id
+        ),
+        TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
+            load_fn=load_top_contributors_by_committee_id
         ),
         TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
             load_fn=load_top_contributors_by_project_id

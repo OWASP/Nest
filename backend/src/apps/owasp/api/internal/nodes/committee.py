@@ -3,6 +3,10 @@
 import strawberry
 import strawberry_django
 
+from apps.github.api.internal.dataloaders.repository_contributor import (
+    TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER,
+)
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.dataloaders.committee import (
     ENTITY_CHANNELS_BY_COMMITTEE_ID_LOADER,
     ENTITY_LEADERS_BY_COMMITTEE_ID_LOADER,
@@ -72,3 +76,13 @@ class CommitteeNode(GenericEntityNode):
     def stars_count(self, root: Committee) -> int:
         """Resolve stars count."""
         return root.owasp_repository.stars_count if root.owasp_repository else 0
+
+    @strawberry_django.field
+    async def top_contributors(
+        self, root: Committee, info: strawberry.Info
+    ) -> list[RepositoryContributorNode]:
+        """Resolve top contributors."""
+        top_contributors = await info.context.github_dataloaders[
+            TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER
+        ].load(root.pk)
+        return [RepositoryContributorNode(**tc) for tc in top_contributors]
