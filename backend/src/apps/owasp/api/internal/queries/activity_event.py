@@ -20,6 +20,7 @@ class ActivityEventQuery:
     @strawberry_django.field
     def activity_events(
         self,
+        *,
         activity_type: str | None = None,
         github_user_login: str | None = None,
         project_key: str | None = None,
@@ -40,12 +41,12 @@ class ActivityEventQuery:
         if order not in {"asc", "desc"}:
             return PaginatedActivityEvents(current_page=1, events=[], total_pages=1)
 
-        order_clause = "occurred_at" if order == "asc" else "-occurred_at"
+        order_clauses = ("occurred_at", "pk") if order == "asc" else ("-occurred_at", "-pk")
 
         queryset = ActivityEvent.objects.select_related(
             "github_user",
             "github_repository",
-        ).order_by(order_clause)
+        ).order_by(*order_clauses)
 
         if not include_bots:
             queryset = ActivityEvent.exclude_bots(queryset)
@@ -63,11 +64,15 @@ class ActivityEventQuery:
             queryset = queryset.filter(github_repository__in=project_repo_ids)
 
         if chapter_key and (cleaned := chapter_key.strip()):
-            chapter_repo_ids = Chapter.objects.filter(
-                key__icontains=cleaned,
-            ).exclude(
-                owasp_repository__isnull=True,
-            ).values_list("owasp_repository_id", flat=True)
+            chapter_repo_ids = (
+                Chapter.objects.filter(
+                    key__icontains=cleaned,
+                )
+                .exclude(
+                    owasp_repository__isnull=True,
+                )
+                .values_list("owasp_repository_id", flat=True)
+            )
             queryset = queryset.filter(github_repository__in=chapter_repo_ids)
 
         if time_range and (cleaned := time_range.strip()):
@@ -93,6 +98,6 @@ class ActivityEventQuery:
         queryset = ActivityEvent.objects.select_related(
             "github_user",
             "github_repository",
-        ).order_by("-occurred_at")
+        ).order_by("-occurred_at", "-pk")
 
         return list(ActivityEvent.exclude_bots(queryset)[:normalized_limit])

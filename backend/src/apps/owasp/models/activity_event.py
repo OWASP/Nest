@@ -1,7 +1,7 @@
 """OWASP app activity event model."""
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -128,8 +128,7 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
     def exclude_bots(cls, queryset):
         """Exclude bot accounts from the given queryset."""
         return queryset.exclude(
-            Q(github_user__is_bot=True)
-            | Q(github_user__login__in=User.get_non_indexable_logins())
+            Q(github_user__is_bot=True) | Q(github_user__login__in=User.get_non_indexable_logins())
         )
 
     @classmethod
