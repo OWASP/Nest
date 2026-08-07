@@ -264,7 +264,7 @@ resource "aws_ecs_service" "vm" {
   cluster                            = aws_ecs_cluster.vm.id
   deployment_maximum_percent         = 100
   deployment_minimum_healthy_percent = 0
-  desired_count                      = 1
+  desired_count                      = var.vm_desired_count
   name                               = "${local.name_prefix}-service"
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-service"

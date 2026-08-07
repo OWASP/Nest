@@ -9,19 +9,29 @@ provider "aws" {
 }
 
 variables {
-  app_security_group_ids = ["sg-11111111", "sg-22222222", "sg-33333333"]
-  aws_region             = "us-east-1"
-  common_tags            = { Environment = "test", Project = "nest" }
-  environment            = "test"
-  kms_key_arn            = "arn:aws:kms:us-east-1:000000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab"
-  project_name           = "nest"
-  subnet_ids             = ["subnet-11111111", "subnet-22222222"]
-  vm_image               = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
-  vpc_id                 = "vpc-11111111"
+  aws_region   = "us-east-1"
+  common_tags  = { Environment = "test", Project = "nest" }
+  environment  = "test"
+  project_name = "nest"
+  vm_image     = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
+}
+
+run "setup" {
+  module {
+    source = "./tests/setup"
+  }
 }
 
 run "observability_integration_apply" {
   command = apply
+
+  variables {
+    app_security_group_ids = run.setup.app_security_group_ids
+    kms_key_arn            = run.setup.kms_key_arn
+    subnet_ids             = run.setup.subnet_ids
+    vm_desired_count       = 0
+    vpc_id                 = run.setup.vpc_id
+  }
 
   assert {
     condition     = can(aws_efs_file_system.vm.id)
@@ -51,6 +61,11 @@ run "observability_integration_apply" {
   assert {
     condition     = can(aws_efs_access_point.vm.id)
     error_message = "EFS access point was not created."
+  }
+
+  assert {
+    condition     = one([for v in aws_ecs_task_definition.vm.volume : v if v.name == "vm-data"]).efs_volume_configuration[0].authorization_config[0].access_point_id == aws_efs_access_point.vm.id
+    error_message = "The vm-data volume must mount through the EFS access point (for non-root UID enforcement)."
   }
 
   assert {

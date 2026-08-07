@@ -62,6 +62,17 @@ variable "vm_cpu" {
   default     = 512
 }
 
+variable "vm_desired_count" {
+  description = "The number of VictoriaMetrics tasks to run (0 or 1; it is a single-node store)."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = contains([0, 1], var.vm_desired_count)
+    error_message = "vm_desired_count must be 0 or 1 (VictoriaMetrics is a single-node store)."
+  }
+}
+
 variable "vm_image" {
   description = "The VictoriaMetrics container image (including digest)."
   type        = string

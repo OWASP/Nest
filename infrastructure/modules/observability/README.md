@@ -10,7 +10,7 @@
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.53.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.53.0 |
 
 ## Modules
 
@@ -52,6 +52,7 @@ No modules.
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | The private subnet IDs for the EFS mount targets and the VictoriaMetrics task. | `list(string)` | n/a | yes |
 | <a name="input_vm_cpu"></a> [vm\_cpu](#input\_vm\_cpu) | The CPU units for the VictoriaMetrics Fargate task. | `number` | `512` | no |
+| <a name="input_vm_desired_count"></a> [vm\_desired\_count](#input\_vm\_desired\_count) | The number of VictoriaMetrics tasks to run (0 or 1; it is a single-node store). | `number` | `1` | no |
 | <a name="input_vm_image"></a> [vm\_image](#input\_vm\_image) | The VictoriaMetrics container image (including digest). | `string` | n/a | yes |
 | <a name="input_vm_memory"></a> [vm\_memory](#input\_vm\_memory) | The memory (in MiB) for the VictoriaMetrics Fargate task. | `number` | `1024` | no |
 | <a name="input_vm_port"></a> [vm\_port](#input\_vm\_port) | The port VictoriaMetrics listens on for ingest and queries. | `number` | `8428` | no |
