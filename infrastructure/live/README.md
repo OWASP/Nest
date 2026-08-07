@@ -59,6 +59,7 @@ No providers.
 | <a name="module_frontend_build_cache"></a> [frontend\_build\_cache](#module\_frontend\_build\_cache) | ../modules/ecr-cache | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
+| <a name="module_observability"></a> [observability](#module\_observability) | ../modules/observability | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |
 | <a name="module_security"></a> [security](#module\_security) | ../modules/security | n/a |
 | <a name="module_storage"></a> [storage](#module\_storage) | ../modules/storage | n/a |
@@ -101,6 +102,7 @@ No resources.
 | <a name="input_enable_additional_parameters"></a> [enable\_additional\_parameters](#input\_enable\_additional\_parameters) | Whether to enable additional parameters (e.g. for production). | `bool` | `false` | no |
 | <a name="input_enable_cron_tasks"></a> [enable\_cron\_tasks](#input\_enable\_cron\_tasks) | Whether to enable scheduled cron tasks. | `bool` | n/a | yes |
 | <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Whether to enable a NAT Gateway. | `bool` | `true` | no |
+| <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Whether to create the observability stack. | `bool` | `false` | no |
 | <a name="input_enable_rds_proxy"></a> [enable\_rds\_proxy](#input\_enable\_rds\_proxy) | Whether to create an RDS proxy. | `bool` | `false` | no |
 | <a name="input_enable_vpc_cloudwatch_logs_endpoint"></a> [enable\_vpc\_cloudwatch\_logs\_endpoint](#input\_enable\_vpc\_cloudwatch\_logs\_endpoint) | Whether to create CloudWatch Logs VPC endpoint. | `bool` | `false` | no |
 | <a name="input_enable_vpc_ecr_api_endpoint"></a> [enable\_vpc\_ecr\_api\_endpoint](#input\_enable\_vpc\_ecr\_api\_endpoint) | Whether to create ECR API VPC endpoint. | `bool` | `false` | no |
