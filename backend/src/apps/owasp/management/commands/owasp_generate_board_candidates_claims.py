@@ -45,9 +45,10 @@ but permit simple present for roles that remain current.
 Avoid present perfect constructions such as "has done", "has been", "has contributed", etc.
 
 Return ONLY a valid JSON array of objects.
-Each object must have exactly two keys:
+Each object must have exactly three keys:
   - "name": A concise 10-20 word summary of the claim.
   - "description": The full contextual text of the claim.
+  - "source_text": A single verbatim sentence copied from the input that supports the claim.
 """
 
 
@@ -165,6 +166,7 @@ class Command(BaseCommand):
                 : BoardCandidateClaim._meta.get_field("name").max_length
             ]
             description = str(claim_data.get("description") or "").strip()
+            source_text = str(claim_data.get("source_text") or "").strip()
 
             if name:
                 claims.append(
@@ -173,6 +175,7 @@ class Command(BaseCommand):
                         description=description,
                         candidate=candidate,
                         name=name,
+                        source_text=source_text,
                         status=BoardCandidateClaim.Status.DRAFT,
                     )
                 )

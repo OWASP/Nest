@@ -46,8 +46,8 @@ class TestGenerateBoardCandidatesClaimsCommand:
         )
         mock_extract.return_value = json.dumps(
             [
-                {"name": "Claim 1", "description": "Desc 1"},
-                {"name": "Claim 2", "description": "Desc 2"},
+                {"name": "Claim 1", "description": "Desc 1", "source_text": "founded OWASP Nest"},
+                {"name": "Claim 2", "description": "Desc 2", "source_text": ""},
             ]
         )
 
@@ -58,9 +58,11 @@ class TestGenerateBoardCandidatesClaimsCommand:
         assert len(claims) == 2
         assert claims[0].name == "Claim 1"
         assert claims[0].description == "Desc 1"
+        assert claims[0].source_text == "founded OWASP Nest"
         assert claims[0].candidate == candidate
         assert claims[0].board == board
         assert claims[0].status == BoardCandidateClaim.Status.DRAFT
+        assert claims[1].source_text == ""
 
     def test_generate_claims_invalid_json(self, command, mocker):
         mocker.patch(
@@ -103,7 +105,11 @@ class TestGenerateBoardCandidatesClaimsCommand:
         )
         mock_extract.return_value = json.dumps(
             [
-                {"name": "Valid Claim", "description": "Valid desc"},
+                {
+                    "name": "Valid Claim",
+                    "description": "Valid desc",
+                    "source_text": "verbatim quote",
+                },
                 "not_a_dict",
                 42,
             ]
@@ -115,6 +121,23 @@ class TestGenerateBoardCandidatesClaimsCommand:
         claims = command.generate_claims("markdown content", candidate, board)
         assert len(claims) == 1
         assert claims[0].name == "Valid Claim"
+        assert claims[0].source_text == "verbatim quote"
+
+    def test_generate_claims_defaults_source_text_to_empty(self, command, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
+        )
+        mock_extract = mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.extract_json_from_markdown"
+        )
+        mock_extract.return_value = json.dumps([{"name": "No Source", "description": "Some desc"}])
+
+        candidate = EntityMember()
+        board = BoardOfDirectors()
+
+        claims = command.generate_claims("markdown content", candidate, board)
+        assert len(claims) == 1
+        assert claims[0].source_text == ""
 
     def test_generate_claims_empty_name(self, command, mocker):
         mocker.patch(
