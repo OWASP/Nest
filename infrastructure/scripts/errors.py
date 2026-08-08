@@ -1,15 +1,15 @@
-"""Shared errors for the infrastructure test runner."""
+"""Shared errors for the infrastructure scripts."""
 
 from __future__ import annotations
 
 
-class TestRunnerError(Exception):
-    """Base error for infrastructure test runner failures."""
+class InfrastructureError(Exception):
+    """Base error for infrastructure script failures."""
 
     __test__ = False
 
 
-class CommandNotFoundError(TestRunnerError):
+class CommandNotFoundError(InfrastructureError):
     """Raised when a required executable is missing from PATH."""
 
     def __init__(self, cmd: str) -> None:
@@ -22,7 +22,7 @@ class CommandNotFoundError(TestRunnerError):
         super().__init__(f"required command '{cmd}' not found on PATH.")
 
 
-class OverrideExistsError(TestRunnerError):
+class OverrideExistsError(InfrastructureError):
     """Raised when a test override file already exists on disk."""
 
     def __init__(self, filepath: str) -> None:
@@ -35,12 +35,38 @@ class OverrideExistsError(TestRunnerError):
         super().__init__(f"{filepath} already exists. Refusing to run to avoid overwriting.")
 
 
-class MissingAuthTokenError(TestRunnerError):
+class MissingAuthTokenError(InfrastructureError):
     """Raised when the LocalStack auth token is missing."""
 
     def __init__(self) -> None:
         """Initialize the missing auth token error."""
         super().__init__(
             "LOCALSTACK_AUTH_TOKEN environment variable is not set.\n"
-            "LocalStack integration tests require a valid auth token to run."
+            "A valid auth token is required to run LocalStack."
         )
+
+
+class MissingEnvVarError(InfrastructureError):
+    """Raised when a required environment variable is missing."""
+
+    def __init__(self, env_var: str) -> None:
+        """Initialize the missing environment variable error.
+
+        Args:
+            env_var (str): The name of the missing environment variable.
+
+        """
+        super().__init__(f"{env_var} is not set in the .env file.")
+
+
+class MissingEnvFileError(InfrastructureError):
+    """Raised when a required .env file is missing."""
+
+    def __init__(self, path: str) -> None:
+        """Initialize the missing env file error.
+
+        Args:
+            path (str): The path to the missing .env file.
+
+        """
+        super().__init__(f"{path} not found.")

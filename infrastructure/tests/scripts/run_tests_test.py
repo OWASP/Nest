@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from scripts import run_tests
-from scripts.errors import TestRunnerError
+from scripts.errors import InfrastructureError
 
 
 class TestRunTestsMain:
@@ -82,7 +82,7 @@ class TestRunTestsMain:
         mock_exit: MagicMock,
         mock_require: MagicMock,
     ) -> None:
-        mock_require.side_effect = TestRunnerError("Mocked failure")
+        mock_require.side_effect = InfrastructureError("Mocked failure")
         with patch("argparse.ArgumentParser.parse_args") as mock_args:
             mock_args.return_value = MagicMock(
                 unit=True,

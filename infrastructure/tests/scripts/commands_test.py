@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -44,6 +45,9 @@ class TestCommandRunner:
             check=False,
             capture_output=False,
             text=True,
+            cwd=None,
+            input=None,
+            env=None,
         )
 
     @patch("subprocess.run")
@@ -60,6 +64,47 @@ class TestCommandRunner:
             check=True,
             capture_output=True,
             text=True,
+            cwd=None,
+            input=None,
+            env=None,
+        )
+
+    @patch("subprocess.run")
+    @patch("shutil.which")
+    def test_run_forwards_cwd_and_input(
+        self,
+        mock_which: MagicMock,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_which.return_value = "/usr/bin/docker"
+        CommandRunner().run("docker", "login", cwd="/tmp", input_data="secret")  # noqa: S108
+        mock_run.assert_called_once_with(
+            ["/usr/bin/docker", "login"],
+            check=False,
+            capture_output=False,
+            text=True,
+            cwd="/tmp",  # noqa: S108
+            input="secret",
+            env=None,
+        )
+
+    @patch("subprocess.run")
+    @patch("shutil.which")
+    def test_run_merges_environment(
+        self,
+        mock_which: MagicMock,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_which.return_value = "/usr/bin/tflocal"
+        CommandRunner().run("tflocal", "apply", env={"TF_VAR_environment": "local"})
+        mock_run.assert_called_once_with(
+            ["/usr/bin/tflocal", "apply"],
+            check=False,
+            capture_output=False,
+            text=True,
+            cwd=None,
+            input=None,
+            env={**os.environ, "TF_VAR_environment": "local"},
         )
 
     @patch("subprocess.run")

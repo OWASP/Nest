@@ -160,6 +160,24 @@ variable "django_configuration" {
   type        = string
 }
 
+variable "django_redis_port" {
+  description = "The port of the Redis cache."
+  type        = string
+  default     = "6379"
+}
+
+variable "django_redis_auth_enabled" {
+  description = "Whether Redis authentication is enabled."
+  type        = bool
+  default     = true
+}
+
+variable "django_redis_use_tls" {
+  description = "Whether Redis connections should use TLS."
+  type        = bool
+  default     = true
+}
+
 variable "django_release_version" {
   description = "The Django release version."
   type        = string
@@ -239,8 +257,8 @@ variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
   validation {
-    condition     = contains(["staging", "production"], var.environment)
-    error_message = "Environment must be either 'staging' or 'production'."
+    condition     = contains(["local", "staging", "production"], var.environment)
+    error_message = "Environment must be either 'local', 'staging' or 'production'."
   }
 }
 
@@ -248,6 +266,12 @@ variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures."
   type        = string
   default     = null
+}
+
+variable "force_new_deployment" {
+  description = "Whether to force a new deployment on each apply."
+  type        = bool
+  default     = false
 }
 
 variable "frontend_desired_count" {
