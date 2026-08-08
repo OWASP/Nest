@@ -9,7 +9,7 @@ jest.mock('@apollo/client/react', () => ({
 }))
 
 jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+  useRouter: jest.fn(() => ({ push: jest.fn(), replace: jest.fn() })),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
@@ -33,8 +33,19 @@ const mockModuleData = {
           },
         ],
       },
+      {
+        id: '2',
+        objectID: '2',
+        number: 102,
+        title: 'Second Issue Title',
+        state: 'open',
+        isMerged: false,
+        labels: ['docs'],
+        assignees: [],
+        taskDeadline: '2099-01-30T00:00:00Z',
+      },
     ],
-    issuesCount: 1,
+    issuesCount: 2,
     availableLabels: ['bug', 'feature-request', 'documentation'],
   },
 }

@@ -116,28 +116,26 @@ const ModuleIssues = ({ programKey, moduleKey }: ModuleIssuesProps) => {
     return Array.from(labels).sort((a, b) => a.localeCompare(b))
   }, [moduleData])
 
-  const handleLabelChange = (label: string) => {
-    setSelectedLabel(label)
+  const applyFilter = (name: string, value: string, clearedValue: string) => {
     setCurrentPage(1)
     const params = new URLSearchParams(searchParams.toString())
-    if (label === LABEL_ALL) {
-      params.delete('label')
+    if (value === clearedValue) {
+      params.delete(name)
     } else {
-      params.set('label', label)
+      params.set(name, value)
     }
-    router.replace(`?${params.toString()}`, { scroll: false })
+    const qs = params.toString()
+    router.replace(qs ? `?${qs}` : globalThis.location.pathname, { scroll: false })
+  }
+
+  const handleLabelChange = (label: string) => {
+    setSelectedLabel(label)
+    applyFilter('label', label, LABEL_ALL)
   }
 
   const handleDeadlineChange = (deadline: string) => {
     setSelectedDeadline(deadline)
-    setCurrentPage(1)
-    const params = new URLSearchParams(searchParams.toString())
-    if (deadline === DEADLINE_ALL) {
-      params.delete('deadline')
-    } else {
-      params.set('deadline', deadline)
-    }
-    router.replace(`?${params.toString()}`, { scroll: false })
+    applyFilter('deadline', deadline, DEADLINE_ALL)
   }
 
   const handlePageChange = (page: number) => {
