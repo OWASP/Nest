@@ -9,7 +9,13 @@ type MockRangeInit = {
   rect?: Partial<DOMRect>
 }
 
-const setupSelection = ({ text, collapsed = false, rangeCount = 1, rect = {} }: MockRangeInit) => {
+const setupSelection = ({
+  text,
+  collapsed = false,
+  rangeCount = 1,
+  rect = {},
+  intersectsHighlight = false,
+}: MockRangeInit & { intersectsHighlight?: boolean }) => {
   const startContainer = document.createElement('span')
   const endContainer = document.createElement('span')
   const boundingRect = { top: 20, left: 10, width: 100, height: 16, ...rect } as DOMRect
@@ -17,6 +23,7 @@ const setupSelection = ({ text, collapsed = false, rangeCount = 1, rect = {} }: 
     startContainer,
     endContainer,
     getBoundingClientRect: () => boundingRect,
+    intersectsNode: () => intersectsHighlight,
   }
   const selection = {
     rangeCount,
@@ -109,6 +116,29 @@ describe('useProfileSelection', () => {
     const container = document.createElement('div')
     const { startContainer, endContainer } = setupSelection({
       text: '   ',
+    })
+    container.appendChild(startContainer)
+    container.appendChild(endContainer)
+
+    const containerRef = { current: container }
+    const { result } = renderHook(() => useProfileSelection(containerRef, true))
+
+    act(() => {
+      document.dispatchEvent(new Event('selectionchange'))
+    })
+
+    expect(result.current).toBeNull()
+  })
+
+  it('returns null when the selection intersects an existing claim highlight', () => {
+    const container = document.createElement('div')
+    document.body.appendChild(container)
+    const highlight = document.createElement('span')
+    highlight.setAttribute('data-claim-highlight', 'true')
+    container.appendChild(highlight)
+    const { startContainer, endContainer } = setupSelection({
+      text: 'hello',
+      intersectsHighlight: true,
     })
     container.appendChild(startContainer)
     container.appendChild(endContainer)

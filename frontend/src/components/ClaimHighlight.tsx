@@ -1,6 +1,5 @@
+import { Button } from '@heroui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@heroui/react'
-import { Tooltip } from '@heroui/tooltip'
-import { useIsMobile } from 'hooks/useIsMobile'
 import { useRouter } from 'next/navigation'
 import { type HTMLAttributes, type ReactNode } from 'react'
 
@@ -64,7 +63,6 @@ const ClaimHighlight = ({
   ...rest
 }: ClaimHighlightProps) => {
   const router = useRouter()
-  const isMobile = useIsMobile()
 
   if (!claimKey) {
     return <span {...rest}>{children}</span>
@@ -72,74 +70,35 @@ const ClaimHighlight = ({
 
   const style = STATUS_STYLES[claimStatus ?? ''] ?? STATUS_STYLES[ClaimStatusEnum.Draft]
   const href = `/board/${year}/candidates/${login}/claims/${claimKey}`
-  const navigate = () => router.push(href)
-
-  const badge = (
-    <span
-      className={`inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${style.badge}`}
-    >
-      {style.label}
-    </span>
-  )
-  const title = (
-    <span className="text-sm font-semibold text-gray-900 dark:text-white">{claimName}</span>
-  )
-
-  const highlightClass = `cursor-pointer rounded px-0.5 transition-colors hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${style.mark}`
   const ariaLabel = `Claim: ${claimName ?? 'unnamed'}, status ${style.label}`
-
-  if (isMobile) {
-    return (
-      <Popover placement="top" showArrow>
-        <PopoverTrigger>
-          <span className={highlightClass} tabIndex={0} role="button" aria-label={ariaLabel}>
-            {children}
-          </span>
-        </PopoverTrigger>
-        <PopoverContent>
-          <div className="flex w-full max-w-xs min-w-48 flex-col items-start gap-2 px-2 py-2">
-            {title}
-            {badge}
-            <button
-              type="button"
-              onClick={navigate}
-              className="mt-1 inline-flex w-full items-center justify-center gap-1 rounded-md bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-            >
-              View claim →
-            </button>
-          </div>
-        </PopoverContent>
-      </Popover>
-    )
-  }
+  const highlightClass = `cursor-pointer rounded px-0.5 transition-colors hover:brightness-95 ${style.mark}`
 
   return (
-    <Tooltip
-      content={
-        <div className="flex max-w-xs min-w-48 flex-col items-start gap-1.5 p-1">
-          {title}
-          {badge}
-          <span className="text-xs text-gray-500 dark:text-gray-400">Click to view</span>
+    <Popover placement="top" showArrow>
+      <PopoverTrigger>
+        <span data-claim-highlight="true" className={highlightClass} aria-label={ariaLabel}>
+          {children}
+        </span>
+      </PopoverTrigger>
+      <PopoverContent>
+        <div className="flex w-full max-w-xs min-w-48 flex-col items-start gap-2 px-2 py-2">
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">{claimName}</span>
+          <span
+            className={`inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${style.badge}`}
+          >
+            {style.label}
+          </span>
+          <Button
+            color="primary"
+            size="sm"
+            className="mt-1 w-full font-medium"
+            onPress={() => router.push(href)}
+          >
+            View claim →
+          </Button>
         </div>
-      }
-      placement="top"
-    >
-      <span
-        className={highlightClass}
-        onClick={navigate}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            navigate()
-          }
-        }}
-        tabIndex={0}
-        role="link"
-        aria-label={ariaLabel}
-      >
-        {children}
-      </span>
-    </Tooltip>
+      </PopoverContent>
+    </Popover>
   )
 }
 

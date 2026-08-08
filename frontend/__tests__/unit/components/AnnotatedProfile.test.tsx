@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { useProfileSelection } from 'hooks/useProfileSelection'
 import { useRouter } from 'next/navigation'
+import React from 'react'
 
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import AnnotatedProfile from 'components/AnnotatedProfile'
@@ -8,6 +9,36 @@ import AnnotatedProfile from 'components/AnnotatedProfile'
 jest.mock('hooks/useProfileSelection', () => ({
   useProfileSelection: jest.fn(() => null),
 }))
+
+jest.mock(
+  'components/ClaimHighlight',
+  () =>
+    function MockClaimHighlight({
+      children,
+      'data-claim-key': claimKey,
+      'data-claim-name': claimName,
+      'data-claim-status': claimStatus,
+      ...rest
+    }: {
+      children?: React.ReactNode
+      'data-claim-key'?: string
+      'data-claim-name'?: string
+      'data-claim-status'?: string
+    } & Record<string, unknown>) {
+      if (!claimKey) return <span {...rest}>{children}</span>
+      return (
+        <span
+          data-testid="claim-highlight"
+          data-claim-highlight="true"
+          data-claim-key={claimKey}
+          data-claim-name={claimName}
+          data-claim-status={claimStatus}
+        >
+          {children}
+        </span>
+      )
+    }
+)
 
 const mockUseProfileSelection = useProfileSelection as jest.Mock
 
@@ -48,9 +79,11 @@ describe('AnnotatedProfile', () => {
         ]}
       />
     )
-    const link = screen.getByRole('link', { name: /Claim: A Claim, status Approved/i })
-    expect(link).toBeInTheDocument()
-    expect(link.textContent).toBe('This is my claim.')
+    const mark = screen.getByTestId('claim-highlight')
+    expect(mark).toHaveAttribute('data-claim-key', 'claim-key')
+    expect(mark).toHaveAttribute('data-claim-name', 'A Claim')
+    expect(mark).toHaveAttribute('data-claim-status', ClaimStatusEnum.Approved)
+    expect(mark.textContent).toBe('This is my claim.')
   })
 
   it('skips claims whose sourceText contains a blank line', () => {
@@ -69,7 +102,7 @@ describe('AnnotatedProfile', () => {
         ]}
       />
     )
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
   })
 
   it('drops claims whose sourceText is not found', () => {
@@ -88,7 +121,7 @@ describe('AnnotatedProfile', () => {
         ]}
       />
     )
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
   })
 
   it('gives longer sourceText priority when two claims overlap', () => {
@@ -114,9 +147,10 @@ describe('AnnotatedProfile', () => {
         ]}
       />
     )
-    const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(1)
-    expect(links[0]).toHaveTextContent('Overlap area')
+    const marks = screen.getAllByTestId('claim-highlight')
+    expect(marks).toHaveLength(1)
+    expect(marks[0]).toHaveTextContent('Overlap area')
+    expect(marks[0]).toHaveAttribute('data-claim-key', 'long')
   })
 
   it('escapes special characters in claim attributes without breaking the markup', () => {
@@ -135,10 +169,9 @@ describe('AnnotatedProfile', () => {
         ]}
       />
     )
-    const link = screen.getByRole('link')
-    expect(link.textContent).toBe('text is here')
-    expect(link).toHaveAttribute('aria-label', expect.stringContaining('Claim:'))
-    expect(link).toHaveAttribute('aria-label', expect.stringContaining('status Draft'))
+    const mark = screen.getByTestId('claim-highlight')
+    expect(mark.textContent).toBe('text is here')
+    expect(mark).toHaveAttribute('data-claim-status', ClaimStatusEnum.Draft)
   })
 
   it('rewrites relative image URLs against the owasp.org base', () => {

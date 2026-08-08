@@ -1,23 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { useIsMobile } from 'hooks/useIsMobile'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import ClaimHighlight from 'components/ClaimHighlight'
-
-jest.mock('hooks/useIsMobile', () => ({
-  useIsMobile: jest.fn(() => false),
-}))
-
-jest.mock('@heroui/tooltip', () => ({
-  Tooltip: ({ content, children }: { content: React.ReactNode; children: React.ReactNode }) => (
-    <>
-      <div data-testid="tooltip-content">{content}</div>
-      {children}
-    </>
-  ),
-}))
 
 jest.mock('@heroui/react', () => ({
   Popover: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -27,7 +13,21 @@ jest.mock('@heroui/react', () => ({
   ),
 }))
 
-const mockUseIsMobile = useIsMobile as jest.Mock
+jest.mock('@heroui/button', () => ({
+  Button: ({
+    children,
+    onPress,
+    className,
+  }: {
+    children: React.ReactNode
+    onPress?: () => void
+    className?: string
+  }) => (
+    <button type="button" onClick={onPress} className={className}>
+      {children}
+    </button>
+  ),
+}))
 
 const renderHighlight = (extra: Record<string, unknown> = {}) =>
   render(
@@ -46,7 +46,6 @@ const renderHighlight = (extra: Record<string, unknown> = {}) =>
 describe('ClaimHighlight', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseIsMobile.mockReturnValue(false)
   })
 
   it('renders a plain span when no claim key is present', () => {
@@ -59,49 +58,32 @@ describe('ClaimHighlight', () => {
     expect(span).not.toBeNull()
     expect(span?.className).toBe('foo')
     expect(span?.textContent).toBe('plain text')
-    expect(screen.queryByTestId('tooltip-content')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
   })
 
-  it('renders desktop tooltip with claim name and status badge', () => {
+  it('renders a popover with claim name, status badge, and View claim button', () => {
     renderHighlight()
-    const tooltip = screen.getByTestId('tooltip-content')
-    expect(tooltip).toHaveTextContent('My Claim')
-    expect(tooltip).toHaveTextContent('Approved')
-    expect(tooltip).toHaveTextContent('Click to view')
-    expect(screen.getByRole('link', { name: /Claim: My Claim, status Approved/i })).toBeVisible()
+    const popover = screen.getByTestId('popover-content')
+    expect(popover).toHaveTextContent('My Claim')
+    expect(popover).toHaveTextContent('Approved')
+    expect(screen.getByRole('button', { name: /View claim/i })).toBeInTheDocument()
   })
 
-  it('navigates on click when in desktop mode', () => {
+  it('navigates when the View claim button is clicked', () => {
     const push = (useRouter() as unknown as { push: jest.Mock }).push
     renderHighlight()
-    fireEvent.click(screen.getByRole('link'))
+    fireEvent.click(screen.getByRole('button', { name: /View claim/i }))
     expect(push).toHaveBeenCalledWith('/board/2025/candidates/alice/claims/my-claim')
-  })
-
-  it('navigates on Enter key press', () => {
-    const push = (useRouter() as unknown as { push: jest.Mock }).push
-    renderHighlight()
-    fireEvent.keyDown(screen.getByRole('link'), { key: 'Enter' })
-    expect(push).toHaveBeenCalledWith('/board/2025/candidates/alice/claims/my-claim')
-  })
-
-  it('navigates on Space key press', () => {
-    const push = (useRouter() as unknown as { push: jest.Mock }).push
-    renderHighlight()
-    fireEvent.keyDown(screen.getByRole('link'), { key: ' ' })
-    expect(push).toHaveBeenCalledWith('/board/2025/candidates/alice/claims/my-claim')
-  })
-
-  it('ignores unrelated keys', () => {
-    const push = (useRouter() as unknown as { push: jest.Mock }).push
-    renderHighlight()
-    fireEvent.keyDown(screen.getByRole('link'), { key: 'a' })
-    expect(push).not.toHaveBeenCalled()
   })
 
   it('falls back to Draft style when status is unknown', () => {
     renderHighlight({ 'data-claim-status': 'MYSTERY' })
-    expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Draft')
+    expect(screen.getByTestId('popover-content')).toHaveTextContent('Draft')
+  })
+
+  it('exposes the claim in the aria-label on the trigger', () => {
+    renderHighlight()
+    expect(screen.getByLabelText('Claim: My Claim, status Approved')).toBeInTheDocument()
   })
 
   it('falls back to unnamed in aria-label when name is missing', () => {
@@ -116,34 +98,5 @@ describe('ClaimHighlight', () => {
       </ClaimHighlight>
     )
     expect(screen.getByLabelText('Claim: unnamed, status Draft')).toBeInTheDocument()
-  })
-
-  describe('mobile', () => {
-    beforeEach(() => {
-      mockUseIsMobile.mockReturnValue(true)
-    })
-
-    it('renders a popover with a View claim button', () => {
-      renderHighlight()
-      const popover = screen.getByTestId('popover-content')
-      expect(popover).toHaveTextContent('My Claim')
-      expect(popover).toHaveTextContent('Approved')
-      expect(screen.getByRole('button', { name: /View claim/i })).toBeInTheDocument()
-      expect(screen.queryByRole('link')).not.toBeInTheDocument()
-    })
-
-    it('navigates when the View claim button is clicked', () => {
-      const push = (useRouter() as unknown as { push: jest.Mock }).push
-      renderHighlight()
-      fireEvent.click(screen.getByRole('button', { name: /View claim/i }))
-      expect(push).toHaveBeenCalledWith('/board/2025/candidates/alice/claims/my-claim')
-    })
-
-    it('does not navigate on click of the highlight trigger', () => {
-      const push = (useRouter() as unknown as { push: jest.Mock }).push
-      renderHighlight()
-      fireEvent.click(screen.getByRole('button', { name: /Claim: My Claim, status Approved/i }))
-      expect(push).not.toHaveBeenCalled()
-    })
   })
 })

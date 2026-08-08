@@ -38,6 +38,12 @@ export const useProfileSelection = (
         return
       }
 
+      const highlights = container.querySelectorAll('[data-claim-highlight]')
+      if (Array.from(highlights).some((el) => range.intersectsNode(el))) {
+        setSelection(null)
+        return
+      }
+
       setSelection({ text, rect: range.getBoundingClientRect() })
     }
 

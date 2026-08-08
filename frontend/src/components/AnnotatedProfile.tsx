@@ -54,7 +54,7 @@ const resolveMediaSrc = <T,>(src: T, year: string): T | string => {
 const wrapClaims = (markdown: string, claims: ProfileClaim[]): string => {
   const eligible = claims
     .filter((c) => c.sourceText && !c.sourceText.includes('\n\n'))
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const lengthDiff = b.sourceText.length - a.sourceText.length
       if (lengthDiff !== 0) return lengthDiff
       return (STATUS_PRIORITY[b.status] ?? 0) - (STATUS_PRIORITY[a.status] ?? 0)
@@ -69,16 +69,28 @@ const wrapClaims = (markdown: string, claims: ProfileClaim[]): string => {
     ranges.push({ start, end, claim })
   }
 
-  return ranges
-    .sort((a, b) => b.start - a.start)
-    .reduce((acc, { start, end, claim }) => {
-      const open =
-        `<span data-claim-key="${escapeAttribute(claim.key)}"` +
-        ` data-claim-name="${escapeAttribute(claim.name)}"` +
-        ` data-claim-status="${claim.status}">`
-      return `${acc.slice(0, start)}${open}${acc.slice(start, end)}</span>${acc.slice(end)}`
-    }, markdown)
+  const orderedRanges = ranges.toSorted((a, b) => b.start - a.start)
+  return orderedRanges.reduce((acc, { start, end, claim }) => {
+    const open =
+      `<span data-claim-key="${escapeAttribute(claim.key)}"` +
+      ` data-claim-name="${escapeAttribute(claim.name)}"` +
+      ` data-claim-status="${claim.status}">`
+    return `${acc.slice(0, start)}${open}${acc.slice(start, end)}</span>${acc.slice(end)}`
+  }, markdown)
 }
+
+type MediaImgProps = ImgHTMLAttributes<HTMLImageElement> & { year: string }
+
+const MediaImg = ({ year, ...props }: MediaImgProps) => (
+  // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text -- candidate markdown may reference arbitrary hosts and set alt itself
+  <img {...props} src={resolveMediaSrc(props.src, year)} />
+)
+
+type MediaSourceProps = SourceHTMLAttributes<HTMLSourceElement> & { year: string }
+
+const MediaSource = ({ year, ...props }: MediaSourceProps) => (
+  <source {...props} src={resolveMediaSrc(props.src, year)} />
+)
 
 const AnnotatedProfile = ({
   claims,
@@ -96,21 +108,9 @@ const AnnotatedProfile = ({
   const markdownOptions = useMemo(
     () => ({
       overrides: {
-        span: {
-          component: ClaimHighlight,
-          props: { year, login },
-        },
-        img: {
-          component: (props: ImgHTMLAttributes<HTMLImageElement>) => (
-            // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text -- candidate markdown may reference arbitrary hosts and set alt itself
-            <img {...props} src={resolveMediaSrc(props.src, year)} />
-          ),
-        },
-        source: {
-          component: (props: SourceHTMLAttributes<HTMLSourceElement>) => (
-            <source {...props} src={resolveMediaSrc(props.src, year)} />
-          ),
-        },
+        span: { component: ClaimHighlight, props: { year, login } },
+        img: { component: MediaImg, props: { year } },
+        source: { component: MediaSource, props: { year } },
       },
     }),
     [year, login]
