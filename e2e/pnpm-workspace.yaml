@@ -1,4 +1,4 @@
-auditConfig: {ignoreGhsas: []}
+auditConfig: {}
 
 ignoreScripts: true
 

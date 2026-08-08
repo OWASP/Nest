@@ -8,7 +8,7 @@
     "node": "^24.0.0"
   },
   "name": "e2e",
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.17.0",
   "private": true,
   "scripts": {
     "test:e2e": "playwright test",

@@ -15,7 +15,6 @@ Use a singular group name that matches the owning file:
 
 - `backend-clean-dependencies`
 - `backend-data-load`
-- `backend-dependency-compile-requirements`
 - `backend-django-migrate`
 - `backend-exec-shell`
 - `backend-image-build`
