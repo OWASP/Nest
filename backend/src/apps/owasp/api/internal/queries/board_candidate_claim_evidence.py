@@ -44,7 +44,7 @@ def get_claim_evidence(
         and user.github_user == evidence.claim.candidate.member
     )
     is_reviewer = (
-        user.is_authenticated and evidence.claim.board.reviewers.filter(id=user.id).exists()
+        user.is_authenticated and evidence.claim.board.claim_reviewers.filter(id=user.id).exists()
     )
 
     return (
@@ -92,7 +92,9 @@ class BoardCandidateClaimEvidenceQuery:
             and claim.candidate.member is not None
             and user.github_user == claim.candidate.member
         )
-        is_reviewer = user.is_authenticated and claim.board.reviewers.filter(id=user.id).exists()
+        is_reviewer = (
+            user.is_authenticated and claim.board.claim_reviewers.filter(id=user.id).exists()
+        )
 
         return (
             claim.evidences.filter(is_removed=False)

@@ -58,11 +58,7 @@ def _validate_review_eligibility(
             message=INVALID_STATUS_MSG,
         )
 
-    if (
-        claim.board
-        and reviewer.github_user
-        and claim.board.get_candidate(login=reviewer.github_user.login)
-    ):
+    if reviewer.github_user and claim.board.get_candidate(login=reviewer.github_user.login):
         return ReviewResult(
             ok=False,
             code="FORBIDDEN",
@@ -91,7 +87,7 @@ class BoardCandidateClaimReviewMutations:
         user = info.context.request.user
 
         is_reviewer = BoardOfDirectors.objects.filter(
-            year=input_data.year, reviewers=user
+            year=input_data.year, claim_reviewers=user
         ).exists()
         if not user.github_user or not is_reviewer:
             return ReviewResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)

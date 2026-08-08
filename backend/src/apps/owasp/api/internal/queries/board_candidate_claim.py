@@ -32,7 +32,7 @@ class BoardCandidateClaimQuery:
         user = info.context.request.user
         is_reviewer = (
             user.is_authenticated
-            and BoardOfDirectors.objects.filter(year=year, reviewers=user).exists()
+            and BoardOfDirectors.objects.filter(year=year, claim_reviewers=user).exists()
         )
         claims = BoardCandidateClaim.objects.filter(
             board__year=year,
@@ -126,7 +126,9 @@ class BoardCandidateClaimQuery:
             and user.github_user is not None
             and user.github_user == claim.candidate.member
         )
-        is_reviewer = user.is_authenticated and claim.board.reviewers.filter(id=user.id).exists()
+        is_reviewer = (
+            user.is_authenticated and claim.board.claim_reviewers.filter(id=user.id).exists()
+        )
 
         return (
             claim
