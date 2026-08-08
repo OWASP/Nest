@@ -55,9 +55,7 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
     }
     WITHDRAWAL_ALLOWED_FIELDS = frozenset({"status", "withdrawn_reason", "withdrawn_at"})
 
-    board = models.ForeignKey(
-        BoardOfDirectors, blank=True, null=True, on_delete=models.SET_NULL, related_name="claims"
-    )
+    board = models.ForeignKey(BoardOfDirectors, on_delete=models.CASCADE, related_name="claims")
     candidate = models.ForeignKey(EntityMember, on_delete=models.CASCADE, related_name="claims")
     description = models.TextField(default="", verbose_name="Description")
     is_locked = models.BooleanField(
@@ -139,7 +137,7 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
         self.full_clean()
 
-        if not self.pk and self.candidate_id and self.board_id:
+        if not self.pk:
             max_order = (
                 BoardCandidateClaim.objects.filter(
                     candidate_id=self.candidate_id,

@@ -58,11 +58,7 @@ def _validate_review_eligibility(
             message=INVALID_STATUS_MSG,
         )
 
-    if (
-        claim.board
-        and reviewer.github_user
-        and claim.board.get_candidate(login=reviewer.github_user.login)
-    ):
+    if reviewer.github_user and claim.board.get_candidate(login=reviewer.github_user.login):
         return ReviewResult(
             ok=False,
             code="FORBIDDEN",

@@ -60,11 +60,7 @@ class BoardCandidateClaimNode(strawberry.relay.Node):
         if is_self or root.status == BoardCandidateClaim.Status.APPROVED:
             return root.reviews.all()
 
-        is_reviewer = (
-            user.is_authenticated
-            and root.board is not None
-            and root.board.reviewers.filter(id=user.id).exists()
-        )
+        is_reviewer = user.is_authenticated and root.board.reviewers.filter(id=user.id).exists()
         if is_reviewer:
             return root.reviews.filter(reviewer=user)
         return []

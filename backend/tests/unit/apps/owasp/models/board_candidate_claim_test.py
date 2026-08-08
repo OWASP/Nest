@@ -79,12 +79,12 @@ class TestBoardCandidateClaimModel:
 
         assert field.default == 0
 
-    def test_board_field_nullable(self):
-        """Test board field is nullable."""
+    def test_board_field_required(self):
+        """Test board field is required."""
         field = BoardCandidateClaim._meta.get_field("board")
 
-        assert field.null
-        assert field.blank
+        assert not field.null
+        assert not field.blank
 
     def test_withdrawn_at_field_nullable(self):
         """Test withdrawn_at field is nullable."""
@@ -325,6 +325,7 @@ class TestBoardCandidateClaimModel:
     def test_save_calls_full_clean(self, mock_super_save, mock_full_clean):
         """Test that save calls full_clean before saving."""
         claim = BoardCandidateClaim(name="Test Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim.pk = 1
 
         claim.save()
 
@@ -346,6 +347,7 @@ class TestBoardCandidateClaimModel:
         """Test that save sets is_locked=True for finalized statuses."""
         claim = BoardCandidateClaim(name="Test Claim", status=status)
         claim.is_locked = False
+        claim.pk = 1
 
         claim.save()
 
@@ -366,6 +368,7 @@ class TestBoardCandidateClaimModel:
         """Test that save does not set is_locked=True for non-finalized statuses."""
         claim = BoardCandidateClaim(name="Test Claim", status=status)
         claim.is_locked = False
+        claim.pk = 1
 
         claim.save()
 
