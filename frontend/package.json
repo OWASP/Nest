@@ -35,6 +35,7 @@
     "lodash": "4.18.1",
     "markdown-it": "14.3.0",
     "markdown-it-task-lists": "2.1.1",
+    "markdown-to-jsx": "9.8.2",
     "millify": "6.1.0",
     "next": "16.2.11",
     "next-auth": "4.24.15",

@@ -1,13 +1,12 @@
 'use client'
 import { useQuery, useApolloClient } from '@apollo/client/react'
-import { Button } from '@heroui/button'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaCode, FaExclamationCircle } from 'react-icons/fa'
 import { FaLinkedin, FaCodeBranch, FaCodeMerge, FaPenToSquare } from 'react-icons/fa6'
@@ -94,6 +93,7 @@ interface CandidateCardProps {
 
 const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) => {
   const client = useApolloClient()
+  const router = useRouter()
   const [snapshot, setSnapshot] = useState<MemberSnapshot | null>(null)
   const [ledChapters, setLedChapters] = useState<Chapter[]>([])
   const [ledProjects, setLedProjects] = useState<Project[]>([])
@@ -281,19 +281,30 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
   }, [client, snapshot?.projectContributions])
 
   const handleCardClick = () => {
-    // Convert name to slug format.
-    const nameSlug = candidate.memberName.toLowerCase().replaceAll(/\s+/g, '_')
-    const candidateUrl = `https://owasp.org/www-board-candidates/${year}/${nameSlug}.html`
-    window.open(candidateUrl, '_blank', 'noopener,noreferrer')
+    if (candidate.member?.login) {
+      router.push(`/board/${year}/candidates/${candidate.member.login}`)
+    } else {
+      // Convert name to slug format.
+      const nameSlug = candidate.memberName.toLowerCase().replaceAll(/\s+/g, '_')
+      const candidateUrl = `https://owasp.org/www-board-candidates/${year}/${nameSlug}.html`
+      window.open(candidateUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   // Check if candidate leads any flagship level projects
   const leadsFlagshipProject = ledProjects.some((project) => project.level === 'flagship')
 
   return (
-    <Button
-      onPress={handleCardClick}
-      className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+    <button
+      type="button"
+      onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleCardClick()
+        }
+      }}
+      className="group flex h-full w-full cursor-pointer flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full items-start gap-4">
         {candidate.member?.avatarUrl && (
@@ -668,7 +679,7 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
           )}
         </div>
       )}
-    </Button>
+    </button>
   )
 }
 

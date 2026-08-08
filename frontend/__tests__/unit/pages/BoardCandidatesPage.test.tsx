@@ -1,5 +1,5 @@
 import { useQuery, useApolloClient } from '@apollo/client/react'
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import BoardCandidatesPage from 'app/board/[year]/candidates/page'
 import {
@@ -13,8 +13,11 @@ jest.mock('@apollo/client/react', () => ({
   useApolloClient: jest.fn(),
 }))
 
+const mockPush = jest.fn()
+
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(() => ({ year: '2025' })),
+  useRouter: jest.fn(() => ({ push: mockPush })),
 }))
 
 jest.mock('app/global-error', () => ({
@@ -241,5 +244,26 @@ describe('BoardCandidatesPage', () => {
     await waitFor(() => {
       expect(handleAppError).toHaveBeenCalledWith(graphQLError)
     })
+  })
+
+  test('navigates to the candidate profile when the card is clicked', async () => {
+    render(<BoardCandidatesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Alice Smith')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Alice Smith/ }))
+
+    expect(mockPush).toHaveBeenCalledWith('/board/2025/candidates/alice')
+  })
+
+  test('does not navigate to the candidate profile when an inner link is clicked', async () => {
+    render(<BoardCandidatesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Alice Smith')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByText(/@alice/))
+    expect(mockPush).not.toHaveBeenCalled()
   })
 })

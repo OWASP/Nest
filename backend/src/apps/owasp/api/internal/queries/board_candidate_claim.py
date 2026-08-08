@@ -47,12 +47,18 @@ class BoardCandidateClaimQuery:
             claims = claims.filter(candidate__member__login=login)
 
             if not is_self and not is_reviewer:
-                claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
+                claims = claims.filter(
+                    status__in=[
+                        BoardCandidateClaim.Status.APPROVED,
+                        BoardCandidateClaim.Status.REJECTED,
+                    ]
+                )
             elif is_reviewer and not is_self:
                 claims = claims.filter(
                     status__in=[
                         BoardCandidateClaim.Status.SUBMITTED,
                         BoardCandidateClaim.Status.APPROVED,
+                        BoardCandidateClaim.Status.REJECTED,
                     ]
                 )
         elif is_reviewer:
@@ -62,16 +68,27 @@ class BoardCandidateClaimQuery:
                     status__in=[
                         BoardCandidateClaim.Status.SUBMITTED,
                         BoardCandidateClaim.Status.APPROVED,
+                        BoardCandidateClaim.Status.REJECTED,
                     ]
                 )
             )
         elif user.is_authenticated and user.github_user:
             claims = claims.filter(
                 Q(candidate__member=user.github_user)
-                | Q(status=BoardCandidateClaim.Status.APPROVED)
+                | Q(
+                    status__in=[
+                        BoardCandidateClaim.Status.APPROVED,
+                        BoardCandidateClaim.Status.REJECTED,
+                    ]
+                )
             )
         else:
-            claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
+            claims = claims.filter(
+                status__in=[
+                    BoardCandidateClaim.Status.APPROVED,
+                    BoardCandidateClaim.Status.REJECTED,
+                ]
+            )
 
         return (
             claims.annotate(
@@ -133,7 +150,11 @@ class BoardCandidateClaimQuery:
             if (
                 is_self
                 or (is_reviewer and claim.status == BoardCandidateClaim.Status.SUBMITTED)
-                or claim.status == BoardCandidateClaim.Status.APPROVED
+                or claim.status
+                in {
+                    BoardCandidateClaim.Status.APPROVED,
+                    BoardCandidateClaim.Status.REJECTED,
+                }
             )
             else None
         )
