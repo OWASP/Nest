@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from scripts.commands import CommandRunner
 from scripts.errors import CommandNotFoundError
 

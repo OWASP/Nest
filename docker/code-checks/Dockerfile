@@ -1,6 +1,6 @@
 # Keep hashicorp/terraform digest in sync with docker/infrastructure/Dockerfile.tests.
 FROM hashicorp/terraform:1.15.8@sha256:7ae513256f7ce67879e218ae8593d6fbe216ec9e123abe6c94e4e10704857963 AS terraform
-FROM ghcr.io/astral-sh/uv:0.11.26@sha256:3d868e555f8f1dbc324afa005066cd11e1053fc4743b9808ca8025283e65efa5 AS uv
+FROM ghcr.io/astral-sh/uv:0.11.29@sha256:eb2843a1e56fd9e30c7276ce1a52cba86e64c7b385f5e3279a0e08e02dd058fc AS uv
 FROM ghcr.io/terraform-linters/tflint:v0.63.1@sha256:890e37827d7b5e400f26137c5189c7efa581365fe9299b5b9814e5148d5978b9 AS tflint
 FROM node:24.18-alpine3.23@sha256:595398b0081eacda8e1c4c5b97b76cd1020e4d58a8ebcb4843b9bca1e79e7436 AS node
 
@@ -70,8 +70,8 @@ RUN apk --no-cache upgrade && \
 COPY --from=uv /uv /usr/local/bin/uv
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv python install 3.13 && \
-    uv venv /opt/pre-commit --python 3.13 && \
-    uv venv /opt/dependency-audit --python 3.13 --seed
+    uv venv /opt/dependency-audit --python 3.13 --seed && \
+    uv venv /opt/pre-commit --python 3.13
 
 COPY package.json /tmp/package.json
 WORKDIR /tmp
@@ -85,8 +85,8 @@ COPY --from=node-deps /opt/code-checks/e2e/node_modules /nest/e2e/node_modules
 COPY --from=terraform --chmod=555 /bin/terraform /usr/local/bin/terraform
 COPY --from=tflint --chmod=555 /usr/local/bin/tflint /usr/local/bin/tflint
 
-COPY --chmod=444 backend/requirements/pre-commit.txt /tmp/pre-commit.txt
 COPY --chmod=444 backend/requirements/build.txt /tmp/build.txt
+COPY --chmod=444 tools/requirements/pre-commit.txt /tmp/pre-commit.txt
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=cache,target=/root/.cache/pip \
     uv pip install --python /opt/pre-commit --require-hashes --requirement /tmp/pre-commit.txt && \
