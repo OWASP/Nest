@@ -30,12 +30,10 @@ class BoardCandidateProfileQuery:
 
         """
         try:
-            board = BoardOfDirectors.objects.get(year=year)
-            content_type = ContentType.objects.get_for_model(BoardOfDirectors)
             return BoardCandidateProfile.objects.select_related("candidate__member").get(
                 candidate__member__login=login,
-                candidate__entity_type=content_type,
-                candidate__entity_id=board.id,
+                candidate__entity_type=ContentType.objects.get_for_model(BoardOfDirectors),
+                candidate__entity_id=BoardOfDirectors.objects.get(year=year).id,
                 candidate__role=EntityMember.Role.CANDIDATE,
                 candidate__is_active=True,
                 candidate__is_reviewed=True,

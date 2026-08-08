@@ -14,6 +14,7 @@ from apps.common.open_ai import OpenAi
 from apps.common.utils import slugify
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
@@ -157,6 +158,11 @@ class Command(BaseCommand):
             )
             return []
 
+        try:
+            profile_markdown = candidate.board_profile.raw_markdown or ""
+        except BoardCandidateProfile.DoesNotExist:
+            profile_markdown = ""
+
         claims = []
         for claim_data in claims_data:
             if not isinstance(claim_data, dict):
@@ -167,6 +173,9 @@ class Command(BaseCommand):
             ]
             description = str(claim_data.get("description") or "").strip()
             source_text = str(claim_data.get("source_text") or "").strip()
+
+            if source_text and source_text not in profile_markdown:
+                source_text = ""
 
             if name:
                 claims.append(

@@ -149,10 +149,9 @@ class Command(BaseCommand):
             }
 
             member = EntityMember.update_data(data, save=True)
-            raw_markdown = self.parse_candidate_profile(file_content)
             BoardCandidateProfile.objects.update_or_create(
                 candidate=member,
-                defaults={"raw_markdown": raw_markdown},
+                defaults={"raw_markdown": self.parse_candidate_profile(file_content)},
             )
 
             synced_count += 1
