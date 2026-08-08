@@ -1,9 +1,10 @@
 import { Button } from '@heroui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@heroui/react'
 import { useRouter } from 'next/navigation'
-import { type HTMLAttributes, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
+import { type ProfileClaim } from 'components/AnnotatedProfile'
 
 type StatusStyle = {
   label: string
@@ -44,33 +45,29 @@ const STATUS_STYLES: Record<string, StatusStyle> = {
   },
 }
 
-type ClaimHighlightProps = HTMLAttributes<HTMLElement> & {
+type ClaimHighlightProps = {
   children?: ReactNode
   year: string
   login: string
-  'data-claim-key'?: string
-  'data-claim-name'?: string
-  'data-claim-status'?: string
+  claimsById: Map<string, ProfileClaim>
+  'data-id'?: string
 }
 
 const ClaimHighlight = ({
   children,
   year,
   login,
-  'data-claim-key': claimKey,
-  'data-claim-name': claimName,
-  'data-claim-status': claimStatus,
-  ...rest
+  claimsById,
+  'data-id': claimId,
 }: ClaimHighlightProps) => {
   const router = useRouter()
 
-  if (!claimKey) {
-    return <span {...rest}>{children}</span>
-  }
+  const claim = claimId ? claimsById.get(claimId) : undefined
+  if (!claim) return <>{children}</>
 
-  const style = STATUS_STYLES[claimStatus ?? ''] ?? STATUS_STYLES[ClaimStatusEnum.Draft]
-  const href = `/board/${year}/candidates/${login}/claims/${claimKey}`
-  const ariaLabel = `Claim: ${claimName ?? 'unnamed'}, status ${style.label}`
+  const style = STATUS_STYLES[claim.status] ?? STATUS_STYLES[ClaimStatusEnum.Draft]
+  const href = `/board/${year}/candidates/${login}/claims/${claim.key}`
+  const ariaLabel = `Claim: ${claim.name || 'unnamed'}, status ${style.label}`
   const highlightClass = `cursor-pointer rounded px-0.5 transition-colors hover:brightness-95 ${style.mark}`
 
   return (
@@ -82,7 +79,7 @@ const ClaimHighlight = ({
       </PopoverTrigger>
       <PopoverContent>
         <div className="flex w-full max-w-xs min-w-48 flex-col items-start gap-2 px-2 py-2">
-          <span className="text-sm font-semibold text-gray-900 dark:text-white">{claimName}</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">{claim.name}</span>
           <span
             className={`inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${style.badge}`}
           >

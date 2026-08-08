@@ -10,29 +10,29 @@ jest.mock('hooks/useProfileSelection', () => ({
   useProfileSelection: jest.fn(() => null),
 }))
 
+type MockClaim = { key: string; name: string; status: string }
+
 jest.mock(
   'components/ClaimHighlight',
   () =>
     function MockClaimHighlight({
       children,
-      'data-claim-key': claimKey,
-      'data-claim-name': claimName,
-      'data-claim-status': claimStatus,
-      ...rest
+      claimsById,
+      'data-id': claimId,
     }: {
       children?: React.ReactNode
-      'data-claim-key'?: string
-      'data-claim-name'?: string
-      'data-claim-status'?: string
-    } & Record<string, unknown>) {
-      if (!claimKey) return <span {...rest}>{children}</span>
+      claimsById: Map<string, MockClaim>
+      'data-id'?: string
+    }) {
+      const claim = claimId ? claimsById.get(claimId) : undefined
+      if (!claim) return <>{children}</>
       return (
         <span
           data-testid="claim-highlight"
           data-claim-highlight="true"
-          data-claim-key={claimKey}
-          data-claim-name={claimName}
-          data-claim-status={claimStatus}
+          data-claim-key={claim.key}
+          data-claim-name={claim.name}
+          data-claim-status={claim.status}
         >
           {children}
         </span>
@@ -173,27 +173,6 @@ describe('AnnotatedProfile', () => {
     expect(marks).toHaveLength(2)
     expect(marks[0]).toHaveAttribute('data-claim-key', 'nest')
     expect(marks[1]).toHaveAttribute('data-claim-key', 'nest')
-  })
-
-  it('escapes special characters in claim attributes without breaking the markup', () => {
-    render(
-      <AnnotatedProfile
-        {...baseProps}
-        rawMarkdown="the text is here."
-        claims={[
-          {
-            id: '1',
-            key: 'a"b<c>',
-            name: 'name & "quote"',
-            sourceText: 'text is here',
-            status: ClaimStatusEnum.Draft,
-          },
-        ]}
-      />
-    )
-    const mark = screen.getByTestId('claim-highlight')
-    expect(mark.textContent).toBe('text is here')
-    expect(mark).toHaveAttribute('data-claim-status', ClaimStatusEnum.Draft)
   })
 
   it('rewrites relative image URLs against the owasp.org base', () => {

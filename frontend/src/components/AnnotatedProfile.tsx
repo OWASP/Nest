@@ -9,7 +9,7 @@ import { FaPlus } from 'react-icons/fa6'
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import ClaimHighlight from 'components/ClaimHighlight'
 
-type ProfileClaim = {
+export type ProfileClaim = {
   id: string
   key: string
   name: string
@@ -34,13 +34,6 @@ const STATUS_PRIORITY: Record<ClaimStatusEnum, number> = {
   [ClaimStatusEnum.Discarded]: 0,
 }
 
-const escapeAttribute = (value: string): string =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-
 const resolveMediaSrc = <T,>(src: T, year: string): T | string => {
   if (typeof src !== 'string' || !src) return src
   try {
@@ -50,7 +43,9 @@ const resolveMediaSrc = <T,>(src: T, year: string): T | string => {
   }
 }
 
-const wrapClaims = (markdown: string, claims: ProfileClaim[]): string => {
+type WrapResult = { wrapped: string; claimsById: Map<string, ProfileClaim> }
+
+const wrapClaims = (markdown: string, claims: ProfileClaim[]): WrapResult => {
   const eligible = claims
     .filter((c) => c.sourceText && !c.sourceText.includes('\n\n'))
     .toSorted((a, b) => {
@@ -73,14 +68,14 @@ const wrapClaims = (markdown: string, claims: ProfileClaim[]): string => {
     }
   }
 
+  const claimsById = new Map<string, ProfileClaim>()
   const orderedRanges = ranges.toSorted((a, b) => b.start - a.start)
-  return orderedRanges.reduce((acc, { start, end, claim }) => {
-    const open =
-      `<span data-claim-key="${escapeAttribute(claim.key)}"` +
-      ` data-claim-name="${escapeAttribute(claim.name)}"` +
-      ` data-claim-status="${claim.status}">`
-    return `${acc.slice(0, start)}${open}${acc.slice(start, end)}</span>${acc.slice(end)}`
+  const wrapped = orderedRanges.reduce((acc, { start, end, claim }) => {
+    claimsById.set(claim.id, claim)
+    const open = `<claim-highlight data-id="${claim.id}">`
+    return `${acc.slice(0, start)}${open}${acc.slice(start, end)}</claim-highlight>${acc.slice(end)}`
   }, markdown)
+  return { wrapped, claimsById }
 }
 
 type MediaImgProps = ImgHTMLAttributes<HTMLImageElement> & { year: string }
@@ -107,18 +102,24 @@ const AnnotatedProfile = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const selection = useProfileSelection(containerRef, isCandidate)
 
-  const wrapped = useMemo(() => wrapClaims(rawMarkdown, claims), [rawMarkdown, claims])
+  const { wrapped, claimsById } = useMemo(
+    () => wrapClaims(rawMarkdown, claims),
+    [rawMarkdown, claims]
+  )
   const canCreateClaim = isCandidate && selection !== null && rawMarkdown.includes(selection.text)
 
   const markdownOptions = useMemo(
     () => ({
       overrides: {
-        span: { component: ClaimHighlight, props: { year, login } },
+        'claim-highlight': {
+          component: ClaimHighlight,
+          props: { year, login, claimsById },
+        },
         img: { component: MediaImg, props: { year } },
         source: { component: MediaSource, props: { year } },
       },
     }),
-    [year, login]
+    [year, login, claimsById]
   )
 
   const handleCreateFromSelection = () => {

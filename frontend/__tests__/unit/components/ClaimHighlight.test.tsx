@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 
 import { ClaimStatusEnum } from 'types/__generated__/graphql'
+import { type ProfileClaim } from 'components/AnnotatedProfile'
 import ClaimHighlight from 'components/ClaimHighlight'
 
 jest.mock('@heroui/react', () => ({
@@ -29,35 +30,46 @@ jest.mock('@heroui/button', () => ({
   ),
 }))
 
-const renderHighlight = (extra: Record<string, unknown> = {}) =>
-  render(
-    <ClaimHighlight
-      year="2025"
-      login="alice"
-      data-claim-key="my-claim"
-      data-claim-name="My Claim"
-      data-claim-status={ClaimStatusEnum.Approved}
-      {...extra}
-    >
+const defaultClaim: ProfileClaim = {
+  id: 'claim-1',
+  key: 'my-claim',
+  name: 'My Claim',
+  sourceText: 'claimed text',
+  status: ClaimStatusEnum.Approved,
+}
+
+const renderHighlight = (overrides: Partial<ProfileClaim> = {}) => {
+  const claim = { ...defaultClaim, ...overrides }
+  const claimsById = new Map([[claim.id, claim]])
+  return render(
+    <ClaimHighlight year="2025" login="alice" claimsById={claimsById} data-id={claim.id}>
       claimed text
     </ClaimHighlight>
   )
+}
 
 describe('ClaimHighlight', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('renders a plain span when no claim key is present', () => {
+  it('renders children only when the claim id is not in the map', () => {
     const { container } = render(
-      <ClaimHighlight year="2025" login="alice" className="foo">
+      <ClaimHighlight year="2025" login="alice" claimsById={new Map()} data-id="missing">
         plain text
       </ClaimHighlight>
     )
-    const span = container.querySelector('span')
-    expect(span).not.toBeNull()
-    expect(span?.className).toBe('foo')
-    expect(span?.textContent).toBe('plain text')
+    expect(container.textContent).toBe('plain text')
+    expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
+  })
+
+  it('renders children only when no data-id is provided', () => {
+    const { container } = render(
+      <ClaimHighlight year="2025" login="alice" claimsById={new Map()}>
+        plain text
+      </ClaimHighlight>
+    )
+    expect(container.textContent).toBe('plain text')
     expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
   })
 
@@ -77,7 +89,7 @@ describe('ClaimHighlight', () => {
   })
 
   it('falls back to Draft style when status is unknown', () => {
-    renderHighlight({ 'data-claim-status': 'MYSTERY' })
+    renderHighlight({ status: 'MYSTERY' as ClaimStatusEnum })
     expect(screen.getByTestId('popover-content')).toHaveTextContent('Draft')
   })
 
@@ -86,17 +98,8 @@ describe('ClaimHighlight', () => {
     expect(screen.getByLabelText('Claim: My Claim, status Approved')).toBeInTheDocument()
   })
 
-  it('falls back to unnamed in aria-label when name is missing', () => {
-    render(
-      <ClaimHighlight
-        year="2025"
-        login="alice"
-        data-claim-key="my-claim"
-        data-claim-status={ClaimStatusEnum.Draft}
-      >
-        text
-      </ClaimHighlight>
-    )
+  it('falls back to unnamed in aria-label when name is empty', () => {
+    renderHighlight({ name: '', status: ClaimStatusEnum.Draft })
     expect(screen.getByLabelText('Claim: unnamed, status Draft')).toBeInTheDocument()
   })
 })

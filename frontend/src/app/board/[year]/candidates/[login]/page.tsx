@@ -57,7 +57,6 @@ const CandidateProfilePage = () => {
 
   const claims = data?.boardCandidateClaims ?? []
   const isCandidate = data?.boardOfDirectors?.candidate != null && session?.user?.login === login
-  const isReviewer = data?.boardOfDirectors?.reviewer != null
   const profile = data?.boardCandidateProfile
 
   if (!profile) {
@@ -81,7 +80,6 @@ const CandidateProfilePage = () => {
       <AnnotatedProfile
         claims={claims}
         isCandidate={isCandidate}
-        isReviewer={isReviewer}
         login={login}
         rawMarkdown={profile.rawMarkdown}
         year={year}
