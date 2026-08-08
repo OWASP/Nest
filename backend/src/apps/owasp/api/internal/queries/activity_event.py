@@ -43,10 +43,16 @@ class ActivityEventQuery:
 
         order_clauses = ("occurred_at", "pk") if order == "asc" else ("-occurred_at", "-pk")
 
-        queryset = ActivityEvent.objects.select_related(
-            "github_user",
-            "github_repository",
-        ).order_by(*order_clauses)
+        queryset = (
+            ActivityEvent.objects.select_related(
+                "github_user",
+                "github_repository",
+            )
+            .prefetch_related(
+                "source_object",
+            )
+            .order_by(*order_clauses)
+        )
 
         if not include_bots:
             queryset = ActivityEvent.exclude_bots(queryset)
@@ -95,9 +101,15 @@ class ActivityEventQuery:
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        queryset = ActivityEvent.objects.select_related(
-            "github_user",
-            "github_repository",
-        ).order_by("-occurred_at", "-pk")
+        queryset = (
+            ActivityEvent.objects.select_related(
+                "github_user",
+                "github_repository",
+            )
+            .prefetch_related(
+                "source_object",
+            )
+            .order_by("-occurred_at", "-pk")
+        )
 
         return list(ActivityEvent.exclude_bots(queryset)[:normalized_limit])
