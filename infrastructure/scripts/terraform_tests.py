@@ -7,10 +7,13 @@ import os
 import sys
 from enum import StrEnum
 from pathlib import Path
-from subprocess import CompletedProcess
+from typing import TYPE_CHECKING
 
 from scripts.commands import CommandRunner
 from scripts.errors import TestRunnerError
+
+if TYPE_CHECKING:
+    from subprocess import CompletedProcess
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +85,7 @@ class TerraformTests:
 
         Args:
             commands (CommandRunner, optional): Command runner instance.
-            search_paths (tuple[str, ...], optional): A tuple of directory paths to search for tests.
+            search_paths (tuple[str, ...], optional): Directory paths to search for tests.
 
         """
         self.commands = commands or CommandRunner()

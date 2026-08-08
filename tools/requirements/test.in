@@ -1,0 +1,2 @@
+-r ../../.github/requirements/scripts.in
+pytest==9.1.1

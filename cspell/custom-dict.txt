@@ -75,6 +75,7 @@ Truncator
 Turbopack
 Twitterbot
 VCALENDAR
+VCS
 VEVENT
 WSL
 Wandji
@@ -121,6 +122,7 @@ dismissable
 dkr
 dsn
 dvo
+eddsa
 elevenlabs
 env
 envsubst
@@ -128,6 +130,7 @@ ephemerals
 euo
 facebookexternalhit
 fdp
+fpr
 gamesec
 geocoders
 geoloc
