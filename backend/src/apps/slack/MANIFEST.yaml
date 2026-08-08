@@ -121,6 +121,7 @@ oauth_config:
       - im:write
       - mpim:read
       - mpim:write
+      - reactions:read
       - reactions:write
       - users:read
 settings:
@@ -134,6 +135,7 @@ settings:
       - app_mention
       - member_joined_channel
       - message.channels
+      - reaction_added
       - team_join
   interactivity:
     is_enabled: true
