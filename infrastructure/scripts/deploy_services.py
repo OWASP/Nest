@@ -8,7 +8,7 @@ import os
 import ssl
 import time
 from http import HTTPStatus
-from http.client import HTTPConnection, HTTPException, HTTPSConnection
+from http.client import HTTPException, HTTPSConnection
 from pathlib import Path
 
 from botocore.exceptions import ClientError
@@ -28,9 +28,9 @@ SERVICE_WAIT_ATTEMPTS = 30
 SERVICE_WAIT_INTERVAL = 5
 HEALTH_MAX_ATTEMPTS = 36
 HEALTH_POLL_INTERVAL = 10
-SMOKE_TIMEOUT = 5
-SMOKE_MAX_ATTEMPTS = 10
-SMOKE_POLL_INTERVAL = 10
+REACHABILITY_TIMEOUT = 5
+REACHABILITY_MAX_ATTEMPTS = 10
+REACHABILITY_POLL_INTERVAL = 10
 
 
 class DeployServices:
@@ -111,7 +111,7 @@ class DeployServices:
 
         self._check_health(outputs["backend_target_group_arn"], "Backend")
         self._check_health(outputs["frontend_target_group_arn"], "Frontend")
-        self._smoke_check(outputs["alb_dns_name"])
+        self._verify_app_reachable(outputs["alb_dns_name"])
         self._log_summary(outputs["alb_dns_name"], backend_service, frontend_service)
 
     def _terraform_outputs(self) -> dict:
@@ -177,13 +177,18 @@ class DeployServices:
         )
 
     def _set_url_parameters(self, alb_dns: str) -> None:
-        """Overwrite ALB-backed SSM URL parameters with the published host ports.
+        """Overwrite the externally reachable SSM URL parameters with the published host ports.
 
-        Terraform provisions URL parameters with bare hostnames, which only work
-        because browsers and Django default to ports 80/443. When LocalStack is
-        started with custom host ports (to avoid conflicts), those URLs point at
-        ports where nothing listens, so they must be rewritten to include the
-        selected ports. Default port usage leaves the provisioned values intact.
+        Terraform provisions URL parameters that are only valid on the host when
+        browsers and Django default to ports 80/443. When LocalStack is started
+        with custom host ports (to avoid conflicts), those URLs point at ports
+        where nothing listens on the host, so the externally reachable parameters
+        must be rewritten to include the selected HTTPS port. The server-side
+        internal URLs (NEXT_SERVER_CSRF_URL and NEXT_SERVER_GRAPHQL_URL) are
+        deliberately left as provisioned: they are consumed inside the ECS
+        containers, where traffic to the ALB stays on the container network and
+        never passes through the published host ports. Default port usage leaves
+        the provisioned values intact.
 
         Args:
             alb_dns (str): The ALB DNS name.
@@ -192,23 +197,13 @@ class DeployServices:
         if not self.custom_ports:
             return
 
-        http_port = self.localstack.http_port
         https_port = self.localstack.https_port
         domain = os.environ.get("DOMAIN_NAME", "localhost")
         logger.info(
-            "  Setting application URLs to use LocalStack host ports %s (http) and %s (https)...",
-            http_port,
+            "  Setting application URLs to use LocalStack host port %s (https)...",
             https_port,
         )
-        self._put_ssm(f"{self.prefix}/NEXTAUTH_URL", f"http://{alb_dns}:{http_port}/")
-        self._put_ssm(
-            f"{self.prefix}/NEXT_SERVER_CSRF_URL",
-            f"http://{alb_dns}:{http_port}/csrf/",
-        )
-        self._put_ssm(
-            f"{self.prefix}/NEXT_SERVER_GRAPHQL_URL",
-            f"http://{alb_dns}:{http_port}/graphql/",
-        )
+        self._put_ssm(f"{self.prefix}/NEXTAUTH_URL", f"https://{alb_dns}:{https_port}/")
         self._put_ssm(
             f"{self.prefix}/DJANGO_ALLOWED_ORIGINS",
             f"https://{domain}:{https_port},https://{alb_dns}:{https_port}",
@@ -227,13 +222,14 @@ class DeployServices:
         """
         return f"https://{alb_dns}:{self.localstack.https_port}{path}"
 
-    def _smoke_check(self, alb_dns: str) -> None:
-        """Verify the application is reachable through the published host ports.
+    def _verify_app_reachable(self, alb_dns: str) -> None:
+        """Verify the application is reachable through the published host port.
 
         Target-group health checks confirm the ECS services are up but never
         exercise the host port mapping. When LocalStack runs on custom ports, a
-        request through the published ports is the only way to prove the emitted
-        URLs are actually reachable. Skipped entirely when default ports are used.
+        request through the published HTTPS port is the only way to prove the
+        emitted URLs are actually reachable. Skipped entirely when default ports
+        are used.
 
         Args:
             alb_dns (str): The ALB DNS name.
@@ -250,23 +246,22 @@ class DeployServices:
         context.verify_mode = ssl.CERT_NONE
 
         checks = (
-            ("Frontend", "https", self.localstack.https_port, "/"),
-            ("Backend", "https", self.localstack.https_port, "/status/"),
-            ("CSRF", "http", self.localstack.http_port, "/csrf/"),
+            ("Frontend", "/"),
+            ("Backend", "/status/"),
+            ("CSRF", "/csrf/"),
         )
-        for attempt in range(1, SMOKE_MAX_ATTEMPTS + 1):
+        for attempt in range(1, REACHABILITY_MAX_ATTEMPTS + 1):
             failures = []
-            for name, scheme, port, path in checks:
-                connection = self._http_connection(alb_dns, scheme, port, context)
+            for name, path in checks:
+                connection = self._https_connection(alb_dns, self.localstack.https_port, context)
                 try:
                     connection.request("GET", path)
                     status = connection.getresponse().status
                     logger.info(
-                        "  %s smoke check on %s://%s:%s%s: %s",
+                        "  %s reachability check on https://%s:%s%s: %s",
                         name,
-                        scheme,
                         alb_dns,
-                        port,
+                        self.localstack.https_port,
                         path,
                         status,
                     )
@@ -279,30 +274,27 @@ class DeployServices:
 
             if not failures:
                 return
-            if attempt == SMOKE_MAX_ATTEMPTS:
+            if attempt == REACHABILITY_MAX_ATTEMPTS:
                 message = (
-                    "Application smoke check failed through published host port"
+                    "Application reachability check failed through published host port"
                     f" {self.localstack.https_port}: {'; '.join(failures)}."
                 )
                 raise InfrastructureError(message)
-            time.sleep(SMOKE_POLL_INTERVAL)
+            time.sleep(REACHABILITY_POLL_INTERVAL)
 
-    def _http_connection(self, host: str, scheme: str, port: int, context: ssl.SSLContext):
-        """Create an HTTP(S) connection to the given host and port.
+    def _https_connection(self, host: str, port: int, context: ssl.SSLContext) -> HTTPSConnection:
+        """Create an HTTPS connection to the given host and port.
 
         Args:
             host (str): The host to connect to.
-            scheme (str): Either "http" or "https".
             port (int): The port to connect to.
-            context (ssl.SSLContext): The SSL context to use for HTTPS connections.
+            context (ssl.SSLContext): The SSL context to use for the connection.
 
         Returns:
-            HTTPConnection | HTTPSConnection: The connection object.
+            HTTPSConnection: The connection object.
 
         """
-        if scheme == "https":
-            return HTTPSConnection(host, port, timeout=SMOKE_TIMEOUT, context=context)
-        return HTTPConnection(host, port, timeout=SMOKE_TIMEOUT)
+        return HTTPSConnection(host, port, timeout=REACHABILITY_TIMEOUT, context=context)
 
     def _container_ip(self) -> str:
         """Return the bridge IP address of the LocalStack container.

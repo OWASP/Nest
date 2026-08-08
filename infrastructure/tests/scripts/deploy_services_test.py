@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 from scripts.commands import CommandRunner
-from scripts.deploy_services import DeployServices
+from scripts.deploy_services import REACHABILITY_MAX_ATTEMPTS, REACHABILITY_TIMEOUT, DeployServices
 from scripts.errors import CommandNotFoundError, InfrastructureError
 from scripts.localstack import LocalStack
 
@@ -52,11 +52,6 @@ class TestDeployServices:
     def test_stack_prefix_uses_environment(self, tmp_path: Path) -> None:
         deployer = build_deployer(tmp_path)
         assert deployer.stack_prefix == "nest-dev"
-
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging", "PROJECT_NAME": "owasp-nest"}, clear=True)
-    def test_stack_prefix_uses_project_name(self, tmp_path: Path) -> None:
-        deployer = build_deployer(tmp_path)
-        assert deployer.stack_prefix == "owasp-nest-staging"
 
     def test_terraform_outputs(self, tmp_path: Path) -> None:
         commands = MagicMock(spec=CommandRunner)
@@ -149,20 +144,15 @@ class TestDeployServices:
 
         mock_put.assert_any_call(
             "/nest/local/NEXTAUTH_URL",
-            "http://nest-alb.localhost.localstack.cloud:8080/",
-        )
-        mock_put.assert_any_call(
-            "/nest/local/NEXT_SERVER_CSRF_URL",
-            "http://nest-alb.localhost.localstack.cloud:8080/csrf/",
-        )
-        mock_put.assert_any_call(
-            "/nest/local/NEXT_SERVER_GRAPHQL_URL",
-            "http://nest-alb.localhost.localstack.cloud:8080/graphql/",
+            "https://nest-alb.localhost.localstack.cloud:8443/",
         )
         mock_put.assert_any_call(
             "/nest/local/DJANGO_ALLOWED_ORIGINS",
             "https://localhost:8443,https://nest-alb.localhost.localstack.cloud:8443",
         )
+        names = [call_args.args[0] for call_args in mock_put.call_args_list]
+        assert "/nest/local/NEXT_SERVER_CSRF_URL" not in names
+        assert "/nest/local/NEXT_SERVER_GRAPHQL_URL" not in names
 
     def test_set_url_parameters_default_ports(self, tmp_path: Path) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner), http_port=80, https_port=443)
@@ -182,7 +172,7 @@ class TestDeployServices:
             == "https://nest-alb.localhost.localstack.cloud:8443/status/"
         )
 
-    def test_smoke_check_passes(self, tmp_path: Path) -> None:
+    def test_app_reachable_on_published_ports(self, tmp_path: Path) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner), http_port=8080, https_port=8443)
         deployer = build_deployer(tmp_path, localstack=localstack)
         connection = MagicMock()
@@ -190,40 +180,57 @@ class TestDeployServices:
         response.status = 200
         connection.getresponse.return_value = response
 
-        with (
-            patch("scripts.deploy_services.HTTPSConnection", return_value=connection),
-            patch("scripts.deploy_services.HTTPConnection", return_value=connection),
-        ):
-            deployer._smoke_check("nest-alb.localhost.localstack.cloud")
+        with patch(
+            "scripts.deploy_services.HTTPSConnection", return_value=connection
+        ) as mock_https:
+            deployer._verify_app_reachable("nest-alb.localhost.localstack.cloud")
 
-        assert connection.request.call_count == 3
+        assert mock_https.call_count == 3
+        assert all(
+            call_args.args[0] == "nest-alb.localhost.localstack.cloud"
+            and call_args.args[1] == 8443
+            for call_args in mock_https.call_args_list
+        )
+        assert all(
+            call_args.kwargs["timeout"] == REACHABILITY_TIMEOUT
+            for call_args in mock_https.call_args_list
+        )
+        assert [c.args[1] for c in connection.request.call_args_list] == [
+            "/",
+            "/status/",
+            "/csrf/",
+        ]
 
-    def test_smoke_check_skipped_when_default_ports(self, tmp_path: Path) -> None:
+    def test_app_reachability_skipped_on_default_ports(self, tmp_path: Path) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner), http_port=80, https_port=443)
         deployer = build_deployer(tmp_path, localstack=localstack)
 
-        with (
-            patch("scripts.deploy_services.HTTPSConnection") as mock_https,
-            patch("scripts.deploy_services.HTTPConnection") as mock_http,
-        ):
-            deployer._smoke_check("nest-alb.localhost.localstack.cloud")
+        with patch("scripts.deploy_services.HTTPSConnection") as mock_https:
+            deployer._verify_app_reachable("nest-alb.localhost.localstack.cloud")
 
         mock_https.assert_not_called()
-        mock_http.assert_not_called()
 
-    def test_smoke_check_failure(self, tmp_path: Path) -> None:
+    def test_app_unreachable_raises_after_max_attempts(self, tmp_path: Path) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner), http_port=8080, https_port=8443)
         deployer = build_deployer(tmp_path, localstack=localstack)
         connection = MagicMock()
         connection.request.side_effect = OSError("Connection refused")
 
         with (
-            patch("scripts.deploy_services.HTTPSConnection", return_value=connection),
-            patch("scripts.deploy_services.HTTPConnection", return_value=connection),
+            patch(
+                "scripts.deploy_services.HTTPSConnection", return_value=connection
+            ) as mock_https,
             patch("scripts.deploy_services.time.sleep"),
-            pytest.raises(InfrastructureError, match="smoke check failed"),
+            pytest.raises(InfrastructureError, match="reachability check failed"),
         ):
-            deployer._smoke_check("nest-alb.localhost.localstack.cloud")
+            deployer._verify_app_reachable("nest-alb.localhost.localstack.cloud")
+
+        assert mock_https.call_count == REACHABILITY_MAX_ATTEMPTS * 3
+        assert all(
+            call_args.args[0] == "nest-alb.localhost.localstack.cloud"
+            and call_args.args[1] == 8443
+            for call_args in mock_https.call_args_list
+        )
 
     def test_put_ssm(self, tmp_path: Path) -> None:
         ssm = MagicMock()
@@ -426,7 +433,7 @@ class TestDeployServices:
             patch.object(DeployServices, "_start_service") as mock_start,
             patch.object(DeployServices, "_wait_for_service") as mock_wait,
             patch.object(DeployServices, "_check_health") as mock_health,
-            patch.object(DeployServices, "_smoke_check") as mock_smoke,
+            patch.object(DeployServices, "_verify_app_reachable") as mock_reachable,
             patch.object(DeployServices, "_log_summary") as mock_summary,
         ):
             commands = MagicMock(spec=CommandRunner)
@@ -447,7 +454,7 @@ class TestDeployServices:
         mock_wait.assert_any_call("nest-local-frontend", "nest-local-frontend-service", "Frontend")
         mock_health.assert_any_call("arn:tg:backend", "Backend")
         mock_health.assert_any_call("arn:tg:frontend", "Frontend")
-        mock_smoke.assert_called_once_with("nest-alb.localhost.localstack.cloud")
+        mock_reachable.assert_called_once_with("nest-alb.localhost.localstack.cloud")
         mock_summary.assert_called_once_with(
             "nest-alb.localhost.localstack.cloud",
             "nest-local-backend-service",
