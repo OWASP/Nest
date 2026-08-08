@@ -87,7 +87,7 @@ class BoardCandidateClaimReviewMutations:
         user = info.context.request.user
 
         is_reviewer = BoardOfDirectors.objects.filter(
-            year=input_data.year, reviewers=user
+            year=input_data.year, claim_reviewers=user
         ).exists()
         if not user.github_user or not is_reviewer:
             return ReviewResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)

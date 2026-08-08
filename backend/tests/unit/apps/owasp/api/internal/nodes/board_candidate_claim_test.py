@@ -126,7 +126,7 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         mock_claim = Mock()
         mock_claim.candidate.member = Mock()
         mock_claim.status = BoardCandidateClaim.Status.SUBMITTED
-        mock_claim.board.reviewers.filter.return_value.exists.return_value = True
+        mock_claim.board.claim_reviewers.filter.return_value.exists.return_value = True
         mock_queryset = MagicMock()
         mock_claim.reviews = MagicMock()
         mock_claim.reviews.filter.return_value = mock_queryset
@@ -146,7 +146,7 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
         mock_claim = Mock()
         mock_claim.candidate.member = Mock()
         mock_claim.status = BoardCandidateClaim.Status.SUBMITTED
-        mock_claim.board.reviewers.filter.return_value.exists.return_value = False
+        mock_claim.board.claim_reviewers.filter.return_value.exists.return_value = False
 
         field = self._get_field_by_name("reviews", BoardCandidateClaimNode)
         result = field.base_resolver.wrapped_func(None, mock_claim, info)

@@ -64,7 +64,7 @@ class BoardCandidateClaimReview(TimestampedModel):
             err = "Review can only be added to submitted claims."
             raise ValidationError(err)
 
-        if not self.claim.board.reviewers.filter(id=self.reviewer.id).exists():
+        if not self.claim.board.claim_reviewers.filter(id=self.reviewer.id).exists():
             err = "Only Claim Reviewers can review claims."
             raise ValidationError(err)
 

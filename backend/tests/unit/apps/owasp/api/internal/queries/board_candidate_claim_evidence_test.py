@@ -80,7 +80,7 @@ class TestBoardCandidateClaimEvidenceQuery:
         login = "alice"
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = False
+        claim.board.claim_reviewers.filter.return_value.exists.return_value = False
         claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_claim_model.objects.filter.return_value.first.return_value = claim
@@ -134,7 +134,7 @@ class TestBoardCandidateClaimEvidenceQuery:
         login = "alice"
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = True
+        claim.board.claim_reviewers.filter.return_value.exists.return_value = True
         claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidences_qs = MagicMock()
@@ -219,7 +219,7 @@ class TestBoardCandidateClaimEvidenceSingleQuery:
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = False
+        evidence.claim.board.claim_reviewers.filter.return_value.exists.return_value = False
         evidence.claim.candidate.member = None
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
 
@@ -264,7 +264,7 @@ class TestBoardCandidateClaimEvidenceSingleQuery:
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = True
+        evidence.claim.board.claim_reviewers.filter.return_value.exists.return_value = True
         evidence.claim.candidate.member = MagicMock()
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
 
@@ -349,7 +349,7 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = False
+        evidence.claim.board.claim_reviewers.filter.return_value.exists.return_value = False
         evidence.claim.candidate.member = None
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidence.file = MagicMock()
@@ -423,7 +423,7 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = True
+        evidence.claim.board.claim_reviewers.filter.return_value.exists.return_value = True
         evidence.claim.candidate.member = None
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidence.file = MagicMock()

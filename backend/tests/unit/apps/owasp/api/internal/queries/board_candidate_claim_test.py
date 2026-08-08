@@ -175,7 +175,7 @@ class TestBoardCandidateClaimSingleQuery:
         info = _make_info(user)
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = False
+        claim.board.claim_reviewers.filter.return_value.exists.return_value = False
         claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.APPROVED
         mock_qs = MagicMock()
@@ -198,7 +198,7 @@ class TestBoardCandidateClaimSingleQuery:
         info = _make_info(user)
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = False
+        claim.board.claim_reviewers.filter.return_value.exists.return_value = False
         claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_qs = MagicMock()
@@ -258,7 +258,7 @@ class TestBoardCandidateClaimSingleQuery:
         info = _make_info(user)
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = True
+        claim.board.claim_reviewers.filter.return_value.exists.return_value = True
         claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         mock_qs = MagicMock()
@@ -280,7 +280,7 @@ class TestBoardCandidateClaimSingleQuery:
         info = _make_info(user)
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = True
+        claim.board.claim_reviewers.filter.return_value.exists.return_value = True
         claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_qs = MagicMock()
