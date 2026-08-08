@@ -217,7 +217,7 @@ describe('AnnotatedProfile', () => {
 
   it('does not render the Create claim button for non-candidates', () => {
     mockUseProfileSelection.mockReturnValue({
-      text: 'a selection',
+      text: 'Hello world.',
       rect: { top: 100, left: 50, width: 80 } as DOMRect,
     })
     render(<AnnotatedProfile {...baseProps} />)
@@ -226,23 +226,38 @@ describe('AnnotatedProfile', () => {
 
   it('renders the Create claim button when a candidate has an active selection', () => {
     mockUseProfileSelection.mockReturnValue({
-      text: 'a selection',
+      text: 'Hello world.',
       rect: { top: 100, left: 50, width: 80 } as DOMRect,
     })
     render(<AnnotatedProfile {...baseProps} isCandidate />)
     expect(screen.getByRole('button', { name: /Create claim/i })).toBeInTheDocument()
   })
 
+  it('hides the Create claim button when the selection is not an exact substring of rawMarkdown', () => {
+    mockUseProfileSelection.mockReturnValue({
+      text: 'I lead OWASP Nest',
+      rect: { top: 100, left: 50, width: 80 } as DOMRect,
+    })
+    render(
+      <AnnotatedProfile
+        {...baseProps}
+        isCandidate
+        rawMarkdown="I lead [OWASP Nest](https://nest.owasp.org)."
+      />
+    )
+    expect(screen.queryByRole('button', { name: /Create claim/i })).not.toBeInTheDocument()
+  })
+
   it('navigates to the create-claim page with the encoded selection', () => {
     const push = (useRouter() as unknown as { push: jest.Mock }).push
     mockUseProfileSelection.mockReturnValue({
-      text: 'hello there',
+      text: 'Hello world.',
       rect: { top: 100, left: 50, width: 80 } as DOMRect,
     })
     render(<AnnotatedProfile {...baseProps} isCandidate />)
     fireEvent.click(screen.getByRole('button', { name: /Create claim/i }))
     expect(push).toHaveBeenCalledWith(
-      '/board/2025/candidates/alice/claims/create?sourceText=hello+there'
+      '/board/2025/candidates/alice/claims/create?sourceText=Hello+world.'
     )
   })
 })

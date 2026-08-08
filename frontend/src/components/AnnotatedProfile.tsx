@@ -104,6 +104,8 @@ const AnnotatedProfile = ({
   const selection = useProfileSelection(containerRef, isCandidate)
 
   const wrapped = useMemo(() => wrapClaims(rawMarkdown, claims), [rawMarkdown, claims])
+  const canCreateClaim =
+    isCandidate && selection !== null && rawMarkdown.includes(selection.text)
 
   const markdownOptions = useMemo(
     () => ({
@@ -131,7 +133,7 @@ const AnnotatedProfile = ({
         <Markdown options={markdownOptions}>{wrapped}</Markdown>
       </div>
 
-      {isCandidate && selection && (
+      {canCreateClaim && selection && (
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
