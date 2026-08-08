@@ -153,6 +153,28 @@ describe('AnnotatedProfile', () => {
     expect(marks[0]).toHaveAttribute('data-claim-key', 'long')
   })
 
+  it('highlights every occurrence of a claim sourceText', () => {
+    render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown="OWASP Nest is great. I love OWASP Nest."
+        claims={[
+          {
+            id: '1',
+            key: 'nest',
+            name: 'Nest',
+            sourceText: 'OWASP Nest',
+            status: ClaimStatusEnum.Approved,
+          },
+        ]}
+      />
+    )
+    const marks = screen.getAllByTestId('claim-highlight')
+    expect(marks).toHaveLength(2)
+    expect(marks[0]).toHaveAttribute('data-claim-key', 'nest')
+    expect(marks[1]).toHaveAttribute('data-claim-key', 'nest')
+  })
+
   it('escapes special characters in claim attributes without breaking the markup', () => {
     render(
       <AnnotatedProfile

@@ -61,11 +61,16 @@ const wrapClaims = (markdown: string, claims: ProfileClaim[]): string => {
 
   const ranges: Array<{ start: number; end: number; claim: ProfileClaim }> = []
   for (const claim of eligible) {
-    const start = markdown.indexOf(claim.sourceText)
-    if (start < 0) continue
-    const end = start + claim.sourceText.length
-    if (ranges.some((r) => start < r.end && end > r.start)) continue
-    ranges.push({ start, end, claim })
+    let searchFrom = 0
+    while (searchFrom < markdown.length) {
+      const start = markdown.indexOf(claim.sourceText, searchFrom)
+      if (start < 0) break
+      const end = start + claim.sourceText.length
+      if (!ranges.some((r) => start < r.end && end > r.start)) {
+        ranges.push({ start, end, claim })
+      }
+      searchFrom = end
+    }
   }
 
   const orderedRanges = ranges.toSorted((a, b) => b.start - a.start)
