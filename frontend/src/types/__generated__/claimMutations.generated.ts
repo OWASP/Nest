@@ -1,42 +1,88 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type CreateBoardCandidateClaimMutationVariables = Types.Exact<{
+export type ClaimStatusEnum =
+  | 'APPROVED'
+  | 'DISCARDED'
+  | 'DRAFT'
+  | 'REJECTED'
+  | 'SUBMITTED'
+  | 'WITHDRAWN';
+
+export type CreateClaimInput = {
+  description: string;
+  name: string;
+  year: number;
+};
+
+export type DiscardClaimInput = {
+  key: string;
+  year: number;
+};
+
+export type ReorderClaimsInput = {
+  keys: Array<string>;
+  year: number;
+};
+
+export type SubmitClaimInput = {
+  key: string;
+  year: number;
+};
+
+export type UpdateClaimInput = {
+  description?: string | null | undefined;
+  key: string;
+  name?: string | null | undefined;
+  year: number;
+};
+
+export type WithdrawClaimInput = {
+  key: string;
+  withdrawnReason: string;
+  year: number;
+};
+
+export type CreateBoardCandidateClaimMutationVariables = Exact<{
   input: Types.CreateClaimInput;
 }>;
 
 
 export type CreateBoardCandidateClaimMutation = { createBoardCandidateClaim: { __typename: 'ClaimResult', ok: boolean, code: string | null, message: string | null, claim: { __typename: 'BoardCandidateClaimNode', createdAt: any, description: string, hasEvidence: boolean, id: string, key: string, name: string, order: number, status: Types.ClaimStatusEnum, updatedAt: any } | null } };
 
-export type UpdateBoardCandidateClaimMutationVariables = Types.Exact<{
+export type UpdateBoardCandidateClaimMutationVariables = Exact<{
   input: Types.UpdateClaimInput;
 }>;
 
 
 export type UpdateBoardCandidateClaimMutation = { updateBoardCandidateClaim: { __typename: 'ClaimResult', ok: boolean, code: string | null, message: string | null, claim: { __typename: 'BoardCandidateClaimNode', createdAt: any, description: string, hasEvidence: boolean, id: string, key: string, name: string, order: number, status: Types.ClaimStatusEnum, updatedAt: any } | null } };
 
-export type DiscardBoardCandidateClaimMutationVariables = Types.Exact<{
+export type DiscardBoardCandidateClaimMutationVariables = Exact<{
   input: Types.DiscardClaimInput;
 }>;
 
 
 export type DiscardBoardCandidateClaimMutation = { discardBoardCandidateClaim: { __typename: 'ClaimResult', ok: boolean, code: string | null, message: string | null, claim: { __typename: 'BoardCandidateClaimNode', createdAt: any, description: string, hasEvidence: boolean, id: string, key: string, name: string, order: number, status: Types.ClaimStatusEnum, updatedAt: any } | null } };
 
-export type SubmitBoardCandidateClaimMutationVariables = Types.Exact<{
+export type SubmitBoardCandidateClaimMutationVariables = Exact<{
   input: Types.SubmitClaimInput;
 }>;
 
 
 export type SubmitBoardCandidateClaimMutation = { submitBoardCandidateClaim: { __typename: 'ClaimResult', ok: boolean, code: string | null, message: string | null, claim: { __typename: 'BoardCandidateClaimNode', createdAt: any, description: string, hasEvidence: boolean, id: string, key: string, name: string, order: number, status: Types.ClaimStatusEnum, updatedAt: any } | null } };
 
-export type WithdrawBoardCandidateClaimMutationVariables = Types.Exact<{
+export type WithdrawBoardCandidateClaimMutationVariables = Exact<{
   input: Types.WithdrawClaimInput;
 }>;
 
 
 export type WithdrawBoardCandidateClaimMutation = { withdrawBoardCandidateClaim: { __typename: 'ClaimResult', ok: boolean, code: string | null, message: string | null, claim: { __typename: 'BoardCandidateClaimNode', createdAt: any, description: string, hasEvidence: boolean, id: string, key: string, name: string, order: number, status: Types.ClaimStatusEnum, updatedAt: any } | null } };
 
-export type ReorderBoardCandidateClaimsMutationVariables = Types.Exact<{
+export type ReorderBoardCandidateClaimsMutationVariables = Exact<{
   input: Types.ReorderClaimsInput;
 }>;
 
