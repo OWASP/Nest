@@ -17,7 +17,7 @@ const CandidateProfilePage = () => {
   const parsedYear = Number.parseInt(year)
 
   const { data, error, loading } = useQuery(GetCandidateProfileDocument, {
-    skip: isSyncing,
+    skip: isSyncing || Number.isNaN(parsedYear),
     variables: {
       login,
       sessionLogin: session?.user?.login ?? '',

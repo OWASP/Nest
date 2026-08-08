@@ -272,7 +272,7 @@ describe('CreateClaimPage', () => {
     const sourceTextarea = await screen.findByDisplayValue('OWASP projects are great')
     expect(sourceTextarea).toHaveAttribute('readonly')
     expect(
-      screen.queryByText('Must match your profile text exactly to be highlighted.')
+      screen.queryByText('*Must match your profile text exactly to be highlighted.')
     ).not.toBeInTheDocument()
   })
 
