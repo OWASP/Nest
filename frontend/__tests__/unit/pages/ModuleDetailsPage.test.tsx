@@ -66,6 +66,12 @@ jest.mock('components/cards/Contributors', () => {
   }
 })
 
+jest.mock('components/cards/ModuleIssues', () => {
+  return function MockModuleIssues() {
+    return <div data-testid="module-issues" />
+  }
+})
+
 jest.mock('components/cards/IssuesMilestones', () => {
   return function MockIssuesMilestones(props: { onLoadMorePullRequests?: () => void }) {
     return (

@@ -1,10 +1,10 @@
 import { useQuery } from '@apollo/client/react'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { handleAppError } from 'app/global-error'
-import IssuesPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/page'
 import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import ModuleIssues from 'components/cards/ModuleIssues'
 
 // Mock dependencies
 jest.mock('@apollo/client/react', () => ({
@@ -12,7 +12,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 jest.mock('next/navigation', () => ({
-  useParams: jest.fn(),
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
 }))
@@ -21,7 +20,6 @@ jest.mock('next-auth/react', () => ({
 }))
 
 const mockUseQuery = useQuery as unknown as jest.Mock
-const mockUseParams = useParams as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
 const mockUseSearchParams = useSearchParams as jest.Mock
 const mockUseSession = useSession as jest.Mock
@@ -79,10 +77,9 @@ jest.mock('app/global-error', () => ({
 
 const mockHandleAppError = handleAppError as jest.Mock
 
-describe('IssuesPage', () => {
+describe('ModuleIssues', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1' })
     mockUseRouter.mockReturnValue({ push: mockPush, replace: mockReplace })
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
     mockUseSession.mockReturnValue({
@@ -102,15 +99,15 @@ describe('IssuesPage', () => {
     })
   })
 
-  it('renders a loading spinner while data is being fetched', () => {
+  it('shows a loading message in the table while data is being fetched', () => {
     mockUseQuery.mockImplementation((document) => {
       if (document === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: undefined, loading: true, error: undefined }
     })
-    render(<IssuesPage />)
-    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
+    expect(screen.getByText('Loading issues...')).toBeInTheDocument()
   })
 
   it('calls handleAppError on query error', () => {
@@ -121,20 +118,19 @@ describe('IssuesPage', () => {
       }
       return { data: undefined, loading: false, error }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     expect(mockHandleAppError).toHaveBeenCalledWith(error)
-    expect(screen.getByText('Server Error')).toBeInTheDocument()
   })
 
-  it('renders a 404 error if the module is not found', () => {
+  it('renders an empty table when the module has no issues data', () => {
     mockUseQuery.mockImplementation((document) => {
       if (document === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: { managementModule: null }, loading: false, error: undefined }
     })
-    render(<IssuesPage />)
-    expect(screen.getByText('Module Not Found')).toBeInTheDocument()
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
+    expect(screen.getByText('No issues found for the selected filter.')).toBeInTheDocument()
   })
 
   it('displays a "no issues found" message when there are no issues', () => {
@@ -150,7 +146,7 @@ describe('IssuesPage', () => {
         error: undefined,
       }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     expect(screen.getAllByText('No issues found for the selected filter.')).toHaveLength(1)
   })
 
@@ -161,8 +157,8 @@ describe('IssuesPage', () => {
       }
       return { data: mockModuleData, loading: false, error: undefined }
     })
-    render(<IssuesPage />)
-    expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
+    expect(screen.getByText('Issues')).toBeInTheDocument()
     expect(screen.getAllByText('First Issue Title')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Open')[0]).toBeInTheDocument()
     expect(screen.getAllByText('bug')[0]).toBeInTheDocument()
@@ -176,7 +172,7 @@ describe('IssuesPage', () => {
       }
       return { data: mockModuleData, loading: false, error: undefined }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     const issueTitleButton = screen.getAllByRole('button', { name: /First Issue Title/i })[0]
     fireEvent.click(issueTitleButton)
     expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/prog1/modules/mod1/issues/101')
@@ -189,7 +185,7 @@ describe('IssuesPage', () => {
       }
       return { data: mockModuleData, loading: false, error: undefined }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
     const selectTrigger = screen.getByRole('button', { name: /Label/i })
     fireEvent.click(selectTrigger)
@@ -199,7 +195,7 @@ describe('IssuesPage', () => {
     fireEvent.click(optionToSelect)
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith('?label=bug')
+      expect(mockReplace).toHaveBeenCalledWith('?label=bug', { scroll: false })
     })
   })
 
@@ -210,7 +206,7 @@ describe('IssuesPage', () => {
       }
       return { data: mockModuleData, loading: false, error: undefined }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
     const selectTrigger = screen.getByRole('button', { name: /Label/i })
     fireEvent.click(selectTrigger)
@@ -220,7 +216,7 @@ describe('IssuesPage', () => {
     fireEvent.click(optionToSelect)
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith('?label=documentation')
+      expect(mockReplace).toHaveBeenCalledWith('?label=documentation', { scroll: false })
     })
   })
 
@@ -232,7 +228,7 @@ describe('IssuesPage', () => {
       return { data: mockModuleData, loading: false, error: undefined }
     })
     mockUseSearchParams.mockReturnValue(new URLSearchParams('?label=bug'))
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
     const selectTrigger = screen.getByRole('button', { name: /Label/i })
     fireEvent.click(selectTrigger)
@@ -242,7 +238,7 @@ describe('IssuesPage', () => {
     fireEvent.click(optionToSelect)
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith('?')
+      expect(mockReplace).toHaveBeenCalledWith('?', { scroll: false })
     })
   })
 
@@ -266,7 +262,7 @@ describe('IssuesPage', () => {
       }
       return { data: twentyFiveIssues, loading: false, error: undefined }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
     const pageTwoButton = screen.getByRole('button', { name: /go to page 2/i })
     fireEvent.click(pageTwoButton)
@@ -276,7 +272,7 @@ describe('IssuesPage', () => {
         expect.anything(),
         expect.objectContaining({
           variables: expect.objectContaining({
-            offset: 20,
+            offset: 10,
           }),
         })
       )
@@ -305,7 +301,7 @@ describe('IssuesPage', () => {
           error: undefined,
         }
       })
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
       const desktopTable = screen.getByRole('table')
       expect(within(desktopTable).getByText(expectedText)).toBeInTheDocument()
     })
@@ -328,7 +324,7 @@ describe('IssuesPage', () => {
         error: undefined,
       }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     expect(screen.getByText('+1 more')).toBeInTheDocument()
   })
 
@@ -364,7 +360,7 @@ describe('IssuesPage', () => {
         error: undefined,
       }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     const plusOneElements = screen.getAllByText(/\+1/)
     expect(plusOneElements.length).toBeGreaterThan(0)
   })
@@ -392,7 +388,7 @@ describe('IssuesPage', () => {
         error: undefined,
       }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
     // Open the label dropdown to verify extracted labels are present
     const selectTrigger = screen.getByRole('button', { name: /Label/i })
@@ -426,7 +422,7 @@ describe('IssuesPage', () => {
         error: undefined,
       }
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
     const selectTrigger = screen.getByRole('button', { name: /Label/i })
     fireEvent.click(selectTrigger)
@@ -456,8 +452,8 @@ describe('IssuesPage', () => {
         error: undefined,
       }
     })
-    render(<IssuesPage />)
-    expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
+    expect(screen.getByText('Issues')).toBeInTheDocument()
     expect(screen.getAllByText('First Issue Title')[0]).toBeInTheDocument()
   })
   it('extracts labels from issues and handles null labels when availableLabels is empty', async () => {
@@ -488,7 +484,7 @@ describe('IssuesPage', () => {
       }
     })
 
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
     const selectTrigger = screen.getByRole('button', { name: /Label/i })
     fireEvent.click(selectTrigger)
@@ -532,7 +528,7 @@ describe('IssuesPage', () => {
           error: undefined,
         }
       })
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       const deadlineSelectTrigger = screen.getByRole('button', { name: /Deadline/i })
       fireEvent.click(deadlineSelectTrigger)
@@ -542,7 +538,7 @@ describe('IssuesPage', () => {
       fireEvent.click(overdueOption)
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('?deadline=overdue')
+        expect(mockReplace).toHaveBeenCalledWith('?deadline=overdue', { scroll: false })
       })
     })
 
@@ -580,7 +576,7 @@ describe('IssuesPage', () => {
           error: undefined,
         }
       })
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       const deadlineSelectTrigger = screen.getByRole('button', { name: /Deadline/i })
       fireEvent.click(deadlineSelectTrigger)
@@ -590,7 +586,7 @@ describe('IssuesPage', () => {
       fireEvent.click(dueSoonOption)
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('?deadline=due-soon')
+        expect(mockReplace).toHaveBeenCalledWith('?deadline=due-soon', { scroll: false })
       })
     })
 
@@ -621,7 +617,7 @@ describe('IssuesPage', () => {
           error: undefined,
         }
       })
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       const deadlineSelectTrigger = screen.getByRole('button', { name: /Deadline/i })
       fireEvent.click(deadlineSelectTrigger)
@@ -631,7 +627,7 @@ describe('IssuesPage', () => {
       fireEvent.click(upcomingOption)
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('?deadline=upcoming')
+        expect(mockReplace).toHaveBeenCalledWith('?deadline=upcoming', { scroll: false })
       })
     })
 
@@ -665,7 +661,7 @@ describe('IssuesPage', () => {
           error: undefined,
         }
       })
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       const deadlineSelectTrigger = screen.getByRole('button', { name: /Deadline/i })
       fireEvent.click(deadlineSelectTrigger)
@@ -675,7 +671,7 @@ describe('IssuesPage', () => {
       fireEvent.click(noDeadlineOption)
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('?deadline=no-deadline')
+        expect(mockReplace).toHaveBeenCalledWith('?deadline=no-deadline', { scroll: false })
       })
     })
 
@@ -691,7 +687,7 @@ describe('IssuesPage', () => {
           error: undefined,
         }
       })
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       const deadlineSelectTrigger = screen.getByRole('button', { name: /Deadline/i })
       fireEvent.click(deadlineSelectTrigger)
@@ -701,7 +697,7 @@ describe('IssuesPage', () => {
       fireEvent.click(allOption)
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('?')
+        expect(mockReplace).toHaveBeenCalledWith('?', { scroll: false })
       })
     })
 
@@ -735,11 +731,11 @@ describe('IssuesPage', () => {
       })
       mockUseSearchParams.mockReturnValue(new URLSearchParams('?deadline=overdue'))
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       await waitFor(() => {
         const rows = screen.getAllByText(/Overdue Issue/)
-        expect(rows.length).toBeLessThanOrEqual(20)
+        expect(rows.length).toBeLessThanOrEqual(10)
       })
 
       mockUseQuery.mockImplementation((document) => {
@@ -796,7 +792,7 @@ describe('IssuesPage', () => {
       })
       mockUseSearchParams.mockReturnValue(new URLSearchParams('?deadline=overdue'))
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       expect(mockUseQuery).toHaveBeenCalledWith(
         expect.anything(),
@@ -836,7 +832,7 @@ describe('IssuesPage', () => {
         }
       })
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       const deadlineSelectTrigger = screen.getByRole('button', { name: /Deadline/i })
       fireEvent.click(deadlineSelectTrigger)
@@ -846,7 +842,7 @@ describe('IssuesPage', () => {
       fireEvent.click(allOption)
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('?label=bug')
+        expect(mockReplace).toHaveBeenCalledWith('?label=bug', { scroll: false })
       })
     })
   })
@@ -865,13 +861,12 @@ describe('IssuesPage', () => {
         }
       })
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       expect(mockHandleAppError).toHaveBeenCalledWith(error)
-      expect(screen.getByText('Server Error')).toBeInTheDocument()
     })
 
-    it('renders 403 when issues query returns FORBIDDEN GraphQL error', () => {
+    it('renders nothing when the issues query returns a FORBIDDEN GraphQL error', () => {
       const error = {
         graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
       }
@@ -882,9 +877,9 @@ describe('IssuesPage', () => {
         return { data: undefined, loading: false, error }
       })
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(screen.queryByRole('table')).not.toBeInTheDocument()
       expect(mockHandleAppError).not.toHaveBeenCalled()
     })
 
@@ -900,7 +895,7 @@ describe('IssuesPage', () => {
         }
       })
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
       expect(mockHandleAppError).not.toHaveBeenCalled()
     })
@@ -917,7 +912,7 @@ describe('IssuesPage', () => {
         }
       })
 
-      const { rerender } = render(<IssuesPage />)
+      const { rerender } = render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
       expect(mockHandleAppError).not.toHaveBeenCalled()
 
       const newError = new Error('Network error')
@@ -932,13 +927,13 @@ describe('IssuesPage', () => {
         }
       })
 
-      rerender(<IssuesPage />)
+      rerender(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
       expect(mockHandleAppError).toHaveBeenCalledWith(newError)
     })
   })
 
   describe('Authorization', () => {
-    it('denies access when the query is forbidden', () => {
+    it('hides the section when the query is forbidden', () => {
       mockUseQuery.mockImplementation(() => ({
         data: undefined,
         loading: false,
@@ -947,10 +942,9 @@ describe('IssuesPage', () => {
         },
       }))
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
+      expect(screen.queryByRole('table')).not.toBeInTheDocument()
     })
 
     it('grants access for authenticated user who is a program admin', () => {
@@ -980,9 +974,9 @@ describe('IssuesPage', () => {
         return { data: mockModuleData, loading: false, error: undefined }
       })
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
-      expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
+      expect(screen.getByText('Issues')).toBeInTheDocument()
     })
 
     it('grants access for authenticated user who is a module mentor', () => {
@@ -1012,16 +1006,15 @@ describe('IssuesPage', () => {
         return { data: mockModuleData, loading: false, error: undefined }
       })
 
-      render(<IssuesPage />)
+      render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
 
-      expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
+      expect(screen.getByText('Issues')).toBeInTheDocument()
     })
   })
 })
 
 describe('Mentee view', () => {
   beforeEach(() => {
-    mockUseParams.mockReturnValue({ programKey: 'prog-1', moduleKey: 'mod-1' })
     mockUseRouter.mockReturnValue({ push: mockPush, replace: mockReplace })
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
     mockUseSession.mockReturnValue({
@@ -1054,7 +1047,7 @@ describe('Mentee view', () => {
       loading: false,
       error: undefined,
     })
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalled()
     })
@@ -1070,8 +1063,8 @@ describe('Mentee view', () => {
       }
       return { data: undefined, loading: true, error: undefined }
     })
-    render(<IssuesPage />)
-    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
+    expect(screen.getByText('Loading issues...')).toBeInTheDocument()
   })
 
   it('renders mentee issues list when data is available', async () => {
@@ -1099,7 +1092,7 @@ describe('Mentee view', () => {
       loading: false,
       error: undefined,
     }))
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     await waitFor(() => {
       expect(screen.getByText('Mentee Issue One')).toBeInTheDocument()
     })
@@ -1107,15 +1100,15 @@ describe('Mentee view', () => {
     expect(screen.queryByRole('button', { name: /Label/i })).not.toBeInTheDocument()
   })
 
-  it('shows error display when the query fails', async () => {
+  it('reports the error when the query fails', async () => {
     mockUseQuery.mockImplementation(() => ({
       data: undefined,
       loading: false,
       error: new Error('Failed'),
     }))
-    render(<IssuesPage />)
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     await waitFor(() => {
-      expect(screen.getByText('Server Error')).toBeInTheDocument()
+      expect(mockHandleAppError).toHaveBeenCalled()
     })
   })
 })
