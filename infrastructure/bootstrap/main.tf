@@ -307,7 +307,7 @@ data "aws_iam_policy_document" "part_two" {
   for_each = local.environments
 
   statement {
-    sid    = "AppAutoscalingManagement"
+    sid    = "AppAutoscalingMgmt"
     effect = "Allow"
     actions = [
       "application-autoscaling:DeleteScalingPolicy",
@@ -365,7 +365,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "ELBManagement"
+    sid    = "ELBMgmt"
     effect = "Allow"
     actions = [
       "elasticloadbalancing:AddTags",
@@ -393,7 +393,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "EventBridgeManagement"
+    sid    = "EventBridgeMgmt"
     effect = "Allow"
     actions = [
       "events:DeleteRule",
@@ -412,7 +412,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "IAMManagement"
+    sid    = "IAMMgmt"
     effect = "Allow"
     actions = [
       "iam:AttachRolePolicy",
@@ -471,7 +471,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "KMSManagement"
+    sid    = "KMSMgmt"
     effect = "Allow"
     actions = [
       "kms:CreateKey",
@@ -525,7 +525,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "S3Management"
+    sid    = "S3Mgmt"
     effect = "Allow"
     actions = [
       "s3:CreateBucket",
@@ -571,7 +571,7 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
-    sid    = "SecretsManagerManagement"
+    sid    = "SecretsManagerMgmt"
     effect = "Allow"
     actions = [
       "secretsmanager:CreateSecret",
@@ -585,11 +585,14 @@ data "aws_iam_policy_document" "part_two" {
       "secretsmanager:UntagResource",
       "secretsmanager:UpdateSecret",
     ]
-    resources = ["arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${each.key}-*"]
+    resources = [
+      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${each.key}-*",
+      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:/${var.project_name}/${each.key}/*",
+    ]
   }
 
   statement {
-    sid    = "SSMManagement"
+    sid    = "SSMMgmt"
     effect = "Allow"
     actions = [
       "ssm:AddTagsToResource",

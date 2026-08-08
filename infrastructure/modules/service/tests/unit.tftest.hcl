@@ -12,12 +12,15 @@ variables {
   image_tag             = "test-tag"
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
-  parameters_arns       = { "NEXT_PUBLIC_API_URL" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/NEXT_PUBLIC_API_URL" }
+  container_secrets     = { "NEXT_PUBLIC_API_URL" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/NEXT_PUBLIC_API_URL" }
   project_name          = "nest"
   security_group_id     = "sg-service-12345"
-  service_name          = "service"
-  subnet_ids            = ["subnet-1", "subnet-2"]
-  target_group_arn      = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
+  secretsmanager_secret_arns = [
+    "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/EXAMPLE"
+  ]
+  service_name     = "service"
+  subnet_ids       = ["subnet-1", "subnet-2"]
+  target_group_arn = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
 }
 
 run "test_cloudwatch_log_group_name_format" {
@@ -26,6 +29,62 @@ run "test_cloudwatch_log_group_name_format" {
   assert {
     condition     = aws_cloudwatch_log_group.main.name == "/aws/ecs/${var.project_name}-${var.environment}-${var.service_name}"
     error_message = "CloudWatch log group name must follow format: /aws/ecs/{project}-{environment}-{service_name}."
+  }
+}
+
+run "test_empty_secretsmanager_arns_omit_policy_statement" {
+  command = plan
+
+  variables {
+    secretsmanager_secret_arns = []
+  }
+
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "secretsmanager:GetSecretValue")
+    ]) == 0
+    error_message = "The execution policy must omit Secrets Manager access when no secret ARNs are supplied."
+  }
+
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]) == 0
+    error_message = "The execution policy must omit KMS decrypt access when no secret ARNs are supplied."
+  }
+}
+
+run "test_kms_decrypt_is_limited_to_secretsmanager" {
+  command = plan
+
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]).Condition.StringEquals["kms:ViaService"] == "secretsmanager.${var.aws_region}.amazonaws.com"
+    error_message = "KMS decrypt access must be limited to requests from Secrets Manager."
+  }
+
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "kms:Decrypt")
+    ]).Resource == var.kms_key_arn
+    error_message = "KMS decrypt access must be limited to the configured key."
+  }
+}
+
+run "test_secretsmanager_policy_uses_supplied_arns" {
+  command = plan
+
+  assert {
+    condition = toset(one([
+      for statement in jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement : statement
+      if contains(statement.Action, "secretsmanager:GetSecretValue")
+    ]).Resource) == var.secretsmanager_secret_arns
+    error_message = "Secrets Manager access must be limited to the supplied secret ARNs."
   }
 }
 
@@ -300,7 +359,7 @@ run "test_service_works_with_backend_config" {
     container_memory = 2048
     container_port   = 8000
     service_name     = "backend"
-    parameters_arns = {
+    container_secrets = {
       "DJANGO_SECRET_KEY" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_SECRET_KEY"
     }
   }

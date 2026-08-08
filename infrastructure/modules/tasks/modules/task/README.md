@@ -33,7 +33,7 @@ No modules.
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region for the CloudWatch logs. | `string` | n/a | yes |
 | <a name="input_command"></a> [command](#input\_command) | The command to run in the container. | `list(string)` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
-| <a name="input_container_parameters_arns"></a> [container\_parameters\_arns](#input\_container\_parameters\_arns) | A Map of environment variable names to the ARNs of all SSM parameters. | `map(string)` | `{}` | no |
+| <a name="input_container_secrets"></a> [container\_secrets](#input\_container\_secrets) | Environment variable names mapped to SSM or Secrets Manager valueFrom references. | `map(string)` | `{}` | no |
 | <a name="input_cpu"></a> [cpu](#input\_cpu) | The CPU units to allocate for the task. | `string` | n/a | yes |
 | <a name="input_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#input\_ecs\_cluster\_arn) | The ARN of the ECS cluster. | `string` | n/a | yes |
 | <a name="input_ecs_tasks_execution_role_arn"></a> [ecs\_tasks\_execution\_role\_arn](#input\_ecs\_tasks\_execution\_role\_arn) | The ARN of the ECS task execution role. | `string` | n/a | yes |
