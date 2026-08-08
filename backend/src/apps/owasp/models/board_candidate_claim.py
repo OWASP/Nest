@@ -155,6 +155,11 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
         super().save(*args, **kwargs)
 
+    def set_status_approved(self) -> None:
+        """Set claim status to approved."""
+        self.status = self.Status.APPROVED
+        self.save()
+
     @staticmethod
     def bulk_save(claims: list, fields: list | None = None) -> None:  # type: ignore[override]
         """Bulk save claims.
@@ -165,3 +170,16 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
         """
         BulkSaveModel.bulk_save(BoardCandidateClaim, claims, fields=fields)
+
+    @classmethod
+    def bulk_set_status_approved(cls, claims: list[BoardCandidateClaim]) -> None:
+        """Bulk-approve and lock claims.
+
+        Args:
+            claims (list[BoardCandidateClaim]): Claims to approve.
+
+        """
+        for claim in claims:
+            claim.status = cls.Status.APPROVED
+            claim.is_locked = True
+        cls.objects.bulk_update(claims, ["is_locked", "status"])

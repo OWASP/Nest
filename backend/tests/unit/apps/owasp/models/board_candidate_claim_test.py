@@ -371,6 +371,16 @@ class TestBoardCandidateClaimModel:
 
         assert claim.is_locked is False
 
+    @patch.object(BoardCandidateClaim, "save")
+    def test_set_status_approved_sets_status_and_saves(self, mock_save):
+        """Test set_status_approved flips status to APPROVED and saves."""
+        claim = BoardCandidateClaim(name="Test Claim", status=BoardCandidateClaim.Status.SUBMITTED)
+
+        claim.set_status_approved()
+
+        assert claim.status == BoardCandidateClaim.Status.APPROVED
+        mock_save.assert_called_once()
+
     @patch("apps.owasp.models.board_candidate_claim.BulkSaveModel.bulk_save")
     def test_bulk_save_delegates(self, mock_bulk_save):
         """Test bulk_save delegates to BulkSaveModel.bulk_save."""
@@ -379,6 +389,22 @@ class TestBoardCandidateClaimModel:
         BoardCandidateClaim.bulk_save(claims, fields=["order"])
 
         mock_bulk_save.assert_called_once_with(BoardCandidateClaim, claims, fields=["order"])
+
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_bulk_set_status_approved_updates_status_lock_and_calls_bulk_update(
+        self, mock_objects
+    ):
+        """Test bulk_set_status_approved flips status, locks, and issues one bulk_update."""
+        claim_a = BoardCandidateClaim(name="Claim A", status=BoardCandidateClaim.Status.SUBMITTED)
+        claim_b = BoardCandidateClaim(name="Claim B", status=BoardCandidateClaim.Status.SUBMITTED)
+        claims = [claim_a, claim_b]
+
+        BoardCandidateClaim.bulk_set_status_approved(claims)
+
+        for claim in claims:
+            assert claim.status == BoardCandidateClaim.Status.APPROVED
+            assert claim.is_locked is True
+        mock_objects.bulk_update.assert_called_once_with(claims, ["is_locked", "status"])
 
     @patch.object(BoardCandidateClaim, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim.TimestampedModel.save")

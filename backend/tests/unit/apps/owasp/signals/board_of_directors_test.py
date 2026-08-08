@@ -32,12 +32,7 @@ class TestBoardPostSaveReEvaluateClaims:
 
         board_post_save_re_evaluate_claims(sender=None, instance=instance)
 
-        assert claim_a.status == BoardCandidateClaim.Status.APPROVED
-        assert claim_a.is_locked is True
-        assert claim_b.status == BoardCandidateClaim.Status.SUBMITTED
-        mock_claim_model.objects.bulk_update.assert_called_once_with(
-            [claim_a], ["is_locked", "status"]
-        )
+        mock_claim_model.bulk_set_status_approved.assert_called_once_with([claim_a])
         mock_logger.info.assert_called_once_with(
             "Approved %d claims after threshold change on board %d.",
             1,
@@ -60,7 +55,7 @@ class TestBoardPostSaveReEvaluateClaims:
 
         board_post_save_re_evaluate_claims(sender=None, instance=instance)
 
-        mock_claim_model.objects.bulk_update.assert_not_called()
+        mock_claim_model.bulk_set_status_approved.assert_not_called()
         mock_logger.info.assert_not_called()
 
     @patch("apps.owasp.signals.board_of_directors.logger")
@@ -83,13 +78,7 @@ class TestBoardPostSaveReEvaluateClaims:
 
         board_post_save_re_evaluate_claims(sender=None, instance=instance)
 
-        assert claim_a.status == BoardCandidateClaim.Status.APPROVED
-        assert claim_a.is_locked is True
-        assert claim_b.status == BoardCandidateClaim.Status.APPROVED
-        assert claim_b.is_locked is True
-        mock_claim_model.objects.bulk_update.assert_called_once_with(
-            [claim_a, claim_b], ["is_locked", "status"]
-        )
+        mock_claim_model.bulk_set_status_approved.assert_called_once_with([claim_a, claim_b])
         mock_logger.info.assert_called_once()
 
     @patch("apps.owasp.signals.board_of_directors.BoardCandidateClaim")
@@ -103,4 +92,4 @@ class TestBoardPostSaveReEvaluateClaims:
         board_post_save_re_evaluate_claims(sender=None, instance=instance)
 
         instance.claims.filter.assert_called_once_with(status=BoardCandidateClaim.Status.SUBMITTED)
-        mock_claim_model.objects.bulk_update.assert_not_called()
+        mock_claim_model.bulk_set_status_approved.assert_not_called()
