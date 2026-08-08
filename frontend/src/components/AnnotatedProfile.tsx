@@ -20,7 +20,6 @@ type ProfileClaim = {
 interface AnnotatedProfileProps {
   claims: ProfileClaim[]
   isCandidate: boolean
-  isReviewer: boolean
   login: string
   rawMarkdown: string
   year: string
@@ -104,8 +103,7 @@ const AnnotatedProfile = ({
   const selection = useProfileSelection(containerRef, isCandidate)
 
   const wrapped = useMemo(() => wrapClaims(rawMarkdown, claims), [rawMarkdown, claims])
-  const canCreateClaim =
-    isCandidate && selection !== null && rawMarkdown.includes(selection.text)
+  const canCreateClaim = isCandidate && selection !== null && rawMarkdown.includes(selection.text)
 
   const markdownOptions = useMemo(
     () => ({
