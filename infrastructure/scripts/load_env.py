@@ -154,41 +154,69 @@ class LoadEnv:
         for env_file in self.env_files:
             logger.info("Reading: %s", env_file)
             for name, value in self.get_env_vars(env_file).items():
-                if not value:
-                    logger.info(
-                        "  SKIP: %s (empty value, SSM Parameter Store does not accept"
-                        " empty value)",
-                        name,
-                    )
-                    skipped += 1
-                    continue
-
-                param_name = f"{self.prefix}/{name}"
-                param_type = parameter_type(name)
-                if dry_run:
-                    logger.info("  WOULD PUT: %s (%s)", param_name, param_type)
-                    uploaded += 1
-                    continue
-
-                try:
-                    ssm_client.put_parameter(
-                        Name=param_name,
-                        Value=value,
-                        Type=param_type,
-                        Overwrite=overwrite,
-                    )
-                except ClientError as exc:
-                    if exc.response["Error"]["Code"] != "ParameterAlreadyExists":
-                        raise
-                    logger.info(
-                        "  SKIP: %s (already exists, use --overwrite to force)",
-                        param_name,
-                    )
-                    skipped += 1
-                    continue
-
-                logger.info("  PUT: %s (%s)", param_name, param_type)
-                uploaded += 1
+                delta_uploaded, delta_skipped = self._upload_parameter(
+                    ssm_client,
+                    name,
+                    value,
+                    dry_run=dry_run,
+                    overwrite=overwrite,
+                )
+                uploaded += delta_uploaded
+                skipped += delta_skipped
 
         logger.info("Done. %d parameters uploaded, %d skipped.", uploaded, skipped)
         return uploaded
+
+    def _upload_parameter(
+        self,
+        ssm_client,
+        name: str,
+        value: str,
+        *,
+        dry_run: bool,
+        overwrite: bool,
+    ) -> tuple[int, int]:
+        """Upload a single variable, returning ``(uploaded, skipped)`` deltas.
+
+        Args:
+            ssm_client: The SSM client.
+            name (str): The environment variable name.
+            value (str): The environment variable value.
+            dry_run (bool): Print the parameter instead of uploading it.
+            overwrite (bool): Overwrite parameters that already exist.
+
+        Returns:
+            tuple[int, int]: The number of parameters uploaded and skipped.
+
+        """
+        if not value:
+            logger.info(
+                "  SKIP: %s (empty value, SSM Parameter Store does not accept empty value)",
+                name,
+            )
+            return 0, 1
+
+        param_name = f"{self.prefix}/{name}"
+        param_type = parameter_type(name)
+        if dry_run:
+            logger.info("  WOULD PUT: %s (%s)", param_name, param_type)
+            return 1, 0
+
+        try:
+            ssm_client.put_parameter(
+                Name=param_name,
+                Value=value,
+                Type=param_type,
+                Overwrite=overwrite,
+            )
+        except ClientError as exc:
+            if exc.response["Error"]["Code"] != "ParameterAlreadyExists":
+                raise
+            logger.info(
+                "  SKIP: %s (already exists, use --overwrite to force)",
+                param_name,
+            )
+            return 0, 1
+
+        logger.info("  PUT: %s (%s)", param_name, param_type)
+        return 1, 0

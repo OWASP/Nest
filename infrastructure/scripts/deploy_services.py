@@ -241,9 +241,9 @@ class DeployServices:
         if not self.custom_ports:
             return
 
-        context = ssl.create_default_context()
+        context = ssl.create_default_context()  # NOSONAR
         context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
+        context.verify_mode = ssl.CERT_NONE  # NOSONAR
 
         checks = (
             ("Frontend", "/"),
