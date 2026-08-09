@@ -31,7 +31,10 @@ class Staging(Base):
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {"bucket_name": AWS_MEDIA_BUCKET_NAME},
+            "OPTIONS": {
+                "bucket_name": AWS_MEDIA_BUCKET_NAME,
+                "custom_domain": None,
+            },
         },
         "staticfiles": {
             "BACKEND": "storages.backends.s3.S3Storage",
