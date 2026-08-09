@@ -6,6 +6,7 @@ output "django_ssm_parameter_arns" {
     "DJANGO_ALGOLIA_WRITE_API_KEY"   = aws_ssm_parameter.django_algolia_write_api_key.arn
     "DJANGO_ALLOWED_HOSTS"           = aws_ssm_parameter.django_allowed_hosts.arn
     "DJANGO_ALLOWED_ORIGINS"         = aws_ssm_parameter.django_allowed_origins.arn
+    "DJANGO_AWS_MEDIA_BUCKET_NAME"   = aws_ssm_parameter.django_aws_media_bucket_name.arn
     "DJANGO_AWS_STORAGE_BUCKET_NAME" = aws_ssm_parameter.django_aws_storage_bucket_name.arn
     "DJANGO_CONFIGURATION"           = aws_ssm_parameter.django_configuration.arn
     "DJANGO_DB_HOST"                 = aws_ssm_parameter.django_db_host.arn

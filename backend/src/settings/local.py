@@ -1,12 +1,8 @@
 """OWASP Nest local configuration."""
 
-from pathlib import Path
-
 from configurations import values
 
 from settings.base import Base
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Local(Base):
@@ -24,7 +20,7 @@ class Local(Base):
     DEBUG = True
     IS_LOCAL_ENVIRONMENT = True
     LOGGING = {}
-    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_ROOT = Base.BASE_DIR / "media"
     MEDIA_URL = "/media/"
     PUBLIC_IP_ADDRESS = values.Value()
 

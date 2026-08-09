@@ -35,6 +35,16 @@ run "storage_integration_apply" {
   }
 
   assert {
+    condition     = can(module.media_bucket.bucket.arn)
+    error_message = "Media bucket was not created."
+  }
+
+  assert {
+    condition     = aws_iam_policy.media_read_write.name == "${var.project_name}-${var.environment}-media-read-write"
+    error_message = "Media IAM policy name format is incorrect."
+  }
+
+  assert {
     condition     = tolist(tolist(module.fixtures_bucket.server_side_encryption_configuration.rule)[0].apply_server_side_encryption_by_default)[0].kms_master_key_id == var.kms_key_arn
     error_message = "Fixtures bucket server-side encryption KMS key ARN is incorrect."
   }
@@ -42,5 +52,15 @@ run "storage_integration_apply" {
   assert {
     condition     = tolist(tolist(module.fixtures_bucket.server_side_encryption_configuration.rule)[0].apply_server_side_encryption_by_default)[0].sse_algorithm == "aws:kms"
     error_message = "Fixtures bucket server-side encryption algorithm is not aws:kms."
+  }
+
+  assert {
+    condition     = tolist(tolist(module.media_bucket.server_side_encryption_configuration.rule)[0].apply_server_side_encryption_by_default)[0].kms_master_key_id == var.kms_key_arn
+    error_message = "Media bucket server-side encryption KMS key ARN is incorrect."
+  }
+
+  assert {
+    condition     = tolist(tolist(module.media_bucket.server_side_encryption_configuration.rule)[0].apply_server_side_encryption_by_default)[0].sse_algorithm == "aws:kms"
+    error_message = "Media bucket server-side encryption algorithm is not aws:kms."
   }
 }
