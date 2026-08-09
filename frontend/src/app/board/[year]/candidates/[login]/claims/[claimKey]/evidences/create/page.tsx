@@ -47,7 +47,7 @@ const CreateEvidencePage = () => {
       description: formData.description,
       file: formData.file,
       name: formData.name,
-      sourceUrl: formData.sourceUrl,
+      sourceUrl: formData.sourceUrl.trim() || null,
       year: Number.parseInt(year),
     }
 

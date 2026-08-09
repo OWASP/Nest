@@ -695,7 +695,7 @@ class TestCreateEvidencePydanticValidation:
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
         assert result.field_errors is not None
-        assert {fe.field for fe in result.field_errors} == {"claim_key"}
+        assert {fe.field for fe in result.field_errors} == {"claimKey"}
 
 
 class TestUpdateEvidencePydanticValidation:

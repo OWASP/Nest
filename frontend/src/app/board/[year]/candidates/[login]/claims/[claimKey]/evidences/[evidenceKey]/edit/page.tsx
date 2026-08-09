@@ -95,7 +95,7 @@ const EditEvidencePage = () => {
       file: formData.file || null,
       key: evidenceKey,
       name: formData.name,
-      sourceUrl: formData.sourceUrl,
+      sourceUrl: formData.sourceUrl.trim() || null,
       year: Number.parseInt(year),
     }
 

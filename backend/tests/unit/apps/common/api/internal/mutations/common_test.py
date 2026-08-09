@@ -53,6 +53,17 @@ class TestPydanticErrorsToFieldErrors:
 
         assert result[0].field == "inner.name"
 
+    def test_converts_snake_case_field_to_camel_case(self):
+        class SnakeModel(pydantic.BaseModel):
+            source_url: pydantic.HttpUrl
+
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            SnakeModel(source_url="not-a-url")
+
+        result = pydantic_errors_to_field_errors(exc_info.value)
+
+        assert result[0].field == "sourceUrl"
+
 
 class TestValidatePydanticInput:
     """Tests for validate_pydantic_input decorator."""

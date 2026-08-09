@@ -7,6 +7,7 @@ from typing import Any
 
 import pydantic
 import strawberry
+from strawberry.utils.str_converters import to_camel_case
 
 
 @strawberry.type
@@ -29,7 +30,7 @@ def pydantic_errors_to_field_errors(exc: pydantic.ValidationError) -> list[Field
     """
     return [
         FieldError(
-            field=".".join(str(part) for part in err["loc"]),
+            field=".".join(to_camel_case(str(part)) for part in err["loc"]),
             message=err["msg"],
         )
         for err in exc.errors()
