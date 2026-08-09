@@ -124,7 +124,9 @@ run "test_shared_bucket_permissions_non_production" {
 
   assert {
     condition = alltrue([
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}"),
       contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}/*"),
+      !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3WriteManagement"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}"),
       !contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3WriteManagement"]).Resource, "arn:aws:s3:::${var.shared_data_bucket_name}/*"),
       !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
     ])
@@ -141,7 +143,9 @@ run "test_shared_bucket_permissions_production" {
 
   assert {
     condition = alltrue([
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::owasp-nest-shared-data"),
       contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3Management"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
+      contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3WriteManagement"]).Resource, "arn:aws:s3:::owasp-nest-shared-data"),
       contains(one([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement if statement.Sid == "S3WriteManagement"]).Resource, "arn:aws:s3:::owasp-nest-shared-data/*"),
       !contains([for statement in jsondecode(data.aws_iam_policy_document.part_two.json).Statement : statement.Sid], "S3SharedBucketRestricted"),
     ])
