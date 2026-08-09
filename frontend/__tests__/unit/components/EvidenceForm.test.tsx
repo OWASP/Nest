@@ -218,9 +218,7 @@ describe('EvidenceForm', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Either a file or source URL is required.')
-        ).toBeInTheDocument()
+        expect(screen.getByText('Either a file or source URL is required.')).toBeInTheDocument()
       })
 
       const fileInput = screen.getByLabelText(/file/i)
