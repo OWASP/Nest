@@ -84,6 +84,7 @@ No resources.
 | <a name="input_backend_max_count"></a> [backend\_max\_count](#input\_backend\_max\_count) | The maximum number of backend tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_backend_min_count"></a> [backend\_min\_count](#input\_backend\_min\_count) | The minimum number of backend tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_backend_use_fargate_spot"></a> [backend\_use\_fargate\_spot](#input\_backend\_use\_fargate\_spot) | Whether to use Fargate Spot for backend tasks. | `bool` | `true` | no |
+| <a name="input_create_shared_data_bucket"></a> [create\_shared\_data\_bucket](#input\_create\_shared\_data\_bucket) | Whether to create the shared public data S3 bucket. | `bool` | `false` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | The allocated storage for the RDS database in GB. | `number` | `20` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The number of days to retain backups for. | `number` | `7` | no |
 | <a name="input_db_deletion_protection"></a> [db\_deletion\_protection](#input\_db\_deletion\_protection) | Specifies whether to prevent database deletion. | `bool` | `true` | no |
