@@ -208,7 +208,10 @@ def sync_repository(
     releases = []
     if not is_owasp_site_repository:
         existing_release_node_ids = set(
-            Release.objects.filter(repository=repository).values_list("node_id", flat=True)
+            Release.objects.filter(
+                repository=repository,
+                published_at__isnull=False,
+            ).values_list("node_id", flat=True)
             if repository.id
             else ()
         )
@@ -218,10 +221,10 @@ def sync_repository(
                 break
 
             author = User.update_data(gh_release.author)
-            releases.append(Release.update_data(gh_release, author=author, repository=repository))
+            release = Release.update_data(gh_release, author=author, repository=repository)
+            releases.append(release)
+            ActivityEvent.update_data(release)
     Release.bulk_save(releases)
-    for release in releases:
-        ActivityEvent.update_data(release)
 
     # GitHub repository contributors.
     RepositoryContributor.bulk_save(

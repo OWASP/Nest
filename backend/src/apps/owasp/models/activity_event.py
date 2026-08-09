@@ -119,8 +119,10 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
     @staticmethod
     def build_for_release(release) -> list[tuple]:
         """Return event tuples for a Release."""
-        occurred_at = release.published_at or release.created_at
-        return [(ActivityEvent.ActivityType.RELEASE_PUBLISHED, occurred_at, release.author)]
+        if release.published_at is None:
+            return []
+
+        return [(ActivityEvent.ActivityType.RELEASE_PUBLISHED, release.published_at, release.author)]
 
     @staticmethod
     def update_data(obj) -> None:
