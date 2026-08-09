@@ -147,6 +147,7 @@ export type ClaimResult = {
   __typename?: 'ClaimResult';
   claim?: Maybe<BoardCandidateClaimNode>;
   code?: Maybe<Scalars['String']['output']>;
+  fieldErrors?: Maybe<Array<FieldError>>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
 };
@@ -289,6 +290,7 @@ export type EvidenceResult = {
   __typename?: 'EvidenceResult';
   code?: Maybe<Scalars['String']['output']>;
   evidence?: Maybe<BoardCandidateClaimEvidenceNode>;
+  fieldErrors?: Maybe<Array<FieldError>>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
 };
@@ -299,6 +301,12 @@ export enum ExperienceLevelEnum {
   Expert = 'EXPERT',
   Intermediate = 'INTERMEDIATE'
 }
+
+export type FieldError = {
+  __typename?: 'FieldError';
+  field: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
 
 export type FloatComparisonFilterLookup = {
   /** Exact match. Filter will be skipped on `null` value */
@@ -1248,6 +1256,7 @@ export type ReorderClaimsResult = {
   __typename?: 'ReorderClaimsResult';
   claims?: Maybe<Array<BoardCandidateClaimNode>>;
   code?: Maybe<Scalars['String']['output']>;
+  fieldErrors?: Maybe<Array<FieldError>>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
 };
@@ -1306,6 +1315,7 @@ export type RepositoryNodeRecentMilestonesArgs = {
 export type ReviewResult = {
   __typename?: 'ReviewResult';
   code?: Maybe<Scalars['String']['output']>;
+  fieldErrors?: Maybe<Array<FieldError>>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
   review?: Maybe<BoardCandidateClaimReviewNode>;
