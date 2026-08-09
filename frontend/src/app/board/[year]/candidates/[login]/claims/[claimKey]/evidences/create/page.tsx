@@ -51,22 +51,13 @@ const CreateEvidencePage = () => {
       year: Number.parseInt(year),
     }
 
-    const result = await createEvidence({
-      variables: { input },
-      update(cache, { data }) {
-        const newEvidence = data?.createBoardCandidateClaimEvidence?.evidence
-        if (!newEvidence) return
-        const existing = cache.readQuery({
-          query: GetClaimAndEvidencesDocument,
-          variables: {
-            key: claimKey,
-            login,
-            sessionLogin: session?.user?.login ?? '',
-            year: Number.parseInt(year),
-          },
-        })
-        if (existing) {
-          cache.writeQuery({
+    try {
+      const result = await createEvidence({
+        variables: { input },
+        update(cache, { data }) {
+          const newEvidence = data?.createBoardCandidateClaimEvidence?.evidence
+          if (!newEvidence) return
+          const existing = cache.readQuery({
             query: GetClaimAndEvidencesDocument,
             variables: {
               key: claimKey,
@@ -74,41 +65,62 @@ const CreateEvidencePage = () => {
               sessionLogin: session?.user?.login ?? '',
               year: Number.parseInt(year),
             },
-            data: {
-              ...existing,
-              boardCandidateClaimEvidences: [...existing.boardCandidateClaimEvidences, newEvidence],
-            },
+          })
+          if (existing) {
+            cache.writeQuery({
+              query: GetClaimAndEvidencesDocument,
+              variables: {
+                key: claimKey,
+                login,
+                sessionLogin: session?.user?.login ?? '',
+                year: Number.parseInt(year),
+              },
+              data: {
+                ...existing,
+                boardCandidateClaimEvidences: [
+                  ...existing.boardCandidateClaimEvidences,
+                  newEvidence,
+                ],
+              },
+            })
+          }
+        },
+      })
+
+      const payload = result.data?.createBoardCandidateClaimEvidence
+      if (!payload?.ok) {
+        if (payload?.fieldErrors?.length) {
+          setBackendErrors(
+            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
+          )
+        } else {
+          addToast({
+            description: payload?.message ?? 'Evidence creation failed.',
+            timeout: 3000,
+            shouldShowTimeoutProgress: true,
+            color: 'danger',
           })
         }
-      },
-    })
-
-    const payload = result.data?.createBoardCandidateClaimEvidence
-    if (!payload?.ok) {
-      if (payload?.fieldErrors?.length) {
-        setBackendErrors(
-          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-        )
-      } else {
-        addToast({
-          description: payload?.message ?? 'Evidence creation failed.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
+        return
       }
-      return
+
+      addToast({
+        description: 'Evidence created successfully!',
+        title: 'Success',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+      })
+
+      router.push(`/board/${year}/candidates/${login}/claims/${claimKey}`)
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Evidence creation failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
-
-    addToast({
-      description: 'Evidence created successfully!',
-      title: 'Success',
-      timeout: 3000,
-      shouldShowTimeoutProgress: true,
-      color: 'success',
-    })
-
-    router.push(`/board/${year}/candidates/${login}/claims/${claimKey}`)
   }
 
   return (

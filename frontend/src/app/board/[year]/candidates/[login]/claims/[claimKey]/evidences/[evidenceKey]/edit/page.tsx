@@ -99,49 +99,58 @@ const EditEvidencePage = () => {
       year: Number.parseInt(year),
     }
 
-    const result = await updateEvidence({
-      variables: { input },
-      update(cache, { data }) {
-        const updatedEvidence = data?.updateBoardCandidateClaimEvidence?.evidence
-        if (!updatedEvidence) return
-        cache.writeQuery({
-          query: GetBoardCandidateClaimEvidenceDocument,
-          variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
-          data: { boardCandidateClaimEvidence: updatedEvidence },
-        })
-      },
-    })
+    try {
+      const result = await updateEvidence({
+        variables: { input },
+        update(cache, { data }) {
+          const updatedEvidence = data?.updateBoardCandidateClaimEvidence?.evidence
+          if (!updatedEvidence) return
+          cache.writeQuery({
+            query: GetBoardCandidateClaimEvidenceDocument,
+            variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
+            data: { boardCandidateClaimEvidence: updatedEvidence },
+          })
+        },
+      })
 
-    const payload = result.data?.updateBoardCandidateClaimEvidence
-    if (!payload?.ok) {
-      if (payload?.fieldErrors?.length) {
-        setBackendErrors(
-          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-        )
-      } else {
-        addToast({
-          description: payload?.message ?? 'Evidence update failed.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
+      const payload = result.data?.updateBoardCandidateClaimEvidence
+      if (!payload?.ok) {
+        if (payload?.fieldErrors?.length) {
+          setBackendErrors(
+            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
+          )
+        } else {
+          addToast({
+            description: payload?.message ?? 'Evidence update failed.',
+            timeout: 3000,
+            shouldShowTimeoutProgress: true,
+            color: 'danger',
+          })
+        }
+        return
       }
-      return
-    }
 
-    addToast({
-      description: 'Evidence updated successfully!',
-      title: 'Success',
-      timeout: 3000,
-      shouldShowTimeoutProgress: true,
-      color: 'success',
-    })
+      addToast({
+        description: 'Evidence updated successfully!',
+        title: 'Success',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+      })
 
-    const updatedEvidence = payload.evidence
-    if (updatedEvidence?.key) {
-      router.push(
-        `/board/${year}/candidates/${login}/claims/${claimKey}/evidences/${updatedEvidence.key}`
-      )
+      const updatedEvidence = payload.evidence
+      if (updatedEvidence?.key) {
+        router.push(
+          `/board/${year}/candidates/${login}/claims/${claimKey}/evidences/${updatedEvidence.key}`
+        )
+      }
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Evidence update failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 

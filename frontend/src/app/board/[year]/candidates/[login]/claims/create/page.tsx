@@ -75,51 +75,60 @@ const CreateClaimPage = () => {
       year: Number.parseInt(year),
     }
 
-    const result = await createClaim({
-      variables: { input },
-      update(cache, { data }) {
-        const newClaim = data?.createBoardCandidateClaim?.claim
-        if (!newClaim) return
-        const existing = cache.readQuery({
-          query: GetBoardCandidateClaimsDocument,
-          variables: { login, year: Number.parseInt(year) },
-        })
-        if (existing) {
-          cache.writeQuery({
+    try {
+      const result = await createClaim({
+        variables: { input },
+        update(cache, { data }) {
+          const newClaim = data?.createBoardCandidateClaim?.claim
+          if (!newClaim) return
+          const existing = cache.readQuery({
             query: GetBoardCandidateClaimsDocument,
             variables: { login, year: Number.parseInt(year) },
-            data: { boardCandidateClaims: [...existing.boardCandidateClaims, newClaim] },
+          })
+          if (existing) {
+            cache.writeQuery({
+              query: GetBoardCandidateClaimsDocument,
+              variables: { login, year: Number.parseInt(year) },
+              data: { boardCandidateClaims: [...existing.boardCandidateClaims, newClaim] },
+            })
+          }
+        },
+      })
+
+      const payload = result.data?.createBoardCandidateClaim
+      if (!payload?.ok) {
+        if (payload?.fieldErrors?.length) {
+          setBackendErrors(
+            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
+          )
+        } else {
+          addToast({
+            description: payload?.message ?? 'Claim creation failed.',
+            timeout: 3000,
+            shouldShowTimeoutProgress: true,
+            color: 'danger',
           })
         }
-      },
-    })
-
-    const payload = result.data?.createBoardCandidateClaim
-    if (!payload?.ok) {
-      if (payload?.fieldErrors?.length) {
-        setBackendErrors(
-          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-        )
-      } else {
-        addToast({
-          description: payload?.message ?? 'Claim creation failed.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
+        return
       }
-      return
+
+      addToast({
+        description: 'Claim created successfully!',
+        title: 'Success',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+      })
+
+      router.push(`/board/${year}/candidates/${login}/claims`)
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Claim creation failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
-
-    addToast({
-      description: 'Claim created successfully!',
-      title: 'Success',
-      timeout: 3000,
-      shouldShowTimeoutProgress: true,
-      color: 'success',
-    })
-
-    router.push(`/board/${year}/candidates/${login}/claims`)
   }
 
   return (

@@ -676,7 +676,8 @@ class TestCreateEvidencePydanticValidation:
         )
 
         if url:
-            assert str(model.source_url).startswith("https://example.com")
+            assert model.source_url.host == "example.com"
+            assert model.source_url.scheme == "https"
         else:
             assert model.source_url is None
 
@@ -718,7 +719,8 @@ class TestUpdateEvidencePydanticValidation:
             claim_key="k", key="e", source_url="https://example.com/x", year=2025
         )
 
-        assert str(model.source_url).startswith("https://example.com")
+        assert model.source_url.host == "example.com"
+        assert model.source_url.scheme == "https"
 
     def test_resolver_returns_field_errors_when_pydantic_fails(self):
         with pytest.raises(pydantic.ValidationError) as exc_info:

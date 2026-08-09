@@ -87,47 +87,56 @@ const EditClaimPage = () => {
       year: Number.parseInt(year),
     }
 
-    const result = await updateClaim({
-      variables: { input },
-      update(cache, { data }) {
-        const updatedClaim = data?.updateBoardCandidateClaim?.claim
-        if (!updatedClaim) return
-        cache.writeQuery({
-          query: GetBoardCandidateClaimDocument,
-          variables: { key: claimKey, login, year: Number.parseInt(year) },
-          data: { boardCandidateClaim: updatedClaim },
-        })
-      },
-    })
+    try {
+      const result = await updateClaim({
+        variables: { input },
+        update(cache, { data }) {
+          const updatedClaim = data?.updateBoardCandidateClaim?.claim
+          if (!updatedClaim) return
+          cache.writeQuery({
+            query: GetBoardCandidateClaimDocument,
+            variables: { key: claimKey, login, year: Number.parseInt(year) },
+            data: { boardCandidateClaim: updatedClaim },
+          })
+        },
+      })
 
-    const payload = result.data?.updateBoardCandidateClaim
-    if (!payload?.ok) {
-      if (payload?.fieldErrors?.length) {
-        setBackendErrors(
-          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-        )
-      } else {
-        addToast({
-          description: payload?.message ?? 'Claim update failed.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
+      const payload = result.data?.updateBoardCandidateClaim
+      if (!payload?.ok) {
+        if (payload?.fieldErrors?.length) {
+          setBackendErrors(
+            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
+          )
+        } else {
+          addToast({
+            description: payload?.message ?? 'Claim update failed.',
+            timeout: 3000,
+            shouldShowTimeoutProgress: true,
+            color: 'danger',
+          })
+        }
+        return
       }
-      return
-    }
 
-    addToast({
-      description: 'Claim updated successfully!',
-      title: 'Success',
-      timeout: 3000,
-      shouldShowTimeoutProgress: true,
-      color: 'success',
-    })
+      addToast({
+        description: 'Claim updated successfully!',
+        title: 'Success',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+      })
 
-    const updatedClaim = payload.claim
-    if (updatedClaim?.key) {
-      router.push(`/board/${year}/candidates/${login}/claims/${updatedClaim.key}`)
+      const updatedClaim = payload.claim
+      if (updatedClaim?.key) {
+        router.push(`/board/${year}/candidates/${login}/claims/${updatedClaim.key}`)
+      }
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Claim update failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 

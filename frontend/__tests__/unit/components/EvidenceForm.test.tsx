@@ -200,5 +200,38 @@ describe('EvidenceForm', () => {
         expect(screen.queryByText('Name is required')).not.toBeInTheDocument()
       })
     })
+
+    it('clears sourceUrl backend error when a file is selected', async () => {
+      render(
+        <TestWrapper
+          initialBackendErrors={{ sourceUrl: 'Either a file or source URL is required.' }}
+          initialData={{
+            name: 'Valid Name',
+            description: 'Valid description',
+            sourceUrl: '',
+            file: null,
+          }}
+        />
+      )
+
+      const submitButton = screen.getByRole('button', { name: /add evidence/i })
+      fireEvent.click(submitButton)
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Either a file or source URL is required.')
+        ).toBeInTheDocument()
+      })
+
+      const fileInput = screen.getByLabelText(/file/i)
+      const file = new File(['dummy content'], 'test.pdf', { type: 'application/pdf' })
+      fireEvent.change(fileInput, { target: { files: [file] } })
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Either a file or source URL is required.')
+        ).not.toBeInTheDocument()
+      })
+    })
   })
 })
