@@ -122,11 +122,13 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
         if release.published_at is None:
             return []
 
-        return [(ActivityEvent.ActivityType.RELEASE_PUBLISHED, release.published_at, release.author)]
+        return [
+            (ActivityEvent.ActivityType.RELEASE_PUBLISHED, release.published_at, release.author)
+        ]
 
     @staticmethod
-    def update_data(obj) -> None:
-        """Create ActivityEvent row(s) for a saved GitHub model instance if they do not exist."""
+    def update_data(obj) -> list["ActivityEvent"]:
+        """Return unsaved ActivityEvent instances for a GitHub model object."""
         handler_name = ActivityEvent.HANDLERS.get(type(obj).__name__)
         if handler_name is None:
             logger.error(
@@ -140,17 +142,22 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
         events = handler(obj)
         content_type = ContentType.objects.get_for_model(obj)
 
-        for activity_type, occurred_at, github_user in events:
-            if occurred_at is None:
-                continue
-
-            ActivityEvent.objects.get_or_create(
+        return [
+            ActivityEvent(
                 activity_type=activity_type,
                 content_type=content_type,
                 object_id=obj.pk,
                 occurred_at=occurred_at,
-                defaults={
-                    "github_user": github_user,
-                    "github_repository": obj.repository,
-                },
+                github_user=github_user,
+                github_repository=obj.repository,
             )
+            for activity_type, occurred_at, github_user in events
+            if occurred_at is not None
+        ]
+
+    @staticmethod
+    def bulk_save_for_objects(objects: list) -> None:
+        """Bulk-insert ActivityEvent rows for source objects, skipping duplicates."""
+        events = [event for obj in objects for event in ActivityEvent.update_data(obj)]
+        if events:
+            ActivityEvent.objects.bulk_create(events, ignore_conflicts=True)

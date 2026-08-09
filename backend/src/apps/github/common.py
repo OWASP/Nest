@@ -116,6 +116,7 @@ def sync_repository(
                 if (latest_updated_issue := repository.latest_updated_issue)
                 else month_ago
             )
+            issues = []
             for gh_issue in gh_repository.get_issues(**kwargs):
                 if gh_issue.pull_request:  # Skip pull requests.
                     continue
@@ -139,7 +140,7 @@ def sync_repository(
                     milestone=milestone,
                     repository=repository,
                 )
-                ActivityEvent.update_data(issue)
+                issues.append(issue)
 
                 # Assignees.
                 issue.assignees.clear()
@@ -154,6 +155,7 @@ def sync_repository(
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
+            ActivityEvent.bulk_save_for_objects(issues)
         else:
             logger.info("Skipping issues sync for %s", repository.name)
 
@@ -168,6 +170,7 @@ def sync_repository(
             if (latest_updated_pull_request := repository.latest_updated_pull_request)
             else month_ago
         )
+        pull_requests = []
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
             if gh_pull_request.updated_at < until:
                 break
@@ -188,7 +191,7 @@ def sync_repository(
                 milestone=milestone,
                 repository=repository,
             )
-            ActivityEvent.update_data(pull_request)
+            pull_requests.append(pull_request)
 
             # Assignees.
             pull_request.assignees.clear()
@@ -203,6 +206,7 @@ def sync_repository(
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
                     logger.exception("Couldn't get GitHub pull request label %s", pull_request.url)
+        ActivityEvent.bulk_save_for_objects(pull_requests)
 
     # GitHub repository releases.
     releases = []
@@ -223,8 +227,8 @@ def sync_repository(
             author = User.update_data(gh_release.author)
             release = Release.update_data(gh_release, author=author, repository=repository)
             releases.append(release)
-            ActivityEvent.update_data(release)
     Release.bulk_save(releases)
+    ActivityEvent.bulk_save_for_objects(releases)
 
     # GitHub repository contributors.
     RepositoryContributor.bulk_save(
