@@ -11,6 +11,7 @@ src = [
   ".github/scripts",
   "infrastructure/scripts",
   "infrastructure/tests",
+  "tools/security",
   "tools/tests",
 ]
 
@@ -86,8 +87,11 @@ ignore = [
 ".github/scripts/*.py" = [
   "INP001", # Standalone CI scripts; not importable packages.
 ]
+"tools/security/*.py" = [
+  "INP001", # Standalone maintainer scripts; not importable packages.
+]
 
 [lint.isort]
 detect-same-package = false
-known-first-party = ["apps", "docker_compose_check", "scripts", "serve", "tests"]
+known-first-party = ["apps", "docker_compose_check", "renew_security_txt", "scripts", "serve", "tests"]
 known-third-party = ["github"]

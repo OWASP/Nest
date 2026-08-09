@@ -1,9 +1,25 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetClaimsAndReviewsQueryVariables = Types.Exact<{
-  sessionLogin: Types.Scalars['String']['input'];
-  year: Types.Scalars['Int']['input'];
+export type ClaimStatusEnum =
+  | 'APPROVED'
+  | 'DISCARDED'
+  | 'DRAFT'
+  | 'REJECTED'
+  | 'SUBMITTED'
+  | 'WITHDRAWN';
+
+export type ReviewStatusEnum =
+  | 'APPROVED'
+  | 'REJECTED';
+
+export type GetClaimsAndReviewsQueryVariables = Exact<{
+  sessionLogin: string;
+  year: number;
 }>;
 
 
