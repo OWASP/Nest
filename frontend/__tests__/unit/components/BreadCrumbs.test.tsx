@@ -61,7 +61,7 @@ describe('BreadCrumbRenderer', () => {
     const { container } = render(<BreadCrumbRenderer items={mockItems} />)
 
     const separators = container.querySelectorAll('ol li svg')
-    expect(separators.length).toBeGreaterThan(0)
+    expect(separators.length).toBe(mockItems.length - 1)
   })
 
   test('handles single item (home only)', () => {

@@ -29,7 +29,10 @@ export default function BreadCrumbsWrapper() {
             return (
               <HeroUIBreadcrumbItem key={item.path}>
                 {isLast ? (
-                  <span className="cursor-default font-semibold text-gray-800 dark:text-gray-100">
+                  <span
+                    aria-current="page"
+                    className="cursor-default font-semibold text-gray-800 dark:text-gray-100"
+                  >
                     <TruncatedText
                       text={item.title}
                       className="max-w-xs sm:max-w-sm md:max-w-none"

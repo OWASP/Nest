@@ -57,6 +57,7 @@ const config: Config = {
   moduleDirectories: ['node_modules', 'src'],
   transformIgnorePatterns: [
     '<rootDir>/node_modules/(?!@zag-js|@heroui|@internationalized|react-aria|react-stately|@react-aria|@react-stately)',
+    '<rootDir>/node_modules/.pnpm/(?!@heroui\\+|@internationalized\\+|react-aria|react-stately|@react-aria\\+|@react-stately\\+)',
   ],
 }
 
