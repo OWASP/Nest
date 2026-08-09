@@ -148,43 +148,61 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
       reject: 'Claim rejected successfully.',
     }
 
-    try {
-      let result
+    const showFailureToast = (message: string | null | undefined, fallback: string) => {
+      addToast({
+        title: 'Error',
+        description: message ?? fallback,
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
+      resetConfirm()
+    }
 
+    try {
       switch (confirmAction) {
-        case 'submit':
-          result = await submitClaim({
+        case 'submit': {
+          const result = await submitClaim({
             variables: { input: { key: claim.key, year: Number.parseInt(year) } },
             update: (cache, { data }) => updateClaimsCache(cache, data?.submitBoardCandidateClaim),
           })
-          if (!result.data?.submitBoardCandidateClaim?.ok) {
-            throw new Error(result.data?.submitBoardCandidateClaim?.message ?? 'Submit failed.')
+          const payload = result.data?.submitBoardCandidateClaim
+          if (!payload?.ok) {
+            showFailureToast(payload?.message, 'Submit failed.')
+            return
           }
           break
-        case 'discard':
-          result = await discardClaim({
+        }
+        case 'discard': {
+          const result = await discardClaim({
             variables: { input: { key: claim.key, year: Number.parseInt(year) } },
             update: (cache, { data }) => updateClaimsCache(cache, data?.discardBoardCandidateClaim),
           })
-          if (!result.data?.discardBoardCandidateClaim?.ok) {
-            throw new Error(result.data?.discardBoardCandidateClaim?.message ?? 'Discard failed.')
+          const payload = result.data?.discardBoardCandidateClaim
+          if (!payload?.ok) {
+            showFailureToast(payload?.message, 'Discard failed.')
+            return
           }
           break
-        case 'withdraw':
-          result = await withdrawClaim({
+        }
+        case 'withdraw': {
+          const result = await withdrawClaim({
             variables: {
               input: { key: claim.key, withdrawnReason: reason ?? '', year: Number.parseInt(year) },
             },
             update: (cache, { data }) =>
               updateClaimsCache(cache, data?.withdrawBoardCandidateClaim),
           })
-          if (!result.data?.withdrawBoardCandidateClaim?.ok) {
-            throw new Error(result.data?.withdrawBoardCandidateClaim?.message ?? 'Withdraw failed.')
+          const payload = result.data?.withdrawBoardCandidateClaim
+          if (!payload?.ok) {
+            showFailureToast(payload?.message, 'Withdraw failed.')
+            return
           }
           break
+        }
         case 'approve':
-        case 'reject':
-          result = await createReview({
+        case 'reject': {
+          const result = await createReview({
             variables: {
               input: {
                 claimKey: claim.key,
@@ -200,13 +218,13 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
             update: (cache, { data }) =>
               updateReviewsCache(cache, data?.createBoardCandidateClaimReview),
           })
-          if (!result.data?.createBoardCandidateClaimReview?.ok) {
-            throw new Error(
-              result.data?.createBoardCandidateClaimReview?.message ??
-                `${upperFirst(confirmAction)} failed.`
-            )
+          const payload = result.data?.createBoardCandidateClaimReview
+          if (!payload?.ok) {
+            showFailureToast(payload?.message, `${upperFirst(confirmAction)} failed.`)
+            return
           }
           break
+        }
       }
       addToast({
         title: 'Success',
@@ -223,14 +241,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
         router.push(`/board/${year}/candidates/${login}/claims`)
       }
     } catch (error) {
-      addToast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Claim action failed.',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-      })
-      resetConfirm()
+      showFailureToast(error instanceof Error ? error.message : null, 'Claim action failed.')
     } finally {
       setIsLoading(false)
     }

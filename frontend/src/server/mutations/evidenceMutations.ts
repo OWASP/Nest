@@ -6,6 +6,10 @@ export const CREATE_CLAIM_EVIDENCE = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       evidence {
         id
         createdAt
@@ -26,6 +30,10 @@ export const REMOVE_CLAIM_EVIDENCE = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       evidence {
         id
         createdAt
@@ -46,6 +54,10 @@ export const UPDATE_CLAIM_EVIDENCE = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       evidence {
         id
         createdAt

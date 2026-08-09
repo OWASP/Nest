@@ -9,7 +9,6 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetBoardCandidateDocument } from 'types/__generated__/boardQueries.generated'
 import { CreateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -25,6 +24,7 @@ const CreateClaimPage = () => {
     description: '',
     name: '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   const {
     data: candidateGraphQLData,
@@ -69,64 +69,65 @@ const CreateClaimPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        description: formData.description,
-        name: formData.name,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      description: formData.description,
+      name: formData.name,
+      year: Number.parseInt(year),
+    }
 
-      const result = await createClaim({
-        variables: { input },
-        update(cache, { data }) {
-          const newClaim = data?.createBoardCandidateClaim?.claim
-          if (!newClaim) return
-          const existing = cache.readQuery({
+    const result = await createClaim({
+      variables: { input },
+      update(cache, { data }) {
+        const newClaim = data?.createBoardCandidateClaim?.claim
+        if (!newClaim) return
+        const existing = cache.readQuery({
+          query: GetBoardCandidateClaimsDocument,
+          variables: { login, year: Number.parseInt(year) },
+        })
+        if (existing) {
+          cache.writeQuery({
             query: GetBoardCandidateClaimsDocument,
             variables: { login, year: Number.parseInt(year) },
+            data: { boardCandidateClaims: [...existing.boardCandidateClaims, newClaim] },
           })
-          if (existing) {
-            cache.writeQuery({
-              query: GetBoardCandidateClaimsDocument,
-              variables: { login, year: Number.parseInt(year) },
-              data: { boardCandidateClaims: [...existing.boardCandidateClaims, newClaim] },
-            })
-          }
-        },
-      })
+        }
+      },
+    })
 
-      if (!result.data?.createBoardCandidateClaim?.ok) {
-        throw new Error(result.data?.createBoardCandidateClaim?.message ?? 'Claim creation failed.')
-      }
-
-      addToast({
-        description: 'Claim created successfully!',
-        title: 'Success',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'success',
-      })
-
-      router.push(`/board/${year}/candidates/${login}/claims`)
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
+    const payload = result.data?.createBoardCandidateClaim
+    if (!payload?.ok) {
+      if (payload?.fieldErrors?.length) {
+        setBackendErrors(
+          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
+        )
+      } else {
         addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
+          description: payload?.message ?? 'Claim creation failed.',
           timeout: 3000,
           shouldShowTimeoutProgress: true,
           color: 'danger',
         })
       }
-      throw err
+      return
     }
+
+    addToast({
+      description: 'Claim created successfully!',
+      title: 'Success',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'success',
+    })
+
+    router.push(`/board/${year}/candidates/${login}/claims`)
   }
 
   return (
     <ClaimForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Create Claim"

@@ -7,8 +7,10 @@ const mockOnSubmit = jest.fn()
 
 const TestWrapper = ({
   initialData,
+  initialBackendErrors,
 }: {
   initialData?: { name: string; description: string; sourceUrl: string; file: File | null }
+  initialBackendErrors?: Record<string, string>
 }) => {
   const [formData, setFormData] = useState(
     initialData ?? {
@@ -18,11 +20,16 @@ const TestWrapper = ({
       file: null as File | null,
     }
   )
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>(
+    initialBackendErrors ?? {}
+  )
 
   return (
     <EvidenceForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={mockOnSubmit}
       loading={false}
       title="Add Evidence"
@@ -144,23 +151,40 @@ describe('EvidenceForm', () => {
     })
   })
 
-  describe('GraphQL backend errors', () => {
-    it('displays and clears backend validation errors on name field', async () => {
-      const gqlError = {
-        graphQLErrors: [
-          { message: 'Name is required', extensions: { code: 'VALIDATION_ERROR', field: 'name' } },
-        ],
-      }
-      mockOnSubmit.mockRejectedValue(gqlError)
+  describe('backend errors prop', () => {
+    it('displays backend error passed via prop after fields are touched', async () => {
+      render(
+        <TestWrapper
+          initialBackendErrors={{ name: 'Name is required' }}
+          initialData={{
+            name: 'Something',
+            description: 'Valid description',
+            sourceUrl: 'https://example.com/doc',
+            file: null,
+          }}
+        />
+      )
 
-      render(<TestWrapper />)
+      const submitButton = screen.getByRole('button', { name: /add evidence/i })
+      fireEvent.click(submitButton)
 
-      const nameInput = screen.getByPlaceholderText('Enter evidence name')
-      fireEvent.change(nameInput, { target: { value: 'Valid Name' } })
-      const descInput = screen.getByPlaceholderText('Enter evidence description')
-      fireEvent.change(descInput, { target: { value: 'Valid description' } })
-      const urlInput = screen.getByPlaceholderText('https://example.com/document.pdf')
-      fireEvent.change(urlInput, { target: { value: 'https://example.com/doc' } })
+      await waitFor(() => {
+        expect(screen.getByText('Name is required')).toBeInTheDocument()
+      })
+    })
+
+    it('clears backend error for the field when the user edits it', async () => {
+      render(
+        <TestWrapper
+          initialBackendErrors={{ name: 'Name is required' }}
+          initialData={{
+            name: 'Something',
+            description: 'Valid description',
+            sourceUrl: 'https://example.com/doc',
+            file: null,
+          }}
+        />
+      )
 
       const submitButton = screen.getByRole('button', { name: /add evidence/i })
       fireEvent.click(submitButton)
@@ -169,47 +193,11 @@ describe('EvidenceForm', () => {
         expect(screen.getByText('Name is required')).toBeInTheDocument()
       })
 
+      const nameInput = screen.getByPlaceholderText('Enter evidence name')
       fireEvent.change(nameInput, { target: { value: 'Updated Name' } })
 
       await waitFor(() => {
         expect(screen.queryByText('Name is required')).not.toBeInTheDocument()
-      })
-    })
-
-    it('clears backend file error when file is changed after validation error', async () => {
-      const gqlError = {
-        graphQLErrors: [
-          { message: 'File is too large', extensions: { code: 'VALIDATION_ERROR', field: 'file' } },
-        ],
-      }
-      mockOnSubmit.mockRejectedValue(gqlError)
-
-      render(<TestWrapper />)
-
-      const nameInput = screen.getByPlaceholderText('Enter evidence name')
-      fireEvent.change(nameInput, { target: { value: 'Valid Name' } })
-      const descInput = screen.getByPlaceholderText('Enter evidence description')
-      fireEvent.change(descInput, { target: { value: 'Valid description' } })
-      const urlInput = screen.getByPlaceholderText('https://example.com/document.pdf')
-      fireEvent.change(urlInput, { target: { value: 'https://example.com/doc' } })
-
-      const submitButton = screen.getByRole('button', { name: /add evidence/i })
-      fireEvent.click(submitButton)
-
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalled()
-      })
-
-      mockOnSubmit.mockResolvedValue(undefined)
-
-      const fileInput = screen.getByLabelText(/file/i)
-      const file = new File(['content'], 'test.pdf', { type: 'application/pdf' })
-      fireEvent.change(fileInput, { target: { files: [file] } })
-
-      fireEvent.click(submitButton)
-
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledTimes(2)
       })
     })
   })

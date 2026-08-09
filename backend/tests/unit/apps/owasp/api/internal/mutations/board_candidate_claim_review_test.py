@@ -2,13 +2,16 @@
 
 from unittest.mock import MagicMock, patch
 
+import pydantic
 import pytest
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
 from apps.owasp.api.internal.mutations.board_candidate_claim_review import (
     BoardCandidateClaimReviewMutations,
+    CreateReviewPydanticInput,
 )
+from apps.owasp.api.internal.nodes.enum import ReviewStatusEnum
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_review import BoardCandidateClaimReview
 
@@ -43,6 +46,7 @@ def _make_input_data(
     data.status.value = status
     data.year = year
     data.notes = notes
+    data.to_pydantic.return_value = data
     return data
 
 
@@ -324,3 +328,40 @@ class TestCreateBoardCandidateClaimReview:
 
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
+
+
+class TestCreateReviewPydanticValidation:
+    """Tests for CreateReviewPydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_claim_key_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            CreateReviewPydanticInput(
+                claim_key="x" * 101,
+                claim_member_login="alice",
+                status=ReviewStatusEnum.APPROVED,
+                year=2025,
+            )
+
+        assert any(err["loc"] == ("claim_key",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            CreateReviewPydanticInput(
+                claim_key="x" * 101,
+                claim_member_login="alice",
+                status=ReviewStatusEnum.APPROVED,
+                year=2025,
+            )
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimReviewMutations().create_board_candidate_claim_review(
+            info, data
+        )
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"claim_key"}

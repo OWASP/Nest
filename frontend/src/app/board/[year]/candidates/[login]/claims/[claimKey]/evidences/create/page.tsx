@@ -7,7 +7,6 @@ import React, { useState } from 'react'
 
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import { CreateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -25,6 +24,7 @@ const CreateEvidencePage = () => {
     file: null as File | null,
     sourceUrl: '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   if (isSyncing) {
     return <LoadingSpinner />
@@ -42,22 +42,31 @@ const CreateEvidencePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        claimKey: claimKey,
-        description: formData.description,
-        file: formData.file,
-        name: formData.name,
-        sourceUrl: formData.sourceUrl,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      claimKey: claimKey,
+      description: formData.description,
+      file: formData.file,
+      name: formData.name,
+      sourceUrl: formData.sourceUrl,
+      year: Number.parseInt(year),
+    }
 
-      const result = await createEvidence({
-        variables: { input },
-        update(cache, { data }) {
-          const newEvidence = data?.createBoardCandidateClaimEvidence?.evidence
-          if (!newEvidence) return
-          const existing = cache.readQuery({
+    const result = await createEvidence({
+      variables: { input },
+      update(cache, { data }) {
+        const newEvidence = data?.createBoardCandidateClaimEvidence?.evidence
+        if (!newEvidence) return
+        const existing = cache.readQuery({
+          query: GetClaimAndEvidencesDocument,
+          variables: {
+            key: claimKey,
+            login,
+            sessionLogin: session?.user?.login ?? '',
+            year: Number.parseInt(year),
+          },
+        })
+        if (existing) {
+          cache.writeQuery({
             query: GetClaimAndEvidencesDocument,
             variables: {
               key: claimKey,
@@ -65,62 +74,49 @@ const CreateEvidencePage = () => {
               sessionLogin: session?.user?.login ?? '',
               year: Number.parseInt(year),
             },
+            data: {
+              ...existing,
+              boardCandidateClaimEvidences: [...existing.boardCandidateClaimEvidences, newEvidence],
+            },
           })
-          if (existing) {
-            cache.writeQuery({
-              query: GetClaimAndEvidencesDocument,
-              variables: {
-                key: claimKey,
-                login,
-                sessionLogin: session?.user?.login ?? '',
-                year: Number.parseInt(year),
-              },
-              data: {
-                ...existing,
-                boardCandidateClaimEvidences: [
-                  ...existing.boardCandidateClaimEvidences,
-                  newEvidence,
-                ],
-              },
-            })
-          }
-        },
-      })
+        }
+      },
+    })
 
-      if (!result.data?.createBoardCandidateClaimEvidence?.ok) {
-        throw new Error(
-          result.data?.createBoardCandidateClaimEvidence?.message ?? 'Evidence creation failed.'
+    const payload = result.data?.createBoardCandidateClaimEvidence
+    if (!payload?.ok) {
+      if (payload?.fieldErrors?.length) {
+        setBackendErrors(
+          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
         )
-      }
-
-      addToast({
-        description: 'Evidence created successfully!',
-        title: 'Success',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'success',
-      })
-
-      router.push(`/board/${year}/candidates/${login}/claims/${claimKey}`)
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
+      } else {
         addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
+          description: payload?.message ?? 'Evidence creation failed.',
           timeout: 3000,
           shouldShowTimeoutProgress: true,
           color: 'danger',
         })
       }
-      throw err
+      return
     }
+
+    addToast({
+      description: 'Evidence created successfully!',
+      title: 'Success',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'success',
+    })
+
+    router.push(`/board/${year}/candidates/${login}/claims/${claimKey}`)
   }
 
   return (
     <EvidenceForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Add Evidence"

@@ -2,7 +2,6 @@
 
 import type React from 'react'
 import { useState } from 'react'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
@@ -21,6 +20,8 @@ interface ClaimFormProps {
       name: string
     }>
   >
+  backendErrors: Record<string, string>
+  setBackendErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>
   onSubmit: (e: React.FormEvent) => Promise<void>
   loading: boolean
   title: string
@@ -30,13 +31,14 @@ interface ClaimFormProps {
 const ClaimForm = ({
   formData,
   setFormData,
+  backendErrors,
+  setBackendErrors,
   onSubmit,
   loading,
   title,
   submitText = 'Create Claim',
 }: ClaimFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   const handleInputChange = (name: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -82,14 +84,7 @@ const ClaimForm = ({
       return
     }
 
-    try {
-      await onSubmit(e)
-    } catch (error) {
-      const { validationErrors, hasValidationErrors } = extractGraphQLErrors(error)
-      if (hasValidationErrors) {
-        setBackendErrors(validationErrors)
-      }
-    }
+    await onSubmit(e)
   }
 
   return (

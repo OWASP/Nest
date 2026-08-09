@@ -91,10 +91,15 @@ const EvidenceActions: React.FC<EvidenceActionsProps> = ({
         },
       })
 
-      if (!result.data?.removeBoardCandidateClaimEvidence?.ok) {
-        throw new Error(
-          result.data?.removeBoardCandidateClaimEvidence?.message ?? 'Evidence remove failed.'
-        )
+      const payload = result.data?.removeBoardCandidateClaimEvidence
+      if (!payload?.ok) {
+        addToast({
+          title: 'Error',
+          description: payload?.message ?? 'Evidence remove failed.',
+          color: 'danger',
+        })
+        resetConfirm()
+        return
       }
 
       addToast({

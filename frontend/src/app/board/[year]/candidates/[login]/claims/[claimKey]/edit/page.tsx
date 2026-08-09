@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimDocument } from 'types/__generated__/claimQueries.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -31,6 +30,7 @@ const EditClaimPage = () => {
     description: '',
     name: '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -80,55 +80,54 @@ const EditClaimPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        description: formData.description,
-        key: claimKey,
-        name: formData.name,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      description: formData.description,
+      key: claimKey,
+      name: formData.name,
+      year: Number.parseInt(year),
+    }
 
-      const result = await updateClaim({
-        variables: { input },
-        update(cache, { data }) {
-          const updatedClaim = data?.updateBoardCandidateClaim?.claim
-          if (!updatedClaim) return
-          cache.writeQuery({
-            query: GetBoardCandidateClaimDocument,
-            variables: { key: claimKey, login, year: Number.parseInt(year) },
-            data: { boardCandidateClaim: updatedClaim },
-          })
-        },
-      })
+    const result = await updateClaim({
+      variables: { input },
+      update(cache, { data }) {
+        const updatedClaim = data?.updateBoardCandidateClaim?.claim
+        if (!updatedClaim) return
+        cache.writeQuery({
+          query: GetBoardCandidateClaimDocument,
+          variables: { key: claimKey, login, year: Number.parseInt(year) },
+          data: { boardCandidateClaim: updatedClaim },
+        })
+      },
+    })
 
-      if (!result.data?.updateBoardCandidateClaim?.ok) {
-        throw new Error(result.data?.updateBoardCandidateClaim?.message ?? 'Claim update failed.')
-      }
-
-      addToast({
-        description: 'Claim updated successfully!',
-        title: 'Success',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'success',
-      })
-
-      const updatedClaim = result.data?.updateBoardCandidateClaim?.claim
-      if (updatedClaim?.key) {
-        router.push(`/board/${year}/candidates/${login}/claims/${updatedClaim.key}`)
-      }
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
+    const payload = result.data?.updateBoardCandidateClaim
+    if (!payload?.ok) {
+      if (payload?.fieldErrors?.length) {
+        setBackendErrors(
+          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
+        )
+      } else {
         addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
+          description: payload?.message ?? 'Claim update failed.',
           timeout: 3000,
           shouldShowTimeoutProgress: true,
           color: 'danger',
         })
       }
-      throw err
+      return
+    }
+
+    addToast({
+      description: 'Claim updated successfully!',
+      title: 'Success',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'success',
+    })
+
+    const updatedClaim = payload.claim
+    if (updatedClaim?.key) {
+      router.push(`/board/${year}/candidates/${login}/claims/${updatedClaim.key}`)
     }
   }
 
@@ -136,6 +135,8 @@ const EditClaimPage = () => {
     <ClaimForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Edit Claim"

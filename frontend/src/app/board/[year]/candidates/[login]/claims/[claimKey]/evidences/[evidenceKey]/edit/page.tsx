@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
 import { GetBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceQueries.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -38,6 +37,7 @@ const EditEvidencePage = () => {
     file: null as File | null,
     sourceUrl: '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -89,62 +89,59 @@ const EditEvidencePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        claimKey: claimKey,
-        description: formData.description,
-        file: formData.file || null,
-        key: evidenceKey,
-        name: formData.name,
-        sourceUrl: formData.sourceUrl,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      claimKey: claimKey,
+      description: formData.description,
+      file: formData.file || null,
+      key: evidenceKey,
+      name: formData.name,
+      sourceUrl: formData.sourceUrl,
+      year: Number.parseInt(year),
+    }
 
-      const result = await updateEvidence({
-        variables: { input },
-        update(cache, { data }) {
-          const updatedEvidence = data?.updateBoardCandidateClaimEvidence?.evidence
-          if (!updatedEvidence) return
-          cache.writeQuery({
-            query: GetBoardCandidateClaimEvidenceDocument,
-            variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
-            data: { boardCandidateClaimEvidence: updatedEvidence },
-          })
-        },
-      })
+    const result = await updateEvidence({
+      variables: { input },
+      update(cache, { data }) {
+        const updatedEvidence = data?.updateBoardCandidateClaimEvidence?.evidence
+        if (!updatedEvidence) return
+        cache.writeQuery({
+          query: GetBoardCandidateClaimEvidenceDocument,
+          variables: { claimKey, key: evidenceKey, login, year: Number.parseInt(year) },
+          data: { boardCandidateClaimEvidence: updatedEvidence },
+        })
+      },
+    })
 
-      if (!result.data?.updateBoardCandidateClaimEvidence?.ok) {
-        throw new Error(
-          result.data?.updateBoardCandidateClaimEvidence?.message ?? 'Evidence update failed.'
+    const payload = result.data?.updateBoardCandidateClaimEvidence
+    if (!payload?.ok) {
+      if (payload?.fieldErrors?.length) {
+        setBackendErrors(
+          Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
         )
-      }
-
-      addToast({
-        description: 'Evidence updated successfully!',
-        title: 'Success',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'success',
-      })
-
-      const updatedEvidence = result.data?.updateBoardCandidateClaimEvidence?.evidence
-      if (updatedEvidence?.key) {
-        router.push(
-          `/board/${year}/candidates/${login}/claims/${claimKey}/evidences/${updatedEvidence.key}`
-        )
-      }
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
+      } else {
         addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
+          description: payload?.message ?? 'Evidence update failed.',
           timeout: 3000,
           shouldShowTimeoutProgress: true,
           color: 'danger',
         })
       }
-      throw err
+      return
+    }
+
+    addToast({
+      description: 'Evidence updated successfully!',
+      title: 'Success',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'success',
+    })
+
+    const updatedEvidence = payload.evidence
+    if (updatedEvidence?.key) {
+      router.push(
+        `/board/${year}/candidates/${login}/claims/${claimKey}/evidences/${updatedEvidence.key}`
+      )
     }
   }
 
@@ -152,6 +149,8 @@ const EditEvidencePage = () => {
     <EvidenceForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Edit Evidence"
