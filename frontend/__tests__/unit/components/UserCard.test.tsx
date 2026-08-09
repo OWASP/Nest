@@ -48,7 +48,6 @@ jest.mock('@heroui/button', () => {
   MockButton.displayName = 'MockButton'
   return {
     __esModule: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     Button: MockButton,
   }
 })

@@ -41,7 +41,6 @@ const mockZoomControl = {
   remove: jest.fn(),
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 jest.mock('leaflet', () => ({
   map: jest.fn(() => mockMap),
   tileLayer: jest.fn(() => ({
@@ -60,7 +59,6 @@ jest.mock('leaflet', () => ({
     zoom: jest.fn(() => mockZoomControl),
   },
 }))
-/* eslint-enable @typescript-eslint/naming-convention */
 
 // Mock CSS imports
 jest.mock('leaflet/dist/leaflet.css', () => ({}))
