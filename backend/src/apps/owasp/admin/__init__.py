@@ -9,7 +9,6 @@ from .chapter import ChapterAdmin
 from .committee import CommitteeAdmin
 from .entity_channel import EntityChannelAdmin
 from .entity_member import EntityMemberAdmin
-from .entity_subscription import EntitySubscriptionAdmin
 from .event import EventAdmin
 from .member_profile import MemberProfileAdmin
 from .member_snapshot import MemberSnapshotAdmin

@@ -8,14 +8,15 @@ from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 class SnapshotSubscriptionAdmin(admin.ModelAdmin):
     """Admin for SnapshotSubscription model."""
 
-    list_display = ("user", "frequency", "is_active", "created_at", "updated_at")
+    list_display = ("user", "name", "frequency", "is_active", "created_at", "updated_at")
     list_filter = ("frequency", "is_active", "created_at")
-    search_fields = ("user__email", "user__username")
+    search_fields = ("user__email", "user__username", "name")
     raw_id_fields = ("user",)
     readonly_fields = ("unsubscribe_token", "created_at", "updated_at")
+    autocomplete_fields = ("subscribed_projects", "subscribed_chapters", "subscribed_committees")
 
     fieldsets = (
-        (None, {"fields": ("user", "frequency", "is_active")}),
+        (None, {"fields": ("user", "name", "frequency", "is_active")}),
         (
             "Content Toggles",
             {
@@ -28,6 +29,16 @@ class SnapshotSubscriptionAdmin(admin.ModelAdmin):
                     "include_pull_requests",
                     "include_releases",
                     "include_users",
+                ),
+            },
+        ),
+        (
+            "Subscribed Entities",
+            {
+                "fields": (
+                    "subscribed_projects",
+                    "subscribed_chapters",
+                    "subscribed_committees",
                 ),
             },
         ),

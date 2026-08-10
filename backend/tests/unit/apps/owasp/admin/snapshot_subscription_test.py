@@ -25,16 +25,25 @@ class TestSnapshotSubscriptionAdmin:
 
         assert admin_instance.list_display == (
             "user",
+            "name",
             "frequency",
             "is_active",
             "created_at",
             "updated_at",
         )
         assert admin_instance.list_filter == ("frequency", "is_active", "created_at")
-        assert admin_instance.search_fields == ("user__email", "user__username")
+        assert admin_instance.search_fields == ("user__email", "user__username", "name")
         assert admin_instance.raw_id_fields == ("user",)
         assert admin_instance.readonly_fields == ("unsubscribe_token", "created_at", "updated_at")
-        assert len(admin_instance.fieldsets) == 3
+        assert admin_instance.autocomplete_fields == (
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
+        assert len(admin_instance.fieldsets) == 4
+
+        main_fieldset = admin_instance.fieldsets[0]
+        assert "name" in main_fieldset[1]["fields"]
 
         content_fieldset = admin_instance.fieldsets[1]
         assert content_fieldset[0] == "Content Toggles"
@@ -49,5 +58,13 @@ class TestSnapshotSubscriptionAdmin:
             "include_users",
         )
 
-        system_fieldset = admin_instance.fieldsets[2]
+        entity_fieldset = admin_instance.fieldsets[2]
+        assert entity_fieldset[0] == "Subscribed Entities"
+        assert entity_fieldset[1]["fields"] == (
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
+
+        system_fieldset = admin_instance.fieldsets[3]
         assert system_fieldset[0] == "System"
