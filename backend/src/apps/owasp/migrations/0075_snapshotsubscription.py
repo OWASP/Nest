@@ -23,6 +23,7 @@ class Migration(migrations.Migration):
                         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
+                ("name", models.CharField(blank=True, default="", max_length=100)),
                 (
                     "frequency",
                     models.CharField(
@@ -53,6 +54,12 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "subscribed_committees",
+                    models.ManyToManyField(
+                        blank=True, related_name="snapshot_subscriptions", to="owasp.committee"
+                    ),
+                ),
+                (
                     "subscribed_projects",
                     models.ManyToManyField(
                         blank=True, related_name="snapshot_subscriptions", to="owasp.project"
@@ -60,9 +67,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "user",
-                    models.OneToOneField(
+                    models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="snapshot_subscription",
+                        related_name="snapshot_subscriptions",
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -70,6 +77,12 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name_plural": "Snapshot Subscriptions",
                 "db_table": "owasp_snapshot_subscriptions",
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=["user", "name"],
+                        name="unique_user_subscription_name",
+                    ),
+                ],
                 "indexes": [models.Index(fields=["is_active"], name="owasp_sub_active_idx")],
             },
         ),

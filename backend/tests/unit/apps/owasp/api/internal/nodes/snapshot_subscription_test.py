@@ -27,6 +27,10 @@ class TestSnapshotSubscriptionNode:
             "include_releases",
             "include_users",
             "is_active",
+            "name",
+            "subscribed_chapters",
+            "subscribed_committees",
+            "subscribed_projects",
             "updated_at",
         }
         assert expected_field_names.issubset(field_names)

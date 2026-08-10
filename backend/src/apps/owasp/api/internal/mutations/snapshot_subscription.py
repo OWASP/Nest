@@ -2,19 +2,20 @@
 
 import strawberry
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.nest.models import User
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
-from apps.owasp.models.snapshot_subscription import SnapshotSubscription
-
-VALID_FREQUENCIES = frozenset(dict(SnapshotSubscription.Frequency.choices))
+from apps.owasp.models.snapshot_subscription import MAX_SUBSCRIPTIONS, SnapshotSubscription
 
 
 @strawberry.input
 class CreateSnapshotSubscriptionInput:
     """Input for creating a snapshot subscription."""
 
+    name: str = ""
     frequency: str = "weekly"
     include_chapters: bool = True
     include_events: bool = True
@@ -24,12 +25,16 @@ class CreateSnapshotSubscriptionInput:
     include_pull_requests: bool = True
     include_releases: bool = True
     include_users: bool = True
+    subscribed_project_ids: list[int] | None = None
+    subscribed_chapter_ids: list[int] | None = None
+    subscribed_committee_ids: list[int] | None = None
 
 
 @strawberry.input
 class UpdateSnapshotSubscriptionInput:
     """Input for updating a snapshot subscription."""
 
+    name: str | None = None
     frequency: str | None = None
     include_chapters: bool | None = None
     include_events: bool | None = None
@@ -39,6 +44,9 @@ class UpdateSnapshotSubscriptionInput:
     include_pull_requests: bool | None = None
     include_releases: bool | None = None
     include_users: bool | None = None
+    subscribed_project_ids: list[int] | None = None
+    subscribed_chapter_ids: list[int] | None = None
+    subscribed_committee_ids: list[int] | None = None
 
 
 @strawberry.type
@@ -48,13 +56,6 @@ class SnapshotSubscriptionResult:
     ok: bool
     message: str
     subscription: SnapshotSubscriptionNode | None = None
-
-
-def _validate_frequency(frequency):
-    """Validate frequency value. Returns error message or None."""
-    if frequency is not None and frequency not in VALID_FREQUENCIES:
-        return f"Frequency must be one of: {', '.join(sorted(VALID_FREQUENCIES))}."
-    return None
 
 
 @strawberry.type
@@ -70,10 +71,6 @@ class SnapshotSubscriptionMutations:
         """Create a new snapshot subscription for the logged-in user."""
         user = info.context.request.user
 
-        error = _validate_frequency(input_data.frequency)
-        if error:
-            return SnapshotSubscriptionResult(ok=False, message=error)
-
         kwargs = {
             "include_chapters": input_data.include_chapters,
             "include_events": input_data.include_events,
@@ -85,16 +82,39 @@ class SnapshotSubscriptionMutations:
             "include_users": input_data.include_users,
         }
 
+        if not any(kwargs.values()):
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="At least one content toggle must be enabled.",
+            )
+
         subscription = SnapshotSubscription.create(
             user=user,
             frequency=input_data.frequency,
+            name=input_data.name,
             **kwargs,
         )
 
         if subscription is None:
             return SnapshotSubscriptionResult(
                 ok=False,
-                message="Snapshot subscription with this User already exists.",
+                message=(
+                    f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached"
+                    " or a subscription with this name already exists."
+                ),
+            )
+
+        subscription.set_m2m_fields(
+            project_ids=input_data.subscribed_project_ids,
+            chapter_ids=input_data.subscribed_chapter_ids,
+            committee_ids=input_data.subscribed_committee_ids,
+        )
+
+        if subscription.has_duplicate_setup():
+            subscription.delete()
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="A subscription with the same setup already exists.",
             )
 
         return SnapshotSubscriptionResult(
@@ -107,22 +127,22 @@ class SnapshotSubscriptionMutations:
     def update_snapshot_subscription(
         self,
         info: Info,
+        subscription_id: int,
         input_data: UpdateSnapshotSubscriptionInput,
     ) -> SnapshotSubscriptionResult:
-        """Update the user's snapshot subscription."""
+        """Update a specific snapshot subscription."""
         user = info.context.request.user
 
         try:
-            subscription = SnapshotSubscription.objects.get(user=user)
+            subscription = SnapshotSubscription.objects.get(
+                id=subscription_id,
+                user=user,
+            )
         except SnapshotSubscription.DoesNotExist:
             return SnapshotSubscriptionResult(
                 ok=False,
                 message="Subscription not found.",
             )
-
-        error = _validate_frequency(input_data.frequency)
-        if error:
-            return SnapshotSubscriptionResult(ok=False, message=error)
 
         update_kwargs = {}
         for field in (
@@ -139,7 +159,35 @@ class SnapshotSubscriptionMutations:
             if value is not None:
                 update_kwargs[field] = value
 
-        subscription.update(frequency=input_data.frequency, **update_kwargs)
+        try:
+            with transaction.atomic():
+                subscription.update(
+                    frequency=input_data.frequency,
+                    name=input_data.name,
+                    **update_kwargs,
+                )
+
+                subscription.set_m2m_fields(
+                    project_ids=input_data.subscribed_project_ids,
+                    chapter_ids=input_data.subscribed_chapter_ids,
+                    committee_ids=input_data.subscribed_committee_ids,
+                )
+
+                subscription.clean()
+
+                if subscription.has_duplicate_setup():
+                    msg = "A subscription with the same setup already exists."
+                    raise ValidationError(msg)  # noqa: TRY301
+        except IntegrityError:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="A subscription with this name already exists.",
+            )
+        except ValidationError as e:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message=e.message,
+            )
 
         return SnapshotSubscriptionResult(
             ok=True,
@@ -151,12 +199,16 @@ class SnapshotSubscriptionMutations:
     def cancel_snapshot_subscription(
         self,
         info: Info,
+        subscription_id: int,
     ) -> SnapshotSubscriptionResult:
-        """Cancel the user's snapshot subscription."""
+        """Cancel a specific snapshot subscription."""
         user = info.context.request.user
 
         try:
-            subscription = SnapshotSubscription.objects.get(user=user)
+            subscription = SnapshotSubscription.objects.get(
+                id=subscription_id,
+                user=user,
+            )
         except SnapshotSubscription.DoesNotExist:
             return SnapshotSubscriptionResult(
                 ok=False,
@@ -169,6 +221,84 @@ class SnapshotSubscriptionMutations:
         return SnapshotSubscriptionResult(
             ok=True,
             message="Subscription cancelled successfully.",
+            subscription=subscription,
+        )
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    def delete_snapshot_subscription(
+        self,
+        info: Info,
+        subscription_id: int,
+    ) -> SnapshotSubscriptionResult:
+        """Permanently delete a specific snapshot subscription."""
+        user = info.context.request.user
+
+        try:
+            subscription = SnapshotSubscription.objects.get(
+                id=subscription_id,
+                user=user,
+            )
+        except SnapshotSubscription.DoesNotExist:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="Subscription not found.",
+            )
+
+        subscription.delete()
+
+        return SnapshotSubscriptionResult(
+            ok=True,
+            message="Subscription deleted successfully.",
+        )
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    def reactivate_snapshot_subscription(
+        self,
+        info: Info,
+        subscription_id: int,
+    ) -> SnapshotSubscriptionResult:
+        """Reactivate an inactive snapshot subscription."""
+        user = info.context.request.user
+
+        try:
+            subscription = SnapshotSubscription.objects.get(
+                id=subscription_id,
+                user=user,
+            )
+        except SnapshotSubscription.DoesNotExist:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="Subscription not found.",
+            )
+
+        if subscription.is_active:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="Subscription is already active.",
+            )
+
+        with transaction.atomic():
+            if getattr(user, "pk", None):
+                User.objects.select_for_update().filter(pk=user.pk).exists()
+
+            active_count = SnapshotSubscription.objects.filter(
+                user=user,
+                is_active=True,
+            ).count()
+            if active_count >= MAX_SUBSCRIPTIONS:
+                return SnapshotSubscriptionResult(
+                    ok=False,
+                    message=(
+                        f"Maximum number of active subscriptions ({MAX_SUBSCRIPTIONS}) reached."
+                    ),
+                )
+
+            subscription.is_active = True
+            subscription.save()
+
+        return SnapshotSubscriptionResult(
+            ok=True,
+            message="Subscription reactivated successfully.",
             subscription=subscription,
         )
 

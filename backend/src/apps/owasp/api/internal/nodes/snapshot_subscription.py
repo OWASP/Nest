@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from strawberry import auto
 
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
@@ -9,6 +10,7 @@ from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 @strawberry_django.type(
     SnapshotSubscription,
     fields=[
+        "name",
         "frequency",
         "include_chapters",
         "include_events",
@@ -25,3 +27,7 @@ from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 )
 class SnapshotSubscriptionNode(strawberry.relay.Node):
     """Snapshot subscription node."""
+
+    subscribed_projects: auto
+    subscribed_chapters: auto
+    subscribed_committees: auto

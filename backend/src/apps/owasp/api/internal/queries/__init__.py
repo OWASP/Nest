@@ -3,7 +3,6 @@
 from .board_of_directors import BoardOfDirectorsQuery
 from .chapter import ChapterQuery
 from .committee import CommitteeQuery
-from .entity_subscription import EntitySubscriptionQuery
 from .event import EventQuery
 from .member_snapshot import MemberSnapshotQuery
 from .post import PostQuery
@@ -19,7 +18,6 @@ class OwaspQuery(
     BoardOfDirectorsQuery,
     ChapterQuery,
     CommitteeQuery,
-    EntitySubscriptionQuery,
     EventQuery,
     MemberSnapshotQuery,
     PostQuery,
