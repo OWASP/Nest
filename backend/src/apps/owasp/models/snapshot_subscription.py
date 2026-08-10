@@ -147,26 +147,6 @@ class SnapshotSubscription(models.Model):
                 msg = f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached."
                 raise ValidationError(msg)
 
-        if getattr(self, "user_id", None):
-            duplicate_query = SnapshotSubscription.objects.filter(
-                user=self.user,
-                frequency=self.frequency,
-                include_chapters=self.include_chapters,
-                include_events=self.include_events,
-                include_issues=self.include_issues,
-                include_posts=self.include_posts,
-                include_projects=self.include_projects,
-                include_pull_requests=self.include_pull_requests,
-                include_releases=self.include_releases,
-                include_users=self.include_users,
-            )
-            if self.pk:
-                duplicate_query = duplicate_query.exclude(pk=self.pk)
-
-            if duplicate_query.exists():
-                msg = "A subscription with the same setup already exists."
-                raise ValidationError(msg)
-
     @classmethod
     @transaction.atomic
     def create(cls, *, user, frequency, name="", **kwargs):
@@ -250,18 +230,26 @@ class SnapshotSubscription(models.Model):
             bool: True if a duplicate setup exists.
 
         """
-        other_subs = SnapshotSubscription.objects.filter(
-            user=self.user,
-            frequency=self.frequency,
-            include_chapters=self.include_chapters,
-            include_events=self.include_events,
-            include_issues=self.include_issues,
-            include_posts=self.include_posts,
-            include_projects=self.include_projects,
-            include_pull_requests=self.include_pull_requests,
-            include_releases=self.include_releases,
-            include_users=self.include_users,
-        ).exclude(pk=self.pk)
+        other_subs = (
+            SnapshotSubscription.objects.filter(
+                user=self.user,
+                frequency=self.frequency,
+                include_chapters=self.include_chapters,
+                include_events=self.include_events,
+                include_issues=self.include_issues,
+                include_posts=self.include_posts,
+                include_projects=self.include_projects,
+                include_pull_requests=self.include_pull_requests,
+                include_releases=self.include_releases,
+                include_users=self.include_users,
+            )
+            .exclude(pk=self.pk)
+            .prefetch_related(
+                "subscribed_projects",
+                "subscribed_chapters",
+                "subscribed_committees",
+            )
+        )
 
         if not other_subs.exists():
             return False
@@ -271,9 +259,8 @@ class SnapshotSubscription(models.Model):
         current_committee_ids = set(self.subscribed_committees.values_list("pk", flat=True))
 
         return any(
-            set(other.subscribed_projects.values_list("pk", flat=True)) == current_project_ids
-            and set(other.subscribed_chapters.values_list("pk", flat=True)) == current_chapter_ids
-            and set(other.subscribed_committees.values_list("pk", flat=True))
-            == current_committee_ids
+            {p.pk for p in other.subscribed_projects.all()} == current_project_ids
+            and {c.pk for c in other.subscribed_chapters.all()} == current_chapter_ids
+            and {c.pk for c in other.subscribed_committees.all()} == current_committee_ids
             for other in other_subs
         )

@@ -2,7 +2,7 @@
 
 import strawberry
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
@@ -82,6 +82,12 @@ class SnapshotSubscriptionMutations:
             "include_users": input_data.include_users,
         }
 
+        if not any(kwargs.values()):
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="At least one content toggle must be enabled.",
+            )
+
         subscription = SnapshotSubscription.create(
             user=user,
             frequency=input_data.frequency,
@@ -92,7 +98,10 @@ class SnapshotSubscriptionMutations:
         if subscription is None:
             return SnapshotSubscriptionResult(
                 ok=False,
-                message=f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached.",
+                message=(
+                    f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached"
+                    " or a subscription with this name already exists."
+                ),
             )
 
         subscription.set_m2m_fields(
@@ -150,11 +159,19 @@ class SnapshotSubscriptionMutations:
             if value is not None:
                 update_kwargs[field] = value
 
-        subscription.update(
-            frequency=input_data.frequency,
-            name=input_data.name,
-            **update_kwargs,
-        )
+        sid = transaction.savepoint()
+        try:
+            subscription.update(
+                frequency=input_data.frequency,
+                name=input_data.name,
+                **update_kwargs,
+            )
+        except IntegrityError:
+            transaction.savepoint_rollback(sid)
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="A subscription with this name already exists.",
+            )
 
         subscription.set_m2m_fields(
             project_ids=input_data.subscribed_project_ids,
@@ -163,11 +180,13 @@ class SnapshotSubscriptionMutations:
         )
 
         if subscription.has_duplicate_setup():
+            transaction.savepoint_rollback(sid)
             return SnapshotSubscriptionResult(
                 ok=False,
                 message="A subscription with the same setup already exists.",
             )
 
+        transaction.savepoint_commit(sid)
         return SnapshotSubscriptionResult(
             ok=True,
             message="Subscription updated successfully.",

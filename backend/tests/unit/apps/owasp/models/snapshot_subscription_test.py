@@ -297,7 +297,6 @@ class TestSnapshotSubscriptionCleanEdgeCases:
         sub.user = MagicMock()
         sub.is_active = True
         sub.pk = 42
-        sub.frequency = "weekly"
         sub.include_chapters = True
         sub.include_events = True
         sub.include_issues = True
@@ -310,10 +309,11 @@ class TestSnapshotSubscriptionCleanEdgeCases:
         mock_qs = MagicMock()
         mock_qs.exclude.return_value = mock_qs
         mock_qs.count.return_value = 2
-        mock_qs.exists.return_value = False
         mock_objects.filter.return_value = mock_qs
 
         SnapshotSubscription.clean(sub)
+
+        mock_qs.exclude.assert_called_once_with(pk=42)
 
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_clean_passes_when_under_max(self, mock_objects):
@@ -323,7 +323,6 @@ class TestSnapshotSubscriptionCleanEdgeCases:
         sub.user = MagicMock()
         sub.is_active = True
         sub.pk = None
-        sub.frequency = "weekly"
         sub.include_chapters = True
         sub.include_events = True
         sub.include_issues = True
@@ -333,12 +332,11 @@ class TestSnapshotSubscriptionCleanEdgeCases:
         sub.include_releases = True
         sub.include_users = True
 
-        mock_qs = MagicMock()
-        mock_qs.count.return_value = MAX_SUBSCRIPTIONS - 1
-        mock_qs.exists.return_value = False
-        mock_objects.filter.return_value = mock_qs
+        mock_objects.filter.return_value.count.return_value = MAX_SUBSCRIPTIONS - 1
 
         SnapshotSubscription.clean(sub)
+
+        mock_objects.filter.assert_called_once_with(user=sub.user, is_active=True)
 
 
 class TestSnapshotSubscriptionCreateEdgeCases:
@@ -453,7 +451,7 @@ class TestHasDuplicateSetup:
 
         mock_qs = MagicMock()
         mock_qs.exclude.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = mock_qs
         mock_qs.exists.return_value = False
         mock_objects.filter.return_value = mock_qs
 
@@ -480,14 +478,16 @@ class TestHasDuplicateSetup:
         sub.subscribed_chapters.values_list.return_value = [20]
         sub.subscribed_committees.values_list.return_value = []
 
+        mock_project = MagicMock(pk=10)
+        mock_chapter = MagicMock(pk=20)
         other = MagicMock()
-        other.subscribed_projects.values_list.return_value = [10]
-        other.subscribed_chapters.values_list.return_value = [20]
-        other.subscribed_committees.values_list.return_value = []
+        other.subscribed_projects.all.return_value = [mock_project]
+        other.subscribed_chapters.all.return_value = [mock_chapter]
+        other.subscribed_committees.all.return_value = []
 
         mock_qs = MagicMock()
         mock_qs.exclude.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
+        mock_qs.prefetch_related.return_value = mock_qs
         mock_qs.exists.return_value = True
         mock_qs.__iter__ = MagicMock(return_value=iter([other]))
         mock_objects.filter.return_value = mock_qs

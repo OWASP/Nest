@@ -52,6 +52,24 @@ class TestCreateSnapshotSubscription:
     def mutations(self):
         return SnapshotSubscriptionMutations()
 
+    def test_all_toggles_off(self, mutations):
+        """Test create fails when all content toggles are off."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly",
+            include_chapters=False,
+            include_events=False,
+            include_issues=False,
+            include_posts=False,
+            include_projects=False,
+            include_pull_requests=False,
+            include_releases=False,
+            include_users=False,
+        )
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+        assert not result.ok
+        assert "toggle" in result.message
+
     @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
     def test_create_success(self, mock_create, mutations):
         """Test successful subscription creation."""
@@ -99,6 +117,16 @@ class TestCreateSnapshotSubscription:
 class TestUpdateSnapshotSubscription:
     """Test cases for updateSnapshotSubscription mutation."""
 
+    @pytest.fixture(autouse=True)
+    def _mock_transaction(self):
+        """Disable transaction savepoints for tests."""
+        with (
+            patch("django.db.transaction.savepoint", return_value="sp"),
+            patch("django.db.transaction.savepoint_rollback"),
+            patch("django.db.transaction.savepoint_commit"),
+        ):
+            yield
+
     @pytest.fixture
     def mutations(self):
         return SnapshotSubscriptionMutations()
@@ -116,20 +144,6 @@ class TestUpdateSnapshotSubscription:
             )
             assert not result.ok
             assert result.message == "Subscription not found."
-
-    def test_invalid_frequency(self, mutations):
-        """Test update fails with invalid frequency."""
-        info = mock_info()
-        input_data = UpdateSnapshotSubscriptionInput(frequency="daily")
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.update_snapshot_subscription(
-                info, subscription_id=1, input_data=input_data
-            )
-            assert not result.ok
 
     def test_success(self, mutations):
         """Test successful subscription update."""
@@ -152,6 +166,22 @@ class TestUpdateSnapshotSubscription:
             assert result.message == "Subscription updated successfully."
             mock_sub.update.assert_called_once()
             mock_sub.set_m2m_fields.assert_called_once()
+
+    def test_duplicate_setup_rejected(self, mutations):
+        """Test update rolls back when duplicate setup detected."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(frequency="monthly")
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.has_duplicate_setup.return_value = True
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert "same setup" in result.message
 
 
 class TestCancelSnapshotSubscription:
