@@ -4,6 +4,7 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.core.exceptions import ValidationError
 
 from apps.owasp.api.internal.mutations.snapshot_subscription import (
     CreateSnapshotSubscriptionInput,
@@ -119,11 +120,10 @@ class TestUpdateSnapshotSubscription:
 
     @pytest.fixture(autouse=True)
     def _mock_transaction(self):
-        """Disable transaction savepoints for tests."""
+        """Disable transaction.atomic for tests."""
         with (
-            patch("django.db.transaction.savepoint", return_value="sp"),
-            patch("django.db.transaction.savepoint_rollback"),
-            patch("django.db.transaction.savepoint_commit"),
+            patch("django.db.transaction.Atomic.__enter__", return_value=None),
+            patch("django.db.transaction.Atomic.__exit__", return_value=False),
         ):
             yield
 
@@ -144,6 +144,26 @@ class TestUpdateSnapshotSubscription:
             )
             assert not result.ok
             assert result.message == "Subscription not found."
+
+    def test_clean_validation_error(self, mutations):
+        """Test update fails when clean() rejects the state."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(
+            include_chapters=False,
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.clean.side_effect = ValidationError(
+            "At least one content toggle must be enabled."
+        )
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert not result.ok
+            assert "toggle" in result.message
 
     def test_success(self, mutations):
         """Test successful subscription update."""
@@ -166,6 +186,7 @@ class TestUpdateSnapshotSubscription:
             assert result.message == "Subscription updated successfully."
             mock_sub.update.assert_called_once()
             mock_sub.set_m2m_fields.assert_called_once()
+            mock_sub.clean.assert_called_once()
 
     def test_duplicate_setup_rejected(self, mutations):
         """Test update rolls back when duplicate setup detected."""

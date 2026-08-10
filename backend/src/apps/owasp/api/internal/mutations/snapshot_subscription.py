@@ -159,34 +159,36 @@ class SnapshotSubscriptionMutations:
             if value is not None:
                 update_kwargs[field] = value
 
-        sid = transaction.savepoint()
         try:
-            subscription.update(
-                frequency=input_data.frequency,
-                name=input_data.name,
-                **update_kwargs,
-            )
+            with transaction.atomic():
+                subscription.update(
+                    frequency=input_data.frequency,
+                    name=input_data.name,
+                    **update_kwargs,
+                )
+
+                subscription.set_m2m_fields(
+                    project_ids=input_data.subscribed_project_ids,
+                    chapter_ids=input_data.subscribed_chapter_ids,
+                    committee_ids=input_data.subscribed_committee_ids,
+                )
+
+                subscription.clean()
+
+                if subscription.has_duplicate_setup():
+                    msg = "A subscription with the same setup already exists."
+                    raise ValidationError(msg)  # noqa: TRY301
         except IntegrityError:
-            transaction.savepoint_rollback(sid)
             return SnapshotSubscriptionResult(
                 ok=False,
                 message="A subscription with this name already exists.",
             )
-
-        subscription.set_m2m_fields(
-            project_ids=input_data.subscribed_project_ids,
-            chapter_ids=input_data.subscribed_chapter_ids,
-            committee_ids=input_data.subscribed_committee_ids,
-        )
-
-        if subscription.has_duplicate_setup():
-            transaction.savepoint_rollback(sid)
+        except ValidationError as e:
             return SnapshotSubscriptionResult(
                 ok=False,
-                message="A subscription with the same setup already exists.",
+                message=e.message,
             )
 
-        transaction.savepoint_commit(sid)
         return SnapshotSubscriptionResult(
             ok=True,
             message="Subscription updated successfully.",

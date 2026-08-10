@@ -306,14 +306,19 @@ class TestSnapshotSubscriptionCleanEdgeCases:
         sub.include_releases = True
         sub.include_users = True
 
-        mock_qs = MagicMock()
-        mock_qs.exclude.return_value = mock_qs
-        mock_qs.count.return_value = 2
-        mock_objects.filter.return_value = mock_qs
+        mock_active_qs = MagicMock()
+        mock_active_qs.exclude.return_value = mock_active_qs
+        mock_active_qs.count.return_value = 2
+
+        mock_dup_qs = MagicMock()
+        mock_dup_qs.exclude.return_value = mock_dup_qs
+        mock_dup_qs.exists.return_value = False
+
+        mock_objects.filter.side_effect = [mock_active_qs, mock_dup_qs]
 
         SnapshotSubscription.clean(sub)
 
-        mock_qs.exclude.assert_called_once_with(pk=42)
+        mock_active_qs.exclude.assert_called_once_with(pk=42)
 
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_clean_passes_when_under_max(self, mock_objects):
@@ -332,11 +337,41 @@ class TestSnapshotSubscriptionCleanEdgeCases:
         sub.include_releases = True
         sub.include_users = True
 
-        mock_objects.filter.return_value.count.return_value = MAX_SUBSCRIPTIONS - 1
+        mock_active_qs = MagicMock()
+        mock_active_qs.count.return_value = MAX_SUBSCRIPTIONS - 1
+
+        mock_dup_qs = MagicMock()
+        mock_dup_qs.exists.return_value = False
+
+        mock_objects.filter.side_effect = [mock_active_qs, mock_dup_qs]
 
         SnapshotSubscription.clean(sub)
 
-        mock_objects.filter.assert_called_once_with(user=sub.user, is_active=True)
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_clean_raises_for_duplicate_configuration(self, mock_objects):
+        """Test clean raises when a duplicate scalar config exists."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.user_id = 1
+        sub.user = MagicMock()
+        sub.is_active = False
+        sub.pk = 10
+        sub.frequency = "weekly"
+        sub.include_chapters = True
+        sub.include_events = True
+        sub.include_issues = True
+        sub.include_posts = True
+        sub.include_projects = True
+        sub.include_pull_requests = True
+        sub.include_releases = True
+        sub.include_users = True
+
+        mock_dup_qs = MagicMock()
+        mock_dup_qs.exclude.return_value = mock_dup_qs
+        mock_dup_qs.exists.return_value = True
+        mock_objects.filter.return_value = mock_dup_qs
+
+        with pytest.raises(ValidationError, match="same configuration"):
+            SnapshotSubscription.clean(sub)
 
 
 class TestSnapshotSubscriptionCreateEdgeCases:

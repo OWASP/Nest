@@ -147,6 +147,26 @@ class SnapshotSubscription(models.Model):
                 msg = f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached."
                 raise ValidationError(msg)
 
+        if getattr(self, "user_id", None):
+            duplicate_query = SnapshotSubscription.objects.filter(
+                user=self.user,
+                frequency=self.frequency,
+                include_chapters=self.include_chapters,
+                include_events=self.include_events,
+                include_issues=self.include_issues,
+                include_posts=self.include_posts,
+                include_projects=self.include_projects,
+                include_pull_requests=self.include_pull_requests,
+                include_releases=self.include_releases,
+                include_users=self.include_users,
+            )
+            if self.pk:
+                duplicate_query = duplicate_query.exclude(pk=self.pk)
+
+            if duplicate_query.exists():
+                msg = "A subscription with the same configuration already exists."
+                raise ValidationError(msg)
+
     @classmethod
     @transaction.atomic
     def create(cls, *, user, frequency, name="", **kwargs):
