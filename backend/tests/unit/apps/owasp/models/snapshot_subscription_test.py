@@ -430,54 +430,40 @@ class TestSetM2mFields:
         sub.subscribed_committees.set.assert_not_called()
 
 
-class TestHasDuplicateSetup:
-    """Test SnapshotSubscription.has_duplicate_setup method."""
+class TestCheckDuplicateSetup:
+    """Test SnapshotSubscription.check_duplicate_setup method."""
 
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_returns_false_when_no_matching_subs(self, mock_objects):
         """Test returns False when no other subs match frequency+toggles."""
-        sub = MagicMock(spec=SnapshotSubscription)
-        sub.pk = 1
-        sub.user = MagicMock()
-        sub.frequency = "weekly"
-        sub.include_chapters = True
-        sub.include_events = True
-        sub.include_issues = True
-        sub.include_posts = True
-        sub.include_projects = True
-        sub.include_pull_requests = True
-        sub.include_releases = True
-        sub.include_users = True
-
         mock_qs = MagicMock()
         mock_qs.exclude.return_value = mock_qs
         mock_qs.prefetch_related.return_value = mock_qs
         mock_qs.exists.return_value = False
         mock_objects.filter.return_value = mock_qs
 
-        result = SnapshotSubscription.has_duplicate_setup(sub)
+        result = SnapshotSubscription.check_duplicate_setup(
+            user=MagicMock(),
+            frequency="weekly",
+            include_chapters=True,
+            include_events=True,
+            include_issues=True,
+            include_posts=True,
+            include_projects=True,
+            include_pull_requests=True,
+            include_releases=True,
+            include_users=True,
+            project_ids=[],
+            chapter_ids=[],
+            committee_ids=[],
+            exclude_pk=1,
+        )
 
         assert result is False
 
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_returns_true_when_duplicate_found(self, mock_objects):
         """Test returns True when another sub has exact same setup."""
-        sub = MagicMock(spec=SnapshotSubscription)
-        sub.pk = 1
-        sub.user = MagicMock()
-        sub.frequency = "weekly"
-        sub.include_chapters = True
-        sub.include_events = True
-        sub.include_issues = True
-        sub.include_posts = True
-        sub.include_projects = True
-        sub.include_pull_requests = True
-        sub.include_releases = True
-        sub.include_users = True
-        sub.subscribed_projects.values_list.return_value = [10]
-        sub.subscribed_chapters.values_list.return_value = [20]
-        sub.subscribed_committees.values_list.return_value = []
-
         mock_project = MagicMock(pk=10)
         mock_chapter = MagicMock(pk=20)
         other = MagicMock()
@@ -492,6 +478,66 @@ class TestHasDuplicateSetup:
         mock_qs.__iter__ = MagicMock(return_value=iter([other]))
         mock_objects.filter.return_value = mock_qs
 
+        result = SnapshotSubscription.check_duplicate_setup(
+            user=MagicMock(),
+            frequency="weekly",
+            include_chapters=True,
+            include_events=True,
+            include_issues=True,
+            include_posts=True,
+            include_projects=True,
+            include_pull_requests=True,
+            include_releases=True,
+            include_users=True,
+            project_ids=[10],
+            chapter_ids=[20],
+            committee_ids=[],
+            exclude_pk=1,
+        )
+
+        assert result is True
+
+
+class TestHasDuplicateSetup:
+    """Test SnapshotSubscription.has_duplicate_setup method."""
+
+    def test_delegates_to_check_duplicate_setup(self):
+        """Test has_duplicate_setup correctly delegates to check_duplicate_setup."""
+        sub = MagicMock()
+        sub.pk = 1
+        sub.user = MagicMock()
+        sub.frequency = "weekly"
+        sub.include_chapters = True
+        sub.include_events = True
+        sub.include_issues = True
+        sub.include_posts = True
+        sub.include_projects = True
+        sub.include_pull_requests = True
+        sub.include_releases = True
+        sub.include_users = True
+
+        sub.subscribed_projects.values_list.return_value = [10]
+        sub.subscribed_chapters.values_list.return_value = [20]
+        sub.subscribed_committees.values_list.return_value = []
+
+        sub.check_duplicate_setup.return_value = True
+
         result = SnapshotSubscription.has_duplicate_setup(sub)
 
         assert result is True
+        sub.check_duplicate_setup.assert_called_once_with(
+            user=sub.user,
+            frequency="weekly",
+            include_chapters=True,
+            include_events=True,
+            include_issues=True,
+            include_posts=True,
+            include_projects=True,
+            include_pull_requests=True,
+            include_releases=True,
+            include_users=True,
+            project_ids=[10],
+            chapter_ids=[20],
+            committee_ids=[],
+            exclude_pk=1,
+        )

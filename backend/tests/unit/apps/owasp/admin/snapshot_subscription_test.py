@@ -80,17 +80,17 @@ class TestSnapshotSubscriptionAdmin:
 class TestSnapshotSubscriptionAdminForm:
     """Test SnapshotSubscriptionAdminForm validation."""
 
-    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.objects")
-    def test_clean_skips_validation_without_user(self, mock_objects):
+    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
+    def test_clean_skips_validation_without_user(self, mock_check_duplicate_setup):
         """Test clean returns early if user is not provided."""
         form = SnapshotSubscriptionAdminForm()
         form.cleaned_data = {"frequency": "weekly"}
         result = form.clean()
         assert result == {"frequency": "weekly"}
-        mock_objects.filter.assert_not_called()
+        mock_check_duplicate_setup.assert_not_called()
 
-    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.objects")
-    def test_clean_passes_when_no_duplicates(self, mock_objects):
+    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
+    def test_clean_passes_when_no_duplicates(self, mock_check_duplicate_setup):
         """Test clean passes when no duplicates exist."""
         form = SnapshotSubscriptionAdminForm()
         form.instance = MagicMock()
@@ -104,41 +104,13 @@ class TestSnapshotSubscriptionAdminForm:
             "subscribed_committees": [],
         }
 
-        mock_qs = mock_objects.filter.return_value.prefetch_related.return_value
-        mock_qs.exists.return_value = False
+        mock_check_duplicate_setup.return_value = False
 
         result = form.clean()
         assert result == form.cleaned_data
 
-    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.objects")
-    def test_clean_passes_when_m2m_differs(self, mock_objects):
-        """Test clean passes when scalar fields match but M2M differs."""
-        form = SnapshotSubscriptionAdminForm()
-        form.instance = MagicMock()
-        form.instance.pk = 10
-        form.cleaned_data = {
-            "user": MagicMock(),
-            "frequency": "weekly",
-            "subscribed_projects": [MagicMock(pk=1)],
-            "subscribed_chapters": [],
-            "subscribed_committees": [],
-        }
-
-        mock_qs = mock_objects.filter.return_value.prefetch_related.return_value
-        mock_qs = mock_qs.exclude.return_value
-        mock_qs.exists.return_value = True
-
-        other_sub = MagicMock()
-        other_sub.subscribed_projects.all.return_value = [MagicMock(pk=2)]
-        other_sub.subscribed_chapters.all.return_value = []
-        other_sub.subscribed_committees.all.return_value = []
-        mock_qs.__iter__.return_value = [other_sub]
-
-        result = form.clean()
-        assert result == form.cleaned_data
-
-    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.objects")
-    def test_clean_raises_when_exact_duplicate(self, mock_objects):
+    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
+    def test_clean_raises_when_exact_duplicate(self, mock_check_duplicate_setup):
         """Test clean raises ValidationError when exact duplicate exists."""
         form = SnapshotSubscriptionAdminForm()
         form.instance = MagicMock()
@@ -151,14 +123,7 @@ class TestSnapshotSubscriptionAdminForm:
             "subscribed_committees": [],
         }
 
-        mock_qs = mock_objects.filter.return_value.prefetch_related.return_value
-        mock_qs.exists.return_value = True
-
-        other_sub = MagicMock()
-        other_sub.subscribed_projects.all.return_value = [MagicMock(pk=1)]
-        other_sub.subscribed_chapters.all.return_value = []
-        other_sub.subscribed_committees.all.return_value = []
-        mock_qs.__iter__.return_value = [other_sub]
+        mock_check_duplicate_setup.return_value = True
 
         with pytest.raises(ValidationError, match="same configuration"):
             form.clean()

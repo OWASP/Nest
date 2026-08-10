@@ -221,6 +221,67 @@ class SnapshotSubscription(models.Model):
         if committee_ids is not None:
             self.subscribed_committees.set(Committee.objects.filter(pk__in=committee_ids))
 
+    @classmethod
+    def check_duplicate_setup(
+        cls,
+        *,
+        user,
+        frequency,
+        include_chapters,
+        include_events,
+        include_issues,
+        include_posts,
+        include_projects,
+        include_pull_requests,
+        include_releases,
+        include_users,
+        project_ids,
+        chapter_ids,
+        committee_ids,
+        exclude_pk=None,
+    ):
+        """Check if another subscription has the exact same setup.
+
+        Compares frequency, all toggle values, and M2M entity sets.
+
+        Returns:
+            bool: True if a duplicate setup exists.
+
+        """
+        other_subs = cls.objects.filter(
+            user=user,
+            frequency=frequency,
+            include_chapters=include_chapters,
+            include_events=include_events,
+            include_issues=include_issues,
+            include_posts=include_posts,
+            include_projects=include_projects,
+            include_pull_requests=include_pull_requests,
+            include_releases=include_releases,
+            include_users=include_users,
+        ).prefetch_related(
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
+
+        if exclude_pk is not None:
+            other_subs = other_subs.exclude(pk=exclude_pk)
+
+        if not other_subs.exists():
+            return False
+
+        current_project_ids = set(project_ids)
+        current_chapter_ids = set(chapter_ids)
+        current_committee_ids = set(committee_ids)
+
+        return any(
+            {p.pk for p in other.subscribed_projects.all()} == current_project_ids
+            and {c.pk for c in other.subscribed_chapters.all()} == current_chapter_ids
+            and {c.pk for c in other.subscribed_committees.all()} == current_committee_ids
+            for other in other_subs
+        )
+
     def has_duplicate_setup(self):
         """Check if another subscription has the exact same setup.
 
@@ -230,37 +291,19 @@ class SnapshotSubscription(models.Model):
             bool: True if a duplicate setup exists.
 
         """
-        other_subs = (
-            SnapshotSubscription.objects.filter(
-                user=self.user,
-                frequency=self.frequency,
-                include_chapters=self.include_chapters,
-                include_events=self.include_events,
-                include_issues=self.include_issues,
-                include_posts=self.include_posts,
-                include_projects=self.include_projects,
-                include_pull_requests=self.include_pull_requests,
-                include_releases=self.include_releases,
-                include_users=self.include_users,
-            )
-            .exclude(pk=self.pk)
-            .prefetch_related(
-                "subscribed_projects",
-                "subscribed_chapters",
-                "subscribed_committees",
-            )
-        )
-
-        if not other_subs.exists():
-            return False
-
-        current_project_ids = set(self.subscribed_projects.values_list("pk", flat=True))
-        current_chapter_ids = set(self.subscribed_chapters.values_list("pk", flat=True))
-        current_committee_ids = set(self.subscribed_committees.values_list("pk", flat=True))
-
-        return any(
-            {p.pk for p in other.subscribed_projects.all()} == current_project_ids
-            and {c.pk for c in other.subscribed_chapters.all()} == current_chapter_ids
-            and {c.pk for c in other.subscribed_committees.all()} == current_committee_ids
-            for other in other_subs
+        return self.check_duplicate_setup(
+            user=self.user,
+            frequency=self.frequency,
+            include_chapters=self.include_chapters,
+            include_events=self.include_events,
+            include_issues=self.include_issues,
+            include_posts=self.include_posts,
+            include_projects=self.include_projects,
+            include_pull_requests=self.include_pull_requests,
+            include_releases=self.include_releases,
+            include_users=self.include_users,
+            project_ids=self.subscribed_projects.values_list("pk", flat=True),
+            chapter_ids=self.subscribed_chapters.values_list("pk", flat=True),
+            committee_ids=self.subscribed_committees.values_list("pk", flat=True),
+            exclude_pk=self.pk,
         )

@@ -40,7 +40,7 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
         if not user:
             return cleaned_data
 
-        other_subs = SnapshotSubscription.objects.filter(
+        duplicate_found = SnapshotSubscription.check_duplicate_setup(
             user=user,
             frequency=cleaned_data.get("frequency"),
             include_chapters=cleaned_data.get("include_chapters"),
@@ -51,27 +51,10 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             include_pull_requests=cleaned_data.get("include_pull_requests"),
             include_releases=cleaned_data.get("include_releases"),
             include_users=cleaned_data.get("include_users"),
-        ).prefetch_related(
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
-        )
-
-        if self.instance and self.instance.pk:
-            other_subs = other_subs.exclude(pk=self.instance.pk)
-
-        if not other_subs.exists():
-            return cleaned_data
-
-        current_project_ids = {p.pk for p in (cleaned_data.get("subscribed_projects") or [])}
-        current_chapter_ids = {c.pk for c in (cleaned_data.get("subscribed_chapters") or [])}
-        current_committee_ids = {c.pk for c in (cleaned_data.get("subscribed_committees") or [])}
-
-        duplicate_found = any(
-            {p.pk for p in other.subscribed_projects.all()} == current_project_ids
-            and {c.pk for c in other.subscribed_chapters.all()} == current_chapter_ids
-            and {c.pk for c in other.subscribed_committees.all()} == current_committee_ids
-            for other in other_subs
+            project_ids=[p.pk for p in (cleaned_data.get("subscribed_projects") or [])],
+            chapter_ids=[c.pk for c in (cleaned_data.get("subscribed_chapters") or [])],
+            committee_ids=[c.pk for c in (cleaned_data.get("subscribed_committees") or [])],
+            exclude_pk=self.instance.pk if self.instance else None,
         )
 
         if duplicate_found:
