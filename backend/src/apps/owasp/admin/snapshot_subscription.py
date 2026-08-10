@@ -51,9 +51,11 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             include_pull_requests=cleaned_data.get("include_pull_requests"),
             include_releases=cleaned_data.get("include_releases"),
             include_users=cleaned_data.get("include_users"),
-            project_ids=[p.pk for p in (cleaned_data.get("subscribed_projects") or [])],
-            chapter_ids=[c.pk for c in (cleaned_data.get("subscribed_chapters") or [])],
-            committee_ids=[c.pk for c in (cleaned_data.get("subscribed_committees") or [])],
+            entity_ids={
+                "projects": [p.pk for p in (cleaned_data.get("subscribed_projects") or [])],
+                "chapters": [c.pk for c in (cleaned_data.get("subscribed_chapters") or [])],
+                "committees": [c.pk for c in (cleaned_data.get("subscribed_committees") or [])],
+            },
             exclude_pk=self.instance.pk if self.instance else None,
         )
 

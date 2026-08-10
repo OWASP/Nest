@@ -235,9 +235,7 @@ class SnapshotSubscription(models.Model):
         include_pull_requests,
         include_releases,
         include_users,
-        project_ids,
-        chapter_ids,
-        committee_ids,
+        entity_ids,
         exclude_pk=None,
     ):
         """Check if another subscription has the exact same setup.
@@ -271,9 +269,9 @@ class SnapshotSubscription(models.Model):
         if not other_subs.exists():
             return False
 
-        current_project_ids = set(project_ids)
-        current_chapter_ids = set(chapter_ids)
-        current_committee_ids = set(committee_ids)
+        current_project_ids = set(entity_ids.get("projects", []))
+        current_chapter_ids = set(entity_ids.get("chapters", []))
+        current_committee_ids = set(entity_ids.get("committees", []))
 
         return any(
             {p.pk for p in other.subscribed_projects.all()} == current_project_ids
@@ -302,8 +300,10 @@ class SnapshotSubscription(models.Model):
             include_pull_requests=self.include_pull_requests,
             include_releases=self.include_releases,
             include_users=self.include_users,
-            project_ids=self.subscribed_projects.values_list("pk", flat=True),
-            chapter_ids=self.subscribed_chapters.values_list("pk", flat=True),
-            committee_ids=self.subscribed_committees.values_list("pk", flat=True),
+            entity_ids={
+                "projects": self.subscribed_projects.values_list("pk", flat=True),
+                "chapters": self.subscribed_chapters.values_list("pk", flat=True),
+                "committees": self.subscribed_committees.values_list("pk", flat=True),
+            },
             exclude_pk=self.pk,
         )

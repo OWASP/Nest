@@ -453,9 +453,7 @@ class TestCheckDuplicateSetup:
             include_pull_requests=True,
             include_releases=True,
             include_users=True,
-            project_ids=[],
-            chapter_ids=[],
-            committee_ids=[],
+            entity_ids={"projects": [], "chapters": [], "committees": []},
             exclude_pk=1,
         )
 
@@ -489,9 +487,7 @@ class TestCheckDuplicateSetup:
             include_pull_requests=True,
             include_releases=True,
             include_users=True,
-            project_ids=[10],
-            chapter_ids=[20],
-            committee_ids=[],
+            entity_ids={"projects": [10], "chapters": [20], "committees": []},
             exclude_pk=1,
         )
 
@@ -536,8 +532,10 @@ class TestHasDuplicateSetup:
             include_pull_requests=True,
             include_releases=True,
             include_users=True,
-            project_ids=[10],
-            chapter_ids=[20],
-            committee_ids=[],
+            entity_ids={
+                "projects": [10],
+                "chapters": [20],
+                "committees": [],
+            },
             exclude_pk=1,
         )
