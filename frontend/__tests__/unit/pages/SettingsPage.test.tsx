@@ -191,10 +191,13 @@ describe('SettingsPage Component', () => {
     test('renders all 8 content toggles', () => {
       setupMocks({ data: mockActiveSubscriptions })
       render(<SettingsPage />)
+      const contentToggles = screen.getAllByRole('button', { pressed: true })
+      expect(contentToggles.length).toBeGreaterThanOrEqual(8)
       expect(screen.getAllByText('Chapters').length).toBeGreaterThan(0)
       expect(screen.getByText('Events')).toBeInTheDocument()
       expect(screen.getByText('Issues')).toBeInTheDocument()
       expect(screen.getByText('Posts')).toBeInTheDocument()
+      expect(screen.getAllByText('Projects').length).toBeGreaterThan(0)
       expect(screen.getByText('Pull Requests')).toBeInTheDocument()
       expect(screen.getByText('Releases')).toBeInTheDocument()
       expect(screen.getByText('Users')).toBeInTheDocument()
@@ -239,6 +242,15 @@ describe('SettingsPage Component', () => {
       expect(screen.getByText('Create Subscription')).toBeInTheDocument()
     })
 
+    test('disables Create button when no content toggles are selected', () => {
+      setupMocks({ data: mockNoSubscriptions })
+      render(<SettingsPage />)
+      fireEvent.click(screen.getByText('New Subscription'))
+
+      const createButton = screen.getByText('Create Subscription').closest('button')
+      expect(createButton).toBeDisabled()
+    })
+
     test('calls create mutation with name and frequency', async () => {
       setupMocks({ data: mockNoSubscriptions })
       render(<SettingsPage />)
@@ -247,10 +259,25 @@ describe('SettingsPage Component', () => {
       fireEvent.change(screen.getByPlaceholderText('e.g., My Weekly Digest'), {
         target: { value: 'Test Sub' },
       })
+
+      const contentToggles = screen.getAllByRole('button', { pressed: false })
+      const chaptersToggle = contentToggles.find((btn) => btn.textContent?.includes('Chapters'))
+      if (chaptersToggle) fireEvent.click(chaptersToggle)
+
       fireEvent.click(screen.getByText('Create Subscription'))
 
       await waitFor(() => {
-        expect(mockCreateMutation).toHaveBeenCalled()
+        expect(mockCreateMutation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            variables: expect.objectContaining({
+              inputData: expect.objectContaining({
+                name: 'Test Sub',
+                frequency: 'weekly',
+                includeChapters: true,
+              }),
+            }),
+          })
+        )
       })
     })
   })

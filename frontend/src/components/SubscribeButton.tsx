@@ -174,6 +174,8 @@ export default function SubscribeButton({
   const openModal = () => {
     setShowModal(true)
     setSelectedSubId(null)
+    setNewName('')
+    setNewFrequency('weekly')
     setModalView(activeSubscriptions.length > 0 ? 'list' : 'create')
   }
 

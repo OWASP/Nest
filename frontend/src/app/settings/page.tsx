@@ -316,6 +316,7 @@ function SubscriptionCard({
   }
 
   const isActive = subscription.isActive
+  const hasAtLeastOnePreference = Object.values(preferences).some(Boolean)
 
   const destructiveButtonStyles =
     'flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white'
@@ -426,7 +427,10 @@ function SubscriptionCard({
                   Delete
                 </Button>
               )}
-              <ActionButton onClick={handleSave} isDisabled={isMutating}>
+              <ActionButton
+                onClick={handleSave}
+                isDisabled={isMutating || !hasAtLeastOnePreference}
+              >
                 <FaFloppyDisk />
                 {isMutating ? 'Saving...' : 'Save Changes'}
               </ActionButton>
@@ -597,6 +601,8 @@ function SubscriptionContent() {
     deleteSubscription({ variables: { subscriptionId: decodeRelayId(id) } })
   }
 
+  const hasAtLeastOneNewPreference = Object.values(newPreferences).some(Boolean)
+
   const handleCreate = () => {
     createSubscription({
       variables: {
@@ -754,7 +760,10 @@ function SubscriptionContent() {
             >
               Cancel
             </ActionButton>
-            <ActionButton onClick={handleCreate} isDisabled={creating}>
+            <ActionButton
+              onClick={handleCreate}
+              isDisabled={creating || !hasAtLeastOneNewPreference}
+            >
               <FaBell />
               {creating ? 'Creating...' : 'Create Subscription'}
             </ActionButton>

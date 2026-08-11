@@ -298,7 +298,7 @@ describe('SubscribeButton', () => {
       expect(screen.getByText('Create New Subscription')).toBeInTheDocument()
     })
 
-    test('marks subscription as "Already added" if entity is in it', () => {
+    test('shows Subscribed link when entity is already in a subscription', () => {
       const subsWithEntity = [
         {
           ...existingSubscriptions[0],
@@ -308,7 +308,6 @@ describe('SubscribeButton', () => {
       ]
       setupMocks({ subscriptions: subsWithEntity })
       render(<SubscribeButton {...defaultProps} />)
-      // Entity is already in sub-1, so button shows "Subscribed" link instead
       expect(screen.getByText('Subscribed')).toBeInTheDocument()
     })
   })

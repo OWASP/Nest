@@ -1,4 +1,4 @@
-const baseSubscription = {
+const createBaseSubscription = () => ({
   includeChapters: true,
   includeEvents: true,
   includeIssues: true,
@@ -12,12 +12,12 @@ const baseSubscription = {
   subscribedCommittees: [] as { id: number; name: string }[],
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-06-01T00:00:00Z',
-}
+})
 
 export const mockActiveSubscriptions = {
   mySnapshotSubscriptions: [
     {
-      ...baseSubscription,
+      ...createBaseSubscription(),
       id: '1',
       name: 'My Weekly Digest',
       frequency: 'weekly',
@@ -31,7 +31,7 @@ export const mockActiveSubscriptions = {
 export const mockMultipleSubscriptions = {
   mySnapshotSubscriptions: [
     {
-      ...baseSubscription,
+      ...createBaseSubscription(),
       id: '1',
       name: 'My Weekly Digest',
       frequency: 'weekly',
@@ -39,7 +39,7 @@ export const mockMultipleSubscriptions = {
       subscribedProjects: [{ id: 1, name: 'OWASP Nest' }],
     },
     {
-      ...baseSubscription,
+      ...createBaseSubscription(),
       id: '2',
       name: 'Monthly Security',
       frequency: 'monthly',
