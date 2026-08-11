@@ -2,7 +2,7 @@
 
 .PHONY: dump-data enrich-data fetch-nest-dump index-data load-data load-data-e2e load-data-fuzz \
 	load-data-staging purge-data purge-data-e2e purge-data-fuzz purge-data-staging recreate-schema \
- 	restore-backup save-backup sync-data update-data upload-nest-dump backend-data-dump backend-data-enrich \
+	restore-backup save-backup sync-data update-data upload-nest-dump backend-data-dump backend-data-enrich \
 	backend-data-fetch-nest-dump backend-data-index backend-data-load backend-data-load-e2e \
 	backend-data-load-fuzz backend-data-load-staging backend-data-purge backend-data-purge-e2e \
 	backend-data-purge-fuzz backend-data-purge-staging backend-data-recreate-schema backend-data-restore-backup \
