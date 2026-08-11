@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: a2a8fb2216f444217ef275db48d6be04a2a88fc1  # v1.41.0
+    rev: d69c3510ebf3e850e0fa00cb998f83bfc6f87c88  # v1.42.1
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -97,7 +97,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.322.0
+          - strawberry-graphql==0.322.2
           - strawberry-graphql-django==0.86.5
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260716
