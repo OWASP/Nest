@@ -73,7 +73,7 @@ class TestGetGithubDataloaders:
     def test_returns_all_expected_loader_keys(self):
         """Every loader key from each sub-module is registered in the aggregated dict."""
         loaders = get_github_dataloaders()
-        assert set(EXPECTED_LOADER_KEYS).issubset(loaders.keys())
+        assert set(EXPECTED_LOADER_KEYS) == set(loaders.keys())
 
     @pytest.mark.parametrize("loader_key", EXPECTED_LOADER_KEYS)
     def test_each_loader_is_a_dataloader_instance(self, loader_key):
