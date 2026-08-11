@@ -3,6 +3,7 @@ import { gql } from '@apollo/client'
 const SNAPSHOT_SUBSCRIPTION_FIELDS = gql`
   fragment SnapshotSubscriptionFields on SnapshotSubscriptionNode {
     id
+    name
     frequency
     isActive
     includeChapters
@@ -13,25 +14,15 @@ const SNAPSHOT_SUBSCRIPTION_FIELDS = gql`
     includePullRequests
     includeReleases
     includeUsers
-    createdAt
-    updatedAt
-  }
-`
-
-const ENTITY_SUBSCRIPTION_FIELDS = gql`
-  fragment EntitySubscriptionFields on EntitySubscriptionNode {
-    id
-    frequency
-    isActive
-    chapter {
+    subscribedProjects {
       id
       name
     }
-    committee {
+    subscribedChapters {
       id
       name
     }
-    project {
+    subscribedCommittees {
       id
       name
     }
@@ -40,9 +31,9 @@ const ENTITY_SUBSCRIPTION_FIELDS = gql`
   }
 `
 
-export const GET_MY_SNAPSHOT_SUBSCRIPTION = gql`
-  query GetMySnapshotSubscription {
-    mySnapshotSubscription {
+export const GET_MY_SNAPSHOT_SUBSCRIPTIONS = gql`
+  query GetMySnapshotSubscriptions {
+    mySnapshotSubscriptions {
       ...SnapshotSubscriptionFields
     }
   }
@@ -63,8 +54,11 @@ export const CREATE_SNAPSHOT_SUBSCRIPTION = gql`
 `
 
 export const UPDATE_SNAPSHOT_SUBSCRIPTION = gql`
-  mutation UpdateSnapshotSubscription($inputData: UpdateSnapshotSubscriptionInput!) {
-    updateSnapshotSubscription(inputData: $inputData) {
+  mutation UpdateSnapshotSubscription(
+    $subscriptionId: Int!
+    $inputData: UpdateSnapshotSubscriptionInput!
+  ) {
+    updateSnapshotSubscription(subscriptionId: $subscriptionId, inputData: $inputData) {
       ok
       message
       subscription {
@@ -76,8 +70,8 @@ export const UPDATE_SNAPSHOT_SUBSCRIPTION = gql`
 `
 
 export const CANCEL_SNAPSHOT_SUBSCRIPTION = gql`
-  mutation CancelSnapshotSubscription {
-    cancelSnapshotSubscription {
+  mutation CancelSnapshotSubscription($subscriptionId: Int!) {
+    cancelSnapshotSubscription(subscriptionId: $subscriptionId) {
       ok
       message
       subscription {
@@ -88,69 +82,18 @@ export const CANCEL_SNAPSHOT_SUBSCRIPTION = gql`
   }
 `
 
-export const GET_MY_ENTITY_SUBSCRIPTIONS = gql`
-  query GetMyEntitySubscriptions {
-    myEntitySubscriptions {
-      ...EntitySubscriptionFields
-    }
-  }
-  ${ENTITY_SUBSCRIPTION_FIELDS}
-`
-
-export const CREATE_ENTITY_SUBSCRIPTION = gql`
-  mutation CreateEntitySubscription($inputData: CreateEntitySubscriptionInput!) {
-    createEntitySubscription(inputData: $inputData) {
-      ok
-      message
-      subscription {
-        ...EntitySubscriptionFields
-      }
-    }
-  }
-  ${ENTITY_SUBSCRIPTION_FIELDS}
-`
-
-export const UPDATE_ENTITY_SUBSCRIPTION = gql`
-  mutation UpdateEntitySubscription(
-    $subscriptionId: Int!
-    $inputData: UpdateEntitySubscriptionInput!
-  ) {
-    updateEntitySubscription(subscriptionId: $subscriptionId, inputData: $inputData) {
-      ok
-      message
-      subscription {
-        ...EntitySubscriptionFields
-      }
-    }
-  }
-  ${ENTITY_SUBSCRIPTION_FIELDS}
-`
-
-export const CANCEL_ENTITY_SUBSCRIPTION = gql`
-  mutation CancelEntitySubscription($subscriptionId: Int!) {
-    cancelEntitySubscription(subscriptionId: $subscriptionId) {
-      ok
-      message
-      subscription {
-        id
-        isActive
-      }
-    }
-  }
-`
-
-export const DELETE_ENTITY_SUBSCRIPTION = gql`
-  mutation DeleteEntitySubscription($subscriptionId: Int!) {
-    deleteEntitySubscription(subscriptionId: $subscriptionId) {
+export const DELETE_SNAPSHOT_SUBSCRIPTION = gql`
+  mutation DeleteSnapshotSubscription($subscriptionId: Int!) {
+    deleteSnapshotSubscription(subscriptionId: $subscriptionId) {
       ok
       message
     }
   }
 `
 
-export const REACTIVATE_ENTITY_SUBSCRIPTION = gql`
-  mutation ReactivateEntitySubscription($subscriptionId: Int!) {
-    reactivateEntitySubscription(subscriptionId: $subscriptionId) {
+export const REACTIVATE_SNAPSHOT_SUBSCRIPTION = gql`
+  mutation ReactivateSnapshotSubscription($subscriptionId: Int!) {
+    reactivateSnapshotSubscription(subscriptionId: $subscriptionId) {
       ok
       message
       subscription {

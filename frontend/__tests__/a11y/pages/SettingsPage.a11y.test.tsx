@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client/react'
-import { mockActiveSubscription, mockNoSubscription } from '@mockData/mockSubscriptionData'
+import { mockActiveSubscriptions, mockNoSubscriptions } from '@mockData/mockSubscriptionData'
 import { screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useSession } from 'next-auth/react'
@@ -46,7 +46,7 @@ describe.each([
       status: 'authenticated',
     })
     mockUseQuery.mockReturnValue({
-      data: mockNoSubscription,
+      data: mockNoSubscriptions,
       loading: false,
       error: null,
       refetch: jest.fn(),
@@ -63,7 +63,7 @@ describe.each([
       status: 'authenticated',
     })
     mockUseQuery.mockReturnValue({
-      data: mockActiveSubscription,
+      data: mockActiveSubscriptions,
       loading: false,
       error: null,
       refetch: jest.fn(),
