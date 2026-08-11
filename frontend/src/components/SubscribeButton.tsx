@@ -3,7 +3,6 @@
 import { useMutation, useQuery } from '@apollo/client/react'
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/modal'
 import { addToast } from '@heroui/toast'
-import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useCallback, useMemo, useState } from 'react'
@@ -181,8 +180,6 @@ export default function SubscribeButton({
 
   if (status !== 'authenticated') return null
 
-  const canSubscribe = activeSubscriptions.length < MAX_SUBSCRIPTIONS
-
   const renderButton = () => {
     if (isSubscribed) {
       return (
@@ -197,32 +194,16 @@ export default function SubscribeButton({
       )
     }
 
-    if (canSubscribe) {
-      return (
-        <button
-          type="button"
-          onClick={openModal}
-          className="flex h-10 cursor-pointer items-center gap-1.5 rounded-md border border-[#1D7BD7] px-2 py-2 text-sm font-medium text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white"
-          aria-label={`Subscribe to ${entityName}`}
-        >
-          <FaBell className="h-3 w-3" />
-          Subscribe
-        </button>
-      )
-    }
-
     return (
-      <Tooltip content={`Maximum ${MAX_SUBSCRIPTIONS} subscriptions reached`}>
-        <button
-          type="button"
-          disabled
-          className="flex h-10 cursor-not-allowed items-center gap-1.5 rounded-md border border-gray-300 px-2 py-2 text-sm font-medium text-gray-400 opacity-50 dark:border-gray-600"
-          aria-label="Subscription limit reached"
-        >
-          <FaBell className="h-3 w-3" />
-          Subscribe
-        </button>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={openModal}
+        className="flex h-10 cursor-pointer items-center gap-1.5 rounded-md border border-[#1D7BD7] px-2 py-2 text-sm font-medium text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white"
+        aria-label={`Subscribe to ${entityName}`}
+      >
+        <FaBell className="h-3 w-3" />
+        Subscribe
+      </button>
     )
   }
 

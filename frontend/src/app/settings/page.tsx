@@ -4,6 +4,7 @@ import { useApolloClient, useMutation, useQuery } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import { addToast } from '@heroui/toast'
+import { Tooltip } from '@heroui/tooltip'
 import debounce from 'lodash/debounce'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
@@ -427,13 +428,21 @@ function SubscriptionCard({
                   Delete
                 </Button>
               )}
-              <ActionButton
-                onClick={handleSave}
-                isDisabled={isMutating || !hasAtLeastOnePreference}
-              >
-                <FaFloppyDisk />
-                {isMutating ? 'Saving...' : 'Save Changes'}
-              </ActionButton>
+              {hasAtLeastOnePreference ? (
+                <ActionButton onClick={handleSave} isDisabled={isMutating}>
+                  <FaFloppyDisk />
+                  {isMutating ? 'Saving...' : 'Save Changes'}
+                </ActionButton>
+              ) : (
+                <Tooltip content="Select at least one content type">
+                  <div className="inline-block cursor-not-allowed">
+                    <ActionButton onClick={handleSave} isDisabled={true}>
+                      <FaFloppyDisk />
+                      Save Changes
+                    </ActionButton>
+                  </div>
+                </Tooltip>
+              )}
             </>
           ) : null}
         </div>
@@ -760,13 +769,21 @@ function SubscriptionContent() {
             >
               Cancel
             </ActionButton>
-            <ActionButton
-              onClick={handleCreate}
-              isDisabled={creating || !hasAtLeastOneNewPreference}
-            >
-              <FaBell />
-              {creating ? 'Creating...' : 'Create Subscription'}
-            </ActionButton>
+            {hasAtLeastOneNewPreference ? (
+              <ActionButton onClick={handleCreate} isDisabled={creating}>
+                <FaBell />
+                {creating ? 'Creating...' : 'Create Subscription'}
+              </ActionButton>
+            ) : (
+              <Tooltip content="Select at least one content type">
+                <div className="inline-block cursor-not-allowed">
+                  <ActionButton onClick={handleCreate} isDisabled={true}>
+                    <FaBell />
+                    Create Subscription
+                  </ActionButton>
+                </div>
+              </Tooltip>
+            )}
           </div>
         </SecondaryCard>
       )}

@@ -201,18 +201,15 @@ describe('SubscribeButton', () => {
       subscribedCommittees: [],
     }))
 
-    test('disables subscribe button when limit reached', () => {
+    test('keeps subscribe button enabled when limit reached to allow adding to existing', () => {
       setupMocks({ subscriptions: maxSubscriptions })
       render(<SubscribeButton {...defaultProps} />)
       const button = screen.getByText('Subscribe')
-      expect(button.closest('button')).toBeDisabled()
-    })
+      expect(button.closest('button')).not.toBeDisabled()
 
-    test('shows limit reached aria-label when disabled', () => {
-      setupMocks({ subscriptions: maxSubscriptions })
-      render(<SubscribeButton {...defaultProps} />)
-      const button = screen.getByText('Subscribe')
-      expect(button.closest('button')).toHaveAttribute('aria-label', 'Subscription limit reached')
+      fireEvent.click(button)
+      expect(screen.getByText('Choose a subscription to add this project to:')).toBeInTheDocument()
+      expect(screen.queryByText('Create New Subscription')).not.toBeInTheDocument()
     })
   })
 
