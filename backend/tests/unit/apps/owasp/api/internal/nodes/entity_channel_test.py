@@ -1,7 +1,13 @@
 """Tests for EntityChannel GraphQL node resolvers."""
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from apps.owasp.api.internal.dataloaders.entity_channel import (
+    EXTERNAL_ID_BY_ENTITY_CHANNEL_ID_LOADER,
+    NAME_BY_ENTITY_CHANNEL_ID_LOADER,
+)
 from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
 
 
@@ -13,32 +19,76 @@ class TestEntityChannelNodeResolvers:
                 return field.base_resolver.wrapped_func if field.base_resolver else None
         return None
 
-    def test_name_and_external_id_resolvers_return_values_from_channel(self):
-        """Return channel name and external id when channel is present."""
-        mock_channel = Mock(name="mock-conversation")
-        mock_channel.name = "chapter-general"
-        mock_channel.slack_channel_id = "C123ABC"
-
+    @pytest.mark.asyncio
+    async def test_external_id_resolver_uses_dataloader(self):
+        """external_id resolver delegates to the dataloader with pk."""
         mock_entity_channel = Mock()
-        mock_entity_channel.channel = mock_channel
+        mock_entity_channel.pk = 42
 
-        name_resolver = self._get_resolver("name")
-        external_id_resolver = self._get_resolver("external_id")
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value="C123ABC")
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {
+            EXTERNAL_ID_BY_ENTITY_CHANNEL_ID_LOADER: mock_loader,
+        }
 
-        assert name_resolver is not None
-        assert external_id_resolver is not None
-        assert name_resolver(None, mock_entity_channel) == "chapter-general"
-        assert external_id_resolver(None, mock_entity_channel) == "C123ABC"
+        resolver = self._get_resolver("external_id")
+        result = await resolver(None, mock_entity_channel, mock_info)
 
-    def test_name_and_external_id_resolvers_return_none_when_channel_missing(self):
-        """Return None when no linked channel exists."""
+        assert result == "C123ABC"
+        mock_loader.load.assert_awaited_once_with(42)
+
+    @pytest.mark.asyncio
+    async def test_name_resolver_uses_dataloader(self):
+        """Name resolver delegates to the dataloader with pk."""
         mock_entity_channel = Mock()
-        mock_entity_channel.channel = None
+        mock_entity_channel.pk = 99
 
-        name_resolver = self._get_resolver("name")
-        external_id_resolver = self._get_resolver("external_id")
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value="chapter-general")
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {
+            NAME_BY_ENTITY_CHANNEL_ID_LOADER: mock_loader,
+        }
 
-        assert name_resolver is not None
-        assert external_id_resolver is not None
-        assert name_resolver(None, mock_entity_channel) is None
-        assert external_id_resolver(None, mock_entity_channel) is None
+        resolver = self._get_resolver("name")
+        result = await resolver(None, mock_entity_channel, mock_info)
+
+        assert result == "chapter-general"
+        mock_loader.load.assert_awaited_once_with(99)
+
+    @pytest.mark.asyncio
+    async def test_external_id_resolver_returns_none(self):
+        """external_id resolver returns None when dataloader returns None."""
+        mock_entity_channel = Mock()
+        mock_entity_channel.pk = 1
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=None)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {
+            EXTERNAL_ID_BY_ENTITY_CHANNEL_ID_LOADER: mock_loader,
+        }
+
+        resolver = self._get_resolver("external_id")
+        result = await resolver(None, mock_entity_channel, mock_info)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_name_resolver_returns_none(self):
+        """Name resolver returns None when dataloader returns None."""
+        mock_entity_channel = Mock()
+        mock_entity_channel.pk = 1
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=None)
+        mock_info = Mock()
+        mock_info.context.owasp_dataloaders = {
+            NAME_BY_ENTITY_CHANNEL_ID_LOADER: mock_loader,
+        }
+
+        resolver = self._get_resolver("name")
+        result = await resolver(None, mock_entity_channel, mock_info)
+
+        assert result is None

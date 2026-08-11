@@ -28,12 +28,9 @@ async def _load_channel_field_by_entity_channel_id(
             Conversation.objects.filter(pk=OuterRef("channel_id")).values(field),
         ),
     )
-    return [
-        value or None
-        for value in await get_result_by_keys(
-            channels, entity_channel_ids, key_field="pk", value_field="value"
-        )
-    ]
+    return await get_result_by_keys(
+        channels, entity_channel_ids, key_field="pk", value_field="value"
+    )
 
 
 async def load_external_id_by_entity_channel_id(
