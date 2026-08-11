@@ -234,19 +234,22 @@ export default function SubscribeButton({
                       (e) => e.id === decodedEntityId
                     )
 
+                    let buttonClasses =
+                      'border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600'
+                    if (alreadyHasEntity) {
+                      buttonClasses =
+                        'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-500'
+                    } else if (selectedSubId === sub.id) {
+                      buttonClasses = 'border-[#1D7BD7] bg-[#1D7BD7]/5 text-[#1D7BD7]'
+                    }
+
                     return (
                       <button
                         key={sub.id}
                         type="button"
                         disabled={alreadyHasEntity}
                         onClick={() => setSelectedSubId(sub.id)}
-                        className={`flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3 text-left text-sm transition-all ${
-                          alreadyHasEntity
-                            ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-500'
-                            : selectedSubId === sub.id
-                              ? 'border-[#1D7BD7] bg-[#1D7BD7]/5 text-[#1D7BD7]'
-                              : 'border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600'
-                        }`}
+                        className={`flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3 text-left text-sm transition-all ${buttonClasses}`}
                       >
                         <div>
                           <span className="font-medium">{sub.name || 'Unnamed Subscription'}</span>
