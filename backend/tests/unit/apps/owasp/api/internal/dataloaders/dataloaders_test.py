@@ -8,10 +8,6 @@ from apps.owasp.api.internal.dataloaders.board_of_directors import (
     CANDIDATES_BY_BOARD_ID_LOADER,
     MEMBERS_BY_BOARD_ID_LOADER,
 )
-from apps.owasp.api.internal.dataloaders.entity_channel import (
-    EXTERNAL_ID_BY_ENTITY_CHANNEL_ID_LOADER,
-    NAME_BY_ENTITY_CHANNEL_ID_LOADER,
-)
 from apps.owasp.api.internal.dataloaders.project import (
     HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER,
     HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER,
@@ -28,8 +24,6 @@ from apps.owasp.api.internal.dataloaders.snapshot import (
 EXPECTED_LOADER_KEYS = (
     CANDIDATES_BY_BOARD_ID_LOADER,
     MEMBERS_BY_BOARD_ID_LOADER,
-    EXTERNAL_ID_BY_ENTITY_CHANNEL_ID_LOADER,
-    NAME_BY_ENTITY_CHANNEL_ID_LOADER,
     PROJECT_BY_REPOSITORY_ID_LOADER,
     HEALTH_METRICS_LIST_BY_PROJECT_ID_LOADER,
     HEALTH_METRICS_LATEST_BY_PROJECT_ID_LOADER,
