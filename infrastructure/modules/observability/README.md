@@ -37,6 +37,8 @@ No modules.
 | [aws_security_group_rule.vm_egress_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.vm_ingest_from_apps](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.vm_to_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_service_discovery_private_dns_namespace.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/service_discovery_private_dns_namespace) | resource |
+| [aws_service_discovery_service.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/service_discovery_service) | resource |
 
 ## Inputs
 
@@ -65,5 +67,6 @@ No modules.
 | ---- | ----------- |
 | <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | The ID of the EFS file system backing VictoriaMetrics storage. |
 | <a name="output_vm_cluster_name"></a> [vm\_cluster\_name](#output\_vm\_cluster\_name) | The name of the ECS cluster running VictoriaMetrics. |
+| <a name="output_vm_endpoint"></a> [vm\_endpoint](#output\_vm\_endpoint) | The private host:port endpoint for reaching VictoriaMetrics. |
 | <a name="output_vm_security_group_id"></a> [vm\_security\_group\_id](#output\_vm\_security\_group\_id) | The ID of the VictoriaMetrics security group. |
 <!-- END_TF_DOCS -->

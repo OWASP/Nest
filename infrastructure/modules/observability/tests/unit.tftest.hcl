@@ -171,3 +171,17 @@ run "test_common_tags_applied" {
     error_message = "common_tags must be applied to the ECS cluster."
   }
 }
+
+run "test_service_discovery_configured" {
+  command = plan
+
+  assert {
+    condition     = aws_service_discovery_private_dns_namespace.vm.name == "${var.project_name}-${var.environment}-observability.internal"
+    error_message = "The service discovery namespace must follow the {project}-{environment}-observability.internal format."
+  }
+
+  assert {
+    condition     = aws_service_discovery_service.vm.dns_config[0].dns_records[0].type == "A"
+    error_message = "The service discovery service must publish an A record."
+  }
+}

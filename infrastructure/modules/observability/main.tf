@@ -260,6 +260,32 @@ resource "aws_ecs_task_definition" "vm" {
   }
 }
 
+resource "aws_service_discovery_private_dns_namespace" "vm" {
+  name = "${local.name_prefix}.internal"
+  vpc  = var.vpc_id
+  tags = merge(var.common_tags, {
+    Name = "${local.name_prefix}-namespace"
+  })
+}
+
+resource "aws_service_discovery_service" "vm" {
+  name = "victoriametrics"
+
+  dns_config {
+    namespace_id   = aws_service_discovery_private_dns_namespace.vm.id
+    routing_policy = "MULTIVALUE"
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "${local.name_prefix}-discovery"
+  })
+}
+
 resource "aws_ecs_service" "vm" {
   cluster                            = aws_ecs_cluster.vm.id
   deployment_maximum_percent         = 100
@@ -281,6 +307,10 @@ resource "aws_ecs_service" "vm" {
     assign_public_ip = var.assign_public_ip
     security_groups  = [aws_security_group.vm.id]
     subnets          = var.subnet_ids
+  }
+
+  service_registries {
+    registry_arn = aws_service_discovery_service.vm.arn
   }
 
   depends_on = [aws_efs_mount_target.vm]
