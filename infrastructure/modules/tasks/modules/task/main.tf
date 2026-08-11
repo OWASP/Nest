@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.14.0"
+  required_version = "~> 1.15.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.55.0"
     }
   }
 }
@@ -16,7 +16,11 @@ resource "aws_ecs_task_definition" "task" {
   memory                   = var.memory
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  task_role_arn            = var.task_role_arn
+  runtime_platform {
+    cpu_architecture        = "ARM64"
+    operating_system_family = "LINUX"
+  }
+  task_role_arn = var.task_role_arn
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-${var.task_name}-task-def"
   })

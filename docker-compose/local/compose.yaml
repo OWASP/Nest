@@ -32,7 +32,7 @@ services:
       '
     container_name: nest-cache
     env_file: ../../backend/.env
-    image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    image: redis:8.8.0-alpine3.23@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
     healthcheck:
       interval: 5s
       retries: 5
@@ -46,7 +46,7 @@ services:
   db:
     container_name: nest-db
     env_file: ../../backend/.env
-    image: pgvector/pgvector:pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
+    image: pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
     healthcheck:
       interval: 5s
       retries: 5
@@ -59,10 +59,7 @@ services:
 
   docs:
     container_name: nest-docs
-    command: >
-      sh -c '
-        mkdocs serve -a 0.0.0.0:8001 -f .mkdocs.yaml
-      '
+    command: python docs/serve.py
     build:
       context: ../../
       dockerfile: docker/docs/Dockerfile.local
@@ -71,12 +68,13 @@ services:
     ports:
       - 8001:8001
     volumes:
-      - ../../docs:/home/owasp/docs
+      - ../../.mkdocs.yaml:/home/owasp/.mkdocs.yaml:ro
       - ../../backend:/home/owasp/backend:ro
-      - ../../frontend:/home/owasp/frontend:ro
-      - ../../README.md:/home/owasp/README.md:ro
       - ../../CODE_OF_CONDUCT.md:/home/owasp/CODE_OF_CONDUCT.md:ro
       - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
+      - ../../docs:/home/owasp/docs
+      - ../../frontend:/home/owasp/frontend:ro
+      - ../../README.md:/home/owasp/README.md:ro
       - docs-venv:/home/owasp/.venv
 
   frontend:

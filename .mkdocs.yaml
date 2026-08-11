@@ -1,18 +1,21 @@
 site_name: OWASP Nest Documentation
+docs_dir: docs/src
 nav:
   - Home:
-      - OWASP Nest: README.md
+      - OWASP Nest: index.md
       - Code of Conduct: code-of-conduct.md
       - Contributing: contributing.md
-  - API: api/README.md
-  - Backend: backend/README.md
-  - Frontend: frontend/README.md
-  - NestBot: nestbot/README.md
-  - Schema: schema/README.md
+  - API: api/index.md
+  - Backend: backend/index.md
+  - Frontend: frontend/index.md
+  - NestBot: nestbot/index.md
+  - Schema: schema/index.md
+  - Maintenance: maintenance/index.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material
   logo: assets/images/owasp_icon_white_sm.png
+  favicon: assets/images/favicon.png
   features:
     - navigation.tabs
     - navigation.instant

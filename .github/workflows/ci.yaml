@@ -6,10 +6,6 @@ on:
     branches:
       - feature/**
       - main
-  push:
-    branches:
-      - feature/**
-      - main
   workflow_dispatch:
 
 concurrency:
@@ -27,6 +23,8 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/run-code-checks.yaml
+    with:
+      check_docker_compose: ${{ github.event_name == 'merge_group' }}
 
   run-code-tests:
     name: Code tests
@@ -36,10 +34,6 @@ jobs:
       actions: write
       contents: read
       id-token: write
+    secrets:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
     uses: ./.github/workflows/run-code-tests.yaml
-
-  run-dependency-audit:
-    name: Dependency audit
-    permissions:
-      contents: read
-    uses: ./.github/workflows/run-dependency-audit.yaml

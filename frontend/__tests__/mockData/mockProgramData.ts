@@ -25,6 +25,7 @@ const mockProgramNode = {
   admins: [{ login: 'admin-user', avatarUrl: 'https://example.com/avatar.png' }],
   tags: ['web', 'security'],
   domains: ['OWASP'],
+  userRole: 'admin',
 }
 
 export const mockProgramDetailsData = {

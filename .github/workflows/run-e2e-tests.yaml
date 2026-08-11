@@ -29,7 +29,7 @@ jobs:
       NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     services:
       cache:
         image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
@@ -55,7 +55,7 @@ jobs:
           - 5432:5432
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
@@ -76,12 +76,12 @@ jobs:
         working-directory: e2e
 
       - name: Cache Playwright Chromium
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
         with:
-          key: e2e-playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
+          key: e2e-playwright-chromium-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
           path: ~/.cache/ms-playwright
           restore-keys: |
-            e2e-playwright-chromium-${{ runner.os }}-
+            e2e-playwright-chromium-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install Playwright Chromium
         run: |
@@ -90,9 +90,10 @@ jobs:
         working-directory: e2e
 
       - name: Cache Next.js build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
         with:
-          key: next-cache-e2e-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
+          key: next-cache-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml')
+            }}
           path: frontend/.next/cache
 
       - name: Prepare environment variables for frontend
@@ -105,8 +106,8 @@ jobs:
 
       - name: Copy public and static folders
         run: |
-          cp -r public .next/standalone/
-          cp -r .next/static .next/standalone/.next/
+          cp -r public .next/standalone/frontend/
+          cp -r .next/static .next/standalone/frontend/.next/
         working-directory: frontend
 
       - name: Run frontend in the background
@@ -119,7 +120,7 @@ jobs:
           NODE_ENV: production
           PORT: '3000'
         run: |
-          nohup node .next/standalone/server.js > /dev/null 2>&1 &
+          nohup node .next/standalone/frontend/server.js > /dev/null 2>&1 &
           disown
         working-directory: frontend
 
@@ -137,7 +138,7 @@ jobs:
         env:
           CI: 'true'
           FRONTEND_URL: http://localhost:3000
-        run: pnpm run test:e2e --shard=${{ matrix.shard }}/${{ matrix.total }} --workers=2
+        run: pnpm run test:e2e --shard=${{ matrix.shard }}/${{ matrix.total }}
         working-directory: e2e
 
       - name: Upload Playwright test results
@@ -147,4 +148,4 @@ jobs:
           name: playwright-test-results-shard-${{ matrix.shard }}
           path: e2e/test-results/
           retention-days: 7
-    timeout-minutes: 5
+    timeout-minutes: 10
