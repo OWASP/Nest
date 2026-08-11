@@ -1,6 +1,19 @@
 """Test cases for SnapshotSubscriptionNode."""
 
-from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
+from apps.owasp.api.internal.nodes.snapshot_subscription import (
+    SnapshotSubscriptionNode,
+    SubscribedEntityNode,
+)
+
+
+class TestSubscribedEntityNode:
+    """Test cases for SubscribedEntityNode."""
+
+    def test_subscribed_entity_node_has_id_and_name(self):
+        """Test SubscribedEntityNode can be instantiated with id and name."""
+        node = SubscribedEntityNode(id=1, name="Test Entity")
+        assert node.id == 1
+        assert node.name == "Test Entity"
 
 
 class TestSnapshotSubscriptionNode:

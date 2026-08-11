@@ -159,11 +159,6 @@ export type CreateSnapshotSubscriptionInput = {
   subscribedProjectIds?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
-export type DjangoModelType = {
-  __typename?: 'DjangoModelType';
-  pk: Scalars['ID']['output'];
-};
-
 export type EntityChannelNode = Node & {
   __typename?: 'EntityChannelNode';
   externalId?: Maybe<Scalars['String']['output']>;
@@ -1216,9 +1211,9 @@ export type SnapshotSubscriptionNode = Node & {
   includeUsers: Scalars['Boolean']['output'];
   isActive: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
-  subscribedChapters: Array<DjangoModelType>;
-  subscribedCommittees: Array<DjangoModelType>;
-  subscribedProjects: Array<DjangoModelType>;
+  subscribedChapters: Array<SubscribedEntityNode>;
+  subscribedCommittees: Array<SubscribedEntityNode>;
+  subscribedProjects: Array<SubscribedEntityNode>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -1246,6 +1241,12 @@ export type StatsNode = {
   contributorsStats: Scalars['Int']['output'];
   countriesStats: Scalars['Int']['output'];
   slackWorkspaceStats: Scalars['Int']['output'];
+};
+
+export type SubscribedEntityNode = {
+  __typename?: 'SubscribedEntityNode';
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type UpdateModuleInput = {
