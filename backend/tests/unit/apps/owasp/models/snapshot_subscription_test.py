@@ -120,7 +120,7 @@ class TestSnapshotSubscriptionClean:
             include_users=False,
         )
 
-        with pytest.raises(ValidationError, match="At least one content toggle"):
+        with pytest.raises(ValidationError, match="Your subscription cannot be empty"):
             sub.clean()
 
     def test_clean_passes_with_one_toggle_on(self):
@@ -203,12 +203,11 @@ class TestSnapshotSubscriptionCreate:
         mock_select_qs = mock_user_objects.select_for_update.return_value.filter.return_value
         mock_select_qs.exists.return_value = True
 
-        result = SnapshotSubscription.create(
-            user=user,
-            frequency="weekly",
-        )
-
-        assert result is None
+        with pytest.raises(ValidationError, match="Maximum number of subscriptions"):
+            SnapshotSubscription.create(
+                user=user,
+                frequency="weekly",
+            )
 
     @patch("apps.owasp.models.snapshot_subscription.User.objects")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
@@ -375,9 +374,8 @@ class TestSnapshotSubscriptionCreateEdgeCases:
         mock_select_qs = mock_user_objects.select_for_update.return_value.filter.return_value
         mock_select_qs.exists.return_value = True
 
-        result = SnapshotSubscription.create(user=user, frequency="weekly")
-
-        assert result is None
+        with pytest.raises(ValidationError, match="already exists"):
+            SnapshotSubscription.create(user=user, frequency="weekly")
 
 
 class TestSetM2mFields:

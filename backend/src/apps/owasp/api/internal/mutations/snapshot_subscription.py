@@ -17,14 +17,14 @@ class CreateSnapshotSubscriptionInput:
 
     name: str = ""
     frequency: str = "weekly"
-    include_chapters: bool = True
-    include_events: bool = True
-    include_issues: bool = True
-    include_posts: bool = True
-    include_projects: bool = True
-    include_pull_requests: bool = True
-    include_releases: bool = True
-    include_users: bool = True
+    include_chapters: bool = False
+    include_events: bool = False
+    include_issues: bool = False
+    include_posts: bool = False
+    include_projects: bool = False
+    include_pull_requests: bool = False
+    include_releases: bool = False
+    include_users: bool = False
     subscribed_project_ids: list[int] | None = None
     subscribed_chapter_ids: list[int] | None = None
     subscribed_committee_ids: list[int] | None = None
@@ -82,26 +82,31 @@ class SnapshotSubscriptionMutations:
             "include_users": input_data.include_users,
         }
 
-        if not any(kwargs.values()):
-            return SnapshotSubscriptionResult(
-                ok=False,
-                message="At least one content toggle must be enabled.",
-            )
-
-        subscription = SnapshotSubscription.create(
-            user=user,
-            frequency=input_data.frequency,
-            name=input_data.name,
-            **kwargs,
+        has_entities = any(
+            [
+                input_data.subscribed_project_ids,
+                input_data.subscribed_chapter_ids,
+                input_data.subscribed_committee_ids,
+            ]
         )
 
-        if subscription is None:
+        if not any(kwargs.values()) and not has_entities:
             return SnapshotSubscriptionResult(
                 ok=False,
-                message=(
-                    f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached"
-                    " or a subscription with this name already exists."
-                ),
+                message="Your subscription cannot be empty. Please choose something to follow.",
+            )
+
+        try:
+            subscription = SnapshotSubscription.create(
+                user=user,
+                frequency=input_data.frequency,
+                name=input_data.name,
+                **kwargs,
+            )
+        except ValidationError as e:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message=e.message,
             )
 
         subscription.set_m2m_fields(
