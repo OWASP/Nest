@@ -3,6 +3,10 @@
 import strawberry
 import strawberry_django
 
+from apps.owasp.api.internal.dataloaders.entity_channel import (
+    EXTERNAL_ID_BY_ENTITY_CHANNEL_ID_LOADER,
+    NAME_BY_ENTITY_CHANNEL_ID_LOADER,
+)
 from apps.owasp.models.entity_channel import EntityChannel
 
 
@@ -19,15 +23,13 @@ class EntityChannelNode(strawberry.relay.Node):
     """Entity channel node."""
 
     @strawberry_django.field
-    def external_id(self, root: EntityChannel) -> str | None:
-        """Platform-specific channel ID."""
-        return (
-            channel.slack_channel_id
-            if (channel := root.channel) and channel.slack_channel_id
-            else None
+    async def external_id(self, root: EntityChannel, info: strawberry.Info) -> str | None:
+        """Resolve platform-specific channel ID."""
+        return await info.context.owasp_dataloaders[EXTERNAL_ID_BY_ENTITY_CHANNEL_ID_LOADER].load(
+            root.pk
         )
 
     @strawberry_django.field
-    def name(self, root: EntityChannel) -> str | None:
-        """Channel display name."""
-        return channel.name if (channel := root.channel) and channel.name else None
+    async def name(self, root: EntityChannel, info: strawberry.Info) -> str | None:
+        """Resolve channel display name."""
+        return await info.context.owasp_dataloaders[NAME_BY_ENTITY_CHANNEL_ID_LOADER].load(root.pk)

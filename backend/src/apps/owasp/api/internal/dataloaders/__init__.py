@@ -5,6 +5,7 @@ from apps.owasp.api.internal.dataloaders.board_of_directors import (
 )
 from apps.owasp.api.internal.dataloaders.chapter import get_chapter_loaders
 from apps.owasp.api.internal.dataloaders.committee import get_committee_loaders
+from apps.owasp.api.internal.dataloaders.entity_channel import get_entity_channel_loaders
 from apps.owasp.api.internal.dataloaders.member_snapshot import (
     get_member_snapshot_loaders,
 )
@@ -18,6 +19,7 @@ def get_owasp_dataloaders() -> dict[str, object]:
     loaders.update(get_board_of_directors_loaders())
     loaders.update(get_chapter_loaders())
     loaders.update(get_committee_loaders())
+    loaders.update(get_entity_channel_loaders())
     loaders.update(get_member_snapshot_loaders())
     loaders.update(get_project_loaders())
     loaders.update(get_snapshot_loaders())
