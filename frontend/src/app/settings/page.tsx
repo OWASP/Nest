@@ -1,13 +1,14 @@
 'use client'
 
 import { useApolloClient, useMutation, useQuery } from '@apollo/client/react'
+import { Autocomplete, AutocompleteItem } from '@heroui/autocomplete'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import { addToast } from '@heroui/toast'
 import { Tooltip } from '@heroui/tooltip'
 import debounce from 'lodash/debounce'
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { Key, useCallback, useEffect, useState } from 'react'
 import { FaBell, FaFloppyDisk, FaPlus, FaTrash } from 'react-icons/fa6'
 
 import { SEARCH_CHAPTERS } from 'server/queries/chapterQueries'
@@ -181,61 +182,68 @@ function EntityMultiSelect({
     }
   }, [inputValue, fetchSuggestions])
 
+  const handleSelectionChange = (keys: Key | null) => {
+    const selectedKey = keys as string
+    if (selectedKey) {
+      const selectedItem = items.find((item) => item.id === selectedKey)
+      if (selectedItem) {
+        onAdd({ id: decodeRelayId(selectedItem.id), name: selectedItem.name })
+        setInputValue('')
+        setItems([])
+      }
+    }
+  }
+
   return (
-    <div>
-      <h4 className="mb-1.5 text-sm font-semibold text-gray-600 dark:text-gray-300">{label}</h4>
-
-      <div className="relative flex min-h-[36px] flex-wrap items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 transition-colors focus-within:border-[#1D7BD7] hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:focus-within:border-[#1D7BD7] dark:hover:border-gray-600">
-        {selectedEntities.map((entity) => (
-          <span
-            key={entity.id}
-            className="inline-flex items-center gap-1 rounded-md bg-gray-500 px-2 py-0.5 text-xs font-medium text-white dark:bg-gray-600"
-          >
-            {entity.name}
-            <button
-              type="button"
-              onClick={() => onRemove(entity.id)}
-              className="ml-0.5 cursor-pointer rounded-full p-0.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
-              aria-label={`Remove ${entity.name}`}
-            >
-              ×
-            </button>
-          </span>
+    <div className="flex flex-col gap-2">
+      <Autocomplete
+        label={label}
+        labelPlacement="outside"
+        placeholder={`Search ${label.toLowerCase()}...`}
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        onSelectionChange={handleSelectionChange}
+        isLoading={isLoading}
+        allowsCustomValue={false}
+        menuTrigger="input"
+        classNames={{
+          base: 'w-full',
+        }}
+        inputProps={{
+          classNames: {
+            label: 'text-sm font-semibold text-gray-600 dark:text-gray-300 pb-1.5',
+            input: 'text-gray-800 dark:text-gray-200',
+            inputWrapper: 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
+          },
+        }}
+      >
+        {items.map((item) => (
+          <AutocompleteItem key={item.id} textValue={item.name}>
+            {item.name}
+          </AutocompleteItem>
         ))}
+      </Autocomplete>
 
-        <div className="min-w-[120px] flex-1">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="w-full border-none bg-transparent py-0.5 text-sm text-gray-800 outline-none dark:text-gray-200"
-            aria-label={`Search ${label.toLowerCase()}`}
-          />
+      {selectedEntities.length > 0 && (
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          {selectedEntities.map((entity) => (
+            <span
+              key={entity.id}
+              className="inline-flex items-center gap-1 rounded-md bg-gray-500 px-2 py-0.5 text-xs font-medium text-white dark:bg-gray-600"
+            >
+              {entity.name}
+              <button
+                type="button"
+                onClick={() => onRemove(entity.id)}
+                className="ml-0.5 cursor-pointer rounded-full p-0.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                aria-label={`Remove ${entity.name}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
         </div>
-
-        {(items.length > 0 || isLoading) && inputValue.trim().length >= 2 && (
-          <div className="absolute top-[calc(100%+4px)] left-0 z-50 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-[#2a2a2a]">
-            {isLoading ? (
-              <div className="px-4 py-3 text-sm text-gray-400">Searching...</div>
-            ) : (
-              items.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    onAdd({ id: decodeRelayId(item.id), name: item.name })
-                    setInputValue('')
-                    setItems([])
-                  }}
-                  className="flex w-full cursor-pointer items-center px-4 py-3 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5"
-                >
-                  {item.name}
-                </button>
-              ))
-            )}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 }
@@ -318,6 +326,8 @@ function SubscriptionCard({
 
   const isActive = subscription.isActive
   const hasAtLeastOnePreference = Object.values(preferences).some(Boolean)
+  const hasAtLeastOneEntity = projects.length > 0 || chapters.length > 0 || committees.length > 0
+  const isValidSubscription = hasAtLeastOnePreference || hasAtLeastOneEntity
 
   const destructiveButtonStyles =
     'flex items-center gap-2 rounded-md border border-red-500 bg-transparent px-2 py-2 text-red-600 transition-all hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white'
@@ -428,13 +438,13 @@ function SubscriptionCard({
                   Delete
                 </Button>
               )}
-              {hasAtLeastOnePreference ? (
+              {isValidSubscription ? (
                 <ActionButton onClick={handleSave} isDisabled={isMutating}>
                   <FaFloppyDisk />
                   {isMutating ? 'Saving...' : 'Save Changes'}
                 </ActionButton>
               ) : (
-                <Tooltip content="Select at least one content type">
+                <Tooltip content="Your subscription cannot be empty. Please choose something to follow.">
                   <div className="inline-block cursor-not-allowed">
                     <ActionButton onClick={handleSave} isDisabled={true}>
                       <FaFloppyDisk />
@@ -449,26 +459,27 @@ function SubscriptionCard({
       </div>
 
       <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} size="md">
-        <ModalContent className="rounded-lg bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-[#212529]">
-          <ModalHeader className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Confirm Delete</h2>
-          </ModalHeader>
-          <ModalBody className="px-5 py-4">
-            <p className="text-gray-600 dark:text-gray-300">
-              Are you sure you want to permanently delete &quot;{name}&quot;? This cannot be undone.
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">Confirm Delete</ModalHeader>
+          <ModalBody>
+            <p>
+              Are you sure you want to permanently delete subscription &quot;{name}&quot;? This
+              cannot be undone.
             </p>
           </ModalBody>
-          <ModalFooter className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-gray-700">
-            <ActionButton onClick={() => setShowDeleteModal(false)}>Cancel</ActionButton>
+          <ModalFooter>
+            <Button color="default" variant="light" onPress={() => setShowDeleteModal(false)}>
+              Cancel
+            </Button>
             <Button
+              color="danger"
               onPress={() => {
                 setShowDeleteModal(false)
                 onDelete?.(subscription.id)
               }}
-              className={destructiveButtonStyles}
+              className="text-white"
             >
-              <FaTrash />
-              Yes, Delete
+              Delete
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -611,6 +622,9 @@ function SubscriptionContent() {
   }
 
   const hasAtLeastOneNewPreference = Object.values(newPreferences).some(Boolean)
+  const hasAtLeastOneNewEntity =
+    newProjects.length > 0 || newChapters.length > 0 || newCommittees.length > 0
+  const isValidNewSubscription = hasAtLeastOneNewPreference || hasAtLeastOneNewEntity
 
   const handleCreate = () => {
     createSubscription({
@@ -769,13 +783,13 @@ function SubscriptionContent() {
             >
               Cancel
             </ActionButton>
-            {hasAtLeastOneNewPreference ? (
+            {isValidNewSubscription ? (
               <ActionButton onClick={handleCreate} isDisabled={creating}>
                 <FaBell />
                 {creating ? 'Creating...' : 'Create Subscription'}
               </ActionButton>
             ) : (
-              <Tooltip content="Select at least one content type">
+              <Tooltip content="Your subscription cannot be empty. Please choose something to follow.">
                 <div className="inline-block cursor-not-allowed">
                   <ActionButton onClick={handleCreate} isDisabled={true}>
                     <FaBell />

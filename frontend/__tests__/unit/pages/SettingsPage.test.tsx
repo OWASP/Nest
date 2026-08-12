@@ -224,8 +224,9 @@ describe('SettingsPage Component', () => {
     test('calls delete mutation when Yes, Delete is clicked', async () => {
       setupMocks({ data: mockActiveSubscriptions })
       render(<SettingsPage />)
-      fireEvent.click(screen.getByText('Delete'))
-      fireEvent.click(screen.getByText('Yes, Delete'))
+      const deleteButtons = screen.getAllByText('Delete')
+      fireEvent.click(deleteButtons[0])
+      fireEvent.click(screen.getAllByText('Delete')[1])
 
       await waitFor(() => {
         expect(mockDeleteMutation).toHaveBeenCalled()
