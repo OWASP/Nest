@@ -15,15 +15,6 @@ CALCULATOR_PATH = "apps.owasp.utils.score_calculator"
 class TestContributionScoreCalculator:
     """Test suite for ContributionScoreCalculator."""
 
-    @pytest.fixture
-    def mock_weights(self):
-        """Mock active scoring weights."""
-        return {
-            "pr_merged": 20,
-            "pr_opened": 5,
-            "issue_completed": 10,
-        }
-
     def _mock_recalculate_all_querysets(self, mock_user_class, mock_pr, mock_issue, users):
         """Set up mock querysets for User, PullRequest, and Issue for recalculate_all tests."""
         mock_users_qs = MagicMock()
@@ -40,7 +31,7 @@ class TestContributionScoreCalculator:
         issue_chain.values_list.return_value = []
 
     @patch(f"{CALCULATOR_PATH}.ScoringWeight")
-    def test_load_scoring_weights(self, mock_scoring_weight, mock_weights):
+    def test_load_scoring_weights(self, mock_scoring_weight):
         """Test load_scoring_weights retrieves active scoring weights from database."""
         w1 = MagicMock(event_type="pr_merged", score=20)
         w2 = MagicMock(event_type="pr_opened", score=5)
