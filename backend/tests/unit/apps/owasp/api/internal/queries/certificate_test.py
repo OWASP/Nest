@@ -15,7 +15,7 @@ class TestCertificateQuery:
         assert hasattr(CertificateQuery, "__strawberry_definition__")
         field_names = [field.name for field in CertificateQuery.__strawberry_definition__.fields]
         assert "certificate" in field_names
-        assert "my_certificate" in field_names
+        assert "my_certificates" in field_names
 
     @patch("apps.owasp.models.crp.certificate.Certificate.objects.select_related")
     def test_certificate_found(self, mock_select_related):
@@ -46,32 +46,31 @@ class TestCertificateQuery:
 
         assert result is None
 
-    def test_my_certificate_user_without_github_user(self):
-        """Test my_certificate returns None when user has no github_user."""
+    def test_my_certificates_user_without_github_user(self):
+        """Test my_certificates returns empty list when user has no github_user."""
         info = MagicMock()
         info.context.request.user = MagicMock(spec=[])  # user has no github_user attr
 
-        result = CertificateQuery().my_certificate(info)
+        result = CertificateQuery().my_certificates(info)
 
-        assert result is None
+        assert result == []
 
     @patch("apps.owasp.models.crp.certificate.Certificate.objects.select_related")
-    def test_my_certificate_returns_latest_active_certificate(self, mock_select_related):
-        """Test my_certificate returns the user's latest active certificate."""
+    def test_my_certificates_returns_active_certificates(self, mock_select_related):
+        """Test my_certificates returns the user's active certificates."""
         info = MagicMock()
         mock_github_user = MagicMock()
         info.context.request.user.github_user = mock_github_user
 
-        mock_cert = MagicMock(spec=Certificate)
+        mock_certs = [MagicMock(spec=Certificate)]
         mock_qs = MagicMock()
         mock_select_related.return_value = mock_qs
         mock_qs.filter.return_value = mock_qs
-        mock_qs.order_by.return_value = mock_qs
-        mock_qs.first.return_value = mock_cert
+        mock_qs.order_by.return_value = mock_certs
 
-        result = CertificateQuery().my_certificate(info)
+        result = CertificateQuery().my_certificates(info)
 
         mock_select_related.assert_called_once_with("github_user")
         mock_qs.filter.assert_called_once_with(github_user=mock_github_user, is_revoked=False)
         mock_qs.order_by.assert_called_once_with("-issued_at")
-        assert result == mock_cert
+        assert result == mock_certs
