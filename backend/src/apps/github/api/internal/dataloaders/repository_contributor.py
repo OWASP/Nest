@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 
 from asgiref.sync import sync_to_async
+from django.db import models
 from django.db.models import F, OuterRef, QuerySet, Subquery, Sum, Window
 from django.db.models.functions import RowNumber
 from strawberry.dataloader import DataLoader
@@ -10,8 +11,10 @@ from strawberry.dataloader import DataLoader
 from apps.common.api.internal.dataloaders.utils import get_top_contributors_by_keys
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.committee import Committee
 
 TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER = "top_contributors_by_chapter_id"
+TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER = "top_contributors_by_committee_id"
 TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER = "top_contributors_by_project_id"
 TOP_CONTRIBUTORS_BY_REPOSITORY_ID_LOADER = "top_contributors_by_repository_id"
 
@@ -104,6 +107,60 @@ async def load_top_contributors_by_project_id(
     )
 
 
+async def _load_top_contributors_by_owasp_entity_id(
+    entity_ids: list[int],
+    model: type[models.Model],
+    key_field: str,
+) -> list[list[dict[str, str | int]]]:
+    """Batch-load top contributors for an OWASP repository-backed entity.
+
+    The entity must expose an ``owasp_repository`` foreign key. Results are
+    capped at ``TOP_CONTRIBUTORS_LIMIT`` per entity.
+    """
+    if not entity_ids:
+        return []
+
+    queryset: RepositoryContributorQuerySet = await sync_to_async(
+        lambda: RepositoryContributor.objects.by_humans().to_community_repositories()
+    )()
+
+    top_contributors: QuerySet[RepositoryContributor, dict[str, str | int]] = (
+        queryset.filter(
+            repository_id__in=model.objects.filter(id__in=entity_ids).values("owasp_repository_id")
+        )
+        .annotate(
+            **{
+                key_field: Subquery(
+                    model.objects.filter(
+                        id__in=entity_ids,
+                        owasp_repository_id=OuterRef("repository_id"),
+                    ).values("id")[:1]
+                ),
+                "row_number": Window(
+                    expression=RowNumber(),
+                    partition_by=[F(key_field)],
+                    order_by=F("contributions_count").desc(),
+                ),
+            }
+        )
+        .filter(row_number__lte=TOP_CONTRIBUTORS_LIMIT)
+        .values(
+            key_field,
+            "contributions_count",
+            avatar_url=F("user__avatar_url"),
+            login=F("user__login"),
+            name=F("user__name"),
+        )
+        .order_by(key_field, "-contributions_count")
+    )
+
+    return await get_top_contributors_by_keys(
+        queryset=top_contributors,
+        keys=entity_ids,
+        key_field=key_field,
+    )
+
+
 async def load_top_contributors_by_chapter_id(
     chapter_ids: list[int],
 ) -> list[list[dict[str, str | int]]]:
@@ -113,47 +170,22 @@ async def load_top_contributors_by_chapter_id(
     repository (``owasp_repository``). Results are capped at
     ``TOP_CONTRIBUTORS_LIMIT`` per chapter.
     """
-    if not chapter_ids:
-        return []
-
-    queryset: RepositoryContributorQuerySet = await sync_to_async(
-        lambda: RepositoryContributor.objects.by_humans().to_community_repositories()
-    )()
-
-    top_contributors: QuerySet[RepositoryContributor, dict[str, str | int]] = (
-        queryset.filter(
-            repository_id__in=Chapter.objects.filter(id__in=chapter_ids).values(
-                "owasp_repository_id"
-            )
-        )
-        .annotate(
-            chapter_id=Subquery(
-                Chapter.objects.filter(
-                    id__in=chapter_ids,
-                    owasp_repository_id=OuterRef("repository_id"),
-                ).values("id")[:1]
-            ),
-            row_number=Window(
-                expression=RowNumber(),
-                partition_by=[F("chapter_id")],
-                order_by=F("contributions_count").desc(),
-            ),
-        )
-        .filter(row_number__lte=TOP_CONTRIBUTORS_LIMIT)
-        .values(
-            "chapter_id",
-            "contributions_count",
-            avatar_url=F("user__avatar_url"),
-            login=F("user__login"),
-            name=F("user__name"),
-        )
-        .order_by("chapter_id", "-contributions_count")
+    return await _load_top_contributors_by_owasp_entity_id(
+        entity_ids=chapter_ids, model=Chapter, key_field="chapter_id"
     )
 
-    return await get_top_contributors_by_keys(
-        queryset=top_contributors,
-        keys=chapter_ids,
-        key_field="chapter_id",
+
+async def load_top_contributors_by_committee_id(
+    committee_ids: list[int],
+) -> list[list[dict[str, str | int]]]:
+    """Batch-load top contributors per committee (humans only, community repos).
+
+    A committee's top contributors are the top contributors of its main OWASP
+    repository (``owasp_repository``). Results are capped at
+    ``TOP_CONTRIBUTORS_LIMIT`` per committee.
+    """
+    return await _load_top_contributors_by_owasp_entity_id(
+        entity_ids=committee_ids, model=Committee, key_field="committee_id"
     )
 
 
@@ -162,6 +194,9 @@ def get_repository_contributor_loaders() -> dict[str, object]:
     return {
         TOP_CONTRIBUTORS_BY_CHAPTER_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
             load_fn=load_top_contributors_by_chapter_id
+        ),
+        TOP_CONTRIBUTORS_BY_COMMITTEE_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
+            load_fn=load_top_contributors_by_committee_id
         ),
         TOP_CONTRIBUTORS_BY_PROJECT_ID_LOADER: DataLoader[int, list[dict[str, str | int]]](
             load_fn=load_top_contributors_by_project_id
