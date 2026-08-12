@@ -7,7 +7,7 @@ import {
   mockNoSubscriptions,
   mockUpdateSubscriptionResult,
 } from '@mockData/mockSubscriptionData'
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import SettingsPage from 'app/settings/page'
@@ -226,7 +226,10 @@ describe('SettingsPage Component', () => {
       render(<SettingsPage />)
       const deleteButtons = screen.getAllByText('Delete')
       fireEvent.click(deleteButtons[0])
-      fireEvent.click(screen.getAllByText('Delete')[1])
+
+      const dialog = screen.getByRole('dialog')
+      const confirmDeleteButton = within(dialog).getByRole('button', { name: 'Delete' })
+      fireEvent.click(confirmDeleteButton)
 
       await waitFor(() => {
         expect(mockDeleteMutation).toHaveBeenCalled()
