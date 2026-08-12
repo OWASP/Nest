@@ -23,7 +23,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv-crp:/home/owasp/.venv
+      - backend-venv:/home/owasp/.venv
 
   cache:
     command: >
@@ -41,12 +41,12 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data-crp:/data
+      - cache-data:/data
 
   db:
     container_name: nest-db
     env_file: ../../backend/.env
-    image: pgvector/pgvector:pg16@sha256:131dcf7ff6a900545df8e7e092c270aa8c6db2f2c818e408cb45ec21316b74e6
+    image: pgvector/pgvector:pg16@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
     healthcheck:
       interval: 5s
       retries: 5
@@ -55,14 +55,11 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data-issue-4702:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
-    command: >
-      sh -c '
-        mkdocs serve -a 0.0.0.0:8001 -f .mkdocs.yaml
-      '
+    command: python docs/serve.py
     build:
       context: ../../
       dockerfile: docker/docs/Dockerfile.local
@@ -71,13 +68,14 @@ services:
     ports:
       - 8001:8001
     volumes:
-      - ../../docs:/home/owasp/docs
+      - ../../.mkdocs.yaml:/home/owasp/.mkdocs.yaml:ro
       - ../../backend:/home/owasp/backend:ro
-      - ../../frontend:/home/owasp/frontend:ro
-      - ../../README.md:/home/owasp/README.md:ro
       - ../../CODE_OF_CONDUCT.md:/home/owasp/CODE_OF_CONDUCT.md:ro
       - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
-      - docs-venv-crp:/home/owasp/.venv
+      - ../../docs:/home/owasp/docs
+      - ../../frontend:/home/owasp/frontend:ro
+      - ../../README.md:/home/owasp/README.md:ro
+      - docs-venv:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -99,8 +97,8 @@ services:
       - 3000:3000
     volumes:
       - ../../frontend:/home/owasp
-      - frontend-next-crp:/home/owasp/.next
-      - frontend-node-modules-crp:/home/owasp/node_modules
+      - frontend-next:/home/owasp/.next
+      - frontend-node-modules:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -121,15 +119,15 @@ services:
       - nest-network
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv-crp:/home/owasp/.venv
+      - backend-venv:/home/owasp/.venv
 
 networks:
   nest-network:
 
 volumes:
-  backend-venv-crp:
-  cache-data-crp:
-  db-data-issue-4702:
-  docs-venv-crp:
-  frontend-next-crp:
-  frontend-node-modules-crp:
+  backend-venv:
+  cache-data:
+  db-data:
+  docs-venv:
+  frontend-next:
+  frontend-node-modules:

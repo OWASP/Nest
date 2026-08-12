@@ -28,6 +28,7 @@ GPG
 GRC
 GSOC
 GTM
+Ghsas
 Golovanova
 Hackbright
 Héllo
@@ -45,10 +46,13 @@ NETTACKER
 NOASSERTION
 NOSEMGREP
 NOSONAR
+NPROCESSORS
 Nadu
 Nagori
 Nominatim
+ONLN
 OSSF
+OSV
 OWHF
 Obmondo
 Oleksiuk
@@ -71,6 +75,7 @@ Truncator
 Turbopack
 Twitterbot
 VCALENDAR
+VCS
 VEVENT
 WSL
 Wandji
@@ -116,6 +121,7 @@ dismissable
 dkr
 dsn
 dvo
+eddsa
 elevenlabs
 env
 envsubst
@@ -123,6 +129,7 @@ ephemerals
 euo
 facebookexternalhit
 fdp
+fpr
 gamesec
 geocoders
 geoloc
@@ -133,6 +140,7 @@ graphiql
 graphqler
 gunicorn
 hackathon
+harfbuzz
 hcl
 heroui
 hsl
@@ -157,6 +165,7 @@ libpango
 libpangoft
 libx
 lighthouseci
+lighthouserc
 linkify
 lte
 lxml
@@ -185,6 +194,7 @@ notab
 nspname
 numfmt
 openblas
+opencre
 openstreetmap
 owasppcitoolkit
 owtf
@@ -231,6 +241,8 @@ speakerdeck
 subgrp
 superfences
 tfbackend
+tfdata
+tftest
 tgz
 tiktok
 trailofbits
