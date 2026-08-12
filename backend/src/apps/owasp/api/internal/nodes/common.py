@@ -3,8 +3,6 @@
 import strawberry
 import strawberry_django
 
-from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
-
 
 @strawberry.type
 class GenericEntityNode(strawberry.relay.Node):
@@ -19,11 +17,6 @@ class GenericEntityNode(strawberry.relay.Node):
     def related_urls(self, root) -> list[str]:
         """Resolve related URLs."""
         return root.related_urls
-
-    @strawberry_django.field
-    def top_contributors(self, root) -> list[RepositoryContributorNode]:
-        """Resolve top contributors."""
-        return [RepositoryContributorNode(**tc) for tc in root.idx_top_contributors]
 
     @strawberry_django.field(
         only=["updated_at", "owasp_repository__updated_at"], select_related=["owasp_repository"]
