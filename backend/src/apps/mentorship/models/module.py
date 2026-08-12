@@ -54,6 +54,14 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         verbose_name="Order",
         help_text="Display order of the module within its program.",
     )
+    mentee_can_manage_deadlines = models.BooleanField(
+        default=False,
+        verbose_name="Mentee can manage deadlines",
+        help_text=(
+            "If enabled, mentees can set or update deadlines for issues "
+            "assigned to them in this module."
+        ),
+    )
 
     # FKs.
     labels = models.JSONField(
@@ -113,6 +121,22 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
             query |= Q(github_user=github_user)
 
         return self.mentors.filter(query).exists()
+
+    def has_mentee(self, user) -> bool:
+        """Check if the given user is a mentee enrolled in this module.
+
+        Falls back to a github_user lookup for mentees who have not linked
+        their nest_user profile yet.
+        """
+        if not user.is_authenticated:
+            return False
+
+        query = Q(mentee__nest_user=user)
+        github_user = getattr(user, "github_user", None)
+        if github_user is not None:
+            query |= Q(mentee__github_user=github_user)
+
+        return self.menteemodule_set.filter(query).exists()
 
     def save(self, *args, **kwargs):
         """Save module."""

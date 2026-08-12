@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.14.0"
+  required_version = "~> 1.15.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.55.0"
     }
   }
 }
@@ -255,6 +255,7 @@ module "slack_sync_data_task" {
     set -e
     EXEC_MODE=direct make slack-sync-data
     EXEC_MODE=direct make slack-check-invite-link
+    EXEC_MODE=direct make slack-match-owasp-channels
     EOT
   ]
   common_tags                  = var.common_tags
