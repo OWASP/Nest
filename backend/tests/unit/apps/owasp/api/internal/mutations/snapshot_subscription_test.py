@@ -63,8 +63,8 @@ class TestCreateSnapshotSubscription:
             yield
 
     @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
-    def test_all_toggles_off(self, mock_create, mutations):
-        """Test create fails when all content toggles are off."""
+    def test_create_validation_error(self, mock_create, mutations):
+        """Test create propagates ValidationError from clean()."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(
             frequency="weekly",
