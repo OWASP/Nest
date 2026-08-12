@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
@@ -11,12 +12,13 @@ import pytest
 from scripts.commands import CommandRunner
 from scripts.errors import (
     CommandNotFoundError,
+    InfrastructureError,
     MissingAuthTokenError,
     OverrideExistsError,
-    TestRunnerError,
 )
 from scripts.localstack import (
     LOCALSTACK_CONTAINER_NAME,
+    LOCALSTACK_EXTERNAL_PORTS,
     LOCALSTACK_PORT,
     LocalStack,
     OverrideManager,
@@ -35,6 +37,17 @@ def mock_info_response(
 
 
 CUSTOM_HOST_API_URL = "http://custom-host:9999"  # NOSONAR: Test-only LocalStack HTTP.
+
+
+def _env_get_with_auth_token(name: str, default=None):
+    """Return a fake auth token for ``LOCALSTACK_AUTH_TOKEN``, else the default.
+
+    ``LocalStack.__init__`` reads ``LOCALSTACK_HTTP_PORT`` and
+    ``LOCALSTACK_HTTPS_PORT`` via ``os.environ.get``, so tests that patch that
+    lookup need a side effect that only fabricates the auth token.
+
+    """
+    return "dummy-token" if name == "LOCALSTACK_AUTH_TOKEN" else default
 
 
 class TestLocalStack:
@@ -121,7 +134,7 @@ class TestLocalStack:
     def test_image_info_missing_dockerfile(self, mock_exists: MagicMock) -> None:
         mock_exists.return_value = False
         localstack = LocalStack()
-        with pytest.raises(TestRunnerError, match="Dockerfile not found"):
+        with pytest.raises(InfrastructureError, match="Dockerfile not found"):
             localstack.image_info("/dummy/root")
 
     @patch("pathlib.Path.exists")
@@ -134,7 +147,7 @@ class TestLocalStack:
         mock_exists.return_value = True
         mock_read_text.return_value = "FROM alpine:3.20\n"
         localstack = LocalStack()
-        with pytest.raises(TestRunnerError, match="could not determine LocalStack image"):
+        with pytest.raises(InfrastructureError, match="could not determine LocalStack image"):
             localstack.image_info("/dummy/root-1")
 
     @patch("pathlib.Path.exists")
@@ -147,12 +160,12 @@ class TestLocalStack:
         mock_exists.return_value = True
         mock_read_text.return_value = "FROM localstack/localstack:\n"
         localstack = LocalStack()
-        with pytest.raises(TestRunnerError, match="could not determine LocalStack image tag"):
+        with pytest.raises(InfrastructureError, match="could not determine LocalStack image tag"):
             localstack.image_info("/dummy/root-1")
 
     @patch("os.environ.get")
     def test_start_success(self, mock_env: MagicMock) -> None:
-        mock_env.return_value = "dummy-token"
+        mock_env.side_effect = _env_get_with_auth_token
         commands = MagicMock(spec=CommandRunner)
         localstack = LocalStack(commands)
 
@@ -166,8 +179,18 @@ class TestLocalStack:
             LOCALSTACK_CONTAINER_NAME,
             "-p",
             f"{LOCALSTACK_PORT}:{LOCALSTACK_PORT}",
+            "-p",
+            f"{LOCALSTACK_EXTERNAL_PORTS}:{LOCALSTACK_EXTERNAL_PORTS}",
+            "-p",
+            "80:80",
+            "-p",
+            "443:443",
+            "-v",
+            "/var/run/docker.sock:/var/run/docker.sock",
             "-e",
             "ECR_ENDPOINT_STRATEGY=off",
+            "-e",
+            "DISABLE_CORS_CHECKS=1",
             "-e",
             "LOCALSTACK_AUTH_TOKEN",
             "localstack/localstack:latest",
@@ -176,7 +199,7 @@ class TestLocalStack:
 
     @patch("os.environ.get")
     def test_start_maps_host_port_to_gateway_port(self, mock_env: MagicMock) -> None:
-        mock_env.return_value = "dummy-token"
+        mock_env.side_effect = _env_get_with_auth_token
         commands = MagicMock(spec=CommandRunner)
         host_port = 4567
         localstack = LocalStack(commands, port=host_port)
@@ -191,8 +214,18 @@ class TestLocalStack:
             LOCALSTACK_CONTAINER_NAME,
             "-p",
             f"{host_port}:{LOCALSTACK_PORT}",
+            "-p",
+            f"{LOCALSTACK_EXTERNAL_PORTS}:{LOCALSTACK_EXTERNAL_PORTS}",
+            "-p",
+            "80:80",
+            "-p",
+            "443:443",
+            "-v",
+            "/var/run/docker.sock:/var/run/docker.sock",
             "-e",
             "ECR_ENDPOINT_STRATEGY=off",
+            "-e",
+            "DISABLE_CORS_CHECKS=1",
             "-e",
             "LOCALSTACK_AUTH_TOKEN",
             "localstack/localstack:latest-alt",
@@ -200,22 +233,96 @@ class TestLocalStack:
         )
 
     @patch("os.environ.get")
-    def test_start_missing_auth_token(self, mock_env: MagicMock) -> None:
-        mock_env.return_value = None
+    def test_start_maps_configurable_http_https_ports(self, mock_env: MagicMock) -> None:
+        mock_env.side_effect = _env_get_with_auth_token
+        commands = MagicMock(spec=CommandRunner)
+        localstack = LocalStack(commands, http_port=8080, https_port=8443)
+
+        localstack.start("localstack/localstack:latest")
+
+        commands.run.assert_any_call(
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            LOCALSTACK_CONTAINER_NAME,
+            "-p",
+            f"{LOCALSTACK_PORT}:{LOCALSTACK_PORT}",
+            "-p",
+            f"{LOCALSTACK_EXTERNAL_PORTS}:{LOCALSTACK_EXTERNAL_PORTS}",
+            "-p",
+            "8080:80",
+            "-p",
+            "8443:443",
+            "-v",
+            "/var/run/docker.sock:/var/run/docker.sock",
+            "-e",
+            "ECR_ENDPOINT_STRATEGY=off",
+            "-e",
+            "DISABLE_CORS_CHECKS=1",
+            "-e",
+            "LOCALSTACK_AUTH_TOKEN",
+            "localstack/localstack:latest",
+            check=True,
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "LOCALSTACK_AUTH_TOKEN": "dummy-token",
+            "LOCALSTACK_HTTP_PORT": "8081",
+            "LOCALSTACK_HTTPS_PORT": "8444",
+        },
+        clear=True,
+    )
+    def test_start_reads_http_https_ports_from_env(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = LocalStack(commands)
+
+        localstack.start("localstack/localstack:latest")
+
+        commands.run.assert_any_call(
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            LOCALSTACK_CONTAINER_NAME,
+            "-p",
+            f"{LOCALSTACK_PORT}:{LOCALSTACK_PORT}",
+            "-p",
+            f"{LOCALSTACK_EXTERNAL_PORTS}:{LOCALSTACK_EXTERNAL_PORTS}",
+            "-p",
+            "8081:80",
+            "-p",
+            "8444:443",
+            "-v",
+            "/var/run/docker.sock:/var/run/docker.sock",
+            "-e",
+            "ECR_ENDPOINT_STRATEGY=off",
+            "-e",
+            "DISABLE_CORS_CHECKS=1",
+            "-e",
+            "LOCALSTACK_AUTH_TOKEN",
+            "localstack/localstack:latest",
+            check=True,
+        )
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_start_missing_auth_token(self) -> None:
         localstack = LocalStack(MagicMock(spec=CommandRunner))
         with pytest.raises(MissingAuthTokenError):
             localstack.start("localstack/localstack:latest")
 
     @patch("os.environ.get")
     def test_start_docker_run_failure(self, mock_env: MagicMock) -> None:
-        mock_env.return_value = "dummy-token"
+        mock_env.side_effect = _env_get_with_auth_token
         commands = MagicMock(spec=CommandRunner)
         commands.run.side_effect = [
             MagicMock(returncode=0),
             CommandNotFoundError("docker"),
         ]
         localstack = LocalStack(commands)
-        with pytest.raises(TestRunnerError, match="Error starting LocalStack container"):
+        with pytest.raises(InfrastructureError, match="Error starting LocalStack container"):
             localstack.start("localstack/localstack:latest")
 
     def test_stop(self) -> None:
@@ -232,7 +339,7 @@ class TestLocalStack:
         with (
             patch.object(localstack, "healthy", return_value=False),
             patch("time.sleep") as mock_sleep,
-            pytest.raises(TestRunnerError, match="failed to become healthy"),
+            pytest.raises(InfrastructureError, match="failed to become healthy"),
         ):
             localstack.wait_ready()
         mock_sleep.assert_called()
@@ -245,7 +352,7 @@ class TestLocalStack:
             patch.object(localstack, "healthy", return_value=True),
             patch.object(localstack, "license_activated", return_value=False),
             patch("time.sleep") as mock_sleep,
-            pytest.raises(TestRunnerError, match="license failed to activate"),
+            pytest.raises(InfrastructureError, match="license failed to activate"),
         ):
             localstack.wait_ready()
         mock_sleep.assert_called()

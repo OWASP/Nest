@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scripts.commands import CommandRunner
-from scripts.errors import TestRunnerError
+from scripts.errors import InfrastructureError
 from scripts.terraform_tests import ExecutionMode, TerraformTests
 
 
@@ -89,14 +89,14 @@ class TestTerraformTests:
         mock_iterdir.return_value = []
 
         commands = MagicMock(spec=CommandRunner)
-        with pytest.raises(TestRunnerError, match="No unit tests were found"):
+        with pytest.raises(InfrastructureError, match="No unit tests were found"):
             TerraformTests(commands).discover_and_run(ExecutionMode.UNIT)
 
     @patch("pathlib.Path.iterdir")
     def test_find_test_files_error(self, mock_iterdir: MagicMock) -> None:
         mock_iterdir.side_effect = OSError("Permission denied")
         terraform_tests = TerraformTests()
-        with pytest.raises(TestRunnerError, match="could not read /dummy/dir"):
+        with pytest.raises(InfrastructureError, match="could not read /dummy/dir"):
             terraform_tests.find_test_files("/dummy/dir", ExecutionMode.UNIT)
 
     @pytest.mark.parametrize(
@@ -128,7 +128,7 @@ class TestTerraformTests:
         )
         terraform_tests = TerraformTests(commands)
         with pytest.raises(
-            TestRunnerError, match="terraform init failed in dummy_dir"
+            InfrastructureError, match="terraform init failed in dummy_dir"
         ) as exc_info:
             terraform_tests.run_module_tests("dummy_dir", ["unit.tftest.hcl"])
         assert "Failed to query available provider packages" in str(exc_info.value)
@@ -145,7 +145,7 @@ class TestTerraformTests:
         ]
         terraform_tests = TerraformTests(commands)
         with pytest.raises(
-            TestRunnerError, match="terraform test failed in dummy_dir"
+            InfrastructureError, match="terraform test failed in dummy_dir"
         ) as exc_info:
             terraform_tests.run_module_tests("dummy_dir", ["unit.tftest.hcl"])
         assert "tests/unit.tftest.hcl... fail" in str(exc_info.value)

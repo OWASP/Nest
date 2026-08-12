@@ -1,0 +1,47 @@
+AWS_REGION := us-east-2
+LIVE_DIR := infrastructure/live
+
+define RUN_ECS_TASK
+	@cd $(LIVE_DIR) && \
+		CLUSTER=$$(tflocal output -raw tasks_cluster_name) && \
+		SUBNETS=$$(tflocal output -json tasks_subnet_ids | jq -r 'join(",")') && \
+		SG=$$(tflocal output -raw tasks_security_group_id) && \
+		AWS_DEFAULT_REGION=$(AWS_REGION) awslocal ecs run-task \
+		--cluster $$CLUSTER \
+		--launch-type FARGATE \
+		--network-configuration "awsvpcConfiguration={subnets=[$$SUBNETS],securityGroups=[$$SG],assignPublicIp=ENABLED}" \
+		--task-definition nest-local-$(1) \
+		--region $(AWS_REGION)
+endef
+
+start-localstack: ## Start LocalStack (requires .env with LOCALSTACK_AUTH_TOKEN)
+	@cd infrastructure && poetry run python -m scripts.dev start-localstack
+
+stop-localstack: ## Stop and remove LocalStack
+	@cd infrastructure && poetry run python -m scripts.dev stop-localstack
+
+provision-infra: ## Create resource on localstack and push images
+	@cd infrastructure && poetry run python -m scripts.dev provision-infra
+
+load-env-params: ## Upload local .env variables to LocalStack SSM Parameter Store
+	@cd infrastructure && poetry run python -m scripts.dev load-env-params $(ARGS)
+
+deploy-services: ## Fix SSM runtime params and scale up the backend/frontend ECS services
+	@cd infrastructure && poetry run python -m scripts.dev deploy-services
+
+ecs-migrate: ## Run database migrations on LocalStack
+	$(call RUN_ECS_TASK,migrate)
+
+ecs-load-data: ## Load initial data on LocalStack
+	$(call RUN_ECS_TASK,load-data)
+
+ecs-index-data: ## Index data for search on LocalStack
+	$(call RUN_ECS_TASK,index-data)
+
+ecs-task: ## Run an ECS task (set TASK=name, e.g. make ecs-task TASK=migrate)
+	$(call RUN_ECS_TASK,$(TASK))
+
+deploy-on-localstack: ## Full LocalStack provision: infra + images + SSM params + deploy services
+	@cd infrastructure && poetry run python -m scripts.dev provision-infra
+	@cd infrastructure && poetry run python -m scripts.dev load-env-params --overwrite
+	@cd infrastructure && poetry run python -m scripts.dev deploy-services

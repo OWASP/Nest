@@ -15,9 +15,9 @@ from pathlib import Path
 from scripts.commands import CommandRunner
 from scripts.errors import (
     CommandNotFoundError,
+    InfrastructureError,
     MissingAuthTokenError,
     OverrideExistsError,
-    TestRunnerError,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 LOCALSTACK_CONTAINER_NAME = "nest-localstack"
 LOCALSTACK_HOST = "localhost"
 LOCALSTACK_PORT = 4566
+LOCALSTACK_EXTERNAL_PORTS = "4510-4559"
+LOCALSTACK_HTTP_PORT = 80
+LOCALSTACK_HTTPS_PORT = 443
 LOCALSTACK_INFO_PATH = "/_localstack/info"
 HEALTH_MAX_ATTEMPTS = 30
 HEALTH_POLL_INTERVAL = 2
@@ -44,6 +47,8 @@ class LocalStack:
         container_name: str = LOCALSTACK_CONTAINER_NAME,
         host: str | None = None,
         port: int = LOCALSTACK_PORT,
+        http_port: int | None = None,
+        https_port: int | None = None,
     ) -> None:
         """Initialize the LocalStack container manager.
 
@@ -53,6 +58,12 @@ class LocalStack:
             host (str, optional): The host address for LocalStack. Defaults to
                 the LOCALSTACK_HOST environment variable or localhost.
             port (int): The port for LocalStack.
+            http_port (int, optional): The host port mapped to the container's
+                HTTP endpoint. Defaults to the LOCALSTACK_HTTP_PORT environment
+                variable or 80.
+            https_port (int, optional): The host port mapped to the container's
+                HTTPS endpoint. Defaults to the LOCALSTACK_HTTPS_PORT
+                environment variable or 443.
 
         """
         self.commands = commands or CommandRunner()
@@ -61,6 +72,16 @@ class LocalStack:
             host if host is not None else os.environ.get("LOCALSTACK_HOST", LOCALSTACK_HOST)
         )
         self.port = port
+        self.http_port = (
+            http_port
+            if http_port is not None
+            else int(os.environ.get("LOCALSTACK_HTTP_PORT", LOCALSTACK_HTTP_PORT))
+        )
+        self.https_port = (
+            https_port
+            if https_port is not None
+            else int(os.environ.get("LOCALSTACK_HTTPS_PORT", LOCALSTACK_HTTPS_PORT))
+        )
         self.api_url = f"http://{self.host}:{self.port}"  # NOSONAR
 
     @property
@@ -136,13 +157,14 @@ class LocalStack:
             tuple[str, str]: A tuple containing the full image reference and the tag.
 
         Raises:
-            TestRunnerError: If the Dockerfile cannot be read or the image cannot be determined.
+            InfrastructureError: If the Dockerfile cannot be read or the image
+                cannot be determined.
 
         """
         dockerfile_path = Path(root_dir) / "docker" / "localstack" / "Dockerfile"
         if not dockerfile_path.exists():
             message = f"Dockerfile not found at {dockerfile_path}"
-            raise TestRunnerError(message)
+            raise InfrastructureError(message)
 
         content = dockerfile_path.read_text(encoding="utf-8")
 
@@ -153,13 +175,13 @@ class LocalStack:
         )
         if match_line is None:
             message = f"could not determine LocalStack image from {dockerfile_path}."
-            raise TestRunnerError(message)
+            raise InfrastructureError(message)
 
         full_image = re.sub(r"^FROM\s+", "", match_line).strip()
         match_tag = _FROM_LOCALSTACK_TAG_RE.search(match_line)
         if match_tag is None:
             message = f"could not determine LocalStack image tag from {dockerfile_path}."
-            raise TestRunnerError(message)
+            raise InfrastructureError(message)
 
         return full_image, match_tag.group(1)
 
@@ -171,7 +193,7 @@ class LocalStack:
 
         Raises:
             MissingAuthTokenError: If the LOCALSTACK_AUTH_TOKEN is not set.
-            TestRunnerError: If the container fails to start.
+            InfrastructureError: If the container fails to start.
 
         """
         if not os.environ.get("LOCALSTACK_AUTH_TOKEN"):
@@ -181,7 +203,16 @@ class LocalStack:
 
         logger.info("Starting LocalStack container...")
         # Forward the token via the process environment (-e NAME) rather than argv.
-        # ECR_ENDPOINT_STRATEGY=off avoids *.localhost.localstack.cloud DNS during teardown.
+        # ECR_ENDPOINT_STRATEGY=off simplifies ECR repository URIs to
+        # localhost.localstack.cloud:<port>. Publish the whole external service port
+        # range so host-side docker login/push can reach ECR at its bound port (4510).
+        # DISABLE_CORS_CHECKS=1 mirrors the previous start-localstack.sh: LocalStack's
+        # gateway enforces its own CORS/CSRF rules and rejects browser requests (e.g.
+        # GraphQL POSTs) whose Origin is not in LocalStack's allowlist with a 403.
+        # Mount the Docker socket so LocalStack can run sibling containers for ECS
+        # tasks and Lambda functions. The legacy HTTP/HTTPS host ports are
+        # configurable so startup does not fail when the host already has 80/443
+        # occupied by another process.
         try:
             self.commands.run(
                 "docker",
@@ -191,8 +222,18 @@ class LocalStack:
                 self.container_name,
                 "-p",
                 f"{self.port}:{LOCALSTACK_PORT}",
+                "-p",
+                f"{LOCALSTACK_EXTERNAL_PORTS}:{LOCALSTACK_EXTERNAL_PORTS}",
+                "-p",
+                f"{self.http_port}:{LOCALSTACK_HTTP_PORT}",
+                "-p",
+                f"{self.https_port}:{LOCALSTACK_HTTPS_PORT}",
+                "-v",
+                "/var/run/docker.sock:/var/run/docker.sock",
                 "-e",
                 "ECR_ENDPOINT_STRATEGY=off",
+                "-e",
+                "DISABLE_CORS_CHECKS=1",
                 "-e",
                 "LOCALSTACK_AUTH_TOKEN",
                 image,
@@ -200,7 +241,7 @@ class LocalStack:
             )
         except (CommandNotFoundError, subprocess.CalledProcessError) as exc:
             message = f"Error starting LocalStack container: {exc}"
-            raise TestRunnerError(message) from exc
+            raise InfrastructureError(message) from exc
 
     def stop(self) -> None:
         """Stop and remove the LocalStack container (best-effort)."""
@@ -212,7 +253,7 @@ class LocalStack:
         """Block until LocalStack is healthy and its license is activated.
 
         Raises:
-            TestRunnerError: If LocalStack fails to become healthy or activate its
+            InfrastructureError: If LocalStack fails to become healthy or activate its
                 license within the timeout.
 
         """
@@ -224,7 +265,7 @@ class LocalStack:
                 self.healthy(log_error=True)
                 timeout = HEALTH_MAX_ATTEMPTS * HEALTH_POLL_INTERVAL
                 message = f"LocalStack failed to become healthy within {timeout} seconds."
-                raise TestRunnerError(message)
+                raise InfrastructureError(message)
             logger.info("Waiting... (attempt %s/%s)", attempt, HEALTH_MAX_ATTEMPTS)
             time.sleep(HEALTH_POLL_INTERVAL)
 
@@ -245,7 +286,7 @@ class LocalStack:
                     )
                 timeout = LICENSE_MAX_ATTEMPTS * HEALTH_POLL_INTERVAL
                 message = f"LocalStack license failed to activate within {timeout} seconds."
-                raise TestRunnerError(message)
+                raise InfrastructureError(message)
             time.sleep(HEALTH_POLL_INTERVAL)
 
         logger.info("LocalStack is ready!")
@@ -291,7 +332,7 @@ class OverrideManager:
         """Write temporary Terraform override files.
 
         Raises:
-            TestRunnerError: If an override file cannot be written.
+            InfrastructureError: If an override file cannot be written.
 
         """
         logger.info("Writing override files...")
@@ -310,7 +351,7 @@ class OverrideManager:
                 path.write_text(content, encoding="utf-8")
             except OSError as exc:
                 message = f"Error writing override file {filepath}: {exc}"
-                raise TestRunnerError(message) from exc
+                raise InfrastructureError(message) from exc
 
     def cleanup(self) -> None:
         """Clean up temporary override files."""
