@@ -67,14 +67,14 @@ class SnapshotSubscription(models.Model):
     )
 
     # Content toggles.
-    include_chapters = models.BooleanField(default=True)
-    include_events = models.BooleanField(default=True)
-    include_issues = models.BooleanField(default=True)
-    include_posts = models.BooleanField(default=True)
-    include_projects = models.BooleanField(default=True)
-    include_pull_requests = models.BooleanField(default=True)
-    include_releases = models.BooleanField(default=True)
-    include_users = models.BooleanField(default=True)
+    include_chapters = models.BooleanField(default=False)
+    include_events = models.BooleanField(default=False)
+    include_issues = models.BooleanField(default=False)
+    include_posts = models.BooleanField(default=False)
+    include_projects = models.BooleanField(default=False)
+    include_pull_requests = models.BooleanField(default=False)
+    include_releases = models.BooleanField(default=False)
+    include_users = models.BooleanField(default=False)
 
     # Specific entity subscriptions.
     subscribed_projects = models.ManyToManyField(
@@ -144,7 +144,7 @@ class SnapshotSubscription(models.Model):
                 ]
             )
 
-        if not any(toggles) and not has_entities:
+        if not getattr(self, "_is_admin_form", False) and not any(toggles) and not has_entities:
             msg = "Your subscription cannot be empty. Please choose something to follow."
             raise ValidationError(msg)
 

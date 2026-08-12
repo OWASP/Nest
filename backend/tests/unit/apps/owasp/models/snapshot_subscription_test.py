@@ -47,18 +47,18 @@ class TestSnapshotSubscription:
         assert result == f"{sub.user} — Unnamed (weekly, active)"
 
     def test_content_preferences_all_defaults(self):
-        """Test that content_preferences returns all True by default."""
+        """Test that content_preferences returns all False by default."""
         sub = SnapshotSubscription()
         prefs = sub.content_preferences
         assert prefs == {
-            "chapters": True,
-            "events": True,
-            "issues": True,
-            "posts": True,
-            "projects": True,
-            "pull_requests": True,
-            "releases": True,
-            "users": True,
+            "chapters": False,
+            "events": False,
+            "issues": False,
+            "posts": False,
+            "projects": False,
+            "pull_requests": False,
+            "releases": False,
+            "users": False,
         }
 
     def test_content_preferences_custom(self):
@@ -195,8 +195,8 @@ class TestSnapshotSubscriptionCreate:
 
     @patch("apps.owasp.models.snapshot_subscription.User.objects")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
-    def test_create_returns_none_when_limit_reached(self, mock_objects, mock_user_objects):
-        """Test create returns None when max subscriptions reached."""
+    def test_create_raises_when_limit_reached(self, mock_objects, mock_user_objects):
+        """Test create raises ValidationError when max subscriptions reached."""
         user = MagicMock()
         user.pk = 1
         mock_objects.filter.return_value.count.return_value = MAX_SUBSCRIPTIONS
@@ -365,8 +365,8 @@ class TestSnapshotSubscriptionCreateEdgeCases:
 
     @patch("apps.owasp.models.snapshot_subscription.User.objects")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
-    def test_create_returns_none_on_integrity_error(self, mock_objects, mock_user_objects):
-        """Test create returns None when IntegrityError is raised."""
+    def test_create_raises_on_integrity_error(self, mock_objects, mock_user_objects):
+        """Test create raises ValidationError when IntegrityError is raised."""
         user = MagicMock()
         user.pk = 1
         mock_objects.filter.return_value.count.return_value = 0

@@ -82,44 +82,30 @@ class SnapshotSubscriptionMutations:
             "include_users": input_data.include_users,
         }
 
-        has_entities = any(
-            [
-                input_data.subscribed_project_ids,
-                input_data.subscribed_chapter_ids,
-                input_data.subscribed_committee_ids,
-            ]
-        )
-
-        if not any(kwargs.values()) and not has_entities:
-            return SnapshotSubscriptionResult(
-                ok=False,
-                message="Your subscription cannot be empty. Please choose something to follow.",
-            )
-
         try:
-            subscription = SnapshotSubscription.create(
-                user=user,
-                frequency=input_data.frequency,
-                name=input_data.name,
-                **kwargs,
-            )
+            with transaction.atomic():
+                subscription = SnapshotSubscription.create(
+                    user=user,
+                    frequency=input_data.frequency,
+                    name=input_data.name,
+                    **kwargs,
+                )
+
+                subscription.set_m2m_fields(
+                    project_ids=input_data.subscribed_project_ids,
+                    chapter_ids=input_data.subscribed_chapter_ids,
+                    committee_ids=input_data.subscribed_committee_ids,
+                )
+
+                subscription.clean()
+
+                if subscription.has_duplicate_setup():
+                    msg = "A subscription with the same setup already exists."
+                    raise ValidationError(msg)  # noqa: TRY301
         except ValidationError as e:
             return SnapshotSubscriptionResult(
                 ok=False,
                 message=e.message,
-            )
-
-        subscription.set_m2m_fields(
-            project_ids=input_data.subscribed_project_ids,
-            chapter_ids=input_data.subscribed_chapter_ids,
-            committee_ids=input_data.subscribed_committee_ids,
-        )
-
-        if subscription.has_duplicate_setup():
-            subscription.delete()
-            return SnapshotSubscriptionResult(
-                ok=False,
-                message="A subscription with the same setup already exists.",
             )
 
         return SnapshotSubscriptionResult(

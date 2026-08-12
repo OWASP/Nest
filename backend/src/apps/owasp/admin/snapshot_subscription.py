@@ -34,6 +34,8 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
 
     def clean(self):
         """Validate form data, including M2M fields, to check for duplicates."""
+        if self.instance:
+            self.instance._is_admin_form = True  # noqa: SLF001
         cleaned_data = super().clean()
 
         user = cleaned_data.get("user")
@@ -58,6 +60,26 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             },
             exclude_pk=self.instance.pk if self.instance else None,
         )
+
+        toggles = [
+            cleaned_data.get("include_chapters"),
+            cleaned_data.get("include_events"),
+            cleaned_data.get("include_issues"),
+            cleaned_data.get("include_posts"),
+            cleaned_data.get("include_projects"),
+            cleaned_data.get("include_pull_requests"),
+            cleaned_data.get("include_releases"),
+            cleaned_data.get("include_users"),
+        ]
+        has_entities = bool(
+            cleaned_data.get("subscribed_projects")
+            or cleaned_data.get("subscribed_chapters")
+            or cleaned_data.get("subscribed_committees")
+        )
+
+        if not any(toggles) and not has_entities:
+            msg = "Your subscription cannot be empty. Please choose something to follow."
+            raise ValidationError(msg)
 
         if duplicate_found:
             msg = "A subscription with the same configuration already exists."
