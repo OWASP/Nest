@@ -155,7 +155,7 @@ def sync_repository(
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
-            ActivityEvent.bulk_save_for_objects(issues)
+            ActivityEvent.bulk_save_for_sources(issues)
         else:
             logger.info("Skipping issues sync for %s", repository.name)
 
@@ -206,7 +206,7 @@ def sync_repository(
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
                     logger.exception("Couldn't get GitHub pull request label %s", pull_request.url)
-        ActivityEvent.bulk_save_for_objects(pull_requests)
+        ActivityEvent.bulk_save_for_sources(pull_requests)
 
     # GitHub repository releases.
     releases = []
@@ -229,7 +229,7 @@ def sync_repository(
             releases.append(release)
     releases_for_events = list(releases)
     Release.bulk_save(releases)
-    ActivityEvent.bulk_save_for_objects(releases_for_events)
+    ActivityEvent.bulk_save_for_sources(releases_for_events)
 
     # GitHub repository contributors.
     RepositoryContributor.bulk_save(

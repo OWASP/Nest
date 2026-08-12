@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.github.models.generic_issue_model import GenericIssueModel
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
     def build_for_issue(issue) -> list[tuple]:
         """Return event tuples for an Issue."""
         events = [(ActivityEvent.ActivityType.ISSUE_OPENED, issue.created_at, issue.author)]
-        if issue.state == "closed" and issue.closed_at:
+        if issue.state == GenericIssueModel.IssueState.CLOSED and issue.closed_at:
             events.append((ActivityEvent.ActivityType.ISSUE_CLOSED, issue.closed_at, issue.author))
         return events
 
@@ -112,7 +113,7 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
         events = [(ActivityEvent.ActivityType.PR_OPENED, pr.created_at, pr.author)]
         if pr.merged_at:
             events.append((ActivityEvent.ActivityType.PR_MERGED, pr.merged_at, pr.author))
-        elif pr.state == "closed" and pr.closed_at:
+        elif pr.state == GenericIssueModel.IssueState.CLOSED and pr.closed_at:
             events.append((ActivityEvent.ActivityType.PR_CLOSED, pr.closed_at, pr.author))
         return events
 
@@ -127,37 +128,37 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
         ]
 
     @staticmethod
-    def update_data(obj) -> list["ActivityEvent"]:
+    def update_data(source) -> list["ActivityEvent"]:
         """Return unsaved ActivityEvent instances for a GitHub model object."""
-        handler_name = ActivityEvent.HANDLERS.get(type(obj).__name__)
+        handler_name = ActivityEvent.HANDLERS.get(type(source).__name__)
         if handler_name is None:
             logger.error(
                 "ActivityEvent.update_data received unsupported model type: %s",
-                type(obj).__name__,
+                type(source).__name__,
             )
-            message = f"Unsupported model type: {type(obj)}"
+            message = f"Unsupported model type: {type(source)}"
             raise TypeError(message)
 
         handler = getattr(ActivityEvent, handler_name)
-        events = handler(obj)
-        content_type = ContentType.objects.get_for_model(obj)
+        events = handler(source)
+        content_type = ContentType.objects.get_for_model(source)
 
         return [
             ActivityEvent(
                 activity_type=activity_type,
                 content_type=content_type,
-                object_id=obj.pk,
+                object_id=source.pk,
                 occurred_at=occurred_at,
                 github_user=github_user,
-                github_repository=obj.repository,
+                github_repository=source.repository,
             )
             for activity_type, occurred_at, github_user in events
             if occurred_at is not None
         ]
 
     @staticmethod
-    def bulk_save_for_objects(objects: list) -> None:
+    def bulk_save_for_sources(sources: list) -> None:
         """Bulk-insert ActivityEvent rows for source objects, skipping duplicates."""
-        events = [event for obj in objects for event in ActivityEvent.update_data(obj)]
+        events = [event for source in sources for event in ActivityEvent.update_data(source)]
         if events:
             ActivityEvent.objects.bulk_create(events, ignore_conflicts=True)
