@@ -11720,7 +11720,7 @@ snapshots:
     dependencies:
       undici-types: 8.3.0
 
-  @types/pako@2.0.4': {}
+  '@types/pako@2.0.4': {}
 
   '@types/raf@3.4.3':
     optional: true
@@ -13791,7 +13791,7 @@ snapshots:
     optionalDependencies:
       canvg: 3.0.11
       core-js: 3.49.0
-      dompurify: 3.4.11
+      dompurify: 3.4.13
       html2canvas: 1.4.1
 
   leaflet.markercluster@1.5.3(leaflet@1.9.4):
