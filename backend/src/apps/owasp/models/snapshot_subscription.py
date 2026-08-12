@@ -67,14 +67,14 @@ class SnapshotSubscription(models.Model):
     )
 
     # Content toggles.
-    include_chapters = models.BooleanField(default=True)
-    include_events = models.BooleanField(default=True)
-    include_issues = models.BooleanField(default=True)
-    include_posts = models.BooleanField(default=True)
-    include_projects = models.BooleanField(default=True)
-    include_pull_requests = models.BooleanField(default=True)
-    include_releases = models.BooleanField(default=True)
-    include_users = models.BooleanField(default=True)
+    include_chapters = models.BooleanField(default=False)
+    include_events = models.BooleanField(default=False)
+    include_issues = models.BooleanField(default=False)
+    include_posts = models.BooleanField(default=False)
+    include_projects = models.BooleanField(default=False)
+    include_pull_requests = models.BooleanField(default=False)
+    include_releases = models.BooleanField(default=False)
+    include_users = models.BooleanField(default=False)
 
     # Specific entity subscriptions.
     subscribed_projects = models.ManyToManyField(
@@ -134,8 +134,18 @@ class SnapshotSubscription(models.Model):
             self.include_releases,
             self.include_users,
         ]
-        if not any(toggles):
-            msg = "At least one content toggle must be enabled."
+        has_entities = False
+        if self.pk:
+            has_entities = any(
+                [
+                    self.subscribed_projects.exists(),
+                    self.subscribed_chapters.exists(),
+                    self.subscribed_committees.exists(),
+                ]
+            )
+
+        if not getattr(self, "_is_admin_form", False) and not any(toggles) and not has_entities:
+            msg = "Your subscription cannot be empty. Please choose something to follow."
             raise ValidationError(msg)
 
         if self.is_active and getattr(self, "user_id", None):
@@ -170,7 +180,8 @@ class SnapshotSubscription(models.Model):
             is_active=True,
         ).count()
         if active_count >= MAX_SUBSCRIPTIONS:
-            return None
+            msg = f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached."
+            raise ValidationError(msg)
 
         try:
             return cls.objects.create(
@@ -179,8 +190,9 @@ class SnapshotSubscription(models.Model):
                 name=name,
                 **kwargs,
             )
-        except IntegrityError:
-            return None
+        except IntegrityError as e:
+            msg = "A subscription with this name already exists."
+            raise ValidationError(msg) from e
 
     def update(self, *, frequency=None, name=None, **kwargs):
         """Update subscription fields.

@@ -53,8 +53,18 @@ class TestCreateSnapshotSubscription:
     def mutations(self):
         return SnapshotSubscriptionMutations()
 
-    def test_all_toggles_off(self, mutations):
-        """Test create fails when all content toggles are off."""
+    @pytest.fixture(autouse=True)
+    def _mock_transaction(self):
+        """Disable transaction.atomic for tests."""
+        with (
+            patch("django.db.transaction.Atomic.__enter__", return_value=None),
+            patch("django.db.transaction.Atomic.__exit__", return_value=False),
+        ):
+            yield
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_create_validation_error(self, mock_create, mutations):
+        """Test create propagates ValidationError from clean()."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(
             frequency="weekly",
@@ -67,15 +77,23 @@ class TestCreateSnapshotSubscription:
             include_releases=False,
             include_users=False,
         )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_sub.clean.side_effect = ValidationError(
+            "Your subscription cannot be empty. Please choose something to follow."
+        )
+        mock_create.return_value = mock_sub
+
         result = mutations.create_snapshot_subscription(info, input_data=input_data)
         assert not result.ok
-        assert "toggle" in result.message
+        assert "subscription cannot be empty" in result.message
 
     @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
     def test_create_success(self, mock_create, mutations):
         """Test successful subscription creation."""
         info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(frequency="weekly", name="My Sub")
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly", name="My Sub", include_chapters=True
+        )
         mock_sub = MagicMock(spec=SnapshotSubscription)
         mock_sub.has_duplicate_setup.return_value = False
         mock_create.return_value = mock_sub
@@ -91,8 +109,10 @@ class TestCreateSnapshotSubscription:
     def test_create_max_reached(self, mock_create, mutations):
         """Test create fails when max subscriptions reached."""
         info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(frequency="weekly")
-        mock_create.return_value = None
+        input_data = CreateSnapshotSubscriptionInput(frequency="weekly", include_chapters=True)
+        mock_create.side_effect = ValidationError(
+            f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached."
+        )
 
         result = mutations.create_snapshot_subscription(info, input_data=input_data)
 
@@ -103,7 +123,9 @@ class TestCreateSnapshotSubscription:
     def test_create_duplicate_setup(self, mock_create, mutations):
         """Test create fails when duplicate setup exists."""
         info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(frequency="weekly", name="Sub")
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency="weekly", name="Sub", include_chapters=True
+        )
         mock_sub = MagicMock(spec=SnapshotSubscription)
         mock_sub.has_duplicate_setup.return_value = True
         mock_create.return_value = mock_sub
@@ -112,7 +134,6 @@ class TestCreateSnapshotSubscription:
 
         assert not result.ok
         assert "same setup" in result.message
-        mock_sub.delete.assert_called_once()
 
 
 class TestUpdateSnapshotSubscription:
@@ -153,7 +174,7 @@ class TestUpdateSnapshotSubscription:
         )
         mock_sub = MagicMock(spec=SnapshotSubscription)
         mock_sub.clean.side_effect = ValidationError(
-            "At least one content toggle must be enabled."
+            "Your subscription cannot be empty. Please choose something to follow."
         )
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
@@ -163,7 +184,7 @@ class TestUpdateSnapshotSubscription:
                 info, subscription_id=1, input_data=input_data
             )
             assert not result.ok
-            assert "toggle" in result.message
+            assert "subscription cannot be empty" in result.message
 
     def test_success(self, mutations):
         """Test successful subscription update."""
