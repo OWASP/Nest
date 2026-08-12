@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: a2a8fb2216f444217ef275db48d6be04a2a88fc1  # v1.41.0
+    rev: d69c3510ebf3e850e0fa00cb998f83bfc6f87c88  # v1.42.1
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -97,7 +97,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.322.0
+          - strawberry-graphql==0.323.0
           - strawberry-graphql-django==0.86.5
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260716
@@ -164,7 +164,7 @@ repos:
           - toml-fmt-common<1.3.3
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: 64a97fb7fa63188393d3215c6e312f5f9c6d0f78  # v1.27.0
+    rev: 067260dc5fe6ea86b7551bfd6f8b3ba4e6c93129  # v1.28.0
     hooks:
       - id: zizmor
         args:
