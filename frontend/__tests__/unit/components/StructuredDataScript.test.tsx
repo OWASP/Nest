@@ -107,9 +107,12 @@ describe('<StructuredDataScript />', () => {
   })
 
   it('sanitizes malicious XSS content', () => {
-    mockDOMPurify.mockImplementation((input: string) =>
-      input.replaceAll(/<script[^>]*>.*?<\/script>/gi, '')
-    )
+    mockDOMPurify.mockImplementation((input: string) => {
+      const container = document.createElement('div')
+      container.innerHTML = input
+      container.querySelectorAll('script').forEach((el) => el.remove())
+      return container.innerHTML
+    })
 
     const maliciousData: ProfilePageStructuredData = {
       '@context': 'https://schema.org',

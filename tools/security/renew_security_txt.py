@@ -157,19 +157,29 @@ class GpgKeyGenerator:
         gnupg_home: Path,
         *args: str,
         stdin_data: str | None = None,
-        passphrase_file: Path | None = None,
+        passphrase: str | None = None,
     ) -> subprocess.CompletedProcess[str]:
-        """Run a gpg command against an isolated home directory."""
+        """Run a gpg command against an isolated home directory.
+
+        The passphrase is never written to disk: on POSIX it is piped over an
+        anonymous file descriptor (``--passphrase-fd``); on Windows, where
+        subprocesses cannot inherit arbitrary fds, it is passed via argv
+        (acceptable: this tool only runs in CI, where the process list is not
+        exposed to untrusted users).
+        """
         command = [self.gpg_binary, "--homedir", str(gnupg_home), "--batch", "--yes"]
-        if passphrase_file is not None:
-            command.extend(
-                [
-                    "--pinentry-mode",
-                    "loopback",
-                    "--passphrase-file",
-                    str(passphrase_file),
-                ]
-            )
+        pass_fds: tuple[int, ...] = ()
+        read_fd: int | None = None
+        if passphrase is not None:
+            command.extend(["--pinentry-mode", "loopback"])
+            if os.name == "posix":
+                read_fd, write_fd = os.pipe()
+                os.write(write_fd, f"{passphrase}\n".encode())
+                os.close(write_fd)
+                pass_fds = (read_fd,)
+                command.extend(["--passphrase-fd", "3"])
+            else:
+                command.extend(["--passphrase", passphrase])
         command.extend(args)
         logger.debug("Running: %s", " ".join(command))
         try:
@@ -179,6 +189,7 @@ class GpgKeyGenerator:
                 capture_output=True,
                 text=True,
                 input=stdin_data,
+                pass_fds=pass_fds,
             )
         except subprocess.CalledProcessError as error:
             detail = (error.stderr or error.stdout or "").strip()
@@ -186,6 +197,9 @@ class GpgKeyGenerator:
             if detail:
                 message = f"{message}: {detail}"
             raise RuntimeError(message) from error
+        finally:
+            if read_fd is not None:
+                os.close(read_fd)
 
     def generate(self, *, expire_date: str, passphrase: str, cleartext: str) -> GeneratedKey:
         """Generate a passphrase-protected Ed25519 keypair and clearsign ``cleartext``.
@@ -202,20 +216,17 @@ class GpgKeyGenerator:
 
         with tempfile.TemporaryDirectory(prefix="nest-security-gpg-") as temp_home:
             gnupg_home = Path(temp_home)
-            passphrase_path = gnupg_home / "passphrase"
-            passphrase_path.write_text(f"{passphrase}\n", encoding="utf-8")
-            passphrase_path.chmod(0o600)
 
             fingerprint = self.generate_keypair(
                 gnupg_home,
                 expire_date=expire_date,
-                passphrase_file=passphrase_path,
+                passphrase=passphrase,
             )
             signed = self.clearsign(
                 gnupg_home,
                 fingerprint,
                 unsigned,
-                passphrase_file=passphrase_path,
+                passphrase=passphrase,
             )
             return GeneratedKey(
                 fingerprint=fingerprint,
@@ -223,7 +234,7 @@ class GpgKeyGenerator:
                 private_key=self.export_private_key(
                     gnupg_home,
                     fingerprint,
-                    passphrase_file=passphrase_path,
+                    passphrase=passphrase,
                 ),
                 signed_security_txt=signed,
             )
@@ -234,7 +245,7 @@ class GpgKeyGenerator:
         fingerprint: str,
         cleartext: str,
         *,
-        passphrase_file: Path,
+        passphrase: str,
     ) -> str:
         """Create an OpenPGP cleartext signature of unsigned ``cleartext``."""
         unsigned = unsigned_security_txt_body(cleartext)
@@ -247,7 +258,7 @@ class GpgKeyGenerator:
             "--local-user",
             fingerprint,
             stdin_data=unsigned,
-            passphrase_file=passphrase_file,
+            passphrase=passphrase,
         )
         signed = result.stdout if result.stdout.endswith("\n") else f"{result.stdout}\n"
         if SIGNED_MESSAGE_BEGIN not in signed or SIGNATURE_BEGIN not in signed:
@@ -265,7 +276,7 @@ class GpgKeyGenerator:
         gnupg_home: Path,
         *,
         expire_date: str,
-        passphrase_file: Path,
+        passphrase: str,
     ) -> str:
         """Generate an Ed25519 key and return its fingerprint."""
         batch = "\n".join(
@@ -295,7 +306,7 @@ class GpgKeyGenerator:
             "1",
             "--generate-key",
             stdin_data=batch,
-            passphrase_file=passphrase_file,
+            passphrase=passphrase,
         )
         fingerprint = self.fingerprint_from_key_created(result.stdout)
         logger.info("Generated key fingerprint %s", fingerprint)
@@ -385,7 +396,7 @@ class GpgKeyGenerator:
         gnupg_home: Path,
         fingerprint: str,
         *,
-        passphrase_file: Path,
+        passphrase: str,
     ) -> str:
         """Export the ASCII-armored private key."""
         result = self.run_gpg(
@@ -393,7 +404,7 @@ class GpgKeyGenerator:
             "--armor",
             "--export-secret-keys",
             fingerprint,
-            passphrase_file=passphrase_file,
+            passphrase=passphrase,
         )
         if "BEGIN PGP PRIVATE KEY BLOCK" not in result.stdout:
             msg = "private key export did not return an armored private key"
