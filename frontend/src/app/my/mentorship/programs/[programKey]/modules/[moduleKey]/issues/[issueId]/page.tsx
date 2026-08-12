@@ -2,7 +2,6 @@
 
 import { useQuery } from '@apollo/client/react'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
-import { useAccessControl } from 'hooks/useAccessControl'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -21,10 +20,8 @@ import {
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
-import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import { LabelList } from 'components/LabelList'
@@ -35,10 +32,7 @@ import SecondaryCard from 'components/SecondaryCard'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
-  const { data: session, status: sessionStatus } = useSession() as {
-    data: ExtendedSession | null
-    status: string
-  }
+  const { data: session } = useSession() as { data: ExtendedSession | null }
   const [hasMorePRs, setHasMorePRs] = useState(true)
   const [visibleCount, setVisibleCount] = useState(4)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
@@ -46,26 +40,49 @@ const ModuleIssueDetailsPage = () => {
   const { programKey, moduleKey, issueId } = params
   const currentUserLogin = session?.user?.login
 
-  const {
-    data: accessData,
-    loading: accessLoading,
-    error: accessError,
-  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
-    variables: { programKey, moduleKey },
-    skip: !programKey || !moduleKey,
-    fetchPolicy: 'network-only',
+  // A single role-aware query serves admins, mentors, and mentees. The backend
+  // scopes issue data by role and reports `userRole`, so the client renders one
+  // view and only toggles management controls off for mentees.
+  const { data, loading, error, fetchMore } = useQuery(GetManagementModuleIssueViewDocument, {
+    variables: {
+      programKey,
+      moduleKey,
+      number: Number(issueId),
+      limit,
+      offset: 0,
+    },
+    skip: !issueId || !programKey || !moduleKey,
+    fetchPolicy: 'cache-and-network',
   })
 
-  const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
-
-  const moduleStartedAt = accessData?.managementModule?.startedAt
-  const moduleEndedAt = accessData?.managementModule?.endedAt
+  const {
+    assignIssue,
+    unassignIssue,
+    setTaskDeadlineMutation,
+    clearTaskDeadlineMutation,
+    assigning,
+    unassigning,
+    settingDeadline,
+    clearingDeadline,
+    isEditingDeadline,
+    setIsEditingDeadline,
+    deadlineInput,
+    setDeadlineInput,
+  } = useIssueMutations({ programKey, moduleKey, issueId })
 
   useEffect(() => {
-    if (accessError && !isForbiddenGraphQLError(accessError)) {
-      handleAppError(accessError)
+    if (error && !isForbiddenGraphQLError(error)) {
+      handleAppError(error)
     }
-  }, [accessError])
+  }, [error])
+
+  useEffect(() => {
+    const prCount = data?.managementModule?.issueByNumber?.pullRequests?.length
+    if (prCount == null) return
+    if (prCount <= limit) {
+      setHasMorePRs(prCount >= limit)
+    }
+  }, [data, limit])
 
   const formatDeadline = (deadline: string | null, isOpen: boolean) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
@@ -113,44 +130,14 @@ const ModuleIssueDetailsPage = () => {
       color,
     }
   }
-  const { data, loading, error, fetchMore } = useQuery(GetManagementModuleIssueViewDocument, {
-    variables: {
-      programKey,
-      moduleKey,
-      number: Number(issueId),
-      limit,
-      offset: 0,
-    },
-    skip: !issueId || !hasAccess,
-    fetchPolicy: 'cache-first',
-    nextFetchPolicy: 'cache-and-network',
-  })
 
-  useEffect(() => {
-    const prCount = data?.managementModule?.issueByNumber?.pullRequests?.length
-    if (prCount == null) return
-    if (prCount <= limit) {
-      setHasMorePRs(prCount >= limit)
-    }
-  }, [data, limit])
-
-  const {
-    assignIssue,
-    unassignIssue,
-    setTaskDeadlineMutation,
-    clearTaskDeadlineMutation,
-    assigning,
-    unassigning,
-    settingDeadline,
-    clearingDeadline,
-    isEditingDeadline,
-    setIsEditingDeadline,
-    deadlineInput,
-    setDeadlineInput,
-  } = useIssueMutations({ programKey, moduleKey, issueId })
-
-  const issue = data?.managementModule?.issueByNumber
-  const taskDeadline = (data?.managementModule?.taskDeadline as string | undefined) ?? null
+  const mentorshipModule = data?.managementModule
+  const isMentee = mentorshipModule?.userRole === 'mentee'
+  const issue = mentorshipModule?.issueByNumber
+  const taskDeadline = (mentorshipModule?.taskDeadline as string | undefined) ?? null
+  const moduleStartedAt = mentorshipModule?.startedAt
+  const moduleEndedAt = mentorshipModule?.endedAt
+  const menteeCanManageDeadlines = mentorshipModule?.menteeCanManageDeadlines
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
@@ -159,52 +146,40 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
-  if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
-    return <LoadingSpinner />
-  }
+  if (loading && !mentorshipModule) return <LoadingSpinner />
 
-  if (accessError && isForbiddenGraphQLError(accessError)) {
+  if (error && isForbiddenGraphQLError(error)) {
     return (
       <ErrorDisplay
         statusCode={403}
         title="Access Denied"
-        message="You do not have permission to view this issue in the mentorship workspace."
+        message="You do not have permission to view this issue."
       />
     )
-  }
-
-  if (accessError) {
-    return (
-      <ErrorDisplay
-        statusCode={500}
-        title="Error Loading Access Information"
-        message="Failed to verify access permissions. Please try again later."
-      />
-    )
-  }
-
-  if (!hasAccess) {
-    return (
-      <AccessDeniedDisplay
-        title="Access Denied"
-        message="Only program admins and module mentors can access this page."
-      />
-    )
-  }
-
-  if (loading && !issue) {
-    return <LoadingSpinner />
   }
 
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
   }
-  if (!issue)
-    return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
+
+  if (!issue) {
+    return (
+      <ErrorDisplay
+        statusCode={404}
+        title="Issue Not Found"
+        message="This issue was not found or is not assigned to you."
+      />
+    )
+  }
 
   const assignees = issue.assignees || []
   const labels = issue.labels || []
-  const canEditDeadline = assignees.length > 0
+  const isAssignee = assignees.some((a) => a.login === currentUserLogin)
+  // Admins/mentors can set a deadline on any assigned issue; a mentee can only do
+  // so when the module allows it and the issue is assigned to them.
+  const canEditDeadline = isMentee
+    ? Boolean(menteeCanManageDeadlines && isAssignee)
+    : assignees.length > 0
 
   let issueStatusClass: string
   let issueStatusLabel: string
@@ -213,17 +188,17 @@ const ModuleIssueDetailsPage = () => {
     issueStatusLabel = 'Open'
   } else if (issue.isMerged) {
     issueStatusClass = 'bg-[#8657E5] text-white'
-    issueStatusLabel = 'Closed'
+    issueStatusLabel = 'Merged'
   } else {
     issueStatusClass = 'bg-[#DA3633] text-white'
     issueStatusLabel = 'Closed'
   }
 
-  const getAssignButtonTitle = (assigning: boolean) => {
+  const getAssignButtonTitle = (assigningUser: boolean) => {
     let title: string
     if (!issueId) {
       title = 'Loading issue…'
-    } else if (assigning) {
+    } else if (assigningUser) {
       title = 'Assigning…'
     } else {
       title = 'Assign to this user'
@@ -267,8 +242,8 @@ const ModuleIssueDetailsPage = () => {
               <div>
                 <span className="font-medium">Assigned:</span>{' '}
                 <span>
-                  {data?.managementModule?.taskAssignedAt
-                    ? new Date(data.managementModule.taskAssignedAt).toLocaleDateString()
+                  {mentorshipModule?.taskAssignedAt
+                    ? new Date(mentorshipModule.taskAssignedAt).toLocaleDateString()
                     : 'Not assigned'}
                 </span>
               </div>
@@ -301,7 +276,8 @@ const ModuleIssueDetailsPage = () => {
                                   deadlineAt: iso,
                                 },
                               })
-                            } else {
+                            } else if (!isMentee) {
+                              // Clearing a deadline is a mentor/admin action only.
                               await clearTaskDeadlineMutation({
                                 variables: {
                                   programKey,
@@ -381,7 +357,12 @@ const ModuleIssueDetailsPage = () => {
                     className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
                   >
                     <Link
-                      href={`/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${a.login}`}
+                      href={
+                        isMentee
+                          ? `https://github.com/${a.login}`
+                          : `/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${a.login}`
+                      }
+                      target={isMentee ? '_blank' : undefined}
                       className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {a.avatarUrl ? (
@@ -397,167 +378,174 @@ const ModuleIssueDetailsPage = () => {
                       )}
                       <span className="text-sm font-medium">{a.login || a.name}</span>
                     </Link>
-                    <button
-                      type="button"
-                      aria-label={`Unassign @${a.login}`}
-                      disabled={!issueId || unassigning}
-                      onClick={async () => {
-                        await unassignIssue({
-                          variables: {
-                            programKey,
-                            moduleKey,
-                            issueNumber: Number(issueId),
-                            userLogin: a.login,
-                          },
-                        })
-                      }}
-                      className={getButtonClassName(!issueId || unassigning)}
-                      title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
-                    >
-                      <FaXmark />
-                    </button>
+                    {!isMentee && (
+                      <button
+                        type="button"
+                        aria-label={`Unassign @${a.login}`}
+                        disabled={!issueId || unassigning}
+                        onClick={async () => {
+                          await unassignIssue({
+                            variables: {
+                              programKey,
+                              moduleKey,
+                              issueNumber: Number(issueId),
+                              userLogin: a.login,
+                            },
+                          })
+                        }}
+                        className={getButtonClassName(!issueId || unassigning)}
+                        title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
+                      >
+                        <FaXmark />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
-            <div className="grid grid-cols-1 gap-3">
-              {(issue.pullRequests || []).slice(0, visibleCount).map((pr) => (
-                <MentorshipPullRequest key={pr.id} pr={pr} />
-              ))}
+          {!isMentee && (
+            <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
+              <div className="grid grid-cols-1 gap-3">
+                {(issue.pullRequests || []).slice(0, visibleCount).map((pr) => (
+                  <MentorshipPullRequest key={pr.id} pr={pr} />
+                ))}
 
-              {(hasMorePRs ||
-                (issue.pullRequests || []).length > visibleCount ||
-                (visibleCount > limit && (issue.pullRequests || []).length > limit)) && (
-                <div className="mt-4 flex justify-start gap-4">
-                  {(hasMorePRs || (issue.pullRequests || []).length > visibleCount) && (
-                    <button
-                      disabled={isFetchingMore}
-                      onClick={() => {
-                        if (isFetchingMore) return
-                        const currentLength = issue.pullRequests?.length || 0
-                        if (hasMorePRs && currentLength < visibleCount + limit) {
-                          setIsFetchingMore(true)
-                          fetchMore({
-                            variables: {
-                              programKey,
-                              moduleKey,
-                              number: Number(issueId),
-                              offset: currentLength,
-                              limit,
-                            },
-                            updateQuery: (prevResult, { fetchMoreResult }) => {
-                              if (!fetchMoreResult) return prevResult
-                              const newPRs =
-                                fetchMoreResult.managementModule?.issueByNumber?.pullRequests || []
-                              if (newPRs.length < limit) setHasMorePRs(false)
-                              if (newPRs.length === 0) return prevResult
-                              return {
-                                ...prevResult,
-                                managementModule: {
-                                  ...prevResult.managementModule!,
-                                  issueByNumber: {
-                                    ...prevResult.managementModule!.issueByNumber!,
-                                    pullRequests: [
-                                      ...(prevResult.managementModule?.issueByNumber
-                                        ?.pullRequests || []),
-                                      ...newPRs,
-                                    ],
+                {(hasMorePRs ||
+                  (issue.pullRequests || []).length > visibleCount ||
+                  (visibleCount > limit && (issue.pullRequests || []).length > limit)) && (
+                  <div className="mt-4 flex justify-start gap-4">
+                    {(hasMorePRs || (issue.pullRequests || []).length > visibleCount) && (
+                      <button
+                        disabled={isFetchingMore}
+                        onClick={() => {
+                          if (isFetchingMore) return
+                          const currentLength = issue.pullRequests?.length || 0
+                          if (hasMorePRs && currentLength < visibleCount + limit) {
+                            setIsFetchingMore(true)
+                            fetchMore({
+                              variables: {
+                                programKey,
+                                moduleKey,
+                                number: Number(issueId),
+                                offset: currentLength,
+                                limit,
+                              },
+                              updateQuery: (prevResult, { fetchMoreResult }) => {
+                                if (!fetchMoreResult) return prevResult
+                                const newPRs =
+                                  fetchMoreResult.managementModule?.issueByNumber?.pullRequests ||
+                                  []
+                                if (newPRs.length < limit) setHasMorePRs(false)
+                                if (newPRs.length === 0) return prevResult
+                                return {
+                                  ...prevResult,
+                                  managementModule: {
+                                    ...prevResult.managementModule!,
+                                    issueByNumber: {
+                                      ...prevResult.managementModule!.issueByNumber!,
+                                      pullRequests: [
+                                        ...(prevResult.managementModule?.issueByNumber
+                                          ?.pullRequests || []),
+                                        ...newPRs,
+                                      ],
+                                    },
                                   },
-                                },
-                              }
-                            },
-                          })
-                            .catch((err) => handleAppError(err))
-                            .finally(() => setIsFetchingMore(false))
-                        }
-                        setVisibleCount((prev) => prev + limit)
-                      }}
-                      type="button"
-                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
-                    >
-                      {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
-                      <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
-                    </button>
-                  )}
-
-                  {visibleCount > limit && (issue.pullRequests || []).length > limit && (
-                    <button
-                      disabled={isFetchingMore}
-                      onClick={() => setVisibleCount(limit)}
-                      type="button"
-                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
-                    >
-                      Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {(!issue.pullRequests || issue.pullRequests.length === 0) && (
-                <span className="text-sm text-gray-400">No linked pull requests.</span>
-              )}
-            </div>
-          </SecondaryCard>
-
-          <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 text-2xl font-semibold">
-              <div className="flex items-center">
-                <div className="flex flex-row items-center gap-2">
-                  <HiUserGroup className="mr-2 h-5 w-5" />
-                </div>
-                <span>Interested Users</span>
-              </div>
-            </h2>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {(data?.managementModule?.interestedUsers || []).map((u) => (
-                <div
-                  key={u.id}
-                  className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
-                >
-                  <div className="inline-flex items-center gap-2">
-                    {u.avatarUrl ? (
-                      <Image
-                        src={u.avatarUrl}
-                        alt=""
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
+                                }
+                              },
+                            })
+                              .catch((err) => handleAppError(err))
+                              .finally(() => setIsFetchingMore(false))
+                          }
+                          setVisibleCount((prev) => prev + limit)
+                        }}
+                        type="button"
+                        className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                      >
+                        {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
+                        <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                      </button>
                     )}
-                    <span className="text-sm font-medium">@{u.login}</span>
+
+                    {visibleCount > limit && (issue.pullRequests || []).length > limit && (
+                      <button
+                        disabled={isFetchingMore}
+                        onClick={() => setVisibleCount(limit)}
+                        type="button"
+                        className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                      >
+                        Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                      </button>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    disabled={!issueId || assigning}
-                    onClick={async () => {
-                      if (!issueId || assigning) return
-                      await assignIssue({
-                        variables: {
-                          programKey,
-                          moduleKey,
-                          issueNumber: Number(issueId),
-                          userLogin: u.login,
-                        },
-                      })
-                    }}
-                    className={`${getButtonClassName(!issueId || assigning)} px-3 py-1`}
-                    title={getAssignButtonTitle(assigning)}
-                  >
-                    <FaPlus className="text-gray-500" />
-                    <span>Assign</span>
-                  </button>
+                )}
+
+                {(!issue.pullRequests || issue.pullRequests.length === 0) && (
+                  <span className="text-sm text-gray-400">No linked pull requests.</span>
+                )}
+              </div>
+            </SecondaryCard>
+          )}
+
+          {!isMentee && (
+            <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+              <h2 className="mb-4 text-2xl font-semibold">
+                <div className="flex items-center">
+                  <div className="flex flex-row items-center gap-2">
+                    <HiUserGroup className="mr-2 h-5 w-5" />
+                  </div>
+                  <span>Interested Users</span>
                 </div>
-              ))}
-              {(data?.managementModule?.interestedUsers || []).length === 0 && (
-                <span className="text-sm text-gray-400">No interested users yet.</span>
-              )}
+              </h2>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {(mentorshipModule?.interestedUsers || []).map((u) => (
+                  <div
+                    key={u.id}
+                    className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
+                  >
+                    <div className="inline-flex items-center gap-2">
+                      {u.avatarUrl ? (
+                        <Image
+                          src={u.avatarUrl}
+                          alt=""
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
+                      )}
+                      <span className="text-sm font-medium">@{u.login}</span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!issueId || assigning}
+                      onClick={async () => {
+                        if (!issueId || assigning) return
+                        await assignIssue({
+                          variables: {
+                            programKey,
+                            moduleKey,
+                            issueNumber: Number(issueId),
+                            userLogin: u.login,
+                          },
+                        })
+                      }}
+                      className={`${getButtonClassName(!issueId || assigning)} px-3 py-1`}
+                      title={getAssignButtonTitle(assigning)}
+                    >
+                      <FaPlus className="text-gray-500" />
+                      <span>Assign</span>
+                    </button>
+                  </div>
+                ))}
+                {(mentorshipModule?.interestedUsers || []).length === 0 && (
+                  <span className="text-sm text-gray-400">No interested users yet.</span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </BreadcrumbStyleProvider>

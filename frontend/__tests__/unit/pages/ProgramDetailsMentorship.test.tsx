@@ -163,9 +163,12 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders program details correctly for a non-admin', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin' } },
-      status: 'authenticated',
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        ...mockProgramDetailsData,
+        managementProgram: { ...mockProgramDetailsData.managementProgram, userRole: 'mentor' },
+      },
     })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
@@ -315,9 +318,12 @@ describe('ProgramDetailsPage', () => {
   test('calls addToast with permission denied when non-admin calls setStatus', async () => {
     const mockUpdateProgram = jest.fn()
     ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin-user' } },
-      status: 'authenticated',
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        ...mockProgramDetailsData,
+        managementProgram: { ...mockProgramDetailsData.managementProgram, userRole: 'mentor' },
+      },
     })
 
     render(<ProgramDetailsPage />)
@@ -433,6 +439,55 @@ describe('ProgramDetailsPage', () => {
 
       const detailsContent = screen.getByTestId('details-content')
       expect(detailsContent).toHaveTextContent('Mentees Limit0')
+    })
+  })
+  it('renders a read-only view for a mentee', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        managementProgram: {
+          ...mockProgramDetailsData.managementProgram,
+          key: 'gsoc-2025',
+          name: 'GSoC 2025',
+          userRole: 'mentee',
+        },
+        managementProgramModules: [],
+      },
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('GSoC 2025')).toBeInTheDocument()
+      // Mentees get a read-only view: no admin status controls or full config.
+      expect(screen.queryByRole('button', { name: /Program actions menu/ })).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentees Limit')).not.toBeInTheDocument()
+    })
+  })
+
+  it('renders access denied when the user has no role in the program', async () => {
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      message: 'Forbidden',
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      loading: false,
+      error: forbiddenError,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    })
+  })
+
+  it('renders loading spinner while the program is loading', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: true,
+      error: undefined,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
     })
   })
 })

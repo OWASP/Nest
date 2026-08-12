@@ -108,6 +108,39 @@ const Metadata = ({
             </>
           )}
         </div>
+        {details?.map((detail) => {
+          if (detail.label === 'Leaders') {
+            return (
+              <div key={detail.label} className="flex flex-row gap-1 pb-1">
+                <strong>{detail.label}:</strong>{' '}
+                <LeadersList
+                  entityKey={`${entityKey}-${detail.label}`}
+                  leaders={String(detail.value ?? 'Unknown')}
+                />
+              </div>
+            )
+          }
+
+          if (detail.label === 'Channels') {
+            if (!detail.value) {
+              return null
+            }
+
+            return (
+              <div key={detail.label} className="flex flex-row items-start gap-1 pb-1">
+                <strong>{detail.label}:</strong>
+                <div className="pt-0.5">{detail.value}</div>
+              </div>
+            )
+          }
+
+          return (
+            <div key={detail.label} className="pb-1">
+              <strong>{detail.label}:</strong> {detail.value || 'Unknown'}
+            </div>
+          )
+        })}
+        {showSocialLinks && socialLinks && <SocialLinks urls={socialLinks} />}
       </SecondaryCard>
       {hasStatistics && (
         <SecondaryCard

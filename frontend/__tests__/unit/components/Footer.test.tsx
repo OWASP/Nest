@@ -317,7 +317,7 @@ describe('Footer', () => {
 
       const spanText = screen.getByText('Plain Text')
       expect(spanText.tagName).toBe('SPAN')
-      expect(spanText).toHaveClass('text-slate-600', 'dark:text-slate-400')
+      expect(spanText).toHaveClass('text-slate-700', 'dark:text-slate-400')
     })
   })
 
@@ -372,7 +372,7 @@ describe('Footer', () => {
         'mt-auto',
         'w-full',
         'border-t-1',
-        'bg-slate-200',
+        'bg-owasp-blue',
         'dark:bg-slate-800',
         'xl:max-w-full'
       )
