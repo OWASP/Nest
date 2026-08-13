@@ -13,10 +13,6 @@ test-infrastructure-unit:
 
 # Implementation targets.
 
-INFRASTRUCTURE_COMPOSE = docker compose \
-	--project-name nest-infrastructure \
-	-f docker-compose/infrastructure/compose.yaml
-
 INFRASTRUCTURE_TEST_IMAGE = nest-test-infrastructure
 
 # Integration tests write these override files; clean them up before and after a run.
