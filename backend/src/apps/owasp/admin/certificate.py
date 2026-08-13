@@ -27,6 +27,11 @@ class CertificateAdmin(admin.ModelAdmin):
         "recipient__login",
         "recipient__name",
         "issuer__login",
+        "issuer__name",
+        "project__name",
+        "project__key",
+        "chapter__name",
+        "chapter__key",
         "title",
         "id",
     )

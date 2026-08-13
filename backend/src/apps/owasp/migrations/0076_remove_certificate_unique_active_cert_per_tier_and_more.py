@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 help_text="Issuer GitHub user (for generic certificates)",
                 null=True,
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 related_name="issued_certificates",
                 to="github.user",
             ),

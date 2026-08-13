@@ -61,6 +61,6 @@ class CertificateNode:
         return root.is_verified
 
     @strawberry_django.field
-    def tier(self, root: Certificate) -> str | None:
+    def tier(self, root: Certificate) -> str:
         """Resolve the human-readable tier level (e.g. 'Level 1')."""
-        return root.get_tier_display() if root.tier else None
+        return root.get_tier_display() if root.tier else ""

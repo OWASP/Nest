@@ -66,7 +66,7 @@ class Certificate(TimestampedModel):
     )
     issuer = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="issued_certificates",
         blank=True,
         null=True,
