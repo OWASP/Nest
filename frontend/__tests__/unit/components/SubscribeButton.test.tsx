@@ -42,6 +42,7 @@ describe('SubscribeButton', () => {
   const mockUseQuery = useQuery as unknown as jest.Mock
   const mockUseMutation = useMutation as unknown as jest.Mock
   const mockRefetch = jest.fn()
+  const mockUpdateMutation = jest.fn()
   const mockCreateMutation = jest.fn()
 
   const defaultProps = {
@@ -52,20 +53,37 @@ describe('SubscribeButton', () => {
 
   const setupMocks = ({
     session = 'authenticated',
-    subscriptions = [],
-    createResult = { data: { createEntitySubscription: { ok: true, message: '' } } },
+    subscriptions = [] as Array<{
+      id: string
+      name: string
+      frequency: string
+      isActive: boolean
+      subscribedProjects: Array<{ id: number; name: string }>
+      subscribedChapters: Array<{ id: number; name: string }>
+      subscribedCommittees: Array<{ id: number; name: string }>
+    }>,
+    createResult = {
+      data: { createSnapshotSubscription: { ok: true, message: '' } },
+    },
+    updateResult = {
+      data: { updateSnapshotSubscription: { ok: true, message: '' } },
+    },
   }: {
     session?: string
     subscriptions?: Array<{
       id: string
+      name: string
       frequency: string
       isActive: boolean
-      project?: { id: string; name: string } | null
-      chapter?: { id: string; name: string } | null
-      committee?: { id: string; name: string } | null
+      subscribedProjects: Array<{ id: number; name: string }>
+      subscribedChapters: Array<{ id: number; name: string }>
+      subscribedCommittees: Array<{ id: number; name: string }>
     }>
     createResult?: {
-      data: { createEntitySubscription: { ok: boolean; message: string } }
+      data: { createSnapshotSubscription: { ok: boolean; message: string } }
+    }
+    updateResult?: {
+      data: { updateSnapshotSubscription: { ok: boolean; message: string } }
     }
   } = {}) => {
     ;(useSession as jest.Mock).mockReturnValue({
@@ -74,17 +92,20 @@ describe('SubscribeButton', () => {
     })
 
     mockUseQuery.mockReturnValue({
-      data: { myEntitySubscriptions: subscriptions },
+      data: { mySnapshotSubscriptions: subscriptions },
       loading: false,
       error: null,
       refetch: mockRefetch,
     })
 
     mockCreateMutation.mockResolvedValue(createResult)
+    mockUpdateMutation.mockResolvedValue(updateResult)
 
     mockUseMutation.mockImplementation((_mutation, options) => {
       const wrappedFn = jest.fn(async (vars) => {
-        const result = await mockCreateMutation(vars)
+        // Determine which mock to use based on query name
+        const isCreate = _mutation?.definitions?.[0]?.name?.value === 'CreateSnapshotSubscription'
+        const result = isCreate ? await mockCreateMutation(vars) : await mockUpdateMutation(vars)
         if (options?.onCompleted) {
           options.onCompleted(result.data)
         }
@@ -119,19 +140,19 @@ describe('SubscribeButton', () => {
   })
 
   describe('Subscribe Button (not subscribed)', () => {
-    test('renders Subscribe button with bell icon', () => {
+    test('renders Subscribe button with correct aria-label', () => {
       setupMocks()
       render(<SubscribeButton {...defaultProps} />)
       const button = screen.getByText('Subscribe')
       expect(button).toBeInTheDocument()
-      expect(button).toHaveAttribute('aria-label', 'Subscribe to Test Project')
+      expect(button.closest('button')).toHaveAttribute('aria-label', 'Subscribe to Test Project')
     })
 
     test('opens modal when Subscribe is clicked', () => {
       setupMocks()
       render(<SubscribeButton {...defaultProps} />)
       fireEvent.click(screen.getByText('Subscribe'))
-      expect(screen.getByText('Subscribe to updates from Test Project')).toBeInTheDocument()
+      expect(screen.getByText('Subscribe to Test Project')).toBeInTheDocument()
     })
   })
 
@@ -139,25 +160,26 @@ describe('SubscribeButton', () => {
     const subscribedMock = [
       {
         id: 'sub-1',
+        name: 'My Digest',
         frequency: 'weekly',
         isActive: true,
-        project: { id: '42', name: 'Test Project' },
-        chapter: null,
-        committee: null,
+        subscribedProjects: [{ id: 42, name: 'Test Project' }],
+        subscribedChapters: [],
+        subscribedCommittees: [],
       },
     ]
 
-    test('renders Subscribed link when already subscribed', () => {
+    test('renders Subscribed link when entity is in a subscription', () => {
       setupMocks({ subscriptions: subscribedMock })
       render(<SubscribeButton {...defaultProps} />)
       expect(screen.getByText('Subscribed')).toBeInTheDocument()
     })
 
-    test('Subscribed links to settings page with entity tab', () => {
+    test('Subscribed links to settings page', () => {
       setupMocks({ subscriptions: subscribedMock })
       render(<SubscribeButton {...defaultProps} />)
       const link = screen.getByText('Subscribed').closest('a')
-      expect(link).toHaveAttribute('href', '/settings?tab=entity')
+      expect(link).toHaveAttribute('href', '/settings')
     })
 
     test('Subscribed has correct aria-label', () => {
@@ -168,70 +190,39 @@ describe('SubscribeButton', () => {
     })
   })
 
-  describe('Inactive Subscription State', () => {
-    const inactiveMock = [
-      {
-        id: 'sub-1',
-        frequency: 'weekly',
-        isActive: false,
-        project: { id: '42', name: 'Test Project' },
-        chapter: null,
-        committee: null,
-      },
-    ]
-
-    test('renders Manage link when subscription is inactive', () => {
-      setupMocks({ subscriptions: inactiveMock })
-      render(<SubscribeButton {...defaultProps} />)
-      expect(screen.getByText('Manage')).toBeInTheDocument()
-      expect(screen.queryByText('Subscribe')).not.toBeInTheDocument()
-    })
-
-    test('Manage links to settings page', () => {
-      setupMocks({ subscriptions: inactiveMock })
-      render(<SubscribeButton {...defaultProps} />)
-      const link = screen.getByText('Manage').closest('a')
-      expect(link).toHaveAttribute('href', '/settings?tab=entity')
-    })
-
-    test('Manage has correct aria-label', () => {
-      setupMocks({ subscriptions: inactiveMock })
-      render(<SubscribeButton {...defaultProps} />)
-      const link = screen.getByText('Manage').closest('a')
-      expect(link).toHaveAttribute('aria-label', 'Manage inactive subscription for Test Project')
-    })
-  })
-
   describe('Subscription Limit', () => {
     const maxSubscriptions = Array.from({ length: 5 }, (_, i) => ({
       id: `sub-${i}`,
+      name: `Sub ${i}`,
       frequency: 'weekly',
       isActive: true,
-      project: { id: `${i + 100}`, name: `Project ${i}` },
-      chapter: null,
-      committee: null,
+      subscribedProjects: [{ id: i + 100, name: `Project ${i}` }],
+      subscribedChapters: [],
+      subscribedCommittees: [],
     }))
 
-    test('disables subscribe button when limit reached', () => {
+    test('keeps subscribe button enabled when limit reached to allow adding to existing', () => {
       setupMocks({ subscriptions: maxSubscriptions })
       render(<SubscribeButton {...defaultProps} />)
       const button = screen.getByText('Subscribe')
-      expect(button).toBeDisabled()
-    })
+      expect(button.closest('button')).not.toBeDisabled()
 
-    test('shows limit reached tooltip when disabled', () => {
-      setupMocks({ subscriptions: maxSubscriptions })
-      render(<SubscribeButton {...defaultProps} />)
-      const button = screen.getByText('Subscribe')
-      expect(button).toHaveAttribute('aria-label', 'Subscription limit reached')
+      fireEvent.click(button)
+      expect(screen.getByText('Choose a subscription to add this project to:')).toBeInTheDocument()
+      expect(screen.queryByText('Create New Subscription')).not.toBeInTheDocument()
     })
   })
 
-  describe('Subscribe Modal', () => {
+  describe('Subscribe Modal — Create New (no existing subscriptions)', () => {
     beforeEach(() => {
       setupMocks()
       render(<SubscribeButton {...defaultProps} />)
       fireEvent.click(screen.getByText('Subscribe'))
+    })
+
+    test('shows create form when no existing subscriptions', () => {
+      expect(screen.getByText('Name')).toBeInTheDocument()
+      expect(screen.getByText('Frequency')).toBeInTheDocument()
     })
 
     test('shows frequency options', () => {
@@ -246,44 +237,97 @@ describe('SubscribeButton', () => {
       const weeklyButton = screen.getByText('Weekly').closest('button')
       expect(weeklyButton).toHaveAttribute('aria-pressed', 'false')
     })
+
     test('closes modal when Cancel is clicked', () => {
       fireEvent.click(screen.getByText('Cancel'))
-      expect(screen.queryByText('Subscribe to updates from Test Project')).not.toBeInTheDocument()
+      expect(screen.queryByText('Subscribe to Test Project')).not.toBeInTheDocument()
+    })
+
+    test('shows Create & Subscribe button', () => {
+      expect(screen.getByText('Create & Subscribe')).toBeInTheDocument()
     })
   })
 
-  describe('Create Subscription', () => {
-    test('calls create mutation with correct variables', async () => {
+  describe('Subscribe Modal — List View (existing subscriptions)', () => {
+    const existingSubscriptions = [
+      {
+        id: 'sub-1',
+        name: 'My Weekly Digest',
+        frequency: 'weekly',
+        isActive: true,
+        subscribedProjects: [],
+        subscribedChapters: [],
+        subscribedCommittees: [],
+      },
+      {
+        id: 'sub-2',
+        name: 'Monthly Security',
+        frequency: 'monthly',
+        isActive: true,
+        subscribedProjects: [],
+        subscribedChapters: [],
+        subscribedCommittees: [],
+      },
+    ]
+
+    test('shows list of existing subscriptions', () => {
+      setupMocks({ subscriptions: existingSubscriptions })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      expect(screen.getByText('My Weekly Digest')).toBeInTheDocument()
+      expect(screen.getByText('Monthly Security')).toBeInTheDocument()
+    })
+
+    test('shows Add to Subscription button', () => {
+      setupMocks({ subscriptions: existingSubscriptions })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      expect(screen.getByText('Add to Subscription')).toBeInTheDocument()
+    })
+
+    test('shows Create New Subscription option', () => {
+      setupMocks({ subscriptions: existingSubscriptions })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      expect(screen.getByText('Create New Subscription')).toBeInTheDocument()
+    })
+
+    test('shows Subscribed link when entity is already in a subscription', () => {
+      const subsWithEntity = [
+        {
+          ...existingSubscriptions[0],
+          subscribedProjects: [{ id: 42, name: 'Test Project' }],
+        },
+        existingSubscriptions[1],
+      ]
+      setupMocks({ subscriptions: subsWithEntity })
+      render(<SubscribeButton {...defaultProps} />)
+      expect(screen.getByText('Subscribed')).toBeInTheDocument()
+    })
+  })
+
+  describe('Create Subscription via Modal', () => {
+    test('calls create mutation when creating new subscription', async () => {
       setupMocks()
       render(<SubscribeButton {...defaultProps} />)
       fireEvent.click(screen.getByText('Subscribe'))
 
-      // Find the Subscribe button inside the modal (not the trigger)
-      const modalButtons = screen.getAllByText('Subscribe')
-      const submitButton = modalButtons[modalButtons.length - 1]
-      fireEvent.click(submitButton)
+      fireEvent.click(screen.getByText('Create & Subscribe'))
 
       await waitFor(() => {
-        expect(mockCreateMutation).toHaveBeenCalledWith({
-          variables: {
-            inputData: {
-              entityType: 'project',
-              entityId: 42,
-              frequency: 'weekly',
-            },
-          },
-        })
+        expect(mockCreateMutation).toHaveBeenCalled()
       })
     })
 
-    test('shows success toast on successful subscription', async () => {
+    test('shows success toast on successful creation', async () => {
       const { addToast } = jest.requireMock('@heroui/toast')
       setupMocks()
       render(<SubscribeButton {...defaultProps} />)
       fireEvent.click(screen.getByText('Subscribe'))
-
-      const modalButtons = screen.getAllByText('Subscribe')
-      fireEvent.click(modalButtons[modalButtons.length - 1])
+      fireEvent.click(screen.getByText('Create & Subscribe'))
 
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith(
@@ -295,18 +339,16 @@ describe('SubscribeButton', () => {
       })
     })
 
-    test('shows error toast on failed subscription', async () => {
+    test('shows error toast on failed creation', async () => {
       const { addToast } = jest.requireMock('@heroui/toast')
       setupMocks({
         createResult: {
-          data: { createEntitySubscription: { ok: false, message: 'Limit reached' } },
+          data: { createSnapshotSubscription: { ok: false, message: 'Limit reached' } },
         },
       })
       render(<SubscribeButton {...defaultProps} />)
       fireEvent.click(screen.getByText('Subscribe'))
-
-      const modalButtons = screen.getAllByText('Subscribe')
-      fireEvent.click(modalButtons[modalButtons.length - 1])
+      fireEvent.click(screen.getByText('Create & Subscribe'))
 
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith(
@@ -325,11 +367,12 @@ describe('SubscribeButton', () => {
         subscriptions: [
           {
             id: 'sub-1',
+            name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            project: null,
-            chapter: { id: '42', name: 'Test Chapter' },
-            committee: null,
+            subscribedProjects: [],
+            subscribedChapters: [{ id: 42, name: 'Test Chapter' }],
+            subscribedCommittees: [],
           },
         ],
       })
@@ -342,11 +385,12 @@ describe('SubscribeButton', () => {
         subscriptions: [
           {
             id: 'sub-1',
+            name: 'My Sub',
             frequency: 'monthly',
             isActive: true,
-            project: null,
-            chapter: null,
-            committee: { id: '42', name: 'Test Committee' },
+            subscribedProjects: [],
+            subscribedChapters: [],
+            subscribedCommittees: [{ id: 42, name: 'Test Committee' }],
           },
         ],
       })
@@ -359,11 +403,12 @@ describe('SubscribeButton', () => {
         subscriptions: [
           {
             id: 'sub-1',
+            name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            project: { id: '99', name: 'Other Project' },
-            chapter: null,
-            committee: null,
+            subscribedProjects: [{ id: 99, name: 'Other Project' }],
+            subscribedChapters: [],
+            subscribedCommittees: [],
           },
         ],
       })
@@ -380,33 +425,141 @@ describe('SubscribeButton', () => {
         subscriptions: [
           {
             id: 'sub-1',
+            name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            project: { id: base64Id, name: 'Test Project' },
-            chapter: null,
-            committee: null,
+            subscribedProjects: [{ id: 42, name: 'Test Project' }],
+            subscribedChapters: [],
+            subscribedCommittees: [],
           },
         ],
       })
       render(<SubscribeButton {...defaultProps} entityId={base64Id} />)
       expect(screen.getByText('Subscribed')).toBeInTheDocument()
     })
+  })
 
-    test('handles non-decodable IDs gracefully', () => {
+  describe('Update Subscription via Modal', () => {
+    const existingSubscriptions = [
+      {
+        id: 'sub-1',
+        name: 'My Weekly Digest',
+        frequency: 'weekly',
+        isActive: true,
+        subscribedProjects: [],
+        subscribedChapters: [],
+        subscribedCommittees: [],
+      },
+    ]
+
+    test('calls update mutation when adding to existing subscription', async () => {
+      setupMocks({ subscriptions: existingSubscriptions })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      fireEvent.click(screen.getByText('My Weekly Digest'))
+      fireEvent.click(screen.getByText('Add to Subscription'))
+
+      await waitFor(() => {
+        expect(mockUpdateMutation).toHaveBeenCalled()
+      })
+    })
+
+    test('shows success toast on successful update', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({ subscriptions: existingSubscriptions })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+      fireEvent.click(screen.getByText('My Weekly Digest'))
+      fireEvent.click(screen.getByText('Add to Subscription'))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Added!',
+            color: 'success',
+          })
+        )
+      })
+    })
+
+    test('shows error toast on failed update', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({
+        subscriptions: existingSubscriptions,
+        updateResult: {
+          data: { updateSnapshotSubscription: { ok: false, message: 'Update failed' } },
+        },
+      })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+      fireEvent.click(screen.getByText('My Weekly Digest'))
+      fireEvent.click(screen.getByText('Add to Subscription'))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+          })
+        )
+      })
+    })
+
+    test('shows error toast on network failure during update', async () => {
+      const { addToast } = jest.requireMock('@heroui/toast')
+      setupMocks({ subscriptions: existingSubscriptions })
+      mockUseMutation.mockImplementation((_mutation, options) => {
+        const wrappedFn = jest.fn(async () => {
+          if (options?.onError) {
+            options.onError(new Error('Network error'))
+          }
+          return { data: null }
+        })
+        return [wrappedFn, { loading: false }]
+      })
+
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+      fireEvent.click(screen.getByText('My Weekly Digest'))
+      fireEvent.click(screen.getByText('Add to Subscription'))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            description: 'Failed to update subscription.',
+            color: 'danger',
+          })
+        )
+      })
+    })
+  })
+
+  describe('Modal View Switching', () => {
+    test('switches from list to create and back', () => {
       setupMocks({
         subscriptions: [
           {
             id: 'sub-1',
+            name: 'My Sub',
             frequency: 'weekly',
             isActive: true,
-            project: { id: 'not-a-number-or-base64!!!', name: 'Test Project' },
-            chapter: null,
-            committee: null,
+            subscribedProjects: [],
+            subscribedChapters: [],
+            subscribedCommittees: [],
           },
         ],
       })
-      render(<SubscribeButton {...defaultProps} entityId="not-a-number-or-base64!!!" />)
-      expect(screen.getByText('Subscribed')).toBeInTheDocument()
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      fireEvent.click(screen.getByText('Create New Subscription'))
+      expect(screen.getByText('Name')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByText('← Back to existing subscriptions'))
+      expect(screen.getByText('My Sub')).toBeInTheDocument()
+      expect(screen.queryByText('Name')).not.toBeInTheDocument()
     })
   })
 
@@ -419,7 +572,7 @@ describe('SubscribeButton', () => {
       })
 
       mockUseQuery.mockReturnValue({
-        data: { myEntitySubscriptions: [] },
+        data: { mySnapshotSubscriptions: [] },
         loading: false,
         error: null,
         refetch: mockRefetch,
@@ -438,8 +591,7 @@ describe('SubscribeButton', () => {
       render(<SubscribeButton {...defaultProps} />)
       fireEvent.click(screen.getByText('Subscribe'))
 
-      const modalButtons = screen.getAllByText('Subscribe')
-      fireEvent.click(modalButtons[modalButtons.length - 1])
+      fireEvent.click(screen.getByText('Create & Subscribe'))
 
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith(

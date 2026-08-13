@@ -117,12 +117,6 @@ export type CreateApiKeyResult = {
   rawKey?: Maybe<Scalars['String']['output']>;
 };
 
-export type CreateEntitySubscriptionInput = {
-  entityId: Scalars['Int']['input'];
-  entityType: Scalars['String']['input'];
-  frequency?: Scalars['String']['input'];
-};
-
 export type CreateModuleInput = {
   description: Scalars['String']['input'];
   domains?: Array<Scalars['String']['input']>;
@@ -159,6 +153,10 @@ export type CreateSnapshotSubscriptionInput = {
   includePullRequests?: Scalars['Boolean']['input'];
   includeReleases?: Scalars['Boolean']['input'];
   includeUsers?: Scalars['Boolean']['input'];
+  name?: Scalars['String']['input'];
+  subscribedChapterIds?: InputMaybe<Array<Scalars['Int']['input']>>;
+  subscribedCommitteeIds?: InputMaybe<Array<Scalars['Int']['input']>>;
+  subscribedProjectIds?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
 export type EntityChannelNode = Node & {
@@ -185,26 +183,6 @@ export type EntityMemberNode = Node & {
   memberName: Scalars['String']['output'];
   order: Scalars['Int']['output'];
   role: Scalars['String']['output'];
-};
-
-export type EntitySubscriptionNode = Node & {
-  __typename?: 'EntitySubscriptionNode';
-  chapter?: Maybe<ChapterNode>;
-  committee?: Maybe<CommitteeNode>;
-  createdAt: Scalars['DateTime']['output'];
-  frequency: Scalars['String']['output'];
-  /** The Globally Unique ID of this object */
-  id: Scalars['ID']['output'];
-  isActive: Scalars['Boolean']['output'];
-  project?: Maybe<ProjectNode>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type EntitySubscriptionResult = {
-  __typename?: 'EntitySubscriptionResult';
-  message: Scalars['String']['output'];
-  ok: Scalars['Boolean']['output'];
-  subscription?: Maybe<EntitySubscriptionNode>;
 };
 
 export type EventNode = Node & {
@@ -439,26 +417,22 @@ export type ModuleNodeTaskDeadlineArgs = {
 export type Mutation = {
   __typename?: 'Mutation';
   assignIssueToUser: ModuleNode;
-  cancelEntitySubscription: EntitySubscriptionResult;
   cancelSnapshotSubscription: SnapshotSubscriptionResult;
   clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
-  createEntitySubscription: EntitySubscriptionResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
   createSnapshotSubscription: SnapshotSubscriptionResult;
-  deleteEntitySubscription: EntitySubscriptionResult;
   deleteModule: Scalars['String']['output'];
+  deleteSnapshotSubscription: SnapshotSubscriptionResult;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
-  reactivateEntitySubscription: EntitySubscriptionResult;
+  reactivateSnapshotSubscription: SnapshotSubscriptionResult;
   reorderModules: Array<ModuleNode>;
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
   unsubscribeByToken: SnapshotSubscriptionResult;
-  unsubscribeEntityByToken: EntitySubscriptionResult;
-  updateEntitySubscription: EntitySubscriptionResult;
   updateModule: ModuleNode;
   updateProgram: ProgramNode;
   updateProgramStatus: ProgramNode;
@@ -474,7 +448,7 @@ export type MutationAssignIssueToUserArgs = {
 };
 
 
-export type MutationCancelEntitySubscriptionArgs = {
+export type MutationCancelSnapshotSubscriptionArgs = {
   subscriptionId: Scalars['Int']['input'];
 };
 
@@ -489,11 +463,6 @@ export type MutationClearTaskDeadlineArgs = {
 export type MutationCreateApiKeyArgs = {
   expiresAt: Scalars['DateTime']['input'];
   name: Scalars['String']['input'];
-};
-
-
-export type MutationCreateEntitySubscriptionArgs = {
-  inputData: CreateEntitySubscriptionInput;
 };
 
 
@@ -512,14 +481,14 @@ export type MutationCreateSnapshotSubscriptionArgs = {
 };
 
 
-export type MutationDeleteEntitySubscriptionArgs = {
-  subscriptionId: Scalars['Int']['input'];
-};
-
-
 export type MutationDeleteModuleArgs = {
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteSnapshotSubscriptionArgs = {
+  subscriptionId: Scalars['Int']['input'];
 };
 
 
@@ -528,7 +497,7 @@ export type MutationGithubAuthArgs = {
 };
 
 
-export type MutationReactivateEntitySubscriptionArgs = {
+export type MutationReactivateSnapshotSubscriptionArgs = {
   subscriptionId: Scalars['Int']['input'];
 };
 
@@ -564,17 +533,6 @@ export type MutationUnsubscribeByTokenArgs = {
 };
 
 
-export type MutationUnsubscribeEntityByTokenArgs = {
-  token: Scalars['String']['input'];
-};
-
-
-export type MutationUpdateEntitySubscriptionArgs = {
-  inputData: UpdateEntitySubscriptionInput;
-  subscriptionId: Scalars['Int']['input'];
-};
-
-
 export type MutationUpdateModuleArgs = {
   inputData: UpdateModuleInput;
 };
@@ -592,6 +550,7 @@ export type MutationUpdateProgramStatusArgs = {
 
 export type MutationUpdateSnapshotSubscriptionArgs = {
   inputData: UpdateSnapshotSubscriptionInput;
+  subscriptionId: Scalars['Int']['input'];
 };
 
 /** An object with a Globally Unique ID */
@@ -841,9 +800,8 @@ export type Query = {
   managementProgramModules: Array<ModuleNode>;
   memberSnapshot?: Maybe<MemberSnapshotNode>;
   memberSnapshots: Array<MemberSnapshotNode>;
-  myEntitySubscriptions: Array<EntitySubscriptionNode>;
   myPrograms: PaginatedPrograms;
-  mySnapshotSubscription?: Maybe<SnapshotSubscriptionNode>;
+  mySnapshotSubscriptions: Array<SnapshotSubscriptionNode>;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
   /** List of project health metrics. */
@@ -1252,6 +1210,10 @@ export type SnapshotSubscriptionNode = Node & {
   includeReleases: Scalars['Boolean']['output'];
   includeUsers: Scalars['Boolean']['output'];
   isActive: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  subscribedChapters: Array<SubscribedEntityNode>;
+  subscribedCommittees: Array<SubscribedEntityNode>;
+  subscribedProjects: Array<SubscribedEntityNode>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -1281,8 +1243,10 @@ export type StatsNode = {
   slackWorkspaceStats: Scalars['Int']['output'];
 };
 
-export type UpdateEntitySubscriptionInput = {
-  frequency?: InputMaybe<Scalars['String']['input']>;
+export type SubscribedEntityNode = {
+  __typename?: 'SubscribedEntityNode';
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type UpdateModuleInput = {
@@ -1331,6 +1295,10 @@ export type UpdateSnapshotSubscriptionInput = {
   includePullRequests?: InputMaybe<Scalars['Boolean']['input']>;
   includeReleases?: InputMaybe<Scalars['Boolean']['input']>;
   includeUsers?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  subscribedChapterIds?: InputMaybe<Array<Scalars['Int']['input']>>;
+  subscribedCommitteeIds?: InputMaybe<Array<Scalars['Int']['input']>>;
+  subscribedProjectIds?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
 export type UserNode = {
