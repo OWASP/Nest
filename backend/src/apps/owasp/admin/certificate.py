@@ -23,6 +23,7 @@ class CertificateAdmin(admin.ModelAdmin):
         "title",
     )
     list_filter = ("is_revoked", "issued_at", "tier")
+    list_display_links = ("id",)
     search_fields = (
         "chapter__key",
         "chapter__name",
