@@ -9,17 +9,45 @@ from apps.owasp.models.crp.certificate import Certificate
 class CertificateAdmin(admin.ModelAdmin):
     """Admin for Certificate model."""
 
-    autocomplete_fields = ("github_user",)
-    list_display = ("id", "github_user", "tier", "score", "issued_at", "is_revoked")
+    autocomplete_fields = ("recipient", "issuer", "project", "chapter")
+    list_display = (
+        "id",
+        "recipient",
+        "title",
+        "project",
+        "chapter",
+        "issuer",
+        "tier",
+        "score",
+        "issued_at",
+        "is_revoked",
+    )
     list_filter = ("tier", "is_revoked", "issued_at")
-    search_fields = ("github_user__login", "github_user__name", "id")
+    search_fields = (
+        "recipient__login",
+        "recipient__name",
+        "issuer__login",
+        "title",
+        "id",
+    )
     readonly_fields = ("id", "issued_at", "nest_created_at", "nest_updated_at")
 
     fieldsets = (
         (
             "Certificate Information",
             {
-                "fields": ("id", "github_user", "tier", "score", "issued_at"),
+                "fields": (
+                    "id",
+                    "recipient",
+                    "issuer",
+                    "title",
+                    "message",
+                    "project",
+                    "chapter",
+                    "tier",
+                    "score",
+                    "issued_at",
+                ),
             },
         ),
         (

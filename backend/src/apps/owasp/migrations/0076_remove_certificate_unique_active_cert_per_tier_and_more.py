@@ -5,59 +5,112 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0044_user_indexes'),
-        ('owasp', '0075_alter_certificate_id'),
+        ("github", "0044_user_indexes"),
+        ("owasp", "0075_alter_certificate_id"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='certificate',
-            name='unique_active_cert_per_tier',
+            model_name="certificate",
+            name="unique_active_cert_per_tier",
         ),
         migrations.AddField(
-            model_name='certificate',
-            name='chapter',
-            field=models.ForeignKey(blank=True, help_text='Associated chapter', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='certificates', to='owasp.chapter'),
+            model_name="certificate",
+            name="chapter",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Associated chapter",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="certificates",
+                to="owasp.chapter",
+            ),
         ),
         migrations.AddField(
-            model_name='certificate',
-            name='issuer',
-            field=models.ForeignKey(blank=True, help_text='Issuer GitHub user (for generic certificates)', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='issued_certificates', to='github.user'),
+            model_name="certificate",
+            name="issuer",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Issuer GitHub user (for generic certificates)",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="issued_certificates",
+                to="github.user",
+            ),
         ),
         migrations.AddField(
-            model_name='certificate',
-            name='message',
-            field=models.TextField(blank=True, default='', help_text='Customizable certificate message', verbose_name='Message'),
+            model_name="certificate",
+            name="message",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Customizable certificate message",
+                verbose_name="Message",
+            ),
         ),
         migrations.AddField(
-            model_name='certificate',
-            name='project',
-            field=models.ForeignKey(blank=True, help_text='Associated project', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='certificates', to='owasp.project'),
+            model_name="certificate",
+            name="project",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Associated project",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="certificates",
+                to="owasp.project",
+            ),
         ),
         migrations.RenameField(
-            model_name='certificate',
-            old_name='github_user',
-            new_name='recipient',
+            model_name="certificate",
+            old_name="github_user",
+            new_name="recipient",
         ),
         migrations.AddField(
-            model_name='certificate',
-            name='title',
-            field=models.CharField(blank=True, default='', help_text='Certificate title', max_length=255, verbose_name='Title'),
+            model_name="certificate",
+            name="title",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Certificate title",
+                max_length=255,
+                verbose_name="Title",
+            ),
         ),
         migrations.AlterField(
-            model_name='certificate',
-            name='score',
-            field=models.PositiveIntegerField(blank=True, help_text="The contributor's score when the certificate was issued", null=True, verbose_name='Score'),
+            model_name="certificate",
+            name="score",
+            field=models.PositiveIntegerField(
+                blank=True,
+                help_text="The contributor's score when the certificate was issued",
+                null=True,
+                verbose_name="Score",
+            ),
         ),
         migrations.AlterField(
-            model_name='certificate',
-            name='tier',
-            field=models.CharField(blank=True, choices=[('level_1', 'Level 1'), ('level_2', 'Level 2'), ('level_3', 'Level 3'), ('level_4', 'Level 4')], default='', help_text='The tier at which the certificate was issued', max_length=20, verbose_name='Tier'),
+            model_name="certificate",
+            name="tier",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("level_1", "Level 1"),
+                    ("level_2", "Level 2"),
+                    ("level_3", "Level 3"),
+                    ("level_4", "Level 4"),
+                ],
+                default="",
+                help_text="The tier at which the certificate was issued",
+                max_length=20,
+                verbose_name="Tier",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='certificate',
-            constraint=models.UniqueConstraint(condition=models.Q(('is_revoked', False), models.Q(('tier', ''), _negated=True)), fields=('recipient', 'tier'), name='unique_active_cert_per_tier', violation_error_message='Cannot have multiple active certificates for same tier'),
+            model_name="certificate",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("is_revoked", False), models.Q(("tier", ""), _negated=True)),
+                fields=("recipient", "tier"),
+                name="unique_active_cert_per_tier",
+                violation_error_message="Cannot have multiple active certificates for same tier",
+            ),
         ),
     ]
