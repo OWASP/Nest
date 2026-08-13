@@ -9,31 +9,31 @@ from apps.owasp.models.crp.certificate import Certificate
 class CertificateAdmin(admin.ModelAdmin):
     """Admin for Certificate model."""
 
-    autocomplete_fields = ("recipient", "issuer", "project", "chapter")
+    autocomplete_fields = ("chapter", "issuer", "project", "recipient")
     list_display = (
-        "id",
-        "recipient",
-        "title",
-        "project",
         "chapter",
-        "issuer",
-        "tier",
-        "score",
-        "issued_at",
+        "id",
         "is_revoked",
+        "issued_at",
+        "issuer",
+        "project",
+        "recipient",
+        "score",
+        "tier",
+        "title",
     )
-    list_filter = ("tier", "is_revoked", "issued_at")
+    list_filter = ("is_revoked", "issued_at", "tier")
     search_fields = (
-        "recipient__login",
-        "recipient__name",
+        "chapter__key",
+        "chapter__name",
+        "id",
         "issuer__login",
         "issuer__name",
-        "project__name",
         "project__key",
-        "chapter__name",
-        "chapter__key",
+        "project__name",
+        "recipient__login",
+        "recipient__name",
         "title",
-        "id",
     )
     readonly_fields = ("id", "issued_at", "nest_created_at", "nest_updated_at")
 
@@ -42,16 +42,16 @@ class CertificateAdmin(admin.ModelAdmin):
             "Certificate Information",
             {
                 "fields": (
+                    "chapter",
                     "id",
-                    "recipient",
+                    "issued_at",
                     "issuer",
-                    "title",
                     "message",
                     "project",
-                    "chapter",
-                    "tier",
+                    "recipient",
                     "score",
-                    "issued_at",
+                    "tier",
+                    "title",
                 ),
             },
         ),

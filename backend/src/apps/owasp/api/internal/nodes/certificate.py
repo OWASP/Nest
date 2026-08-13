@@ -26,15 +26,22 @@ if TYPE_CHECKING:
 class CertificateNode:
     """Certificate node."""
 
-    @strawberry_django.field(select_related=["recipient"])
-    def recipient(self, root: Certificate) -> UserNode:
-        """Resolve the recipient user."""
-        return root.recipient
+    @strawberry_django.field(select_related=["chapter"])
+    def chapter(
+        self, root: Certificate
+    ) -> Annotated["ChapterNode", strawberry.lazy("apps.owasp.api.internal.nodes.chapter")] | None:
+        """Resolve associated chapter."""
+        return root.chapter
 
     @strawberry_django.field(select_related=["recipient"])
     def github_user(self, root: Certificate) -> UserNode:
         """Resolve the associated GitHub user (alias for recipient)."""
         return root.recipient
+
+    @strawberry_django.field
+    def is_verified(self, root: Certificate) -> bool:
+        """Resolve whether the certificate is active/verified."""
+        return root.is_verified
 
     @strawberry_django.field(select_related=["issuer"])
     def issuer(self, root: Certificate) -> UserNode | None:
@@ -48,17 +55,10 @@ class CertificateNode:
         """Resolve associated project."""
         return root.project
 
-    @strawberry_django.field(select_related=["chapter"])
-    def chapter(
-        self, root: Certificate
-    ) -> Annotated["ChapterNode", strawberry.lazy("apps.owasp.api.internal.nodes.chapter")] | None:
-        """Resolve associated chapter."""
-        return root.chapter
-
-    @strawberry_django.field
-    def is_verified(self, root: Certificate) -> bool:
-        """Resolve whether the certificate is active/verified."""
-        return root.is_verified
+    @strawberry_django.field(select_related=["recipient"])
+    def recipient(self, root: Certificate) -> UserNode:
+        """Resolve the recipient user."""
+        return root.recipient
 
     @strawberry_django.field
     def tier(self, root: Certificate) -> str:
