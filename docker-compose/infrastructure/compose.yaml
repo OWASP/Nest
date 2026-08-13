@@ -14,7 +14,10 @@ services:
       test: [CMD, curl, -f, http://localhost:4566/_localstack/info]
       timeout: 5s
     networks:
-      - infrastructure-tests
+      - infrastructure-nest
+    ports:
+      - 4510-4559:4510-4559
+      - 4566:4566
     volumes:
       # Host Docker socket so LocalStack can start sibling containers (Lambda, ECS, etc.).
       - /var/run/docker.sock:/var/run/docker.sock
@@ -37,4 +40,4 @@ services:
       - ../../infrastructure/tests:/home/owasp/infrastructure/tests:ro
 
 networks:
-  infrastructure-tests:
+  infrastructure-nest:
