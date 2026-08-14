@@ -54,6 +54,7 @@ No modules.
 | <a name="input_container_cpu"></a> [container\_cpu](#input\_container\_cpu) | The CPU units for the container (1024 = 1 vCPU). | `number` | `512` | no |
 | <a name="input_container_memory"></a> [container\_memory](#input\_container\_memory) | The memory for the container in MiB. | `number` | `1024` | no |
 | <a name="input_container_port"></a> [container\_port](#input\_container\_port) | The port the container listens on. | `number` | n/a | yes |
+| <a name="input_container_secrets"></a> [container\_secrets](#input\_container\_secrets) | Environment variable names mapped to SSM or Secrets Manager valueFrom references. | `map(string)` | `{}` | no |
 | <a name="input_desired_count"></a> [desired\_count](#input\_desired\_count) | The desired number of tasks. | `number` | `2` | no |
 | <a name="input_enable_auto_scaling"></a> [enable\_auto\_scaling](#input\_enable\_auto\_scaling) | Whether to enable auto scaling for the service. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name (e.g., staging, production). | `string` | n/a | yes |
@@ -64,8 +65,8 @@ No modules.
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The CloudWatch log retention in days. | `number` | `30` | no |
 | <a name="input_max_count"></a> [max\_count](#input\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_min_count"></a> [min\_count](#input\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
-| <a name="input_parameters_arns"></a> [parameters\_arns](#input\_parameters\_arns) | Map of environment variable names to the ARNs of SSM parameters. | `map(string)` | `{}` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
+| <a name="input_secretsmanager_secret_arns"></a> [secretsmanager\_secret\_arns](#input\_secretsmanager\_secret\_arns) | Bare secrets manager ARNs that the ECS execution role may read | `set(string)` | `[]` | no |
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | The ID of the security group for the service. | `string` | n/a | yes |
 | <a name="input_service_name"></a> [service\_name](#input\_service\_name) | The name of the service (e.g., backend, frontend). | `string` | n/a | yes |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Subnet IDs for ECS tasks (can be public or private). | `list(string)` | n/a | yes |
