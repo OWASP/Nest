@@ -61,6 +61,6 @@ infrastructure-test-integration:
 			up \
 			--abort-on-container-exit \
 			--build \
-			--exit-code-from tests \
+			--exit-code-from runner \
 		|| status=$$?; \
 	exit $$status

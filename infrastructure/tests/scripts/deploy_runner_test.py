@@ -2,12 +2,16 @@
 
 import logging
 import os
+import subprocess
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
+from scripts.commands import CommandRunner
 from scripts.deploy_runner import InfrastructureDeployRunner
+from scripts.errors import TestRunnerError
+from scripts.localstack import LocalStack
 
 
 class TestInfrastructureDeployRunner:
@@ -42,3 +46,90 @@ class TestInfrastructureDeployRunner:
         mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
         assert "TF_PLUGIN_CACHE_DIR" not in os.environ
         assert "Could not configure TF_PLUGIN_CACHE_DIR" in caplog.text
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_deploy_runs_init_and_apply(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = MagicMock(spec=LocalStack)
+
+        captured: dict[str, str] = {}
+
+        def capture(*_args: object, **_kwargs: object) -> None:
+            captured.setdefault("AWS_ACCESS_KEY_ID", os.environ["AWS_ACCESS_KEY_ID"])
+            captured.setdefault("AWS_SECRET_ACCESS_KEY", os.environ["AWS_SECRET_ACCESS_KEY"])
+
+        commands.run.side_effect = capture
+
+        runner = InfrastructureDeployRunner(
+            root_dir=Path("/repo"),
+            commands=commands,
+            localstack=localstack,
+        )
+
+        runner.deploy()
+
+        commands.require.assert_called_once_with("tflocal")
+        localstack.wait_ready.assert_called_once()
+
+        live_dir = str(Path("/repo") / "infrastructure" / "live")
+        commands.run.assert_has_calls(
+            [
+                call(
+                    "tflocal",
+                    f"-chdir={live_dir}",
+                    "init",
+                    "-backend-config=terraform.localstack.tfbackend",
+                    "-input=false",
+                    "-reconfigure",
+                    check=True,
+                ),
+                call(
+                    "tflocal",
+                    f"-chdir={live_dir}",
+                    "apply",
+                    "-auto-approve",
+                    "-input=false",
+                    "-var-file=terraform.localstack.tfvars",
+                    check=True,
+                ),
+            ]
+        )
+        fake_credential = "test"
+        assert captured["AWS_ACCESS_KEY_ID"] == fake_credential
+        assert captured["AWS_SECRET_ACCESS_KEY"] == fake_credential
+        assert "AWS_ACCESS_KEY_ID" not in os.environ
+        assert "AWS_SECRET_ACCESS_KEY" not in os.environ
+
+    def test_deploy_propagates_wait_ready_failure(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = MagicMock(spec=LocalStack)
+        localstack.wait_ready.side_effect = TestRunnerError("localstack down")
+
+        runner = InfrastructureDeployRunner(
+            root_dir=Path("/repo"),
+            commands=commands,
+            localstack=localstack,
+        )
+
+        with pytest.raises(TestRunnerError, match="localstack down"):
+            runner.deploy()
+
+        commands.run.assert_not_called()
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_deploy_propagates_terraform_failure(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        commands.run.side_effect = subprocess.CalledProcessError(1, "tflocal")
+        localstack = MagicMock(spec=LocalStack)
+
+        runner = InfrastructureDeployRunner(
+            root_dir=Path("/repo"),
+            commands=commands,
+            localstack=localstack,
+        )
+
+        with pytest.raises(subprocess.CalledProcessError):
+            runner.deploy()
+
+        assert "AWS_ACCESS_KEY_ID" not in os.environ
+        assert "AWS_SECRET_ACCESS_KEY" not in os.environ

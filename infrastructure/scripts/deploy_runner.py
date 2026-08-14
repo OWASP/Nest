@@ -5,7 +5,7 @@ from pathlib import Path
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack
-from scripts.utils import configure_terraform_cache, enter_repo_root
+from scripts.utils import configure_terraform_cache, enter_repo_root, temporary_env
 
 logger = logging.getLogger(__name__)
 
@@ -39,3 +39,33 @@ class InfrastructureDeployRunner:
             configure_terraform_cache()
         except OSError as exc:
             logger.warning("Could not configure TF_PLUGIN_CACHE_DIR: %s", exc)
+
+    def deploy(self) -> None:
+        """Orchestrate a deployment."""
+        self.commands.require("tflocal")
+        self.localstack.wait_ready()
+
+        live_dir = self.root_dir / "infrastructure" / "live"
+        with (
+            temporary_env("AWS_ACCESS_KEY_ID", "test"),
+            temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
+        ):
+            self.commands.run(
+                "tflocal",
+                f"-chdir={live_dir}",
+                "init",
+                "-backend-config=terraform.localstack.tfbackend",
+                "-input=false",
+                "-reconfigure",
+                check=True,
+            )
+            self.commands.run(
+                "tflocal",
+                f"-chdir={live_dir}",
+                "apply",
+                "-auto-approve",
+                "-input=false",
+                "-var-file=terraform.localstack.tfvars",
+                check=True,
+            )
+        logger.info("Deployment on LocalStack successful!")

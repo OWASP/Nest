@@ -10,6 +10,7 @@ license = "MIT"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 packages = [ { include = "scripts" } ]
 dependencies.python = "^3.13"
+dependencies.terraform-local = "^0.26.0"
 group.test.dependencies.pytest = "9.0.3"
 
 [tool.pytest]
