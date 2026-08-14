@@ -377,11 +377,13 @@ aws ecs run-task \
 
 Local Make targets use Docker (like backend). CI runs Poetry + Terraform directly on the runner for speed (cached plugins/venv, no image build).
 
+The Terraform CLI version is pinned via the `hashicorp/terraform` image digest in `docker/code-checks/Dockerfile` and `docker/infrastructure/Dockerfile.tests` (keep those in sync; Dependabot tracks both). CI installs the same tag via `setup-terraform-environment`. Run `make check-terraform-version` to verify module `required_version` constraints match the pin.
+
 ### Unit Testing
 
 These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.
 
-Locally, `make test-infrastructure-unit` builds the shared `nest-test-infrastructure` image from `docker/infrastructure/Dockerfile.tests` (Poetry + Terraform), mounts `scripts`, `tests`, `bootstrap`, and `modules` from the host, and runs:
+Locally, `make test-infrastructure-unit` builds the shared `nest-test-infrastructure` image from `docker/infrastructure/Dockerfile.tests` (Poetry + Terraform), mounts `bootstrap`, `live`, `modules`, `scripts`, `state`, and `tests` from the host, and runs:
 
 1. The runner's pytest suite
 2. Terraform unit tests via `python -m scripts.run_tests --unit`
@@ -426,6 +428,15 @@ make test-infrastructure
   ```bash
   terraform destroy
   ```
+
+## Provider version pins
+
+Every Terraform module under `infrastructure/` (roots and children) declares
+specific provider version constraints in `required_providers` using pessimistic
+pins (for example `~> 6.53.0`), matching Nest's explicit dependency style
+elsewhere. Dependabot updates these pins across `infrastructure/**/*`; keep
+root and child pins for the same provider in sync. Consistency is asserted by
+`infrastructure/tests/provider_pins_test.py` (run via pytest / unit tests).
 
 ## Documentation
 

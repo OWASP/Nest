@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from scripts.commands import CommandRunner
 from scripts.localstack import LOCALSTACK_PORT, LocalStack, OverrideManager
 from scripts.runner import InfrastructureTestRunner

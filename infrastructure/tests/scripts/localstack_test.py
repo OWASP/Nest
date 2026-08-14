@@ -7,6 +7,7 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from scripts.commands import CommandRunner
 from scripts.errors import (
     CommandNotFoundError,

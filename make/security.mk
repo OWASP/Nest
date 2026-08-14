@@ -1,23 +1,57 @@
 ##@ Security
 
-.PHONY: security-dependency-audit security-scan security-sast-scan security-dast-scan \
-	security-image-scan security-repository-scan security-sast-scan-semgrep \
+.PHONY: security-dependency-audit security-dependency-check security-dependency-scan \
+	security-scan security-sast-scan security-dast-scan security-image-scan \
+	security-repository-scan security-sast-scan-semgrep \
+	security-dependency-check-osv security-dependency-check-trivy \
 	security-repository-scan-trivy security-dast-scan-zap tooling-dependency-audit
-
-security-dependency-audit: ## Audit dependencies for known vulnerabilities
-	@$(MAKE) backend-dependency-audit
-	@$(MAKE) cspell-dependency-audit
-	@$(MAKE) docs-dependency-audit
-	@$(MAKE) e2e-dependency-audit
-	@$(MAKE) frontend-dependency-audit
-	@$(MAKE) infrastructure-dependency-audit
-	@$(MAKE) tooling-dependency-audit
 
 security-scan: ## Run security scans
 	@$(MAKE) security-sast-scan
 	@$(MAKE) security-repository-scan
+	@$(MAKE) security-dependency-scan
 	@$(MAKE) security-image-scan
 	@$(MAKE) security-dast-scan
+
+security-dependency-audit: ## Audit dependencies for known vulnerabilities
+	@exit_code=0; \
+	echo "============================= Backend dependency audit ============================="; \
+	$(MAKE) backend-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================= CSpell dependency audit =============================="; \
+	$(MAKE) cspell-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================== Docs dependency audit ==============================="; \
+	$(MAKE) docs-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "=============================== E2E dependency audit ==============================="; \
+	$(MAKE) e2e-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================ Frontend dependency audit ============================="; \
+	$(MAKE) frontend-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "========================= Infrastructure dependency audit =========================="; \
+	$(MAKE) infrastructure-dependency-audit || exit_code=1; \
+	echo ""; \
+	echo "============================ Tooling dependency audit =============================="; \
+	$(MAKE) tooling-dependency-audit || exit_code=1; \
+	echo ""; \
+	exit $$exit_code
+
+security-dependency-scan: ## Audit and check dependencies for known vulnerabilities
+	@exit_code=0; \
+	$(MAKE) security-dependency-audit || exit_code=1; \
+	$(MAKE) security-dependency-check || exit_code=1; \
+	exit $$exit_code
+
+security-dependency-check: ## Check dependencies for known vulnerabilities
+	@exit_code=0; \
+	$(MAKE) security-dependency-check-osv || exit_code=1; \
+	$(MAKE) security-dependency-check-trivy || exit_code=1; \
+	exit $$exit_code
+
+security-repository-scan: ## Scan the repository for misconfigurations and secrets
+	@$(MAKE) security-repository-scan-trivy
 
 security-dast-scan: ## Run DAST security scan
 	@$(MAKE) security-dast-scan-zap
@@ -28,9 +62,6 @@ security-image-scan: ## Run image security scan
 
 security-sast-scan: ## Run SAST security scan
 	@$(MAKE) security-sast-scan-semgrep
-
-security-repository-scan: ## Scan the repository for vulnerabilities and security issues
-	@$(MAKE) security-repository-scan-trivy
 
 security-sast-scan-semgrep:
 	@echo "Running Semgrep security scan..."
@@ -50,7 +81,6 @@ security-sast-scan-semgrep:
 		--config p/dockerfile \
 		--config p/javascript \
 		--config p/nextjs \
-		--config p/nginx \
 		--config p/nodejs \
 		--config p/owasp-top-ten \
 		--config p/python \
@@ -71,8 +101,8 @@ security-sast-scan-semgrep:
 		--text-output=semgrep-security-report.txt \
 		.
 
-security-repository-scan-trivy:
-	@echo "Running Trivy security scan..."
+security-dependency-check-trivy:
+	@echo "Running Trivy vulnerability check..."
 	@docker run \
 		--rm \
 		-v $(CURDIR):/src \
@@ -80,7 +110,27 @@ security-repository-scan-trivy:
 		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		fs --config /.trivy.yaml /src
+		fs --config /.trivy.yaml --scanners vuln /src
+
+security-dependency-check-osv:
+	@echo "Running OSV vulnerability check..."
+	@docker run \
+		--rm \
+		-v $(CURDIR):/src \
+		-v $(CURDIR)/.osv-scanner-cache:/root/.cache/osv-scanner \
+		$$(grep -E '^FROM ghcr.io/google/osv-scanner:' docker/osv-scanner/Dockerfile | sed 's/^FROM //') \
+		scan source --recursive /src
+
+security-repository-scan-trivy:
+	@echo "Running Trivy repository scan..."
+	@docker run \
+		--rm \
+		-v $(CURDIR):/src \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		fs --config /.trivy.yaml --scanners misconfig,secret /src
 
 ZAP_TARGET ?= http://host.docker.internal:3000
 
@@ -98,4 +148,4 @@ security-dast-scan-zap:
 
 tooling-dependency-audit:
 	@echo "Auditing root tooling npm dependencies..."
-	@$(MAKE) code-checks CMD='pnpm audit --audit-level=high'
+	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate'

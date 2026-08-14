@@ -11,7 +11,9 @@ include make/maintenance.mk
 include make/run.mk
 include make/security.mk
 include make/shell.mk
+include make/terraform.mk
 include make/test.mk
+include tools/Makefile
 
 .DEFAULT_GOAL := help
 

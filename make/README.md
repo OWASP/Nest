@@ -32,6 +32,7 @@ Use one singular, goal-based filename for each target group:
 - `run.mk`
 - `security.mk`
 - `shell.mk`
+- `terraform.mk`
 - `test.mk`
 
 Keep the root `Makefile` as a thin aggregator that includes these files.
