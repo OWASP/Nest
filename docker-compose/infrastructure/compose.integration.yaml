@@ -1,0 +1,3 @@
+services:
+  tests:
+    command: [python, -m, scripts.run_tests, --integration]

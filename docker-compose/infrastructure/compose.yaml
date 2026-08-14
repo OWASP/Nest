@@ -23,14 +23,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   tests:
-    command: [python, -m, scripts.run_tests, --integration]
     depends_on:
       localstack:
         condition: service_healthy
     environment:
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
       LOCALSTACK_HOST: localhost
-    image: nest-test-infrastructure
+    image: nest-infrastructure
     network_mode: service:localstack
     pull_policy: never
     volumes:
