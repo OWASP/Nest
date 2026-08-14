@@ -3,8 +3,9 @@
 Before the first **staging** CI/CD run you must:
 
 1. **IAM role `nest-staging-terraform` (lifecycle)**
-   The staging pipeline assumes this role (see the "STSStateManagement" resource below). The role is **created automatically** by the bootstrap when you run it (e.g. the bootstrap workflow that applies `infrastructure/bootstrap` with `staging` in the environments list). On first deployment, the bootstrap run creates `aws_iam_role.terraform` (named `${project}-${env}-terraform`, here `nest-staging-terraform`); subsequent bootstrap runs **update** the existing role. No code or workflow changes are required for this.
-   **Manual intervention** may still be needed if you delete the role in AWS, remove it from Terraform state, or need to change the ExternalId (e.g. in the role trust policy or in the staging pipeline configuration).
+   - The staging pipeline assumes this role (see the "STSStateManagement" resource below).
+   - For the initial run, manual creation may be required before running the CI/CD deployment pipeline (see [infrastructure/bootstrap/README.md](../bootstrap/README.md)).
+   - Subsequent automated bootstrap runs update the existing role and policies.
 
 2. **Create the `nest-staging` IAM user** and attach the inline permissions documented below. This user is used to assume the `nest-staging-terraform` role.
 
@@ -83,6 +84,7 @@ No resources.
 | <a name="input_backend_max_count"></a> [backend\_max\_count](#input\_backend\_max\_count) | The maximum number of backend tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_backend_min_count"></a> [backend\_min\_count](#input\_backend\_min\_count) | The minimum number of backend tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_backend_use_fargate_spot"></a> [backend\_use\_fargate\_spot](#input\_backend\_use\_fargate\_spot) | Whether to use Fargate Spot for backend tasks. | `bool` | `true` | no |
+| <a name="input_create_shared_data_bucket"></a> [create\_shared\_data\_bucket](#input\_create\_shared\_data\_bucket) | Whether to create the shared public data S3 bucket. | `bool` | `false` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | The allocated storage for the RDS database in GB. | `number` | `20` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The number of days to retain backups for. | `number` | `7` | no |
 | <a name="input_db_deletion_protection"></a> [db\_deletion\_protection](#input\_db\_deletion\_protection) | Specifies whether to prevent database deletion. | `bool` | `true` | no |
