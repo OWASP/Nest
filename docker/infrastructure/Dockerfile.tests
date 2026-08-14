@@ -50,8 +50,10 @@ RUN addgroup -S -g ${OWASP_GID} owasp && \
       /home/owasp/.cache/pycache \
       /home/owasp/.terraform.d/plugin-cache \
       /home/owasp/infrastructure/bootstrap \
+      /home/owasp/infrastructure/live \
       /home/owasp/infrastructure/modules \
       /home/owasp/infrastructure/scripts \
+      /home/owasp/infrastructure/state \
       /home/owasp/infrastructure/tests && \
     chown -R owasp:owasp /home/owasp
 
