@@ -1,12 +1,21 @@
 """OWASP certificate GraphQL queries."""
 
+import re
+
 import strawberry
 import strawberry_django
-from django.core.exceptions import ValidationError
 
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.certificate import CertificateNode
-from apps.owasp.models.crp.certificate import Certificate
+from apps.owasp.models.crp.certificate import (
+    CERTIFICATE_ID_ALPHABET,
+    CERTIFICATE_ID_LENGTH,
+    Certificate,
+)
+
+CERTIFICATE_ID_RE = re.compile(
+    rf"^[{re.escape(CERTIFICATE_ID_ALPHABET)}]{{{CERTIFICATE_ID_LENGTH}}}$"
+)
 
 
 @strawberry.type
@@ -15,12 +24,15 @@ class CertificateQuery:
 
     @strawberry_django.field
     def certificate(self, certificate_id: str) -> CertificateNode | None:
-        """Resolve certificate by raw ID."""
+        """Resolve certificate by ID."""
+        if not CERTIFICATE_ID_RE.fullmatch(certificate_id):
+            return None
+
         try:
             return Certificate.objects.select_related(
                 "github_user",
             ).get(id=certificate_id)
-        except (Certificate.DoesNotExist, ValidationError, ValueError):
+        except Certificate.DoesNotExist:
             return None
 
     @strawberry_django.field(permission_classes=[IsAuthenticated])
