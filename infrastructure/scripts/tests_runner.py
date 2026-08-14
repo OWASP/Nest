@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import logging
-import os
 import sys
 from pathlib import Path
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack, OverrideManager
 from scripts.terraform_tests import ExecutionMode, TerraformTests
-from scripts.utils import temporary_env
+from scripts.utils import configure_terraform_cache, enter_repo_root, temporary_env
 
 logger = logging.getLogger(__name__)
 
@@ -46,12 +45,9 @@ class InfrastructureTestRunner:
 
     def configure_environment(self) -> None:
         """Change to the repo root and configure the Terraform plugin cache."""
-        os.chdir(self.root_dir)
-
-        cache_dir = Path.home() / ".terraform.d" / "plugin-cache"
+        enter_repo_root(self.root_dir)
         try:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            os.environ["TF_PLUGIN_CACHE_DIR"] = str(cache_dir)
+            configure_terraform_cache()
         except OSError as exc:
             logger.warning("Could not configure TF_PLUGIN_CACHE_DIR: %s", exc)
 
