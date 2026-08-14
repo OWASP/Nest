@@ -5,32 +5,14 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack, OverrideManager
 from scripts.terraform_tests import ExecutionMode, TerraformTests
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
+from scripts.utils import temporary_env
 
 logger = logging.getLogger(__name__)
-
-
-@contextmanager
-def temporary_env(name: str, value: str) -> Iterator[None]:
-    """Set an environment variable for the duration of the context."""
-    previous = os.environ.get(name, None)
-    os.environ[name] = value
-    try:
-        yield
-    finally:
-        if previous is None:
-            os.environ.pop(name, None)
-        else:
-            os.environ[name] = previous
 
 
 class InfrastructureTestRunner:

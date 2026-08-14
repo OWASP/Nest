@@ -1,4 +1,4 @@
-"""Tests for ``scripts.runner``."""
+"""Tests for ``scripts.tests_runner``."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ import pytest
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LOCALSTACK_PORT, LocalStack, OverrideManager
-from scripts.runner import InfrastructureTestRunner
 from scripts.terraform_tests import ExecutionMode, TerraformTests
+from scripts.tests_runner import InfrastructureTestRunner
 
 EXTERNAL_LOCALSTACK_ENDPOINT_URL = (
     f"http://localstack:{LOCALSTACK_PORT}"  # NOSONAR: Test-only LocalStack HTTP.

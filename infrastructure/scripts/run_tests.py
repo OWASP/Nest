@@ -7,7 +7,7 @@ import logging
 import sys
 
 from scripts.errors import TestRunnerError
-from scripts.runner import InfrastructureTestRunner
+from scripts.tests_runner import InfrastructureTestRunner
 
 
 def main() -> None:
