@@ -34,8 +34,10 @@ class TestGsocCommand:
             (
                 True,
                 "2011",
-                f"Year 2011 is not supported. Supported years: "
-                f"{SUPPORTED_YEAR_START}-{Gsoc().supported_year_end}",
+                (
+                    f"Year 2011 is not supported. Supported years: "
+                    f"{SUPPORTED_YEAR_START}-{Gsoc().supported_year_end}"
+                ),
             ),
         ],
     )
