@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimDocument } from 'types/__generated__/claimQueries.generated'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -102,19 +103,7 @@ const EditClaimPage = () => {
       })
 
       const payload = result.data?.updateBoardCandidateClaim
-      if (!payload?.ok) {
-        if (payload?.fieldErrors?.length) {
-          setBackendErrors(
-            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-          )
-        } else {
-          addToast({
-            description: payload?.message ?? 'Claim update failed.',
-            timeout: 3000,
-            shouldShowTimeoutProgress: true,
-            color: 'danger',
-          })
-        }
+      if (!handleMutationPayloadErrors(payload, 'Claim update failed.', setBackendErrors)) {
         return
       }
 

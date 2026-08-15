@@ -1,4 +1,33 @@
+import { addToast } from '@heroui/toast'
+
 export type ValidationErrors = Record<string, string>
+
+type MutationPayload = {
+  ok: boolean
+  message?: string | null
+  fieldErrors?: Array<{ field: string; message: string }> | null
+}
+
+export function handleMutationPayloadErrors(
+  payload: MutationPayload | null | undefined,
+  fallbackMessage: string,
+  setBackendErrors: (errors: ValidationErrors) => void
+): boolean {
+  if (payload?.ok) return true
+
+  if (payload?.fieldErrors?.length) {
+    setBackendErrors(Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message])))
+  } else {
+    addToast({
+      description: payload?.message ?? fallbackMessage,
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+      color: 'danger',
+    })
+  }
+
+  return false
+}
 
 interface GraphQLErrorLike {
   message: string

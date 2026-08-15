@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
 import { GetBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceQueries.generated'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -114,19 +115,7 @@ const EditEvidencePage = () => {
       })
 
       const payload = result.data?.updateBoardCandidateClaimEvidence
-      if (!payload?.ok) {
-        if (payload?.fieldErrors?.length) {
-          setBackendErrors(
-            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-          )
-        } else {
-          addToast({
-            description: payload?.message ?? 'Evidence update failed.',
-            timeout: 3000,
-            shouldShowTimeoutProgress: true,
-            color: 'danger',
-          })
-        }
+      if (!handleMutationPayloadErrors(payload, 'Evidence update failed.', setBackendErrors)) {
         return
       }
 

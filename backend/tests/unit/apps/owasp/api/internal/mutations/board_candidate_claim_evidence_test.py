@@ -282,7 +282,8 @@ class TestUpdateBoardCandidateClaimEvidence:
         assert result.ok
         assert result.code == "SUCCESS"
         assert evidence.name == "Updated Name"
-        evidence.save.assert_called_once_with(update_fields=["name", "key"])
+        assert evidence.source_url == ""
+        evidence.save.assert_called_once_with(update_fields=["name", "key", "source_url"])
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     @patch(

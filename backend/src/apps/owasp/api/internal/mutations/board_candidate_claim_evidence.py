@@ -191,9 +191,8 @@ class BoardCandidateClaimEvidenceMutations:
         if validated.description is not None:
             evidence.description = validated.description
             update_fields.append("description")
-        if validated.source_url is not None:
-            evidence.source_url = str(validated.source_url)
-            update_fields.append("source_url")
+        evidence.source_url = str(validated.source_url) if validated.source_url else ""
+        update_fields.append("source_url")
         if input_data.file is not None:
             evidence.file = input_data.file
             update_fields.extend(["file", "file_name", "file_size"])

@@ -7,6 +7,7 @@ import React, { useState } from 'react'
 
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import { CreateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -88,19 +89,7 @@ const CreateEvidencePage = () => {
       })
 
       const payload = result.data?.createBoardCandidateClaimEvidence
-      if (!payload?.ok) {
-        if (payload?.fieldErrors?.length) {
-          setBackendErrors(
-            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-          )
-        } else {
-          addToast({
-            description: payload?.message ?? 'Evidence creation failed.',
-            timeout: 3000,
-            shouldShowTimeoutProgress: true,
-            color: 'danger',
-          })
-        }
+      if (!handleMutationPayloadErrors(payload, 'Evidence creation failed.', setBackendErrors)) {
         return
       }
 

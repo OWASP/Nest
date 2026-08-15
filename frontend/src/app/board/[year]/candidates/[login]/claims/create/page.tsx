@@ -9,6 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetBoardCandidateDocument } from 'types/__generated__/boardQueries.generated'
 import { CreateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -96,19 +97,7 @@ const CreateClaimPage = () => {
       })
 
       const payload = result.data?.createBoardCandidateClaim
-      if (!payload?.ok) {
-        if (payload?.fieldErrors?.length) {
-          setBackendErrors(
-            Object.fromEntries(payload.fieldErrors.map((fe) => [fe.field, fe.message]))
-          )
-        } else {
-          addToast({
-            description: payload?.message ?? 'Claim creation failed.',
-            timeout: 3000,
-            shouldShowTimeoutProgress: true,
-            color: 'danger',
-          })
-        }
+      if (!handleMutationPayloadErrors(payload, 'Claim creation failed.', setBackendErrors)) {
         return
       }
 
