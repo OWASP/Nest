@@ -13,7 +13,7 @@ variables {
   common_tags  = { Environment = "test", Project = "nest" }
   environment  = "test"
   project_name = "nest"
-  vm_image     = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
+  vm_image     = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("../../../docker/victoriametrics/Dockerfile"))[0]
 }
 
 run "setup" {

@@ -56,7 +56,7 @@ No modules.
 | <a name="input_vm_image"></a> [vm\_image](#input\_vm\_image) | The VictoriaMetrics container image (including digest). | `string` | n/a | yes |
 | <a name="input_vm_memory"></a> [vm\_memory](#input\_vm\_memory) | The memory (in MiB) for the VictoriaMetrics Fargate task. | `number` | `1024` | no |
 | <a name="input_vm_port"></a> [vm\_port](#input\_vm\_port) | The port VictoriaMetrics listens on for ingest and queries. | `number` | `8428` | no |
-| <a name="input_vm_retention_period"></a> [vm\_retention\_period](#input\_vm\_retention\_period) | The VictoriaMetrics data retention period (e.g., 12, 5y). | `string` | `"12"` | no |
+| <a name="input_vm_retention_period"></a> [vm\_retention\_period](#input\_vm\_retention\_period) | The VictoriaMetrics data retention period. A value without a suffix is in months, so the default "12" means 12 months (duration suffixes like 1y, 30d, 1w are also supported). | `string` | `"12"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The VPC ID where the VictoriaMetrics security group is created. | `string` | n/a | yes |
 
 ## Outputs

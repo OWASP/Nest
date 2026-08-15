@@ -8,7 +8,7 @@ variables {
   kms_key_arn            = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name           = "nest"
   subnet_ids             = ["subnet-1", "subnet-2"]
-  vm_image               = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
+  vm_image               = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("../../../docker/victoriametrics/Dockerfile"))[0]
   vm_port                = 8428
   vpc_id                 = "vpc-12345"
 }
@@ -53,12 +53,12 @@ run "test_vm_ingest_from_source_security_group_only" {
   command = plan
 
   assert {
-    condition     = aws_security_group_rule.vm_ingest_from_apps["sg-backend"].source_security_group_id == "sg-backend"
+    condition     = aws_security_group_rule.vm_ingest_from_apps[0].source_security_group_id == var.app_security_group_ids[0]
     error_message = "VM ingest must be restricted to application security groups, not public CIDRs."
   }
 
   assert {
-    condition     = aws_security_group_rule.vm_ingest_from_apps["sg-backend"].from_port == var.vm_port
+    condition     = aws_security_group_rule.vm_ingest_from_apps[0].from_port == var.vm_port
     error_message = "VM ingest must be allowed on the configured VictoriaMetrics port."
   }
 }

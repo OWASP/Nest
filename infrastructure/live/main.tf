@@ -21,11 +21,8 @@ locals {
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
-  fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
-  observability_vm_image = trimspace(trimprefix(
-    one([for line in split("\n", file("${path.root}/../../docker/victoriametrics/Dockerfile")) : line if startswith(line, "FROM ")]),
-    "FROM "
-  ))
+  fixtures_bucket_name   = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
+  observability_vm_image = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("${path.root}/../../docker/victoriametrics/Dockerfile"))[0]
 }
 
 module "alb" {
@@ -198,9 +195,10 @@ module "observability" {
   environment      = var.environment
   kms_key_arn      = module.kms.key_arn
   project_name     = var.project_name
-  subnet_ids       = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  vm_image         = local.observability_vm_image
-  vpc_id           = module.networking.vpc_id
+  # TODO(#5429): Use private_subnet_ids unconditionally once NAT is enabled in all environments.
+  subnet_ids = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  vm_image   = local.observability_vm_image
+  vpc_id     = module.networking.vpc_id
 }
 
 module "parameters" {

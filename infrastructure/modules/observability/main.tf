@@ -64,13 +64,13 @@ resource "aws_security_group" "vm" {
 }
 
 resource "aws_security_group_rule" "vm_ingest_from_apps" {
-  for_each = toset(var.app_security_group_ids)
+  count = length(var.app_security_group_ids)
 
   description              = "Allow metrics ingest and queries from application tasks"
   from_port                = var.vm_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.vm.id
-  source_security_group_id = each.value
+  source_security_group_id = var.app_security_group_ids[count.index]
   to_port                  = var.vm_port
   type                     = "ingress"
 }
@@ -127,11 +127,11 @@ resource "aws_efs_file_system" "vm" {
 }
 
 resource "aws_efs_mount_target" "vm" {
-  for_each = toset(var.subnet_ids)
+  count = length(var.subnet_ids)
 
   file_system_id  = aws_efs_file_system.vm.id
   security_groups = [aws_security_group.efs.id]
-  subnet_id       = each.value
+  subnet_id       = var.subnet_ids[count.index]
 }
 
 resource "aws_efs_access_point" "vm" {

@@ -101,9 +101,9 @@ variable "vm_port" {
 }
 
 variable "vm_retention_period" {
-  description = "The VictoriaMetrics data retention period (e.g., 12, 5y)."
+  description = "The VictoriaMetrics data retention period. A value without a suffix is in months, so the default \"12\" means 12 months (duration suffixes like 1y, 30d, 1w are also supported)."
   type        = string
-  default     = "12"
+  default     = "12" # 12 months
 }
 
 variable "vpc_id" {
