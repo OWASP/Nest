@@ -27,7 +27,9 @@ infrastructure-image-build:
 
 infrastructure-test-unit:
 	@$(MAKE) infrastructure-image-build
-	@docker run --rm $(INFRASTRUCTURE_IMAGE) \
+	@docker run --rm \
+		-v nest-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache \
+		$(INFRASTRUCTURE_IMAGE) \
 		sh -c "pytest && python -m scripts.run_tests --unit"
 
 infrastructure-test-integration:
@@ -41,7 +43,7 @@ infrastructure-test-integration:
 	fi; \
 	$(MAKE) infrastructure-image-build || exit $$?; \
 	status=0; \
-	trap '$(INFRASTRUCTURE_COMPOSE) down --volumes --remove-orphans >/dev/null 2>&1 || true' EXIT; \
+	trap '$(INFRASTRUCTURE_COMPOSE) down --remove-orphans >/dev/null 2>&1 || true' EXIT; \
 	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 		$(INFRASTRUCTURE_COMPOSE) \
 			-f docker-compose/infrastructure/compose.integration.yaml \
