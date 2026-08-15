@@ -1,1 +1,1 @@
-"""Infrastructure test runner package."""
+"""Infrastructure scripts."""
