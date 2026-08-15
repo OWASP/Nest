@@ -47,7 +47,7 @@ if SlackConfig.app:
             **kwargs: Additional keyword arguments.
 
         """
-        logger.exception(error, extra={"body": body})
+        logger.error("%s", error, extra={"body": body}, exc_info=error)
 
     @SlackConfig.app.use
     def log_events(
