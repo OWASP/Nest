@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.55.0"
+      version = "~> 6.56.0"
     }
     # tflint-ignore: terraform_unused_required_providers
     random = {
@@ -222,11 +222,12 @@ module "security" {
 module "storage" {
   source = "../modules/storage"
 
-  common_tags          = local.common_tags
-  environment          = var.environment
-  fixtures_bucket_name = local.fixtures_bucket_name
-  kms_key_arn          = module.kms.key_arn
-  project_name         = var.project_name
+  common_tags               = local.common_tags
+  create_shared_data_bucket = var.create_shared_data_bucket
+  environment               = var.environment
+  fixtures_bucket_name      = local.fixtures_bucket_name
+  kms_key_arn               = module.kms.key_arn
+  project_name              = var.project_name
 }
 
 module "tasks" {

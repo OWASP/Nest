@@ -33,4 +33,27 @@ run "storage_integration_apply" {
     condition     = tolist(tolist(module.fixtures_bucket.server_side_encryption_configuration.rule)[0].apply_server_side_encryption_by_default)[0].sse_algorithm == "aws:kms"
     error_message = "Fixtures bucket server-side encryption algorithm is not aws:kms."
   }
+
+  assert {
+    condition     = output.shared_data_bucket_name == null
+    error_message = "Shared data bucket output must be null when create_shared_data_bucket is false."
+  }
+}
+
+run "storage_integration_apply_with_shared_data_bucket" {
+  command = apply
+
+  variables {
+    create_shared_data_bucket = true
+  }
+
+  assert {
+    condition     = length(module.shared_data_bucket) == 1
+    error_message = "Shared data bucket was not created when create_shared_data_bucket is true."
+  }
+
+  assert {
+    condition     = output.shared_data_bucket_name != null
+    error_message = "Shared data bucket output must be set when create_shared_data_bucket is true."
+  }
 }
