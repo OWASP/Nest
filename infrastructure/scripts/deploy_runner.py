@@ -6,7 +6,7 @@ from pathlib import Path
 from scripts.commands import CommandRunner
 from scripts.errors import RunnerError
 from scripts.localstack import LocalStack
-from scripts.utils import configure_terraform_cache, enter_repo_root, temporary_env
+from scripts.utils import chdir_repository_root, configure_terraform_cache, set_temporary_env
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class InfrastructureDeployRunner:
 
     def configure_environment(self) -> None:
         """Change to the repo root and configure the Terraform plugin cache."""
-        enter_repo_root(self.root_dir)
+        chdir_repository_root(self.root_dir)
         try:
             configure_terraform_cache()
         except OSError as exc:
@@ -53,9 +53,9 @@ class InfrastructureDeployRunner:
 
         live_dir = self.root_dir / "infrastructure" / "live"
         with (
-            temporary_env("AWS_ACCESS_KEY_ID", "test"),
-            temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
-            temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
+            set_temporary_env("AWS_ACCESS_KEY_ID", "test"),
+            set_temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
+            set_temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
         ):
             init_result = self.commands.run(
                 "tflocal",

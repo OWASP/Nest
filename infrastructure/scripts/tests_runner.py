@@ -9,7 +9,7 @@ from pathlib import Path
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack, OverrideManager
 from scripts.terraform_tests import ExecutionMode, TerraformTests
-from scripts.utils import configure_terraform_cache, enter_repo_root, temporary_env
+from scripts.utils import chdir_repository_root, configure_terraform_cache, set_temporary_env
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class InfrastructureTestRunner:
 
     def configure_environment(self) -> None:
         """Change to the repo root and configure the Terraform plugin cache."""
-        enter_repo_root(self.root_dir)
+        chdir_repository_root(self.root_dir)
         try:
             configure_terraform_cache()
         except OSError as exc:
@@ -96,9 +96,9 @@ class InfrastructureTestRunner:
             # Always wait: /_localstack/info can succeed before the Pro license activates.
             self.localstack.wait_ready()
             with (
-                temporary_env("AWS_ACCESS_KEY_ID", "test"),
-                temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
-                temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
+                set_temporary_env("AWS_ACCESS_KEY_ID", "test"),
+                set_temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
+                set_temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
             ):
                 self.overrides.write()
                 self.terraform_tests.discover_and_run(ExecutionMode.INTEGRATION)

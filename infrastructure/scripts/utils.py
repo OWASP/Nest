@@ -18,7 +18,7 @@ def configure_terraform_cache() -> None:
     os.environ["TF_PLUGIN_CACHE_DIR"] = str(cache_dir)
 
 
-def enter_repo_root(root_dir: Path) -> None:
+def chdir_repository_root(root_dir: Path) -> None:
     """Change the working directory to the repository root.
 
     Args:
@@ -32,7 +32,7 @@ def enter_repo_root(root_dir: Path) -> None:
 
 
 @contextmanager
-def temporary_env(name: str, value: str) -> Iterator[None]:
+def set_temporary_env(name: str, value: str) -> Iterator[None]:
     """Set an environment variable for the duration of the context.
 
     Args:
@@ -43,12 +43,12 @@ def temporary_env(name: str, value: str) -> Iterator[None]:
         None: Control returns to the caller with the variable set.
 
     """
-    previous = os.environ.get(name, None)
+    previous_value = os.environ.get(name, None)
     os.environ[name] = value
     try:
         yield
     finally:
-        if previous is None:
+        if previous_value is None:
             os.environ.pop(name, None)
         else:
-            os.environ[name] = previous
+            os.environ[name] = previous_value
