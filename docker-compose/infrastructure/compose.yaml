@@ -33,11 +33,11 @@ services:
     network_mode: service:localstack
     pull_policy: never
     volumes:
-      - nest-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache
+      - infrastructure-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache
 
 networks:
   infrastructure-nest:
 
 volumes:
-  nest-terraform-plugin-cache:
-    name: nest-terraform-plugin-cache
+  infrastructure-terraform-plugin-cache:
+    name: infrastructure-terraform-plugin-cache

@@ -40,6 +40,7 @@ CANONICAL_VOLUMES = frozenset(
         "frontend-node-modules",
         "fuzz-cache-data",
         "fuzz-db-data",
+        "infrastructure-terraform-plugin-cache",
     }
 )
 

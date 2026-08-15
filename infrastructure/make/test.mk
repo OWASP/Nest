@@ -28,7 +28,7 @@ infrastructure-image-build:
 infrastructure-test-unit:
 	@$(MAKE) infrastructure-image-build
 	@docker run --rm \
-		-v nest-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache \
+		-v infrastructure-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache \
 		$(INFRASTRUCTURE_IMAGE) \
 		sh -c "pytest && python -m scripts.run_tests --unit"
 
