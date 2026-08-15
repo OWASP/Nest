@@ -14,27 +14,30 @@ services:
       test: [CMD, curl, -f, http://localhost:4566/_localstack/info]
       timeout: 5s
     networks:
-      - infrastructure-tests
+      - infrastructure-nest
+    ports:
+      - 4510-4559:4510-4559
+      - 4566:4566
     volumes:
       # Host Docker socket so LocalStack can start sibling containers (Lambda, ECS, etc.).
       - /var/run/docker.sock:/var/run/docker.sock
 
-  tests:
-    command: [python, -m, scripts.run_tests, --integration]
+  runner:
     depends_on:
       localstack:
         condition: service_healthy
     environment:
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
       LOCALSTACK_HOST: localhost
-    image: nest-test-infrastructure
+    image: nest-infrastructure
     network_mode: service:localstack
     pull_policy: never
     volumes:
-      - ../../infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap
-      - ../../infrastructure/modules:/home/owasp/infrastructure/modules
-      - ../../infrastructure/scripts:/home/owasp/infrastructure/scripts:ro
-      - ../../infrastructure/tests:/home/owasp/infrastructure/tests:ro
+      - infrastructure-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache
 
 networks:
-  infrastructure-tests:
+  infrastructure-nest:
+
+volumes:
+  infrastructure-terraform-plugin-cache:
+    name: infrastructure-terraform-plugin-cache

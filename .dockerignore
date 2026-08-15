@@ -3,3 +3,7 @@ e2e/.pnpm-store/
 e2e/node_modules/
 e2e/playwright-report/
 e2e/test-results/
+infrastructure/**/__pycache__/
+infrastructure/**/.terraform/
+infrastructure/**/*.tfstate
+infrastructure/**/*.tfstate.*

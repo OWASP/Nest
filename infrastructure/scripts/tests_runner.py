@@ -3,34 +3,15 @@
 from __future__ import annotations
 
 import logging
-import os
 import sys
-from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from scripts.commands import CommandRunner
 from scripts.localstack import LocalStack, OverrideManager
 from scripts.terraform_tests import ExecutionMode, TerraformTests
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
+from scripts.utils import chdir_repository_root, configure_terraform_cache, set_temporary_env
 
 logger = logging.getLogger(__name__)
-
-
-@contextmanager
-def temporary_env(name: str, value: str) -> Iterator[None]:
-    """Set an environment variable for the duration of the context."""
-    previous = os.environ.get(name, None)
-    os.environ[name] = value
-    try:
-        yield
-    finally:
-        if previous is None:
-            os.environ.pop(name, None)
-        else:
-            os.environ[name] = previous
 
 
 class InfrastructureTestRunner:
@@ -64,12 +45,9 @@ class InfrastructureTestRunner:
 
     def configure_environment(self) -> None:
         """Change to the repo root and configure the Terraform plugin cache."""
-        os.chdir(self.root_dir)
-
-        cache_dir = Path.home() / ".terraform.d" / "plugin-cache"
+        chdir_repository_root(self.root_dir)
         try:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            os.environ["TF_PLUGIN_CACHE_DIR"] = str(cache_dir)
+            configure_terraform_cache()
         except OSError as exc:
             logger.warning("Could not configure TF_PLUGIN_CACHE_DIR: %s", exc)
 
@@ -85,13 +63,13 @@ class InfrastructureTestRunner:
 
     def run_unit(self) -> None:
         """Run Terraform unit tests."""
-        self.commands.require("terraform")
+        self.commands.require("tflocal")
         self.terraform_tests.discover_and_run(ExecutionMode.UNIT)
         logger.info("All unit tests executed successfully!")
 
     def run_integration(self) -> None:
         """Run Terraform integration tests against LocalStack."""
-        self.commands.require("terraform")
+        self.commands.require("tflocal")
         self.overrides.check_absent()
 
         localstack_started = False
@@ -117,7 +95,11 @@ class InfrastructureTestRunner:
 
             # Always wait: /_localstack/info can succeed before the Pro license activates.
             self.localstack.wait_ready()
-            with temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url):
+            with (
+                set_temporary_env("AWS_ACCESS_KEY_ID", "test"),
+                set_temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
+                set_temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
+            ):
                 self.overrides.write()
                 self.terraform_tests.discover_and_run(ExecutionMode.INTEGRATION)
                 logger.info("All integration tests executed successfully!")

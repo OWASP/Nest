@@ -13,7 +13,7 @@ from scripts.errors import (
     CommandNotFoundError,
     MissingAuthTokenError,
     OverrideExistsError,
-    TestRunnerError,
+    RunnerError,
 )
 from scripts.localstack import (
     LOCALSTACK_CONTAINER_NAME,
@@ -121,7 +121,7 @@ class TestLocalStack:
     def test_image_info_missing_dockerfile(self, mock_exists: MagicMock) -> None:
         mock_exists.return_value = False
         localstack = LocalStack()
-        with pytest.raises(TestRunnerError, match="Dockerfile not found"):
+        with pytest.raises(RunnerError, match="Dockerfile not found"):
             localstack.image_info("/dummy/root")
 
     @patch("pathlib.Path.exists")
@@ -134,7 +134,7 @@ class TestLocalStack:
         mock_exists.return_value = True
         mock_read_text.return_value = "FROM alpine:3.20\n"
         localstack = LocalStack()
-        with pytest.raises(TestRunnerError, match="could not determine LocalStack image"):
+        with pytest.raises(RunnerError, match="could not determine LocalStack image"):
             localstack.image_info("/dummy/root-1")
 
     @patch("pathlib.Path.exists")
@@ -147,7 +147,7 @@ class TestLocalStack:
         mock_exists.return_value = True
         mock_read_text.return_value = "FROM localstack/localstack:\n"
         localstack = LocalStack()
-        with pytest.raises(TestRunnerError, match="could not determine LocalStack image tag"):
+        with pytest.raises(RunnerError, match="could not determine LocalStack image tag"):
             localstack.image_info("/dummy/root-1")
 
     @patch("os.environ.get")
@@ -215,7 +215,7 @@ class TestLocalStack:
             CommandNotFoundError("docker"),
         ]
         localstack = LocalStack(commands)
-        with pytest.raises(TestRunnerError, match="Error starting LocalStack container"):
+        with pytest.raises(RunnerError, match="Error starting LocalStack container"):
             localstack.start("localstack/localstack:latest")
 
     def test_stop(self) -> None:
@@ -232,7 +232,7 @@ class TestLocalStack:
         with (
             patch.object(localstack, "healthy", return_value=False),
             patch("time.sleep") as mock_sleep,
-            pytest.raises(TestRunnerError, match="failed to become healthy"),
+            pytest.raises(RunnerError, match="failed to become healthy"),
         ):
             localstack.wait_ready()
         mock_sleep.assert_called()
@@ -245,7 +245,7 @@ class TestLocalStack:
             patch.object(localstack, "healthy", return_value=True),
             patch.object(localstack, "license_activated", return_value=False),
             patch("time.sleep") as mock_sleep,
-            pytest.raises(TestRunnerError, match="license failed to activate"),
+            pytest.raises(RunnerError, match="license failed to activate"),
         ):
             localstack.wait_ready()
         mock_sleep.assert_called()

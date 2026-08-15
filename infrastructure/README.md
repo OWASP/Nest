@@ -377,13 +377,13 @@ aws ecs run-task \
 
 Local Make targets use Docker (like backend). CI runs Poetry + Terraform directly on the runner for speed (cached plugins/venv, no image build).
 
-The Terraform CLI version is pinned via the `hashicorp/terraform` image digest in `docker/code-checks/Dockerfile` and `docker/infrastructure/Dockerfile.tests` (keep those in sync; Dependabot tracks both). CI installs the same tag via `setup-terraform-environment`. Run `make check-terraform-version` to verify module `required_version` constraints match the pin.
+The Terraform CLI version is pinned via the `hashicorp/terraform` image digest in `docker/code-checks/Dockerfile` and `docker/infrastructure/Dockerfile` (keep those in sync; Dependabot tracks both). CI installs the same tag via `setup-terraform-environment`. Run `make check-terraform-version` to verify module `required_version` constraints match the pin.
 
 ### Unit Testing
 
 These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.
 
-Locally, `make test-infrastructure-unit` builds the shared `nest-test-infrastructure` image from `docker/infrastructure/Dockerfile.tests` (Poetry + Terraform), mounts `bootstrap`, `live`, `modules`, `scripts`, `state`, and `tests` from the host, and runs:
+Locally, `make test-infrastructure-unit` builds the shared `nest-infrastructure` image from `docker/infrastructure/Dockerfile` (Poetry + Terraform), copying `bootstrap`, `live`, `modules`, `scripts`, `state`, and `tests` into the image at build time, and runs:
 
 1. The runner's pytest suite
 2. Terraform unit tests via `python -m scripts.run_tests --unit`
@@ -392,11 +392,11 @@ Locally, `make test-infrastructure-unit` builds the shared `nest-test-infrastruc
 make test-infrastructure-unit
 ```
 
-Rebuild the image when `infrastructure/poetry.lock` (or Terraform version) changes; source edits do not require a rebuild.
+Because the sources are baked into the image, any edit under those directories requires an image rebuild. `make test-infrastructure-unit` triggers `infrastructure-image-build` automatically, so re-running the target picks up local changes.
 
 ### Integration Testing (with LocalStack)
 
-Integration tests deploy resources against LocalStack to verify IAM policies, SSM/KMS interactions, and resource wiring. Locally, `make test-infrastructure-integration` reuses `nest-test-infrastructure`, starts LocalStack via Compose, and runs `--integration`.
+Integration tests deploy resources against LocalStack to verify IAM policies, SSM/KMS interactions, and resource wiring. Locally, `make test-infrastructure-integration` reuses `nest-infrastructure`, starts LocalStack via Compose, and runs `--integration`.
 
 #### Prerequisite
 

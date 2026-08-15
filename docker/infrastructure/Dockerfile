@@ -8,7 +8,7 @@ FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212
 ARG OWASP_GID
 ARG OWASP_UID
 
-ENV APK_CACHE_DIR="/home/owasp/.cache/apk-infrastructure-test" \
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-infrastructure" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     OWASP_GID=${OWASP_GID} \
     OWASP_UID=${OWASP_UID} \
@@ -70,6 +70,11 @@ USER owasp
 COPY --from=terraform --chmod=555 --chown=root:root /bin/terraform /usr/local/bin/terraform
 COPY --from=builder --chown=owasp:owasp /home/owasp /home/owasp
 
-WORKDIR /home/owasp/infrastructure
+COPY --chown=owasp:owasp infrastructure/bootstrap /home/owasp/infrastructure/bootstrap
+COPY --chown=owasp:owasp infrastructure/live      /home/owasp/infrastructure/live
+COPY --chown=owasp:owasp infrastructure/modules   /home/owasp/infrastructure/modules
+COPY --chown=owasp:owasp infrastructure/scripts   /home/owasp/infrastructure/scripts
+COPY --chown=owasp:owasp infrastructure/state     /home/owasp/infrastructure/state
+COPY --chown=owasp:owasp infrastructure/tests     /home/owasp/infrastructure/tests
 
-CMD ["sh", "-c", "pytest && python -m scripts.run_tests --unit"]
+WORKDIR /home/owasp/infrastructure

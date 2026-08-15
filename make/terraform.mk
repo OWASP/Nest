@@ -1,6 +1,6 @@
 # Shared Terraform image pin helpers.
 # Version/digest are pinned in docker/code-checks/Dockerfile and
-# docker/infrastructure/Dockerfile.tests (keep those in sync).
+# docker/infrastructure/Dockerfile (keep those in sync).
 
 .PHONY: check-terraform-version
 
