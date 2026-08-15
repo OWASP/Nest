@@ -4,8 +4,6 @@ INFRASTRUCTURE_COMPOSE = docker compose \
 	--project-name nest-infrastructure \
 	-f docker-compose/infrastructure/compose.yaml
 
-INFRASTRUCTURE_LOCAL_IMAGE = nest-local-infrastructure
-
 infrastructure-up: ## Start LocalStack and deploy infrastructure
 	@if [ -z "$$LOCALSTACK_AUTH_TOKEN" ]; then \
 		if [ -t 2 ]; then \

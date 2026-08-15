@@ -7,7 +7,7 @@ import logging
 import sys
 
 from scripts.deploy_runner import InfrastructureDeployRunner
-from scripts.errors import TestRunnerError
+from scripts.errors import RunnerError
 
 
 def main() -> None:
@@ -22,7 +22,7 @@ def main() -> None:
 
     try:
         runner.deploy()
-    except TestRunnerError as exc:
+    except RunnerError as exc:
         sys.stderr.write(f"Error: {exc}\n")
         sys.exit(1)
 

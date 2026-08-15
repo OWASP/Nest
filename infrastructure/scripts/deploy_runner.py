@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from scripts.commands import CommandRunner
+from scripts.errors import RunnerError
 from scripts.localstack import LocalStack
 from scripts.utils import configure_terraform_cache, enter_repo_root, temporary_env
 
@@ -41,7 +42,12 @@ class InfrastructureDeployRunner:
             logger.warning("Could not configure TF_PLUGIN_CACHE_DIR: %s", exc)
 
     def deploy(self) -> None:
-        """Orchestrate a deployment."""
+        """Orchestrate a deployment.
+
+        Raises:
+            RunnerError: If a Terraform command exits with a non-zero status.
+
+        """
         self.commands.require("tflocal")
         self.localstack.wait_ready()
 
@@ -51,22 +57,29 @@ class InfrastructureDeployRunner:
             temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
             temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
         ):
-            self.commands.run(
+            init_result = self.commands.run(
                 "tflocal",
                 f"-chdir={live_dir}",
                 "init",
                 "-backend-config=terraform.localstack.tfbackend",
                 "-input=false",
                 "-reconfigure",
-                check=True,
+                check=False,
             )
-            self.commands.run(
+            if init_result.returncode != 0:
+                message = f"terraform init failed in {live_dir}"
+                raise RunnerError(message)
+
+            apply_result = self.commands.run(
                 "tflocal",
                 f"-chdir={live_dir}",
                 "apply",
                 "-auto-approve",
                 "-input=false",
                 "-var-file=terraform.localstack.tfvars",
-                check=True,
+                check=False,
             )
+            if apply_result.returncode != 0:
+                message = f"terraform apply failed in {live_dir}"
+                raise RunnerError(message)
         logger.info("Deployment on LocalStack successful!")

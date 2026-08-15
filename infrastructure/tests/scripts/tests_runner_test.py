@@ -155,7 +155,7 @@ class TestInfrastructureTestRunner:
 
         runner.run_unit()
 
-        commands.require.assert_called_once_with("terraform")
+        commands.require.assert_called_once_with("tflocal")
         terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.UNIT)
 
     @patch.dict(os.environ, {}, clear=True)

@@ -6,7 +6,7 @@ import argparse
 import logging
 import sys
 
-from scripts.errors import TestRunnerError
+from scripts.errors import RunnerError
 from scripts.tests_runner import InfrastructureTestRunner
 
 
@@ -42,7 +42,7 @@ def main() -> None:
             runner.run_integration()
         else:
             runner.run_unit()
-    except TestRunnerError as exc:
+    except RunnerError as exc:
         sys.stderr.write(f"Error: {exc}\n")
         sys.exit(1)
 

@@ -63,7 +63,7 @@ class InfrastructureTestRunner:
 
     def run_unit(self) -> None:
         """Run Terraform unit tests."""
-        self.commands.require("terraform")
+        self.commands.require("tflocal")
         self.terraform_tests.discover_and_run(ExecutionMode.UNIT)
         logger.info("All unit tests executed successfully!")
 

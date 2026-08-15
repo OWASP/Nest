@@ -387,7 +387,7 @@ The Terraform CLI version is pinned via the `hashicorp/terraform` image digest i
 
 These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.
 
-Locally, `make test-infrastructure-unit` builds the shared `nest-infrastructure` image from `docker/infrastructure/Dockerfile` (Poetry + Terraform), mounts `bootstrap`, `live`, `modules`, `scripts`, `state`, and `tests` from the host, and runs:
+Locally, `make test-infrastructure-unit` builds the shared `nest-infrastructure` image from `docker/infrastructure/Dockerfile` (Poetry + Terraform), copying `bootstrap`, `live`, `modules`, `scripts`, `state`, and `tests` into the image at build time, and runs:
 
 1. The runner's pytest suite
 2. Terraform unit tests via `python -m scripts.run_tests --unit`
@@ -396,7 +396,7 @@ Locally, `make test-infrastructure-unit` builds the shared `nest-infrastructure`
 make test-infrastructure-unit
 ```
 
-Rebuild the image when `infrastructure/poetry.lock` (or Terraform version) changes; source edits do not require a rebuild.
+Because the sources are baked into the image, any edit under those directories requires an image rebuild. `make test-infrastructure-unit` triggers `infrastructure-image-build` automatically, so re-running the target picks up local changes.
 
 ### Integration Testing (with LocalStack)
 

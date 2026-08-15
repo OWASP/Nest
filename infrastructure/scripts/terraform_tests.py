@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from scripts.commands import CommandRunner
-from scripts.errors import TestRunnerError
+from scripts.errors import RunnerError
 
 if TYPE_CHECKING:
     from subprocess import CompletedProcess
@@ -98,7 +98,7 @@ class TerraformTests:
             mode (ExecutionMode): The test execution mode.
 
         Raises:
-            TestRunnerError: If no tests were found or executed for the given mode.
+            RunnerError: If no tests were found or executed for the given mode.
 
         """
         test_dirs = self.find_test_dirs()
@@ -116,7 +116,7 @@ class TerraformTests:
 
         if test_count == 0:
             message = f"No {mode} tests were found or executed."
-            raise TestRunnerError(message)
+            raise RunnerError(message)
 
     def find_test_dirs(self) -> list[str]:
         """Return sorted ``tests`` directories under the search roots.
@@ -146,7 +146,7 @@ class TerraformTests:
             list[str]: A sorted list of matching test filenames.
 
         Raises:
-            TestRunnerError: If the directory cannot be read.
+            RunnerError: If the directory cannot be read.
 
         """
         try:
@@ -157,7 +157,7 @@ class TerraformTests:
             )
         except OSError as exc:
             message = f"could not read {test_dir}: {exc}"
-            raise TestRunnerError(message) from exc
+            raise RunnerError(message) from exc
 
     def run_module_tests(self, module_dir: str, test_files: list[str]) -> None:
         """Initialize and test a Terraform module with the given filters.
@@ -167,7 +167,7 @@ class TerraformTests:
             test_files (list[str]): A list of test filenames to pass as filters.
 
         Raises:
-            TestRunnerError: If Terraform fails to initialize or if any tests fail.
+            RunnerError: If Terraform fails to initialize or if any tests fail.
 
         """
         init_result = self.commands.run(
@@ -180,7 +180,7 @@ class TerraformTests:
             capture_output=True,
         )
         if init_result.returncode != 0:
-            raise TestRunnerError(self.failure_message("init", module_dir, init_result))
+            raise RunnerError(self.failure_message("init", module_dir, init_result))
         self.emit_output(init_result)
 
         filter_args = [f"-filter=tests/{test_file}" for test_file in test_files]
@@ -193,5 +193,5 @@ class TerraformTests:
             capture_output=True,
         )
         if test_result.returncode != 0:
-            raise TestRunnerError(self.failure_message("test", module_dir, test_result))
+            raise RunnerError(self.failure_message("test", module_dir, test_result))
         self.emit_output(test_result)

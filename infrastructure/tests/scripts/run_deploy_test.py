@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from scripts import run_deploy
-from scripts.errors import TestRunnerError
+from scripts.errors import RunnerError
 
 
 class TestRunDeployMain:
@@ -29,7 +29,7 @@ class TestRunDeployMain:
         mock_runner_cls: MagicMock,
     ) -> None:
         mock_runner = mock_runner_cls.return_value
-        mock_runner.deploy.side_effect = TestRunnerError("boom")
+        mock_runner.deploy.side_effect = RunnerError("boom")
 
         with patch("argparse.ArgumentParser.parse_args"):
             run_deploy.main()
