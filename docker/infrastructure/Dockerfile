@@ -70,4 +70,11 @@ USER owasp
 COPY --from=terraform --chmod=555 --chown=root:root /bin/terraform /usr/local/bin/terraform
 COPY --from=builder --chown=owasp:owasp /home/owasp /home/owasp
 
+COPY --chown=owasp:owasp infrastructure/bootstrap /home/owasp/infrastructure/bootstrap
+COPY --chown=owasp:owasp infrastructure/live      /home/owasp/infrastructure/live
+COPY --chown=owasp:owasp infrastructure/modules   /home/owasp/infrastructure/modules
+COPY --chown=owasp:owasp infrastructure/scripts   /home/owasp/infrastructure/scripts
+COPY --chown=owasp:owasp infrastructure/state     /home/owasp/infrastructure/state
+COPY --chown=owasp:owasp infrastructure/tests     /home/owasp/infrastructure/tests
+
 WORKDIR /home/owasp/infrastructure

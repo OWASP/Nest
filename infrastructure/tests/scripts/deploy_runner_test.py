@@ -13,6 +13,8 @@ from scripts.deploy_runner import InfrastructureDeployRunner
 from scripts.errors import TestRunnerError
 from scripts.localstack import LocalStack
 
+LOCALSTACK_ENDPOINT_URL = "http://localstack:4566"  # NOSONAR: Test-only LocalStack HTTP.
+
 
 class TestInfrastructureDeployRunner:
     """Tests for ``InfrastructureDeployRunner`` orchestration."""
@@ -51,11 +53,13 @@ class TestInfrastructureDeployRunner:
     def test_deploy_runs_init_and_apply(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         localstack = MagicMock(spec=LocalStack)
+        localstack.api_url = LOCALSTACK_ENDPOINT_URL
 
         captured: dict[str, str] = {}
 
         def capture(*_args: object, **_kwargs: object) -> None:
             captured.setdefault("AWS_ACCESS_KEY_ID", os.environ["AWS_ACCESS_KEY_ID"])
+            captured.setdefault("AWS_ENDPOINT_URL", os.environ["AWS_ENDPOINT_URL"])
             captured.setdefault("AWS_SECRET_ACCESS_KEY", os.environ["AWS_SECRET_ACCESS_KEY"])
 
         commands.run.side_effect = capture
@@ -97,8 +101,10 @@ class TestInfrastructureDeployRunner:
         fake_credential = "test"
         assert captured["AWS_ACCESS_KEY_ID"] == fake_credential
         assert captured["AWS_SECRET_ACCESS_KEY"] == fake_credential
+        assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
         assert "AWS_ACCESS_KEY_ID" not in os.environ
         assert "AWS_SECRET_ACCESS_KEY" not in os.environ
+        assert "AWS_ENDPOINT_URL" not in os.environ
 
     def test_deploy_propagates_wait_ready_failure(self) -> None:
         commands = MagicMock(spec=CommandRunner)
@@ -121,6 +127,7 @@ class TestInfrastructureDeployRunner:
         commands = MagicMock(spec=CommandRunner)
         commands.run.side_effect = subprocess.CalledProcessError(1, "tflocal")
         localstack = MagicMock(spec=LocalStack)
+        localstack.api_url = LOCALSTACK_ENDPOINT_URL
 
         runner = InfrastructureDeployRunner(
             root_dir=Path("/repo"),
@@ -133,3 +140,4 @@ class TestInfrastructureDeployRunner:
 
         assert "AWS_ACCESS_KEY_ID" not in os.environ
         assert "AWS_SECRET_ACCESS_KEY" not in os.environ
+        assert "AWS_ENDPOINT_URL" not in os.environ

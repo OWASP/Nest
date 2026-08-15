@@ -1,5 +1,3 @@
 services:
   runner:
     command: [python, -m, scripts.run_deploy]
-    volumes:
-      - ../../infrastructure/live:/home/owasp/infrastructure/live

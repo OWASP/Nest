@@ -55,7 +55,7 @@ class TestTerraformTests:
         TerraformTests(commands).discover_and_run(ExecutionMode.UNIT)
 
         commands.run.assert_any_call(
-            "terraform",
+            "tflocal",
             "-chdir=infrastructure/modules/storage",
             "init",
             "-backend=false",
@@ -64,7 +64,7 @@ class TestTerraformTests:
             capture_output=True,
         )
         commands.run.assert_any_call(
-            "terraform",
+            "tflocal",
             "-chdir=infrastructure/modules/storage",
             "test",
             "-filter=tests/unit.tftest.hcl",

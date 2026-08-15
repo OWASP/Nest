@@ -15,11 +15,6 @@ test-infrastructure-unit:
 
 INFRASTRUCTURE_IMAGE = nest-infrastructure
 
-# Integration tests write these override files; clean them up before and after a run.
-INFRASTRUCTURE_TEST_OVERRIDES = \
-	infrastructure/modules/storage/modules/s3-bucket/test_override.tf \
-	infrastructure/modules/storage/modules/shared-data-bucket/test_override.tf
-
 infrastructure-test:
 	@$(MAKE) infrastructure-test-unit
 	@$(MAKE) infrastructure-test-integration
@@ -32,14 +27,7 @@ infrastructure-image-build:
 
 infrastructure-test-unit:
 	@$(MAKE) infrastructure-image-build
-	@docker run --rm \
-		-v "$(CURDIR)/infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap" \
-		-v "$(CURDIR)/infrastructure/live:/home/owasp/infrastructure/live" \
-		-v "$(CURDIR)/infrastructure/modules:/home/owasp/infrastructure/modules" \
-		-v "$(CURDIR)/infrastructure/scripts:/home/owasp/infrastructure/scripts:ro" \
-		-v "$(CURDIR)/infrastructure/state:/home/owasp/infrastructure/state" \
-		-v "$(CURDIR)/infrastructure/tests:/home/owasp/infrastructure/tests:ro" \
-		$(INFRASTRUCTURE_IMAGE) \
+	@docker run --rm $(INFRASTRUCTURE_IMAGE) \
 		sh -c "pytest && python -m scripts.run_tests --unit"
 
 infrastructure-test-integration:
@@ -53,8 +41,7 @@ infrastructure-test-integration:
 	fi; \
 	$(MAKE) infrastructure-image-build || exit $$?; \
 	status=0; \
-	trap '$(INFRASTRUCTURE_COMPOSE) down --volumes --remove-orphans >/dev/null 2>&1 || true; rm -f $(INFRASTRUCTURE_TEST_OVERRIDES)' EXIT; \
-	rm -f $(INFRASTRUCTURE_TEST_OVERRIDES); \
+	trap '$(INFRASTRUCTURE_COMPOSE) down --volumes --remove-orphans >/dev/null 2>&1 || true' EXIT; \
 	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 		$(INFRASTRUCTURE_COMPOSE) \
 			-f docker-compose/infrastructure/compose.integration.yaml \

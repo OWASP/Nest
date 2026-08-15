@@ -69,7 +69,7 @@ class InfrastructureTestRunner:
 
     def run_integration(self) -> None:
         """Run Terraform integration tests against LocalStack."""
-        self.commands.require("terraform")
+        self.commands.require("tflocal")
         self.overrides.check_absent()
 
         localstack_started = False
@@ -95,7 +95,11 @@ class InfrastructureTestRunner:
 
             # Always wait: /_localstack/info can succeed before the Pro license activates.
             self.localstack.wait_ready()
-            with temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url):
+            with (
+                temporary_env("AWS_ACCESS_KEY_ID", "test"),
+                temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
+                temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
+            ):
                 self.overrides.write()
                 self.terraform_tests.discover_and_run(ExecutionMode.INTEGRATION)
                 logger.info("All integration tests executed successfully!")

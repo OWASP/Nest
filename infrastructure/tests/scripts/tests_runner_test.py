@@ -20,15 +20,28 @@ EXTERNAL_LOCALSTACK_ENDPOINT_URL = (
 LOCALSTACK_ENDPOINT_URL = (
     f"http://localhost:{LOCALSTACK_PORT}"  # NOSONAR: Test-only LocalStack HTTP.
 )
-PRIOR_ENDPOINT_URL = "http://prior-endpoint"  # NOSONAR: Synthetic test endpoint.
+PRIOR_ACCESS_KEY_ID = "prior-access-key"
 
 
-def capture_endpoint_url(terraform_tests: MagicMock) -> dict[str, str]:
-    """Capture ``AWS_ENDPOINT_URL`` while discovery runs."""
+def assert_aws_credentials_set(captured: dict[str, str], expected_endpoint: str) -> None:
+    """Assert AWS creds were set to LocalStack test values during the run and unset after."""
+    fake_credential = "test"
+    assert captured["AWS_ACCESS_KEY_ID"] == fake_credential
+    assert captured["AWS_SECRET_ACCESS_KEY"] == fake_credential
+    assert captured["AWS_ENDPOINT_URL"] == expected_endpoint
+    assert "AWS_ACCESS_KEY_ID" not in os.environ
+    assert "AWS_SECRET_ACCESS_KEY" not in os.environ
+    assert "AWS_ENDPOINT_URL" not in os.environ
+
+
+def capture_aws_env_vars(terraform_tests: MagicMock) -> dict[str, str]:
+    """Capture AWS env vars while discovery runs."""
     captured: dict[str, str] = {}
 
     def capture(*_args: object, **_kwargs: object) -> None:
+        captured["AWS_ACCESS_KEY_ID"] = os.environ["AWS_ACCESS_KEY_ID"]
         captured["AWS_ENDPOINT_URL"] = os.environ["AWS_ENDPOINT_URL"]
+        captured["AWS_SECRET_ACCESS_KEY"] = os.environ["AWS_SECRET_ACCESS_KEY"]
 
     terraform_tests.discover_and_run.side_effect = capture
     return captured
@@ -64,7 +77,7 @@ def integration_runner(
     if cleanup_error is not None:
         overrides.cleanup.side_effect = cleanup_error
     terraform_tests = MagicMock(spec=TerraformTests)
-    captured = capture_endpoint_url(terraform_tests)
+    captured = capture_aws_env_vars(terraform_tests)
 
     runner = InfrastructureTestRunner(
         root_dir=root_dir,
@@ -157,8 +170,7 @@ class TestInfrastructureTestRunner:
         terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.INTEGRATION)
         overrides.cleanup.assert_called_once()
         localstack.stop.assert_not_called()
-        assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
-        assert "AWS_ENDPOINT_URL" not in os.environ
+        assert_aws_credentials_set(captured, LOCALSTACK_ENDPOINT_URL)
 
     @patch.dict(os.environ, {}, clear=True)
     def test_run_integration_starts_localstack_when_docker_available(self) -> None:
@@ -170,8 +182,7 @@ class TestInfrastructureTestRunner:
         localstack.wait_ready.assert_called_once()
         localstack.stop.assert_called_once()
         terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.INTEGRATION)
-        assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
-        assert "AWS_ENDPOINT_URL" not in os.environ
+        assert_aws_credentials_set(captured, LOCALSTACK_ENDPOINT_URL)
 
     @patch.dict(os.environ, {}, clear=True)
     def test_run_integration_stops_localstack_when_cleanup_fails(self) -> None:
@@ -187,8 +198,7 @@ class TestInfrastructureTestRunner:
 
         overrides.cleanup.assert_called_once()
         localstack.stop.assert_called_once()
-        assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
-        assert "AWS_ENDPOINT_URL" not in os.environ
+        assert_aws_credentials_set(captured, LOCALSTACK_ENDPOINT_URL)
 
     @patch.dict(os.environ, {}, clear=True)
     def test_run_integration_waits_for_external_localstack(self) -> None:
@@ -202,19 +212,18 @@ class TestInfrastructureTestRunner:
 
         runner.run_integration()
 
-        commands.require.assert_called_once_with("terraform")
+        commands.require.assert_called_once_with("tflocal")
         localstack.start.assert_not_called()
         localstack.wait_ready.assert_called_once()
         localstack.stop.assert_not_called()
         terraform_tests.discover_and_run.assert_called_once_with(ExecutionMode.INTEGRATION)
-        assert captured["AWS_ENDPOINT_URL"] == EXTERNAL_LOCALSTACK_ENDPOINT_URL
-        assert "AWS_ENDPOINT_URL" not in os.environ
+        assert_aws_credentials_set(captured, EXTERNAL_LOCALSTACK_ENDPOINT_URL)
 
-    @patch.dict(os.environ, {"AWS_ENDPOINT_URL": PRIOR_ENDPOINT_URL}, clear=True)
-    def test_run_integration_restores_previous_endpoint_url(self) -> None:
+    @patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": PRIOR_ACCESS_KEY_ID}, clear=True)
+    def test_run_integration_restores_previous_credentials(self) -> None:
         runner, _, _, _, _, captured = integration_runner()
 
         runner.run_integration()
 
-        assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
-        assert os.environ["AWS_ENDPOINT_URL"] == PRIOR_ENDPOINT_URL
+        assert captured["AWS_ACCESS_KEY_ID"] == "test"
+        assert os.environ["AWS_ACCESS_KEY_ID"] == PRIOR_ACCESS_KEY_ID

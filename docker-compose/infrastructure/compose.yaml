@@ -33,8 +33,7 @@ services:
     network_mode: service:localstack
     pull_policy: never
     volumes:
-      - ../../infrastructure/modules:/home/owasp/infrastructure/modules
-      - ../../infrastructure/scripts:/home/owasp/infrastructure/scripts:ro
+      - $HOME/.terraform.d/plugin-cache:/home/owasp/.terraform.d/plugin-cache
 
 networks:
   infrastructure-nest:

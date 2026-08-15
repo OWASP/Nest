@@ -48,6 +48,7 @@ class InfrastructureDeployRunner:
         live_dir = self.root_dir / "infrastructure" / "live"
         with (
             temporary_env("AWS_ACCESS_KEY_ID", "test"),
+            temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
             temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
         ):
             self.commands.run(

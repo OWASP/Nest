@@ -1,6 +1,3 @@
 services:
   runner:
     command: [python, -m, scripts.run_tests, --integration]
-    volumes:
-      - ../../infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap
-      - ../../infrastructure/tests:/home/owasp/infrastructure/tests:ro

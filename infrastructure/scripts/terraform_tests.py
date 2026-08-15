@@ -171,7 +171,7 @@ class TerraformTests:
 
         """
         init_result = self.commands.run(
-            "terraform",
+            "tflocal",
             f"-chdir={module_dir}",
             "init",
             "-backend=false",
@@ -185,7 +185,7 @@ class TerraformTests:
 
         filter_args = [f"-filter=tests/{test_file}" for test_file in test_files]
         test_result = self.commands.run(
-            "terraform",
+            "tflocal",
             f"-chdir={module_dir}",
             "test",
             *filter_args,
