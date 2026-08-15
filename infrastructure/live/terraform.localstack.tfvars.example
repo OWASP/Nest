@@ -1,8 +1,8 @@
 auto_scaling_cpu_target         = 70
 auto_scaling_scale_in_cooldown  = 300
 auto_scaling_scale_out_cooldown = 60
-availability_zones              = ["us-east-2a", "us-east-2b", "us-east-2c"]
-aws_region                      = "us-east-2"
+availability_zones              = ["us-east-1a", "us-east-1b", "us-east-1c"]
+aws_region                      = "us-east-1"
 backend_desired_count           = 2
 backend_enable_auto_scaling     = true
 backend_image_tag               = "REPLACE_WITH_BACKEND_IMAGE_TAG"
