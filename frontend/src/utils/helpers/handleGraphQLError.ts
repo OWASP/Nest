@@ -8,11 +8,11 @@ type MutationPayload = {
   fieldErrors?: Array<{ field: string; message: string }> | null
 }
 
-export function handleMutationPayloadErrors(
-  payload: MutationPayload | null | undefined,
+export function handleMutationPayloadErrors<T extends MutationPayload>(
+  payload: T | null | undefined,
   fallbackMessage: string,
   setBackendErrors: (errors: ValidationErrors) => void
-): boolean {
+): payload is T {
   if (payload?.ok) return true
 
   if (payload?.fieldErrors?.length) {
