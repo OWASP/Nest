@@ -1,3 +1,3 @@
 bucket         = "nest-localstack-terraform-state"
-key            = "production/terraform.tfstate"
+key            = "localstack/terraform.tfstate"
 region         = "us-east-2"
