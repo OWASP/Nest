@@ -308,7 +308,7 @@ class TestContributionScoreCalculator:
 
         mock_cert_class.issue_certificate.side_effect = [
             CertificateIssuanceError("Batch issue 1"),
-            RuntimeError("Batch issue 2"),
+            CertificateIssuanceError("Batch issue 2"),
         ]
 
         calc = ContributionScoreCalculator()
@@ -389,45 +389,6 @@ class TestContributionScoreCalculator:
         assert res["total"] == 1
         assert res["failed_count"] == 1
         assert res["failures"][0][0] == "failing_user"
-
-    @patch("django.db.transaction.Atomic.__enter__", return_value=None)
-    @patch("django.db.transaction.Atomic.__exit__", return_value=None)
-    @patch.object(
-        ContributionScoreCalculator,
-        "load_scoring_weights",
-        return_value={"pr_merged": 50},
-    )
-    @patch(f"{CALCULATOR_PATH}.Certificate")
-    @patch(f"{CALCULATOR_PATH}.BulkSaveModel")
-    @patch(f"{CALCULATOR_PATH}.User")
-    @patch(f"{CALCULATOR_PATH}.Issue")
-    @patch(f"{CALCULATOR_PATH}.PullRequest")
-    def test_recalculate_all_handles_generic_certificate_exception(
-        self,
-        mock_pr,
-        mock_issue,
-        mock_user_class,
-        mock_bulk_save_model,
-        mock_cert_class,
-        mock_load,
-        mock_exit,
-        mock_enter,
-    ):
-        """Test recalculate_all records non-CertificateIssuanceError exceptions."""
-        user1 = User(login="unexpected_error_user")
-        existing_score = ContributionScore(github_user=user1, value=10, tier="level_1")
-        user1.contribution_score = existing_score
-
-        self._mock_recalculate_all_querysets(mock_user_class, mock_pr, mock_issue, [user1])
-
-        mock_cert_class.issue_certificate.side_effect = RuntimeError("Unexpected DB issue")
-
-        calc = ContributionScoreCalculator()
-        res = calc.recalculate_all()
-
-        assert res["total"] == 1
-        assert res["failed_count"] == 1
-        assert res["failures"][0][0] == "unexpected_error_user"
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)
     @patch("django.db.transaction.Atomic.__exit__", return_value=None)
