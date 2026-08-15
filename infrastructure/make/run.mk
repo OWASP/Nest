@@ -1,4 +1,4 @@
-.PHONY: infrastructure-deploy-local
+.PHONY: infrastructure-up
 
 INFRASTRUCTURE_COMPOSE = docker compose \
 	--project-name nest-infrastructure \
@@ -6,7 +6,7 @@ INFRASTRUCTURE_COMPOSE = docker compose \
 
 INFRASTRUCTURE_LOCAL_IMAGE = nest-local-infrastructure
 
-infrastructure-deploy-local: ## Deploy infrastructure to LocalStack
+infrastructure-up: ## Start LocalStack and deploy infrastructure
 	@if [ -z "$$LOCALSTACK_AUTH_TOKEN" ]; then \
 		if [ -t 2 ]; then \
 			printf '\033[1;31mError:\033[0m LOCALSTACK_AUTH_TOKEN is not set.\n' >&2; \
