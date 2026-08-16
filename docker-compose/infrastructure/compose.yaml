@@ -16,6 +16,7 @@ services:
     networks:
       - infrastructure-nest
     ports:
+      - 443:443
       - 4510-4559:4510-4559
       - 4566:4566
     volumes:
