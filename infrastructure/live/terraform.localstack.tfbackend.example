@@ -1,3 +1,5 @@
 bucket         = "nest-localstack-terraform-state"
+endpoints      = { s3 = "http://localstack:4566" }
 key            = "localstack/terraform.tfstate"
 region         = "us-east-1"
+use_path_style = true
