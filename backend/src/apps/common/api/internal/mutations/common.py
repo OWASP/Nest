@@ -58,8 +58,7 @@ def validate_pydantic_input(
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            bound = signature.bind(*args, **kwargs)
-            input_data = bound.arguments[input_arg]
+            input_data = signature.bind(*args, **kwargs).arguments[input_arg]
             try:
                 object.__setattr__(input_data, "validated_data", input_data.to_pydantic())
             except pydantic.ValidationError as e:
