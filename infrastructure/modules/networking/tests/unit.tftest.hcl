@@ -1,4 +1,12 @@
-mock_provider "aws" {}
+mock_provider "aws" {
+  override_during = plan
+
+  mock_resource "aws_nat_gateway" {
+    defaults = {
+      id = "nat-000000000000test"
+    }
+  }
+}
 
 variables {
   availability_zones                  = ["us-east-2a", "us-east-2b", "us-east-2c"]
@@ -169,12 +177,12 @@ run "test_nat_gateway_name_format" {
   }
 }
 
-run "test_private_route_to_internet_exists" {
+run "test_private_route_targets_nat_gateway" {
   command = plan
 
   assert {
-    condition     = contains([for route in aws_route_table.private.route : route.cidr_block], "0.0.0.0/0")
-    error_message = "Private route table must have a default route to the internet via the NAT gateway."
+    condition     = one([for route in aws_route_table.private.route : route if route.cidr_block == "0.0.0.0/0"]).nat_gateway_id == aws_nat_gateway.main.id
+    error_message = "Private route table must route 0.0.0.0/0 through the NAT gateway."
   }
 }
 

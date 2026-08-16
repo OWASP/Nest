@@ -65,6 +65,16 @@ resource "aws_nat_gateway" "main" {
   })
 }
 
+moved {
+  from = aws_eip.nat[0]
+  to   = aws_eip.nat
+}
+
+moved {
+  from = aws_nat_gateway.main[0]
+  to   = aws_nat_gateway.main
+}
+
 resource "aws_route_table" "public" {
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-public-rt"

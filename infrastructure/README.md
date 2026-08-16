@@ -260,8 +260,7 @@ Run the following commands to execute ECS tasks with the correct network configu
 CLUSTER=$(terraform output -raw tasks_cluster_name)
 SECURITY_GROUP=$(terraform output -raw tasks_security_group_id)
 SUBNETS=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')
-NAT_ENABLED=$(terraform output -raw nat_gateway_enabled)
-ASSIGN_PUBLIC_IP=$([ "$NAT_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+ASSIGN_PUBLIC_IP=DISABLED
 ```
 
 > [!NOTE]
