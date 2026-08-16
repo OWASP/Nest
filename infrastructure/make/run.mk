@@ -14,7 +14,5 @@ infrastructure-up: ## Start LocalStack and deploy infrastructure
 		exit 1; \
 	fi; \
 	$(MAKE) infrastructure-image-build || exit $$?; \
-	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-		$(INFRASTRUCTURE_COMPOSE) \
-			-f docker-compose/infrastructure/compose.deploy.yaml \
-			up
+	$(INFRASTRUCTURE_COMPOSE) up --wait localstack || exit $$?; \
+	$(INFRASTRUCTURE_COMPOSE) run --rm runner python -m scripts.run_deploy
