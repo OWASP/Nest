@@ -4,7 +4,6 @@ variables {
   availability_zones                  = ["us-east-2a", "us-east-2b", "us-east-2c"]
   aws_region                          = "us-east-2"
   common_tags                         = { Environment = "test", Project = "nest" }
-  enable_nat_gateway                  = true
   enable_vpc_cloudwatch_logs_endpoint = false
   enable_vpc_ecr_api_endpoint         = false
   enable_vpc_ecr_dkr_endpoint         = false
@@ -143,28 +142,11 @@ run "test_internet_gateway_name_format" {
   }
 }
 
-run "test_nat_eip_created_when_enabled" {
-  command = plan
-
-  variables {
-    enable_nat_gateway = true
-  }
-
-  assert {
-    condition     = length(aws_eip.nat) == 1
-    error_message = "NAT EIP must be created when enable_nat_gateway is true."
-  }
-}
-
 run "test_nat_eip_name_format" {
   command = plan
 
-  variables {
-    enable_nat_gateway = true
-  }
-
   assert {
-    condition     = aws_eip.nat[0].tags["Name"] == "${var.project_name}-${var.environment}-nat-eip"
+    condition     = aws_eip.nat.tags["Name"] == "${var.project_name}-${var.environment}-nat-eip"
     error_message = "NAT EIP name must follow format: {project}-{environment}-nat-eip."
   }
 }
@@ -172,65 +154,27 @@ run "test_nat_eip_name_format" {
 run "test_nat_eip_domain_is_vpc" {
   command = plan
 
-  variables {
-    enable_nat_gateway = true
-  }
-
   assert {
-    condition     = aws_eip.nat[0].domain == "vpc"
+    condition     = aws_eip.nat.domain == "vpc"
     error_message = "NAT EIP domain must be VPC."
-  }
-}
-
-run "test_nat_eip_not_created_when_disabled" {
-  command = plan
-
-  variables {
-    enable_nat_gateway = false
-  }
-
-  assert {
-    condition     = length(aws_eip.nat) == 0
-    error_message = "NAT EIP must not be created when enable_nat_gateway is false."
-  }
-}
-
-run "test_nat_gateway_created_when_enabled" {
-  command = plan
-
-  variables {
-    enable_nat_gateway = true
-  }
-
-  assert {
-    condition     = length(aws_nat_gateway.main) == 1
-    error_message = "NAT Gateway must be created when enable_nat_gateway is true."
   }
 }
 
 run "test_nat_gateway_name_format" {
   command = plan
 
-  variables {
-    enable_nat_gateway = true
-  }
-
   assert {
-    condition     = aws_nat_gateway.main[0].tags["Name"] == "${var.project_name}-${var.environment}-nat"
+    condition     = aws_nat_gateway.main.tags["Name"] == "${var.project_name}-${var.environment}-nat"
     error_message = "NAT gateway name must follow format: {project}-{environment}-nat."
   }
 }
 
-run "test_nat_gateway_not_created_when_disabled" {
+run "test_private_route_to_internet_exists" {
   command = plan
 
-  variables {
-    enable_nat_gateway = false
-  }
-
   assert {
-    condition     = length(aws_nat_gateway.main) == 0
-    error_message = "NAT Gateway must not be created when enable_nat_gateway is false."
+    condition     = contains([for route in aws_route_table.private.route : route.cidr_block], "0.0.0.0/0")
+    error_message = "Private route table must have a default route to the internet via the NAT gateway."
   }
 }
 

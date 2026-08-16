@@ -102,7 +102,6 @@ No resources.
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name for the site. | `string` | n/a | yes |
 | <a name="input_enable_additional_parameters"></a> [enable\_additional\_parameters](#input\_enable\_additional\_parameters) | Whether to enable additional parameters (e.g. for production). | `bool` | `false` | no |
 | <a name="input_enable_cron_tasks"></a> [enable\_cron\_tasks](#input\_enable\_cron\_tasks) | Whether to enable scheduled cron tasks. | `bool` | n/a | yes |
-| <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Whether to enable a NAT Gateway. | `bool` | `true` | no |
 | <a name="input_enable_rds_proxy"></a> [enable\_rds\_proxy](#input\_enable\_rds\_proxy) | Whether to create an RDS proxy. | `bool` | `false` | no |
 | <a name="input_enable_vpc_cloudwatch_logs_endpoint"></a> [enable\_vpc\_cloudwatch\_logs\_endpoint](#input\_enable\_vpc\_cloudwatch\_logs\_endpoint) | Whether to create CloudWatch Logs VPC endpoint. | `bool` | `false` | no |
 | <a name="input_enable_vpc_ecr_api_endpoint"></a> [enable\_vpc\_ecr\_api\_endpoint](#input\_enable\_vpc\_ecr\_api\_endpoint) | Whether to create ECR API VPC endpoint. | `bool` | `false` | no |
@@ -145,10 +144,9 @@ No resources.
 | <a name="output_frontend_ecr_repository_url"></a> [frontend\_ecr\_repository\_url](#output\_frontend\_ecr\_repository\_url) | The URL of the frontend ECR repository. |
 | <a name="output_frontend_service_name"></a> [frontend\_service\_name](#output\_frontend\_service\_name) | The name of the ECS frontend service. |
 | <a name="output_frontend_url"></a> [frontend\_url](#output\_frontend\_url) | The URL to access the frontend. |
-| <a name="output_nat_gateway_enabled"></a> [nat\_gateway\_enabled](#output\_nat\_gateway\_enabled) | Whether a NAT Gateway is enabled. |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | A list of private subnet IDs. |
 | <a name="output_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#output\_shared\_data\_bucket\_name) | S3 bucket for shared public data (e.g. nest.dump). |
 | <a name="output_tasks_cluster_name"></a> [tasks\_cluster\_name](#output\_tasks\_cluster\_name) | The name of the ECS tasks cluster. |
 | <a name="output_tasks_security_group_id"></a> [tasks\_security\_group\_id](#output\_tasks\_security\_group\_id) | The ID of the security group for ECS tasks. |
-| <a name="output_tasks_subnet_ids"></a> [tasks\_subnet\_ids](#output\_tasks\_subnet\_ids) | A list of public or private subnet IDs for ECS tasks. |
+| <a name="output_tasks_subnet_ids"></a> [tasks\_subnet\_ids](#output\_tasks\_subnet\_ids) | A list of private subnet IDs for ECS tasks. |
 <!-- END_TF_DOCS -->
