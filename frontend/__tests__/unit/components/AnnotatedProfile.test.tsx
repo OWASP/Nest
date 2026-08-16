@@ -105,6 +105,32 @@ describe('AnnotatedProfile', () => {
     expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
   })
 
+  it('drops Withdrawn and Discarded claims even when sourceText matches', () => {
+    render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown="Public statement about work."
+        claims={[
+          {
+            id: 'w',
+            key: 'withdrawn',
+            name: 'Withdrawn',
+            sourceText: 'Public statement',
+            status: ClaimStatusEnum.Withdrawn,
+          },
+          {
+            id: 'd',
+            key: 'discarded',
+            name: 'Discarded',
+            sourceText: 'about work',
+            status: ClaimStatusEnum.Discarded,
+          },
+        ]}
+      />
+    )
+    expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
+  })
+
   it('drops claims whose sourceText is not found', () => {
     render(
       <AnnotatedProfile

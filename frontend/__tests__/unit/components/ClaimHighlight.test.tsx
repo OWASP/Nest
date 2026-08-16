@@ -38,11 +38,20 @@ const defaultClaim: ProfileClaim = {
   status: ClaimStatusEnum.Approved,
 }
 
-const renderHighlight = (overrides: Partial<ProfileClaim> = {}) => {
+const renderHighlight = (
+  overrides: Partial<ProfileClaim> = {},
+  { isCandidate = false }: { isCandidate?: boolean } = {}
+) => {
   const claim = { ...defaultClaim, ...overrides }
   const claimsById = new Map([[claim.id, claim]])
   return render(
-    <ClaimHighlight year="2025" login="alice" claimsById={claimsById} data-id={claim.id}>
+    <ClaimHighlight
+      year="2025"
+      login="alice"
+      isCandidate={isCandidate}
+      claimsById={claimsById}
+      data-id={claim.id}
+    >
       claimed text
     </ClaimHighlight>
   )
@@ -55,7 +64,13 @@ describe('ClaimHighlight', () => {
 
   it('renders children only when the claim id is not in the map', () => {
     const { container } = render(
-      <ClaimHighlight year="2025" login="alice" claimsById={new Map()} data-id="missing">
+      <ClaimHighlight
+        year="2025"
+        login="alice"
+        isCandidate={false}
+        claimsById={new Map()}
+        data-id="missing"
+      >
         plain text
       </ClaimHighlight>
     )
@@ -65,7 +80,7 @@ describe('ClaimHighlight', () => {
 
   it('renders children only when no data-id is provided', () => {
     const { container } = render(
-      <ClaimHighlight year="2025" login="alice" claimsById={new Map()}>
+      <ClaimHighlight year="2025" login="alice" isCandidate={false} claimsById={new Map()}>
         plain text
       </ClaimHighlight>
     )
@@ -73,12 +88,27 @@ describe('ClaimHighlight', () => {
     expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
   })
 
-  it('renders a popover with claim name, status badge, and View claim button', () => {
+  it('shows only the public label to non-candidates', () => {
     renderHighlight()
     const popover = screen.getByTestId('popover-content')
     expect(popover).toHaveTextContent('My Claim')
-    expect(popover).toHaveTextContent('Approved')
+    expect(popover).toHaveTextContent('Verified')
+    expect(popover).not.toHaveTextContent('Approved')
     expect(screen.getByRole('button', { name: /View claim/i })).toBeInTheDocument()
+  })
+
+  it('shows both the public and candidate labels to a candidate', () => {
+    renderHighlight({ status: ClaimStatusEnum.Submitted }, { isCandidate: true })
+    const popover = screen.getByTestId('popover-content')
+    expect(popover).toHaveTextContent('Under Review')
+    expect(popover).toHaveTextContent('Submitted')
+  })
+
+  it('renders a gray highlight for a Submitted claim', () => {
+    renderHighlight({ status: ClaimStatusEnum.Submitted })
+    const trigger = screen.getByLabelText(/status Under Review/)
+    expect(trigger.className).toMatch(/bg-gray-/)
+    expect(trigger.className).not.toMatch(/bg-yellow-/)
   })
 
   it('navigates when the View claim button is clicked', () => {
@@ -95,7 +125,7 @@ describe('ClaimHighlight', () => {
 
   it('exposes the claim in the aria-label on the trigger', () => {
     renderHighlight()
-    expect(screen.getByLabelText('Claim: My Claim, status Approved')).toBeInTheDocument()
+    expect(screen.getByLabelText('Claim: My Claim, status Verified')).toBeInTheDocument()
   })
 
   it('falls back to unnamed in aria-label when name is empty', () => {

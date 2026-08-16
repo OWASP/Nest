@@ -25,14 +25,14 @@ interface AnnotatedProfileProps {
   year: string
 }
 
-const STATUS_PRIORITY: Record<ClaimStatusEnum, number> = {
-  [ClaimStatusEnum.Approved]: 5,
-  [ClaimStatusEnum.Submitted]: 4,
-  [ClaimStatusEnum.Draft]: 3,
-  [ClaimStatusEnum.Rejected]: 2,
-  [ClaimStatusEnum.Withdrawn]: 1,
-  [ClaimStatusEnum.Discarded]: 0,
+const STATUS_PRIORITY: Partial<Record<ClaimStatusEnum, number>> = {
+  [ClaimStatusEnum.Approved]: 3,
+  [ClaimStatusEnum.Submitted]: 2,
+  [ClaimStatusEnum.Draft]: 1,
+  [ClaimStatusEnum.Rejected]: 0,
 }
+
+const VISIBLE_STATUSES = new Set(Object.keys(STATUS_PRIORITY) as ClaimStatusEnum[])
 
 const resolveMediaSrc = <T,>(src: T, year: string): T | string => {
   if (typeof src !== 'string' || !src) return src
@@ -47,7 +47,7 @@ type WrapResult = { wrapped: string; claimsById: Map<string, ProfileClaim> }
 
 const wrapClaims = (markdown: string, claims: ProfileClaim[]): WrapResult => {
   const eligible = claims
-    .filter((c) => c.sourceText && !c.sourceText.includes('\n\n'))
+    .filter((c) => c.sourceText && !c.sourceText.includes('\n\n') && VISIBLE_STATUSES.has(c.status))
     .toSorted((a, b) => {
       const lengthDiff = b.sourceText.length - a.sourceText.length
       if (lengthDiff !== 0) return lengthDiff
@@ -113,13 +113,13 @@ const AnnotatedProfile = ({
       overrides: {
         'claim-highlight': {
           component: ClaimHighlight,
-          props: { year, login, claimsById },
+          props: { year, login, isCandidate, claimsById },
         },
         img: { component: MediaImg, props: { year } },
         source: { component: MediaSource, props: { year } },
       },
     }),
-    [year, login, claimsById]
+    [year, login, isCandidate, claimsById]
   )
 
   const handleCreateFromSelection = () => {
