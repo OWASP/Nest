@@ -139,17 +139,18 @@ describe('useBreadcrumbs', () => {
           path: '/board/2026/candidates',
         })
         unregisterLogin = registerBreadcrumb({
-          title: 'johndoe',
+          title: 'John Doe',
           path: '/board/2026/candidates/johndoe',
         })
       })
 
       const titles = result.current.map((item) => item.title)
       expect(titles).not.toContain('2026')
+      expect(titles).not.toContain('johndoe')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
         { title: '2026 Board Candidates', path: '/board/2026/candidates' },
-        { title: 'johndoe', path: '/board/2026/candidates/johndoe' },
+        { title: 'John Doe', path: '/board/2026/candidates/johndoe' },
         { title: 'Claims', path: '/board/2026/candidates/johndoe/claims' },
       ])
 
@@ -183,7 +184,7 @@ describe('useBreadcrumbs', () => {
           path: '/board/2026/candidates',
         })
         unregisterLogin = registerBreadcrumb({
-          title: 'johndoe',
+          title: 'John Doe',
           path: '/board/2026/candidates/johndoe',
         })
         unregisterEvidences = registerBreadcrumb({
@@ -196,10 +197,11 @@ describe('useBreadcrumbs', () => {
       const titles = result.current.map((item) => item.title)
       expect(titles).not.toContain('Evidences')
       expect(titles).not.toContain('2026')
+      expect(titles).not.toContain('johndoe')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
         { title: '2026 Board Candidates', path: '/board/2026/candidates' },
-        { title: 'johndoe', path: '/board/2026/candidates/johndoe' },
+        { title: 'John Doe', path: '/board/2026/candidates/johndoe' },
         { title: 'Claims', path: '/board/2026/candidates/johndoe/claims' },
         { title: 'Leadership', path: '/board/2026/candidates/johndoe/claims/leadership' },
       ])

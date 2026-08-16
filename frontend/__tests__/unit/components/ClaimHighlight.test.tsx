@@ -102,6 +102,9 @@ describe('ClaimHighlight', () => {
     const popover = screen.getByTestId('popover-content')
     expect(popover).toHaveTextContent('Under Review')
     expect(popover).toHaveTextContent('Submitted')
+    expect(
+      screen.getByLabelText('Claim: My Claim, status Under Review (Submitted)')
+    ).toBeInTheDocument()
   })
 
   it('renders a gray highlight for a Submitted claim', () => {

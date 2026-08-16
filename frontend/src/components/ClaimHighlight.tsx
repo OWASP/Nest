@@ -66,7 +66,11 @@ const ClaimHighlight = ({
 
   const style = STATUS_STYLES[claim.status] ?? STATUS_STYLES[ClaimStatusEnum.Draft]
   const href = `/board/${year}/candidates/${login}/claims/${claim.key}`
-  const ariaLabel = `Claim: ${claim.name || 'unnamed'}, status ${style.publicLabel}`
+  const statusForAria =
+    isCandidate && style.candidateLabel !== style.publicLabel
+      ? `${style.publicLabel} (${style.candidateLabel})`
+      : style.publicLabel
+  const ariaLabel = `Claim: ${claim.name || 'unnamed'}, status ${statusForAria}`
   const highlightClass = `cursor-pointer rounded px-0.5 transition-colors hover:brightness-95 ${style.mark}`
   const badgeBaseClass =
     'inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase'
