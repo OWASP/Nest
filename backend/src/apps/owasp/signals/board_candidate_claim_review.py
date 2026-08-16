@@ -25,8 +25,7 @@ def review_post_save_finalize_claim_status(sender, instance, **kwargs):  # noqa:
     ).count()
 
     if approved_count >= threshold:
-        claim.status = BoardCandidateClaim.Status.APPROVED
-        claim.save()
+        claim.set_status_approved()
         logger.info(
             "Claim '%s' auto-approved with %d approvals (threshold: %d).",
             claim.key,

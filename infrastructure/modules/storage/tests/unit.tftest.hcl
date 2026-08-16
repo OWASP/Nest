@@ -34,6 +34,32 @@ run "test_iam_policy_name_format" {
   }
 }
 
+run "test_media_bucket_name" {
+  command = plan
+
+  override_resource {
+    target          = random_id.suffix
+    override_during = plan
+    values = {
+      hex = "abcd1234"
+    }
+  }
+
+  assert {
+    condition     = module.media_bucket.bucket.bucket == "${var.project_name}-${var.environment}-media-abcd1234"
+    error_message = "Media bucket name must follow format: {project}-{environment}-media-{suffix}."
+  }
+}
+
+run "test_media_iam_policy_name_format" {
+  command = plan
+
+  assert {
+    condition     = aws_iam_policy.media_read_write.name == "${var.project_name}-${var.environment}-media-read-write"
+    error_message = "Media IAM policy name must follow format: {project}-{environment}-media-read-write."
+  }
+}
+
 run "test_static_bucket_name" {
   command = plan
 

@@ -26,6 +26,7 @@ No modules.
 | [aws_ssm_parameter.django_algolia_write_api_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_allowed_origins](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.django_aws_media_bucket_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_aws_storage_bucket_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_db_host](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -64,6 +65,7 @@ No modules.
 | <a name="input_db_password_arn"></a> [db\_password\_arn](#input\_db\_password\_arn) | The SSM Parameter ARN of password of the database. | `string` | n/a | yes |
 | <a name="input_django_allowed_hosts"></a> [django\_allowed\_hosts](#input\_django\_allowed\_hosts) | Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev). | `string` | n/a | yes |
 | <a name="input_django_allowed_origins"></a> [django\_allowed\_origins](#input\_django\_allowed\_origins) | The Django allowed CORS origins (comma-separated URLs with protocol). | `string` | n/a | yes |
+| <a name="input_django_aws_media_bucket_name"></a> [django\_aws\_media\_bucket\_name](#input\_django\_aws\_media\_bucket\_name) | The name of the S3 bucket for Django media files. | `string` | n/a | yes |
 | <a name="input_django_aws_static_bucket_name"></a> [django\_aws\_static\_bucket\_name](#input\_django\_aws\_static\_bucket\_name) | The name of the S3 bucket for Django static files. | `string` | n/a | yes |
 | <a name="input_django_configuration"></a> [django\_configuration](#input\_django\_configuration) | The name of the Django configuration to use (e.g., Staging, Production). | `string` | n/a | yes |
 | <a name="input_django_db_host"></a> [django\_db\_host](#input\_django\_db\_host) | The hostname of the database. | `string` | n/a | yes |

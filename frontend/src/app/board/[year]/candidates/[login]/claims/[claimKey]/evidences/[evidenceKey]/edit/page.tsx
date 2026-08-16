@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
 import { GetBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceQueries.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -38,6 +38,7 @@ const EditEvidencePage = () => {
     file: null as File | null,
     sourceUrl: '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -89,17 +90,17 @@ const EditEvidencePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        claimKey: claimKey,
-        description: formData.description,
-        file: formData.file || null,
-        key: evidenceKey,
-        name: formData.name,
-        sourceUrl: formData.sourceUrl,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      claimKey: claimKey,
+      description: formData.description,
+      file: formData.file || null,
+      key: evidenceKey,
+      name: formData.name,
+      sourceUrl: formData.sourceUrl.trim() || null,
+      year: Number.parseInt(year),
+    }
 
+    try {
       const result = await updateEvidence({
         variables: { input },
         update(cache, { data }) {
@@ -113,10 +114,9 @@ const EditEvidencePage = () => {
         },
       })
 
-      if (!result.data?.updateBoardCandidateClaimEvidence?.ok) {
-        throw new Error(
-          result.data?.updateBoardCandidateClaimEvidence?.message ?? 'Evidence update failed.'
-        )
+      const payload = result.data?.updateBoardCandidateClaimEvidence
+      if (!handleMutationPayloadErrors(payload, 'Evidence update failed.', setBackendErrors)) {
+        return
       }
 
       addToast({
@@ -127,24 +127,19 @@ const EditEvidencePage = () => {
         color: 'success',
       })
 
-      const updatedEvidence = result.data?.updateBoardCandidateClaimEvidence?.evidence
+      const updatedEvidence = payload.evidence
       if (updatedEvidence?.key) {
         router.push(
           `/board/${year}/candidates/${login}/claims/${claimKey}/evidences/${updatedEvidence.key}`
         )
       }
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
-        addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
-      }
-      throw err
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Evidence update failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 
@@ -152,6 +147,8 @@ const EditEvidencePage = () => {
     <EvidenceForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Edit Evidence"

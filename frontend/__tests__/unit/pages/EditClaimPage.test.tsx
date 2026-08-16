@@ -196,12 +196,17 @@ describe('EditClaimPage', () => {
   })
 
   test('shows backend validation errors from GraphQL', async () => {
-    const gqlError = {
-      graphQLErrors: [
-        { message: 'Name is required', extensions: { code: 'VALIDATION_ERROR', field: 'name' } },
-      ],
-    }
-    mockUpdateFn.mockRejectedValue(gqlError)
+    mockUpdateFn.mockResolvedValue({
+      data: {
+        updateBoardCandidateClaim: {
+          ok: false,
+          code: 'VALIDATION_ERROR',
+          message: 'Some fields are invalid.',
+          fieldErrors: [{ field: 'name', message: 'Name is required' }],
+          claim: null,
+        },
+      },
+    })
 
     render(<EditClaimPage />)
 
@@ -221,12 +226,17 @@ describe('EditClaimPage', () => {
   })
 
   test('clears backend error when user types after validation error', async () => {
-    const gqlError = {
-      graphQLErrors: [
-        { message: 'Name is required', extensions: { code: 'VALIDATION_ERROR', field: 'name' } },
-      ],
-    }
-    mockUpdateFn.mockRejectedValue(gqlError)
+    mockUpdateFn.mockResolvedValue({
+      data: {
+        updateBoardCandidateClaim: {
+          ok: false,
+          code: 'VALIDATION_ERROR',
+          message: 'Some fields are invalid.',
+          fieldErrors: [{ field: 'name', message: 'Name is required' }],
+          claim: null,
+        },
+      },
+    })
 
     render(<EditClaimPage />)
 

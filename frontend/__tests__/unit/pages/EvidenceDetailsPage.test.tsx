@@ -154,7 +154,7 @@ describe('EvidenceDetailsPage', () => {
     expect(screen.getByTestId('error-title')).toHaveTextContent('Evidence Not Found')
   })
 
-  test('renders access denied when viewing another user profile', () => {
+  test('renders evidence details when viewing another user profile', async () => {
     mockUseDjangoSession.mockReturnValue({
       isSyncing: false,
       session: { user: { login: 'otheruser' } },
@@ -163,7 +163,10 @@ describe('EvidenceDetailsPage', () => {
 
     render(<EvidenceDetailsPage />)
 
-    expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Evidence Details')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Access Denied')).not.toBeInTheDocument()
   })
 
   test('renders evidence details', async () => {

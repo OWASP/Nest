@@ -2,6 +2,7 @@
 
 import logging
 
+import pydantic
 import strawberry
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -10,6 +11,7 @@ from django.utils import timezone
 from strawberry.file_uploads import Upload
 from strawberry.types import Info
 
+from apps.common.api.internal.mutations.common import FieldError, validate_pydantic_input
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.board_candidate_claim_evidence import (
     BoardCandidateClaimEvidenceNode,
@@ -25,39 +27,53 @@ EVIDENCE_NOT_FOUND_MSG = "Evidence not found."
 GENERIC_ERROR_MSG = "Something went wrong."
 
 
-@strawberry.input
+class CreateEvidencePydanticInput(pydantic.BaseModel):
+    """Pydantic validation for creating claim evidence."""
+
+    claim_key: str = pydantic.Field(max_length=100)
+    description: str
+    name: str = pydantic.Field(max_length=200)
+    source_url: pydantic.HttpUrl | None = None
+    year: int
+
+
+@strawberry.experimental.pydantic.input(model=CreateEvidencePydanticInput, all_fields=True)
 class CreateEvidenceInput:
     """Input for creating claim evidence."""
 
-    claim_key: str
-    description: str
-    file: Upload | None = None
-    name: str
-    source_url: str | None = None
+    file: Upload | None = strawberry.field(default=None)
+
+
+class UpdateEvidencePydanticInput(pydantic.BaseModel):
+    """Pydantic validation for updating claim evidence."""
+
+    claim_key: str = pydantic.Field(max_length=100)
+    description: str | None = None
+    key: str = pydantic.Field(max_length=100)
+    name: str | None = pydantic.Field(default=None, max_length=200)
+    source_url: pydantic.HttpUrl | None = None
     year: int
 
 
-@strawberry.input
+@strawberry.experimental.pydantic.input(model=UpdateEvidencePydanticInput, all_fields=True)
 class UpdateEvidenceInput:
     """Input for updating claim evidence."""
 
-    claim_key: str
-    description: str | None = None
-    file: Upload | None = None
-    key: str
-    name: str | None = None
-    source_url: str | None = None
-    year: int
+    file: Upload | None = strawberry.field(default=None)
 
 
-@strawberry.input
-class RemoveEvidenceInput:
-    """Input for removing claim evidence."""
+class RemoveEvidencePydanticInput(pydantic.BaseModel):
+    """Pydantic validation for removing claim evidence."""
 
-    claim_key: str
-    key: str
+    claim_key: str = pydantic.Field(max_length=100)
+    key: str = pydantic.Field(max_length=100)
     removed_reason: str | None = None
     year: int
+
+
+@strawberry.experimental.pydantic.input(model=RemoveEvidencePydanticInput, all_fields=True)
+class RemoveEvidenceInput:
+    """Input for removing claim evidence."""
 
 
 @strawberry.type
@@ -68,6 +84,7 @@ class EvidenceResult:
     code: str | None = None
     message: str | None = None
     evidence: BoardCandidateClaimEvidenceNode | None = None
+    field_errors: list[FieldError] | None = None
 
 
 @strawberry.type
@@ -76,19 +93,21 @@ class BoardCandidateClaimEvidenceMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(EvidenceResult)
     def create_board_candidate_claim_evidence(
         self, info: Info, input_data: CreateEvidenceInput
     ) -> EvidenceResult:
         """Create evidence for a claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                board__year=input_data.year,
+                board__year=validated.year,
                 candidate__member__login=user.github_user.login,
-                key=input_data.claim_key,
+                key=validated.claim_key,
             )
         except BoardCandidateClaim.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -103,10 +122,10 @@ class BoardCandidateClaimEvidenceMutations:
         try:
             evidence = BoardCandidateClaimEvidence.objects.create(
                 claim=claim,
-                description=input_data.description,
+                description=validated.description,
                 file=input_data.file,
-                name=input_data.name,
-                source_url=input_data.source_url or "",
+                name=validated.name,
+                source_url=str(validated.source_url) if validated.source_url else "",
             )
         except IntegrityError:
             logger.warning(
@@ -137,20 +156,22 @@ class BoardCandidateClaimEvidenceMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(EvidenceResult)
     def update_board_candidate_claim_evidence(
         self, info: Info, input_data: UpdateEvidenceInput
     ) -> EvidenceResult:
         """Update evidence for a claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                claim__board__year=input_data.year,
+                claim__board__year=validated.year,
                 claim__candidate__member__login=user.github_user.login,
-                claim__key=input_data.claim_key,
-                key=input_data.key,
+                claim__key=validated.claim_key,
+                key=validated.key,
             )
         except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
@@ -163,16 +184,15 @@ class BoardCandidateClaimEvidenceMutations:
             )
 
         update_fields = []
-        if input_data.name is not None:
-            evidence.name = input_data.name
+        if validated.name is not None:
+            evidence.name = validated.name
             update_fields.append("name")
             update_fields.append("key")
-        if input_data.description is not None:
-            evidence.description = input_data.description
+        if validated.description is not None:
+            evidence.description = validated.description
             update_fields.append("description")
-        if input_data.source_url is not None:
-            evidence.source_url = input_data.source_url
-            update_fields.append("source_url")
+        evidence.source_url = str(validated.source_url) if validated.source_url else ""
+        update_fields.append("source_url")
         if input_data.file is not None:
             evidence.file = input_data.file
             update_fields.extend(["file", "file_name", "file_size"])
@@ -208,20 +228,22 @@ class BoardCandidateClaimEvidenceMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(EvidenceResult)
     def remove_board_candidate_claim_evidence(
         self, info: Info, input_data: RemoveEvidenceInput
     ) -> EvidenceResult:
         """Remove evidence for a claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return EvidenceResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             evidence = BoardCandidateClaimEvidence.objects.select_for_update().get(
-                claim__board__year=input_data.year,
+                claim__board__year=validated.year,
                 claim__candidate__member__login=user.github_user.login,
-                claim__key=input_data.claim_key,
-                key=input_data.key,
+                claim__key=validated.claim_key,
+                key=validated.key,
             )
         except BoardCandidateClaimEvidence.DoesNotExist:
             return EvidenceResult(ok=False, code="NOT_FOUND", message=EVIDENCE_NOT_FOUND_MSG)
@@ -238,7 +260,7 @@ class BoardCandidateClaimEvidenceMutations:
             evidence.file = None
             evidence.is_removed = True
             evidence.removed_at = timezone.now()
-            evidence.removed_reason = input_data.removed_reason or ""
+            evidence.removed_reason = validated.removed_reason or ""
             evidence.save(update_fields=["file", "is_removed", "removed_reason", "removed_at"])
             if old_file:
                 transaction.on_commit(lambda f=old_file: f.delete(save=False))

@@ -6,6 +6,10 @@ export const CREATE_CLAIM = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       claim {
         createdAt
         description
@@ -27,6 +31,10 @@ export const UPDATE_CLAIM = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       claim {
         createdAt
         description
@@ -48,6 +56,10 @@ export const DISCARD_CLAIM = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       claim {
         createdAt
         description
@@ -69,6 +81,10 @@ export const SUBMIT_CLAIM = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       claim {
         createdAt
         description
@@ -90,6 +106,10 @@ export const WITHDRAW_CLAIM = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       claim {
         createdAt
         description
@@ -111,6 +131,10 @@ export const REORDER_CLAIMS = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       claims {
         createdAt
         description

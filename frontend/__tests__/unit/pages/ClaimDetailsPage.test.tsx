@@ -87,7 +87,7 @@ describe('ClaimDetailsPage', () => {
     expect(screen.getByTestId('error-title')).toHaveTextContent('Claim Not Found')
   })
 
-  test('renders access denied when viewing another user profile', () => {
+  test('renders claim details when viewing another user profile', async () => {
     mockUseDjangoSession.mockReturnValue({
       isSyncing: false,
       session: { user: { login: 'otheruser' } },
@@ -96,7 +96,10 @@ describe('ClaimDetailsPage', () => {
 
     render(<ClaimDetailsPage />)
 
-    expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Claim Details')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Access Denied')).not.toBeInTheDocument()
   })
 
   test('renders claim name in claim details metadata', async () => {

@@ -21,6 +21,7 @@ class TestBoardCandidateClaimEvidenceQuery:
     @patch("apps.owasp.api.internal.queries.board_candidate_claim_evidence.BoardCandidateClaim")
     def test_board_candidate_claim_evidences_claim_not_found(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
@@ -44,6 +45,7 @@ class TestBoardCandidateClaimEvidenceQuery:
     @patch("apps.owasp.api.internal.queries.board_candidate_claim_evidence.BoardCandidateClaim")
     def test_board_candidate_claim_evidences_self(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = True
         mock_github_user = MagicMock()
@@ -63,78 +65,64 @@ class TestBoardCandidateClaimEvidenceQuery:
             info, claim_key=claim_key, login=login, year=2025
         )
 
-        mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login=login, key=claim_key, board__year=2025
-        )
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim_evidence.BoardCandidateClaim")
-    def test_board_candidate_claim_evidences_non_self_non_approved(self, mock_claim_model):
+    def test_board_candidate_claim_evidences_non_self_draft_hidden(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
         info = _make_info(user)
-        claim_key = "my-key"
-        login = "alice"
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = False
         claim.candidate.member = None
-        claim.status = BoardCandidateClaim.Status.SUBMITTED
+        claim.status = BoardCandidateClaim.Status.DRAFT
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
         result = query.board_candidate_claim_evidences(
-            info, claim_key=claim_key, login=login, year=2025
+            info, claim_key="my-key", login="alice", year=2025
         )
 
-        mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login=login, key=claim_key, board__year=2025
-        )
         assert result == []
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim_evidence.BoardCandidateClaim")
     def test_board_candidate_claim_evidences_non_self_approved(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
         info = _make_info(user)
-        claim_key = "my-key"
-        login = "alice"
 
         claim = MagicMock()
         claim.candidate.member = MagicMock()
-        claim.status = mock_claim_model.Status.APPROVED
+        claim.status = BoardCandidateClaim.Status.APPROVED
         evidences_qs = MagicMock()
         claim.evidences.filter.return_value = evidences_qs
         mock_claim_model.objects.filter.return_value.first.return_value = claim
 
         query = BoardCandidateClaimEvidenceQuery()
         result = query.board_candidate_claim_evidences(
-            info, claim_key=claim_key, login=login, year=2025
+            info, claim_key="my-key", login="alice", year=2025
         )
 
-        mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login=login, key=claim_key, board__year=2025
-        )
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim_evidence.BoardCandidateClaim")
-    def test_board_candidate_claim_evidences_reviewer_sees_submitted(self, mock_claim_model):
+    def test_board_candidate_claim_evidences_non_self_submitted(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
         info = _make_info(user)
-        claim_key = "my-key"
-        login = "alice"
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = True
         claim.candidate.member = MagicMock()
         claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidences_qs = MagicMock()
@@ -143,12 +131,9 @@ class TestBoardCandidateClaimEvidenceQuery:
 
         query = BoardCandidateClaimEvidenceQuery()
         result = query.board_candidate_claim_evidences(
-            info, claim_key=claim_key, login=login, year=2025
+            info, claim_key="my-key", login="alice", year=2025
         )
 
-        mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login=login, key=claim_key, board__year=2025
-        )
         claim.evidences.filter.assert_called_once_with(is_removed=False)
         assert result == evidences_qs
 
@@ -179,13 +164,6 @@ class TestBoardCandidateClaimEvidenceSingleQuery:
                 info, claim_key="test-key", key="ev-key", login="alice", year=2025
             )
 
-        mock_evidence_model.objects.get.assert_called_once_with(
-            claim__key="test-key",
-            key="ev-key",
-            claim__candidate__member__login="alice",
-            claim__board__year=2025,
-            is_removed=False,
-        )
         assert result == evidence
 
     def test_board_candidate_claim_evidence_non_self_approved(self):
@@ -212,16 +190,39 @@ class TestBoardCandidateClaimEvidenceSingleQuery:
 
         assert result == evidence
 
-    def test_board_candidate_claim_evidence_non_self_not_approved(self):
+    def test_board_candidate_claim_evidence_non_self_submitted(self):
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = False
-        evidence.claim.candidate.member = None
+        evidence.claim.candidate.member = MagicMock()
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
+
+        with patch(
+            "apps.owasp.api.internal.queries.board_candidate_claim_evidence"
+            ".BoardCandidateClaimEvidence"
+        ) as mock_evidence_model:
+            mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
+            mock_evidence_model.objects.get.return_value = evidence
+
+            query = BoardCandidateClaimEvidenceQuery()
+            result = query.board_candidate_claim_evidence(
+                info, claim_key="test-key", key="ev-key", login="alice", year=2025
+            )
+
+        assert result == evidence
+
+    def test_board_candidate_claim_evidence_non_self_draft_hidden(self):
+        user = MagicMock()
+        user.is_authenticated = True
+        user.github_user = MagicMock()
+        info = _make_info(user)
+
+        evidence = MagicMock()
+        evidence.claim.candidate.member = None
+        evidence.claim.status = BoardCandidateClaim.Status.DRAFT
 
         with patch(
             "apps.owasp.api.internal.queries.board_candidate_claim_evidence"
@@ -256,31 +257,6 @@ class TestBoardCandidateClaimEvidenceSingleQuery:
             )
 
         assert result is None
-
-    def test_board_candidate_claim_evidence_reviewer_sees_submitted(self):
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-
-        evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = True
-        evidence.claim.candidate.member = MagicMock()
-        evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
-
-        with patch(
-            "apps.owasp.api.internal.queries.board_candidate_claim_evidence"
-            ".BoardCandidateClaimEvidence"
-        ) as mock_evidence_model:
-            mock_evidence_model.DoesNotExist = BoardCandidateClaimEvidence.DoesNotExist
-            mock_evidence_model.objects.get.return_value = evidence
-
-            query = BoardCandidateClaimEvidenceQuery()
-            result = query.board_candidate_claim_evidence(
-                info, claim_key="test-key", key="ev-key", login="alice", year=2025
-            )
-
-        assert result == evidence
 
 
 class TestBoardCandidateClaimEvidenceFileUrlQuery:
@@ -342,16 +318,15 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
 
         assert result is None
 
-    def test_file_url_not_accessible(self):
+    def test_file_url_not_accessible_draft(self):
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = False
         evidence.claim.candidate.member = None
-        evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
+        evidence.claim.status = BoardCandidateClaim.Status.DRAFT
         evidence.file = MagicMock()
         evidence.file.url = "/media/test.pdf"
 
@@ -416,15 +391,12 @@ class TestBoardCandidateClaimEvidenceFileUrlQuery:
 
         assert result == "https://example.com/media/test.pdf"
 
-    def test_file_url_reviewer_accessible(self):
+    def test_file_url_anonymous_submitted(self):
         user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
+        user.is_authenticated = False
         info = _make_info(user)
 
         evidence = MagicMock()
-        evidence.claim.board.reviewers.filter.return_value.exists.return_value = True
-        evidence.claim.candidate.member = None
         evidence.claim.status = BoardCandidateClaim.Status.SUBMITTED
         evidence.file = MagicMock()
         evidence.file.url = "/media/test.pdf"

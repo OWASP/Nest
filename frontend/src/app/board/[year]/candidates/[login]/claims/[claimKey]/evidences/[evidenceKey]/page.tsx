@@ -13,7 +13,6 @@ import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.g
 import { GetBoardCandidateClaimEvidenceFileUrlDocument } from 'types/__generated__/evidenceQueries.generated'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
@@ -30,7 +29,7 @@ const EvidenceDetailsPage = () => {
   const { isSyncing, session } = useDjangoSession()
   const { data, loading, error } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: isSyncing || !claimKey || !login || !year || !session?.user?.login,
+    skip: isSyncing || !claimKey || !login || !year,
     variables: {
       key: claimKey,
       login,
@@ -39,7 +38,7 @@ const EvidenceDetailsPage = () => {
     },
   })
 
-  const isReviewer = data?.boardOfDirectors?.reviewer != null
+  const isSelf = session?.user?.login === login
   const [fetchFileUrl] = useLazyQuery(GetBoardCandidateClaimEvidenceFileUrlDocument)
 
   const claim = data?.boardCandidateClaim
@@ -53,12 +52,6 @@ const EvidenceDetailsPage = () => {
   }, [error])
 
   if (loading || isSyncing) return <LoadingSpinner />
-
-  if (session?.user?.login !== login && !isReviewer) {
-    return (
-      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
-    )
-  }
 
   if (error) {
     return (
@@ -135,7 +128,7 @@ const EvidenceDetailsPage = () => {
                 {'Download Evidence'}
               </ActionButton>
             )}
-            {!isReviewer && (
+            {isSelf && (
               <EvidenceActions
                 evidence={evidence}
                 claim={claim}

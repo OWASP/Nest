@@ -7,6 +7,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
+from PIL.ExifTags import Base
 from pypdf import PdfReader, PdfWriter
 
 from apps.owasp.utils.file import (
@@ -14,13 +15,15 @@ from apps.owasp.utils.file import (
     IMAGE_EXTENSIONS,
     PDF_CONTENT_TYPE,
     PDF_EXTENSION,
-    _strip_image_metadata,
-    _strip_pdf_metadata,
     strip_file_metadata,
+    strip_image_metadata,
+    strip_pdf_metadata,
 )
 
+EXIF_ORIENTATION_ROTATE_90_CW = 6
 
-def _create_test_image_simple(fmt="JPEG", ext=".jpg"):
+
+def create_test_image_simple(fmt="JPEG", ext=".jpg"):
     """Create a simple test image file without external EXIF libraries."""
     image = Image.new("RGB", (10, 10), color="red")
     output = io.BytesIO()
@@ -34,12 +37,12 @@ def _create_test_image_simple(fmt="JPEG", ext=".jpg"):
     )
 
 
-def _create_jpeg_with_exif():
+def create_jpeg_with_exif():
     """Create a JPEG with EXIF data embedded via Pillow."""
     image = Image.new("RGB", (10, 10), color="blue")
     output = io.BytesIO()
     exif = image.getexif()
-    exif[271] = "TestCamera"
+    exif[Base.Make] = "TestCamera"
     image.save(output, format="JPEG", exif=exif)
     content = output.getvalue()
 
@@ -51,12 +54,12 @@ def _create_jpeg_with_exif():
     return file, content
 
 
-def _create_jpeg_with_orientation():
+def create_jpeg_with_orientation():
     """Create a 10x5 JPEG image with EXIF Orientation = 6 (requires 90 CW rotation)."""
     image = Image.new("RGB", (10, 5), color="blue")
     output = io.BytesIO()
     exif = image.getexif()
-    exif[0x0112] = 6  # Orientation tag
+    exif[Base.Orientation] = EXIF_ORIENTATION_ROTATE_90_CW
     image.save(output, format="JPEG", exif=exif)
     content = output.getvalue()
     return SimpleUploadedFile(
@@ -66,7 +69,7 @@ def _create_jpeg_with_orientation():
     )
 
 
-def _create_test_pdf(*, with_metadata=True):
+def create_test_pdf(*, with_metadata=True):
     """Create a test PDF file with optional metadata."""
     writer = PdfWriter()
     writer.add_blank_page(width=72, height=72)
@@ -92,7 +95,7 @@ def _create_test_pdf(*, with_metadata=True):
     )
 
 
-def _create_test_pdf_with_xmp():
+def create_test_pdf_with_xmp():
     """Create a test PDF file containing an XMP /Metadata stream."""
     xmp_xml = (
         b'<?xml version="1.0" encoding="UTF-8"?>'
@@ -134,7 +137,7 @@ class TestStripFileMetadata:
         mock_file.name = f"test.{ext}"
 
         with patch(
-            "apps.owasp.utils.file._strip_image_metadata", return_value=mock_file
+            "apps.owasp.utils.file.strip_image_metadata", return_value=mock_file
         ) as mock_strip:
             result = strip_file_metadata(mock_file)
 
@@ -147,7 +150,7 @@ class TestStripFileMetadata:
         mock_file.name = f"test.{ext}"
 
         with patch(
-            "apps.owasp.utils.file._strip_pdf_metadata", return_value=mock_file
+            "apps.owasp.utils.file.strip_pdf_metadata", return_value=mock_file
         ) as mock_strip:
             result = strip_file_metadata(mock_file)
 
@@ -168,7 +171,7 @@ class TestStripFileMetadata:
         mock_file.name = "test.JPEG"
 
         with patch(
-            "apps.owasp.utils.file._strip_image_metadata", return_value=mock_file
+            "apps.owasp.utils.file.strip_image_metadata", return_value=mock_file
         ) as mock_strip:
             strip_file_metadata(mock_file)
 
@@ -179,7 +182,7 @@ class TestStripFileMetadata:
         mock_file.name = "test.Pdf"
 
         with patch(
-            "apps.owasp.utils.file._strip_pdf_metadata", return_value=mock_file
+            "apps.owasp.utils.file.strip_pdf_metadata", return_value=mock_file
         ) as mock_strip:
             strip_file_metadata(mock_file)
 
@@ -196,7 +199,7 @@ class TestStripFileMetadata:
 
 
 class TestStripImageMetadata:
-    """Tests for _strip_image_metadata."""
+    """Tests for strip_image_metadata."""
 
     @pytest.mark.parametrize(
         ("fmt", "ext"),
@@ -208,9 +211,9 @@ class TestStripImageMetadata:
         ],
     )
     def test_strips_metadata_and_preserves_image_content(self, fmt, ext):
-        mock_file = _create_test_image_simple(fmt=fmt, ext=ext)
+        mock_file = create_test_image_simple(fmt=fmt, ext=ext)
 
-        result = _strip_image_metadata(mock_file, ext)
+        result = strip_image_metadata(mock_file, ext)
 
         result_image = Image.open(io.BytesIO(result.read()))
         assert result_image.size == (10, 10)
@@ -226,9 +229,9 @@ class TestStripImageMetadata:
         ],
     )
     def test_preserves_file_name(self, fmt, ext):
-        mock_file = _create_test_image_simple(fmt=fmt, ext=ext)
+        mock_file = create_test_image_simple(fmt=fmt, ext=ext)
 
-        result = _strip_image_metadata(mock_file, ext)
+        result = strip_image_metadata(mock_file, ext)
 
         assert result.name == f"test_image.{ext.lstrip('.')}"
 
@@ -242,25 +245,25 @@ class TestStripImageMetadata:
         ],
     )
     def test_sets_correct_content_type(self, fmt, ext):
-        mock_file = _create_test_image_simple(fmt=fmt, ext=ext)
+        mock_file = create_test_image_simple(fmt=fmt, ext=ext)
 
-        result = _strip_image_metadata(mock_file, ext)
+        result = strip_image_metadata(mock_file, ext)
 
         assert result.content_type == IMAGE_CONTENT_TYPE_MAP[ext]
 
     def test_result_has_valid_size(self):
-        mock_file = _create_test_image_simple(fmt="JPEG", ext=".jpg")
+        mock_file = create_test_image_simple(fmt="JPEG", ext=".jpg")
 
-        result = _strip_image_metadata(mock_file, ".jpg")
+        result = strip_image_metadata(mock_file, ".jpg")
 
         assert result.size > 0
 
     def test_strips_exif_data_from_jpeg(self):
-        mock_file, original_bytes = _create_jpeg_with_exif()
+        mock_file, original_bytes = create_jpeg_with_exif()
 
         assert b"TestCamera" in original_bytes
 
-        result = _strip_image_metadata(mock_file, ".jpg")
+        result = strip_image_metadata(mock_file, ".jpg")
 
         result_image = Image.open(io.BytesIO(result.read()))
         assert not result_image.getexif()
@@ -272,24 +275,24 @@ class TestStripImageMetadata:
             content_type="image/jpeg",
         )
         with pytest.raises(ValidationError, match="Invalid or corrupt image"):
-            _strip_image_metadata(mock_file, ".jpg")
+            strip_image_metadata(mock_file, ".jpg")
 
     def test_exif_transpose_preserves_orientation(self):
-        mock_file = _create_jpeg_with_orientation()
-        result = _strip_image_metadata(mock_file, ".jpg")
+        mock_file = create_jpeg_with_orientation()
+        result = strip_image_metadata(mock_file, ".jpg")
 
         result_image = Image.open(io.BytesIO(result.read()))
         assert result_image.size == (5, 10)
-        assert result_image.getexif().get(0x0112) is None
+        assert result_image.getexif().get(Base.Orientation) is None
 
 
 class TestStripPdfMetadata:
-    """Tests for _strip_pdf_metadata."""
+    """Tests for strip_pdf_metadata."""
 
     def test_strips_metadata_from_pdf(self):
-        mock_file = _create_test_pdf(with_metadata=True)
+        mock_file = create_test_pdf(with_metadata=True)
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         reader = PdfReader(io.BytesIO(result.read()))
         metadata = reader.metadata
@@ -297,46 +300,46 @@ class TestStripPdfMetadata:
         assert not metadata.get("/Title")
 
     def test_preserves_page_count(self):
-        mock_file = _create_test_pdf(with_metadata=True)
+        mock_file = create_test_pdf(with_metadata=True)
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         reader = PdfReader(io.BytesIO(result.read()))
         assert len(reader.pages) == 1
 
     def test_preserves_file_name(self):
-        mock_file = _create_test_pdf()
+        mock_file = create_test_pdf()
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         assert result.name == "test_document.pdf"
 
     def test_sets_correct_content_type(self):
-        mock_file = _create_test_pdf()
+        mock_file = create_test_pdf()
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         assert result.content_type == PDF_CONTENT_TYPE
 
     def test_result_has_valid_size(self):
-        mock_file = _create_test_pdf()
+        mock_file = create_test_pdf()
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         assert result.size > 0
 
     def test_handles_pdf_without_metadata(self):
-        mock_file = _create_test_pdf(with_metadata=False)
+        mock_file = create_test_pdf(with_metadata=False)
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         assert result.size > 0
         assert result.name == "test_document.pdf"
 
     def test_producer_and_creator_are_cleared(self):
-        mock_file = _create_test_pdf(with_metadata=True)
+        mock_file = create_test_pdf(with_metadata=True)
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         reader = PdfReader(io.BytesIO(result.read()))
         metadata = reader.metadata
@@ -344,9 +347,9 @@ class TestStripPdfMetadata:
         assert not metadata.get("/Creator")
 
     def test_strips_xmp_metadata_stream(self):
-        mock_file = _create_test_pdf_with_xmp()
+        mock_file = create_test_pdf_with_xmp()
 
-        result = _strip_pdf_metadata(mock_file)
+        result = strip_pdf_metadata(mock_file)
 
         cleaned_bytes = result.read()
         reader = PdfReader(io.BytesIO(cleaned_bytes))
@@ -360,4 +363,4 @@ class TestStripPdfMetadata:
             content_type="application/pdf",
         )
         with pytest.raises(ValidationError, match="Invalid or corrupt PDF"):
-            _strip_pdf_metadata(mock_file)
+            strip_pdf_metadata(mock_file)

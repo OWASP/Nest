@@ -20,7 +20,7 @@ IMAGE_CONTENT_TYPE_MAP = {
     ".png": "image/png",
     ".webp": "image/webp",
 }
-IMAGE_EXTENSIONS = frozenset({".jpeg", ".jpg", ".png", ".webp"})
+IMAGE_EXTENSIONS = frozenset(IMAGE_CONTENT_TYPE_MAP)
 IMAGE_FORMAT_MAP = {
     ".jpeg": "JPEG",
     ".jpg": "JPEG",
@@ -51,16 +51,16 @@ def strip_file_metadata(file: UploadedFile | None) -> UploadedFile | None:
     ext = Path(file.name).suffix.lower()
 
     if ext in IMAGE_EXTENSIONS:
-        return _strip_image_metadata(file, ext)
+        return strip_image_metadata(file, ext)
 
     if ext == PDF_EXTENSION:
-        return _strip_pdf_metadata(file)
+        return strip_pdf_metadata(file)
 
     msg = f"Unsupported file type for metadata stripping: {ext}"
     raise ValidationError(msg)
 
 
-def _strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
+def strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
     """Strip EXIF/XMP metadata from an image file.
 
     Opens the image with Pillow and re-saves it without metadata.
@@ -100,7 +100,7 @@ def _strip_image_metadata(file: UploadedFile, ext: str) -> SimpleUploadedFile:
     )
 
 
-def _strip_pdf_metadata(file: UploadedFile) -> SimpleUploadedFile:
+def strip_pdf_metadata(file: UploadedFile) -> SimpleUploadedFile:
     """Strip metadata from a PDF file.
 
     Uses pypdf to read and rewrite the PDF, removing the /Info
