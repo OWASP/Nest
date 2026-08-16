@@ -51,12 +51,38 @@ class InfrastructureDeployRunner:
         self.commands.require("tflocal")
         self.localstack.wait_ready()
 
+        state_dir = self.root_dir / "infrastructure" / "state"
         live_dir = self.root_dir / "infrastructure" / "live"
         with (
             set_temporary_env("AWS_ACCESS_KEY_ID", "test"),
             set_temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
             set_temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
         ):
+            state_init_result = self.commands.run(
+                "tflocal",
+                f"-chdir={state_dir}",
+                "init",
+                "-input=false",
+                "-reconfigure",
+                check=False,
+            )
+            if state_init_result.returncode != 0:
+                message = f"terraform init failed in {state_dir}"
+                raise RunnerError(message)
+
+            state_apply_result = self.commands.run(
+                "tflocal",
+                f"-chdir={state_dir}",
+                "apply",
+                "-auto-approve",
+                "-input=false",
+                "-var-file=terraform.localstack.tfvars",
+                check=False,
+            )
+            if state_apply_result.returncode != 0:
+                message = f"terraform apply failed in {state_dir}"
+                raise RunnerError(message)
+
             init_result = self.commands.run(
                 "tflocal",
                 f"-chdir={live_dir}",

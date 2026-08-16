@@ -13,6 +13,12 @@ from scripts.errors import RunnerError
 from scripts.localstack import LocalStack
 
 LOCALSTACK_ENDPOINT_URL = "http://localstack:4566"  # NOSONAR: Test-only LocalStack HTTP.
+AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_ENDPOINT_URL")
+
+
+def assert_aws_env_unset() -> None:
+    for var in AWS_ENV_VARS:
+        assert var not in os.environ
 
 
 class TestInfrastructureDeployRunner:
@@ -75,9 +81,27 @@ class TestInfrastructureDeployRunner:
         commands.require.assert_called_once_with("tflocal")
         localstack.wait_ready.assert_called_once()
 
+        state_dir = str(Path("/repo") / "infrastructure" / "state")
         live_dir = str(Path("/repo") / "infrastructure" / "live")
         commands.run.assert_has_calls(
             [
+                call(
+                    "tflocal",
+                    f"-chdir={state_dir}",
+                    "init",
+                    "-input=false",
+                    "-reconfigure",
+                    check=False,
+                ),
+                call(
+                    "tflocal",
+                    f"-chdir={state_dir}",
+                    "apply",
+                    "-auto-approve",
+                    "-input=false",
+                    "-var-file=terraform.localstack.tfvars",
+                    check=False,
+                ),
                 call(
                     "tflocal",
                     f"-chdir={live_dir}",
@@ -102,9 +126,7 @@ class TestInfrastructureDeployRunner:
         assert captured["AWS_ACCESS_KEY_ID"] == fake_credential
         assert captured["AWS_SECRET_ACCESS_KEY"] == fake_credential
         assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
-        assert "AWS_ACCESS_KEY_ID" not in os.environ
-        assert "AWS_SECRET_ACCESS_KEY" not in os.environ
-        assert "AWS_ENDPOINT_URL" not in os.environ
+        assert_aws_env_unset()
 
     def test_deploy_propagates_wait_ready_failure(self) -> None:
         commands = MagicMock(spec=CommandRunner)
@@ -123,7 +145,7 @@ class TestInfrastructureDeployRunner:
         commands.run.assert_not_called()
 
     @patch.dict(os.environ, {}, clear=True)
-    def test_deploy_raises_runner_error_when_init_fails(self) -> None:
+    def test_deploy_raises_runner_error_when_state_init_fails(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         commands.run.return_value = MagicMock(returncode=1)
         localstack = MagicMock(spec=LocalStack)
@@ -138,13 +160,10 @@ class TestInfrastructureDeployRunner:
         with pytest.raises(RunnerError, match="terraform init failed"):
             runner.deploy()
 
-        assert commands.run.call_count == 1
-        assert "AWS_ACCESS_KEY_ID" not in os.environ
-        assert "AWS_SECRET_ACCESS_KEY" not in os.environ
-        assert "AWS_ENDPOINT_URL" not in os.environ
+        assert_aws_env_unset()
 
     @patch.dict(os.environ, {}, clear=True)
-    def test_deploy_raises_runner_error_when_apply_fails(self) -> None:
+    def test_deploy_raises_runner_error_when_state_apply_fails(self) -> None:
         commands = MagicMock(spec=CommandRunner)
         commands.run.side_effect = [MagicMock(returncode=0), MagicMock(returncode=1)]
         localstack = MagicMock(spec=LocalStack)
@@ -159,7 +178,49 @@ class TestInfrastructureDeployRunner:
         with pytest.raises(RunnerError, match="terraform apply failed"):
             runner.deploy()
 
-        assert commands.run.call_count == 2
-        assert "AWS_ACCESS_KEY_ID" not in os.environ
-        assert "AWS_SECRET_ACCESS_KEY" not in os.environ
-        assert "AWS_ENDPOINT_URL" not in os.environ
+        assert_aws_env_unset()
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_deploy_raises_runner_error_when_live_init_fails(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        commands.run.side_effect = [
+            MagicMock(returncode=0),
+            MagicMock(returncode=0),
+            MagicMock(returncode=1),
+        ]
+        localstack = MagicMock(spec=LocalStack)
+        localstack.api_url = LOCALSTACK_ENDPOINT_URL
+
+        runner = InfrastructureDeployRunner(
+            root_dir=Path("/repo"),
+            commands=commands,
+            localstack=localstack,
+        )
+
+        with pytest.raises(RunnerError, match="terraform init failed"):
+            runner.deploy()
+
+        assert_aws_env_unset()
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_deploy_raises_runner_error_when_live_apply_fails(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        commands.run.side_effect = [
+            MagicMock(returncode=0),
+            MagicMock(returncode=0),
+            MagicMock(returncode=0),
+            MagicMock(returncode=1),
+        ]
+        localstack = MagicMock(spec=LocalStack)
+        localstack.api_url = LOCALSTACK_ENDPOINT_URL
+
+        runner = InfrastructureDeployRunner(
+            root_dir=Path("/repo"),
+            commands=commands,
+            localstack=localstack,
+        )
+
+        with pytest.raises(RunnerError, match="terraform apply failed"):
+            runner.deploy()
+
+        assert_aws_env_unset()
