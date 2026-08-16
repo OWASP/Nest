@@ -10,11 +10,11 @@ authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
 packages = [ { include = "apps", from = "src" } ]
 dependencies.python = "^3.13"
-dependencies.aiohttp = "3.14.1"
+dependencies.aiohttp = "3.14.3"
 dependencies.algoliasearch = "4.40.0"
 dependencies.algoliasearch-django = "4.0.0"
-dependencies.cryptography = "48.0.1"
-dependencies.django = "6.0.6"
+dependencies.cryptography = "50.0.0"
+dependencies.django = "6.0.8"
 dependencies.django-configurations = "2.5.1"
 dependencies.django-cors-headers = "4.9.0"
 dependencies.django-ninja = "1.6.2"
@@ -61,7 +61,7 @@ group.test.dependencies.pytest-xdist = "3.8.0"
 group.test.dependencies.python-dotenv = "1.2.2"
 group.video.dependencies.elevenlabs = "2.45.0"
 group.video.dependencies.ffmpeg-python = "0.2.0"
-group.video.dependencies.pillow = "12.2.0"
+group.video.dependencies.pillow = "12.3.0"
 group.video.dependencies.pypdfium2 = "5.7.1"
 group.video.dependencies.weasyprint = "68.1"
 
@@ -70,73 +70,6 @@ indent = 4
 format_css = true
 format_js = true
 format = true
-
-[tool.ruff]
-target-version = "py313"
-line-length = 99
-src = [ "src" ]
-lint.select = [ "ALL" ]
-lint.extend-select = [ "I" ]
-lint.ignore = [
-  "ANN",     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
-  "ARG002",  # https://docs.astral.sh/ruff/rules/unused-method-argument/
-  "C901",    # https://docs.astral.sh/ruff/rules/complex-structure/
-  "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
-  "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
-  "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
-  "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
-  "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
-  "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
-  "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
-  "TD003",   # https://docs.astral.sh/ruff/rules/missing-todo-link/
-]
-lint.per-file-ignores."**/__init__.py" = [
-  "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-  "F401", # https://docs.astral.sh/ruff/rules/unused-import/
-]
-lint.per-file-ignores."**/src/apps/**/management/commands/*.py" = [
-  "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-  "D102",   # https://docs.astral.sh/ruff/rules/undocumented-public-method/
-  "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
-]
-lint.per-file-ignores."**/src/apps/**/migrations/*.py" = [
-  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
-  "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-  "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-  "D103",   # https://docs.astral.sh/ruff/rules/undocumented-public-function/
-  "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-  "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
-  "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
-]
-lint.per-file-ignores."**/src/apps/api/rest/**/*.py" = [
-  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
-  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-]
-lint.per-file-ignores."**/src/apps/github/models/mixins/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."**/src/apps/slack/commands/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."**/src/apps/slack/common/handlers/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."**/src/apps/slack/events/**/*.py" = [ "PLC0415" ]
-lint.per-file-ignores."**/src/settings/*.py" = [
-  "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
-]
-lint.per-file-ignores."tests/**/*.py" = [
-  "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-  "D101",    # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-  "D102",    # https://docs.astral.sh/ruff/rules/undocumented-public-method/
-  "D103",    # https://docs.astral.sh/ruff/rules/undocumented-public-function/
-  "D106",    # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-  "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
-  "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
-  "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
-  "S101",    # https://docs.astral.sh/ruff/rules/assert/
-  "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
-]
-lint.per-file-ignores."tests/cluster-fuzz-lite/**/*.py" = [
-  "INP001", # Atheris fuzz harnesses mirror production paths; not importable packages.
-]
-lint.isort.detect-same-package = false
-lint.isort.known-first-party = [ "apps", "tests" ]
 
 [tool.mypy]
 mypy_path = "src"

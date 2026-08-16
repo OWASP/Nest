@@ -104,21 +104,39 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
         return self.admins.filter(query).exists()
 
     def user_has_access(self, user) -> bool:
-        """Check if the given user has admin or mentor access to this program.
+        """Check if the given user has any role (admin, mentor, or mentee) here.
 
-        Returns True if the user is authenticated and is either an admin or
-        a mentor of this program, False otherwise.
+        Returns True if the user is authenticated and is an admin, mentor, or
+        mentee of this program, False otherwise.
+        """
+        return self.get_user_role(user) is not None
+
+    def get_user_role(self, user) -> str | None:
+        """Return the user's highest role in this program.
+
+        One of "admin", "mentor", or "mentee", or None if the user is not
+        authenticated or has no role in the program. Admin takes precedence over
+        mentor, and mentor over mentee.
         """
         if not user.is_authenticated:
-            return False
-        return (
-            self.admins.filter(nest_user=user).exists()
-            or self.modules.filter(mentors__nest_user=user).exists()
-            or (
-                user.github_user is not None
-                and self.modules.filter(mentors__github_user=user.github_user).exists()
-            )
-        )
+            return None
+
+        if self.has_admin(user):
+            return "admin"
+
+        github_user = getattr(user, "github_user", None)
+
+        mentor_q = Q(mentors__nest_user=user)
+        mentee_q = Q(menteemodule__mentee__nest_user=user)
+        if github_user is not None:
+            mentor_q |= Q(mentors__github_user=github_user)
+            mentee_q |= Q(menteemodule__mentee__github_user=github_user)
+
+        if self.modules.filter(mentor_q).exists():
+            return "mentor"
+        if self.modules.filter(mentee_q).exists():
+            return "mentee"
+        return None
 
     def save(self, *args, **kwargs) -> None:
         """Save program."""

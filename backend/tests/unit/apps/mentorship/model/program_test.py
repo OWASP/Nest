@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, patch
 
-from apps.github.models import User as GithubUser
 from apps.mentorship.models import Program
 
 
@@ -28,64 +27,97 @@ class TestProgram:
 
 
 class TestProgramUserHasAccess:
-    """Tests for Program.user_has_access method."""
+    """Tests for Program.user_has_access, which delegates to get_user_role."""
 
-    def test_anonymous_user_has_no_access(self):
-        """Test that anonymous users do not have access."""
+    def test_no_role_has_no_access(self):
+        """A user with no role in the program (get_user_role -> None) has no access."""
+        program = MagicMock(spec=Program)
+        program.get_user_role.return_value = None
+
+        assert Program.user_has_access(program, MagicMock()) is False
+
+    def test_admin_has_access(self):
+        """A program admin has access."""
+        program = MagicMock(spec=Program)
+        program.get_user_role.return_value = "admin"
+
+        assert Program.user_has_access(program, MagicMock()) is True
+
+    def test_mentor_has_access(self):
+        """A mentor of the program has access."""
+        program = MagicMock(spec=Program)
+        program.get_user_role.return_value = "mentor"
+
+        assert Program.user_has_access(program, MagicMock()) is True
+
+    def test_mentee_has_access(self):
+        """A mentee enrolled in the program has access."""
+        program = MagicMock(spec=Program)
+        program.get_user_role.return_value = "mentee"
+
+        assert Program.user_has_access(program, MagicMock()) is True
+
+
+class TestProgramGetUserRole:
+    """Tests for Program.get_user_role, including its authentication gate."""
+
+    def test_anonymous_user_has_no_role(self):
+        """Unauthenticated users get no role and never trigger a role lookup."""
         mock_user = MagicMock()
         mock_user.is_authenticated = False
 
         program = MagicMock(spec=Program)
 
-        assert Program.user_has_access(program, mock_user) is False
+        assert Program.get_user_role(program, mock_user) is None
+        program.has_admin.assert_not_called()
+        program.modules.filter.assert_not_called()
 
-    def test_admin_has_access(self):
-        """Test that a program admin has access."""
+    def test_admin_returns_admin(self):
+        """An admin resolves to the admin role and short-circuits other lookups."""
         mock_user = MagicMock()
         mock_user.is_authenticated = True
 
         program = MagicMock(spec=Program)
-        program.admins.filter.return_value.exists.return_value = True
+        program.has_admin.return_value = True
 
-        assert Program.user_has_access(program, mock_user) is True
+        assert Program.get_user_role(program, mock_user) == "admin"
+        program.modules.filter.assert_not_called()
 
-    def test_mentor_has_access(self):
-        """Test that a mentor of the program has access."""
-        mock_github_user = MagicMock(spec=GithubUser, id=1, login="testuser")
+    def test_mentor_returns_mentor(self):
+        """A non-admin who mentors a module resolves to the mentor role."""
         mock_user = MagicMock()
         mock_user.is_authenticated = True
-        mock_user.github_user = mock_github_user
+        mock_user.github_user = MagicMock()
 
         program = MagicMock(spec=Program)
-        program.admins.filter.return_value.exists.return_value = False
+        program.has_admin.return_value = False
         program.modules.filter.return_value.exists.return_value = True
 
-        assert Program.user_has_access(program, mock_user) is True
+        assert Program.get_user_role(program, mock_user) == "mentor"
 
-    def test_authenticated_non_admin_non_mentor_has_no_access(self):
-        """Test that an authenticated user who is not admin or mentor has no access."""
-        mock_github_user = MagicMock(spec=GithubUser, id=1, login="testuser")
+    def test_mentee_returns_mentee(self):
+        """A non-admin non-mentor enrolled as a mentee resolves to the mentee role."""
         mock_user = MagicMock()
         mock_user.is_authenticated = True
-        mock_user.github_user = mock_github_user
+        mock_user.github_user = MagicMock()
 
         program = MagicMock(spec=Program)
-        program.admins.filter.return_value.exists.return_value = False
-        program.modules.filter.return_value.exists.return_value = False
+        program.has_admin.return_value = False
+        program.modules.filter.return_value.exists.side_effect = [False, True]
 
-        assert Program.user_has_access(program, mock_user) is False
+        assert Program.get_user_role(program, mock_user) == "mentee"
 
-    def test_authenticated_user_without_github_user(self):
-        """User without github_user who is not admin or nest_user mentor has no access."""
+    def test_authenticated_user_without_role_returns_none(self):
+        """An authenticated user with no admin/mentor/mentee tie gets no role."""
         mock_user = MagicMock()
         mock_user.is_authenticated = True
-        mock_user.github_user = None
+        mock_user.github_user = MagicMock()
 
         program = MagicMock(spec=Program)
-        program.admins.filter.return_value.exists.return_value = False
-        program.modules.filter.return_value.exists.return_value = False
+        program.has_admin.return_value = False
+        program.modules.filter.return_value.exists.side_effect = [False, False]
 
-        assert Program.user_has_access(program, mock_user) is False
+        assert Program.get_user_role(program, mock_user) is None
 
 
 class TestProgramHasAdmin:

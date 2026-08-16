@@ -18,7 +18,10 @@ repos:
         args:
           - --config
           - .bake.toml
-        exclude: ^backend/
+        # Component Makefiles use root-relative includes and call shared targets; mbake
+        # validates each file in isolation from its own directory, so only the root
+        # Makefile can be checked.
+        exclude: ^(backend|cspell|docs|e2e|frontend|infrastructure|make|tools)/
 
   - repo: https://github.com/adrienverge/yamllint.git
     rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # v1.38.0
@@ -31,8 +34,16 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015  # v1.106.0
+    rev: bf9dd9c695ddaf238af36f179049202358ec22b7  # v1.108.1
     hooks:
+      - id: terraform_providers_lock
+        args:
+          - --args=-platform=darwin_arm64
+          - --args=-platform=linux_amd64
+          - --args=-platform=linux_arm64
+          - --hook-config=--mode=regenerate-lockfile-if-some-platform-missed
+        files: .terraform.lock.hcl
+        name: Lock Terraform providers
       - id: terraform_fmt
         files: ^infrastructure/.*\.(tf|tftest\.hcl)$
       - id: terraform_tflint
@@ -41,15 +52,20 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 3b3f7c3f57fe9925356faf5fe6230835138be230  # v0.15.17
+    rev: cb8c523fd4835aba42af70f4cad5568db4df0b6c  # v0.16.0
     hooks:
       - id: ruff-check
         args:
+          - --config
+          - ruff.toml
           - --fix
       - id: ruff-format
+        args:
+          - --config
+          - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: a8264ddb425b07a8bd1bfd758c4d8d938ed064ad  # v1.39.2
+    rev: 464aca7350666b43f6a3c4d218acd2ccd5f5f114  # v1.42.3
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -58,7 +74,7 @@ repos:
           - html
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: a4d5d37e66ebcd6b3705204a1d6dbb56dea66338  # v0.49.0
+    rev: 5b5dddc4fb0f83c3ea1fc5616fa63e115dce83e0  # v0.49.1
     hooks:
       - id: markdownlint
         args:
@@ -77,16 +93,16 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # v2.1.0
+    rev: 41e691678310dfd3833f7ab4e180ddb014310356  # v2.3.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.316.0
-          - strawberry-graphql-django==0.86.0
+          - strawberry-graphql==0.323.2
+          - strawberry-graphql-django==0.86.5
           - types-lxml==2026.2.16
-          - types-python-dateutil==2.9.0.20260518
-          - types-PyYAML==6.0.12.20260518
-          - types-requests==2.33.0.20260518
+          - types-python-dateutil==2.9.0.20260716
+          - types-PyYAML==6.0.12.20260724
+          - types-requests==2.33.0.20260712
         entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -106,6 +122,8 @@ repos:
       - id: check-yaml
         exclude: pnpm-lock\.yaml$
       - id: detect-private-key
+        # Armor markers appear in the renewer/export helpers and test fixtures.
+        exclude: ^tools/(security/renew_security_txt\.py|tests/security/renew_security_txt_test\.py)$
       - id: end-of-file-fixer
         exclude: frontend/src/types/__generated__
         exclude_types:
@@ -139,14 +157,14 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: ca620e0df5ae9a02b7b81a6e4c954894f043ce42  # v2.24.1
+    rev: 3632ea90e7641b574983ddf3a11ccedefff3c881  # v2.25.3
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
           - toml-fmt-common<1.3.3
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # v1.25.2
+    rev: 067260dc5fe6ea86b7551bfd6f8b3ba4e6c93129  # v1.28.0
     hooks:
       - id: zizmor
         args:

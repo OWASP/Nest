@@ -1,10 +1,15 @@
 terraform {
-  required_version = "~> 1.14.0"
+  required_version = "~> 1.15.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.56.0"
+    }
+    # tflint-ignore: terraform_unused_required_providers
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.9.0"
     }
   }
 }
@@ -217,11 +222,12 @@ module "security" {
 module "storage" {
   source = "../modules/storage"
 
-  common_tags          = local.common_tags
-  environment          = var.environment
-  fixtures_bucket_name = local.fixtures_bucket_name
-  kms_key_arn          = module.kms.key_arn
-  project_name         = var.project_name
+  common_tags               = local.common_tags
+  create_shared_data_bucket = var.create_shared_data_bucket
+  environment               = var.environment
+  fixtures_bucket_name      = local.fixtures_bucket_name
+  kms_key_arn               = module.kms.key_arn
+  project_name              = var.project_name
 }
 
 module "tasks" {
