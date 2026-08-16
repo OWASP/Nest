@@ -312,9 +312,9 @@ aws ecs run-task \
   - Environment: Cluster: `nest-staging-tasks-cluster`
   - Networking:
     - VPC: `nest-staging-vpc`
-    - Subnets: Choose a private subnet if NAT Gateway is enabled, public otherwise (default).
+    - Subnets: Choose a private subnet.
     - Security group name: select the ECS security group (e.g. `nest-staging-tasks-sg`).
-    - Public IP: Turned off if NAT Gateway is enabled, Turned on otherwise (default).
+    - Public IP: Turned off.
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.
