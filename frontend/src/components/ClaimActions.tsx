@@ -27,6 +27,7 @@ interface ClaimActionsProps {
   claim: { key: string; status: ClaimStatusEnum }
   hasReviewed: boolean
   isReviewer: boolean | undefined
+  isSelf: boolean
   login: string
   year: string
 }
@@ -46,6 +47,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
   claim,
   hasReviewed,
   isReviewer,
+  isSelf,
   login,
   year,
 }) => {
@@ -248,7 +250,7 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
   }
 
   const options = [
-    ...(claim.status == ClaimStatusEnum.Draft
+    ...(isSelf && claim.status == ClaimStatusEnum.Draft
       ? [
           {
             key: 'edit',
@@ -258,14 +260,14 @@ const ClaimActions: React.FC<ClaimActionsProps> = ({
           },
         ]
       : []),
-    ...(!isReviewer
+    ...(isSelf
       ? (ACTIONS_BY_STATUS[claim.status] ?? []).map((key) => ({
           key,
           label: `${upperFirst(key)} Claim`,
           onAction: ACTION_HANDLERS[key],
         }))
       : []),
-    ...(isReviewer && !hasReviewed && claim.status === ClaimStatusEnum.Submitted
+    ...(isReviewer && !isSelf && !hasReviewed && claim.status === ClaimStatusEnum.Submitted
       ? [
           {
             key: 'approve',

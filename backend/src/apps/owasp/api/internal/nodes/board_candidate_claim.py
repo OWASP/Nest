@@ -57,14 +57,8 @@ class BoardCandidateClaimNode(strawberry.relay.Node):
             and root.candidate.member is not None
             and user.github_user == root.candidate.member
         )
-        if is_self or root.status == BoardCandidateClaim.Status.APPROVED:
+        if is_self or root.status in BoardCandidateClaim.PUBLIC_STATUSES:
             return root.reviews.all()
-
-        is_reviewer = (
-            user.is_authenticated and root.board.claim_reviewers.filter(id=user.id).exists()
-        )
-        if is_reviewer:
-            return root.reviews.filter(reviewer=user)
         return []
 
     @strawberry_django.field

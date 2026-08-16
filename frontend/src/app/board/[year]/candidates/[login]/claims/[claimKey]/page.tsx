@@ -15,7 +15,6 @@ import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.g
 import { ClaimStatusEnum, ReviewStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
@@ -33,7 +32,7 @@ const ClaimDetailsPage = () => {
     error: graphQLRequestError,
   } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: isSyncing || !claimKey || !year || !session?.user?.login,
+    skip: isSyncing || !claimKey || !year,
     variables: {
       key: claimKey,
       login,
@@ -43,6 +42,7 @@ const ClaimDetailsPage = () => {
   })
 
   const isReviewer = graphQLData?.boardOfDirectors?.reviewer != null
+  const isSelf = session?.user?.login === login
   const claim = graphQLData?.boardCandidateClaim
   const evidences = graphQLData?.boardCandidateClaimEvidences ?? []
   const hasReviewed =
@@ -64,12 +64,6 @@ const ClaimDetailsPage = () => {
   }, [claim, claimKey, login, year])
 
   if (isLoading || isSyncing) return <LoadingSpinner />
-
-  if (session?.user?.login !== login && !isReviewer) {
-    return (
-      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
-    )
-  }
 
   if (graphQLRequestError) {
     return (
@@ -113,7 +107,7 @@ const ClaimDetailsPage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">@{login}</p>
           </div>
           <div className="flex items-center gap-2">
-            {claim.status === ClaimStatusEnum.Draft && session?.user?.login === login && (
+            {claim.status === ClaimStatusEnum.Draft && isSelf && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
                 {'Add Evidence'}
@@ -123,6 +117,7 @@ const ClaimDetailsPage = () => {
               claim={claim}
               hasReviewed={hasReviewed}
               isReviewer={isReviewer}
+              isSelf={isSelf}
               login={login}
               year={year}
             />

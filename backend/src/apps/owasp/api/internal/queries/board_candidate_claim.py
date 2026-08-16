@@ -7,7 +7,6 @@ from django.db.models import Exists, OuterRef, Q
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
-from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 
 @strawberry.type
@@ -30,13 +29,7 @@ class BoardCandidateClaimQuery:
 
         """
         user = info.context.request.user
-        is_reviewer = (
-            user.is_authenticated
-            and BoardOfDirectors.objects.filter(year=year, claim_reviewers=user).exists()
-        )
-        claims = BoardCandidateClaim.objects.filter(
-            board__year=year,
-        )
+        claims = BoardCandidateClaim.objects.filter(board__year=year)
 
         if login is not None:
             is_self = (
@@ -45,33 +38,15 @@ class BoardCandidateClaimQuery:
                 and user.github_user.login == login
             )
             claims = claims.filter(candidate__member__login=login)
-
-            if not is_self and not is_reviewer:
-                claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
-            elif is_reviewer and not is_self:
-                claims = claims.filter(
-                    status__in=[
-                        BoardCandidateClaim.Status.SUBMITTED,
-                        BoardCandidateClaim.Status.APPROVED,
-                    ]
-                )
-        elif is_reviewer:
-            claims = claims.filter(
-                Q(candidate__member=user.github_user)
-                | Q(
-                    status__in=[
-                        BoardCandidateClaim.Status.SUBMITTED,
-                        BoardCandidateClaim.Status.APPROVED,
-                    ]
-                )
-            )
+            if not is_self:
+                claims = claims.filter(status__in=BoardCandidateClaim.PUBLIC_STATUSES)
         elif user.is_authenticated and user.github_user:
             claims = claims.filter(
                 Q(candidate__member=user.github_user)
-                | Q(status=BoardCandidateClaim.Status.APPROVED)
+                | Q(status__in=BoardCandidateClaim.PUBLIC_STATUSES)
             )
         else:
-            claims = claims.filter(status=BoardCandidateClaim.Status.APPROVED)
+            claims = claims.filter(status__in=BoardCandidateClaim.PUBLIC_STATUSES)
 
         return (
             claims.annotate(
@@ -126,16 +101,5 @@ class BoardCandidateClaimQuery:
             and user.github_user is not None
             and user.github_user == claim.candidate.member
         )
-        is_reviewer = (
-            user.is_authenticated and claim.board.claim_reviewers.filter(id=user.id).exists()
-        )
 
-        return (
-            claim
-            if (
-                is_self
-                or (is_reviewer and claim.status == BoardCandidateClaim.Status.SUBMITTED)
-                or claim.status == BoardCandidateClaim.Status.APPROVED
-            )
-            else None
-        )
+        return claim if is_self or claim.status in BoardCandidateClaim.PUBLIC_STATUSES else None

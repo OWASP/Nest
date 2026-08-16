@@ -61,6 +61,16 @@ class TestBoardCandidateClaimModel:
 
         assert expected == BoardCandidateClaim.FINALIZED_STATUSES
 
+    def test_public_statuses(self):
+        """Test PUBLIC_STATUSES contains the correct statuses."""
+        expected = {
+            BoardCandidateClaim.Status.APPROVED,
+            BoardCandidateClaim.Status.REJECTED,
+            BoardCandidateClaim.Status.SUBMITTED,
+        }
+
+        assert expected == BoardCandidateClaim.PUBLIC_STATUSES
+
     def test_default_status_is_draft(self):
         """Test default status is DRAFT."""
         field = BoardCandidateClaim._meta.get_field("status")
