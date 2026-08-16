@@ -34,19 +34,19 @@ class TestCertificateNode(GraphQLNodeBaseTest):
         mock_cert.get_tier_display.assert_called_once()
 
     def test_is_verified_resolver_active(self):
-        """Test is_verified returns True when certificate is not revoked."""
+        """Test is_verified returns True when certificate is verified."""
         mock_cert = Mock()
-        mock_cert.is_revoked = False
+        mock_cert.is_verified = True
 
         field = self._get_field_by_name("is_verified", CertificateNode)
         result = field.base_resolver.wrapped_func(None, mock_cert)
 
         assert result is True
 
-    def test_is_verified_resolver_revoked(self):
-        """Test is_verified returns False when certificate is revoked."""
+    def test_is_verified_resolver_not_verified(self):
+        """Test is_verified returns False when certificate is not verified."""
         mock_cert = Mock()
-        mock_cert.is_revoked = True
+        mock_cert.is_verified = False
 
         field = self._get_field_by_name("is_verified", CertificateNode)
         result = field.base_resolver.wrapped_func(None, mock_cert)
