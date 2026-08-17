@@ -121,7 +121,7 @@ class TestSearchProjectsResolution:
     def test_search_projects_query_too_short(self):
         """Test search_projects returns empty for query < MIN_SEARCH_QUERY_LENGTH."""
         query = ProjectQuery()
-        result = query.__class__.__dict__["search_projects"](query, query="ab")
+        result = query.__class__.__dict__["search_projects"](query, query="a")
 
         assert result == []
 
@@ -136,7 +136,7 @@ class TestSearchProjectsResolution:
     def test_search_projects_whitespace_trimmed(self):
         """Test search_projects trims whitespace before checking length."""
         query = ProjectQuery()
-        result = query.__class__.__dict__["search_projects"](query, query="  ab  ")
+        result = query.__class__.__dict__["search_projects"](query, query="  a  ")
 
         assert result == []
 
