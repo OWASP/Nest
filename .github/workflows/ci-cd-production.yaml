@@ -57,6 +57,7 @@ jobs:
       backend_min_count: 2
       backend_use_fargate_spot: false
       base_url: https://nest.owasp.org
+      create_shared_data_bucket: true
       django_configuration: Production
       django_settings_module: settings.production
       enable_additional_parameters: true

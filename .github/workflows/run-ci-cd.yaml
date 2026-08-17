@@ -47,6 +47,11 @@ on:
         description: The base URL for Lighthouse and ZAP scans
         required: true
         type: string
+      create_shared_data_bucket:
+        description: Create the shared public data S3 bucket
+        required: false
+        default: false
+        type: boolean
       django_configuration:
         description: Django configuration string
         required: true
@@ -300,6 +305,7 @@ jobs:
       backend_max_count: ${{ inputs.backend_max_count }}
       backend_min_count: ${{ inputs.backend_min_count }}
       backend_use_fargate_spot: ${{ inputs.backend_use_fargate_spot }}
+      create_shared_data_bucket: ${{ inputs.create_shared_data_bucket }}
       django_configuration: ${{ inputs.django_configuration }}
       django_settings_module: ${{ inputs.django_settings_module }}
       enable_additional_parameters: ${{ inputs.enable_additional_parameters }}

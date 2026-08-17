@@ -35,12 +35,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b  # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6.2.3
         with:
           aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -50,15 +50,18 @@ jobs:
         uses: ./.github/actions/apply-infrastructure-changes
         with:
           plugin-cache-dir: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          summary-title: Bootstrap Terraform Plan Output
+          summary-title: Bootstrap Terraform Plan Output (${{ inputs.environment }})
           tfbackend-path: infrastructure/bootstrap/terraform.tfbackend
           tfbackend-content: |
             bucket="${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}"
+            key="${{ inputs.environment }}/bootstrap/terraform.tfstate"
+            kms_key_id="alias/nest-${{ inputs.environment }}-state"
             region="${{ vars.AWS_REGION }}"
           tfvars-path: infrastructure/bootstrap/terraform.tfvars
           tfvars-content: |
             aws_region="${{ vars.AWS_REGION }}"
-            project_name="nest"
             aws_role_external_id="${{ secrets.AWS_ROLE_EXTERNAL_ID }}"
+            environment="${{ inputs.environment }}"
+            project_name="nest"
           working-directory: infrastructure/bootstrap
     timeout-minutes: 10

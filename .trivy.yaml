@@ -5,6 +5,9 @@ filesystem:
 
 ignorefile: /.trivyignore.yaml
 
+pkg:
+  include-dev-deps: true
+
 report: all
 
 scan:
@@ -33,10 +36,12 @@ scan:
   skip-files:
     - '**/.env'
     - '**/*.pem'
+    - '**/private/**'
 
 severity:
   - CRITICAL
   - HIGH
+  - MEDIUM
   - UNKNOWN
 
 timeout: 10m

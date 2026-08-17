@@ -28,9 +28,21 @@ The backend code lives in this directory. Key directories include:
 The project uses **Docker** for local development. From the project root:
 
 ```bash
-# Start all services (backend, db, cache)
+# Start all services (backend, db, cache, …)
+make run
+```
+
+Or with Compose directly (add
+`-f docker-compose/local/compose.override.yaml` if you use local overrides):
+
+```bash
 docker compose -f docker-compose/local/compose.yaml up
 ```
+
+For local-only volume name customization on a feature branch (parallel
+checkouts / PR work), edit `docker-compose/local/compose.override.yaml` and see
+[docker-compose/README.md](../docker-compose/README.md). Merge queue (not PR CI)
+rejects non-canonical volume names before they reach `main`.
 
 For common tasks, use the provided `Makefile` targets:
 

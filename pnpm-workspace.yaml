@@ -1,15 +1,17 @@
+auditConfig: {}
+
 ignoreScripts: true
 
 # 21 days (in minutes)
 minimumReleaseAge: 30240
 
 minimumReleaseAgeExclude:
-  - brace-expansion@1.1.16
-  - brace-expansion@5.0.7
+  - brace-expansion@1.1.18
+  - brace-expansion@5.0.9
 
 overrides:
-  brace-expansion@1: 1.1.16
-  brace-expansion@5: 5.0.7
+  brace-expansion@1: 1.1.18
+  brace-expansion@5: 5.0.9
 
 saveExact: true
 
