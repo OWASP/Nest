@@ -16,13 +16,18 @@ class ReactionAlertAdmin(admin.ModelAdmin):
         "reaction_count",
         "nest_created_at",
     )
-    search_fields = ("conversation__name", "message_ts", "report_type")
     readonly_fields = (
         "conversation",
         "message_ts",
         "report_type",
         "reaction_count",
+        "reporter_user_ids",
         "alert_message_ts",
+    )
+    search_fields = (
+        "conversation__name",
+        "message_ts",
+        "report_type",
     )
 
     def has_add_permission(self, request):

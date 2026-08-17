@@ -11,4 +11,4 @@ class TestReactionAlertAdmin:
 
         assert not admin.has_add_permission(request=None)
         assert not admin.has_delete_permission(request=None)
-        assert "alert_message_ts" in admin.readonly_fields
+        assert "reporter_user_ids" in admin.readonly_fields
