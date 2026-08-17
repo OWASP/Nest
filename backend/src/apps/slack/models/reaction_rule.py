@@ -20,8 +20,16 @@ class ReactionRule(TimestampedModel):
     class Meta:
         """Model options."""
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=("conversation", "report_type"),
+                name="unique_reactionrule_conversation_report_type",
+                violation_error_message=(
+                    "A reaction rule already exists for this conversation and report type."
+                ),
+            ),
+        ]
         db_table = "slack_reaction_rules"
-        unique_together = ("conversation", "report_type")
 
     alert_channel_id = models.CharField(
         max_length=50,

@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackRequestError
 
 from apps.slack.events.reaction_added import ReactionAdded
 
@@ -262,6 +262,22 @@ class TestReactionAdded:
             reporter_user_ids=["U1", "U2", "U3"],
         )
 
+    def test_handle_event_names_only_matched_emojis(self, mocker):
+        """Test unused configured emojis are omitted from the alert text."""
+        client = mock_client()
+        rule = mock_rule(threshold=2, emojis=["spam", "flag"])
+        patch_rule_lookup(mocker, rule)
+        patch_alert_lock(mocker)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        _, kwargs = client.chat_postMessage.call_args
+        assert (
+            "Reported by: <@U_REACTOR> <@U_OTHER> using the following emojis: :spam:"
+            in kwargs["text"]
+        )
+        assert ":flag:" not in kwargs["text"]
+
     def test_handle_event_skips_non_message_items(self, mocker):
         """Test file reactions do not look up Slack reactions."""
         client = mock_client()
@@ -307,6 +323,27 @@ class TestReactionAdded:
             }
         )
         client.chat_getPermalink.side_effect = slack_error("message_not_found")
+        patch_rule_lookup(mocker)
+        _, release, record = patch_alert_lock(mocker)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        client.chat_postMessage.assert_called_once()
+        _, kwargs = client.chat_postMessage.call_args
+        assert "https://" not in kwargs["text"]
+        record.assert_called_once()
+        release.assert_called_once()
+
+    def test_handle_event_posts_when_permalink_transport_fails(self, mocker):
+        """Test a permalink transport failure still posts the threshold alert."""
+        client = mock_client(
+            {
+                "message": {
+                    "reactions": [{"name": "spam", "count": 1, "users": ["U_REACTOR"]}],
+                }
+            }
+        )
+        client.chat_getPermalink.side_effect = SlackRequestError("connection failed")
         patch_rule_lookup(mocker)
         _, release, record = patch_alert_lock(mocker)
 

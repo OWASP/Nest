@@ -2,7 +2,7 @@
 
 import logging
 
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.slack.blocks import markdown
 from apps.slack.events.event import EventBase
@@ -33,6 +33,9 @@ def fetch_permalink(client, channel_id: str, message_ts: str) -> str:
             "Could not fetch Slack permalink for moderation alert: %s",
             e.response.get("error", "unknown_error"),
         )
+        return ""
+    except SlackClientError as e:
+        logger.warning("Could not fetch Slack permalink for moderation alert: %s", e)
         return ""
 
 
@@ -74,7 +77,7 @@ class ReactionAdded(EventBase):
         if (snapshot := fetch_reaction(client, channel_id, message_ts, rule.emojis)) is None:
             return
 
-        reaction_count, reporter_user_ids, permalink = snapshot
+        reaction_count, reporter_user_ids, permalink, matched_emojis = snapshot
         if reaction_count < rule.threshold:
             return
 
@@ -91,7 +94,7 @@ class ReactionAdded(EventBase):
             if ReactionAlert.renew(rule.conversation, message_ts, rule.report_type, owner):
                 alert_users = mention_users(rule.alert_user_ids)
                 reporters = mention_users(reporter_user_ids)
-                emojis = format_emojis(rule.emojis)
+                emojis = format_emojis(matched_emojis)
                 text = (
                     f"{alert_users}\n"
                     f"A message in <#{channel_id}> reached the "

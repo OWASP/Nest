@@ -23,6 +23,5 @@ class ReactionRuleAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "conversation__name",
-        "emojis",
         "alert_channel_id",
     )

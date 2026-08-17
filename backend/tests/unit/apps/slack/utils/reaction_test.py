@@ -47,6 +47,7 @@ class TestReactionFromPayload:
             2,
             ["U_REACTOR", "U_OTHER"],
             "https://slack.test/message",
+            ["spam"],
         )
 
     def test_reaction_from_payload_returns_none_when_emoji_missing(self):
@@ -70,6 +71,16 @@ class TestReactionFromPayload:
             3,
             ["U1", "U2", "U3"],
             "https://slack.test/message",
+            ["spam", "flag"],
+        )
+
+    def test_reaction_from_payload_returns_matched_emojis_only(self):
+        """Test unused configured emojis are omitted from the snapshot."""
+        assert reaction_from_payload(PAYLOAD, ["spam", "flag"]) == (
+            2,
+            ["U_REACTOR", "U_OTHER"],
+            "https://slack.test/message",
+            ["spam"],
         )
 
     def test_reaction_from_payload_ignores_non_list_emojis(self):

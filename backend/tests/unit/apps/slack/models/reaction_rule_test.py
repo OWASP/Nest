@@ -22,6 +22,16 @@ class TestReactionRule:
         assert ReactionRule.ReportType.SPAM == "spam"
         assert ReactionRule.ReportType.choices == [("spam", "Spam")]
 
+    def test_unique_conversation_report_type_constraint(self):
+        """Test one reaction rule is allowed per conversation and report type."""
+        constraint = next(
+            item
+            for item in ReactionRule._meta.constraints
+            if item.name == "unique_reactionrule_conversation_report_type"
+        )
+
+        assert tuple(constraint.fields) == ("conversation", "report_type")
+
     def test_for_emoji_returns_matching_rule(self, mocker):
         """Test reaction rule lookup returns the active rule that lists the emoji."""
         rule = Mock(emojis=["spam", "flag"])

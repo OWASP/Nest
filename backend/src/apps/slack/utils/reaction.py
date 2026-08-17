@@ -32,8 +32,8 @@ def parse_message_reaction(event):
     return channel_id, message_ts, emoji_name
 
 
-def reaction_from_payload(payload, emojis: object) -> tuple[int, list[str], str] | None:
-    """Return unique reporter IDs and permalink for listed emojis on a reactions.get payload."""
+def reaction_from_payload(payload, emojis: object) -> tuple[int, list[str], str, list[str]] | None:
+    """Return unique reporters, permalink, and matched emoji names from reactions.get."""
     if not isinstance(emojis, list):
         return None
     wanted = {name for name in emojis if name}
@@ -44,15 +44,17 @@ def reaction_from_payload(payload, emojis: object) -> tuple[int, list[str], str]
     permalink = message.get("permalink") or ""
     reporters: list[str] = []
     seen: set[str] = set()
-    matched = False
+    matched_names: set[str] = set()
     for reaction in message.get("reactions") or []:
-        if reaction.get("name") not in wanted:
+        name = reaction.get("name")
+        if name not in wanted:
             continue
-        matched = True
+        matched_names.add(name)
         for user_id in reaction.get("users") or []:
             if user_id and user_id not in seen:
                 seen.add(user_id)
                 reporters.append(user_id)
-    if not matched:
+    if not matched_names:
         return None
-    return len(reporters), reporters, permalink
+    matched_emojis = [name for name in emojis if name in matched_names]
+    return len(reporters), reporters, permalink, matched_emojis
