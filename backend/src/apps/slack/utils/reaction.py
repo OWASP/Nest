@@ -1,9 +1,18 @@
 """Slack reaction event helpers."""
 
 
-def mention_users(user_ids) -> str:
+def format_emojis(emojis: object) -> str:
+    """Return Slack emoji markup for the given emoji names."""
+    if not emojis or not isinstance(emojis, list):
+        return ""
+    return " ".join(f":{name}:" for name in emojis if name)
+
+
+def mention_users(user_ids: object) -> str:
     """Return Slack mention markup for the given user IDs."""
-    return " ".join(f"<@{user_id}>" for user_id in user_ids or [])
+    if not user_ids or not isinstance(user_ids, list):
+        return ""
+    return " ".join(f"<@{user_id}>" for user_id in user_ids if user_id)
 
 
 def parse_message_reaction(event):
@@ -23,15 +32,27 @@ def parse_message_reaction(event):
     return channel_id, message_ts, emoji_name
 
 
-def reaction_from_payload(payload, emoji_name: str) -> tuple[int, list[str], str] | None:
-    """Return count, reporter IDs, and permalink for an emoji on a reactions.get payload."""
+def reaction_from_payload(payload, emojis: object) -> tuple[int, list[str], str] | None:
+    """Return unique reporter IDs and permalink for listed emojis on a reactions.get payload."""
+    if not isinstance(emojis, list):
+        return None
+    wanted = {name for name in emojis if name}
+    if not wanted:
+        return None
+
     message = payload.get("message") or {}
     permalink = message.get("permalink") or ""
+    reporters: list[str] = []
+    seen: set[str] = set()
+    matched = False
     for reaction in message.get("reactions") or []:
-        if reaction.get("name") != emoji_name:
+        if reaction.get("name") not in wanted:
             continue
-        reporter_user_ids = list(reaction.get("users") or [])
-        count = reaction.get("count")
-        reaction_count = int(count) if count is not None else len(reporter_user_ids)
-        return reaction_count, reporter_user_ids, permalink
-    return None
+        matched = True
+        for user_id in reaction.get("users") or []:
+            if user_id and user_id not in seen:
+                seen.add(user_id)
+                reporters.append(user_id)
+    if not matched:
+        return None
+    return len(reporters), reporters, permalink

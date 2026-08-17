@@ -12,7 +12,7 @@ class ReactionRuleAdmin(admin.ModelAdmin):
     autocomplete_fields = ("conversation",)
     list_display = (
         "conversation",
-        "emoji_name",
+        "emojis",
         "report_type",
         "threshold",
         "is_active",
@@ -23,6 +23,6 @@ class ReactionRuleAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "conversation__name",
-        "emoji_name",
+        "emojis",
         "alert_channel_id",
     )

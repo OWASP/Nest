@@ -1,4 +1,9 @@
-from apps.slack.utils.reaction import mention_users, parse_message_reaction, reaction_from_payload
+from apps.slack.utils.reaction import (
+    format_emojis,
+    mention_users,
+    parse_message_reaction,
+    reaction_from_payload,
+)
 
 EVENT = {
     "item": {"type": "message", "channel": "C_SOURCE", "ts": "123.000"},
@@ -37,16 +42,58 @@ class TestParseMessageReaction:
 
 class TestReactionFromPayload:
     def test_reaction_from_payload_returns_matching_emoji(self):
-        """Test reactions.get payloads expose count, reporters, and permalink."""
-        assert reaction_from_payload(PAYLOAD, "spam") == (
+        """Test reactions.get payloads expose unique reporters and permalink."""
+        assert reaction_from_payload(PAYLOAD, ["spam"]) == (
             2,
             ["U_REACTOR", "U_OTHER"],
             "https://slack.test/message",
         )
 
     def test_reaction_from_payload_returns_none_when_emoji_missing(self):
-        """Test an unmatched emoji does not produce a snapshot."""
-        assert reaction_from_payload(PAYLOAD, "flag") is None
+        """Test an unmatched emoji set does not produce a snapshot."""
+        assert reaction_from_payload(PAYLOAD, ["flag"]) is None
+
+    def test_reaction_from_payload_unions_unique_reporters(self):
+        """Test listed emojis share one unique-reporter count."""
+        payload = {
+            "message": {
+                "permalink": "https://slack.test/message",
+                "reactions": [
+                    {"name": "spam", "count": 2, "users": ["U1", "U2"]},
+                    {"name": "flag", "count": 2, "users": ["U2", "U3"]},
+                    {"name": "thumbsup", "count": 4, "users": ["U4"]},
+                ],
+            }
+        }
+
+        assert reaction_from_payload(payload, ["spam", "flag"]) == (
+            3,
+            ["U1", "U2", "U3"],
+            "https://slack.test/message",
+        )
+
+    def test_reaction_from_payload_ignores_non_list_emojis(self):
+        """Test a JSON scalar emoji list does not produce a snapshot."""
+        assert reaction_from_payload(PAYLOAD, "spam") is None
+
+
+class TestFormatEmojis:
+    def test_format_emojis_joins_names(self):
+        """Test emoji names are formatted as Slack emoji markup."""
+        assert format_emojis(["spam", "flag"]) == ":spam: :flag:"
+
+    def test_format_emojis_handles_empty(self):
+        """Test missing emoji names produce no markup."""
+        assert format_emojis([]) == ""
+        assert format_emojis(None) == ""
+
+    def test_format_emojis_ignores_non_list_values(self):
+        """Test JSON scalars and objects are not treated as emoji lists."""
+        assert format_emojis("spam") == ""
+
+    def test_format_emojis_ignores_empty_names(self):
+        """Test blank emoji names are omitted from markup."""
+        assert format_emojis(["", "spam", None, "flag"]) == ":spam: :flag:"
 
 
 class TestMentionUsers:
@@ -58,3 +105,13 @@ class TestMentionUsers:
         """Test missing user IDs produce no mention markup."""
         assert mention_users([]) == ""
         assert mention_users(None) == ""
+
+    def test_mention_users_ignores_non_list_values(self):
+        """Test JSON scalars and objects are not treated as user ID lists."""
+        assert mention_users("U123") == ""
+        assert mention_users({"U123": True}) == ""
+        assert mention_users(123) == ""
+
+    def test_mention_users_ignores_empty_ids(self):
+        """Test blank user IDs are omitted from mention markup."""
+        assert mention_users(["", "U1", None, "U2"]) == "<@U1> <@U2>"
