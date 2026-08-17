@@ -30,15 +30,10 @@ class TestSnapshotSubscriptionQuery:
         ]
         assert "my_snapshot_subscriptions" in field_names
 
-    def _resolve_my_snapshot_subscriptions(self, info):
-        """Invoke the underlying resolver for my_snapshot_subscriptions."""
-        field = SnapshotSubscriptionQuery.__dict__["my_snapshot_subscriptions"]
-        return field(self.query, info=info)
-
     def test_my_snapshot_subscriptions_unauthenticated(self):
         """Test my_snapshot_subscriptions returns empty list for unauthenticated user."""
         info = mock_info(authenticated=False)
-        result = self._resolve_my_snapshot_subscriptions(info)
+        result = self.query.my_snapshot_subscriptions(info=info)
         assert result == []
 
     def test_my_snapshot_subscriptions_returns_list(self):
@@ -52,6 +47,6 @@ class TestSnapshotSubscriptionQuery:
             "apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
             mock_objects.filter.return_value = mock_qs
-            result = self._resolve_my_snapshot_subscriptions(info)
+            result = self.query.my_snapshot_subscriptions(info=info)
             assert result == [mock_sub1, mock_sub2]
             mock_objects.filter.assert_called_once_with(user=info.context.request.user)

@@ -372,3 +372,14 @@ class SnapshotSubscription(models.Model):
             },
             exclude_pk=self.pk,
         )
+
+    def validate_unique_setup(self):
+        """Raise ValidationError if another subscription has the exact same setup.
+
+        Raises:
+            ValidationError: If a duplicate setup exists.
+
+        """
+        if self.has_duplicate_setup():
+            msg = "A subscription with the same setup already exists."
+            raise ValidationError(msg)

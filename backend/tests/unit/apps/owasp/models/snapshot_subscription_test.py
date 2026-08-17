@@ -651,6 +651,27 @@ class TestReactivate:
         sub.save.assert_called_once_with(update_fields=("is_active",))
 
 
+class TestValidateUniqueSetup:
+    """Test SnapshotSubscription.validate_unique_setup method."""
+
+    def test_passes_when_no_duplicate(self):
+        """Test validate_unique_setup passes when no duplicate exists."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.has_duplicate_setup.return_value = False
+
+        SnapshotSubscription.validate_unique_setup(sub)
+
+        sub.has_duplicate_setup.assert_called_once()
+
+    def test_raises_when_duplicate_found(self):
+        """Test validate_unique_setup raises ValidationError for duplicates."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.has_duplicate_setup.return_value = True
+
+        with pytest.raises(ValidationError, match="same setup"):
+            SnapshotSubscription.validate_unique_setup(sub)
+
+
 class TestCheckDuplicateSetupEdgeCases:
     """Test check_duplicate_setup edge cases."""
 
