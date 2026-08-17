@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@playwright/test": "1.61.1",
+    "@playwright/test": "1.62.0",
     "dayjs": "1.11.21",
     "millify": "6.1.0"
   },
