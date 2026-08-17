@@ -21,6 +21,7 @@ class GeoLocationType:
     fields=[
         "contribution_data",
         "country",
+        "id",
         "is_active",
         "meetup_group",
         "name",

@@ -8,6 +8,9 @@ from apps.owasp.api.internal.nodes.chapter import ChapterNode
 from apps.owasp.models.chapter import Chapter
 
 MAX_LIMIT = 1000
+MAX_SEARCH_QUERY_LENGTH = 100
+MIN_SEARCH_QUERY_LENGTH = 3
+SEARCH_CHAPTERS_LIMIT = 3
 
 
 @strawberry.type
@@ -38,3 +41,17 @@ class ChapterQuery:
             return []
 
         return Chapter.active_chapters.order_by("-created_at")[:normalized_limit]
+
+    @strawberry_django.field
+    def search_chapters(self, query: str) -> list[ChapterNode]:
+        """Search active chapters by name (case-insensitive, partial match)."""
+        cleaned_query = query.strip()
+        if (
+            len(cleaned_query) < MIN_SEARCH_QUERY_LENGTH
+            or len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH
+        ):
+            return []
+
+        return Chapter.active_chapters.filter(
+            name__icontains=cleaned_query,
+        ).order_by("name")[:SEARCH_CHAPTERS_LIMIT]

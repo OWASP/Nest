@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.owasp.api.internal.queries.chapter import ChapterQuery
+from apps.owasp.api.internal.queries.chapter import SEARCH_CHAPTERS_LIMIT, ChapterQuery
 from apps.owasp.models.chapter import Chapter
 
 
@@ -17,6 +17,7 @@ class TestChapterQuery:
         assert "chapter" in field_names
         assert "chapter_countries" in field_names
         assert "recent_chapters" in field_names
+        assert "search_chapters" in field_names
 
 
 class TestChapterResolution:
@@ -115,3 +116,43 @@ class TestChapterResolution:
             result = query.chapter_countries()
 
             assert result == []
+
+
+class TestSearchChapters:
+    """Test cases for search_chapters query."""
+
+    def test_search_chapters_short_query(self):
+        """Test search_chapters returns empty for short queries."""
+        query = ChapterQuery()
+        result = query.search_chapters(query="ab")
+        assert result == []
+
+    def test_search_chapters_long_query(self):
+        """Test search_chapters returns empty for queries exceeding max length."""
+        query = ChapterQuery()
+        result = query.search_chapters(query="a" * 101)
+        assert result == []
+
+    def test_search_chapters_valid_query(self):
+        """Test search_chapters returns matching chapters."""
+        mock_chapters = [Mock(), Mock()]
+        query = ChapterQuery()
+        with patch.object(Chapter, "active_chapters") as mock_active:
+            mock_qs = Mock()
+            mock_active.filter.return_value = mock_qs
+            mock_ordered_qs = Mock()
+            mock_qs.order_by.return_value = mock_ordered_qs
+            mock_ordered_qs.__getitem__ = Mock(return_value=mock_chapters)
+
+            result = query.search_chapters(query="test")
+
+            mock_active.filter.assert_called_once_with(name__icontains="test")
+            mock_qs.order_by.assert_called_once_with("name")
+            mock_ordered_qs.__getitem__.assert_called_once_with(slice(None, SEARCH_CHAPTERS_LIMIT))
+            assert result == mock_chapters
+
+    def test_search_chapters_whitespace_query(self):
+        """Test search_chapters strips whitespace before checking length."""
+        query = ChapterQuery()
+        result = query.search_chapters(query="  ab  ")
+        assert result == []
