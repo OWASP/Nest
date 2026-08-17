@@ -57,6 +57,7 @@ jobs:
       backend_min_count: 1
       backend_use_fargate_spot: true
       base_url: https://nest.owasp.dev
+      create_shared_data_bucket: false
       django_configuration: Staging
       django_settings_module: settings.staging
       enable_cron_tasks: false

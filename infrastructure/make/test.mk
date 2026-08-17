@@ -30,7 +30,6 @@ infrastructure-test:
 
 infrastructure-test-image-build:
 	@DOCKER_BUILDKIT=1 docker build -q \
-		--build-context terraform=docker-image://$(TERRAFORM_IMAGE) \
 		--cache-from $(INFRASTRUCTURE_TEST_IMAGE) \
 		-f docker/infrastructure/Dockerfile.tests . \
 		-t $(INFRASTRUCTURE_TEST_IMAGE) 1>/dev/null
@@ -39,8 +38,10 @@ infrastructure-test-unit:
 	@$(MAKE) infrastructure-test-image-build
 	@docker run --rm \
 		-v "$(CURDIR)/infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap" \
+		-v "$(CURDIR)/infrastructure/live:/home/owasp/infrastructure/live" \
 		-v "$(CURDIR)/infrastructure/modules:/home/owasp/infrastructure/modules" \
 		-v "$(CURDIR)/infrastructure/scripts:/home/owasp/infrastructure/scripts:ro" \
+		-v "$(CURDIR)/infrastructure/state:/home/owasp/infrastructure/state" \
 		-v "$(CURDIR)/infrastructure/tests:/home/owasp/infrastructure/tests:ro" \
 		$(INFRASTRUCTURE_TEST_IMAGE)
 
