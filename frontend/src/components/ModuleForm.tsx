@@ -1,6 +1,6 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
-import { Autocomplete, AutocompleteItem, Switch } from '@heroui/react'
+import { ComboBox, FieldError, Input, Label, ListBox, Switch } from '@heroui/react'
 import { Select, SelectItem } from '@heroui/select'
 import debounce from 'lodash/debounce'
 import type React from 'react'
@@ -319,10 +319,16 @@ const ModuleForm = ({
                   <Switch
                     aria-label="Mentees can manage deadlines"
                     isSelected={formData.menteeCanManageDeadlines}
-                    onValueChange={(value) =>
+                    onChange={(value) =>
                       setFormData((prev) => ({ ...prev, menteeCanManageDeadlines: value }))
                     }
-                  />
+                  >
+                    <Switch.Content>
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch.Content>
+                  </Switch>
                   <div>
                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                       Mentees can manage deadlines
@@ -364,7 +370,6 @@ export const ProjectSelector = ({
   const client = useApolloClient()
   const [inputValue, setInputValue] = useState(defaultName || '')
   const [items, setItems] = useState<{ id: string; name: string }[]>([])
-  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (value && defaultName && defaultName !== inputValue) {
@@ -381,11 +386,9 @@ export const ProjectSelector = ({
       const trimmedQuery = query.trim()
       if (trimmedQuery.length < 2) {
         setItems([])
-        setIsLoading(false)
         return
       }
 
-      setIsLoading(true)
       try {
         const { data } = await client.query({
           query: SearchProjectNamesDocument,
@@ -403,8 +406,6 @@ export const ProjectSelector = ({
           err
         )
         setItems([])
-      } finally {
-        setIsLoading(false)
       }
     }, 300),
     [client, value]
@@ -445,44 +446,39 @@ export const ProjectSelector = ({
 
   return (
     <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-      <Autocomplete
-        id="projectSelector"
-        label="Project Name"
-        labelPlacement="outside"
-        placeholder="Start typing project name..."
+      <ComboBox
+        isRequired
+        isInvalid={shouldShowInvalid}
+        allowsEmptyCollection
         inputValue={inputValue}
         selectedKey={value || null}
         onInputChange={handleInputChange}
         onSelectionChange={handleSelectionChange}
         menuTrigger="input"
-        isRequired
-        isInvalid={shouldShowInvalid}
-        errorMessage={displayError}
-        isLoading={isLoading}
         allowsCustomValue={false}
-        classNames={{
-          base: 'w-full min-w-0',
-          selectorButton: 'hidden',
-        }}
-        inputProps={{
-          classNames: {
-            label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-            input: 'text-gray-800 dark:text-gray-200',
-            inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-            helperWrapper: 'min-w-0 max-w-full w-full',
-            errorMessage: 'break-words whitespace-normal max-w-full w-full',
-          },
-        }}
-        clearButtonProps={{
-          'aria-label': 'clear selected project',
-        }}
+        className="w-full min-w-0"
       >
-        {items.map((project) => (
-          <AutocompleteItem key={project.id} textValue={project.name}>
-            {project.name}
-          </AutocompleteItem>
-        ))}
-      </Autocomplete>
+        <Label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+          Project Name
+        </Label>
+        <ComboBox.InputGroup>
+          <Input
+            id="projectSelector"
+            placeholder="Start typing project name..."
+            className="bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+          />
+        </ComboBox.InputGroup>
+        <ComboBox.Popover>
+          <ListBox>
+            {items.map((project) => (
+              <ListBox.Item key={project.id} id={project.id} textValue={project.name}>
+                {project.name}
+              </ListBox.Item>
+            ))}
+          </ListBox>
+        </ComboBox.Popover>
+        {shouldShowInvalid && displayError && <FieldError>{displayError}</FieldError>}
+      </ComboBox>
     </div>
   )
 }

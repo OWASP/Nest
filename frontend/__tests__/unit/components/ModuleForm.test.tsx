@@ -26,102 +26,147 @@ jest.mock('@apollo/client/react', () => ({
 
 // Mock heroui components
 jest.mock('@heroui/react', () => ({
-  Autocomplete: ({
-    children,
-    inputValue,
-    _selectedKey,
-    onInputChange,
-    onSelectionChange,
-    isInvalid,
-    errorMessage,
-    isLoading,
-    label,
+  ComboBox: Object.assign(
+    ({
+      children,
+      inputValue,
+      onInputChange,
+      onSelectionChange,
+      isInvalid,
+      className,
+    }: {
+      children?: React.ReactNode
+      inputValue?: string
+      onInputChange?: (value: string) => void
+      onSelectionChange?: (key: React.Key | null) => void
+      isInvalid?: boolean
+      className?: string
+    }) => (
+      <div data-testid="autocomplete">
+        <input
+          data-testid="autocomplete-input"
+          value={inputValue || ''}
+          onChange={(e) => onInputChange?.(e.target.value)}
+        />
+        <div data-testid="combobox-children">{children}</div>
+        <button
+          type="button"
+          data-testid="autocomplete-select-item"
+          onClick={() => onSelectionChange?.('project-1')}
+        >
+          Select Project 1
+        </button>
+        <button
+          type="button"
+          data-testid="autocomplete-select-all"
+          onClick={() => onSelectionChange?.('all' as any)}
+        >
+          Select All
+        </button>
+        <button
+          type="button"
+          data-testid="autocomplete-clear"
+          onClick={() => {
+            onInputChange?.('')
+            onSelectionChange?.(null)
+          }}
+        >
+          Clear Selection
+        </button>
+        <button
+          type="button"
+          data-testid="autocomplete-select-single"
+          onClick={() => onSelectionChange?.('project-1')}
+        >
+          Select Single Key
+        </button>
+      </div>
+    ),
+    {
+      InputGroup: ({ children }: { children?: React.ReactNode }) => (
+        <div data-testid="combobox-input-group">{children}</div>
+      ),
+      Popover: ({ children }: { children?: React.ReactNode }) => (
+        <div data-testid="combobox-popover">{children}</div>
+      ),
+      Trigger: () => <button data-testid="combobox-trigger" />,
+    }
+  ),
+  Input: ({
     id,
+    placeholder,
+    className,
+    onChange,
   }: {
-    children: React.ReactNode
-    inputValue?: string
-    _selectedKey?: string | null
-    onInputChange?: (value: string) => void
-    onSelectionChange?: (key: React.Key | Set<React.Key> | 'all') => void
-    isInvalid?: boolean
-    errorMessage?: string
-    isLoading?: boolean
-    label?: string
     id?: string
-  }) => (
-    <div data-testid="autocomplete">
-      <label htmlFor={id}>{label}</label>
-      <input
-        id={id}
-        data-testid="autocomplete-input"
-        value={inputValue || ''}
-        data-selected-key={_selectedKey ?? ''}
-        onChange={(e) => onInputChange?.(e.target.value)}
-        data-loading={isLoading}
-        data-invalid={isInvalid}
-      />
-      {errorMessage && <span data-testid="autocomplete-error">{errorMessage}</span>}
-      <div data-testid="autocomplete-items">{children}</div>
-      <button
-        type="button"
-        data-testid="autocomplete-select-item"
-        onClick={() => onSelectionChange?.(new Set(['project-1']))}
-      >
-        Select Project 1
-      </button>
-      <button
-        type="button"
-        data-testid="autocomplete-select-all"
-        onClick={() => onSelectionChange?.('all')}
-      >
-        Select All
-      </button>
-      <button
-        type="button"
-        data-testid="autocomplete-clear"
-        onClick={() => {
-          onInputChange?.('')
-          onSelectionChange?.(null)
-        }}
-      >
-        Clear Selection
-      </button>
-      <button
-        type="button"
-        data-testid="autocomplete-select-single"
-        onClick={() => onSelectionChange?.('project-1')}
-      >
-        Select Single Key
-      </button>
-    </div>
-  ),
-  AutocompleteItem: ({
+    placeholder?: string
+    className?: string
+    onChange?: React.ChangeEventHandler<HTMLInputElement>
+  }) => <input id={id} placeholder={placeholder} className={className} onChange={onChange} />,
+  Label: ({
     children,
-    textValue,
+    htmlFor,
+    className,
   }: {
-    children: React.ReactNode
-    textValue?: string
+    children?: React.ReactNode
+    htmlFor?: string
+    className?: string
   }) => (
-    <div data-testid="autocomplete-item" data-text-value={textValue}>
+    <label htmlFor={htmlFor} className={className}>
       {children}
-    </div>
+    </label>
   ),
-  Switch: ({
-    isSelected,
-    onValueChange,
-    'aria-label': ariaLabel,
-  }: {
-    isSelected?: boolean
-    onValueChange?: (value: boolean) => void
-    'aria-label'?: string
-  }) => (
-    <input
-      type="checkbox"
-      role="switch"
-      aria-label={ariaLabel}
-      checked={!!isSelected}
-      onChange={(e) => onValueChange?.(e.target.checked)}
-    />
+  ListBox: Object.assign(
+    ({ children }: { children?: React.ReactNode }) => (
+      <div data-testid="autocomplete-items">{children}</div>
+    ),
+    {
+      Item: ({
+        children,
+        id,
+        textValue,
+      }: {
+        children?: React.ReactNode
+        id?: string
+        textValue?: string
+      }) => (
+        <div data-testid="autocomplete-item" data-id={id} data-text-value={textValue}>
+          {children}
+        </div>
+      ),
+    }
+  ),
+  FieldError: ({ children }: { children?: React.ReactNode }) => (
+    <span data-testid="autocomplete-error">{children}</span>
+  ),
+  Switch: Object.assign(
+    ({
+      isSelected,
+      onChange,
+      'aria-label': ariaLabel,
+      children,
+    }: {
+      isSelected?: boolean
+      onChange?: (value: boolean) => void
+      'aria-label'?: string
+      children?: React.ReactNode
+    }) => (
+      <div>
+        <input
+          type="checkbox"
+          role="switch"
+          aria-label={ariaLabel}
+          checked={!!isSelected}
+          onChange={(e) => onChange?.(e.target.checked)}
+        />
+        {children}
+      </div>
+    ),
+    {
+      Content: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+      Control: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+      Thumb: () => <span />,
+    }
   ),
 }))
 
