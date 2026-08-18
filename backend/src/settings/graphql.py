@@ -20,6 +20,7 @@ from apps.mentorship.api.internal.queries import (
     ProgramQuery,
 )
 from apps.nest.api.internal.mutations import NestMutations
+from apps.owasp.api.internal.mutations import OwaspMutations
 from apps.owasp.api.internal.queries import OwaspQuery
 
 
@@ -28,6 +29,7 @@ class Mutation(
     ApiMutations,
     ModuleMutation,
     NestMutations,
+    OwaspMutations,
     ProgramMutation,
 ):
     """Schema mutations."""

@@ -1,7 +1,10 @@
 from unittest.mock import Mock, patch
 
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
-from apps.owasp.api.internal.queries.committee import CommitteeQuery
+from apps.owasp.api.internal.queries.committee import (
+    SEARCH_COMMITTEES_LIMIT,
+    CommitteeQuery,
+)
 from apps.owasp.models.committee import Committee
 
 
@@ -14,6 +17,7 @@ class TestCommitteeQuery:
 
         field_names = [field.name for field in CommitteeQuery.__strawberry_definition__.fields]
         assert "committee" in field_names
+        assert "search_committees" in field_names
 
     def test_committee_field_configuration(self):
         """Test if 'committee' field is configured properly."""
@@ -56,3 +60,48 @@ class TestCommitteeResolution:
 
             assert result is None
             mock_get.assert_called_once_with(key="www-committee-non-existent")
+
+
+class TestSearchCommittees:
+    """Test cases for search_committees query."""
+
+    def test_search_committees_short_query(self):
+        """Test search_committees returns empty for short queries."""
+        query = CommitteeQuery()
+        result = query.search_committees(query="ab")
+        assert result == []
+
+    def test_search_committees_long_query(self):
+        """Test search_committees returns empty for queries exceeding max length."""
+        query = CommitteeQuery()
+        result = query.search_committees(query="a" * 101)
+        assert result == []
+
+    def test_search_committees_whitespace_query(self):
+        """Test search_committees strips whitespace before checking length."""
+        query = CommitteeQuery()
+        result = query.search_committees(query="  ab  ")
+        assert result == []
+
+    def test_search_committees_valid_query(self):
+        """Test search_committees returns matching committees."""
+        mock_committees = [Mock(), Mock()]
+        query = CommitteeQuery()
+        with patch.object(Committee, "active_committees") as mock_active:
+            mock_selected_qs = Mock()
+            mock_active.select_related.return_value = mock_selected_qs
+            mock_qs = Mock()
+            mock_selected_qs.filter.return_value = mock_qs
+            mock_ordered_qs = Mock()
+            mock_qs.order_by.return_value = mock_ordered_qs
+            mock_ordered_qs.__getitem__ = Mock(return_value=mock_committees)
+
+            result = query.search_committees(query="test")
+
+            mock_active.select_related.assert_called_once_with("owasp_repository")
+            mock_selected_qs.filter.assert_called_once_with(name__icontains="test")
+            mock_qs.order_by.assert_called_once_with("name")
+            mock_ordered_qs.__getitem__.assert_called_once_with(
+                slice(None, SEARCH_COMMITTEES_LIMIT)
+            )
+            assert result == mock_committees
