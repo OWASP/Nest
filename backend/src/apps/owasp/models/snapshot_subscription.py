@@ -183,6 +183,9 @@ class SnapshotSubscription(models.Model):
             msg = f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached."
             raise ValidationError(msg)
 
+        if not name:
+            name = cls._generate_default_name(user)
+
         try:
             return cls.objects.create(
                 user=user,
@@ -193,6 +196,25 @@ class SnapshotSubscription(models.Model):
         except IntegrityError as e:
             msg = "A subscription with this name already exists."
             raise ValidationError(msg) from e
+
+    @classmethod
+    def _generate_default_name(cls, user):
+        """Generate a default subscription name like 'Subscription 1'.
+
+        Finds the next available number by checking existing subscription names.
+
+        Args:
+            user: The user to generate the name for.
+
+        Returns:
+            str: A unique default name.
+
+        """
+        existing_names = set(cls.objects.filter(user=user).values_list("name", flat=True))
+        counter = len(existing_names) + 1
+        while f"Subscription {counter}" in existing_names:
+            counter += 1
+        return f"Subscription {counter}"
 
     def update(self, *, frequency=None, name=None, **kwargs):
         """Update subscription fields.
@@ -232,6 +254,37 @@ class SnapshotSubscription(models.Model):
 
         if committee_ids is not None:
             self.subscribed_committees.set(Committee.objects.filter(pk__in=committee_ids))
+
+    def deactivate(self):
+        """Deactivate this subscription."""
+        self.is_active = False
+        self.save(update_fields=("is_active",))
+
+    @transaction.atomic
+    def reactivate(self):
+        """Reactivate an inactive subscription with limit enforcement.
+
+        Raises:
+            ValidationError: If already active or max subscriptions reached.
+
+        """
+        if self.is_active:
+            msg = "Subscription is already active."
+            raise ValidationError(msg)
+
+        if getattr(self.user, "pk", None):
+            User.objects.select_for_update().filter(pk=self.user.pk).exists()
+
+        active_count = SnapshotSubscription.objects.filter(
+            user=self.user,
+            is_active=True,
+        ).count()
+        if active_count >= MAX_SUBSCRIPTIONS:
+            msg = f"Maximum number of active subscriptions ({MAX_SUBSCRIPTIONS}) reached."
+            raise ValidationError(msg)
+
+        self.is_active = True
+        self.save(update_fields=("is_active",))
 
     @classmethod
     def check_duplicate_setup(
@@ -319,3 +372,14 @@ class SnapshotSubscription(models.Model):
             },
             exclude_pk=self.pk,
         )
+
+    def validate_unique_setup(self):
+        """Raise ValidationError if another subscription has the exact same setup.
+
+        Raises:
+            ValidationError: If a duplicate setup exists.
+
+        """
+        if self.has_duplicate_setup():
+            msg = "A subscription with the same setup already exists."
+            raise ValidationError(msg)

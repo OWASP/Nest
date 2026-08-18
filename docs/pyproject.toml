@@ -8,10 +8,16 @@ version = "0.1.0"
 description = "OWASP Nest Documentation"
 license = "MIT"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
+packages = [ { include = "serve.py" } ]
 dependencies.python = "^3.13"
 dependencies.click = "8.3.3"
 dependencies.mkdocs = "^1.6.1"
 dependencies.mkdocs-material = "^9.6.19"
 dependencies.mkdocs-minify-plugin = "^0.8.0"
 dependencies.mkdocstrings = "^1.0.0"
-dependencies.pymdown-extensions = "^10.20.0"
+dependencies.pymdown-extensions = "^11.0.0"
+group.test.dependencies.pytest = "9.0.3"
+
+[tool.pytest]
+ini_options.testpaths = [ "tests" ]
+ini_options.pythonpath = [ "." ]

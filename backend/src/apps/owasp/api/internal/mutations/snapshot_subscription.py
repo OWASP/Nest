@@ -1,14 +1,23 @@
 """OWASP snapshot subscription GraphQL mutations."""
 
+import enum
+
 import strawberry
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
-from apps.nest.models import User
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
-from apps.owasp.models.snapshot_subscription import MAX_SUBSCRIPTIONS, SnapshotSubscription
+from apps.owasp.models.snapshot_subscription import SnapshotSubscription
+
+
+@strawberry.enum
+class SnapshotFrequency(enum.Enum):
+    """Snapshot subscription frequency."""
+
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
 
 
 @strawberry.input
@@ -16,7 +25,7 @@ class CreateSnapshotSubscriptionInput:
     """Input for creating a snapshot subscription."""
 
     name: str = ""
-    frequency: str = "weekly"
+    frequency: SnapshotFrequency = SnapshotFrequency.WEEKLY
     include_chapters: bool = False
     include_events: bool = False
     include_issues: bool = False
@@ -35,7 +44,7 @@ class UpdateSnapshotSubscriptionInput:
     """Input for updating a snapshot subscription."""
 
     name: str | None = None
-    frequency: str | None = None
+    frequency: SnapshotFrequency | None = None
     include_chapters: bool | None = None
     include_events: bool | None = None
     include_issues: bool | None = None
@@ -86,7 +95,7 @@ class SnapshotSubscriptionMutations:
             with transaction.atomic():
                 subscription = SnapshotSubscription.create(
                     user=user,
-                    frequency=input_data.frequency,
+                    frequency=input_data.frequency.value,
                     name=input_data.name,
                     **kwargs,
                 )
@@ -99,9 +108,8 @@ class SnapshotSubscriptionMutations:
 
                 subscription.clean()
 
-                if subscription.has_duplicate_setup():
-                    msg = "A subscription with the same setup already exists."
-                    raise ValidationError(msg)  # noqa: TRY301
+                subscription.validate_unique_setup()
+
         except ValidationError as e:
             return SnapshotSubscriptionResult(
                 ok=False,
@@ -152,8 +160,9 @@ class SnapshotSubscriptionMutations:
 
         try:
             with transaction.atomic():
+                frequency_value = input_data.frequency.value if input_data.frequency else None
                 subscription.update(
-                    frequency=input_data.frequency,
+                    frequency=frequency_value,
                     name=input_data.name,
                     **update_kwargs,
                 )
@@ -166,9 +175,8 @@ class SnapshotSubscriptionMutations:
 
                 subscription.clean()
 
-                if subscription.has_duplicate_setup():
-                    msg = "A subscription with the same setup already exists."
-                    raise ValidationError(msg)  # noqa: TRY301
+                subscription.validate_unique_setup()
+
         except IntegrityError:
             return SnapshotSubscriptionResult(
                 ok=False,
@@ -206,8 +214,7 @@ class SnapshotSubscriptionMutations:
                 message="Subscription not found.",
             )
 
-        subscription.is_active = False
-        subscription.save()
+        subscription.deactivate()
 
         return SnapshotSubscriptionResult(
             ok=True,
@@ -262,30 +269,13 @@ class SnapshotSubscriptionMutations:
                 message="Subscription not found.",
             )
 
-        if subscription.is_active:
+        try:
+            subscription.reactivate()
+        except ValidationError as e:
             return SnapshotSubscriptionResult(
                 ok=False,
-                message="Subscription is already active.",
+                message=e.message,
             )
-
-        with transaction.atomic():
-            if getattr(user, "pk", None):
-                User.objects.select_for_update().filter(pk=user.pk).exists()
-
-            active_count = SnapshotSubscription.objects.filter(
-                user=user,
-                is_active=True,
-            ).count()
-            if active_count >= MAX_SUBSCRIPTIONS:
-                return SnapshotSubscriptionResult(
-                    ok=False,
-                    message=(
-                        f"Maximum number of active subscriptions ({MAX_SUBSCRIPTIONS}) reached."
-                    ),
-                )
-
-            subscription.is_active = True
-            subscription.save()
 
         return SnapshotSubscriptionResult(
             ok=True,
@@ -310,8 +300,7 @@ class SnapshotSubscriptionMutations:
                 message="Subscription is already inactive.",
             )
 
-        subscription.is_active = False
-        subscription.save()
+        subscription.deactivate()
 
         return SnapshotSubscriptionResult(
             ok=True,

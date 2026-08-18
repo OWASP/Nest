@@ -42,6 +42,12 @@ class CommitteeQuery:
         ):
             return []
 
-        return Committee.active_committees.filter(
-            name__icontains=cleaned_query,
-        ).order_by("name")[:SEARCH_COMMITTEES_LIMIT]
+        return (
+            Committee.active_committees.select_related(
+                "owasp_repository",
+            )
+            .filter(
+                name__icontains=cleaned_query,
+            )
+            .order_by("name")[:SEARCH_COMMITTEES_LIMIT]
+        )

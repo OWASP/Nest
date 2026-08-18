@@ -41,7 +41,8 @@ class CommandRunner:
         Args:
             command (str): The name of the executable to run.
             *args (str): Positional arguments to pass to the command.
-            check (bool): Whether to raise an exception if the command exits with a non-zero status.
+            check (bool): Whether to raise an exception if the command exits with a
+                non-zero status.
             capture_output (bool): Whether to capture stdout and stderr.
 
         Returns:
@@ -49,7 +50,7 @@ class CommandRunner:
 
         """
         executable = self.require(command)
-        return subprocess.run(
+        return subprocess.run(  # noqa: S603
             [executable, *args],
             check=check,
             capture_output=capture_output,

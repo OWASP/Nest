@@ -607,7 +607,7 @@ function SubscriptionContent() {
         subscriptionId: decodeRelayId(id),
         inputData: {
           name: data.name,
-          frequency: data.frequency,
+          frequency: data.frequency.toUpperCase(),
           ...data.preferences,
           subscribedProjectIds: data.projectIds,
           subscribedChapterIds: data.chapterIds,
@@ -631,7 +631,7 @@ function SubscriptionContent() {
       variables: {
         inputData: {
           name: newName || undefined,
-          frequency: newFrequency,
+          frequency: newFrequency.toUpperCase(),
           ...newPreferences,
           subscribedProjectIds: newProjects.map((p) => p.id),
           subscribedChapterIds: newChapters.map((c) => c.id),

@@ -28,6 +28,7 @@ GPG
 GRC
 GSOC
 GTM
+Ghsas
 Golovanova
 Hackbright
 Héllo
@@ -51,6 +52,7 @@ Nagori
 Nominatim
 ONLN
 OSSF
+OSV
 OWHF
 Obmondo
 Oleksiuk
@@ -73,6 +75,7 @@ Truncator
 Turbopack
 Twitterbot
 VCALENDAR
+VCS
 VEVENT
 WSL
 Wandji
@@ -118,6 +121,7 @@ dismissable
 dkr
 dsn
 dvo
+eddsa
 elevenlabs
 env
 envsubst
@@ -125,6 +129,7 @@ ephemerals
 euo
 facebookexternalhit
 fdp
+fpr
 gamesec
 geocoders
 geoloc

@@ -6,7 +6,7 @@ import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type CreateSnapshotSubscriptionInput = {
-  frequency?: string;
+  frequency?: SnapshotFrequency;
   includeChapters?: boolean;
   includeEvents?: boolean;
   includeIssues?: boolean;
@@ -21,8 +21,12 @@ export type CreateSnapshotSubscriptionInput = {
   subscribedProjectIds?: Array<number> | null | undefined;
 };
 
+export type SnapshotFrequency =
+  | 'MONTHLY'
+  | 'WEEKLY';
+
 export type UpdateSnapshotSubscriptionInput = {
-  frequency?: string | null | undefined;
+  frequency?: SnapshotFrequency | null | undefined;
   includeChapters?: boolean | null | undefined;
   includeEvents?: boolean | null | undefined;
   includeIssues?: boolean | null | undefined;

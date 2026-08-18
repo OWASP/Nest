@@ -350,22 +350,27 @@ class TestSnapshotSubscriptionCreateEdgeCases:
         ):
             yield
 
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription._generate_default_name")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
-    def test_create_skips_select_for_update_when_no_user_pk(self, mock_objects):
+    def test_create_skips_select_for_update_when_no_user_pk(self, mock_objects, mock_gen_name):
         """Test create skips select_for_update when user has no pk."""
         user = MagicMock()
         user.pk = None
         mock_sub = MagicMock(spec=SnapshotSubscription)
         mock_objects.filter.return_value.count.return_value = 0
         mock_objects.create.return_value = mock_sub
+        mock_gen_name.return_value = "Subscription 1"
 
         result = SnapshotSubscription.create(user=user, frequency="weekly")
 
         assert result == mock_sub
 
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription._generate_default_name")
     @patch("apps.owasp.models.snapshot_subscription.User.objects")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
-    def test_create_raises_on_integrity_error(self, mock_objects, mock_user_objects):
+    def test_create_raises_on_integrity_error(
+        self, mock_objects, mock_user_objects, mock_gen_name
+    ):
         """Test create raises ValidationError when IntegrityError is raised."""
         user = MagicMock()
         user.pk = 1
@@ -373,9 +378,39 @@ class TestSnapshotSubscriptionCreateEdgeCases:
         mock_objects.create.side_effect = IntegrityError("duplicate")
         mock_select_qs = mock_user_objects.select_for_update.return_value.filter.return_value
         mock_select_qs.exists.return_value = True
+        mock_gen_name.return_value = "Subscription 1"
 
         with pytest.raises(ValidationError, match="already exists"):
             SnapshotSubscription.create(user=user, frequency="weekly")
+
+    @patch("apps.owasp.models.snapshot_subscription.User.objects")
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_create_generates_default_name_when_blank(self, mock_objects, mock_user_objects):
+        """Test create auto-generates a default name when name is blank."""
+        user = MagicMock()
+        user.pk = 1
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_count_qs = MagicMock()
+        mock_count_qs.count.return_value = 0
+        mock_values_qs = MagicMock()
+        mock_values_qs.values_list.return_value = []
+
+        mock_objects.filter.side_effect = [
+            mock_count_qs,
+            mock_values_qs,
+        ]
+        mock_objects.create.return_value = mock_sub
+        mock_select_qs = mock_user_objects.select_for_update.return_value.filter.return_value
+        mock_select_qs.exists.return_value = True
+
+        result = SnapshotSubscription.create(user=user, frequency="weekly", name="")
+
+        assert result == mock_sub
+        mock_objects.create.assert_called_once_with(
+            user=user,
+            frequency="weekly",
+            name="Subscription 1",
+        )
 
 
 class TestSetM2mFields:
@@ -537,3 +572,185 @@ class TestHasDuplicateSetup:
             },
             exclude_pk=1,
         )
+
+
+class TestDeactivate:
+    """Test SnapshotSubscription.deactivate method."""
+
+    def test_deactivate_sets_inactive_and_saves(self):
+        """Test deactivate sets is_active to False and saves."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.is_active = True
+
+        SnapshotSubscription.deactivate(sub)
+
+        assert sub.is_active is False
+        sub.save.assert_called_once_with(update_fields=("is_active",))
+
+
+class TestReactivate:
+    """Test SnapshotSubscription.reactivate method."""
+
+    @pytest.fixture(autouse=True)
+    def _mock_transaction(self):
+        """Disable transaction.atomic for tests."""
+        with (
+            patch("django.db.transaction.Atomic.__enter__", return_value=None),
+            patch("django.db.transaction.Atomic.__exit__", return_value=False),
+        ):
+            yield
+
+    @patch("apps.owasp.models.snapshot_subscription.User.objects")
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_reactivate_success(self, mock_objects, mock_user_objects):
+        """Test successful reactivation."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.is_active = False
+        sub.user = MagicMock()
+        sub.user.pk = 1
+        mock_objects.filter.return_value.count.return_value = 2
+
+        SnapshotSubscription.reactivate(sub)
+
+        assert sub.is_active is True
+        sub.save.assert_called_once_with(update_fields=("is_active",))
+
+    def test_reactivate_raises_when_already_active(self):
+        """Test reactivate raises ValidationError when already active."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.is_active = True
+
+        with pytest.raises(ValidationError, match="already active"):
+            SnapshotSubscription.reactivate(sub)
+
+    @patch("apps.owasp.models.snapshot_subscription.User.objects")
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_reactivate_raises_when_max_reached(self, mock_objects, mock_user_objects):
+        """Test reactivate raises ValidationError when max subscriptions reached."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.is_active = False
+        sub.user = MagicMock()
+        sub.user.pk = 1
+        mock_objects.filter.return_value.count.return_value = MAX_SUBSCRIPTIONS
+
+        with pytest.raises(ValidationError, match="Maximum number"):
+            SnapshotSubscription.reactivate(sub)
+
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_reactivate_skips_select_for_update_when_no_user_pk(self, mock_objects):
+        """Test reactivate skips select_for_update when user has no pk."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.is_active = False
+        sub.user = MagicMock()
+        sub.user.pk = None
+        mock_objects.filter.return_value.count.return_value = 0
+
+        SnapshotSubscription.reactivate(sub)
+
+        assert sub.is_active is True
+        sub.save.assert_called_once_with(update_fields=("is_active",))
+
+
+class TestValidateUniqueSetup:
+    """Test SnapshotSubscription.validate_unique_setup method."""
+
+    def test_passes_when_no_duplicate(self):
+        """Test validate_unique_setup passes when no duplicate exists."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.has_duplicate_setup.return_value = False
+
+        SnapshotSubscription.validate_unique_setup(sub)
+
+        sub.has_duplicate_setup.assert_called_once()
+
+    def test_raises_when_duplicate_found(self):
+        """Test validate_unique_setup raises ValidationError for duplicates."""
+        sub = MagicMock(spec=SnapshotSubscription)
+        sub.has_duplicate_setup.return_value = True
+
+        with pytest.raises(ValidationError, match="same setup"):
+            SnapshotSubscription.validate_unique_setup(sub)
+
+
+class TestCheckDuplicateSetupEdgeCases:
+    """Test check_duplicate_setup edge cases."""
+
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_without_exclude_pk(self, mock_objects):
+        """Test check_duplicate_setup skips exclude when exclude_pk is None."""
+        mock_qs = MagicMock()
+        mock_qs.prefetch_related.return_value = mock_qs
+        mock_qs.exists.return_value = False
+        mock_objects.filter.return_value = mock_qs
+
+        result = SnapshotSubscription.check_duplicate_setup(
+            user=MagicMock(),
+            frequency="weekly",
+            include_chapters=True,
+            include_events=False,
+            include_issues=False,
+            include_posts=False,
+            include_projects=False,
+            include_pull_requests=False,
+            include_releases=False,
+            include_users=False,
+            entity_ids={"projects": [], "chapters": [], "committees": []},
+            exclude_pk=None,
+        )
+
+        assert result is False
+        mock_qs.exclude.assert_not_called()
+
+
+class TestGenerateDefaultName:
+    """Test SnapshotSubscription._generate_default_name method."""
+
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_first_subscription(self, mock_objects):
+        """Test generates 'Subscription 1' when no existing subscriptions."""
+        mock_objects.filter.return_value.values_list.return_value = []
+        user = MagicMock()
+
+        result = SnapshotSubscription._generate_default_name(user)
+
+        assert result == "Subscription 1"
+
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_counts_from_total_with_custom_names(self, mock_objects):
+        """Test generates 'Subscription 4' when 3 custom-named subs exist."""
+        mock_objects.filter.return_value.values_list.return_value = [
+            "My Projects",
+            "Security Weekly",
+            "AI Digest",
+        ]
+        user = MagicMock()
+
+        result = SnapshotSubscription._generate_default_name(user)
+
+        assert result == "Subscription 4"
+
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_skips_conflict(self, mock_objects):
+        """Test increments past existing 'Subscription N' name conflicts."""
+        mock_objects.filter.return_value.values_list.return_value = [
+            "Subscription 1",
+            "Subscription 3",
+        ]
+        user = MagicMock()
+
+        result = SnapshotSubscription._generate_default_name(user)
+
+        assert result == "Subscription 4"
+
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
+    def test_increments_past_existing(self, mock_objects):
+        """Test generates next number when all previous exist."""
+        mock_objects.filter.return_value.values_list.return_value = [
+            "Subscription 1",
+            "Subscription 2",
+        ]
+        user = MagicMock()
+
+        result = SnapshotSubscription._generate_default_name(user)
+
+        assert result == "Subscription 3"

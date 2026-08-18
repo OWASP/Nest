@@ -163,7 +163,7 @@ export default function SubscribeButton({
       variables: {
         inputData: {
           name: newName || undefined,
-          frequency: newFrequency,
+          frequency: newFrequency.toUpperCase(),
           [inputField]: [decodedEntityId],
         },
       },
@@ -252,7 +252,7 @@ export default function SubscribeButton({
                         className={`flex w-full cursor-pointer items-center justify-between rounded-md border px-4 py-3 text-left text-sm transition-all ${buttonClasses}`}
                       >
                         <div>
-                          <span className="font-medium">{sub.name || 'Unnamed Subscription'}</span>
+                          <span className="font-medium">{sub.name}</span>
                           <span className="ml-2 text-xs text-gray-400">
                             {sub.frequency.charAt(0).toUpperCase() + sub.frequency.slice(1)}
                           </span>

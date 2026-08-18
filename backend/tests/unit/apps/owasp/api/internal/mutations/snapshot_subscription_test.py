@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 
 from apps.owasp.api.internal.mutations.snapshot_subscription import (
     CreateSnapshotSubscriptionInput,
+    SnapshotFrequency,
     SnapshotSubscriptionMutations,
     SnapshotSubscriptionResult,
     UpdateSnapshotSubscriptionInput,
@@ -67,7 +68,7 @@ class TestCreateSnapshotSubscription:
         """Test create propagates ValidationError from clean()."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly",
+            frequency=SnapshotFrequency.WEEKLY,
             include_chapters=False,
             include_events=False,
             include_issues=False,
@@ -92,10 +93,9 @@ class TestCreateSnapshotSubscription:
         """Test successful subscription creation."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly", name="My Sub", include_chapters=True
+            frequency=SnapshotFrequency.WEEKLY, name="My Sub", include_chapters=True
         )
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.has_duplicate_setup.return_value = False
         mock_create.return_value = mock_sub
 
         result = mutations.create_snapshot_subscription(info, input_data=input_data)
@@ -109,7 +109,9 @@ class TestCreateSnapshotSubscription:
     def test_create_max_reached(self, mock_create, mutations):
         """Test create fails when max subscriptions reached."""
         info = mock_info()
-        input_data = CreateSnapshotSubscriptionInput(frequency="weekly", include_chapters=True)
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency=SnapshotFrequency.WEEKLY, include_chapters=True
+        )
         mock_create.side_effect = ValidationError(
             f"Maximum number of subscriptions ({MAX_SUBSCRIPTIONS}) reached."
         )
@@ -124,10 +126,13 @@ class TestCreateSnapshotSubscription:
         """Test create fails when duplicate setup exists."""
         info = mock_info()
         input_data = CreateSnapshotSubscriptionInput(
-            frequency="weekly", name="Sub", include_chapters=True
+            frequency=SnapshotFrequency.WEEKLY, name="Sub", include_chapters=True
         )
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.has_duplicate_setup.return_value = True
+        mock_sub.validate_unique_setup.side_effect = ValidationError(
+            "A subscription with the same setup already exists."
+        )
+        mock_sub.clean.return_value = None
         mock_create.return_value = mock_sub
 
         result = mutations.create_snapshot_subscription(info, input_data=input_data)
@@ -190,12 +195,11 @@ class TestUpdateSnapshotSubscription:
         """Test successful subscription update."""
         info = mock_info()
         input_data = UpdateSnapshotSubscriptionInput(
-            frequency="monthly",
+            frequency=SnapshotFrequency.MONTHLY,
             name="Updated Name",
             include_chapters=False,
         )
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.has_duplicate_setup.return_value = False
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
@@ -212,9 +216,11 @@ class TestUpdateSnapshotSubscription:
     def test_duplicate_setup_rejected(self, mutations):
         """Test update rolls back when duplicate setup detected."""
         info = mock_info()
-        input_data = UpdateSnapshotSubscriptionInput(frequency="monthly")
+        input_data = UpdateSnapshotSubscriptionInput(frequency=SnapshotFrequency.MONTHLY)
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.has_duplicate_setup.return_value = True
+        mock_sub.validate_unique_setup.side_effect = ValidationError(
+            "A subscription with the same setup already exists."
+        )
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
@@ -254,8 +260,7 @@ class TestCancelSnapshotSubscription:
             mock_objects.get.return_value = mock_sub
             result = mutations.cancel_snapshot_subscription(info, subscription_id=1)
             assert result.ok
-            assert mock_sub.is_active is False
-            mock_sub.save.assert_called_once()
+            mock_sub.deactivate.assert_called_once()
 
 
 class TestDeleteSnapshotSubscription:
@@ -328,21 +333,11 @@ class TestUnsubscribeByToken:
             mock_objects.get.return_value = mock_sub
             result = mutations.unsubscribe_by_token(token=str(uuid.uuid4()))
             assert result.ok
-            assert mock_sub.is_active is False
-            mock_sub.save.assert_called_once()
+            mock_sub.deactivate.assert_called_once()
 
 
 class TestReactivateSnapshotSubscription:
     """Test cases for reactivateSnapshotSubscription mutation."""
-
-    @pytest.fixture(autouse=True)
-    def _mock_transaction(self):
-        """Disable transaction.atomic for tests."""
-        with (
-            patch("django.db.transaction.Atomic.__enter__", return_value=None),
-            patch("django.db.transaction.Atomic.__exit__", return_value=False),
-        ):
-            yield
 
     @pytest.fixture
     def mutations(self):
@@ -363,7 +358,7 @@ class TestReactivateSnapshotSubscription:
         """Test reactivate fails when already active."""
         info = mock_info()
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.is_active = True
+        mock_sub.reactivate.side_effect = ValidationError("Subscription is already active.")
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
@@ -376,15 +371,13 @@ class TestReactivateSnapshotSubscription:
         """Test reactivate fails when max active subscriptions reached."""
         info = mock_info()
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.is_active = False
-        with (
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-            ) as mock_objects,
-            patch("apps.owasp.api.internal.mutations.snapshot_subscription.User.objects"),
-        ):
+        mock_sub.reactivate.side_effect = ValidationError(
+            f"Maximum number of active subscriptions ({MAX_SUBSCRIPTIONS}) reached."
+        )
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
             mock_objects.get.return_value = mock_sub
-            mock_objects.filter.return_value.count.return_value = MAX_SUBSCRIPTIONS
             result = mutations.reactivate_snapshot_subscription(info, subscription_id=1)
             assert not result.ok
             assert str(MAX_SUBSCRIPTIONS) in result.message
@@ -393,30 +386,10 @@ class TestReactivateSnapshotSubscription:
         """Test successful reactivation."""
         info = mock_info()
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.is_active = False
-        with (
-            patch(
-                "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-            ) as mock_objects,
-            patch("apps.owasp.api.internal.mutations.snapshot_subscription.User.objects"),
-        ):
-            mock_objects.get.return_value = mock_sub
-            mock_objects.filter.return_value.count.return_value = 2
-            result = mutations.reactivate_snapshot_subscription(info, subscription_id=1)
-            assert result.ok
-            assert mock_sub.is_active is True
-
-    def test_reactivate_without_user_pk(self, mutations):
-        """Test reactivate skips select_for_update when user has no pk."""
-        info = mock_info()
-        info.context.request.user.pk = None
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.is_active = False
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
             mock_objects.get.return_value = mock_sub
-            mock_objects.filter.return_value.count.return_value = 2
             result = mutations.reactivate_snapshot_subscription(info, subscription_id=1)
             assert result.ok
-            assert mock_sub.is_active is True
+            mock_sub.reactivate.assert_called_once()

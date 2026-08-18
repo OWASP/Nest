@@ -276,7 +276,7 @@ describe('SettingsPage Component', () => {
             variables: expect.objectContaining({
               inputData: expect.objectContaining({
                 name: 'Test Sub',
-                frequency: 'weekly',
+                frequency: 'WEEKLY',
                 includeChapters: true,
               }),
             }),

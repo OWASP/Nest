@@ -127,3 +127,68 @@ class TestSnapshotSubscriptionAdminForm:
 
         with pytest.raises(ValidationError, match="same configuration"):
             form.clean()
+
+    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
+    def test_clean_raises_when_empty_subscription(self, mock_check_duplicate_setup):
+        """Test clean raises ValidationError when no toggles and no entities selected."""
+        form = SnapshotSubscriptionAdminForm()
+        form.instance = MagicMock()
+        form.instance.pk = None
+        form.cleaned_data = {
+            "user": MagicMock(),
+            "frequency": "weekly",
+            "include_chapters": False,
+            "include_events": False,
+            "include_issues": False,
+            "include_posts": False,
+            "include_projects": False,
+            "include_pull_requests": False,
+            "include_releases": False,
+            "include_users": False,
+            "subscribed_projects": None,
+            "subscribed_chapters": None,
+            "subscribed_committees": None,
+        }
+        mock_check_duplicate_setup.return_value = False
+
+        with pytest.raises(ValidationError, match="cannot be empty"):
+            form.clean()
+
+    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
+    def test_clean_sets_admin_form_flag_on_instance(self, mock_check_duplicate_setup):
+        """Test clean sets _is_admin_form flag when instance exists."""
+        form = SnapshotSubscriptionAdminForm()
+        form.instance = MagicMock()
+        form.instance.pk = 42
+        form.cleaned_data = {
+            "user": MagicMock(),
+            "frequency": "weekly",
+            "include_chapters": True,
+            "subscribed_projects": [],
+            "subscribed_chapters": [],
+            "subscribed_committees": [],
+        }
+        mock_check_duplicate_setup.return_value = False
+
+        form.clean()
+
+        assert form.instance._is_admin_form is True
+
+    @patch("apps.owasp.admin.snapshot_subscription.SnapshotSubscription.check_duplicate_setup")
+    def test_clean_handles_no_instance(self, mock_check_duplicate_setup):
+        """Test clean works when instance is None (no _is_admin_form set)."""
+        form = SnapshotSubscriptionAdminForm()
+        form.instance = None
+        form.cleaned_data = {
+            "user": MagicMock(),
+            "frequency": "weekly",
+            "include_chapters": True,
+            "subscribed_projects": [],
+            "subscribed_chapters": [],
+            "subscribed_committees": [],
+        }
+        mock_check_duplicate_setup.return_value = False
+
+        result = form.clean()
+
+        assert result == form.cleaned_data
