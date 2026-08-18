@@ -20,6 +20,7 @@ export type CardProps = {
   button: Button
   cardKey: string
   className?: string
+  extraAction?: JSX.Element
   icons?: Icon
   isActive?: boolean
   labels?: string[]

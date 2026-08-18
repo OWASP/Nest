@@ -19,6 +19,12 @@ jest.mock('@/components/MarkdownWrapper', () => {
   )
 })
 
+jest.mock('components/SubscribeButton', () => {
+  return function MockSubscribeButton() {
+    return <button data-testid="subscribe-button">Subscribe</button>
+  }
+})
+
 describe.each([
   { theme: 'light', name: 'light' },
   { theme: 'dark', name: 'dark' },

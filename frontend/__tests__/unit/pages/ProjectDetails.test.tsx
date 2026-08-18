@@ -37,6 +37,12 @@ jest.mock('utils/env.client', () => ({
   IS_PROJECT_HEALTH_ENABLED: true,
 }))
 
+jest.mock('components/SubscribeButton', () => {
+  return function MockSubscribeButton() {
+    return <button data-testid="subscribe-button">Subscribe</button>
+  }
+})
+
 const mockError = {
   error: new Error('GraphQL error'),
 }

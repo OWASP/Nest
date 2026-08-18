@@ -113,6 +113,10 @@ export default function UserMenu({
             </Link>
           )}
 
+          <Link href="/settings" className={userMenuItemClasses} onClick={() => setIsOpen(false)}>
+            Settings
+          </Link>
+
           <button
             type="button"
             onClick={handleLogout}
