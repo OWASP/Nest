@@ -21,6 +21,30 @@ class Migration(migrations.Migration):
                 to="github.user",
             ),
         ),
+        migrations.AlterField(
+            model_name="certificate",
+            name="project",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Associated project",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="certificates",
+                to="owasp.project",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="certificate",
+            name="chapter",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Associated chapter",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="certificates",
+                to="owasp.chapter",
+            ),
+        ),
         migrations.AddConstraint(
             model_name="certificate",
             constraint=models.CheckConstraint(
@@ -33,7 +57,6 @@ class Migration(migrations.Migration):
                         models.Q(
                             models.Q(("project__isnull", False), ("chapter__isnull", True)),
                             models.Q(("project__isnull", True), ("chapter__isnull", False)),
-                            models.Q(("project__isnull", True), ("chapter__isnull", True)),
                             _connector="OR",
                         ),
                     ),

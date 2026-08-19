@@ -59,7 +59,6 @@ class Certificate(TimestampedModel):
                         & (
                             (Q(project__isnull=False) & Q(chapter__isnull=True))
                             | (Q(project__isnull=True) & Q(chapter__isnull=False))
-                            | (Q(project__isnull=True) & Q(chapter__isnull=True))
                         )
                     )
                 ),
@@ -107,7 +106,7 @@ class Certificate(TimestampedModel):
     )
     project = models.ForeignKey(
         "owasp.Project",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="certificates",
         blank=True,
         null=True,
@@ -115,7 +114,7 @@ class Certificate(TimestampedModel):
     )
     chapter = models.ForeignKey(
         "owasp.Chapter",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="certificates",
         blank=True,
         null=True,
