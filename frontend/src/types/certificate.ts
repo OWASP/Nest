@@ -6,5 +6,5 @@ export type Certificate = {
   issuedAt: string
   isVerified: boolean
   score?: number | null
-  tier: string
+  tier?: string | null
 }

@@ -97,10 +97,12 @@ const authOptions: AuthOptions = {
         const login = (profile as ExtendedProfile).login
         token.login = login
 
-        const isLeader = await checkIfProjectLeader(login)
-        const isChapterLeader = await checkIfChapterLeader(login)
-        const isMentor = await checkIfMentor(login)
-        const isMentee = await checkIfMentee(login)
+        const [isLeader, isChapterLeader, isMentor, isMentee] = await Promise.all([
+          checkIfProjectLeader(login),
+          checkIfChapterLeader(login),
+          checkIfMentor(login),
+          checkIfMentee(login),
+        ])
         token.isLeader = isLeader
         token.isChapterLeader = isChapterLeader
         token.isMentor = isMentor

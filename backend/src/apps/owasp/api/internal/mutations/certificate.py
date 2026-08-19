@@ -1,10 +1,13 @@
 """OWASP Certificate GraphQL Mutations."""
 
 import logging
+import operator
+from functools import reduce
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.models import Q
 from graphql import GraphQLError
 
 from apps.github.models.user import User as GithubUser
@@ -29,6 +32,9 @@ class IssueCertificateInput:
     chapter_key: str | None = None
 
 
+MAX_TITLE_LENGTH = 255
+
+
 @strawberry.type
 class CertificateMutation:
     """GraphQL mutations related to certificates."""
@@ -38,7 +44,7 @@ class CertificateMutation:
     def issue_certificate(
         self, info: strawberry.Info, input_data: IssueCertificateInput
     ) -> list[CertificateNode]:
-        """Issue generic certificates to one or multiple contributors (project/chapter leaders only)."""
+        """Issue generic certificates to contributors (project or chapter leaders only)."""
         user = info.context.request.user
 
         if not user.github_user or (
@@ -53,7 +59,9 @@ class CertificateMutation:
 
         logins = []
         if input_data.recipient_logins:
-            logins = [l.strip() for l in input_data.recipient_logins if l and l.strip()]
+            logins = [
+                login.strip() for login in input_data.recipient_logins if login and login.strip()
+            ]
         elif input_data.recipient_login and input_data.recipient_login.strip():
             logins = [input_data.recipient_login.strip()]
 
@@ -61,13 +69,23 @@ class CertificateMutation:
             msg = "Recipient login cannot be empty."
             raise ValidationError(msg)
 
-        if not input_data.title.strip():
+        title = input_data.title.strip()
+        if not title:
             msg = "Certificate title cannot be empty."
             raise ValidationError(msg)
 
-        if not (input_data.project_key and input_data.project_key.strip()) and not (
-            input_data.chapter_key and input_data.chapter_key.strip()
-        ):
+        if len(title) > MAX_TITLE_LENGTH:
+            msg = "Certificate title cannot exceed 255 characters."
+            raise ValidationError(msg)
+
+        has_project = bool(input_data.project_key and input_data.project_key.strip())
+        has_chapter = bool(input_data.chapter_key and input_data.chapter_key.strip())
+
+        if has_project and has_chapter:
+            msg = "Provide either project or chapter, not both."
+            raise ValidationError(msg)
+
+        if not has_project and not has_chapter:
             msg = "Either project or chapter must be provided."
             raise ValidationError(msg)
 
@@ -75,46 +93,51 @@ class CertificateMutation:
         chapter = None
 
         if input_data.project_key:
-            clean_p = input_data.project_key.strip()
+            clean_p = input_data.project_key.strip().removeprefix("www-project-")
             try:
-                project = Project.objects.get(key=f"www-project-{clean_p.replace('www-project-', '')}")
-            except Project.DoesNotExist:
-                try:
-                    project = Project.objects.get(key=clean_p)
-                except Project.DoesNotExist as err:
-                    msg = f"Project with key '{input_data.project_key}' not found."
-                    raise GraphQLError(
-                        msg,
-                        extensions={"code": "NOT_FOUND", "field": "projectKey"},
-                    ) from err
+                project = Project.objects.get(key=f"www-project-{clean_p}")
+            except Project.DoesNotExist as err:
+                msg = f"Project with key '{input_data.project_key}' not found."
+                raise GraphQLError(
+                    msg,
+                    extensions={"code": "NOT_FOUND", "field": "projectKey"},
+                ) from err
 
         if input_data.chapter_key:
-            clean_c = input_data.chapter_key.strip()
+            clean_c = input_data.chapter_key.strip().removeprefix("www-chapter-")
             try:
-                chapter = Chapter.objects.get(key=f"www-chapter-{clean_c.replace('www-chapter-', '')}")
-            except Chapter.DoesNotExist:
-                try:
-                    chapter = Chapter.objects.get(key=clean_c)
-                except Chapter.DoesNotExist as err:
-                    msg = f"Chapter with key '{input_data.chapter_key}' not found."
-                    raise GraphQLError(
-                        msg,
-                        extensions={"code": "NOT_FOUND", "field": "chapterKey"},
-                    ) from err
+                chapter = Chapter.objects.get(key=f"www-chapter-{clean_c}")
+            except Chapter.DoesNotExist as err:
+                msg = f"Chapter with key '{input_data.chapter_key}' not found."
+                raise GraphQLError(
+                    msg,
+                    extensions={"code": "NOT_FOUND", "field": "chapterKey"},
+                ) from err
+
+        filter_q = reduce(operator.or_, (Q(login__iexact=login_name) for login_name in logins))
+        recipients = GithubUser.objects.filter(filter_q)
+        found = {r.login.lower(): r for r in recipients}
+
+        missing = [login_name for login_name in logins if login_name.lower() not in found]
+        if missing:
+            msg = (
+                f"GitHub user '{missing[0]}' not found."
+                if len(missing) == 1
+                else f"GitHub users not found: {', '.join(missing)}."
+            )
+            logger.warning("GitHub user(s) not found: %s", ", ".join(missing))
+            raise GraphQLError(
+                msg,
+                extensions={"code": "NOT_FOUND", "field": "recipientLogins"},
+            )
 
         certificates = []
         for recipient_login in logins:
-            try:
-                recipient = GithubUser.objects.get(login__iexact=recipient_login)
-            except GithubUser.DoesNotExist as err:
-                msg = f"GitHub user '{recipient_login}' not found."
-                logger.warning("GitHub user '%s' not found.", recipient_login, exc_info=True)
-                raise ObjectDoesNotExist(msg) from err
-
+            recipient = found[recipient_login.lower()]
             certificate = Certificate.objects.create(
                 recipient=recipient,
                 issuer=user.github_user,
-                title=input_data.title.strip(),
+                title=title,
                 message=input_data.message.strip(),
                 project=project,
                 chapter=chapter,

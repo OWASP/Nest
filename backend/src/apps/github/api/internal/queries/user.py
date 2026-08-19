@@ -4,14 +4,18 @@ import strawberry
 import strawberry_django
 from django.db.models import Q, Sum
 
+from apps.common.constants import (
+    MAX_SEARCH_QUERY_LENGTH,
+    MIN_SEARCH_QUERY_LENGTH,
+    SEARCH_LIMIT,
+)
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.user import USER_BADGES_PREFETCH, UserNode
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 
-MIN_USER_SEARCH_LENGTH = 2
-MAX_USER_SEARCH_LENGTH = 100
-USER_SEARCH_LIMIT = 5
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -67,15 +71,16 @@ class UserQuery:
         """Search GitHub users by login or name."""
         cleaned_query = query.strip()
         if (
-            len(cleaned_query) < MIN_USER_SEARCH_LENGTH
-            or len(cleaned_query) > MAX_USER_SEARCH_LENGTH
+            len(cleaned_query) < MIN_SEARCH_QUERY_LENGTH
+            or len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH
         ):
             return []
 
         return list(
             User.objects.filter(
-                Q(login__icontains=cleaned_query) | Q(name__icontains=cleaned_query)
-            ).order_by("login")[:USER_SEARCH_LIMIT]
+                Q(has_public_member_page=True),
+                Q(login__icontains=cleaned_query) | Q(name__icontains=cleaned_query),
+            ).order_by("login")[:SEARCH_LIMIT]
         )
 
     @strawberry_django.field
@@ -87,6 +92,9 @@ class UserQuery:
     ) -> list[UserNode]:
         """Fetch top contributors for a project or chapter in a single JOIN query."""
         if not project_key and not chapter_key:
+            return []
+
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
         if project_key:
@@ -101,5 +109,6 @@ class UserQuery:
         return list(
             User.objects.filter(filter_q)
             .annotate(total_contributions=Sum("repositorycontributor__contributions_count"))
-            .order_by("-total_contributions")[:limit]
+            .prefetch_related(USER_BADGES_PREFETCH)
+            .order_by("-total_contributions")[:normalized_limit]
         )
