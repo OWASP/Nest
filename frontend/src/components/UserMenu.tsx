@@ -22,6 +22,7 @@ export default function UserMenu({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
   const isProjectLeader = session?.user?.isLeader
+  const isChapterLeader = session?.user?.isChapterLeader
   const isMentor = session?.user?.isMentor
   const isMentee = session?.user?.isMentee
   const isOwaspStaff = session?.user?.isOwaspStaff
@@ -134,6 +135,16 @@ export default function UserMenu({
               onClick={() => setIsOpen(false)}
             >
               My Certificate
+            </Link>
+          )}
+
+          {(isProjectLeader || isChapterLeader) && (
+            <Link
+              href="/certificate/issue"
+              className={userMenuItemClasses}
+              onClick={() => setIsOpen(false)}
+            >
+              Issue Certificate
             </Link>
           )}
 

@@ -107,7 +107,7 @@ const Label: React.FC<LabelProps> = ({ children, size = 'md' }) => (
 )
 
 interface MetricsProps {
-  score: number
+  score?: number | null
   tier: string
 }
 
@@ -120,7 +120,7 @@ const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
       <div className="flex flex-col items-center justify-center text-center leading-none">
         <Label size="sm">Contribution Score</Label>
         <span className="mt-1.5 text-[28px] leading-[0.95] font-extrabold text-[#111827]">
-          {score}
+          {score ?? 0}
         </span>
         <span className="mt-0.5 text-[12px] font-bold tracking-[0.15em] text-[#4B5563] uppercase">
           Points
