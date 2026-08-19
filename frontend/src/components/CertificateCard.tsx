@@ -135,7 +135,7 @@ const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
       <div className="flex flex-col items-center justify-center text-center leading-none">
         <Label size="sm">Achievement Tier</Label>
         <span className="mt-1.5 text-[20px] leading-[0.95] font-extrabold tracking-[0.12em] text-[#111827]">
-          {tier?.toUpperCase() ?? 'N/A'}
+          {tier?.trim().toUpperCase() || 'N/A'}
         </span>
       </div>
     </div>

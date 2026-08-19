@@ -4,7 +4,7 @@ import { useApolloClient } from '@apollo/client/react'
 import { Autocomplete, AutocompleteItem } from '@heroui/react'
 import { useDebouncedSuggestions } from 'hooks/useDebouncedSuggestions'
 import Image from 'next/image'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FaUserPlus, FaXmark } from 'react-icons/fa6'
 
 import {
@@ -51,8 +51,8 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
 
   // Fetch entity contributors whenever projectKey / chapterKey changes
   useEffect(() => {
+    setSuggestedContributors([])
     if (!projectKey && !chapterKey) {
-      setSuggestedContributors([])
       return
     }
     let active = true
@@ -83,29 +83,73 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
     [client]
   )
 
+  const MIN_SEARCH_LENGTH = 3
   const { items, isLoading } = useDebouncedSuggestions<UserItem>(inputValue, fetcher, {
-    minLength: 2,
+    minLength: MIN_SEARCH_LENGTH,
   })
+
+  const pendingSelectionRef = useRef(false)
 
   const addUser = (raw: string) => {
     const login = raw.trim().replace(/^@/, '')
-    if (login && !logins.includes(login)) onChange([...logins, login])
+    if (login && !logins.some((l) => l.toLowerCase() === login.toLowerCase())) {
+      onChange([...logins, login])
+    }
     setInputValue('')
   }
 
-  const displayItems = inputValue.trim().length >= 2 ? items : suggestedContributors
+  const displayItems = inputValue.trim().length >= MIN_SEARCH_LENGTH ? items : suggestedContributors
 
   const handleSelectionChange = (key: React.Key | null) => {
     if (!key) return
+    pendingSelectionRef.current = true
     const selected = displayItems.find((item) => item.login === key || item.id === key)
     addUser(selected?.login ?? (typeof key === 'string' ? key : ''))
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === 'Enter' || e.key === ',' || e.key === ' ') && inputValue.trim()) {
-      e.preventDefault()
-      addUser(inputValue)
+  const handleInputChange = (newValue: string) => {
+    if (pendingSelectionRef.current) {
+      pendingSelectionRef.current = false
+      setInputValue('')
+      return
     }
+    setInputValue(newValue)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === ',' || e.key === ' ') {
+      if (inputValue.trim()) {
+        e.preventDefault()
+        addUser(inputValue)
+      }
+      return
+    }
+
+    if (e.key === 'Enter') {
+      const target = e.currentTarget
+      const hasActiveDescendant = Boolean(target.getAttribute('aria-activedescendant'))
+      const hasFocusedOption = Boolean(
+        document.querySelector(
+          '[role="option"][aria-selected="true"], [role="option"][data-focus="true"], [role="option"][data-focused="true"], [role="option"][data-selected="true"]'
+        )
+      )
+
+      if (hasActiveDescendant || hasFocusedOption) {
+        return
+      }
+
+      if (inputValue.trim()) {
+        e.preventDefault()
+        addUser(inputValue)
+      }
+    }
+  }
+
+  let placeholder = 'Type username and press Enter or select...'
+  if (disabled) {
+    placeholder = 'Select a Project or Chapter first...'
+  } else if (suggestedContributors.length > 0) {
+    placeholder = 'Select a contributor or type username...'
   }
 
   return (
@@ -116,18 +160,12 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
         isRequired
         isDisabled={disabled}
         labelPlacement="outside"
-        placeholder={
-          disabled
-            ? 'Select a Project or Chapter first...'
-            : suggestedContributors.length > 0
-              ? 'Select a contributor or type username...'
-              : 'Type username and press Enter or select...'
-        }
+        placeholder={placeholder}
         description={
           disabled ? '⚠ Select a Project or Chapter above to enable this field.' : undefined
         }
         inputValue={inputValue}
-        onInputChange={setInputValue}
+        onInputChange={handleInputChange}
         onSelectionChange={handleSelectionChange}
         onKeyDown={handleKeyDown}
         menuTrigger="input"
@@ -179,9 +217,18 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
             </span>
             <button
               type="button"
-              onClick={() =>
-                onChange([...new Set([...logins, ...suggestedContributors.map((c) => c.login)])])
-              }
+              onClick={() => {
+                const existingLower = new Set(logins.map((l) => l.toLowerCase()))
+                const toAdd: string[] = []
+                for (const c of suggestedContributors) {
+                  const lower = c.login.toLowerCase()
+                  if (!existingLower.has(lower)) {
+                    existingLower.add(lower)
+                    toAdd.push(c.login)
+                  }
+                }
+                if (toAdd.length > 0) onChange([...logins, ...toAdd])
+              }}
               className="text-xs font-semibold text-[#1D7BD7] hover:underline"
             >
               + Add All
@@ -189,7 +236,7 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
           </div>
           <div className="flex flex-wrap gap-1.5 pt-1">
             {suggestedContributors.map((user) => {
-              const isAdded = logins.includes(user.login)
+              const isAdded = logins.some((l) => l.toLowerCase() === user.login.toLowerCase())
               return (
                 <button
                   key={user.login}
@@ -230,7 +277,10 @@ const UserSelectorInput: React.FC<UserSelectorInputProps> = ({
               <span>@{login}</span>
               <button
                 type="button"
-                onClick={() => onChange(logins.filter((l) => l !== login))}
+                aria-label={`Remove recipient @${login}`}
+                onClick={() =>
+                  onChange(logins.filter((l) => l.toLowerCase() !== login.toLowerCase()))
+                }
                 className="rounded-full p-0.5 text-gray-400 transition hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-200"
               >
                 <FaXmark className="h-3 w-3" />

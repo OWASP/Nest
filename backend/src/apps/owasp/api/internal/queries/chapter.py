@@ -6,7 +6,6 @@ import strawberry_django
 from apps.common.constants import (
     MAX_SEARCH_QUERY_LENGTH,
     MIN_SEARCH_QUERY_LENGTH,
-    SEARCH_LIMIT,
 )
 from apps.common.utils import normalize_limit
 from apps.github.models.user import User as GithubUser
@@ -14,6 +13,7 @@ from apps.owasp.api.internal.nodes.chapter import ChapterNode
 from apps.owasp.models.chapter import Chapter
 
 MAX_LIMIT = 1000
+SEARCH_CHAPTERS_LIMIT = 8
 
 
 @strawberry.type
@@ -57,14 +57,13 @@ class ChapterQuery:
 
         return Chapter.active_chapters.filter(
             name__icontains=cleaned_query,
-        ).order_by("name")[:SEARCH_LIMIT]
+        ).order_by("name")[:SEARCH_CHAPTERS_LIMIT]
 
     @strawberry_django.field
     def is_chapter_leader(self, login: str) -> bool:
         """Check if a GitHub login is an active, reviewed OWASP chapter leader."""
-        try:
-            github_user = GithubUser.objects.get(login__iexact=login)
-        except GithubUser.DoesNotExist:
+        github_user = GithubUser.objects.filter(login__iexact=login).first()
+        if github_user is None:
             return False
 
         return github_user.chapters.exists()

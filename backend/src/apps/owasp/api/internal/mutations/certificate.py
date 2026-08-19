@@ -46,9 +46,10 @@ class CertificateMutation:
     ) -> list[CertificateNode]:
         """Issue generic certificates to contributors (project or chapter leaders only)."""
         user = info.context.request.user
+        github_user = getattr(user, "github_user", None)
 
-        if not user.github_user or (
-            not user.github_user.is_project_leader and not user.github_user.chapters.exists()
+        if not github_user or (
+            not github_user.is_project_leader and not github_user.chapters.exists()
         ):
             msg = "You must be a project leader or chapter leader to issue certificates."
             logger.warning(
@@ -59,9 +60,13 @@ class CertificateMutation:
 
         logins = []
         if input_data.recipient_logins:
-            logins = [
-                login.strip() for login in input_data.recipient_logins if login and login.strip()
-            ]
+            seen_logins = set()
+            for raw_login in input_data.recipient_logins:
+                if raw_login and (clean_login := raw_login.strip()):
+                    lower_login = clean_login.lower()
+                    if lower_login not in seen_logins:
+                        seen_logins.add(lower_login)
+                        logins.append(clean_login)
         elif input_data.recipient_login and input_data.recipient_login.strip():
             logins = [input_data.recipient_login.strip()]
 
@@ -78,24 +83,31 @@ class CertificateMutation:
             msg = "Certificate title cannot exceed 255 characters."
             raise ValidationError(msg)
 
-        has_project = bool(input_data.project_key and input_data.project_key.strip())
-        has_chapter = bool(input_data.chapter_key and input_data.chapter_key.strip())
+        clean_project_key = (
+            input_data.project_key.strip().removeprefix("www-project-")
+            if input_data.project_key and input_data.project_key.strip()
+            else None
+        )
+        clean_chapter_key = (
+            input_data.chapter_key.strip().removeprefix("www-chapter-")
+            if input_data.chapter_key and input_data.chapter_key.strip()
+            else None
+        )
 
-        if has_project and has_chapter:
+        if clean_project_key and clean_chapter_key:
             msg = "Provide either project or chapter, not both."
             raise ValidationError(msg)
 
-        if not has_project and not has_chapter:
+        if not clean_project_key and not clean_chapter_key:
             msg = "Either project or chapter must be provided."
             raise ValidationError(msg)
 
         project = None
         chapter = None
 
-        if input_data.project_key:
-            clean_p = input_data.project_key.strip().removeprefix("www-project-")
+        if clean_project_key:
             try:
-                project = Project.objects.get(key=f"www-project-{clean_p}")
+                project = Project.objects.get(key=f"www-project-{clean_project_key}")
             except Project.DoesNotExist as err:
                 msg = f"Project with key '{input_data.project_key}' not found."
                 raise GraphQLError(
@@ -103,10 +115,9 @@ class CertificateMutation:
                     extensions={"code": "NOT_FOUND", "field": "projectKey"},
                 ) from err
 
-        if input_data.chapter_key:
-            clean_c = input_data.chapter_key.strip().removeprefix("www-chapter-")
+        if clean_chapter_key:
             try:
-                chapter = Chapter.objects.get(key=f"www-chapter-{clean_c}")
+                chapter = Chapter.objects.get(key=f"www-chapter-{clean_chapter_key}")
             except Chapter.DoesNotExist as err:
                 msg = f"Chapter with key '{input_data.chapter_key}' not found."
                 raise GraphQLError(
@@ -136,7 +147,7 @@ class CertificateMutation:
             recipient = found[recipient_login.lower()]
             certificate = Certificate.objects.create(
                 recipient=recipient,
-                issuer=user.github_user,
+                issuer=github_user,
                 title=title,
                 message=input_data.message.strip(),
                 project=project,

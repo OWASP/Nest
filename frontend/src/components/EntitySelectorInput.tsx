@@ -34,10 +34,13 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
   const client = useApolloClient()
   const [inputValue, setInputValue] = useState(value)
   const pendingSelectionRef = useRef(false)
+  const lastKeyRef = useRef<string>('')
 
   const isProject = entityType === 'project'
-  const prefix = isProject ? /^www-project-/ : /^www-chapter-/
-  const stripPrefix = (key: string) => key.replace(prefix, '')
+  const stripPrefix = useCallback(
+    (key: string) => key.replace(isProject ? /^www-project-/ : /^www-chapter-/, ''),
+    [isProject]
+  )
 
   const fetcher = useCallback(
     async (q: string) => {
@@ -65,16 +68,42 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
   }>(inputValue, fetcher, { minLength: 3 })
 
   useEffect(() => {
-    if (!value) setInputValue('')
+    if (!value && lastKeyRef.current !== '') {
+      setInputValue('')
+      lastKeyRef.current = ''
+    }
   }, [value])
+
+  useEffect(() => {
+    if (!inputValue.trim()) {
+      if (lastKeyRef.current !== '') {
+        lastKeyRef.current = ''
+        onChange('')
+      }
+      return
+    }
+    const matched = items.find(
+      (item) =>
+        item.name.toLowerCase() === inputValue.trim().toLowerCase() ||
+        stripPrefix(item.key).toLowerCase() === inputValue.trim().toLowerCase()
+    )
+    const newKey = matched ? stripPrefix(matched.key) : ''
+    if (lastKeyRef.current !== newKey) {
+      lastKeyRef.current = newKey
+      onChange(newKey)
+    }
+  }, [inputValue, items, onChange, stripPrefix])
 
   const handleSelectionChange = (key: React.Key | null) => {
     const selected = key ? items.find((item) => item.key === key || item.id === key) : null
     if (selected) {
       pendingSelectionRef.current = true
+      const strippedKey = stripPrefix(selected.key)
       setInputValue(selected.name)
-      onChange(stripPrefix(selected.key))
+      lastKeyRef.current = strippedKey
+      onChange(strippedKey)
     } else if (!key) {
+      lastKeyRef.current = ''
       onChange('')
     }
   }
@@ -85,16 +114,6 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
       return
     }
     setInputValue(newValue)
-    if (!newValue.trim()) {
-      onChange('')
-      return
-    }
-    const matched = items.find(
-      (item) =>
-        item.name.toLowerCase() === newValue.trim().toLowerCase() ||
-        stripPrefix(item.key).toLowerCase() === newValue.trim().toLowerCase()
-    )
-    onChange(matched ? stripPrefix(matched.key) : '')
   }
 
   return (

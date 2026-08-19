@@ -107,6 +107,8 @@ const authOptions: AuthOptions = {
         token.isChapterLeader = isChapterLeader
         token.isMentor = isMentor
         token.isMentee = isMentee
+      } else if (token.login && typeof token.isChapterLeader !== 'boolean') {
+        token.isChapterLeader = await checkIfChapterLeader(token.login as string)
       }
 
       if (trigger === 'update' && session) {

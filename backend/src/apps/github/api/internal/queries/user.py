@@ -14,6 +14,7 @@ from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.user import USER_BADGES_PREFETCH, UserNode
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
+from apps.nest.api.internal.permissions import IsAuthenticated
 
 MAX_LIMIT = 1000
 
@@ -66,7 +67,7 @@ class UserQuery:
             .first()
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(permission_classes=[IsAuthenticated])
     def search_users(self, query: str) -> list[UserNode]:
         """Search GitHub users by login or name."""
         cleaned_query = query.strip()
@@ -83,7 +84,7 @@ class UserQuery:
             ).order_by("login")[:SEARCH_LIMIT]
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(permission_classes=[IsAuthenticated])
     def entity_contributors(
         self,
         project_key: str | None = None,
@@ -98,13 +99,19 @@ class UserQuery:
             return []
 
         if project_key:
+            clean_project_key = project_key.strip().removeprefix("www-project-")
             filter_q = Q(
-                repositorycontributor__repository__project__key__iexact=f"www-project-{project_key}"
+                repositorycontributor__repository__project_set__key__iexact=(
+                    f"www-project-{clean_project_key}"
+                )
+            )
+        elif chapter_key:
+            clean_chapter_key = chapter_key.strip().removeprefix("www-chapter-")
+            filter_q = Q(
+                repositorycontributor__repository__key__iexact=(f"www-chapter-{clean_chapter_key}")
             )
         else:
-            filter_q = Q(
-                repositorycontributor__repository__key__iexact=f"www-chapter-{chapter_key}"
-            )
+            return []
 
         return list(
             User.objects.filter(filter_q)

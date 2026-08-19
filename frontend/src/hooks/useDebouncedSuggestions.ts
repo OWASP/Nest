@@ -32,6 +32,7 @@ export function useDebouncedSuggestions<T>(
     debounce(async (q: string) => {
       const trimmed = q.trim()
       if (trimmed.length < minLength) {
+        ++requestIdRef.current
         setItems([])
         setIsLoading(false)
         return
