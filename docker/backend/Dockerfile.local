@@ -57,7 +57,7 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk --no-cache update && \
-    apk --no-cache add postgresql16-client=16.14-r0 redis && \
+    apk --no-cache add postgresql16-client=16.15-r0 redis && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 

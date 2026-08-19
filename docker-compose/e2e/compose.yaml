@@ -7,6 +7,7 @@ services:
     command: >
       sh -c '
         python manage.py migrate &&
+        python manage.py e2e_seed_users &&
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
     container_name: e2e-nest-backend

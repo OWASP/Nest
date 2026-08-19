@@ -67,7 +67,7 @@ ARG OWASP_UID
 
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add make postgresql16-client=16.14-r0 && \
+    apk --no-cache add make postgresql16-client=16.15-r0 && \
     rm -rf /var/cache/apk/* /var/tmp/* /tmp/* && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
@@ -118,7 +118,7 @@ ARG OWASP_UID
 
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add ffmpeg make postgresql16-client=16.14-r0 \
+    apk --no-cache add ffmpeg make postgresql16-client=16.15-r0 \
     # WeasyPrint dependencies: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
     so:libfontconfig.so.1 so:libgobject-2.0.so.0 so:libharfbuzz-subset.so.0 \
     so:libharfbuzz.so.0 so:libpango-1.0.so.0 so:libpangoft2-1.0.so.0 ttf-freefont && \
