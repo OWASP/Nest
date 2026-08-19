@@ -1,4 +1,4 @@
-import { loginAs } from '@e2e/helpers/loginAs'
+import { loginAs, loginAsPage } from '@e2e/helpers/loginAs'
 import { test, expect } from '@playwright/test'
 
 const MY_PROGRAMS_QUERY = `
@@ -33,5 +33,13 @@ test.describe('My Mentorship', () => {
 
     expect(body.errors).toBeUndefined()
     expect(body.data.myPrograms).toBeTruthy()
+  })
+
+  test('renders My Mentorship after e2e page login', async ({ page }) => {
+    await loginAsPage(page, 'e2e-mentor')
+    await page.goto('/my/mentorship', { waitUntil: 'domcontentloaded' })
+    await expect(page).not.toHaveURL(/\/auth\/login/)
+    await expect(page.getByRole('heading', { name: 'My Mentorship' })).toBeVisible()
+    await expect(page.getByText('No programs found')).toBeVisible()
   })
 })
