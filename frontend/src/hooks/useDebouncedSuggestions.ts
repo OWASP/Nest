@@ -29,27 +29,25 @@ export function useDebouncedSuggestions<T>(
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchSuggestions = useCallback(
-    debounce(async (q: string) => {
+    debounce(async (q: string, requestId: number) => {
       const trimmed = q.trim()
-      if (trimmed.length < minLength) {
-        ++requestIdRef.current
+      if (trimmed.length < minLength || requestId !== requestIdRef.current) {
         setItems([])
         setIsLoading(false)
         return
       }
-      const currentId = ++requestIdRef.current
       setIsLoading(true)
       try {
         const results = await fetcher(trimmed, client)
-        if (currentId === requestIdRef.current) {
+        if (requestId === requestIdRef.current) {
           setItems(results)
         }
       } catch {
-        if (currentId === requestIdRef.current) {
+        if (requestId === requestIdRef.current) {
           setItems([])
         }
       } finally {
-        if (currentId === requestIdRef.current) {
+        if (requestId === requestIdRef.current) {
           setIsLoading(false)
         }
       }
@@ -59,11 +57,19 @@ export function useDebouncedSuggestions<T>(
   )
 
   useEffect(() => {
-    fetchSuggestions(query)
+    const currentId = ++requestIdRef.current
+    const trimmed = query.trim()
+    if (trimmed.length < minLength) {
+      fetchSuggestions.cancel()
+      setItems([])
+      setIsLoading(false)
+    } else {
+      fetchSuggestions(query, currentId)
+    }
     return () => {
       fetchSuggestions.cancel()
     }
-  }, [query, fetchSuggestions])
+  }, [query, minLength, fetchSuggestions])
 
   return { items, isLoading }
 }

@@ -35,6 +35,7 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
   const [inputValue, setInputValue] = useState(value)
   const pendingSelectionRef = useRef(false)
   const lastKeyRef = useRef<string>('')
+  const isExplicitEditRef = useRef(false)
 
   const isProject = entityType === 'project'
   const stripPrefix = useCallback(
@@ -71,6 +72,7 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
     if (!value && lastKeyRef.current !== '') {
       setInputValue('')
       lastKeyRef.current = ''
+      isExplicitEditRef.current = false
     }
   }, [value])
 
@@ -80,8 +82,14 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
         lastKeyRef.current = ''
         onChange('')
       }
+      isExplicitEditRef.current = false
       return
     }
+
+    if (!isExplicitEditRef.current) {
+      return
+    }
+
     const matched = items.find(
       (item) =>
         item.name.toLowerCase() === inputValue.trim().toLowerCase() ||
@@ -92,17 +100,22 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
       lastKeyRef.current = newKey
       onChange(newKey)
     }
+    if (matched) {
+      isExplicitEditRef.current = false
+    }
   }, [inputValue, items, onChange, stripPrefix])
 
   const handleSelectionChange = (key: React.Key | null) => {
     const selected = key ? items.find((item) => item.key === key || item.id === key) : null
     if (selected) {
       pendingSelectionRef.current = true
+      isExplicitEditRef.current = false
       const strippedKey = stripPrefix(selected.key)
       setInputValue(selected.name)
       lastKeyRef.current = strippedKey
       onChange(strippedKey)
     } else if (!key) {
+      isExplicitEditRef.current = false
       lastKeyRef.current = ''
       onChange('')
     }
@@ -113,6 +126,7 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
       pendingSelectionRef.current = false
       return
     }
+    isExplicitEditRef.current = true
     setInputValue(newValue)
   }
 

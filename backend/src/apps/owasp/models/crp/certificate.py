@@ -53,11 +53,13 @@ class Certificate(TimestampedModel):
                 condition=(
                     Q(tier__in=TierChoices.values)
                     | (
-                        ~Q(title="")
+                        Q(tier="")
+                        & ~Q(title="")
                         & Q(title__isnull=False)
                         & (
                             (Q(project__isnull=False) & Q(chapter__isnull=True))
                             | (Q(project__isnull=True) & Q(chapter__isnull=False))
+                            | (Q(project__isnull=True) & Q(chapter__isnull=True))
                         )
                     )
                 ),

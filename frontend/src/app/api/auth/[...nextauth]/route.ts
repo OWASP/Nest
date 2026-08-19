@@ -108,7 +108,11 @@ const authOptions: AuthOptions = {
         token.isMentor = isMentor
         token.isMentee = isMentee
       } else if (token.login && typeof token.isChapterLeader !== 'boolean') {
-        token.isChapterLeader = await checkIfChapterLeader(token.login as string)
+        try {
+          token.isChapterLeader = await checkIfChapterLeader(token.login as string)
+        } catch {
+          // Leave the claim unset so the next session request retries the lookup.
+        }
       }
 
       if (trigger === 'update' && session) {
