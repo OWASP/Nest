@@ -27,17 +27,30 @@ class TestE2ESeedUsersCommand:
             call_command("e2e_seed_users")
 
     @patch("apps.nest.management.commands.e2e_seed_users.index.disable_indexing")
+    @patch("apps.nest.management.commands.e2e_seed_users.ContentType")
+    @patch("apps.nest.management.commands.e2e_seed_users.EntityMember")
+    @patch("apps.nest.management.commands.e2e_seed_users.Project")
     @patch("apps.nest.management.commands.e2e_seed_users.Mentee")
     @patch("apps.nest.management.commands.e2e_seed_users.Mentor")
     @patch("apps.nest.management.commands.e2e_seed_users.NestUser")
     @patch("apps.nest.management.commands.e2e_seed_users.GithubUser")
     def test_creates_users(
-        self, mock_github_user, mock_nest_user, mock_mentor, mock_mentee, mock_disable_indexing
+        self,
+        mock_github_user,
+        mock_nest_user,
+        mock_mentor,
+        mock_mentee,
+        mock_project,
+        mock_entity_member,
+        mock_content_type,
+        mock_disable_indexing,
     ):
         github_user = MagicMock()
         nest_user = MagicMock()
+        project = MagicMock(id=1)
         mock_github_user.objects.get_or_create.return_value = (github_user, True)
         mock_nest_user.objects.get_or_create.return_value = (nest_user, True)
+        mock_project.objects.get_or_create.return_value = (project, True)
 
         with patch(
             "apps.nest.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
@@ -55,4 +68,19 @@ class TestE2ESeedUsersCommand:
         mock_mentee.objects.get_or_create.assert_called_once_with(
             github_user=github_user,
             defaults={"nest_user": nest_user},
+        )
+        mock_project.objects.get_or_create.assert_called_once_with(
+            key="www-project-e2e",
+            defaults={"name": "E2E Project"},
+        )
+        mock_entity_member.objects.get_or_create.assert_called_once_with(
+            entity_id=project.id,
+            entity_type=mock_content_type.objects.get_for_model.return_value,
+            member_name="e2e-user",
+            role=mock_entity_member.Role.LEADER,
+            defaults={
+                "is_active": True,
+                "is_reviewed": True,
+                "member": github_user,
+            },
         )

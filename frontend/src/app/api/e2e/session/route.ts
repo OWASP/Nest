@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     secret: process.env.NEXTAUTH_SECRET ?? '',
     token: {
       email: `${username}@example.com`,
-      isLeader: false,
+      isLeader: username === 'e2e-user',
       isMentee: username === 'e2e-mentee',
       isMentor: username === 'e2e-mentor',
       login: username,

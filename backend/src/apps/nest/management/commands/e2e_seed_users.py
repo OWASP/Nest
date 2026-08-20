@@ -1,6 +1,7 @@
 """Seed deterministic users for end-to-end tests."""
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
@@ -8,6 +9,8 @@ from apps.core.utils import index
 from apps.github.models.user import User as GithubUser
 from apps.mentorship.models import Mentee, Mentor
 from apps.nest.models import User as NestUser
+from apps.owasp.models.entity_member import EntityMember
+from apps.owasp.models.project import Project
 
 E2E_USERS = (
     ("e2e-mentee", "mentee"),
@@ -54,4 +57,20 @@ class Command(BaseCommand):
                     Mentee.objects.get_or_create(
                         github_user=github_user,
                         defaults={"nest_user": nest_user},
+                    )
+                elif login == "e2e-user":
+                    project, _ = Project.objects.get_or_create(
+                        key="www-project-e2e",
+                        defaults={"name": "E2E Project"},
+                    )
+                    EntityMember.objects.get_or_create(
+                        entity_id=project.id,
+                        entity_type=ContentType.objects.get_for_model(Project),
+                        member_name=login,
+                        role=EntityMember.Role.LEADER,
+                        defaults={
+                            "is_active": True,
+                            "is_reviewed": True,
+                            "member": github_user,
+                        },
                     )
