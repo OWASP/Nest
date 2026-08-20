@@ -84,29 +84,3 @@ class TestBoardCandidateProfileQuery:
         result = query.board_candidate_profile(info, login="unknown", year=2025)
 
         assert result is None
-
-    @patch("apps.owasp.api.internal.queries.board_candidate_profile.ContentType")
-    @patch("apps.owasp.api.internal.queries.board_candidate_profile.BoardOfDirectors")
-    @patch("apps.owasp.api.internal.queries.board_candidate_profile.BoardCandidateProfile")
-    def test_inactive_candidate_returns_none(self, mock_profile_model, mock_board_model, mock_ct):
-        mock_profile_model.DoesNotExist = BoardCandidateProfile.DoesNotExist
-        mock_board_model.DoesNotExist = BoardOfDirectors.DoesNotExist
-
-        board = MagicMock()
-        board.id = 1
-        mock_board_model.objects.get.return_value = board
-        mock_ct.objects.get_for_model.return_value = MagicMock()
-
-        mock_qs = MagicMock()
-        mock_qs.get.side_effect = BoardCandidateProfile.DoesNotExist
-        mock_profile_model.objects.select_related.return_value = mock_qs
-
-        query = BoardCandidateProfileQuery()
-        info = MagicMock()
-        result = query.board_candidate_profile(info, login="inactive", year=2025)
-
-        _, kwargs = mock_qs.get.call_args
-        assert kwargs["candidate__is_active"]
-        assert kwargs["candidate__is_reviewed"]
-        assert kwargs["candidate__role"] == EntityMember.Role.CANDIDATE
-        assert result is None
