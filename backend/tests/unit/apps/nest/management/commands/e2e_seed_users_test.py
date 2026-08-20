@@ -46,11 +46,15 @@ class TestE2ESeedUsersCommand:
         mock_disable_indexing,
     ):
         github_user = MagicMock()
+        github_user.id = 10
         nest_user = MagicMock()
+        nest_user.github_user_id = 10
         project = MagicMock(id=1)
+        membership = MagicMock()
         mock_github_user.objects.get_or_create.return_value = (github_user, True)
         mock_nest_user.objects.get_or_create.return_value = (nest_user, True)
         mock_project.objects.get_or_create.return_value = (project, True)
+        mock_entity_member.objects.get_or_create.return_value = (membership, True)
 
         with patch(
             "apps.nest.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
@@ -83,4 +87,7 @@ class TestE2ESeedUsersCommand:
                 "is_reviewed": True,
                 "member": github_user,
             },
+        )
+        membership.save.assert_called_once_with(
+            update_fields=["is_active", "is_reviewed", "member"]
         )

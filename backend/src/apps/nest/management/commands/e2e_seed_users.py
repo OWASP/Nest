@@ -48,6 +48,9 @@ class Command(BaseCommand):
                         "github_user": github_user,
                     },
                 )
+                if nest_user.github_user_id != github_user.id:
+                    nest_user.github_user = github_user
+                    nest_user.save(update_fields=["github_user"])
                 if role == "mentor":
                     Mentor.objects.get_or_create(
                         github_user=github_user,
@@ -63,7 +66,7 @@ class Command(BaseCommand):
                         key="www-project-e2e",
                         defaults={"name": "E2E Project"},
                     )
-                    EntityMember.objects.get_or_create(
+                    membership, _ = EntityMember.objects.get_or_create(
                         entity_id=project.id,
                         entity_type=ContentType.objects.get_for_model(Project),
                         member_name=login,
@@ -74,3 +77,7 @@ class Command(BaseCommand):
                             "member": github_user,
                         },
                     )
+                    membership.is_active = True
+                    membership.is_reviewed = True
+                    membership.member = github_user
+                    membership.save(update_fields=["is_active", "is_reviewed", "member"])
