@@ -6,21 +6,20 @@ export async function POST(request: Request) {
     return new NextResponse(null, { status: 404 })
   }
 
-  let username = ''
-  let maxAge: number | undefined
+  let body: { maxAge?: number; username?: string }
   try {
-    const body = (await request.json()) as { maxAge?: number; username?: string }
-    username = (body.username ?? '').trim()
-    if (typeof body.maxAge === 'number' && Number.isFinite(body.maxAge)) {
-      maxAge = body.maxAge
-    }
+    body = (await request.json()) as { maxAge?: number; username?: string }
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 })
   }
 
+  const username = (body.username ?? '').trim()
   if (!username) {
     return NextResponse.json({ ok: false }, { status: 400 })
   }
+
+  const maxAge =
+    typeof body.maxAge === 'number' && Number.isFinite(body.maxAge) ? body.maxAge : undefined
 
   const token = await encode({
     secret: process.env.NEXTAUTH_SECRET ?? '',

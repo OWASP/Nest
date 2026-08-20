@@ -17,7 +17,7 @@ e2e-db-init:
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml build -q backend \
 		1>/dev/null
-	@DOCKER_BUILDKIT=1 docker compose \
+	@E2E_SKIP_SEED=1 DOCKER_BUILDKIT=1 docker compose \
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml up \
 		--abort-on-container-exit \
