@@ -4,8 +4,7 @@ import {
   setInvalidNextAuthSession,
   setNextAuthSession,
 } from '@e2e/helpers/loginAs'
-import { test, expect } from '@playwright/test'
-import { Page } from '@playwright/test'
+import { expect, Page, test } from '@playwright/test'
 
 const USER = 'e2e-mentor'
 
