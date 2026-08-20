@@ -74,7 +74,7 @@ describe('AnnotatedProfile', () => {
             key: 'claim-key',
             name: 'A Claim',
             sourceText: 'This is my claim.',
-            status: ClaimStatusEnum.Approved,
+            status: ClaimStatusEnum.Submitted,
           },
         ]}
       />
@@ -82,7 +82,7 @@ describe('AnnotatedProfile', () => {
     const mark = screen.getByTestId('claim-highlight')
     expect(mark).toHaveAttribute('data-claim-key', 'claim-key')
     expect(mark).toHaveAttribute('data-claim-name', 'A Claim')
-    expect(mark).toHaveAttribute('data-claim-status', ClaimStatusEnum.Approved)
+    expect(mark).toHaveAttribute('data-claim-status', ClaimStatusEnum.Submitted)
     expect(mark.textContent).toBe('This is my claim.')
   })
 
@@ -105,11 +105,11 @@ describe('AnnotatedProfile', () => {
     expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
   })
 
-  it('drops Withdrawn and Discarded claims even when sourceText matches', () => {
+  it('drops Withdrawn, Discarded, and Approved claims even when sourceText matches', () => {
     render(
       <AnnotatedProfile
         {...baseProps}
-        rawMarkdown="Public statement about work."
+        rawMarkdown="Public statement about important work."
         claims={[
           {
             id: 'w',
@@ -122,8 +122,15 @@ describe('AnnotatedProfile', () => {
             id: 'd',
             key: 'discarded',
             name: 'Discarded',
-            sourceText: 'about work',
+            sourceText: 'about',
             status: ClaimStatusEnum.Discarded,
+          },
+          {
+            id: 'a',
+            key: 'approved',
+            name: 'Approved',
+            sourceText: 'important work',
+            status: ClaimStatusEnum.Approved,
           },
         ]}
       />
@@ -190,7 +197,7 @@ describe('AnnotatedProfile', () => {
             key: 'nest',
             name: 'Nest',
             sourceText: 'OWASP Nest',
-            status: ClaimStatusEnum.Approved,
+            status: ClaimStatusEnum.Submitted,
           },
         ]}
       />
