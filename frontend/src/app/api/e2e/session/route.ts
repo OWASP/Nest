@@ -7,9 +7,13 @@ export async function POST(request: Request) {
   }
 
   let username = ''
+  let maxAge: number | undefined
   try {
-    const body = (await request.json()) as { username?: string }
+    const body = (await request.json()) as { maxAge?: number; username?: string }
     username = (body.username ?? '').trim()
+    if (typeof body.maxAge === 'number' && Number.isFinite(body.maxAge)) {
+      maxAge = body.maxAge
+    }
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 })
   }
@@ -29,6 +33,7 @@ export async function POST(request: Request) {
       name: username,
       sub: username,
     },
+    ...(maxAge === undefined ? {} : { maxAge }),
   })
 
   const response = NextResponse.json({ ok: true })

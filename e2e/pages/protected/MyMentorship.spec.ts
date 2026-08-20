@@ -1,4 +1,4 @@
-import { loginAs, loginAsPage } from '@e2e/helpers/loginAs'
+import { loginAs, loginAsPage, setInvalidNextAuthSession, setNextAuthSession } from '@e2e/helpers/loginAs'
 import { test, expect } from '@playwright/test'
 
 const MY_PROGRAMS_QUERY = `
@@ -41,5 +41,19 @@ test.describe('My Mentorship', () => {
     await expect(page).not.toHaveURL(/\/auth\/login/)
     await expect(page.getByRole('heading', { name: 'My Mentorship' })).toBeVisible()
     await expect(page.getByText('No programs found')).toBeVisible()
+  })
+
+  test('redirects when NextAuth session cookie is invalid', async ({ page }) => {
+    await loginAs(page, 'e2e-mentor')
+    await setInvalidNextAuthSession(page)
+    await page.goto('/my/mentorship', { waitUntil: 'domcontentloaded' })
+    await expect(page).toHaveURL(/\/auth\/login/)
+  })
+
+  test('redirects when NextAuth session cookie is expired', async ({ page }) => {
+    await loginAs(page, 'e2e-mentor')
+    await setNextAuthSession(page, 'e2e-mentor', { maxAge: 0 })
+    await page.goto('/my/mentorship', { waitUntil: 'domcontentloaded' })
+    await expect(page).toHaveURL(/\/auth\/login/)
   })
 })

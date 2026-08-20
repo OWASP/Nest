@@ -4,7 +4,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from apps.nest.management.commands.e2e_seed_users import Command, E2E_USERS
+from apps.nest.management.commands.e2e_seed_users import E2E_USERS, Command
 
 
 class TestE2ESeedUsersCommand:
