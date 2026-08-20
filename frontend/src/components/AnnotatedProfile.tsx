@@ -132,7 +132,7 @@ const AnnotatedProfile = ({
     <div className="relative">
       <div
         ref={containerRef}
-        className="md-wrapper rounded-xl bg-white p-6 text-gray-700 shadow-sm"
+        className="md-wrapper md-neutralized rounded-xl bg-white p-6 text-gray-700 shadow-sm dark:bg-slate-800 dark:text-gray-300"
       >
         <Markdown options={markdownOptions}>{wrapped}</Markdown>
       </div>

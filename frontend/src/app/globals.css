@@ -297,6 +297,23 @@ select:disabled,
     color: oklch(74.6% 0.16 232.661);
     background-color: #333539;
   }
+
+  /*
+   * Candidate profiles are synced verbatim from www-board-candidates, which is
+   * authored for a light-only site and ships arbitrary inline colors. Drop them
+   * so the content always inherits whichever color the active theme sets on the
+   * wrapper. Code and claim highlights keep their own themed backgrounds, and
+   * links additionally keep their own themed color.
+   */
+  .md-neutralized *:not(code, [data-claim-highlight]) {
+    background-color: transparent !important;
+    background-image: none !important;
+    text-shadow: none !important;
+  }
+
+  .md-neutralized *:not(a, code, [data-claim-highlight]) {
+    color: inherit !important;
+  }
 }
 
 @layer base {
