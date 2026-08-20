@@ -20,7 +20,7 @@ class TestE2ESeedUsersCommand:
         with (
             patch(
                 "apps.nest.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
-                False,
+                new=False,
             ),
             pytest.raises(CommandError, match="e2e environment"),
         ):
@@ -41,7 +41,7 @@ class TestE2ESeedUsersCommand:
 
         with patch(
             "apps.nest.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
-            True,
+            new=True,
         ):
             call_command("e2e_seed_users")
 

@@ -24,7 +24,7 @@ class TestE2ELoginView:
         with (
             patch(
                 "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
-                False,
+                new=False,
             ),
             pytest.raises(Http404),
         ):
@@ -33,7 +33,7 @@ class TestE2ELoginView:
     def test_returns_400_for_invalid_json(self):
         with patch(
             "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
-            True,
+            new=True,
         ):
             response = e2e_login(_post("{"))
 
@@ -43,7 +43,7 @@ class TestE2ELoginView:
     def test_returns_400_without_username(self):
         with patch(
             "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
-            True,
+            new=True,
         ):
             response = e2e_login(_post({}))
 
@@ -54,7 +54,7 @@ class TestE2ELoginView:
         with (
             patch(
                 "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
-                True,
+                new=True,
             ),
             patch(
                 "apps.nest.api.internal.views.e2e_login.User.objects.get",
@@ -71,7 +71,7 @@ class TestE2ELoginView:
         with (
             patch(
                 "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
-                True,
+                new=True,
             ),
             patch(
                 "apps.nest.api.internal.views.e2e_login.User.objects.get",
