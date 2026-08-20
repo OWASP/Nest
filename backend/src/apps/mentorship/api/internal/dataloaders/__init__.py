@@ -5,6 +5,7 @@ from strawberry.dataloader import DataLoader
 from apps.github.models.user import User
 from apps.mentorship.api.internal.dataloaders.admin import get_admin_loaders
 from apps.mentorship.api.internal.dataloaders.interested_users import get_interested_users_loaders
+from apps.mentorship.api.internal.dataloaders.tasks import get_task_loaders
 
 
 def get_mentorship_dataloaders() -> dict[str, object]:
@@ -12,4 +13,5 @@ def get_mentorship_dataloaders() -> dict[str, object]:
     loaders: dict[str, object] = {}
     loaders.update(get_admin_loaders())
     loaders.update(get_interested_users_loaders())
+    loaders.update(get_task_loaders())
     return loaders

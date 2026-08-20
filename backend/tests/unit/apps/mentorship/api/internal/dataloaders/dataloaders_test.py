@@ -8,10 +8,12 @@ from apps.mentorship.api.internal.dataloaders.admin import ADMINS_BY_PROGRAM_ID_
 from apps.mentorship.api.internal.dataloaders.interested_users import (
     INTERESTED_USERS_BY_ISSUE_ID_LOADER,
 )
+from apps.mentorship.api.internal.dataloaders.tasks import TASK_DEADLINES_BY_ISSUE_ID_LOADER
 
 EXPECTED_LOADER_KEYS = (
     ADMINS_BY_PROGRAM_ID_LOADER,
     INTERESTED_USERS_BY_ISSUE_ID_LOADER,
+    TASK_DEADLINES_BY_ISSUE_ID_LOADER,
 )
 
 
