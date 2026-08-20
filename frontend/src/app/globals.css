@@ -383,6 +383,30 @@ select:disabled,
     font-weight: bold;
   }
 
+  .md-wrapper h1 {
+    font-size: 2em;
+  }
+
+  .md-wrapper h2 {
+    font-size: 1.5em;
+  }
+
+  .md-wrapper h3 {
+    font-size: 1.25em;
+  }
+
+  .md-wrapper h4 {
+    font-size: 1em;
+  }
+
+  .md-wrapper h5 {
+    font-size: 0.875em;
+  }
+
+  .md-wrapper h6 {
+    font-size: 0.75em;
+  }
+
   .md-wrapper img {
     display: inline;
     max-width: 100%;

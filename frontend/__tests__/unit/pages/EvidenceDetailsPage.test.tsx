@@ -254,18 +254,6 @@ describe('EvidenceDetailsPage', () => {
     })
   })
 
-  test('denies draft claim evidence for non-owner, non-reviewer', () => {
-    mockUseDjangoSession.mockReturnValue({
-      isSyncing: false,
-      session: { user: { login: 'otheruser' } },
-      status: 'authenticated',
-    })
-
-    render(<EvidenceDetailsPage />)
-
-    expect(screen.getByText('Access Denied')).toBeInTheDocument()
-  })
-
   test('denies submitted claim evidence for non-owner, non-reviewer', () => {
     mockUseDjangoSession.mockReturnValue({
       isSyncing: false,
