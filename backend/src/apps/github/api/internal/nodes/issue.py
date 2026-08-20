@@ -89,18 +89,18 @@ class IssueNode(strawberry.relay.Node):
         )
 
     @strawberry.field
-    def task_deadline(self, root: Issue, info: Info) -> datetime | None:
+    async def task_deadline(self, root: Issue, info: Info) -> datetime | None:
         """Return the deadline for the latest assigned task linked to this issue."""
         mapping = getattr(info.context, "task_deadlines_by_issue", None)
         if mapping is not None:
             return mapping.get(root.number)
 
-        return (
+        return await (
             Task.objects.filter(
                 issue=root,
                 deadline_at__isnull=False,
             )
             .order_by("-assigned_at")
             .values_list("deadline_at", flat=True)
-            .first()
+            .afirst()
         )
