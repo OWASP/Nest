@@ -18,9 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false }, { status: 400 })
   }
 
-  const maxAge =
-    typeof body.maxAge === 'number' && Number.isFinite(body.maxAge) ? body.maxAge : undefined
-
+  const { maxAge } = body
   const token = await encode({
     secret: process.env.NEXTAUTH_SECRET ?? '',
     token: {
@@ -32,7 +30,9 @@ export async function POST(request: Request) {
       name: username,
       sub: username,
     },
-    ...(maxAge === undefined ? {} : { maxAge }),
+    ...(typeof maxAge === 'number' && Number.isFinite(maxAge)
+      ? { maxAge: maxAge > 0 ? maxAge : -60 }
+      : {}),
   })
 
   const response = NextResponse.json({ ok: true })

@@ -24,11 +24,12 @@ export async function setNextAuthSession(page: Page, username: string, maxAge?: 
 }
 
 export async function setInvalidNextAuthSession(page: Page) {
+  const frontend = new URL(process.env.FRONTEND_URL)
   await page.context().addCookies([
     {
+      domain: frontend.hostname,
       name: 'next-auth.session-token',
       path: '/',
-      url: process.env.FRONTEND_URL || 'http://localhost:3000',
       value: 'invalid-session-token',
     },
   ])

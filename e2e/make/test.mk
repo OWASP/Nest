@@ -5,7 +5,7 @@
 test-e2e: ## Run e2e tests
 	@$(MAKE) e2e-test
 
-test-e2e-protected: e2e-test-protected ## Run e2e tests for protected routes (no dump required)
+test-e2e-protected: e2e-test-protected
 
 # Implementation targets.
 
