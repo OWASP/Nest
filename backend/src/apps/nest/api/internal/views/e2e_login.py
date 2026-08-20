@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from apps.nest.models import User
 
 
-@csrf_exempt  # reject POSTs that have no CSRF cookie
+@csrf_exempt
 @require_POST
 def e2e_login(request: HttpRequest) -> JsonResponse:
     """Log in a seeded e2e user and set the Django session cookie."""
