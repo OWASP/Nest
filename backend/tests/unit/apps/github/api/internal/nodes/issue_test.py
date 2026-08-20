@@ -5,10 +5,12 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
+from apps.github.api.internal.dataloaders.pull_request import PULL_REQUESTS_BY_ISSUE_ID_LOADER
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.mentorship.api.internal.dataloaders.interested_users import (
     INTERESTED_USERS_BY_ISSUE_ID_LOADER,
 )
+from apps.mentorship.api.internal.dataloaders.tasks import TASK_DEADLINES_BY_ISSUE_ID_LOADER
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -93,36 +95,82 @@ class TestIssueNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_issue)
         assert result is None
 
-    def test_pull_requests_resolver(self):
-        """Test pull_requests field resolver with pagination."""
+    @pytest.mark.asyncio
+    async def test_pull_requests_resolver(self):
+        """Test pull_requests field resolver returns pull requests from the dataloader."""
         mock_issue = Mock()
-        mock_qs = Mock()
+        mock_issue.pk = 123
+        pr1 = Mock()
+        pr2 = Mock()
 
-        mock_issue.pull_requests.all.return_value = mock_qs
-        mock_qs.order_by.return_value = ["pr1", "pr2", "pr3", "pr4", "pr5"]
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=[pr1, pr2])
+
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.github_dataloaders = {PULL_REQUESTS_BY_ISSUE_ID_LOADER: mock_loader}
 
         field = self._get_field_by_name("pull_requests", IssueNode)
-        result = field.base_resolver.wrapped_func(mock_issue)
-        assert result == ["pr1", "pr2", "pr3", "pr4"]
-        result = field.base_resolver.wrapped_func(mock_issue, limit=2, offset=2)
-        assert result == ["pr3", "pr4"]
+        result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info)
 
+        assert result == [pr1, pr2]
+        mock_loader.load.assert_awaited_once_with((123, 4, 0))
+
+    @pytest.mark.asyncio
+    async def test_pull_requests_resolver_with_pagination(self):
+        """Test pull_requests field resolver passes limit and offset to the dataloader."""
+        mock_issue = Mock()
+        mock_issue.pk = 123
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=[])
+
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.github_dataloaders = {PULL_REQUESTS_BY_ISSUE_ID_LOADER: mock_loader}
+
+        field = self._get_field_by_name("pull_requests", IssueNode)
+        result = await field.base_resolver.wrapped_func(
+            None, mock_issue, mock_info, limit=2, offset=2
+        )
+
+        assert result == []
+        mock_loader.load.assert_awaited_once_with((123, 2, 2))
+
+    @pytest.mark.asyncio
+    async def test_pull_requests_resolver_with_negative_offset(self):
+        """Test pull_requests field resolver clamps negative offsets to zero."""
+        mock_issue = Mock()
+        mock_issue.pk = 123
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=[])
+
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.github_dataloaders = {PULL_REQUESTS_BY_ISSUE_ID_LOADER: mock_loader}
+
+        field = self._get_field_by_name("pull_requests", IssueNode)
+        await field.base_resolver.wrapped_func(None, mock_issue, mock_info, offset=-5)
+
+        mock_loader.load.assert_awaited_once_with((123, 4, 0))
+
+    @pytest.mark.asyncio
     @patch("apps.github.api.internal.nodes.issue.normalize_limit")
-    def test_pull_requests_resolver_security(self, mock_normalize_limit):
-        """Test pull_requests field security check."""
+    async def test_pull_requests_resolver_invalid_limit(self, mock_normalize_limit):
+        """Test pull_requests field returns an empty list for invalid limit."""
         mock_issue = Mock()
 
-        mock_normalize_limit.return_value = 10
-        field = self._get_field_by_name("pull_requests", IssueNode)
-
-        mock_issue.pull_requests.all.return_value.order_by.return_value = []
-
-        field.base_resolver.wrapped_func(mock_issue, limit=10)
-        mock_normalize_limit.assert_called()
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.github_dataloaders = {}
 
         mock_normalize_limit.return_value = None
-        result = field.base_resolver.wrapped_func(mock_issue, limit=999999)
+        field = self._get_field_by_name("pull_requests", IssueNode)
+
+        result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info, limit=999999)
         assert result == []
+        mock_normalize_limit.assert_called()
 
     def test_labels(self):
         """Test labels field returns list of label names."""
@@ -180,7 +228,8 @@ class TestIssueNode(GraphQLNodeBaseTest):
         assert result == [mock_user1, mock_user2]
         mock_loader.load.assert_awaited_once_with(mock_issue.pk)
 
-    def test_task_deadline_with_bulk_load_mapping(self):
+    @pytest.mark.asyncio
+    async def test_task_deadline_with_bulk_load_mapping(self):
         """Test task_deadline field when mapping exists with issue deadline."""
         expected_date = datetime(2025, 10, 26, tzinfo=UTC)
         mock_issue = Mock()
@@ -191,10 +240,11 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_info.context.task_deadlines_by_issue = {123: expected_date}
 
         field = self._get_field_by_name("task_deadline", IssueNode)
-        result = field.base_resolver.wrapped_func(None, mock_issue, mock_info)
+        result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info)
         assert result == expected_date
 
-    def test_task_deadline_with_bulk_load_mapping_no_deadline(self):
+    @pytest.mark.asyncio
+    async def test_task_deadline_with_bulk_load_mapping_no_deadline(self):
         """Test task_deadline field when mapping exists but issue not in mapping."""
         mock_issue = Mock()
         mock_issue.number = 123
@@ -204,26 +254,26 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_info.context.task_deadlines_by_issue = {456: datetime(2025, 10, 26, tzinfo=UTC)}
 
         field = self._get_field_by_name("task_deadline", IssueNode)
-        result = field.base_resolver.wrapped_func(None, mock_issue, mock_info)
+        result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info)
         assert result is None
 
-    def test_task_deadline_without_bulk_load_mapping(self):
-        """Test task_deadline field when no mapping exists (fallback to query)."""
+    @pytest.mark.asyncio
+    async def test_task_deadline_without_bulk_load_mapping(self):
+        """Test task_deadline field falls back to the dataloader when no mapping exists."""
         expected_date = datetime(2025, 10, 26, tzinfo=UTC)
         mock_issue = Mock()
-        mock_issue.number = 123
+        mock_issue.pk = 123
+
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=expected_date)
 
         mock_info = Mock()
         mock_info.context = Mock()
         mock_info.context.task_deadlines_by_issue = None
+        mock_info.context.mentorship_dataloaders = {TASK_DEADLINES_BY_ISSUE_ID_LOADER: mock_loader}
 
-        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            mock_query = mock_task_objects.filter.return_value.order_by.return_value
-            mock_query.values_list.return_value.first.return_value = expected_date
+        field = self._get_field_by_name("task_deadline", IssueNode)
+        result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info)
 
-            field = self._get_field_by_name("task_deadline", IssueNode)
-            result = field.base_resolver.wrapped_func(None, mock_issue, mock_info)
-            assert result == expected_date
-            mock_task_objects.filter.assert_called_once_with(
-                issue=mock_issue, deadline_at__isnull=False
-            )
+        assert result == expected_date
+        mock_loader.load.assert_awaited_once_with(mock_issue.pk)
