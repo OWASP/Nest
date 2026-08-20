@@ -17,25 +17,25 @@ const STATUS_STYLES: Record<string, StatusStyle> = {
   [ClaimStatusEnum.Approved]: {
     publicLabel: 'Verified',
     candidateLabel: 'Approved',
-    mark: 'bg-green-200/70 text-green-900',
+    mark: 'bg-green-200/70 text-green-900 dark:bg-green-400/20 dark:text-inherit',
     badge: 'bg-green-100 text-green-800 dark:bg-green-800/50 dark:text-green-100',
   },
   [ClaimStatusEnum.Submitted]: {
     publicLabel: 'Under Review',
     candidateLabel: 'Submitted',
-    mark: 'bg-gray-200/70 text-gray-800',
+    mark: 'bg-gray-200/70 text-gray-800 dark:bg-slate-400/30 dark:text-inherit',
     badge: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100',
   },
   [ClaimStatusEnum.Draft]: {
     publicLabel: 'Draft',
     candidateLabel: 'Draft',
-    mark: 'bg-gray-200/70 text-gray-800',
+    mark: 'bg-gray-200/70 text-gray-800 dark:bg-slate-400/30 dark:text-inherit',
     badge: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100',
   },
   [ClaimStatusEnum.Rejected]: {
     publicLabel: 'Not Verified',
     candidateLabel: 'Rejected',
-    mark: 'bg-red-200/70 text-red-900',
+    mark: 'bg-red-200/70 text-red-900 dark:bg-red-400/20 dark:text-inherit',
     badge: 'bg-red-100 text-red-800 dark:bg-red-800/50 dark:text-red-100',
   },
 }
