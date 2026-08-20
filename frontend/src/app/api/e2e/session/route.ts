@@ -1,5 +1,5 @@
-import { encode } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
+import { encode } from 'next-auth/jwt'
 
 export async function POST(request: Request) {
   if (!process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL) {
