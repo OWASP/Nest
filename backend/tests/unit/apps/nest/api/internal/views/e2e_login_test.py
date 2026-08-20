@@ -21,6 +21,7 @@ def _post(body: dict | str):
 
 class TestE2ELoginView:
     def test_returns_404_outside_e2e(self):
+        request = _post({"username": "e2e-mentor"})
         with (
             patch(
                 "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
@@ -28,29 +29,44 @@ class TestE2ELoginView:
             ),
             pytest.raises(Http404),
         ):
-            e2e_login(_post({"username": "e2e-mentor"}))
+            e2e_login(request)
 
     def test_returns_400_for_invalid_json(self):
+        request = _post("{")
         with patch(
             "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
             new=True,
         ):
-            response = e2e_login(_post("{"))
+            response = e2e_login(request)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert json.loads(response.content)["ok"] is False
+
+    @pytest.mark.parametrize("payload", ["[1, 2]", '"string"', "123", "null"])
+    def test_returns_400_for_non_dict_json(self, payload):
+        request = _post(payload)
+        with patch(
+            "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+            new=True,
+        ):
+            response = e2e_login(request)
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
         assert json.loads(response.content)["ok"] is False
 
     def test_returns_400_without_username(self):
+        request = _post({})
         with patch(
             "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
             new=True,
         ):
-            response = e2e_login(_post({}))
+            response = e2e_login(request)
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
         assert json.loads(response.content)["ok"] is False
 
     def test_returns_404_for_unknown_user(self):
+        request = _post({"username": "missing"})
         with (
             patch(
                 "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
@@ -62,7 +78,7 @@ class TestE2ELoginView:
             ),
             pytest.raises(Http404),
         ):
-            e2e_login(_post({"username": "missing"}))
+            e2e_login(request)
 
     def test_logs_in_user(self):
         user = MagicMock()

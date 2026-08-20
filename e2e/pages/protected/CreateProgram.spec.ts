@@ -46,7 +46,7 @@ test.describe('Create Program', () => {
 
     await page.goto('/my/mentorship', { waitUntil: 'domcontentloaded' })
     await page.getByRole('heading', { name: program.name }).click()
-    await expect(page).toHaveURL(new RegExp(`/my/mentorship/programs/${program.key}$`))
+    await expect(page).toHaveURL(`/my/mentorship/programs/${program.key}`)
     await expect(page.getByRole('heading', { level: 1, name: program.name })).toBeVisible()
   })
 })

@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from apps.nest.models import User
 
 
-@csrf_exempt
+@csrf_exempt  # NOSONAR
 @require_POST
 def e2e_login(request: HttpRequest) -> JsonResponse:
     """Log in a seeded e2e user and set the Django session cookie."""
@@ -21,6 +21,9 @@ def e2e_login(request: HttpRequest) -> JsonResponse:
     try:
         payload = json.loads(request.body or b"{}")
     except json.JSONDecodeError:
+        return JsonResponse({"message": "Invalid JSON.", "ok": False}, status=400)
+
+    if not isinstance(payload, dict):
         return JsonResponse({"message": "Invalid JSON.", "ok": False}, status=400)
 
     username = (payload.get("username") or "").strip()
