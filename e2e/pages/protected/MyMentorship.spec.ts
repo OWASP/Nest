@@ -28,6 +28,9 @@ async function postGraphql(page: Page, query: string) {
       'X-CSRFToken': csrftoken,
     },
   })
+  if (!response.ok()) {
+    throw new Error(`GraphQL request failed: ${response.status()} ${await response.text()}`)
+  }
   return response.json()
 }
 

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { encode } from 'next-auth/jwt'
 
+const E2E_ALLOWED_USERS = new Set(['e2e-user', 'e2e-mentor', 'e2e-mentee'])
+
 export async function POST(request: Request) {
-  if (!process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL) {
+  if (!process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL || !process.env.NEXTAUTH_SECRET) {
     return new NextResponse(null, { status: 404 })
   }
 
@@ -14,13 +16,13 @@ export async function POST(request: Request) {
   }
 
   const username = (body.username ?? '').trim()
-  if (!username) {
+  if (!username || !E2E_ALLOWED_USERS.has(username)) {
     return NextResponse.json({ ok: false }, { status: 400 })
   }
 
   const { maxAge } = body
   const token = await encode({
-    secret: process.env.NEXTAUTH_SECRET ?? '',
+    secret: process.env.NEXTAUTH_SECRET,
     token: {
       email: `${username}@example.com`,
       isLeader: username === 'e2e-user',

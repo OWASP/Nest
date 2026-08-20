@@ -24,7 +24,7 @@ export async function setNextAuthSession(page: Page, username: string, maxAge?: 
 }
 
 export async function setInvalidNextAuthSession(page: Page) {
-  const frontend = new URL(process.env.FRONTEND_URL)
+  const frontend = new URL(process.env.FRONTEND_URL || 'http://localhost:3000')
   await page.context().addCookies([
     {
       domain: frontend.hostname,

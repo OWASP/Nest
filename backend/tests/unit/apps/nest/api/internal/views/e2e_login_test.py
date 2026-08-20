@@ -54,8 +54,9 @@ class TestE2ELoginView:
         assert response.status_code == HTTPStatus.BAD_REQUEST
         assert json.loads(response.content)["ok"] is False
 
-    def test_returns_400_without_username(self):
-        request = _post({})
+    @pytest.mark.parametrize("username", [123, True, [], {}, "   "])
+    def test_returns_400_for_invalid_username_type(self, username):
+        request = _post({"username": username})
         with patch(
             "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
             new=True,
@@ -65,8 +66,19 @@ class TestE2ELoginView:
         assert response.status_code == HTTPStatus.BAD_REQUEST
         assert json.loads(response.content)["ok"] is False
 
+    def test_returns_404_for_non_allowlisted_user(self):
+        request = _post({"username": "admin"})
+        with (
+            patch(
+                "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+                new=True,
+            ),
+            pytest.raises(Http404),
+        ):
+            e2e_login(request)
+
     def test_returns_404_for_unknown_user(self):
-        request = _post({"username": "missing"})
+        request = _post({"username": "e2e-mentor"})
         with (
             patch(
                 "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
