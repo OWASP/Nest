@@ -1,27 +1,26 @@
 import { Page } from '@playwright/test'
 
-export async function loginAs(page: Page, username: string) {
-  const response = await page.request.post('/e2e/login/', {
-    data: { username },
+async function postJson(page: Page, url: string, data: object, errorLabel: string) {
+  const response = await page.request.post(url, {
+    data,
     headers: { 'Content-Type': 'application/json' },
   })
   if (!response.ok()) {
-    throw new Error(`e2e login failed: ${response.status()} ${await response.text()}`)
+    throw new Error(`${errorLabel}: ${response.status()} ${await response.text()}`)
   }
 }
 
-export async function setNextAuthSession(
-  page: Page,
-  username: string,
-  options?: { maxAge?: number }
-) {
-  const response = await page.request.post('/api/e2e/session', {
-    data: { username, ...(options?.maxAge === undefined ? {} : { maxAge: options.maxAge }) },
-    headers: { 'Content-Type': 'application/json' },
-  })
-  if (!response.ok()) {
-    throw new Error(`e2e nextauth session failed: ${response.status()} ${await response.text()}`)
-  }
+export async function loginAs(page: Page, username: string) {
+  await postJson(page, '/e2e/login/', { username }, 'e2e login failed')
+}
+
+export async function setNextAuthSession(page: Page, username: string, maxAge?: number) {
+  await postJson(
+    page,
+    '/api/e2e/session',
+    maxAge === undefined ? { username } : { username, maxAge },
+    'e2e nextauth session failed'
+  )
 }
 
 export async function setInvalidNextAuthSession(page: Page) {
