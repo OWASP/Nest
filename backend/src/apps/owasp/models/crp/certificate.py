@@ -44,10 +44,29 @@ class Certificate(TimestampedModel):
         ]
         constraints = [
             models.UniqueConstraint(
-                fields=["github_user", "tier"],
-                condition=Q(is_revoked=False),
+                fields=["recipient", "tier"],
+                condition=Q(is_revoked=False) & ~Q(tier=""),
                 name="unique_active_cert_per_tier",
                 violation_error_message="Cannot have multiple active certificates for same tier",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(tier__in=TierChoices.values)
+                    | (
+                        Q(tier="")
+                        & ~Q(title="")
+                        & Q(title__isnull=False)
+                        & (
+                            (Q(project__isnull=False) & Q(chapter__isnull=True))
+                            | (Q(project__isnull=True) & Q(chapter__isnull=False))
+                        )
+                    )
+                ),
+                name="valid_certificate_type",
+                violation_error_message=(
+                    "Certificate must be either a valid tier certificate or a generic certificate"
+                    " with a title and associated project/chapter."
+                ),
             ),
         ]
 
@@ -58,20 +77,61 @@ class Certificate(TimestampedModel):
         editable=False,
         verbose_name="Certificate ID",
     )
-    github_user = models.ForeignKey(
+    recipient = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="certificates",
-        help_text="Associated GitHub user",
+        help_text="Recipient GitHub user",
+    )
+    issuer = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="issued_certificates",
+        blank=True,
+        null=True,
+        help_text="Issuer GitHub user (for generic certificates)",
+    )
+    title = models.CharField(
+        verbose_name="Title",
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="Certificate title",
+    )
+    message = models.TextField(
+        verbose_name="Message",
+        blank=True,
+        default="",
+        help_text="Customizable certificate message",
+    )
+    project = models.ForeignKey(
+        "owasp.Project",
+        on_delete=models.PROTECT,
+        related_name="certificates",
+        blank=True,
+        null=True,
+        help_text="Associated project",
+    )
+    chapter = models.ForeignKey(
+        "owasp.Chapter",
+        on_delete=models.PROTECT,
+        related_name="certificates",
+        blank=True,
+        null=True,
+        help_text="Associated chapter",
     )
     tier = models.CharField(
         verbose_name="Tier",
         max_length=20,
         choices=TierChoices.choices,
+        blank=True,
+        default="",
         help_text="The tier at which the certificate was issued",
     )
     score = models.PositiveIntegerField(
         verbose_name="Score",
+        blank=True,
+        null=True,
         help_text="The contributor's score when the certificate was issued",
     )
     issued_at = models.DateTimeField(
@@ -93,7 +153,11 @@ class Certificate(TimestampedModel):
     def __str__(self) -> str:
         """Return human-readable representation."""
         status = "Revoked" if self.is_revoked else "Active"
-        return f"{self.github_user.login} - {self.tier.upper()} Certificate ({status})"
+        cert_type = self.title or (
+            f"{self.tier.upper()} Certificate" if self.tier else "Certificate"
+        )
+        recipient_name = self.recipient.login if self.recipient else "No Recipient"
+        return f"{recipient_name} - {cert_type} ({status})"
 
     @classmethod
     @transaction.atomic
@@ -117,7 +181,7 @@ class Certificate(TimestampedModel):
 
         # Check if user already has an active certificate for this specific tier
         if cls.objects.filter(
-            github_user=user,
+            recipient=user,
             tier=tier,
             is_revoked=False,
         ).exists():

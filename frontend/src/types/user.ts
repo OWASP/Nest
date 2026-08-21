@@ -29,8 +29,8 @@ export type User = {
   publicRepositoriesCount?: number
   releases?: Release[]
   releasesCount?: number
-  tier?: string
-  contributionScore?: number
+  tier?: string | null
+  contributionScore?: number | null
   topRepositories?: RepositoryCardProps[]
   updatedAt?: string
   url?: string

@@ -6,3 +6,7 @@ OWASP_NEST_URL = "https://nest.owasp.org"
 OWASP_NEWS_URL = "https://owasp.org/news"
 OWASP_URL = "https://owasp.org"
 TAB = "\t"
+
+MIN_SEARCH_QUERY_LENGTH = 3
+MAX_SEARCH_QUERY_LENGTH = 100
+SEARCH_LIMIT = 5

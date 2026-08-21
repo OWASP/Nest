@@ -5,6 +5,6 @@ export type Certificate = {
   githubUser: User
   issuedAt: string
   isVerified: boolean
-  score: number
-  tier: string
+  score?: number | null
+  tier?: string | null
 }
