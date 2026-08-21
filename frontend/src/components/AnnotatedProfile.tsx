@@ -72,7 +72,8 @@ const wrapClaims = (markdown: string, claims: ProfileClaim[]): WrapResult => {
   const wrapped = orderedRanges.reduce((acc, { start, end, claim }) => {
     claimsById.set(claim.id, claim)
     const open = `<claim-highlight data-id="${claim.id}">`
-    return `${acc.slice(0, start)}${open}${acc.slice(start, end)}</claim-highlight>${acc.slice(end)}`
+    const prefix = start === 0 || acc[start - 1] === '\n' ? '​' : ''
+    return `${acc.slice(0, start)}${prefix}${open}${acc.slice(start, end)}</claim-highlight>${acc.slice(end)}`
   }, markdown)
   return { wrapped, claimsById }
 }
