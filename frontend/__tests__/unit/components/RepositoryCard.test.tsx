@@ -82,65 +82,67 @@ describe('RepositoryCard', () => {
     expect(container.querySelector('.grid')).toBeNull()
   })
 
-  it('shows first 4 repositories initially when there are more than 4', () => {
-    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+  it('shows first 6 repositories initially when there are more than 6', () => {
+    const repositories = Array.from({ length: 8 }, (_, i) => createMockRepository(i))
 
     render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.getByText('Repository 0')).toBeInTheDocument()
-    expect(screen.getByText('Repository 3')).toBeInTheDocument()
-    expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
-    expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+    expect(screen.getByText('Repository 5')).toBeInTheDocument()
+    expect(screen.queryByText('Repository 6')).not.toBeInTheDocument()
+    expect(screen.queryByText('Repository 7')).not.toBeInTheDocument()
   })
 
-  it('shows all repositories when there are 4 or fewer', () => {
-    const repositories = Array.from({ length: 3 }, (_, i) => createMockRepository(i))
+  it('shows all repositories when there are 6 or fewer', () => {
+    const repositories = Array.from({ length: 5 }, (_, i) => createMockRepository(i))
 
     render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.getByText('Repository 0')).toBeInTheDocument()
     expect(screen.getByText('Repository 1')).toBeInTheDocument()
     expect(screen.getByText('Repository 2')).toBeInTheDocument()
+    expect(screen.getByText('Repository 3')).toBeInTheDocument()
+    expect(screen.getByText('Repository 4')).toBeInTheDocument()
   })
 
-  it('displays ShowMoreButton when there are more than 4 repositories', () => {
-    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+  it('displays ShowMoreButton when there are more than 6 repositories', () => {
+    const repositories = Array.from({ length: 8 }, (_, i) => createMockRepository(i))
 
     render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.getByRole('button', { name: /Show/ })).toBeInTheDocument()
   })
 
-  it('does not display ShowMoreButton when there are 4 or fewer repositories', () => {
-    const repositories = Array.from({ length: 4 }, (_, i) => createMockRepository(i))
+  it('does not display ShowMoreButton when there are 6 or fewer repositories', () => {
+    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
 
     render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.queryByRole('button', { name: /Show/ })).not.toBeInTheDocument()
   })
 
-  it('toggles between showing 4 and all repositories when clicked', () => {
-    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+  it('toggles between showing 6 and all repositories when clicked', () => {
+    const repositories = Array.from({ length: 8 }, (_, i) => createMockRepository(i))
 
     render(<RepositoryCard repositories={repositories} />)
 
-    // Initially shows first 4
+    // Initially shows first 6
     expect(screen.getByText('Repository 0')).toBeInTheDocument()
-    expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
+    expect(screen.queryByText('Repository 6')).not.toBeInTheDocument()
 
     // Click show more
     fireEvent.click(screen.getByRole('button', { name: /Show/ }))
 
     // Now shows all repositories
-    expect(screen.getByText('Repository 4')).toBeInTheDocument()
-    expect(screen.getByText('Repository 5')).toBeInTheDocument()
+    expect(screen.getByText('Repository 6')).toBeInTheDocument()
+    expect(screen.getByText('Repository 7')).toBeInTheDocument()
 
     // Click show less
     fireEvent.click(screen.getByRole('button', { name: /Show/ }))
 
-    // Back to showing first 4
-    expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
-    expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+    // Back to showing first 6
+    expect(screen.queryByText('Repository 6')).not.toBeInTheDocument()
+    expect(screen.queryByText('Repository 7')).not.toBeInTheDocument()
   })
 
   it('renders repository items with correct information', () => {
@@ -311,22 +313,22 @@ describe('RepositoryCard', () => {
     })
 
     it('archived badge persists when toggling show more/less', () => {
-      const repositories = Array.from({ length: 6 }, (_, i) => ({
+      const repositories = Array.from({ length: 8 }, (_, i) => ({
         ...createMockRepository(i),
         isArchived: i % 2 === 0,
       }))
 
       render(<RepositoryCard repositories={repositories} />)
 
-      expect(screen.getAllByText('Archived')).toHaveLength(2)
-
-      fireEvent.click(screen.getByRole('button', { name: /Show/ }))
-
       expect(screen.getAllByText('Archived')).toHaveLength(3)
 
       fireEvent.click(screen.getByRole('button', { name: /Show/ }))
 
-      expect(screen.getAllByText('Archived')).toHaveLength(2)
+      expect(screen.getAllByText('Archived')).toHaveLength(4)
+
+      fireEvent.click(screen.getByRole('button', { name: /Show/ }))
+
+      expect(screen.getAllByText('Archived')).toHaveLength(3)
     })
 
     it('clicking archived repository still navigates correctly', () => {
