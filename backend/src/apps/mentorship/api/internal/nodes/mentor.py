@@ -1,14 +1,18 @@
 """GraphQL node for Mentor model."""
 
+from typing import TYPE_CHECKING
+
 import strawberry
 
+if TYPE_CHECKING:
+    from apps.github.models.user import User as GitHubUser
 
 @strawberry.type
 class MentorNode:
     """A GraphQL node representing a mentorship mentor."""
 
     id: strawberry.ID
-
+    github_user: GitHubUser | None
     @strawberry.field
     def avatar_url(self) -> str:
         """Get the GitHub avatar URL of the mentor."""
