@@ -98,8 +98,10 @@ class UserQuery:
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        if project_key:
-            clean_project_key = project_key.strip().removeprefix("www-project-")
+        clean_project_key = (project_key or "").strip().removeprefix("www-project-")
+        clean_chapter_key = (chapter_key or "").strip().removeprefix("www-chapter-")
+
+        if clean_project_key:
             logins = [
                 c["login"]
                 for c in RepositoryContributor.get_top_contributors(
@@ -107,13 +109,13 @@ class UserQuery:
                     limit=normalized_limit,
                 )
             ]
-            return list(
-                User.objects.filter(login__in=logins).prefetch_related(USER_BADGES_PREFETCH)
-            )
-        if chapter_key:
-            clean_chapter_key = chapter_key.strip().removeprefix("www-chapter-")
+            users = User.objects.filter(login__in=logins).prefetch_related(USER_BADGES_PREFETCH)
+            users_by_login = {user.login: user for user in users}
+            return [users_by_login[login] for login in logins if login in users_by_login]
+
+        if clean_chapter_key:
             filter_q = Q(
-                repositorycontributor__repository__key__iexact=(f"www-chapter-{clean_chapter_key}")
+                repositorycontributor__repository__key__iexact=f"www-chapter-{clean_chapter_key}"
             )
             return list(
                 User.objects.filter(filter_q)
