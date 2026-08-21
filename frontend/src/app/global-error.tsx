@@ -62,7 +62,11 @@ export class AppError extends Error {
   }
 }
 
-export const handleAppError = (error: unknown) => {
+interface HandleAppErrorOptions {
+  timeout?: number
+}
+
+export const handleAppError = (error: unknown, options?: HandleAppErrorOptions) => {
   let appError: AppError
 
   if (error instanceof AppError) {
@@ -81,7 +85,7 @@ export const handleAppError = (error: unknown) => {
   addToast({
     title: errorConfig.title,
     description: appError.message || errorConfig.message,
-    timeout: 5000,
+    timeout: options?.timeout ?? 5000,
     variant: 'solid',
     color: 'danger',
     shouldShowTimeoutProgress: true,
