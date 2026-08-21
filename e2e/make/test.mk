@@ -11,7 +11,7 @@ test-e2e-protected: e2e-test-protected
 
 e2e-db-init:
 	@$(MAKE) fetch-nest-dump
-	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
+	@docker container rm -f e2e-nest-db e2e-nest-backend >/dev/null 2>&1 || true
 	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
 	@DOCKER_BUILDKIT=1 docker compose \
 		--project-name nest-e2e \
@@ -26,6 +26,12 @@ e2e-db-init:
 		--quiet-pull \
 		backend cache db data-loader \
 		--remove-orphans
+	@DOCKER_BUILDKIT=1 docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml run \
+		--rm \
+		backend python manage.py e2e_seed_users
+	@docker container rm -f e2e-nest-backend >/dev/null 2>&1 || true
 
 e2e-load-data:
 	@$(MAKE) backend-data-load-e2e
