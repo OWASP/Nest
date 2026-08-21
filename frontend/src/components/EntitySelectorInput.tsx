@@ -24,12 +24,14 @@ export type EntitySelectorInputProps = {
   value: string
   onChange: (key: string) => void
   entityType: 'project' | 'chapter'
+  error?: string
 }
 
 const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
   value,
   onChange,
   entityType,
+  error,
 }) => {
   const client = useApolloClient()
   const [inputValue, setInputValue] = useState(value)
@@ -49,12 +51,14 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
         const { data } = await client.query({
           query: SearchProjectNamesDocument,
           variables: { query: q },
+          fetchPolicy: 'network-only',
         })
         return data?.searchProjects || []
       } else {
         const { data } = await client.query({
           query: SearchChapterNamesDocument,
           variables: { query: q },
+          fetchPolicy: 'network-only',
         })
         return data?.searchChapters || []
       }
@@ -143,6 +147,8 @@ const EntitySelectorInput: React.FC<EntitySelectorInputProps> = ({
         menuTrigger="input"
         isLoading={isLoading}
         allowsCustomValue
+        isInvalid={!!error}
+        errorMessage={error}
         classNames={AUTOCOMPLETE_CLASS_NAMES}
         inputProps={AUTOCOMPLETE_INPUT_PROPS}
       >

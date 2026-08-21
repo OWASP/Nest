@@ -2,15 +2,6 @@ import { useApolloClient } from '@apollo/client/react'
 import debounce from 'lodash/debounce'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-/**
- * Generic debounced suggestion hook.
- *
- * @param query        - The current input value to search on.
- * @param minLength    - Minimum query length before fetching (default: 3).
- * @param delayMs      - Debounce delay in milliseconds (default: 300).
- * @param fetcher      - Async function that receives the trimmed query and the Apollo
- *                       client, and resolves to the suggestions array.
- */
 export function useDebouncedSuggestions<T>(
   query: string,
   fetcher: (trimmedQuery: string, client: ReturnType<typeof useApolloClient>) => Promise<T[]>,
@@ -52,7 +43,6 @@ export function useDebouncedSuggestions<T>(
         }
       }
     }, delayMs),
-    // fetcher identity changes only when the caller passes a new ref; keep it stable with useCallback at call-site.
     [client, minLength, delayMs, fetcher]
   )
 

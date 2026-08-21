@@ -112,6 +112,18 @@ const IssueCertificatePage: React.FC = () => {
       return
     }
 
+    if (formData.projectKey.trim() && formData.chapterKey.trim()) {
+      addToast({
+        title: 'Validation Error',
+        description: 'Please select only one of Project Name or Chapter Name, not both.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+      return
+    }
+
     try {
       await issueCertificate({
         variables: {
@@ -124,9 +136,10 @@ const IssueCertificatePage: React.FC = () => {
           },
         },
       })
+      const recipients = formData.recipientLogins.map((login) => `@${login}`).join(', ')
       addToast({
         title: 'Success',
-        description: `Certificate(s) successfully issued to ${formData.recipientLogins.map((l) => `@${l}`).join(', ')}.`,
+        description: `Certificate(s) successfully issued to ${recipients}.`,
         color: 'success',
         variant: 'solid',
         timeout: 4000,
@@ -224,11 +237,21 @@ const IssueCertificatePage: React.FC = () => {
             entityType="project"
             value={formData.projectKey}
             onChange={(key) => setFormData((prev) => ({ ...prev, projectKey: key }))}
+            error={
+              formData.projectKey && formData.chapterKey
+                ? 'Only one of Project or Chapter can be selected.'
+                : undefined
+            }
           />
           <EntitySelectorInput
             entityType="chapter"
             value={formData.chapterKey}
             onChange={(key) => setFormData((prev) => ({ ...prev, chapterKey: key }))}
+            error={
+              formData.projectKey && formData.chapterKey
+                ? 'Only one of Project or Chapter can be selected.'
+                : undefined
+            }
           />
         </div>
       </section>

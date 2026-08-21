@@ -110,8 +110,12 @@ const authOptions: AuthOptions = {
       } else if (token.login && typeof token.isChapterLeader !== 'boolean') {
         try {
           token.isChapterLeader = await checkIfChapterLeader(token.login as string)
-        } catch {
-          // Leave the claim unset so the next session request retries the lookup.
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'Failed to fetch chapter leader status; will retry on next session refresh:',
+            err
+          )
         }
       }
 

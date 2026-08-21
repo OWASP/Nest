@@ -100,22 +100,26 @@ class UserQuery:
 
         if project_key:
             clean_project_key = project_key.strip().removeprefix("www-project-")
-            filter_q = Q(
-                repositorycontributor__repository__project_set__key__iexact=(
-                    f"www-project-{clean_project_key}"
+            logins = [
+                c["login"]
+                for c in RepositoryContributor.get_top_contributors(
+                    project=clean_project_key,
+                    limit=normalized_limit,
                 )
+            ]
+            return list(
+                User.objects.filter(login__in=logins).prefetch_related(USER_BADGES_PREFETCH)
             )
-        elif chapter_key:
+        if chapter_key:
             clean_chapter_key = chapter_key.strip().removeprefix("www-chapter-")
             filter_q = Q(
                 repositorycontributor__repository__key__iexact=(f"www-chapter-{clean_chapter_key}")
             )
-        else:
-            return []
+            return list(
+                User.objects.filter(filter_q)
+                .annotate(total_contributions=Sum("repositorycontributor__contributions_count"))
+                .prefetch_related(USER_BADGES_PREFETCH)
+                .order_by("-total_contributions")[:normalized_limit]
+            )
 
-        return list(
-            User.objects.filter(filter_q)
-            .annotate(total_contributions=Sum("repositorycontributor__contributions_count"))
-            .prefetch_related(USER_BADGES_PREFETCH)
-            .order_by("-total_contributions")[:normalized_limit]
-        )
+        return []
