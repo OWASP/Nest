@@ -1,13 +1,11 @@
-"""Slack text formatting helpers."""
+"""Dependency-free Slack text formatting helpers."""
 
 from __future__ import annotations
 
 import re
 from html import escape as escape_html
 
-from apps.common.constants import NL
-from apps.common.utils import truncate
-
+NL = "\n"
 PREVIEW_LIMIT = 500
 SLACK_LINK_PATTERN = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
 
@@ -97,7 +95,12 @@ def get_text(blocks: tuple) -> str:
 
 def preview_text(text: str, limit: int = PREVIEW_LIMIT) -> str:
     """Return a truncated, sanitized preview for modal and alert embeds."""
-    return sanitize_mrkdwn(truncate(text or "", limit))
+    content = text or ""
+    if len(content) > limit:
+        ellipsis = "..."
+        keep = max(limit - len(ellipsis), 0)
+        content = f"{content[:keep]}{ellipsis}"
+    return sanitize_mrkdwn(content)
 
 
 def sanitize_mrkdwn(text: str) -> str:
