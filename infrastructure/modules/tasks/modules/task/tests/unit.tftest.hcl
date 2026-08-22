@@ -179,3 +179,31 @@ run "test_capacity_provider_fargate_spot" {
     error_message = "Capacity provider must be FARGATE_SPOT when use_fargate_spot is true."
   }
 }
+
+run "test_task_assign_public_ip_disabled" {
+  command = plan
+
+  variables {
+    schedule_expression   = "cron(0 12 * * ? *)"
+    event_bridge_role_arn = "arn:aws:iam::123456789012:role/test-eventbridge-role"
+  }
+
+  assert {
+    condition     = one(aws_cloudwatch_event_target.task[0].ecs_target[0].network_configuration).assign_public_ip == false
+    error_message = "ECS task must not assign a public IP. Use a NAT Gateway instead."
+  }
+}
+
+run "test_task_uses_private_subnets" {
+  command = plan
+
+  variables {
+    schedule_expression   = "cron(0 12 * * ? *)"
+    event_bridge_role_arn = "arn:aws:iam::123456789012:role/test-eventbridge-role"
+  }
+
+  assert {
+    condition     = one(aws_cloudwatch_event_target.task[0].ecs_target[0].network_configuration).subnets == toset(var.private_subnet_ids)
+    error_message = "ECS task must be deployed into the configured private subnets."
+  }
+}

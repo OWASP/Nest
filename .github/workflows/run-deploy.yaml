@@ -247,12 +247,11 @@ jobs:
           TASK_DEFINITION: ${{ inputs.migrate_task_definition }}
           TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
-          ASSIGN_PUBLIC_IP=DISABLED
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
@@ -288,12 +287,11 @@ jobs:
           TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
-          ASSIGN_PUBLIC_IP=DISABLED
           RESPONSE=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}")
 
           FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
           TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')

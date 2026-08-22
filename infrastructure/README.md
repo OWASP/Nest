@@ -260,7 +260,6 @@ Run the following commands to execute ECS tasks with the correct network configu
 CLUSTER=$(terraform output -raw tasks_cluster_name)
 SECURITY_GROUP=$(terraform output -raw tasks_security_group_id)
 SUBNETS=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')
-ASSIGN_PUBLIC_IP=DISABLED
 ```
 
 > [!NOTE]
@@ -274,7 +273,7 @@ ASSIGN_PUBLIC_IP=DISABLED
 aws ecs run-task \
   --cluster "$CLUSTER" \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
   --task-definition nest-staging-migrate \
   --region AWS_REGION
 ```
@@ -285,7 +284,7 @@ aws ecs run-task \
 aws ecs run-task \
   --cluster "$CLUSTER" \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
   --task-definition nest-staging-load-data \
   --region AWS_REGION
 ```
@@ -296,7 +295,7 @@ aws ecs run-task \
 aws ecs run-task \
   --cluster "$CLUSTER" \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
   --task-definition nest-staging-index-data \
   --region AWS_REGION
 ```
