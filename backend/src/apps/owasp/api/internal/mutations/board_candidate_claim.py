@@ -27,6 +27,7 @@ class CreateClaimInput:
 
     description: str
     name: str
+    source_text: str = ""
     year: int
 
 
@@ -37,6 +38,7 @@ class UpdateClaimInput:
     description: str | None = None
     key: str
     name: str | None = None
+    source_text: str | None = None
     year: int
 
 
@@ -173,6 +175,7 @@ class BoardCandidateClaimMutations:
                 candidate=candidate,
                 description=input_data.description,
                 name=input_data.name,
+                source_text=input_data.source_text,
             )
         except IntegrityError:
             logger.warning(
@@ -232,6 +235,9 @@ class BoardCandidateClaimMutations:
         if input_data.description:
             claim.description = input_data.description
             update_fields.append("description")
+        if input_data.source_text is not None:
+            claim.source_text = input_data.source_text
+            update_fields.append("source_text")
 
         try:
             claim.save(update_fields=update_fields)

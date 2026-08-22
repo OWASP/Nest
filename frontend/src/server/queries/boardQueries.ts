@@ -39,6 +39,34 @@ export const GET_BOARD_CANDIDATES = gql`
   }
 `
 
+export const GET_CANDIDATE_PROFILE = gql`
+  query GetCandidateProfile($login: String!, $sessionLogin: String!, $year: Int!) {
+    boardCandidateProfile(login: $login, year: $year) {
+      id
+      rawMarkdown
+      candidate {
+        memberName
+      }
+    }
+    boardCandidateClaims(login: $login, year: $year) {
+      id
+      key
+      name
+      sourceText
+      status
+    }
+    boardOfDirectors(year: $year) {
+      id
+      candidate(login: $login) {
+        id
+      }
+      reviewer(login: $sessionLogin) {
+        id
+      }
+    }
+  }
+`
+
 export const GET_MEMBER_SNAPSHOT = gql`
   query GetMemberSnapshot($userLogin: String!) {
     memberSnapshot(userLogin: $userLogin) {

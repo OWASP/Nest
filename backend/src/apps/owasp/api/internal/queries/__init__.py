@@ -4,6 +4,7 @@ from apps.owasp.api.internal.queries.board_candidate_claim import BoardCandidate
 from apps.owasp.api.internal.queries.board_candidate_claim_evidence import (
     BoardCandidateClaimEvidenceQuery,
 )
+from apps.owasp.api.internal.queries.board_candidate_profile import BoardCandidateProfileQuery
 
 from .board_of_directors import BoardOfDirectorsQuery
 from .chapter import ChapterQuery
@@ -21,6 +22,7 @@ from .stats import StatsQuery
 class OwaspQuery(
     BoardCandidateClaimEvidenceQuery,
     BoardCandidateClaimQuery,
+    BoardCandidateProfileQuery,
     BoardOfDirectorsQuery,
     ChapterQuery,
     CommitteeQuery,

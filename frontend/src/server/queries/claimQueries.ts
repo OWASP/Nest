@@ -8,6 +8,7 @@ export const GET_CANDIDATE_CLAIM = gql`
       description
       key
       name
+      sourceText
       status
       updatedAt
     }
@@ -24,6 +25,7 @@ export const GET_CANDIDATE_CLAIMS = gql`
       key
       name
       order
+      sourceText
       status
       updatedAt
     }
@@ -40,6 +42,7 @@ export const GET_CANDIDATE_AND_CLAIMS = gql`
       key
       name
       order
+      sourceText
       status
       updatedAt
     }

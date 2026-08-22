@@ -71,6 +71,7 @@ test.describe('Board Candidate Claim Details Page', () => {
     await expectBreadCrumbsToBeVisible(page, [
       'Home',
       '2025 Board Candidates',
+      'Testuser',
       'Claims',
       'Leadership Experience',
     ])

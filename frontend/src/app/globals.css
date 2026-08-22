@@ -297,6 +297,23 @@ select:disabled,
     color: oklch(74.6% 0.16 232.661);
     background-color: #333539;
   }
+
+  /*
+   * Candidate profiles are synced verbatim from www-board-candidates, which is
+   * authored for a light-only site and ships arbitrary inline colors. Drop them
+   * so the content always inherits whichever color the active theme sets on the
+   * wrapper. Code and claim highlights keep their own themed backgrounds, and
+   * links additionally keep their own themed color.
+   */
+  .md-neutralized *:not(code, [data-claim-highlight]) {
+    background-color: transparent !important;
+    background-image: none !important;
+    text-shadow: none !important;
+  }
+
+  .md-neutralized *:not(a, code, [data-claim-highlight]) {
+    color: inherit !important;
+  }
 }
 
 @layer base {
@@ -350,6 +367,72 @@ select:disabled,
   .md-wrapper ol {
     margin: 0 0 1em 1.5em;
     padding-left: 1.5em;
+  }
+
+  .md-wrapper p {
+    margin: 0 0 1em;
+  }
+
+  .md-wrapper h1,
+  .md-wrapper h2,
+  .md-wrapper h3,
+  .md-wrapper h4,
+  .md-wrapper h5,
+  .md-wrapper h6 {
+    margin: 1.5em 0 0.5em;
+    font-weight: bold;
+  }
+
+  .md-wrapper h1 {
+    font-size: 2em;
+  }
+
+  .md-wrapper h2 {
+    font-size: 1.5em;
+  }
+
+  .md-wrapper h3 {
+    font-size: 1.25em;
+  }
+
+  .md-wrapper h4 {
+    font-size: 1em;
+  }
+
+  .md-wrapper h5 {
+    font-size: 0.875em;
+  }
+
+  .md-wrapper h6 {
+    font-size: 0.75em;
+  }
+
+  .md-wrapper img {
+    display: inline;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .md-wrapper blockquote {
+    margin: 0 0 1em;
+    padding-left: 1em;
+    border-left: 4px solid rgb(156 163 175 / 0.5);
+  }
+
+  .md-wrapper pre {
+    margin: 0 0 1em;
+    overflow-x: auto;
+  }
+
+  .md-wrapper table {
+    width: 100%;
+    margin: 0 0 1em;
+  }
+
+  .md-wrapper td,
+  .md-wrapper th {
+    padding: 0.25em 0.5em;
+    text-align: left;
   }
 
   .md-wrapper ul {

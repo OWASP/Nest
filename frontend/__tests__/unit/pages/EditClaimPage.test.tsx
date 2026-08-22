@@ -53,6 +53,7 @@ const stableClaim = {
     description: 'Experience in leadership.',
     key: 'experience-leadership',
     name: 'Leadership Experience',
+    sourceText: 'OWASP projects',
     status: 'DRAFT',
     updatedAt: '2025-01-15T10:00:00Z',
   },
@@ -136,6 +137,10 @@ describe('EditClaimPage', () => {
       expect(screen.getByDisplayValue('Leadership Experience')).toBeInTheDocument()
     })
     expect(screen.getByDisplayValue('Experience in leadership.')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('OWASP projects')).toBeInTheDocument()
+    expect(
+      screen.getByText('*Must match your profile text exactly to be highlighted.')
+    ).toBeInTheDocument()
   })
 
   test('submits form and redirects on success', async () => {
@@ -156,6 +161,30 @@ describe('EditClaimPage', () => {
     })
     expect(mockRouter.push).toHaveBeenCalledWith(
       '/board/2025/candidates/testuser/claims/experience-leadership'
+    )
+  })
+
+  test('submits sourceText in the update mutation', async () => {
+    render(<EditClaimPage />)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('OWASP projects')).toBeInTheDocument()
+    })
+
+    await userEvent.type(screen.getByPlaceholderText(/paste the exact text/i), ' and more')
+    await userEvent.click(screen.getByRole('button', { name: /edit claim/i }))
+
+    await waitFor(() => {
+      expect(mockUpdateFn).toHaveBeenCalled()
+    })
+    expect(mockUpdateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: {
+          input: expect.objectContaining({
+            sourceText: 'OWASP projects and more',
+          }),
+        },
+      })
     )
   })
 

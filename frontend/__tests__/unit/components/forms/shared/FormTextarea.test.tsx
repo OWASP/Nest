@@ -55,4 +55,16 @@ describe('FormTextarea', () => {
     fireEvent.change(textarea, { target: { value: 'New Value' } })
     expect(handleChange).toHaveBeenCalledTimes(1)
   })
+
+  it('is read-only when readOnly is true', () => {
+    render(<FormTextarea {...defaultProps} readOnly={true} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toHaveAttribute('readonly')
+  })
+
+  it('is editable by default', () => {
+    render(<FormTextarea {...defaultProps} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).not.toHaveAttribute('readonly')
+  })
 })

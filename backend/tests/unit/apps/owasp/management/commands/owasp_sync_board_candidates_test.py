@@ -79,6 +79,65 @@ Content"""
         metadata = command.parse_candidate_metadata(content)
         assert metadata == {}
 
+    def test_parse_candidate_profile_valid(self, command):
+        """Test parse_candidate_profile successfully strips valid YAML frontmatter."""
+        content = """---
+name: John Doe
+email: john.doe@example.com
+---
+
+# Candidate Statement
+
+I am running for the board."""
+
+        profile_text = command.parse_candidate_profile(content)
+
+        assert profile_text == "# Candidate Statement\n\nI am running for the board."
+
+    def test_parse_candidate_profile_no_frontmatter(self, command):
+        """Test parse_candidate_profile handles markdown with no frontmatter."""
+        content = """# Just a heading
+
+Some content"""
+
+        profile_text = command.parse_candidate_profile(content)
+
+        assert profile_text == "# Just a heading\n\nSome content"
+
+    def test_parse_candidate_profile_incomplete_frontmatter(self, command):
+        """Test parse_candidate_profile handles incomplete frontmatter without crashing."""
+        content = """---
+name: John Doe
+missing closing dashes
+
+# Statement"""
+
+        profile_text = command.parse_candidate_profile(content)
+        assert profile_text == content.strip()
+
+    def test_parse_candidate_profile_strips_only_first_frontmatter(self, command):
+        """Test parse_candidate_profile strips only the leading frontmatter block."""
+        content = """---
+name: John Doe
+email: john.doe@example.com
+---
+
+## About Me
+
+Some bio.
+
+---
+
+## Key Contributions
+
+I contributed to the board."""
+        profile_text = command.parse_candidate_profile(content)
+
+        assert profile_text == (
+            "## About Me\n\nSome bio.\n\n---\n\n## Key Contributions\n\n"
+            "I contributed to the board."
+        )
+
     def test_sync_year_candidates_success(self, command, mocker):
         mocker.patch(
             "apps.owasp.management.commands.owasp_sync_board_candidates.get_repository_file_content"
@@ -93,6 +152,9 @@ Content"""
         )
 
         mock_update_data = mocker.patch("apps.owasp.models.entity_member.EntityMember.update_data")
+        mock_profile_update_or_create = mocker.patch(
+            "apps.owasp.models.board_candidate_profile.BoardCandidateProfile.objects.update_or_create"
+        )
 
         repo_files = [{"name": "jane-doe.md", "download_url": "https://github.com/jane-doe.md"}]
 
@@ -118,6 +180,52 @@ Content"""
         data_arg = args[0]
         assert kwargs["save"]
         assert data_arg["member_name"] == "Jane Doe"
+        mock_profile_update_or_create.assert_called_once_with(
+            candidate=mock_update_data.return_value,
+            defaults={"raw_markdown": "Bio"},
+        )
+
+    def test_sync_year_candidates_no_frontmatter(self, command, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_sync_board_candidates.get_repository_file_content"
+        )
+
+        mock_board = Mock()
+        mock_board.id = 100
+        mock_board_manager = Mock()
+        mock_board_manager.get_or_create.return_value = (mock_board, True)
+        mocker.patch(
+            "apps.owasp.models.board_of_directors.BoardOfDirectors.objects", mock_board_manager
+        )
+
+        mock_update_data = mocker.patch("apps.owasp.models.entity_member.EntityMember.update_data")
+        mock_profile_update_or_create = mocker.patch(
+            "apps.owasp.models.board_candidate_profile.BoardCandidateProfile.objects.update_or_create"
+        )
+
+        repo_files = [{"name": "jane-doe.md", "download_url": "https://github.com/jane-doe.md"}]
+
+        file_content = "# Just a heading\n\nBio without frontmatter"
+
+        def side_effect(url):
+            if "contents/2024" in url:
+                return json.dumps(repo_files)
+            if "jane-doe.md" in url:
+                return file_content
+            return ""
+
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_sync_board_candidates.get_repository_file_content",
+            side_effect=side_effect,
+        )
+
+        count = command.sync_year_candidates(2024)
+
+        assert count == 1
+        mock_profile_update_or_create.assert_called_once_with(
+            candidate=mock_update_data.return_value,
+            defaults={"raw_markdown": file_content},
+        )
 
     def test_sync_year_candidates_api_error(self, command, mocker):
         mocker.patch(

@@ -6,10 +6,55 @@ import pytest
 from django.db import IntegrityError
 
 from apps.common.utils import slugify
-from apps.owasp.management.commands.owasp_generate_board_candidates_claims import Command
+from apps.owasp.management.commands.owasp_generate_board_candidates_claims import (
+    Command,
+    fuzzy_search_substring,
+)
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
+
+
+class TestFuzzySearchSubstring:
+    def test_returns_empty_when_substring_is_empty(self):
+        assert fuzzy_search_substring("", "Some text.") == ""
+
+    def test_returns_empty_when_text_is_empty(self):
+        assert fuzzy_search_substring("some quote", "") == ""
+
+    def test_returns_substring_when_it_is_an_exact_substring(self):
+        text = "He founded OWASP Nest last year."
+        assert fuzzy_search_substring("founded OWASP Nest", text) == "founded OWASP Nest"
+
+    def test_returns_matched_substring_when_close_enough(self):
+        text = "He founded OWASP Nest last year."
+        result = fuzzy_search_substring("founded  OWASP  Nest", text)
+        assert result
+        assert result in text
+        assert "OWASP Nest" in result
+
+    def test_returns_empty_when_fuzzy_score_below_threshold(self):
+        text = "This text talks about completely unrelated topics."
+        assert fuzzy_search_substring("founded OWASP Nest and led many chapters", text) == ""
+
+    def test_returns_empty_when_matched_span_crosses_a_blank_line(self, mocker):
+        text = "Founded OWASP Nest.\n\nAlso led Nettacker."
+        mock_alignment = mocker.Mock(score=95, dest_start=0, dest_end=len(text))
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.fuzz"
+            ".partial_ratio_alignment",
+            return_value=mock_alignment,
+        )
+        assert fuzzy_search_substring("Founded OWASP Nest and led Nettacker.", text) == ""
+
+    def test_returns_empty_when_alignment_is_none(self, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.fuzz"
+            ".partial_ratio_alignment",
+            return_value=None,
+        )
+        assert fuzzy_search_substring("anything", "text that does not contain it") == ""
 
 
 class TestGenerateBoardCandidatesClaimsCommand:
@@ -46,21 +91,29 @@ class TestGenerateBoardCandidatesClaimsCommand:
         )
         mock_extract.return_value = json.dumps(
             [
-                {"name": "Claim 1", "description": "Desc 1"},
-                {"name": "Claim 2", "description": "Desc 2"},
+                {"name": "Claim 1", "description": "Desc 1", "source_text": "founded OWASP Nest"},
+                {"name": "Claim 2", "description": "Desc 2", "source_text": ""},
             ]
         )
 
-        candidate = EntityMember()
+        candidate = EntityMember(member_name="John Doe")
+        mocker.patch.object(
+            EntityMember,
+            "board_profile",
+            new_callable=mocker.PropertyMock,
+            return_value=Mock(raw_markdown="He founded OWASP Nest last year."),
+        )
         board = BoardOfDirectors()
 
         claims = command.generate_claims("markdown content", candidate, board)
         assert len(claims) == 2
         assert claims[0].name == "Claim 1"
         assert claims[0].description == "Desc 1"
+        assert claims[0].source_text == "founded OWASP Nest"
         assert claims[0].candidate == candidate
         assert claims[0].board == board
         assert claims[0].status == BoardCandidateClaim.Status.DRAFT
+        assert claims[1].source_text == ""
 
     def test_generate_claims_invalid_json(self, command, mocker):
         mocker.patch(
@@ -103,18 +156,105 @@ class TestGenerateBoardCandidatesClaimsCommand:
         )
         mock_extract.return_value = json.dumps(
             [
-                {"name": "Valid Claim", "description": "Valid desc"},
+                {
+                    "name": "Valid Claim",
+                    "description": "Valid desc",
+                    "source_text": "verbatim quote",
+                },
                 "not_a_dict",
                 42,
             ]
         )
+
+        candidate = EntityMember(member_name="John Doe")
+        mocker.patch.object(
+            EntityMember,
+            "board_profile",
+            new_callable=mocker.PropertyMock,
+            return_value=Mock(raw_markdown="This is a verbatim quote from the profile."),
+        )
+        board = BoardOfDirectors()
+
+        claims = command.generate_claims("markdown content", candidate, board)
+        assert len(claims) == 1
+        assert claims[0].name == "Valid Claim"
+        assert claims[0].source_text == "verbatim quote"
+
+    def test_generate_claims_defaults_source_text_to_empty(self, command, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
+        )
+        mock_extract = mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.extract_json_from_markdown"
+        )
+        mock_extract.return_value = json.dumps([{"name": "No Source", "description": "Some desc"}])
 
         candidate = EntityMember()
         board = BoardOfDirectors()
 
         claims = command.generate_claims("markdown content", candidate, board)
         assert len(claims) == 1
-        assert claims[0].name == "Valid Claim"
+        assert claims[0].source_text == ""
+
+    def test_generate_claims_clears_source_text_missing_from_profile(self, command, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
+        )
+        mock_extract = mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.extract_json_from_markdown"
+        )
+        mock_extract.return_value = json.dumps(
+            [
+                {
+                    "name": "In Profile",
+                    "description": "d",
+                    "source_text": "quote from current year",
+                },
+                {
+                    "name": "From Prior Year",
+                    "description": "d",
+                    "source_text": "quote only present in older statement",
+                },
+            ]
+        )
+
+        candidate = EntityMember(member_name="John Doe")
+        mocker.patch.object(
+            EntityMember,
+            "board_profile",
+            new_callable=mocker.PropertyMock,
+            return_value=Mock(raw_markdown="Here is a quote from current year in profile."),
+        )
+        board = BoardOfDirectors()
+
+        claims = command.generate_claims("aggregated content", candidate, board)
+        assert len(claims) == 2
+        assert claims[0].source_text == "quote from current year"
+        assert claims[1].source_text == ""
+
+    def test_generate_claims_clears_source_text_when_profile_missing(self, command, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.OpenAi"
+        )
+        mock_extract = mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.extract_json_from_markdown"
+        )
+        mock_extract.return_value = json.dumps(
+            [{"name": "Claim", "description": "d", "source_text": "some quote"}]
+        )
+
+        candidate = EntityMember(member_name="John Doe")
+        mocker.patch.object(
+            EntityMember,
+            "board_profile",
+            new_callable=mocker.PropertyMock,
+            side_effect=BoardCandidateProfile.DoesNotExist,
+        )
+        board = BoardOfDirectors()
+
+        claims = command.generate_claims("markdown content", candidate, board)
+        assert len(claims) == 1
+        assert claims[0].source_text == ""
 
     def test_generate_claims_empty_name(self, command, mocker):
         mocker.patch(
