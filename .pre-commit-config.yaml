@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: 464aca7350666b43f6a3c4d218acd2ccd5f5f114  # v1.42.3
+    rev: 6e993b3376d0e9ebe8d974074e6e2347b2602850  # v1.43.0
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -157,7 +157,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: 3632ea90e7641b574983ddf3a11ccedefff3c881  # v2.25.3
+    rev: d600c142bb19f521ae6a6a345f94a2efd7937759  # v2.26.0
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
