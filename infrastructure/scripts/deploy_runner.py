@@ -128,5 +128,19 @@ class InfrastructureDeployRunner:
         logger.info("Deployment on LocalStack successful!")
 
     def refresh(self) -> None:
-        """Orchestrate a deployment refresh."""
-        logger.info("Refresh is not implemented yet.")
+        """Orchestrate a deployment refresh.
+
+        Raises:
+            RunnerError: If a Terraform command exits with a non-zero status.
+
+        """
+        self.commands.require("tflocal")
+        self.localstack.wait_ready()
+
+        with (
+            set_temporary_env("AWS_ACCESS_KEY_ID", "test"),
+            set_temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
+            set_temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
+        ):
+            self.apply_live()
+        logger.info("Deployment on LocalStack successful!")

@@ -200,3 +200,38 @@ class TestInfrastructureDeployRunner:
             runner.deploy()
 
         commands.run.assert_not_called()
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_refresh_calls_apply_live_inside_aws_env(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = MagicMock(spec=LocalStack)
+        localstack.api_url = LOCALSTACK_ENDPOINT_URL
+        runner = build_runner(commands, localstack)
+
+        captured: dict[str, str] = {}
+
+        def record_live() -> None:
+            for var in AWS_ENV_VARS:
+                captured[var] = os.environ[var]
+
+        with patch.object(runner, "apply_live", side_effect=record_live) as mock_live:
+            runner.refresh()
+
+        commands.require.assert_called_once_with("tflocal")
+        localstack.wait_ready.assert_called_once()
+        mock_live.assert_called_once_with()
+        assert captured["AWS_ACCESS_KEY_ID"] == FAKE_CREDENTIAL
+        assert captured["AWS_SECRET_ACCESS_KEY"] == FAKE_CREDENTIAL
+        assert captured["AWS_ENDPOINT_URL"] == LOCALSTACK_ENDPOINT_URL
+        assert_aws_env_unset()
+
+    def test_refresh_propagates_wait_ready_failure(self) -> None:
+        commands = MagicMock(spec=CommandRunner)
+        localstack = MagicMock(spec=LocalStack)
+        localstack.wait_ready.side_effect = RunnerError("localstack down")
+        runner = build_runner(commands, localstack)
+
+        with pytest.raises(RunnerError, match="localstack down"):
+            runner.refresh()
+
+        commands.run.assert_not_called()
