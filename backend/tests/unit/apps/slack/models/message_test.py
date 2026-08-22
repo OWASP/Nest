@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, Mock, patch
 
+from slack_sdk.errors import SlackApiError, SlackClientError
+
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.member import Member
 from apps.slack.models.message import Message
@@ -280,3 +282,176 @@ class TestMessageModel:
 
         assert result == mock_reply
         mock_filter.assert_called_once()
+
+    def test_get_author_id(self):
+        """Test author id extraction from Slack message payloads."""
+        assert Message.get_author_id({"user": "U123"}) == "U123"
+        assert Message.get_author_id({"user": ""}) is None
+        assert Message.get_author_id({"user": 7}) is None
+        assert Message.get_author_id({}) is None
+
+    def test_compact_ts_to_message_ts(self):
+        """Test permalink compact timestamps convert to message ts."""
+        assert Message.compact_ts_to_message_ts("1700000000123456") == "1700000000.123456"
+        assert Message.compact_ts_to_message_ts("123") == ""
+
+    def test_find_in_api_list(self):
+        """Test message lookup within a Slack API messages list."""
+        messages = [{"ts": "1.0", "text": "a"}, {"ts": "2.0", "text": "b"}]
+        assert Message.find_in_api_list(messages, "2.0") == {"ts": "2.0", "text": "b"}
+        assert Message.find_in_api_list(messages, "3.0") is None
+
+    def test_unwrap_slack_link(self):
+        """Test Slack mrkdwn link unwrapping."""
+        assert (
+            Message.unwrap_slack_link("<https://example.com/path|label>")
+            == "https://example.com/path"
+        )
+        assert Message.unwrap_slack_link("https://example.com") == "https://example.com"
+
+    def test_parse_permalink_rejects_invalid_thread_ts(self):
+        """Test invalid thread_ts query values are dropped."""
+        assert Message.parse_permalink(
+            "https://owasp.slack.com/archives/C123/p1700000000123456?thread_ts=bad"
+        ) == ("C123", "1700000000.123456", None)
+
+    def test_get_raw_data_by_channel_and_ts(self, mocker):
+        """Test stored raw_data is returned when present."""
+        existing = Mock(raw_data={"ts": "1.0", "text": "hi"})
+        manager = mocker.patch("apps.slack.models.message.Message.objects")
+        manager.filter.return_value.only.return_value.first.return_value = existing
+
+        assert Message.get_raw_data_by_channel_and_ts("C1", "1.0") == {
+            "ts": "1.0",
+            "text": "hi",
+        }
+
+    def test_get_raw_data_by_channel_and_ts_missing(self, mocker):
+        """Test missing or empty stored raw_data returns None."""
+        manager = mocker.patch("apps.slack.models.message.Message.objects")
+        manager.filter.return_value.only.return_value.first.return_value = Mock(raw_data={})
+
+        assert Message.get_raw_data_by_channel_and_ts("C1", "1.0") is None
+
+    def test_load_payload_prefers_database(self, mocker):
+        """Test load_payload returns Nest storage before calling Slack."""
+        mocker.patch(
+            "apps.slack.models.message.Message.get_raw_data_by_channel_and_ts",
+            return_value={"ts": "1.0"},
+        )
+        fetch = mocker.patch("apps.slack.models.message.Message.fetch_payload")
+
+        assert Message.load_payload(Mock(), "C1", "1.0") == {"ts": "1.0"}
+        fetch.assert_not_called()
+
+    def test_load_payload_falls_back_to_fetch(self, mocker):
+        """Test load_payload fetches from Slack when Nest has no row."""
+        mocker.patch(
+            "apps.slack.models.message.Message.get_raw_data_by_channel_and_ts",
+            return_value=None,
+        )
+        fetch = mocker.patch(
+            "apps.slack.models.message.Message.fetch_payload",
+            return_value={"ts": "1.0", "text": "from slack"},
+        )
+        client = Mock()
+
+        assert Message.load_payload(client, "C1", "1.0", "0.9") == {
+            "ts": "1.0",
+            "text": "from slack",
+        }
+        fetch.assert_called_once_with(client, "C1", "1.0", "0.9")
+
+    def test_fetch_payload_from_history(self):
+        """Test fetch_payload returns a channel history match."""
+        client = Mock()
+        client.conversations_history.return_value = {
+            "messages": [{"ts": "1.0", "text": "hi"}],
+        }
+
+        assert Message.fetch_payload(client, "C1", "1.0") == {"ts": "1.0", "text": "hi"}
+        client.conversations_replies.assert_not_called()
+
+    def test_fetch_payload_from_thread_replies(self):
+        """Test fetch_payload uses conversations.replies for thread messages."""
+        client = Mock()
+        client.conversations_replies.return_value = {
+            "messages": [{"ts": "1.1", "text": "reply"}],
+        }
+
+        assert Message.fetch_payload(client, "C1", "1.1", "1.0") == {
+            "ts": "1.1",
+            "text": "reply",
+        }
+        client.conversations_history.assert_not_called()
+
+    def test_fetch_payload_visibility_error(self):
+        """Test fetch_payload returns None for not-visible channels."""
+        client = Mock()
+        client.conversations_history.side_effect = SlackApiError(
+            message="missing",
+            response={"ok": False, "error": "not_in_channel"},
+        )
+
+        assert Message.fetch_payload(client, "C1", "1.0") is None
+
+    def test_fetch_payload_other_api_error(self):
+        """Test fetch_payload returns None for unexpected Slack API errors."""
+        client = Mock()
+        client.conversations_history.side_effect = SlackApiError(
+            message="fail",
+            response={"ok": False, "error": "fatal_error"},
+        )
+
+        assert Message.fetch_payload(client, "C1", "1.0") is None
+
+    def test_fetch_permalink_success(self):
+        """Test fetch_permalink returns the Slack permalink."""
+        client = Mock()
+        client.chat_getPermalink.return_value = {"permalink": "https://example.slack.com/p"}
+
+        assert Message.fetch_permalink(client, "C1", "1.0") == "https://example.slack.com/p"
+
+    def test_fetch_payload_falls_back_to_broad_thread_search(self):
+        """Test fetch_payload searches replies when history misses a thread message."""
+        client = Mock()
+        client.conversations_replies.side_effect = [
+            {"messages": []},
+            {"messages": [{"ts": "1.1", "text": "reply"}]},
+        ]
+        client.conversations_history.return_value = {"messages": []}
+
+        assert Message.fetch_payload(client, "C1", "1.1", "1.0") == {
+            "ts": "1.1",
+            "text": "reply",
+        }
+        assert client.conversations_replies.call_count == 2
+
+    def test_fetch_payload_returns_none_when_missing(self):
+        """Test fetch_payload returns None when Slack has no matching message."""
+        client = Mock()
+        client.conversations_history.return_value = {"messages": []}
+
+        assert Message.fetch_payload(client, "C1", "1.0") is None
+
+    def test_fetch_permalink_client_error(self):
+        """Test fetch_permalink returns empty string on Slack client failures."""
+        client = Mock()
+        client.chat_getPermalink.side_effect = SlackClientError("boom")
+
+        assert Message.fetch_permalink(client, "C1", "1.0") == ""
+
+    def test_parse_permalink_rejects_empty_compact_ts(self):
+        """Test too-short compact timestamps are rejected."""
+        assert Message.parse_permalink("https://owasp.slack.com/archives/C123/p123") is None
+
+    def test_parse_permalink_rejects_empty_input(self):
+        """Test empty permalink input returns None."""
+        assert Message.parse_permalink("") is None
+        assert Message.parse_permalink("   ") is None
+
+    def test_unwrap_slack_link_without_label(self):
+        """Test Slack links without labels unwrap to the URL."""
+        assert (
+            Message.unwrap_slack_link("<https://example.com/path>") == "https://example.com/path"
+        )

@@ -1,5 +1,6 @@
 """Slack app conversation model."""
 
+import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
@@ -10,6 +11,8 @@ from apps.slack.models.workspace import Workspace
 
 if TYPE_CHECKING:  # pragma: no cover
     from apps.slack.models.message import Message
+
+logger = logging.getLogger(__name__)
 
 
 class Conversation(TimestampedModel):
@@ -50,6 +53,15 @@ class Conversation(TimestampedModel):
         return f"{self.workspace} #{self.name}"
 
     @property
+    def content_origin(self) -> str:
+        """Human-readable origin for content-report alerts and previews."""
+        if self.is_im:
+            return "a direct message"
+        if self.is_mpim:
+            return "a group direct message"
+        return f"<#{self.slack_channel_id}>"
+
+    @property
     def latest_message(self) -> "Message | None":
         """Get the latest message in the conversation."""
         return self.messages.order_by("-created_at").first()
@@ -82,6 +94,38 @@ class Conversation(TimestampedModel):
     def bulk_save(conversations, fields=None):
         """Bulk save conversations."""
         BulkSaveModel.bulk_save(Conversation, conversations, fields=fields)
+
+    @staticmethod
+    def get_by_channel_id(channel_id: str, workspace: Workspace) -> "Conversation | None":
+        """Return a conversation by channel id scoped to a workspace."""
+        return Conversation.objects.filter(
+            slack_channel_id=channel_id,
+            workspace=workspace,
+        ).first()
+
+    @staticmethod
+    def get_or_create_for_report(workspace: Workspace, channel_id: str) -> "Conversation":
+        """Return an existing conversation or a minimal row for content reporting."""
+        conversation, created = Conversation.objects.get_or_create(
+            slack_channel_id=channel_id,
+            defaults={
+                "is_channel": channel_id.startswith("C"),
+                "is_group": channel_id.startswith("G"),
+                "is_im": channel_id.startswith("D"),
+                "is_mpim": channel_id.startswith("G"),
+                "name": "",
+                "slack_creator_id": "",
+                "sync_messages": False,
+                "workspace": workspace,
+            },
+        )
+        if created:
+            logger.info(
+                "Created conversation for content report channel_id=%s workspace=%s",
+                channel_id,
+                workspace.slack_workspace_id,
+            )
+        return conversation
 
     @staticmethod
     def update_data(conversation_data, workspace, *, save=True):

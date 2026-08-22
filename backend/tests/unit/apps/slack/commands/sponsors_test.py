@@ -51,10 +51,10 @@ class TestSponsorsHandler:
             (True, False, "*OWASP Sponsors:*"),
         ],
     )
-    @patch("apps.slack.commands.sponsors.get_sponsors_data")
+    @patch("apps.slack.commands.sponsors.Sponsor.objects")
     def test_handler_responses(
         self,
-        mock_get_sponsors_data,
+        mock_sponsor_objects,
         commands_enabled,
         has_sponsors_data,
         expected_header,
@@ -62,7 +62,7 @@ class TestSponsorsHandler:
         mock_slack_command,
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        mock_get_sponsors_data.return_value = mock_sponsors if has_sponsors_data else []
+        mock_sponsor_objects.all.return_value = mock_sponsors if has_sponsors_data else []
 
         ack = MagicMock()
         Sponsors().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)

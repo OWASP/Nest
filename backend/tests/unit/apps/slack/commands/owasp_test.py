@@ -41,6 +41,7 @@ class TestOwaspHandler:
                 assert any("chapters" in str(block) for block in blocks)
                 assert any("committees" in str(block) for block in blocks)
                 assert any("projects" in str(block) for block in blocks)
+                assert any("report" in str(block) for block in blocks)
             elif "invalid_command" in command_text:
                 assert any("is not supported" in str(block) for block in blocks)
         else:
@@ -54,7 +55,7 @@ class TestOwaspHandler:
         mock_command["text"] = f"{subcommand} test"
         with patch.object(Owasp, "find_command") as mock_find_command:
             mock_find_command.return_value = MagicMock(
-                handler=lambda _, command, client: client.chat_postMessage(
+                handler=lambda _, command, client, *_args, **_kwargs: client.chat_postMessage(
                     channel=client.conversations_open(users=command["user_id"])["channel"]["id"],
                     blocks=[
                         {
@@ -87,3 +88,20 @@ class TestOwaspHandler:
         owasp = Owasp()
         result = owasp.find_command("nonexistent")
         assert result is None
+
+    def test_owasp_forwards_respond_to_subcommand(self, mock_client, mock_command):
+        """Test /owasp <subcommand> forwards Bolt respond when present."""
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_command["text"] = "report"
+        respond = MagicMock()
+        subcommand = MagicMock()
+        with patch.object(Owasp, "find_command", return_value=subcommand):
+            Owasp().handler(
+                ack=MagicMock(),
+                command=mock_command,
+                client=mock_client,
+                respond=respond,
+            )
+
+        subcommand.handler.assert_called_once()
+        assert subcommand.handler.call_args.kwargs["respond"] is respond

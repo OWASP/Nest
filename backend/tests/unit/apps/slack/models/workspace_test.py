@@ -60,3 +60,36 @@ class TestWorkspaceModel:
         )
 
         assert workspace.invite_link_alert_threshold == 60
+
+    def test_is_content_reporting_enabled(self):
+        """Content reporting requires a non-empty alert channel id."""
+        assert (
+            Workspace(
+                slack_workspace_id="T1",
+                content_report_alert_channel_id="C_ALERT",
+            ).is_content_reporting_enabled
+            is True
+        )
+        assert (
+            Workspace(
+                slack_workspace_id="T1",
+                content_report_alert_channel_id="",
+            ).is_content_reporting_enabled
+            is False
+        )
+        assert (
+            Workspace(
+                slack_workspace_id="T1",
+                content_report_alert_channel_id="   ",
+            ).is_content_reporting_enabled
+            is False
+        )
+
+    def test_get_by_workspace_id(self, mocker):
+        """Lookup returns the matching workspace."""
+        workspace = Workspace(slack_workspace_id="T1")
+        manager = mocker.patch("apps.slack.models.workspace.Workspace.objects")
+        manager.filter.return_value.first.return_value = workspace
+
+        assert Workspace.get_by_workspace_id("T1") is workspace
+        manager.filter.assert_called_once_with(slack_workspace_id="T1")

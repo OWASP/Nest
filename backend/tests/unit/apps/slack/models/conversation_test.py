@@ -153,3 +153,50 @@ class TestConversationModel:
 
         mock_queryset.order_by.assert_called_once_with("-created_at")
         assert result == mock_message
+
+    def test_get_by_channel_id(self, mocker):
+        """Lookup filters by channel id and workspace."""
+        conversation = Mock()
+        workspace = Workspace(slack_workspace_id="T1")
+        manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
+        manager.filter.return_value.first.return_value = conversation
+
+        assert Conversation.get_by_channel_id("C123", workspace) is conversation
+        manager.filter.assert_called_once_with(slack_channel_id="C123", workspace=workspace)
+
+    def test_content_origin(self):
+        """Test human-readable origin for IM, MPIM, and channels."""
+        assert Conversation(is_im=True, is_mpim=False).content_origin == "a direct message"
+        assert Conversation(is_im=False, is_mpim=True).content_origin == "a group direct message"
+        assert (
+            Conversation(is_im=False, is_mpim=False, slack_channel_id="C123").content_origin
+            == "<#C123>"
+        )
+
+    def test_get_or_create_for_report_returns_existing(self, mocker):
+        """Test existing conversations are reused for content reporting."""
+        conversation = Mock()
+        workspace = Workspace(slack_workspace_id="T1")
+        manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
+        manager.get_or_create.return_value = (conversation, False)
+
+        assert Conversation.get_or_create_for_report(workspace, "C123") is conversation
+        manager.get_or_create.assert_called_once()
+        _, kwargs = manager.get_or_create.call_args
+        assert kwargs["slack_channel_id"] == "C123"
+        assert kwargs["defaults"]["workspace"] is workspace
+        assert kwargs["defaults"]["is_channel"] is True
+
+    def test_get_or_create_for_report_creates_im_stub(self, mocker):
+        """Test a missing IM channel creates a minimal conversation row."""
+        conversation = Mock()
+        workspace = Workspace(slack_workspace_id="T1")
+        manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
+        manager.get_or_create.return_value = (conversation, True)
+        info = mocker.patch("apps.slack.models.conversation.logger.info")
+
+        assert Conversation.get_or_create_for_report(workspace, "D999") is conversation
+        _, kwargs = manager.get_or_create.call_args
+        assert kwargs["defaults"]["is_im"] is True
+        assert kwargs["defaults"]["is_channel"] is False
+        info.assert_called_once()

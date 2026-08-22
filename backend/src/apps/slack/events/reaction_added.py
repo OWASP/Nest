@@ -1,45 +1,26 @@
 """Handle Slack reaction_added events."""
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
-from slack_sdk.errors import SlackApiError, SlackClientError
+from slack_sdk.errors import SlackApiError
 
-from apps.slack.blocks import markdown
+from apps.slack.enums import ReportSource
 from apps.slack.events.event import EventBase
-from apps.slack.models.reaction_alert import ReactionAlert
+from apps.slack.models.content_report import ContentReport
+from apps.slack.models.message import Message
 from apps.slack.models.reaction_rule import ReactionRule
-from apps.slack.utils.reaction import (
-    format_emojis,
-    mention_users,
-    parse_message_reaction,
-    reaction_from_payload,
-)
+from apps.slack.utils.reaction import mention_users, parse_message_reaction
+
+if TYPE_CHECKING:
+    from slack_sdk import WebClient
 
 logger = logging.getLogger(__name__)
 
 
-def fetch_permalink(client, channel_id: str, message_ts: str) -> str:
-    """Return a Slack permalink for the message, or an empty string."""
-    try:
-        return (
-            client.chat_getPermalink(
-                channel=channel_id,
-                message_ts=message_ts,
-            ).get("permalink")
-            or ""
-        )
-    except SlackApiError as e:
-        logger.warning(
-            "Could not fetch Slack permalink for moderation alert: %s",
-            e.response.get("error", "unknown_error"),
-        )
-        return ""
-    except SlackClientError as e:
-        logger.warning("Could not fetch Slack permalink for moderation alert: %s", e)
-        return ""
-
-
-def fetch_reaction(client, channel_id: str, message_ts: str, emojis: list[str]):
+def fetch_reaction(client: WebClient, channel_id: str, message_ts: str, emojis: list[str]):
     """Return Slack's current unique-reporter snapshot for the rule emojis, or None."""
     try:
         payload = client.reactions_get(
@@ -54,7 +35,41 @@ def fetch_reaction(client, channel_id: str, message_ts: str, emojis: list[str]):
         )
         return None
 
-    return reaction_from_payload(payload, emojis)
+    return ReactionRule.parse_reactions_get(payload, emojis)
+
+
+def threshold_alert_context(event, client: WebClient):
+    """Return alert context when a reaction rule threshold is met, else None."""
+    if (details := parse_message_reaction(event)) is None:
+        return None
+
+    channel_id, message_ts, emoji_name = details
+    rule = ReactionRule.for_emoji(channel_id, emoji_name)
+    if rule is None or ContentReport.exists_for(rule.conversation, message_ts):
+        return None
+
+    snapshot = fetch_reaction(client, channel_id, message_ts, rule.emojis)
+    if snapshot is None:
+        return None
+
+    reaction_count, reporter_user_ids, permalink, matched_emojis = snapshot
+    if reaction_count < rule.threshold:
+        return None
+
+    owner = ContentReport.acquire(rule.conversation, message_ts)
+    if owner is None:
+        return None
+
+    return (
+        channel_id,
+        message_ts,
+        rule,
+        reaction_count,
+        reporter_user_ids,
+        permalink,
+        matched_emojis,
+        owner,
+    )
 
 
 class ReactionAdded(EventBase):
@@ -64,67 +79,57 @@ class ReactionAdded(EventBase):
 
     def handle_event(self, event, client):
         """Post an alert when Slack shows the rule threshold is reached."""
-        if (details := parse_message_reaction(event)) is None:
+        context = threshold_alert_context(event, client)
+        if context is None:
             return
 
-        channel_id, message_ts, emoji_name = details
-        if (rule := ReactionRule.for_emoji(channel_id, emoji_name)) is None:
-            return
-
-        if ReactionAlert.exists_for(rule.conversation, message_ts, rule.report_type):
-            return
-
-        if (snapshot := fetch_reaction(client, channel_id, message_ts, rule.emojis)) is None:
-            return
-
-        reaction_count, reporter_user_ids, permalink, matched_emojis = snapshot
-        if reaction_count < rule.threshold:
-            return
-
-        # Lock in-flight posts; the DB row is written only after Slack succeeds.
-        if (
-            owner := ReactionAlert.acquire(rule.conversation, message_ts, rule.report_type)
-        ) is None:
-            return
+        (
+            channel_id,
+            message_ts,
+            rule,
+            reaction_count,
+            reporter_user_ids,
+            permalink,
+            matched_emojis,
+            owner,
+        ) = context
 
         try:
             if not permalink:
-                permalink = fetch_permalink(client, channel_id, message_ts)
+                permalink = Message.fetch_permalink(client, channel_id, message_ts)
 
-            if ReactionAlert.renew(rule.conversation, message_ts, rule.report_type, owner):
-                alert_users = mention_users(rule.alert_user_ids)
-                reporters = mention_users(reporter_user_ids)
-                emojis = format_emojis(matched_emojis)
-                text = (
-                    f"{alert_users}\n"
-                    f"A message in <#{channel_id}> reached the "
-                    f"{rule.report_type} report threshold."
-                )
-                if reporters:
-                    text = f"{text}\nReported by: {reporters} using the following emojis: {emojis}"
-                if permalink:
-                    text = f"{text}\n{permalink}"
-                text = text.strip()
+            if not ContentReport.renew(rule.conversation, message_ts, owner):
+                return
 
-                try:
-                    alert = client.chat_postMessage(
-                        blocks=[markdown(text)],
-                        channel=rule.alert_channel_id,
-                        text=text,
-                    )
-                except SlackApiError as e:
-                    logger.warning(
-                        "Could not post Slack moderation alert: %s",
-                        e.response.get("error", "unknown_error"),
-                    )
-                else:
-                    ReactionAlert.record(
-                        rule.conversation,
-                        message_ts,
-                        rule.report_type,
-                        reaction_count,
-                        alert.get("ts", ""),
-                        reporter_user_ids=reporter_user_ids,
-                    )
+            alert_users = mention_users(rule.alert_user_ids)
+            reporters = mention_users(reporter_user_ids)
+            emojis = ReactionRule.format_emojis(matched_emojis)
+            text = (
+                f"{alert_users}\n"
+                f"A message in <#{channel_id}> reached the "
+                f"{rule.report_type} report threshold."
+            )
+            if reporters:
+                text = f"{text}\nReported by: {reporters} using the following emojis: {emojis}"
+            if permalink:
+                text = f"{text}\n{permalink}"
+            text = text.strip()
+
+            message = Message.objects.filter(
+                conversation=rule.conversation,
+                slack_message_id=message_ts,
+            ).first()
+            ContentReport.deliver_alert(
+                client,
+                channel_id=rule.alert_channel_id,
+                text=text,
+                conversation=rule.conversation,
+                message_ts=message_ts,
+                report_type=rule.report_type,
+                source=str(ReportSource.EMOJI),
+                reporter_user_ids=reporter_user_ids,
+                reaction_count=reaction_count,
+                message=message,
+            )
         finally:
-            ReactionAlert.release(rule.conversation, message_ts, rule.report_type, owner)
+            ContentReport.release(rule.conversation, message_ts, owner)

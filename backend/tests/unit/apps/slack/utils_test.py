@@ -1,4 +1,4 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from urllib.parse import urljoin
 
 import pytest
@@ -10,8 +10,6 @@ from apps.slack.utils import (
     format_links_for_slack,
     get_gsoc_projects,
     get_news_data,
-    get_posts_data,
-    get_sponsors_data,
     get_staff_data,
     get_text,
     strip_markdown,
@@ -342,51 +340,3 @@ class TestGetStaffData:
 
         result = get_staff_data()
         assert result is None
-
-
-class TestGetSponsorsData:
-    def test_get_sponsors_data(self):
-        """Test get_sponsors_data returns sponsors queryset."""
-        mock_sponsor = Mock()
-        mock_queryset = Mock()
-        mock_queryset.__getitem__ = Mock(return_value=[mock_sponsor])
-
-        with patch("apps.owasp.models.sponsor.Sponsor.objects") as mock_objects:
-            mock_objects.all.return_value = mock_queryset
-
-            result = get_sponsors_data(limit=5)
-            mock_objects.all.assert_called_once()
-            assert result is not None
-
-    def test_get_sponsors_data_exception(self):
-        """Test get_sponsors_data handles exceptions gracefully."""
-        with patch("apps.owasp.models.sponsor.Sponsor.objects") as mock_objects:
-            mock_objects.all.side_effect = Exception("Database error")
-
-            result = get_sponsors_data()
-            assert result is None
-
-
-class TestGetPostsData:
-    def test_get_posts_data(self):
-        """Test get_posts_data returns posts queryset."""
-        mock_post = Mock()
-        mock_queryset = Mock()
-        mock_queryset.__getitem__ = Mock(return_value=[mock_post])
-
-        with patch("apps.owasp.models.post.Post.recent_posts") as mock_recent:
-            mock_recent.return_value = mock_queryset
-            get_posts_data.cache_clear()
-
-            result = get_posts_data(limit=3)
-            mock_recent.assert_called_once()
-            assert result is not None
-
-    def test_get_posts_data_exception(self):
-        """Test get_posts_data handles exceptions gracefully."""
-        with patch("apps.owasp.models.post.Post.recent_posts") as mock_recent:
-            mock_recent.side_effect = Exception("Database error")
-            get_posts_data.cache_clear()
-
-            result = get_posts_data()
-            assert result is None
