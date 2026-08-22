@@ -71,7 +71,7 @@ const ClaimHighlight = ({
       ? `${style.publicLabel} (${style.candidateLabel})`
       : style.publicLabel
   const ariaLabel = `Claim: ${claim.name || 'unnamed'}, status ${statusForAria}`
-  const highlightClass = `cursor-pointer transition-all hover:decoration-[3px] ${style.mark}`
+  const highlightClass = `cursor-pointer transition-all hover:decoration-[3px] hover:opacity-80 ${style.mark}`
   const badgeBaseClass =
     'inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase'
 
