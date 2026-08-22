@@ -6,11 +6,55 @@ import pytest
 from django.db import IntegrityError
 
 from apps.common.utils import slugify
-from apps.owasp.management.commands.owasp_generate_board_candidates_claims import Command
+from apps.owasp.management.commands.owasp_generate_board_candidates_claims import (
+    Command,
+    fuzzy_search_substring,
+)
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
+
+
+class TestFuzzySearchSubstring:
+    def test_returns_empty_when_substring_is_empty(self):
+        assert fuzzy_search_substring("", "Some text.") == ""
+
+    def test_returns_empty_when_text_is_empty(self):
+        assert fuzzy_search_substring("some quote", "") == ""
+
+    def test_returns_substring_when_it_is_an_exact_substring(self):
+        text = "He founded OWASP Nest last year."
+        assert fuzzy_search_substring("founded OWASP Nest", text) == "founded OWASP Nest"
+
+    def test_returns_matched_substring_when_close_enough(self):
+        text = "He founded OWASP Nest last year."
+        result = fuzzy_search_substring("founded  OWASP  Nest", text)
+        assert result
+        assert result in text
+        assert "OWASP Nest" in result
+
+    def test_returns_empty_when_fuzzy_score_below_threshold(self):
+        text = "This text talks about completely unrelated topics."
+        assert fuzzy_search_substring("founded OWASP Nest and led many chapters", text) == ""
+
+    def test_returns_empty_when_matched_span_crosses_a_blank_line(self, mocker):
+        text = "Founded OWASP Nest.\n\nAlso led Nettacker."
+        mock_alignment = mocker.Mock(score=95, dest_start=0, dest_end=len(text))
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.fuzz"
+            ".partial_ratio_alignment",
+            return_value=mock_alignment,
+        )
+        assert fuzzy_search_substring("Founded OWASP Nest and led Nettacker.", text) == ""
+
+    def test_returns_empty_when_alignment_is_none(self, mocker):
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_generate_board_candidates_claims.fuzz"
+            ".partial_ratio_alignment",
+            return_value=None,
+        )
+        assert fuzzy_search_substring("anything", "text that does not contain it") == ""
 
 
 class TestGenerateBoardCandidatesClaimsCommand:
