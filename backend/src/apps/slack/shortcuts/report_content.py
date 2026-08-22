@@ -6,14 +6,9 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-import requests
-from slack_sdk.errors import SlackApiError
-
 from apps.slack.apps import SlackConfig
 from apps.slack.enums import ReportSource
 from apps.slack.models.content_report import ContentReport
-from apps.slack.models.conversation import Conversation
-from apps.slack.models.member import Member
 from apps.slack.models.message import Message
 from apps.slack.models.workspace import Workspace
 from apps.slack.utils.report_modal import (
@@ -21,23 +16,26 @@ from apps.slack.utils.report_modal import (
     CONSENT_BLOCK_ID,
     FEATURE_OFF_TEXT,
     MISSING_MESSAGE_TEXT,
-    MODAL_OPEN_FAILED_TEXT,
     REPORT_CONTENT_CALLBACK_ID,
     REPORT_CONTENT_VIEW_CALLBACK_ID,
     REPORT_TYPE_BLOCK_ID,
     SELF_REPORT_TEXT,
     SUBMIT_FAILED_TEXT,
     SUCCESS_TEXT,
-    build_report_modal,
     consent_given,
     decode_metadata,
     selected_report_type,
 )
+from apps.slack.utils.report_open import (
+    make_ephemeral,
+    open_report_content_modal,
+    post_ephemeral_url,
+)
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from slack_sdk import WebClient
+
+    from apps.slack.models.conversation import Conversation
 
 logger = logging.getLogger(__name__)
 
@@ -52,85 +50,6 @@ class SubmissionContext:
     reporter_user_id: str
     response_url: str
     source: str
-
-
-def post_ephemeral_url(response_url: str, text: str) -> None:
-    """Post an ephemeral message to a Slack response_url."""
-    try:
-        requests.post(
-            response_url,
-            json={"text": text, "response_type": "ephemeral"},
-            timeout=5,
-        )
-    except requests.RequestException:
-        logger.exception("Failed to post content-report ephemeral response")
-
-
-def make_ephemeral(
-    respond: Callable[..., Any] | None = None,
-    response_url: str = "",
-) -> Callable[..., None]:
-    """Build an ephemeral sender that prefers Bolt respond, then response_url."""
-
-    def ephemeral(*, text: str, response_type: str = "ephemeral") -> None:  # noqa: ARG001
-        if respond is not None:
-            respond(text=text, response_type="ephemeral")
-            return
-        if response_url:
-            post_ephemeral_url(response_url, text)
-
-    return ephemeral
-
-
-def open_report_content_modal(
-    *,
-    client: WebClient,
-    workspace: Workspace,
-    channel_id: str,
-    message_payload: dict[str, Any],
-    reporter_user_id: str,
-    response_url: str,
-    trigger_id: str,
-    source: ReportSource | str,
-    respond: Callable[..., Any] | None = None,
-) -> None:
-    """Apply open-time guards, upsert the message, and open the report modal."""
-    ephemeral = make_ephemeral(respond, response_url)
-    author_id = Message.get_author_id(message_payload)
-    if ContentReport.is_self_report(reporter_user_id, author_id):
-        ephemeral(text=SELF_REPORT_TEXT)
-        return
-
-    message_ts = message_payload.get("ts") or ""
-    if not message_ts:
-        ephemeral(text=MISSING_MESSAGE_TEXT)
-        return
-
-    conversation = Conversation.get_or_create_for_report(workspace, channel_id)
-    if ContentReport.exists_for(conversation, message_ts):
-        ephemeral(text=ALREADY_REPORTED_TEXT)
-        return
-
-    author = None
-    if isinstance(author_id, str) and author_id:
-        author, _ = Member.objects.get_or_create(
-            slack_user_id=author_id,
-            defaults={"workspace": workspace},
-        )
-    message = Message.update_data(message_payload, conversation, author=author)
-    try:
-        client.views_open(
-            trigger_id=trigger_id,
-            view=build_report_modal(
-                message=message,
-                conversation=conversation,
-                response_url=response_url,
-                source=source,
-            ),
-        )
-    except SlackApiError:
-        logger.exception("Failed to open report_content modal")
-        ephemeral(text=MODAL_OPEN_FAILED_TEXT)
 
 
 def load_submission_context(
@@ -266,9 +185,10 @@ def handle_report_content_submission(ack, body: dict[str, Any], client: WebClien
     """Validate consent and category, then post a workspace content-report alert."""
     view = body.get("view") or {}
     report_type = selected_report_type(view)
-    if not consent_given(view) or report_type is None:
+    has_consent = consent_given(view)
+    if not has_consent or report_type is None:
         errors: dict[str, str] = {}
-        if not consent_given(view):
+        if not has_consent:
             errors[CONSENT_BLOCK_ID] = (
                 "Please confirm that this message will be shared with workspace moderators."
             )

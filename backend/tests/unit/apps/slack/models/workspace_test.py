@@ -84,12 +84,22 @@ class TestWorkspaceModel:
             ).is_content_reporting_enabled
             is False
         )
+        assert (
+            Workspace(
+                slack_workspace_id="T1",
+                content_report_alert_channel_id=None,
+            ).is_content_reporting_enabled
+            is False
+        )
 
     def test_get_by_workspace_id(self, mocker):
-        """Lookup returns the matching workspace."""
+        """Lookup returns the matching workspace, or None when missing."""
         workspace = Workspace(slack_workspace_id="T1")
         manager = mocker.patch("apps.slack.models.workspace.Workspace.objects")
         manager.filter.return_value.first.return_value = workspace
 
         assert Workspace.get_by_workspace_id("T1") is workspace
         manager.filter.assert_called_once_with(slack_workspace_id="T1")
+
+        manager.filter.return_value.first.return_value = None
+        assert Workspace.get_by_workspace_id("T_MISSING") is None

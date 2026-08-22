@@ -1,4 +1,20 @@
 from django.db import migrations, models
+from django.db.models import Count, Min
+
+
+def remove_duplicate_content_reports(apps, schema_editor):
+    """Keep one ContentReport per conversation/message_ts before unique constraint."""
+    content_report = apps.get_model("slack", "ContentReport")
+    duplicates = (
+        content_report.objects.values("conversation_id", "message_ts")
+        .annotate(row_count=Count("id"), keep_id=Min("id"))
+        .filter(row_count__gt=1)
+    )
+    for row in duplicates:
+        content_report.objects.filter(
+            conversation_id=row["conversation_id"],
+            message_ts=row["message_ts"],
+        ).exclude(id=row["keep_id"]).delete()
 
 
 class Migration(migrations.Migration):
@@ -86,6 +102,7 @@ class Migration(migrations.Migration):
                 help_text="Slack user IDs that triggered this content report.",
             ),
         ),
+        migrations.RunPython(remove_duplicate_content_reports, migrations.RunPython.noop),
         migrations.AddConstraint(
             model_name="contentreport",
             constraint=models.UniqueConstraint(
@@ -103,8 +120,8 @@ class Migration(migrations.Migration):
                 blank=True,
                 default="",
                 help_text=(
-                    "Slack channel ID for message-shortcut content reports "
-                    "(e.g. C..., without #); empty disables shortcut content reporting."
+                    "Slack channel ID for content reports (e.g. C..., without #); "
+                    "empty disables content reporting."
                 ),
                 max_length=32,
                 null=True,
@@ -118,8 +135,8 @@ class Migration(migrations.Migration):
                 blank=True,
                 default=None,
                 help_text=(
-                    'Optional JSON list of Slack user IDs (e.g. ["U01ABC…"]) '
-                    "mentioned on shortcut content-report alerts."
+                    'Optional JSON list of Slack user IDs (e.g. ["U01ABC..."]) '
+                    "mentioned on content-report alerts."
                 ),
                 null=True,
                 verbose_name="Content report Slack user IDs to mention",

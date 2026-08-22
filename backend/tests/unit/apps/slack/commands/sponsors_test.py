@@ -16,17 +16,12 @@ class MockSponsor:
 
 mock_sponsors = [
     MockSponsor(
-        name="Example Sponsor 1",
-        member_type="Platinum",
-        description="A top-tier sponsor.",
-        url="https://example.com/sponsor1",
-    ),
-    MockSponsor(
-        name="Example Sponsor 2",
-        member_type="Gold",
-        description="A mid-tier sponsor.",
-        url="https://example.com/sponsor2",
-    ),
+        name=f"Example Sponsor {index}",
+        member_type="Platinum" if index == 1 else "Gold",
+        description=f"Sponsor description {index}.",
+        url=f"https://example.com/sponsor{index}",
+    )
+    for index in range(1, 13)
 ]
 
 
@@ -62,7 +57,7 @@ class TestSponsorsHandler:
         mock_slack_command,
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        mock_sponsor_objects.all.return_value = mock_sponsors if has_sponsors_data else []
+        mock_sponsor_objects.order_by.return_value = mock_sponsors if has_sponsors_data else []
 
         ack = MagicMock()
         Sponsors().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
@@ -73,6 +68,8 @@ class TestSponsorsHandler:
             mock_slack_client.conversations_open.assert_not_called()
             mock_slack_client.chat_postMessage.assert_not_called()
             return
+
+        mock_sponsor_objects.order_by.assert_called_once()
 
         if not has_sponsors_data:
             mock_slack_client.conversations_open.assert_called_once_with(
@@ -94,30 +91,37 @@ class TestSponsorsHandler:
         assert expected_header in blocks[0]["text"]["text"]
 
         if has_sponsors_data:
-            current_block = 1
-            sponsor_block = blocks[current_block]["text"]["text"]
-            assert "*1. <https://example.com/sponsor1|Example Sponsor 1>*" in sponsor_block
-            assert "Member Type: Platinum" in sponsor_block
-            assert "A top-tier sponsor." in sponsor_block
-            current_block += 1
+            sponsor_blocks = [
+                block
+                for block in blocks
+                if block.get("type") == "section"
+                and "Member Type:" in block.get("text", {}).get("text", "")
+            ]
+            assert len(sponsor_blocks) == 10
+            assert (
+                "*1. <https://example.com/sponsor1|Example Sponsor 1>*"
+                in sponsor_blocks[0]["text"]["text"]
+            )
+            assert (
+                "*10. <https://example.com/sponsor10|Example Sponsor 10>*"
+                in sponsor_blocks[-1]["text"]["text"]
+            )
+            assert not any("Sponsor 11" in block["text"]["text"] for block in sponsor_blocks)
 
-            sponsor_block = blocks[current_block]["text"]["text"]
-            assert "*2. <https://example.com/sponsor2|Example Sponsor 2>*" in sponsor_block
-            assert "Member Type: Gold" in sponsor_block
-            assert "A mid-tier sponsor." in sponsor_block
-            current_block += 1
-
-            assert blocks[current_block]["type"] == "divider"
-            current_block += 1
-
-            footer_block = blocks[current_block]["text"]["text"]
+            footer_block = next(
+                block["text"]["text"]
+                for block in blocks
+                if "OWASP Supporters" in block.get("text", {}).get("text", "")
+            )
             assert (
                 "* Please visit the <https://owasp.org/supporters/|OWASP Supporters>"
                 in footer_block
             )
             assert "for more information about the sponsors" in footer_block
-            current_block += 1
 
-            # Check that the feedback message is in the next block
-            feedback_block = blocks[current_block]["text"]["text"]
+            feedback_block = next(
+                block["text"]["text"]
+                for block in blocks
+                if "💬 You can share feedback" in block.get("text", {}).get("text", "")
+            )
             assert "💬 You can share feedback" in feedback_block

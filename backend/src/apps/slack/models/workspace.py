@@ -37,7 +37,7 @@ class Workspace(TimestampedModel):
         null=True,
         default=None,
         help_text=(
-            'Optional JSON list of Slack user IDs (e.g. ["U01ABC…"]) '
+            'Optional JSON list of Slack user IDs (e.g. ["U01ABC..."]) '
             "mentioned on content-report alerts."
         ),
     )
@@ -152,7 +152,7 @@ class Workspace(TimestampedModel):
         """Return True when content reporting is configured for this workspace."""
         return bool((self.content_report_alert_channel_id or "").strip())
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Workspace human readable representation."""
         return f"{self.name or self.slack_workspace_id}"
 

@@ -2,6 +2,8 @@ from unittest.mock import Mock
 from urllib.parse import urljoin
 
 import pytest
+import yaml
+from django.core.cache import cache
 from requests.exceptions import RequestException
 
 from apps.common.constants import OWASP_NEWS_URL
@@ -14,6 +16,7 @@ from apps.slack.utils import (
     get_text,
     strip_markdown,
 )
+from apps.slack.utils.content import STAFF_YAML_URL
 
 MOCK_GSOC_PROJECTS = {
     "2023": [
@@ -104,6 +107,10 @@ class TestGetText:
             (
                 [{"type": "section", "text": {"type": "mrkdwn", "text": "Hello world"}}],
                 "Hello world",
+            ),
+            (
+                [{"type": "section", "text": {"type": "plain_text", "text": "Plain section"}}],
+                "Plain section",
             ),
             (
                 [
@@ -260,15 +267,19 @@ class TestGetGsocProjects:
 
 
 class TestGetNewsData:
+    def setup_method(self):
+        """Clear Django cache before each news test."""
+        cache.clear()
+
     def test_get_news_data(self, monkeypatch):
         """Test getting news data with mocked response."""
         mock_response = Mock()
         mock_response.content = MOCK_HTML_CONTENT.encode()
+        mock_response.raise_for_status = Mock()
 
         mock_get = Mock(return_value=mock_response)
 
         monkeypatch.setattr("requests.get", mock_get)
-        get_news_data.cache_clear()
 
         result = get_news_data()
         length = 3
@@ -300,25 +311,47 @@ class TestGetNewsData:
         """
         mock_response = Mock()
         mock_response.content = mock_html.encode()
+        mock_response.raise_for_status = Mock()
         mock_get = Mock(return_value=mock_response)
 
         monkeypatch.setattr("requests.get", mock_get)
-        get_news_data.cache_clear()
 
         result = get_news_data()
 
         assert len(result) == 1
         assert result[0]["title"] == "Title with anchor"
 
+    @pytest.mark.parametrize("limit", [0, -1])
+    def test_get_news_data_rejects_non_positive_limit(self, limit, monkeypatch):
+        """Test get_news_data returns [] for non-positive limits without fetching."""
+        mock_get = Mock()
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data(limit=limit) == []
+        mock_get.assert_not_called()
+
+    def test_get_news_data_request_exception(self, monkeypatch):
+        """Test get_news_data returns [] on request failures and does not cache them."""
+        mock_get = Mock(side_effect=RequestException("Network error"))
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data() == []
+        assert get_news_data() == []
+        assert mock_get.call_count == 2
+
 
 class TestGetStaffData:
+    def setup_method(self):
+        """Clear Django cache before each staff test."""
+        cache.clear()
+
     def test_get_staff_data(self, monkeypatch):
         """Test getting staff data with mocked response."""
         mock_response = Mock()
         mock_response.text = MOCK_STAFF_YAML
+        mock_response.raise_for_status = Mock()
         mock_get = Mock(return_value=mock_response)
         monkeypatch.setattr("requests.get", mock_get)
-        get_staff_data.cache_clear()
 
         length = 3
         result = get_staff_data()
@@ -327,16 +360,47 @@ class TestGetStaffData:
         assert result[1]["name"] == "Bob Wilson"
         assert result[2]["name"] == "John Doe"
 
-        mock_get.assert_called_once_with(
-            "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml",
-            timeout=30,
-        )
+        mock_get.assert_called_once_with(STAFF_YAML_URL, timeout=30)
+
+        result2 = get_staff_data()
+        assert mock_get.call_count == 1
+        assert result == result2
 
     def test_get_staff_data_request_exception(self, monkeypatch):
-        """Test get_staff_data handles RequestException gracefully."""
+        """Test get_staff_data handles RequestException gracefully without caching None."""
         mock_get = Mock(side_effect=RequestException("Network error"))
         monkeypatch.setattr("requests.get", mock_get)
-        get_staff_data.cache_clear()
 
-        result = get_staff_data()
-        assert result is None
+        assert get_staff_data() is None
+        assert get_staff_data() is None
+        assert mock_get.call_count == 2
+
+    def test_get_staff_data_yaml_error(self, monkeypatch):
+        """Test get_staff_data handles YAML parse errors."""
+        mock_response = Mock()
+        mock_response.text = "invalid: [\n  - broken"
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_staff_data() is None
+
+    def test_get_staff_data_invalid_shape(self, monkeypatch):
+        """Test get_staff_data rejects YAML that is not a list of named dicts."""
+        mock_response = Mock()
+        mock_response.text = yaml.dump({"name": "not a list"})
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_staff_data() is None
+
+    def test_get_staff_data_missing_name(self, monkeypatch):
+        """Test get_staff_data rejects staff entries without a name."""
+        mock_response = Mock()
+        mock_response.text = yaml.dump([{"title": "Developer"}])
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_staff_data() is None

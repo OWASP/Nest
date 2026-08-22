@@ -18,8 +18,8 @@ class TestReactionRule:
 
         assert str(rule) == "OWASP #general :spam: :flag:"
 
-    def test_report_type_defaults_to_spam(self):
-        """Test report type choices are shared and limited to spam."""
+    def test_report_type_choices_are_shared(self):
+        """Test reaction rules use the shared ReportType choices."""
         assert ReportType.SPAM == "spam"
         assert ReportType.choices == [
             ("harassment", "Harassment"),
@@ -28,6 +28,7 @@ class TestReactionRule:
             ("spam", "Spam"),
         ]
         assert ReactionRule._meta.get_field("report_type").choices == list(ReportType.choices)
+        assert ReactionRule._meta.get_field("report_type").default == ReportType.SPAM
 
     def test_unique_conversation_report_type_constraint(self):
         """Test one reaction rule is allowed per conversation and report type."""

@@ -1,13 +1,15 @@
-"""Slack text formatting helpers."""
+"""Dependency-free Slack text formatting helpers."""
 
 from __future__ import annotations
 
 import re
 from html import escape as escape_html
+from typing import TYPE_CHECKING, Any
 
-from apps.common.constants import NL
-from apps.common.utils import truncate
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
 
+NL = "\n"
 PREVIEW_LIMIT = 500
 SLACK_LINK_PATTERN = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
 
@@ -42,11 +44,11 @@ def format_links_for_slack(text: str) -> str:
     return markdown_link_pattern.sub(r"<\2|\1>", text)
 
 
-def get_text(blocks: tuple) -> str:
+def get_text(blocks: Sequence[Mapping[str, Any]]) -> str:
     """Convert blocks to plain text.
 
     Args:
-        blocks (tuple): A tuple of Slack block elements.
+        blocks: A sequence of Slack block elements (list or tuple of dicts).
 
     Returns:
         str: The plain text representation of the blocks.
@@ -57,8 +59,12 @@ def get_text(blocks: tuple) -> str:
     for block in blocks:
         match block.get("type"):
             case "section":
-                if "text" in block and block["text"].get("type") == "mrkdwn":
-                    text.append(strip_markdown(block["text"]["text"]))
+                if "text" in block and block["text"].get("type") in ("mrkdwn", "plain_text"):
+                    section_text = block["text"]["text"]
+                    if block["text"].get("type") == "mrkdwn":
+                        text.append(strip_markdown(section_text))
+                    else:
+                        text.append(section_text)
                 elif "fields" in block:
                     text.append(
                         NL.join(
@@ -97,7 +103,12 @@ def get_text(blocks: tuple) -> str:
 
 def preview_text(text: str, limit: int = PREVIEW_LIMIT) -> str:
     """Return a truncated, sanitized preview for modal and alert embeds."""
-    return sanitize_mrkdwn(truncate(text or "", limit))
+    content = text or ""
+    if len(content) > limit:
+        ellipsis = "..."
+        keep = max(limit - len(ellipsis), 0)
+        content = f"{content[:keep]}{ellipsis}"
+    return sanitize_mrkdwn(content)
 
 
 def sanitize_mrkdwn(text: str) -> str:

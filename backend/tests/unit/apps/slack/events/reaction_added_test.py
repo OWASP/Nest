@@ -55,7 +55,7 @@ def patch_rule_lookup(mocker, rule=None, *, missing=False):
     )
 
 
-def patch_alert_lock(mocker, *, acquired=True, recorded=False, renewed=True):
+def patch_alert_lock(mocker, *, acquired=True, recorded=False, renewed=True, message=None):
     """Patch content report lookup, lock, and record helpers."""
     mocker.patch(
         "apps.slack.events.reaction_added.ContentReport.exists_for",
@@ -73,7 +73,7 @@ def patch_alert_lock(mocker, *, acquired=True, recorded=False, renewed=True):
     record = mocker.patch("apps.slack.events.reaction_added.ContentReport.record")
     mocker.patch(
         "apps.slack.events.reaction_added.Message.objects.filter",
-        return_value=Mock(first=Mock(return_value=None)),
+        return_value=Mock(first=Mock(return_value=message)),
     )
     return acquire, release, record
 
@@ -126,6 +126,28 @@ class TestReactionAdded:
             reporter_user_ids=["U_REACTOR", "U_OTHER"],
             reaction_count=2,
             message=None,
+        )
+        release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
+
+    def test_handle_event_records_with_matched_message(self, mocker):
+        """Test ContentReport.record receives the stored Message when one exists."""
+        client = mock_client()
+        rule = mock_rule(threshold=2)
+        message = Mock(name="stored_message")
+        patch_rule_lookup(mocker, rule)
+        _, release, record = patch_alert_lock(mocker, message=message)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        record.assert_called_once_with(
+            rule.conversation,
+            "123.000",
+            "spam",
+            "999.000",
+            source="emoji",
+            reporter_user_ids=["U_REACTOR", "U_OTHER"],
+            reaction_count=2,
+            message=message,
         )
         release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
 

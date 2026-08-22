@@ -112,13 +112,22 @@ class Conversation(TimestampedModel):
                 "is_channel": channel_id.startswith("C"),
                 "is_group": channel_id.startswith("G"),
                 "is_im": channel_id.startswith("D"),
-                "is_mpim": channel_id.startswith("G"),
+                "is_mpim": False,
                 "name": "",
                 "slack_creator_id": "",
                 "sync_messages": False,
                 "workspace": workspace,
             },
         )
+        if not created and conversation.workspace_id != workspace.pk:
+            logger.error(
+                "Conversation channel_id=%s belongs to workspace=%s, expected workspace=%s",
+                channel_id,
+                getattr(conversation.workspace, "slack_workspace_id", conversation.workspace_id),
+                workspace.slack_workspace_id,
+            )
+            message = f"Conversation {channel_id} belongs to a different Slack workspace"
+            raise ValueError(message)
         if created:
             logger.info(
                 "Created conversation for content report channel_id=%s workspace=%s",

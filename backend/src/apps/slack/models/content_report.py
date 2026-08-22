@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from django.core.cache import cache
-from django.db import IntegrityError, models
-from slack_sdk.errors import SlackApiError
+from django.db import IntegrityError, models, transaction
+from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.common.models import TimestampedModel
 from apps.slack.blocks import markdown
@@ -160,6 +160,9 @@ class ContentReport(TimestampedModel):
                 e.response.get("error", "unknown_error"),
             )
             return False
+        except SlackClientError as e:
+            logger.warning("Could not post content report alert: %s", e)
+            return False
 
         ContentReport.record(
             conversation,
@@ -205,16 +208,17 @@ class ContentReport(TimestampedModel):
     ) -> None:
         """Store that an alert was sent, ignoring a concurrent unique insert."""
         try:
-            ContentReport.objects.create(
-                alert_message_ts=alert_message_ts,
-                conversation=conversation,
-                message=message,
-                message_ts=message_ts,
-                reaction_count=reaction_count,
-                report_type=report_type,
-                reporter_user_ids=reporter_user_ids,
-                source=str(source),
-            )
+            with transaction.atomic():
+                ContentReport.objects.create(
+                    alert_message_ts=alert_message_ts,
+                    conversation=conversation,
+                    message=message,
+                    message_ts=message_ts,
+                    reaction_count=reaction_count,
+                    report_type=report_type,
+                    reporter_user_ids=reporter_user_ids,
+                    source=str(source),
+                )
         except IntegrityError:
             if ContentReport.exists_for(conversation, message_ts):
                 return

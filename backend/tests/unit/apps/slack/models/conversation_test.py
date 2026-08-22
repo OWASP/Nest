@@ -1,6 +1,8 @@
 from datetime import UTC, datetime
 from unittest.mock import Mock, PropertyMock, patch
 
+import pytest
+
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.workspace import Workspace
 
@@ -175,8 +177,8 @@ class TestConversationModel:
 
     def test_get_or_create_for_report_returns_existing(self, mocker):
         """Test existing conversations are reused for content reporting."""
-        conversation = Mock()
-        workspace = Workspace(slack_workspace_id="T1")
+        workspace = Workspace(pk=1, slack_workspace_id="T1")
+        conversation = Mock(workspace_id=1, workspace=workspace)
         manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
         manager.get_or_create.return_value = (conversation, False)
 
@@ -190,7 +192,7 @@ class TestConversationModel:
     def test_get_or_create_for_report_creates_im_stub(self, mocker):
         """Test a missing IM channel creates a minimal conversation row."""
         conversation = Mock()
-        workspace = Workspace(slack_workspace_id="T1")
+        workspace = Workspace(pk=1, slack_workspace_id="T1")
         manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
         manager.get_or_create.return_value = (conversation, True)
         info = mocker.patch("apps.slack.models.conversation.logger.info")
@@ -199,4 +201,16 @@ class TestConversationModel:
         _, kwargs = manager.get_or_create.call_args
         assert kwargs["defaults"]["is_im"] is True
         assert kwargs["defaults"]["is_channel"] is False
+        assert kwargs["defaults"]["is_mpim"] is False
         info.assert_called_once()
+
+    def test_get_or_create_for_report_rejects_workspace_mismatch(self, mocker):
+        """Test existing conversations for another workspace are rejected."""
+        other_workspace = Workspace(pk=2, slack_workspace_id="T2")
+        conversation = Mock(workspace_id=2, workspace=other_workspace)
+        workspace = Workspace(pk=1, slack_workspace_id="T1")
+        manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
+        manager.get_or_create.return_value = (conversation, False)
+
+        with pytest.raises(ValueError, match="different Slack workspace"):
+            Conversation.get_or_create_for_report(workspace, "C123")

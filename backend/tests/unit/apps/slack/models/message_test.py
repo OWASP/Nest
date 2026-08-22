@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock, Mock, patch
 
-from slack_sdk.errors import SlackApiError, SlackClientError
+from slack_sdk.errors import SlackApiError, SlackClientError, SlackRequestError
 
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.member import Member
@@ -405,6 +405,13 @@ class TestMessageModel:
 
         assert Message.fetch_payload(client, "C1", "1.0") is None
 
+    def test_fetch_payload_request_error(self):
+        """Test fetch_payload returns None on Slack transport failures."""
+        client = Mock()
+        client.conversations_history.side_effect = SlackRequestError("timeout")
+
+        assert Message.fetch_payload(client, "C1", "1.0") is None
+
     def test_fetch_permalink_success(self):
         """Test fetch_permalink returns the Slack permalink."""
         client = Mock()
@@ -426,6 +433,48 @@ class TestMessageModel:
             "text": "reply",
         }
         assert client.conversations_replies.call_count == 2
+
+    def test_fetch_payload_paginates_thread_replies(self):
+        """Test fetch_payload follows next_cursor until the reply is found."""
+        client = Mock()
+        client.conversations_replies.side_effect = [
+            {"messages": []},
+            {
+                "messages": [{"ts": "1.0", "text": "parent"}],
+                "response_metadata": {"next_cursor": "page2"},
+            },
+            {
+                "messages": [{"ts": "1.1", "text": "reply"}],
+                "response_metadata": {"next_cursor": ""},
+            },
+        ]
+        client.conversations_history.return_value = {"messages": []}
+
+        assert Message.fetch_payload(client, "C1", "1.1", "1.0") == {
+            "ts": "1.1",
+            "text": "reply",
+        }
+        assert client.conversations_replies.call_count == 3
+        assert client.conversations_replies.call_args_list[2].kwargs["cursor"] == "page2"
+
+    def test_fetch_payload_thread_pagination_exhausted(self):
+        """Test fetch_payload returns None when replies pagination ends without a match."""
+        client = Mock()
+        client.conversations_replies.side_effect = [
+            {"messages": []},
+            {
+                "messages": [{"ts": "1.0", "text": "parent"}],
+                "response_metadata": {"next_cursor": "page2"},
+            },
+            {
+                "messages": [{"ts": "1.05", "text": "other"}],
+                "response_metadata": {"next_cursor": ""},
+            },
+        ]
+        client.conversations_history.return_value = {"messages": []}
+
+        assert Message.fetch_payload(client, "C1", "1.1", "1.0") is None
+        assert client.conversations_replies.call_count == 3
 
     def test_fetch_payload_returns_none_when_missing(self):
         """Test fetch_payload returns None when Slack has no matching message."""

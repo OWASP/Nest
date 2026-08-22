@@ -173,6 +173,8 @@ class Message(TimestampedModel):
     ) -> dict[str, Any] | None:
         """Fetch a Slack message payload, or None when missing / not visible."""
         try:
+            found: dict[str, Any] | None = None
+
             if thread_ts and thread_ts != message_ts:
                 response = client.conversations_replies(
                     channel=channel_id,
@@ -183,27 +185,29 @@ class Message(TimestampedModel):
                     limit=1,
                 )
                 found = Message.find_in_api_list(response.get("messages") or [], message_ts)
-                if found is not None:
-                    return found
 
-            response = client.conversations_history(
-                channel=channel_id,
-                latest=message_ts,
-                oldest=message_ts,
-                inclusive=True,
-                limit=1,
-            )
-            found = Message.find_in_api_list(response.get("messages") or [], message_ts)
-            if found is not None:
-                return found
+            if found is None:
+                response = client.conversations_history(
+                    channel=channel_id,
+                    latest=message_ts,
+                    oldest=message_ts,
+                    inclusive=True,
+                    limit=1,
+                )
+                found = Message.find_in_api_list(response.get("messages") or [], message_ts)
 
-            if thread_ts:
+            cursor: str | None = None
+            while found is None and thread_ts:
                 response = client.conversations_replies(
                     channel=channel_id,
                     ts=thread_ts,
                     limit=200,
+                    cursor=cursor,
                 )
-                return Message.find_in_api_list(response.get("messages") or [], message_ts)
+                found = Message.find_in_api_list(response.get("messages") or [], message_ts)
+                cursor = (response.get("response_metadata") or {}).get("next_cursor") or None
+                if not cursor:
+                    break
         except SlackApiError as e:
             error = e.response.get("error", "unknown_error")
             if error in VISIBILITY_ERRORS:
@@ -213,15 +217,24 @@ class Message(TimestampedModel):
                     message_ts,
                     error,
                 )
-                return None
+            else:
+                logger.warning(
+                    "Failed to fetch message channel_id=%s ts=%s error=%s",
+                    channel_id,
+                    message_ts,
+                    error,
+                )
+            return None
+        except SlackClientError as e:
             logger.warning(
                 "Failed to fetch message channel_id=%s ts=%s error=%s",
                 channel_id,
                 message_ts,
-                error,
+                e,
             )
             return None
-        return None
+        else:
+            return found
 
     @staticmethod
     def fetch_permalink(client: WebClient, channel_id: str, message_ts: str) -> str:

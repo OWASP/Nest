@@ -3,7 +3,7 @@
 from unittest.mock import Mock
 
 import requests
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.slack.common.text import preview_text
 from apps.slack.enums import ReportSource, ReportType
@@ -14,10 +14,7 @@ from apps.slack.shortcuts.report_content import (
     handle_report_content_shortcut,
     handle_report_content_submission,
     load_submission_context,
-    make_ephemeral,
-    open_report_content_modal,
     post_content_report_alert,
-    post_ephemeral_url,
 )
 from apps.slack.utils.report_modal import (
     ALREADY_REPORTED_TEXT,
@@ -33,20 +30,12 @@ from apps.slack.utils.report_modal import (
     encode_metadata,
     selected_report_type,
 )
-
-
-def enabled_workspace(**kwargs):
-    """Return a workspace mock with content reporting enabled."""
-    workspace = Mock(**kwargs)
-    workspace.is_content_reporting_enabled = True
-    return workspace
-
-
-def disabled_workspace(**kwargs):
-    """Return a workspace mock with content reporting disabled."""
-    workspace = Mock(**kwargs)
-    workspace.is_content_reporting_enabled = False
-    return workspace
+from apps.slack.utils.report_open import (
+    make_ephemeral,
+    open_report_content_modal,
+    post_ephemeral_url,
+)
+from tests.unit.apps.slack.conftest import disabled_workspace, enabled_workspace
 
 
 class TestContentReportUtils:
@@ -59,21 +48,49 @@ class TestContentReportUtils:
         """Test thin private_metadata round-trips with source."""
         encoded = encode_metadata(
             42,
-            "https://hooks.slack.test/response",
+            "https://hooks.slack.com/response",
             ReportSource.SHORTCUT,
         )
         assert decode_metadata(encoded) == (
             42,
-            "https://hooks.slack.test/response",
+            "https://hooks.slack.com/response",
             ReportSource.SHORTCUT,
         )
         assert decode_metadata("not-json") is None
         assert (
-            decode_metadata(encode_metadata(1, "https://hooks.slack.test/r", "not-a-source"))
+            decode_metadata(encode_metadata(1, "https://hooks.slack.com/r", "not-a-source"))
             is None
         )
         assert (
             decode_metadata('{"message_db_id": 1, "response_url": "", "source": "shortcut"}')
+            is None
+        )
+        assert (
+            decode_metadata(
+                '{"message_db_id": true, "response_url": "https://hooks.slack.com/r",'
+                ' "source": "shortcut"}'
+            )
+            is None
+        )
+        assert (
+            decode_metadata(
+                '{"message_db_id": 1.5, "response_url": "https://hooks.slack.com/r",'
+                ' "source": "shortcut"}'
+            )
+            is None
+        )
+        assert (
+            decode_metadata(
+                '{"message_db_id": 0, "response_url": "https://hooks.slack.com/r",'
+                ' "source": "shortcut"}'
+            )
+            is None
+        )
+        assert (
+            decode_metadata(
+                '{"message_db_id": -1, "response_url": "https://hooks.slack.com/r",'
+                ' "source": "shortcut"}'
+            )
             is None
         )
 
@@ -155,7 +172,7 @@ class TestContentReportUtils:
         view = build_report_modal(
             message=message,
             conversation=conversation,
-            response_url="https://hooks.slack.test/response",
+            response_url="https://hooks.slack.com/response",
             source=ReportSource.SHORTCUT,
         )
 
@@ -170,7 +187,7 @@ class TestContentReportUtils:
         assert view["blocks"][2]["label"]["text"] == "Confirm sharing with moderators"
         assert decode_metadata(view["private_metadata"]) == (
             9,
-            "https://hooks.slack.test/response",
+            "https://hooks.slack.com/response",
             ReportSource.SHORTCUT,
         )
 
@@ -193,7 +210,7 @@ class TestReportContentShortcut:
                 "channel": {"id": "D1"},
                 "message": {"ts": "1.0", "user": "U_OTHER", "text": "hi"},
                 "team": {"id": "T1"},
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -220,7 +237,7 @@ class TestReportContentShortcut:
                 "channel": {"id": "D1"},
                 "message": {"ts": "1.0", "user": "U_SAME", "text": "hi"},
                 "team": {"id": "T1"},
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -241,11 +258,11 @@ class TestReportContentShortcut:
             return_value=enabled_workspace(content_report_alert_channel_id="C_ALERT"),
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Conversation.get_or_create_for_report",
+            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
             return_value=conversation,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.ContentReport.exists_for",
+            "apps.slack.utils.report_open.ContentReport.exists_for",
             return_value=True,
         )
 
@@ -256,7 +273,7 @@ class TestReportContentShortcut:
                 "channel": {"id": "D1"},
                 "message": {"ts": "1.0", "user": "U_OTHER", "text": "hi"},
                 "team": {"id": "T1"},
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -282,19 +299,19 @@ class TestReportContentShortcut:
             return_value=workspace,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Conversation.get_or_create_for_report",
+            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
             return_value=conversation,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.ContentReport.exists_for",
+            "apps.slack.utils.report_open.ContentReport.exists_for",
             return_value=False,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Message.update_data",
+            "apps.slack.utils.report_open.Message.update_data",
             return_value=message,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Member.objects.get_or_create",
+            "apps.slack.utils.report_open.Member.objects.get_or_create",
             return_value=(Mock(), False),
         )
 
@@ -305,7 +322,7 @@ class TestReportContentShortcut:
                 "channel": {"id": "D1"},
                 "message": {"ts": "1.0", "user": "U_OTHER", "text": "spam text"},
                 "team": {"id": "T1"},
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -361,7 +378,7 @@ class TestReportContentSubmission:
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.decode_metadata",
-            return_value=(5, "https://hooks.slack.test/r", ReportSource.SHORTCUT),
+            return_value=(5, "https://hooks.slack.com/r", ReportSource.SHORTCUT),
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -399,7 +416,7 @@ class TestReportContentSubmission:
                 "view": {
                     "private_metadata": encode_metadata(
                         5,
-                        "https://hooks.slack.test/r",
+                        "https://hooks.slack.com/r",
                         ReportSource.SHORTCUT,
                     ),
                     "state": {
@@ -437,7 +454,7 @@ class TestReportContentSubmission:
             message=message,
         )
         release.assert_called_once_with(conversation, "1.0", "owner")
-        post_ephemeral.assert_called_once_with("https://hooks.slack.test/r", SUCCESS_TEXT)
+        post_ephemeral.assert_called_once_with("https://hooks.slack.com/r", SUCCESS_TEXT)
 
     def test_report_type_required(self):
         """Test missing report category returns a modal error."""
@@ -480,7 +497,7 @@ class TestReportContentSubmission:
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.decode_metadata",
-            return_value=(5, "https://hooks.slack.test/r", ReportSource.SHORTCUT),
+            return_value=(5, "https://hooks.slack.com/r", ReportSource.SHORTCUT),
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -523,7 +540,7 @@ class TestReportContentSubmission:
         )
 
         post_ephemeral.assert_called_once_with(
-            "https://hooks.slack.test/r",
+            "https://hooks.slack.com/r",
             ALREADY_REPORTED_TEXT,
         )
 
@@ -532,30 +549,48 @@ class TestReportContentHelpers:
     def test_make_ephemeral_prefers_respond(self, mocker):
         """Test make_ephemeral uses Bolt respond when available."""
         respond = Mock()
-        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+        post = mocker.patch("apps.slack.utils.report_open.post_ephemeral_url")
 
-        make_ephemeral(respond, "https://hooks.slack.test/r")(text="hi")
+        make_ephemeral(respond, "https://hooks.slack.com/r")(text="hi")
 
         respond.assert_called_once_with(text="hi", response_type="ephemeral")
         post.assert_not_called()
 
     def test_make_ephemeral_falls_back_to_response_url(self, mocker):
         """Test make_ephemeral posts to response_url without respond."""
-        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+        post = mocker.patch("apps.slack.utils.report_open.post_ephemeral_url")
 
-        make_ephemeral(None, "https://hooks.slack.test/r")(text="hi")
+        make_ephemeral(None, "https://hooks.slack.com/r")(text="hi")
 
-        post.assert_called_once_with("https://hooks.slack.test/r", "hi")
+        post.assert_called_once_with("https://hooks.slack.com/r", "hi")
+
+    def test_post_ephemeral_url_rejects_disallowed_host(self, mocker):
+        """Test response_url hosts outside Slack hooks are rejected."""
+        post = mocker.patch("apps.slack.utils.report_open.requests.post")
+
+        post_ephemeral_url("https://evil.example/r", "hi")
+
+        post.assert_not_called()
 
     def test_post_ephemeral_url_swallows_request_errors(self, mocker):
         """Test response_url failures are logged and ignored."""
         mocker.patch(
-            "apps.slack.shortcuts.report_content.requests.post",
+            "apps.slack.utils.report_open.requests.post",
             side_effect=requests.RequestException("boom"),
         )
-        post_ephemeral_url("https://hooks.slack.test/r", "hi")
+        post_ephemeral_url("https://hooks.slack.com/r", "hi")
 
-    def test_open_modal_missing_message_ts(self, mocker):
+    def test_post_ephemeral_url_raises_for_status(self, mocker):
+        """Test non-2xx response_url posts are treated as request failures."""
+        response = Mock()
+        response.raise_for_status.side_effect = requests.HTTPError("500")
+        mocker.patch("apps.slack.utils.report_open.requests.post", return_value=response)
+
+        post_ephemeral_url("https://hooks.slack.com/r", "hi")
+
+        response.raise_for_status.assert_called_once_with()
+
+    def test_open_modal_missing_message_ts(self):
         """Test open path rejects payloads without a message timestamp."""
         respond = Mock()
         open_report_content_modal(
@@ -564,7 +599,7 @@ class TestReportContentHelpers:
             channel_id="C1",
             message_payload={"user": "U_OTHER"},
             reporter_user_id="U_REP",
-            response_url="https://hooks.slack.test/r",
+            response_url="https://hooks.slack.com/r",
             trigger_id="trig",
             source=ReportSource.SHORTCUT,
             respond=respond,
@@ -580,19 +615,19 @@ class TestReportContentHelpers:
             response={"ok": False, "error": "invalid_trigger"},
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Conversation.get_or_create_for_report",
+            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
             return_value=Mock(),
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.ContentReport.exists_for",
+            "apps.slack.utils.report_open.ContentReport.exists_for",
             return_value=False,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Message.update_data",
+            "apps.slack.utils.report_open.Message.update_data",
             return_value=Mock(pk=1, text="x", raw_data={}),
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Member.objects.get_or_create",
+            "apps.slack.utils.report_open.Member.objects.get_or_create",
             return_value=(Mock(), False),
         )
 
@@ -602,7 +637,43 @@ class TestReportContentHelpers:
             channel_id="C1",
             message_payload={"ts": "1.0", "user": "U_OTHER"},
             reporter_user_id="U_REP",
-            response_url="https://hooks.slack.test/r",
+            response_url="https://hooks.slack.com/r",
+            trigger_id="trig",
+            source=ReportSource.SHORTCUT,
+            respond=respond,
+        )
+
+        respond.assert_called_once_with(text=MODAL_OPEN_FAILED_TEXT, response_type="ephemeral")
+
+    def test_open_modal_views_open_client_error(self, mocker):
+        """Test SlackClientError from views_open sends an ephemeral error."""
+        respond = Mock()
+        client = Mock()
+        client.views_open.side_effect = SlackClientError("timeout")
+        mocker.patch(
+            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
+            return_value=Mock(),
+        )
+        mocker.patch(
+            "apps.slack.utils.report_open.ContentReport.exists_for",
+            return_value=False,
+        )
+        mocker.patch(
+            "apps.slack.utils.report_open.Message.update_data",
+            return_value=Mock(pk=1, text="x", raw_data={}),
+        )
+        mocker.patch(
+            "apps.slack.utils.report_open.Member.objects.get_or_create",
+            return_value=(Mock(), False),
+        )
+
+        open_report_content_modal(
+            client=client,
+            workspace=enabled_workspace(),
+            channel_id="C1",
+            message_payload={"ts": "1.0", "user": "U_OTHER"},
+            reporter_user_id="U_REP",
+            response_url="https://hooks.slack.com/r",
             trigger_id="trig",
             source=ReportSource.SHORTCUT,
             respond=respond,
@@ -631,7 +702,7 @@ class TestReportContentHelpers:
             message=Mock(slack_message_id="1.0"),
             conversation=Mock(slack_channel_id="C1"),
             reporter_user_id="U_REP",
-            response_url="https://hooks.slack.test/r",
+            response_url="https://hooks.slack.com/r",
             source="shortcut",
         )
         mocker.patch(
@@ -648,7 +719,7 @@ class TestReportContentHelpers:
             report_type="spam",
         )
 
-        post.assert_called_once_with("https://hooks.slack.test/r", ALREADY_REPORTED_TEXT)
+        post.assert_called_once_with("https://hooks.slack.com/r", ALREADY_REPORTED_TEXT)
         release.assert_called_once()
 
     def test_post_alert_deliver_failure(self, mocker):
@@ -658,7 +729,7 @@ class TestReportContentHelpers:
             message=Mock(slack_message_id="1.0", text="hi", raw_data={}),
             conversation=Mock(slack_channel_id="C1", content_origin="<#C1>"),
             reporter_user_id="U_REP",
-            response_url="https://hooks.slack.test/r",
+            response_url="https://hooks.slack.com/r",
             source="shortcut",
         )
         mocker.patch(
@@ -683,12 +754,12 @@ class TestReportContentHelpers:
             report_type="spam",
         )
 
-        post.assert_called_once_with("https://hooks.slack.test/r", SUBMIT_FAILED_TEXT)
+        post.assert_called_once_with("https://hooks.slack.com/r", SUBMIT_FAILED_TEXT)
         release.assert_called_once()
 
     def test_make_ephemeral_noop_without_destinations(self, mocker):
         """Test make_ephemeral is a no-op without respond or response_url."""
-        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+        post = mocker.patch("apps.slack.utils.report_open.post_ephemeral_url")
 
         make_ephemeral(None, "")(text="hi")
 
@@ -711,7 +782,7 @@ class TestReportContentHelpers:
         """Test submit path rejects workspaces without content reporting."""
         mocker.patch(
             "apps.slack.shortcuts.report_content.decode_metadata",
-            return_value=(5, "https://hooks.slack.test/r", "shortcut"),
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -726,13 +797,13 @@ class TestReportContentHelpers:
             )
             is None
         )
-        post.assert_called_once_with("https://hooks.slack.test/r", FEATURE_OFF_TEXT)
+        post.assert_called_once_with("https://hooks.slack.com/r", FEATURE_OFF_TEXT)
 
     def test_load_submission_missing_message(self, mocker):
         """Test submit path rejects missing stored messages."""
         mocker.patch(
             "apps.slack.shortcuts.report_content.decode_metadata",
-            return_value=(5, "https://hooks.slack.test/r", "shortcut"),
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -751,7 +822,7 @@ class TestReportContentHelpers:
             )
             is None
         )
-        post.assert_called_once_with("https://hooks.slack.test/r", MISSING_MESSAGE_TEXT)
+        post.assert_called_once_with("https://hooks.slack.com/r", MISSING_MESSAGE_TEXT)
 
     def test_load_submission_self_report(self, mocker):
         """Test submit path rejects self-reports."""
@@ -762,7 +833,7 @@ class TestReportContentHelpers:
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.decode_metadata",
-            return_value=(5, "https://hooks.slack.test/r", "shortcut"),
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -781,7 +852,7 @@ class TestReportContentHelpers:
             )
             is None
         )
-        post.assert_called_once_with("https://hooks.slack.test/r", SELF_REPORT_TEXT)
+        post.assert_called_once_with("https://hooks.slack.com/r", SELF_REPORT_TEXT)
 
     def test_load_submission_already_reported(self, mocker):
         """Test submit path rejects messages that were already reported."""
@@ -793,7 +864,7 @@ class TestReportContentHelpers:
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.decode_metadata",
-            return_value=(5, "https://hooks.slack.test/r", "shortcut"),
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -816,7 +887,7 @@ class TestReportContentHelpers:
             )
             is None
         )
-        post.assert_called_once_with("https://hooks.slack.test/r", ALREADY_REPORTED_TEXT)
+        post.assert_called_once_with("https://hooks.slack.com/r", ALREADY_REPORTED_TEXT)
 
     def test_submission_context_none_after_ack(self, mocker):
         """Test submission returns after ack when context cannot be loaded."""
@@ -854,20 +925,18 @@ class TestReportContentHelpers:
         respond = Mock()
         client = Mock()
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Conversation.get_or_create_for_report",
+            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
             return_value=Mock(is_im=False, is_mpim=False, slack_channel_id="C1"),
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.ContentReport.exists_for",
+            "apps.slack.utils.report_open.ContentReport.exists_for",
             return_value=False,
         )
         update = mocker.patch(
-            "apps.slack.shortcuts.report_content.Message.update_data",
+            "apps.slack.utils.report_open.Message.update_data",
             return_value=Mock(pk=1, text="bot", raw_data={}),
         )
-        get_or_create = mocker.patch(
-            "apps.slack.shortcuts.report_content.Member.objects.get_or_create"
-        )
+        get_or_create = mocker.patch("apps.slack.utils.report_open.Member.objects.get_or_create")
 
         open_report_content_modal(
             client=client,
@@ -875,7 +944,7 @@ class TestReportContentHelpers:
             channel_id="C1",
             message_payload={"ts": "1.0", "text": "bot"},
             reporter_user_id="U_REP",
-            response_url="https://hooks.slack.test/r",
+            response_url="https://hooks.slack.com/r",
             trigger_id="trig",
             source=ReportSource.COMMAND,
             respond=respond,

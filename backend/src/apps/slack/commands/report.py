@@ -11,13 +11,13 @@ from apps.slack.commands.command import CommandBase
 from apps.slack.enums import ReportSource
 from apps.slack.models.message import Message
 from apps.slack.models.workspace import Workspace
-from apps.slack.shortcuts.report_content import make_ephemeral, open_report_content_modal
 from apps.slack.utils.report_modal import (
     FEATURE_OFF_TEXT,
     INVALID_LINK_TEXT,
     NOT_VISIBLE_TEXT,
     USAGE_TEXT,
 )
+from apps.slack.utils.report_open import make_ephemeral, open_report_content_modal
 
 if TYPE_CHECKING:
     from slack_sdk import WebClient
@@ -51,7 +51,7 @@ class Report(CommandBase):
             ephemeral(text=USAGE_TEXT)
             return
 
-        parsed = Message.parse_permalink(text.split()[0])
+        parsed = Message.parse_permalink(text)
         if parsed is None:
             ephemeral(text=INVALID_LINK_TEXT)
             return

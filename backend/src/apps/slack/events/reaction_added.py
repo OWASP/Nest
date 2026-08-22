@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from slack_sdk.errors import SlackApiError
 
-from apps.slack.enums import ReportSource
+from apps.slack.enums import ReportSource, ReportType
 from apps.slack.events.event import EventBase
 from apps.slack.models.content_report import ContentReport
 from apps.slack.models.message import Message
@@ -18,6 +18,19 @@ if TYPE_CHECKING:
     from slack_sdk import WebClient
 
 logger = logging.getLogger(__name__)
+
+
+class ThresholdAlertContext(NamedTuple):
+    """Context for posting a reaction-threshold content-report alert."""
+
+    channel_id: str
+    message_ts: str
+    rule: ReactionRule
+    reaction_count: int
+    reporter_user_ids: list[str]
+    permalink: str
+    matched_emojis: list[str]
+    owner: str
 
 
 def fetch_reaction(client: WebClient, channel_id: str, message_ts: str, emojis: list[str]):
@@ -38,7 +51,7 @@ def fetch_reaction(client: WebClient, channel_id: str, message_ts: str, emojis: 
     return ReactionRule.parse_reactions_get(payload, emojis)
 
 
-def threshold_alert_context(event, client: WebClient):
+def threshold_alert_context(event, client: WebClient) -> ThresholdAlertContext | None:
     """Return alert context when a reaction rule threshold is met, else None."""
     if (details := parse_message_reaction(event)) is None:
         return None
@@ -60,15 +73,15 @@ def threshold_alert_context(event, client: WebClient):
     if owner is None:
         return None
 
-    return (
-        channel_id,
-        message_ts,
-        rule,
-        reaction_count,
-        reporter_user_ids,
-        permalink,
-        matched_emojis,
-        owner,
+    return ThresholdAlertContext(
+        channel_id=channel_id,
+        message_ts=message_ts,
+        rule=rule,
+        reaction_count=reaction_count,
+        reporter_user_ids=reporter_user_ids,
+        permalink=permalink,
+        matched_emojis=matched_emojis,
+        owner=owner,
     )
 
 
@@ -83,16 +96,11 @@ class ReactionAdded(EventBase):
         if context is None:
             return
 
-        (
-            channel_id,
-            message_ts,
-            rule,
-            reaction_count,
-            reporter_user_ids,
-            permalink,
-            matched_emojis,
-            owner,
-        ) = context
+        channel_id = context.channel_id
+        message_ts = context.message_ts
+        rule = context.rule
+        permalink = context.permalink
+        owner = context.owner
 
         try:
             if not permalink:
@@ -102,12 +110,17 @@ class ReactionAdded(EventBase):
                 return
 
             alert_users = mention_users(rule.alert_user_ids)
-            reporters = mention_users(reporter_user_ids)
-            emojis = ReactionRule.format_emojis(matched_emojis)
+            reporters = mention_users(context.reporter_user_ids)
+            emojis = ReactionRule.format_emojis(context.matched_emojis)
+            category = (
+                ReportType(rule.report_type).label
+                if rule.report_type in ReportType.values
+                else rule.report_type
+            )
             text = (
                 f"{alert_users}\n"
                 f"A message in <#{channel_id}> reached the "
-                f"{rule.report_type} report threshold."
+                f"{category.lower()} report threshold."
             )
             if reporters:
                 text = f"{text}\nReported by: {reporters} using the following emojis: {emojis}"
@@ -127,8 +140,8 @@ class ReactionAdded(EventBase):
                 message_ts=message_ts,
                 report_type=rule.report_type,
                 source=str(ReportSource.EMOJI),
-                reporter_user_ids=reporter_user_ids,
-                reaction_count=reaction_count,
+                reporter_user_ids=context.reporter_user_ids,
+                reaction_count=context.reaction_count,
                 message=message,
             )
         finally:

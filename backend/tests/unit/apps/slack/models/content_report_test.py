@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from django.db import IntegrityError
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.slack.models.content_report import LOCK_TTL_SECONDS, ContentReport
 
@@ -82,6 +82,10 @@ class TestContentReport:
         """Test a successful Slack post is stored as a content report."""
         conversation = Mock()
         message = Mock()
+        mocker.patch(
+            "apps.slack.models.content_report.transaction.atomic",
+            return_value=mocker.MagicMock(),
+        )
         manager = mocker.patch("apps.slack.models.content_report.ContentReport.objects")
 
         ContentReport.record(
@@ -108,6 +112,10 @@ class TestContentReport:
 
     def test_record_ignores_existing_row(self, mocker):
         """Test a concurrent unique insert does not raise."""
+        mocker.patch(
+            "apps.slack.models.content_report.transaction.atomic",
+            return_value=mocker.MagicMock(),
+        )
         manager = mocker.patch("apps.slack.models.content_report.ContentReport.objects")
         manager.create.side_effect = IntegrityError
         manager.filter.return_value.exists.return_value = True
@@ -123,6 +131,10 @@ class TestContentReport:
 
     def test_record_raises_unexpected_integrity_error(self, mocker):
         """Test a non-unique IntegrityError is not swallowed."""
+        mocker.patch(
+            "apps.slack.models.content_report.transaction.atomic",
+            return_value=mocker.MagicMock(),
+        )
         manager = mocker.patch("apps.slack.models.content_report.ContentReport.objects")
         manager.create.side_effect = IntegrityError
         manager.filter.return_value.exists.return_value = False
@@ -221,7 +233,9 @@ class TestContentReport:
         assert "Author:" not in text
         assert "custom" in text
         assert "<@U_REP>" in text
-        assert "permalink" not in text
+        assert "https://" not in text
+        assert "\n>" not in text
+        assert not text.startswith(">")
 
     def test_deliver_alert_posts_and_records(self, mocker):
         """Test deliver_alert posts to Slack then records the report."""
@@ -255,6 +269,27 @@ class TestContentReport:
             message="fail",
             response={"ok": False, "error": "channel_not_found"},
         )
+        record = mocker.patch("apps.slack.models.content_report.ContentReport.record")
+
+        assert (
+            ContentReport.deliver_alert(
+                client,
+                channel_id="C_ALERT",
+                text="alert",
+                conversation=Mock(),
+                message_ts="1.0",
+                report_type="spam",
+                source="emoji",
+                reporter_user_ids=["U1"],
+            )
+            is False
+        )
+        record.assert_not_called()
+
+    def test_deliver_alert_returns_false_on_client_error(self, mocker):
+        """Test deliver_alert does not record when Slack transport fails."""
+        client = Mock()
+        client.chat_postMessage.side_effect = SlackClientError("timeout")
         record = mocker.patch("apps.slack.models.content_report.ContentReport.record")
 
         assert (

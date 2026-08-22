@@ -53,12 +53,15 @@ def decode_metadata(raw: str) -> tuple[int, str, str] | None:
     """Decode thin modal private_metadata, or None if invalid."""
     try:
         data = json.loads(raw or "")
-        message_db_id = int(data["message_db_id"])
+        message_db_id = data["message_db_id"]
         response_url = data["response_url"]
         source = data["source"]
-    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+    except (KeyError, TypeError, ValueError):
         return None
 
+    # Reject bool/float; JSON ints decode as int (True is a subclass of int).
+    if type(message_db_id) is not int or message_db_id <= 0:
+        return None
     if not isinstance(response_url, str) or not response_url:
         return None
     if not isinstance(source, str) or source not in VALID_SOURCES:

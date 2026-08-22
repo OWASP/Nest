@@ -11,6 +11,13 @@ class TestContentReportAdmin:
 
         assert not admin.has_add_permission(request=None)
         assert not admin.has_delete_permission(request=None)
-        assert "reporter_user_ids" in admin.readonly_fields
-        assert "source" in admin.readonly_fields
-        assert "message" in admin.readonly_fields
+        assert admin.readonly_fields == (
+            "conversation",
+            "message",
+            "message_ts",
+            "report_type",
+            "source",
+            "reaction_count",
+            "reporter_user_ids",
+            "alert_message_ts",
+        )

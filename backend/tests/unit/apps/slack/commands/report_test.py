@@ -2,6 +2,7 @@
 
 from unittest.mock import Mock
 
+from apps.slack.commands.owasp import Owasp
 from apps.slack.commands.report import Report
 from apps.slack.enums import ReportSource
 from apps.slack.utils.report_modal import (
@@ -11,20 +12,7 @@ from apps.slack.utils.report_modal import (
     USAGE_TEXT,
     decode_metadata,
 )
-
-
-def enabled_workspace(**kwargs):
-    """Return a workspace mock with content reporting enabled."""
-    workspace = Mock(**kwargs)
-    workspace.is_content_reporting_enabled = True
-    return workspace
-
-
-def disabled_workspace(**kwargs):
-    """Return a workspace mock with content reporting disabled."""
-    workspace = Mock(**kwargs)
-    workspace.is_content_reporting_enabled = False
-    return workspace
+from tests.unit.apps.slack.conftest import disabled_workspace, enabled_workspace
 
 
 class TestReportCommand:
@@ -41,7 +29,7 @@ class TestReportCommand:
                 "user_id": "U_REP",
                 "team_id": "T1",
                 "text": "",
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -64,7 +52,7 @@ class TestReportCommand:
                 "user_id": "U_REP",
                 "team_id": "T1",
                 "text": "not-a-link",
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -73,6 +61,45 @@ class TestReportCommand:
 
         respond.assert_called_once_with(text=INVALID_LINK_TEXT, response_type="ephemeral")
         client.views_open.assert_not_called()
+
+    def test_slack_formatted_link_with_spaces_in_label(self, mocker):
+        """Test Slack mrkdwn links with spaces in the label still parse."""
+        mocker.patch("apps.slack.commands.report.settings.SLACK_COMMANDS_ENABLED", new=True)
+        open_modal = mocker.patch("apps.slack.commands.report.open_report_content_modal")
+        mocker.patch(
+            "apps.slack.commands.report.Workspace.get_by_workspace_id",
+            return_value=enabled_workspace(content_report_alert_channel_id="C_ALERT"),
+        )
+        mocker.patch(
+            "apps.slack.commands.report.Message.load_payload",
+            return_value={"user": "U_OTHER", "ts": "1700000000.123456", "text": "spam"},
+        )
+        ack = Mock()
+        respond = Mock()
+        client = Mock()
+        link = (
+            "<https://owasp.slack.com/archives/C123/p1700000000123456"
+            "|Message with spaces in label>"
+        )
+
+        Report().handler(
+            ack,
+            {
+                "user_id": "U_REP",
+                "team_id": "T1",
+                "text": link,
+                "response_url": "https://hooks.slack.com/r",
+                "trigger_id": "trig",
+            },
+            client,
+            respond,
+        )
+
+        open_modal.assert_called_once()
+        _, kwargs = open_modal.call_args
+        assert kwargs["channel_id"] == "C123"
+        assert kwargs["message_payload"]["ts"] == "1700000000.123456"
+        respond.assert_not_called()
 
     def test_feature_off(self, mocker):
         """Test unconfigured workspace gets an ephemeral error."""
@@ -91,7 +118,7 @@ class TestReportCommand:
                 "user_id": "U_REP",
                 "team_id": "T1",
                 "text": "https://owasp.slack.com/archives/C123/p1700000000123456",
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -122,7 +149,7 @@ class TestReportCommand:
                 "user_id": "U_REP",
                 "team_id": "T1",
                 "text": "https://owasp.slack.com/archives/C123/p1700000000123456",
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -150,19 +177,19 @@ class TestReportCommand:
             return_value={"user": "U_OTHER", "ts": "1700000000.123456", "text": "spam"},
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Conversation.get_or_create_for_report",
+            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
             return_value=conversation,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.ContentReport.exists_for",
+            "apps.slack.utils.report_open.ContentReport.exists_for",
             return_value=False,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Message.update_data",
+            "apps.slack.utils.report_open.Message.update_data",
             return_value=message,
         )
         mocker.patch(
-            "apps.slack.shortcuts.report_content.Member.objects.get_or_create",
+            "apps.slack.utils.report_open.Member.objects.get_or_create",
             return_value=(Mock(), False),
         )
         ack = Mock()
@@ -175,7 +202,7 @@ class TestReportCommand:
                 "user_id": "U_REP",
                 "team_id": "T1",
                 "text": "https://owasp.slack.com/archives/C123/p1700000000123456",
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
@@ -188,10 +215,39 @@ class TestReportCommand:
         assert decode_metadata(kwargs["view"]["private_metadata"])[2] == (ReportSource.COMMAND)
         respond.assert_not_called()
 
-    def test_owasp_subcommand_uses_response_url_without_respond(self, mocker):
-        """Test /owasp report works when Owasp delegates without a respond helper."""
+    def test_injects_message_ts_when_payload_missing_ts(self, mocker):
+        """Test /report injects message_ts when load_payload omits ts."""
         mocker.patch("apps.slack.commands.report.settings.SLACK_COMMANDS_ENABLED", new=True)
-        post_ephemeral = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+        open_modal = mocker.patch("apps.slack.commands.report.open_report_content_modal")
+        mocker.patch(
+            "apps.slack.commands.report.Workspace.get_by_workspace_id",
+            return_value=enabled_workspace(content_report_alert_channel_id="C_ALERT"),
+        )
+        mocker.patch(
+            "apps.slack.commands.report.Message.load_payload",
+            return_value={"user": "U_OTHER", "text": "spam"},
+        )
+
+        Report().handler(
+            Mock(),
+            {
+                "user_id": "U_REP",
+                "team_id": "T1",
+                "text": "https://owasp.slack.com/archives/C123/p1700000000123456",
+                "response_url": "https://hooks.slack.com/r",
+                "trigger_id": "trig",
+            },
+            Mock(),
+            Mock(),
+        )
+
+        _, kwargs = open_modal.call_args
+        assert kwargs["message_payload"]["ts"] == "1700000000.123456"
+
+    def test_uses_response_url_without_respond(self, mocker):
+        """Test Report.handler falls back to response_url without a respond helper."""
+        mocker.patch("apps.slack.commands.report.settings.SLACK_COMMANDS_ENABLED", new=True)
+        post_ephemeral = mocker.patch("apps.slack.utils.report_open.post_ephemeral_url")
         ack = Mock()
         client = Mock()
 
@@ -201,11 +257,39 @@ class TestReportCommand:
                 "user_id": "U_REP",
                 "team_id": "T1",
                 "text": "",
-                "response_url": "https://hooks.slack.test/r",
+                "response_url": "https://hooks.slack.com/r",
                 "trigger_id": "trig",
             },
             client,
         )
 
-        post_ephemeral.assert_called_once_with("https://hooks.slack.test/r", USAGE_TEXT)
+        post_ephemeral.assert_called_once_with("https://hooks.slack.com/r", USAGE_TEXT)
+        client.views_open.assert_not_called()
+
+    def test_owasp_report_empty_remainder_shows_usage(self, mocker):
+        """Test /owasp report with no args clears text and shows usage via respond."""
+        mocker.patch("apps.slack.commands.report.settings.SLACK_COMMANDS_ENABLED", new=True)
+        report_handler = mocker.spy(Report, "handler")
+        ack = Mock()
+        respond = Mock()
+        client = Mock()
+
+        Owasp().handler(
+            ack,
+            {
+                "user_id": "U_REP",
+                "team_id": "T1",
+                "text": "report",
+                "response_url": "https://hooks.slack.com/r",
+                "trigger_id": "trig",
+            },
+            client,
+            respond,
+        )
+
+        report_handler.assert_called_once()
+        command = report_handler.call_args.args[2]
+        assert command["text"] == ""
+        assert report_handler.call_args.kwargs["respond"] is respond
+        respond.assert_called_once_with(text=USAGE_TEXT, response_type="ephemeral")
         client.views_open.assert_not_called()
