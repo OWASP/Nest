@@ -7,6 +7,7 @@ services:
     command: >
       sh -c '
         python manage.py migrate &&
+        if [ "$${E2E_SKIP_SEED:-0}" != "1" ]; then python manage.py e2e_seed_users; fi &&
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
     container_name: e2e-nest-backend
@@ -15,6 +16,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+    environment:
+      E2E_SKIP_SEED: ${E2E_SKIP_SEED:-0}
     env_file: ../../backend/.env.e2e-tests
     healthcheck:
       interval: 10s

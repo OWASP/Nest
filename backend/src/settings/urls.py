@@ -48,5 +48,10 @@ if SlackConfig.app:
         path("integrations/slack/interactivity/", slack_request_handler),
     ]
 
+if settings.IS_E2E_ENVIRONMENT:
+    from apps.nest.api.internal.views.e2e_login import e2e_login
+
+    urlpatterns += [path("e2e/login/", e2e_login)]
+
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
