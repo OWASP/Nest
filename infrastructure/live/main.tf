@@ -40,7 +40,6 @@ module "alb" {
 module "backend" {
   source = "../modules/service"
 
-  assign_public_ip                = false
   auto_scaling_cpu_target         = var.auto_scaling_cpu_target
   auto_scaling_scale_in_cooldown  = var.auto_scaling_scale_in_cooldown
   auto_scaling_scale_out_cooldown = var.auto_scaling_scale_out_cooldown
@@ -110,7 +109,6 @@ module "database" {
 module "frontend" {
   source = "../modules/service"
 
-  assign_public_ip                = false
   auto_scaling_cpu_target         = var.auto_scaling_cpu_target
   auto_scaling_scale_in_cooldown  = var.auto_scaling_scale_in_cooldown
   auto_scaling_scale_out_cooldown = var.auto_scaling_scale_out_cooldown
@@ -231,7 +229,6 @@ module "storage" {
 module "tasks" {
   source = "../modules/tasks"
 
-  assign_public_ip              = false
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns

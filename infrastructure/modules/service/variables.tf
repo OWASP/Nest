@@ -1,9 +1,3 @@
-variable "assign_public_ip" {
-  description = "Whether to assign public IPs to ECS tasks (required for public subnets)."
-  type        = bool
-  default     = false
-}
-
 variable "auto_scaling_cpu_target" {
   description = "Target average CPU utilization percentage for auto scaling."
   type        = number

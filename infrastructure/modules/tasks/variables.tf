@@ -1,9 +1,3 @@
-variable "assign_public_ip" {
-  description = "Whether to assign public IPs to ECS tasks (required for public subnets)."
-  type        = bool
-  default     = false
-}
-
 variable "aws_region" {
   description = "The AWS region."
   type        = string

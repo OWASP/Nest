@@ -65,6 +65,9 @@ resource "aws_nat_gateway" "main" {
   })
 }
 
+# Used to migrate production state.
+# Remove both moved blocks after next production release.
+# (Latest release: 2026.08.17)
 moved {
   from = aws_eip.nat[0]
   to   = aws_eip.nat

@@ -1,9 +1,3 @@
-variable "assign_public_ip" {
-  description = "Whether to assign public IPs to ECS tasks."
-  type        = bool
-  default     = false
-}
-
 variable "aws_region" {
   description = "The AWS region for the CloudWatch logs."
   type        = string
