@@ -33,6 +33,73 @@ class InfrastructureDeployRunner:
         self.commands = commands or CommandRunner()
         self.localstack = localstack or LocalStack(self.commands)
 
+    def apply_live(self) -> None:
+        """Initialize and apply the live/ Terraform configuration.
+
+        Raises:
+            RunnerError: If a Terraform command exits with a non-zero status.
+
+        """
+        live_dir = self.root_dir / "infrastructure" / "live"
+        init_result = self.commands.run(
+            "tflocal",
+            f"-chdir={live_dir}",
+            "init",
+            "-backend-config=terraform.localstack.tfbackend",
+            "-input=false",
+            "-reconfigure",
+            check=False,
+        )
+        if init_result.returncode != 0:
+            message = f"terraform init failed in {live_dir}"
+            raise RunnerError(message)
+
+        apply_result = self.commands.run(
+            "tflocal",
+            f"-chdir={live_dir}",
+            "apply",
+            "-auto-approve",
+            "-input=false",
+            "-var-file=terraform.localstack.tfvars",
+            check=False,
+        )
+        if apply_result.returncode != 0:
+            message = f"terraform apply failed in {live_dir}"
+            raise RunnerError(message)
+
+    def apply_state(self) -> None:
+        """Initialize and apply the state/ Terraform configuration.
+
+        Raises:
+            RunnerError: If a Terraform command exits with a non-zero status.
+
+        """
+        state_dir = self.root_dir / "infrastructure" / "state"
+        init_result = self.commands.run(
+            "tflocal",
+            f"-chdir={state_dir}",
+            "init",
+            "-input=false",
+            "-reconfigure",
+            check=False,
+        )
+        if init_result.returncode != 0:
+            message = f"terraform init failed in {state_dir}"
+            raise RunnerError(message)
+
+        apply_result = self.commands.run(
+            "tflocal",
+            f"-chdir={state_dir}",
+            "apply",
+            "-auto-approve",
+            "-input=false",
+            "-var-file=terraform.localstack.tfvars",
+            check=False,
+        )
+        if apply_result.returncode != 0:
+            message = f"terraform apply failed in {state_dir}"
+            raise RunnerError(message)
+
     def configure_environment(self) -> None:
         """Change to the repo root and configure the Terraform plugin cache."""
         chdir_repository_root(self.root_dir)
@@ -51,61 +118,15 @@ class InfrastructureDeployRunner:
         self.commands.require("tflocal")
         self.localstack.wait_ready()
 
-        state_dir = self.root_dir / "infrastructure" / "state"
-        live_dir = self.root_dir / "infrastructure" / "live"
         with (
             set_temporary_env("AWS_ACCESS_KEY_ID", "test"),
             set_temporary_env("AWS_ENDPOINT_URL", self.localstack.api_url),
             set_temporary_env("AWS_SECRET_ACCESS_KEY", "test"),
         ):
-            state_init_result = self.commands.run(
-                "tflocal",
-                f"-chdir={state_dir}",
-                "init",
-                "-input=false",
-                "-reconfigure",
-                check=False,
-            )
-            if state_init_result.returncode != 0:
-                message = f"terraform init failed in {state_dir}"
-                raise RunnerError(message)
-
-            state_apply_result = self.commands.run(
-                "tflocal",
-                f"-chdir={state_dir}",
-                "apply",
-                "-auto-approve",
-                "-input=false",
-                "-var-file=terraform.localstack.tfvars",
-                check=False,
-            )
-            if state_apply_result.returncode != 0:
-                message = f"terraform apply failed in {state_dir}"
-                raise RunnerError(message)
-
-            init_result = self.commands.run(
-                "tflocal",
-                f"-chdir={live_dir}",
-                "init",
-                "-backend-config=terraform.localstack.tfbackend",
-                "-input=false",
-                "-reconfigure",
-                check=False,
-            )
-            if init_result.returncode != 0:
-                message = f"terraform init failed in {live_dir}"
-                raise RunnerError(message)
-
-            apply_result = self.commands.run(
-                "tflocal",
-                f"-chdir={live_dir}",
-                "apply",
-                "-auto-approve",
-                "-input=false",
-                "-var-file=terraform.localstack.tfvars",
-                check=False,
-            )
-            if apply_result.returncode != 0:
-                message = f"terraform apply failed in {live_dir}"
-                raise RunnerError(message)
+            self.apply_state()
+            self.apply_live()
         logger.info("Deployment on LocalStack successful!")
+
+    def refresh(self) -> None:
+        """Orchestrate a deployment refresh."""
+        logger.info("Refresh is not implemented yet.")
