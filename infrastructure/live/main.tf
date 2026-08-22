@@ -58,10 +58,10 @@ module "backend" {
   max_count                       = var.backend_max_count
   min_count                       = var.backend_min_count
   parameters_arns                 = module.parameters.django_ssm_parameter_arns
+  private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.backend_sg_id
   service_name                    = "backend"
-  subnet_ids                      = module.networking.private_subnet_ids
   target_group_arn                = module.alb.backend_target_group_arn
   task_role_policy_arns           = [module.storage.static_read_write_policy_arn]
   use_fargate_spot                = var.backend_use_fargate_spot
@@ -124,10 +124,10 @@ module "frontend" {
   max_count                       = var.frontend_max_count
   min_count                       = var.frontend_min_count
   parameters_arns                 = module.parameters.frontend_ssm_parameter_arns
+  private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.frontend_sg_id
   service_name                    = "frontend"
-  subnet_ids                      = module.networking.private_subnet_ids
   target_group_arn                = module.alb.frontend_target_group_arn
   use_fargate_spot                = var.frontend_use_fargate_spot
 }
@@ -241,7 +241,7 @@ module "tasks" {
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   image_tag                     = var.backend_image_tag
   kms_key_arn                   = module.kms.key_arn
+  private_subnet_ids            = module.networking.private_subnet_ids
   project_name                  = var.project_name
-  subnet_ids                    = module.networking.private_subnet_ids
   use_fargate_spot              = var.tasks_use_fargate_spot
 }

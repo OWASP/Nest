@@ -143,6 +143,16 @@ variable "parameters_arns" {
   default     = {}
 }
 
+variable "private_subnet_ids" {
+  description = "Private subnet IDs for ECS tasks."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.private_subnet_ids) > 0
+    error_message = "private_subnet_ids must contain at least one subnet."
+  }
+}
+
 variable "project_name" {
   description = "The name of the project."
   type        = string
@@ -156,16 +166,6 @@ variable "security_group_id" {
 variable "service_name" {
   description = "The name of the service (e.g., backend, frontend)."
   type        = string
-}
-
-variable "subnet_ids" {
-  description = "Subnet IDs for ECS tasks (can be public or private)."
-  type        = list(string)
-
-  validation {
-    condition     = length(var.subnet_ids) > 0
-    error_message = "subnet_ids must contain at least one subnet."
-  }
 }
 
 variable "target_group_arn" {

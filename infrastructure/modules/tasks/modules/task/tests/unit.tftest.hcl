@@ -12,9 +12,9 @@ variables {
   image_url                    = "123456789012.dkr.ecr.us-east-2.amazonaws.com/test:latest"
   kms_key_arn                  = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   memory                       = "512"
+  private_subnet_ids           = ["subnet-12345678"]
   project_name                 = "nest"
   security_group_ids           = ["sg-12345678"]
-  subnet_ids                   = ["subnet-12345678"]
   task_name                    = "test-task"
 }
 
