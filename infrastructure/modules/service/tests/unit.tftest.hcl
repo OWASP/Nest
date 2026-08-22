@@ -360,3 +360,12 @@ run "test_service_assign_public_ip_disabled" {
     error_message = "ECS service must not assign a public IP. Use a NAT Gateway instead."
   }
 }
+
+run "test_service_uses_private_subnets" {
+  command = plan
+
+  assert {
+    condition     = one(aws_ecs_service.main.network_configuration).subnets == toset(var.private_subnet_ids)
+    error_message = "ECS service must be deployed into the configured private subnets."
+  }
+}
