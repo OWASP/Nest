@@ -107,11 +107,29 @@ describe('ClaimHighlight', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders a gray highlight for a Submitted claim', () => {
+  it('renders a gray dashed underline for a Submitted claim', () => {
     renderHighlight({ status: ClaimStatusEnum.Submitted })
     const trigger = screen.getByLabelText(/status Under Review/)
-    expect(trigger.className).toMatch(/bg-gray-/)
-    expect(trigger.className).not.toMatch(/bg-yellow-/)
+    expect(trigger.className).toMatch(/underline/)
+    expect(trigger.className).toMatch(/decoration-dashed/)
+    expect(trigger.className).toMatch(/decoration-gray-/)
+    expect(trigger.className).not.toMatch(/bg-gray-/)
+  })
+
+  it('renders a green dashed underline for an Approved claim', () => {
+    renderHighlight({ status: ClaimStatusEnum.Approved })
+    const trigger = screen.getByLabelText(/status Verified/)
+    expect(trigger.className).toMatch(/decoration-green-/)
+    expect(trigger.className).toMatch(/decoration-dashed/)
+    expect(trigger.className).not.toMatch(/bg-green-/)
+  })
+
+  it('renders a red dashed underline for a Rejected claim', () => {
+    renderHighlight({ status: ClaimStatusEnum.Rejected })
+    const trigger = screen.getByLabelText(/status Not Verified/)
+    expect(trigger.className).toMatch(/decoration-red-/)
+    expect(trigger.className).toMatch(/decoration-dashed/)
+    expect(trigger.className).not.toMatch(/bg-red-/)
   })
 
   it('navigates when the View claim button is clicked', () => {

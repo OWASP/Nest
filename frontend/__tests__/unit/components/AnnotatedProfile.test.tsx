@@ -105,7 +105,7 @@ describe('AnnotatedProfile', () => {
     expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
   })
 
-  it('drops Withdrawn, Discarded, and Approved claims even when sourceText matches', () => {
+  it('drops Withdrawn and Discarded claims even when sourceText matches', () => {
     render(
       <AnnotatedProfile
         {...baseProps}
@@ -125,6 +125,18 @@ describe('AnnotatedProfile', () => {
             sourceText: 'about',
             status: ClaimStatusEnum.Discarded,
           },
+        ]}
+      />
+    )
+    expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
+  })
+
+  it('highlights Approved claims', () => {
+    render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown="This is important work."
+        claims={[
           {
             id: 'a',
             key: 'approved',
@@ -135,7 +147,38 @@ describe('AnnotatedProfile', () => {
         ]}
       />
     )
-    expect(screen.queryByTestId('claim-highlight')).not.toBeInTheDocument()
+    const mark = screen.getByTestId('claim-highlight')
+    expect(mark).toHaveAttribute('data-claim-key', 'approved')
+    expect(mark).toHaveAttribute('data-claim-status', ClaimStatusEnum.Approved)
+    expect(mark).toHaveTextContent('important work')
+  })
+
+  it('gives Approved priority over Submitted when two claims tie on length', () => {
+    render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown="Shared phrase in the profile."
+        claims={[
+          {
+            id: 's',
+            key: 'submitted',
+            name: 'Submitted',
+            sourceText: 'Shared phrase',
+            status: ClaimStatusEnum.Submitted,
+          },
+          {
+            id: 'a',
+            key: 'approved',
+            name: 'Approved',
+            sourceText: 'Shared phrase',
+            status: ClaimStatusEnum.Approved,
+          },
+        ]}
+      />
+    )
+    const marks = screen.getAllByTestId('claim-highlight')
+    expect(marks).toHaveLength(1)
+    expect(marks[0]).toHaveAttribute('data-claim-key', 'approved')
   })
 
   it('drops claims whose sourceText is not found', () => {
@@ -206,6 +249,66 @@ describe('AnnotatedProfile', () => {
     expect(marks).toHaveLength(2)
     expect(marks[0]).toHaveAttribute('data-claim-key', 'nest')
     expect(marks[1]).toHaveAttribute('data-claim-key', 'nest')
+  })
+
+  it('prepends a zero-width space when a highlight starts at position 0', () => {
+    const { container } = render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown="Opening claim text is here."
+        claims={[
+          {
+            id: '1',
+            key: 'opening',
+            name: 'Opening',
+            sourceText: 'Opening claim text',
+            status: ClaimStatusEnum.Submitted,
+          },
+        ]}
+      />
+    )
+    expect(screen.getByTestId('claim-highlight')).toHaveTextContent('Opening claim text')
+    expect(container.textContent).toContain('​')
+  })
+
+  it('prepends a zero-width space when a highlight starts right after a newline', () => {
+    const { container } = render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown={'First line.\nSecond line highlight.'}
+        claims={[
+          {
+            id: '1',
+            key: 'second',
+            name: 'Second',
+            sourceText: 'Second line highlight.',
+            status: ClaimStatusEnum.Submitted,
+          },
+        ]}
+      />
+    )
+    expect(screen.getByTestId('claim-highlight')).toHaveTextContent('Second line highlight.')
+    expect(container.textContent).toContain('​')
+  })
+
+  it('does not prepend a zero-width space when a highlight starts mid-line', () => {
+    const { container } = render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown="Prefix then Highlighted portion here."
+        claims={[
+          {
+            id: '1',
+            key: 'mid',
+            name: 'Mid',
+            sourceText: 'Highlighted portion',
+            status: ClaimStatusEnum.Submitted,
+          },
+        ]}
+      />
+    )
+    expect(screen.getByTestId('claim-highlight')).toHaveTextContent('Highlighted portion')
+    expect(container.textContent).not.toContain('​')
   })
 
   it('rewrites relative image URLs against the owasp.org base', () => {

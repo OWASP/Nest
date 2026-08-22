@@ -26,6 +26,7 @@ interface AnnotatedProfileProps {
 }
 
 const STATUS_PRIORITY: Partial<Record<ClaimStatusEnum, number>> = {
+  [ClaimStatusEnum.Approved]: 3,
   [ClaimStatusEnum.Submitted]: 2,
   [ClaimStatusEnum.Draft]: 1,
   [ClaimStatusEnum.Rejected]: 0,
