@@ -10,6 +10,9 @@ from scripts.utils import chdir_repository_root, configure_terraform_cache, set_
 
 logger = logging.getLogger(__name__)
 
+LOCALSTACK_TFBACKEND = "terraform.localstack.tfbackend"
+LOCALSTACK_TFVARS = "terraform.localstack.tfvars"
+
 
 class InfrastructureDeployRunner:
     """Infrastructure deployment orchestrator."""
@@ -45,7 +48,7 @@ class InfrastructureDeployRunner:
             "tflocal",
             f"-chdir={live_dir}",
             "init",
-            "-backend-config=terraform.localstack.tfbackend",
+            f"-backend-config={LOCALSTACK_TFBACKEND}",
             "-input=false",
             "-reconfigure",
             check=False,
@@ -60,7 +63,7 @@ class InfrastructureDeployRunner:
             "apply",
             "-auto-approve",
             "-input=false",
-            "-var-file=terraform.localstack.tfvars",
+            f"-var-file={LOCALSTACK_TFVARS}",
             check=False,
         )
         if apply_result.returncode != 0:
@@ -93,7 +96,7 @@ class InfrastructureDeployRunner:
             "apply",
             "-auto-approve",
             "-input=false",
-            "-var-file=terraform.localstack.tfvars",
+            f"-var-file={LOCALSTACK_TFVARS}",
             check=False,
         )
         if apply_result.returncode != 0:

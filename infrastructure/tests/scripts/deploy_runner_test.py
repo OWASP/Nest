@@ -8,7 +8,11 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 from scripts.commands import CommandRunner
-from scripts.deploy_runner import InfrastructureDeployRunner
+from scripts.deploy_runner import (
+    LOCALSTACK_TFBACKEND,
+    LOCALSTACK_TFVARS,
+    InfrastructureDeployRunner,
+)
 from scripts.errors import RunnerError
 from scripts.localstack import LocalStack
 
@@ -87,7 +91,7 @@ class TestInfrastructureDeployRunner:
                     "apply",
                     "-auto-approve",
                     "-input=false",
-                    "-var-file=terraform.localstack.tfvars",
+                    f"-var-file={LOCALSTACK_TFVARS}",
                     check=False,
                 ),
             ]
@@ -123,7 +127,7 @@ class TestInfrastructureDeployRunner:
                     "tflocal",
                     f"-chdir={live_dir}",
                     "init",
-                    "-backend-config=terraform.localstack.tfbackend",
+                    f"-backend-config={LOCALSTACK_TFBACKEND}",
                     "-input=false",
                     "-reconfigure",
                     check=False,
@@ -134,7 +138,7 @@ class TestInfrastructureDeployRunner:
                     "apply",
                     "-auto-approve",
                     "-input=false",
-                    "-var-file=terraform.localstack.tfvars",
+                    f"-var-file={LOCALSTACK_TFVARS}",
                     check=False,
                 ),
             ]
