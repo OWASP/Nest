@@ -222,7 +222,6 @@ resource "aws_iam_role_policy_attachment" "event_bridge_policy_attachment" {
 module "sync_data_task" {
   source = "./modules/task"
 
-  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make sync-data"]
   common_tags                  = var.common_tags
@@ -235,10 +234,10 @@ module "sync_data_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.sync_data_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = local.sync_data_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "sync-data"
   use_fargate_spot             = var.use_fargate_spot
 }
@@ -246,8 +245,7 @@ module "sync_data_task" {
 module "slack_sync_data_task" {
   source = "./modules/task"
 
-  assign_public_ip = var.assign_public_ip
-  aws_region       = var.aws_region
+  aws_region = var.aws_region
   command = [
     "/bin/sh",
     "-c",
@@ -268,10 +266,10 @@ module "slack_sync_data_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.slack_sync_data_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = local.slack_sync_data_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "slack-sync-data"
   use_fargate_spot             = var.use_fargate_spot
 }
@@ -279,8 +277,7 @@ module "slack_sync_data_task" {
 module "owasp_update_project_health_metrics_task" {
   source = "./modules/task"
 
-  assign_public_ip = var.assign_public_ip
-  aws_region       = var.aws_region
+  aws_region = var.aws_region
   command = [
     "/bin/sh",
     "-c",
@@ -300,10 +297,10 @@ module "owasp_update_project_health_metrics_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_metrics_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = local.update_project_health_metrics_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-metrics"
   use_fargate_spot             = var.use_fargate_spot
 }
@@ -311,7 +308,6 @@ module "owasp_update_project_health_metrics_task" {
 module "owasp_update_project_health_scores_task" {
   source = "./modules/task"
 
-  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make owasp-update-project-health-scores"]
   common_tags                  = var.common_tags
@@ -324,10 +320,10 @@ module "owasp_update_project_health_scores_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_scores_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = local.update_project_health_scores_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-scores"
   use_fargate_spot             = var.use_fargate_spot
 }
@@ -335,8 +331,7 @@ module "owasp_update_project_health_scores_task" {
 module "mentorship_sync_modules_data" {
   source = "./modules/task"
 
-  assign_public_ip = var.assign_public_ip
-  aws_region       = var.aws_region
+  aws_region = var.aws_region
   command = [
     "/bin/sh",
     "-c",
@@ -356,10 +351,10 @@ module "mentorship_sync_modules_data" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.mentorship_sync_modules_data_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = local.mentorship_sync_modules_data_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "mentorship-sync-modules-data"
   use_fargate_spot             = var.use_fargate_spot
 }
@@ -367,7 +362,6 @@ module "mentorship_sync_modules_data" {
 module "migrate_task" {
   source = "./modules/task"
 
-  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make migrate"]
   common_tags                  = var.common_tags
@@ -379,9 +373,9 @@ module "migrate_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.migrate_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "migrate"
   use_fargate_spot             = false
 }
@@ -389,8 +383,7 @@ module "migrate_task" {
 module "load_data_task" {
   source = "./modules/task"
 
-  assign_public_ip = var.assign_public_ip
-  aws_region       = var.aws_region
+  aws_region = var.aws_region
   command = [
     "/bin/sh",
     "-c",
@@ -422,9 +415,9 @@ module "load_data_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.load_data_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "load-data"
   task_role_arn                = aws_iam_role.ecs_task_role.arn
   use_fargate_spot             = false
@@ -433,7 +426,6 @@ module "load_data_task" {
 module "index_data_task" {
   source = "./modules/task"
 
-  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make index-data"]
   common_tags                  = var.common_tags
@@ -445,9 +437,9 @@ module "index_data_task" {
   image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.index_data_task_memory
+  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
-  subnet_ids                   = var.subnet_ids
   task_name                    = "index-data"
   use_fargate_spot             = false
 }

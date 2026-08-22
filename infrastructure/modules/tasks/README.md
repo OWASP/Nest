@@ -49,7 +49,6 @@
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether to assign public IPs to ECS tasks (required for public subnets). | `bool` | `false` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region. | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
 | <a name="input_container_parameters_arns"></a> [container\_parameters\_arns](#input\_container\_parameters\_arns) | Map of environment variable names to the ARNs of all SSM parameters. | `map(string)` | `{}` | no |
@@ -70,10 +69,10 @@
 | <a name="input_mentorship_sync_modules_data_task_memory"></a> [mentorship\_sync\_modules\_data\_task\_memory](#input\_mentorship\_sync\_modules\_data\_task\_memory) | The memory for the mentorship-sync-modules-data task. | `string` | `"1024"` | no |
 | <a name="input_migrate_task_cpu"></a> [migrate\_task\_cpu](#input\_migrate\_task\_cpu) | The CPU for the migrate task. | `string` | `"256"` | no |
 | <a name="input_migrate_task_memory"></a> [migrate\_task\_memory](#input\_migrate\_task\_memory) | The memory for the migrate task. | `string` | `"1024"` | no |
+| <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | Private subnet IDs for ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_slack_sync_data_task_cpu"></a> [slack\_sync\_data\_task\_cpu](#input\_slack\_sync\_data\_task\_cpu) | The CPU for the slack-sync-data scheduled task. | `string` | `"1024"` | no |
 | <a name="input_slack_sync_data_task_memory"></a> [slack\_sync\_data\_task\_memory](#input\_slack\_sync\_data\_task\_memory) | The memory for the slack-sync-data scheduled task. | `string` | `"2048"` | no |
-| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Subnet IDs for ECS tasks (can be public or private). | `list(string)` | n/a | yes |
 | <a name="input_sync_data_task_cpu"></a> [sync\_data\_task\_cpu](#input\_sync\_data\_task\_cpu) | The CPU for the sync-data task. | `string` | `"256"` | no |
 | <a name="input_sync_data_task_memory"></a> [sync\_data\_task\_memory](#input\_sync\_data\_task\_memory) | The memory for the sync-data task. | `string` | `"1024"` | no |
 | <a name="input_update_project_health_metrics_task_cpu"></a> [update\_project\_health\_metrics\_task\_cpu](#input\_update\_project\_health\_metrics\_task\_cpu) | The CPU for the update-project-health-metrics task. | `string` | `"256"` | no |
