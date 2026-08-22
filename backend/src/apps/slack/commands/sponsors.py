@@ -1,8 +1,8 @@
 """Slack bot sponsors command."""
 
 from apps.common.constants import OWASP_URL
+from apps.owasp.models.sponsor import Sponsor
 from apps.slack.commands.command import CommandBase
-from apps.slack.utils import get_sponsors_data
 
 
 class Sponsors(CommandBase):
@@ -18,10 +18,9 @@ class Sponsors(CommandBase):
             dict: The template context.
 
         """
-        sponsors = get_sponsors_data()
         return {
             **super().get_context(command),
-            "SPONSORS": sponsors,
+            "SPONSORS": Sponsor.objects.all()[:10],
             "SPONSORS_PAGE_NAME": "OWASP Supporters",
             "SPONSORS_PAGE_URL": f"{OWASP_URL}/supporters/",
         }

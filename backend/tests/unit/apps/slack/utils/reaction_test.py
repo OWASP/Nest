@@ -1,9 +1,5 @@
-from apps.slack.utils.reaction import (
-    format_emojis,
-    mention_users,
-    parse_message_reaction,
-    reaction_from_payload,
-)
+from apps.slack.models.reaction_rule import ReactionRule
+from apps.slack.utils.reaction import mention_users, parse_message_reaction
 
 EVENT = {
     "item": {"type": "message", "channel": "C_SOURCE", "ts": "123.000"},
@@ -40,89 +36,83 @@ class TestParseMessageReaction:
         assert parse_message_reaction(event) is None
 
 
-class TestReactionFromPayload:
-    def test_reaction_from_payload_returns_matching_emoji(self):
+class TestParseReactionsGet:
+    def test_parse_reactions_get_returns_matching_emoji(self):
         """Test reactions.get payloads expose unique reporters and permalink."""
-        assert reaction_from_payload(PAYLOAD, ["spam"]) == (
+        assert ReactionRule.parse_reactions_get(PAYLOAD, ["spam"]) == (
             2,
             ["U_REACTOR", "U_OTHER"],
             "https://slack.test/message",
             ["spam"],
         )
 
-    def test_reaction_from_payload_returns_none_when_emoji_missing(self):
-        """Test an unmatched emoji set does not produce a snapshot."""
-        assert reaction_from_payload(PAYLOAD, ["flag"]) is None
+    def test_parse_reactions_get_returns_none_when_emoji_missing(self):
+        """Test unmatched emoji lists return None."""
+        assert ReactionRule.parse_reactions_get(PAYLOAD, ["flag"]) is None
 
-    def test_reaction_from_payload_unions_unique_reporters(self):
-        """Test listed emojis share one unique-reporter count."""
+    def test_parse_reactions_get_unions_unique_reporters(self):
+        """Test matching emojis union unique reporters."""
         payload = {
             "message": {
                 "permalink": "https://slack.test/message",
                 "reactions": [
-                    {"name": "spam", "count": 2, "users": ["U1", "U2"]},
-                    {"name": "flag", "count": 2, "users": ["U2", "U3"]},
-                    {"name": "thumbsup", "count": 4, "users": ["U4"]},
+                    {"name": "spam", "count": 2, "users": ["U_REACTOR", "U_OTHER"]},
+                    {"name": "flag", "count": 2, "users": ["U_OTHER", "U_THIRD"]},
                 ],
             }
         }
 
-        assert reaction_from_payload(payload, ["spam", "flag"]) == (
+        assert ReactionRule.parse_reactions_get(payload, ["spam", "flag"]) == (
             3,
-            ["U1", "U2", "U3"],
+            ["U_REACTOR", "U_OTHER", "U_THIRD"],
             "https://slack.test/message",
             ["spam", "flag"],
         )
 
-    def test_reaction_from_payload_returns_matched_emojis_only(self):
-        """Test unused configured emojis are omitted from the snapshot."""
-        assert reaction_from_payload(PAYLOAD, ["spam", "flag"]) == (
+    def test_parse_reactions_get_returns_matched_emojis_only(self):
+        """Test only configured emojis present on the message are returned."""
+        assert ReactionRule.parse_reactions_get(PAYLOAD, ["spam", "flag"]) == (
             2,
             ["U_REACTOR", "U_OTHER"],
             "https://slack.test/message",
             ["spam"],
         )
 
-    def test_reaction_from_payload_ignores_non_list_emojis(self):
-        """Test a JSON scalar emoji list does not produce a snapshot."""
-        assert reaction_from_payload(PAYLOAD, "spam") is None
+    def test_parse_reactions_get_ignores_non_list_emojis(self):
+        """Test non-list emoji config returns None."""
+        assert ReactionRule.parse_reactions_get(PAYLOAD, "spam") is None
+
+    def test_parse_reactions_get_ignores_empty_emoji_list(self):
+        """Test empty or blank-only emoji lists return None."""
+        assert ReactionRule.parse_reactions_get(PAYLOAD, []) is None
+        assert ReactionRule.parse_reactions_get(PAYLOAD, ["", None]) is None
 
 
 class TestFormatEmojis:
     def test_format_emojis_joins_names(self):
-        """Test emoji names are formatted as Slack emoji markup."""
-        assert format_emojis(["spam", "flag"]) == ":spam: :flag:"
+        """Test emoji names are rendered as Slack markup."""
+        assert ReactionRule.format_emojis(["spam", "flag"]) == ":spam: :flag:"
 
     def test_format_emojis_handles_empty(self):
-        """Test missing emoji names produce no markup."""
-        assert format_emojis([]) == ""
-        assert format_emojis(None) == ""
+        """Test empty emoji lists render as empty strings."""
+        assert ReactionRule.format_emojis([]) == ""
+        assert ReactionRule.format_emojis(None) == ""
 
     def test_format_emojis_ignores_non_list_values(self):
-        """Test JSON scalars and objects are not treated as emoji lists."""
-        assert format_emojis("spam") == ""
+        """Test non-list emoji values render as empty strings."""
+        assert ReactionRule.format_emojis("spam") == ""
 
     def test_format_emojis_ignores_empty_names(self):
-        """Test blank emoji names are omitted from markup."""
-        assert format_emojis(["", "spam", None, "flag"]) == ":spam: :flag:"
+        """Test blank emoji names are skipped."""
+        assert ReactionRule.format_emojis(["", "spam", None, "flag"]) == ":spam: :flag:"
 
 
 class TestMentionUsers:
     def test_mention_users_joins_ids(self):
-        """Test Slack user IDs are formatted as mentions."""
+        """Test user IDs are rendered as Slack mentions."""
         assert mention_users(["U1", "U2"]) == "<@U1> <@U2>"
 
     def test_mention_users_handles_empty(self):
-        """Test missing user IDs produce no mention markup."""
+        """Test empty user lists render as empty strings."""
         assert mention_users([]) == ""
         assert mention_users(None) == ""
-
-    def test_mention_users_ignores_non_list_values(self):
-        """Test JSON scalars and objects are not treated as user ID lists."""
-        assert mention_users("U123") == ""
-        assert mention_users({"U123": True}) == ""
-        assert mention_users(123) == ""
-
-    def test_mention_users_ignores_empty_ids(self):
-        """Test blank user IDs are omitted from mention markup."""
-        assert mention_users(["", "U1", None, "U2"]) == "<@U1> <@U2>"

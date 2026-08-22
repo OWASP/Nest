@@ -1,15 +1,40 @@
 """Slack app message model."""
 
+from __future__ import annotations
+
+import logging
 import re
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+from urllib.parse import parse_qs, unquote, urlparse
 
 import emoji
 from django.db import models
+from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.member import Member
+
+if TYPE_CHECKING:
+    from slack_sdk import WebClient
+
+logger = logging.getLogger(__name__)
+
+ARCHIVE_PATH_RE = re.compile(
+    r"^/archives/(?P<channel>[CGD][A-Z0-9]+)/p(?P<compact_ts>\d+)$",
+    re.IGNORECASE,
+)
+COMPACT_TS_FRACTION_DIGITS = 6
+VISIBILITY_ERRORS = frozenset(
+    {
+        "channel_not_found",
+        "is_archived",
+        "missing_scope",
+        "not_in_channel",
+    }
+)
 
 
 class Message(TimestampedModel):
@@ -65,7 +90,7 @@ class Message(TimestampedModel):
         return text.strip()
 
     @property
-    def latest_reply(self) -> "Message | None":
+    def latest_reply(self) -> Message | None:
         """Get the latest reply to this message."""
         return (
             Message.objects.filter(
@@ -104,9 +129,9 @@ class Message(TimestampedModel):
         self,
         message_data: dict,
         conversation: Conversation,
-        author: "Member | None" = None,
+        author: Member | None = None,
         *,
-        parent_message: "Message | None" = None,
+        parent_message: Message | None = None,
     ) -> None:
         """Update instance based on Slack message data."""
         self.created_at = datetime.fromtimestamp(float(message_data["ts"]), tz=UTC)
@@ -120,9 +145,176 @@ class Message(TimestampedModel):
         self.parent_message = parent_message
 
     @staticmethod
-    def bulk_save(messages: list["Message"], fields=None) -> None:
+    def get_author_id(message_payload: dict[str, Any]) -> str | None:
+        """Return the Slack user id of the message author when present."""
+        return user if isinstance(user := message_payload.get("user"), str) and user else None
+
+    @staticmethod
+    def bulk_save(messages: list[Message], fields=None) -> None:
         """Bulk save messages."""
         BulkSaveModel.bulk_save(Message, messages, fields=fields)
+
+    @staticmethod
+    def compact_ts_to_message_ts(compact_ts: str) -> str:
+        """Convert a Slack permalink p-timestamp to a message ts."""
+        if len(compact_ts) <= COMPACT_TS_FRACTION_DIGITS:
+            return ""
+        return (
+            f"{compact_ts[:-COMPACT_TS_FRACTION_DIGITS]}"
+            f".{compact_ts[-COMPACT_TS_FRACTION_DIGITS:]}"
+        )
+
+    @staticmethod
+    def fetch_payload(
+        client: WebClient,
+        channel_id: str,
+        message_ts: str,
+        thread_ts: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Fetch a Slack message payload, or None when missing / not visible."""
+        try:
+            if thread_ts and thread_ts != message_ts:
+                response = client.conversations_replies(
+                    channel=channel_id,
+                    ts=thread_ts,
+                    latest=message_ts,
+                    oldest=message_ts,
+                    inclusive=True,
+                    limit=1,
+                )
+                found = Message.find_in_api_list(response.get("messages") or [], message_ts)
+                if found is not None:
+                    return found
+
+            response = client.conversations_history(
+                channel=channel_id,
+                latest=message_ts,
+                oldest=message_ts,
+                inclusive=True,
+                limit=1,
+            )
+            found = Message.find_in_api_list(response.get("messages") or [], message_ts)
+            if found is not None:
+                return found
+
+            if thread_ts:
+                response = client.conversations_replies(
+                    channel=channel_id,
+                    ts=thread_ts,
+                    limit=200,
+                )
+                return Message.find_in_api_list(response.get("messages") or [], message_ts)
+        except SlackApiError as e:
+            error = e.response.get("error", "unknown_error")
+            if error in VISIBILITY_ERRORS:
+                logger.info(
+                    "NestBot cannot fetch message channel_id=%s ts=%s error=%s",
+                    channel_id,
+                    message_ts,
+                    error,
+                )
+                return None
+            logger.warning(
+                "Failed to fetch message channel_id=%s ts=%s error=%s",
+                channel_id,
+                message_ts,
+                error,
+            )
+            return None
+        return None
+
+    @staticmethod
+    def fetch_permalink(client: WebClient, channel_id: str, message_ts: str) -> str:
+        """Return a Slack permalink for the message, or an empty string."""
+        try:
+            return (
+                client.chat_getPermalink(
+                    channel=channel_id,
+                    message_ts=message_ts,
+                ).get("permalink")
+                or ""
+            )
+        except SlackApiError as e:
+            logger.warning(
+                "Could not fetch Slack permalink: %s",
+                e.response.get("error", "unknown_error"),
+            )
+            return ""
+        except SlackClientError as e:
+            logger.warning("Could not fetch Slack permalink: %s", e)
+            return ""
+
+    @staticmethod
+    def find_in_api_list(
+        messages: list[dict[str, Any]],
+        message_ts: str,
+    ) -> dict[str, Any] | None:
+        """Return the message matching message_ts from a Slack messages list."""
+        for item in messages:
+            if item.get("ts") == message_ts:
+                return item
+        return None
+
+    @staticmethod
+    def get_raw_data_by_channel_and_ts(channel_id: str, message_ts: str) -> dict | None:
+        """Return stored Slack raw_data for a channel message, if present."""
+        existing = (
+            Message.objects.filter(
+                conversation__slack_channel_id=channel_id,
+                slack_message_id=message_ts,
+            )
+            .only("raw_data")
+            .first()
+        )
+        if existing is not None and isinstance(existing.raw_data, dict) and existing.raw_data:
+            return existing.raw_data
+        return None
+
+    @staticmethod
+    def load_payload(
+        client: WebClient,
+        channel_id: str,
+        message_ts: str,
+        thread_ts: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Return a message payload from Nest DB or Slack API."""
+        if raw_data := Message.get_raw_data_by_channel_and_ts(channel_id, message_ts):
+            return raw_data
+        return Message.fetch_payload(client, channel_id, message_ts, thread_ts)
+
+    @staticmethod
+    def parse_permalink(raw: str) -> tuple[str, str, str | None] | None:
+        """Parse channel_id, message_ts, and optional thread_ts from a Slack archive URL."""
+        url = Message.unwrap_slack_link(raw)
+        if not url:
+            return None
+
+        parsed = urlparse(url if "://" in url else f"https://{url}")
+        match = ARCHIVE_PATH_RE.match(parsed.path or "")
+        if match is None:
+            return None
+
+        message_ts = Message.compact_ts_to_message_ts(match.group("compact_ts"))
+        if not message_ts:
+            return None
+
+        query = parse_qs(parsed.query or "")
+        thread_values = query.get("thread_ts") or []
+        thread_ts = thread_values[0] if thread_values else None
+        if thread_ts is not None and not re.fullmatch(r"\d+\.\d+", thread_ts):
+            thread_ts = None
+
+        return match.group("channel"), message_ts, thread_ts
+
+    @staticmethod
+    def unwrap_slack_link(raw: str) -> str:
+        """Strip Slack link markup and take the first URL-looking token."""
+        text = (raw or "").strip()
+        if text.startswith("<") and text.endswith(">"):
+            text = text[1:-1]
+            if "|" in text:
+                text = text.split("|", 1)[0]
+        return unquote(text.strip())
 
     @staticmethod
     def update_data(
@@ -130,9 +322,9 @@ class Message(TimestampedModel):
         conversation: Conversation,
         author: Member | None = None,
         *,
-        parent_message: "Message | None" = None,
+        parent_message: Message | None = None,
         save: bool = True,
-    ) -> "Message":
+    ) -> Message:
         """Update message data.
 
         Args:

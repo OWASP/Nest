@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 from django.core.exceptions import ValidationError
 
+from apps.slack.enums import ReportType
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.reaction_rule import ReactionRule
 from apps.slack.models.workspace import Workspace
@@ -18,9 +19,15 @@ class TestReactionRule:
         assert str(rule) == "OWASP #general :spam: :flag:"
 
     def test_report_type_defaults_to_spam(self):
-        """Test report type is limited to spam."""
-        assert ReactionRule.ReportType.SPAM == "spam"
-        assert ReactionRule.ReportType.choices == [("spam", "Spam")]
+        """Test report type choices are shared and limited to spam."""
+        assert ReportType.SPAM == "spam"
+        assert ReportType.choices == [
+            ("harassment", "Harassment"),
+            ("off_topic", "Off-topic"),
+            ("other", "Other"),
+            ("spam", "Spam"),
+        ]
+        assert ReactionRule._meta.get_field("report_type").choices == list(ReportType.choices)
 
     def test_unique_conversation_report_type_constraint(self):
         """Test one reaction rule is allowed per conversation and report type."""
@@ -97,3 +104,32 @@ class TestReactionRule:
             rule.clean()
 
         manager.filter.assert_called_once_with(conversation_id=7, is_active=True)
+
+    def test_clean_rejects_empty_string_emoji(self):
+        """Test blank emoji entries are rejected."""
+        rule = ReactionRule(emojis=["spam", "  "])
+
+        with pytest.raises(ValidationError, match="non-empty"):
+            rule.clean()
+
+    def test_clean_skips_overlap_check_without_conversation(self):
+        """Test clean returns after normalizing when conversation is unset."""
+        rule = ReactionRule(emojis=["spam"])
+        rule.conversation_id = None
+
+        rule.clean()
+
+        assert rule.emojis == ["spam"]
+
+    def test_clean_excludes_self_when_checking_overlap(self, mocker):
+        """Test updating a rule excludes its own emojis from overlap checks."""
+        manager = mocker.patch("apps.slack.models.reaction_rule.ReactionRule.objects")
+        filtered = Mock()
+        manager.filter.return_value = filtered
+        filtered.exclude.return_value = []
+        rule = ReactionRule(emojis=["spam"], pk=3)
+        rule.conversation_id = 7
+
+        rule.clean()
+
+        filtered.exclude.assert_called_once_with(pk=3)

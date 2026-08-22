@@ -20,19 +20,26 @@ class Workspace(TimestampedModel):
         db_table = "slack_workspaces"
         verbose_name_plural = "Workspaces"
 
-    name = models.CharField(
-        verbose_name="Workspace Name",
-        max_length=100,
+    content_report_alert_channel_id = models.CharField(
+        verbose_name="Content report alert channel ID",
+        max_length=32,
+        blank=True,
+        null=True,
         default="",
+        help_text=(
+            "Slack channel ID for content reports (e.g. C..., without #); "
+            "empty disables content reporting."
+        ),
     )
-    slack_workspace_id = models.CharField(
-        verbose_name="Workspace ID",
-        max_length=50,
-        unique=True,
-    )
-    total_members_count = models.PositiveIntegerField(
-        default=0,
-        verbose_name="Members count",
+    content_report_alert_user_ids = models.JSONField(
+        verbose_name="Content report Slack user IDs to mention",
+        blank=True,
+        null=True,
+        default=None,
+        help_text=(
+            'Optional JSON list of Slack user IDs (e.g. ["U01ABC…"]) '
+            "mentioned on content-report alerts."
+        ),
     )
     invite_link_alert_channel_id = models.CharField(
         verbose_name="Invite link alert channel ID",
@@ -43,16 +50,6 @@ class Workspace(TimestampedModel):
         help_text=(
             "Slack channel ID for invite-limit alerts (e.g. C..., without # prefix); "
             "empty skips posting. Used by slack_check_invite_link when posting warnings."
-        ),
-    )
-    invite_link_alert_user_ids = models.JSONField(
-        verbose_name="Invite alert Slack user IDs to mention",
-        blank=True,
-        null=True,
-        default=None,
-        help_text=(
-            'Optional JSON list of Slack user IDs (e.g. ["U01ABC…"]). '
-            "A trailing cc: line with <@mentions> is added to invite-limit alerts."
         ),
     )
     invite_link_alert_member_offset = models.PositiveSmallIntegerField(
@@ -68,12 +65,14 @@ class Workspace(TimestampedModel):
             "those use 350 in application logic."
         ),
     )
-    invite_link_created_at = models.DateTimeField(
-        verbose_name="Public invite link updated at",
+    invite_link_alert_user_ids = models.JSONField(
+        verbose_name="Invite alert Slack user IDs to mention",
         blank=True,
         null=True,
+        default=None,
         help_text=(
-            "Committer time of the latest matching GitHub commit for the public invite include."
+            'Optional JSON list of Slack user IDs (e.g. ["U01ABC…"]). '
+            "A trailing cc: line with <@mentions> is added to invite-limit alerts."
         ),
     )
     invite_link_commit_sha = models.CharField(
@@ -87,20 +86,13 @@ class Workspace(TimestampedModel):
             "(used to link to the commit on GitHub)."
         ),
     )
-    invite_link_member_count = models.PositiveIntegerField(
-        verbose_name="Member count when invite baseline was set",
+    invite_link_created_at = models.DateTimeField(
+        verbose_name="Public invite link updated at",
         blank=True,
         null=True,
         help_text=(
-            "total_members_count from slack_sync_data when baseline was last set for the "
-            "current invite link."
+            "Committer time of the latest matching GitHub commit for the public invite include."
         ),
-    )
-    invite_link_last_alert_sent_at = models.DateTimeField(
-        verbose_name="Last invite-limit alert sent at",
-        blank=True,
-        null=True,
-        help_text="When slack_check_invite_link last posted an invite-limit alert to Slack.",
     )
     invite_link_last_alert_message_ts = models.CharField(
         verbose_name="Last invite-limit alert message timestamp",
@@ -112,6 +104,35 @@ class Workspace(TimestampedModel):
             "Slack message timestamp (ts) of the last invite-limit alert. "
             "Used to post a threaded resolution reply when the invite link is updated."
         ),
+    )
+    invite_link_last_alert_sent_at = models.DateTimeField(
+        verbose_name="Last invite-limit alert sent at",
+        blank=True,
+        null=True,
+        help_text="When slack_check_invite_link last posted an invite-limit alert to Slack.",
+    )
+    invite_link_member_count = models.PositiveIntegerField(
+        verbose_name="Member count when invite baseline was set",
+        blank=True,
+        null=True,
+        help_text=(
+            "total_members_count from slack_sync_data when baseline was last set for the "
+            "current invite link."
+        ),
+    )
+    name = models.CharField(
+        verbose_name="Workspace Name",
+        max_length=100,
+        default="",
+    )
+    slack_workspace_id = models.CharField(
+        verbose_name="Workspace ID",
+        max_length=50,
+        unique=True,
+    )
+    total_members_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Members count",
     )
 
     @property
@@ -126,9 +147,19 @@ class Workspace(TimestampedModel):
         )
         return self.invite_link_member_count + offset
 
+    @property
+    def is_content_reporting_enabled(self) -> bool:
+        """Return True when content reporting is configured for this workspace."""
+        return bool((self.content_report_alert_channel_id or "").strip())
+
     def __str__(self):
         """Workspace human readable representation."""
         return f"{self.name or self.slack_workspace_id}"
+
+    @staticmethod
+    def get_by_workspace_id(workspace_id: str) -> "Workspace | None":
+        """Return the Nest workspace for a Slack workspace/team id."""
+        return Workspace.objects.filter(slack_workspace_id=workspace_id).first()
 
     @staticmethod
     def get_default_workspace() -> "Workspace | None":
