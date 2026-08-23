@@ -16,6 +16,7 @@ from apps.github.api.internal.dataloaders.milestone import (
     RECENT_MILESTONES_BY_REPOSITORY_ID_LOADER,
 )
 from apps.github.api.internal.dataloaders.pull_request import (
+    PULL_REQUESTS_BY_ISSUE_ID_LOADER,
     RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER,
 )
 from apps.github.api.internal.dataloaders.release import (
@@ -47,6 +48,7 @@ EXPECTED_LOADER_KEYS = (
     ISSUES_COUNT_BY_PROJECT_ID_LOADER,
     LATEST_RELEASE_BY_REPOSITORY_ID_LOADER,
     OPEN_ISSUES_COUNT_BY_PROJECT_ID_LOADER,
+    PULL_REQUESTS_BY_ISSUE_ID_LOADER,
     RECENT_ISSUES_BY_PROJECT_ID_LOADER,
     RECENT_MILESTONES_BY_PROGRAM_ID_LOADER,
     RECENT_MILESTONES_BY_PROJECT_ID_LOADER,
