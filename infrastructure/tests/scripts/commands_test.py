@@ -43,6 +43,7 @@ class TestCommandRunner:
             ["/usr/bin/terraform-run", "init", "-backend=false"],
             check=False,
             capture_output=False,
+            input=None,
             text=True,
         )
 
@@ -59,6 +60,24 @@ class TestCommandRunner:
             ["/usr/bin/docker", "info"],
             check=True,
             capture_output=True,
+            input=None,
+            text=True,
+        )
+
+    @patch("subprocess.run")
+    @patch("shutil.which")
+    def test_run_forwards_stdin_input(
+        self,
+        mock_which: MagicMock,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_which.return_value = "/usr/bin/docker"
+        CommandRunner().run("docker", "login", stdin_input="secret")
+        mock_run.assert_called_once_with(
+            ["/usr/bin/docker", "login"],
+            check=False,
+            capture_output=False,
+            input="secret",
             text=True,
         )
 
