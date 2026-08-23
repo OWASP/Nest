@@ -250,8 +250,8 @@ class TestConversationModel:
         assert kwargs["defaults"]["is_mpim"] is False
         info.assert_called_once()
 
-    def test_get_or_create_creates_mpim_stub_for_g_channel(self, mocker):
-        """Test a missing G... channel creates an MPIM stub until Slack metadata hydrates."""
+    def test_get_or_create_creates_private_stub_for_g_channel(self, mocker):
+        """Test a missing G... channel fails closed as private until Slack hydrates it."""
         conversation = Mock()
         workspace = Workspace(pk=1, slack_workspace_id="T1")
         manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
@@ -261,7 +261,8 @@ class TestConversationModel:
         assert Conversation.get_or_create(workspace, "G999") is conversation
         _, kwargs = manager.get_or_create.call_args
         assert kwargs["defaults"]["is_group"] is True
-        assert kwargs["defaults"]["is_mpim"] is True
+        assert kwargs["defaults"]["is_mpim"] is False
+        assert kwargs["defaults"]["is_private"] is True
         assert kwargs["defaults"]["is_channel"] is False
 
     def test_get_or_create_rejects_workspace_mismatch(self, mocker):

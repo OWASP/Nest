@@ -14,7 +14,8 @@ NL = "\n"
 PREVIEW_LIMIT = 500
 # Slack section mrkdwn text max; leave headroom for format_links_for_slack expansion.
 SLACK_SECTION_TEXT_LIMIT = 3000
-ALERT_SECTION_BUDGET = 2900
+ALERT_SECTION_HEADROOM = 100
+ALERT_SECTION_BUDGET = SLACK_SECTION_TEXT_LIMIT - ALERT_SECTION_HEADROOM
 SLACK_LINK_PATTERN = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
 
 

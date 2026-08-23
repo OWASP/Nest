@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 ALLOWED_RESPONSE_URL_HOSTS = frozenset({"hooks.slack.com"})
+CONVERSATION_INFO_TIMEOUT_SECONDS = 1.5
 WORKSPACE_MISMATCH_TEXT = (
     "That message belongs to a different Slack workspace and cannot be reported here."
 )
@@ -84,10 +85,20 @@ def resolve_conversation(
     workspace: Workspace,
     channel_id: str,
 ) -> Conversation:
-    """Return a conversation, hydrating flags from Slack when conversations.info works."""
+    """Return a conversation, hydrating flags from Slack when conversations.info works.
+
+    Skips the network call when Slack metadata is already present (created_at set).
+    Uses a short timeout so a stalled conversations.info cannot burn the trigger_id.
+    """
     conversation = Conversation.get_or_create(workspace, channel_id)
+    if conversation.created_at is not None:
+        return conversation
+
     try:
-        response = client.conversations_info(channel=channel_id)
+        response = client.conversations_info(
+            channel=channel_id,
+            timeout=CONVERSATION_INFO_TIMEOUT_SECONDS,
+        )
     except SlackClientError:
         logger.warning(
             "Could not hydrate conversation metadata for channel_id=%s",

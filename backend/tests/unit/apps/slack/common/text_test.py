@@ -4,7 +4,40 @@ import unicodedata
 
 import pytest
 
-from apps.slack.common.text import prefix_by_visible_len, preview_text, quote_mrkdwn
+from apps.slack.common.text import (
+    fit_quoted_mrkdwn,
+    prefix_by_visible_len,
+    preview_text,
+    quote_mrkdwn,
+)
+
+
+class TestFitQuotedMrkdwn:
+    def test_non_positive_limit(self):
+        """Test non-positive limits return an empty string."""
+        assert fit_quoted_mrkdwn("hello", limit=0) == ""
+        assert fit_quoted_mrkdwn("hello", limit=-1) == ""
+
+    def test_under_and_exact_limit(self):
+        """Test under-limit and exact-limit quoted text are kept in full."""
+        assert fit_quoted_mrkdwn("ab", limit=10) == ">ab"
+        assert fit_quoted_mrkdwn("ab", limit=3) == ">ab"
+
+    def test_over_limit_truncates_before_quoting(self):
+        """Test over-limit input is shortened so the quoted result fits."""
+        assert fit_quoted_mrkdwn("abcd", limit=3) == ">ab"
+        assert len(fit_quoted_mrkdwn("abcdefghij", limit=5)) <= 5
+
+    def test_sanitizer_expansion_is_accounted_for(self):
+        """Test ampersand expansion is included in the fitted length."""
+        # "&" becomes "&amp;" (5 chars) then quoted as ">&amp;" (6 chars).
+        assert fit_quoted_mrkdwn("&", limit=6) == ">&amp;"
+        assert fit_quoted_mrkdwn("&", limit=5) == ""
+
+    def test_multiline_quoting(self):
+        """Test each line is quoted and the combined length stays in budget."""
+        assert fit_quoted_mrkdwn("a\nb", limit=10) == ">a\n>b"
+        assert fit_quoted_mrkdwn("a\nb\nc", limit=5) == ">a\n>b"
 
 
 class TestPrefixByVisibleLen:

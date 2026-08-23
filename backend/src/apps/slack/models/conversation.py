@@ -129,8 +129,8 @@ class Conversation(TimestampedModel):
     @staticmethod
     def get_or_create(workspace: Workspace, channel_id: str) -> "Conversation":
         """Return an existing conversation or a minimal row for content reporting."""
-        # G... IDs are typically MPIMs (or legacy private groups). Treat stubs as
-        # MPIMs until conversations.info hydrates authoritative flags.
+        # G... IDs may be MPIMs or legacy private groups. Fail closed as private
+        # until conversations.info supplies authoritative flags.
         is_g = channel_id.startswith("G")
         conversation, created = Conversation.objects.get_or_create(
             slack_channel_id=channel_id,
@@ -138,7 +138,8 @@ class Conversation(TimestampedModel):
                 "is_channel": channel_id.startswith("C"),
                 "is_group": is_g,
                 "is_im": channel_id.startswith("D"),
-                "is_mpim": is_g,
+                "is_mpim": False,
+                "is_private": is_g,
                 "name": "",
                 "slack_creator_id": "",
                 "sync_messages": False,

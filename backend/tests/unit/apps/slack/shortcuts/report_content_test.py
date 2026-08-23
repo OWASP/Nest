@@ -32,11 +32,13 @@ from apps.slack.shortcuts.report_content import (
     post_content_report_alert,
 )
 from apps.slack.utils.report import (
+    CONVERSATION_INFO_TIMEOUT_SECONDS,
     WORKSPACE_MISMATCH_TEXT,
     is_allowed_response_url,
     make_ephemeral,
     open_report_content_modal,
     post_ephemeral_url,
+    resolve_conversation,
 )
 from tests.unit.apps.slack.conftest import disabled_workspace, enabled_workspace
 
@@ -658,6 +660,79 @@ class TestReportContentSubmission:
         )
 
 
+class TestResolveConversation:
+    def test_skips_network_when_already_hydrated(self, mocker):
+        """Test synced conversations reuse cached metadata without conversations.info."""
+        client = Mock()
+        workspace = enabled_workspace()
+        conversation = Mock(created_at="2024-01-01")
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=conversation,
+        )
+
+        assert resolve_conversation(client, workspace, "C1") is conversation
+        client.conversations_info.assert_not_called()
+
+    def test_hydrates_from_conversations_info(self, mocker):
+        """Test successful conversations.info updates and returns the conversation."""
+        client = Mock()
+        workspace = enabled_workspace()
+        stub = Mock(created_at=None)
+        hydrated = Mock(is_private=False, is_mpim=True)
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=stub,
+        )
+        channel = {"id": "G1", "is_mpim": True, "is_private": False}
+        client.conversations_info.return_value = {"channel": channel}
+        update = mocker.patch(
+            "apps.slack.utils.report.Conversation.update_data",
+            return_value=hydrated,
+        )
+
+        assert resolve_conversation(client, workspace, "G1") is hydrated
+        client.conversations_info.assert_called_once_with(
+            channel="G1",
+            timeout=CONVERSATION_INFO_TIMEOUT_SECONDS,
+        )
+        update.assert_called_once_with(channel, workspace, save=True)
+
+    def test_falls_back_on_slack_client_error(self, mocker):
+        """Test SlackClientError leaves the stub conversation unchanged."""
+        client = Mock()
+        workspace = enabled_workspace()
+        stub = Mock(created_at=None, is_private=True)
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=stub,
+        )
+        client.conversations_info.side_effect = SlackClientError("timeout")
+
+        assert resolve_conversation(client, workspace, "G1") is stub
+
+    def test_falls_back_on_malformed_response(self, mocker):
+        """Test missing or non-dict channel payloads keep the stub conversation."""
+        client = Mock()
+        workspace = enabled_workspace()
+        stub = Mock(created_at=None)
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=stub,
+        )
+        update = mocker.patch("apps.slack.utils.report.Conversation.update_data")
+
+        client.conversations_info.return_value = {"channel": None}
+        assert resolve_conversation(client, workspace, "C1") is stub
+
+        client.conversations_info.return_value = {"channel": {"name": "no-id"}}
+        assert resolve_conversation(client, workspace, "C1") is stub
+
+        client.conversations_info.return_value = None
+        assert resolve_conversation(client, workspace, "C1") is stub
+        update.assert_not_called()
+
+
 class TestReportContentHelpers:
     def test_make_ephemeral_prefers_respond(self, mocker):
         """Test make_ephemeral uses Bolt respond when available."""
@@ -758,7 +833,7 @@ class TestReportContentHelpers:
         respond = Mock()
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(is_private=True),
+            return_value=Mock(is_private=True, created_at="already-synced"),
         )
 
         open_report_content_modal(
@@ -774,6 +849,43 @@ class TestReportContentHelpers:
         )
 
         respond.assert_called_once_with(text=PRIVATE_CHANNEL_TEXT, response_type="ephemeral")
+
+    def test_open_modal_hydrates_unsynced_private_channel(self, mocker):
+        """Test conversations.info private flags block reports before the modal opens."""
+        respond = Mock()
+        client = Mock()
+        stub = Mock(is_private=False, created_at=None)
+        private = Mock(is_private=True)
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=stub,
+        )
+        client.conversations_info.return_value = {
+            "channel": {"id": "C_PRIV", "is_private": True, "is_channel": True},
+        }
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.update_data",
+            return_value=private,
+        )
+
+        open_report_content_modal(
+            client=client,
+            workspace=enabled_workspace(),
+            channel_id="C_PRIV",
+            message_payload={"ts": "1.0", "user": "U_OTHER"},
+            reporter_user_id="U_REP",
+            response_url="https://hooks.slack.com/r",
+            trigger_id="trig",
+            source=ReportSource.SHORTCUT,
+            respond=respond,
+        )
+
+        client.conversations_info.assert_called_once_with(
+            channel="C_PRIV",
+            timeout=CONVERSATION_INFO_TIMEOUT_SECONDS,
+        )
+        respond.assert_called_once_with(text=PRIVATE_CHANNEL_TEXT, response_type="ephemeral")
+        client.views_open.assert_not_called()
 
     def test_open_modal_views_open_failure(self, mocker):
         """Test views_open failures send an ephemeral error."""
