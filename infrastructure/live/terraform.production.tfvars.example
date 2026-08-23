@@ -16,7 +16,6 @@ django_release_version        = "0.0.0"
 django_settings_module        = "settings.production"
 enable_additional_parameters  = true
 enable_cron_tasks             = true
-enable_nat_gateway            = true
 enable_rds_proxy              = true
 environment                   = "production"
 frontend_desired_count          = 2

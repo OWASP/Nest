@@ -4,13 +4,13 @@
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.56.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.57.1 |
 
 ## Providers
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.56.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.57.1 |
 
 ## Modules
 
@@ -46,7 +46,6 @@
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | A list of availability zones for the VPC. | `list(string)` | n/a | yes |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region. | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
-| <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Whether to enable a NAT Gateway. | `bool` | `true` | no |
 | <a name="input_enable_vpc_cloudwatch_logs_endpoint"></a> [enable\_vpc\_cloudwatch\_logs\_endpoint](#input\_enable\_vpc\_cloudwatch\_logs\_endpoint) | Whether to create CloudWatch Logs VPC endpoint. | `bool` | `false` | no |
 | <a name="input_enable_vpc_ecr_api_endpoint"></a> [enable\_vpc\_ecr\_api\_endpoint](#input\_enable\_vpc\_ecr\_api\_endpoint) | Whether to create ECR API VPC endpoint. | `bool` | `false` | no |
 | <a name="input_enable_vpc_ecr_dkr_endpoint"></a> [enable\_vpc\_ecr\_dkr\_endpoint](#input\_enable\_vpc\_ecr\_dkr\_endpoint) | Whether to create ECR DKR VPC endpoint. | `bool` | `false` | no |
