@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 NL = "\n"
 PREVIEW_LIMIT = 500
+# Leave headroom for other alert sections inside one Slack section block (~3000 max).
+ALERT_MESSAGE_TEXT_LIMIT = 2500
 SLACK_LINK_PATTERN = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
 
 
@@ -105,6 +107,13 @@ def get_text(blocks: Sequence[Mapping[str, Any]]) -> str:
 def preview_text(text: str, limit: int = PREVIEW_LIMIT) -> str:
     """Return a truncated, sanitized preview for modal and alert embeds."""
     return sanitize_mrkdwn(truncate_chars(text or "", limit))
+
+
+def quote_mrkdwn(text: str) -> str:
+    """Prefix each line so Slack renders a multiline blockquote."""
+    if not text:
+        return ""
+    return "\n".join(f">{line}" for line in text.split("\n"))
 
 
 def visible_len(text: str) -> int:

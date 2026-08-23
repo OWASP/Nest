@@ -13,6 +13,7 @@ from apps.slack.modals.report import (
     ALREADY_REPORTED_TEXT,
     MISSING_MESSAGE_TEXT,
     MODAL_OPEN_FAILED_TEXT,
+    PRIVATE_CHANNEL_TEXT,
     SELF_REPORT_TEXT,
     build_report_modal,
 )
@@ -111,6 +112,10 @@ def open_report_content_modal(
             workspace.slack_workspace_id,
         )
         ephemeral(text=WORKSPACE_MISMATCH_TEXT)
+        return
+
+    if conversation.is_private:
+        ephemeral(text=PRIVATE_CHANNEL_TEXT)
         return
 
     if ContentReport.exists_for(conversation, message_ts):

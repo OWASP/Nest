@@ -12,8 +12,8 @@ from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.common.models import TimestampedModel
 from apps.slack.blocks import markdown
-from apps.slack.common.text import preview_text
 from apps.slack.enums import ReportSource, ReportType
+from apps.slack.modals.report import DM_MODERATOR_NOTE, alert_text_section
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.message import Message
 from apps.slack.utils.reaction import mention_users
@@ -116,22 +116,32 @@ class ContentReport(TimestampedModel):
         """Build the moderation-channel alert text for a content report."""
         alert_users = mention_users(workspace.content_report_alert_user_ids or [])
         author_id = message.raw_data.get("user") if isinstance(message.raw_data, dict) else None
-        where = conversation.content_origin
         category = (
             ReportType(report_type).label if report_type in ReportType.values else report_type
         )
-        lines = [
-            alert_users,
-            f"Content report ({category.lower()}) from <@{reporter_user_id}> in {where}.",
+        sections = [
+            ":bangbang: *New Content Report*",
+            f"*Reported Content Origin:* {conversation.content_origin(author_id)}",
         ]
-        if author_id:
-            lines.append(f"Author: <@{author_id}>")
-        quoted = preview_text(message.text)
-        if quoted:
-            lines.append(f">{quoted}")
+        if text_section := alert_text_section(conversation, message.text, permalink):
+            sections.append(text_section)
+        sections.extend(
+            [
+                f"*Report Category:* {category}",
+                f"*Reported by:* <@{reporter_user_id}>",
+            ]
+        )
         if permalink:
-            lines.append(permalink)
-        return "\n".join(line for line in lines if line).strip()
+            if conversation.is_im:
+                sections.append(f"*Permanent Link:* {permalink}")
+            else:
+                sections.append(permalink)
+        if conversation.is_im:
+            sections.append(DM_MODERATOR_NOTE)
+        body = "\n\n".join(sections)
+        if alert_users:
+            return f"{alert_users}\n\n{body}"
+        return body
 
     @staticmethod
     def post_alert(

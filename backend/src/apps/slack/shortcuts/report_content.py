@@ -11,6 +11,7 @@ from apps.slack.modals.report import (
     CONSENT_BLOCK_ID,
     FEATURE_OFF_TEXT,
     MISSING_MESSAGE_TEXT,
+    PRIVATE_CHANNEL_TEXT,
     REPORT_CONTENT_CALLBACK_ID,
     REPORT_CONTENT_VIEW_CALLBACK_ID,
     REPORT_TYPE_BLOCK_ID,
@@ -67,11 +68,17 @@ def load_submission_context(
     author_id = Message.get_author_id(
         message.raw_data if isinstance(message.raw_data, dict) else {}
     )
-    if ContentReport.is_self_report(reporter_user_id, author_id):
-        post_ephemeral_url(response_url, SELF_REPORT_TEXT)
-        return None
-    if ContentReport.exists_for(conversation, message.slack_message_id):
-        post_ephemeral_url(response_url, ALREADY_REPORTED_TEXT)
+    if conversation.is_private:
+        error = PRIVATE_CHANNEL_TEXT
+    elif ContentReport.is_self_report(reporter_user_id, author_id):
+        error = SELF_REPORT_TEXT
+    elif ContentReport.exists_for(conversation, message.slack_message_id):
+        error = ALREADY_REPORTED_TEXT
+    else:
+        error = None
+
+    if error is not None:
+        post_ephemeral_url(response_url, error)
         return None
 
     return workspace, message, reporter_user_id, response_url, source
@@ -172,7 +179,7 @@ class ReportContent(ShortcutBase):
         )
 
     def handle_view(self, ack, body: dict[str, Any], client: WebClient) -> None:
-        """Validate consent and category, then post a workspace content-report alert."""
+        """Validate consent and category, then post a content-report alert."""
         view = body.get("view") or {}
         report_type = selected_report_type(view)
         has_consent = consent_given(view)

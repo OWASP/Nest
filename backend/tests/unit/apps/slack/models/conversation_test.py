@@ -166,14 +166,46 @@ class TestConversationModel:
         assert Conversation.get_by_channel_id("C123", workspace) is conversation
         manager.filter.assert_called_once_with(slack_channel_id="C123", workspace=workspace)
 
-    def test_content_origin(self):
-        """Test human-readable origin for IM, MPIM, and channels."""
-        assert Conversation(is_im=True, is_mpim=False).content_origin == "a direct message"
-        assert Conversation(is_im=False, is_mpim=True).content_origin == "a group direct message"
-        assert (
-            Conversation(is_im=False, is_mpim=False, slack_channel_id="C123").content_origin
-            == "<#C123>"
+    def test_source_label_and_content_origin(self):
+        """Test Content Origin labels for IM, MPIM, named channels, and authors."""
+        dm = Conversation(is_im=True, is_mpim=False, is_private=False)
+        assert dm.source_label == "direct message"
+        assert dm.content_origin() == "direct message"
+        assert dm.content_origin("U1") == "direct message by <@U1>"
+        assert dm.is_public_channel is False
+
+        group = Conversation(is_im=False, is_mpim=True, is_private=False)
+        assert group.source_label == "group chat"
+        assert group.is_public_channel is False
+
+        named = Conversation(
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            name="general",
+            slack_channel_id="C123",
         )
+        assert named.source_label == "#general"
+        assert named.content_origin("U2") == "#general by <@U2>"
+        assert named.is_public_channel is True
+
+        unnamed = Conversation(
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            name="",
+            slack_channel_id="C123",
+        )
+        assert unnamed.source_label == "<#C123>"
+
+        private = Conversation(
+            is_im=False,
+            is_mpim=False,
+            is_private=True,
+            name="secret",
+            slack_channel_id="G1",
+        )
+        assert private.is_public_channel is False
 
     def test_get_or_create_returns_existing(self, mocker):
         """Test existing conversations are reused for content reporting."""

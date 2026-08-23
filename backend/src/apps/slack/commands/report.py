@@ -12,9 +12,10 @@ from apps.slack.enums import ReportSource
 from apps.slack.modals.report import (
     FEATURE_OFF_TEXT,
     INVALID_LINK_TEXT,
-    NOT_VISIBLE_TEXT,
     USAGE_TEXT,
+    get_inaccessible_message_error,
 )
+from apps.slack.models.conversation import Conversation
 from apps.slack.models.message import Message
 from apps.slack.models.workspace import Workspace
 from apps.slack.utils.report import make_ephemeral, open_report_content_modal
@@ -69,7 +70,8 @@ class Report(CommandBase):
                 thread_ts,
             )
         ) is None:
-            ephemeral(text=NOT_VISIBLE_TEXT)
+            conversation = Conversation.get_by_channel_id(channel_id, workspace)
+            ephemeral(text=get_inaccessible_message_error(channel_id, conversation))
             return
 
         if not message_payload.get("ts"):

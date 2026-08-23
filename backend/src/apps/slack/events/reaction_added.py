@@ -58,7 +58,11 @@ def threshold_alert_context(event, client: WebClient) -> ThresholdAlertContext |
 
     channel_id, message_ts, emoji_name = details
     rule = ReactionRule.for_emoji(channel_id, emoji_name)
-    if rule is None or ContentReport.exists_for(rule.conversation, message_ts):
+    if (
+        rule is None
+        or rule.conversation.is_private
+        or ContentReport.exists_for(rule.conversation, message_ts)
+    ):
         return None
 
     snapshot = fetch_reaction(client, channel_id, message_ts, rule.emojis)

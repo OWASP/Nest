@@ -53,13 +53,26 @@ class Conversation(TimestampedModel):
         return f"{self.workspace} #{self.name}"
 
     @property
-    def content_origin(self) -> str:
-        """Human-readable origin for content-report alerts and previews."""
+    def is_public_channel(self) -> bool:
+        """Return True when Slack can unfurl message links for any workspace member."""
+        return not self.is_private and not self.is_im and not self.is_mpim
+
+    @property
+    def source_label(self) -> str:
+        """Return conversation label for content-report Content Origin fields."""
         if self.is_im:
-            return "a direct message"
+            return "direct message"
         if self.is_mpim:
-            return "a group direct message"
+            return "group chat"
+        if self.name:
+            return f"#{self.name}"
         return f"<#{self.slack_channel_id}>"
+
+    def content_origin(self, author_id: str | None = None) -> str:
+        """Return Content Origin text: source, optionally trailed by author."""
+        if author_id:
+            return f"{self.source_label} by <@{author_id}>"
+        return self.source_label
 
     @property
     def latest_message(self) -> "Message | None":

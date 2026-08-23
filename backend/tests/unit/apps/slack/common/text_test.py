@@ -4,7 +4,20 @@ import unicodedata
 
 import pytest
 
-from apps.slack.common.text import preview_text
+from apps.slack.common.text import prefix_by_visible_len, preview_text, quote_mrkdwn
+
+
+class TestPrefixByVisibleLen:
+    def test_keeps_combining_marks_with_base_character(self):
+        """Test combining marks stay attached when truncating by visible length."""
+        decomposed = "a\u0301b"
+        assert prefix_by_visible_len(decomposed, limit=1) == "a\u0301"
+        assert prefix_by_visible_len(decomposed, limit=2) == decomposed
+
+    @pytest.mark.parametrize("limit", [0, -1])
+    def test_non_positive_limit(self, limit):
+        """Test non-positive limits return an empty prefix."""
+        assert prefix_by_visible_len("abc", limit=limit) == ""
 
 
 class TestPreviewText:
@@ -43,3 +56,10 @@ class TestPreviewText:
         """Test truncation still escapes mrkdwn-sensitive characters."""
         assert "&lt;" in preview_text("<script>")
         assert "\\*" in preview_text("hello *bold*")
+
+
+class TestQuoteMrkdwn:
+    def test_prefixes_each_line(self):
+        """Test each line is quoted for Slack multiline blockquotes."""
+        assert quote_mrkdwn("a\nb") == ">a\n>b"
+        assert quote_mrkdwn("") == ""

@@ -12,6 +12,8 @@ from apps.slack.modals.report import (
     FEATURE_OFF_TEXT,
     MISSING_MESSAGE_TEXT,
     MODAL_OPEN_FAILED_TEXT,
+    MODAL_REPORT_TYPES,
+    PRIVATE_CHANNEL_TEXT,
     SELF_REPORT_TEXT,
     SUBMIT_FAILED_TEXT,
     SUCCESS_TEXT,
@@ -22,6 +24,7 @@ from apps.slack.modals.report import (
     selected_report_type,
 )
 from apps.slack.models.content_report import ContentReport
+from apps.slack.models.conversation import Conversation
 from apps.slack.models.message import Message
 from apps.slack.shortcuts.report_content import (
     ReportContent,
@@ -30,6 +33,7 @@ from apps.slack.shortcuts.report_content import (
 )
 from apps.slack.utils.report import (
     WORKSPACE_MISMATCH_TEXT,
+    is_allowed_response_url,
     make_ephemeral,
     open_report_content_modal,
     post_ephemeral_url,
@@ -131,7 +135,7 @@ class TestContentReportUtils:
         assert consent_given({"state": {"values": {}}}) is False
 
     def test_selected_report_type(self):
-        """Test report category select parsing."""
+        """Test report category select parsing accepts spam-only options."""
         view = {
             "state": {
                 "values": {
@@ -152,7 +156,7 @@ class TestContentReportUtils:
                         "values": {
                             "report_type": {
                                 "report_type": {
-                                    "selected_option": {"value": "unknown"},
+                                    "selected_option": {"value": "harassment"},
                                 }
                             }
                         }
@@ -163,13 +167,14 @@ class TestContentReportUtils:
         )
 
     def test_build_report_modal_includes_preview_and_consent(self):
-        """Test modal includes preview, category select, and consent checkbox."""
+        """Test modal shows origin first, then preview, category, and consent."""
         message = Mock(pk=9, text="hello spam", raw_data={"user": "U_AUTHOR"})
-        conversation = Mock(
+        conversation = Conversation(
             is_im=True,
             is_mpim=False,
+            is_private=False,
+            name="",
             slack_channel_id="D123",
-            content_origin="a direct message",
         )
 
         view = build_report_modal(
@@ -180,18 +185,97 @@ class TestContentReportUtils:
         )
 
         assert view["callback_id"] == "report_content_submit"
-        assert "hello spam" in view["blocks"][0]["text"]["text"]
+        assert view["title"]["text"] == "Report Content"
+        summary = view["blocks"][0]["text"]["text"]
+        assert summary.startswith("*Reported Content Origin:* direct message by <@U_AUTHOR>")
+        assert "*Text Preview:*" in summary
+        assert ">hello spam" in summary
         assert view["blocks"][1]["block_id"] == "report_type"
+        assert view["blocks"][1]["label"]["text"] == "Report Category"
         assert view["blocks"][1]["element"]["options"] == [
-            {"text": {"type": "plain_text", "text": label}, "value": value}
-            for value, label in ReportType.choices
+            {
+                "text": {"type": "plain_text", "text": ReportType(report_type).label},
+                "value": report_type,
+            }
+            for report_type in MODAL_REPORT_TYPES
         ]
         assert view["blocks"][2]["block_id"] == "consent"
-        assert view["blocks"][2]["label"]["text"] == "Confirm sharing with moderators"
+        assert view["blocks"][2]["label"]["text"] == "Confirm Sharing with Moderators"
+        assert (
+            "my name and the reported message text (if any)"
+            in (view["blocks"][2]["element"]["options"][0]["text"]["text"])
+        )
         assert decode_metadata(view["private_metadata"]) == (
             9,
             "https://hooks.slack.com/response",
             ReportSource.SHORTCUT,
+        )
+
+    def test_build_report_modal_omits_preview_when_no_text(self):
+        """Test Text Preview section is omitted when the message has no text."""
+        message = Mock(pk=1, text="", raw_data={"user": "U_AUTHOR"})
+        conversation = Conversation(
+            is_im=True,
+            is_mpim=False,
+            is_private=False,
+            name="",
+            slack_channel_id="D123",
+        )
+
+        view = build_report_modal(
+            message=message,
+            conversation=conversation,
+            response_url="https://hooks.slack.com/r",
+            source=ReportSource.SHORTCUT,
+        )
+
+        summary = view["blocks"][0]["text"]["text"]
+        assert "*Text Preview:*" not in summary
+        assert "*Reported Content Origin:* direct message by <@U_AUTHOR>" in summary
+        assert view["blocks"][1]["block_id"] == "report_type"
+
+    def test_build_report_modal_source_for_channel(self):
+        """Test Reported Content Origin uses the channel name when there is no author."""
+        message = Mock(pk=1, text="hi", raw_data={})
+        conversation = Conversation(
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            name="general",
+            slack_channel_id="C123",
+        )
+
+        view = build_report_modal(
+            message=message,
+            conversation=conversation,
+            response_url="https://hooks.slack.com/r",
+            source=ReportSource.COMMAND,
+        )
+
+        summary = view["blocks"][0]["text"]["text"]
+        assert "*Reported Content Origin:* #general" in summary
+        assert " by <@" not in summary
+
+    def test_build_report_modal_source_for_group_chat(self):
+        """Test Reported Content Origin labels multi-party DMs as group chat with author."""
+        message = Mock(pk=1, text="hi", raw_data={"user": "U1"})
+        conversation = Conversation(
+            is_im=False,
+            is_mpim=True,
+            is_private=False,
+            name="",
+            slack_channel_id="G123",
+        )
+
+        view = build_report_modal(
+            message=message,
+            conversation=conversation,
+            response_url="https://hooks.slack.com/r",
+            source=ReportSource.SHORTCUT,
+        )
+
+        assert (
+            "*Reported Content Origin:* group chat by <@U1>" in (view["blocks"][0]["text"]["text"])
         )
 
 
@@ -255,7 +339,7 @@ class TestReportContentShortcut:
         ack = Mock()
         respond = Mock()
         client = Mock()
-        conversation = Mock()
+        conversation = Mock(is_private=False)
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
             return_value=enabled_workspace(content_report_alert_channel_id="C_ALERT"),
@@ -295,7 +379,7 @@ class TestReportContentShortcut:
             content_report_alert_channel_id="C_ALERT",
             slack_workspace_id="T1",
         )
-        conversation = Mock(is_im=True, is_mpim=False, slack_channel_id="D1")
+        conversation = Mock(is_im=True, is_mpim=False, is_private=False, slack_channel_id="D1")
         message = Mock(pk=5, text="spam text", raw_data={"user": "U_OTHER"})
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -335,7 +419,7 @@ class TestReportContentShortcut:
         client.views_open.assert_called_once()
         _, kwargs = client.views_open.call_args
         assert kwargs["trigger_id"] == "trig"
-        assert kwargs["view"]["title"]["text"] == "Report content"
+        assert kwargs["view"]["title"]["text"] == "Report Content"
         assert decode_metadata(kwargs["view"]["private_metadata"])[2] == (ReportSource.SHORTCUT)
         respond.assert_not_called()
 
@@ -356,8 +440,60 @@ class TestReportContentSubmission:
         assert "consent" in kwargs["errors"]
         assert "report_type" in kwargs["errors"]
 
+    def test_consent_required_when_category_selected(self):
+        """Test missing consent alone returns a consent modal error."""
+        ack = Mock()
+
+        ReportContent().handle_view(
+            ack,
+            {
+                "view": {
+                    "state": {
+                        "values": {
+                            "report_type": {
+                                "report_type": {"selected_option": {"value": "spam"}},
+                            },
+                        }
+                    }
+                },
+                "user": {"id": "U_REP"},
+            },
+            Mock(),
+        )
+
+        _, kwargs = ack.call_args
+        assert kwargs["response_action"] == "errors"
+        assert "consent" in kwargs["errors"]
+        assert "report_type" not in kwargs["errors"]
+
+    def test_report_type_required_when_consent_given(self):
+        """Test missing category alone returns a report-type modal error."""
+        ack = Mock()
+
+        ReportContent().handle_view(
+            ack,
+            {
+                "view": {
+                    "state": {
+                        "values": {
+                            "consent": {
+                                "consent": {"selected_options": [{"value": "agreed"}]},
+                            },
+                        }
+                    }
+                },
+                "user": {"id": "U_REP"},
+            },
+            Mock(),
+        )
+
+        _, kwargs = ack.call_args
+        assert kwargs["response_action"] == "errors"
+        assert "report_type" in kwargs["errors"]
+        assert "consent" not in kwargs["errors"]
+
     def test_successful_submit(self, mocker):
-        """Test consenting submit posts an embed alert and records the report."""
+        """Test consenting submit posts an embed alert and records the report as spam."""
         ack = Mock()
         client = Mock()
         client.chat_postMessage.return_value = {"ts": "alert.ts"}
@@ -369,9 +505,11 @@ class TestReportContentSubmission:
         conversation = Mock(
             is_im=True,
             is_mpim=False,
+            is_private=False,
+            is_public_channel=False,
             slack_channel_id="D1",
-            content_origin="a direct message",
         )
+        conversation.content_origin = Mock(return_value="direct message by <@U_OTHER>")
         message = Mock(
             pk=5,
             text="spam body",
@@ -459,39 +597,11 @@ class TestReportContentSubmission:
         release.assert_called_once_with(conversation, "1.0", "owner")
         post_ephemeral.assert_called_once_with("https://hooks.slack.com/r", SUCCESS_TEXT)
 
-    def test_report_type_required(self):
-        """Test missing report category returns a modal error."""
-        ack = Mock()
-        client = Mock()
-
-        ReportContent().handle_view(
-            ack,
-            {
-                "view": {
-                    "state": {
-                        "values": {
-                            "consent": {
-                                "consent": {
-                                    "selected_options": [{"value": "agreed"}],
-                                }
-                            }
-                        }
-                    }
-                },
-                "user": {"id": "U_REP"},
-            },
-            client,
-        )
-
-        _, kwargs = ack.call_args
-        assert kwargs["response_action"] == "errors"
-        assert "report_type" in kwargs["errors"]
-
     def test_acquire_failure_posts_already_reported(self, mocker):
         """Test submit posts already-reported when lock acquisition fails."""
         ack = Mock()
         client = Mock()
-        conversation = Mock(slack_channel_id="D1")
+        conversation = Mock(is_private=False, slack_channel_id="D1")
         message = Mock(
             pk=5,
             slack_message_id="1.0",
@@ -575,6 +685,15 @@ class TestReportContentHelpers:
 
         post.assert_not_called()
 
+    def test_is_allowed_response_url_rejects_urlparse_errors(self, mocker):
+        """Test malformed response_url values that raise during parse are rejected."""
+        mocker.patch(
+            "apps.slack.utils.report.urlparse",
+            side_effect=ValueError("bad url"),
+        )
+
+        assert is_allowed_response_url("https://hooks.slack.com/r") is False
+
     def test_post_ephemeral_url_swallows_request_errors(self, mocker):
         """Test response_url failures are logged and ignored."""
         mocker.patch(
@@ -634,6 +753,28 @@ class TestReportContentHelpers:
             response_type="ephemeral",
         )
 
+    def test_open_modal_private_channel(self, mocker):
+        """Test open path rejects private channels."""
+        respond = Mock()
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=Mock(is_private=True),
+        )
+
+        open_report_content_modal(
+            client=Mock(),
+            workspace=enabled_workspace(),
+            channel_id="G1",
+            message_payload={"ts": "1.0", "user": "U_OTHER"},
+            reporter_user_id="U_REP",
+            response_url="https://hooks.slack.com/r",
+            trigger_id="trig",
+            source=ReportSource.SHORTCUT,
+            respond=respond,
+        )
+
+        respond.assert_called_once_with(text=PRIVATE_CHANNEL_TEXT, response_type="ephemeral")
+
     def test_open_modal_views_open_failure(self, mocker):
         """Test views_open failures send an ephemeral error."""
         respond = Mock()
@@ -644,7 +785,7 @@ class TestReportContentHelpers:
         )
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(),
+            return_value=Mock(is_private=False),
         )
         mocker.patch(
             "apps.slack.utils.report.ContentReport.exists_for",
@@ -680,7 +821,7 @@ class TestReportContentHelpers:
         client.views_open.side_effect = SlackClientError("timeout")
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(),
+            return_value=Mock(is_private=False),
         )
         mocker.patch(
             "apps.slack.utils.report.ContentReport.exists_for",
@@ -750,7 +891,14 @@ class TestReportContentHelpers:
 
     def test_post_alert_deliver_failure(self, mocker):
         """Test deliver failure posts submit-failed ephemeral."""
-        conversation = Mock(slack_channel_id="C1", content_origin="<#C1>")
+        conversation = Mock(
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            is_public_channel=True,
+            slack_channel_id="C1",
+        )
+        conversation.content_origin = Mock(return_value="<#C1>")
         message = Mock(
             slack_message_id="1.0",
             text="hi",
@@ -857,7 +1005,7 @@ class TestReportContentHelpers:
         """Test submit path rejects self-reports."""
         message = Mock(
             slack_message_id="1.0",
-            conversation=Mock(),
+            conversation=Mock(is_private=False),
             raw_data={"user": "U_REP"},
         )
         mocker.patch(
@@ -883,9 +1031,39 @@ class TestReportContentHelpers:
         )
         post.assert_called_once_with("https://hooks.slack.com/r", SELF_REPORT_TEXT)
 
+    def test_load_submission_private_channel(self, mocker):
+        """Test submit path rejects private channels."""
+        message = Mock(
+            slack_message_id="1.0",
+            conversation=Mock(is_private=True),
+            raw_data={"user": "U_OTHER"},
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.decode_metadata",
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
+            return_value=enabled_workspace(),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Message.objects.select_related",
+            return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
+        )
+        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+
+        assert (
+            load_submission_context(
+                {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                {"private_metadata": "x"},
+            )
+            is None
+        )
+        post.assert_called_once_with("https://hooks.slack.com/r", PRIVATE_CHANNEL_TEXT)
+
     def test_load_submission_already_reported(self, mocker):
         """Test submit path rejects messages that were already reported."""
-        conversation = Mock()
+        conversation = Mock(is_private=False)
         message = Mock(
             slack_message_id="1.0",
             conversation=conversation,
@@ -955,7 +1133,12 @@ class TestReportContentHelpers:
         client = Mock()
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(is_im=False, is_mpim=False, slack_channel_id="C1"),
+            return_value=Mock(
+                is_im=False,
+                is_mpim=False,
+                is_private=False,
+                slack_channel_id="C1",
+            ),
         )
         mocker.patch(
             "apps.slack.utils.report.ContentReport.exists_for",

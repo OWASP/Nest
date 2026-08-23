@@ -5,6 +5,7 @@ from django.db import IntegrityError
 from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.slack.models.content_report import LOCK_TTL_SECONDS, ContentReport
+from apps.slack.models.conversation import Conversation
 
 LOCK_OWNER = "lock-owner"
 LOCK_KEY = "slack:content-report:7:123.000"
@@ -184,17 +185,23 @@ class TestContentReport:
         touch.assert_not_called()
 
     def test_build_alert_text_includes_author_quote_and_permalink(self, mocker):
-        """Test alert text includes author, quote, and permalink when present."""
+        """Test private-channel alert includes sections, truncated preview, and permalink."""
         mocker.patch(
             "apps.slack.models.content_report.mention_users",
             return_value="<@U_MOD>",
         )
         mocker.patch(
-            "apps.slack.models.content_report.preview_text",
+            "apps.slack.modals.report.preview_text",
             return_value="quoted spam",
         )
         workspace = Mock(content_report_alert_user_ids=["U_MOD"])
-        conversation = Mock(content_origin="<#C123>")
+        conversation = Conversation(
+            is_im=False,
+            is_mpim=False,
+            is_private=True,
+            name="mods",
+            slack_channel_id="C123",
+        )
         message = Mock(text="spam", raw_data={"user": "U_AUTHOR"})
 
         text = ContentReport.build_alert_text(
@@ -207,18 +214,97 @@ class TestContentReport:
         )
 
         assert "<@U_MOD>" in text
-        assert "spam" in text
-        assert "<@U_REP>" in text
-        assert "Author: <@U_AUTHOR>" in text
-        assert ">quoted spam" in text
+        assert ":bangbang: *New Content Report*" in text
+        assert "*Report Category:* Spam" in text
+        assert "*Reported Content Origin:* #mods by <@U_AUTHOR>" in text
+        assert text.index(":bangbang:") < text.index("*Reported Content Origin:*")
+        assert "*Text Preview:*\n>quoted spam" in text
+        assert "*Reported by:* <@U_REP>" in text
+        assert "Message contents may not be available for review" not in text
+        assert "*Permanent Link:*" not in text
+        assert "https://example.slack.com/archives/C123/p1" in text
+        assert text.index("*Reported Content Origin:*") < text.index("*Text Preview:*")
+        assert text.index("*Text Preview:*") < text.index("*Report Category:*")
+
+    def test_build_alert_text_omits_preview_for_public_channel_with_permalink(self, mocker):
+        """Test public-channel alerts rely on Slack unfurl instead of quoting text."""
+        mocker.patch(
+            "apps.slack.models.content_report.mention_users",
+            return_value="<@U_MOD>",
+        )
+        workspace = Mock(content_report_alert_user_ids=["U_MOD"])
+        conversation = Conversation(
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            name="general",
+            slack_channel_id="C123",
+        )
+        message = Mock(text="public spam", raw_data={"user": "U_AUTHOR"})
+
+        text = ContentReport.build_alert_text(
+            workspace=workspace,
+            conversation=conversation,
+            message=message,
+            reporter_user_id="U_REP",
+            report_type="spam",
+            permalink="https://example.slack.com/archives/C123/p1",
+        )
+
+        assert "*Text Preview:*" not in text
+        assert "*Message Text:*" not in text
+        assert "public spam" not in text
+        assert "*Reported Content Origin:* #general by <@U_AUTHOR>" in text
+        assert "*Report Category:* Spam" in text
+        assert ":bangbang: *New Content Report*" in text
         assert "https://example.slack.com/archives/C123/p1" in text
 
-    def test_build_alert_text_skips_optional_lines(self, mocker):
-        """Test alert text omits author, quote, and permalink when absent."""
-        mocker.patch("apps.slack.models.content_report.mention_users", return_value="")
-        mocker.patch("apps.slack.models.content_report.preview_text", return_value="")
+    def test_build_alert_text_includes_full_message_for_direct_message(self, mocker):
+        """Test DM alerts include full message text because moderators cannot open them."""
+        mocker.patch(
+            "apps.slack.models.content_report.mention_users",
+            return_value="",
+        )
         workspace = Mock(content_report_alert_user_ids=[])
-        conversation = Mock(content_origin="a direct message")
+        conversation = Conversation(
+            is_im=True,
+            is_mpim=False,
+            is_private=False,
+            name="",
+            slack_channel_id="D123",
+        )
+        long_text = "line1\nline2 *bold*"
+        message = Mock(text=long_text, raw_data={"user": "U_AUTHOR"})
+
+        text = ContentReport.build_alert_text(
+            workspace=workspace,
+            conversation=conversation,
+            message=message,
+            reporter_user_id="U_REP",
+            report_type="spam",
+            permalink="https://example.slack.com/archives/D123/p1",
+        )
+
+        assert "*Text Preview:*\n>line1\n>line2 \\*bold\\*" in text
+        assert ":bangbang: *New Content Report*" in text
+        assert "*Reported Content Origin:* direct message by <@U_AUTHOR>" in text
+        assert "*Reported by:* <@U_REP>" in text
+        assert "*Permanent Link:* https://example.slack.com/archives/D123/p1" in text
+        assert "Message contents may not be available for review" in text
+        assert "reported content link" in text
+        assert "text preview for context" in text
+
+    def test_build_alert_text_skips_optional_lines(self, mocker):
+        """Test alert text omits message text and permalink when absent."""
+        mocker.patch("apps.slack.models.content_report.mention_users", return_value="")
+        workspace = Mock(content_report_alert_user_ids=[])
+        conversation = Conversation(
+            is_im=True,
+            is_mpim=False,
+            is_private=False,
+            name="",
+            slack_channel_id="D123",
+        )
         message = Mock(text="", raw_data={})
 
         text = ContentReport.build_alert_text(
@@ -230,12 +316,40 @@ class TestContentReport:
             permalink="",
         )
 
-        assert "Author:" not in text
-        assert "custom" in text
-        assert "<@U_REP>" in text
+        assert "*Reported Content Origin:* direct message" in text
+        assert "*Report Category:* custom" in text
+        assert ":bangbang: *New Content Report*" in text
+        assert "*Reported by:* <@U_REP>" in text
+        assert "*Text Preview:*" not in text
+        assert "*Message Text:*" not in text
+        assert "Message contents may not be available for review" in text
         assert "https://" not in text
-        assert "\n>" not in text
-        assert not text.startswith(">")
+
+    def test_build_alert_text_omits_empty_preview_for_private_channel(self, mocker):
+        """Test private-channel alerts omit Text Preview when message text is empty."""
+        mocker.patch("apps.slack.models.content_report.mention_users", return_value="")
+        workspace = Mock(content_report_alert_user_ids=[])
+        conversation = Conversation(
+            is_im=False,
+            is_mpim=False,
+            is_private=True,
+            name="mods",
+            slack_channel_id="C123",
+        )
+        message = Mock(text="", raw_data={"user": "U_AUTHOR"})
+
+        text = ContentReport.build_alert_text(
+            workspace=workspace,
+            conversation=conversation,
+            message=message,
+            reporter_user_id="U_REP",
+            report_type="spam",
+            permalink="https://example.slack.com/archives/C123/p1",
+        )
+
+        assert "*Text Preview:*" not in text
+        assert "*Reported Content Origin:* #mods by <@U_AUTHOR>" in text
+        assert "https://example.slack.com/archives/C123/p1" in text
 
     def test_post_alert_posts_and_records(self, mocker):
         """Test post_alert posts to Slack then records the report."""

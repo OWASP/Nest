@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import pytest
 import yaml
 from django.core.cache import cache
+from lxml.etree import ParserError
 from requests.exceptions import RequestException
 
 from apps.common.constants import OWASP_NEWS_URL
@@ -349,6 +350,19 @@ class TestGetNewsData:
 
         assert get_news_data() == []
         mock_get.assert_called_once_with(OWASP_NEWS_URL, timeout=30)
+
+    def test_get_news_data_parser_error(self, monkeypatch):
+        """Test get_news_data returns [] when HTML parsing fails."""
+        mock_response = Mock()
+        mock_response.content = b"<html>"
+        mock_response.raise_for_status = Mock()
+        monkeypatch.setattr("requests.get", Mock(return_value=mock_response))
+        monkeypatch.setattr(
+            "apps.slack.utils.content.html.fromstring",
+            Mock(side_effect=ParserError("bad html")),
+        )
+
+        assert get_news_data() == []
 
 
 class TestGetStaffData:

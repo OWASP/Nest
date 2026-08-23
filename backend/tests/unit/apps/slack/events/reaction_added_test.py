@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from slack_sdk.errors import SlackApiError, SlackRequestError
 
-from apps.slack.events.reaction_added import ReactionAdded
+from apps.slack.events.reaction_added import ReactionAdded, ThresholdAlertContext
 
 EVENT = {
     "item": {"type": "message", "channel": "C_SOURCE", "ts": "123.000"},
@@ -32,7 +32,7 @@ def mock_rule(threshold=1, emojis=None):
     return Mock(
         alert_channel_id="C_ALERT",
         alert_user_ids=["U_MOD"],
-        conversation=Mock(),
+        conversation=Mock(is_private=False),
         emojis=emojis or ["spam"],
         report_type="spam",
         threshold=threshold,
@@ -92,6 +92,21 @@ class TestReactionAdded:
         record.assert_not_called()
         client.chat_postMessage.assert_not_called()
 
+    def test_handle_event_stops_for_private_channel(self, mocker):
+        """Test reaction alerts are skipped for private channels."""
+        client = mock_client()
+        rule = mock_rule()
+        rule.conversation.is_private = True
+        patch_rule_lookup(mocker, rule)
+        acquire, _, record = patch_alert_lock(mocker)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        client.reactions_get.assert_not_called()
+        acquire.assert_not_called()
+        record.assert_not_called()
+        client.chat_postMessage.assert_not_called()
+
     def test_handle_event_posts_alert_and_records_it(self, mocker):
         """Test threshold hit posts a Slack alert with reporters and records it."""
         client = mock_client()
@@ -127,6 +142,33 @@ class TestReactionAdded:
             reaction_count=2,
             message=None,
         )
+        release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
+
+    def test_handle_event_omits_reporters_when_none(self, mocker):
+        """Test threshold alerts omit the reporters line when no reactors are listed."""
+        client = mock_client()
+        rule = mock_rule()
+        mocker.patch(
+            "apps.slack.events.reaction_added.threshold_alert_context",
+            return_value=ThresholdAlertContext(
+                channel_id="C_SOURCE",
+                matched_emojis=["spam"],
+                message_ts="123.000",
+                owner=LOCK_OWNER,
+                permalink="https://slack.test/message",
+                reaction_count=2,
+                reporter_user_ids=[],
+                rule=rule,
+            ),
+        )
+        _, release, record = patch_alert_lock(mocker)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        _, kwargs = client.chat_postMessage.call_args
+        assert "Reported by:" not in kwargs["text"]
+        assert "https://slack.test/message" in kwargs["text"]
+        record.assert_called_once()
         release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
 
     def test_handle_event_records_with_matched_message(self, mocker):
