@@ -1,5 +1,8 @@
 .PHONY: infrastructure-check-auth-token infrastructure-refresh infrastructure-up
 
+DOCKER_GID := $(shell stat -c '%g' /var/run/docker.sock 2>/dev/null || stat -f '%g' /var/run/docker.sock)
+export DOCKER_GID
+
 INFRASTRUCTURE_COMPOSE = docker compose \
 	--project-name nest-infrastructure \
 	-f docker-compose/infrastructure/compose.yaml
