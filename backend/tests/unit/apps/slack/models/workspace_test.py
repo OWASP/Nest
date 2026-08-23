@@ -80,6 +80,13 @@ class TestWorkspaceModel:
         assert (
             Workspace(
                 slack_workspace_id="T1",
+                content_report_alert_channel_id=None,
+            ).is_content_reporting_enabled
+            is False
+        )
+        assert (
+            Workspace(
+                slack_workspace_id="T1",
                 content_report_alert_channel_id="   ",
             ).is_content_reporting_enabled
             is False
