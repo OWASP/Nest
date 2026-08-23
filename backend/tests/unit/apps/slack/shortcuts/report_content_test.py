@@ -187,8 +187,8 @@ class TestContentReportUtils:
         assert view["callback_id"] == "report_content_submit"
         assert view["title"]["text"] == "Report Content"
         summary = view["blocks"][0]["text"]["text"]
-        assert summary.startswith("*Reported Content Origin:* direct message by <@U_AUTHOR>")
-        assert "*Text Preview:*" in summary
+        assert summary.startswith("*Report Content Origin:* direct message by <@U_AUTHOR>")
+        assert "*Content Preview:*" in summary
         assert ">hello spam" in summary
         assert view["blocks"][1]["block_id"] == "report_type"
         assert view["blocks"][1]["label"]["text"] == "Report Category"
@@ -200,9 +200,9 @@ class TestContentReportUtils:
             for report_type in MODAL_REPORT_TYPES
         ]
         assert view["blocks"][2]["block_id"] == "consent"
-        assert view["blocks"][2]["label"]["text"] == "Confirm Sharing with Moderators"
+        assert view["blocks"][2]["label"]["text"] == "Sharing Consent"
         assert (
-            "my name and the reported message text (if any)"
+            "my name and the reported message content"
             in (view["blocks"][2]["element"]["options"][0]["text"]["text"])
         )
         assert decode_metadata(view["private_metadata"]) == (
@@ -212,7 +212,7 @@ class TestContentReportUtils:
         )
 
     def test_build_report_modal_omits_preview_when_no_text(self):
-        """Test Text Preview section is omitted when the message has no text."""
+        """Test Content Preview section is omitted when the message has no text."""
         message = Mock(pk=1, text="", raw_data={"user": "U_AUTHOR"})
         conversation = Conversation(
             is_im=True,
@@ -230,12 +230,12 @@ class TestContentReportUtils:
         )
 
         summary = view["blocks"][0]["text"]["text"]
-        assert "*Text Preview:*" not in summary
-        assert "*Reported Content Origin:* direct message by <@U_AUTHOR>" in summary
+        assert "*Content Preview:*" not in summary
+        assert "*Report Content Origin:* direct message by <@U_AUTHOR>" in summary
         assert view["blocks"][1]["block_id"] == "report_type"
 
     def test_build_report_modal_source_for_channel(self):
-        """Test Reported Content Origin uses the channel name when there is no author."""
+        """Test Report Content Origin uses the channel name when there is no author."""
         message = Mock(pk=1, text="hi", raw_data={})
         conversation = Conversation(
             is_im=False,
@@ -253,11 +253,11 @@ class TestContentReportUtils:
         )
 
         summary = view["blocks"][0]["text"]["text"]
-        assert "*Reported Content Origin:* #general" in summary
+        assert "*Report Content Origin:* #general" in summary
         assert " by <@" not in summary
 
     def test_build_report_modal_source_for_group_chat(self):
-        """Test Reported Content Origin labels multi-party DMs as group chat with author."""
+        """Test Report Content Origin labels multi-party DMs as group chat with author."""
         message = Mock(pk=1, text="hi", raw_data={"user": "U1"})
         conversation = Conversation(
             is_im=False,
@@ -275,7 +275,7 @@ class TestContentReportUtils:
         )
 
         assert (
-            "*Reported Content Origin:* group chat by <@U1>" in (view["blocks"][0]["text"]["text"])
+            "*Report Content Origin:* group chat by <@U1>" in (view["blocks"][0]["text"]["text"])
         )
 
 

@@ -214,15 +214,15 @@ class TestContentReport:
         assert "<@U_MOD>" in text
         assert ":bangbang: *New Content Report*" in text
         assert "*Report Category:* Spam" in text
-        assert "*Reported Content Origin:* #mods by <@U_AUTHOR>" in text
-        assert text.index(":bangbang:") < text.index("*Reported Content Origin:*")
-        assert "*Text Preview:*\n>spam" in text
+        assert "*Report Content Origin:* #mods by <@U_AUTHOR>" in text
+        assert text.index(":bangbang:") < text.index("*Report Content Origin:*")
+        assert "*Content Preview:*\n>spam" in text
         assert "*Reported by:* <@U_REP>" in text
         assert "Message contents may not be available for review" not in text
         assert "*Permanent Link:*" not in text
         assert "https://example.slack.com/archives/C123/p1" in text
-        assert text.index("*Reported Content Origin:*") < text.index("*Text Preview:*")
-        assert text.index("*Text Preview:*") < text.index("*Report Category:*")
+        assert text.index("*Report Content Origin:*") < text.index("*Content Preview:*")
+        assert text.index("*Content Preview:*") < text.index("*Report Category:*")
 
     def test_build_alert_text_omits_preview_for_public_channel_with_permalink(self, mocker):
         """Test public-channel alerts rely on Slack unfurl instead of quoting text."""
@@ -250,10 +250,10 @@ class TestContentReport:
             permalink="https://example.slack.com/archives/C123/p1",
         )
 
-        assert "*Text Preview:*" not in text
+        assert "*Content Preview:*" not in text
         assert "*Message Text:*" not in text
         assert "public spam" not in text
-        assert "*Reported Content Origin:* #general by <@U_AUTHOR>" in text
+        assert "*Report Content Origin:* #general by <@U_AUTHOR>" in text
         assert "*Report Category:* Spam" in text
         assert ":bangbang: *New Content Report*" in text
         assert "https://example.slack.com/archives/C123/p1" in text
@@ -284,14 +284,14 @@ class TestContentReport:
             permalink="https://example.slack.com/archives/D123/p1",
         )
 
-        assert "*Text Preview:*\n>line1\n>line2 \\*bold\\*" in text
+        assert "*Content Preview:*\n>line1\n>line2 \\*bold\\*" in text
         assert ":bangbang: *New Content Report*" in text
-        assert "*Reported Content Origin:* direct message by <@U_AUTHOR>" in text
+        assert "*Report Content Origin:* direct message by <@U_AUTHOR>" in text
         assert "*Reported by:* <@U_REP>" in text
         assert "*Permanent Link:* https://example.slack.com/archives/D123/p1" in text
         assert "Message contents may not be available for review" in text
         assert "reported content link" in text
-        assert "text preview for context" in text
+        assert "content preview for context" in text
 
     def test_build_alert_text_includes_group_chat_handling_for_mpim(self, mocker):
         """Test MPIM alerts use permanent-link labeling and the group-chat moderator note."""
@@ -318,13 +318,13 @@ class TestContentReport:
             permalink="https://example.slack.com/archives/G123/p1",
         )
 
-        assert "*Text Preview:*\n>group spam" in text
-        assert "*Reported Content Origin:* group chat by <@U_AUTHOR>" in text
+        assert "*Content Preview:*\n>group spam" in text
+        assert "*Report Content Origin:* group chat by <@U_AUTHOR>" in text
         assert "*Permanent Link:* https://example.slack.com/archives/G123/p1" in text
         assert "because this is a group chat" in text
 
     def test_build_alert_text_keeps_formatted_dm_preview_within_section_budget(self, mocker):
-        """Test DM text previews are clipped after formatting so the alert fits Slack limits."""
+        """Test DM content previews are clipped after formatting so the alert fits Slack limits."""
         mocker.patch("apps.slack.models.content_report.mention_users", return_value="")
         workspace = Mock(content_report_alert_user_ids=[])
         conversation = Conversation(
@@ -347,7 +347,7 @@ class TestContentReport:
         )
 
         assert len(text) <= ALERT_SECTION_BUDGET
-        assert "*Text Preview:*" in text
+        assert "*Content Preview:*" in text
 
     def test_build_alert_text_skips_optional_lines(self, mocker):
         """Test alert text omits message text and permalink when absent."""
@@ -371,17 +371,17 @@ class TestContentReport:
             permalink="",
         )
 
-        assert "*Reported Content Origin:* direct message" in text
+        assert "*Report Content Origin:* direct message" in text
         assert "*Report Category:* custom" in text
         assert ":bangbang: *New Content Report*" in text
         assert "*Reported by:* <@U_REP>" in text
-        assert "*Text Preview:*" not in text
+        assert "*Content Preview:*" not in text
         assert "*Message Text:*" not in text
         assert "Message contents may not be available for review" in text
         assert "https://" not in text
 
     def test_build_alert_text_omits_empty_preview_for_private_channel(self, mocker):
-        """Test private-channel alerts omit Text Preview when message text is empty."""
+        """Test private-channel alerts omit Content Preview when message text is empty."""
         mocker.patch("apps.slack.models.content_report.mention_users", return_value="")
         workspace = Mock(content_report_alert_user_ids=[])
         conversation = Conversation(
@@ -402,8 +402,8 @@ class TestContentReport:
             permalink="https://example.slack.com/archives/C123/p1",
         )
 
-        assert "*Text Preview:*" not in text
-        assert "*Reported Content Origin:* #mods by <@U_AUTHOR>" in text
+        assert "*Content Preview:*" not in text
+        assert "*Report Content Origin:* #mods by <@U_AUTHOR>" in text
         assert "https://example.slack.com/archives/C123/p1" in text
 
     def test_post_alert_posts_and_records(self, mocker):

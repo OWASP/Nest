@@ -47,15 +47,15 @@ DM_NOT_VISIBLE_TEXT = (
 )
 DM_MODERATOR_NOTE = (
     "Note: Message contents may not be available for review because this is a "
-    "direct message. Use the reported content link for reference and the text "
+    "direct message. Use the reported content link for reference and the content "
     "preview for context."
 )
 MPIM_MODERATOR_NOTE = (
     "Note: Message contents may not be available for review because this is a "
-    "group chat. Use the reported content link for reference and the text "
+    "group chat. Use the reported content link for reference and the content "
     "preview for context."
 )
-TEXT_PREVIEW_LABEL = "*Text Preview:*\n"
+CONTENT_PREVIEW_LABEL = "*Content Preview:*\n"
 MODAL_OPEN_FAILED_TEXT = "Could not open the report dialog. Please try again."
 SUBMIT_FAILED_TEXT = "Could not submit the report. Please try again."
 
@@ -73,12 +73,12 @@ def alert_text_section(
 
     Public channels with a permalink rely on Slack's link unfurl instead.
     Direct / group messages include as much text as fits in max_len (formatted).
-    Other inaccessible contexts use a truncated text preview.
+    Other inaccessible contexts use a truncated content preview.
     """
     if permalink and conversation.is_public_channel:
         return None
 
-    body_budget = max_len - len(TEXT_PREVIEW_LABEL)
+    body_budget = max_len - len(CONTENT_PREVIEW_LABEL)
     if body_budget <= 0:
         return None
 
@@ -90,7 +90,7 @@ def alert_text_section(
     quoted = fit_quoted_mrkdwn(raw, body_budget)
     if not quoted:
         return None
-    return f"{TEXT_PREVIEW_LABEL}{quoted}"
+    return f"{CONTENT_PREVIEW_LABEL}{quoted}"
 
 
 def build_report_modal(
@@ -103,9 +103,9 @@ def build_report_modal(
     """Build the Report content confirmation modal view (spam-only category for now)."""
     author_id = message.raw_data.get("user") if isinstance(message.raw_data, dict) else None
     quoted = preview_text(message.text)
-    summary_lines = [f"*Reported Content Origin:* {conversation.content_origin(author_id)}"]
+    summary_lines = [f"*Report Content Origin:* {conversation.content_origin(author_id)}"]
     if quoted:
-        summary_lines.append(f"*Text Preview:*\n{quote_mrkdwn(quoted)}")
+        summary_lines.append(f"*Content Preview:*\n{quote_mrkdwn(quoted)}")
     summary = "\n\n".join(summary_lines)
     spam_option = {
         "text": {"type": "plain_text", "text": ReportType(str(ReportType.SPAM)).label},
@@ -141,7 +141,7 @@ def build_report_modal(
             "optional": False,
             "label": {
                 "type": "plain_text",
-                "text": "Confirm Sharing with Moderators",
+                "text": "Sharing Consent",
             },
             "element": {
                 "type": "checkboxes",
@@ -152,7 +152,7 @@ def build_report_modal(
                             "type": "mrkdwn",
                             "text": (
                                 "I understand my name and the reported message "
-                                "text (if any) will be shared with workspace "
+                                "content will be shared with workspace "
                                 "moderators to process this report."
                             ),
                         },

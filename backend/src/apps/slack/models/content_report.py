@@ -122,7 +122,7 @@ class ContentReport(TimestampedModel):
         )
         head = [
             ":bangbang: *New Content Report*",
-            f"*Reported Content Origin:* {conversation.content_origin(author_id)}",
+            f"*Report Content Origin:* {conversation.content_origin(author_id)}",
         ]
         tail = [
             f"*Report Category:* {category}",
