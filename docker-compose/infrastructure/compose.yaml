@@ -35,6 +35,8 @@ services:
     pull_policy: never
     volumes:
       - infrastructure-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache
+      # Host Docker socket so runner can build containers (Backend, Frontend, etc.).
+      - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   infrastructure-nest:
