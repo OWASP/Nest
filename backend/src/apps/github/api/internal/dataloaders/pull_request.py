@@ -7,8 +7,8 @@ from strawberry.dataloader import DataLoader
 from apps.common.api.internal.dataloaders.utils import get_results_by_keys
 from apps.github.models.pull_request import PullRequest
 
-RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER = "recent_pull_requests_by_project_id"
 PULL_REQUESTS_BY_ISSUE_ID_LOADER = "pull_requests_by_issue_id"
+RECENT_PULL_REQUESTS_BY_PROJECT_ID_LOADER = "recent_pull_requests_by_project_id"
 
 
 async def load_pull_requests_by_issue_id(
