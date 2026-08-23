@@ -65,10 +65,6 @@ on:
         description: Enable cron tasks
         required: true
         type: boolean
-      enable_nat_gateway:
-        description: Enable NAT gateway
-        required: true
-        type: boolean
       enable_rds_proxy:
         description: Enable RDS proxy
         required: true
@@ -217,7 +213,6 @@ jobs:
             django_settings_module="${{ inputs.django_settings_module }}"
             enable_additional_parameters=${{ inputs.enable_additional_parameters }}
             enable_cron_tasks=${{ inputs.enable_cron_tasks }}
-            enable_nat_gateway=${{ inputs.enable_nat_gateway }}
             enable_rds_proxy=${{ inputs.enable_rds_proxy }}
             environment="${{ inputs.environment }}"
             frontend_desired_count=${{ inputs.frontend_desired_count }}
@@ -238,7 +233,6 @@ jobs:
             echo "backend_service_name=$(terraform output -raw backend_service_name)"
             echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)"
             echo "frontend_service_name=$(terraform output -raw frontend_service_name)"
-            echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)"
             echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)"
             echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)"
             echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')"
@@ -249,17 +243,15 @@ jobs:
         id: migrate-task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: ${{ inputs.migrate_task_definition }}
           TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
-          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
@@ -291,17 +283,15 @@ jobs:
       - name: Run ECS index-data task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASK_DEFINITION: ${{ inputs.index_task_definition }}
           TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
-          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
           RESPONSE=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}")
 
           FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
           TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')

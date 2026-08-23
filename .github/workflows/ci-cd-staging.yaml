@@ -61,7 +61,6 @@ jobs:
       django_configuration: Staging
       django_settings_module: settings.staging
       enable_cron_tasks: false
-      enable_nat_gateway: false
       enable_rds_proxy: false
       environment: staging
       frontend_desired_count: 1
