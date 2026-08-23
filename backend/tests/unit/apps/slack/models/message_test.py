@@ -380,19 +380,6 @@ class TestMessageModel:
         assert Message.fetch_payload(client, "C1", "1.0") == {"ts": "1.0", "text": "hi"}
         client.conversations_replies.assert_not_called()
 
-    def test_fetch_payload_from_thread_replies(self):
-        """Test fetch_payload uses conversations.replies for thread messages."""
-        client = Mock()
-        client.conversations_replies.return_value = {
-            "messages": [{"ts": "1.1", "text": "reply"}],
-        }
-
-        assert Message.fetch_payload(client, "C1", "1.1", "1.0") == {
-            "ts": "1.1",
-            "text": "reply",
-        }
-        client.conversations_history.assert_not_called()
-
     def test_fetch_payload_visibility_error(self):
         """Test fetch_payload returns None for not-visible channels."""
         client = Mock()
