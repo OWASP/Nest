@@ -69,9 +69,9 @@ class Workspace(TimestampedModel):
         verbose_name="Invite alert Slack user IDs to mention",
         blank=True,
         null=True,
-        default=None,
+        default=list,
         help_text=(
-            'Optional JSON list of Slack user IDs (e.g. ["U01ABC…"]). '
+            'Optional JSON list of Slack user IDs (e.g. ["U01ABC..."]). '
             "A trailing cc: line with <@mentions> is added to invite-limit alerts."
         ),
     )

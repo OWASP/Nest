@@ -118,14 +118,13 @@ class CommandBase:
         """
         return self.template.render(context)
 
-    def handler(self, ack, command, client, respond=None):
+    def handler(self, ack, command, client):
         """Handle the Slack command.
 
         Args:
             ack (function): Acknowledge the Slack command request.
             command (dict): The Slack command payload.
             client (slack_sdk.WebClient): The Slack WebClient instance for API calls.
-            respond: Optional Bolt respond helper (used by interactive commands).
 
         """
         ack()

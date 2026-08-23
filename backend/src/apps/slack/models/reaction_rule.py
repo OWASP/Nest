@@ -120,11 +120,11 @@ class ReactionRule(TimestampedModel):
         return " ".join(f":{name}:" for name in emojis if name)
 
     @staticmethod
-    def parse_reactions_get(
+    def match_reactions(
         payload,
         emojis: object,
     ) -> tuple[int, list[str], str, list[str]] | None:
-        """Return unique reporters, permalink, and matched emoji names from reactions.get."""
+        """Return reporter count, user ids, permalink, and matched emoji names."""
         if not isinstance(emojis, list):
             return None
         wanted = {name for name in emojis if name}

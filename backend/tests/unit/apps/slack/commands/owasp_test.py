@@ -95,6 +95,7 @@ class TestOwaspHandler:
         mock_command["text"] = "report"
         respond = MagicMock()
         subcommand = MagicMock()
+        subcommand.command_name = "/report"
         with patch.object(Owasp, "find_command", return_value=subcommand):
             Owasp().handler(
                 ack=MagicMock(),

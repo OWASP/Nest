@@ -175,21 +175,21 @@ class TestConversationModel:
             == "<#C123>"
         )
 
-    def test_get_or_create_for_report_returns_existing(self, mocker):
+    def test_get_or_create_returns_existing(self, mocker):
         """Test existing conversations are reused for content reporting."""
         workspace = Workspace(pk=1, slack_workspace_id="T1")
         conversation = Mock(workspace_id=1, workspace=workspace)
         manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
         manager.get_or_create.return_value = (conversation, False)
 
-        assert Conversation.get_or_create_for_report(workspace, "C123") is conversation
+        assert Conversation.get_or_create(workspace, "C123") is conversation
         manager.get_or_create.assert_called_once()
         _, kwargs = manager.get_or_create.call_args
         assert kwargs["slack_channel_id"] == "C123"
         assert kwargs["defaults"]["workspace"] is workspace
         assert kwargs["defaults"]["is_channel"] is True
 
-    def test_get_or_create_for_report_creates_im_stub(self, mocker):
+    def test_get_or_create_creates_im_stub(self, mocker):
         """Test a missing IM channel creates a minimal conversation row."""
         conversation = Mock()
         workspace = Workspace(pk=1, slack_workspace_id="T1")
@@ -197,14 +197,14 @@ class TestConversationModel:
         manager.get_or_create.return_value = (conversation, True)
         info = mocker.patch("apps.slack.models.conversation.logger.info")
 
-        assert Conversation.get_or_create_for_report(workspace, "D999") is conversation
+        assert Conversation.get_or_create(workspace, "D999") is conversation
         _, kwargs = manager.get_or_create.call_args
         assert kwargs["defaults"]["is_im"] is True
         assert kwargs["defaults"]["is_channel"] is False
         assert kwargs["defaults"]["is_mpim"] is False
         info.assert_called_once()
 
-    def test_get_or_create_for_report_rejects_workspace_mismatch(self, mocker):
+    def test_get_or_create_rejects_workspace_mismatch(self, mocker):
         """Test existing conversations for another workspace are rejected."""
         other_workspace = Workspace(pk=2, slack_workspace_id="T2")
         conversation = Mock(workspace_id=2, workspace=other_workspace)
@@ -213,4 +213,4 @@ class TestConversationModel:
         manager.get_or_create.return_value = (conversation, False)
 
         with pytest.raises(ValueError, match="different Slack workspace"):
-            Conversation.get_or_create_for_report(workspace, "C123")
+            Conversation.get_or_create(workspace, "C123")

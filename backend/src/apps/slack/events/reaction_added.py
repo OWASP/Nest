@@ -24,13 +24,13 @@ class ThresholdAlertContext(NamedTuple):
     """Context for posting a reaction-threshold content-report alert."""
 
     channel_id: str
+    matched_emojis: list[str]
     message_ts: str
-    rule: ReactionRule
+    owner: str
+    permalink: str
     reaction_count: int
     reporter_user_ids: list[str]
-    permalink: str
-    matched_emojis: list[str]
-    owner: str
+    rule: ReactionRule
 
 
 def fetch_reaction(client: WebClient, channel_id: str, message_ts: str, emojis: list[str]):
@@ -48,7 +48,7 @@ def fetch_reaction(client: WebClient, channel_id: str, message_ts: str, emojis: 
         )
         return None
 
-    return ReactionRule.parse_reactions_get(payload, emojis)
+    return ReactionRule.match_reactions(payload, emojis)
 
 
 def threshold_alert_context(event, client: WebClient) -> ThresholdAlertContext | None:
@@ -75,13 +75,13 @@ def threshold_alert_context(event, client: WebClient) -> ThresholdAlertContext |
 
     return ThresholdAlertContext(
         channel_id=channel_id,
+        matched_emojis=matched_emojis,
         message_ts=message_ts,
-        rule=rule,
+        owner=owner,
+        permalink=permalink,
         reaction_count=reaction_count,
         reporter_user_ids=reporter_user_ids,
-        permalink=permalink,
-        matched_emojis=matched_emojis,
-        owner=owner,
+        rule=rule,
     )
 
 
@@ -132,17 +132,17 @@ class ReactionAdded(EventBase):
                 conversation=rule.conversation,
                 slack_message_id=message_ts,
             ).first()
-            ContentReport.deliver_alert(
+            ContentReport.post_alert(
                 client,
                 channel_id=rule.alert_channel_id,
-                text=text,
                 conversation=rule.conversation,
                 message_ts=message_ts,
-                report_type=rule.report_type,
-                source=str(ReportSource.EMOJI),
-                reporter_user_ids=context.reporter_user_ids,
-                reaction_count=context.reaction_count,
                 message=message,
+                reaction_count=context.reaction_count,
+                report_type=rule.report_type,
+                reporter_user_ids=context.reporter_user_ids,
+                source=str(ReportSource.EMOJI),
+                text=text,
             )
         finally:
             ContentReport.release(rule.conversation, message_ts, owner)

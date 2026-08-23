@@ -134,7 +134,7 @@ class ContentReport(TimestampedModel):
         return "\n".join(line for line in lines if line).strip()
 
     @staticmethod
-    def deliver_alert(
+    def post_alert(
         client: WebClient,
         *,
         channel_id: str,

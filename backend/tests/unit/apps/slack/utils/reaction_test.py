@@ -36,21 +36,21 @@ class TestParseMessageReaction:
         assert parse_message_reaction(event) is None
 
 
-class TestParseReactionsGet:
-    def test_parse_reactions_get_returns_matching_emoji(self):
-        """Test reactions.get payloads expose unique reporters and permalink."""
-        assert ReactionRule.parse_reactions_get(PAYLOAD, ["spam"]) == (
+class TestMatchReactions:
+    def test_match_reactions_returns_matching_emoji(self):
+        """Test matched reactions expose unique reporters and permalink."""
+        assert ReactionRule.match_reactions(PAYLOAD, ["spam"]) == (
             2,
             ["U_REACTOR", "U_OTHER"],
             "https://slack.test/message",
             ["spam"],
         )
 
-    def test_parse_reactions_get_returns_none_when_emoji_missing(self):
+    def test_match_reactions_returns_none_when_emoji_missing(self):
         """Test unmatched emoji lists return None."""
-        assert ReactionRule.parse_reactions_get(PAYLOAD, ["flag"]) is None
+        assert ReactionRule.match_reactions(PAYLOAD, ["flag"]) is None
 
-    def test_parse_reactions_get_unions_unique_reporters(self):
+    def test_match_reactions_unions_unique_reporters(self):
         """Test matching emojis union unique reporters."""
         payload = {
             "message": {
@@ -62,30 +62,30 @@ class TestParseReactionsGet:
             }
         }
 
-        assert ReactionRule.parse_reactions_get(payload, ["spam", "flag"]) == (
+        assert ReactionRule.match_reactions(payload, ["spam", "flag"]) == (
             3,
             ["U_REACTOR", "U_OTHER", "U_THIRD"],
             "https://slack.test/message",
             ["spam", "flag"],
         )
 
-    def test_parse_reactions_get_returns_matched_emojis_only(self):
+    def test_match_reactions_returns_matched_emojis_only(self):
         """Test only configured emojis present on the message are returned."""
-        assert ReactionRule.parse_reactions_get(PAYLOAD, ["spam", "flag"]) == (
+        assert ReactionRule.match_reactions(PAYLOAD, ["spam", "flag"]) == (
             2,
             ["U_REACTOR", "U_OTHER"],
             "https://slack.test/message",
             ["spam"],
         )
 
-    def test_parse_reactions_get_ignores_non_list_emojis(self):
+    def test_match_reactions_ignores_non_list_emojis(self):
         """Test non-list emoji config returns None."""
-        assert ReactionRule.parse_reactions_get(PAYLOAD, "spam") is None
+        assert ReactionRule.match_reactions(PAYLOAD, "spam") is None
 
-    def test_parse_reactions_get_ignores_empty_emoji_list(self):
+    def test_match_reactions_ignores_empty_emoji_list(self):
         """Test empty or blank-only emoji lists return None."""
-        assert ReactionRule.parse_reactions_get(PAYLOAD, []) is None
-        assert ReactionRule.parse_reactions_get(PAYLOAD, ["", None]) is None
+        assert ReactionRule.match_reactions(PAYLOAD, []) is None
+        assert ReactionRule.match_reactions(PAYLOAD, ["", None]) is None
 
 
 class TestFormatEmojis:

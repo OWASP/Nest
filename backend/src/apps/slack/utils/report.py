@@ -9,17 +9,17 @@ from urllib.parse import urlparse
 import requests
 from slack_sdk.errors import SlackClientError
 
-from apps.slack.models.content_report import ContentReport
-from apps.slack.models.conversation import Conversation
-from apps.slack.models.member import Member
-from apps.slack.models.message import Message
-from apps.slack.utils.report_modal import (
+from apps.slack.modals.report import (
     ALREADY_REPORTED_TEXT,
     MISSING_MESSAGE_TEXT,
     MODAL_OPEN_FAILED_TEXT,
     SELF_REPORT_TEXT,
     build_report_modal,
 )
+from apps.slack.models.content_report import ContentReport
+from apps.slack.models.conversation import Conversation
+from apps.slack.models.member import Member
+from apps.slack.models.message import Message
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -103,7 +103,7 @@ def open_report_content_modal(
         return
 
     try:
-        conversation = Conversation.get_or_create_for_report(workspace, channel_id)
+        conversation = Conversation.get_or_create(workspace, channel_id)
     except ValueError:
         logger.exception(
             "Cannot open content report for channel_id=%s workspace=%s",

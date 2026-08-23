@@ -3,15 +3,10 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from apps.slack.apps import SlackConfig
 from apps.slack.enums import ReportSource
-from apps.slack.models.content_report import ContentReport
-from apps.slack.models.message import Message
-from apps.slack.models.workspace import Workspace
-from apps.slack.utils.report_modal import (
+from apps.slack.modals.report import (
     ALREADY_REPORTED_TEXT,
     CONSENT_BLOCK_ID,
     FEATURE_OFF_TEXT,
@@ -26,7 +21,11 @@ from apps.slack.utils.report_modal import (
     decode_metadata,
     selected_report_type,
 )
-from apps.slack.utils.report_open import (
+from apps.slack.models.content_report import ContentReport
+from apps.slack.models.message import Message
+from apps.slack.models.workspace import Workspace
+from apps.slack.shortcuts.shortcut import ShortcutBase
+from apps.slack.utils.report import (
     make_ephemeral,
     open_report_content_modal,
     post_ephemeral_url,
@@ -35,28 +34,14 @@ from apps.slack.utils.report_open import (
 if TYPE_CHECKING:
     from slack_sdk import WebClient
 
-    from apps.slack.models.conversation import Conversation
-
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class SubmissionContext:
-    """Validated modal submission context for posting a content report."""
-
-    workspace: Workspace
-    message: Message
-    conversation: Conversation
-    reporter_user_id: str
-    response_url: str
-    source: str
 
 
 def load_submission_context(
     body: dict[str, Any],
     view: dict[str, Any],
-) -> SubmissionContext | None:
-    """Validate submission payload and return report context, or None after ephemeral errors."""
+) -> tuple[Workspace, Message, str, str, str] | None:
+    """Validate submission and return workspace, message, reporter, response_url, source."""
     reporter_user_id = (body.get("user") or {}).get("id") or ""
     team_id = (body.get("team") or {}).get("id") or view.get("team_id")
     metadata = decode_metadata(view.get("private_metadata") or "")
@@ -65,14 +50,16 @@ def load_submission_context(
         return None
 
     message_db_id, response_url, source = metadata
-    workspace = Workspace.get_by_workspace_id(team_id)
-    if workspace is None or not workspace.is_content_reporting_enabled:
+    if (
+        workspace := Workspace.get_by_workspace_id(team_id)
+    ) is None or not workspace.is_content_reporting_enabled:
         post_ephemeral_url(response_url, FEATURE_OFF_TEXT)
         return None
 
-    try:
-        message = Message.objects.select_related("conversation", "author").get(pk=message_db_id)
-    except Message.DoesNotExist:
+    message = (
+        Message.objects.select_related("conversation", "author").filter(pk=message_db_id).first()
+    )
+    if message is None:
         post_ephemeral_url(response_url, MISSING_MESSAGE_TEXT)
         return None
 
@@ -87,135 +74,138 @@ def load_submission_context(
         post_ephemeral_url(response_url, ALREADY_REPORTED_TEXT)
         return None
 
-    return SubmissionContext(
-        workspace=workspace,
-        message=message,
-        conversation=conversation,
-        reporter_user_id=reporter_user_id,
-        response_url=response_url,
-        source=source,
-    )
+    return workspace, message, reporter_user_id, response_url, source
 
 
 def post_content_report_alert(
     *,
     client: WebClient,
-    context: SubmissionContext,
+    message: Message,
     owner: str,
     report_type: str,
+    reporter_user_id: str,
+    response_url: str,
+    source: str,
+    workspace: Workspace,
 ) -> None:
     """Post the moderation alert and record the content report while holding the lock."""
-    message = context.message
-    conversation = context.conversation
+    conversation = message.conversation
     message_ts = message.slack_message_id
     try:
         if not ContentReport.renew(conversation, message_ts, owner):
-            post_ephemeral_url(context.response_url, ALREADY_REPORTED_TEXT)
+            post_ephemeral_url(response_url, ALREADY_REPORTED_TEXT)
             return
 
         permalink = Message.fetch_permalink(client, conversation.slack_channel_id, message_ts)
         text = ContentReport.build_alert_text(
-            workspace=context.workspace,
             conversation=conversation,
             message=message,
-            reporter_user_id=context.reporter_user_id,
-            report_type=report_type,
             permalink=permalink,
+            report_type=report_type,
+            reporter_user_id=reporter_user_id,
+            workspace=workspace,
         )
-        channel_id = (context.workspace.content_report_alert_channel_id or "").strip()
-        if ContentReport.deliver_alert(
+        channel_id = (workspace.content_report_alert_channel_id or "").strip()
+        if ContentReport.post_alert(
             client,
             channel_id=channel_id,
-            text=text,
             conversation=conversation,
             message_ts=message_ts,
-            report_type=report_type,
-            source=context.source,
-            reporter_user_ids=[context.reporter_user_id],
-            reaction_count=None,
             message=message,
+            reaction_count=None,
+            report_type=report_type,
+            reporter_user_ids=[reporter_user_id],
+            source=source,
+            text=text,
         ):
-            post_ephemeral_url(context.response_url, SUCCESS_TEXT)
+            post_ephemeral_url(response_url, SUCCESS_TEXT)
         else:
-            post_ephemeral_url(context.response_url, SUBMIT_FAILED_TEXT)
+            post_ephemeral_url(response_url, SUBMIT_FAILED_TEXT)
     finally:
         ContentReport.release(conversation, message_ts, owner)
 
 
-def handle_report_content_shortcut(
-    ack,
-    shortcut: dict[str, Any],
-    client: WebClient,
-    respond,
-) -> None:
-    """Open the Report content modal after applying open-time guards."""
-    ack()
+class ReportContent(ShortcutBase):
+    """Report content message shortcut and modal submission."""
 
-    reporter_user_id = (shortcut.get("user") or {}).get("id") or ""
-    channel_id = (shortcut.get("channel") or {}).get("id") or ""
-    message_payload = shortcut.get("message") or {}
-    team_id = (shortcut.get("team") or {}).get("id")
-    response_url = shortcut.get("response_url") or ""
-    trigger_id = shortcut.get("trigger_id") or ""
-    message_ts = message_payload.get("ts") or ""
+    callback_id = REPORT_CONTENT_CALLBACK_ID
+    view_callback_id = REPORT_CONTENT_VIEW_CALLBACK_ID
 
-    if not reporter_user_id or not channel_id or not message_ts or not trigger_id or not team_id:
-        logger.warning("Ignoring incomplete report_content shortcut payload")
-        return
+    def handle(self, ack, shortcut: dict[str, Any], client: WebClient, respond) -> None:
+        """Open the Report content modal after applying open-time guards."""
+        ack()
 
-    workspace = Workspace.get_by_workspace_id(team_id)
-    if workspace is None or not workspace.is_content_reporting_enabled:
-        make_ephemeral(respond, response_url)(text=FEATURE_OFF_TEXT)
-        return
+        reporter_user_id = (shortcut.get("user") or {}).get("id") or ""
+        channel_id = (shortcut.get("channel") or {}).get("id") or ""
+        message_payload = shortcut.get("message") or {}
+        team_id = (shortcut.get("team") or {}).get("id")
+        response_url = shortcut.get("response_url") or ""
+        trigger_id = shortcut.get("trigger_id") or ""
+        message_ts = message_payload.get("ts") or ""
 
-    open_report_content_modal(
-        client=client,
-        workspace=workspace,
-        channel_id=channel_id,
-        message_payload=message_payload,
-        reporter_user_id=reporter_user_id,
-        response_url=response_url,
-        trigger_id=trigger_id,
-        source=str(ReportSource.SHORTCUT),
-        respond=respond,
-    )
+        if (
+            not reporter_user_id
+            or not channel_id
+            or not message_ts
+            or not trigger_id
+            or not team_id
+        ):
+            logger.warning("Ignoring incomplete report_content shortcut payload")
+            return
 
+        if (
+            workspace := Workspace.get_by_workspace_id(team_id)
+        ) is None or not workspace.is_content_reporting_enabled:
+            make_ephemeral(respond, response_url)(text=FEATURE_OFF_TEXT)
+            return
 
-def handle_report_content_submission(ack, body: dict[str, Any], client: WebClient) -> None:
-    """Validate consent and category, then post a workspace content-report alert."""
-    view = body.get("view") or {}
-    report_type = selected_report_type(view)
-    has_consent = consent_given(view)
-    if not has_consent or report_type is None:
-        errors: dict[str, str] = {}
-        if not has_consent:
-            errors[CONSENT_BLOCK_ID] = (
-                "Please confirm that this message will be shared with workspace moderators."
-            )
-        if report_type is None:
-            errors[REPORT_TYPE_BLOCK_ID] = "Please select a report category."
-        ack(response_action="errors", errors=errors)
-        return
+        open_report_content_modal(
+            client=client,
+            workspace=workspace,
+            channel_id=channel_id,
+            message_payload=message_payload,
+            reporter_user_id=reporter_user_id,
+            response_url=response_url,
+            trigger_id=trigger_id,
+            source=str(ReportSource.SHORTCUT),
+            respond=respond,
+        )
 
-    ack()
-    context = load_submission_context(body, view)
-    if context is None:
-        return
+    def handle_view(self, ack, body: dict[str, Any], client: WebClient) -> None:
+        """Validate consent and category, then post a workspace content-report alert."""
+        view = body.get("view") or {}
+        report_type = selected_report_type(view)
+        has_consent = consent_given(view)
+        if not has_consent or report_type is None:
+            errors: dict[str, str] = {}
+            if not has_consent:
+                errors[CONSENT_BLOCK_ID] = (
+                    "Please confirm that this message will be shared with workspace moderators."
+                )
+            if report_type is None:
+                errors[REPORT_TYPE_BLOCK_ID] = "Please select a report category."
+            ack(response_action="errors", errors=errors)
+            return
 
-    if (
-        owner := ContentReport.acquire(context.conversation, context.message.slack_message_id)
-    ) is None:
-        post_ephemeral_url(context.response_url, ALREADY_REPORTED_TEXT)
-        return
+        ack()
+        loaded = load_submission_context(body, view)
+        if loaded is None:
+            return
 
-    post_content_report_alert(
-        client=client,
-        context=context,
-        owner=owner,
-        report_type=report_type,
-    )
+        workspace, message, reporter_user_id, response_url, source = loaded
+        if (
+            owner := ContentReport.acquire(message.conversation, message.slack_message_id)
+        ) is None:
+            post_ephemeral_url(response_url, ALREADY_REPORTED_TEXT)
+            return
 
-
-if SlackConfig.app:
-    SlackConfig.app.shortcut(REPORT_CONTENT_CALLBACK_ID)(handle_report_content_shortcut)
-    SlackConfig.app.view(REPORT_CONTENT_VIEW_CALLBACK_ID)(handle_report_content_submission)
+        post_content_report_alert(
+            client=client,
+            workspace=workspace,
+            message=message,
+            reporter_user_id=reporter_user_id,
+            response_url=response_url,
+            source=source,
+            owner=owner,
+            report_type=report_type,
+        )

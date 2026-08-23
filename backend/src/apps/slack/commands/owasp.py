@@ -23,9 +23,11 @@ class Owasp(CommandBase):
         cmd = self.find_command(command_tokens[0].strip().lower() if command_tokens else "")
         if cmd:
             command["text"] = " ".join(command_tokens[1:]).strip()
-            return cmd.handler(ack, command, client, respond=respond)
+            if cmd.command_name == "/report":
+                return cmd.handler(ack, command, client, respond=respond)
+            return cmd.handler(ack, command, client)
 
-        return super().handler(ack, command, client, respond=respond)
+        return super().handler(ack, command, client)
 
     def get_context(self, command: dict):
         """Get the template context.

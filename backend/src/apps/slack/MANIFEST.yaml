@@ -1,5 +1,5 @@
 display_information:
-  name: OWASP Nest
+  name: NestBot
   description: Your gateway to OWASP. Discover, engage, and help shape the future!
   background_color: '#1d293d'
   long_description: "OWASP NestBot is the OWASP community assistant integrated directly into Slack. It helps contributors, chapter leaders, project maintainers,\

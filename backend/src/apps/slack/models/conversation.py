@@ -104,7 +104,7 @@ class Conversation(TimestampedModel):
         ).first()
 
     @staticmethod
-    def get_or_create_for_report(workspace: Workspace, channel_id: str) -> "Conversation":
+    def get_or_create(workspace: Workspace, channel_id: str) -> "Conversation":
         """Return an existing conversation or a minimal row for content reporting."""
         conversation, created = Conversation.objects.get_or_create(
             slack_channel_id=channel_id,

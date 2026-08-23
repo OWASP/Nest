@@ -4,7 +4,7 @@ from slack_sdk.errors import SlackApiError, SlackClientError, SlackRequestError
 
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.member import Member
-from apps.slack.models.message import MAX_THREAD_REPLY_PAGES, Message
+from apps.slack.models.message import Message
 
 
 def create_model_mock(model_class):
@@ -427,76 +427,41 @@ class TestMessageModel:
 
         assert Message.fetch_permalink(client, "C1", "1.0") == "https://example.slack.com/p"
 
-    def test_fetch_payload_falls_back_to_broad_thread_search(self):
-        """Test fetch_payload searches replies when history misses a thread message."""
+    def test_fetch_payload_uses_targeted_thread_lookup(self):
+        """Test fetch_payload loads a reply via oldest/latest on conversations.replies."""
         client = Mock()
-        client.conversations_replies.side_effect = [
-            {"messages": []},
-            {"messages": [{"ts": "1.1", "text": "reply"}]},
-        ]
-        client.conversations_history.return_value = {"messages": []}
+        client.conversations_replies.return_value = {
+            "messages": [{"ts": "1.1", "text": "reply"}],
+        }
 
         assert Message.fetch_payload(client, "C1", "1.1", "1.0") == {
             "ts": "1.1",
             "text": "reply",
         }
-        assert client.conversations_replies.call_count == 2
+        client.conversations_replies.assert_called_once_with(
+            channel="C1",
+            ts="1.0",
+            latest="1.1",
+            oldest="1.1",
+            inclusive=True,
+            limit=1,
+        )
+        client.conversations_history.assert_not_called()
 
-    def test_fetch_payload_paginates_thread_replies(self):
-        """Test fetch_payload follows next_cursor until the reply is found."""
+    def test_fetch_payload_thread_miss_falls_back_to_history(self):
+        """Test fetch_payload tries history when the targeted replies call misses."""
         client = Mock()
-        client.conversations_replies.side_effect = [
-            {"messages": []},
-            {
-                "messages": [{"ts": "1.0", "text": "parent"}],
-                "response_metadata": {"next_cursor": "page2"},
-            },
-            {
-                "messages": [{"ts": "1.1", "text": "reply"}],
-                "response_metadata": {"next_cursor": ""},
-            },
-        ]
-        client.conversations_history.return_value = {"messages": []}
+        client.conversations_replies.return_value = {"messages": []}
+        client.conversations_history.return_value = {
+            "messages": [{"ts": "1.1", "text": "channel message"}],
+        }
 
         assert Message.fetch_payload(client, "C1", "1.1", "1.0") == {
             "ts": "1.1",
-            "text": "reply",
+            "text": "channel message",
         }
-        assert client.conversations_replies.call_count == 3
-        assert client.conversations_replies.call_args_list[2].kwargs["cursor"] == "page2"
-
-    def test_fetch_payload_thread_pagination_exhausted(self):
-        """Test fetch_payload returns None when replies pagination ends without a match."""
-        client = Mock()
-        client.conversations_replies.side_effect = [
-            {"messages": []},
-            {
-                "messages": [{"ts": "1.0", "text": "parent"}],
-                "response_metadata": {"next_cursor": "page2"},
-            },
-            {
-                "messages": [{"ts": "1.05", "text": "other"}],
-                "response_metadata": {"next_cursor": ""},
-            },
-        ]
-        client.conversations_history.return_value = {"messages": []}
-
-        assert Message.fetch_payload(client, "C1", "1.1", "1.0") is None
-        assert client.conversations_replies.call_count == 3
-
-    def test_fetch_payload_thread_pagination_page_cap(self):
-        """Test fetch_payload stops after MAX_THREAD_REPLY_PAGES broad reply pages."""
-        client = Mock()
-        page = {
-            "messages": [{"ts": "1.0", "text": "parent"}],
-            "response_metadata": {"next_cursor": "next"},
-        }
-        client.conversations_replies.side_effect = [{"messages": []}, *[page] * 12]
-        client.conversations_history.return_value = {"messages": []}
-
-        assert Message.fetch_payload(client, "C1", "1.1", "1.0") is None
-        # One targeted replies call + MAX_THREAD_REPLY_PAGES broad pages.
-        assert client.conversations_replies.call_count == 1 + MAX_THREAD_REPLY_PAGES
+        client.conversations_replies.assert_called_once()
+        client.conversations_history.assert_called_once()
 
     def test_fetch_payload_returns_none_when_missing(self):
         """Test fetch_payload returns None when Slack has no matching message."""
@@ -504,6 +469,16 @@ class TestMessageModel:
         client.conversations_history.return_value = {"messages": []}
 
         assert Message.fetch_payload(client, "C1", "1.0") is None
+
+    def test_fetch_payload_returns_none_when_thread_and_history_miss(self):
+        """Test fetch_payload returns None without broad thread pagination."""
+        client = Mock()
+        client.conversations_replies.return_value = {"messages": []}
+        client.conversations_history.return_value = {"messages": []}
+
+        assert Message.fetch_payload(client, "C1", "1.1", "1.0") is None
+        client.conversations_replies.assert_called_once()
+        client.conversations_history.assert_called_once()
 
     def test_fetch_permalink_client_error(self):
         """Test fetch_permalink returns empty string on Slack client failures."""

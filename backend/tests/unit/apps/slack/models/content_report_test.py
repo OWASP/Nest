@@ -237,8 +237,8 @@ class TestContentReport:
         assert "\n>" not in text
         assert not text.startswith(">")
 
-    def test_deliver_alert_posts_and_records(self, mocker):
-        """Test deliver_alert posts to Slack then records the report."""
+    def test_post_alert_posts_and_records(self, mocker):
+        """Test post_alert posts to Slack then records the report."""
         client = Mock()
         client.chat_postMessage.return_value = {"ts": "alert.ts"}
         record = mocker.patch("apps.slack.models.content_report.ContentReport.record")
@@ -246,7 +246,7 @@ class TestContentReport:
         message = Mock()
 
         assert (
-            ContentReport.deliver_alert(
+            ContentReport.post_alert(
                 client,
                 channel_id="C_ALERT",
                 text="alert",
@@ -262,8 +262,8 @@ class TestContentReport:
         client.chat_postMessage.assert_called_once()
         record.assert_called_once()
 
-    def test_deliver_alert_returns_false_on_slack_error(self, mocker):
-        """Test deliver_alert does not record when chat_postMessage fails."""
+    def test_post_alert_returns_false_on_slack_error(self, mocker):
+        """Test post_alert does not record when chat_postMessage fails."""
         client = Mock()
         client.chat_postMessage.side_effect = SlackApiError(
             message="fail",
@@ -272,7 +272,7 @@ class TestContentReport:
         record = mocker.patch("apps.slack.models.content_report.ContentReport.record")
 
         assert (
-            ContentReport.deliver_alert(
+            ContentReport.post_alert(
                 client,
                 channel_id="C_ALERT",
                 text="alert",
@@ -286,14 +286,14 @@ class TestContentReport:
         )
         record.assert_not_called()
 
-    def test_deliver_alert_returns_false_on_client_error(self, mocker):
-        """Test deliver_alert does not record when Slack transport fails."""
+    def test_post_alert_returns_false_on_client_error(self, mocker):
+        """Test post_alert does not record when Slack transport fails."""
         client = Mock()
         client.chat_postMessage.side_effect = SlackClientError("timeout")
         record = mocker.patch("apps.slack.models.content_report.ContentReport.record")
 
         assert (
-            ContentReport.deliver_alert(
+            ContentReport.post_alert(
                 client,
                 channel_id="C_ALERT",
                 text="alert",

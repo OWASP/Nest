@@ -27,7 +27,6 @@ ARCHIVE_PATH_RE = re.compile(
     re.IGNORECASE,
 )
 COMPACT_TS_FRACTION_DIGITS = 6
-MAX_THREAD_REPLY_PAGES = 10
 VISIBILITY_ERRORS = frozenset(
     {
         "channel_not_found",
@@ -146,11 +145,6 @@ class Message(TimestampedModel):
         self.parent_message = parent_message
 
     @staticmethod
-    def get_author_id(message_payload: dict[str, Any]) -> str | None:
-        """Return the Slack user id of the message author when present."""
-        return user if isinstance(user := message_payload.get("user"), str) and user else None
-
-    @staticmethod
     def bulk_save(messages: list[Message], fields=None) -> None:
         """Bulk save messages."""
         BulkSaveModel.bulk_save(Message, messages, fields=fields)
@@ -164,6 +158,27 @@ class Message(TimestampedModel):
             f"{compact_ts[:-COMPACT_TS_FRACTION_DIGITS]}"
             f".{compact_ts[-COMPACT_TS_FRACTION_DIGITS:]}"
         )
+
+    @staticmethod
+    def fetch_permalink(client: WebClient, channel_id: str, message_ts: str) -> str:
+        """Return a Slack permalink for the message, or an empty string."""
+        try:
+            return (
+                client.chat_getPermalink(
+                    channel=channel_id,
+                    message_ts=message_ts,
+                ).get("permalink")
+                or ""
+            )
+        except SlackApiError as e:
+            logger.warning(
+                "Could not fetch Slack permalink: %s",
+                e.response.get("error", "unknown_error"),
+            )
+            return ""
+        except SlackClientError as e:
+            logger.warning("Could not fetch Slack permalink: %s", e)
+            return ""
 
     @staticmethod
     def fetch_payload(
@@ -196,21 +211,6 @@ class Message(TimestampedModel):
                     limit=1,
                 )
                 found = Message.find_in_api_list(response.get("messages") or [], message_ts)
-
-            cursor: str | None = None
-            pages = 0
-            while found is None and thread_ts and pages < MAX_THREAD_REPLY_PAGES:
-                response = client.conversations_replies(
-                    channel=channel_id,
-                    ts=thread_ts,
-                    limit=200,
-                    cursor=cursor,
-                )
-                pages += 1
-                found = Message.find_in_api_list(response.get("messages") or [], message_ts)
-                cursor = (response.get("response_metadata") or {}).get("next_cursor") or None
-                if not cursor:
-                    break
         except SlackApiError as e:
             error = e.response.get("error", "unknown_error")
             if error in VISIBILITY_ERRORS:
@@ -240,27 +240,6 @@ class Message(TimestampedModel):
             return found
 
     @staticmethod
-    def fetch_permalink(client: WebClient, channel_id: str, message_ts: str) -> str:
-        """Return a Slack permalink for the message, or an empty string."""
-        try:
-            return (
-                client.chat_getPermalink(
-                    channel=channel_id,
-                    message_ts=message_ts,
-                ).get("permalink")
-                or ""
-            )
-        except SlackApiError as e:
-            logger.warning(
-                "Could not fetch Slack permalink: %s",
-                e.response.get("error", "unknown_error"),
-            )
-            return ""
-        except SlackClientError as e:
-            logger.warning("Could not fetch Slack permalink: %s", e)
-            return ""
-
-    @staticmethod
     def find_in_api_list(
         messages: list[dict[str, Any]],
         message_ts: str,
@@ -270,6 +249,11 @@ class Message(TimestampedModel):
             if item.get("ts") == message_ts:
                 return item
         return None
+
+    @staticmethod
+    def get_author_id(message_payload: dict[str, Any]) -> str | None:
+        """Return the Slack user id of the message author when present."""
+        return user if isinstance(user := message_payload.get("user"), str) and user else None
 
     @staticmethod
     def get_raw_data_by_channel_and_ts(channel_id: str, message_ts: str) -> dict | None:

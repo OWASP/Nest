@@ -5,7 +5,7 @@ from unittest.mock import Mock
 from apps.slack.commands.owasp import Owasp
 from apps.slack.commands.report import Report
 from apps.slack.enums import ReportSource
-from apps.slack.utils.report_modal import (
+from apps.slack.modals.report import (
     FEATURE_OFF_TEXT,
     INVALID_LINK_TEXT,
     NOT_VISIBLE_TEXT,
@@ -177,19 +177,19 @@ class TestReportCommand:
             return_value={"user": "U_OTHER", "ts": "1700000000.123456", "text": "spam"},
         )
         mocker.patch(
-            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
+            "apps.slack.utils.report.Conversation.get_or_create",
             return_value=conversation,
         )
         mocker.patch(
-            "apps.slack.utils.report_open.ContentReport.exists_for",
+            "apps.slack.utils.report.ContentReport.exists_for",
             return_value=False,
         )
         mocker.patch(
-            "apps.slack.utils.report_open.Message.update_data",
+            "apps.slack.utils.report.Message.update_data",
             return_value=message,
         )
         mocker.patch(
-            "apps.slack.utils.report_open.Member.objects.get_or_create",
+            "apps.slack.utils.report.Member.objects.get_or_create",
             return_value=(Mock(), False),
         )
         ack = Mock()
@@ -247,7 +247,7 @@ class TestReportCommand:
     def test_uses_response_url_without_respond(self, mocker):
         """Test Report.handler falls back to response_url without a respond helper."""
         mocker.patch("apps.slack.commands.report.settings.SLACK_COMMANDS_ENABLED", new=True)
-        post_ephemeral = mocker.patch("apps.slack.utils.report_open.post_ephemeral_url")
+        post_ephemeral = mocker.patch("apps.slack.utils.report.post_ephemeral_url")
         ack = Mock()
         client = Mock()
 
