@@ -73,7 +73,7 @@ const SearchPageLayout = ({
               {filterChildren}
             </div>
           ))}
-        <div className="flex w-full justify-center md:w-[28rem] md:shrink-0">
+        <div className="mb-4 flex w-full justify-center md:mb-0 md:w-[28rem] md:shrink-0">
           <SearchBar
             isLoaded={!isFirstLoad}
             onSearch={onSearch}
@@ -98,7 +98,7 @@ const SearchPageLayout = ({
       {/* Mobile layout — max-w-md matches SearchBar so stacked controls align with search */}
       {(filterChildren || (inlineSort && sortChildren)) && (
         <div
-          className={`mx-auto mt-2 mb-4 flex w-full max-w-md items-stretch md:hidden ${
+          className={`mx-auto -mt-1 mb-4 flex w-full max-w-md items-stretch md:hidden ${
             inlineSort ? 'gap-0' : 'justify-between gap-4'
           }`}
         >
