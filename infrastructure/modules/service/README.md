@@ -4,13 +4,13 @@
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.56.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.57.1 |
 
 ## Providers
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.56.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.57.1 |
 
 ## Modules
 
@@ -44,7 +44,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether to assign public IPs to ECS tasks (required for public subnets). | `bool` | `false` | no |
 | <a name="input_auto_scaling_cpu_target"></a> [auto\_scaling\_cpu\_target](#input\_auto\_scaling\_cpu\_target) | Target average CPU utilization percentage for auto scaling. | `number` | `70` | no |
 | <a name="input_auto_scaling_scale_in_cooldown"></a> [auto\_scaling\_scale\_in\_cooldown](#input\_auto\_scaling\_scale\_in\_cooldown) | Cooldown period in seconds after a scale-in activity. | `number` | `300` | no |
 | <a name="input_auto_scaling_scale_out_cooldown"></a> [auto\_scaling\_scale\_out\_cooldown](#input\_auto\_scaling\_scale\_out\_cooldown) | Cooldown period in seconds after a scale-out activity. | `number` | `60` | no |
@@ -65,10 +64,10 @@ No modules.
 | <a name="input_max_count"></a> [max\_count](#input\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_min_count"></a> [min\_count](#input\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_parameters_arns"></a> [parameters\_arns](#input\_parameters\_arns) | Map of environment variable names to the ARNs of SSM parameters. | `map(string)` | `{}` | no |
+| <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | Private subnet IDs for ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | The ID of the security group for the service. | `string` | n/a | yes |
 | <a name="input_service_name"></a> [service\_name](#input\_service\_name) | The name of the service (e.g., backend, frontend). | `string` | n/a | yes |
-| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Subnet IDs for ECS tasks (can be public or private). | `list(string)` | n/a | yes |
 | <a name="input_target_group_arn"></a> [target\_group\_arn](#input\_target\_group\_arn) | The ARN of the ALB target group. | `string` | n/a | yes |
 | <a name="input_task_role_policy_arns"></a> [task\_role\_policy\_arns](#input\_task\_role\_policy\_arns) | A list of additional IAM policy ARNs to attach to the ECS task role. | `list(string)` | `[]` | no |
 | <a name="input_use_fargate_spot"></a> [use\_fargate\_spot](#input\_use\_fargate\_spot) | Whether to use Fargate Spot capacity provider. | `bool` | `false` | no |
