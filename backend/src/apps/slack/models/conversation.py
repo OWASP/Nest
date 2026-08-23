@@ -54,8 +54,18 @@ class Conversation(TimestampedModel):
 
     @property
     def is_public_channel(self) -> bool:
-        """Return True when Slack can unfurl message links for any workspace member."""
-        return not self.is_private and not self.is_im and not self.is_mpim
+        """Return True when Slack can unfurl message links for any workspace member.
+
+        Requires a known channel classification so unsynced G... stubs (and other
+        non-channel conversations) are not treated as public unfurl targets.
+        """
+        return (
+            self.is_channel
+            and not self.is_private
+            and not self.is_im
+            and not self.is_mpim
+            and not self.is_group
+        )
 
     @property
     def source_label(self) -> str:
@@ -119,13 +129,16 @@ class Conversation(TimestampedModel):
     @staticmethod
     def get_or_create(workspace: Workspace, channel_id: str) -> "Conversation":
         """Return an existing conversation or a minimal row for content reporting."""
+        # G... IDs are typically MPIMs (or legacy private groups). Treat stubs as
+        # MPIMs until conversations.info hydrates authoritative flags.
+        is_g = channel_id.startswith("G")
         conversation, created = Conversation.objects.get_or_create(
             slack_channel_id=channel_id,
             defaults={
                 "is_channel": channel_id.startswith("C"),
-                "is_group": channel_id.startswith("G"),
+                "is_group": is_g,
                 "is_im": channel_id.startswith("D"),
-                "is_mpim": False,
+                "is_mpim": is_g,
                 "name": "",
                 "slack_creator_id": "",
                 "sync_messages": False,

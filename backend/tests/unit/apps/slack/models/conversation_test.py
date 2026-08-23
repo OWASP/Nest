@@ -179,6 +179,7 @@ class TestConversationModel:
         assert group.is_public_channel is False
 
         named = Conversation(
+            is_channel=True,
             is_im=False,
             is_mpim=False,
             is_private=False,
@@ -197,13 +198,26 @@ class TestConversationModel:
             slack_channel_id="C123",
         )
         assert unnamed.source_label == "<#C123>"
+        assert unnamed.is_public_channel is False
+
+        group_stub = Conversation(
+            is_channel=False,
+            is_group=True,
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            name="",
+            slack_channel_id="G123",
+        )
+        assert group_stub.is_public_channel is False
 
         private = Conversation(
+            is_channel=True,
             is_im=False,
             is_mpim=False,
             is_private=True,
             name="secret",
-            slack_channel_id="G1",
+            slack_channel_id="C1",
         )
         assert private.is_public_channel is False
 
@@ -235,6 +249,20 @@ class TestConversationModel:
         assert kwargs["defaults"]["is_channel"] is False
         assert kwargs["defaults"]["is_mpim"] is False
         info.assert_called_once()
+
+    def test_get_or_create_creates_mpim_stub_for_g_channel(self, mocker):
+        """Test a missing G... channel creates an MPIM stub until Slack metadata hydrates."""
+        conversation = Mock()
+        workspace = Workspace(pk=1, slack_workspace_id="T1")
+        manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
+        manager.get_or_create.return_value = (conversation, True)
+        mocker.patch("apps.slack.models.conversation.logger.info")
+
+        assert Conversation.get_or_create(workspace, "G999") is conversation
+        _, kwargs = manager.get_or_create.call_args
+        assert kwargs["defaults"]["is_group"] is True
+        assert kwargs["defaults"]["is_mpim"] is True
+        assert kwargs["defaults"]["is_channel"] is False
 
     def test_get_or_create_rejects_workspace_mismatch(self, mocker):
         """Test existing conversations for another workspace are rejected."""

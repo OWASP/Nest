@@ -12,8 +12,9 @@ from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.common.models import TimestampedModel
 from apps.slack.blocks import markdown
+from apps.slack.common.text import ALERT_SECTION_BUDGET
 from apps.slack.enums import ReportSource, ReportType
-from apps.slack.modals.report import DM_MODERATOR_NOTE, alert_text_section
+from apps.slack.modals.report import alert_text_section, moderator_inaccessibility_note
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.message import Message
 from apps.slack.utils.reaction import mention_users
@@ -119,25 +120,34 @@ class ContentReport(TimestampedModel):
         category = (
             ReportType(report_type).label if report_type in ReportType.values else report_type
         )
-        sections = [
+        head = [
             ":bangbang: *New Content Report*",
             f"*Reported Content Origin:* {conversation.content_origin(author_id)}",
         ]
-        if text_section := alert_text_section(conversation, message.text, permalink):
-            sections.append(text_section)
-        sections.extend(
-            [
-                f"*Report Category:* {category}",
-                f"*Reported by:* <@{reporter_user_id}>",
-            ]
-        )
+        tail = [
+            f"*Report Category:* {category}",
+            f"*Reported by:* <@{reporter_user_id}>",
+        ]
         if permalink:
-            if conversation.is_im:
-                sections.append(f"*Permanent Link:* {permalink}")
+            if conversation.is_im or conversation.is_mpim:
+                tail.append(f"*Permanent Link:* {permalink}")
             else:
-                sections.append(permalink)
-        if conversation.is_im:
-            sections.append(DM_MODERATOR_NOTE)
+                tail.append(permalink)
+        if note := moderator_inaccessibility_note(conversation):
+            tail.append(note)
+
+        prefix = f"{alert_users}\n\n" if alert_users else ""
+        skeleton = "\n\n".join([*head, *tail])
+        preview_budget = ALERT_SECTION_BUDGET - len(prefix) - len(skeleton) - len("\n\n")
+        if text_section := alert_text_section(
+            conversation,
+            message.text,
+            permalink,
+            max_len=preview_budget,
+        ):
+            sections = [*head, text_section, *tail]
+        else:
+            sections = [*head, *tail]
         body = "\n\n".join(sections)
         if alert_users:
             return f"{alert_users}\n\n{body}"

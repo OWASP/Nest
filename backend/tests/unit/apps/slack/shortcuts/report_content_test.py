@@ -156,7 +156,7 @@ class TestContentReportUtils:
                         "values": {
                             "report_type": {
                                 "report_type": {
-                                    "selected_option": {"value": "harassment"},
+                                    "selected_option": {"value": "not_a_category"},
                                 }
                             }
                         }

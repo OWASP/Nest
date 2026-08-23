@@ -14,7 +14,4 @@ class ReportSource(models.TextChoices):
 class ReportType(models.TextChoices):
     """Content report category choices (emoji rules and content reports)."""
 
-    HARASSMENT = "harassment", "Harassment"
-    OFF_TOPIC = "off_topic", "Off-topic"
-    OTHER = "other", "Other"
     SPAM = "spam", "Spam"

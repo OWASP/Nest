@@ -12,8 +12,9 @@ if TYPE_CHECKING:
 
 NL = "\n"
 PREVIEW_LIMIT = 500
-# Leave headroom for other alert sections inside one Slack section block (~3000 max).
-ALERT_MESSAGE_TEXT_LIMIT = 2500
+# Slack section mrkdwn text max; leave headroom for format_links_for_slack expansion.
+SLACK_SECTION_TEXT_LIMIT = 3000
+ALERT_SECTION_BUDGET = 2900
 SLACK_LINK_PATTERN = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
 
 
@@ -114,6 +115,24 @@ def quote_mrkdwn(text: str) -> str:
     if not text:
         return ""
     return "\n".join(f">{line}" for line in text.split("\n"))
+
+
+def fit_quoted_mrkdwn(text: str, limit: int) -> str:
+    """Sanitize and quote text so the formatted result is at most limit characters."""
+    if limit <= 0:
+        return ""
+    raw = text or ""
+    low, high = 0, len(raw)
+    best = ""
+    while low <= high:
+        mid = (low + high) // 2
+        formatted = quote_mrkdwn(sanitize_mrkdwn(raw[:mid]))
+        if len(formatted) <= limit:
+            best = formatted
+            low = mid + 1
+        else:
+            high = mid - 1
+    return best
 
 
 def visible_len(text: str) -> int:

@@ -22,9 +22,6 @@ class TestReactionRule:
         """Test reaction rules use the shared ReportType choices."""
         assert ReportType.SPAM == "spam"
         assert ReportType.choices == [
-            ("harassment", "Harassment"),
-            ("off_topic", "Off-topic"),
-            ("other", "Other"),
             ("spam", "Spam"),
         ]
         assert ReactionRule._meta.get_field("report_type").choices == list(ReportType.choices)

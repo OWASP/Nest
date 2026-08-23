@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, Any
 
 from apps.slack.blocks import markdown
 from apps.slack.common.text import (
-    ALERT_MESSAGE_TEXT_LIMIT,
+    PREVIEW_LIMIT,
+    fit_quoted_mrkdwn,
     preview_text,
     quote_mrkdwn,
-    sanitize_mrkdwn,
     truncate_chars,
 )
 from apps.slack.enums import ReportSource, ReportType
@@ -42,7 +42,7 @@ NOT_VISIBLE_TEXT = (
     "or use `Connect to apps -> Report content` on the message."
 )
 DM_NOT_VISIBLE_TEXT = (
-    "NestBot cannot access direct messages. "
+    "NestBot cannot access direct messages or group chats. "
     "Use `Connect to apps -> Report content` on the message instead."
 )
 DM_MODERATOR_NOTE = (
@@ -50,6 +50,12 @@ DM_MODERATOR_NOTE = (
     "direct message. Use the reported content link for reference and the text "
     "preview for context."
 )
+MPIM_MODERATOR_NOTE = (
+    "Note: Message contents may not be available for review because this is a "
+    "group chat. Use the reported content link for reference and the text "
+    "preview for context."
+)
+TEXT_PREVIEW_LABEL = "*Text Preview:*\n"
 MODAL_OPEN_FAILED_TEXT = "Could not open the report dialog. Please try again."
 SUBMIT_FAILED_TEXT = "Could not submit the report. Please try again."
 
@@ -57,27 +63,34 @@ VALID_SOURCES = frozenset(ReportSource.values)
 
 
 def alert_text_section(
-    conversation: Conversation, message_text: str, permalink: str
+    conversation: Conversation,
+    message_text: str,
+    permalink: str,
+    *,
+    max_len: int,
 ) -> str | None:
     """Return a labeled message-text section for moderation alerts, or None to omit.
 
     Public channels with a permalink rely on Slack's link unfurl instead.
-    Direct / group messages include the full text (moderators cannot open them).
+    Direct / group messages include as much text as fits in max_len (formatted).
     Other inaccessible contexts use a truncated text preview.
     """
     if permalink and conversation.is_public_channel:
         return None
 
-    if conversation.is_im or conversation.is_mpim:
-        body = sanitize_mrkdwn(truncate_chars(message_text or "", ALERT_MESSAGE_TEXT_LIMIT))
-        if not body:
-            return None
-        return f"*Text Preview:*\n{quote_mrkdwn(body)}"
+    body_budget = max_len - len(TEXT_PREVIEW_LABEL)
+    if body_budget <= 0:
+        return None
 
-    quoted = preview_text(message_text)
+    if conversation.is_im or conversation.is_mpim:
+        raw = message_text or ""
+    else:
+        raw = truncate_chars(message_text or "", PREVIEW_LIMIT)
+
+    quoted = fit_quoted_mrkdwn(raw, body_budget)
     if not quoted:
         return None
-    return f"*Text Preview:*\n{quote_mrkdwn(quoted)}"
+    return f"{TEXT_PREVIEW_LABEL}{quoted}"
 
 
 def build_report_modal(
@@ -207,9 +220,19 @@ def get_inaccessible_message_error(
     """Return the error when NestBot cannot load a message for /report."""
     if conversation is not None and (conversation.is_im or conversation.is_mpim):
         return DM_NOT_VISIBLE_TEXT
-    if channel_id.startswith("D"):
+    # D... = IM; G... = MPIM / legacy group - NestBot cannot join these for users.
+    if channel_id.startswith(("D", "G")):
         return DM_NOT_VISIBLE_TEXT
     return NOT_VISIBLE_TEXT
+
+
+def moderator_inaccessibility_note(conversation: Conversation) -> str | None:
+    """Return the moderator note for conversations they typically cannot open."""
+    if conversation.is_im:
+        return DM_MODERATOR_NOTE
+    if conversation.is_mpim:
+        return MPIM_MODERATOR_NOTE
+    return None
 
 
 def selected_report_type(view: dict[str, Any]) -> str | None:

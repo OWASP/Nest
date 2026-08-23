@@ -79,6 +79,29 @@ def make_ephemeral(
     return ephemeral
 
 
+def resolve_conversation(
+    client: WebClient,
+    workspace: Workspace,
+    channel_id: str,
+) -> Conversation:
+    """Return a conversation, hydrating flags from Slack when conversations.info works."""
+    conversation = Conversation.get_or_create(workspace, channel_id)
+    try:
+        response = client.conversations_info(channel=channel_id)
+    except SlackClientError:
+        logger.warning(
+            "Could not hydrate conversation metadata for channel_id=%s",
+            channel_id,
+            exc_info=True,
+        )
+        return conversation
+
+    channel = response.get("channel") if response is not None else None
+    if not isinstance(channel, dict) or not channel.get("id"):
+        return conversation
+    return Conversation.update_data(channel, workspace, save=True)
+
+
 def open_report_content_modal(
     *,
     client: WebClient,
@@ -104,7 +127,7 @@ def open_report_content_modal(
         return
 
     try:
-        conversation = Conversation.get_or_create(workspace, channel_id)
+        conversation = resolve_conversation(client, workspace, channel_id)
     except ValueError:
         logger.exception(
             "Cannot open content report for channel_id=%s workspace=%s",
