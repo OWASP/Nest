@@ -32,6 +32,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 ALLOWED_RESPONSE_URL_HOSTS = frozenset({"hooks.slack.com"})
+WORKSPACE_MISMATCH_TEXT = (
+    "That message belongs to a different Slack workspace and cannot be reported here."
+)
 
 
 def is_allowed_response_url(response_url: str) -> bool:
@@ -99,17 +102,27 @@ def open_report_content_modal(
         ephemeral(text=MISSING_MESSAGE_TEXT)
         return
 
-    conversation = Conversation.get_or_create_for_report(workspace, channel_id)
+    try:
+        conversation = Conversation.get_or_create_for_report(workspace, channel_id)
+    except ValueError:
+        logger.exception(
+            "Cannot open content report for channel_id=%s workspace=%s",
+            channel_id,
+            workspace.slack_workspace_id,
+        )
+        ephemeral(text=WORKSPACE_MISMATCH_TEXT)
+        return
+
     if ContentReport.exists_for(conversation, message_ts):
         ephemeral(text=ALREADY_REPORTED_TEXT)
         return
 
     author = None
     if isinstance(author_id, str) and author_id:
-        author, _ = Member.objects.get_or_create(
+        author = Member.objects.get_or_create(
             slack_user_id=author_id,
             defaults={"workspace": workspace},
-        )
+        )[0]
     message = Message.update_data(message_payload, conversation, author=author)
     try:
         client.views_open(

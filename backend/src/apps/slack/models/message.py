@@ -27,6 +27,7 @@ ARCHIVE_PATH_RE = re.compile(
     re.IGNORECASE,
 )
 COMPACT_TS_FRACTION_DIGITS = 6
+MAX_THREAD_REPLY_PAGES = 10
 VISIBILITY_ERRORS = frozenset(
     {
         "channel_not_found",
@@ -197,13 +198,15 @@ class Message(TimestampedModel):
                 found = Message.find_in_api_list(response.get("messages") or [], message_ts)
 
             cursor: str | None = None
-            while found is None and thread_ts:
+            pages = 0
+            while found is None and thread_ts and pages < MAX_THREAD_REPLY_PAGES:
                 response = client.conversations_replies(
                     channel=channel_id,
                     ts=thread_ts,
                     limit=200,
                     cursor=cursor,
                 )
+                pages += 1
                 found = Message.find_in_api_list(response.get("messages") or [], message_ts)
                 cursor = (response.get("response_metadata") or {}).get("next_cursor") or None
                 if not cursor:
@@ -321,13 +324,17 @@ class Message(TimestampedModel):
 
     @staticmethod
     def unwrap_slack_link(raw: str) -> str:
-        """Strip Slack link markup and take the first URL-looking token."""
+        """Strip Slack link markup and return the URL, ignoring trailing text."""
         text = (raw or "").strip()
-        if text.startswith("<") and text.endswith(">"):
-            text = text[1:-1]
-            if "|" in text:
-                text = text.split("|", 1)[0]
-        return unquote(text.strip())
+        if text.startswith("<"):
+            end = text.find(">")
+            if end != -1:
+                text = text[1:end]
+                if "|" in text:
+                    text = text.split("|", 1)[0]
+                return unquote(text.strip())
+        token = text.split(None, 1)[0] if text else ""
+        return unquote(token)
 
     @staticmethod
     def update_data(

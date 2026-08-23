@@ -31,6 +31,7 @@ from apps.slack.utils.report_modal import (
     selected_report_type,
 )
 from apps.slack.utils.report_open import (
+    WORKSPACE_MISMATCH_TEXT,
     make_ephemeral,
     open_report_content_modal,
     post_ephemeral_url,
@@ -103,6 +104,10 @@ class TestContentReportUtils:
             "<https://owasp.slack.com/archives/C123ABC/p1700000000123456"
             "?thread_ts=1700000000.000100|message>"
         ) == ("C123ABC", "1700000000.123456", "1700000000.000100")
+        assert Message.parse_permalink(
+            "<https://owasp.slack.com/archives/C123ABC/p1700000000123456|link with spaces> "
+            "extra trailing text"
+        ) == ("C123ABC", "1700000000.123456", None)
         assert Message.parse_permalink("not-a-link") is None
 
     def test_is_self_report(self):
@@ -605,6 +610,31 @@ class TestReportContentHelpers:
             respond=respond,
         )
         respond.assert_called_once_with(text=MISSING_MESSAGE_TEXT, response_type="ephemeral")
+
+    def test_open_modal_workspace_mismatch(self, mocker):
+        """Test ValueError from conversation lookup becomes an ephemeral error."""
+        respond = Mock()
+        mocker.patch(
+            "apps.slack.utils.report_open.Conversation.get_or_create_for_report",
+            side_effect=ValueError("workspace mismatch"),
+        )
+
+        open_report_content_modal(
+            client=Mock(),
+            workspace=enabled_workspace(),
+            channel_id="C1",
+            message_payload={"ts": "1.0", "user": "U_OTHER"},
+            reporter_user_id="U_REP",
+            response_url="https://hooks.slack.com/r",
+            trigger_id="trig",
+            source=ReportSource.SHORTCUT,
+            respond=respond,
+        )
+
+        respond.assert_called_once_with(
+            text=WORKSPACE_MISMATCH_TEXT,
+            response_type="ephemeral",
+        )
 
     def test_open_modal_views_open_failure(self, mocker):
         """Test views_open failures send an ephemeral error."""

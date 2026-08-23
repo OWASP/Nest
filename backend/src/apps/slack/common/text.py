@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from html import escape as escape_html
 from typing import TYPE_CHECKING, Any
 
@@ -103,12 +104,47 @@ def get_text(blocks: Sequence[Mapping[str, Any]]) -> str:
 
 def preview_text(text: str, limit: int = PREVIEW_LIMIT) -> str:
     """Return a truncated, sanitized preview for modal and alert embeds."""
-    content = text or ""
-    if len(content) > limit:
-        ellipsis = "..."
-        keep = max(limit - len(ellipsis), 0)
-        content = f"{content[:keep]}{ellipsis}"
-    return sanitize_mrkdwn(content)
+    return sanitize_mrkdwn(truncate_chars(text or "", limit))
+
+
+def visible_len(text: str) -> int:
+    """Count characters the way Django Truncator.chars does (skip combining marks)."""
+    return sum(1 for char in text if not unicodedata.combining(char))
+
+
+def prefix_by_visible_len(text: str, limit: int) -> str:
+    """Return a prefix with at most limit non-combining characters."""
+    if limit <= 0:
+        return ""
+    visible = 0
+    end = 0
+    for index, char in enumerate(text):
+        if unicodedata.combining(char):
+            end = index + 1
+            continue
+        if visible >= limit:
+            break
+        visible += 1
+        end = index + 1
+    return text[:end]
+
+
+def truncate_chars(text: str, limit: int, ellipsis: str = "...") -> str:
+    """Truncate text to at most limit visible characters, dependency-free.
+
+    Mirrors Django Truncator.chars for NFC normalization and combining marks, and
+    caps the ellipsis so the result never exceeds the requested limit.
+    """
+    if limit <= 0:
+        return ""
+
+    text = unicodedata.normalize("NFC", text)
+    if visible_len(text) <= limit:
+        return text
+
+    ellipsis = prefix_by_visible_len(ellipsis, limit)
+    keep = limit - visible_len(ellipsis)
+    return f"{prefix_by_visible_len(text, keep)}{ellipsis}"
 
 
 def sanitize_mrkdwn(text: str) -> str:

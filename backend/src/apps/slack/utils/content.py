@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 import requests
 import yaml
 from django.core.cache import cache
-from lxml import html
+from lxml import etree, html
 from requests.exceptions import RequestException
 
 from apps.common.constants import OWASP_NEWS_URL
@@ -68,6 +68,8 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
     try:
         response = requests.get(OWASP_NEWS_URL, timeout=timeout)
         response.raise_for_status()
+        if not response.content:
+            return []
         tree = html.fromstring(response.content)
         h2_tags = tree.xpath("//h2")
 
@@ -89,6 +91,9 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
                 break
 
         cache.set(cache_key, items, timeout=CACHE_TTL_SECONDS)
+    except etree.ParserError:
+        logger.exception("Unable to parse OWASP news HTML", extra={"url": OWASP_NEWS_URL})
+        return []
     except RequestException:
         logger.exception("Unable to fetch OWASP news data", extra={"url": OWASP_NEWS_URL})
         return []
@@ -96,7 +101,7 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
         return items
 
 
-def _is_valid_staff_data(data: object) -> bool:
+def is_valid_staff_data(data: object) -> bool:
     """Return True when staff YAML parses to a list of dicts with name keys."""
     if not isinstance(data, list):
         return False
@@ -121,7 +126,7 @@ def get_staff_data(timeout: float | None = 30) -> list | None:
         response = requests.get(STAFF_YAML_URL, timeout=timeout)
         response.raise_for_status()
         data = yaml.safe_load(response.text)
-        if not _is_valid_staff_data(data):
+        if not is_valid_staff_data(data):
             logger.error(
                 "Unable to parse OWASP staff data file",
                 extra={"file_path": STAFF_YAML_URL},

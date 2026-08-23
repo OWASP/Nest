@@ -4,7 +4,7 @@ from slack_sdk.errors import SlackApiError, SlackClientError, SlackRequestError
 
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.member import Member
-from apps.slack.models.message import Message
+from apps.slack.models.message import MAX_THREAD_REPLY_PAGES, Message
 
 
 def create_model_mock(model_class):
@@ -308,6 +308,14 @@ class TestMessageModel:
             == "https://example.com/path"
         )
         assert Message.unwrap_slack_link("https://example.com") == "https://example.com"
+        assert (
+            Message.unwrap_slack_link("<https://example.com/path|label with spaces> trailing")
+            == "https://example.com/path"
+        )
+        assert (
+            Message.unwrap_slack_link("https://example.com/path trailing")
+            == "https://example.com/path"
+        )
 
     def test_parse_permalink_rejects_invalid_thread_ts(self):
         """Test invalid thread_ts query values are dropped."""
@@ -475,6 +483,20 @@ class TestMessageModel:
 
         assert Message.fetch_payload(client, "C1", "1.1", "1.0") is None
         assert client.conversations_replies.call_count == 3
+
+    def test_fetch_payload_thread_pagination_page_cap(self):
+        """Test fetch_payload stops after MAX_THREAD_REPLY_PAGES broad reply pages."""
+        client = Mock()
+        page = {
+            "messages": [{"ts": "1.0", "text": "parent"}],
+            "response_metadata": {"next_cursor": "next"},
+        }
+        client.conversations_replies.side_effect = [{"messages": []}, *[page] * 12]
+        client.conversations_history.return_value = {"messages": []}
+
+        assert Message.fetch_payload(client, "C1", "1.1", "1.0") is None
+        # One targeted replies call + MAX_THREAD_REPLY_PAGES broad pages.
+        assert client.conversations_replies.call_count == 1 + MAX_THREAD_REPLY_PAGES
 
     def test_fetch_payload_returns_none_when_missing(self):
         """Test fetch_payload returns None when Slack has no matching message."""

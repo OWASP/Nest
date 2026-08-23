@@ -3,7 +3,7 @@ from unittest.mock import ANY, MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.sponsors import Sponsors
+from apps.slack.commands.sponsors import SPONSOR_TIER_ORDER, Sponsors
 
 
 class MockSponsor:
@@ -69,7 +69,7 @@ class TestSponsorsHandler:
             mock_slack_client.chat_postMessage.assert_not_called()
             return
 
-        mock_sponsor_objects.order_by.assert_called_once()
+        mock_sponsor_objects.order_by.assert_called_once_with(SPONSOR_TIER_ORDER, "sort_name")
 
         if not has_sponsors_data:
             mock_slack_client.conversations_open.assert_called_once_with(

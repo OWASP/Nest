@@ -339,6 +339,17 @@ class TestGetNewsData:
         assert get_news_data() == []
         assert mock_get.call_count == 2
 
+    def test_get_news_data_empty_response_body(self, monkeypatch):
+        """Test get_news_data returns [] for HTTP 200 with an empty body."""
+        mock_response = Mock()
+        mock_response.content = b""
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data() == []
+        mock_get.assert_called_once_with(OWASP_NEWS_URL, timeout=30)
+
 
 class TestGetStaffData:
     def setup_method(self):

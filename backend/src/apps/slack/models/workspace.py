@@ -24,7 +24,6 @@ class Workspace(TimestampedModel):
         verbose_name="Content report alert channel ID",
         max_length=32,
         blank=True,
-        null=True,
         default="",
         help_text=(
             "Slack channel ID for content reports (e.g. C..., without #); "
