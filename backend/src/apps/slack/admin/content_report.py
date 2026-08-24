@@ -41,5 +41,5 @@ class ContentReportAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        """Allow content report deletion only in the local environment."""
-        return settings.IS_LOCAL_ENVIRONMENT
+        """Allow content report deletion only locally for users with delete permission."""
+        return settings.IS_LOCAL_ENVIRONMENT and super().has_delete_permission(request, obj)

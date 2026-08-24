@@ -130,11 +130,12 @@ class ContentReport(TimestampedModel):
         ]
         if permalink:
             if conversation.is_im or conversation.is_mpim:
-                tail.append(f"*Permanent Link:* {permalink}")
+                link_line = f"*Permanent Link:* {permalink}"
+                if note := moderator_inaccessibility_note(conversation):
+                    link_line = f"{link_line} ({note})"
+                tail.append(link_line)
             else:
                 tail.append(permalink)
-        if note := moderator_inaccessibility_note(conversation):
-            tail.append(note)
 
         prefix = f"{alert_users}\n\n" if alert_users else ""
         skeleton = "\n\n".join([*head, *tail])

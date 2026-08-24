@@ -294,10 +294,13 @@ class TestContentReport:
         assert ":bangbang: *New Content Report*" in text
         assert "*Reported From:* direct message by <@U_AUTHOR>" in text
         assert "*Reporter:* <@U_REP>" in text
-        assert "*Permanent Link:* https://example.slack.com/archives/D123/p1" in text
-        assert "Message contents may not be available for review" in text
-        assert "reported content link" in text
-        assert "content preview for context" in text
+        assert (
+            "*Permanent Link:* https://example.slack.com/archives/D123/p1 "
+            "(message contents may not be available for review because this is a "
+            "direct message. Use the reported content link for reference and the "
+            "content preview for context)"
+        ) in text
+        assert text.count("message contents may not be available for review") == 1
 
     def test_build_alert_text_includes_group_chat_handling_for_mpim(self, mocker):
         """Test MPIM alerts use permanent-link labeling and the group-chat moderator note."""
@@ -326,8 +329,12 @@ class TestContentReport:
 
         assert "*Content Preview:*\n>group spam" in text
         assert "*Reported From:* group chat by <@U_AUTHOR>" in text
-        assert "*Permanent Link:* https://example.slack.com/archives/G123/p1" in text
-        assert "because this is a group chat" in text
+        assert (
+            "*Permanent Link:* https://example.slack.com/archives/G123/p1 "
+            "(message contents may not be available for review because this is a "
+            "group chat. Use the reported content link for reference and the "
+            "content preview for context)"
+        ) in text
 
     def test_build_alert_text_keeps_formatted_dm_preview_within_section_budget(self, mocker):
         """Test DM content previews are clipped after formatting so the alert fits Slack limits."""
@@ -383,7 +390,8 @@ class TestContentReport:
         assert "*Reporter:* <@U_REP>" in text
         assert "*Content Preview:*" not in text
         assert "*Message Text:*" not in text
-        assert "Message contents may not be available for review" in text
+        assert "*Permanent Link:*" not in text
+        assert "message contents may not be available for review" not in text
         assert "https://" not in text
 
     def test_build_alert_text_omits_empty_preview_for_private_channel(self, mocker):

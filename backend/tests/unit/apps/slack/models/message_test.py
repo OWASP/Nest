@@ -316,6 +316,9 @@ class TestMessageModel:
             Message.unwrap_slack_link("https://example.com/path trailing")
             == "https://example.com/path"
         )
+        assert (
+            Message.unwrap_slack_link("<https://example.com/path") == "<https://example.com/path"
+        )
 
     def test_parse_permalink_rejects_invalid_thread_ts(self):
         """Test invalid thread_ts query values are dropped."""

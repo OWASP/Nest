@@ -30,7 +30,9 @@ DM_NOT_VISIBLE_TEXT = (
 )
 FEATURE_OFF_TEXT = "Content reporting is not configured."
 INVALID_LINK_TEXT = "That does not look like a Slack message link. Usage: /report <message link>"
-METADATA_UNAVAILABLE_TEXT = "Could not verify this conversation. Please try again in a moment."
+METADATA_UNAVAILABLE_TEXT = (
+    "Could not load this conversation's details. Please try again in a moment."
+)
 MISSING_MESSAGE_TEXT = "Could not load the reported message. Please try again."
 MODAL_OPEN_FAILED_TEXT = "Could not open the report dialog. Please try again."
 # Modal category options are intentionally spam-only for now.
@@ -226,7 +228,7 @@ def get_inaccessible_message_error(
 
 
 def moderator_inaccessibility_note(conversation: Conversation) -> str | None:
-    """Return the moderator note for conversations they typically cannot open."""
+    """Return parenthetical moderator context for conversations they often cannot open."""
     if conversation.is_im:
         kind = "direct message"
     elif conversation.is_mpim:
@@ -234,9 +236,9 @@ def moderator_inaccessibility_note(conversation: Conversation) -> str | None:
     else:
         return None
     return (
-        "Note: Message contents may not be available for review because this is a "
+        "message contents may not be available for review because this is a "
         f"{kind}. Use the reported content link for reference and the content "
-        "preview for context."
+        "preview for context"
     )
 
 

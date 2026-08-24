@@ -20,6 +20,7 @@ from apps.slack.shortcuts.report_content import (
     load_submission_context,
     post_content_report_alert,
 )
+from apps.slack.utils.report import WORKSPACE_MISMATCH_TEXT
 from tests.unit.apps.slack.conftest import disabled_workspace, enabled_workspace
 
 
@@ -578,6 +579,42 @@ class TestReportContentHelpers:
             is None
         )
         post.assert_called_once_with("https://hooks.slack.com/r", MISSING_MESSAGE_TEXT)
+
+    def test_load_submission_workspace_mismatch(self, mocker):
+        """Test submit path rejects conversations that belong to another workspace."""
+        conversation = Mock(slack_channel_id="C1")
+        message = Mock(
+            slack_message_id="1.0",
+            conversation=conversation,
+            raw_data={"user": "U_OTHER"},
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.decode_metadata",
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
+            return_value=enabled_workspace(),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Message.objects.select_related",
+            return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.resolve_conversation",
+            side_effect=ValueError("workspace mismatch"),
+        )
+        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+
+        assert (
+            load_submission_context(
+                {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
+                {"private_metadata": "x"},
+            )
+            is None
+        )
+        post.assert_called_once_with("https://hooks.slack.com/r", WORKSPACE_MISMATCH_TEXT)
 
     def test_load_submission_self_report(self, mocker):
         """Test submit path rejects self-reports."""

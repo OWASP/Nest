@@ -134,13 +134,27 @@ class TestConversationModel:
         assert conversation.slack_metadata_synced_at is not None
 
     def test_str_method(self):
-        # Create a conversation with a name
-        conversation = Conversation(
-            name="test-channel", workspace=Workspace(name="test-workspace")
+        """Test string representation for channels, DMs, and group chats."""
+        workspace = Workspace(name="test-workspace")
+        channel = Conversation(name="test-channel", workspace=workspace)
+        dm = Conversation(
+            is_im=True,
+            name="",
+            slack_channel_id="D123",
+            workspace=workspace,
         )
+        group_chat = Conversation(
+            is_mpim=True,
+            name="",
+            slack_channel_id="G123",
+            workspace=workspace,
+        )
+        unnamed = Conversation(name="", slack_channel_id="C123", workspace=workspace)
 
-        # Check __str__ returns the name
-        assert str(conversation) == "test-workspace #test-channel"
+        assert str(channel) == "test-workspace #test-channel"
+        assert str(dm) == "test-workspace DM (D123)"
+        assert str(group_chat) == "test-workspace group chat (G123)"
+        assert str(unnamed) == "test-workspace C123"
 
     def test_latest_message_property(self, mocker):
         """Test latest_message property returns the most recent message."""
@@ -237,6 +251,25 @@ class TestConversationModel:
         assert stub.has_slack_metadata is False
         assert stale.has_fresh_metadata is False
         assert stale.has_slack_metadata is True
+
+    def test_mark_direct_message_metadata(self, mocker):
+        """Test D-prefixed ids are classified as non-private IMs without Slack API data."""
+        conversation = Conversation(slack_channel_id="D123")
+        save = mocker.patch.object(conversation, "save")
+
+        assert conversation.mark_direct_message_metadata() is True
+        assert conversation.is_im is True
+        assert conversation.is_private is False
+        assert conversation.is_channel is False
+        assert conversation.is_group is False
+        assert conversation.is_mpim is False
+        assert conversation.slack_metadata_synced_at is not None
+        save.assert_called_once()
+        assert conversation.mark_direct_message_metadata() is True
+
+        channel = Conversation(slack_channel_id="C123")
+        assert channel.mark_direct_message_metadata() is False
+        assert channel.slack_metadata_synced_at is None
 
     def test_get_or_create_returns_existing(self, mocker):
         """Test existing conversations are reused for content reporting."""

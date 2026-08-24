@@ -25,10 +25,11 @@ class ConversationAdmin(admin.ModelAdmin):
             "Properties",
             {
                 "fields": (
-                    "is_private",
                     "is_archived",
                     "is_general",
+                    "is_im",
                     "is_nest_bot_assistant_enabled",
+                    "is_private",
                 )
             },
         ),
@@ -49,6 +50,7 @@ class ConversationAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "slack_channel_id",
+        "is_im",
         "created_at",
         "total_members_count",
     )

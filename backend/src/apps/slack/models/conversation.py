@@ -59,8 +59,14 @@ class Conversation(TimestampedModel):
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="channels")
 
     def __str__(self):
-        """Channel human readable representation."""
-        return f"{self.workspace} #{self.name}"
+        """Conversation human readable representation."""
+        if self.is_im:
+            return f"{self.workspace} DM ({self.slack_channel_id})"
+        if self.is_mpim:
+            return f"{self.workspace} group chat ({self.slack_channel_id})"
+        if self.name:
+            return f"{self.workspace} #{self.name}"
+        return f"{self.workspace} {self.slack_channel_id}"
 
     @property
     def has_fresh_metadata(self) -> bool:
@@ -140,6 +146,33 @@ class Conversation(TimestampedModel):
         self.slack_metadata_synced_at = timezone.now()
 
         self.workspace = workspace
+
+    def mark_direct_message_metadata(self) -> bool:
+        """Classify a D-prefixed conversation as a DM without conversations.info.
+
+        NestBot is not a member of user-to-user DMs, so conversations.info returns
+        channel_not_found. Slack channel ids starting with D are authoritative for IMs.
+        """
+        if not self.slack_channel_id.startswith("D"):
+            return False
+        self.is_channel = False
+        self.is_group = False
+        self.is_im = True
+        self.is_mpim = False
+        self.is_private = False
+        self.slack_metadata_synced_at = timezone.now()
+        self.save(
+            update_fields=[
+                "is_channel",
+                "is_group",
+                "is_im",
+                "is_mpim",
+                "is_private",
+                "nest_updated_at",
+                "slack_metadata_synced_at",
+            ]
+        )
+        return True
 
     @staticmethod
     def get_by_channel_id(channel_id: str, workspace: Workspace) -> "Conversation | None":

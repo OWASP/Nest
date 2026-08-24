@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import logging
+from http import HTTPStatus
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
-import requests
 from slack_sdk.errors import SlackClientError
+from slack_sdk.webhook import WebhookClient
 
 from apps.slack.modals.report import (
     ALREADY_REPORTED_TEXT,
@@ -37,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 ALLOWED_RESPONSE_URL_HOSTS = frozenset({"hooks.slack.com"})
 CONVERSATION_INFO_TIMEOUT_SECONDS = 1.5
+RESPONSE_URL_TIMEOUT_SECONDS = 5
 WORKSPACE_MISMATCH_TEXT = (
     "That message belongs to a different Slack workspace and cannot be reported here."
 )
@@ -103,34 +105,46 @@ def open_report_content_modal(
         ephemeral(text=MODAL_OPEN_FAILED_TEXT)
         return
 
-    view = report_modal_view(
-        client=client,
-        workspace=workspace,
-        channel_id=channel_id,
-        message_payload=message_payload,
-        author_id=author_id,
-        message_ts=message_ts,
-        response_url=response_url,
-        source=source,
-    )
+    try:
+        view = report_modal_view(
+            client=client,
+            workspace=workspace,
+            channel_id=channel_id,
+            message_payload=message_payload,
+            author_id=author_id,
+            message_ts=message_ts,
+            response_url=response_url,
+            source=source,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to build report_content modal for channel_id=%s",
+            channel_id,
+        )
+        view = build_error_modal(MODAL_OPEN_FAILED_TEXT)
     if not update_modal(client, view_id, view):
         ephemeral(text=MODAL_OPEN_FAILED_TEXT)
 
 
 def post_ephemeral_url(response_url: str, text: str) -> None:
-    """Post an ephemeral message to a Slack response_url."""
+    """Post an ephemeral message via Slack's response_url webhook."""
     if not is_allowed_response_url(response_url):
         logger.warning("Rejected disallowed content-report response_url host")
         return
     try:
-        response = requests.post(
-            response_url,
-            json={"text": text, "response_type": "ephemeral"},
-            timeout=5,
+        response = WebhookClient(response_url, timeout=RESPONSE_URL_TIMEOUT_SECONDS).send(
+            text=text,
+            response_type="ephemeral",
         )
-        response.raise_for_status()
-    except requests.RequestException:
+    except Exception:
         logger.exception("Failed to post content-report ephemeral response")
+        return
+    if response.status_code >= HTTPStatus.BAD_REQUEST:
+        logger.error(
+            "Content-report ephemeral response_url returned status_code=%s body=%s",
+            response.status_code,
+            response.body,
+        )
 
 
 def report_modal_view(
@@ -187,9 +201,15 @@ def resolve_conversation(
     Skips conversations.info when Slack metadata is already present and fresh so
     a slow refresh cannot burn the views_open trigger_id budget (~3s). Uses a
     short timeout when a refresh is required.
+
+    User-to-user DMs (D-prefixed ids) skip conversations.info: NestBot is not a
+    member of those conversations, so the API returns channel_not_found. The id
+    prefix is enough to classify them as non-private IMs for content reporting.
     """
     conversation = Conversation.get_or_create(workspace, channel_id)
     if conversation.has_fresh_metadata:
+        return conversation
+    if conversation.mark_direct_message_metadata():
         return conversation
 
     try:

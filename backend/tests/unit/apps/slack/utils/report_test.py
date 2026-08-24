@@ -1,8 +1,8 @@
 """Tests for Slack content-report open-path helpers."""
 
+from http import HTTPStatus
 from unittest.mock import Mock
 
-import requests
 from slack_sdk.errors import SlackApiError, SlackClientError
 
 from apps.slack.enums import ReportSource
@@ -17,12 +17,14 @@ from apps.slack.modals.report import (
 )
 from apps.slack.utils.report import (
     CONVERSATION_INFO_TIMEOUT_SECONDS,
+    RESPONSE_URL_TIMEOUT_SECONDS,
     WORKSPACE_MISMATCH_TEXT,
     is_allowed_response_url,
     make_ephemeral,
     open_report_content_modal,
     post_ephemeral_url,
     resolve_conversation,
+    update_modal,
 )
 from tests.unit.apps.slack.conftest import enabled_workspace
 
@@ -42,6 +44,7 @@ class TestResolveConversation:
         workspace = enabled_workspace()
         existing = Mock()
         existing.has_fresh_metadata = False
+        existing.mark_direct_message_metadata.return_value = False
         updated = Mock(is_private=False, is_mpim=True)
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
@@ -83,6 +86,7 @@ class TestResolveConversation:
         workspace = enabled_workspace()
         existing = Mock()
         existing.has_fresh_metadata = False
+        existing.mark_direct_message_metadata.return_value = False
         updated = Mock(is_private=False)
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
@@ -103,8 +107,9 @@ class TestResolveConversation:
         """Test SlackClientError keeps the existing conversation row."""
         client = Mock()
         workspace = enabled_workspace()
-        existing = Mock(is_private=False)
+        existing = Mock(is_private=False, slack_channel_id="G1")
         existing.has_fresh_metadata = False
+        existing.mark_direct_message_metadata.return_value = False
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
             return_value=existing,
@@ -113,12 +118,31 @@ class TestResolveConversation:
 
         assert resolve_conversation(client, workspace, "G1") is existing
 
+    def test_classifies_direct_messages_without_conversations_info(self, mocker):
+        """Test D-prefixed channels skip conversations.info and mark IM metadata."""
+        client = Mock()
+        workspace = enabled_workspace()
+        existing = Mock(slack_channel_id="D123")
+        existing.has_fresh_metadata = False
+        existing.mark_direct_message_metadata.return_value = True
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=existing,
+        )
+        update = mocker.patch("apps.slack.utils.report.Conversation.update_data")
+
+        assert resolve_conversation(client, workspace, "D123") is existing
+        existing.mark_direct_message_metadata.assert_called_once_with()
+        client.conversations_info.assert_not_called()
+        update.assert_not_called()
+
     def test_falls_back_on_malformed_response(self, mocker):
         """Test missing or non-dict channel payloads keep the existing conversation."""
         client = Mock()
         workspace = enabled_workspace()
-        existing = Mock()
+        existing = Mock(slack_channel_id="C1")
         existing.has_fresh_metadata = False
+        existing.mark_direct_message_metadata.return_value = False
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
             return_value=existing,
@@ -157,11 +181,11 @@ class TestReportOpenPathHelpers:
 
     def test_post_ephemeral_url_rejects_disallowed_host(self, mocker):
         """Test response_url hosts outside Slack hooks are rejected."""
-        post = mocker.patch("apps.slack.utils.report.requests.post")
+        webhook = mocker.patch("apps.slack.utils.report.WebhookClient")
 
         post_ephemeral_url("https://evil.example/r", "hi")
 
-        post.assert_not_called()
+        webhook.assert_not_called()
 
     def test_is_allowed_response_url_rejects_urlparse_errors(self, mocker):
         """Test malformed response_url values that raise during parse are rejected."""
@@ -174,21 +198,42 @@ class TestReportOpenPathHelpers:
 
     def test_post_ephemeral_url_swallows_request_errors(self, mocker):
         """Test response_url failures are logged and ignored."""
-        mocker.patch(
-            "apps.slack.utils.report.requests.post",
-            side_effect=requests.RequestException("boom"),
+        client = Mock()
+        client.send.side_effect = SlackClientError("boom")
+        mocker.patch("apps.slack.utils.report.WebhookClient", return_value=client)
+
+        post_ephemeral_url("https://hooks.slack.com/r", "hi")
+
+        client.send.assert_called_once_with(text="hi", response_type="ephemeral")
+
+    def test_post_ephemeral_url_logs_error_status(self, mocker):
+        """Test non-2xx response_url status codes are logged without raising."""
+        client = Mock()
+        client.send.return_value = Mock(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, body="error")
+        webhook = mocker.patch("apps.slack.utils.report.WebhookClient", return_value=client)
+        logger = mocker.patch("apps.slack.utils.report.logger")
+
+        post_ephemeral_url("https://hooks.slack.com/r", "hi")
+
+        webhook.assert_called_once_with(
+            "https://hooks.slack.com/r",
+            timeout=RESPONSE_URL_TIMEOUT_SECONDS,
         )
+        client.send.assert_called_once_with(text="hi", response_type="ephemeral")
+        logger.error.assert_called_once()
+
+    def test_post_ephemeral_url_success(self, mocker):
+        """Test successful response_url posts via WebhookClient."""
+        client = Mock()
+        client.send.return_value = Mock(status_code=HTTPStatus.OK, body="ok")
+        mocker.patch("apps.slack.utils.report.WebhookClient", return_value=client)
+        logger = mocker.patch("apps.slack.utils.report.logger")
+
         post_ephemeral_url("https://hooks.slack.com/r", "hi")
 
-    def test_post_ephemeral_url_raises_for_status(self, mocker):
-        """Test non-2xx response_url posts are treated as request failures."""
-        response = Mock()
-        response.raise_for_status.side_effect = requests.HTTPError("500")
-        mocker.patch("apps.slack.utils.report.requests.post", return_value=response)
-
-        post_ephemeral_url("https://hooks.slack.com/r", "hi")
-
-        response.raise_for_status.assert_called_once_with()
+        client.send.assert_called_once_with(text="hi", response_type="ephemeral")
+        logger.error.assert_not_called()
+        logger.exception.assert_not_called()
 
     def test_open_modal_missing_message_ts(self):
         """Test open path rejects payloads without a message timestamp."""
@@ -243,6 +288,7 @@ class TestReportOpenPathHelpers:
         client.views_open.return_value = {"view": {"id": "V1"}}
         conversation = Mock(is_private=False)
         conversation.has_fresh_metadata = False
+        conversation.mark_direct_message_metadata.return_value = False
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
             return_value=conversation,
@@ -284,6 +330,7 @@ class TestReportOpenPathHelpers:
         client.views_open.return_value = {"view": {"id": "V1"}}
         conversation = Mock(is_private=False, has_slack_metadata=False)
         conversation.has_fresh_metadata = False
+        conversation.mark_direct_message_metadata.return_value = False
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
             return_value=conversation,
@@ -362,6 +409,104 @@ class TestReportOpenPathHelpers:
 
         respond.assert_called_once_with(text=MODAL_OPEN_FAILED_TEXT, response_type="ephemeral")
         client.views_update.assert_not_called()
+
+    def test_open_modal_views_open_without_view_id(self, mocker):
+        """Test views_open without a view id sends an ephemeral error."""
+        respond = Mock()
+        client = Mock()
+        client.views_open.return_value = {"view": {}}
+
+        open_report_content_modal(
+            client=client,
+            workspace=enabled_workspace(),
+            channel_id="C1",
+            message_payload={"ts": "1.0", "user": "U_OTHER"},
+            reporter_user_id="U_REP",
+            response_url="https://hooks.slack.com/r",
+            trigger_id="trig",
+            source=ReportSource.SHORTCUT,
+            respond=respond,
+        )
+
+        respond.assert_called_once_with(text=MODAL_OPEN_FAILED_TEXT, response_type="ephemeral")
+        client.views_update.assert_not_called()
+
+    def test_open_modal_build_failure_updates_error_view(self, mocker):
+        """Test construction failures after views_open replace the loading modal."""
+        respond = Mock()
+        client = Mock()
+        client.views_open.return_value = {"view": {"id": "V1"}}
+        mocker.patch(
+            "apps.slack.utils.report.report_modal_view",
+            side_effect=RuntimeError("build failed"),
+        )
+
+        open_report_content_modal(
+            client=client,
+            workspace=enabled_workspace(),
+            channel_id="C1",
+            message_payload={"ts": "1.0", "user": "U_OTHER"},
+            reporter_user_id="U_REP",
+            response_url="https://hooks.slack.com/r",
+            trigger_id="trig",
+            source=ReportSource.SHORTCUT,
+            respond=respond,
+        )
+
+        client.views_update.assert_called_once_with(
+            view_id="V1",
+            view=build_error_modal(MODAL_OPEN_FAILED_TEXT),
+        )
+        respond.assert_not_called()
+
+    def test_open_modal_views_update_failure(self, mocker):
+        """Test views_update failures send an ephemeral after the loading modal opens."""
+        respond = Mock()
+        client = Mock()
+        client.views_open.return_value = {"view": {"id": "V1"}}
+        client.views_update.side_effect = SlackClientError("timeout")
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=synced_conversation(),
+        )
+        mocker.patch(
+            "apps.slack.utils.report.ContentReport.exists_for",
+            return_value=False,
+        )
+        mocker.patch(
+            "apps.slack.utils.report.Message.update_data",
+            return_value=Mock(pk=1, text="hi", raw_data={"user": "U_OTHER"}),
+        )
+        mocker.patch(
+            "apps.slack.utils.report.Member.objects.get_or_create",
+            return_value=(Mock(), False),
+        )
+        mocker.patch(
+            "apps.slack.utils.report.build_report_modal",
+            return_value={"type": "modal"},
+        )
+
+        open_report_content_modal(
+            client=client,
+            workspace=enabled_workspace(),
+            channel_id="C1",
+            message_payload={"ts": "1.0", "user": "U_OTHER"},
+            reporter_user_id="U_REP",
+            response_url="https://hooks.slack.com/r",
+            trigger_id="trig",
+            source=ReportSource.SHORTCUT,
+            respond=respond,
+        )
+
+        client.views_update.assert_called_once()
+        respond.assert_called_once_with(text=MODAL_OPEN_FAILED_TEXT, response_type="ephemeral")
+
+    def test_update_modal_client_error(self):
+        """Test update_modal returns False when Slack rejects views_update."""
+        client = Mock()
+        client.views_update.side_effect = SlackClientError("timeout")
+
+        assert update_modal(client, "V1", {"type": "modal"}) is False
 
     def test_open_modal_views_open_client_error(self, mocker):
         """Test SlackClientError from views_open sends an ephemeral error."""
