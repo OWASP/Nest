@@ -83,6 +83,7 @@ class TestReportContentShortcut:
         respond = Mock()
         client = Mock()
         conversation = Mock(is_private=False)
+        conversation.has_fresh_metadata = True
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
             return_value=enabled_workspace(content_report_alert_channel_id="C_ALERT"),
@@ -122,7 +123,13 @@ class TestReportContentShortcut:
             content_report_alert_channel_id="C_ALERT",
             slack_workspace_id="T1",
         )
-        conversation = Mock(is_im=True, is_mpim=False, is_private=False, slack_channel_id="D1")
+        conversation = Mock(
+            is_im=True,
+            is_mpim=False,
+            is_private=False,
+            slack_channel_id="D1",
+        )
+        conversation.has_fresh_metadata = True
         message = Mock(pk=5, text="spam text", raw_data={"user": "U_OTHER"})
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",

@@ -85,12 +85,16 @@ def resolve_conversation(
     workspace: Workspace,
     channel_id: str,
 ) -> Conversation:
-    """Return a conversation after loading privacy flags from Slack when possible.
+    """Return a conversation, refreshing privacy flags from Slack when needed.
 
-    Always calls conversations.info with a short timeout so private-channel
-    status is current before the report modal opens.
+    Skips conversations.info when Slack metadata is already present and fresh so
+    a slow refresh cannot burn the views_open trigger_id budget (~3s). Uses a
+    short timeout when a refresh is required.
     """
     conversation = Conversation.get_or_create(workspace, channel_id)
+    if conversation.has_fresh_metadata:
+        return conversation
+
     try:
         response = client.conversations_info(
             channel=channel_id,

@@ -2,8 +2,9 @@ from datetime import UTC, datetime
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
+from django.utils import timezone
 
-from apps.slack.models.conversation import Conversation
+from apps.slack.models.conversation import METADATA_MAX_AGE, Conversation
 from apps.slack.models.workspace import Workspace
 
 
@@ -220,6 +221,22 @@ class TestConversationModel:
             slack_channel_id="C1",
         )
         assert private.is_public_channel is False
+
+    def test_has_fresh_metadata(self):
+        """Test freshness requires Slack created_at and a recent nest_updated_at."""
+        fresh = Conversation(
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+            nest_updated_at=timezone.now(),
+        )
+        stub = Conversation(created_at=None, nest_updated_at=timezone.now())
+        stale = Conversation(
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+            nest_updated_at=timezone.now() - METADATA_MAX_AGE,
+        )
+
+        assert fresh.has_fresh_metadata is True
+        assert stub.has_fresh_metadata is False
+        assert stale.has_fresh_metadata is False
 
     def test_get_or_create_returns_existing(self, mocker):
         """Test existing conversations are reused for content reporting."""

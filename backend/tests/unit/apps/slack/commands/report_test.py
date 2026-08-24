@@ -291,7 +291,13 @@ class TestReportCommand:
             content_report_alert_channel_id="C_ALERT",
             slack_workspace_id="T1",
         )
-        conversation = Mock(is_im=False, is_mpim=False, is_private=False, slack_channel_id="C123")
+        conversation = Mock(
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            slack_channel_id="C123",
+        )
+        conversation.has_fresh_metadata = True
         message = Mock(pk=7, text="spam", raw_data={"user": "U_OTHER", "ts": "1700000000.123456"})
         mocker.patch(
             "apps.slack.commands.report.Workspace.get_by_workspace_id",

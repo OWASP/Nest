@@ -1,10 +1,11 @@
 """Slack app conversation model."""
 
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from django.db import models
+from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.slack.models.workspace import Workspace
@@ -13,6 +14,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from apps.slack.models.message import Message
 
 logger = logging.getLogger(__name__)
+
+# How long conversations.info results can be reused on the report open path.
+METADATA_MAX_AGE = timedelta(minutes=5)
 
 
 class Conversation(TimestampedModel):
@@ -53,6 +57,13 @@ class Conversation(TimestampedModel):
         return f"{self.workspace} #{self.name}"
 
     @property
+    def has_fresh_metadata(self) -> bool:
+        """Return True when Slack metadata was loaded recently enough to reuse."""
+        if self.created_at is None:
+            return False
+        return timezone.now() - self.nest_updated_at < METADATA_MAX_AGE
+
+    @property
     def is_public_channel(self) -> bool:
         """Return True when Slack can unfurl message links for any workspace member.
 
@@ -68,6 +79,11 @@ class Conversation(TimestampedModel):
         )
 
     @property
+    def latest_message(self) -> "Message | None":
+        """Get the latest message in the conversation."""
+        return self.messages.order_by("-created_at").first()
+
+    @property
     def source_label(self) -> str:
         """Return conversation label for content-report Reported From fields."""
         if self.is_im:
@@ -78,16 +94,16 @@ class Conversation(TimestampedModel):
             return f"#{self.name}"
         return f"<#{self.slack_channel_id}>"
 
+    @staticmethod
+    def bulk_save(conversations, fields=None):
+        """Bulk save conversations."""
+        BulkSaveModel.bulk_save(Conversation, conversations, fields=fields)
+
     def content_origin(self, author_id: str | None = None) -> str:
         """Return Reported From text: location, optionally trailed by author."""
         if author_id:
             return f"{self.source_label} by <@{author_id}>"
         return self.source_label
-
-    @property
-    def latest_message(self) -> "Message | None":
-        """Get the latest message in the conversation."""
-        return self.messages.order_by("-created_at").first()
 
     def from_slack(self, conversation_data, workspace: Workspace) -> None:
         """Update instance based on Slack conversation data."""
@@ -112,11 +128,6 @@ class Conversation(TimestampedModel):
         self.total_members_count = conversation_data.get("num_members", 0)
 
         self.workspace = workspace
-
-    @staticmethod
-    def bulk_save(conversations, fields=None):
-        """Bulk save conversations."""
-        BulkSaveModel.bulk_save(Conversation, conversations, fields=fields)
 
     @staticmethod
     def get_by_channel_id(channel_id: str, workspace: Workspace) -> "Conversation | None":

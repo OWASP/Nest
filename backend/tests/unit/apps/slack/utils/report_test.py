@@ -29,6 +29,7 @@ class TestResolveConversation:
         client = Mock()
         workspace = enabled_workspace()
         existing = Mock()
+        existing.has_fresh_metadata = False
         updated = Mock(is_private=False, is_mpim=True)
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
@@ -48,11 +49,50 @@ class TestResolveConversation:
         )
         update.assert_called_once_with(channel, workspace, save=True)
 
+    def test_skips_conversations_info_when_metadata_is_fresh(self, mocker):
+        """Test fresh Slack metadata skips the network call on the trigger path."""
+        client = Mock()
+        workspace = enabled_workspace()
+        existing = Mock(is_private=False)
+        existing.has_fresh_metadata = True
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=existing,
+        )
+        update = mocker.patch("apps.slack.utils.report.Conversation.update_data")
+
+        assert resolve_conversation(client, workspace, "C1") is existing
+        client.conversations_info.assert_not_called()
+        update.assert_not_called()
+
+    def test_refreshes_when_metadata_is_stale(self, mocker):
+        """Test stale Slack metadata still triggers conversations.info."""
+        client = Mock()
+        workspace = enabled_workspace()
+        existing = Mock()
+        existing.has_fresh_metadata = False
+        updated = Mock(is_private=False)
+        mocker.patch(
+            "apps.slack.utils.report.Conversation.get_or_create",
+            return_value=existing,
+        )
+        channel = {"id": "C1", "is_private": False, "is_channel": True}
+        client.conversations_info.return_value = {"channel": channel}
+        update = mocker.patch(
+            "apps.slack.utils.report.Conversation.update_data",
+            return_value=updated,
+        )
+
+        assert resolve_conversation(client, workspace, "C1") is updated
+        client.conversations_info.assert_called_once()
+        update.assert_called_once_with(channel, workspace, save=True)
+
     def test_falls_back_on_slack_client_error(self, mocker):
         """Test SlackClientError keeps the existing conversation row."""
         client = Mock()
         workspace = enabled_workspace()
         existing = Mock(is_private=False)
+        existing.has_fresh_metadata = False
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
             return_value=existing,
@@ -66,6 +106,7 @@ class TestResolveConversation:
         client = Mock()
         workspace = enabled_workspace()
         existing = Mock()
+        existing.has_fresh_metadata = False
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
             return_value=existing,
@@ -182,9 +223,11 @@ class TestReportOpenPathHelpers:
         """Test open path rejects private channels."""
         respond = Mock()
         client = Mock()
+        conversation = Mock(is_private=False)
+        conversation.has_fresh_metadata = False
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(is_private=False),
+            return_value=conversation,
         )
         client.conversations_info.return_value = {
             "channel": {"id": "C_PRIV", "is_private": True, "is_channel": True},
@@ -221,9 +264,11 @@ class TestReportOpenPathHelpers:
             message="fail",
             response={"ok": False, "error": "invalid_trigger"},
         )
+        conversation = Mock(is_private=False)
+        conversation.has_fresh_metadata = True
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(is_private=False),
+            return_value=conversation,
         )
         mocker.patch(
             "apps.slack.utils.report.ContentReport.exists_for",
@@ -257,9 +302,11 @@ class TestReportOpenPathHelpers:
         respond = Mock()
         client = Mock()
         client.views_open.side_effect = SlackClientError("timeout")
+        conversation = Mock(is_private=False)
+        conversation.has_fresh_metadata = True
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(is_private=False),
+            return_value=conversation,
         )
         mocker.patch(
             "apps.slack.utils.report.ContentReport.exists_for",
@@ -300,14 +347,16 @@ class TestReportOpenPathHelpers:
         """Test open path works when the message has no author user id."""
         respond = Mock()
         client = Mock()
+        conversation = Mock(
+            is_im=False,
+            is_mpim=False,
+            is_private=False,
+            slack_channel_id="C1",
+        )
+        conversation.has_fresh_metadata = True
         mocker.patch(
             "apps.slack.utils.report.Conversation.get_or_create",
-            return_value=Mock(
-                is_im=False,
-                is_mpim=False,
-                is_private=False,
-                slack_channel_id="C1",
-            ),
+            return_value=conversation,
         )
         mocker.patch(
             "apps.slack.utils.report.ContentReport.exists_for",
