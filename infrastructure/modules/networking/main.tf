@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.56.0"
+      version = "~> 6.57.1"
     }
   }
 }
@@ -49,7 +49,6 @@ resource "aws_internet_gateway" "main" {
 }
 
 resource "aws_eip" "nat" {
-  count      = var.enable_nat_gateway ? 1 : 0
   depends_on = [aws_internet_gateway.main]
   domain     = "vpc"
   tags = merge(var.common_tags, {
@@ -58,13 +57,25 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-  count         = var.enable_nat_gateway ? 1 : 0
-  allocation_id = aws_eip.nat[0].id
+  allocation_id = aws_eip.nat.id
   depends_on    = [aws_internet_gateway.main]
   subnet_id     = aws_subnet.public[0].id
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-nat"
   })
+}
+
+# Used to migrate production state.
+# Remove both moved blocks after next production release.
+# (Latest release: 2026.08.17)
+moved {
+  from = aws_eip.nat[0]
+  to   = aws_eip.nat
+}
+
+moved {
+  from = aws_nat_gateway.main[0]
+  to   = aws_nat_gateway.main
 }
 
 resource "aws_route_table" "public" {
@@ -85,12 +96,9 @@ resource "aws_route_table" "private" {
   })
   vpc_id = aws_vpc.main.id
 
-  dynamic "route" {
-    for_each = var.enable_nat_gateway ? [1] : []
-    content {
-      cidr_block     = "0.0.0.0/0"
-      nat_gateway_id = aws_nat_gateway.main[0].id
-    }
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main.id
   }
 }
 

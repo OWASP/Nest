@@ -144,14 +144,14 @@ jobs:
 
       - name: Attest backend SBOM
         id: attest-backend-sbom
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6  # v4.2.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d  # v4.2.1
         with:
           sbom-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
           subject-path: backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
 
       - name: Attest frontend SBOM
         id: attest-frontend-sbom
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6  # v4.2.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d  # v4.2.1
         with:
           sbom-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
           subject-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json

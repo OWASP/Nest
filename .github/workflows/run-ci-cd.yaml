@@ -69,10 +69,6 @@ on:
         description: Enable cron tasks
         required: true
         type: boolean
-      enable_nat_gateway:
-        description: Enable NAT gateway
-        required: true
-        type: boolean
       enable_rds_proxy:
         description: Enable RDS proxy
         required: true
@@ -310,7 +306,6 @@ jobs:
       django_settings_module: ${{ inputs.django_settings_module }}
       enable_additional_parameters: ${{ inputs.enable_additional_parameters }}
       enable_cron_tasks: ${{ inputs.enable_cron_tasks }}
-      enable_nat_gateway: ${{ inputs.enable_nat_gateway }}
       enable_rds_proxy: ${{ inputs.enable_rds_proxy }}
       environment: ${{ inputs.environment }}
       frontend_desired_count: ${{ inputs.frontend_desired_count }}

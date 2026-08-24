@@ -1,7 +1,13 @@
 display_information:
   name: OWASP Nest
-  description: Your gateway to OWASP
-  background_color: '#293559'
+  description: Your gateway to OWASP. Discover, engage, and help shape the future!
+  background_color: '#1d293d'
+  long_description: "OWASP NestBot is the OWASP community assistant integrated directly into Slack. It helps contributors, chapter leaders, project maintainers,\
+    \ and newcomers quickly find information, navigate OWASP resources, and stay productive.\r\n\r\nNestBot can:\r\n  - Answer questions about OWASP projects,\
+    \ chapters, events, and guidelines\r\n  - Provide helpful summaries and context for issues, repositories, and documents\r\n  - Assist with contributor\
+    \ onboarding and point to the right resources\r\n  - Surface relevant information from OWASP Nest, including issues, analytics, and project metadata\r\
+    \n\r\nBuilt on top of OWASP Nest data, NestBot is designed to improve collaboration, reduce friction, and make it easier for anyone to contribute to\
+    \ OWASP."
 features:
   app_home:
     home_tab_enabled: true
@@ -121,8 +127,10 @@ oauth_config:
       - im:write
       - mpim:read
       - mpim:write
+      - reactions:read
       - reactions:write
       - users:read
+  pkce_enabled: false
 settings:
   event_subscriptions:
     request_url: https://nest.owasp.org/integrations/slack/events/
@@ -134,10 +142,12 @@ settings:
       - app_mention
       - member_joined_channel
       - message.channels
+      - reaction_added
       - team_join
   interactivity:
     is_enabled: true
     request_url: https://nest.owasp.org/integrations/slack/interactivity/
+  is_mcp_enabled: false
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false
