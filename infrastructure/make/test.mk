@@ -37,6 +37,7 @@ infrastructure-test-image-build:
 infrastructure-test-unit:
 	@$(MAKE) infrastructure-test-image-build
 	@docker run --rm \
+		-v "$(CURDIR)/docker:/home/owasp/docker:ro" \
 		-v "$(CURDIR)/infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap" \
 		-v "$(CURDIR)/infrastructure/live:/home/owasp/infrastructure/live" \
 		-v "$(CURDIR)/infrastructure/modules:/home/owasp/infrastructure/modules" \

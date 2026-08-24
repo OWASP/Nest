@@ -45,6 +45,9 @@ misconfigurations:
   - id: AVD-AWS-0176  # IAM DB auth deferred; app uses Secrets Manager credentials today
     paths:
       - infrastructure/modules/database/main.tf
+  - id: AVD-AWS-0178  # Throwaway VPC fixture for module tests; flow logs are not applicable
+    paths:
+      - infrastructure/modules/observability/tests/setup/main.tf
   - id: AVD-AWS-0342  # EventBridge PassRole required to run ECS tasks
     paths:
       - infrastructure/modules/tasks/main.tf

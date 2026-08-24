@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.53.0"
+      version = "~> 6.56.0"
     }
   }
 }
@@ -33,5 +33,6 @@ resource "aws_security_group" "app" {
 }
 
 resource "aws_kms_key" "main" {
-  description = "Test key for the observability integration tests."
+  description         = "Test key for the observability integration tests."
+  enable_key_rotation = true
 }
