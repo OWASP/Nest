@@ -1,1 +1,1 @@
-FROM aquasec/trivy:0.69.3
+FROM aquasec/trivy:0.72.0@sha256:cffe3f5161a47a6823fbd23d985795b3ed72a4c806da4c4df16266c02accdd6f

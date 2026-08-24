@@ -1,0 +1,214 @@
+name: Code checks
+
+on:
+  workflow_call:
+    inputs:
+      check_docker_compose:
+        description: Run Docker Compose check (merge queue)
+        required: false
+        type: boolean
+        default: false
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-cspell-checks:
+    name: CSpell
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86  # v6.0.10
+        with:
+          package_json_file: cspell/package.json
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          cache: pnpm
+          cache-dependency-path: cspell/pnpm-lock.yaml
+          node-version: 24
+
+      - name: Install CSpell dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+        working-directory: cspell
+
+      - name: Run CSpell
+        run: make cspell
+    timeout-minutes: 5
+
+  run-dependency-checks:
+    name: Dependency
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-dependency-checks.yaml
+
+  run-eslint-checks:
+    name: ESLint
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install tooling dependencies
+        uses: ./.github/actions/install-tooling-dependencies
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Run ESLint check
+        run: make eslint
+    timeout-minutes: 5
+
+  run-pre-commit-checks:
+    name: Pre-commit
+    env:
+      MYPY_CACHE_DIR: /home/runner/.cache/mypy
+      TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          cache: pip
+          cache-dependency-path: tools/requirements/pre-commit.txt
+          python-version: '3.13'
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          key: pre-commit-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/pre-commit
+
+      - name: Cache mypy
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          key: mypy-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.pre-commit-config.yaml', 'backend/pyproject.toml', 'backend/poetry.lock') }}
+          path: ${{ env.MYPY_CACHE_DIR }}
+          restore-keys: |
+            mypy-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Install pre-commit
+        run: python -m pip install --require-hashes --requirement tools/requirements/pre-commit.txt
+
+      - name: Setup Terraform environment
+        uses: ./.github/actions/setup-terraform-environment
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@6e1e0642c0289bd619021bf6b34e3c08ed1e005a  # v6.3.0
+        env:
+          RUNNER_OS: ${{ runner.os }}-${{ runner.arch }}
+        with:
+          cache: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tflint_config_path: infrastructure/.tflint.hcl
+          tflint_version: v0.60.0
+
+      - name: Ensure mypy cache directory exists
+        run: mkdir -p "$MYPY_CACHE_DIR"
+
+      - name: Run pre-commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make pre-commit
+    timeout-minutes: 5
+
+  run-prettier-checks:
+    name: Prettier
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install tooling dependencies
+        uses: ./.github/actions/install-tooling-dependencies
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/install-frontend-dependencies
+
+      - name: Run Prettier check
+        run: make prettier
+    timeout-minutes: 5
+
+  run-docker-compose-check:
+    name: Docker Compose
+    if: inputs.check_docker_compose
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          cache: pip
+          cache-dependency-path: .github/requirements/scripts.txt
+          python-version: '3.13'
+
+      - name: Install GitHub script dependencies
+        run: python -m pip install --require-hashes --requirement .github/requirements/scripts.txt
+
+      - name: Check Docker Compose
+        run: python .github/scripts/docker_compose_check.py
+    timeout-minutes: 5
+
+  run-repository-checks:
+    name: Repository
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run Trivy repository check
+        uses: ./.github/actions/run-trivy-check
+        with:
+          command: make security-repository-scan-trivy
+    timeout-minutes: 5
+
+  run-semgrep-checks:
+    name: Semgrep
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run Semgrep security scan
+        run: make security-sast-scan-semgrep
+    timeout-minutes: 5

@@ -5,12 +5,13 @@ import { useMutation } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import { addToast } from '@heroui/toast'
+import { Tooltip } from '@heroui/tooltip'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 
 const DELETE_MODULE_MUTATION = gql`
   mutation DeleteModule($programKey: String!, $moduleKey: String!) {
@@ -65,11 +66,6 @@ const EntityActions: React.FC<EntityActionsProps> = ({
           router.push(`/my/mentorship/programs/${programKey}/modules/${moduleKey}/edit`)
         }
         break
-      case 'view_issues':
-        if (moduleKey) {
-          router.push(`/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues`)
-        }
-        break
       case 'delete_module':
         setDeleteModalOpen(true)
         break
@@ -97,17 +93,17 @@ const EntityActions: React.FC<EntityActionsProps> = ({
 
         update(cache) {
           const existing = cache.readQuery({
-            query: GetProgramAndModulesDocument,
+            query: GetManagementProgramAndModulesDocument,
             variables: { programKey },
           })
 
-          if (existing?.getProgramModules) {
+          if (existing?.managementProgramModules) {
             cache.writeQuery({
-              query: GetProgramAndModulesDocument,
+              query: GetManagementProgramAndModulesDocument,
               variables: { programKey },
               data: {
                 ...existing,
-                getProgramModules: existing.getProgramModules.filter(
+                managementProgramModules: existing.managementProgramModules.filter(
                   (module) => module.key !== moduleKey
                 ),
               },
@@ -164,8 +160,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
             : []),
         ]
       : [
-          { key: 'edit_module', label: 'Edit' },
-          ...(isAdmin || isMentor ? [{ key: 'view_issues', label: 'View Issues' }] : []),
+          ...(isAdmin || isMentor ? [{ key: 'edit_module', label: 'Edit' }] : []),
           ...(isAdmin
             ? [{ key: 'delete_module', label: 'Delete', className: 'text-red-500' }]
             : []),
@@ -219,6 +214,14 @@ const EntityActions: React.FC<EntityActionsProps> = ({
     }
   }
 
+  const getRoleLabel = () => {
+    if (isAdmin) return 'Admin actions'
+    if (isMentor) return 'Mentor actions'
+    return null
+  }
+
+  const roleLabel = getRoleLabel()
+
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -234,20 +237,29 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   return (
     <>
       <div className="relative" ref={dropdownRef}>
-        <button
-          ref={triggerButtonRef}
-          type="button"
-          onClick={handleToggle}
-          className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-          aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
-          aria-expanded={dropdownOpen}
-          aria-haspopup="true"
+        <Tooltip
+          closeDelay={100}
+          content={roleLabel}
+          delay={100}
+          isDisabled={!roleLabel}
+          placement="bottom"
+          showArrow
         >
-          <FaEllipsisV className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200" />
-        </button>
+          <button
+            ref={triggerButtonRef}
+            type="button"
+            onClick={handleToggle}
+            className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+            aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
+            aria-expanded={dropdownOpen}
+            aria-haspopup="true"
+          >
+            <FaEllipsisV className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100" />
+          </button>
+        </Tooltip>
         {dropdownOpen && (
           <div
-            className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+            className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
             onKeyDown={handleKeyDown}
             role="menu"
             tabIndex={0}
@@ -270,7 +282,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
                   role="menuitem"
                   tabIndex={focusIndex === index ? 0 : -1}
                   onClick={handleMenuItemClick}
-                  className={`block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 ${
+                  className={`block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 ${
                     option.className || ''
                   }`}
                 >

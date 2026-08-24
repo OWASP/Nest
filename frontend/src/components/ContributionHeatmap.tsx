@@ -1,3 +1,4 @@
+import type { ApexTooltipCustomOpts } from 'apexcharts'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React, { useMemo } from 'react'
@@ -147,12 +148,12 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   states: {
     hover: {
       filter: {
-        type: 'none',
+        type: 'none' as const,
       },
     },
     active: {
       filter: {
-        type: 'none',
+        type: 'none' as const,
       },
     },
   },
@@ -179,16 +180,11 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
     style: {
       fontSize: '12px',
     },
-    custom: ({
-      seriesIndex,
-      dataPointIndex,
-      w,
-    }: {
-      seriesIndex: number
-      dataPointIndex: number
-      w: { config: { series: Array<{ data: Array<{ y: number; date: string }> }> } }
-    }) => {
-      const data = w.config.series[seriesIndex].data[dataPointIndex]
+    custom: ({ seriesIndex, dataPointIndex, w }: ApexTooltipCustomOpts) => {
+      const series = w.config.series as unknown as Array<{
+        data: Array<{ y: number; date: string }>
+      }>
+      const data = series?.[seriesIndex]?.data?.[dataPointIndex]
       if (!data) return ''
 
       const count = data.y

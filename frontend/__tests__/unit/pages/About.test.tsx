@@ -107,9 +107,9 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tools',
       tools: {
-        ansible: {
-          icon: '/images/icons/ansible.svg',
-          url: 'https://www.ansible.com/',
+        terraform: {
+          icon: '/images/icons/terraform.svg',
+          url: 'https://www.terraform.io/',
         },
         gitHub: {
           icon: '/images/icons/github.svg',
@@ -394,12 +394,12 @@ describe('About Component', () => {
     expect(screen.getByText('Tests')).toBeInTheDocument()
     expect(screen.getByText('Tools')).toBeInTheDocument()
 
-    expect(screen.getByText('Ansible')).toBeInTheDocument()
+    expect(screen.getByText('Terraform')).toBeInTheDocument()
     expect(screen.getByText('GitHub')).toBeInTheDocument()
     expect(screen.getByText('Next.js')).toBeInTheDocument()
 
-    const ansibleLink = screen.getByText('Ansible').closest('a')
-    expect(ansibleLink).toHaveAttribute('href', 'https://www.ansible.com/')
+    const terraformLink = screen.getByText('Terraform').closest('a')
+    expect(terraformLink).toHaveAttribute('href', 'https://www.terraform.io/')
 
     const githubLink = screen.getByText('GitHub').closest('a')
     expect(githubLink).toHaveAttribute('href', 'https://www.github.com/')
@@ -407,8 +407,8 @@ describe('About Component', () => {
     const reactLink = screen.getByText('Next.js').closest('a')
     expect(reactLink).toHaveAttribute('href', 'https://nextjs.org/')
 
-    const ansibleIconContainer = screen.getByText('Ansible').previousSibling
-    expect(ansibleIconContainer).toBeInTheDocument()
+    const terraformIconContainer = screen.getByText('Terraform').previousSibling
+    expect(terraformIconContainer).toBeInTheDocument()
 
     const githubIconContainer = screen.getByText('GitHub').previousSibling
     expect(githubIconContainer).toBeInTheDocument()

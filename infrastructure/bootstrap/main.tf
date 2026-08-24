@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.14.0"
+  required_version = "~> 1.15.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.36.0"
+      version = "~> 6.57.1"
     }
   }
 }
@@ -15,24 +15,23 @@ locals {
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
-  environments = toset(var.environments)
+
+  # IAM managed policy size limit in characters
+  iam_policy_size_limit = 6144
 }
 
 data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "part_one" {
-  for_each = local.environments
-
   statement {
     sid    = "GlobalDiscovery"
     effect = "Allow"
     actions = [
       "acm:DescribeCertificate",
       "application-autoscaling:DescribeScalableTargets",
+      "application-autoscaling:DescribeScalingActivities",
       "application-autoscaling:DescribeScalingPolicies",
       "ec2:Describe*",
-      "ec2:DescribeFlowLogs",
-      "ec2:DescribeNetworkAcls",
       "ecr:DescribeRepositories",
       "ecs:DescribeTaskDefinition",
       "elasticache:DescribeCacheClusters",
@@ -70,22 +69,7 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "AppAutoscalingManagement"
-    effect = "Allow"
-    actions = [
-      "application-autoscaling:DeleteScalingPolicy",
-      "application-autoscaling:DeregisterScalableTarget",
-      "application-autoscaling:ListTagsForResource",
-      "application-autoscaling:PutScalingPolicy",
-      "application-autoscaling:RegisterScalableTarget",
-      "application-autoscaling:TagResource",
-      "application-autoscaling:UntagResource",
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "CloudWatchLogsManagement"
+    sid    = "CWLogsManagement"
     effect = "Allow"
     actions = [
       "logs:AssociateKmsKey",
@@ -114,7 +98,7 @@ data "aws_iam_policy_document" "part_one" {
       "dynamodb:PutItem",
     ]
     resources = [
-      "arn:aws:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/${var.project_name}-${each.key}-terraform-state-lock",
+      "arn:aws:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/${var.project_name}-${var.environment}-terraform-state-lock",
     ]
   }
 
@@ -133,10 +117,10 @@ data "aws_iam_policy_document" "part_one" {
       "elasticache:RemoveTagsFromResource",
     ]
     resources = [
-      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster:${var.project_name}-${each.key}-*",
-      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parametergroup:*",
-      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:replicationgroup:${var.project_name}-${each.key}-*",
-      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subnetgroup:${var.project_name}-${each.key}-*",
+      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster:${var.project_name}-${var.environment}-*",
+      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parametergroup:${var.project_name}-${var.environment}-*",
+      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:replicationgroup:${var.project_name}-${var.environment}-*",
+      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subnetgroup:${var.project_name}-${var.environment}-*",
     ]
   }
 
@@ -226,7 +210,7 @@ data "aws_iam_policy_document" "part_one" {
       "ecr:UploadLayerPart",
     ]
     resources = [
-      "arn:aws:ecr:*:${data.aws_caller_identity.current.account_id}:repository/${var.project_name}-${each.key}-*",
+      "arn:aws:ecr:*:${data.aws_caller_identity.current.account_id}:repository/${var.project_name}-${var.environment}-*",
     ]
   }
 
@@ -243,20 +227,7 @@ data "aws_iam_policy_document" "part_one" {
       "ecs:UntagResource",
       "ecs:UpdateCluster",
     ]
-    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster/${var.project_name}-${each.key}-*"]
-  }
-
-  statement {
-    sid    = "ECSGlobal"
-    effect = "Allow"
-    actions = [
-      "ecs:DeregisterTaskDefinition",
-      "ecs:ListClusters",
-      "ecs:ListTaskDefinitions",
-      "ecs:RegisterTaskDefinition",
-      "ecs:TagResource",
-    ]
-    resources = ["*"]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster/${var.project_name}-${var.environment}-*"]
   }
 
   statement {
@@ -270,10 +241,10 @@ data "aws_iam_policy_document" "part_one" {
       "ecs:UpdateService"
     ]
     resources = [
-      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${each.key}-*:*",
-      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:service/${var.project_name}-${each.key}-*/*",
-      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster/${var.project_name}-${each.key}-*",
-      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task/${var.project_name}-${each.key}-*/*"
+      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster/${var.project_name}-${var.environment}-*",
+      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:service/${var.project_name}-${var.environment}-*/*",
+      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*",
+      "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task/${var.project_name}-${var.environment}-*/*"
     ]
   }
 
@@ -286,22 +257,107 @@ data "aws_iam_policy_document" "part_one" {
       "ecs:DescribeServices",
       "ecs:UpdateService",
     ]
-    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:service/${var.project_name}-${each.key}-*/*"]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:service/${var.project_name}-${var.environment}-*/*"]
   }
 
   statement {
-    sid    = "ECSTaskDefinition"
+    sid    = "ECSTaskDef"
     effect = "Allow"
     actions = [
       "ecs:DescribeTaskDefinition",
       "ecs:TagResource",
     ]
-    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${each.key}-*:*"]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*"]
+  }
+
+  statement {
+    sid    = "RDSManagement"
+    effect = "Allow"
+    actions = [
+      "rds:AddTagsToResource",
+      "rds:CreateDBInstance",
+      "rds:CreateDBProxy",
+      "rds:CreateDBProxyTargetGroup",
+      "rds:CreateDBSubnetGroup",
+      "rds:DeleteDBInstance",
+      "rds:DeleteDBProxy",
+      "rds:DeleteDBProxyTargetGroup",
+      "rds:DeleteDBSubnetGroup",
+      "rds:DeregisterDBProxyTargets",
+      "rds:ListTagsForResource",
+      "rds:ModifyDBInstance",
+      "rds:ModifyDBProxy",
+      "rds:ModifyDBProxyTargetGroup",
+      "rds:ModifyDBSubnetGroup",
+      "rds:RegisterDBProxyTargets",
+      "rds:RemoveTagsFromResource",
+    ]
+    resources = [
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${var.environment}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${var.environment}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:target-group:${var.project_name}-${var.environment}-*",
+    ]
   }
 }
 
 data "aws_iam_policy_document" "part_two" {
-  for_each = local.environments
+  statement {
+    sid    = "AppAutoscalingManagement"
+    effect = "Allow"
+    actions = [
+      "application-autoscaling:DeleteScalingPolicy",
+      "application-autoscaling:DeregisterScalableTarget",
+      "application-autoscaling:ListTagsForResource",
+      "application-autoscaling:PutScalingPolicy",
+      "application-autoscaling:RegisterScalableTarget",
+      "application-autoscaling:TagResource",
+      "application-autoscaling:UntagResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "IAMCreateECSAutoScalingSLR"
+    effect = "Allow"
+    actions = [
+      "iam:CreateServiceLinkedRole",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:AWSServiceName"
+      values   = ["ecs.application-autoscaling.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid    = "CWAutoscalingAlarms"
+    effect = "Allow"
+    actions = [
+      "cloudwatch:DeleteAlarms",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:PutMetricAlarm",
+    ]
+    resources = [
+      "arn:aws:cloudwatch:${var.aws_region}:${data.aws_caller_identity.current.account_id}:alarm:TargetTracking-service/${var.project_name}-${var.environment}-*",
+    ]
+  }
+
+  statement {
+    sid    = "ECSGlobal"
+    effect = "Allow"
+    actions = [
+      "ecs:DeregisterTaskDefinition",
+      "ecs:ListClusters",
+      "ecs:ListTaskDefinitions",
+      "ecs:RegisterTaskDefinition",
+    ]
+    resources = ["*"]
+  }
 
   statement {
     sid    = "ELBManagement"
@@ -328,7 +384,12 @@ data "aws_iam_policy_document" "part_two" {
       "elasticloadbalancing:SetRulePriorities",
       "elasticloadbalancing:SetSecurityGroups",
     ]
-    resources = ["*"]
+    resources = [
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener-rule/app/${var.project_name}-${var.environment}-*/*/*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:listener/app/${var.project_name}-${var.environment}-*/*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.project_name}-${var.environment}-*/*",
+      "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:targetgroup/${var.project_name}-${var.environment}-*/*",
+    ]
   }
 
   statement {
@@ -346,7 +407,7 @@ data "aws_iam_policy_document" "part_two" {
       "events:UntagResource",
     ]
     resources = [
-      "arn:aws:events:*:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-${each.key}-*",
+      "arn:aws:events:*:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-${var.environment}-*",
     ]
   }
 
@@ -380,10 +441,10 @@ data "aws_iam_policy_document" "part_two" {
       "iam:UpdateRole",
     ]
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-${each.key}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-*-${each.key}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${each.key}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${each.key}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-*-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${var.environment}-*",
     ]
   }
 
@@ -394,8 +455,8 @@ data "aws_iam_policy_document" "part_two" {
       "iam:PassRole",
     ]
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${each.key}-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${each.key}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${var.environment}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-*-${var.environment}-*",
     ]
     condition {
       test     = "StringEquals"
@@ -433,6 +494,7 @@ data "aws_iam_policy_document" "part_two" {
     effect = "Allow"
     actions = [
       "kms:Decrypt",
+      "kms:Encrypt",
       "kms:GenerateDataKey",
       "kms:UpdateKeyDescription",
     ]
@@ -443,8 +505,8 @@ data "aws_iam_policy_document" "part_two" {
       variable = "kms:ResourceAliases"
       values = [
         "alias/${var.project_name}-state",
-        "alias/${var.project_name}-${each.key}-state",
-        "alias/${var.project_name}-${each.key}"
+        "alias/${var.project_name}-${var.environment}-state",
+        "alias/${var.project_name}-${var.environment}"
       ]
     }
   }
@@ -463,48 +525,14 @@ data "aws_iam_policy_document" "part_two" {
     ]
   }
 
-
-  statement {
-    sid    = "RDSManagement"
-    effect = "Allow"
-    actions = [
-      "rds:AddTagsToResource",
-      "rds:CreateDBInstance",
-      "rds:CreateDBProxy",
-      "rds:CreateDBProxyTargetGroup",
-      "rds:CreateDBSubnetGroup",
-      "rds:DeleteDBInstance",
-      "rds:DeleteDBProxy",
-      "rds:DeleteDBProxyTargetGroup",
-      "rds:DeleteDBSubnetGroup",
-      "rds:DeregisterDBProxyTargets",
-      "rds:ListTagsForResource",
-      "rds:ModifyDBInstance",
-      "rds:ModifyDBProxy",
-      "rds:ModifyDBProxyTargetGroup",
-      "rds:ModifyDBSubnetGroup",
-      "rds:RegisterDBProxyTargets",
-      "rds:RemoveTagsFromResource",
-    ]
-    resources = [
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:target-group:*",
-    ]
-  }
-
   statement {
     sid    = "S3Management"
     effect = "Allow"
     actions = [
-      "s3:CreateBucket",
-      "s3:DeleteBucket",
-      "s3:DeleteBucketPolicy",
-      "s3:DeleteObject",
       "s3:GetAccelerateConfiguration",
       "s3:GetBucketAcl",
       "s3:GetBucketCors",
+      "s3:GetBucketLocation",
       "s3:GetBucketLogging",
       "s3:GetBucketObjectLockConfiguration",
       "s3:GetBucketOwnershipControls",
@@ -517,9 +545,27 @@ data "aws_iam_policy_document" "part_two" {
       "s3:GetEncryptionConfiguration",
       "s3:GetLifecycleConfiguration",
       "s3:GetObject",
+      "s3:GetObjectVersion",
       "s3:GetReplicationConfiguration",
       "s3:ListBucket",
       "s3:ListBucketVersions",
+    ]
+    resources = [
+      "arn:aws:s3:::${var.project_name}-${var.environment}-*",
+      "arn:aws:s3:::${var.project_name}-${var.environment}-*/*",
+      "arn:aws:s3:::${var.shared_data_bucket_name}",
+      "arn:aws:s3:::${var.shared_data_bucket_name}/*",
+    ]
+  }
+
+  statement {
+    sid    = "S3WriteManagement"
+    effect = "Allow"
+    actions = [
+      "s3:CreateBucket",
+      "s3:DeleteBucket",
+      "s3:DeleteBucketPolicy",
+      "s3:DeleteObject",
       "s3:PutBucketAcl",
       "s3:PutBucketLogging",
       "s3:PutBucketObjectLockConfiguration",
@@ -532,14 +578,20 @@ data "aws_iam_policy_document" "part_two" {
       "s3:PutLifecycleConfiguration",
       "s3:PutObject",
     ]
-    resources = [
-      "arn:aws:s3:::${var.project_name}-${each.key}-*",
-      "arn:aws:s3:::${var.project_name}-${each.key}-*/*",
-      "arn:aws:s3:::${var.shared_data_bucket_name}",
-      "arn:aws:s3:::${var.shared_data_bucket_name}/*",
-    ]
+    resources = concat(
+      [
+        "arn:aws:s3:::${var.project_name}-${var.environment}-*",
+        "arn:aws:s3:::${var.project_name}-${var.environment}-*/*",
+      ],
+      var.environment == "production" ? [
+        "arn:aws:s3:::${var.shared_data_bucket_name}",
+        "arn:aws:s3:::${var.shared_data_bucket_name}/*",
+      ] : []
+    )
   }
+}
 
+data "aws_iam_policy_document" "part_three" {
   statement {
     sid    = "SecretsManagerManagement"
     effect = "Allow"
@@ -555,7 +607,10 @@ data "aws_iam_policy_document" "part_two" {
       "secretsmanager:UntagResource",
       "secretsmanager:UpdateSecret",
     ]
-    resources = ["arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${each.key}-*"]
+    resources = [
+      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${var.environment}-*",
+      "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:/${var.project_name}/${var.environment}/*",
+    ]
   }
 
   statement {
@@ -570,17 +625,14 @@ data "aws_iam_policy_document" "part_two" {
       "ssm:PutParameter",
       "ssm:RemoveTagsFromResource",
     ]
-    resources = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${each.key}/*"]
+    resources = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"]
   }
 }
 
 resource "aws_iam_role" "terraform" {
-  for_each = local.environments
-
-  name = "${var.project_name}-${each.key}-terraform"
+  name = "${var.project_name}-${var.environment}-terraform"
   tags = merge(local.common_tags, {
-    Environment = each.key
-    Name        = "${var.project_name}-${each.key}-terraform"
+    Name = "${var.project_name}-${var.environment}-terraform"
   })
 
   assume_role_policy = jsonencode({
@@ -595,7 +647,7 @@ resource "aws_iam_role" "terraform" {
         }
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.project_name}-${each.key}"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.project_name}-${var.environment}"
         }
       },
     ]
@@ -603,25 +655,52 @@ resource "aws_iam_role" "terraform" {
 }
 
 resource "aws_iam_policy" "part_one" {
-  for_each = local.environments
-  name     = "${var.project_name}-${each.key}-part-one-terraform"
-  policy   = data.aws_iam_policy_document.part_one[each.key].json
+  name   = "${var.project_name}-${var.environment}-part-one-terraform"
+  policy = data.aws_iam_policy_document.part_one.minified_json
+
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_iam_policy_document.part_one.minified_json) <= local.iam_policy_size_limit
+      error_message = "part_one minified policy is ${length(data.aws_iam_policy_document.part_one.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+    }
+  }
 }
 
 resource "aws_iam_policy" "part_two" {
-  for_each = local.environments
-  name     = "${var.project_name}-${each.key}-part-two-terraform"
-  policy   = data.aws_iam_policy_document.part_two[each.key].json
+  name   = "${var.project_name}-${var.environment}-part-two-terraform"
+  policy = data.aws_iam_policy_document.part_two.minified_json
+
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_iam_policy_document.part_two.minified_json) <= local.iam_policy_size_limit
+      error_message = "part_two minified policy is ${length(data.aws_iam_policy_document.part_two.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+    }
+  }
+}
+
+resource "aws_iam_policy" "part_three" {
+  name   = "${var.project_name}-${var.environment}-part-three-terraform"
+  policy = data.aws_iam_policy_document.part_three.minified_json
+
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_iam_policy_document.part_three.minified_json) <= local.iam_policy_size_limit
+      error_message = "part_three minified policy is ${length(data.aws_iam_policy_document.part_three.minified_json)} characters, exceeding the IAM managed policy size limit of ${local.iam_policy_size_limit} characters."
+    }
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "attach_part_one" {
-  for_each   = local.environments
-  role       = aws_iam_role.terraform[each.key].name
-  policy_arn = aws_iam_policy.part_one[each.key].arn
+  role       = aws_iam_role.terraform.name
+  policy_arn = aws_iam_policy.part_one.arn
 }
 
 resource "aws_iam_role_policy_attachment" "attach_part_two" {
-  for_each   = local.environments
-  role       = aws_iam_role.terraform[each.key].name
-  policy_arn = aws_iam_policy.part_two[each.key].arn
+  role       = aws_iam_role.terraform.name
+  policy_arn = aws_iam_policy.part_two.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_part_three" {
+  role       = aws_iam_role.terraform.name
+  policy_arn = aws_iam_policy.part_three.arn
 }

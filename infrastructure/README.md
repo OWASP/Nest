@@ -62,24 +62,20 @@ Follow these steps to set up the infrastructure:
     cd infrastructure/bootstrap/
     ```
 
-- Copy the contents from the template file into your new local terraform variables file:
+  > [!NOTE]
+  > The following steps bootstrap the **staging** environment's IAM role. Bootstrapping **production** requires identical steps using the production-specific files (`terraform.production.tfbackend.example` and `terraform.production.tfvars.example`).
+
+- Copy the example files into your local configuration files (for staging):
 
     ```bash
-    cp terraform.tfvars.example terraform.tfvars
+    cp terraform.staging.tfbackend.example terraform.tfbackend
+    cp terraform.staging.tfvars.example terraform.tfvars
     ```
 
   > [!NOTE]
-  > Update `AWS_ROLE_EXTERNAL_ID` in `terraform.tfvars` with a randomly generated ID of your choice.
-  > This ID is required in the next step.
-
-- Copy the contents from the template file into your new terraform backend file:
-
-    ```bash
-    cp terraform.tfbackend.example terraform.tfbackend
-    ```
-
-  > [!NOTE]
-  > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (`state_bucket_names["bootstrap"]`) created in the state creation step.
+  > - Update `REPLACE_WITH_TF_STATE_BUCKET_NAME` in `terraform.tfbackend` with the name of the state bucket (`state_bucket_names["bootstrap"]`) created in the state creation step.
+  > - Update `AWS_ROLE_EXTERNAL_ID` in `terraform.tfvars` with a randomly generated ID of your choice.
+  > - This ID is required when configuring the main infrastructure profile in the next step.
 
 - Initialize Terraform if needed:
 
@@ -191,7 +187,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend + Sche
 - Build the backend image using the following command:
 
     ```bash
-    docker build -t nest-staging-backend:latest -f docker/backend/Dockerfile backend/
+    docker build -t nest-staging-backend:latest --target backend -f docker/backend/Dockerfile backend/
     ```
 
 - Tag the image:
@@ -264,8 +260,6 @@ Run the following commands to execute ECS tasks with the correct network configu
 CLUSTER=$(terraform output -raw tasks_cluster_name)
 SECURITY_GROUP=$(terraform output -raw tasks_security_group_id)
 SUBNETS=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')
-NAT_ENABLED=$(terraform output -raw nat_gateway_enabled)
-ASSIGN_PUBLIC_IP=$([ "$NAT_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
 ```
 
 > [!NOTE]
@@ -279,7 +273,7 @@ ASSIGN_PUBLIC_IP=$([ "$NAT_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABL
 aws ecs run-task \
   --cluster "$CLUSTER" \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
   --task-definition nest-staging-migrate \
   --region AWS_REGION
 ```
@@ -290,7 +284,7 @@ aws ecs run-task \
 aws ecs run-task \
   --cluster "$CLUSTER" \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
   --task-definition nest-staging-load-data \
   --region AWS_REGION
 ```
@@ -301,7 +295,7 @@ aws ecs run-task \
 aws ecs run-task \
   --cluster "$CLUSTER" \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
   --task-definition nest-staging-index-data \
   --region AWS_REGION
 ```
@@ -317,9 +311,9 @@ aws ecs run-task \
   - Environment: Cluster: `nest-staging-tasks-cluster`
   - Networking:
     - VPC: `nest-staging-vpc`
-    - Subnets: Choose a private subnet if NAT Gateway is enabled, public otherwise (default).
+    - Subnets: Choose a private subnet.
     - Security group name: select the ECS security group (e.g. `nest-staging-tasks-sg`).
-    - Public IP: Turned off if NAT Gateway is enabled, Turned on otherwise (default).
+    - Public IP: Turned off.
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.
@@ -377,6 +371,49 @@ aws ecs run-task \
         --region AWS_REGION
     ```
 
+## Testing
+
+Local Make targets use Docker (like backend). CI runs Poetry + Terraform directly on the runner for speed (cached plugins/venv, no image build).
+
+The Terraform CLI version is pinned via the `hashicorp/terraform` image digest in `docker/code-checks/Dockerfile` and `docker/infrastructure/Dockerfile.tests` (keep those in sync; Dependabot tracks both). CI installs the same tag via `setup-terraform-environment`. Run `make check-terraform-version` to verify module `required_version` constraints match the pin.
+
+### Unit Testing
+
+These tests use a mock AWS provider and validate variable constraints, name formatting, and structure without creating actual cloud resources or contacting any APIs.
+
+Locally, `make test-infrastructure-unit` builds the shared `nest-test-infrastructure` image from `docker/infrastructure/Dockerfile.tests` (Poetry + Terraform), mounts `bootstrap`, `live`, `modules`, `scripts`, `state`, and `tests` from the host, and runs:
+
+1. The runner's pytest suite
+2. Terraform unit tests via `python -m scripts.run_tests --unit`
+
+```bash
+make test-infrastructure-unit
+```
+
+Rebuild the image when `infrastructure/poetry.lock` (or Terraform version) changes; source edits do not require a rebuild.
+
+### Integration Testing (with LocalStack)
+
+Integration tests deploy resources against LocalStack to verify IAM policies, SSM/KMS interactions, and resource wiring. Locally, `make test-infrastructure-integration` reuses `nest-test-infrastructure`, starts LocalStack via Compose, and runs `--integration`.
+
+#### Prerequisite
+
+- Docker running locally
+- `LOCALSTACK_AUTH_TOKEN` set (if unset, the Make target skips integration tests)
+
+```bash
+export LOCALSTACK_AUTH_TOKEN="<your_auth_token>"
+make test-infrastructure-integration
+```
+
+### Run All Infrastructure Tests
+
+`make test-infrastructure` runs unit tests, then integration tests when `LOCALSTACK_AUTH_TOKEN` is set.
+
+```bash
+make test-infrastructure
+```
+
 ## Cleaning Up
 
 - Ensure all buckets and ECR repositories are empty.
@@ -389,3 +426,16 @@ aws ecs run-task \
   ```bash
   terraform destroy
   ```
+
+## Provider version pins
+
+Every Terraform module under `infrastructure/` (roots and children) declares
+specific provider version constraints in `required_providers` using pessimistic
+pins (for example `~> 6.53.0`), matching Nest's explicit dependency style
+elsewhere. Dependabot updates these pins across `infrastructure/**/*`; keep
+root and child pins for the same provider in sync. Consistency is asserted by
+`infrastructure/tests/provider_pins_test.py` (run via pytest / unit tests).
+
+## Documentation
+
+Documentation is generated using [terraform-docs](https://github.com/terraform-docs/terraform-docs).

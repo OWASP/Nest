@@ -1,0 +1,62 @@
+backend:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - backend/**
+          - all-globs-to-all-files:
+              - '!backend/src/apps/slack/**'
+              - '!backend/tests/unit/apps/slack/**'
+
+backend-tests:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - backend/tests/**
+          - all-globs-to-all-files:
+              - '!backend/tests/unit/apps/slack/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docker-*.yaml
+          - '**/Dockerfile.*'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/**
+
+frontend-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/__tests__/**
+
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - infrastructure/**
+
+makefile:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/Makefile'
+
+nestbot:
+  - changed-files:
+      - any-glob-to-any-file:
+          - backend/src/apps/slack/**
+
+nestbot-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - backend/tests/unit/apps/slack/**

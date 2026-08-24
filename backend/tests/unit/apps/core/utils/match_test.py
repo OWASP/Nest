@@ -71,6 +71,8 @@ class TestParamsMapping:
                 "idx_leaders",
                 "idx_level",
                 "idx_name",
+                "idx_open_issues_count",
+                "idx_open_pull_requests_count",
                 "idx_organizations",
                 "idx_repositories_count",
                 "idx_repositories",

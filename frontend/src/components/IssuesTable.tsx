@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 
+import { formatDate } from 'utils/dateFormatter'
 import { LabelList } from 'components/LabelList'
 
 export type IssueRow = {
@@ -76,15 +77,22 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
     return count
   }
 
-  const getDeadlineStatus = (deadline?: string | null) => {
+  const getDeadlineStatus = (deadline: string | null | undefined, isOpen: boolean) => {
     if (!deadline)
       return {
         text: 'No Deadline',
         class: 'border border-dashed border-gray-500 text-gray-500 bg-transparent',
       }
 
-    const now = new Date()
     const deadlineDate = new Date(deadline)
+
+    if (!isOpen)
+      return {
+        text: formatDate(deadline),
+        class: 'bg-gray-500/15 text-gray-400 border border-gray-500/30',
+      }
+
+    const now = new Date()
     const utcStart = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
     const diffDays = Math.floor((utcStart(deadlineDate) - utcStart(now)) / 86400000)
 
@@ -216,14 +224,23 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
               {/* Deadline */}
               {showDeadline &&
                 (() => {
-                  const status = getDeadlineStatus(issue.deadline)
+                  const isOpen = issue.state === 'open'
+                  const status = getDeadlineStatus(issue.deadline, isOpen)
+                  const dueDate = isOpen && issue.deadline ? formatDate(issue.deadline) : ''
                   return (
                     <td className="block pt-2 text-right lg:table-cell lg:px-6 lg:py-4 lg:pt-0">
-                      <span
-                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium whitespace-nowrap ${status.class}`}
-                      >
-                        {status.text}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium whitespace-nowrap ${status.class}`}
+                        >
+                          {status.text}
+                        </span>
+                        {dueDate && (
+                          <span className="text-[11px] whitespace-nowrap text-gray-500 dark:text-gray-400">
+                            {dueDate}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   )
                 })()}

@@ -1,28 +1,15 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
-
-from apps.slack.apps import SlackConfig
 from apps.slack.events.url_verification import UrlVerification
 
 
-@pytest.fixture
-def mock_slack_app():
-    mock_app = MagicMock()
-    mock_app.event = MagicMock()
-    return mock_app
-
-
-@pytest.fixture
-def slack_bot(mock_slack_app):
-    """Provide mocked SlackConfig.app, restored after the test."""
-    with patch.object(SlackConfig, "app", mock_slack_app):
-        yield SlackConfig
-
-
 class TestUrlVerification:
-    def test_url_verification_handler(self, slack_bot):
+    def test_url_verification_handler_acknowledges_challenge(self):
+        """Test Slack URL verification responds with the challenge value."""
         event = {"challenge": "test_challenge"}
+        ack = MagicMock()
         handler = UrlVerification()
-        response = handler.handle_event(event, client=None)
-        assert response == "test_challenge"
+
+        handler.handler(event, client=None, ack=ack)
+
+        ack.assert_called_once_with("test_challenge")

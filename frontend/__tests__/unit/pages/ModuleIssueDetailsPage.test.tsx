@@ -4,8 +4,8 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import ModuleIssueDetailsPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/[issueId]/page'
-import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 
 // Mock dependencies
 jest.mock('@apollo/client/react', () => ({
@@ -53,16 +53,16 @@ const mockSetTaskDeadline = jest.fn()
 const mockClearTaskDeadline = jest.fn()
 
 const mockAccessData = {
-  getProgram: {
+  managementProgram: {
     admins: [{ login: 'test-user' }],
   },
-  getModule: {
+  managementModule: {
     mentors: [{ login: 'test-user' }],
   },
 }
 
 const mockIssueData = {
-  getModule: {
+  managementModule: {
     issueByNumber: {
       id: '1',
       title: 'Test Issue Title',
@@ -97,6 +97,10 @@ const mockIssueData = {
         },
       ],
     },
+    userRole: 'mentor',
+    menteeCanManageDeadlines: false,
+    startedAt: null,
+    endedAt: null,
     taskAssignedAt: new Date().toISOString(),
     taskDeadline: null,
     interestedUsers: [
@@ -109,15 +113,58 @@ const mockIssueData = {
   },
 }
 
-function setupQueryMock(
-  issueData: typeof mockIssueData = mockIssueData,
-  accessData: typeof mockAccessData = mockAccessData
-) {
+// Builds the single role-aware query (managementModule) response for a mentee.
+const menteeIssueView = (
+  issueOverrides: Record<string, unknown> = {},
+  moduleOverrides: Record<string, unknown> = {}
+) => ({
+  managementModule: {
+    userRole: 'mentee',
+    menteeCanManageDeadlines: false,
+    startedAt: null,
+    endedAt: null,
+    taskDeadline: null,
+    taskAssignedAt: null,
+    interestedUsers: [],
+    issueMentees: [],
+    ...moduleOverrides,
+    issueByNumber: {
+      id: '1',
+      number: 42,
+      title: 'Mentee Issue',
+      body: '',
+      url: 'https://github.com/issue/42',
+      state: 'open',
+      isMerged: false,
+      organizationName: 'OWASP',
+      repositoryName: 'Nest',
+      labels: [],
+      assignees: [
+        {
+          id: '1',
+          login: 'mentee1',
+          name: 'Mentee',
+          avatarUrl: 'https://github.com/mentee1.png',
+        },
+      ],
+      pullRequests: [],
+      ...issueOverrides,
+    },
+  },
+})
+
+// A GraphQL error carrying the FORBIDDEN extension, as the backend returns for
+// a user with no role on the module.
+const forbiddenError = {
+  graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+}
+
+function setupQueryMock(issueData: unknown = mockIssueData, accessData: unknown = mockAccessData) {
   mockUseQuery.mockImplementation((query) => {
-    if (query === GetProgramAdminsAndModulesDocument) {
+    if (query === GetManagementProgramAdminsAndModulesDocument) {
       return { data: accessData, loading: false, error: undefined }
     }
-    if (query === GetModuleIssueViewDocument) {
+    if (query === GetManagementModuleIssueViewDocument) {
       return { data: issueData, loading: false, error: undefined }
     }
     return { data: undefined, loading: false, error: undefined }
@@ -126,10 +173,10 @@ function setupQueryMock(
 
 function setupQueryMockLoading() {
   mockUseQuery.mockImplementation((query) => {
-    if (query === GetProgramAdminsAndModulesDocument) {
+    if (query === GetManagementProgramAdminsAndModulesDocument) {
       return { data: mockAccessData, loading: false, error: undefined }
     }
-    if (query === GetModuleIssueViewDocument) {
+    if (query === GetManagementModuleIssueViewDocument) {
       return { data: undefined, loading: true, error: undefined }
     }
     return { data: undefined, loading: true, error: undefined }
@@ -138,10 +185,10 @@ function setupQueryMockLoading() {
 
 function setupQueryMockError(error: Error) {
   mockUseQuery.mockImplementation((query) => {
-    if (query === GetProgramAdminsAndModulesDocument) {
+    if (query === GetManagementProgramAdminsAndModulesDocument) {
       return { data: mockAccessData, loading: false, error: undefined }
     }
-    if (query === GetModuleIssueViewDocument) {
+    if (query === GetManagementModuleIssueViewDocument) {
       return { data: undefined, loading: false, error }
     }
     return { data: undefined, loading: false, error: undefined }
@@ -182,10 +229,10 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('does not show full-page spinner when loading with cached issue (e.g. fetchMore)', () => {
     mockUseQuery.mockImplementation((query) => {
-      if (query === GetProgramAdminsAndModulesDocument) {
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
-      if (query === GetModuleIssueViewDocument) {
+      if (query === GetManagementModuleIssueViewDocument) {
         return {
           data: mockIssueData,
           loading: true,
@@ -209,7 +256,12 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   it('renders a 404 error if the issue is not found', () => {
-    setupQueryMock({ getModule: { issueByNumber: null } } as typeof mockIssueData)
+    setupQueryMock({
+      managementModule: {
+        ...mockIssueData.managementModule,
+        issueByNumber: null,
+      },
+    })
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('Issue Not Found')).toBeInTheDocument()
   })
@@ -268,10 +320,10 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('shows "No linked pull requests" when there are none', () => {
     const noPrData = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           pullRequests: [],
         },
       },
@@ -283,8 +335,8 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('shows "No interested users yet" when there are none', () => {
     const noInterestedData = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         interestedUsers: [],
       },
     }
@@ -320,7 +372,7 @@ describe('ModuleIssueDetailsPage', () => {
 
         const dataWithDeadline = {
           ...mockIssueData,
-          getModule: { ...mockIssueData.getModule, taskDeadline: deadline },
+          managementModule: { ...mockIssueData.managementModule, taskDeadline: deadline },
         }
         setupQueryMock(dataWithDeadline)
         render(<ModuleIssueDetailsPage />)
@@ -333,10 +385,10 @@ describe('ModuleIssueDetailsPage', () => {
     it('disables the deadline button when there are no assignees', () => {
       const noAssigneesData = {
         ...mockIssueData,
-        getModule: {
-          ...mockIssueData.getModule,
+        managementModule: {
+          ...mockIssueData.managementModule,
           issueByNumber: {
-            ...mockIssueData.getModule.issueByNumber,
+            ...mockIssueData.managementModule.issueByNumber,
             assignees: [],
           },
         },
@@ -396,7 +448,7 @@ describe('ModuleIssueDetailsPage', () => {
       const pastDate = new Date('2020-01-01').toISOString()
       const dataWithDeadline = {
         ...mockIssueData,
-        getModule: { ...mockIssueData.getModule, taskDeadline: pastDate },
+        managementModule: { ...mockIssueData.managementModule, taskDeadline: pastDate },
       }
 
       setupQueryMock(dataWithDeadline)
@@ -414,16 +466,16 @@ describe('ModuleIssueDetailsPage', () => {
 
   describe('issue states', () => {
     it.each([
-      { state: 'closed', isMerged: true, expectedText: 'Closed' },
+      { state: 'closed', isMerged: true, expectedText: 'Merged' },
       { state: 'closed', isMerged: false, expectedText: 'Closed' },
       { state: 'open', isMerged: false, expectedText: 'Open' },
     ])('renders issue state as "$expectedText"', ({ state, isMerged, expectedText }) => {
       const issueWithState = {
         ...mockIssueData,
-        getModule: {
-          ...mockIssueData.getModule,
+        managementModule: {
+          ...mockIssueData.managementModule,
           issueByNumber: {
-            ...mockIssueData.getModule.issueByNumber,
+            ...mockIssueData.managementModule.issueByNumber,
             state,
             isMerged,
           },
@@ -437,11 +489,11 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('renders correctly with missing optional data', () => {
     const dataWithMissingFields = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         taskAssignedAt: null,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           body: null,
           assignees: [{ id: 'a1', login: 'user1', name: null, avatarUrl: null }],
           pullRequests: [
@@ -515,7 +567,7 @@ describe('ModuleIssueDetailsPage', () => {
   it('calls fetchMore when clicking Show More button', async () => {
     const fetchMoreMock = jest.fn().mockResolvedValue({
       data: {
-        getModule: {
+        managementModule: {
           issueByNumber: {
             pullRequests: [
               {
@@ -534,17 +586,17 @@ describe('ModuleIssueDetailsPage', () => {
     })
 
     mockUseQuery.mockImplementation((query) => {
-      if (query === GetProgramAdminsAndModulesDocument) {
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
-      if (query === GetModuleIssueViewDocument) {
+      if (query === GetManagementModuleIssueViewDocument) {
         return {
           data: {
-            getModule: {
+            managementModule: {
               issueByNumber: {
-                ...mockIssueData.getModule.issueByNumber,
+                ...mockIssueData.managementModule.issueByNumber,
                 pullRequests: Array.from({ length: 4 }, (_, i) => ({
-                  ...mockIssueData.getModule.issueByNumber.pullRequests[0],
+                  ...mockIssueData.managementModule.issueByNumber.pullRequests[0],
                   id: `pr-${i}`,
                 })),
               },
@@ -585,7 +637,7 @@ describe('ModuleIssueDetailsPage', () => {
 
     const dataWithTodayDeadline = {
       ...mockIssueData,
-      getModule: { ...mockIssueData.getModule, taskDeadline: todayDeadline },
+      managementModule: { ...mockIssueData.managementModule, taskDeadline: todayDeadline },
     }
     setupQueryMock(dataWithTodayDeadline)
     render(<ModuleIssueDetailsPage />)
@@ -610,10 +662,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('shows ShowMoreButton when there are more than 4 pull requests', async () => {
     const manyPRsData = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           pullRequests: Array.from({ length: 6 }, (_, i) => ({
             id: `pr${i + 1}`,
             title: `Pull Request ${i + 1}`,
@@ -630,10 +682,10 @@ describe('ModuleIssueDetailsPage', () => {
       },
     }
     mockUseQuery.mockImplementation((query) => {
-      if (query === GetProgramAdminsAndModulesDocument) {
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
-      if (query === GetModuleIssueViewDocument) {
+      if (query === GetManagementModuleIssueViewDocument) {
         return {
           data: manyPRsData,
           loading: false,
@@ -662,10 +714,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('renders assignee name when login is not available', () => {
     const dataWithNameOnlyAssignee = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: [
             {
               id: 'assignee1',
@@ -685,10 +737,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('renders placeholder avatar for assignee without avatarUrl', () => {
     const dataWithNoAvatarAssignee = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: [
             {
               id: 'assignee1',
@@ -709,10 +761,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('handles null pullRequests array', () => {
     const dataWithNullPRs = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           pullRequests: null,
         },
       },
@@ -725,8 +777,8 @@ describe('ModuleIssueDetailsPage', () => {
   it('renders placeholder avatar for interested user without avatarUrl', () => {
     const dataWithNoAvatarInterestedUser = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         interestedUsers: [
           {
             id: 'user2',
@@ -746,11 +798,11 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('handles null assignees, labels, and interestedUsers', () => {
     const dataWithNulls = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         interestedUsers: null,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: null,
           labels: null,
         },
@@ -835,10 +887,10 @@ describe('ModuleIssueDetailsPage', () => {
 
     const noAssigneesData = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: [],
         },
       },
@@ -852,141 +904,424 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   describe('Authorization', () => {
-    it('denies access for unauthenticated users', () => {
-      mockUseSession.mockReturnValue({
-        data: null,
-        status: 'unauthenticated',
-      })
-
-      const deniedAccessData = {
-        getProgram: {
-          admins: [],
-        },
-        getModule: {
-          mentors: [],
-        },
-      }
-      setupQueryMock(mockIssueData, deniedAccessData)
-      render(<ModuleIssueDetailsPage />)
-
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
-      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
-      expect(assignButtons.length).toBe(0)
-    })
-
-    it('denies access for authenticated user who is not an admin or mentor', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'unauthorized-user',
-            email: 'unauth@example.com',
-            name: 'Unauthorized User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const deniedAccessData = {
-        getProgram: {
-          admins: [{ login: 'other-admin' }],
-        },
-        getModule: {
-          mentors: [{ login: 'other-mentor' }],
-        },
-      }
-      setupQueryMock(mockIssueData, deniedAccessData)
-      render(<ModuleIssueDetailsPage />)
-
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
-      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
-      expect(assignButtons.length).toBe(0)
-    })
-
-    it('grants access for authenticated user who is a program admin', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'admin-user',
-            email: 'admin@example.com',
-            name: 'Admin User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const adminAccessData = {
-        getProgram: {
-          admins: [{ login: 'admin-user' }],
-        },
-        getModule: {
-          mentors: [],
-        },
-      }
-      setupQueryMock(mockIssueData, adminAccessData)
+    it('renders the issue for a user with access', () => {
+      setupQueryMock()
       render(<ModuleIssueDetailsPage />)
 
       expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
     })
 
-    it('grants access for authenticated user who is a module mentor', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'mentor-user',
-            email: 'mentor@example.com',
-            name: 'Mentor User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const mentorAccessData = {
-        getProgram: {
-          admins: [],
-        },
-        getModule: {
-          mentors: [{ login: 'mentor-user' }],
-        },
-      }
-      setupQueryMock(mockIssueData, mentorAccessData)
-      render(<ModuleIssueDetailsPage />)
-
-      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
-    })
-
-    it('displays Access Denied when user authorization is revoked', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            login: 'revoked-user',
-            email: 'revoked@example.com',
-            name: 'Revoked User',
-          },
-        },
-        status: 'authenticated',
-      })
-
-      const revokedAccessData = {
-        getProgram: {
-          admins: [],
-        },
-        getModule: {
-          mentors: [],
-        },
-      }
-      setupQueryMock(mockIssueData, revokedAccessData)
+    it('denies access when the query is forbidden', () => {
+      setupQueryMockError(forbiddenError as unknown as Error)
       render(<ModuleIssueDetailsPage />)
 
       expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only program admins and module mentors can access this page.')
-      ).toBeInTheDocument()
+      expect(screen.getByText('You do not have permission to view this issue.')).toBeInTheDocument()
+      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
+      expect(assignButtons.length).toBe(0)
     })
+  })
+  describe('Mentee view', () => {
+    beforeEach(() => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: { login: 'mentee1', isLeader: false, isMentor: false },
+          expires: '2099-01-01T00:00:00.000Z',
+        },
+        status: 'authenticated',
+      })
+    })
+
+    it('renders the issue view for a mentee without management controls', async () => {
+      setupQueryMock(menteeIssueView({ title: 'My Issue', body: 'Issue body' }))
+      render(<ModuleIssueDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByText('My Issue')).toBeInTheDocument()
+      })
+      expect(screen.queryByRole('button', { name: /Unassign/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /Interested Users/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /Pull Requests/i })).not.toBeInTheDocument()
+    })
+
+    it('shows issue not found for a mentee when issueByNumber is null', async () => {
+      setupQueryMock({
+        managementModule: { ...menteeIssueView().managementModule, issueByNumber: null },
+      })
+      render(<ModuleIssueDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByText('Issue Not Found')).toBeInTheDocument()
+      })
+    })
+  })
+})
+it('renders mentee issue view for merged issue', async () => {
+  setupQueryMock(menteeIssueView({ title: 'Merged Issue', state: 'closed', isMerged: true }))
+  render(<ModuleIssueDetailsPage />)
+  await waitFor(() => {
+    expect(screen.getByText('Merged Issue')).toBeInTheDocument()
+  })
+})
+
+it('renders mentee issue view with deadline management enabled', async () => {
+  setupQueryMock(
+    menteeIssueView(
+      { title: 'Deadline Issue' },
+      {
+        menteeCanManageDeadlines: true,
+        taskDeadline: '2026-12-01T00:00:00Z',
+        taskAssignedAt: '2026-01-01T00:00:00Z',
+      }
+    )
+  )
+  render(<ModuleIssueDetailsPage />)
+  await waitFor(() => {
+    expect(screen.getByText('Deadline Issue')).toBeInTheDocument()
+  })
+})
+
+describe('Mentee deadline management', () => {
+  beforeEach(() => {
+    mockUseSession.mockReturnValue({
+      data: {
+        user: { login: 'mentee1', isLeader: false, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+  })
+
+  it('enables the deadline control when the module allows it and the mentee is assigned', async () => {
+    setupQueryMock(
+      menteeIssueView({ title: 'Editable Deadline Issue' }, { menteeCanManageDeadlines: true })
+    )
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Editable Deadline Issue')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /No deadline set/i })).not.toBeDisabled()
+  })
+
+  it('keeps the deadline control disabled when the module disallows it', async () => {
+    setupQueryMock(menteeIssueView({ title: 'Locked Deadline Issue' }))
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Locked Deadline Issue')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /No deadline set/i })).toBeDisabled()
+  })
+
+  it('enters edit mode when an allowed mentee clicks the deadline', async () => {
+    const setIsEditingDeadline = jest.fn()
+    const setDeadlineInput = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      setIsEditingDeadline,
+      setDeadlineInput,
+    })
+    setupQueryMock(
+      menteeIssueView({ title: 'Edit Deadline Issue' }, { menteeCanManageDeadlines: true })
+    )
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Edit Deadline Issue')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /No deadline set/i }))
+    await waitFor(() => {
+      expect(setIsEditingDeadline).toHaveBeenCalledWith(true)
+    })
+  })
+
+  it('does not let a mentee clear the deadline', async () => {
+    const clearTaskDeadlineMutation = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      isEditingDeadline: true,
+      deadlineInput: '2026-12-25',
+      clearTaskDeadlineMutation,
+    })
+    setupQueryMock(
+      menteeIssueView(
+        { title: 'No Clear Issue' },
+        { menteeCanManageDeadlines: true, taskDeadline: '2026-12-25T00:00:00Z' }
+      )
+    )
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('No Clear Issue')).toBeInTheDocument()
+    })
+    fireEvent.change(screen.getByDisplayValue('2026-12-25'), { target: { value: '' } })
+    expect(clearTaskDeadlineMutation).not.toHaveBeenCalled()
+  })
+
+  it('saves the deadline when the mentee picks a date', async () => {
+    const setTaskDeadlineMutation = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      isEditingDeadline: true,
+      deadlineInput: '',
+      setTaskDeadlineMutation,
+    })
+    setupQueryMock(
+      menteeIssueView({ title: 'Save Deadline Issue' }, { menteeCanManageDeadlines: true })
+    )
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Save Deadline Issue')).toBeInTheDocument()
+    })
+    fireEvent.change(screen.getByDisplayValue(''), { target: { value: '2026-12-25' } })
+    await waitFor(() => {
+      expect(setTaskDeadlineMutation).toHaveBeenCalledWith({
+        variables: expect.objectContaining({
+          deadlineAt: new Date(Date.UTC(2026, 11, 25, 23, 59, 59, 999)).toISOString(),
+        }),
+      })
+    })
+  })
+  it('updates the deadline input as the mentee types', async () => {
+    const setDeadlineInput = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      isEditingDeadline: true,
+      deadlineInput: '',
+      setDeadlineInput,
+    })
+    setupQueryMock(
+      menteeIssueView({ title: 'Date Input Issue' }, { menteeCanManageDeadlines: true })
+    )
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => expect(screen.getByText('Date Input Issue')).toBeInTheDocument())
+    const dateInput = screen.getByDisplayValue('')
+    fireEvent.change(dateInput, { target: { value: '2026-12-01' } })
+    expect(setDeadlineInput).toHaveBeenCalledWith('2026-12-01')
+  })
+})
+
+it('shows deadline in gray for mentee view when issue is closed', async () => {
+  mockUseSession.mockReturnValue({
+    data: {
+      user: { login: 'mentee1', isLeader: false, isMentor: false },
+      expires: '2099-01-01T00:00:00.000Z',
+    },
+    status: 'authenticated',
+  })
+  setupQueryMock(
+    menteeIssueView(
+      { title: 'Closed Deadline Issue', state: 'closed' },
+      { taskDeadline: '2025-01-01T00:00:00Z', taskAssignedAt: '2024-01-01T00:00:00Z' }
+    )
+  )
+  render(<ModuleIssueDetailsPage />)
+  await waitFor(() => expect(screen.getByText('Closed Deadline Issue')).toBeInTheDocument())
+  const deadlineEl = document.querySelector('.text-gray-600')
+  expect(deadlineEl).toBeInTheDocument()
+})
+
+describe('PR pagination edge cases', () => {
+  const makePRs = (count: number) =>
+    Array.from({ length: count }, (_, i) => ({
+      id: `pr-${i}`,
+      title: `PR ${i + 1}`,
+      url: `https://github.com/pr/${i}`,
+      state: 'open',
+      mergedAt: null,
+      createdAt: new Date().toISOString(),
+      author: { login: `user${i}`, avatarUrl: 'https://github.com/avatar.png' },
+    }))
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId: '123' })
+    mockUseIssueMutations.mockReturnValue({
+      assignIssue: jest.fn(),
+      unassignIssue: jest.fn(),
+      setTaskDeadlineMutation: jest.fn(),
+      clearTaskDeadlineMutation: jest.fn(),
+      assigning: false,
+      unassigning: false,
+      settingDeadline: false,
+      clearingDeadline: false,
+      isEditingDeadline: false,
+      setIsEditingDeadline: jest.fn(),
+      deadlineInput: '',
+      setDeadlineInput: jest.fn(),
+    })
+    mockUseSession.mockReturnValue({
+      data: {
+        user: { login: 'test-user', isLeader: true, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+  })
+
+  const setupPRMock = (
+    prs: object[],
+    fetchMore: (opts: {
+      updateQuery: (prev: unknown, next: { fetchMoreResult: unknown }) => unknown
+    }) => Promise<unknown>
+  ) => {
+    mockUseQuery.mockImplementation((query: unknown) => {
+      if (query === GetManagementProgramAdminsAndModulesDocument)
+        return { data: mockAccessData, loading: false, error: undefined }
+      if (query === GetManagementModuleIssueViewDocument)
+        return {
+          data: {
+            managementModule: {
+              ...mockIssueData.managementModule,
+              issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+            },
+          },
+          loading: false,
+          error: undefined,
+          fetchMore,
+        }
+      return { data: undefined, loading: false, error: undefined }
+    })
+  }
+
+  it('does not append PRs when fetchMore returns empty list', async () => {
+    const prs = makePRs(4)
+    setupPRMock(
+      prs,
+      (opts: { updateQuery: (prev: unknown, next: { fetchMoreResult: unknown }) => unknown }) => {
+        opts.updateQuery(
+          {
+            managementModule: {
+              ...mockIssueData.managementModule,
+              issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+            },
+          },
+          { fetchMoreResult: { managementModule: { issueByNumber: { pullRequests: [] } } } }
+        )
+        return Promise.resolve({})
+      }
+    )
+    render(<ModuleIssueDetailsPage />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show more/i }))
+    })
+    expect(screen.queryByText('PR 5')).not.toBeInTheDocument()
+  })
+
+  it('hides Show more when fetchMore returns fewer than limit PRs', async () => {
+    const prs = makePRs(4)
+    const extraPRs = [{ ...makePRs(1)[0], id: 'extra-0', title: 'Extra PR' }]
+    let currentPRs = prs
+    mockUseQuery.mockImplementation((query: unknown) => {
+      if (query === GetManagementProgramAdminsAndModulesDocument)
+        return { data: mockAccessData, loading: false, error: undefined }
+      if (query === GetManagementModuleIssueViewDocument)
+        return {
+          data: {
+            managementModule: {
+              ...mockIssueData.managementModule,
+              issueByNumber: {
+                ...mockIssueData.managementModule.issueByNumber,
+                pullRequests: currentPRs,
+              },
+            },
+          },
+          loading: false,
+          error: undefined,
+          fetchMore: (opts: {
+            updateQuery: (prev: unknown, next: { fetchMoreResult: unknown }) => unknown
+          }) => {
+            currentPRs = [...prs, ...extraPRs]
+            opts.updateQuery(
+              {
+                managementModule: {
+                  ...mockIssueData.managementModule,
+                  issueByNumber: {
+                    ...mockIssueData.managementModule.issueByNumber,
+                    pullRequests: prs,
+                  },
+                },
+              },
+              {
+                fetchMoreResult: {
+                  managementModule: { issueByNumber: { pullRequests: extraPRs } },
+                },
+              }
+            )
+            return Promise.resolve({})
+          },
+        }
+      return { data: undefined, loading: false, error: undefined }
+    })
+    render(<ModuleIssueDetailsPage />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show more/i }))
+    })
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /Show more/i })).not.toBeInTheDocument()
+    })
+  })
+
+  it('collapses PR list when Show less is clicked', async () => {
+    setupPRMock(makePRs(6), jest.fn().mockResolvedValue({}))
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.queryByText('PR 5')).not.toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show more/i }))
+    })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeInTheDocument()
+    )
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Show less/i }))
+    })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Show more/i })).toBeInTheDocument()
+    )
+  })
+})
+
+describe('Mentee issue status badges', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId: '123' })
+    mockUseIssueMutations.mockReturnValue({
+      assignIssue: jest.fn(),
+      unassignIssue: jest.fn(),
+      setTaskDeadlineMutation: jest.fn(),
+      clearTaskDeadlineMutation: jest.fn(),
+      assigning: false,
+      unassigning: false,
+      settingDeadline: false,
+      clearingDeadline: false,
+      isEditingDeadline: false,
+      setIsEditingDeadline: jest.fn(),
+      deadlineInput: '',
+      setDeadlineInput: jest.fn(),
+    })
+    mockUseSession.mockReturnValue({
+      data: {
+        user: { login: 'mentee1', isLeader: false, isMentor: false },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+  })
+
+  const setupMenteeIssueMock = (state: string, isMerged: boolean) => {
+    setupQueryMock(menteeIssueView({ title: 'Status Issue', state, isMerged }))
+  }
+
+  it('shows Merged badge for mentee view when issue is merged', async () => {
+    setupMenteeIssueMock('closed', true)
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => expect(screen.getByText('Status Issue')).toBeInTheDocument())
+    expect(screen.getByText('Merged')).toBeInTheDocument()
+  })
+
+  it('shows Closed badge for mentee view when issue is closed and not merged', async () => {
+    setupMenteeIssueMock('closed', false)
+    render(<ModuleIssueDetailsPage />)
+    await waitFor(() => expect(screen.getByText('Status Issue')).toBeInTheDocument())
+    expect(screen.getAllByText('Closed')[0]).toBeInTheDocument()
   })
 })

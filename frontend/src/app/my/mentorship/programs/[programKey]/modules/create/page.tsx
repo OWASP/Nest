@@ -8,8 +8,8 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import {
-  GetProgramAdminDetailsDocument,
-  GetProgramAndModulesDocument,
+  GetManagementProgramAdminDetailsDocument,
+  GetManagementProgramAndModulesDocument,
 } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -29,7 +29,7 @@ const CreateModulePage = () => {
     data: programData,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GetProgramAdminDetailsDocument, {
+  } = useQuery(GetManagementProgramAdminDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
@@ -41,6 +41,7 @@ const CreateModulePage = () => {
     endedAt: string
     experienceLevel: string
     labels: string
+    menteeCanManageDeadlines: boolean
     mentorLogins: string
     name: string
     projectId: string
@@ -53,6 +54,7 @@ const CreateModulePage = () => {
     endedAt: '',
     experienceLevel: ExperienceLevelEnum.Beginner,
     labels: '',
+    menteeCanManageDeadlines: false,
     mentorLogins: '',
     name: '',
     projectId: '',
@@ -69,13 +71,13 @@ const CreateModulePage = () => {
       return
     }
 
-    if (queryError || !programData?.getProgram || sessionStatus === 'unauthenticated') {
+    if (queryError || !programData?.managementProgram || sessionStatus === 'unauthenticated') {
       setAccessStatus('denied')
       return
     }
 
     const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
-    const isAdmin = programData.getProgram.admins?.some(
+    const isAdmin = programData.managementProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
@@ -105,6 +107,7 @@ const CreateModulePage = () => {
         endedAt: formData.endedAt,
         experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         labels: parseCommaSeparated(formData.labels),
+        menteeCanManageDeadlines: formData.menteeCanManageDeadlines,
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
         name: formData.name,
         programKey: programKey,
@@ -116,7 +119,9 @@ const CreateModulePage = () => {
 
       await createModule({
         awaitRefetchQueries: true,
-        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        refetchQueries: [
+          { query: GetManagementProgramAndModulesDocument, variables: { programKey } },
+        ],
         variables: { input },
       })
 
@@ -167,16 +172,15 @@ const CreateModulePage = () => {
       setFormData={setFormData}
       onSubmit={handleSubmit}
       loading={mutationLoading}
-      isEdit={false}
       validationErrors={validationErrors}
       minDate={
-        programData?.getProgram?.startedAt
-          ? formatDateForInput(programData.getProgram.startedAt)
+        programData?.managementProgram?.startedAt
+          ? formatDateForInput(programData.managementProgram.startedAt)
           : undefined
       }
       maxDate={
-        programData?.getProgram?.endedAt
-          ? formatDateForInput(programData.getProgram.endedAt)
+        programData?.managementProgram?.endedAt
+          ? formatDateForInput(programData.managementProgram.endedAt)
           : undefined
       }
     />

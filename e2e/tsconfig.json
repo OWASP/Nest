@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2023",
+    "paths": {
+      "@e2e/*": ["./*"],
+      "@mockData/*": ["../frontend/__tests__/mockData/*"],
+      "utils/*": ["../frontend/src/utils/*"]
+    }
+  },
+  "include": ["**/*.ts"]
+}

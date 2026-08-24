@@ -119,6 +119,8 @@ export const themeToggleTooltip = {
 
 export const desktopViewMinWidth = 768
 
+export const MAX_RELEASES_TO_SHOW = 9
+
 export const userAuthStatus = {
   AUTHENTICATED: 'authenticated',
   LOADING: 'loading',

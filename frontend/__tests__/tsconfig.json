@@ -9,6 +9,6 @@
     "strict": false,
     "types": ["jest", "node"]
   },
-  "exclude": ["e2e", "node_modules"],
+  "exclude": ["node_modules"],
   "include": ["**/*.ts", "**/*.tsx", "../jest.config.ts"]
 }

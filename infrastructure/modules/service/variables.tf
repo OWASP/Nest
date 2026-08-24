@@ -1,7 +1,34 @@
-variable "assign_public_ip" {
-  description = "Whether to assign public IPs to ECS tasks (required for public subnets)."
-  type        = bool
-  default     = false
+variable "auto_scaling_cpu_target" {
+  description = "Target average CPU utilization percentage for auto scaling."
+  type        = number
+  default     = 70
+
+  validation {
+    condition     = var.auto_scaling_cpu_target >= 1 && var.auto_scaling_cpu_target <= 100
+    error_message = "auto_scaling_cpu_target must be between 1 and 100."
+  }
+}
+
+variable "auto_scaling_scale_in_cooldown" {
+  description = "Cooldown period in seconds after a scale-in activity."
+  type        = number
+  default     = 300
+
+  validation {
+    condition     = var.auto_scaling_scale_in_cooldown >= 0
+    error_message = "auto_scaling_scale_in_cooldown must be >= 0."
+  }
+}
+
+variable "auto_scaling_scale_out_cooldown" {
+  description = "Cooldown period in seconds after a scale-out activity."
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = var.auto_scaling_scale_out_cooldown >= 0
+    error_message = "auto_scaling_scale_out_cooldown must be >= 0."
+  }
 }
 
 variable "aws_region" {
@@ -116,6 +143,16 @@ variable "parameters_arns" {
   default     = {}
 }
 
+variable "private_subnet_ids" {
+  description = "Private subnet IDs for ECS tasks."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.private_subnet_ids) > 0
+    error_message = "private_subnet_ids must contain at least one subnet."
+  }
+}
+
 variable "project_name" {
   description = "The name of the project."
   type        = string
@@ -129,16 +166,6 @@ variable "security_group_id" {
 variable "service_name" {
   description = "The name of the service (e.g., backend, frontend)."
   type        = string
-}
-
-variable "subnet_ids" {
-  description = "Subnet IDs for ECS tasks (can be public or private)."
-  type        = list(string)
-
-  validation {
-    condition     = length(var.subnet_ids) > 0
-    error_message = "subnet_ids must contain at least one subnet."
-  }
 }
 
 variable "target_group_arn" {

@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "baseUrl": ".",
     "esModuleInterop": true,
-    "ignoreDeprecations": "6.0",
     "incremental": true,
     "inlineSources": true,
     "isolatedModules": true,
@@ -19,16 +17,15 @@
     ],
     "paths": {
       "*": ["./src/*"],
-      "@e2e/*": ["__tests__/e2e/*"],
-      "@mockData/*": ["__tests__/mockData/*"],
-      "@unit/*": ["__tests__/unit/*"],
-      "app/*": ["src/app/*"],
-      "components/*": ["src/components/*"],
-      "hooks/*": ["src/hooks/*"],
-      "server/*": ["src/server/*"],
-      "types/*": ["src/types/*"],
-      "utils/*": ["src/utils/*"],
-      "wrappers/*": ["src/wrappers/*"]
+      "@mockData/*": ["./__tests__/mockData/*"],
+      "@unit/*": ["./__tests__/unit/*"],
+      "app/*": ["./src/app/*"],
+      "components/*": ["./src/components/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "server/*": ["./src/server/*"],
+      "types/*": ["./src/types/*"],
+      "utils/*": ["./src/utils/*"],
+      "wrappers/*": ["./src/wrappers/*"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -37,7 +34,7 @@
     "target": "ES2023",
     "useDefineForClassFields": true
   },
-  "exclude": ["__tests__/**/*", "node_modules", "playwright.config.ts"],
+  "exclude": ["__tests__/**/*", "node_modules"],
   "include": [
     "**/*.ts",
     "**/*.tsx",

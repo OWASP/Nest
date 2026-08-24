@@ -1,6 +1,7 @@
 import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import EntityActions from 'components/EntityActions'
@@ -55,7 +56,14 @@ describe('EntityActions', () => {
 
   describe('Module Actions - Edit Module', () => {
     it('navigates to edit module page when Edit is clicked with moduleKey', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -68,7 +76,7 @@ describe('EntityActions', () => {
     })
 
     it('does not navigate when moduleKey is missing for edit action', () => {
-      render(<EntityActions type="module" programKey="test-program" />)
+      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -79,65 +87,20 @@ describe('EntityActions', () => {
     })
 
     it('closes dropdown after clicking Edit', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
       const editButton = screen.getByText('Edit')
       fireEvent.click(editButton)
-
-      expect(button).toHaveAttribute('aria-expanded', 'false')
-    })
-  })
-
-  describe('Module Actions - View Issues', () => {
-    it('navigates to view issues page when View Issues is clicked with moduleKey', () => {
-      render(
-        <EntityActions
-          type="module"
-          programKey="test-program"
-          moduleKey="test-module"
-          isAdmin={true}
-        />
-      )
-      const button = screen.getByRole('button', { name: /Module actions menu/ })
-      fireEvent.click(button)
-
-      const viewIssuesButton = screen.getByText('View Issues')
-      fireEvent.click(viewIssuesButton)
-
-      expect(mockPush).toHaveBeenCalledWith(
-        '/my/mentorship/programs/test-program/modules/test-module/issues'
-      )
-    })
-
-    it('does not navigate when moduleKey is missing for view issues action', () => {
-      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
-      const button = screen.getByRole('button', { name: /Module actions menu/ })
-      fireEvent.click(button)
-
-      const viewIssuesButton = screen.getByText('View Issues')
-      fireEvent.click(viewIssuesButton)
-
-      expect(mockPush).not.toHaveBeenCalled()
-    })
-
-    it('closes dropdown after clicking View Issues', () => {
-      render(
-        <EntityActions
-          type="module"
-          programKey="test-program"
-          moduleKey="test-module"
-          isAdmin={true}
-        />
-      )
-      const button = screen.getByRole('button', { name: /Module actions menu/ })
-      fireEvent.click(button)
-      expect(button).toHaveAttribute('aria-expanded', 'true')
-
-      const viewIssuesButton = screen.getByText('View Issues')
-      fireEvent.click(viewIssuesButton)
 
       expect(button).toHaveAttribute('aria-expanded', 'false')
     })
@@ -878,7 +841,7 @@ describe('EntityActions', () => {
     it('calls update cache function when delete is successful', async () => {
       const mockCache = {
         readQuery: jest.fn().mockReturnValue({
-          getProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
+          managementProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
         }),
         writeQuery: jest.fn(),
       }
@@ -907,7 +870,7 @@ describe('EntityActions', () => {
         expect(mockCache.writeQuery).toHaveBeenCalledWith(
           expect.objectContaining({
             data: {
-              getProgramModules: [{ key: 'other-module' }],
+              managementProgramModules: [{ key: 'other-module' }],
             },
           })
         )
@@ -1025,7 +988,7 @@ describe('EntityActions', () => {
       })
     })
 
-    it('skips cache update when getProgramModules is not in cache', async () => {
+    it('skips cache update when managementProgramModules is not in cache', async () => {
       const mockCache = {
         readQuery: jest.fn().mockReturnValue(null),
         writeQuery: jest.fn(),
@@ -1081,6 +1044,48 @@ describe('EntityActions', () => {
             description: 'Failed to delete module. Please try again.',
           })
         )
+      })
+    })
+  })
+  describe('Role tooltip', () => {
+    // Keyboard focus opens a tooltip immediately. Hover goes through a global
+    // warm-up in react-aria that swallows the first hover of a run, which makes
+    // hover-driven assertions order-dependent.
+    it.each([
+      { role: 'isAdmin', label: 'Admin actions' },
+      { role: 'isMentor', label: 'Mentor actions' },
+    ])('names the $label role on the module trigger', async ({ role, label }) => {
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          {...{ [role]: true }}
+        />
+      )
+
+      await userEvent.tab()
+
+      expect(screen.getByRole('button', { name: /Module actions menu/ })).toHaveFocus()
+      expect(await screen.findByText(label)).toBeInTheDocument()
+    })
+
+    it('names the admin role on the program trigger', async () => {
+      render(<EntityActions type="program" programKey="test-program" isAdmin={true} />)
+
+      await userEvent.tab()
+
+      expect(await screen.findByText('Admin actions')).toBeInTheDocument()
+    })
+
+    it('shows no tooltip when no role is known', async () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+
+      await userEvent.tab()
+
+      expect(screen.getByRole('button', { name: /Program actions menu/ })).toHaveFocus()
+      await waitFor(() => {
+        expect(screen.queryByText(/actions$/)).not.toBeInTheDocument()
       })
     })
   })

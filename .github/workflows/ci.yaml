@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - feature/**
+      - main
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  run-code-checks:
+    name: Code checks
+    permissions:
+      contents: read
+    uses: ./.github/workflows/run-code-checks.yaml
+    with:
+      check_docker_compose: ${{ github.event_name == 'merge_group' }}
+
+  run-code-tests:
+    name: Code tests
+    needs:
+      - run-code-checks
+    permissions:
+      actions: write
+      contents: read
+      id-token: write
+    secrets:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+    uses: ./.github/workflows/run-code-tests.yaml

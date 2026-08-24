@@ -1,7 +1,7 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
 import { useRouter, useParams } from 'next/navigation'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaCalendar, FaRightToBracket } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
@@ -14,11 +14,13 @@ import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
-import Release from 'components/Release'
+import { ReleasesSection } from 'components/SnapshotReleaseSection'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams<{ id: string }>()
   const router = useRouter()
+
+  const [showAllReleases, setShowAllReleases] = useState(false)
 
   const {
     data,
@@ -29,6 +31,9 @@ const SnapshotDetailsPage: React.FC = () => {
   })
 
   const snapshot = data?.snapshot
+  useEffect(() => {
+    setShowAllReleases(false)
+  }, [snapshot])
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -183,21 +188,13 @@ const SnapshotDetailsPage: React.FC = () => {
           <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
             New Releases
           </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {snapshot.newReleases.map((release, index) => {
-              return (
-                <Release
-                  key={
-                    release.id ||
-                    `${release.tagName}-${release.repositoryName ?? 'unknown'}-${index}`
-                  }
-                  release={release as unknown as ReleaseType}
-                  showAvatar={true}
-                  index={index}
-                />
-              )
-            })}
-          </div>
+          {
+            <ReleasesSection
+              releases={snapshot.newReleases as ReleaseType[]}
+              showAll={showAllReleases}
+              onToggle={() => setShowAllReleases((p) => !p)}
+            />
+          }
         </div>
       )}
     </div>

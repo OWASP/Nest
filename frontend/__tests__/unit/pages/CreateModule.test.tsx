@@ -59,7 +59,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
         },
       },
@@ -85,7 +85,7 @@ describe('CreateModulePage', () => {
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
     await user.type(screen.getByLabelText(/Domains/i), 'AI, ML')
     await user.type(screen.getByLabelText(/Tags/i), 'react, graphql')
-
+    await user.type(screen.getByLabelText(/Mentor GitHub Usernames/i), 'alice, bob')
     const projectInput = await waitFor(() => {
       return screen.getByPlaceholderText('Start typing project name...')
     })
@@ -121,6 +121,8 @@ describe('CreateModulePage', () => {
     await waitFor(
       () => {
         expect(mockCreateModule).toHaveBeenCalled()
+        const variables = mockCreateModule.mock.calls[0][0].variables
+        expect(variables.input.mentorLogins).toEqual(['alice', 'bob'])
         expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
       },
       { timeout: 10000 }
@@ -167,7 +169,7 @@ describe('CreateModulePage', () => {
       status: 'unauthenticated',
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { getProgram: { admins: [] } },
+      data: { managementProgram: { admins: [] } },
       loading: false,
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -185,7 +187,7 @@ describe('CreateModulePage', () => {
       status: 'authenticated',
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { getProgram: null },
+      data: { managementProgram: null },
       loading: false,
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -206,7 +208,7 @@ describe('CreateModulePage', () => {
       })
       ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: {
-          getProgram: {
+          managementProgram: {
             admins: [{ login: 'admin-user' }],
           },
         },
@@ -238,7 +240,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',
@@ -264,7 +266,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',
@@ -316,7 +318,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-15T00:00:00Z',
           endedAt: '2025-12-31T00:00:00Z',

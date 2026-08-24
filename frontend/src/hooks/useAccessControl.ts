@@ -7,6 +7,13 @@ interface AccessData {
   getModule?: {
     mentors?: Array<{ login: string }> | null
   } | null
+  /** Staff-only queries under `/my/mentorship/` */
+  managementProgram?: {
+    admins?: Array<{ login: string }> | null
+  } | null
+  managementModule?: {
+    mentors?: Array<{ login: string }> | null
+  } | null
 }
 
 export const useAccessControl = (
@@ -28,18 +35,26 @@ export const useAccessControl = (
       return
     }
 
-    if (!accessData?.getProgram?.admins || !accessData?.getModule?.mentors) {
+    const program = accessData?.managementProgram ?? accessData?.getProgram
+    const moduleNode = accessData?.managementModule ?? accessData?.getModule
+
+    const hasProgram = Boolean(program)
+    const hasModule = Boolean(moduleNode)
+
+    if (!hasProgram && !hasModule) {
       setHasAccess(false)
       return
     }
 
-    const isAdmin = (accessData.getProgram?.admins || []).some(
-      (admin: { login: string }) => admin.login === currentUserLogin
-    )
+    const isAdmin =
+      hasProgram &&
+      (program?.admins || []).some((admin: { login: string }) => admin.login === currentUserLogin)
 
-    const isMentor = (accessData.getModule?.mentors || []).some(
-      (mentor: { login: string }) => mentor.login === currentUserLogin
-    )
+    const isMentor =
+      hasModule &&
+      (moduleNode?.mentors || []).some(
+        (mentor: { login: string }) => mentor.login === currentUserLogin
+      )
 
     setHasAccess(isAdmin || isMentor)
   }, [sessionStatus, currentUserLogin, isLoading, accessData])
