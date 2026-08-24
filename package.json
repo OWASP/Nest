@@ -11,7 +11,7 @@
     "eslint-plugin-playwright": "2.11.0",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
-    "globals": "17.8.0",
+    "globals": "17.9.0",
     "prettier": "3.9.6",
     "prettier-plugin-tailwindcss": "0.8.1",
     "typescript-eslint": "8.65.0"
