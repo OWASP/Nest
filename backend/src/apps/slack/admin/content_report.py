@@ -1,5 +1,6 @@
 """Django admin screen for emitted Slack content reports."""
 
+from django.conf import settings
 from django.contrib import admin
 
 from apps.slack.models.content_report import ContentReport
@@ -40,5 +41,5 @@ class ContentReportAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        """Disable manual content report deletion in Django admin."""
-        return False
+        """Allow content report deletion only in the local environment."""
+        return settings.IS_LOCAL_ENVIRONMENT

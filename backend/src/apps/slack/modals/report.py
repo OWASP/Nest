@@ -19,45 +19,36 @@ if TYPE_CHECKING:
     from apps.slack.models.conversation import Conversation
     from apps.slack.models.message import Message
 
-REPORT_CONTENT_CALLBACK_ID = "report_content"
-REPORT_CONTENT_VIEW_CALLBACK_ID = "report_content_submit"
-CONSENT_BLOCK_ID = "consent"
-CONSENT_ACTION_ID = "consent"
-CONSENT_VALUE = "agreed"
-REPORT_TYPE_BLOCK_ID = "report_type"
-REPORT_TYPE_ACTION_ID = "report_type"
-# Modal category options are intentionally spam-only for now.
-MODAL_REPORT_TYPES: tuple[str, ...] = tuple(ReportType.values)
-
-FEATURE_OFF_TEXT = "Content reporting is not configured."
-SELF_REPORT_TEXT = "You cannot report your own message."
 ALREADY_REPORTED_TEXT = "Already reported."
-PRIVATE_CHANNEL_TEXT = "Content reporting is not available in private channels."
-SUCCESS_TEXT = "Thanks. Your report was submitted to workspace moderators."
-MISSING_MESSAGE_TEXT = "Could not load the reported message. Please try again."
-USAGE_TEXT = "Usage: /report <message link>"
-INVALID_LINK_TEXT = "That does not look like a Slack message link. Usage: /report <message link>"
-NOT_VISIBLE_TEXT = (
-    "NestBot cannot access that message. Add NestBot to the channel, "
-    "or use `Connect to apps -> Report content` on the message."
-)
+CONSENT_ACTION_ID = "consent"
+CONSENT_BLOCK_ID = "consent"
+CONSENT_VALUE = "agreed"
+CONTENT_PREVIEW_LABEL = "*Content Preview:*\n"
 DM_NOT_VISIBLE_TEXT = (
     "NestBot cannot access direct messages or group chats. "
     "Use `Connect to apps -> Report content` on the message instead."
 )
-CONTENT_PREVIEW_LABEL = "*Content Preview:*\n"
+FEATURE_OFF_TEXT = "Content reporting is not configured."
+INVALID_LINK_TEXT = "That does not look like a Slack message link. Usage: /report <message link>"
+METADATA_UNAVAILABLE_TEXT = "Could not verify this conversation. Please try again in a moment."
+MISSING_MESSAGE_TEXT = "Could not load the reported message. Please try again."
 MODAL_OPEN_FAILED_TEXT = "Could not open the report dialog. Please try again."
+# Modal category options are intentionally spam-only for now.
+MODAL_REPORT_TYPES: tuple[str, ...] = tuple(ReportType.values)
+NOT_VISIBLE_TEXT = (
+    "NestBot cannot access that message. Add NestBot to the channel, "
+    "or use `Connect to apps -> Report content` on the message."
+)
+PRIVATE_CHANNEL_TEXT = "Content reporting is not available in private channels."
+REPORT_CONTENT_CALLBACK_ID = "report_content"
+REPORT_CONTENT_VIEW_CALLBACK_ID = "report_content_submit"
+REPORT_TYPE_ACTION_ID = "report_type"
+REPORT_TYPE_BLOCK_ID = "report_type"
+SELF_REPORT_TEXT = "You cannot report your own message."
 SUBMIT_FAILED_TEXT = "Could not submit the report. Please try again."
-
+SUCCESS_TEXT = "Thanks. Your report was submitted to workspace moderators."
+USAGE_TEXT = "Usage: /report <message link>"
 VALID_SOURCES = frozenset(ReportSource.values)
-
-
-def report_type_option(report_type: str) -> dict[str, Any]:
-    """Return a Slack static_select option for a report category value."""
-    return {
-        "text": {"type": "plain_text", "text": ReportType(report_type).label},
-        "value": report_type,
-    }
 
 
 def alert_text_section(
@@ -89,6 +80,28 @@ def alert_text_section(
     if not quoted:
         return None
     return f"{CONTENT_PREVIEW_LABEL}{quoted}"
+
+
+def build_error_modal(text: str) -> dict[str, Any]:
+    """Build a non-submittable modal that shows an open-path error."""
+    return {
+        "type": "modal",
+        "callback_id": REPORT_CONTENT_VIEW_CALLBACK_ID,
+        "title": {"type": "plain_text", "text": "Report Content"},
+        "close": {"type": "plain_text", "text": "Close"},
+        "blocks": [markdown(text)],
+    }
+
+
+def build_loading_modal() -> dict[str, Any]:
+    """Build a temporary modal so trigger_id can be exchanged immediately."""
+    return {
+        "type": "modal",
+        "callback_id": REPORT_CONTENT_VIEW_CALLBACK_ID,
+        "title": {"type": "plain_text", "text": "Report Content"},
+        "close": {"type": "plain_text", "text": "Cancel"},
+        "blocks": [markdown("_Loading report dialog..._")],
+    }
 
 
 def build_report_modal(
@@ -225,6 +238,14 @@ def moderator_inaccessibility_note(conversation: Conversation) -> str | None:
         f"{kind}. Use the reported content link for reference and the content "
         "preview for context."
     )
+
+
+def report_type_option(report_type: str) -> dict[str, Any]:
+    """Return a Slack static_select option for a report category value."""
+    return {
+        "text": {"type": "plain_text", "text": ReportType(report_type).label},
+        "value": report_type,
+    }
 
 
 def selected_report_type(view: dict[str, Any]) -> str | None:

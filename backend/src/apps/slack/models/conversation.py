@@ -45,12 +45,18 @@ class Conversation(TimestampedModel):
     purpose = models.TextField(verbose_name="Purpose", blank=True, default="")
     slack_channel_id = models.CharField(verbose_name="Channel ID", max_length=50, unique=True)
     slack_creator_id = models.CharField(verbose_name="Creator ID", max_length=255)
+    slack_metadata_synced_at = models.DateTimeField(
+        verbose_name="Slack metadata synced at",
+        blank=True,
+        null=True,
+        help_text="When privacy and channel flags were last loaded from Slack.",
+    )
+    sync_messages = models.BooleanField(verbose_name="Sync messages", default=False)
     topic = models.TextField(verbose_name="Topic", blank=True, default="")
     total_members_count = models.PositiveIntegerField(verbose_name="Members count", default=0)
-    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="channels")
 
-    # Additional attributes.
-    sync_messages = models.BooleanField(verbose_name="Sync messages", default=False)
+    # FKs.
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="channels")
 
     def __str__(self):
         """Channel human readable representation."""
@@ -59,9 +65,14 @@ class Conversation(TimestampedModel):
     @property
     def has_fresh_metadata(self) -> bool:
         """Return True when Slack metadata was loaded recently enough to reuse."""
-        if self.created_at is None:
+        if self.slack_metadata_synced_at is None:
             return False
-        return timezone.now() - self.nest_updated_at < METADATA_MAX_AGE
+        return timezone.now() - self.slack_metadata_synced_at < METADATA_MAX_AGE
+
+    @property
+    def has_slack_metadata(self) -> bool:
+        """Return True when privacy flags have been loaded from Slack at least once."""
+        return self.slack_metadata_synced_at is not None
 
     @property
     def is_public_channel(self) -> bool:
@@ -126,6 +137,7 @@ class Conversation(TimestampedModel):
         self.slack_creator_id = conversation_data.get("creator", "")
         self.topic = conversation_data.get("topic", {}).get("value", "")
         self.total_members_count = conversation_data.get("num_members", 0)
+        self.slack_metadata_synced_at = timezone.now()
 
         self.workspace = workspace
 

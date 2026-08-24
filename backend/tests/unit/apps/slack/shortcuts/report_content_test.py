@@ -6,6 +6,7 @@ from apps.slack.enums import ReportSource
 from apps.slack.modals.report import (
     ALREADY_REPORTED_TEXT,
     FEATURE_OFF_TEXT,
+    METADATA_UNAVAILABLE_TEXT,
     MISSING_MESSAGE_TEXT,
     PRIVATE_CHANNEL_TEXT,
     SELF_REPORT_TEXT,
@@ -78,12 +79,14 @@ class TestReportContentShortcut:
         client.views_open.assert_not_called()
 
     def test_already_reported(self, mocker):
-        """Test an existing content report skips the modal."""
+        """Test an existing content report updates the loading modal."""
         ack = Mock()
         respond = Mock()
         client = Mock()
+        client.views_open.return_value = {"view": {"id": "V1"}}
         conversation = Mock(is_private=False)
         conversation.has_fresh_metadata = True
+        conversation.has_slack_metadata = True
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
             return_value=enabled_workspace(content_report_alert_channel_id="C_ALERT"),
@@ -111,14 +114,20 @@ class TestReportContentShortcut:
             respond,
         )
 
-        respond.assert_called_once_with(text=ALREADY_REPORTED_TEXT, response_type="ephemeral")
-        client.views_open.assert_not_called()
+        client.views_open.assert_called_once()
+        client.views_update.assert_called_once()
+        assert (
+            client.views_update.call_args.kwargs["view"]["blocks"][0]["text"]["text"]
+            == ALREADY_REPORTED_TEXT
+        )
+        respond.assert_not_called()
 
     def test_opens_modal(self, mocker):
-        """Test a valid shortcut persists the message and opens the modal."""
+        """Test a valid shortcut persists the message and fills the modal."""
         ack = Mock()
         respond = Mock()
         client = Mock()
+        client.views_open.return_value = {"view": {"id": "V1"}}
         workspace = enabled_workspace(
             content_report_alert_channel_id="C_ALERT",
             slack_workspace_id="T1",
@@ -130,6 +139,7 @@ class TestReportContentShortcut:
             slack_channel_id="D1",
         )
         conversation.has_fresh_metadata = True
+        conversation.has_slack_metadata = True
         message = Mock(pk=5, text="spam text", raw_data={"user": "U_OTHER"})
         mocker.patch(
             "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
@@ -167,10 +177,11 @@ class TestReportContentShortcut:
         )
 
         client.views_open.assert_called_once()
-        _, kwargs = client.views_open.call_args
-        assert kwargs["trigger_id"] == "trig"
-        assert kwargs["view"]["title"]["text"] == "Report Content"
-        assert decode_metadata(kwargs["view"]["private_metadata"])[2] == (ReportSource.SHORTCUT)
+        assert client.views_open.call_args.kwargs["trigger_id"] == "trig"
+        client.views_update.assert_called_once()
+        view = client.views_update.call_args.kwargs["view"]
+        assert view["title"]["text"] == "Report Content"
+        assert decode_metadata(view["private_metadata"])[2] == (ReportSource.SHORTCUT)
         respond.assert_not_called()
 
 
@@ -257,6 +268,7 @@ class TestReportContentSubmission:
             is_mpim=False,
             is_private=False,
             is_public_channel=False,
+            has_slack_metadata=True,
             slack_channel_id="D1",
         )
         conversation.content_origin = Mock(return_value="direct message by <@U_OTHER>")
@@ -278,6 +290,10 @@ class TestReportContentSubmission:
         mocker.patch(
             "apps.slack.shortcuts.report_content.Message.objects.select_related",
             return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.resolve_conversation",
+            return_value=conversation,
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.ContentReport.exists_for",
@@ -351,7 +367,11 @@ class TestReportContentSubmission:
         """Test submit posts already-reported when lock acquisition fails."""
         ack = Mock()
         client = Mock()
-        conversation = Mock(is_private=False, slack_channel_id="D1")
+        conversation = Mock(
+            is_private=False,
+            has_slack_metadata=True,
+            slack_channel_id="D1",
+        )
         message = Mock(
             pk=5,
             slack_message_id="1.0",
@@ -369,6 +389,10 @@ class TestReportContentSubmission:
         mocker.patch(
             "apps.slack.shortcuts.report_content.Message.objects.select_related",
             return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.resolve_conversation",
+            return_value=conversation,
         )
         mocker.patch(
             "apps.slack.shortcuts.report_content.ContentReport.exists_for",
@@ -500,6 +524,7 @@ class TestReportContentHelpers:
         assert (
             load_submission_context(
                 {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
                 {"private_metadata": "bad"},
             )
             is None
@@ -521,6 +546,7 @@ class TestReportContentHelpers:
         assert (
             load_submission_context(
                 {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
                 {"private_metadata": "x"},
             )
             is None
@@ -546,6 +572,7 @@ class TestReportContentHelpers:
         assert (
             load_submission_context(
                 {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
                 {"private_metadata": "x"},
             )
             is None
@@ -554,9 +581,10 @@ class TestReportContentHelpers:
 
     def test_load_submission_self_report(self, mocker):
         """Test submit path rejects self-reports."""
+        conversation = Mock(is_private=False, slack_channel_id="C1", has_slack_metadata=True)
         message = Mock(
             slack_message_id="1.0",
-            conversation=Mock(is_private=False),
+            conversation=conversation,
             raw_data={"user": "U_REP"},
         )
         mocker.patch(
@@ -571,50 +599,25 @@ class TestReportContentHelpers:
             "apps.slack.shortcuts.report_content.Message.objects.select_related",
             return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
         )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.resolve_conversation",
+            return_value=conversation,
+        )
         post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
 
         assert (
             load_submission_context(
                 {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
                 {"private_metadata": "x"},
             )
             is None
         )
         post.assert_called_once_with("https://hooks.slack.com/r", SELF_REPORT_TEXT)
 
-    def test_load_submission_private_channel(self, mocker):
-        """Test submit path rejects private channels."""
-        message = Mock(
-            slack_message_id="1.0",
-            conversation=Mock(is_private=True),
-            raw_data={"user": "U_OTHER"},
-        )
-        mocker.patch(
-            "apps.slack.shortcuts.report_content.decode_metadata",
-            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
-        )
-        mocker.patch(
-            "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
-            return_value=enabled_workspace(),
-        )
-        mocker.patch(
-            "apps.slack.shortcuts.report_content.Message.objects.select_related",
-            return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
-        )
-        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
-
-        assert (
-            load_submission_context(
-                {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
-                {"private_metadata": "x"},
-            )
-            is None
-        )
-        post.assert_called_once_with("https://hooks.slack.com/r", PRIVATE_CHANNEL_TEXT)
-
-    def test_load_submission_already_reported(self, mocker):
-        """Test submit path rejects messages that were already reported."""
-        conversation = Mock(is_private=False)
+    def test_load_submission_metadata_unavailable(self, mocker):
+        """Test submit path rejects when Slack privacy metadata is unknown."""
+        conversation = Mock(is_private=False, slack_channel_id="C1", has_slack_metadata=False)
         message = Mock(
             slack_message_id="1.0",
             conversation=conversation,
@@ -633,6 +636,82 @@ class TestReportContentHelpers:
             return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
         )
         mocker.patch(
+            "apps.slack.shortcuts.report_content.resolve_conversation",
+            return_value=conversation,
+        )
+        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+
+        assert (
+            load_submission_context(
+                {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
+                {"private_metadata": "x"},
+            )
+            is None
+        )
+        post.assert_called_once_with("https://hooks.slack.com/r", METADATA_UNAVAILABLE_TEXT)
+
+    def test_load_submission_private_channel(self, mocker):
+        """Test submit path rejects private channels."""
+        conversation = Mock(is_private=True, slack_channel_id="C1", has_slack_metadata=True)
+        message = Mock(
+            slack_message_id="1.0",
+            conversation=conversation,
+            raw_data={"user": "U_OTHER"},
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.decode_metadata",
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
+            return_value=enabled_workspace(),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Message.objects.select_related",
+            return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.resolve_conversation",
+            return_value=conversation,
+        )
+        post = mocker.patch("apps.slack.shortcuts.report_content.post_ephemeral_url")
+
+        assert (
+            load_submission_context(
+                {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
+                {"private_metadata": "x"},
+            )
+            is None
+        )
+        post.assert_called_once_with("https://hooks.slack.com/r", PRIVATE_CHANNEL_TEXT)
+
+    def test_load_submission_already_reported(self, mocker):
+        """Test submit path rejects messages that were already reported."""
+        conversation = Mock(is_private=False, slack_channel_id="C1", has_slack_metadata=True)
+        message = Mock(
+            slack_message_id="1.0",
+            conversation=conversation,
+            raw_data={"user": "U_OTHER"},
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.decode_metadata",
+            return_value=(5, "https://hooks.slack.com/r", "shortcut"),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Workspace.get_by_workspace_id",
+            return_value=enabled_workspace(),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.Message.objects.select_related",
+            return_value=Mock(filter=Mock(return_value=Mock(first=Mock(return_value=message)))),
+        )
+        mocker.patch(
+            "apps.slack.shortcuts.report_content.resolve_conversation",
+            return_value=conversation,
+        )
+        mocker.patch(
             "apps.slack.shortcuts.report_content.ContentReport.exists_for",
             return_value=True,
         )
@@ -641,6 +720,7 @@ class TestReportContentHelpers:
         assert (
             load_submission_context(
                 {"user": {"id": "U_REP"}, "team": {"id": "T1"}},
+                Mock(),
                 {"private_metadata": "x"},
             )
             is None

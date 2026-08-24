@@ -10,6 +10,7 @@ from apps.slack.modals.report import (
     ALREADY_REPORTED_TEXT,
     CONSENT_BLOCK_ID,
     FEATURE_OFF_TEXT,
+    METADATA_UNAVAILABLE_TEXT,
     MISSING_MESSAGE_TEXT,
     PRIVATE_CHANNEL_TEXT,
     REPORT_CONTENT_CALLBACK_ID,
@@ -27,9 +28,11 @@ from apps.slack.models.message import Message
 from apps.slack.models.workspace import Workspace
 from apps.slack.shortcuts.shortcut import ShortcutBase
 from apps.slack.utils.report import (
+    WORKSPACE_MISMATCH_TEXT,
     make_ephemeral,
     open_report_content_modal,
     post_ephemeral_url,
+    resolve_conversation,
 )
 
 if TYPE_CHECKING:
@@ -40,6 +43,7 @@ logger = logging.getLogger(__name__)
 
 def load_submission_context(
     body: dict[str, Any],
+    client: WebClient,
     view: dict[str, Any],
 ) -> tuple[Workspace, Message, str, str, str] | None:
     """Validate submission and return workspace, message, reporter, response_url, source."""
@@ -64,11 +68,27 @@ def load_submission_context(
         post_ephemeral_url(response_url, MISSING_MESSAGE_TEXT)
         return None
 
-    conversation = message.conversation
+    try:
+        conversation = resolve_conversation(
+            client,
+            workspace,
+            message.conversation.slack_channel_id,
+        )
+    except ValueError:
+        logger.exception(
+            "Cannot submit content report for message_id=%s workspace=%s",
+            message_db_id,
+            workspace.slack_workspace_id,
+        )
+        post_ephemeral_url(response_url, WORKSPACE_MISMATCH_TEXT)
+        return None
+    message.conversation = conversation
     author_id = Message.get_author_id(
         message.raw_data if isinstance(message.raw_data, dict) else {}
     )
-    if conversation.is_private:
+    if not conversation.has_slack_metadata:
+        error = METADATA_UNAVAILABLE_TEXT
+    elif conversation.is_private:
         error = PRIVATE_CHANNEL_TEXT
     elif ContentReport.is_self_report(reporter_user_id, author_id):
         error = SELF_REPORT_TEXT
@@ -195,7 +215,7 @@ class ReportContent(ShortcutBase):
             return
 
         ack()
-        loaded = load_submission_context(body, view)
+        loaded = load_submission_context(body, client, view)
         if loaded is None:
             return
 

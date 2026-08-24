@@ -11,10 +11,13 @@ from slack_sdk.errors import SlackClientError
 
 from apps.slack.modals.report import (
     ALREADY_REPORTED_TEXT,
+    METADATA_UNAVAILABLE_TEXT,
     MISSING_MESSAGE_TEXT,
     MODAL_OPEN_FAILED_TEXT,
     PRIVATE_CHANNEL_TEXT,
     SELF_REPORT_TEXT,
+    build_error_modal,
+    build_loading_modal,
     build_report_modal,
 )
 from apps.slack.models.content_report import ContentReport
@@ -48,6 +51,72 @@ def is_allowed_response_url(response_url: str) -> bool:
     return parsed.scheme == "https" and parsed.hostname in ALLOWED_RESPONSE_URL_HOSTS
 
 
+def make_ephemeral(
+    respond: Callable[..., Any] | None = None,
+    response_url: str = "",
+) -> Callable[..., None]:
+    """Build an ephemeral sender that prefers Bolt respond, then response_url."""
+
+    def ephemeral(*, text: str) -> None:
+        if respond is not None:
+            respond(text=text, response_type="ephemeral")
+            return
+        if response_url:
+            post_ephemeral_url(response_url, text)
+
+    return ephemeral
+
+
+def open_report_content_modal(
+    *,
+    client: WebClient,
+    workspace: Workspace,
+    channel_id: str,
+    message_payload: dict[str, Any],
+    reporter_user_id: str,
+    response_url: str,
+    trigger_id: str,
+    source: ReportSource | str,
+    respond: Callable[..., Any] | None = None,
+) -> None:
+    """Exchange trigger_id immediately, then fill or replace the report modal."""
+    ephemeral = make_ephemeral(respond, response_url)
+    author_id = Message.get_author_id(message_payload)
+    message_ts = message_payload.get("ts") or ""
+    if ContentReport.is_self_report(reporter_user_id, author_id):
+        ephemeral(text=SELF_REPORT_TEXT)
+        return
+    if not message_ts:
+        ephemeral(text=MISSING_MESSAGE_TEXT)
+        return
+
+    try:
+        opened = client.views_open(trigger_id=trigger_id, view=build_loading_modal())
+    except SlackClientError:
+        logger.exception("Failed to open report_content loading modal")
+        ephemeral(text=MODAL_OPEN_FAILED_TEXT)
+        return
+
+    view_id = (opened.get("view") or {}).get("id") if opened is not None else None
+    if not view_id:
+        logger.error("views_open succeeded without a view id for channel_id=%s", channel_id)
+        ephemeral(text=MODAL_OPEN_FAILED_TEXT)
+        return
+
+    view = report_modal_view(
+        client=client,
+        workspace=workspace,
+        channel_id=channel_id,
+        message_payload=message_payload,
+        author_id=author_id,
+        message_ts=message_ts,
+        response_url=response_url,
+        source=source,
+    )
+    if not update_modal(client, view_id, view):
+        ephemeral(text=MODAL_OPEN_FAILED_TEXT)
+
+
 def post_ephemeral_url(response_url: str, text: str) -> None:
     """Post an ephemeral message to a Slack response_url."""
     if not is_allowed_response_url(response_url):
@@ -64,20 +133,48 @@ def post_ephemeral_url(response_url: str, text: str) -> None:
         logger.exception("Failed to post content-report ephemeral response")
 
 
-def make_ephemeral(
-    respond: Callable[..., Any] | None = None,
-    response_url: str = "",
-) -> Callable[..., None]:
-    """Build an ephemeral sender that prefers Bolt respond, then response_url."""
+def report_modal_view(
+    *,
+    client: WebClient,
+    workspace: Workspace,
+    channel_id: str,
+    message_payload: dict[str, Any],
+    author_id: str | None,
+    message_ts: str,
+    response_url: str,
+    source: ReportSource | str,
+) -> dict[str, Any]:
+    """Build the filled report modal or an error modal after the loading view opens."""
+    try:
+        conversation = resolve_conversation(client, workspace, channel_id)
+    except ValueError:
+        logger.exception(
+            "Cannot open content report for channel_id=%s workspace=%s",
+            channel_id,
+            workspace.slack_workspace_id,
+        )
+        return build_error_modal(WORKSPACE_MISMATCH_TEXT)
 
-    def ephemeral(*, text: str) -> None:
-        if respond is not None:
-            respond(text=text, response_type="ephemeral")
-            return
-        if response_url:
-            post_ephemeral_url(response_url, text)
+    if not conversation.has_slack_metadata:
+        return build_error_modal(METADATA_UNAVAILABLE_TEXT)
+    if conversation.is_private:
+        return build_error_modal(PRIVATE_CHANNEL_TEXT)
+    if ContentReport.exists_for(conversation, message_ts):
+        return build_error_modal(ALREADY_REPORTED_TEXT)
 
-    return ephemeral
+    author = None
+    if isinstance(author_id, str) and author_id:
+        author = Member.objects.get_or_create(
+            slack_user_id=author_id,
+            defaults={"workspace": workspace},
+        )[0]
+    message = Message.update_data(message_payload, conversation, author=author)
+    return build_report_modal(
+        message=message,
+        conversation=conversation,
+        response_url=response_url,
+        source=source,
+    )
 
 
 def resolve_conversation(
@@ -114,66 +211,11 @@ def resolve_conversation(
     return Conversation.update_data(channel, workspace, save=True)
 
 
-def open_report_content_modal(
-    *,
-    client: WebClient,
-    workspace: Workspace,
-    channel_id: str,
-    message_payload: dict[str, Any],
-    reporter_user_id: str,
-    response_url: str,
-    trigger_id: str,
-    source: ReportSource | str,
-    respond: Callable[..., Any] | None = None,
-) -> None:
-    """Apply open-time guards, upsert the message, and open the report modal."""
-    ephemeral = make_ephemeral(respond, response_url)
-    author_id = Message.get_author_id(message_payload)
-    if ContentReport.is_self_report(reporter_user_id, author_id):
-        ephemeral(text=SELF_REPORT_TEXT)
-        return
-
-    message_ts = message_payload.get("ts") or ""
-    if not message_ts:
-        ephemeral(text=MISSING_MESSAGE_TEXT)
-        return
-
+def update_modal(client: WebClient, view_id: str, view: dict[str, Any]) -> bool:
+    """Replace an open modal view. Return False when Slack rejects the update."""
     try:
-        conversation = resolve_conversation(client, workspace, channel_id)
-    except ValueError:
-        logger.exception(
-            "Cannot open content report for channel_id=%s workspace=%s",
-            channel_id,
-            workspace.slack_workspace_id,
-        )
-        ephemeral(text=WORKSPACE_MISMATCH_TEXT)
-        return
-
-    if conversation.is_private:
-        ephemeral(text=PRIVATE_CHANNEL_TEXT)
-        return
-
-    if ContentReport.exists_for(conversation, message_ts):
-        ephemeral(text=ALREADY_REPORTED_TEXT)
-        return
-
-    author = None
-    if isinstance(author_id, str) and author_id:
-        author = Member.objects.get_or_create(
-            slack_user_id=author_id,
-            defaults={"workspace": workspace},
-        )[0]
-    message = Message.update_data(message_payload, conversation, author=author)
-    try:
-        client.views_open(
-            trigger_id=trigger_id,
-            view=build_report_modal(
-                message=message,
-                conversation=conversation,
-                response_url=response_url,
-                source=source,
-            ),
-        )
+        client.views_update(view_id=view_id, view=view)
     except SlackClientError:
-        logger.exception("Failed to open report_content modal")
-        ephemeral(text=MODAL_OPEN_FAILED_TEXT)
+        logger.exception("Failed to update report_content modal view_id=%s", view_id)
+        return False
+    return True

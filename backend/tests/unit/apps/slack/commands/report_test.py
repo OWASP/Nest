@@ -298,6 +298,7 @@ class TestReportCommand:
             slack_channel_id="C123",
         )
         conversation.has_fresh_metadata = True
+        conversation.has_slack_metadata = True
         message = Mock(pk=7, text="spam", raw_data={"user": "U_OTHER", "ts": "1700000000.123456"})
         mocker.patch(
             "apps.slack.commands.report.Workspace.get_by_workspace_id",
@@ -326,6 +327,7 @@ class TestReportCommand:
         ack = Mock()
         respond = Mock()
         client = Mock()
+        client.views_open.return_value = {"view": {"id": "V1"}}
 
         Report().handler(
             ack,
@@ -341,9 +343,10 @@ class TestReportCommand:
         )
 
         client.views_open.assert_called_once()
-        _, kwargs = client.views_open.call_args
-        assert kwargs["view"]["callback_id"] == "report_content_submit"
-        assert decode_metadata(kwargs["view"]["private_metadata"])[2] == (ReportSource.COMMAND)
+        client.views_update.assert_called_once()
+        view = client.views_update.call_args.kwargs["view"]
+        assert view["callback_id"] == "report_content_submit"
+        assert decode_metadata(view["private_metadata"])[2] == (ReportSource.COMMAND)
         respond.assert_not_called()
 
     def test_injects_message_ts_when_payload_missing_ts(self, mocker):

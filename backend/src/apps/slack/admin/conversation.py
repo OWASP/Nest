@@ -16,6 +16,7 @@ class ConversationAdmin(admin.ModelAdmin):
                     "slack_channel_id",
                     "name",
                     "created_at",
+                    "slack_metadata_synced_at",
                     "slack_creator_id",
                 )
             },
@@ -62,6 +63,7 @@ class ConversationAdmin(admin.ModelAdmin):
     readonly_fields = (
         "slack_channel_id",
         "created_at",
+        "slack_metadata_synced_at",
         "slack_creator_id",
     )
     search_fields = (

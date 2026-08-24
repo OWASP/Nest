@@ -131,6 +131,7 @@ class TestConversationModel:
         assert conversation.topic == "General topic"
         assert conversation.purpose == "General purpose"
         assert conversation.slack_creator_id == "U12345"
+        assert conversation.slack_metadata_synced_at is not None
 
     def test_str_method(self):
         # Create a conversation with a name
@@ -223,20 +224,19 @@ class TestConversationModel:
         assert private.is_public_channel is False
 
     def test_has_fresh_metadata(self):
-        """Test freshness requires Slack created_at and a recent nest_updated_at."""
-        fresh = Conversation(
-            created_at=datetime(2024, 1, 1, tzinfo=UTC),
-            nest_updated_at=timezone.now(),
-        )
-        stub = Conversation(created_at=None, nest_updated_at=timezone.now())
+        """Test freshness requires a recent slack_metadata_synced_at."""
+        fresh = Conversation(slack_metadata_synced_at=timezone.now())
+        stub = Conversation(slack_metadata_synced_at=None)
         stale = Conversation(
-            created_at=datetime(2024, 1, 1, tzinfo=UTC),
-            nest_updated_at=timezone.now() - METADATA_MAX_AGE,
+            slack_metadata_synced_at=timezone.now() - METADATA_MAX_AGE,
         )
 
         assert fresh.has_fresh_metadata is True
+        assert fresh.has_slack_metadata is True
         assert stub.has_fresh_metadata is False
+        assert stub.has_slack_metadata is False
         assert stale.has_fresh_metadata is False
+        assert stale.has_slack_metadata is True
 
     def test_get_or_create_returns_existing(self, mocker):
         """Test existing conversations are reused for content reporting."""
