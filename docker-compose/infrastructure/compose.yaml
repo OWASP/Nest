@@ -16,6 +16,7 @@ services:
     networks:
       - infrastructure-nest
     ports:
+      - 443:443
       - 4510-4559:4510-4559
       - 4566:4566
     volumes:
@@ -29,11 +30,22 @@ services:
     environment:
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
       LOCALSTACK_HOST: localhost
+    group_add:
+      # Grant access to the mounted docker socket. Its in-container GID varies:
+      # Linux exposes the host docker group's GID; macOS runtimes (Docker Desktop,
+      # OrbStack, colima, etc) proxy the socket through a Linux VM and it typically
+      # shows up as root:root inside the container.
+      - '0'
+      - ${DOCKER_GID}
     image: nest-infrastructure
     network_mode: service:localstack
     pull_policy: never
     volumes:
       - infrastructure-terraform-plugin-cache:/home/owasp/.terraform.d/plugin-cache
+      # Host Docker socket so runner can build containers (Backend, Frontend, etc.).
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Host repo as docker build context for backend/frontend images.
+      - ../..:/repo:ro
 
 networks:
   infrastructure-nest:
