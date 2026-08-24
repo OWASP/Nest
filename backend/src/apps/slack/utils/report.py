@@ -85,15 +85,12 @@ def resolve_conversation(
     workspace: Workspace,
     channel_id: str,
 ) -> Conversation:
-    """Return a conversation, hydrating flags from Slack when conversations.info works.
+    """Return a conversation after loading privacy flags from Slack when possible.
 
-    Skips the network call when Slack metadata is already present (created_at set).
-    Uses a short timeout so a stalled conversations.info cannot burn the trigger_id.
+    Always calls conversations.info with a short timeout so private-channel
+    status is current before the report modal opens.
     """
     conversation = Conversation.get_or_create(workspace, channel_id)
-    if conversation.created_at is not None:
-        return conversation
-
     try:
         response = client.conversations_info(
             channel=channel_id,
@@ -101,7 +98,7 @@ def resolve_conversation(
         )
     except SlackClientError:
         logger.warning(
-            "Could not hydrate conversation metadata for channel_id=%s",
+            "Could not load conversation metadata for channel_id=%s",
             channel_id,
             exc_info=True,
         )

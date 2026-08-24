@@ -19,6 +19,12 @@ class TestContentReport:
 
         assert ContentReport.lock_key(conversation, "123.000") == LOCK_KEY
 
+    def test_is_self_report(self):
+        """Test self-report detection ignores missing authors."""
+        assert ContentReport.is_self_report("U1", "U1") is True
+        assert ContentReport.is_self_report("U1", "U2") is False
+        assert ContentReport.is_self_report("U1", None) is False
+
     def test_acquire_returns_none_when_report_exists(self, mocker):
         """Test an existing report row skips the in-flight lock."""
         conversation = Mock(pk=7)
@@ -214,14 +220,14 @@ class TestContentReport:
         assert "<@U_MOD>" in text
         assert ":bangbang: *New Content Report*" in text
         assert "*Report Category:* Spam" in text
-        assert "*Report Content Origin:* #mods by <@U_AUTHOR>" in text
-        assert text.index(":bangbang:") < text.index("*Report Content Origin:*")
+        assert "*Reported From:* #mods by <@U_AUTHOR>" in text
+        assert text.index(":bangbang:") < text.index("*Reported From:*")
         assert "*Content Preview:*\n>spam" in text
-        assert "*Reported by:* <@U_REP>" in text
+        assert "*Reporter:* <@U_REP>" in text
         assert "Message contents may not be available for review" not in text
         assert "*Permanent Link:*" not in text
         assert "https://example.slack.com/archives/C123/p1" in text
-        assert text.index("*Report Content Origin:*") < text.index("*Content Preview:*")
+        assert text.index("*Reported From:*") < text.index("*Content Preview:*")
         assert text.index("*Content Preview:*") < text.index("*Report Category:*")
 
     def test_build_alert_text_omits_preview_for_public_channel_with_permalink(self, mocker):
@@ -253,7 +259,7 @@ class TestContentReport:
         assert "*Content Preview:*" not in text
         assert "*Message Text:*" not in text
         assert "public spam" not in text
-        assert "*Report Content Origin:* #general by <@U_AUTHOR>" in text
+        assert "*Reported From:* #general by <@U_AUTHOR>" in text
         assert "*Report Category:* Spam" in text
         assert ":bangbang: *New Content Report*" in text
         assert "https://example.slack.com/archives/C123/p1" in text
@@ -286,8 +292,8 @@ class TestContentReport:
 
         assert "*Content Preview:*\n>line1\n>line2 \\*bold\\*" in text
         assert ":bangbang: *New Content Report*" in text
-        assert "*Report Content Origin:* direct message by <@U_AUTHOR>" in text
-        assert "*Reported by:* <@U_REP>" in text
+        assert "*Reported From:* direct message by <@U_AUTHOR>" in text
+        assert "*Reporter:* <@U_REP>" in text
         assert "*Permanent Link:* https://example.slack.com/archives/D123/p1" in text
         assert "Message contents may not be available for review" in text
         assert "reported content link" in text
@@ -319,7 +325,7 @@ class TestContentReport:
         )
 
         assert "*Content Preview:*\n>group spam" in text
-        assert "*Report Content Origin:* group chat by <@U_AUTHOR>" in text
+        assert "*Reported From:* group chat by <@U_AUTHOR>" in text
         assert "*Permanent Link:* https://example.slack.com/archives/G123/p1" in text
         assert "because this is a group chat" in text
 
@@ -371,10 +377,10 @@ class TestContentReport:
             permalink="",
         )
 
-        assert "*Report Content Origin:* direct message" in text
+        assert "*Reported From:* direct message" in text
         assert "*Report Category:* custom" in text
         assert ":bangbang: *New Content Report*" in text
-        assert "*Reported by:* <@U_REP>" in text
+        assert "*Reporter:* <@U_REP>" in text
         assert "*Content Preview:*" not in text
         assert "*Message Text:*" not in text
         assert "Message contents may not be available for review" in text
@@ -403,7 +409,7 @@ class TestContentReport:
         )
 
         assert "*Content Preview:*" not in text
-        assert "*Report Content Origin:* #mods by <@U_AUTHOR>" in text
+        assert "*Reported From:* #mods by <@U_AUTHOR>" in text
         assert "https://example.slack.com/archives/C123/p1" in text
 
     def test_post_alert_posts_and_records(self, mocker):

@@ -323,6 +323,21 @@ class TestMessageModel:
             "https://owasp.slack.com/archives/C123/p1700000000123456?thread_ts=bad"
         ) == ("C123", "1700000000.123456", None)
 
+    def test_parse_permalink_extracts_channel_ts_and_thread(self):
+        """Test Slack archive permalink parsing."""
+        assert Message.parse_permalink(
+            "https://owasp.slack.com/archives/C123ABC/p1700000000123456"
+        ) == ("C123ABC", "1700000000.123456", None)
+        assert Message.parse_permalink(
+            "<https://owasp.slack.com/archives/C123ABC/p1700000000123456"
+            "?thread_ts=1700000000.000100|message>"
+        ) == ("C123ABC", "1700000000.123456", "1700000000.000100")
+        assert Message.parse_permalink(
+            "<https://owasp.slack.com/archives/C123ABC/p1700000000123456|link with spaces> "
+            "extra trailing text"
+        ) == ("C123ABC", "1700000000.123456", None)
+        assert Message.parse_permalink("not-a-link") is None
+
     def test_get_raw_data_by_channel_and_ts(self, mocker):
         """Test stored raw_data is returned when present."""
         existing = Mock(raw_data={"ts": "1.0", "text": "hi"})

@@ -56,8 +56,8 @@ class Conversation(TimestampedModel):
     def is_public_channel(self) -> bool:
         """Return True when Slack can unfurl message links for any workspace member.
 
-        Requires a known channel classification so unsynced G... stubs (and other
-        non-channel conversations) are not treated as public unfurl targets.
+        Requires a known channel classification so group chats and other
+        non-channel conversations are not treated as public unfurl targets.
         """
         return (
             self.is_channel
@@ -69,7 +69,7 @@ class Conversation(TimestampedModel):
 
     @property
     def source_label(self) -> str:
-        """Return conversation label for content-report Content Origin fields."""
+        """Return conversation label for content-report Reported From fields."""
         if self.is_im:
             return "direct message"
         if self.is_mpim:
@@ -79,7 +79,7 @@ class Conversation(TimestampedModel):
         return f"<#{self.slack_channel_id}>"
 
     def content_origin(self, author_id: str | None = None) -> str:
-        """Return Content Origin text: source, optionally trailed by author."""
+        """Return Reported From text: location, optionally trailed by author."""
         if author_id:
             return f"{self.source_label} by <@{author_id}>"
         return self.source_label
@@ -129,17 +129,13 @@ class Conversation(TimestampedModel):
     @staticmethod
     def get_or_create(workspace: Workspace, channel_id: str) -> "Conversation":
         """Return an existing conversation or a minimal row for content reporting."""
-        # G... IDs may be MPIMs or legacy private groups. Fail closed as private
-        # until conversations.info supplies authoritative flags.
-        is_g = channel_id.startswith("G")
         conversation, created = Conversation.objects.get_or_create(
             slack_channel_id=channel_id,
             defaults={
                 "is_channel": channel_id.startswith("C"),
-                "is_group": is_g,
+                "is_group": channel_id.startswith("G"),
                 "is_im": channel_id.startswith("D"),
                 "is_mpim": False,
-                "is_private": is_g,
                 "name": "",
                 "slack_creator_id": "",
                 "sync_messages": False,

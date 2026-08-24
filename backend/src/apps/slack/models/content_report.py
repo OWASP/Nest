@@ -122,11 +122,11 @@ class ContentReport(TimestampedModel):
         )
         head = [
             ":bangbang: *New Content Report*",
-            f"*Report Content Origin:* {conversation.content_origin(author_id)}",
+            f"*Reported From:* {conversation.content_origin(author_id)}",
         ]
         tail = [
             f"*Report Category:* {category}",
-            f"*Reported by:* <@{reporter_user_id}>",
+            f"*Reporter:* <@{reporter_user_id}>",
         ]
         if permalink:
             if conversation.is_im or conversation.is_mpim:

@@ -167,7 +167,7 @@ class TestConversationModel:
         manager.filter.assert_called_once_with(slack_channel_id="C123", workspace=workspace)
 
     def test_source_label_and_content_origin(self):
-        """Test Content Origin labels for IM, MPIM, named channels, and authors."""
+        """Test Reported From labels for IM, MPIM, named channels, and authors."""
         dm = Conversation(is_im=True, is_mpim=False, is_private=False)
         assert dm.source_label == "direct message"
         assert dm.content_origin() == "direct message"
@@ -200,7 +200,7 @@ class TestConversationModel:
         assert unnamed.source_label == "<#C123>"
         assert unnamed.is_public_channel is False
 
-        group_stub = Conversation(
+        group = Conversation(
             is_channel=False,
             is_group=True,
             is_im=False,
@@ -209,7 +209,7 @@ class TestConversationModel:
             name="",
             slack_channel_id="G123",
         )
-        assert group_stub.is_public_channel is False
+        assert group.is_public_channel is False
 
         private = Conversation(
             is_channel=True,
@@ -235,8 +235,8 @@ class TestConversationModel:
         assert kwargs["defaults"]["workspace"] is workspace
         assert kwargs["defaults"]["is_channel"] is True
 
-    def test_get_or_create_creates_im_stub(self, mocker):
-        """Test a missing IM channel creates a minimal conversation row."""
+    def test_get_or_create_creates_im_for_d_channel(self, mocker):
+        """Test a missing D... channel creates a minimal IM conversation row."""
         conversation = Mock()
         workspace = Workspace(pk=1, slack_workspace_id="T1")
         manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
@@ -250,8 +250,8 @@ class TestConversationModel:
         assert kwargs["defaults"]["is_mpim"] is False
         info.assert_called_once()
 
-    def test_get_or_create_creates_private_stub_for_g_channel(self, mocker):
-        """Test a missing G... channel fails closed as private until Slack hydrates it."""
+    def test_get_or_create_creates_group_for_g_channel(self, mocker):
+        """Test a missing G... channel creates a minimal group conversation row."""
         conversation = Mock()
         workspace = Workspace(pk=1, slack_workspace_id="T1")
         manager = mocker.patch("apps.slack.models.conversation.Conversation.objects")
@@ -262,8 +262,8 @@ class TestConversationModel:
         _, kwargs = manager.get_or_create.call_args
         assert kwargs["defaults"]["is_group"] is True
         assert kwargs["defaults"]["is_mpim"] is False
-        assert kwargs["defaults"]["is_private"] is True
         assert kwargs["defaults"]["is_channel"] is False
+        assert "is_private" not in kwargs["defaults"]
 
     def test_get_or_create_rejects_workspace_mismatch(self, mocker):
         """Test existing conversations for another workspace are rejected."""

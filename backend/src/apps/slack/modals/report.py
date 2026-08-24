@@ -27,7 +27,7 @@ CONSENT_VALUE = "agreed"
 REPORT_TYPE_BLOCK_ID = "report_type"
 REPORT_TYPE_ACTION_ID = "report_type"
 # Modal category options are intentionally spam-only for now.
-MODAL_REPORT_TYPES: tuple[str, ...] = (str(ReportType.SPAM),)
+MODAL_REPORT_TYPES: tuple[str, ...] = tuple(ReportType.values)
 
 FEATURE_OFF_TEXT = "Content reporting is not configured."
 SELF_REPORT_TEXT = "You cannot report your own message."
@@ -45,21 +45,19 @@ DM_NOT_VISIBLE_TEXT = (
     "NestBot cannot access direct messages or group chats. "
     "Use `Connect to apps -> Report content` on the message instead."
 )
-DM_MODERATOR_NOTE = (
-    "Note: Message contents may not be available for review because this is a "
-    "direct message. Use the reported content link for reference and the content "
-    "preview for context."
-)
-MPIM_MODERATOR_NOTE = (
-    "Note: Message contents may not be available for review because this is a "
-    "group chat. Use the reported content link for reference and the content "
-    "preview for context."
-)
 CONTENT_PREVIEW_LABEL = "*Content Preview:*\n"
 MODAL_OPEN_FAILED_TEXT = "Could not open the report dialog. Please try again."
 SUBMIT_FAILED_TEXT = "Could not submit the report. Please try again."
 
 VALID_SOURCES = frozenset(ReportSource.values)
+
+
+def report_type_option(report_type: str) -> dict[str, Any]:
+    """Return a Slack static_select option for a report category value."""
+    return {
+        "text": {"type": "plain_text", "text": ReportType(report_type).label},
+        "value": report_type,
+    }
 
 
 def alert_text_section(
@@ -103,14 +101,11 @@ def build_report_modal(
     """Build the Report content confirmation modal view (spam-only category for now)."""
     author_id = message.raw_data.get("user") if isinstance(message.raw_data, dict) else None
     quoted = preview_text(message.text)
-    summary_lines = [f"*Report Content Origin:* {conversation.content_origin(author_id)}"]
+    summary_lines = [f"*Reported From:* {conversation.content_origin(author_id)}"]
     if quoted:
         summary_lines.append(f"*Content Preview:*\n{quote_mrkdwn(quoted)}")
     summary = "\n\n".join(summary_lines)
-    spam_option = {
-        "text": {"type": "plain_text", "text": ReportType(str(ReportType.SPAM)).label},
-        "value": str(ReportType.SPAM),
-    }
+    spam_option = report_type_option(MODAL_REPORT_TYPES[0])
     blocks: list[dict[str, Any]] = [
         markdown(summary),
         {
@@ -123,16 +118,7 @@ def build_report_modal(
                 "action_id": REPORT_TYPE_ACTION_ID,
                 "placeholder": {"type": "plain_text", "text": "Select a Category"},
                 "initial_option": spam_option,
-                "options": [
-                    {
-                        "text": {
-                            "type": "plain_text",
-                            "text": ReportType(report_type).label,
-                        },
-                        "value": report_type,
-                    }
-                    for report_type in MODAL_REPORT_TYPES
-                ],
+                "options": [report_type_option(report_type) for report_type in MODAL_REPORT_TYPES],
             },
         },
         {
@@ -229,10 +215,16 @@ def get_inaccessible_message_error(
 def moderator_inaccessibility_note(conversation: Conversation) -> str | None:
     """Return the moderator note for conversations they typically cannot open."""
     if conversation.is_im:
-        return DM_MODERATOR_NOTE
-    if conversation.is_mpim:
-        return MPIM_MODERATOR_NOTE
-    return None
+        kind = "direct message"
+    elif conversation.is_mpim:
+        kind = "group chat"
+    else:
+        return None
+    return (
+        "Note: Message contents may not be available for review because this is a "
+        f"{kind}. Use the reported content link for reference and the content "
+        "preview for context."
+    )
 
 
 def selected_report_type(view: dict[str, Any]) -> str | None:
