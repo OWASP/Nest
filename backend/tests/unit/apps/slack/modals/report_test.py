@@ -115,8 +115,8 @@ class TestReportModal:
             is None
         )
 
-    def test_build_report_modal_includes_preview_and_consent(self):
-        """Test modal shows origin first, then preview, category, and consent."""
+    def test_build_report_modal_includes_origin_and_consent(self):
+        """Test modal shows origin, category, and consent without message body."""
         message = Mock(pk=9, text="hello spam", raw_data={"user": "U_AUTHOR"})
         conversation = Conversation(
             is_im=True,
@@ -136,9 +136,9 @@ class TestReportModal:
         assert view["callback_id"] == "report_content_submit"
         assert view["title"]["text"] == "Report Content"
         summary = view["blocks"][0]["text"]["text"]
-        assert summary.startswith("*Reported From:* direct message by <@U_AUTHOR>")
-        assert "*Content Preview:*" in summary
-        assert ">hello spam" in summary
+        assert summary == "*Reported From:* direct message by <@U_AUTHOR>"
+        assert "*Content Preview:*" not in summary
+        assert "hello spam" not in summary
         assert view["blocks"][1]["block_id"] == "report_type"
         assert view["blocks"][1]["label"]["text"] == "Report Category"
         assert view["blocks"][1]["element"]["options"] == [
@@ -155,29 +155,6 @@ class TestReportModal:
             "https://hooks.slack.com/response",
             ReportSource.SHORTCUT,
         )
-
-    def test_build_report_modal_omits_preview_when_no_text(self):
-        """Test Content Preview section is omitted when the message has no text."""
-        message = Mock(pk=1, text="", raw_data={"user": "U_AUTHOR"})
-        conversation = Conversation(
-            is_im=True,
-            is_mpim=False,
-            is_private=False,
-            name="",
-            slack_channel_id="D123",
-        )
-
-        view = build_report_modal(
-            message=message,
-            conversation=conversation,
-            response_url="https://hooks.slack.com/r",
-            source=ReportSource.SHORTCUT,
-        )
-
-        summary = view["blocks"][0]["text"]["text"]
-        assert "*Content Preview:*" not in summary
-        assert "*Reported From:* direct message by <@U_AUTHOR>" in summary
-        assert view["blocks"][1]["block_id"] == "report_type"
 
     def test_build_report_modal_source_for_channel(self):
         """Test Reported From uses the channel name when there is no author."""
