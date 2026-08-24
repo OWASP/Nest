@@ -46,8 +46,8 @@ importers:
         specifier: 7.1.1
         version: 7.1.1(eslint@10.8.0)
       globals:
-        specifier: 17.8.0
-        version: 17.8.0
+        specifier: 17.9.0
+        version: 17.9.0
       prettier:
         specifier: 3.9.6
         version: 3.9.6
@@ -723,8 +723,8 @@ packages:
     resolution: {integrity: sha512-XxwI8EOhVQgWp6iDL+3b0r86f4d6AX6zSU55HfB4ydCEuXLXc5FcYeOu+nnGftS4TEju/11rt4KJPTMgbfmv4A==}
     engines: {node: '>=10.13.0'}
 
-  globals@17.8.0:
-    resolution: {integrity: sha512-Zz/LMDZScFmkakeL2cTHzf+PbWKdpU3uclqkZT7TjDG58j5WPt0PpA+n9uPI24fZtlw07q0OtEi84K+umsRzqQ==}
+  globals@17.9.0:
+    resolution: {integrity: sha512-m/MvAW61QVU5VDNF1Vj8axt016h8w7L5TU1e9zlab7XIttAT2YAlCwl75K1fOqvMM9apmD7lbCIRhpfkhmxhCg==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -2033,7 +2033,7 @@ snapshots:
   eslint-plugin-playwright@2.11.0(eslint@10.8.0):
     dependencies:
       eslint: 10.8.0
-      globals: 17.8.0
+      globals: 17.9.0
 
   eslint-plugin-react-hooks@7.1.1(eslint@10.8.0):
     dependencies:
@@ -2227,7 +2227,7 @@ snapshots:
     dependencies:
       is-glob: 4.0.3
 
-  globals@17.8.0: {}
+  globals@17.9.0: {}
 
   globalthis@1.0.4:
     dependencies:
