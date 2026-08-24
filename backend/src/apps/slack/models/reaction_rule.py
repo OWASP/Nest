@@ -5,17 +5,12 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.slack.enums import ReportType
 from apps.slack.models.conversation import Conversation
-from apps.slack.utils.reaction import format_emojis
 
 
 class ReactionRule(TimestampedModel):
     """Channel-specific emoji threshold and alert target."""
-
-    class ReportType(models.TextChoices):
-        """Reaction report category choices."""
-
-        SPAM = "spam", "Spam"
 
     class Meta:
         """Model options."""
@@ -59,7 +54,7 @@ class ReactionRule(TimestampedModel):
 
     def __str__(self):
         """Human readable representation."""
-        return f"{self.conversation} {format_emojis(self.emojis)}".strip()
+        return f"{self.conversation} {ReactionRule.format_emojis(self.emojis)}".strip()
 
     def clean(self):
         """Validate emojis and reject overlap with other active rules on the channel."""
@@ -116,3 +111,41 @@ class ReactionRule(TimestampedModel):
             if isinstance(rule.emojis, list) and emoji_name in rule.emojis:
                 return rule
         return None
+
+    @staticmethod
+    def format_emojis(emojis: object) -> str:
+        """Return Slack emoji markup for the given emoji names."""
+        if not emojis or not isinstance(emojis, list):
+            return ""
+        return " ".join(f":{name}:" for name in emojis if name)
+
+    @staticmethod
+    def match_reactions(
+        payload,
+        emojis: object,
+    ) -> tuple[int, list[str], str, list[str]] | None:
+        """Return reporter count, user ids, permalink, and matched emoji names."""
+        if not isinstance(emojis, list):
+            return None
+        wanted = {name for name in emojis if name}
+        if not wanted:
+            return None
+
+        message = payload.get("message") or {}
+        permalink = message.get("permalink") or ""
+        reporters: list[str] = []
+        seen: set[str] = set()
+        matched_names: set[str] = set()
+        for reaction in message.get("reactions") or []:
+            name = reaction.get("name")
+            if name not in wanted:
+                continue
+            matched_names.add(name)
+            for user_id in reaction.get("users") or []:
+                if user_id and user_id not in seen:
+                    seen.add(user_id)
+                    reporters.append(user_id)
+        if not matched_names:
+            return None
+        matched_emojis = [name for name in emojis if name in matched_names]
+        return len(reporters), reporters, permalink, matched_emojis

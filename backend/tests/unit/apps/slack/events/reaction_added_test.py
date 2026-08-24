@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from slack_sdk.errors import SlackApiError, SlackRequestError
 
-from apps.slack.events.reaction_added import ReactionAdded
+from apps.slack.events.reaction_added import ReactionAdded, ThresholdAlertContext
 
 EVENT = {
     "item": {"type": "message", "channel": "C_SOURCE", "ts": "123.000"},
@@ -32,7 +32,7 @@ def mock_rule(threshold=1, emojis=None):
     return Mock(
         alert_channel_id="C_ALERT",
         alert_user_ids=["U_MOD"],
-        conversation=Mock(),
+        conversation=Mock(is_private=False),
         emojis=emojis or ["spam"],
         report_type="spam",
         threshold=threshold,
@@ -55,22 +55,26 @@ def patch_rule_lookup(mocker, rule=None, *, missing=False):
     )
 
 
-def patch_alert_lock(mocker, *, acquired=True, recorded=False, renewed=True):
-    """Patch reaction alert lookup, lock, and record helpers."""
+def patch_alert_lock(mocker, *, acquired=True, recorded=False, renewed=True, message=None):
+    """Patch content report lookup, lock, and record helpers."""
     mocker.patch(
-        "apps.slack.events.reaction_added.ReactionAlert.exists_for",
+        "apps.slack.events.reaction_added.ContentReport.exists_for",
         return_value=recorded,
     )
     acquire = mocker.patch(
-        "apps.slack.events.reaction_added.ReactionAlert.acquire",
+        "apps.slack.events.reaction_added.ContentReport.acquire",
         return_value=LOCK_OWNER if acquired else None,
     )
     mocker.patch(
-        "apps.slack.events.reaction_added.ReactionAlert.renew",
+        "apps.slack.events.reaction_added.ContentReport.renew",
         return_value=renewed,
     )
-    release = mocker.patch("apps.slack.events.reaction_added.ReactionAlert.release")
-    record = mocker.patch("apps.slack.events.reaction_added.ReactionAlert.record")
+    release = mocker.patch("apps.slack.events.reaction_added.ContentReport.release")
+    record = mocker.patch("apps.slack.events.reaction_added.ContentReport.record")
+    mocker.patch(
+        "apps.slack.events.reaction_added.Message.objects.filter",
+        return_value=Mock(first=Mock(return_value=message)),
+    )
     return acquire, release, record
 
 
@@ -79,6 +83,21 @@ class TestReactionAdded:
         """Test missing reaction rules skip Slack lookups and alerts."""
         client = mock_client()
         patch_rule_lookup(mocker, missing=True)
+        acquire, _, record = patch_alert_lock(mocker)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        client.reactions_get.assert_not_called()
+        acquire.assert_not_called()
+        record.assert_not_called()
+        client.chat_postMessage.assert_not_called()
+
+    def test_handle_event_stops_for_private_channel(self, mocker):
+        """Test reaction alerts are skipped for private channels."""
+        client = mock_client()
+        rule = mock_rule()
+        rule.conversation.is_private = True
+        patch_rule_lookup(mocker, rule)
         acquire, _, record = patch_alert_lock(mocker)
 
         ReactionAdded().handle_event(EVENT, client)
@@ -117,11 +136,62 @@ class TestReactionAdded:
             rule.conversation,
             "123.000",
             "spam",
-            2,
             "999.000",
+            source="emoji",
             reporter_user_ids=["U_REACTOR", "U_OTHER"],
+            reaction_count=2,
+            message=None,
         )
-        release.assert_called_once_with(rule.conversation, "123.000", "spam", LOCK_OWNER)
+        release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
+
+    def test_handle_event_omits_reporters_when_none(self, mocker):
+        """Test threshold alerts omit the reporters line when no reactors are listed."""
+        client = mock_client()
+        rule = mock_rule()
+        mocker.patch(
+            "apps.slack.events.reaction_added.threshold_alert_context",
+            return_value=ThresholdAlertContext(
+                channel_id="C_SOURCE",
+                matched_emojis=["spam"],
+                message_ts="123.000",
+                owner=LOCK_OWNER,
+                permalink="https://slack.test/message",
+                reaction_count=2,
+                reporter_user_ids=[],
+                rule=rule,
+            ),
+        )
+        _, release, record = patch_alert_lock(mocker)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        _, kwargs = client.chat_postMessage.call_args
+        assert "Reported by:" not in kwargs["text"]
+        assert "https://slack.test/message" in kwargs["text"]
+        record.assert_called_once()
+        release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
+
+    def test_handle_event_records_with_matched_message(self, mocker):
+        """Test ContentReport.record receives the stored Message when one exists."""
+        client = mock_client()
+        rule = mock_rule(threshold=2)
+        message = Mock(name="stored_message")
+        patch_rule_lookup(mocker, rule)
+        _, release, record = patch_alert_lock(mocker, message=message)
+
+        ReactionAdded().handle_event(EVENT, client)
+
+        record.assert_called_once_with(
+            rule.conversation,
+            "123.000",
+            "spam",
+            "999.000",
+            source="emoji",
+            reporter_user_ids=["U_REACTOR", "U_OTHER"],
+            reaction_count=2,
+            message=message,
+        )
+        release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
 
     def test_handle_event_skips_recorded_alert(self, mocker):
         """Test an existing reaction alert skips Slack lookups and posts."""
@@ -180,7 +250,7 @@ class TestReactionAdded:
         ReactionAdded().handle_event(EVENT, client)
 
         record.assert_not_called()
-        release.assert_called_once_with(rule.conversation, "123.000", "spam", LOCK_OWNER)
+        release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
 
     def test_handle_event_skips_post_when_lock_lease_is_lost(self, mocker):
         """Test a lost in-flight lock skips posting and still releases the owned lock."""
@@ -193,7 +263,7 @@ class TestReactionAdded:
 
         client.chat_postMessage.assert_not_called()
         record.assert_not_called()
-        release.assert_called_once_with(rule.conversation, "123.000", "spam", LOCK_OWNER)
+        release.assert_called_once_with(rule.conversation, "123.000", LOCK_OWNER)
 
     def test_handle_event_skips_when_reactions_get_fails(self, mocker):
         """Test a reactions.get failure does not post or lock."""
@@ -257,9 +327,11 @@ class TestReactionAdded:
             rule.conversation,
             "123.000",
             "spam",
-            3,
             "999.000",
+            source="emoji",
             reporter_user_ids=["U1", "U2", "U3"],
+            reaction_count=3,
+            message=None,
         )
 
     def test_handle_event_names_only_matched_emojis(self, mocker):
