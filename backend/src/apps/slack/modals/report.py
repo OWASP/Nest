@@ -9,8 +9,6 @@ from apps.slack.blocks import markdown
 from apps.slack.common.text import (
     PREVIEW_LIMIT,
     fit_quoted_mrkdwn,
-    preview_text,
-    quote_mrkdwn,
     truncate_chars,
 )
 from apps.slack.enums import ReportSource, ReportType
@@ -113,13 +111,14 @@ def build_report_modal(
     response_url: str,
     source: ReportSource | str,
 ) -> dict[str, Any]:
-    """Build the Report content confirmation modal view (spam-only category for now)."""
+    """Build the Report content confirmation modal view (spam-only category for now).
+
+    Omits message body from the view so view_submission payloads stay inert
+    (edge filters and mrkdwn edge cases). Moderators still get preview text
+    on the alert built server-side after submit.
+    """
     author_id = message.raw_data.get("user") if isinstance(message.raw_data, dict) else None
-    quoted = preview_text(message.text)
-    summary_lines = [f"*Reported From:* {conversation.content_origin(author_id)}"]
-    if quoted:
-        summary_lines.append(f"*Content Preview:*\n{quote_mrkdwn(quoted)}")
-    summary = "\n\n".join(summary_lines)
+    summary = f"*Reported From:* {conversation.content_origin(author_id)}"
     spam_option = report_type_option(MODAL_REPORT_TYPES[0])
     blocks: list[dict[str, Any]] = [
         markdown(summary),
