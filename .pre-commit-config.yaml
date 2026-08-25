@@ -157,7 +157,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: d600c142bb19f521ae6a6a345f94a2efd7937759  # v2.26.0
+    rev: b82a24a520c5d496cb7b23b4e9b63537c280f51b  # v2.27.0
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
