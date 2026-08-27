@@ -73,6 +73,22 @@ class TestDjangoEmailService:
         call_kwargs = mock_email_class.call_args[1]
         assert call_kwargs["headers"] == headers
 
+    @patch("apps.owasp.services.email.django_email.EmailMultiAlternatives")
+    def test_send_with_exception(self, mock_email_class, service):
+        """Test send returns False when exception occurs."""
+        mock_msg = MagicMock()
+        mock_msg.send.side_effect = Exception("SMTP Error")
+        mock_email_class.return_value = mock_msg
+
+        result = service.send(
+            to="test@example.com",
+            subject="Test Subject",
+            html_body="<h1>Hello</h1>",
+            plain_body="Hello",
+        )
+
+        assert result is False
+
     @patch("apps.owasp.services.email.django_email.get_connection")
     @patch("apps.owasp.services.email.django_email.EmailMultiAlternatives")
     def test_send_bulk_all_success(self, mock_email_class, mock_get_conn, service):

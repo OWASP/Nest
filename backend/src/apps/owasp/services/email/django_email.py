@@ -28,15 +28,19 @@ class DjangoEmailService(EmailService):
         headers: dict[str, str] | None = None,
     ) -> bool:
         """Send a single email using Django's EmailMultiAlternatives."""
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=plain_body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[to],
-            headers=headers,
-        )
-        msg.attach_alternative(html_body, "text/html")
-        sent_count = msg.send()
+        try:
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[to],
+                headers=headers,
+            )
+            msg.attach_alternative(html_body, "text/html")
+            sent_count = msg.send()
+        except Exception:
+            logger.exception("Failed to send email to %s", to)
+            return False
         return sent_count > 0
 
     def send_bulk(self, messages: list[dict]) -> dict:
@@ -45,11 +49,14 @@ class DjangoEmailService(EmailService):
         if not messages:
             return results
 
-        connection = get_connection()
+        connection = None
         try:
+            connection = get_connection()
             connection.open()
         except Exception:
             logger.exception("Failed to open email connection")
+            if connection:
+                connection.close()
             return {"sent": 0, "failed": len(messages)}
 
         try:
