@@ -56,7 +56,10 @@ class DjangoEmailService(EmailService):
         except Exception:
             logger.exception("Failed to open email connection")
             if connection:
-                connection.close()
+                try:
+                    connection.close()
+                except Exception:
+                    logger.exception("Failed to close email connection")
             return {"sent": 0, "failed": len(messages)}
 
         try:
