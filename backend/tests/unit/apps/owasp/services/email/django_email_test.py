@@ -192,3 +192,41 @@ class TestDjangoEmailService:
         results = service.send_bulk(messages)
 
         assert results == {"sent": 0, "failed": 2}
+
+    @patch("apps.owasp.services.email.django_email.get_connection")
+    @patch("apps.owasp.services.email.django_email.EmailMultiAlternatives")
+    def test_send_bulk_close_failure_after_send(self, mock_email_class, mock_get_conn, service):
+        """Test that results are returned even when connection.close() fails after sending."""
+        mock_conn = MagicMock()
+        mock_conn.close.side_effect = Exception("Close failed")
+        mock_get_conn.return_value = mock_conn
+
+        mock_msg = MagicMock()
+        mock_msg.send.return_value = 1
+        mock_email_class.return_value = mock_msg
+
+        messages = [
+            {"to": "a@ex.com", "subject": "A", "html_body": "<p>A</p>", "plain_body": "A"},
+        ]
+
+        results = service.send_bulk(messages)
+
+        assert results == {"sent": 1, "failed": 0}
+        mock_conn.close.assert_called_once()
+
+    @patch("apps.owasp.services.email.django_email.get_connection")
+    def test_send_bulk_open_and_close_failure(self, mock_get_conn, service):
+        """Test that results are returned when both open() and close() fail."""
+        mock_conn = MagicMock()
+        mock_conn.open.side_effect = Exception("Open failed")
+        mock_conn.close.side_effect = Exception("Close failed")
+        mock_get_conn.return_value = mock_conn
+
+        messages = [
+            {"to": "a@ex.com", "subject": "A", "html_body": "<p>A</p>", "plain_body": "A"},
+        ]
+
+        results = service.send_bulk(messages)
+
+        assert results == {"sent": 0, "failed": 1}
+        mock_conn.close.assert_called_once()

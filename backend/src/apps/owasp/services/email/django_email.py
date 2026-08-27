@@ -43,6 +43,14 @@ class DjangoEmailService(EmailService):
             return False
         return sent_count > 0
 
+    def _close_connection_safely(self, connection) -> None:
+        """Safely close the email connection, logging any exceptions."""
+        if connection:
+            try:
+                connection.close()
+            except Exception:
+                logger.exception("Failed to close email connection")
+
     def send_bulk(self, messages: list[dict]) -> dict:
         """Send multiple emails using a single shared connection."""
         results = {"sent": 0, "failed": 0}
@@ -55,11 +63,7 @@ class DjangoEmailService(EmailService):
             connection.open()
         except Exception:
             logger.exception("Failed to open email connection")
-            if connection:
-                try:
-                    connection.close()
-                except Exception:
-                    logger.exception("Failed to close email connection")
+            self._close_connection_safely(connection)
             return {"sent": 0, "failed": len(messages)}
 
         try:
@@ -82,6 +86,6 @@ class DjangoEmailService(EmailService):
                     logger.exception("Failed to send email to %s", message.get("to"))
                     results["failed"] += 1
         finally:
-            connection.close()
+            self._close_connection_safely(connection)
 
         return results
