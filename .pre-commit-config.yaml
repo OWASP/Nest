@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: 1537d9f347a8312ebaeff95762266a780dd31e02  # v1.44.0
+    rev: a1f8e712afba98e93b2342a1cffea98df764c2ba  # v1.44.1
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -98,9 +98,9 @@ repos:
       - id: mypy
         additional_dependencies:
           - strawberry-graphql==0.323.2
-          - strawberry-graphql-django==0.86.8
+          - strawberry-graphql-django==0.87.0
           - types-lxml==2026.2.16
-          - types-python-dateutil==2.9.0.20260716
+          - types-python-dateutil==2.9.0.20260807
           - types-PyYAML==6.0.12.20260724
           - types-requests==2.33.0.20260712
         entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
