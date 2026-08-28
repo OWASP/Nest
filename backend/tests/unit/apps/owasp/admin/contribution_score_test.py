@@ -57,11 +57,11 @@ class TestContributionScoreAdmin:
         score2.github_user.login = "user2"
         queryset = [score1, score2]
 
-        self.admin.recalculate(self.request, queryset)
+        with patch.object(self.admin, "message_user") as mock_message_user:
+            self.admin.recalculate(self.request, queryset)
 
         assert mock_calculator.recalculate_user.call_count == 2
-        self.request.assert_not_called()
-        self.admin.message_user(
+        mock_message_user.assert_called_once_with(
             self.request,
             "Recalculated scores for 2 contributor(s). Failed for 0 contributor(s).",
         )
@@ -77,10 +77,11 @@ class TestContributionScoreAdmin:
         score1.github_user.login = "user1"
         queryset = [score1]
 
-        self.admin.recalculate(self.request, queryset)
+        with patch.object(self.admin, "message_user") as mock_message_user:
+            self.admin.recalculate(self.request, queryset)
 
         mock_calculator.recalculate_user.assert_called_once_with(score1.github_user)
-        self.admin.message_user(
+        mock_message_user.assert_called_once_with(
             self.request,
             "Recalculated scores for 0 contributor(s). Failed for 1 contributor(s).",
         )
@@ -105,10 +106,11 @@ class TestContributionScoreAdmin:
         mock_calculator.recalculate_user.side_effect = side_effect
         queryset = [score_ok, score_fail]
 
-        self.admin.recalculate(self.request, queryset)
+        with patch.object(self.admin, "message_user") as mock_message_user:
+            self.admin.recalculate(self.request, queryset)
 
         assert mock_calculator.recalculate_user.call_count == 2
-        self.admin.message_user(
+        mock_message_user.assert_called_once_with(
             self.request,
             "Recalculated scores for 1 contributor(s). Failed for 1 contributor(s).",
         )
