@@ -2,10 +2,10 @@
 
 from unittest.mock import MagicMock, Mock, patch
 
-import pytest
 from django.contrib.admin.sites import AdminSite
 
 from apps.owasp.admin.contribution_score import ContributionScoreAdmin
+from apps.owasp.exceptions import CertificateIssuanceError
 from apps.owasp.models.crp.contribution_score import ContributionScore
 
 ADMIN_PATH = "apps.owasp.admin.contribution_score"
@@ -97,9 +97,10 @@ class TestContributionScoreAdmin:
         score_fail = Mock()
         score_fail.github_user.login = "fail_user"
 
-        def side_effect(user):
+        def side_effect(user) -> None:
             if user == score_fail.github_user:
-                raise TypeError("type error")
+                error_msg = "type error"
+                raise TypeError(error_msg)
 
         mock_calculator.recalculate_user.side_effect = side_effect
         queryset = [score_ok, score_fail]
@@ -162,4 +163,24 @@ class TestContributionScoreAdmin:
         mock_message_user.assert_called_once_with(
             self.request,
             "Recalculated scores for 0 contributor(s). Failed for 0 contributor(s).",
+        )
+
+    @patch(f"{ADMIN_PATH}.ContributionScoreCalculator")
+    def test_recalculate_certificate_issuance_error(self, mock_calculator_cls):
+        """Test recalculate handles CertificateIssuanceError as a failure, continuing the loop."""
+        mock_calculator = MagicMock()
+        mock_calculator.recalculate_user.side_effect = CertificateIssuanceError
+        mock_calculator_cls.return_value = mock_calculator
+
+        score = Mock()
+        score.github_user.login = "cert_error_user"
+        queryset = [score]
+
+        with patch.object(self.admin, "message_user") as mock_message_user:
+            self.admin.recalculate(self.request, queryset)
+
+        mock_calculator.recalculate_user.assert_called_once_with(score.github_user)
+        mock_message_user.assert_called_once_with(
+            self.request,
+            "Recalculated scores for 0 contributor(s). Failed for 1 contributor(s).",
         )
