@@ -383,7 +383,7 @@ class ContributionScoreCalculator:
             },
         )
 
-        Certificate.issue_certificate(user, total_score, tier)
+        Certificate.issue_certificate(user, total_score, TierChoices(tier))
 
         logger.info(
             "Recalculated score for %s: %s points (%s)",
