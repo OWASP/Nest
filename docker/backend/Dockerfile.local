@@ -1,4 +1,4 @@
-ARG OWASP_GID=1000
+gitARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
 FROM python:3.13.14-alpine3.23@sha256:9fdbf2e3e82628351513560b121e2ee6ce31cac212be9e070c5a5e2769fb5e76 AS builder
@@ -57,7 +57,7 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk --no-cache update && \
-    apk --no-cache add postgresql16-client=16.14-r0 redis && \
+    apk --no-cache add postgresql16-client=16.15-r0 redis && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
