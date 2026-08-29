@@ -12,7 +12,7 @@ class BoardCandidateProfile(TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "owasp_board_candidate_profile"
+        db_table = "owasp_board_candidate_profiles"
         verbose_name_plural = "Board Candidate Profiles"
 
     candidate = models.OneToOneField(

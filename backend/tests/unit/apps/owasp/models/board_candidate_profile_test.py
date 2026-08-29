@@ -16,7 +16,7 @@ class TestBoardCandidateProfileModel:
 
     def test_meta_options(self) -> None:
         """Test model meta options."""
-        assert BoardCandidateProfile._meta.db_table == "owasp_board_candidate_profile"
+        assert BoardCandidateProfile._meta.db_table == "owasp_board_candidate_profiles"
         assert BoardCandidateProfile._meta.verbose_name_plural == "Board Candidate Profiles"
 
     def test_has_timestamp_fields(self) -> None:
