@@ -93,7 +93,7 @@ class Certificate(TimestampedModel):
     )
     title = models.CharField(
         verbose_name="Title",
-        max_length=255,
+        max_length=50,
         blank=True,
         default="",
         help_text="Certificate title",

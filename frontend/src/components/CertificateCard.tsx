@@ -32,24 +32,43 @@ interface HeaderProps {
   title?: string | null
 }
 
-const Header: React.FC<HeaderProps> = ({ title }) => (
-  <div className="flex flex-col items-center pt-2 text-center">
-    <div className="relative mb-2.5 h-[52px] w-[192px]">
-      <Image src="/img/OWASP_logo.svg" alt="OWASP Logo" fill priority className="object-contain" />
+const Header: React.FC<HeaderProps> = ({ title }) => {
+  const text = title || 'Certificate of Recognition'
+  const len = text.length
+  const titleSize =
+    len <= 28
+      ? 'text-[32px] leading-tight'
+      : len <= 45
+        ? 'text-[24px] leading-snug'
+        : 'text-[18px] leading-snug'
+
+  return (
+    <div className="flex flex-col items-center pt-2 text-center">
+      <div className="relative mb-2.5 h-[52px] w-[192px]">
+        <Image
+          src="/img/OWASP_logo.svg"
+          alt="OWASP Logo"
+          fill
+          priority
+          className="object-contain"
+        />
+      </div>
+      <span className="mb-3 block text-[11px] font-semibold tracking-[0.22em] text-[#8fa3b8] uppercase">
+        Open Worldwide Application Security Project
+      </span>
+      <h1
+        className={`mb-3 max-w-[680px] font-extrabold tracking-[0.12em] break-words text-[#0B2545] uppercase ${titleSize}`}
+      >
+        {text}
+      </h1>
+      <div className="mt-0 flex w-[200px] items-center">
+        <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
+        <div className="mx-2 h-2.5 w-2.5 shrink-0 rotate-45 bg-[#1D70B8]" />
+        <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
+      </div>
     </div>
-    <span className="mb-3 block text-[11px] font-semibold tracking-[0.22em] text-[#8fa3b8] uppercase">
-      Open Worldwide Application Security Project
-    </span>
-    <h1 className="mb-3 text-[32px] leading-none font-extrabold tracking-[0.12em] text-[#0B2545] uppercase">
-      {title || 'Certificate of Recognition'}
-    </h1>
-    <div className="mt-0 flex w-[200px] items-center">
-      <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
-      <div className="mx-2 h-2.5 w-2.5 shrink-0 rotate-45 bg-[#1D70B8]" />
-      <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
-    </div>
-  </div>
-)
+  )
+}
 
 interface RecipientProps {
   name?: string | null
@@ -175,7 +194,7 @@ const IssuedByBadge: React.FC<IssuedByBadgeProps> = ({
     <div className="mx-auto mt-2 flex w-full items-center justify-center">
       <div className="flex items-center gap-2 rounded-full border border-[#1D70B8]/35 bg-[#EBF4FF] px-5 py-[5px]">
         <Icon size={13} className="shrink-0 text-[#1D70B8]" />
-        <p className="whitespace-nowrap text-[13px] font-semibold tracking-[0.05em] text-[#4B5563]">
+        <p className="text-[13px] font-semibold tracking-[0.05em] whitespace-nowrap text-[#4B5563]">
           Issued under the{' '}
           <a href={href} className="font-extrabold text-[#1D70B8] hover:underline">
             {name} {entityLabel}
@@ -351,11 +370,24 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
 
                 {!hasCustomContent && <RecognitionText />}
 
-                {hasCustomContent && message && (
-                  <p className="mx-auto mt-2 max-w-[560px] text-center text-[15px] leading-[1.8] font-medium text-slate-700 italic">
-                    &quot;{message}&quot;
-                  </p>
-                )}
+                {hasCustomContent &&
+                  message &&
+                  (() => {
+                    const msgLen = message.length
+                    const msgSize =
+                      msgLen <= 120
+                        ? 'text-[15px] leading-[1.8]'
+                        : msgLen <= 210
+                          ? 'text-[14px] leading-[1.75]'
+                          : 'text-[13px] leading-[1.7]'
+                    return (
+                      <p
+                        className={`mx-auto mt-2 max-w-[620px] text-center font-medium break-words text-slate-700 italic ${msgSize}`}
+                      >
+                        &quot;{message}&quot;
+                      </p>
+                    )
+                  })()}
 
                 {hasIssuedBy && (
                   <IssuedByBadge

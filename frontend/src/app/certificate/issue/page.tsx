@@ -82,12 +82,18 @@ const IssueCertificatePage: React.FC = () => {
       {
         field: 'title',
         shouldValidate: !!touched.title,
-        validator: () => validateRequired(formData.title, 'Certificate title'),
+        validator: () =>
+          formData.title.length > 50
+            ? 'Certificate title must be 50 characters or fewer.'
+            : validateRequired(formData.title, 'Certificate title'),
       },
       {
         field: 'message',
         shouldValidate: !!touched.message,
-        validator: () => validateRequired(formData.message, 'Certificate body message'),
+        validator: () =>
+          formData.message.length > 280
+            ? 'Certificate body message must be 280 characters or fewer.'
+            : validateRequired(formData.message, 'Certificate body message'),
       },
     ],
     [formData, touched, backendErrors]
@@ -217,6 +223,8 @@ const IssueCertificatePage: React.FC = () => {
             error={errors.title || backendErrors.title}
             touched={touched.title}
             required
+            maxLength={50}
+            showCharCount
           />
           <FormTextarea
             id="certificate-message"
@@ -227,6 +235,8 @@ const IssueCertificatePage: React.FC = () => {
             error={errors.message}
             touched={touched.message}
             required
+            maxLength={280}
+            showCharCount
           />
         </div>
       </section>

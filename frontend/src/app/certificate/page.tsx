@@ -335,11 +335,11 @@ const MyCertificatePage: React.FC = () => {
                     <div className="flex flex-col">
                       {hasCustomTitle ? (
                         <>
-                          <span className="text-xs font-bold tracking-wide text-gray-900 uppercase dark:text-white line-clamp-2">
+                          <span className="line-clamp-2 text-xs font-bold tracking-wide text-gray-900 uppercase dark:text-white">
                             {cert.title}
                           </span>
                           {cert.tier && (
-                            <span className="mt-0.5 text-[10px] font-semibold text-blue-400 uppercase tracking-wider">
+                            <span className="mt-0.5 text-[10px] font-semibold tracking-wider text-blue-400 uppercase">
                               {cert.tier}
                             </span>
                           )}
@@ -355,7 +355,7 @@ const MyCertificatePage: React.FC = () => {
                   {hasIssuedBy && (
                     <div className="mb-3 flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 dark:bg-blue-400/10">
                       <IssuedByIcon className="h-3 w-3 shrink-0 text-blue-400" />
-                      <span className="text-[10px] font-semibold tracking-wide text-blue-500 truncate dark:text-blue-400">
+                      <span className="min-w-0 truncate text-[10px] font-semibold tracking-wide text-blue-500 dark:text-blue-400">
                         {issuedByName}
                       </span>
                     </div>

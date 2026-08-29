@@ -32,7 +32,8 @@ class IssueCertificateInput:
     chapter_key: str | None = None
 
 
-MAX_TITLE_LENGTH = 255
+MAX_TITLE_LENGTH = 50
+MAX_MESSAGE_LENGTH = 280
 
 
 @strawberry.type
@@ -80,7 +81,12 @@ class CertificateMutation:
             raise ValidationError(msg)
 
         if len(title) > MAX_TITLE_LENGTH:
-            msg = "Certificate title cannot exceed 255 characters."
+            msg = f"Certificate title cannot exceed {MAX_TITLE_LENGTH} characters."
+            raise ValidationError(msg)
+
+        message = input_data.message.strip()
+        if len(message) > MAX_MESSAGE_LENGTH:
+            msg = f"Certificate body message cannot exceed {MAX_MESSAGE_LENGTH} characters."
             raise ValidationError(msg)
 
         clean_project_key = (
@@ -149,7 +155,7 @@ class CertificateMutation:
                 recipient=recipient,
                 issuer=github_user,
                 title=title,
-                message=input_data.message.strip(),
+                message=message,
                 project=project,
                 chapter=chapter,
             )
