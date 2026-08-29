@@ -47,6 +47,11 @@ export const FormTextInput = ({
   const charCount = value.length
   const isNearLimit = maxLength !== undefined && charCount >= maxLength - 10
   const isAtLimit = maxLength !== undefined && charCount >= maxLength
+  const counterColorClass = isAtLimit
+    ? 'text-red-500'
+    : isNearLimit
+      ? 'text-amber-500'
+      : 'text-gray-400 dark:text-gray-500'
   return (
     <div className={className || 'w-full min-w-0'} style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <Input
@@ -66,15 +71,7 @@ export const FormTextInput = ({
         classNames={COMMON_INPUT_CLASS_NAMES}
       />
       {showCharCount && maxLength !== undefined && (
-        <p
-          className={`mt-1 text-right text-xs font-medium transition-colors ${
-            isAtLimit
-              ? 'text-red-500'
-              : isNearLimit
-                ? 'text-amber-500'
-                : 'text-gray-400 dark:text-gray-500'
-          }`}
-        >
+        <p className={`mt-1 text-right text-xs font-medium transition-colors ${counterColorClass}`}>
           {charCount}/{maxLength} characters
           {isAtLimit && <span className="ml-1 font-semibold">- limit reached</span>}
         </p>

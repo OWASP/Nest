@@ -32,15 +32,15 @@ interface HeaderProps {
   title?: string | null
 }
 
+const getTitleSizeClass = (len: number): string => {
+  if (len <= 28) return 'text-[32px] leading-tight'
+  if (len <= 45) return 'text-[24px] leading-snug'
+  return 'text-[18px] leading-snug'
+}
+
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const text = title || 'Certificate of Recognition'
-  const len = text.length
-  const titleSize =
-    len <= 28
-      ? 'text-[32px] leading-tight'
-      : len <= 45
-        ? 'text-[24px] leading-snug'
-        : 'text-[18px] leading-snug'
+  const titleSize = getTitleSizeClass(text.length)
 
   return (
     <div className="flex flex-col items-center pt-2 text-center">
@@ -305,8 +305,15 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
 
   const hasCustomContent = Boolean(title)
   const hasIssuedBy = Boolean(project?.name || chapter?.name)
-
   const hasScoreOrTier = Boolean(score) || Boolean(tier)
+
+  const msgLen = message?.length ?? 0
+  const msgSizeClass =
+    msgLen <= 120
+      ? 'text-[15px] leading-[1.8]'
+      : msgLen <= 210
+        ? 'text-[14px] leading-[1.75]'
+        : 'text-[13px] leading-[1.7]'
 
   useEffect(() => {
     const handleResize = () => {
@@ -370,24 +377,13 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
 
                 {!hasCustomContent && <RecognitionText />}
 
-                {hasCustomContent &&
-                  message &&
-                  (() => {
-                    const msgLen = message.length
-                    const msgSize =
-                      msgLen <= 120
-                        ? 'text-[15px] leading-[1.8]'
-                        : msgLen <= 210
-                          ? 'text-[14px] leading-[1.75]'
-                          : 'text-[13px] leading-[1.7]'
-                    return (
-                      <p
-                        className={`mx-auto mt-2 max-w-[620px] text-center font-medium break-words text-slate-700 italic ${msgSize}`}
-                      >
-                        &quot;{message}&quot;
-                      </p>
-                    )
-                  })()}
+                {hasCustomContent && message && (
+                  <p
+                    className={`mx-auto mt-2 max-w-[620px] text-center font-medium break-words text-slate-700 italic ${msgSizeClass}`}
+                  >
+                    &quot;{message}&quot;
+                  </p>
+                )}
 
                 {hasIssuedBy && (
                   <IssuedByBadge

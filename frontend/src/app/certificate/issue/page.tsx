@@ -103,7 +103,13 @@ const IssueCertificatePage: React.FC = () => {
     e.preventDefault()
     setTouched({ recipientLogins: true, title: true, message: true })
 
-    if (formData.recipientLogins.length === 0 || !formData.title.trim() || !formData.message.trim())
+    if (
+      formData.recipientLogins.length === 0 ||
+      !formData.title.trim() ||
+      !formData.message.trim() ||
+      formData.title.length > 50 ||
+      formData.message.length > 280
+    )
       return
 
     if (!formData.projectKey.trim() && !formData.chapterKey.trim()) {

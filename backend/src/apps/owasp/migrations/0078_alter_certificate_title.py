@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0077_alter_certificate_recipient_and_more'),
+        ("owasp", "0077_alter_certificate_recipient_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='certificate',
-            name='title',
-            field=models.CharField(blank=True, default='', help_text='Certificate title', max_length=50, verbose_name='Title'),
+            model_name="certificate",
+            name="title",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Certificate title",
+                max_length=50,
+                verbose_name="Title",
+            ),
         ),
     ]

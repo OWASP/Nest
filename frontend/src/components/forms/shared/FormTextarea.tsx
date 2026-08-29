@@ -33,6 +33,11 @@ export const FormTextarea = ({
   const isNearLimit = maxLength !== undefined && charCount >= maxLength - 20
   const isAtLimit = maxLength !== undefined && charCount >= maxLength
   const hasError = touched && !!error
+  const counterColorClass = isAtLimit
+    ? 'text-red-500'
+    : isNearLimit
+      ? 'text-amber-500'
+      : 'text-gray-400 dark:text-gray-500'
 
   return (
     <div className="w-full min-w-0 lg:col-span-2" style={{ maxWidth: '100%', overflow: 'hidden' }}>
@@ -53,15 +58,7 @@ export const FormTextarea = ({
           }`}
         />
         {showCharCount && maxLength !== undefined && (
-          <p
-            className={`text-right text-xs font-medium transition-colors ${
-              isAtLimit
-                ? 'text-red-500'
-                : isNearLimit
-                  ? 'text-amber-500'
-                  : 'text-gray-400 dark:text-gray-500'
-            }`}
-          >
+          <p className={`text-right text-xs font-medium transition-colors ${counterColorClass}`}>
             {charCount}/{maxLength} characters
             {isAtLimit && <span className="ml-1 font-semibold">- limit reached</span>}
           </p>
