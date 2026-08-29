@@ -47,11 +47,9 @@ export const FormTextInput = ({
   const charCount = value.length
   const isNearLimit = maxLength !== undefined && charCount >= maxLength - 10
   const isAtLimit = maxLength !== undefined && charCount >= maxLength
-  const counterColorClass = isAtLimit
-    ? 'text-red-500'
-    : isNearLimit
-      ? 'text-amber-500'
-      : 'text-gray-400 dark:text-gray-500'
+  let counterColorClass = 'text-gray-400 dark:text-gray-500'
+  if (isAtLimit) counterColorClass = 'text-red-500'
+  else if (isNearLimit) counterColorClass = 'text-amber-500'
   return (
     <div className={className || 'w-full min-w-0'} style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <Input

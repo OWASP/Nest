@@ -308,12 +308,9 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
   const hasScoreOrTier = Boolean(score) || Boolean(tier)
 
   const msgLen = message?.length ?? 0
-  const msgSizeClass =
-    msgLen <= 120
-      ? 'text-[15px] leading-[1.8]'
-      : msgLen <= 210
-        ? 'text-[14px] leading-[1.75]'
-        : 'text-[13px] leading-[1.7]'
+  let msgSizeClass = 'text-[13px] leading-[1.7]'
+  if (msgLen <= 120) msgSizeClass = 'text-[15px] leading-[1.8]'
+  else if (msgLen <= 210) msgSizeClass = 'text-[14px] leading-[1.75]'
 
   useEffect(() => {
     const handleResize = () => {
