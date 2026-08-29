@@ -4,14 +4,14 @@
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.54.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.58.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.9.0 |
 
 ## Providers
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.54.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.58.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
 
 ## Modules
@@ -35,6 +35,7 @@
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
+| <a name="input_create_shared_data_bucket"></a> [create\_shared\_data\_bucket](#input\_create\_shared\_data\_bucket) | Whether to create the shared public data S3 bucket. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
 | <a name="input_fixtures_bucket_name"></a> [fixtures\_bucket\_name](#input\_fixtures\_bucket\_name) | The name of the S3 bucket for fixtures. | `string` | n/a | yes |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key (used for fixtures bucket encryption). | `string` | n/a | yes |

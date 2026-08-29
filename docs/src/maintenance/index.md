@@ -59,6 +59,11 @@ empty PRs for CVEs with no patched release. Accepted Trivy findings can be
 recorded in
 [`.trivyignore.yaml`](https://github.com/OWASP/Nest/blob/main/.trivyignore.yaml).
 
+Accepted unfixed `pnpm audit` findings must be committed manually in the
+owning workspace’s `pnpm-workspace.yaml` under `audit.ignore` (preferred) or
+legacy `auditConfig.ignoreGhsas`. Do not use `pnpm audit --ignore-unfixable`
+in Nest targets — it rewrites workspace config during checks.
+
 ### Security updates
 
 When a finding needs a fix sooner than cooldown or age gates allow, update

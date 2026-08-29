@@ -195,6 +195,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def from_github(
         self,
         gh_repository,
+        *,
         commits=None,
         contributors=None,
         languages=None,

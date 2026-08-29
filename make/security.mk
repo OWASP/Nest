@@ -148,4 +148,4 @@ security-dast-scan-zap:
 
 tooling-dependency-audit:
 	@echo "Auditing root tooling npm dependencies..."
-	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate --ignore-unfixable'
+	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate'

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/AleksaC/hadolint-py
-    rev: 458cb25edf664682e3e856a53a2f9af33e068297  # v2.14.0
+    rev: 6e7504451511eaeb62a3e7f14d63b0296cbf86eb  # v2.15.1
     hooks:
       - id: hadolint
         args:
@@ -34,7 +34,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: 05fd71a57a467ccf5598f7e836d3af4cf9225abb  # v1.108.0
+    rev: bf9dd9c695ddaf238af36f179049202358ec22b7  # v1.108.1
     hooks:
       - id: terraform_providers_lock
         args:
@@ -52,7 +52,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 01a675ea018f2fb714478a5ffb83fcea8374bb06  # v0.15.21
+    rev: 39d9ac5938dadb73df0564a45f163e25ff9fa6e2  # v0.16.1
     hooks:
       - id: ruff-check
         args:
@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: fefa6e957dc4143c20fd42201dec463ec190f847  # v1.40.4
+    rev: 1537d9f347a8312ebaeff95762266a780dd31e02  # v1.44.0
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -74,7 +74,7 @@ repos:
           - html
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: a4d5d37e66ebcd6b3705204a1d6dbb56dea66338  # v0.49.0
+    rev: 5b5dddc4fb0f83c3ea1fc5616fa63e115dce83e0  # v0.49.1
     hooks:
       - id: markdownlint
         args:
@@ -93,16 +93,16 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 0cbe8f6e54466b1b48f9d41f44abb4d06c061b5e  # v2.2.0
+    rev: 41e691678310dfd3833f7ab4e180ddb014310356  # v2.3.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.320.4
-          - strawberry-graphql-django==0.86.4
+          - strawberry-graphql==0.323.2
+          - strawberry-graphql-django==0.86.8
           - types-lxml==2026.2.16
-          - types-python-dateutil==2.9.0.20260518
-          - types-PyYAML==6.0.12.20260518
-          - types-requests==2.33.0.20260518
+          - types-python-dateutil==2.9.0.20260716
+          - types-PyYAML==6.0.12.20260724
+          - types-requests==2.33.0.20260712
         entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -157,14 +157,14 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: cf78bb920f358be6dea099e6b1fd6f67bccb0955  # v2.25.2
+    rev: b82a24a520c5d496cb7b23b4e9b63537c280f51b  # v2.27.0
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
           - toml-fmt-common<1.3.3
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: e3eebf65325ccc992422292cb7a4baee967cf815  # v1.26.1
+    rev: 451b56af716f9f0d0c2b816503a3fd0cf8b036fa  # v1.29.0
     hooks:
       - id: zizmor
         args:

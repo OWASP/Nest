@@ -13,14 +13,14 @@ variables {
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
   container_secrets     = { "NEXT_PUBLIC_API_URL" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/NEXT_PUBLIC_API_URL" }
+  private_subnet_ids    = ["subnet-1", "subnet-2"]
   project_name          = "nest"
-  security_group_id     = "sg-service-12345"
   secretsmanager_secret_arns = [
     "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/EXAMPLE"
   ]
-  service_name     = "service"
-  subnet_ids       = ["subnet-1", "subnet-2"]
-  target_group_arn = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
+  security_group_id = "sg-service-12345"
+  service_name      = "service"
+  target_group_arn  = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
 }
 
 run "test_cloudwatch_log_group_name_format" {
@@ -408,5 +408,23 @@ run "test_fargate_standard_capacity_provider" {
   assert {
     condition     = one([for s in aws_ecs_cluster_capacity_providers.main.default_capacity_provider_strategy : s.capacity_provider]) == "FARGATE"
     error_message = "Cluster must use FARGATE when use_fargate_spot is false."
+  }
+}
+
+run "test_service_assign_public_ip_disabled" {
+  command = plan
+
+  assert {
+    condition     = one(aws_ecs_service.main.network_configuration).assign_public_ip == false
+    error_message = "ECS service must not assign a public IP. Use a NAT Gateway instead."
+  }
+}
+
+run "test_service_uses_private_subnets" {
+  command = plan
+
+  assert {
+    condition     = one(aws_ecs_service.main.network_configuration).subnets == toset(var.private_subnet_ids)
+    error_message = "ECS service must be deployed into the configured private subnets."
   }
 }

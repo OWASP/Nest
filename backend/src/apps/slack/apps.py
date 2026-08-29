@@ -28,7 +28,11 @@ class SlackConfig(AppConfig):
     def ready(self):
         """Configure Slack events when the app is ready."""
         super().ready()
-        from apps.slack import actions, commands  # noqa: F401, PLC0415 -- register handlers
+        from apps.slack import (  # noqa: F401, PLC0415 -- register handlers
+            actions,
+            commands,
+            shortcuts,
+        )
         from apps.slack.events import configure_slack_events  # noqa: PLC0415
 
         configure_slack_events()
@@ -47,7 +51,7 @@ if SlackConfig.app:
             **kwargs: Additional keyword arguments.
 
         """
-        logger.exception(error, extra={"body": body})
+        logger.error("%s", error, extra={"body": body}, exc_info=error)
 
     @SlackConfig.app.use
     def log_events(
