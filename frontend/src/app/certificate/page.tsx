@@ -12,7 +12,9 @@ import {
   FaCopy,
   FaFilePdf,
   FaImage,
+  FaLayerGroup,
   FaLinkedin,
+  FaMap,
 } from 'react-icons/fa6'
 
 import { GetMyCertificateDocument } from 'types/__generated__/certificateQueries.generated'
@@ -310,49 +312,84 @@ const MyCertificatePage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4">
-            {otherCertificates.map(({ cert, idx }) => (
-              <button
-                key={cert.id}
-                type="button"
-                onClick={() => handleSelectCertificate(idx)}
-                disabled={isDownloading || isSavingPdf}
-                className="group flex w-64 flex-col rounded-lg bg-white p-5 text-left shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
-              >
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-400/15 dark:bg-blue-400/20">
-                    <FaAward className="h-4 w-4 text-blue-400" />
-                  </div>
-                  <span className="text-sm font-bold tracking-wide text-gray-900 uppercase dark:text-white">
-                    {cert.tier}
-                  </span>
-                </div>
+            {otherCertificates.map(({ cert, idx }) => {
+              const hasCustomTitle = Boolean(cert.title)
+              const issuedByProject = Boolean(cert.project?.name)
+              const issuedByChapter = Boolean(cert.chapter?.name)
+              const hasIssuedBy = issuedByProject || issuedByChapter
+              const IssuedByIcon = issuedByProject ? FaLayerGroup : FaMap
+              const issuedByName = issuedByProject ? cert.project?.name : cert.chapter?.name
 
-                <div className="mb-3 border-t border-gray-100 dark:border-gray-700" />
-
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
-                      Issued
-                    </span>
-                    <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
-                      <FaCalendarDays className="h-3.5 w-3.5 shrink-0 text-blue-400" />
-                      <span className="font-medium">{formatDate(cert.issuedAt)}</span>
+              return (
+                <button
+                  key={cert.id}
+                  type="button"
+                  onClick={() => handleSelectCertificate(idx)}
+                  disabled={isDownloading || isSavingPdf}
+                  className="group flex w-72 flex-col rounded-xl bg-white p-5 text-left shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+                >
+                  <div className="mb-3 flex items-start gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-400/15 dark:bg-blue-400/20">
+                      <FaAward className="h-4 w-4 text-blue-400" />
+                    </div>
+                    <div className="flex flex-col">
+                      {hasCustomTitle ? (
+                        <>
+                          <span className="text-xs font-bold tracking-wide text-gray-900 uppercase dark:text-white line-clamp-2">
+                            {cert.title}
+                          </span>
+                          {cert.tier && (
+                            <span className="mt-0.5 text-[10px] font-semibold text-blue-400 uppercase tracking-wider">
+                              {cert.tier}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-sm font-bold tracking-wide text-gray-900 uppercase dark:text-white">
+                          {cert.tier}
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
-                      Score
-                    </span>
-                    <span className="font-bold text-blue-400">{cert.score} pts</span>
-                  </div>
-                </div>
 
-                <div className="mt-4 flex items-center text-sm font-medium text-blue-400">
-                  View Certificate
-                  <FaChevronRight className="ml-1.5 h-3 w-3 transform transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-              </button>
-            ))}
+                  {hasIssuedBy && (
+                    <div className="mb-3 flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 dark:bg-blue-400/10">
+                      <IssuedByIcon className="h-3 w-3 shrink-0 text-blue-400" />
+                      <span className="text-[10px] font-semibold tracking-wide text-blue-500 truncate dark:text-blue-400">
+                        {issuedByName}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="mb-3 border-t border-gray-100 dark:border-gray-700" />
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
+                        Issued
+                      </span>
+                      <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+                        <FaCalendarDays className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+                        <span className="font-medium">{formatDate(cert.issuedAt)}</span>
+                      </div>
+                    </div>
+                    {cert.score > 0 && (
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
+                          Score
+                        </span>
+                        <span className="font-bold text-blue-400">{cert.score} pts</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 flex items-center text-sm font-medium text-blue-400">
+                    View Certificate
+                    <FaChevronRight className="ml-1.5 h-3 w-3 transform transition-transform duration-200 group-hover:translate-x-1" />
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

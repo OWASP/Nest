@@ -10,6 +10,8 @@ import {
   FaCircleXmark,
   FaGithub,
   FaGlobe,
+  FaLayerGroup,
+  FaMap,
   FaShieldHalved,
 } from 'react-icons/fa6'
 import type { Certificate } from 'types/certificate'
@@ -26,7 +28,11 @@ const BorderFrame: React.FC = () => (
   </div>
 )
 
-const Header: React.FC = () => (
+interface HeaderProps {
+  title?: string | null
+}
+
+const Header: React.FC<HeaderProps> = ({ title }) => (
   <div className="flex flex-col items-center pt-2 text-center">
     <div className="relative mb-2.5 h-[52px] w-[192px]">
       <Image src="/img/OWASP_logo.svg" alt="OWASP Logo" fill priority className="object-contain" />
@@ -35,7 +41,7 @@ const Header: React.FC = () => (
       Open Worldwide Application Security Project
     </span>
     <h1 className="mb-3 text-[32px] leading-none font-extrabold tracking-[0.12em] text-[#0B2545] uppercase">
-      Certificate of Recognition
+      {title || 'Certificate of Recognition'}
     </h1>
     <div className="mt-0 flex w-[200px] items-center">
       <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
@@ -142,6 +148,44 @@ const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
   </div>
 )
 
+interface IssuedByBadgeProps {
+  projectName?: string | null
+  projectKey?: string | null
+  chapterName?: string | null
+  chapterKey?: string | null
+}
+
+const IssuedByBadge: React.FC<IssuedByBadgeProps> = ({
+  projectName,
+  projectKey,
+  chapterName,
+  chapterKey,
+}) => {
+  const isProject = Boolean(projectName)
+  const isChapter = Boolean(chapterName)
+  if (!isProject && !isChapter) return null
+
+  const Icon = isProject ? FaLayerGroup : FaMap
+  const name = isProject ? projectName : chapterName
+  const key = isProject ? projectKey : chapterKey
+  const href = isProject ? `/projects/${key}` : `/chapters/${key}`
+  const entityLabel = isProject ? 'Project' : 'Chapter'
+
+  return (
+    <div className="mx-auto mt-2 flex w-full items-center justify-center">
+      <div className="flex items-center gap-2 rounded-full border border-[#1D70B8]/35 bg-[#EBF4FF] px-5 py-[5px]">
+        <Icon size={13} className="shrink-0 text-[#1D70B8]" />
+        <p className="whitespace-nowrap text-[13px] font-semibold tracking-[0.05em] text-[#4B5563]">
+          Issued under the{' '}
+          <a href={href} className="font-extrabold text-[#1D70B8] hover:underline">
+            {name} {entityLabel}
+          </a>
+        </p>
+      </div>
+    </div>
+  )
+}
+
 interface FooterProps {
   id: string
   issuedAt: string
@@ -235,9 +279,15 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
   isPublicView = false,
   cardRef,
 }) => {
-  const { id, tier, issuedAt, score, isVerified, githubUser } = certificate
+  const { id, tier, issuedAt, score, isVerified, githubUser, title, message, project, chapter } =
+    certificate
   const [scale, setScale] = useState(1)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  const hasCustomContent = Boolean(title)
+  const hasIssuedBy = Boolean(project?.name || chapter?.name)
+
+  const hasScoreOrTier = Boolean(score) || Boolean(tier)
 
   useEffect(() => {
     const handleResize = () => {
@@ -292,14 +342,32 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
               {isPublicView && (isVerified ? <VerificationBadge /> : <RevokedBadge />)}
               {!isVerified && <RevokedWatermark />}
               <div className="flex flex-1 flex-col justify-between px-12 pt-6 pb-10">
-                <Header />
+                <Header title={title} />
                 <Recipient
                   name={githubUser.name}
                   login={githubUser.login}
                   avatarUrl={githubUser.avatarUrl}
                 />
-                <RecognitionText />
-                <Metrics score={score} tier={tier} />
+
+                {!hasCustomContent && <RecognitionText />}
+
+                {hasCustomContent && message && (
+                  <p className="mx-auto mt-2 max-w-[560px] text-center text-[15px] leading-[1.8] font-medium text-slate-700 italic">
+                    &quot;{message}&quot;
+                  </p>
+                )}
+
+                {hasIssuedBy && (
+                  <IssuedByBadge
+                    projectName={project?.name}
+                    projectKey={project?.key}
+                    chapterName={chapter?.name}
+                    chapterKey={chapter?.key}
+                  />
+                )}
+
+                {hasScoreOrTier && <Metrics score={score} tier={tier} />}
+
                 <Footer id={id} issuedAt={issuedAt} />
               </div>
             </div>
