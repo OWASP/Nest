@@ -1,7 +1,6 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
-import { registerBreadcrumb } from 'contexts/BreadcrumbContext'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
@@ -31,16 +30,6 @@ const CandidateProfilePage = () => {
       handleAppError(error)
     }
   }, [error])
-
-  const memberName = data?.boardCandidateProfile?.candidate.memberName
-  useEffect(() => {
-    if (!memberName) return
-    const unregister = registerBreadcrumb({
-      title: memberName,
-      path: `/board/${year}/candidates/${login}`,
-    })
-    return unregister
-  }, [memberName, login, year])
 
   if (isSyncing || loading) {
     return <LoadingSpinner />

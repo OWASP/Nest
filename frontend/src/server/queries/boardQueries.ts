@@ -10,6 +10,17 @@ export const GET_BOARD_CANDIDATE = gql`
   }
 `
 
+export const GET_BOARD_CANDIDATE_NAME = gql`
+  query GetBoardCandidateName($login: String!, $year: Int!) {
+    boardCandidateProfile(login: $login, year: $year) {
+      id
+      candidate {
+        memberName
+      }
+    }
+  }
+`
+
 export const GET_BOARD_CANDIDATES = gql`
   query GetBoardCandidates($year: Int!) {
     boardOfDirectors(year: $year) {
