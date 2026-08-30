@@ -4,7 +4,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from apps.nest.management.commands.e2e_seed_users import E2E_USERS, Command
+from apps.e2e.management.commands.e2e_seed_users import E2E_USERS, Command
 
 
 class TestE2ESeedUsersCommand:
@@ -19,21 +19,21 @@ class TestE2ESeedUsersCommand:
     def test_requires_e2e_environment(self):
         with (
             patch(
-                "apps.nest.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
+                "apps.e2e.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
                 new=False,
             ),
             pytest.raises(CommandError, match="e2e environment"),
         ):
-            call_command("e2e_seed_users")
+            call_command(Command())
 
-    @patch("apps.nest.management.commands.e2e_seed_users.index.disable_indexing")
-    @patch("apps.nest.management.commands.e2e_seed_users.ContentType")
-    @patch("apps.nest.management.commands.e2e_seed_users.EntityMember")
-    @patch("apps.nest.management.commands.e2e_seed_users.Project")
-    @patch("apps.nest.management.commands.e2e_seed_users.Mentee")
-    @patch("apps.nest.management.commands.e2e_seed_users.Mentor")
-    @patch("apps.nest.management.commands.e2e_seed_users.NestUser")
-    @patch("apps.nest.management.commands.e2e_seed_users.GithubUser")
+    @patch("apps.e2e.management.commands.e2e_seed_users.index.disable_indexing")
+    @patch("apps.e2e.management.commands.e2e_seed_users.ContentType")
+    @patch("apps.e2e.management.commands.e2e_seed_users.EntityMember")
+    @patch("apps.e2e.management.commands.e2e_seed_users.Project")
+    @patch("apps.e2e.management.commands.e2e_seed_users.Mentee")
+    @patch("apps.e2e.management.commands.e2e_seed_users.Mentor")
+    @patch("apps.e2e.management.commands.e2e_seed_users.NestUser")
+    @patch("apps.e2e.management.commands.e2e_seed_users.GithubUser")
     def test_creates_users(
         self,
         mock_github_user,
@@ -57,10 +57,10 @@ class TestE2ESeedUsersCommand:
         mock_entity_member.objects.get_or_create.return_value = (membership, True)
 
         with patch(
-            "apps.nest.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
+            "apps.e2e.management.commands.e2e_seed_users.settings.IS_E2E_ENVIRONMENT",
             new=True,
         ):
-            call_command("e2e_seed_users")
+            call_command(Command())
 
         mock_disable_indexing.assert_called_once()
         assert mock_github_user.objects.get_or_create.call_count == 3

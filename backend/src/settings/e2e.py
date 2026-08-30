@@ -33,3 +33,6 @@ class E2E(Base):
         **Base.ALGOLIA,
         "AUTO_INDEXING": False,
     }
+
+    LOCAL_APPS = (*Base.LOCAL_APPS, "apps.e2e")
+    INSTALLED_APPS = Base.DJANGO_APPS + Base.THIRD_PARTY_APPS + LOCAL_APPS

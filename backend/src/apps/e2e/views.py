@@ -1,4 +1,4 @@
-"""E2E-only login view."""
+"""E2E-only views."""
 
 import json
 

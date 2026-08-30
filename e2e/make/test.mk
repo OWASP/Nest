@@ -1,11 +1,9 @@
-.PHONY: test-e2e test-e2e-protected e2e-load-data e2e-db-init e2e-test \
-	e2e-test-no-db-init e2e-test-protected e2e-test-run-backend e2e-test-ui \
+.PHONY: test-e2e e2e-load-data e2e-db-init e2e-test \
+	e2e-test-no-db-init e2e-test-run-backend e2e-test-ui \
 	e2e-test-ui-no-db-init
 
 test-e2e: ## Run e2e tests
 	@$(MAKE) e2e-test
-
-test-e2e-protected: e2e-test-protected
 
 # Implementation targets.
 
@@ -46,21 +44,6 @@ e2e-test-no-db-init:
 		-f docker-compose/e2e/compose.yaml build -q backend frontend e2e-tests \
 		1>/dev/null
 	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml up \
-		--abort-on-container-exit \
-		--attach e2e-tests \
-		--no-build \
-		--quiet-pull \
-		backend cache db frontend e2e-tests \
-		--remove-orphans
-
-e2e-test-protected:
-	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
-		-f docker-compose/e2e/compose.yaml build -q backend frontend e2e-tests \
-		1>/dev/null
-	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:protected" docker compose \
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml up \
 		--abort-on-container-exit \

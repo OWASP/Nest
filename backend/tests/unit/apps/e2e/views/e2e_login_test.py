@@ -6,7 +6,7 @@ import pytest
 from django.http import Http404
 from django.test import RequestFactory
 
-from apps.nest.api.internal.views.e2e_login import e2e_login
+from apps.e2e.views import e2e_login
 from apps.nest.models import User
 
 
@@ -24,7 +24,7 @@ class TestE2ELoginView:
         request = _post({"username": "e2e-mentor"})
         with (
             patch(
-                "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+                "apps.e2e.views.settings.IS_E2E_ENVIRONMENT",
                 new=False,
             ),
             pytest.raises(Http404),
@@ -34,7 +34,7 @@ class TestE2ELoginView:
     def test_returns_400_for_invalid_json(self):
         request = _post("{")
         with patch(
-            "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+            "apps.e2e.views.settings.IS_E2E_ENVIRONMENT",
             new=True,
         ):
             response = e2e_login(request)
@@ -46,7 +46,7 @@ class TestE2ELoginView:
     def test_returns_400_for_non_dict_json(self, payload):
         request = _post(payload)
         with patch(
-            "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+            "apps.e2e.views.settings.IS_E2E_ENVIRONMENT",
             new=True,
         ):
             response = e2e_login(request)
@@ -58,7 +58,7 @@ class TestE2ELoginView:
     def test_returns_400_for_invalid_username_type(self, username):
         request = _post({"username": username})
         with patch(
-            "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+            "apps.e2e.views.settings.IS_E2E_ENVIRONMENT",
             new=True,
         ):
             response = e2e_login(request)
@@ -70,7 +70,7 @@ class TestE2ELoginView:
         request = _post({"username": "admin"})
         with (
             patch(
-                "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+                "apps.e2e.views.settings.IS_E2E_ENVIRONMENT",
                 new=True,
             ),
             pytest.raises(Http404),
@@ -81,11 +81,11 @@ class TestE2ELoginView:
         request = _post({"username": "e2e-mentor"})
         with (
             patch(
-                "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+                "apps.e2e.views.settings.IS_E2E_ENVIRONMENT",
                 new=True,
             ),
             patch(
-                "apps.nest.api.internal.views.e2e_login.User.objects.get",
+                "apps.e2e.views.User.objects.get",
                 side_effect=User.DoesNotExist,
             ),
             pytest.raises(Http404),
@@ -98,14 +98,14 @@ class TestE2ELoginView:
 
         with (
             patch(
-                "apps.nest.api.internal.views.e2e_login.settings.IS_E2E_ENVIRONMENT",
+                "apps.e2e.views.settings.IS_E2E_ENVIRONMENT",
                 new=True,
             ),
             patch(
-                "apps.nest.api.internal.views.e2e_login.User.objects.get",
+                "apps.e2e.views.User.objects.get",
                 return_value=user,
             ) as mock_get,
-            patch("apps.nest.api.internal.views.e2e_login.login") as mock_login,
+            patch("apps.e2e.views.login") as mock_login,
         ):
             response = e2e_login(request)
 
