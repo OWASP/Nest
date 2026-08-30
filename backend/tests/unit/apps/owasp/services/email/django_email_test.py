@@ -35,6 +35,7 @@ class TestDjangoEmailService:
         call_kwargs = mock_email_class.call_args[1]
         assert call_kwargs["from_email"] == settings.DEFAULT_FROM_EMAIL
         assert call_kwargs["to"] == ["test@example.com"]
+        assert call_kwargs["body"] == "Hello"
         mock_msg.attach_alternative.assert_called_once_with("<h1>Hello</h1>", "text/html")
         mock_msg.send.assert_called_once()
 
@@ -123,6 +124,33 @@ class TestDjangoEmailService:
         assert mock_email_class.call_count == 2
         for call in mock_email_class.call_args_list:
             assert call[1]["connection"] is mock_conn
+
+    @patch("apps.owasp.services.email.django_email.get_connection")
+    @patch("apps.owasp.services.email.django_email.EmailMultiAlternatives")
+    def test_send_bulk_with_headers(self, mock_email_class, mock_get_conn, service):
+        """Test that custom headers are passed through to each message in send_bulk."""
+        mock_conn = MagicMock()
+        mock_get_conn.return_value = mock_conn
+
+        mock_msg = MagicMock()
+        mock_msg.send.return_value = 1
+        mock_email_class.return_value = mock_msg
+
+        headers = {"List-Unsubscribe": "<https://example.com/unsub>"}
+        messages = [
+            {
+                "to": "a@example.com",
+                "subject": "Subject A",
+                "html_body": "<p>A</p>",
+                "plain_body": "A",
+                "headers": headers,
+            },
+        ]
+
+        service.send_bulk(messages)
+
+        call_kwargs = mock_email_class.call_args[1]
+        assert call_kwargs["headers"] == headers
 
     @patch("apps.owasp.services.email.django_email.get_connection")
     @patch("apps.owasp.services.email.django_email.EmailMultiAlternatives")
