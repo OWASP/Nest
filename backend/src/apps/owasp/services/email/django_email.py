@@ -39,7 +39,7 @@ class DjangoEmailService(EmailService):
             msg.attach_alternative(html_body, "text/html")
             sent_count = msg.send()
         except Exception:
-            logger.exception("Failed to send email to %s", to)
+            logger.exception("Failed to send email")
             return False
         return sent_count > 0
 
@@ -83,7 +83,7 @@ class DjangoEmailService(EmailService):
                     else:
                         results["failed"] += 1
                 except Exception:
-                    logger.exception("Failed to send email to %s", message.get("to"))
+                    logger.exception("Failed to send email")
                     results["failed"] += 1
         finally:
             self._close_connection_safely(connection)
