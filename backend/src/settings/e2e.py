@@ -34,5 +34,5 @@ class E2E(Base):
         "AUTO_INDEXING": False,
     }
 
-    LOCAL_APPS = (*Base.LOCAL_APPS, "apps.e2e")
-    INSTALLED_APPS = Base.DJANGO_APPS + Base.THIRD_PARTY_APPS + LOCAL_APPS
+    LOCAL_APPS = (*Base.LOCAL_APPS, "apps.e2e")  # type: ignore[assignment]
+    INSTALLED_APPS = Base.DJANGO_APPS + Base.THIRD_PARTY_APPS + LOCAL_APPS  # type: ignore[assignment]
