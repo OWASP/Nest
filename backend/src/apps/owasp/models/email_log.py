@@ -21,6 +21,7 @@ class EmailLog(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["snapshot_subscription", "snapshot"],
+                condition=models.Q(status="sent"),
                 name="unique_email_per_subscription_snapshot",
             ),
         ]
@@ -70,6 +71,7 @@ class EmailLog(models.Model):
         return cls.objects.filter(
             snapshot=snapshot,
             snapshot_subscription=snapshot_subscription,
+            status=cls.Status.SENT,
         ).exists()
 
     @classmethod

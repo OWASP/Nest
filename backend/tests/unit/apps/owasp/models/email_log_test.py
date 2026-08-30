@@ -36,7 +36,7 @@ class TestEmailLogIsDuplicate:
 
     @patch("apps.owasp.models.email_log.EmailLog.objects")
     def test_is_duplicate_returns_true(self, mock_objects):
-        """Test duplicate check returns True when log exists."""
+        """Test duplicate check returns True only when a SENT log exists."""
         mock_objects.filter.return_value.exists.return_value = True
         snapshot = MagicMock(spec=Snapshot)
         subscription = MagicMock(spec=SnapshotSubscription)
@@ -45,7 +45,9 @@ class TestEmailLogIsDuplicate:
 
         assert result is True
         mock_objects.filter.assert_called_once_with(
-            snapshot=snapshot, snapshot_subscription=subscription
+            snapshot=snapshot,
+            snapshot_subscription=subscription,
+            status=EmailLog.Status.SENT,
         )
 
     @patch("apps.owasp.models.email_log.EmailLog.objects")
@@ -58,6 +60,22 @@ class TestEmailLogIsDuplicate:
         result = EmailLog.is_duplicate(snapshot=snapshot, snapshot_subscription=subscription)
 
         assert result is False
+
+    @patch("apps.owasp.models.email_log.EmailLog.objects")
+    def test_failed_log_is_not_duplicate(self, mock_objects):
+        """Test that a FAILED log does not count as a duplicate — retries are allowed."""
+        mock_objects.filter.return_value.exists.return_value = False
+        snapshot = MagicMock(spec=Snapshot)
+        subscription = MagicMock(spec=SnapshotSubscription)
+
+        result = EmailLog.is_duplicate(snapshot=snapshot, snapshot_subscription=subscription)
+
+        assert result is False
+        mock_objects.filter.assert_called_once_with(
+            snapshot=snapshot,
+            snapshot_subscription=subscription,
+            status=EmailLog.Status.SENT,
+        )
 
 
 class TestEmailLogMarkSent:

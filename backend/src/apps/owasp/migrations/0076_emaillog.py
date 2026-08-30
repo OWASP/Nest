@@ -56,6 +56,7 @@ class Migration(migrations.Migration):
                 "constraints": [
                     models.UniqueConstraint(
                         fields=["snapshot_subscription", "snapshot"],
+                        condition=models.Q(status="sent"),
                         name="unique_email_per_subscription_snapshot",
                     )
                 ],
