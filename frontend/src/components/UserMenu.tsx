@@ -130,17 +130,17 @@ export default function UserMenu({
 
           {hasCertificate && (
             <Link
-              href="/certificate"
+              href="/my/certificate"
               className={userMenuItemClasses}
               onClick={() => setIsOpen(false)}
             >
-              My Certificate
+              My Certificates
             </Link>
           )}
 
           {(isProjectLeader || isChapterLeader) && (
             <Link
-              href="/certificate/issue"
+              href="/my/certificate/issue"
               className={userMenuItemClasses}
               onClick={() => setIsOpen(false)}
             >

@@ -6,7 +6,7 @@ export const metadata: Metadata = generateSeoMetadata({
   title: 'Issue Certificate',
   description:
     'Issue an OWASP Contributor Recognition Certificate to project or chapter contributors.',
-  canonicalPath: '/certificate/issue',
+  canonicalPath: '/my/certificate/issue',
 })
 
 export default function IssueCertificateLayout({ children }: { children: React.ReactNode }) {
