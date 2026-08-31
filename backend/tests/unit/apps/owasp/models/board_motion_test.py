@@ -17,21 +17,21 @@ class TestBoardMotionModel:
         assert BoardMotion._meta.db_table == "owasp_board_motions"
         assert BoardMotion._meta.verbose_name_plural == "Board Motions"
 
-    def test_amends_motion_is_nullable_self_reference_cascade(self):
-        """Test amends_motion is a nullable self-reference with CASCADE."""
+    def test_amends_motion_is_nullable_self_reference_set_null(self):
+        """Test amends_motion is a nullable self-reference with SET_NULL."""
         field = BoardMotion._meta.get_field("amends_motion")
 
         assert field.related_model is BoardMotion
         assert field.null is True
-        assert field.remote_field.on_delete.__name__ == "CASCADE"
+        assert field.remote_field.on_delete.__name__ == "SET_NULL"
 
     def test_sponsor_and_second_foreign_keys_target_entity_member(self):
-        """Test sponsor and second foreign keys target EntityMember and CASCADE."""
+        """Test sponsor and second foreign keys target EntityMember and SET_NULL."""
         for name in ("sponsor", "second"):
             field = BoardMotion._meta.get_field(name)
             assert field.related_model.__name__ == "EntityMember"
             assert field.null is True
-            assert field.remote_field.on_delete.__name__ == "CASCADE"
+            assert field.remote_field.on_delete.__name__ == "SET_NULL"
 
     def test_field_defaults(self):
         """Test default values on optional fields."""

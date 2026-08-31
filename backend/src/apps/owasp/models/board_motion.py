@@ -25,21 +25,21 @@ class BoardMotion(TimestampedModel):
         "self",
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     second = models.ForeignKey(
         EntityMember,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     sponsor = models.ForeignKey(
         EntityMember,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
 

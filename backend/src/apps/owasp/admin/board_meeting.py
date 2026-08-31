@@ -13,7 +13,6 @@ class BoardMeetingAdmin(admin.ModelAdmin):
     list_display = ("title", "date", "board", "type", "quorum_present")
     list_filter = ("type", "quorum_present", "board__year")
     ordering = ("-date",)
-    raw_id_fields = ("board",)
     search_fields = ("title", "location", "source_path")
 
 
