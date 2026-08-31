@@ -66,8 +66,8 @@ class TestBoardMeetingModel:
 
         assert field.get_internal_type() == "DateTimeField"
 
-    def test_board_fk_targets_board_of_directors_cascade(self):
-        """Test board FK targets BoardOfDirectors and cascades."""
+    def test_board_foreign_key_targets_board_of_directors_cascade(self):
+        """Test board foreign key targets BoardOfDirectors and cascades."""
         field = BoardMeeting._meta.get_field("board")
 
         assert field.related_model.__name__ == "BoardOfDirectors"

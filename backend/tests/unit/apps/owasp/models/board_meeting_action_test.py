@@ -24,26 +24,26 @@ class TestBoardMeetingActionModel:
         assert "board_meeting_action_unique_meeting_order" in constraint_names
 
     def test_exactly_one_target_check_constraint(self):
-        """Test check constraint enforcing exactly one target FK is declared."""
+        """Test check constraint enforcing exactly one target foreign key is declared."""
         constraint_names = {c.name for c in BoardMeetingAction._meta.constraints}
 
         assert "board_meeting_action_exactly_one_target" in constraint_names
 
     def test_target_fields_are_nullable(self):
-        """Test all three target FKs are nullable."""
+        """Test all three target foreign keys are nullable."""
         for name in ("discussion", "motion", "outcome"):
             field = BoardMeetingAction._meta.get_field(name)
             assert field.null is True
 
     def test_meeting_fk_is_required(self):
-        """Test meeting FK is required."""
+        """Test meeting foreign key is required."""
         field = BoardMeetingAction._meta.get_field("meeting")
 
         assert field.null is False
         assert field.related_model.__name__ == "BoardMeeting"
 
-    def test_target_fks_point_at_expected_models(self):
-        """Test target FKs point at the expected models."""
+    def test_target_foreign_keys_point_at_expected_models(self):
+        """Test target foreign keys point at the expected models."""
         expected = {
             "discussion": "BoardDiscussion",
             "motion": "BoardMotion",

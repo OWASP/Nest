@@ -52,8 +52,8 @@ class TestBoardVoteModel:
             assert field.many_to_many
             assert field.related_model.__name__ == "EntityMember"
 
-    def test_motion_fk_required_cascade(self):
-        """Test motion FK is required and uses CASCADE on delete."""
+    def test_motion_foreign_key_required_cascade(self):
+        """Test motion foreign key is required and uses CASCADE on delete."""
         field = BoardVote._meta.get_field("motion")
 
         assert field.null is False

@@ -17,16 +17,16 @@ class TestBoardMotionModel:
         assert BoardMotion._meta.db_table == "owasp_board_motions"
         assert BoardMotion._meta.verbose_name_plural == "Board Motions"
 
-    def test_amends_motion_is_self_fk_nullable_cascade(self):
-        """Test amends_motion is a nullable self-FK with CASCADE."""
+    def test_amends_motion_is_nullable_self_reference_cascade(self):
+        """Test amends_motion is a nullable self-reference with CASCADE."""
         field = BoardMotion._meta.get_field("amends_motion")
 
         assert field.related_model is BoardMotion
         assert field.null is True
         assert field.remote_field.on_delete.__name__ == "CASCADE"
 
-    def test_sponsor_and_second_fks_target_entity_member(self):
-        """Test sponsor and second FKs target EntityMember and CASCADE."""
+    def test_sponsor_and_second_foreign_keys_target_entity_member(self):
+        """Test sponsor and second foreign keys target EntityMember and CASCADE."""
         for name in ("sponsor", "second"):
             field = BoardMotion._meta.get_field(name)
             assert field.related_model.__name__ == "EntityMember"
