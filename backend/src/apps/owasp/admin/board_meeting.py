@@ -8,8 +8,7 @@ from apps.owasp.models.board_meeting import BoardMeeting
 class BoardMeetingAdmin(admin.ModelAdmin):
     """Admin for BoardMeeting model."""
 
-    autocomplete_fields = ("board",)
-    filter_horizontal = ("attendees", "absentees")
+    autocomplete_fields = ("board", "attendees", "absentees")
     list_display = ("title", "date", "board", "type", "quorum_present")
     list_filter = ("type", "quorum_present", "board__year")
     ordering = ("-date",)
