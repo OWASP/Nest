@@ -40,7 +40,7 @@ class DjangoEmailService(EmailService):
             sent_count = msg.send()
         except Exception:
             logger.exception("Failed to send email")
-            return False
+            raise
         return sent_count > 0
 
     def _close_connection_safely(self, connection) -> None:
