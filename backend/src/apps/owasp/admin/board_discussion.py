@@ -8,7 +8,7 @@ from apps.owasp.models.board_discussion import BoardDiscussion
 class BoardDiscussionAdmin(admin.ModelAdmin):
     """Admin for BoardDiscussion model."""
 
-    filter_horizontal = ("participants",)
+    autocomplete_fields = ("participants",)
     list_display = ("topic",)
     search_fields = ("topic", "description")
 

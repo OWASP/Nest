@@ -8,7 +8,7 @@ from apps.owasp.models.board_outcome import BoardOutcome
 class BoardOutcomeAdmin(admin.ModelAdmin):
     """Admin for BoardOutcome model."""
 
-    filter_horizontal = ("assignees",)
+    autocomplete_fields = ("assignees",)
     list_display = ("description", "status", "due_date")
     list_filter = ("status",)
     ordering = ("-due_date",)
