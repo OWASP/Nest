@@ -23,7 +23,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - bod-activity-backend-venv:/home/owasp/.venv
 
   cache:
     command: >
@@ -41,7 +41,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - bod-activity-cache-data:/data
 
   db:
     container_name: nest-db
@@ -55,7 +55,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - bod-activity-db-data:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -75,7 +75,7 @@ services:
       - ../../docs:/home/owasp/docs
       - ../../frontend:/home/owasp/frontend:ro
       - ../../README.md:/home/owasp/README.md:ro
-      - docs-venv:/home/owasp/.venv
+      - bod-activity-docs-venv:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -97,8 +97,8 @@ services:
       - 3000:3000
     volumes:
       - ../../frontend:/home/owasp
-      - frontend-next:/home/owasp/.next
-      - frontend-node-modules:/home/owasp/node_modules
+      - bod-activity-frontend-next:/home/owasp/.next
+      - bod-activity-frontend-node-modules:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -119,15 +119,15 @@ services:
       - nest-network
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - bod-activity-backend-venv:/home/owasp/.venv
 
 networks:
   nest-network:
 
 volumes:
-  backend-venv:
-  cache-data:
-  db-data:
-  docs-venv:
-  frontend-next:
-  frontend-node-modules:
+  bod-activity-backend-venv:
+  bod-activity-cache-data:
+  bod-activity-db-data:
+  bod-activity-docs-venv:
+  bod-activity-frontend-next:
+  bod-activity-frontend-node-modules:
