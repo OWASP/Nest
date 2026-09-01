@@ -123,6 +123,32 @@ class TestGetUsersBlocks:
         assert "Location:" not in user_block_text
         assert "Followers:" not in user_block_text
 
+    def test_get_blocks_with_none_metadata_fields(self, mocker):
+        """Test users with nullable metadata fields."""
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "User NoMeta",
+                    "idx_login": "user_nometa",
+                    "idx_url": "https://github.com/user_nometa",
+                    "idx_bio": None,
+                    "idx_location": None,
+                    "idx_company": None,
+                    "idx_followers_count": 0,
+                    "idx_following_count": 0,
+                    "idx_public_repositories_count": 0,
+                }
+            ],
+            "nbPages": 1,
+        }
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_data)
+
+        blocks = get_blocks()
+
+        user_block_text = blocks[1]["text"]["text"]
+        assert "Company:" not in user_block_text
+        assert "Location:" not in user_block_text
+
     def test_get_blocks_with_no_name_uses_login(self, mocker):
         """Test users with no name field uses login instead."""
         mock_data = {
