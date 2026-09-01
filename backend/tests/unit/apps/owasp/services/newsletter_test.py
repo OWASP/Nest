@@ -681,3 +681,26 @@ class TestSendDigestEmail:
         mock_sub_cls.objects.get.side_effect = SnapshotSubscription.DoesNotExist
 
         send_digest_email(snapshot_id=1, subscription_id=999)
+
+    @patch("apps.owasp.services.newsletter.get_email_service")
+    @patch("apps.owasp.services.newsletter.EmailLog")
+    @patch("apps.owasp.services.newsletter.SnapshotSubscription")
+    @patch("apps.owasp.services.newsletter.Snapshot")
+    def test_skips_if_subscription_inactive(
+        self,
+        mock_snapshot_cls,
+        mock_sub_cls,
+        mock_email_log,
+        mock_get_service,
+    ):
+        """Test job skips sending when subscription is inactive."""
+        mock_snapshot_cls.objects.get.return_value = MagicMock()
+        mock_sub = MagicMock()
+        mock_sub.is_active = False
+        mock_sub_cls.objects.get.return_value = mock_sub
+
+        send_digest_email(snapshot_id=1, subscription_id=1)
+
+        mock_get_service.return_value.send.assert_not_called()
+        mock_email_log.mark_sent.assert_not_called()
+        mock_email_log.mark_failed.assert_not_called()
