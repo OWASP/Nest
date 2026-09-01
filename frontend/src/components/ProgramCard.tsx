@@ -81,6 +81,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
                   programKey={program.key}
                   status={program.status}
                   setStatus={updateProgramStatus}
+                  isAdmin={isAdmin}
                 />
               </div>
             )}

@@ -19,7 +19,6 @@ export interface HeaderProps {
   accessLevel?: string
   admins?: Array<{ login: string }>
   mentors?: Array<{ login: string }>
-  isMentee?: boolean
   isActive?: boolean
   isArchived?: boolean
   healthMetricsData?: Array<{ score?: number }>
@@ -41,7 +40,6 @@ const Header = ({
   accessLevel,
   admins,
   mentors,
-  isMentee = false,
   isActive = true,
   isArchived = false,
   healthMetricsData,
@@ -64,6 +62,7 @@ const Header = ({
                 programKey={programKey}
                 status={status}
                 setStatus={setStatus}
+                isAdmin={canUpdateStatus}
               />
             )}
             {showModuleActions &&
@@ -74,14 +73,14 @@ const Header = ({
                   accessLevel === 'admin' &&
                   admins?.some((admin) => admin.login === currentUserLogin)
                 const isMentor = mentors?.some((mentor) => mentor.login === currentUserLogin)
-                return isAdmin || isMentor || isMentee ? (
+                // Mentees have no module actions left, so they get no menu.
+                return isAdmin || isMentor ? (
                   <EntityActions
                     type="module"
                     programKey={programKey}
                     moduleKey={moduleKey}
                     isAdmin={isAdmin ? true : undefined}
                     isMentor={isMentor ? true : undefined}
-                    isMentee={isMentee ? true : undefined}
                   />
                 ) : null
               })()}
