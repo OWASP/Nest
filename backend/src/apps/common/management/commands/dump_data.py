@@ -35,6 +35,7 @@ class Command(BaseCommand):
             action="append",
             dest="tables",
             default=[
+                "public.django_content_type",
                 "public.owasp_*",
                 "public.github_*",
                 "public.slack_members",

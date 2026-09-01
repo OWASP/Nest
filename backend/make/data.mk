@@ -1,11 +1,11 @@
 ##@ Data
 
 .PHONY: dump-data enrich-data fetch-nest-dump index-data load-data load-data-e2e load-data-fuzz \
-	load-data-staging purge-data purge-data-e2e purge-data-fuzz recreate-schema restore-backup \
-	save-backup sync-data update-data upload-nest-dump backend-data-dump backend-data-enrich \
+	load-data-staging purge-data purge-data-e2e purge-data-fuzz purge-data-staging recreate-schema \
+	restore-backup save-backup sync-data update-data upload-nest-dump backend-data-dump backend-data-enrich \
 	backend-data-fetch-nest-dump backend-data-index backend-data-load backend-data-load-e2e \
 	backend-data-load-fuzz backend-data-load-staging backend-data-purge backend-data-purge-e2e \
-	backend-data-purge-fuzz backend-data-recreate-schema backend-data-restore-backup \
+	backend-data-purge-fuzz backend-data-purge-staging backend-data-recreate-schema backend-data-restore-backup \
 	backend-data-save-backup backend-data-sync backend-data-update backend-data-upload-nest-dump
 
 dump-data:
@@ -40,6 +40,9 @@ purge-data-e2e:
 
 purge-data-fuzz:
 	@$(MAKE) backend-data-purge-fuzz
+
+purge-data-staging:
+	@$(MAKE) backend-data-purge-staging
 
 recreate-schema: ## Recreate the local database schema
 	@$(MAKE) backend-data-recreate-schema
@@ -86,19 +89,19 @@ backend-data-index:
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) backend-exec-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) backend-exec-command
 
-backend-data-load: backend-data-fetch-nest-dump
+backend-data-load: backend-data-purge backend-data-fetch-nest-dump
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) backend-exec-db-command
 
-backend-data-load-e2e: backend-data-fetch-nest-dump
+backend-data-load-e2e: backend-data-purge-e2e backend-data-fetch-nest-dump
 	@echo "Loading Nest e2e data"
 	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) backend-exec-db-command-e2e
 
-backend-data-load-fuzz: backend-data-fetch-nest-dump
+backend-data-load-fuzz: backend-data-purge-fuzz backend-data-fetch-nest-dump
 	@echo "Loading Nest fuzz data"
 	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) backend-exec-db-command-fuzz
 
-backend-data-load-staging: backend-data-fetch-nest-dump
+backend-data-load-staging: backend-data-purge-staging backend-data-fetch-nest-dump
 	@echo "Loading Nest staging data"
 	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) backend-exec-db-command-staging
 
@@ -110,6 +113,9 @@ backend-data-purge-e2e:
 
 backend-data-purge-fuzz:
 	@CMD="python manage.py purge_data" $(MAKE) backend-exec-command-fuzz
+
+backend-data-purge-staging:
+	@CMD="python manage.py purge_data" $(MAKE) backend-exec-command-staging
 
 backend-data-recreate-schema:
 	@echo "Recreating Nest schema"
