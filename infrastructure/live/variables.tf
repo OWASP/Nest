@@ -78,6 +78,12 @@ variable "backend_use_fargate_spot" {
   default     = true
 }
 
+variable "create_shared_data_bucket" {
+  description = "Whether to create the shared public data S3 bucket."
+  type        = bool
+  default     = false
+}
+
 variable "db_allocated_storage" {
   description = "The allocated storage for the RDS database in GB."
   type        = number
@@ -185,12 +191,6 @@ variable "enable_additional_parameters" {
 variable "enable_cron_tasks" {
   description = "Whether to enable scheduled cron tasks."
   type        = bool
-}
-
-variable "enable_nat_gateway" {
-  description = "Whether to enable a NAT Gateway."
-  type        = bool
-  default     = true
 }
 
 variable "enable_rds_proxy" {

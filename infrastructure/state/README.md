@@ -1,3 +1,6 @@
+> [!NOTE]
+> A single state bucket is used for bootstrap resources, see [infrastructure/bootstrap/README.md](../bootstrap/README.md).
+
 ## Inline Permissions
 
 Use the following inline permissions for the `nest-state` IAM User
@@ -88,14 +91,14 @@ Use the following inline permissions for the `nest-state` IAM User
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.56.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.58.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.9.0 |
 
 ## Providers
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.56.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.58.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
 
 ## Modules
