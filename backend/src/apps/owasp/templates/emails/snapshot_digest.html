@@ -605,7 +605,7 @@
                   </td>
                 </tr>
                 {% endif %}
-                {% if posts_items %}
+                {% if posts_data %}
                 <tr>
                   <td class="px" style="padding: 24px 24px 0;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -631,7 +631,7 @@
                                 </table>
                               </td>
                             </tr>
-                            {% for post in posts_items %}
+                            {% for post in posts_data.items %}
                             <tr>
                               <td
                                 style="padding: 16px 14px; margin-bottom: 8px; background-color: #e9ecef; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; word-break: break-word; overflow-wrap: break-word; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
@@ -646,11 +646,11 @@
                               </td>
                             </tr>
                             {% endfor %}
-                            {% if posts_total > posts_items|length %}
+                            {% if posts_data.extra %}
                             <tr>
                               <td
                                 style="padding-top: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; color: #9ca3af; line-height: 1.5; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
-                                + {{ posts_total|add:"-1" }} more posts
+                                + {{ posts_data.extra }} more posts
                               </td>
                             </tr>
                             {% endif %}
@@ -661,7 +661,7 @@
                   </td>
                 </tr>
                 {% endif %}
-                {% if events_items %}
+                {% if events_data %}
                 <tr>
                   <td class="px" style="padding: 24px 24px 0;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -687,7 +687,7 @@
                                 </table>
                               </td>
                             </tr>
-                            {% for event in events_items %}
+                            {% for event in events_data.items %}
                             <tr>
                               <td
                                 style="padding: 16px 14px; margin-bottom: 8px; background-color: #e9ecef; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; word-break: break-word; overflow-wrap: break-word; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
@@ -701,11 +701,11 @@
                               </td>
                             </tr>
                             {% endfor %}
-                            {% if events_total > events_items|length %}
+                            {% if events_data.extra %}
                             <tr>
                               <td
                                 style="padding-top: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; color: #9ca3af; line-height: 1.5; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
-                                + {{ events_total|add:"-1" }} more events
+                                + {{ events_data.extra }} more events
                               </td>
                             </tr>
                             {% endif %}

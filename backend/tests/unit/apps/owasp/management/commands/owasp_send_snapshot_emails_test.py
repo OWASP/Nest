@@ -3,7 +3,9 @@
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.core.management import call_command
+from django.core.management.base import CommandError
 
 from apps.owasp.models.snapshot import Snapshot
 
@@ -13,32 +15,29 @@ class TestSendSnapshotEmailsCommand:
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.Snapshot.objects")
     def test_snapshot_not_found(self, mock_objects):
-        """Test command fails when snapshot doesn't exist."""
+        """Test command raises CommandError when snapshot doesn't exist."""
         mock_objects.get.side_effect = Snapshot.DoesNotExist
 
-        stderr = StringIO()
-        call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W99", stderr=stderr)
-
-        assert "not found" in stderr.getvalue()
+        with pytest.raises(CommandError, match="not found"):
+            call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W99")
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.Snapshot.objects")
     def test_snapshot_not_completed(self, mock_objects):
-        """Test command fails when snapshot is not completed."""
+        """Test command raises CommandError when snapshot is not completed."""
         mock_snapshot = MagicMock(spec=Snapshot)
         mock_snapshot.status = Snapshot.Status.PENDING
         mock_objects.get.return_value = mock_snapshot
 
-        stderr = StringIO()
-        call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30", stderr=stderr)
+        with pytest.raises(CommandError, match="not completed"):
+            call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30")
 
-        assert "not completed" in stderr.getvalue()
-
+    @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(
         "apps.owasp.management.commands.owasp_send_snapshot_emails.SnapshotSubscription.objects"
     )
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.EmailLog")
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.Snapshot.objects")
-    def test_dry_run(self, mock_snap_objects, mock_email_log, mock_snap_sub):
+    def test_dry_run(self, mock_snap_objects, mock_email_log, mock_snap_sub, mock_rq):
         """Test dry run doesn't enqueue jobs."""
         mock_snapshot = MagicMock(spec=Snapshot)
         mock_snapshot.status = Snapshot.Status.COMPLETED
@@ -62,6 +61,7 @@ class TestSendSnapshotEmailsCommand:
 
         output = stdout.getvalue()
         assert "DRY RUN" in output
+        mock_rq.get_queue.return_value.enqueue.assert_not_called()
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(

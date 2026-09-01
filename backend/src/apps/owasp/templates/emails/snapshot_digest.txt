@@ -1,4 +1,4 @@
-OWASP Nest — Community Snapshot
+{% autoescape off %}OWASP Nest — Community Snapshot
 ================================
 {{ snapshot.title }}
 {% if snapshot.start_at and snapshot.end_at %}{{ snapshot.start_at|date:"M d" }} – {{ snapshot.end_at|date:"M d, Y" }}{% endif %}
@@ -76,3 +76,4 @@ Manage Preferences: {{ site_url }}/settings
 Unsubscribe: {{ unsubscribe_url }}
 
 © OWASP Foundation. All rights reserved.
+{% endautoescape %}

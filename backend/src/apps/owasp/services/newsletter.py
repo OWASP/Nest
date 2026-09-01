@@ -101,7 +101,7 @@ class SnapshotDigestService:
                     "extra": max(0, total - MAX_ITEMS_PER_SECTION),
                 }
 
-        # Project sections — one section per project with issues/PRs/releases
+        # Project sections
         projects_data = []
         projects_extra = 0
         if any(preferences.get(k) for k in ("projects", "issues", "pull_requests", "releases")):
@@ -141,7 +141,7 @@ class SnapshotDigestService:
                     "extra": max(0, total - MAX_ITEMS_PER_SECTION),
                 }
 
-        # Entity sections (subscribed projects/chapters/committees)
+        # Entity sections
         entity_sections = []
         for entity_type, m2m_field in (
             ("project", "subscribed_projects"),
@@ -301,7 +301,10 @@ def send_digest_email(snapshot_id: int, subscription_id: int):
         )
         return
 
-    # Double-check idempotency in case of RQ retry
+    if not subscription.is_active:
+        logger.info("Subscription %s is inactive, skipping.", subscription_id)
+        return
+
     if EmailLog.is_duplicate(snapshot=snapshot, snapshot_subscription=subscription):
         logger.info("Email already sent for snapshot %s, skipping.", snapshot.key)
         return
@@ -309,7 +312,6 @@ def send_digest_email(snapshot_id: int, subscription_id: int):
     try:
         digest = SnapshotDigestService().generate(snapshot, subscription)
 
-        # Skip if there's nothing to send
         has_content = (
             digest.get("chapters_data")
             or digest.get("users_data")

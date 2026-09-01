@@ -3,7 +3,7 @@
 import logging
 
 import django_rq
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from apps.owasp.models.email_log import EmailLog
 from apps.owasp.models.snapshot import Snapshot
@@ -50,17 +50,13 @@ class Command(BaseCommand):
 
         try:
             snapshot = Snapshot.objects.get(key=snapshot_key)
-        except Snapshot.DoesNotExist:
-            self.stderr.write(self.style.ERROR(f"Snapshot '{snapshot_key}' not found."))
-            return
+        except Snapshot.DoesNotExist as err:
+            msg = f"Snapshot '{snapshot_key}' not found."
+            raise CommandError(msg) from err
 
         if snapshot.status != Snapshot.Status.COMPLETED:
-            self.stderr.write(
-                self.style.ERROR(
-                    f"Snapshot '{snapshot_key}' is not completed (status: {snapshot.status})."
-                )
-            )
-            return
+            msg = f"Snapshot '{snapshot_key}' is not completed (status: {snapshot.status})."
+            raise CommandError(msg)
 
         self.stdout.write(
             self.style.NOTICE(
