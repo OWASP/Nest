@@ -109,6 +109,8 @@ services:
       backend:
         condition: service_healthy
     env_file: ../../frontend/.env.e2e
+    environment:
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-your-nextauth-secret}
     healthcheck:
       interval: 5s
       retries: 10
