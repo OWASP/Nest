@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@apollo/client": "4.2.10",
+    "@apollo/client": "4.2.11",
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
@@ -38,7 +38,7 @@
     "next": "16.3.0",
     "next-auth": "4.24.15",
     "next-themes": "0.4.6",
-    "posthog-js": "1.415.2",
+    "posthog-js": "1.415.7",
     "react": "19.2.8",
     "react-apexcharts": "2.1.1",
     "react-dom": "19.2.8",
@@ -49,7 +49,7 @@
     "tailwind-merge": "3.6.0"
   },
   "devDependencies": {
-    "@axe-core/react": "4.12.1",
+    "@axe-core/react": "4.13.0",
     "@graphql-codegen/cli": "7.2.0",
     "@graphql-codegen/near-operation-file-preset": "5.2.1",
     "@graphql-codegen/typed-document-node": "7.1.0",
@@ -62,7 +62,7 @@
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.2",
-    "@testing-library/user-event": "14.6.3",
+    "@testing-library/user-event": "14.6.4",
     "@types/jest": "30.0.0",
     "@types/jest-axe": "3.5.9",
     "@types/leaflet": "1.9.22",
