@@ -193,12 +193,6 @@ variable "enable_cron_tasks" {
   type        = bool
 }
 
-variable "enable_nat_gateway" {
-  description = "Whether to enable a NAT Gateway."
-  type        = bool
-  default     = true
-}
-
 variable "enable_observability" {
   description = "Whether to create the observability stack."
   type        = bool

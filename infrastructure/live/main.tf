@@ -185,16 +185,15 @@ module "observability" {
     module.security.frontend_sg_id,
     module.security.tasks_sg_id,
   ]
-  assign_public_ip = local.assign_public_ip
+  assign_public_ip = false
   aws_region       = var.aws_region
   common_tags      = local.common_tags
   environment      = var.environment
   kms_key_arn      = module.kms.key_arn
   project_name     = var.project_name
-  # TODO(#5429): Use private_subnet_ids unconditionally once NAT is enabled in all environments.
-  subnet_ids = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  vm_image   = local.observability_vm_image
-  vpc_id     = module.networking.vpc_id
+  subnet_ids       = module.networking.private_subnet_ids
+  vm_image         = local.observability_vm_image
+  vpc_id           = module.networking.vpc_id
 }
 
 module "parameters" {
