@@ -134,6 +134,7 @@ services:
         condition: service_healthy
     environment:
       - FRONTEND_URL=http://frontend:3000
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-your-nextauth-secret}
     networks:
       - e2e-nest-network
     ports:
