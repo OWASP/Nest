@@ -103,7 +103,6 @@ No resources.
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name for the site. | `string` | n/a | yes |
 | <a name="input_enable_additional_parameters"></a> [enable\_additional\_parameters](#input\_enable\_additional\_parameters) | Whether to enable additional parameters (e.g. for production). | `bool` | `false` | no |
 | <a name="input_enable_cron_tasks"></a> [enable\_cron\_tasks](#input\_enable\_cron\_tasks) | Whether to enable scheduled cron tasks. | `bool` | n/a | yes |
-| <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Whether to enable a NAT Gateway. | `bool` | `true` | no |
 | <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Whether to create the observability stack. | `bool` | `false` | no |
 | <a name="input_enable_rds_proxy"></a> [enable\_rds\_proxy](#input\_enable\_rds\_proxy) | Whether to create an RDS proxy. | `bool` | `false` | no |
 | <a name="input_enable_vpc_cloudwatch_logs_endpoint"></a> [enable\_vpc\_cloudwatch\_logs\_endpoint](#input\_enable\_vpc\_cloudwatch\_logs\_endpoint) | Whether to create CloudWatch Logs VPC endpoint. | `bool` | `false` | no |
