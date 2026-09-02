@@ -3,8 +3,9 @@
 Before the first **staging** CI/CD run you must:
 
 1. **IAM role `nest-staging-terraform` (lifecycle)**
-   The staging pipeline assumes this role (see the "STSStateManagement" resource below). The role is **created automatically** by the bootstrap when you run it (e.g. the bootstrap workflow that applies `infrastructure/bootstrap` with `staging` in the environments list). On first deployment, the bootstrap run creates `aws_iam_role.terraform` (named `${project}-${env}-terraform`, here `nest-staging-terraform`); subsequent bootstrap runs **update** the existing role. No code or workflow changes are required for this.
-   **Manual intervention** may still be needed if you delete the role in AWS, remove it from Terraform state, or need to change the ExternalId (e.g. in the role trust policy or in the staging pipeline configuration).
+   - The staging pipeline assumes this role (see the "STSStateManagement" resource below).
+   - For the initial run, manual creation may be required before running the CI/CD deployment pipeline (see [infrastructure/bootstrap/README.md](../bootstrap/README.md)).
+   - Subsequent automated bootstrap runs update the existing role and policies.
 
 2. **Create the `nest-staging` IAM user** and attach the inline permissions documented below. This user is used to assume the `nest-staging-terraform` role.
 
@@ -39,7 +40,7 @@ Use the following inline permissions for the `nest-staging` IAM User.
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.56.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.58.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.9.0 |
 
 ## Providers
@@ -84,6 +85,7 @@ No resources.
 | <a name="input_backend_max_count"></a> [backend\_max\_count](#input\_backend\_max\_count) | The maximum number of backend tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_backend_min_count"></a> [backend\_min\_count](#input\_backend\_min\_count) | The minimum number of backend tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_backend_use_fargate_spot"></a> [backend\_use\_fargate\_spot](#input\_backend\_use\_fargate\_spot) | Whether to use Fargate Spot for backend tasks. | `bool` | `true` | no |
+| <a name="input_create_shared_data_bucket"></a> [create\_shared\_data\_bucket](#input\_create\_shared\_data\_bucket) | Whether to create the shared public data S3 bucket. | `bool` | `false` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | The allocated storage for the RDS database in GB. | `number` | `20` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The number of days to retain backups for. | `number` | `7` | no |
 | <a name="input_db_deletion_protection"></a> [db\_deletion\_protection](#input\_db\_deletion\_protection) | Specifies whether to prevent database deletion. | `bool` | `true` | no |
@@ -145,10 +147,9 @@ No resources.
 | <a name="output_frontend_ecr_repository_url"></a> [frontend\_ecr\_repository\_url](#output\_frontend\_ecr\_repository\_url) | The URL of the frontend ECR repository. |
 | <a name="output_frontend_service_name"></a> [frontend\_service\_name](#output\_frontend\_service\_name) | The name of the ECS frontend service. |
 | <a name="output_frontend_url"></a> [frontend\_url](#output\_frontend\_url) | The URL to access the frontend. |
-| <a name="output_nat_gateway_enabled"></a> [nat\_gateway\_enabled](#output\_nat\_gateway\_enabled) | Whether a NAT Gateway is enabled. |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | A list of private subnet IDs. |
 | <a name="output_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#output\_shared\_data\_bucket\_name) | S3 bucket for shared public data (e.g. nest.dump). |
 | <a name="output_tasks_cluster_name"></a> [tasks\_cluster\_name](#output\_tasks\_cluster\_name) | The name of the ECS tasks cluster. |
 | <a name="output_tasks_security_group_id"></a> [tasks\_security\_group\_id](#output\_tasks\_security\_group\_id) | The ID of the security group for ECS tasks. |
-| <a name="output_tasks_subnet_ids"></a> [tasks\_subnet\_ids](#output\_tasks\_subnet\_ids) | A list of public or private subnet IDs for ECS tasks. |
+| <a name="output_tasks_subnet_ids"></a> [tasks\_subnet\_ids](#output\_tasks\_subnet\_ids) | A list of private subnet IDs for ECS tasks. |
 <!-- END_TF_DOCS -->

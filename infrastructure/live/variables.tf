@@ -78,6 +78,12 @@ variable "backend_use_fargate_spot" {
   default     = true
 }
 
+variable "create_shared_data_bucket" {
+  description = "Whether to create the shared public data S3 bucket."
+  type        = bool
+  default     = false
+}
+
 variable "db_allocated_storage" {
   description = "The allocated storage for the RDS database in GB."
   type        = number

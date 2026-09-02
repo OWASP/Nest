@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.56.0"
+      version = "~> 6.58.0"
     }
     # tflint-ignore: terraform_unused_required_providers
     random = {
@@ -15,7 +15,6 @@ terraform {
 }
 
 locals {
-  assign_public_ip = var.enable_nat_gateway ? false : true
   common_tags = {
     Environment = var.environment
     ManagedBy   = "Terraform"
@@ -42,7 +41,6 @@ module "alb" {
 module "backend" {
   source = "../modules/service"
 
-  assign_public_ip                = local.assign_public_ip
   auto_scaling_cpu_target         = var.auto_scaling_cpu_target
   auto_scaling_scale_in_cooldown  = var.auto_scaling_scale_in_cooldown
   auto_scaling_scale_out_cooldown = var.auto_scaling_scale_out_cooldown
@@ -61,10 +59,10 @@ module "backend" {
   max_count                       = var.backend_max_count
   min_count                       = var.backend_min_count
   parameters_arns                 = module.parameters.django_ssm_parameter_arns
+  private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.backend_sg_id
   service_name                    = "backend"
-  subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn                = module.alb.backend_target_group_arn
   task_role_policy_arns           = [module.storage.static_read_write_policy_arn]
   use_fargate_spot                = var.backend_use_fargate_spot
@@ -112,7 +110,6 @@ module "database" {
 module "frontend" {
   source = "../modules/service"
 
-  assign_public_ip                = local.assign_public_ip
   auto_scaling_cpu_target         = var.auto_scaling_cpu_target
   auto_scaling_scale_in_cooldown  = var.auto_scaling_scale_in_cooldown
   auto_scaling_scale_out_cooldown = var.auto_scaling_scale_out_cooldown
@@ -128,10 +125,10 @@ module "frontend" {
   max_count                       = var.frontend_max_count
   min_count                       = var.frontend_min_count
   parameters_arns                 = module.parameters.frontend_ssm_parameter_arns
+  private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.frontend_sg_id
   service_name                    = "frontend"
-  subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn                = module.alb.frontend_target_group_arn
   use_fargate_spot                = var.frontend_use_fargate_spot
 }
@@ -165,7 +162,6 @@ module "networking" {
   availability_zones                  = var.availability_zones
   aws_region                          = var.aws_region
   common_tags                         = local.common_tags
-  enable_nat_gateway                  = var.enable_nat_gateway
   enable_vpc_cloudwatch_logs_endpoint = var.enable_vpc_cloudwatch_logs_endpoint
   enable_vpc_ecr_api_endpoint         = var.enable_vpc_ecr_api_endpoint
   enable_vpc_ecr_dkr_endpoint         = var.enable_vpc_ecr_dkr_endpoint
@@ -244,17 +240,17 @@ module "security" {
 module "storage" {
   source = "../modules/storage"
 
-  common_tags          = local.common_tags
-  environment          = var.environment
-  fixtures_bucket_name = local.fixtures_bucket_name
-  kms_key_arn          = module.kms.key_arn
-  project_name         = var.project_name
+  common_tags               = local.common_tags
+  create_shared_data_bucket = var.create_shared_data_bucket
+  environment               = var.environment
+  fixtures_bucket_name      = local.fixtures_bucket_name
+  kms_key_arn               = module.kms.key_arn
+  project_name              = var.project_name
 }
 
 module "tasks" {
   source = "../modules/tasks"
 
-  assign_public_ip              = local.assign_public_ip
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns
@@ -267,7 +263,7 @@ module "tasks" {
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   image_tag                     = var.backend_image_tag
   kms_key_arn                   = module.kms.key_arn
+  private_subnet_ids            = module.networking.private_subnet_ids
   project_name                  = var.project_name
-  subnet_ids                    = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   use_fargate_spot              = var.tasks_use_fargate_spot
 }

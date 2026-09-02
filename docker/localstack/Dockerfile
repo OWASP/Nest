@@ -1,1 +1,1 @@
-FROM localstack/localstack:2026.7.0@sha256:2a81e5da4c32bb53e8d86e92050a12937f9be1915c5a4afad0931f75c112fc7e
+FROM localstack/localstack:2026.7.2@sha256:f52869de342d4758f6899d88a561b586765ac6789e7e1484e8806e0fc0eeed88

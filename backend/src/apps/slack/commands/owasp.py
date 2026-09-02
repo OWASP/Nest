@@ -17,12 +17,14 @@ class Owasp(CommandBase):
                 return cmd_class()
         return None
 
-    def handler(self, ack, command, client):
+    def handler(self, ack, command, client, respond=None):
         """Handle the command."""
         command_tokens = command["text"].split()
         cmd = self.find_command(command_tokens[0].strip().lower() if command_tokens else "")
         if cmd:
             command["text"] = " ".join(command_tokens[1:]).strip()
+            if cmd.command_name == "/report":
+                return cmd.handler(ack, command, client, respond=respond)
             return cmd.handler(ack, command, client)
 
         return super().handler(ack, command, client)

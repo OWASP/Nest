@@ -23,6 +23,7 @@ ignore = [
   "ARG002",  # https://docs.astral.sh/ruff/rules/unused-method-argument/
   "C901",    # https://docs.astral.sh/ruff/rules/complex-structure/
   "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "CPY001",  # https://docs.astral.sh/ruff/rules/missing-copyright-notice/
   "D203",    # conflicts with D211; https://docs.astral.sh/ruff/rules/one-blank-line-before-class/
   "D213",    # conflicts with D212; https://docs.astral.sh/ruff/rules/multi-line-summary-second-line/
   "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
@@ -49,6 +50,7 @@ ignore = [
   "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
   "FBT001",  # https://docs.astral.sh/ruff/rules/boolean-type-hint-positional-argument/
   "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "PLR0917", # https://docs.astral.sh/ruff/rules/too-many-positional-arguments/
   "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
   "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
   "S101",    # https://docs.astral.sh/ruff/rules/assert/

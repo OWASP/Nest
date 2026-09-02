@@ -90,6 +90,10 @@ const ModuleDetailsPage = () => {
     },
   ]
 
+  const summaryDetailsGridClass = programModule.description
+    ? 'grid grid-cols-1 gap-x-6 md:grid-cols-3'
+    : 'grid grid-cols-1 gap-x-6'
+
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
       <PageWrapper>
@@ -102,9 +106,15 @@ const ModuleDetailsPage = () => {
           showModuleActions={true}
         />
 
-        <Summary summary={programModule.description} />
+        <div className={summaryDetailsGridClass}>
+          <Summary summary={programModule.description} className="md:col-span-2" />
 
-        <Metadata details={moduleDetails} detailsTitle="Module Details" />
+          <Metadata
+            details={moduleDetails}
+            detailsTitle="Module Details"
+            className="md:col-span-1"
+          />
+        </div>
 
         <Tags tags={programModule.tags ?? undefined} domains={programModule.domains ?? undefined} />
 
