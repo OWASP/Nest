@@ -20,7 +20,11 @@ class OpenAi:
     """Open AI communication class."""
 
     def __init__(
-        self, model: str = "gpt-4o-mini", max_tokens: int = 1000, temperature: float = 0.7
+        self,
+        model: str = "gpt-4o-mini",
+        max_tokens: int = 1000,
+        temperature: float = 0.7,
+        timeout: int = 30,
     ) -> None:
         """OpenAi constructor.
 
@@ -28,11 +32,12 @@ class OpenAi:
             model (str, optional): The model to use.
             max_tokens (int, optional): Maximum tokens for the response.
             temperature (float, optional): Sampling temperature.
+            timeout (int, optional): Request timeout in seconds. Defaults to 30.
 
         """
         self.client = openai.OpenAI(
             api_key=settings.OPEN_AI_SECRET_KEY,
-            timeout=30,  # In seconds.
+            timeout=timeout,
         )
 
         self.max_tokens = max_tokens

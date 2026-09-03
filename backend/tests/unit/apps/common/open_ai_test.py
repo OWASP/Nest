@@ -37,6 +37,15 @@ class TestOpenAi:
         assert instance.model == DEFAULT_MODEL
         assert instance.temperature == DEFAULT_TEMPERATURE
 
+    @patch("apps.common.open_ai.settings")
+    @patch("openai.OpenAI")
+    def test_init_custom_timeout(self, mock_openai, mock_settings):
+        mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
+
+        OpenAi(timeout=90)
+
+        mock_openai.assert_called_once_with(api_key=DEFAULT_API_KEY, timeout=90)
+
     @pytest.mark.parametrize(
         ("input_content", "expected_input"), [("Test input content", "Test input content")]
     )
