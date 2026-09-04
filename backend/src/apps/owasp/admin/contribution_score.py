@@ -4,6 +4,7 @@ import logging
 
 from django.contrib import admin
 
+from apps.owasp.exceptions import CertificateIssuanceError
 from apps.owasp.models.crp.contribution_score import ContributionScore
 from apps.owasp.utils.score_calculator import ContributionScoreCalculator
 
@@ -53,7 +54,7 @@ class ContributionScoreAdmin(admin.ModelAdmin):
             try:
                 calculator.recalculate_user(score.github_user)
                 updated_count += 1
-            except (ValueError, TypeError):
+            except (CertificateIssuanceError, TypeError, ValueError):
                 logger.exception(
                     "Failed to recalculate score for user %s",
                     score.github_user.login,
