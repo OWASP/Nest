@@ -1,8 +1,21 @@
 """Dependency-free Slack text formatting helpers."""
 
-import re
-from html import escape as escape_html
+from __future__ import annotations
 
+import re
+import unicodedata
+from html import escape as escape_html
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
+NL = "\n"
+PREVIEW_LIMIT = 500
+# Slack section mrkdwn text max; leave headroom for format_links_for_slack expansion.
+SLACK_SECTION_TEXT_LIMIT = 3000
+ALERT_SECTION_HEADROOM = 100
+ALERT_SECTION_BUDGET = SLACK_SECTION_TEXT_LIMIT - ALERT_SECTION_HEADROOM
 SLACK_LINK_PATTERN = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
 
 
@@ -34,6 +47,146 @@ def format_links_for_slack(text: str) -> str:
 
     markdown_link_pattern = re.compile(r"\[([^\]]+)\]\((https?://[^\s)]+)\)")
     return markdown_link_pattern.sub(r"<\2|\1>", text)
+
+
+def get_text(blocks: Sequence[Mapping[str, Any]]) -> str:
+    """Convert blocks to plain text.
+
+    Args:
+        blocks: A sequence of Slack block elements (list or tuple of dicts).
+
+    Returns:
+        str: The plain text representation of the blocks.
+
+    """
+    text = []
+
+    for block in blocks:
+        match block.get("type"):
+            case "section":
+                if "text" in block and block["text"].get("type") in ("mrkdwn", "plain_text"):
+                    section_text = block["text"]["text"]
+                    if block["text"].get("type") == "mrkdwn":
+                        text.append(strip_markdown(section_text))
+                    else:
+                        text.append(section_text)
+                elif "fields" in block:
+                    text.append(
+                        NL.join(
+                            strip_markdown(field["text"])
+                            for field in block["fields"]
+                            if field.get("type") == "mrkdwn"
+                        )
+                    )
+            case "divider":
+                text.append("---")
+            case "context":
+                text.append(
+                    NL.join(
+                        strip_markdown(element["text"])
+                        for element in block["elements"]
+                        if element.get("type") == "mrkdwn"
+                    )
+                )
+            case "actions":
+                text.append(
+                    NL.join(
+                        strip_markdown(element["text"]["text"])
+                        for element in block["elements"]
+                        if element.get("type") == "button"
+                    )
+                )
+            # TODO(arkid15r): consider removing this.
+            case "image":
+                text.append(f"Image: {block.get('image_url', '')}")
+            case "header":
+                if "text" in block and block["text"].get("type") == "plain_text":
+                    text.append(block["text"]["text"])
+
+    return NL.join(text).strip()
+
+
+def preview_text(text: str, limit: int = PREVIEW_LIMIT) -> str:
+    """Return a truncated, sanitized preview for modal and alert embeds."""
+    return sanitize_mrkdwn(truncate_chars(text or "", limit))
+
+
+def quote_mrkdwn(text: str) -> str:
+    """Prefix each line so Slack renders a multiline blockquote."""
+    if not text:
+        return ""
+    return "\n".join(f">{line}" for line in text.split("\n"))
+
+
+def fit_quoted_mrkdwn(text: str, limit: int) -> str:
+    """Sanitize and quote text so the formatted result is at most limit characters."""
+    if limit <= 0:
+        return ""
+    raw = text or ""
+    low, high = 0, len(raw)
+    best = ""
+    while low <= high:
+        mid = (low + high) // 2
+        formatted = quote_mrkdwn(sanitize_mrkdwn(raw[:mid]))
+        if len(formatted) <= limit:
+            best = formatted
+            low = mid + 1
+        else:
+            high = mid - 1
+    return best
+
+
+def visible_len(text: str) -> int:
+    """Count characters the way Django Truncator.chars does (skip combining marks)."""
+    return sum(1 for char in text if not unicodedata.combining(char))
+
+
+def prefix_by_visible_len(text: str, limit: int) -> str:
+    """Return a prefix with at most limit non-combining characters."""
+    if limit <= 0:
+        return ""
+    visible = 0
+    end = 0
+    for index, char in enumerate(text):
+        if unicodedata.combining(char):
+            end = index + 1
+            continue
+        if visible >= limit:
+            break
+        visible += 1
+        end = index + 1
+    return text[:end]
+
+
+def truncate_chars(text: str, limit: int, ellipsis: str = "...") -> str:
+    """Truncate text to at most limit visible characters, dependency-free.
+
+    Mirrors Django Truncator.chars for NFC normalization and combining marks, and
+    caps the ellipsis so the result never exceeds the requested limit.
+    """
+    if limit <= 0:
+        return ""
+
+    text = unicodedata.normalize("NFC", text)
+    if visible_len(text) <= limit:
+        return text
+
+    ellipsis = prefix_by_visible_len(ellipsis, limit)
+    keep = limit - visible_len(ellipsis)
+    return f"{prefix_by_visible_len(text, keep)}{ellipsis}"
+
+
+def sanitize_mrkdwn(text: str) -> str:
+    """Escape characters that break Slack mrkdwn in quoted previews."""
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("*", "\\*")
+        .replace("_", "\\_")
+        .replace("~", "\\~")
+        .replace("`", "\\`")
+    )
 
 
 def strip_markdown(text: str) -> str:
