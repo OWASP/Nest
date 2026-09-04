@@ -42,7 +42,7 @@ def upsert(parsed: ParsedMeeting, *, source_path: str, source_checksum: str) -> 
         source_checksum (str): Git blob SHA of the source file.
 
     Returns:
-        BoardMeeting: The upserted meeting row.
+        BoardMeeting: The created or updated meeting row.
 
     """
     with transaction.atomic():
@@ -269,10 +269,14 @@ def create_action(
         action (ParsedAction): The parsed action payload.
         resolve (PersonResolver): Person resolver from build_person_resolver.
 
+    Raises:
+        ValueError: If the action's kind has no matching payload.
+
     """
     payload = getattr(action, action.kind)
     if not payload:
-        return
+        message = f"ParsedAction(kind={action.kind}) has no matching payload."
+        raise ValueError(message)
 
     row = ACTION_CREATORS[action.kind](payload, resolve)
     BoardMeetingAction.objects.create(

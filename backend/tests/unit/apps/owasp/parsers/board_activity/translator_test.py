@@ -357,11 +357,12 @@ class TestCreateAction:
         creator.assert_called_once()
         mock_action_create.assert_called_once_with(meeting=meeting, order=3, outcome="o_row")
 
-    def test_no_op_when_payload_missing(self, mock_action_create):
-        """Malformed action (kind set but payload None) is skipped, not raised."""
+    def test_raises_when_payload_missing(self, mock_action_create):
+        """Malformed action (kind set but payload None) raises so upsert rolls back."""
         action = ParsedAction(kind=ActionKind.MOTION, motion=None)
 
-        translator.create_action(Mock(), 1, action, Mock())
+        with pytest.raises(ValueError, match="has no matching payload"):
+            translator.create_action(Mock(), 1, action, Mock())
 
         mock_action_create.assert_not_called()
 

@@ -119,6 +119,46 @@ class TestTargetPaths:
 
         assert result == []
 
+    @pytest.mark.parametrize("year", [1, 202, 10000])
+    def test_rejects_non_four_digit_year(self, tree, year):
+        """Year outside 1000-9999 is rejected so short prefixes don't match multiple years."""
+        with pytest.raises(ValueError, match="4-digit"):
+            list(sync.target_paths(tree, year=year))
+
+
+class TestFetchFileContent:
+    """Tests for fetch_file_content status handling."""
+
+    def test_returns_text_on_2xx(self, mocker):
+        """A 200 response returns the body text."""
+        response = Mock(ok=True, status_code=200, text="hello")
+        mocker.patch(
+            "apps.owasp.parsers.board_activity.sync.requests.get",
+            return_value=response,
+        )
+
+        assert sync.fetch_file_content("p.md") == "hello"
+
+    @pytest.mark.parametrize("status", [403, 404, 500, 502])
+    def test_returns_empty_on_non_2xx(self, mocker, status):
+        """A non-2xx response returns empty string so error body is not fed to the LLM."""
+        response = Mock(ok=False, status_code=status, text="error body")
+        mocker.patch(
+            "apps.owasp.parsers.board_activity.sync.requests.get",
+            return_value=response,
+        )
+
+        assert sync.fetch_file_content("p.md") == ""
+
+    def test_returns_empty_on_request_exception(self, mocker):
+        """A connection error returns empty string rather than propagating."""
+        mocker.patch(
+            "apps.owasp.parsers.board_activity.sync.requests.get",
+            side_effect=RequestException("boom"),
+        )
+
+        assert sync.fetch_file_content("p.md") == ""
+
 
 class TestSyncFile:
     """Tests for sync_file per-file behavior."""

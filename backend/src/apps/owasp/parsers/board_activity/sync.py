@@ -14,7 +14,6 @@ import requests
 from requests.exceptions import RequestException
 
 from apps.common.open_ai import OpenAi
-from apps.github.utils import get_repository_file_content
 from apps.owasp.models.board_meeting import BoardMeeting
 from apps.owasp.parsers.board_activity import translator
 from apps.owasp.parsers.board_activity.schemas import ParsedMeeting
@@ -46,6 +45,8 @@ MEETING_DIRS: tuple[str, ...] = (
 )
 YEARMONTH_PREFIX_LEN = 6  # YYYY + MM
 FILENAME_PREFIX_RE = re.compile(rf"^\d{{{YEARMONTH_PREFIX_LEN}}}")
+MIN_YEAR = 1000
+MAX_YEAR = 9999
 
 SYSTEM_PROMPT = """\
 You extract structured data from OWASP Board of Directors meeting minutes (unstructured Markdown)
@@ -137,7 +138,7 @@ Every substantive subsection maps to exactly one action:
   Action items appear in TWO places:
     a) explicit "Action Items:" / "Board Comments & Actions" bullet blocks.
     b) INLINE within discussion prose, e.g. "Andrew to confirm SLA with Belgian authorities",
-    "directors Diego and Ashwini to provide ID by 9 September", "Sam and Andrew to consolidate
+    "directors Diego and Illia to provide ID by 9 September", "Sam and Andrew to consolidate
     proposed edits".
 
   Extract BOTH. For (b), scan every discussion description for sentences of the form
@@ -185,9 +186,9 @@ Preserve people's names exactly as they appear in the source, with one exception
 uses a first-name-only reference (e.g. "Dave", "Ricardo") inside a vote record, discussion,
 or outcome, resolve it to the corresponding full name from the meeting's attendees/guests roster
 IF the mapping is unambiguous. Example:
-    Roster: "Dave Wichers", "Eoin Keary", "Matt Tesauro"
-    Source: "(Approve: Dave, Eoin, Matt)"
-    -> in_favor: ["Dave Wichers", "Eoin Keary", "Matt Tesauro"]
+    Roster: "Dave Balbin", "Kerlyn Wandji", "Matt Stegen"
+    Source: "(Approve: Dave, Kerlyn, Matt)"
+    -> in_favor: ["Dave Balbin", "Kerlyn Wandji", "Matt Stegen"]
 
 If a short-form name matches multiple people in the roster (e.g. two "Daves"), keep it as-is rather
 than guessing. Do not normalize casing or fix typos.
@@ -228,7 +229,7 @@ Input:
     #### EU Entity Status
     **Background** The ED will update on the new EU entity.
     - Belgian Government approval pending.
-    - Directors Diego and Ashwini to provide ID by 9 September for Regus offices.
+    - Directors Diego and Illia to provide ID by 9 September for office access.
     - Andrew to confirm SLA with Belgian authorities.
     - Board to review draft charter by November - Board Meeting.
     - Sam to send meeting invites on October 25.
@@ -242,8 +243,8 @@ Output (in agenda order):
                       Belgian Government approval pending."
         participants: []
     outcome:
-        description: "Diego and Ashwini to provide ID for Regus offices."
-        assignees: [Diego Silva Martins, Ashwini Siddhi]
+        description: "Diego and Illia to provide ID for office access."
+        assignees: [Diego Silva Martins, Illia Oleksiuk]
         due_date: "2025-09-09"    # "by 9 September" -> specific day, year inferred
     outcome:
         description: "Andrew to confirm SLA with Belgian authorities."
@@ -329,6 +330,9 @@ def target_paths(
     Yields:
         str: A matching file path.
 
+    Raises:
+        ValueError: If year is not a 4-digit value.
+
     """
     if path:
         if path in tree:
@@ -337,6 +341,9 @@ def target_paths(
 
     prefix = ""
     if year is not None:
+        if not MIN_YEAR <= year <= MAX_YEAR:
+            message = f"year must be a 4-digit value between {MIN_YEAR} and {MAX_YEAR}."
+            raise ValueError(message)
         prefix = str(year)
         if month is not None:
             prefix = f"{year}{month:02d}"
@@ -365,10 +372,21 @@ def fetch_file_content(path: str) -> str:
         path (str): Repo-relative path of the file.
 
     Returns:
-        str: The file content, or empty string if the fetch failed.
+        str: The file content, or empty string if the fetch failed or returned non-2xx.
 
     """
-    return get_repository_file_content(RAW_FILE_URL_TEMPLATE.format(path=path))
+    url = RAW_FILE_URL_TEMPLATE.format(path=path)
+    try:
+        response = requests.get(url, timeout=30)
+    except RequestException:
+        logger.exception("Failed to fetch %s", url)
+        return ""
+
+    if not response.ok:
+        logger.warning("Non-OK status %s for %s", response.status_code, url)
+        return ""
+
+    return response.text
 
 
 def sync_file(

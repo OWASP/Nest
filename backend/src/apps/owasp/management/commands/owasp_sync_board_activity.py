@@ -3,9 +3,12 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.owasp.parsers.board_activity import sync
+from apps.owasp.parsers.board_activity.sync import SyncStatus
 
 MIN_MONTH = 1
 MAX_MONTH = 12
+MIN_YEAR = 1000
+MAX_YEAR = 9999
 
 
 class Command(BaseCommand):
@@ -48,7 +51,7 @@ class Command(BaseCommand):
         """Run the board activity sync.
 
         Raises:
-            CommandError: If --month is provided without --year, or is out of range.
+            CommandError: If --month is invalid, or if any file failed to sync.
 
         """
         year = options.get("year")
@@ -62,6 +65,10 @@ class Command(BaseCommand):
             message = f"--month must be between {MIN_MONTH} and {MAX_MONTH}."
             raise CommandError(message)
 
+        if year is not None and not (MIN_YEAR <= year <= MAX_YEAR):
+            message = f"--year must be a 4-digit value between {MIN_YEAR} and {MAX_YEAR}."
+            raise CommandError(message)
+
         stats = sync.run(
             year=year,
             month=month,
@@ -72,3 +79,8 @@ class Command(BaseCommand):
 
         summary = ", ".join(f"{k}={v}" for k, v in sorted(stats.counts.items())) or "no files"
         self.stdout.write(self.style.SUCCESS(f"Board activity sync: {summary}"))
+
+        errored = stats.counts.get(SyncStatus.ERRORED, 0)
+        if errored:
+            message = f"Board activity sync had {errored} errored file(s)."
+            raise CommandError(message)
