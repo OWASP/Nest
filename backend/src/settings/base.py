@@ -41,6 +41,8 @@ class Base(Configuration):
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
+    DEFAULT_FROM_EMAIL = "OWASP Nest <noreply@owasp.org>"
+
     DJANGO_APPS = (
         "django.contrib.admin",
         "django.contrib.auth",
