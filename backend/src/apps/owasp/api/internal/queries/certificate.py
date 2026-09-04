@@ -30,7 +30,10 @@ class CertificateQuery:
 
         try:
             return Certificate.objects.select_related(
-                "github_user",
+                "chapter",
+                "issuer",
+                "project",
+                "recipient",
             ).get(id=certificate_id)
         except Certificate.DoesNotExist:
             return None
@@ -44,8 +47,11 @@ class CertificateQuery:
 
         return (
             Certificate.objects.select_related(
-                "github_user",
+                "chapter",
+                "issuer",
+                "project",
+                "recipient",
             )
-            .filter(github_user=user.github_user, is_revoked=False)
+            .filter(recipient=user.github_user, is_revoked=False)
             .order_by("-issued_at")
         )

@@ -21,7 +21,7 @@ class TestLocalCertificateProvider:
         provider.issue_certificate(mock_user, 200, TierChoices.LEVEL_2)
 
         mock_create.assert_called_once_with(
-            github_user=mock_user,
+            recipient=mock_user,
             score=200,
             tier=TierChoices.LEVEL_2,
         )
