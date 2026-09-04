@@ -72,10 +72,10 @@ const MyCertificatePage: React.FC = () => {
 
   if (certificates.length === 0) {
     return (
-      <PageLayout title="My Certificate" breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]">
+      <PageLayout title="My Certificates" breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]">
         <div className="container mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
           <h2 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">
-            No Certificate Found
+            No Certificates Found
           </h2>
           <p className="mb-6 text-gray-600 dark:text-gray-400">
             You don&apos;t have a contributor certificate yet. Contribute to OWASP repositories to
@@ -249,7 +249,7 @@ const MyCertificatePage: React.FC = () => {
     globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const certificateUrl = `${globalThis.location?.origin}/certificate/${certificate.id}`
+  const certificateUrl = `${globalThis.location?.origin}/certificates/${certificate.id}`
   const displayName = certificate.githubUser.name || certificate.githubUser.login
 
   const otherCertificates = certificates
@@ -258,7 +258,7 @@ const MyCertificatePage: React.FC = () => {
 
   return (
     <PageLayout
-      title={`${displayName}'s Certificate`}
+      title={`${displayName}'s Certificates`}
       breadcrumbClassName="bg-[#f4f6fc] dark:bg-[#212529]"
     >
       <div className="container mx-auto mb-auto flex flex-col items-center justify-center gap-4 px-4 pt-2 pb-3 md:flex-row md:items-start md:gap-8 lg:gap-10">

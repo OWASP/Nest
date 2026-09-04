@@ -3,9 +3,9 @@ import React from 'react'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export const metadata: Metadata = generateSeoMetadata({
-  title: 'My Certificate',
+  title: 'My Certificates',
   description: 'View your OWASP Contributor Recognition Certificate.',
-  canonicalPath: '/my/certificate',
+  canonicalPath: '/my/certificates',
 })
 
 export default function MyCertificateLayout({ children }: { children: React.ReactNode }) {

@@ -240,7 +240,7 @@ const Footer: React.FC<FooterProps> = ({ id, issuedAt }) => (
       <div className="flex max-w-[220px] flex-col items-start justify-center leading-none">
         <Label>Verify Certificate</Label>
         <a
-          href={`/certificate/${id}`}
+          href={`/certificates/${id}`}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-1.5 block max-w-[200px] truncate text-[14px] font-bold text-[#111827] hover:underline"

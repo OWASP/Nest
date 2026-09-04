@@ -166,7 +166,7 @@ const IssueCertificatePage: React.FC = () => {
         setBackendErrors(validationErrors)
       } else {
         addToast({
-          title: 'Failed to Issue Certificate',
+          title: 'Failed to Issue Certificates',
           description:
             err instanceof Error ? err.message : 'Unable to complete the requested operation.',
           color: 'danger',
@@ -194,7 +194,7 @@ const IssueCertificatePage: React.FC = () => {
   const hasEntity = formData.projectKey.trim() || formData.chapterKey.trim()
 
   return (
-    <FormContainer title="Issue Certificate" onSubmit={handleSubmit}>
+    <FormContainer title="Issue Certificates" onSubmit={handleSubmit}>
       {showBanner && (
         <div className="flex items-start justify-between gap-3 rounded-lg border border-l-[3px] border-gray-200 border-l-[#1D7BD7] bg-gray-50 px-4 py-3 dark:border-gray-700 dark:border-l-[#1D7BD7] dark:bg-gray-800/60">
           <div className="flex items-start gap-2.5">
@@ -287,7 +287,7 @@ const IssueCertificatePage: React.FC = () => {
         touched={touched.recipientLogins}
       />
 
-      <FormButtons loading={loading} submitText="Issue Certificate" />
+      <FormButtons loading={loading} submitText="Issue Certificates" />
     </FormContainer>
   )
 }

@@ -176,7 +176,7 @@ describe('CertificateCard', () => {
       render(<CertificateCard certificate={mockCertificate} />)
 
       const verifyLink = screen.getByRole('link', { name: /nest\.owasp\.org/i })
-      expect(verifyLink).toHaveAttribute('href', '/certificate/F9DD2BJ9ZYXW')
+      expect(verifyLink).toHaveAttribute('href', '/certificates/F9DD2BJ9ZYXW')
       expect(verifyLink).toHaveAttribute('target', '_blank')
     })
 
