@@ -33,6 +33,7 @@ import EntityChannelLinks from 'components/EntityChannelLinks'
 import HealthMetrics from 'components/HealthMetrics'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SponsorCard from 'components/SponsorCard'
+import SubscribeButton from 'components/SubscribeButton'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
@@ -134,12 +135,15 @@ const ProjectDetailsPage = () => {
 
   return (
     <PageWrapper>
-      <Header
-        title={project.name}
-        isActive={project.isActive}
-        isArchived={false}
-        showHealthMetrics={true}
-      />
+      <div className="flex items-center justify-between">
+        <Header
+          title={project.name}
+          isActive={project.isActive}
+          isArchived={false}
+          showHealthMetrics={true}
+        />
+        <SubscribeButton entityType="project" entityId={project.id} entityName={project.name} />
+      </div>
 
       <Summary summary={project.summary} />
 

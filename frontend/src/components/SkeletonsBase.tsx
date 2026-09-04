@@ -42,7 +42,12 @@ const SkeletonBase = ({
 
   switch (indexName) {
     case 'chapters':
-      componentProps = { showLevel: false, showIcons: false, showLink: false }
+      componentProps = {
+        showLevel: false,
+        showIcons: false,
+        showLink: false,
+        showExtraActionButton: true,
+      }
       break
     case 'issues':
       componentProps = {
@@ -54,10 +59,22 @@ const SkeletonBase = ({
       }
       break
     case 'projects':
-      componentProps = { showLink: false, showSocial: false, showIcons: true, numIcons: 3 }
+      componentProps = {
+        showLink: false,
+        showSocial: false,
+        showIcons: true,
+        numIcons: 3,
+        showExtraActionButton: true,
+      }
       break
     case 'committees':
-      componentProps = { showLink: false, showLevel: false, showIcons: true, numIcons: 1 }
+      componentProps = {
+        showLink: false,
+        showLevel: false,
+        showIcons: true,
+        numIcons: 1,
+        showExtraActionButton: true,
+      }
       break
     case 'users':
       return userCardRender()

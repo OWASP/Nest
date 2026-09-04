@@ -15,6 +15,7 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import CountryFilter from 'components/CountryFilter'
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
+import SubscribeButton from 'components/SubscribeButton'
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
@@ -99,6 +100,15 @@ const ChaptersPage = () => {
         topContributors={chapter.topContributors}
         button={submitButton}
         social={formattedUrls}
+        extraAction={
+          chapter.objectID ? (
+            <SubscribeButton
+              entityType="chapter"
+              entityId={String(chapter.objectID)}
+              entityName={chapter.name}
+            />
+          ) : undefined
+        }
       />
     )
   }

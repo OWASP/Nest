@@ -39,6 +39,7 @@ export type Project = {
   leaders?: string[]
   level?: string
   name: string
+  objectID?: string
   openIssuesCount?: number
   openPullRequestsCount?: number
   organizations?: string
