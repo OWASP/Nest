@@ -10,6 +10,8 @@ import {
   FaCircleXmark,
   FaGithub,
   FaGlobe,
+  FaLayerGroup,
+  FaMap,
   FaShieldHalved,
 } from 'react-icons/fa6'
 import type { Certificate } from 'types/certificate'
@@ -26,24 +28,47 @@ const BorderFrame: React.FC = () => (
   </div>
 )
 
-const Header: React.FC = () => (
-  <div className="flex flex-col items-center pt-2 text-center">
-    <div className="relative mb-2.5 h-[52px] w-[192px]">
-      <Image src="/img/OWASP_logo.svg" alt="OWASP Logo" fill priority className="object-contain" />
+interface HeaderProps {
+  title?: string | null
+}
+
+const getTitleSizeClass = (len: number): string => {
+  if (len <= 28) return 'text-[32px] leading-tight'
+  if (len <= 45) return 'text-[24px] leading-snug'
+  return 'text-[18px] leading-snug'
+}
+
+const Header: React.FC<HeaderProps> = ({ title }) => {
+  const text = title || 'Certificate of Recognition'
+  const titleSize = getTitleSizeClass(text.length)
+
+  return (
+    <div className="flex flex-col items-center pt-2 text-center">
+      <div className="relative mb-2.5 h-[52px] w-[192px]">
+        <Image
+          src="/img/OWASP_logo.svg"
+          alt="OWASP Logo"
+          fill
+          priority
+          className="object-contain"
+        />
+      </div>
+      <span className="mb-3 block text-[11px] font-semibold tracking-[0.22em] text-[#8fa3b8] uppercase">
+        Open Worldwide Application Security Project
+      </span>
+      <h1
+        className={`mb-3 max-w-[680px] font-extrabold tracking-[0.12em] break-words text-[#0B2545] uppercase ${titleSize}`}
+      >
+        {text}
+      </h1>
+      <div className="mt-0 flex w-[200px] items-center">
+        <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
+        <div className="mx-2 h-2.5 w-2.5 shrink-0 rotate-45 bg-[#1D70B8]" />
+        <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
+      </div>
     </div>
-    <span className="mb-3 block text-[11px] font-semibold tracking-[0.22em] text-[#8fa3b8] uppercase">
-      Open Worldwide Application Security Project
-    </span>
-    <h1 className="mb-3 text-[32px] leading-none font-extrabold tracking-[0.12em] text-[#0B2545] uppercase">
-      Certificate of Recognition
-    </h1>
-    <div className="mt-0 flex w-[200px] items-center">
-      <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
-      <div className="mx-2 h-2.5 w-2.5 shrink-0 rotate-45 bg-[#1D70B8]" />
-      <div className="h-[1.5px] flex-1 bg-[#1D70B8]" />
-    </div>
-  </div>
-)
+  )
+}
 
 interface RecipientProps {
   name?: string | null
@@ -107,8 +132,8 @@ const Label: React.FC<LabelProps> = ({ children, size = 'md' }) => (
 )
 
 interface MetricsProps {
-  score: number
-  tier: string
+  score?: number | null
+  tier?: string | null
 }
 
 const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
@@ -120,7 +145,7 @@ const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
       <div className="flex flex-col items-center justify-center text-center leading-none">
         <Label size="sm">Contribution Score</Label>
         <span className="mt-1.5 text-[28px] leading-[0.95] font-extrabold text-[#111827]">
-          {score}
+          {score ?? 0}
         </span>
         <span className="mt-0.5 text-[12px] font-bold tracking-[0.15em] text-[#4B5563] uppercase">
           Points
@@ -135,12 +160,50 @@ const Metrics: React.FC<MetricsProps> = ({ score, tier }) => (
       <div className="flex flex-col items-center justify-center text-center leading-none">
         <Label size="sm">Achievement Tier</Label>
         <span className="mt-1.5 text-[20px] leading-[0.95] font-extrabold tracking-[0.12em] text-[#111827]">
-          {tier.toUpperCase()}
+          {tier?.trim().toUpperCase() || 'N/A'}
         </span>
       </div>
     </div>
   </div>
 )
+
+interface IssuedByBadgeProps {
+  projectName?: string | null
+  projectKey?: string | null
+  chapterName?: string | null
+  chapterKey?: string | null
+}
+
+const IssuedByBadge: React.FC<IssuedByBadgeProps> = ({
+  projectName,
+  projectKey,
+  chapterName,
+  chapterKey,
+}) => {
+  const isProject = Boolean(projectName)
+  const isChapter = Boolean(chapterName)
+  if (!isProject && !isChapter) return null
+
+  const Icon = isProject ? FaLayerGroup : FaMap
+  const name = isProject ? projectName : chapterName
+  const key = isProject ? projectKey : chapterKey
+  const href = isProject ? `/projects/${key}` : `/chapters/${key}`
+  const entityLabel = isProject ? 'Project' : 'Chapter'
+
+  return (
+    <div className="mx-auto mt-2 flex w-full items-center justify-center">
+      <div className="flex items-center gap-2 rounded-full border border-[#1D70B8]/35 bg-[#EBF4FF] px-5 py-[5px]">
+        <Icon size={13} className="shrink-0 text-[#1D70B8]" />
+        <p className="text-[13px] font-semibold tracking-[0.05em] whitespace-nowrap text-[#4B5563]">
+          Issued under the{' '}
+          <a href={href} className="font-extrabold text-[#1D70B8] hover:underline">
+            {name} {entityLabel}
+          </a>
+        </p>
+      </div>
+    </div>
+  )
+}
 
 interface FooterProps {
   id: string
@@ -177,7 +240,7 @@ const Footer: React.FC<FooterProps> = ({ id, issuedAt }) => (
       <div className="flex max-w-[220px] flex-col items-start justify-center leading-none">
         <Label>Verify Certificate</Label>
         <a
-          href={`/certificate/${id}`}
+          href={`/certificates/${id}`}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-1.5 block max-w-[200px] truncate text-[14px] font-bold text-[#111827] hover:underline"
@@ -235,9 +298,19 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
   isPublicView = false,
   cardRef,
 }) => {
-  const { id, tier, issuedAt, score, isVerified, githubUser } = certificate
+  const { id, tier, issuedAt, score, isVerified, githubUser, title, message, project, chapter } =
+    certificate
   const [scale, setScale] = useState(1)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  const hasCustomContent = Boolean(title)
+  const hasIssuedBy = Boolean(project?.name || chapter?.name)
+  const hasScoreOrTier = Boolean(score) || Boolean(tier)
+
+  const msgLen = message?.length ?? 0
+  let msgSizeClass = 'text-[13px] leading-[1.7]'
+  if (msgLen <= 120) msgSizeClass = 'text-[15px] leading-[1.8]'
+  else if (msgLen <= 210) msgSizeClass = 'text-[14px] leading-[1.75]'
 
   useEffect(() => {
     const handleResize = () => {
@@ -292,14 +365,34 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
               {isPublicView && (isVerified ? <VerificationBadge /> : <RevokedBadge />)}
               {!isVerified && <RevokedWatermark />}
               <div className="flex flex-1 flex-col justify-between px-12 pt-6 pb-10">
-                <Header />
+                <Header title={title} />
                 <Recipient
                   name={githubUser.name}
                   login={githubUser.login}
                   avatarUrl={githubUser.avatarUrl}
                 />
-                <RecognitionText />
-                <Metrics score={score} tier={tier} />
+
+                {!hasCustomContent && <RecognitionText />}
+
+                {hasCustomContent && message && (
+                  <p
+                    className={`mx-auto mt-2 max-w-[620px] text-center font-medium break-words text-slate-700 italic ${msgSizeClass}`}
+                  >
+                    &quot;{message}&quot;
+                  </p>
+                )}
+
+                {hasIssuedBy && (
+                  <IssuedByBadge
+                    projectName={project?.name}
+                    projectKey={project?.key}
+                    chapterName={chapter?.name}
+                    chapterKey={chapter?.key}
+                  />
+                )}
+
+                {hasScoreOrTier && <Metrics score={score} tier={tier} />}
+
                 <Footer id={id} issuedAt={issuedAt} />
               </div>
             </div>

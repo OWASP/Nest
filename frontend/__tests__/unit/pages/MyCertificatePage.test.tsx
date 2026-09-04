@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
-import MyCertificatePage from 'app/certificate/page'
+import MyCertificatePage from 'app/my/certificates/page'
 import { CertificateCard } from 'components/CertificateCard'
 
 jest.mock('@apollo/client/react', () => ({
@@ -210,7 +210,7 @@ describe('MyCertificatePage', () => {
       render(<MyCertificatePage />)
 
       await waitFor(() => {
-        expect(screen.getByText('No Certificate Found')).toBeInTheDocument()
+        expect(screen.getByText('No Certificates Found')).toBeInTheDocument()
         expect(screen.getByText('Start Contributing')).toBeInTheDocument()
       })
     })
@@ -222,7 +222,7 @@ describe('MyCertificatePage', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('certificate-card')).toBeInTheDocument()
-        expect(screen.getByText("Test User's Certificate")).toBeInTheDocument()
+        expect(screen.getByText("Test User's Certificates")).toBeInTheDocument()
         expect(screen.getByText('Save as Image')).toBeInTheDocument()
       })
 
@@ -246,7 +246,7 @@ describe('MyCertificatePage', () => {
       render(<MyCertificatePage />)
 
       await waitFor(() => {
-        expect(screen.getByText("loginonly's Certificate")).toBeInTheDocument()
+        expect(screen.getByText("loginonly's Certificates")).toBeInTheDocument()
       })
     })
 
@@ -419,7 +419,7 @@ describe('MyCertificatePage', () => {
 
       await waitFor(() => {
         expect(writeTextMock).toHaveBeenCalledWith(
-          expect.stringContaining('/certificate/F9DD2BJ9ZYXW')
+          expect.stringContaining('/certificates/F9DD2BJ9ZYXW')
         )
         expect(addToast).toHaveBeenCalledWith({
           title: 'Link Copied',
