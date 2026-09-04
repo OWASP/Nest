@@ -360,9 +360,11 @@ class TestCreateAction:
     def test_raises_when_payload_missing(self, mock_action_create):
         """Malformed action (kind set but payload None) raises so upsert rolls back."""
         action = ParsedAction(kind=ActionKind.MOTION, motion=None)
+        meeting = Mock()
+        resolve = Mock()
 
         with pytest.raises(ValueError, match="has no matching payload"):
-            translator.create_action(Mock(), 1, action, Mock())
+            translator.create_action(meeting, 1, action, resolve)
 
         mock_action_create.assert_not_called()
 
