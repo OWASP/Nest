@@ -20,8 +20,8 @@ locals {
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
-  fixtures_bucket_name   = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
-  observability_vm_image = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("${path.root}/../../docker/victoriametrics/Dockerfile"))[0]
+  fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
+  observability_image  = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("${path.root}/../../docker/victoriametrics/Dockerfile"))[0]
 }
 
 module "alb" {
@@ -192,7 +192,7 @@ module "observability" {
   kms_key_arn      = module.kms.key_arn
   project_name     = var.project_name
   subnet_ids       = module.networking.private_subnet_ids
-  vm_image         = local.observability_vm_image
+  image            = local.observability_image
   vpc_id           = module.networking.vpc_id
 }
 

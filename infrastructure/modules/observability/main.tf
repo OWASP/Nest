@@ -12,21 +12,21 @@ terraform {
 locals {
   name_prefix = "${var.project_name}-${var.environment}-observability"
 
-  vm_container_definition = {
+  container_definition = {
     command = [
       "-storageDataPath=/data",
-      "-retentionPeriod=${var.vm_retention_period}",
-      "-httpListenAddr=:${var.vm_port}",
+      "-retentionPeriod=${var.retention_period}",
+      "-httpListenAddr=:${var.port}",
     ]
     essential = true
     healthCheck = {
-      command     = ["CMD-SHELL", "wget --spider -q http://localhost:${var.vm_port}/health || exit 1"]
+      command     = ["CMD-SHELL", "wget --spider -q http://localhost:${var.port}/health || exit 1"]
       interval    = 30
       retries     = 3
       startPeriod = 30
       timeout     = 5
     }
-    image = var.vm_image
+    image = var.image
     logConfiguration = {
       logDriver = "awslogs"
       options = {
@@ -45,8 +45,8 @@ locals {
     name = "victoriametrics"
     portMappings = [
       {
-        containerPort = var.vm_port
-        hostPort      = var.vm_port
+        containerPort = var.port
+        hostPort      = var.port
         protocol      = "tcp"
       }
     ]
@@ -55,7 +55,7 @@ locals {
 }
 
 resource "aws_security_group" "vm" {
-  description = "Security group for the VictoriaMetrics task"
+  description = "Security group for the observability backend task"
   name        = "${local.name_prefix}-vm-sg"
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-vm-sg"
@@ -67,11 +67,11 @@ resource "aws_security_group_rule" "vm_ingest_from_apps" {
   count = length(var.app_security_group_ids)
 
   description              = "Allow metrics ingest and queries from application tasks"
-  from_port                = var.vm_port
+  from_port                = var.port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.vm.id
   source_security_group_id = var.app_security_group_ids[count.index]
-  to_port                  = var.vm_port
+  to_port                  = var.port
   type                     = "ingress"
 }
 
@@ -105,7 +105,7 @@ resource "aws_security_group" "efs" {
 }
 
 resource "aws_security_group_rule" "efs_from_vm" {
-  description              = "Allow NFS from the VictoriaMetrics task"
+  description              = "Allow NFS from the observability backend task"
   from_port                = 2049
   protocol                 = "tcp"
   security_group_id        = aws_security_group.efs.id
@@ -207,7 +207,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 }
 
 resource "aws_iam_policy" "ecs_task_execution_policy" {
-  description = "Policy for the VictoriaMetrics ECS task execution - CloudWatch Logs access."
+  description = "Policy for observability ECS task execution - CloudWatch Logs access."
   name        = "${local.name_prefix}-execution-policy"
 
   policy = jsonencode({
@@ -231,11 +231,11 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy_attachment"
 }
 
 resource "aws_ecs_task_definition" "vm" {
-  container_definitions    = jsonencode([local.vm_container_definition])
-  cpu                      = var.vm_cpu
+  container_definitions    = jsonencode([local.container_definition])
+  cpu                      = var.cpu
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   family                   = local.name_prefix
-  memory                   = var.vm_memory
+  memory                   = var.memory
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   runtime_platform {
@@ -264,7 +264,7 @@ resource "aws_ecs_service" "vm" {
   cluster                            = aws_ecs_cluster.vm.id
   deployment_maximum_percent         = 100
   deployment_minimum_healthy_percent = 0
-  desired_count                      = var.vm_desired_count
+  desired_count                      = var.desired_count
   name                               = "${local.name_prefix}-service"
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-service"

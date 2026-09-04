@@ -42,28 +42,28 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_app_security_group_ids"></a> [app\_security\_group\_ids](#input\_app\_security\_group\_ids) | Security group IDs of the application tasks allowed to send metrics to VictoriaMetrics. | `list(string)` | n/a | yes |
-| <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether to assign a public IP to the VictoriaMetrics task. | `bool` | `false` | no |
+| <a name="input_app_security_group_ids"></a> [app\_security\_group\_ids](#input\_app\_security\_group\_ids) | Security group IDs of the application tasks allowed to send metrics to the observability backend. | `list(string)` | n/a | yes |
+| <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether to assign a public IP to the observability task. | `bool` | `false` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the module is deployed. | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
+| <a name="input_cpu"></a> [cpu](#input\_cpu) | The CPU units for the observability Fargate task. | `number` | `512` | no |
+| <a name="input_desired_count"></a> [desired\_count](#input\_desired\_count) | The number of observability tasks to run (0 or 1; the current backend is a single-node store). | `number` | `1` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_image"></a> [image](#input\_image) | The observability backend container image (including digest). | `string` | n/a | yes |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key used to encrypt the EFS file system. | `string` | n/a | yes |
-| <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The number of days to retain VictoriaMetrics container logs. | `number` | `90` | no |
+| <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The number of days to retain observability container logs. | `number` | `90` | no |
+| <a name="input_memory"></a> [memory](#input\_memory) | The memory (in MiB) for the observability Fargate task. | `number` | `1024` | no |
+| <a name="input_port"></a> [port](#input\_port) | The port the observability backend listens on for ingest and queries. | `number` | `8428` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
-| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | The private subnet IDs for the EFS mount targets and the VictoriaMetrics task. | `list(string)` | n/a | yes |
-| <a name="input_vm_cpu"></a> [vm\_cpu](#input\_vm\_cpu) | The CPU units for the VictoriaMetrics Fargate task. | `number` | `512` | no |
-| <a name="input_vm_desired_count"></a> [vm\_desired\_count](#input\_vm\_desired\_count) | The number of VictoriaMetrics tasks to run (0 or 1; it is a single-node store). | `number` | `1` | no |
-| <a name="input_vm_image"></a> [vm\_image](#input\_vm\_image) | The VictoriaMetrics container image (including digest). | `string` | n/a | yes |
-| <a name="input_vm_memory"></a> [vm\_memory](#input\_vm\_memory) | The memory (in MiB) for the VictoriaMetrics Fargate task. | `number` | `1024` | no |
-| <a name="input_vm_port"></a> [vm\_port](#input\_vm\_port) | The port VictoriaMetrics listens on for ingest and queries. | `number` | `8428` | no |
-| <a name="input_vm_retention_period"></a> [vm\_retention\_period](#input\_vm\_retention\_period) | The VictoriaMetrics data retention period. A value without a suffix is in months, so the default "12" means 12 months (duration suffixes like 1y, 30d, 1w are also supported). | `string` | `"12"` | no |
-| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The VPC ID where the VictoriaMetrics security group is created. | `string` | n/a | yes |
+| <a name="input_retention_period"></a> [retention\_period](#input\_retention\_period) | The VictoriaMetrics data retention period. A value without a suffix is in months, so the default "12" means 12 months (duration suffixes like 1y, 30d, 1w are also supported). | `string` | `"12"` | no |
+| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | The private subnet IDs for the EFS mount targets and the observability task. | `list(string)` | n/a | yes |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The VPC ID where the observability backend security group is created. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | The ID of the EFS file system backing VictoriaMetrics storage. |
-| <a name="output_vm_cluster_name"></a> [vm\_cluster\_name](#output\_vm\_cluster\_name) | The name of the ECS cluster running VictoriaMetrics. |
-| <a name="output_vm_security_group_id"></a> [vm\_security\_group\_id](#output\_vm\_security\_group\_id) | The ID of the VictoriaMetrics security group. |
+| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the ECS cluster running the observability backend. |
+| <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | The ID of the EFS file system backing observability storage. |
+| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the observability backend security group. |
 <!-- END_TF_DOCS -->

@@ -13,7 +13,7 @@ variables {
   common_tags  = { Environment = "test", Project = "nest" }
   environment  = "test"
   project_name = "nest"
-  vm_image     = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("../../../docker/victoriametrics/Dockerfile"))[0]
+  image        = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("../../../docker/victoriametrics/Dockerfile"))[0]
 }
 
 run "setup" {
@@ -31,7 +31,7 @@ run "observability_integration_apply" {
     app_security_group_ids = run.setup.app_security_group_ids
     kms_key_arn            = run.setup.kms_key_arn
     subnet_ids             = run.setup.subnet_ids
-    vm_desired_count       = 0
+    desired_count          = 0
     vpc_id                 = run.setup.vpc_id
   }
 

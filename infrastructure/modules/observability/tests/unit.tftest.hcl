@@ -8,8 +8,8 @@ variables {
   kms_key_arn            = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name           = "nest"
   subnet_ids             = ["subnet-1", "subnet-2"]
-  vm_image               = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("../../../docker/victoriametrics/Dockerfile"))[0]
-  vm_port                = 8428
+  image                  = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("../../../docker/victoriametrics/Dockerfile"))[0]
+  port                   = 8428
   vpc_id                 = "vpc-12345"
 }
 
@@ -58,7 +58,7 @@ run "test_vm_ingest_from_source_security_group_only" {
   }
 
   assert {
-    condition     = aws_security_group_rule.vm_ingest_from_apps[0].from_port == var.vm_port
+    condition     = aws_security_group_rule.vm_ingest_from_apps[0].from_port == var.port
     error_message = "VM ingest must be allowed on the configured VictoriaMetrics port."
   }
 }

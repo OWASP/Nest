@@ -1,5 +1,5 @@
 variable "app_security_group_ids" {
-  description = "Security group IDs of the application tasks allowed to send metrics to VictoriaMetrics."
+  description = "Security group IDs of the application tasks allowed to send metrics to the observability backend."
   type        = list(string)
 
   validation {
@@ -9,7 +9,7 @@ variable "app_security_group_ids" {
 }
 
 variable "assign_public_ip" {
-  description = "Whether to assign a public IP to the VictoriaMetrics task."
+  description = "Whether to assign a public IP to the observability task."
   type        = bool
   default     = false
 }
@@ -36,7 +36,7 @@ variable "kms_key_arn" {
 }
 
 variable "log_retention_in_days" {
-  description = "The number of days to retain VictoriaMetrics container logs."
+  description = "The number of days to retain observability container logs."
   type        = number
   default     = 90
 }
@@ -47,7 +47,7 @@ variable "project_name" {
 }
 
 variable "subnet_ids" {
-  description = "The private subnet IDs for the EFS mount targets and the VictoriaMetrics task."
+  description = "The private subnet IDs for the EFS mount targets and the observability task."
   type        = list(string)
 
   validation {
@@ -56,57 +56,57 @@ variable "subnet_ids" {
   }
 }
 
-variable "vm_cpu" {
-  description = "The CPU units for the VictoriaMetrics Fargate task."
+variable "cpu" {
+  description = "The CPU units for the observability Fargate task."
   type        = number
   default     = 512
 }
 
-variable "vm_desired_count" {
-  description = "The number of VictoriaMetrics tasks to run (0 or 1; it is a single-node store)."
+variable "desired_count" {
+  description = "The number of observability tasks to run (0 or 1; the current backend is a single-node store)."
   type        = number
   default     = 1
 
   validation {
-    condition     = contains([0, 1], var.vm_desired_count)
-    error_message = "vm_desired_count must be 0 or 1 (VictoriaMetrics is a single-node store)."
+    condition     = contains([0, 1], var.desired_count)
+    error_message = "desired_count must be 0 or 1 because the current observability backend is a single-node store."
   }
 }
 
-variable "vm_image" {
-  description = "The VictoriaMetrics container image (including digest)."
+variable "image" {
+  description = "The observability backend container image (including digest)."
   type        = string
 
   validation {
-    condition     = can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.vm_image))
-    error_message = "vm_image must be an image reference pinned to an immutable digest (e.g., repo:tag@sha256:...)."
+    condition     = can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.image))
+    error_message = "image must be an image reference pinned to an immutable digest (e.g., repo:tag@sha256:...)."
   }
 }
 
-variable "vm_memory" {
-  description = "The memory (in MiB) for the VictoriaMetrics Fargate task."
+variable "memory" {
+  description = "The memory (in MiB) for the observability Fargate task."
   type        = number
   default     = 1024
 }
 
-variable "vm_port" {
-  description = "The port VictoriaMetrics listens on for ingest and queries."
+variable "port" {
+  description = "The port the observability backend listens on for ingest and queries."
   type        = number
   default     = 8428
 
   validation {
-    condition     = var.vm_port > 0 && var.vm_port < 65536 && floor(var.vm_port) == var.vm_port
-    error_message = "vm_port must be a whole number between 1 and 65535."
+    condition     = var.port > 0 && var.port < 65536 && floor(var.port) == var.port
+    error_message = "port must be a whole number between 1 and 65535."
   }
 }
 
-variable "vm_retention_period" {
+variable "retention_period" {
   description = "The VictoriaMetrics data retention period. A value without a suffix is in months, so the default \"12\" means 12 months (duration suffixes like 1y, 30d, 1w are also supported)."
   type        = string
   default     = "12" # 12 months
 }
 
 variable "vpc_id" {
-  description = "The VPC ID where the VictoriaMetrics security group is created."
+  description = "The VPC ID where the observability backend security group is created."
   type        = string
 }
