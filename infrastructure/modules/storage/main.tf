@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.55.0"
+      version = "~> 6.59.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -42,6 +42,7 @@ resource "aws_iam_policy" "fixtures_read_only" {
 }
 
 module "shared_data_bucket" {
+  count  = var.create_shared_data_bucket ? 1 : 0
   source = "./modules/shared-data-bucket"
 
   common_tags = merge(var.common_tags, {
