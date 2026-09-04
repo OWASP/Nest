@@ -9,6 +9,7 @@ import { getFilteredIcons } from 'utils/utility'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
+import SubscribeButton from 'components/SubscribeButton'
 
 const ProjectsPage = () => {
   const {
@@ -55,6 +56,15 @@ const ProjectsPage = () => {
       <Card
         button={submitButton}
         cardKey={project.key ?? ''}
+        extraAction={
+          project.objectID ? (
+            <SubscribeButton
+              entityType="project"
+              entityId={String(project.objectID)}
+              entityName={project.name}
+            />
+          ) : undefined
+        }
         icons={filteredIcons}
         key={project.key ?? project.name}
         level={level[`${project.level as keyof typeof level}`]}

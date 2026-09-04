@@ -15,6 +15,7 @@ import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
 import Summary from 'components/cards/Summary'
 import LoadingSpinner from 'components/LoadingSpinner'
+import SubscribeButton from 'components/SubscribeButton'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
@@ -88,7 +89,14 @@ export default function CommitteeDetailsPage() {
 
   return (
     <PageWrapper>
-      <Header title={committee.name} />
+      <div className="flex items-center justify-between">
+        <Header title={committee.name} />
+        <SubscribeButton
+          entityType="committee"
+          entityId={committee.id}
+          entityName={committee.name}
+        />
+      </div>
 
       <Summary summary={committee.summary} />
 

@@ -14,6 +14,7 @@ const Card = ({
   button,
   cardKey,
   className = '',
+  extraAction,
   icons,
   labels,
   level,
@@ -140,8 +141,9 @@ const Card = ({
             ))}
           </div>
 
-          {/* Action Button */}
-          <div className="flex sm:justify-end">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 sm:justify-end">
+            {extraAction}
             <ActionButton
               tooltipLabel={tooltipLabel}
               url={button.url}
