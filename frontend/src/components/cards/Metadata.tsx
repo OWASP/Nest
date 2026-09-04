@@ -21,6 +21,7 @@ interface MetadataProps {
   detailsTitle?: string
   contributionScore?: number
   tierLevel?: string
+  className?: string
 }
 
 const Metadata = ({
@@ -35,13 +36,14 @@ const Metadata = ({
   detailsTitle = 'Details',
   contributionScore,
   tierLevel,
+  className = '',
 }: MetadataProps) => {
   const statistics = stats ?? []
   const hasStatistics = showStatistics && statistics.length > 0
   const hasContributionInfo = contributionScore !== undefined || tierLevel !== undefined
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
+    <div className={`grid grid-cols-1 gap-6 md:grid-cols-7 ${className}`}>
       <SecondaryCard
         icon={FaRectangleList}
         title={<AnchorTitle title={detailsTitle} />}

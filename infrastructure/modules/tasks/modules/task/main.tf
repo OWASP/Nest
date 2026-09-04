@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.55.0"
+      version = "~> 6.59.0"
     }
   }
 }
@@ -84,9 +84,9 @@ resource "aws_cloudwatch_event_target" "task" {
     }
 
     network_configuration {
-      assign_public_ip = var.assign_public_ip
+      assign_public_ip = false
       security_groups  = var.security_group_ids
-      subnets          = var.subnet_ids
+      subnets          = var.private_subnet_ids
     }
   }
 }

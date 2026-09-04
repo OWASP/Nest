@@ -18,6 +18,7 @@ from . import (
     owasp,
     policies,
     projects,
+    report,
     sponsor,
     sponsors,
     staff,
