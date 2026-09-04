@@ -1,6 +1,7 @@
 from .board_candidate_claim import BoardCandidateClaim
 from .board_candidate_claim_evidence import BoardCandidateClaimEvidence
 from .board_candidate_claim_review import BoardCandidateClaimReview
+from .board_candidate_profile import BoardCandidateProfile
 from .board_of_directors import BoardOfDirectors
 from .chapter import Chapter
 from .committee import Committee

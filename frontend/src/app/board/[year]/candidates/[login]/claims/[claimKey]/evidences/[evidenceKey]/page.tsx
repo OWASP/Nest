@@ -11,6 +11,7 @@ import { FaDownload } from 'react-icons/fa6'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import { GetBoardCandidateClaimEvidenceFileUrlDocument } from 'types/__generated__/evidenceQueries.generated'
+import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
@@ -30,7 +31,7 @@ const EvidenceDetailsPage = () => {
   const { isSyncing, session } = useDjangoSession()
   const { data, loading, error } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: isSyncing || !claimKey || !login || !year || !session?.user?.login,
+    skip: isSyncing || !claimKey || !login || !year,
     variables: {
       key: claimKey,
       login,
@@ -40,6 +41,7 @@ const EvidenceDetailsPage = () => {
   })
 
   const isReviewer = data?.boardOfDirectors?.reviewer != null
+  const isOwner = session?.user?.login === login
   const [fetchFileUrl] = useLazyQuery(GetBoardCandidateClaimEvidenceFileUrlDocument)
 
   const claim = data?.boardCandidateClaim
@@ -54,9 +56,16 @@ const EvidenceDetailsPage = () => {
 
   if (loading || isSyncing) return <LoadingSpinner />
 
-  if (session?.user?.login !== login && !isReviewer) {
+  const publicClaimStatuses = [ClaimStatusEnum.Approved, ClaimStatusEnum.Rejected]
+  const canView =
+    isOwner || isReviewer || (claim?.status != null && publicClaimStatuses.includes(claim.status))
+
+  if (!canView) {
     return (
-      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="You do not have permission to view this claim."
+      />
     )
   }
 
@@ -135,7 +144,7 @@ const EvidenceDetailsPage = () => {
                 {'Download Evidence'}
               </ActionButton>
             )}
-            {!isReviewer && (
+            {isOwner && (
               <EvidenceActions
                 evidence={evidence}
                 claim={claim}

@@ -33,7 +33,7 @@ const ClaimDetailsPage = () => {
     error: graphQLRequestError,
   } = useQuery(GetClaimAndEvidencesDocument, {
     fetchPolicy: 'cache-and-network',
-    skip: isSyncing || !claimKey || !year || !session?.user?.login,
+    skip: isSyncing || !claimKey || !year,
     variables: {
       key: claimKey,
       login,
@@ -43,10 +43,15 @@ const ClaimDetailsPage = () => {
   })
 
   const isReviewer = graphQLData?.boardOfDirectors?.reviewer != null
+  const isOwner = session?.user?.login === login
   const claim = graphQLData?.boardCandidateClaim
   const evidences = graphQLData?.boardCandidateClaimEvidences ?? []
   const hasReviewed =
     claim?.reviews?.some((r) => r.reviewer?.login === session?.user?.login) ?? false
+
+  const publicClaimStatuses = [ClaimStatusEnum.Approved, ClaimStatusEnum.Rejected]
+  const canView =
+    isOwner || isReviewer || (claim?.status != null && publicClaimStatuses.includes(claim.status))
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -65,12 +70,6 @@ const ClaimDetailsPage = () => {
 
   if (isLoading || isSyncing) return <LoadingSpinner />
 
-  if (session?.user?.login !== login && !isReviewer) {
-    return (
-      <AccessDeniedDisplay title="Access Denied" message="You can only view your own claims." />
-    )
-  }
-
   if (graphQLRequestError) {
     return (
       <ErrorDisplay
@@ -87,6 +86,15 @@ const ClaimDetailsPage = () => {
         statusCode={404}
         title="Claim Not Found"
         message="Sorry, the claim you're looking for doesn't exist."
+      />
+    )
+  }
+
+  if (!canView) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="You do not have permission to view this claim."
       />
     )
   }
@@ -113,19 +121,21 @@ const ClaimDetailsPage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">@{login}</p>
           </div>
           <div className="flex items-center gap-2">
-            {claim.status === ClaimStatusEnum.Draft && session?.user?.login === login && (
+            {claim.status === ClaimStatusEnum.Draft && isOwner && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
                 {'Add Evidence'}
               </ActionButton>
             )}
-            <ClaimActions
-              claim={claim}
-              hasReviewed={hasReviewed}
-              isReviewer={isReviewer}
-              login={login}
-              year={year}
-            />
+            {(isOwner || isReviewer) && (
+              <ClaimActions
+                claim={claim}
+                hasReviewed={hasReviewed}
+                isReviewer={isReviewer}
+                login={login}
+                year={year}
+              />
+            )}
           </div>
         </div>
         <Metadata details={claimDetails} detailsTitle="Claim Details" />

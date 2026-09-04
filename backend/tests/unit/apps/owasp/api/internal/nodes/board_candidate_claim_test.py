@@ -30,6 +30,7 @@ class TestBoardCandidateClaimNode(GraphQLNodeBaseTest):
             "key",
             "name",
             "order",
+            "source_text",
             "reviews",
             "status",
             "updated_at",

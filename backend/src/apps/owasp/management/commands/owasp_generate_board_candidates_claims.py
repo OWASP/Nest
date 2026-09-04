@@ -8,18 +8,21 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from django.utils.html import strip_tags
+from rapidfuzz import fuzz
 
 from apps.ai.common.utils import extract_json_from_markdown
 from apps.common.open_ai import OpenAi
 from apps.common.utils import slugify
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
+from apps.owasp.models.board_candidate_profile import BoardCandidateProfile
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 from apps.owasp.models.entity_member import EntityMember
 
 AI_MAX_TOKENS = 2000
 BOARD_CANDIDATES_RAW_BASE_URL = "https://raw.githubusercontent.com/OWASP/www-board-candidates"
 CONTENT_PREVIEW_LENGTH = 30
+FUZZY_MATCH_THRESHOLD = 90
 _2022_SUFFIX_YEAR = 2022
 
 PROMPT_EXTRACT_CLAIMS = """
@@ -45,10 +48,40 @@ but permit simple present for roles that remain current.
 Avoid present perfect constructions such as "has done", "has been", "has contributed", etc.
 
 Return ONLY a valid JSON array of objects.
-Each object must have exactly two keys:
+Each object must have exactly three keys:
   - "name": A concise 10-20 word summary of the claim.
   - "description": The full contextual text of the claim.
+  - "source_text": A single verbatim sentence copied from the input that supports the claim.
 """
+
+
+def fuzzy_search_substring(substring: str, text: str) -> str:
+    """Return a substring of text matching substring.
+
+    Args:
+        substring (str): The substring to look up.
+        text (str): The text to search within.
+
+    Returns:
+        str: A matching substring of text, or an empty string when no
+        acceptable match is found.
+
+    """
+    if not substring or not text:
+        return ""
+
+    if substring in text:
+        return substring
+
+    alignment = fuzz.partial_ratio_alignment(substring, text)
+    if alignment is None or alignment.score < FUZZY_MATCH_THRESHOLD:
+        return ""
+
+    match = text[alignment.dest_start : alignment.dest_end].strip()
+    if not match or "\n\n" in match or match not in text:
+        return ""
+
+    return match
 
 
 class Command(BaseCommand):
@@ -156,6 +189,11 @@ class Command(BaseCommand):
             )
             return []
 
+        try:
+            profile_markdown = candidate.board_profile.raw_markdown or ""
+        except BoardCandidateProfile.DoesNotExist:
+            profile_markdown = ""
+
         claims = []
         for claim_data in claims_data:
             if not isinstance(claim_data, dict):
@@ -165,6 +203,9 @@ class Command(BaseCommand):
                 : BoardCandidateClaim._meta.get_field("name").max_length
             ]
             description = str(claim_data.get("description") or "").strip()
+            source_text = str(claim_data.get("source_text") or "").strip()
+
+            source_text = fuzzy_search_substring(source_text, profile_markdown)
 
             if name:
                 claims.append(
@@ -173,6 +214,7 @@ class Command(BaseCommand):
                         description=description,
                         candidate=candidate,
                         name=name,
+                        source_text=source_text,
                         status=BoardCandidateClaim.Status.DRAFT,
                     )
                 )

@@ -52,7 +52,11 @@ def get_claim_evidence(
         if (
             is_self
             or (is_reviewer and evidence.claim.status == BoardCandidateClaim.Status.SUBMITTED)
-            or evidence.claim.status == BoardCandidateClaim.Status.APPROVED
+            or evidence.claim.status
+            in {
+                BoardCandidateClaim.Status.APPROVED,
+                BoardCandidateClaim.Status.REJECTED,
+            }
         )
         else None
     )
@@ -99,7 +103,11 @@ class BoardCandidateClaimEvidenceQuery:
             if (
                 is_self
                 or (is_reviewer and claim.status == BoardCandidateClaim.Status.SUBMITTED)
-                or claim.status == BoardCandidateClaim.Status.APPROVED
+                or claim.status
+                in {
+                    BoardCandidateClaim.Status.APPROVED,
+                    BoardCandidateClaim.Status.REJECTED,
+                }
             )
             else []
         )

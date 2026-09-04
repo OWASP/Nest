@@ -10,6 +10,17 @@ export const GET_BOARD_CANDIDATE = gql`
   }
 `
 
+export const GET_BOARD_CANDIDATE_NAME = gql`
+  query GetBoardCandidateName($login: String!, $year: Int!) {
+    boardCandidateProfile(login: $login, year: $year) {
+      id
+      candidate {
+        memberName
+      }
+    }
+  }
+`
+
 export const GET_BOARD_CANDIDATES = gql`
   query GetBoardCandidates($year: Int!) {
     boardOfDirectors(year: $year) {
@@ -35,6 +46,34 @@ export const GET_BOARD_CANDIDATES = gql`
       id
       owaspUrl
       year
+    }
+  }
+`
+
+export const GET_CANDIDATE_PROFILE = gql`
+  query GetCandidateProfile($login: String!, $sessionLogin: String!, $year: Int!) {
+    boardCandidateProfile(login: $login, year: $year) {
+      id
+      rawMarkdown
+      candidate {
+        memberName
+      }
+    }
+    boardCandidateClaims(login: $login, year: $year) {
+      id
+      key
+      name
+      sourceText
+      status
+    }
+    boardOfDirectors(year: $year) {
+      id
+      candidate(login: $login) {
+        id
+      }
+      reviewer(login: $sessionLogin) {
+        id
+      }
     }
   }
 `

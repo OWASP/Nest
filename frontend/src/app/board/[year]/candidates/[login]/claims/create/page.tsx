@@ -2,8 +2,8 @@
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useDjangoSession } from 'hooks/useDjangoSession'
-import { useParams, useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import React, { Suspense, useEffect, useState } from 'react'
 
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetBoardCandidateDocument } from 'types/__generated__/boardQueries.generated'
@@ -14,16 +14,18 @@ import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
 
-const CreateClaimPage = () => {
+const CreateClaimContent = () => {
   const router = useRouter()
   const { isSyncing, session } = useDjangoSession()
   const { login, year } = useParams<{ login: string; year: string }>()
+  const searchParams = useSearchParams()
 
   const [createClaim, { loading }] = useMutation(CreateBoardCandidateClaimDocument)
 
   const [formData, setFormData] = useState({
     description: '',
     name: '',
+    sourceText: searchParams.get('sourceText') ?? '',
   })
 
   const {
@@ -73,6 +75,7 @@ const CreateClaimPage = () => {
       const input = {
         description: formData.description,
         name: formData.name,
+        sourceText: formData.sourceText,
         year: Number.parseInt(year),
       }
 
@@ -123,6 +126,8 @@ const CreateClaimPage = () => {
     }
   }
 
+  const isSourceTextReadOnly = Boolean(searchParams.get('sourceText'))
+
   return (
     <ClaimForm
       formData={formData}
@@ -130,7 +135,16 @@ const CreateClaimPage = () => {
       onSubmit={handleSubmit}
       loading={loading}
       title="Create Claim"
+      isSourceTextReadOnly={isSourceTextReadOnly}
     />
+  )
+}
+
+const CreateClaimPage = () => {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <CreateClaimContent />
+    </Suspense>
   )
 }
 

@@ -111,6 +111,13 @@ class TestBoardCandidateClaimModel:
 
         assert field.default == ""
 
+    def test_source_text_default_empty(self):
+        """Test source_text field defaults to empty string."""
+        field = BoardCandidateClaim._meta.get_field("source_text")
+
+        assert field.default == ""
+        assert field.blank is True
+
     def test_clean_new_claim_passes(self):
         """Test that clean passes for new draft claims without pk."""
         claim = BoardCandidateClaim(name="New Claim", status=BoardCandidateClaim.Status.DRAFT)
