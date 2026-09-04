@@ -18,6 +18,9 @@ importers:
       dayjs:
         specifier: 1.11.21
         version: 1.11.21
+      jose:
+        specifier: 4.15.9
+        version: 4.15.9
       millify:
         specifier: 6.1.0
         version: 6.1.0
@@ -70,6 +73,9 @@ packages:
   is-fullwidth-code-point@3.0.0:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==}
     engines: {node: '>=8'}
+
+  jose@4.15.9:
+    resolution: {integrity: sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==}
 
   millify@6.1.0:
     resolution: {integrity: sha512-H/E3J6t+DQs/F2YgfDhxUVZz/dF8JXPPKTLHL/yHCcLZLtCXJDUaqvhJXQwqOVBvbyNn4T0WjLpIHd7PAw7fBA==}
@@ -149,6 +155,8 @@ snapshots:
   get-caller-file@2.0.5: {}
 
   is-fullwidth-code-point@3.0.0: {}
+
+  jose@4.15.9: {}
 
   millify@6.1.0:
     dependencies:

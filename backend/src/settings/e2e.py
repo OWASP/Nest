@@ -28,3 +28,11 @@ class E2E(Base):
     SECURE_PROXY_SSL_HEADER = None  # type: ignore[assignment]  # Django accepts None to disable.
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
+
+    ALGOLIA = {
+        **Base.ALGOLIA,
+        "AUTO_INDEXING": False,
+    }
+
+    LOCAL_APPS = (*Base.LOCAL_APPS, "apps.e2e")  # type: ignore[assignment]
+    INSTALLED_APPS = Base.DJANGO_APPS + Base.THIRD_PARTY_APPS + LOCAL_APPS  # type: ignore[assignment]

@@ -48,5 +48,9 @@ if SlackConfig.app:
         path("integrations/slack/interactivity/", slack_request_handler),
     ]
 
+if settings.IS_E2E_ENVIRONMENT:
+    urlpatterns += [path("e2e/", include("apps.e2e.urls"))]
+
+
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
