@@ -144,7 +144,7 @@ export type CreateProgramInput = {
 };
 
 export type CreateSnapshotSubscriptionInput = {
-  frequency?: Scalars['String']['input'];
+  frequency?: SnapshotFrequency;
   includeChapters?: Scalars['Boolean']['input'];
   includeEvents?: Scalars['Boolean']['input'];
   includeIssues?: Scalars['Boolean']['input'];
@@ -1146,6 +1146,11 @@ export type RevokeApiKeyResult = {
   ok: Scalars['Boolean']['output'];
 };
 
+export enum SnapshotFrequency {
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY'
+}
+
 export type SnapshotNode = Node & {
   __typename?: 'SnapshotNode';
   chapters: Array<ChapterNode>;
@@ -1286,7 +1291,7 @@ export type UpdateProgramStatusInput = {
 };
 
 export type UpdateSnapshotSubscriptionInput = {
-  frequency?: InputMaybe<Scalars['String']['input']>;
+  frequency?: InputMaybe<SnapshotFrequency>;
   includeChapters?: InputMaybe<Scalars['Boolean']['input']>;
   includeEvents?: InputMaybe<Scalars['Boolean']['input']>;
   includeIssues?: InputMaybe<Scalars['Boolean']['input']>;

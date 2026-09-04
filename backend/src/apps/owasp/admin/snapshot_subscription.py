@@ -38,12 +38,16 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             self.instance._is_admin_form = True  # noqa: SLF001
         cleaned_data = super().clean()
 
-        user = cleaned_data.get("user")
-        if not user:
+        if not (user := cleaned_data.get("user")):
             return cleaned_data
 
         duplicate_found = SnapshotSubscription.check_duplicate_setup(
-            user=user,
+            entity_ids={
+                "chapters": [c.pk for c in (cleaned_data.get("subscribed_chapters") or [])],
+                "committees": [c.pk for c in (cleaned_data.get("subscribed_committees") or [])],
+                "projects": [p.pk for p in (cleaned_data.get("subscribed_projects") or [])],
+            },
+            exclude_pk=self.instance.pk if self.instance else None,
             frequency=cleaned_data.get("frequency"),
             include_chapters=cleaned_data.get("include_chapters"),
             include_events=cleaned_data.get("include_events"),
@@ -53,15 +57,10 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             include_pull_requests=cleaned_data.get("include_pull_requests"),
             include_releases=cleaned_data.get("include_releases"),
             include_users=cleaned_data.get("include_users"),
-            entity_ids={
-                "projects": [p.pk for p in (cleaned_data.get("subscribed_projects") or [])],
-                "chapters": [c.pk for c in (cleaned_data.get("subscribed_chapters") or [])],
-                "committees": [c.pk for c in (cleaned_data.get("subscribed_committees") or [])],
-            },
-            exclude_pk=self.instance.pk if self.instance else None,
+            user=user,
         )
 
-        toggles = [
+        toggles = (
             cleaned_data.get("include_chapters"),
             cleaned_data.get("include_events"),
             cleaned_data.get("include_issues"),
@@ -70,14 +69,14 @@ class SnapshotSubscriptionAdminForm(forms.ModelForm):
             cleaned_data.get("include_pull_requests"),
             cleaned_data.get("include_releases"),
             cleaned_data.get("include_users"),
-        ]
+        )
         has_entities = bool(
             cleaned_data.get("subscribed_projects")
             or cleaned_data.get("subscribed_chapters")
             or cleaned_data.get("subscribed_committees")
         )
 
-        if not any(toggles) and not has_entities:
+        if not has_entities and not any(toggles):
             msg = "Your subscription cannot be empty. Please choose something to follow."
             raise ValidationError(msg)
 
