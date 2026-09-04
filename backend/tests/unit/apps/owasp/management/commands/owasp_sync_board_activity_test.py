@@ -24,19 +24,28 @@ class TestSyncBoardActivityCommand:
     def test_month_without_year_raises(self, command):
         """Passing --month without --year is rejected with a CommandError."""
         with pytest.raises(CommandError, match="--month requires --year"):
-            command.handle(year=None, month=8)
+            command.handle(year=None, month=8, path=None)
 
     @pytest.mark.parametrize("month", [0, -1, 13, 100])
     def test_month_out_of_range_raises(self, command, month):
         """Passing --month outside 1-12 is rejected with a CommandError."""
         with pytest.raises(CommandError, match="--month must be between 1 and 12"):
-            command.handle(year=2025, month=month)
+            command.handle(year=2025, month=month, path=None)
 
     @pytest.mark.parametrize("year", [1, 202, 10000])
     def test_year_out_of_range_raises(self, command, year):
         """Passing a non-4-digit --year is rejected with a CommandError."""
         with pytest.raises(CommandError, match="4-digit"):
-            command.handle(year=year, month=None)
+            command.handle(year=year, month=None, path=None)
+
+    def test_path_bypasses_year_month_validation(self, command, mocker):
+        """--path takes precedence over --year/--month, so range checks are skipped."""
+        mocker.patch(
+            "apps.owasp.management.commands.owasp_sync_board_activity.sync.run",
+            return_value=SyncStats(),
+        )
+
+        command.handle(year=1, month=99, path="meetings-historical/2025/202508.md")
 
     def test_errored_count_raises_command_error(self, command, mocker):
         """A non-zero ERRORED count exits the command with a CommandError."""

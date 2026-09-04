@@ -3,12 +3,10 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.owasp.parsers.board_activity import sync
-from apps.owasp.parsers.board_activity.sync import SyncStatus
+from apps.owasp.parsers.board_activity.sync import MAX_YEAR, MIN_YEAR, SyncStatus
 
 MIN_MONTH = 1
 MAX_MONTH = 12
-MIN_YEAR = 1000
-MAX_YEAR = 9999
 
 
 class Command(BaseCommand):
@@ -51,28 +49,30 @@ class Command(BaseCommand):
         """Run the board activity sync.
 
         Raises:
-            CommandError: If --month is invalid, or if any file failed to sync.
+            CommandError: If --month or --year is invalid, or if any file failed to sync.
 
         """
         year = options.get("year")
         month = options.get("month")
+        path = options.get("path")
 
-        if month is not None and year is None:
-            message = "--month requires --year."
-            raise CommandError(message)
+        if path is None:
+            if month is not None and year is None:
+                message = "--month requires --year."
+                raise CommandError(message)
 
-        if month is not None and not (MIN_MONTH <= month <= MAX_MONTH):
-            message = f"--month must be between {MIN_MONTH} and {MAX_MONTH}."
-            raise CommandError(message)
+            if month is not None and not (MIN_MONTH <= month <= MAX_MONTH):
+                message = f"--month must be between {MIN_MONTH} and {MAX_MONTH}."
+                raise CommandError(message)
 
-        if year is not None and not (MIN_YEAR <= year <= MAX_YEAR):
-            message = f"--year must be a 4-digit value between {MIN_YEAR} and {MAX_YEAR}."
-            raise CommandError(message)
+            if year is not None and not (MIN_YEAR <= year <= MAX_YEAR):
+                message = f"--year must be a 4-digit value between {MIN_YEAR} and {MAX_YEAR}."
+                raise CommandError(message)
 
         stats = sync.run(
             year=year,
             month=month,
-            path=options.get("path"),
+            path=path,
             force=options.get("force", False),
             dry_run=options.get("dry_run", False),
         )

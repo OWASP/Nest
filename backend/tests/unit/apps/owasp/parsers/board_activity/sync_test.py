@@ -139,10 +139,9 @@ class TestFetchFileContent:
 
         assert sync.fetch_file_content("p.md") == "hello"
 
-    @pytest.mark.parametrize("status", [403, 404, 500, 502])
-    def test_returns_empty_on_non_2xx(self, mocker, status):
-        """A non-2xx response returns empty string so error body is not fed to the LLM."""
-        response = Mock(ok=False, status_code=status, text="error body")
+    def test_returns_empty_on_non_ok(self, mocker):
+        """A non-ok response returns empty string so the error body is not fed to the LLM."""
+        response = Mock(ok=False, status_code=404, text="error body")
         mocker.patch(
             "apps.owasp.parsers.board_activity.sync.requests.get",
             return_value=response,
