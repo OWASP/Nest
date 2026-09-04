@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime  # noqa: TC003
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -117,7 +118,7 @@ class ParsedMeeting(BaseModel):
     """The full extraction of a single meeting markdown file."""
 
     title: str
-    date: str  # ISO 8601 UTC datetime string
+    date: datetime
     type: MeetingType = MeetingType.PUBLIC
     location: str = ""
     call_in_url: str = ""

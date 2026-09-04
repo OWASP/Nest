@@ -1,7 +1,7 @@
 """Tests for board_activity.translator."""
 
 from contextlib import contextmanager
-from datetime import date
+from datetime import UTC, date, datetime
 from unittest.mock import Mock
 
 import pytest
@@ -372,7 +372,7 @@ class TestUpsert:
     def test_upsert_creates_meeting_and_dispatches_actions(self, mocker):
         """Upsert wires the board, meeting, attendance M2Ms, and actions correctly."""
         board = Mock(id=1)
-        mocker.patch(
+        mock_board_get_or_create = mocker.patch(
             "apps.owasp.models.board_of_directors.BoardOfDirectors.objects.get_or_create",
             return_value=(board, True),
         )
@@ -420,6 +420,10 @@ class TestUpsert:
 
         assert result is meeting
         assert mock_update_or_create.call_args.kwargs["defaults"]["guests"] == ["Guest"]
+        assert mock_update_or_create.call_args.kwargs["defaults"]["date"] == datetime(
+            2025, 8, 26, 13, 0, 0, tzinfo=UTC
+        )
+        mock_board_get_or_create.assert_called_once_with(year=2025)
         mock_delete_children.assert_called_once_with(meeting)
         meeting.attendees.set.assert_called_once()
         meeting.absentees.set.assert_called_once()

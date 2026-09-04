@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.models import ContentType
@@ -46,8 +46,7 @@ def upsert(parsed: ParsedMeeting, *, source_path: str, source_checksum: str) -> 
 
     """
     with transaction.atomic():
-        meeting_date = datetime.fromisoformat(parsed.date)
-        board, _ = BoardOfDirectors.objects.get_or_create(year=meeting_date.year)
+        board, _ = BoardOfDirectors.objects.get_or_create(year=parsed.date.year)
 
         meeting, _ = BoardMeeting.objects.update_or_create(
             source_path=source_path,
@@ -55,7 +54,7 @@ def upsert(parsed: ParsedMeeting, *, source_path: str, source_checksum: str) -> 
                 "attachments": [a.model_dump() for a in parsed.attachments],
                 "board": board,
                 "call_in_url": parsed.call_in_url,
-                "date": meeting_date,
+                "date": parsed.date,
                 "guests": list(parsed.guests),
                 "location": parsed.location,
                 "quorum_present": parsed.quorum_present,
