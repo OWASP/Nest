@@ -1,0 +1,79 @@
+{% autoescape off %}OWASP Nest — Community Snapshot
+================================
+{{ snapshot.title }}
+{% if snapshot.start_at and snapshot.end_at %}{{ snapshot.start_at|date:"M d" }} – {{ snapshot.end_at|date:"M d, Y" }}{% endif %}
+{% if chapters_data %}
+CHAPTERS ({{ chapters_data.total }} total)
+--------
+{% for chapter in chapters_data.items %}• {{ chapter.name }}{% if chapter.suggested_location or chapter.country %} — {{ chapter.suggested_location|default:chapter.country }}{% endif %}
+{% if chapter.summary %}  {{ chapter.summary|truncatewords:25 }}{% endif %}
+{% endfor %}{% if chapters_data.extra %}  + {{ chapters_data.extra }} more chapters{% endif %}
+
+{% endif %}{% if users_data %}
+USERS ({{ users_data.total }} new members)
+-----
+{% for user in users_data.items %}• {{ user.name|default:user.login }}
+{% endfor %}{% if users_data.extra %}  + {{ users_data.extra }} more members{% endif %}
+
+{% endif %}{% if issues_data %}
+ISSUES ({{ issues_data.total }} total)
+------
+{% for issue in issues_data.items %}• {{ issue.title|truncatewords:10 }}
+    {{ issue.url }}
+{% endfor %}{% if issues_data.extra %}  + {{ issues_data.extra }} more issues{% endif %}
+
+{% endif %}{% if prs_data %}
+PULL REQUESTS ({{ prs_data.total }} total)
+-------------
+{% for pr in prs_data.items %}• {{ pr.title|truncatewords:10 }}
+    {{ pr.url }}
+{% endfor %}{% if prs_data.extra %}  + {{ prs_data.extra }} more pull requests{% endif %}
+
+{% endif %}{% if releases_data %}
+RELEASES ({{ releases_data.total }} total)
+--------
+{% for release in releases_data.items %}• {{ release.name }}{% if release.tag_name %} ({{ release.tag_name }}){% endif %}
+    {{ release.url }}
+{% endfor %}{% if releases_data.extra %}  + {{ releases_data.extra }} more releases{% endif %}
+
+{% endif %}{% if projects_data %}
+PROJECTS
+--------
+{% for project_entry in projects_data %}
+{{ project_entry.project.name }}
+{% for content in project_entry.content %}{% if content.type == "issues" %}  Issues ({{ content.total }}):{% elif content.type == "pull_requests" %}  Pull Requests ({{ content.total }}):{% elif content.type == "releases" %}  Releases ({{ content.total }}):{% endif %}
+{% for item in content.items %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
+      {{ item.url }}
+{% endfor %}{% endfor %}{% endfor %}{% if projects_extra %}  + {{ projects_extra }} more projects{% endif %}
+
+{% endif %}{% if posts_data %}
+BLOG POSTS ({{ posts_data.total }} total)
+----------
+{% for post in posts_data.items %}• {{ post.title }}{% if post.author_name %} — {{ post.author_name }}{% endif %}
+  {{ post.url }}
+{% endfor %}{% if posts_data.extra %}  + {{ posts_data.extra }} more articles{% endif %}
+
+{% endif %}{% if events_data %}
+UPCOMING EVENTS ({{ events_data.total }} total)
+---------------
+{% for event in events_data.items %}• {{ event.name }}
+  📅 {{ event.start_date|date:"M d, Y" }}{% if event.suggested_location %}
+  📍 {{ event.suggested_location }}{% endif %}
+{% endfor %}{% if events_data.extra %}  + {{ events_data.extra }} more events{% endif %}
+
+{% endif %}{% if entity_sections %}
+YOUR SUBSCRIBED ENTITIES
+========================
+{% for entity_section in entity_sections %}
+{{ entity_section.entity.name }} ({{ entity_section.entity_type }})
+{% for content in entity_section.content %}{% if content.type == "issues" %}  Issues ({{ content.total }}):{% elif content.type == "pull_requests" %}  Pull Requests ({{ content.total }}):{% elif content.type == "releases" %}  Releases ({{ content.total }}):{% endif %}
+{% for item in content.items %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
+      {{ item.url }}
+{% endfor %}{% endfor %}{% endfor %}{% endif %}
+---
+View Full Snapshot: {{ snapshot_url }}
+Manage Preferences: {{ site_url }}/settings
+Unsubscribe: {{ unsubscribe_url }}
+
+© OWASP Foundation. All rights reserved.
+{% endautoescape %}
