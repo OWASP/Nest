@@ -42,7 +42,7 @@ class LocalCertificateProvider(BaseCertificateProvider):
         from apps.owasp.models.crp.certificate import Certificate  # noqa: PLC0415
 
         Certificate.objects.create(
-            github_user=user,
+            recipient=user,
             score=score,
             tier=tier,
         )

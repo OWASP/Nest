@@ -27,14 +27,14 @@ class TestCertificateModel:
     def test_str_representation_active(self):
         """Test __str__ for active certificate."""
         user = User(login="john_doe")
-        cert = Certificate(github_user=user, tier=TierChoices.LEVEL_1, is_revoked=False)
+        cert = Certificate(recipient=user, tier=TierChoices.LEVEL_1, is_revoked=False)
 
         assert str(cert) == "john_doe - LEVEL_1 Certificate (Active)"
 
     def test_str_representation_revoked(self):
         """Test __str__ for revoked certificate."""
         user = User(login="jane_doe")
-        cert = Certificate(github_user=user, tier=TierChoices.LEVEL_2, is_revoked=True)
+        cert = Certificate(recipient=user, tier=TierChoices.LEVEL_2, is_revoked=True)
 
         assert str(cert) == "jane_doe - LEVEL_2 Certificate (Revoked)"
 
@@ -53,7 +53,7 @@ class TestCertificateModel:
         Certificate.issue_certificate(user, 150, TierChoices.LEVEL_2)
 
         mock_cert_objects.filter.assert_called_once_with(
-            github_user=user, tier=TierChoices.LEVEL_2, is_revoked=False
+            recipient=user, tier=TierChoices.LEVEL_2, is_revoked=False
         )
 
     @patch("django.db.transaction.Atomic.__enter__", return_value=None)

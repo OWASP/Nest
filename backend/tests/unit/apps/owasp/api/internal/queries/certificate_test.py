@@ -25,7 +25,7 @@ class TestCertificateQuery:
 
         result = CertificateQuery().certificate("CERT12345678")
 
-        mock_select_related.assert_called_once_with("github_user")
+        mock_select_related.assert_called_once_with("chapter", "issuer", "project", "recipient")
         mock_select_related.return_value.get.assert_called_once_with(id="CERT12345678")
         assert result == mock_cert
 
@@ -70,7 +70,7 @@ class TestCertificateQuery:
 
         result = CertificateQuery().my_certificates(info)
 
-        mock_select_related.assert_called_once_with("github_user")
-        mock_qs.filter.assert_called_once_with(github_user=mock_github_user, is_revoked=False)
+        mock_select_related.assert_called_once_with("chapter", "issuer", "project", "recipient")
+        mock_qs.filter.assert_called_once_with(recipient=mock_github_user, is_revoked=False)
         mock_qs.order_by.assert_called_once_with("-issued_at")
         assert result == mock_certs
