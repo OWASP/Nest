@@ -4,6 +4,9 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.owasp.parsers.board_activity import sync
 
+MIN_MONTH = 1
+MAX_MONTH = 12
+
 
 class Command(BaseCommand):
     help = "Sync OWASP board meeting activity from the www-board repository."
@@ -45,7 +48,7 @@ class Command(BaseCommand):
         """Run the board activity sync.
 
         Raises:
-            CommandError: If --month is provided without --year.
+            CommandError: If --month is provided without --year, or is out of range.
 
         """
         year = options.get("year")
@@ -53,6 +56,10 @@ class Command(BaseCommand):
 
         if month is not None and year is None:
             message = "--month requires --year."
+            raise CommandError(message)
+
+        if month is not None and not (MIN_MONTH <= month <= MAX_MONTH):
+            message = f"--month must be between {MIN_MONTH} and {MAX_MONTH}."
             raise CommandError(message)
 
         stats = sync.run(

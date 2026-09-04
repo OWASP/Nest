@@ -26,6 +26,12 @@ class TestSyncBoardActivityCommand:
         with pytest.raises(CommandError, match="--month requires --year"):
             command.handle(year=None, month=8)
 
+    @pytest.mark.parametrize("month", [0, -1, 13, 100])
+    def test_month_out_of_range_raises(self, command, month):
+        """Passing --month outside 1-12 is rejected with a CommandError."""
+        with pytest.raises(CommandError, match="--month must be between 1 and 12"):
+            command.handle(year=2025, month=month)
+
     def test_handle_delegates_to_sync_run(self, command, mocker):
         """CLI options are threaded through to sync.run."""
         mock_run = mocker.patch(
