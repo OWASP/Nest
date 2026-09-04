@@ -40,7 +40,7 @@ const Pagination: React.FC<PaginationProps> = ({
       pageNumbers.push(i)
     }
 
-    if (currentPage < totalPages - 3) {
+    if (currentPage <= totalPages - 3) {
       pageNumbers.push('...')
     }
 

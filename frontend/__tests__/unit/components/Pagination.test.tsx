@@ -2,6 +2,7 @@ import { within, render, fireEvent, screen, cleanup } from '@testing-library/rea
 import '@testing-library/jest-dom'
 import Pagination from 'components/Pagination'
 
+
 afterEach(cleanup)
 
 describe('<Pagination />', () => {
@@ -23,8 +24,15 @@ describe('<Pagination />', () => {
     return render(<Pagination {...props} />)
   }
 
+
   beforeEach(() => {
     onPageChange.mockClear()
+  })
+
+  it('shows a trailing ellipsis when page 7 is omitted', () => {
+    const { container } = renderComponent({ currentPage: 5, totalPages: 8 })
+
+    expect(container.querySelectorAll('svg')).toHaveLength(2)
   })
 
   it('does not render when isLoaded is false', () => {
@@ -156,3 +164,4 @@ describe('<Pagination />', () => {
     expect(ellipses).toHaveLength(1)
   })
 })
+
