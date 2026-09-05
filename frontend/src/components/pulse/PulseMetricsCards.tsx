@@ -2,7 +2,11 @@ import { Skeleton } from '@heroui/skeleton'
 import { FaCodeBranch, FaRocket, FaUsers, FaWaveSquare } from 'react-icons/fa6'
 import type { PulseMetricsCardsProps } from 'types/pulse'
 
-export default function PulseMetricsCards({ error, loading, stats }: PulseMetricsCardsProps) {
+export default function PulseMetricsCards({
+  error,
+  loading,
+  stats,
+}: Readonly<PulseMetricsCardsProps>) {
   const renderValue = (val?: number) => {
     if (loading) {
       return <Skeleton className="my-1 h-7 w-20 rounded-lg" />

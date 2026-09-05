@@ -114,10 +114,11 @@ export default function PulsePage() {
     setTimeRange(searchParams.get('timeRange') || '')
     setOrder(searchParams.get('order') || 'desc')
     const search = searchParams.get('search') || ''
+    debouncedSetSearch.cancel()
     setSearchQuery(search)
     setDebouncedSearchQuery(search)
     setPage(Math.max(1, Number.parseInt(searchParams.get('page') || '1') || 1))
-  }, [searchParams])
+  }, [searchParams, debouncedSetSearch])
 
   const fetchProjectSuggestions = useCallback(
     async (queryText: string) => {

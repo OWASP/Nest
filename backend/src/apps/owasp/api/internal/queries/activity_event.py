@@ -95,11 +95,7 @@ class ActivityEventQuery:
             project_repo_ids = Project.objects.filter(name__iexact=cleaned).values_list(
                 "repositories", flat=True
             )
-
-            queryset = queryset.filter(
-                Q(github_repository__in=project_repo_ids)
-                | Q(github_repository__name__icontains=cleaned)
-            )
+            queryset = queryset.filter(github_repository__in=project_repo_ids)
 
         if chapter_key and (cleaned := chapter_key.strip()):
             chapter_repo_ids = (

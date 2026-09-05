@@ -127,6 +127,7 @@ export default function PulseFilters({
               setProjectSearchInput(e.target.value)
               setShowProjectSuggestions(true)
               setProjectKey('')
+              setPage(1)
             }}
             className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-2.5 pr-8 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-400"
           />
@@ -172,6 +173,7 @@ export default function PulseFilters({
               setChapterSearchInput(e.target.value)
               setShowChapterSuggestions(true)
               setChapterKey('')
+              setPage(1)
             }}
             className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-2.5 pr-8 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-400"
           />
