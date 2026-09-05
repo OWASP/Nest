@@ -16,8 +16,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.8.1)
       '@next/eslint-plugin-next':
-        specifier: 16.3.0
-        version: 16.3.0(eslint@10.8.1)
+        specifier: 16.3.1
+        version: 16.3.1(eslint@10.8.1)
       eslint:
         specifier: 10.8.1
         version: 10.8.1
@@ -208,8 +208,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@next/eslint-plugin-next@16.3.0':
-    resolution: {integrity: sha512-OqgJ8PN0d04KcPhDX/PTY5tJUJZxlbrt7O7FBsm4XE0XW2JDrKnDXsc9uo9WUimJGPoo2j+JRGhyXApC//mvbw==}
+  '@next/eslint-plugin-next@16.3.1':
+    resolution: {integrity: sha512-B4SznlXwVpaLDa7Tbi6zLuueria2d/PmFDhXyDymPGrk2r1n/RMJmcn5FZq1L64k+Jsyte1lKvOr7lP9Xo80mQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1529,7 +1529,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@next/eslint-plugin-next@16.3.0(eslint@10.8.1)':
+  '@next/eslint-plugin-next@16.3.1(eslint@10.8.1)':
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.8.1)
       fast-glob: 3.3.1
