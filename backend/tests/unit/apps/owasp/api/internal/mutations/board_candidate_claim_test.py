@@ -781,6 +781,7 @@ class TestUpdateBoardCandidateClaim:
         input_data = MagicMock(key="test-key", description=None, year=2024)
         input_data.name = "Updated Name"
         input_data.source_text = "Exact text from profile"
+        input_data.to_pydantic.return_value = input_data
 
         claim = MagicMock()
         claim.candidate.member = mock_github_user
@@ -807,6 +808,7 @@ class TestUpdateBoardCandidateClaim:
         input_data = MagicMock(key="test-key", description=None, year=2024)
         input_data.name = None
         input_data.source_text = ""
+        input_data.to_pydantic.return_value = input_data
 
         claim = MagicMock()
         claim.candidate.member = mock_github_user
