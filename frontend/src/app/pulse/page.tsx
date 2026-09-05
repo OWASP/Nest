@@ -4,7 +4,7 @@ import { useApolloClient, useQuery } from '@apollo/client/react'
 import { Skeleton } from '@heroui/skeleton'
 import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { FaCodeBranch, FaWaveSquare } from 'react-icons/fa6'
 import { SearchChapterNamesDocument } from 'types/__generated__/chapterQueries.generated'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
@@ -81,7 +81,15 @@ export default function PulsePage() {
 
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery)
   const debouncedSetSearch = useMemo(
-    () => debounce((v: string) => setDebouncedSearchQuery(v), 300),
+    () =>
+      debounce((v: string) => {
+        setDebouncedSearchQuery((prev) => {
+          if (prev !== v) {
+            setPage(1)
+          }
+          return v
+        })
+      }, 300),
     []
   )
   useEffect(() => {
@@ -93,8 +101,14 @@ export default function PulsePage() {
 
   const projectFetchGen = useRef(0)
   const chapterFetchGen = useRef(0)
+  const lastSyncedQueryString = useRef<string | null>(null)
 
   useEffect(() => {
+    const currentQueryString = searchParams.toString()
+    if (lastSyncedQueryString.current === currentQueryString) {
+      return
+    }
+
     setActivityType(searchParams.get('activityType') || '')
 
     const project = searchParams.get('project') || ''
@@ -193,7 +207,9 @@ export default function PulsePage() {
     if (order !== 'desc') params.set('order', order)
     if (debouncedSearchQuery.trim()) params.set('search', debouncedSearchQuery.trim())
     if (page > 1) params.set('page', page.toString())
-    router.replace(`?${params.toString()}`)
+    const queryString = params.toString()
+    lastSyncedQueryString.current = queryString
+    router.replace(`?${queryString}`)
   }, [activityType, projectKey, chapterKey, timeRange, order, debouncedSearchQuery, page, router])
 
   const {
@@ -254,6 +270,54 @@ export default function PulsePage() {
     setChapterKey(filterValue)
     setShowChapterSuggestions(false)
     setPage(1)
+  }
+
+  let content: ReactNode
+
+  if (loading) {
+    content = (
+      <div className="flex flex-col items-center justify-center py-16">
+        <LoadingSpinner />
+        <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          Loading OWASP activity stream...
+        </p>
+      </div>
+    )
+  } else if (error) {
+    content = (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+        <h3 className="text-lg font-semibold">GraphQL Query Error</h3>
+        <p className="mt-1 text-sm">{error.message}</p>
+      </div>
+    )
+  } else if (events.length === 0) {
+    content = (
+      <div className="rounded-xl border border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
+        <FaCodeBranch className="mx-auto h-8 w-8 text-gray-400" />
+        <h3 className="mt-3 text-base font-semibold text-gray-800 dark:text-gray-200">
+          No activities found
+        </h3>
+        <p className="mt-1 text-sm">Try clearing or adjusting your search filters.</p>
+      </div>
+    )
+  } else {
+    content = (
+      <div className="space-y-8 pt-2">
+        {Object.entries(groupedEvents).map(([dateHeader, dayEvents]) => (
+          <div key={dateHeader} className="space-y-4">
+            <div className="mb-1.5 pt-2 text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              {dateHeader}
+            </div>
+
+            <div className="relative ml-4 space-y-4 border-l-2 border-gray-300 pl-6 dark:border-gray-700">
+              {dayEvents.map((event) => (
+                <PulseTimelineItem key={event.id} event={event} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -327,43 +391,7 @@ export default function PulsePage() {
           )}
         </div>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <LoadingSpinner />
-            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-              Loading OWASP activity stream...
-            </p>
-          </div>
-        ) : error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
-            <h3 className="text-lg font-semibold">GraphQL Query Error</h3>
-            <p className="mt-1 text-sm">{error.message}</p>
-          </div>
-        ) : events.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            <FaCodeBranch className="mx-auto h-8 w-8 text-gray-400" />
-            <h3 className="mt-3 text-base font-semibold text-gray-800 dark:text-gray-200">
-              No activities found
-            </h3>
-            <p className="mt-1 text-sm">Try clearing or adjusting your search filters.</p>
-          </div>
-        ) : (
-          <div className="space-y-8 pt-2">
-            {Object.entries(groupedEvents).map(([dateHeader, dayEvents]) => (
-              <div key={dateHeader} className="space-y-4">
-                <div className="mb-1.5 pt-2 text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                  {dateHeader}
-                </div>
-
-                <div className="relative ml-4 space-y-4 border-l-2 border-gray-300 pl-6 dark:border-gray-700">
-                  {dayEvents.map((event) => (
-                    <PulseTimelineItem key={event.id} event={event} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {content}
 
         <Pagination
           currentPage={currentPage}

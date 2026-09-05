@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@heroui/button'
+import { type ReactNode } from 'react'
 import {
   FaArrowUpWideShort,
   FaCalendarDays,
@@ -72,7 +73,34 @@ export default function PulseFilters({
   showChapterSuggestions,
   showProjectSuggestions,
   timeRange,
-}: PulseFiltersProps) {
+}: Readonly<PulseFiltersProps>) {
+  let projectSuggestionsContent: ReactNode
+
+  if (isSearchingProjects) {
+    projectSuggestionsContent = (
+      <div className="px-3.5 py-2 text-xs text-gray-400">Searching projects...</div>
+    )
+  } else if (projectSuggestions.length === 0) {
+    projectSuggestionsContent = (
+      <div className="px-3.5 py-2 text-xs text-gray-400">No project suggestions found</div>
+    )
+  } else {
+    projectSuggestionsContent = projectSuggestions.map((proj) => (
+      <button
+        key={proj.id || proj.name}
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault()
+          handleSelectProject(proj)
+        }}
+        onClick={() => handleSelectProject(proj)}
+        className="flex w-full items-center justify-between px-3.5 py-2 text-left text-xs font-medium text-gray-700 hover:bg-blue-50 dark:text-gray-200 dark:hover:bg-gray-700"
+      >
+        <span className="font-semibold text-gray-900 dark:text-white">{proj.name}</span>
+      </button>
+    ))
+  }
+
   return (
     <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -84,7 +112,6 @@ export default function PulseFilters({
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
-              setPage(1)
             }}
             className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pr-4 pl-10 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400"
           />
@@ -135,28 +162,7 @@ export default function PulseFilters({
 
           {showProjectSuggestions && (
             <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-              {isSearchingProjects ? (
-                <div className="px-3.5 py-2 text-xs text-gray-400">Searching projects...</div>
-              ) : projectSuggestions.length === 0 ? (
-                <div className="px-3.5 py-2 text-xs text-gray-400">
-                  No project suggestions found
-                </div>
-              ) : (
-                projectSuggestions.map((proj) => (
-                  <button
-                    key={proj.id || proj.name}
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault()
-                      handleSelectProject(proj)
-                    }}
-                    onClick={() => handleSelectProject(proj)}
-                    className="flex w-full items-center justify-between px-3.5 py-2 text-left text-xs font-medium text-gray-700 hover:bg-blue-50 dark:text-gray-200 dark:hover:bg-gray-700"
-                  >
-                    <span className="font-semibold text-gray-900 dark:text-white">{proj.name}</span>
-                  </button>
-                ))
-              )}
+              {projectSuggestionsContent}
             </div>
           )}
         </div>

@@ -113,7 +113,7 @@ const renderTimelineIcon = (activityType: string) => {
   }
 }
 
-export default function PulseTimelineItem({ event }: PulseTimelineItemProps) {
+export default function PulseTimelineItem({ event }: Readonly<PulseTimelineItemProps>) {
   return (
     <div className="group relative">
       <div className="absolute top-3 -left-[43px]">{renderTimelineIcon(event.activityType)}</div>
