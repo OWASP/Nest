@@ -56,7 +56,7 @@ class Command(BaseCommand):
         month = options.get("month")
         path = options.get("path")
 
-        if path is None:
+        if not path:
             if month is not None and year is None:
                 message = "--month requires --year."
                 raise CommandError(message)
