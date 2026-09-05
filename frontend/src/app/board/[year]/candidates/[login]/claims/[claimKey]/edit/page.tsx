@@ -30,6 +30,7 @@ const EditClaimPage = () => {
   const [formData, setFormData] = useState({
     description: '',
     name: '',
+    sourceText: '',
   })
   const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
@@ -46,6 +47,7 @@ const EditClaimPage = () => {
       setFormData({
         description: claim.description ?? '',
         name: claim.name ?? '',
+        sourceText: claim.sourceText ?? '',
       })
     }
   }, [claim])
@@ -85,6 +87,7 @@ const EditClaimPage = () => {
       description: formData.description,
       key: claimKey,
       name: formData.name,
+      sourceText: formData.sourceText,
       year: Number.parseInt(year),
     }
 

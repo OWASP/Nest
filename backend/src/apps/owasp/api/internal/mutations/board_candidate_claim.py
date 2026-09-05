@@ -28,6 +28,7 @@ class CreateClaimPydanticInput(pydantic.BaseModel):
 
     description: str
     name: str = pydantic.Field(max_length=200)
+    source_text: str = ""
     year: int
 
 
@@ -42,6 +43,7 @@ class UpdateClaimPydanticInput(pydantic.BaseModel):
     description: str | None = None
     key: str = pydantic.Field(max_length=100)
     name: str | None = pydantic.Field(default=None, max_length=200)
+    source_text: str | None = None
     year: int
 
 
@@ -203,6 +205,7 @@ class BoardCandidateClaimMutations:
                 candidate=candidate,
                 description=validated.description,
                 name=validated.name,
+                source_text=validated.source_text,
             )
         except IntegrityError:
             logger.warning(
@@ -264,6 +267,9 @@ class BoardCandidateClaimMutations:
         if validated.description:
             claim.description = validated.description
             update_fields.append("description")
+        if validated.source_text is not None:
+            claim.source_text = validated.source_text
+            update_fields.append("source_text")
 
         try:
             claim.save(update_fields=update_fields)

@@ -18,6 +18,7 @@ export const CREATE_CLAIM = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }
@@ -43,6 +44,7 @@ export const UPDATE_CLAIM = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }
@@ -68,6 +70,7 @@ export const DISCARD_CLAIM = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }
@@ -93,6 +96,7 @@ export const SUBMIT_CLAIM = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }
@@ -118,6 +122,7 @@ export const WITHDRAW_CLAIM = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }
@@ -143,6 +148,7 @@ export const REORDER_CLAIMS = gql`
         key
         name
         order
+        sourceText
         status
         updatedAt
       }

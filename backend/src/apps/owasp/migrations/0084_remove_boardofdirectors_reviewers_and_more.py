@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("owasp", "0081_alter_boardcandidateclaim_board_and_more"),
+        ("owasp", "0083_alter_boardcandidateclaim_board_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

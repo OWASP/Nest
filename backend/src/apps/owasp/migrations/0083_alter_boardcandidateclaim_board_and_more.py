@@ -10,7 +10,7 @@ import apps.owasp.validators
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("owasp", "0080_boardcandidateclaimreview_boardofdirectors_reviewers_and_more"),
+        ("owasp", "0082_alter_boardcandidateprofile_table"),
     ]
 
     operations = [

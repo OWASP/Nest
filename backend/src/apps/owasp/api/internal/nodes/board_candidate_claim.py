@@ -21,6 +21,7 @@ from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
         "key",
         "name",
         "order",
+        "source_text",
         "withdrawn_at",
         "withdrawn_reason",
     ],
