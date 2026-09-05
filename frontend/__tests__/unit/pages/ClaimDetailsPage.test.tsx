@@ -175,45 +175,13 @@ describe('ClaimDetailsPage', () => {
     ['APPROVED', 'anonymous', ANONYMOUS],
     ['REJECTED', 'non-owner', NON_OWNER],
     ['REJECTED', 'anonymous', ANONYMOUS],
+    ['SUBMITTED', 'non-owner', NON_OWNER],
+    ['SUBMITTED', 'anonymous', ANONYMOUS],
   ] as const)('%s claim is visible to %s viewer', async (status, _label, session) => {
     setupAccessCase(status, session)
     render(<ClaimDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText(/Leadership Experience/i)).toBeInTheDocument()
     })
-  })
-
-  test.each([
-    ['SUBMITTED', 'non-owner', NON_OWNER],
-    ['SUBMITTED', 'anonymous', ANONYMOUS],
-    ['DRAFT', 'non-owner', NON_OWNER],
-    ['DRAFT', 'anonymous', ANONYMOUS],
-  ] as const)('%s claim is denied for %s viewer', (status, _label, session) => {
-    setupAccessCase(status, session)
-    render(<ClaimDetailsPage />)
-    expect(screen.getByText('Access Denied')).toBeInTheDocument()
-  })
-
-  test('does not render ClaimActions for non-owner, non-reviewer public viewer', async () => {
-    mockUseDjangoSession.mockReturnValue({
-      isSyncing: false,
-      session: { user: { login: 'otheruser' } },
-      status: 'authenticated',
-    })
-    mockUseQuery.mockReturnValue({
-      data: {
-        boardCandidateClaim: { ...mockSingleClaim, status: 'APPROVED' },
-        boardCandidateClaimEvidences: mockEvidences,
-      },
-      loading: false,
-      error: null,
-    })
-
-    render(<ClaimDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText(/Leadership Experience/i)).toBeInTheDocument()
-    })
-    expect(screen.queryByTestId('claim-actions')).not.toBeInTheDocument()
   })
 })

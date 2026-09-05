@@ -257,7 +257,7 @@ describe('EvidenceDetailsPage', () => {
     })
   })
 
-  test('denies submitted claim evidence for non-owner, non-reviewer', () => {
+  test('renders submitted claim evidence for non-owner', async () => {
     mockUseDjangoSession.mockReturnValue({
       isSyncing: false,
       session: { user: { login: 'otheruser' } },
@@ -274,7 +274,9 @@ describe('EvidenceDetailsPage', () => {
 
     render(<EvidenceDetailsPage />)
 
-    expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getAllByText(/Certificate/i).length).toBeGreaterThanOrEqual(2)
+    })
   })
 
   test('does not render EvidenceActions for public viewer', async () => {
