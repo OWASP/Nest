@@ -30,12 +30,13 @@ export const TIME_RANGES = [
   { label: 'Last 90 Days', value: '90d' },
 ]
 
-const FilterDismissButton = ({ onPress }: { onPress: () => void }) => (
+const FilterDismissButton = ({ onPress, label }: { onPress: () => void; label: string }) => (
   <Button
     size="sm"
     isIconOnly
     variant="light"
     onPress={onPress}
+    aria-label={label}
     className="h-4 w-4 min-w-0 p-0 text-gray-400 hover:text-gray-900 dark:hover:text-white"
   >
     <FaXmark className="h-3 w-3" />
@@ -93,6 +94,7 @@ export default function PulseFilters({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="relative">
           <select
+            aria-label="Activity type"
             value={activityType}
             onChange={(e) => {
               setActivityType(e.target.value)
@@ -115,6 +117,7 @@ export default function PulseFilters({
 
         <div className="relative">
           <input
+            aria-label="Filter by project"
             type="text"
             placeholder="All Projects"
             value={projectSearchInput}
@@ -123,9 +126,7 @@ export default function PulseFilters({
             onChange={(e) => {
               setProjectSearchInput(e.target.value)
               setShowProjectSuggestions(true)
-              if (!e.target.value.trim()) {
-                setProjectKey('')
-              }
+              setProjectKey('')
             }}
             className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-2.5 pr-8 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-400"
           />
@@ -148,6 +149,7 @@ export default function PulseFilters({
                       e.preventDefault()
                       handleSelectProject(proj)
                     }}
+                    onClick={() => handleSelectProject(proj)}
                     className="flex w-full items-center justify-between px-3.5 py-2 text-left text-xs font-medium text-gray-700 hover:bg-blue-50 dark:text-gray-200 dark:hover:bg-gray-700"
                   >
                     <span className="font-semibold text-gray-900 dark:text-white">{proj.name}</span>
@@ -160,6 +162,7 @@ export default function PulseFilters({
 
         <div className="relative">
           <input
+            aria-label="Filter by chapter"
             type="text"
             placeholder="All Chapters"
             value={chapterSearchInput}
@@ -168,9 +171,7 @@ export default function PulseFilters({
             onChange={(e) => {
               setChapterSearchInput(e.target.value)
               setShowChapterSuggestions(true)
-              if (!e.target.value.trim()) {
-                setChapterKey('')
-              }
+              setChapterKey('')
             }}
             className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-2.5 pr-8 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-400"
           />
@@ -193,6 +194,7 @@ export default function PulseFilters({
                       e.preventDefault()
                       handleSelectChapter(chap)
                     }}
+                    onClick={() => handleSelectChapter(chap)}
                     className="flex w-full items-center justify-between px-3.5 py-2 text-left text-xs font-medium text-gray-700 hover:bg-blue-50 dark:text-gray-200 dark:hover:bg-gray-700"
                   >
                     <span className="font-semibold text-gray-900 dark:text-white">{chap.name}</span>
@@ -205,6 +207,7 @@ export default function PulseFilters({
 
         <div className="relative">
           <select
+            aria-label="Time range"
             value={timeRange}
             onChange={(e) => {
               setTimeRange(e.target.value)
@@ -227,6 +230,7 @@ export default function PulseFilters({
 
         <div className="relative">
           <select
+            aria-label="Sort order"
             value={order}
             onChange={(e) => {
               setOrder(e.target.value)
@@ -251,16 +255,24 @@ export default function PulseFilters({
           {activityType
             ? ACTIVITY_TYPES.find((t) => t.value === activityType)?.label
             : 'All Activity Types'}
-          <FilterDismissButton onPress={() => setActivityType('')} />
+          <FilterDismissButton
+            label="Clear activity type filter"
+            onPress={() => {
+              setActivityType('')
+              setPage(1)
+            }}
+          />
         </span>
 
         {projectKey && (
           <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
             Project: {projectKey}
             <FilterDismissButton
+              label="Clear project filter"
               onPress={() => {
                 setProjectKey('')
                 setProjectSearchInput('')
+                setPage(1)
               }}
             />
           </span>
@@ -270,9 +282,11 @@ export default function PulseFilters({
           <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
             Chapter: {chapterKey}
             <FilterDismissButton
+              label="Clear chapter filter"
               onPress={() => {
                 setChapterKey('')
                 setChapterSearchInput('')
+                setPage(1)
               }}
             />
           </span>
@@ -280,7 +294,13 @@ export default function PulseFilters({
 
         <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
           {TIME_RANGES.find((tr) => tr.value === timeRange)?.label || 'All Time'}
-          <FilterDismissButton onPress={() => setTimeRange('')} />
+          <FilterDismissButton
+            label="Clear time range filter"
+            onPress={() => {
+              setTimeRange('')
+              setPage(1)
+            }}
+          />
         </span>
 
         <Button

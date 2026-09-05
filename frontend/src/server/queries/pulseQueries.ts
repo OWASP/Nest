@@ -1,30 +1,5 @@
 import { gql } from '@apollo/client'
 
-export const GET_RECENT_ACTIVITY_EVENTS = gql`
-  query GetRecentActivityEvents($limit: Int) {
-    recentActivityEvents(limit: $limit) {
-      id
-      activityType
-      occurredAt
-      title
-      url
-      number
-      githubUser {
-        id
-        login
-        name
-        avatarUrl
-      }
-      githubRepository {
-        id
-        key
-        name
-        url
-      }
-    }
-  }
-`
-
 export const GET_ACTIVITY_EVENT_STATS = gql`
   query GetActivityEventStats {
     activityEventStats {
@@ -41,7 +16,7 @@ export const GET_ACTIVITY_EVENT_STATS = gql`
 export const GET_ACTIVITY_EVENTS = gql`
   query GetActivityEvents(
     $activityType: String
-    $githubUserLogin: String
+    $githubUser: String
     $projectKey: String
     $chapterKey: String
     $timeRange: String
@@ -52,7 +27,7 @@ export const GET_ACTIVITY_EVENTS = gql`
   ) {
     activityEvents(
       activityType: $activityType
-      githubUserLogin: $githubUserLogin
+      githubUser: $githubUser
       projectKey: $projectKey
       chapterKey: $chapterKey
       timeRange: $timeRange

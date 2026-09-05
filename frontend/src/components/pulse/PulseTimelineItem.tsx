@@ -172,14 +172,17 @@ export default function PulseTimelineItem({ event }: PulseTimelineItemProps) {
         <div className="flex shrink-0 items-center justify-between gap-4 sm:justify-end">
           {renderBadge(event.activityType)}
 
-          <a
-            href={event.url || 'https://github.com'}
-            target="_blank"
-            rel="noreferrer"
-            className="text-gray-400 transition hover:text-gray-700 dark:hover:text-white"
-          >
-            <FaGithub className="h-5 w-5" />
-          </a>
+          {event.url && (
+            <a
+              href={event.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="View on GitHub"
+              className="text-gray-400 transition hover:text-gray-700 dark:hover:text-white"
+            >
+              <FaGithub aria-hidden="true" className="h-5 w-5" />
+            </a>
+          )}
         </div>
       </div>
     </div>

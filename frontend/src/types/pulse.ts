@@ -1,23 +1,6 @@
-export type ActivityEventItem = {
-  activityType: string
-  githubRepository?: {
-    id: string
-    key: string
-    name: string
-    url?: string | null
-  } | null
-  githubUser?: {
-    avatarUrl?: string | null
-    id: string
-    login: string
-    name?: string | null
-  } | null
-  id: string
-  number?: number | null
-  occurredAt: string
-  title?: string | null
-  url?: string | null
-}
+import type { GetActivityEventsQuery } from 'types/__generated__/pulseQueries.generated'
+
+export type ActivityEventItem = GetActivityEventsQuery['activityEvents']['events'][number]
 
 export type ActivityEventStats = {
   activeRepos?: number
@@ -60,6 +43,7 @@ export type PulseFiltersProps = {
 }
 
 export type PulseMetricsCardsProps = {
+  error?: boolean
   loading?: boolean
   stats?: ActivityEventStats | null
 }

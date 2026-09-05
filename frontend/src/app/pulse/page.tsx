@@ -2,8 +2,9 @@
 
 import { useApolloClient, useQuery } from '@apollo/client/react'
 import { Skeleton } from '@heroui/skeleton'
+import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FaCodeBranch, FaWaveSquare } from 'react-icons/fa6'
 import { SearchChapterNamesDocument } from 'types/__generated__/chapterQueries.generated'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
@@ -74,22 +75,71 @@ export default function PulsePage() {
   const [timeRange, setTimeRange] = useState<string>(searchParams.get('timeRange') || '')
   const [order, setOrder] = useState<string>(searchParams.get('order') || 'desc')
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('search') || '')
-  const [page, setPage] = useState<number>(Number.parseInt(searchParams.get('page') || '1'))
+  const [page, setPage] = useState<number>(
+    Math.max(1, Number.parseInt(searchParams.get('page') || '1') || 1)
+  )
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery)
+  const debouncedSetSearch = useMemo(
+    () => debounce((v: string) => setDebouncedSearchQuery(v), 300),
+    []
+  )
+  useEffect(() => {
+    debouncedSetSearch(searchQuery)
+  }, [searchQuery, debouncedSetSearch])
+  useEffect(() => {
+    return () => debouncedSetSearch.cancel()
+  }, [debouncedSetSearch])
+
+  const projectFetchGen = useRef(0)
+  const chapterFetchGen = useRef(0)
+
+  useEffect(() => {
+    setActivityType(searchParams.get('activityType') || '')
+
+    const project = searchParams.get('project') || ''
+    setProjectKey(project)
+    setProjectSearchInput(project)
+    setProjectSuggestions([])
+    setShowProjectSuggestions(false)
+    setIsSearchingProjects(false)
+
+    const chapter = searchParams.get('chapter') || ''
+    setChapterKey(chapter)
+    setChapterSearchInput(chapter)
+    setChapterSuggestions([])
+    setShowChapterSuggestions(false)
+    setIsSearchingChapters(false)
+
+    setTimeRange(searchParams.get('timeRange') || '')
+    setOrder(searchParams.get('order') || 'desc')
+    const search = searchParams.get('search') || ''
+    setSearchQuery(search)
+    setDebouncedSearchQuery(search)
+    setPage(Math.max(1, Number.parseInt(searchParams.get('page') || '1') || 1))
+  }, [searchParams])
 
   const fetchProjectSuggestions = useCallback(
     async (queryText: string) => {
       const cleanQuery = queryText.trim()
+      const gen = ++projectFetchGen.current
       setIsSearchingProjects(true)
       try {
         const { data } = await client.query({
           query: SearchProjectNamesDocument,
           variables: { query: cleanQuery },
         })
-        setProjectSuggestions((data?.searchProjects || []) as Array<{ id: string; name: string }>)
+        if (gen === projectFetchGen.current) {
+          setProjectSuggestions((data?.searchProjects || []) as Array<{ id: string; name: string }>)
+        }
       } catch {
-        setProjectSuggestions([])
+        if (gen === projectFetchGen.current) {
+          setProjectSuggestions([])
+        }
       } finally {
-        setIsSearchingProjects(false)
+        if (gen === projectFetchGen.current) {
+          setIsSearchingProjects(false)
+        }
       }
     },
     [client]
@@ -104,17 +154,24 @@ export default function PulsePage() {
   const fetchChapterSuggestions = useCallback(
     async (queryText: string) => {
       const cleanQuery = queryText.trim()
+      const gen = ++chapterFetchGen.current
       setIsSearchingChapters(true)
       try {
         const { data } = await client.query({
           query: SearchChapterNamesDocument,
           variables: { query: cleanQuery },
         })
-        setChapterSuggestions((data?.searchChapters || []) as Array<{ id: string; name: string }>)
+        if (gen === chapterFetchGen.current) {
+          setChapterSuggestions((data?.searchChapters || []) as Array<{ id: string; name: string }>)
+        }
       } catch {
-        setChapterSuggestions([])
+        if (gen === chapterFetchGen.current) {
+          setChapterSuggestions([])
+        }
       } finally {
-        setIsSearchingChapters(false)
+        if (gen === chapterFetchGen.current) {
+          setIsSearchingChapters(false)
+        }
       }
     },
     [client]
@@ -133,20 +190,22 @@ export default function PulsePage() {
     if (chapterKey.trim()) params.set('chapter', chapterKey.trim())
     if (timeRange) params.set('timeRange', timeRange)
     if (order !== 'desc') params.set('order', order)
-    if (searchQuery.trim()) params.set('search', searchQuery.trim())
+    if (debouncedSearchQuery.trim()) params.set('search', debouncedSearchQuery.trim())
     if (page > 1) params.set('page', page.toString())
-    router.push(`?${params.toString()}`)
-  }, [activityType, projectKey, chapterKey, timeRange, order, searchQuery, page, router])
+    router.replace(`?${params.toString()}`)
+  }, [activityType, projectKey, chapterKey, timeRange, order, debouncedSearchQuery, page, router])
 
-  const { data: statsData, loading: statsLoading } = useQuery(GetActivityEventStatsDocument, {
-    errorPolicy: 'ignore',
-  })
+  const {
+    data: statsData,
+    loading: statsLoading,
+    error: statsError,
+  } = useQuery(GetActivityEventStatsDocument)
   const stats = statsData?.activityEventStats
 
   const { data, loading, error } = useQuery(GetActivityEventsDocument, {
     variables: {
       activityType: activityType || undefined,
-      githubUserLogin: searchQuery.trim() || undefined,
+      githubUser: debouncedSearchQuery.trim() || undefined,
       projectKey: projectKey.trim() || undefined,
       chapterKey: chapterKey.trim() || undefined,
       timeRange: timeRange || undefined,
@@ -158,6 +217,7 @@ export default function PulsePage() {
   })
 
   const events = data?.activityEvents?.events || []
+  const currentPage = data?.activityEvents?.currentPage ?? page
   const totalPages = data?.activityEvents?.totalPages || 1
   const totalCount = data?.activityEvents?.totalCount ?? 0
 
@@ -212,7 +272,7 @@ export default function PulsePage() {
           </div>
         </div>
 
-        <PulseMetricsCards stats={stats} loading={statsLoading} />
+        <PulseMetricsCards stats={stats} loading={statsLoading} error={!!statsError} />
 
         <PulseFilters
           activityType={activityType}
@@ -305,7 +365,7 @@ export default function PulsePage() {
         )}
 
         <Pagination
-          currentPage={page}
+          currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={(newPage) => setPage(newPage)}
           isLoaded={!loading}

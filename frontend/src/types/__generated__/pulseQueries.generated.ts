@@ -19,7 +19,7 @@ export type GetActivityEventStatsQuery = { activityEventStats: { __typename: 'Ac
 
 export type GetActivityEventsQueryVariables = Exact<{
   activityType?: string | null | undefined;
-  githubUserLogin?: string | null | undefined;
+  githubUser?: string | null | undefined;
   projectKey?: string | null | undefined;
   chapterKey?: string | null | undefined;
   timeRange?: string | null | undefined;

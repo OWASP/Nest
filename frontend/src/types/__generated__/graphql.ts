@@ -814,7 +814,7 @@ export type Query = {
 export type QueryActivityEventsArgs = {
   activityType?: InputMaybe<Scalars['String']['input']>;
   chapterKey?: InputMaybe<Scalars['String']['input']>;
-  githubUserLogin?: InputMaybe<Scalars['String']['input']>;
+  githubUser?: InputMaybe<Scalars['String']['input']>;
   includeBots?: Scalars['Boolean']['input'];
   limit?: Scalars['Int']['input'];
   order?: Scalars['String']['input'];

@@ -31,7 +31,7 @@ class ActivityEventQuery:
         self,
         *,
         activity_type: str | None = None,
-        github_user_login: str | None = None,
+        github_user: str | None = None,
         project_key: str | None = None,
         chapter_key: str | None = None,
         time_range: str | None = None,
@@ -44,8 +44,7 @@ class ActivityEventQuery:
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             normalized_limit = PAGE_SIZE
 
-        if page < 1:
-            return PaginatedActivityEvents(current_page=1, events=[], total_pages=1, total_count=0)
+        page = max(1, page)
 
         if order not in {"asc", "desc"}:
             return PaginatedActivityEvents(current_page=1, events=[], total_pages=1, total_count=0)
@@ -69,13 +68,15 @@ class ActivityEventQuery:
         if activity_type:
             queryset = queryset.filter(activity_type=activity_type)
 
-        if github_user_login and (cleaned := github_user_login.strip()):
+        if github_user and (cleaned := github_user.strip()):
             issue_ct = ContentType.objects.get_for_model(Issue)
             pr_ct = ContentType.objects.get_for_model(PullRequest)
             release_ct = ContentType.objects.get_for_model(Release)
 
             issue_ids = Issue.objects.filter(title__icontains=cleaned).values_list("pk", flat=True)
-            pr_ids = PullRequest.objects.filter(title__icontains=cleaned).values_list("pk", flat=True)
+            pr_ids = PullRequest.objects.filter(title__icontains=cleaned).values_list(
+                "pk", flat=True
+            )
             release_ids = Release.objects.filter(
                 Q(name__icontains=cleaned) | Q(tag_name__icontains=cleaned)
             ).values_list("pk", flat=True)
@@ -91,9 +92,9 @@ class ActivityEventQuery:
             )
 
         if project_key and (cleaned := project_key.strip()):
-            project_repo_ids = Project.objects.filter(
-                name__icontains=cleaned
-            ).values_list("repositories", flat=True)
+            project_repo_ids = Project.objects.filter(name__iexact=cleaned).values_list(
+                "repositories", flat=True
+            )
 
             queryset = queryset.filter(
                 Q(github_repository__in=project_repo_ids)
@@ -102,7 +103,7 @@ class ActivityEventQuery:
 
         if chapter_key and (cleaned := chapter_key.strip()):
             chapter_repo_ids = (
-                Chapter.objects.filter(name__icontains=cleaned)
+                Chapter.objects.filter(name__iexact=cleaned)
                 .exclude(owasp_repository__isnull=True)
                 .values_list("owasp_repository_id", flat=True)
             )
