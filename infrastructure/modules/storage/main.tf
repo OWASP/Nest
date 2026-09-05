@@ -41,12 +41,36 @@ resource "aws_iam_policy" "fixtures_read_only" {
   tags = var.common_tags
 }
 
-module "shared_data_bucket" {
-  source = "./modules/shared-data-bucket"
+module "media_bucket" {
+  source = "./modules/s3-bucket"
 
-  common_tags = merge(var.common_tags, {
-    Purpose = "owasp-nest-shared-data"
+  bucket_name = "${var.project_name}-${var.environment}-media-${random_id.suffix.hex}"
+  kms_key_arn = var.kms_key_arn
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-media"
   })
+}
+
+resource "aws_iam_policy" "media_read_write" {
+  name        = "${var.project_name}-${var.environment}-media-read-write"
+  description = "Allows read/write access to the media files S3 bucket"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ]
+      Resource = [
+        module.media_bucket.arn,
+        "${module.media_bucket.arn}/*"
+      ]
+    }]
+  })
+  tags = var.common_tags
 }
 
 module "static_bucket" {
@@ -79,4 +103,12 @@ resource "aws_iam_policy" "static_read_write" {
     }]
   })
   tags = var.common_tags
+}
+
+module "shared_data_bucket" {
+  source = "./modules/shared-data-bucket"
+
+  common_tags = merge(var.common_tags, {
+    Purpose = "owasp-nest-shared-data"
+  })
 }

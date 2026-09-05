@@ -13,6 +13,7 @@ variables {
   db_password_arn               = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_DB_PASSWORD"
   django_allowed_hosts          = "nest.owasp.dev"
   django_allowed_origins        = "https://nest.owasp.dev"
+  django_aws_media_bucket_name  = "nest-test-media-abcd1234"
   django_aws_static_bucket_name = "nest-test-static-abcd1234"
   django_configuration          = "Staging"
   django_db_host                = "db.example.com"

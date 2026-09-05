@@ -18,6 +18,7 @@ class Staging(Base):
         traces_sample_rate=0.5,
     )
 
+    AWS_MEDIA_BUCKET_NAME = values.Value(environ_name="AWS_MEDIA_BUCKET_NAME")
     AWS_STORAGE_BUCKET_NAME = values.Value(environ_name="AWS_STORAGE_BUCKET_NAME")
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
     AWS_S3_OBJECT_PARAMETERS = {
@@ -30,6 +31,10 @@ class Staging(Base):
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": AWS_MEDIA_BUCKET_NAME,
+                "custom_domain": None,
+            },
         },
         "staticfiles": {
             "BACKEND": "storages.backends.s3.S3Storage",

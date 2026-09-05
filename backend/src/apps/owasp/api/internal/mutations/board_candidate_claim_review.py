@@ -2,12 +2,14 @@
 
 import logging
 
+import pydantic
 import strawberry
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.utils import IntegrityError
 from strawberry.types import Info
 
+from apps.common.api.internal.mutations.common import FieldError, validate_pydantic_input
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.nest.models.user import User
 from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
@@ -27,15 +29,19 @@ GENERIC_ERROR_MSG = "Something went wrong."
 INVALID_STATUS_MSG = "Review can only be added to submitted claims."
 
 
-@strawberry.input
-class CreateReviewInput:
-    """Input for creating claim review."""
+class CreateReviewPydanticInput(pydantic.BaseModel):
+    """Pydantic validation for creating a claim review."""
 
-    claim_key: str
+    claim_key: str = pydantic.Field(max_length=100)
     claim_member_login: str
     notes: str = ""
     status: ReviewStatusEnum
     year: int
+
+
+@strawberry.experimental.pydantic.input(model=CreateReviewPydanticInput, all_fields=True)
+class CreateReviewInput:
+    """Input for creating claim review."""
 
 
 @strawberry.type
@@ -46,6 +52,7 @@ class ReviewResult:
     code: str | None = None
     message: str | None = None
     review: BoardCandidateClaimReviewNode | None = None
+    field_errors: list[FieldError] | None = None
 
 
 def _validate_review_eligibility(
@@ -58,11 +65,7 @@ def _validate_review_eligibility(
             message=INVALID_STATUS_MSG,
         )
 
-    if (
-        claim.board
-        and reviewer.github_user
-        and claim.board.get_candidate(login=reviewer.github_user.login)
-    ):
+    if reviewer.github_user and claim.board.get_candidate(login=reviewer.github_user.login):
         return ReviewResult(
             ok=False,
             code="FORBIDDEN",
@@ -84,23 +87,25 @@ class BoardCandidateClaimReviewMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(ReviewResult)
     def create_board_candidate_claim_review(
         self, info: Info, input_data: CreateReviewInput
     ) -> ReviewResult:
         """Create review for a claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
 
         is_reviewer = BoardOfDirectors.objects.filter(
-            year=input_data.year, reviewers=user
+            year=validated.year, claim_reviewers=user
         ).exists()
         if not user.github_user or not is_reviewer:
             return ReviewResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                board__year=input_data.year,
-                candidate__member__login=input_data.claim_member_login,
-                key=input_data.claim_key,
+                board__year=validated.year,
+                candidate__member__login=validated.claim_member_login,
+                key=validated.claim_key,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ReviewResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -113,15 +118,15 @@ class BoardCandidateClaimReviewMutations:
         try:
             review = BoardCandidateClaimReview.objects.create(
                 claim=claim,
-                status=input_data.status.value,
-                notes=input_data.notes,
+                status=validated.status.value,
+                notes=validated.notes,
                 reviewer=user,
             )
         except IntegrityError:
             logger.warning(
                 "Error creating Board Candidate Claim Review for claim %s of user %s",
-                input_data.claim_key,
-                input_data.claim_member_login,
+                validated.claim_key,
+                validated.claim_member_login,
             )
             return ReviewResult(
                 ok=False,

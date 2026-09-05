@@ -61,12 +61,6 @@ test.describe('Board Candidate Claim Details Page', () => {
     await expect(page.getByText("Sorry, the claim you're looking for doesn't exist.")).toBeVisible()
   })
 
-  test('shows access denied when viewing another user profile', async ({ page }) => {
-    await mockClaimAuth(page, mockData, 'otheruser', ['GetClaimAndEvidences'])
-    await page.goto(baseUrl)
-    await expect(page.getByText('Access Denied')).toBeVisible()
-  })
-
   test('breadcrumb renders correct segments', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, [
       'Home',

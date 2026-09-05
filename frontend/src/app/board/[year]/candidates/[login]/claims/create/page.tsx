@@ -9,7 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetBoardCandidateDocument } from 'types/__generated__/boardQueries.generated'
 import { CreateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimsDocument } from 'types/__generated__/claimQueries.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -27,6 +27,7 @@ const CreateClaimContent = () => {
     name: '',
     sourceText: searchParams.get('sourceText') ?? '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   const {
     data: candidateGraphQLData,
@@ -71,14 +72,14 @@ const CreateClaimContent = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        description: formData.description,
-        name: formData.name,
-        sourceText: formData.sourceText,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      description: formData.description,
+      name: formData.name,
+      sourceText: formData.sourceText,
+      year: Number.parseInt(year),
+    }
 
+    try {
       const result = await createClaim({
         variables: { input },
         update(cache, { data }) {
@@ -98,8 +99,9 @@ const CreateClaimContent = () => {
         },
       })
 
-      if (!result.data?.createBoardCandidateClaim?.ok) {
-        throw new Error(result.data?.createBoardCandidateClaim?.message ?? 'Claim creation failed.')
+      const payload = result.data?.createBoardCandidateClaim
+      if (!handleMutationPayloadErrors(payload, 'Claim creation failed.', setBackendErrors)) {
+        return
       }
 
       addToast({
@@ -111,18 +113,13 @@ const CreateClaimContent = () => {
       })
 
       router.push(`/board/${year}/candidates/${login}/claims`)
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
-        addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
-      }
-      throw err
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Claim creation failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 
@@ -132,6 +129,8 @@ const CreateClaimContent = () => {
     <ClaimForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Create Claim"

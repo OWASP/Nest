@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UpdateBoardCandidateClaimDocument } from 'types/__generated__/claimMutations.generated'
 import { GetBoardCandidateClaimDocument } from 'types/__generated__/claimQueries.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ClaimForm from 'components/ClaimForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -32,6 +32,7 @@ const EditClaimPage = () => {
     name: '',
     sourceText: '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -82,15 +83,15 @@ const EditClaimPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        description: formData.description,
-        key: claimKey,
-        name: formData.name,
-        sourceText: formData.sourceText,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      description: formData.description,
+      key: claimKey,
+      name: formData.name,
+      sourceText: formData.sourceText,
+      year: Number.parseInt(year),
+    }
 
+    try {
       const result = await updateClaim({
         variables: { input },
         update(cache, { data }) {
@@ -104,8 +105,9 @@ const EditClaimPage = () => {
         },
       })
 
-      if (!result.data?.updateBoardCandidateClaim?.ok) {
-        throw new Error(result.data?.updateBoardCandidateClaim?.message ?? 'Claim update failed.')
+      const payload = result.data?.updateBoardCandidateClaim
+      if (!handleMutationPayloadErrors(payload, 'Claim update failed.', setBackendErrors)) {
+        return
       }
 
       addToast({
@@ -116,22 +118,17 @@ const EditClaimPage = () => {
         color: 'success',
       })
 
-      const updatedClaim = result.data?.updateBoardCandidateClaim?.claim
+      const updatedClaim = payload.claim
       if (updatedClaim?.key) {
         router.push(`/board/${year}/candidates/${login}/claims/${updatedClaim.key}`)
       }
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
-        addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
-      }
-      throw err
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Claim update failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 
@@ -139,6 +136,8 @@ const EditClaimPage = () => {
     <ClaimForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Edit Claim"

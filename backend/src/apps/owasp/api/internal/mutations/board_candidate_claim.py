@@ -2,6 +2,7 @@
 
 import logging
 
+import pydantic
 import strawberry
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -9,6 +10,7 @@ from django.db.utils import IntegrityError
 from django.utils import timezone
 from strawberry.types import Info
 
+from apps.common.api.internal.mutations.common import FieldError, validate_pydantic_input
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
@@ -21,58 +23,82 @@ CLAIM_NOT_FOUND_MSG = "Claim not found."
 GENERIC_ERROR_MSG = "Something went wrong."
 
 
-@strawberry.input
-class CreateClaimInput:
-    """Input for creating a claim."""
+class CreateClaimPydanticInput(pydantic.BaseModel):
+    """Pydantic validation for creating a claim."""
 
     description: str
-    name: str
+    name: str = pydantic.Field(max_length=200)
     source_text: str = ""
     year: int
 
 
-@strawberry.input
-class UpdateClaimInput:
-    """Input for updating a claim."""
+@strawberry.experimental.pydantic.input(model=CreateClaimPydanticInput, all_fields=True)
+class CreateClaimInput:
+    """Input for creating a claim."""
+
+
+class UpdateClaimPydanticInput(pydantic.BaseModel):
+    """Pydantic validation for updating a claim."""
 
     description: str | None = None
-    key: str
-    name: str | None = None
+    key: str = pydantic.Field(max_length=100)
+    name: str | None = pydantic.Field(default=None, max_length=200)
     source_text: str | None = None
     year: int
 
 
-@strawberry.input
+@strawberry.experimental.pydantic.input(model=UpdateClaimPydanticInput, all_fields=True)
+class UpdateClaimInput:
+    """Input for updating a claim."""
+
+
+class DiscardClaimPydanticInput(pydantic.BaseModel):
+    """Pydantic validation for discarding a claim."""
+
+    key: str = pydantic.Field(max_length=100)
+    year: int
+
+
+@strawberry.experimental.pydantic.input(model=DiscardClaimPydanticInput, all_fields=True)
 class DiscardClaimInput:
     """Input for discarding a claim."""
 
-    key: str
+
+class SubmitClaimPydanticInput(pydantic.BaseModel):
+    """Pydantic validation for submitting a claim."""
+
+    key: str = pydantic.Field(max_length=100)
     year: int
 
 
-@strawberry.input
+@strawberry.experimental.pydantic.input(model=SubmitClaimPydanticInput, all_fields=True)
 class SubmitClaimInput:
     """Input for submitting a claim."""
 
-    key: str
-    year: int
 
+class WithdrawClaimPydanticInput(pydantic.BaseModel):
+    """Pydantic validation for withdrawing a claim."""
 
-@strawberry.input
-class WithdrawClaimInput:
-    """Input for withdrawing a claim."""
-
-    key: str
+    key: str = pydantic.Field(max_length=100)
     withdrawn_reason: str
     year: int
 
 
-@strawberry.input
-class ReorderClaimsInput:
-    """Input for reordering claims."""
+@strawberry.experimental.pydantic.input(model=WithdrawClaimPydanticInput, all_fields=True)
+class WithdrawClaimInput:
+    """Input for withdrawing a claim."""
+
+
+class ReorderClaimsPydanticInput(pydantic.BaseModel):
+    """Pydantic validation for reordering claims."""
 
     keys: list[str]
     year: int
+
+
+@strawberry.experimental.pydantic.input(model=ReorderClaimsPydanticInput, all_fields=True)
+class ReorderClaimsInput:
+    """Input for reordering claims."""
 
 
 @strawberry.type
@@ -83,6 +109,7 @@ class ReorderClaimsResult:
     code: str | None = None
     message: str | None = None
     claims: list[BoardCandidateClaimNode] | None = None
+    field_errors: list[FieldError] | None = None
 
 
 @strawberry.type
@@ -93,17 +120,18 @@ class ClaimResult:
     code: str | None = None
     message: str | None = None
     claim: BoardCandidateClaimNode | None = None
+    field_errors: list[FieldError] | None = None
 
 
 def _validate_reorder_claims(
     login: str,
-    input_data: ReorderClaimsInput,
+    input_data: ReorderClaimsPydanticInput,
 ) -> tuple[list[str], ReorderClaimsResult | None]:
     """Validate reorder claims input.
 
     Args:
         login (str): The login of the candidate.
-        input_data (ReorderClaimsInput): Input containing claim keys to reorder.
+        input_data (ReorderClaimsPydanticInput): Input containing claim keys to reorder.
 
     Returns:
         tuple of (list[str], ReorderClaimsResult | None)
@@ -144,21 +172,23 @@ class BoardCandidateClaimMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(ClaimResult)
     def create_board_candidate_claim(
         self, info: Info, input_data: CreateClaimInput
     ) -> ClaimResult:
         """Create a new draft claim for a candidate."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
-            board = BoardOfDirectors.objects.get(year=input_data.year)
+            board = BoardOfDirectors.objects.get(year=validated.year)
         except BoardOfDirectors.DoesNotExist:
             return ClaimResult(
                 ok=False,
                 code="NOT_FOUND",
-                message=f"No board election found for the year {input_data.year}.",
+                message=f"No board election found for the year {validated.year}.",
             )
 
         candidate = board.get_candidate(login=user.github_user.login)
@@ -173,15 +203,15 @@ class BoardCandidateClaimMutations:
             claim = BoardCandidateClaim.objects.create(
                 board=board,
                 candidate=candidate,
-                description=input_data.description,
-                name=input_data.name,
-                source_text=input_data.source_text,
+                description=validated.description,
+                name=validated.name,
+                source_text=validated.source_text,
             )
         except IntegrityError:
             logger.warning(
                 "Error creating Board Candidate Claim for candidate %s, year %s",
                 candidate.member.login,
-                input_data.year,
+                validated.year,
             )
             return ClaimResult(
                 ok=False,
@@ -207,19 +237,21 @@ class BoardCandidateClaimMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(ClaimResult)
     def update_board_candidate_claim(
         self, info: Info, input_data: UpdateClaimInput
     ) -> ClaimResult:
         """Update a draft claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                board__year=input_data.year,
+                board__year=validated.year,
                 candidate__member__login=user.github_user.login,
-                key=input_data.key,
+                key=validated.key,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -228,15 +260,15 @@ class BoardCandidateClaimMutations:
             return ClaimResult(ok=False, code="LOCKED", message="Cannot update a locked claim.")
 
         update_fields = []
-        if input_data.name:
-            claim.name = input_data.name
+        if validated.name:
+            claim.name = validated.name
             update_fields.append("name")
             update_fields.append("key")
-        if input_data.description:
-            claim.description = input_data.description
+        if validated.description:
+            claim.description = validated.description
             update_fields.append("description")
-        if input_data.source_text is not None:
-            claim.source_text = input_data.source_text
+        if validated.source_text is not None:
+            claim.source_text = validated.source_text
             update_fields.append("source_text")
 
         try:
@@ -245,7 +277,7 @@ class BoardCandidateClaimMutations:
             logger.warning(
                 "Error updating Board Candidate Claim for candidate %s, key %s",
                 claim.candidate.member.login,
-                input_data.key,
+                validated.key,
             )
             return ClaimResult(
                 ok=False,
@@ -271,19 +303,21 @@ class BoardCandidateClaimMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(ClaimResult)
     def discard_board_candidate_claim(
         self, info: Info, input_data: DiscardClaimInput
     ) -> ClaimResult:
         """Discard a claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                board__year=input_data.year,
+                board__year=validated.year,
                 candidate__member__login=user.github_user.login,
-                key=input_data.key,
+                key=validated.key,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -328,19 +362,21 @@ class BoardCandidateClaimMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(ClaimResult)
     def submit_board_candidate_claim(
         self, info: Info, input_data: SubmitClaimInput
     ) -> ClaimResult:
         """Submit a claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                board__year=input_data.year,
+                board__year=validated.year,
                 candidate__member__login=user.github_user.login,
-                key=input_data.key,
+                key=validated.key,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -395,19 +431,21 @@ class BoardCandidateClaimMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(ClaimResult)
     def withdraw_board_candidate_claim(
         self, info: Info, input_data: WithdrawClaimInput
     ) -> ClaimResult:
         """Withdraw a claim."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return ClaimResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         try:
             claim = BoardCandidateClaim.objects.select_for_update().get(
-                board__year=input_data.year,
+                board__year=validated.year,
                 candidate__member__login=user.github_user.login,
-                key=input_data.key,
+                key=validated.key,
             )
         except BoardCandidateClaim.DoesNotExist:
             return ClaimResult(ok=False, code="NOT_FOUND", message=CLAIM_NOT_FOUND_MSG)
@@ -424,7 +462,7 @@ class BoardCandidateClaimMutations:
 
         try:
             claim.status = BoardCandidateClaim.Status.WITHDRAWN
-            claim.withdrawn_reason = input_data.withdrawn_reason
+            claim.withdrawn_reason = validated.withdrawn_reason
             claim.withdrawn_at = timezone.now()
             claim.save()
         except IntegrityError:
@@ -457,23 +495,25 @@ class BoardCandidateClaimMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    @validate_pydantic_input(ReorderClaimsResult)
     def reorder_board_candidate_claims(
         self, info: Info, input_data: ReorderClaimsInput
     ) -> ReorderClaimsResult:
         """Reorder claims for a candidate in a board year."""
+        validated = input_data.validated_data  # type: ignore[attr-defined]
         user = info.context.request.user
         if user.github_user is None:
             return ReorderClaimsResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         login = user.github_user.login
 
-        keys, error = _validate_reorder_claims(login, input_data)
+        keys, error = _validate_reorder_claims(login, validated)
         if error:
             return error
 
         claims = list(
             BoardCandidateClaim.objects.filter(
-                board__year=input_data.year,
+                board__year=validated.year,
                 candidate__member__login=login,
                 key__in=keys,
             )
@@ -496,7 +536,7 @@ class BoardCandidateClaimMutations:
 
         ordered_claims = (
             BoardCandidateClaim.objects.filter(
-                board__year=input_data.year,
+                board__year=validated.year,
                 candidate__member__login=login,
                 key__in=keys,
             )
