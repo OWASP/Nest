@@ -68,6 +68,16 @@ jobs:
           db_username: nest_user_e2e
           env_file: .env.e2e-tests
 
+      - name: Seed e2e users
+        run: |
+          set -euo pipefail && set -a && source .env.e2e-tests && set +a
+          export DJANGO_DB_HOST=localhost
+          export DJANGO_REDIS_AUTH_ENABLED=False
+          export DJANGO_REDIS_HOST=localhost
+          export PYTHONPATH="${PWD}/src"
+          poetry run python manage.py e2e_seed_users
+        working-directory: backend
+
       - name: Install frontend dependencies
         uses: ./.github/actions/install-frontend-dependencies
 

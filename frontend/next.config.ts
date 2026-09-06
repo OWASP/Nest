@@ -74,6 +74,7 @@ const nextConfig: NextConfig = {
         const backendBase = process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL
         return [
           { source: '/csrf/', destination: `${backendBase}/csrf/` },
+          { source: '/e2e/login/', destination: `${backendBase}/e2e/login/` },
           { source: '/graphql/', destination: `${backendBase}/graphql/` },
         ]
       }
