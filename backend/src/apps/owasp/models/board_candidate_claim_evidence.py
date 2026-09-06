@@ -148,7 +148,7 @@ class BoardCandidateClaimEvidence(TimestampedModel):
 
     def save(self, *args, **kwargs) -> None:
         """Save evidence."""
-        self.key = slugify(self.name)[: self._meta.get_field("key").max_length].rstrip("-")
+        self.key = slugify(self.name)[: self._meta.get_field("key").max_length]
 
         old_file = self._original_file_name if self.pk else None
 

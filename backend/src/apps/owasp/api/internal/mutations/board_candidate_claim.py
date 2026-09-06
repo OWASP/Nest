@@ -19,7 +19,6 @@ from apps.owasp.api.internal.mutations.common import (
     MAX_REORDER_KEYS,
     MAX_TEXT_LENGTH,
     BaseInput,
-    validate_slug,
     validate_year,
 )
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
@@ -58,7 +57,6 @@ class UpdateClaimPydanticInput(BaseInput):
     source_text: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
     year: int
 
-    _validate_key = pydantic.field_validator("key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 
@@ -73,7 +71,6 @@ class DiscardClaimPydanticInput(BaseInput):
     key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     year: int
 
-    _validate_key = pydantic.field_validator("key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 
@@ -88,7 +85,6 @@ class SubmitClaimPydanticInput(BaseInput):
     key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     year: int
 
-    _validate_key = pydantic.field_validator("key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 
@@ -104,7 +100,6 @@ class WithdrawClaimPydanticInput(BaseInput):
     withdrawn_reason: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     year: int
 
-    _validate_key = pydantic.field_validator("key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 
@@ -125,13 +120,11 @@ class ReorderClaimsPydanticInput(BaseInput):
 
     @pydantic.field_validator("keys")
     @classmethod
-    def keys_must_be_unique_slugs(cls, value: list[str]) -> list[str]:
-        """Reject duplicate keys and keys that aren't valid slugs."""
+    def keys_must_be_unique(cls, value: list[str]) -> list[str]:
+        """Reject duplicate keys."""
         if len(set(value)) != len(value):
             message = "Duplicate claim keys are not allowed."
             raise ValueError(message)
-        for key in value:
-            validate_slug(key)
         return value
 
 

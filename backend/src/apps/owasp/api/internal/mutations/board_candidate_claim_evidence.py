@@ -18,7 +18,6 @@ from apps.owasp.api.internal.mutations.common import (
     MAX_NAME_LENGTH,
     MAX_TEXT_LENGTH,
     BaseInput,
-    validate_slug,
     validate_year,
 )
 from apps.owasp.api.internal.nodes.board_candidate_claim_evidence import (
@@ -44,7 +43,6 @@ class CreateEvidencePydanticInput(BaseInput):
     source_url: pydantic.HttpUrl | None = None
     year: int
 
-    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 
@@ -65,8 +63,6 @@ class UpdateEvidencePydanticInput(BaseInput):
     source_url: pydantic.HttpUrl | None = None
     year: int
 
-    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
-    _validate_key = pydantic.field_validator("key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 
@@ -85,8 +81,6 @@ class RemoveEvidencePydanticInput(BaseInput):
     removed_reason: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
     year: int
 
-    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
-    _validate_key = pydantic.field_validator("key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 

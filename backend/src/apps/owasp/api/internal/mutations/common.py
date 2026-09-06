@@ -6,8 +6,6 @@ import datetime
 
 import pydantic
 
-from apps.common.utils import slugify
-
 GITHUB_LOGIN_MAX_LENGTH = 39
 MAX_KEY_LENGTH = 100
 MAX_NAME_LENGTH = 200
@@ -27,13 +25,5 @@ def validate_year(value: int) -> int:
     max_year = datetime.datetime.now(tz=datetime.UTC).year + 1
     if not MIN_ELECTION_YEAR <= value <= max_year:
         message = f"Year must be between {MIN_ELECTION_YEAR} and {max_year}."
-        raise ValueError(message)
-    return value
-
-
-def validate_slug(value: str) -> str:
-    """Reject values that don't match the output of slugify()."""
-    if value != slugify(value):
-        message = "Invalid key."
         raise ValueError(message)
     return value

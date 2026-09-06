@@ -17,7 +17,6 @@ from apps.owasp.api.internal.mutations.common import (
     MAX_KEY_LENGTH,
     MAX_TEXT_LENGTH,
     BaseInput,
-    validate_slug,
     validate_year,
 )
 from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
@@ -46,7 +45,6 @@ class CreateReviewPydanticInput(BaseInput):
     status: ReviewStatusEnum
     year: int
 
-    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
     _validate_year = pydantic.field_validator("year")(validate_year)
 
 
