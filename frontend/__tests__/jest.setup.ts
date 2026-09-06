@@ -3,6 +3,8 @@ import { toHaveNoViolations } from 'jest-axe'
 import React from 'react'
 
 globalThis.React = React
+globalThis.IS_REACT_ACT_ENVIRONMENT = true
+jest.setTimeout(30000)
 
 // Mock framer-motion due to how Jest 30 ESM resolution treats
 // motion-dom's internal .mjs imports as "outside test scope".

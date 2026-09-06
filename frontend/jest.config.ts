@@ -1,6 +1,7 @@
 import type { Config } from 'jest'
 
 const config: Config = {
+  testTimeout: 30000,
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

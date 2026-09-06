@@ -12,7 +12,7 @@ import {
   FaBars,
   FaTimes,
 } from 'react-icons/fa'
-import { desktopViewMinWidth, headerLinks } from 'utils/constants'
+import { headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
@@ -27,21 +27,37 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const logoSrc = '/img/logo_dark.png'
 
   useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
     const handleResize = () => {
-      if (globalThis.innerWidth >= desktopViewMinWidth) {
+      if (globalThis.innerWidth >= 1024) {
         setMobileMenuOpen(false)
       }
     }
 
     const handleOutsideClick = (event: Event) => {
       const navbar = document.getElementById('navbar-sticky')
-      const sidebar = document.querySelector('.fixed.inset-y-0')
+      const drawer = document.getElementById('mobile-drawer')
       if (
         mobileMenuOpen &&
         navbar &&
         !navbar.contains(event.target as Node) &&
-        sidebar &&
-        !sidebar.contains(event.target as Node)
+        drawer &&
+        !drawer.contains(event.target as Node)
       ) {
         setMobileMenuOpen(false)
       }
@@ -58,12 +74,15 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
-      <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
+      <div
+        className="flex h-16 w-full items-center gap-2 px-3 max-lg:justify-between sm:gap-4 sm:px-4"
+        id="navbar-sticky"
+      >
         {/* Logo */}
         <Link
           href="/"
           onClick={() => setMobileMenuOpen(false)}
-          className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="shrink-0 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <div className="flex h-full items-center">
             <div className="flex h-16 w-16 items-center justify-center py-2">
@@ -82,8 +101,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </Link>
         {/* Desktop Header Links */}
-        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
-          <div className="flex justify-start pl-6">
+        <div className="hidden flex-1 justify-between rounded-lg pl-4 font-medium lg:block">
+          <div className="flex items-center justify-start gap-1 pl-2">
             {headerLinks
               .filter((link) => {
                 if (link.requiresGitHubAuth) {
@@ -99,7 +118,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     key={link.text}
                     href={link.href || '/'}
                     className={cn(
-                      'navlink px-3 py-2 text-slate-700 transition-colors duration-200 hover:text-white dark:text-slate-300 dark:hover:text-blue-400',
+                      'navlink px-3 py-2 whitespace-nowrap text-slate-700 transition-colors duration-200 hover:text-white dark:text-slate-300 dark:hover:text-blue-400',
                       pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                     )}
                     aria-current={pathname === link.href ? 'page' : undefined}
@@ -110,9 +129,9 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+        <div className="ml-auto flex shrink-0 items-center justify-end gap-2 pl-2 sm:gap-3 sm:pl-4">
           <GlobalSearch />
-          <div className="hidden md:flex">
+          <div className="hidden xl:flex">
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={FaRegStar}
@@ -123,7 +142,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             />
           </div>
 
-          <div className="hidden md:flex">
+          <div className="hidden xl:flex">
             <NavButton
               href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
               defaultIcon={FaRegHeart}
@@ -133,7 +152,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               text="Sponsor"
             />
           </div>
-          <div className="hidden md:flex">
+          <div className="hidden lg:flex">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
           <ModeToggle />
@@ -148,14 +167,26 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </div>
       </div>
+
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile Drawer */}
       <div
+        id="mobile-drawer"
         className={cn(
-          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
+          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform shadow-xl transition-transform duration-300 ease-in-out lg:hidden dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
-          {/* Logo */}
+        <div className="flex h-full flex-col justify-between overflow-y-auto px-3 pt-2 pb-4">
+          {/* Logo & Navigation Links */}
           <div className="flex flex-col justify-center gap-5">
             <Link
               href="/"
@@ -201,7 +232,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                             pathname === sub.href &&
                               'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
                           )}
-                          onClick={toggleMobileMenu}
+                          onClick={() => setMobileMenuOpen(false)}
                         >
                           {sub.text}
                         </Link>
@@ -216,7 +247,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                       'navlink block px-3 py-2 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
                       pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                     )}
-                    onClick={toggleMobileMenu}
+                    onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.text}
                   </Link>
@@ -224,7 +255,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               )}
           </div>
 
-          <div className="flex flex-col gap-y-2 md:hidden">
+          {/* Mobile Bottom Actions */}
+          <div className="mt-4 flex flex-col gap-y-2 border-t border-slate-300/30 pt-4 lg:hidden dark:border-slate-700/50">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
             <NavButton
               href="https://github.com/OWASP/Nest"
