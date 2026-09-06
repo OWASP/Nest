@@ -686,4 +686,61 @@ describe('<SearchPageLayout />', () => {
     expect(filterSkeleton).toHaveClass('h-12', 'w-60', 'rounded-lg')
     expect(filterSkeleton).not.toHaveClass('rounded-r-none')
   })
+
+  // -------- Mobile spacing below search --------
+  it('adds mobile bottom margin on search toolbar when no mobile filter/sort controls', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={1}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        sortChildren={<div>Sort</div>}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const searchToolbar = container.querySelector(
+      String.raw`div.flex.w-full.flex-col.md\:flex-row.md\:items-center.md\:justify-center`
+    )
+    expect(searchToolbar).toHaveClass('mb-4', 'md:mb-0')
+  })
+
+  it('does not add search toolbar bottom margin when mobile filter controls are present', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={1}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const searchToolbar = container.querySelector(
+      String.raw`div.flex.w-full.flex-col.md\:flex-row.md\:items-center.md\:justify-center`
+    )
+    expect(searchToolbar).not.toHaveClass('mb-4')
+    expect(searchToolbar).not.toHaveClass('md:mb-0')
+
+    const mobileControls = container.querySelector(
+      String.raw`div.mx-auto.mt-2.mb-4.flex.w-full.max-w-md.items-stretch.md\:hidden`
+    )
+    expect(mobileControls).toBeInTheDocument()
+  })
 })

@@ -53,12 +53,14 @@ const SearchPageLayout = ({
     searchBarClassName = 'md:rounded-r-none'
   }
 
+  const hasMobileToolbar = Boolean(filterChildren || (inlineSort && sortChildren))
+
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       <div
         className={`flex w-full flex-col md:flex-row md:items-center md:justify-center ${
           inlineSort ? 'md:gap-0' : 'md:gap-2'
-        }`}
+        } ${hasMobileToolbar ? '' : 'mb-4 md:mb-0'}`}
       >
         {filterChildren &&
           (isFirstLoad ? (
@@ -96,7 +98,7 @@ const SearchPageLayout = ({
       </div>
 
       {/* Mobile layout — max-w-md matches SearchBar so stacked controls align with search */}
-      {(filterChildren || (inlineSort && sortChildren)) && (
+      {hasMobileToolbar && (
         <div
           className={`mx-auto mt-2 mb-4 flex w-full max-w-md items-stretch md:hidden ${
             inlineSort ? 'gap-0' : 'justify-between gap-4'
