@@ -53,7 +53,7 @@ class UpdateClaimPydanticInput(BaseInput):
     """Pydantic validation for updating a claim."""
 
     description: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
-    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     name: str | None = pydantic.Field(default=None, min_length=1, max_length=MAX_NAME_LENGTH)
     source_text: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
     year: int
@@ -70,7 +70,7 @@ class UpdateClaimInput:
 class DiscardClaimPydanticInput(BaseInput):
     """Pydantic validation for discarding a claim."""
 
-    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     year: int
 
     _validate_key = pydantic.field_validator("key")(validate_slug)
@@ -85,7 +85,7 @@ class DiscardClaimInput:
 class SubmitClaimPydanticInput(BaseInput):
     """Pydantic validation for submitting a claim."""
 
-    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     year: int
 
     _validate_key = pydantic.field_validator("key")(validate_slug)
@@ -100,7 +100,7 @@ class SubmitClaimInput:
 class WithdrawClaimPydanticInput(BaseInput):
     """Pydantic validation for withdrawing a claim."""
 
-    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     withdrawn_reason: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     year: int
 
@@ -116,9 +116,9 @@ class WithdrawClaimInput:
 class ReorderClaimsPydanticInput(BaseInput):
     """Pydantic validation for reordering claims."""
 
-    keys: list[Annotated[str, pydantic.StringConstraints(max_length=MAX_KEY_LENGTH)]] = (
-        pydantic.Field(min_length=1, max_length=MAX_REORDER_KEYS)
-    )
+    keys: list[
+        Annotated[str, pydantic.StringConstraints(min_length=1, max_length=MAX_KEY_LENGTH)]
+    ] = pydantic.Field(min_length=1, max_length=MAX_REORDER_KEYS)
     year: int
 
     _validate_year = pydantic.field_validator("year")(validate_year)

@@ -40,7 +40,7 @@ INVALID_STATUS_MSG = "Review can only be added to submitted claims."
 class CreateReviewPydanticInput(BaseInput):
     """Pydantic validation for creating a claim review."""
 
-    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    claim_key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     claim_member_login: str = pydantic.Field(min_length=1, max_length=GITHUB_LOGIN_MAX_LENGTH)
     notes: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     status: ReviewStatusEnum

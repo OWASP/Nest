@@ -38,7 +38,7 @@ GENERIC_ERROR_MSG = "Something went wrong."
 class CreateEvidencePydanticInput(BaseInput):
     """Pydantic validation for creating claim evidence."""
 
-    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    claim_key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     description: str = pydantic.Field(min_length=1, max_length=MAX_TEXT_LENGTH)
     name: str = pydantic.Field(min_length=1, max_length=MAX_NAME_LENGTH)
     source_url: pydantic.HttpUrl | None = None
@@ -58,9 +58,9 @@ class CreateEvidenceInput:
 class UpdateEvidencePydanticInput(BaseInput):
     """Pydantic validation for updating claim evidence."""
 
-    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    claim_key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     description: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
-    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     name: str | None = pydantic.Field(default=None, min_length=1, max_length=MAX_NAME_LENGTH)
     source_url: pydantic.HttpUrl | None = None
     year: int
@@ -80,8 +80,8 @@ class UpdateEvidenceInput:
 class RemoveEvidencePydanticInput(BaseInput):
     """Pydantic validation for removing claim evidence."""
 
-    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
-    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    claim_key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
+    key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     removed_reason: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
     year: int
 

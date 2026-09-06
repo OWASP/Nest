@@ -944,6 +944,18 @@ class TestReorderClaimsPydanticValidation:
     def test_pydantic_accepts_valid_input(self):
         ReorderClaimsPydanticInput(keys=["k1", "k2"], year=2025)
 
+    def test_pydantic_rejects_empty_keys(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            ReorderClaimsPydanticInput(keys=[], year=2025)
+
+        assert any(err["loc"] == ("keys",) for err in exc_info.value.errors())
+
+    def test_pydantic_rejects_duplicate_keys(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            ReorderClaimsPydanticInput(keys=["k1", "k1"], year=2025)
+
+        assert any(err["loc"] == ("keys",) for err in exc_info.value.errors())
+
     def test_resolver_returns_field_errors_when_pydantic_fails(self):
         with pytest.raises(pydantic.ValidationError) as exc_info:
             ReorderClaimsPydanticInput(keys=["k1"], year="not-an-int")  # type: ignore[arg-type]
