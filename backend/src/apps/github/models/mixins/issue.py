@@ -120,6 +120,11 @@ class IssueIndexMixin:
         return self.summary
 
     @property
+    def idx_body(self) -> str:
+        """Return issue description for indexing."""
+        return self.body
+
+    @property
     def idx_title(self) -> str:
         """Return title for indexing."""
         return self.title

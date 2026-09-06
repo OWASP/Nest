@@ -91,7 +91,7 @@ class TestIssueModel:
 
         issue.generate_summary()
 
-        assert issue.summary == ""
+        assert issue.summary == "Test Body"
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
@@ -107,7 +107,53 @@ class TestIssueModel:
 
         issue.generate_summary()
 
-        assert issue.summary == ""
+        assert issue.summary == "Test Body"
+
+    @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
+    def test_generate_summary_uses_explicit_message_when_body_is_empty(self, mock_get_prompt, issue):
+        """Use explicit text when neither AI nor the issue body provides a summary."""
+        issue.body = ""
+        mock_get_prompt.return_value = None
+
+        issue.generate_summary()
+
+        assert issue.summary == "No summary available"
+    
+    @patch("apps.github.models.issue.OpenAi")
+    @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
+    def test_generate_summary_falls_back_to_body_when_ai_returns_whitespace(
+        self, mock_get_prompt, mock_openai, issue
+    ):
+        """Use the issue description when AI returns only whitespace."""
+        mock_get_prompt.return_value = "Summarize the following issue"
+
+        mock_openai_instance = mock_openai.return_value
+        mock_openai_instance.set_input.return_value = mock_openai_instance
+        mock_openai_instance.set_max_tokens.return_value = mock_openai_instance
+        mock_openai_instance.set_prompt.return_value = mock_openai_instance
+        mock_openai_instance.complete.return_value = "   "
+
+        issue.generate_summary()
+
+        assert issue.summary == "Test Body"
+
+    @patch("apps.github.models.issue.OpenAi")
+    @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
+    def test_generate_summary_falls_back_to_body_when_ai_fails(
+        self, mock_get_prompt, mock_openai, issue
+    ):
+        """Use the issue description when AI generation fails."""
+        mock_get_prompt.return_value = "Summarize the following issue"
+
+        mock_openai_instance = mock_openai.return_value
+        mock_openai_instance.set_input.return_value = mock_openai_instance
+        mock_openai_instance.set_max_tokens.return_value = mock_openai_instance
+        mock_openai_instance.set_prompt.return_value = mock_openai_instance
+        mock_openai_instance.complete.side_effect = RuntimeError("AI unavailable")
+
+        issue.generate_summary()
+
+        assert issue.summary == "Test Body"
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_hint")

@@ -28,6 +28,7 @@ const ContributePage = () => {
   const renderContributeCard = (issue: Issue, index: number) => {
     const params: string[] = ['createdAt', 'commentsCount']
     const filteredIcons = getFilteredIcons(issue, params)
+    const issueSummary = issue.summary?.trim() || issue.body?.trim() || 'No summary available'
 
     const SubmitButton = {
       label: 'Read More',
@@ -51,7 +52,7 @@ const ContributePage = () => {
           labels={issue.labels}
           projectLink={issue.projectUrl}
           projectName={issue.projectName}
-          summary={issue.summary ?? ''}
+          summary={issueSummary}
           title={issue.title}
           url={issue.url}
         />
@@ -62,7 +63,7 @@ const ContributePage = () => {
           isOpen={modalOpenIndex === index}
           key={`modal-${issue.objectID ?? issue.url}`}
           onClose={() => setModalOpenIndex(null)}
-          summary={issue.summary ?? ''}
+          summary={issueSummary}
           title={issue.title}
         ></DialogComp>
       </React.Fragment>

@@ -269,11 +269,13 @@ describe('Contribute Component', () => {
     })
   })
 
-  test('renders issue card without summary (uses empty string fallback)', async () => {
+  test('falls back to the issue description when the summary is missing', async () => {
     const issueWithoutSummary = {
       ...mockContributeData.issues[0],
+      body: 'This is the original issue description.',
       summary: undefined,
     }
+
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [issueWithoutSummary],
       totalPages: 1,
@@ -282,7 +284,7 @@ describe('Contribute Component', () => {
     render(<ContributePage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Contribution 1')).toBeInTheDocument()
+      expect(screen.getByText('This is the original issue description.')).toBeInTheDocument()
     })
   })
 
@@ -304,9 +306,10 @@ describe('Contribute Component', () => {
     })
   })
 
-  test('renders issue card with null summary (uses empty string fallback)', async () => {
+  test('falls back to the issue description when the summary is null', async () => {
     const issueWithNullSummary = {
       ...mockContributeData.issues[0],
+      body: 'This is the original issue description.',
       summary: null,
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
@@ -317,7 +320,26 @@ describe('Contribute Component', () => {
     render(<ContributePage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Contribution 1')).toBeInTheDocument()
+      expect(screen.getByText('This is the original issue description.')).toBeInTheDocument()
+    })
+  })
+
+  test('shows an explicit message when no summary or description is available', async () => {
+    const issueWithoutContent = {
+      ...mockContributeData.issues[0],
+      body: undefined,
+      summary: undefined,
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [issueWithoutContent],
+      totalPages: 1,
+    })
+
+    render(<ContributePage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('No summary available')).toBeInTheDocument()
     })
   })
 })

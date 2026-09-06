@@ -173,6 +173,9 @@ class Issue(GenericIssueModel):
             max_tokens (int, optional): The maximum number of tokens for the AI response.
 
         """
+
+        fallback_summary = self.body.strip() or "No summary available"
+
         if not self.is_indexable or not (
             prompt := (
                 Prompt.get_github_issue_documentation_project_summary()
@@ -180,12 +183,18 @@ class Issue(GenericIssueModel):
                 else Prompt.get_github_issue_project_summary()
             )
         ):
+            self.summary = fallback_summary
             return
 
-        open_ai = open_ai or OpenAi()
-        open_ai.set_input(f"{self.title}\r\n{self.body}")
-        open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
-        self.summary = open_ai.complete() or ""
+        try:
+            open_ai = open_ai or OpenAi()
+            open_ai.set_input(f"{self.title}\r\n{self.body}")
+            open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
+
+            summary = open_ai.complete()
+            self.summary = summary.strip() if summary and summary.strip() else fallback_summary
+        except Exception:
+            self.summary = fallback_summary
 
     def save(self, *args, **kwargs) -> None:
         """Save issue."""
