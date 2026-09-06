@@ -16,7 +16,6 @@ from apps.owasp.api.internal.mutations.board_candidate_claim import (
     SubmitClaimPydanticInput,
     UpdateClaimPydanticInput,
     WithdrawClaimPydanticInput,
-    _validate_reorder_claims,
 )
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
@@ -281,62 +280,6 @@ class TestWithdrawBoardCandidateClaim:
         assert result.code == "INVALID_STATUS"
 
 
-class TestValidateReorderClaims:
-    """Tests for _validate_reorder_claims helper."""
-
-    def _make_input_data(self, keys, year=2025):
-        return MagicMock(keys=list(keys), year=year)
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_validate_success(self, mock_claim_model):
-        login = "alice"
-        input_data = self._make_input_data(["k1", "k2", "k3"])
-        mock_claim_model.objects.filter.return_value.count.return_value = 3
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login=login, key__in=["k1", "k2", "k3"], board__year=input_data.year
-        )
-        assert keys == ["k1", "k2", "k3"]
-        assert error is None
-
-    def test_validate_empty_input(self):
-        login = "alice"
-        input_data = self._make_input_data([])
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        assert keys == []
-        assert error is not None
-        assert not error.ok
-        assert error.code == "VALIDATION_ERROR"
-
-    def test_validate_duplicate_keys(self):
-        login = "alice"
-        input_data = self._make_input_data(["k1", "k1", "k2"])
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        assert keys == ["k1", "k1", "k2"]
-        assert error is not None
-        assert not error.ok
-        assert error.code == "VALIDATION_ERROR"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_validate_missing_keys(self, mock_claim_model):
-        login = "alice"
-        input_data = self._make_input_data(["k1", "k2"])
-        mock_claim_model.objects.filter.return_value.count.return_value = 1
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        assert keys == ["k1", "k2"]
-        assert error is not None
-        assert not error.ok
-        assert error.code == "NOT_FOUND"
-
-
 class TestReorderBoardCandidateClaims:
     """Tests for reorder_board_candidate_claims mutation."""
 
@@ -394,42 +337,20 @@ class TestReorderBoardCandidateClaims:
         )
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_reorder_claims_empty_input(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        user = MagicMock()
-        user.is_authenticated = True
-        info = _make_info(user)
-        input_data = self._make_input_data([])
-
-        mutation = BoardCandidateClaimMutations()
-        result = mutation.reorder_board_candidate_claims(info, input_data)
-
-        assert not result.ok
-        assert result.code == "VALIDATION_ERROR"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_reorder_claims_duplicate_keys(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        user = MagicMock()
-        user.is_authenticated = True
-        info = _make_info(user)
-        input_data = self._make_input_data(["k1", "k1", "k2"])
-
-        mutation = BoardCandidateClaimMutations()
-        result = mutation.reorder_board_candidate_claims(info, input_data)
-
-        assert not result.ok
-        assert result.code == "VALIDATION_ERROR"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_reorder_claims_missing_keys(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(["k1", "k2"])
 
-        mock_claim_model.objects.filter.return_value.count.return_value = 1
+        mock_queryset = MagicMock()
+        mock_queryset.select_related.return_value = [
+            MagicMock(id=1, key="k1", status=BoardCandidateClaim.Status.APPROVED)
+        ]
+        mock_claim_model.objects.filter.return_value.select_for_update.return_value = mock_queryset
 
         mutation = BoardCandidateClaimMutations()
         result = mutation.reorder_board_candidate_claims(info, input_data)

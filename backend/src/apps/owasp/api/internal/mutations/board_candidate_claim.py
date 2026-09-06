@@ -1,6 +1,7 @@
 """OWASP Board Candidate Claim GraphQL mutations."""
 
 import logging
+from typing import Annotated
 
 import pydantic
 import strawberry
@@ -12,6 +13,15 @@ from strawberry.types import Info
 
 from apps.common.api.internal.mutations.common import FieldError, validate_pydantic_input
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.owasp.api.internal.mutations.common import (
+    MAX_KEY_LENGTH,
+    MAX_NAME_LENGTH,
+    MAX_REORDER_KEYS,
+    MAX_TEXT_LENGTH,
+    BaseInput,
+    validate_slug,
+    validate_year,
+)
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
@@ -23,13 +33,15 @@ CLAIM_NOT_FOUND_MSG = "Claim not found."
 GENERIC_ERROR_MSG = "Something went wrong."
 
 
-class CreateClaimPydanticInput(pydantic.BaseModel):
+class CreateClaimPydanticInput(BaseInput):
     """Pydantic validation for creating a claim."""
 
-    description: str
-    name: str = pydantic.Field(max_length=200)
-    source_text: str = ""
+    description: str = pydantic.Field(min_length=1, max_length=MAX_TEXT_LENGTH)
+    name: str = pydantic.Field(min_length=1, max_length=MAX_NAME_LENGTH)
+    source_text: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     year: int
+
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=CreateClaimPydanticInput, all_fields=True)
@@ -37,14 +49,17 @@ class CreateClaimInput:
     """Input for creating a claim."""
 
 
-class UpdateClaimPydanticInput(pydantic.BaseModel):
+class UpdateClaimPydanticInput(BaseInput):
     """Pydantic validation for updating a claim."""
 
-    description: str | None = None
-    key: str = pydantic.Field(max_length=100)
-    name: str | None = pydantic.Field(default=None, max_length=200)
-    source_text: str | None = None
+    description: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
+    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    name: str | None = pydantic.Field(default=None, min_length=1, max_length=MAX_NAME_LENGTH)
+    source_text: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
     year: int
+
+    _validate_key = pydantic.field_validator("key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=UpdateClaimPydanticInput, all_fields=True)
@@ -52,11 +67,14 @@ class UpdateClaimInput:
     """Input for updating a claim."""
 
 
-class DiscardClaimPydanticInput(pydantic.BaseModel):
+class DiscardClaimPydanticInput(BaseInput):
     """Pydantic validation for discarding a claim."""
 
-    key: str = pydantic.Field(max_length=100)
+    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
     year: int
+
+    _validate_key = pydantic.field_validator("key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=DiscardClaimPydanticInput, all_fields=True)
@@ -64,11 +82,14 @@ class DiscardClaimInput:
     """Input for discarding a claim."""
 
 
-class SubmitClaimPydanticInput(pydantic.BaseModel):
+class SubmitClaimPydanticInput(BaseInput):
     """Pydantic validation for submitting a claim."""
 
-    key: str = pydantic.Field(max_length=100)
+    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
     year: int
+
+    _validate_key = pydantic.field_validator("key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=SubmitClaimPydanticInput, all_fields=True)
@@ -76,12 +97,15 @@ class SubmitClaimInput:
     """Input for submitting a claim."""
 
 
-class WithdrawClaimPydanticInput(pydantic.BaseModel):
+class WithdrawClaimPydanticInput(BaseInput):
     """Pydantic validation for withdrawing a claim."""
 
-    key: str = pydantic.Field(max_length=100)
-    withdrawn_reason: str
+    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    withdrawn_reason: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     year: int
+
+    _validate_key = pydantic.field_validator("key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=WithdrawClaimPydanticInput, all_fields=True)
@@ -89,11 +113,26 @@ class WithdrawClaimInput:
     """Input for withdrawing a claim."""
 
 
-class ReorderClaimsPydanticInput(pydantic.BaseModel):
+class ReorderClaimsPydanticInput(BaseInput):
     """Pydantic validation for reordering claims."""
 
-    keys: list[str]
+    keys: list[Annotated[str, pydantic.StringConstraints(max_length=MAX_KEY_LENGTH)]] = (
+        pydantic.Field(min_length=1, max_length=MAX_REORDER_KEYS)
+    )
     year: int
+
+    _validate_year = pydantic.field_validator("year")(validate_year)
+
+    @pydantic.field_validator("keys")
+    @classmethod
+    def keys_must_be_unique_slugs(cls, value: list[str]) -> list[str]:
+        """Reject duplicate keys and keys that aren't valid slugs."""
+        if len(set(value)) != len(value):
+            message = "Duplicate claim keys are not allowed."
+            raise ValueError(message)
+        for key in value:
+            validate_slug(key)
+        return value
 
 
 @strawberry.experimental.pydantic.input(model=ReorderClaimsPydanticInput, all_fields=True)
@@ -121,49 +160,6 @@ class ClaimResult:
     message: str | None = None
     claim: BoardCandidateClaimNode | None = None
     field_errors: list[FieldError] | None = None
-
-
-def _validate_reorder_claims(
-    login: str,
-    input_data: ReorderClaimsPydanticInput,
-) -> tuple[list[str], ReorderClaimsResult | None]:
-    """Validate reorder claims input.
-
-    Args:
-        login (str): The login of the candidate.
-        input_data (ReorderClaimsPydanticInput): Input containing claim keys to reorder.
-
-    Returns:
-        tuple of (list[str], ReorderClaimsResult | None)
-
-    """
-    keys = input_data.keys
-    if not keys:
-        return keys, ReorderClaimsResult(
-            ok=False,
-            code="VALIDATION_ERROR",
-            message="At least one claim is required for reordering.",
-        )
-
-    if len(set(keys)) != len(keys):
-        return keys, ReorderClaimsResult(
-            ok=False,
-            code="VALIDATION_ERROR",
-            message="Duplicate claim keys are not allowed.",
-        )
-
-    if BoardCandidateClaim.objects.filter(
-        board__year=input_data.year,
-        candidate__member__login=login,
-        key__in=keys,
-    ).count() != len(keys):
-        return keys, ReorderClaimsResult(
-            ok=False,
-            code="NOT_FOUND",
-            message="One or more claims were not found.",
-        )
-
-    return keys, None
 
 
 @strawberry.type
@@ -506,10 +502,7 @@ class BoardCandidateClaimMutations:
             return ReorderClaimsResult(ok=False, code="FORBIDDEN", message=ACCESS_DENIED_MSG)
 
         login = user.github_user.login
-
-        keys, error = _validate_reorder_claims(login, validated)
-        if error:
-            return error
+        keys = validated.keys
 
         claims = list(
             BoardCandidateClaim.objects.filter(
@@ -520,6 +513,13 @@ class BoardCandidateClaimMutations:
             .select_for_update(of=("self",))
             .select_related("candidate__member")
         )
+
+        if len(claims) != len(keys):
+            return ReorderClaimsResult(
+                ok=False,
+                code="NOT_FOUND",
+                message="One or more claims were not found.",
+            )
 
         keys_to_order = {key: idx for idx, key in enumerate(keys)}
         for claim in claims:

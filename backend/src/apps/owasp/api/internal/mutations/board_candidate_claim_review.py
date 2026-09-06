@@ -12,6 +12,14 @@ from strawberry.types import Info
 from apps.common.api.internal.mutations.common import FieldError, validate_pydantic_input
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.nest.models.user import User
+from apps.owasp.api.internal.mutations.common import (
+    GITHUB_LOGIN_MAX_LENGTH,
+    MAX_KEY_LENGTH,
+    MAX_TEXT_LENGTH,
+    BaseInput,
+    validate_slug,
+    validate_year,
+)
 from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
     BoardCandidateClaimReviewNode,
 )
@@ -29,14 +37,17 @@ GENERIC_ERROR_MSG = "Something went wrong."
 INVALID_STATUS_MSG = "Review can only be added to submitted claims."
 
 
-class CreateReviewPydanticInput(pydantic.BaseModel):
+class CreateReviewPydanticInput(BaseInput):
     """Pydantic validation for creating a claim review."""
 
-    claim_key: str = pydantic.Field(max_length=100)
-    claim_member_login: str
-    notes: str = ""
+    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    claim_member_login: str = pydantic.Field(min_length=1, max_length=GITHUB_LOGIN_MAX_LENGTH)
+    notes: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     status: ReviewStatusEnum
     year: int
+
+    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=CreateReviewPydanticInput, all_fields=True)

@@ -13,6 +13,14 @@ from strawberry.types import Info
 
 from apps.common.api.internal.mutations.common import FieldError, validate_pydantic_input
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.owasp.api.internal.mutations.common import (
+    MAX_KEY_LENGTH,
+    MAX_NAME_LENGTH,
+    MAX_TEXT_LENGTH,
+    BaseInput,
+    validate_slug,
+    validate_year,
+)
 from apps.owasp.api.internal.nodes.board_candidate_claim_evidence import (
     BoardCandidateClaimEvidenceNode,
 )
@@ -27,14 +35,17 @@ EVIDENCE_NOT_FOUND_MSG = "Evidence not found."
 GENERIC_ERROR_MSG = "Something went wrong."
 
 
-class CreateEvidencePydanticInput(pydantic.BaseModel):
+class CreateEvidencePydanticInput(BaseInput):
     """Pydantic validation for creating claim evidence."""
 
-    claim_key: str = pydantic.Field(max_length=100)
-    description: str
-    name: str = pydantic.Field(max_length=200)
+    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    description: str = pydantic.Field(min_length=1, max_length=MAX_TEXT_LENGTH)
+    name: str = pydantic.Field(min_length=1, max_length=MAX_NAME_LENGTH)
     source_url: pydantic.HttpUrl | None = None
     year: int
+
+    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=CreateEvidencePydanticInput, all_fields=True)
@@ -44,15 +55,19 @@ class CreateEvidenceInput:
     file: Upload | None = strawberry.field(default=None)
 
 
-class UpdateEvidencePydanticInput(pydantic.BaseModel):
+class UpdateEvidencePydanticInput(BaseInput):
     """Pydantic validation for updating claim evidence."""
 
-    claim_key: str = pydantic.Field(max_length=100)
-    description: str | None = None
-    key: str = pydantic.Field(max_length=100)
-    name: str | None = pydantic.Field(default=None, max_length=200)
+    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    description: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
+    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    name: str | None = pydantic.Field(default=None, min_length=1, max_length=MAX_NAME_LENGTH)
     source_url: pydantic.HttpUrl | None = None
     year: int
+
+    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
+    _validate_key = pydantic.field_validator("key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=UpdateEvidencePydanticInput, all_fields=True)
@@ -62,13 +77,17 @@ class UpdateEvidenceInput:
     file: Upload | None = strawberry.field(default=None)
 
 
-class RemoveEvidencePydanticInput(pydantic.BaseModel):
+class RemoveEvidencePydanticInput(BaseInput):
     """Pydantic validation for removing claim evidence."""
 
-    claim_key: str = pydantic.Field(max_length=100)
-    key: str = pydantic.Field(max_length=100)
-    removed_reason: str | None = None
+    claim_key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    key: str = pydantic.Field(max_length=MAX_KEY_LENGTH)
+    removed_reason: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
     year: int
+
+    _validate_claim_key = pydantic.field_validator("claim_key")(validate_slug)
+    _validate_key = pydantic.field_validator("key")(validate_slug)
+    _validate_year = pydantic.field_validator("year")(validate_year)
 
 
 @strawberry.experimental.pydantic.input(model=RemoveEvidencePydanticInput, all_fields=True)
