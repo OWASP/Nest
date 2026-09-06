@@ -17,7 +17,7 @@ from apps.owasp.api.internal.mutations.common import (
     MAX_KEY_LENGTH,
     MAX_TEXT_LENGTH,
     BaseInput,
-    validate_year,
+    validate_election_year,
 )
 from apps.owasp.api.internal.nodes.board_candidate_claim_review import (
     BoardCandidateClaimReviewNode,
@@ -45,7 +45,7 @@ class CreateReviewPydanticInput(BaseInput):
     status: ReviewStatusEnum
     year: int
 
-    _validate_year = pydantic.field_validator("year")(validate_year)
+    _validate_year = pydantic.field_validator("year")(validate_election_year)
 
 
 @strawberry.experimental.pydantic.input(model=CreateReviewPydanticInput, all_fields=True)

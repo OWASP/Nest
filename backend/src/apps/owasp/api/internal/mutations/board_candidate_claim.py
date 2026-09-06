@@ -19,7 +19,7 @@ from apps.owasp.api.internal.mutations.common import (
     MAX_REORDER_KEYS,
     MAX_TEXT_LENGTH,
     BaseInput,
-    validate_year,
+    validate_election_year,
 )
 from apps.owasp.api.internal.nodes.board_candidate_claim import BoardCandidateClaimNode
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
@@ -40,7 +40,7 @@ class CreateClaimPydanticInput(BaseInput):
     source_text: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     year: int
 
-    _validate_year = pydantic.field_validator("year")(validate_year)
+    _validate_year = pydantic.field_validator("year")(validate_election_year)
 
 
 @strawberry.experimental.pydantic.input(model=CreateClaimPydanticInput, all_fields=True)
@@ -57,7 +57,7 @@ class UpdateClaimPydanticInput(BaseInput):
     source_text: str | None = pydantic.Field(default=None, max_length=MAX_TEXT_LENGTH)
     year: int
 
-    _validate_year = pydantic.field_validator("year")(validate_year)
+    _validate_year = pydantic.field_validator("year")(validate_election_year)
 
 
 @strawberry.experimental.pydantic.input(model=UpdateClaimPydanticInput, all_fields=True)
@@ -71,7 +71,7 @@ class DiscardClaimPydanticInput(BaseInput):
     key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     year: int
 
-    _validate_year = pydantic.field_validator("year")(validate_year)
+    _validate_year = pydantic.field_validator("year")(validate_election_year)
 
 
 @strawberry.experimental.pydantic.input(model=DiscardClaimPydanticInput, all_fields=True)
@@ -85,7 +85,7 @@ class SubmitClaimPydanticInput(BaseInput):
     key: str = pydantic.Field(min_length=1, max_length=MAX_KEY_LENGTH)
     year: int
 
-    _validate_year = pydantic.field_validator("year")(validate_year)
+    _validate_year = pydantic.field_validator("year")(validate_election_year)
 
 
 @strawberry.experimental.pydantic.input(model=SubmitClaimPydanticInput, all_fields=True)
@@ -100,7 +100,7 @@ class WithdrawClaimPydanticInput(BaseInput):
     withdrawn_reason: str = pydantic.Field(default="", max_length=MAX_TEXT_LENGTH)
     year: int
 
-    _validate_year = pydantic.field_validator("year")(validate_year)
+    _validate_year = pydantic.field_validator("year")(validate_election_year)
 
 
 @strawberry.experimental.pydantic.input(model=WithdrawClaimPydanticInput, all_fields=True)
@@ -116,7 +116,7 @@ class ReorderClaimsPydanticInput(BaseInput):
     ] = pydantic.Field(min_length=1, max_length=MAX_REORDER_KEYS)
     year: int
 
-    _validate_year = pydantic.field_validator("year")(validate_year)
+    _validate_year = pydantic.field_validator("year")(validate_election_year)
 
     @pydantic.field_validator("keys")
     @classmethod

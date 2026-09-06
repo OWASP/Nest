@@ -20,7 +20,7 @@ class BaseInput(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(str_strip_whitespace=True)
 
 
-def validate_year(value: int) -> int:
+def validate_election_year(value: int) -> int:
     """Ensure the election year falls in a plausible range."""
     max_year = datetime.datetime.now(tz=datetime.UTC).year + 1
     if not MIN_ELECTION_YEAR <= value <= max_year:
