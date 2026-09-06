@@ -8,7 +8,9 @@ const config: Config = {
     '!src/app/**/layout.tsx',
     '!src/app/api/**',
     '!src/app/board/**',
+    '!src/app/pulse/**',
     '!src/components/icons/**',
+    '!src/components/pulse/**',
     '!src/app/settings/**',
     '!src/components/Mentee*.tsx',
     '!src/hooks/**',
@@ -39,6 +41,8 @@ const config: Config = {
     '<rootDir>/__tests__/unit/data/',
     '<rootDir>/__tests__/mockData/',
     '<rootDir>/__tests__/jest.setup.ts',
+    '<rootDir>/src/app/pulse/',
+    '<rootDir>/src/components/pulse/',
   ],
   transform: {
     '^.+\\.tsx?$': '@swc/jest',
