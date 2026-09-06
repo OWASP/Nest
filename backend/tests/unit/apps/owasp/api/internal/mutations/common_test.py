@@ -8,7 +8,7 @@ from apps.owasp.api.internal.mutations.common import MIN_ELECTION_YEAR, validate
 
 
 class TestValidateYear:
-    """Tests for validate_year."""
+    """Tests for validate_election_year."""
 
     def test_accepts_current_year(self):
         current = datetime.datetime.now(tz=datetime.UTC).year
