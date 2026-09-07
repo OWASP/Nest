@@ -2,11 +2,14 @@
 
 from unittest.mock import MagicMock, patch
 
+from django.template.loader import render_to_string
+
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 from apps.owasp.services.newsletter import (
     MAX_ITEMS_PER_SECTION,
     MIN_ITEMS_PER_SECTION,
+    SNAPSHOT_TEMPLATE_TXT,
     TOTAL_ITEMS_BUDGET,
     SnapshotDigestService,
     send_digest_email,
@@ -245,8 +248,8 @@ class TestSnapshotDigestService:
         assert len(all_projects) == 1
         assert all_projects[0]["project"] == mock_project
 
-    def test_generate_skips_project_without_repos(self):
-        """Test generate skips projects without repositories."""
+    def test_generate_includes_project_without_repos(self):
+        """Test generate includes projects without repositories but with empty content."""
         preferences = _all_false_preferences()
         preferences["projects"] = True
 
@@ -360,7 +363,7 @@ class TestSnapshotDigestService:
         subscription = _make_subscription(preferences)
 
         result = SnapshotDigestService().generate(snapshot, subscription)
-        assert result["chapters_data"]["extra"] >= 0
+        assert result["chapters_data"]["extra"] == 1
 
     def test_get_repositories_for_project(self):
         """Test _get_repositories returns M2M repos for a project."""
@@ -845,3 +848,52 @@ class TestDynamicAllocationIntegration:
 
         assert limits_few["issues"] > limits_many["issues"]
         assert limits_few["releases"] > limits_many["releases"]
+
+
+class TestTemplateRendering:
+    """Test plain text template rendering."""
+
+    def test_plain_text_template_renders_row_based_sections(self):
+        """Test the text template can render chunked rows for global sections."""
+
+        class DummyItem:
+            def __init__(self, title, url="", login="", **kwargs):
+                self.title = title
+                self.name = title
+                self.url = url
+                self.login = login or title
+                for key, val in kwargs.items():
+                    setattr(self, key, val)
+
+        context = {
+            "chapters_data": {"rows": [[DummyItem("Chapter 1", "url")]], "total": 1},
+            "issues_data": {
+                "rows": [
+                    [
+                        DummyItem("Issue 1", "url"),
+                        DummyItem("Issue 2", "url"),
+                    ],
+                ],
+                "total": 2,
+            },
+            "projects_data": {"rows": []},
+            "users_data": {"items": [DummyItem("User 1")], "total": 1},
+            "prs_data": {"rows": []},
+            "releases_data": {"rows": []},
+            "posts_data": {"rows": []},
+            "events_data": {"rows": []},
+            "entity_sections": [],
+            "snapshot_url": "url",
+            "site_url": "url",
+            "unsubscribe_url": "url",
+        }
+
+        content = render_to_string(SNAPSHOT_TEMPLATE_TXT, context)
+
+        assert "CHAPTERS" in content
+        assert "• Chapter 1" in content
+        assert "ISSUES" in content
+        assert "• Issue 1" in content
+        assert "• Issue 2" in content
+        assert "USERS" in content
+        assert "• User 1" in content

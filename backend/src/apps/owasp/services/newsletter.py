@@ -320,6 +320,7 @@ class SnapshotDigestService:
                     {
                         "type": content_type,
                         "items": list(qs[:limit]),
+                        "rows": self._chunk_rows(list(qs[:limit])),
                         "total": total,
                         "extra": max(0, total - limit),
                     }
