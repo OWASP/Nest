@@ -60,8 +60,8 @@ const SearchPageLayout = ({
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       {/* Search header: search bar + optional stacked mobile controls.
-          The mb-4 wrapper gives every page type a consistent gap before results. */}
-      <div className="mb-4 w-full">
+          mb-4 on mobile only — desktop spacing comes from SearchBar's md:py-4. */}
+      <div className="mb-4 w-full md:mb-0">
         <div
           className={`flex w-full flex-col md:flex-row md:items-center md:justify-center ${
             inlineSort ? 'md:gap-0' : 'md:gap-2'

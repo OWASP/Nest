@@ -688,7 +688,7 @@ describe('<SearchPageLayout />', () => {
   })
 
   // -------- Consistent spacing below search header --------
-  it('search header wrapper always has mb-4 regardless of filter controls', () => {
+  it('search header wrapper has mb-4 md:mb-0 when no filter controls are present', () => {
     const { container } = render(
       <SearchPageLayout
         isLoaded={true}
@@ -706,12 +706,12 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    // The outer search header wrapper always carries mb-4
     const searchHeader = container.querySelector('div.mb-4.w-full')
     expect(searchHeader).toBeInTheDocument()
+    expect(searchHeader).toHaveClass('mb-4', 'md:mb-0')
   })
 
-  it('search header wrapper also has mb-4 when filter controls are present', () => {
+  it('search header wrapper has mb-4 md:mb-0 when filter controls are present', () => {
     const { container } = render(
       <SearchPageLayout
         isLoaded={true}
@@ -731,9 +731,9 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    // mb-4 is on the wrapper, not conditionally absent when controls exist
     const searchHeader = container.querySelector('div.mb-4.w-full')
     expect(searchHeader).toBeInTheDocument()
+    expect(searchHeader).toHaveClass('mb-4', 'md:mb-0')
 
     // Mobile controls row has mt-2 but no longer its own mb-4
     const mobileControls = container.querySelector(
