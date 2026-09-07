@@ -1,89 +1,30 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useMemo } from 'react'
-import { FaCodeMerge, FaFolderOpen, FaPersonWalkingArrowRight, FaUserPlus } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
-import { Badge } from 'types/badge'
 import { User } from 'types/user'
-import { formatDate } from 'utils/dateFormatter'
-import Badges from 'components/Badges'
-import Contributions from 'components/cards/Contributions'
-import Contributors from 'components/cards/Contributors'
-import Header from 'components/cards/Header'
-import IssuesMilestones from 'components/cards/IssuesMilestones'
-import Metadata from 'components/cards/Metadata'
+import MemberDetailSidebar from 'components/cards/MemberDetailSidebar'
 import PageWrapper from 'components/cards/PageWrapper'
 import RepositoriesModules from 'components/cards/RepositoriesModules'
-import Summary from 'components/cards/Summary'
 import ContributionHeatmap from 'components/ContributionHeatmap'
+import Milestones from 'components/Milestones'
+import RecentIssues from 'components/RecentIssues'
+import RecentPullRequests from 'components/RecentPullRequests'
+import RecentReleases from 'components/RecentReleases'
+
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
-type DateRange = { startDate: string; endDate: string }
-
 interface UserSummaryProps {
-  user: User | null
-  contributionData: Record<string, number>
-  dateRange: DateRange
-  hasContributionData: boolean
+  user: User
   formattedBio: React.ReactNode
 }
 
-export const UserSummary: React.FC<UserSummaryProps> = ({
-  user,
-  contributionData,
-  dateRange,
-  hasContributionData,
-  formattedBio,
-}) => (
-  <div className="mt-4 flex flex-col items-center lg:flex-row">
-    <Image
-      width={200}
-      height={200}
-      className="mr-4 h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
-      src={user?.avatarUrl || '/placeholder.svg'}
-      alt={user?.name || user?.login || 'User Avatar'}
-    />
-    <div className="w-full overflow-x-auto text-center lg:text-left">
-      <div className="pl-0 lg:pl-4">
-        <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
-          <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
-            @{user?.login}
-          </Link>
-          {user?.badges && user.badges.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {user.badges.slice().map((badge: Badge) => (
-                <React.Fragment key={badge.id}>
-                  <Badges
-                    name={badge.name}
-                    cssClass={badge.cssClass || 'medal'}
-                    showTooltip={true}
-                  />
-                </React.Fragment>
-              ))}
-            </div>
-          )}
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
-      </div>
-      {hasContributionData && dateRange.startDate && dateRange.endDate && (
-        <div className="w-full lg:block">
-          <div className="overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800">
-            <ContributionHeatmap
-              contributionData={contributionData}
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
-              variant="medium"
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
+export const UserSummary: React.FC<UserSummaryProps> = ({ user, formattedBio }) => (
+  <MemberDetailSidebar user={user} formattedBio={formattedBio} />
 )
 
 const UserDetailsPage: React.FC = () => {
@@ -181,56 +122,59 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
-  const userDetails = [
-    { label: 'Joined', value: user?.createdAt ? formatDate(user.createdAt) : 'Not available' },
-    { label: 'Email', value: user?.email || 'N/A' },
-    { label: 'Company', value: user?.company || 'N/A' },
-    { label: 'Location', value: user?.location || 'N/A' },
-  ]
-
-  const userStats = [
-    { icon: FaPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
-    { icon: FaUserPlus, value: user?.followingCount || 0, unit: 'Following' },
-    {
-      icon: FaFolderOpen,
-      pluralizedName: 'Repositories',
-      unit: 'Repository',
-      value: user?.publicRepositoriesCount ?? 0,
-    },
-    { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
-  ]
-
   return (
     <PageWrapper>
-      <Header title={user?.name || user?.login} isActive={true} isArchived={false} />
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+          <aside className="w-full shrink-0 xl:w-[18rem]">
+            <UserSummary user={user} formattedBio={formattedBio} />
+          </aside>
 
-      <Summary
-        userSummary={
-          <UserSummary
-            user={user}
-            contributionData={contributionData}
-            dateRange={dateRange}
-            hasContributionData={hasContributionData}
-            formattedBio={formattedBio}
-          />
-        }
-      />
+          <div className="flex min-w-0 flex-1 flex-col gap-6">
+            {hasContributionData && dateRange.startDate && dateRange.endDate && (
+              <div className="rounded-lg bg-gray-100 pt-0 pr-4 pb-1 pl-1 shadow-md dark:bg-gray-800">
+                <div className="overflow-x-auto">
+                  <ContributionHeatmap
+                    contributionData={contributionData}
+                    startDate={dateRange.startDate}
+                    endDate={dateRange.endDate}
+                    variant="medium"
+                  />
+                </div>
+              </div>
+            )}
 
-      <Metadata details={userDetails} stats={userStats} detailsTitle="User Details" />
+            {topRepositories.length > 0 && (
+              <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                <RepositoriesModules repositories={topRepositories} />
+              </div>
+            )}
 
-      <Contributions hasContributions={false} />
-
-      <Contributors />
-
-      <IssuesMilestones
-        recentIssues={issues}
-        recentMilestones={milestones}
-        pullRequests={pullRequests}
-        recentReleases={releases}
-        showAvatar={false}
-      />
-
-      <RepositoriesModules repositories={topRepositories} />
+            <div className="grid grow grid-cols-1 gap-6 md:grid-cols-2">
+              {issues.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <RecentIssues data={issues} showAvatar={false} />
+                </div>
+              )}
+              {pullRequests.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <RecentPullRequests data={pullRequests} showAvatar={false} />
+                </div>
+              )}
+              {milestones.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <Milestones data={milestones} showAvatar={false} />
+                </div>
+              )}
+              {releases.length > 0 && (
+                <div className="flex flex-col [&>div]:mb-0! [&>div]:grow">
+                  <RecentReleases data={releases} showAvatar={false} showSingleColumn={true} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </PageWrapper>
   )
 }

@@ -25,7 +25,7 @@ const RepositoriesModules = ({
     <>
       {repositories.length > 0 && (
         <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
-          <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
+          <RepositoryCard maxInitialDisplay={6} repositories={repositories} />
         </SecondaryCard>
       )}
       {modules &&
