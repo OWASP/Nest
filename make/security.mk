@@ -81,7 +81,6 @@ security-sast-scan-semgrep:
 		--config p/dockerfile \
 		--config p/javascript \
 		--config p/nextjs \
-		--config p/nginx \
 		--config p/nodejs \
 		--config p/owasp-top-ten \
 		--config p/python \
@@ -149,4 +148,4 @@ security-dast-scan-zap:
 
 tooling-dependency-audit:
 	@echo "Auditing root tooling npm dependencies..."
-	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate --ignore-unfixable'
+	@$(MAKE) code-checks CMD='pnpm audit --audit-level=moderate'

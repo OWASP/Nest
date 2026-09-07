@@ -1,7 +1,7 @@
 # Maintenance
 
 This section documents maintenance procedures for OWASP Nest, including dependency
-updates and vulnerability scanning.
+updates, vulnerability scanning, and security.txt renewal.
 
 ## Dependency maintenance
 
@@ -59,6 +59,11 @@ empty PRs for CVEs with no patched release. Accepted Trivy findings can be
 recorded in
 [`.trivyignore.yaml`](https://github.com/OWASP/Nest/blob/main/.trivyignore.yaml).
 
+Accepted unfixed `pnpm audit` findings must be committed manually in the
+owning workspace’s `pnpm-workspace.yaml` under `audit.ignore` (preferred) or
+legacy `auditConfig.ignoreGhsas`. Do not use `pnpm audit --ignore-unfixable`
+in Nest targets — it rewrites workspace config during checks.
+
 ### Security updates
 
 When a finding needs a fix sooner than cooldown or age gates allow, update
@@ -113,3 +118,58 @@ After applying a fix:
 3. Once a release is older than 21 days and the lockfile still resolves without
    them, remove obsolete `minimumReleaseAgeExclude` /
    `min-release-age-exclude` entries.
+
+## security.txt renewal
+
+Nest publishes RFC 9116 disclosure metadata at
+[`frontend/public/.well-known/security.txt`](https://github.com/OWASP/Nest/blob/main/frontend/public/.well-known/security.txt)
+and an OpenPGP public key at
+[`frontend/public/.well-known/pgp-key.txt`](https://github.com/OWASP/Nest/blob/main/frontend/public/.well-known/pgp-key.txt).
+
+Renew when `Expires` is within about 30 days (tools tests warn) or when rotating
+the Nest security mailbox key. GnuPG runs inside
+`docker/tools/Dockerfile.security` — no host `gpg` install is required.
+
+### Renew
+
+Provide a PGP passphrase via `NEST_SECURITY_PGP_PASSPHRASE` (avoid putting
+passphrases on the CLI / shell history):
+
+```bash
+export NEST_SECURITY_PGP_PASSPHRASE='...'
+make tools-renew-security-txt
+```
+
+Pass extra flags with `RENEW_SECURITY_TXT_ARGS`:
+
+```bash
+make tools-renew-security-txt \
+  RENEW_SECURITY_TXT_ARGS='--expires 2028-07-01T00:00:00-07:00'
+```
+
+That builds/runs the Nest security image, which executes
+[`tools/security/renew_security_txt.py`](https://github.com/OWASP/Nest/blob/main/tools/security/renew_security_txt.py)
+and:
+
+1. Generates a passphrase-protected Ed25519 OpenPGP key for
+   `OWASP Nest Security <nest+security@owasp.org>` whose GnuPG expiry matches
+   `security.txt` `Expires`
+2. Clearsigns `security.txt` with that key (RFC 9116 §2.3). Any existing
+   clearsign wrapper is stripped first so the file is never double-signed.
+3. Writes the public key to `frontend/public/.well-known/pgp-key.txt`
+4. Writes the clearsigned `frontend/public/.well-known/security.txt`
+5. Exports the private key to `tools/security/private/`
+
+### After renewing
+
+1. Store the private key **and passphrase** in the organization secret store used
+   for Nest security mail, then delete the local export under
+   `tools/security/private/`.
+2. Never commit private key material or passphrases.
+3. Open a PR with the updated `security.txt` and `pgp-key.txt`.
+4. After deploy, confirm
+   `https://nest.owasp.org/.well-known/security.txt` and
+   `https://nest.owasp.org/.well-known/pgp-key.txt` resolve. Playwright e2e
+   also covers serving these paths against the Nest frontend (`WellKnown.spec.ts`).
+5. Run `make test-tools` (or `make check-test-tools`) so the security.txt checks
+   stay green.

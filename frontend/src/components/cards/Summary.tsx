@@ -7,18 +7,23 @@ import SecondaryCard from 'components/SecondaryCard'
 interface SummaryProps {
   summary?: string
   userSummary?: ReactNode
+  className?: string
 }
 
-const Summary = ({ summary, userSummary }: SummaryProps) => {
+const Summary = ({ summary, userSummary, className = '' }: SummaryProps) => {
   return (
     <>
       {summary && (
-        <SecondaryCard icon={FaCircleInfo} title={<AnchorTitle title="Summary" />}>
+        <SecondaryCard
+          icon={FaCircleInfo}
+          title={<AnchorTitle title="Summary" />}
+          className={className}
+        >
           <Markdown content={summary} />
         </SecondaryCard>
       )}
 
-      {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
+      {userSummary && <SecondaryCard className={className}>{userSummary}</SecondaryCard>}
     </>
   )
 }

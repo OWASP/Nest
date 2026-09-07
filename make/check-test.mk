@@ -1,6 +1,7 @@
 ##@ Checks and tests
 
-.PHONY: check-test check-test-backend check-test-frontend check-test-e2e check-test-infrastructure
+.PHONY: check-test check-test-backend check-test-frontend check-test-e2e \
+	check-test-infrastructure check-test-tools
 
 check-test: ## Run code quality checks and tests
 	@$(MAKE) check
@@ -21,3 +22,7 @@ check-test-e2e: ## Run code quality checks and e2e tests
 check-test-infrastructure: ## Run code quality checks and infrastructure tests
 	@$(MAKE) check
 	@$(MAKE) test-infrastructure
+
+check-test-tools: ## Run code quality checks and tools tests
+	@$(MAKE) check
+	@$(MAKE) test-tools

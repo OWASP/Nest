@@ -1,0 +1,3 @@
+# Local OpenPGP private key exports from renew_security_txt.py. Never commit these.
+*
+!.gitignore

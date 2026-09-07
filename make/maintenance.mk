@@ -1,7 +1,7 @@
 ##@ Maintenance
 
 .PHONY: clean compile-requirements graphql-codegen prune clean-dependencies clean-docker \
-	clean-trivy-cache dependency-compile-requirements tooling-clean-dependencies
+	clean-trivy-cache dependency-compile-requirements
 
 clean: ## Remove all generated files and containers
 	@$(MAKE) clean-dependencies
@@ -24,7 +24,6 @@ prune: ## Prune Docker resources
 clean-dependencies:
 	@$(MAKE) backend-clean-dependencies
 	@$(MAKE) frontend-clean-dependencies
-	@$(MAKE) tooling-clean-dependencies
 
 clean-docker:
 	@$(MAKE) backend-clean-docker
@@ -60,6 +59,3 @@ dependency-compile-requirements:
 		python -m piptools compile --no-strip-extras --generate-hashes \
 		--output-file=tools/requirements/test.txt \
 		tools/requirements/test.in'
-
-tooling-clean-dependencies:
-	@rm -rf node_modules

@@ -114,7 +114,15 @@ class Command(BaseCommand):
         return heatmap_data
 
     def generate_entity_contributions(
-        self, user, commits, pull_requests, issues, entity_type: str, start_at, end_at
+        self,
+        user,
+        commits,
+        pull_requests,
+        issues,
+        *,
+        entity_type: str,
+        start_at,
+        end_at,
     ) -> dict:
         """Generate contribution counts per chapter or project led by the user.
 
@@ -441,13 +449,25 @@ class Command(BaseCommand):
 
         # Generate chapter contributions (only for chapters led by the user)
         chapter_contributions = self.generate_entity_contributions(
-            user, commits, pull_requests, issues, "chapter", start_at, end_at
+            user,
+            commits,
+            pull_requests,
+            issues,
+            entity_type="chapter",
+            start_at=start_at,
+            end_at=end_at,
         )
         snapshot.chapter_contributions = chapter_contributions
 
         # Generate project contributions (only for projects led by the user)
         project_contributions = self.generate_entity_contributions(
-            user, commits, pull_requests, issues, "project", start_at, end_at
+            user,
+            commits,
+            pull_requests,
+            issues,
+            entity_type="project",
+            start_at=start_at,
+            end_at=end_at,
         )
         snapshot.project_contributions = project_contributions
 

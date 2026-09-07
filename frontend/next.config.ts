@@ -29,6 +29,9 @@ const headers = [
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: {
+    useTypeScriptCli: true,
+  },
   async headers() {
     return [
       {

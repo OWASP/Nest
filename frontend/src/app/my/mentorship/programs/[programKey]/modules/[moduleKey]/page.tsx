@@ -12,6 +12,7 @@ import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import Contributors from 'components/cards/Contributors'
 import Header from 'components/cards/Header'
 import Metadata from 'components/cards/Metadata'
+import ModuleIssues from 'components/cards/ModuleIssues'
 import PageWrapper from 'components/cards/PageWrapper'
 import Summary from 'components/cards/Summary'
 import Tags from 'components/cards/Tags'
@@ -82,6 +83,10 @@ const ModuleDetailsPage = () => {
     },
   ]
 
+  const summaryDetailsGridClass = mentorshipModule.description
+    ? 'grid grid-cols-1 gap-x-6 md:grid-cols-3'
+    : 'grid grid-cols-1 gap-x-6'
+
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
       <PageWrapper>
@@ -93,21 +98,25 @@ const ModuleDetailsPage = () => {
           accessLevel={isPrivileged ? 'admin' : 'user'}
           admins={admins ?? undefined}
           mentors={mentorshipModule.mentors ?? undefined}
-          isMentee={mentorshipModule.userRole === 'mentee'}
           isActive={true}
           isArchived={false}
           showModuleActions={true}
         />
 
-        <Summary summary={mentorshipModule.description} />
+        <div className={summaryDetailsGridClass}>
+          <Summary summary={mentorshipModule.description} className="md:col-span-2" />
 
-        <Metadata details={moduleDetails} detailsTitle="Module Details" />
+          <Metadata
+            details={moduleDetails}
+            detailsTitle="Module Details"
+            className="md:col-span-1"
+          />
+        </div>
 
         <Tags
           entityKey={moduleKey}
           tags={mentorshipModule.tags ?? undefined}
           domains={mentorshipModule.domains ?? undefined}
-          labels={isPrivileged ? (mentorshipModule.labels ?? undefined) : undefined}
         />
 
         <Contributors
@@ -116,6 +125,8 @@ const ModuleDetailsPage = () => {
           mentors={mentorshipModule.mentors ?? undefined}
           mentees={mentorshipModule.mentees ?? undefined}
         />
+
+        <ModuleIssues programKey={programKey} moduleKey={moduleKey} />
       </PageWrapper>
     </BreadcrumbStyleProvider>
   )

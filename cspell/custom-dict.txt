@@ -120,6 +120,7 @@ dismissable
 dkr
 dsn
 dvo
+eddsa
 elevenlabs
 env
 envsubst
@@ -127,6 +128,7 @@ ephemerals
 euo
 facebookexternalhit
 fdp
+fpr
 gamesec
 geocoders
 geoloc
@@ -170,6 +172,7 @@ mamicidal
 markdownit
 markercluster
 mastg
+mcp
 mcr
 mdfile
 mentee

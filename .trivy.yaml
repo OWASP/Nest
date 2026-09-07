@@ -36,6 +36,7 @@ scan:
   skip-files:
     - '**/.env'
     - '**/*.pem'
+    - '**/private/**'
 
 severity:
   - CRITICAL

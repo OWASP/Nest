@@ -47,31 +47,33 @@ theme:
       primary: teal
       accent: cyan
 markdown_extensions:
-  - pymdownx.tasklist
-  - pymdownx.tabbed:
-      alternate_style: true
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
   - md_in_html
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.caret
+  - pymdownx.critic
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets:
-      check_paths: true
-      base_path: [.]
-  - admonition
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.critic
-  - pymdownx.caret
   - pymdownx.keys
-  - footnotes
-  - attr_list
-  - def_list
-  - abbr
+  - pymdownx.snippets:
+      base_path: [.]
+      check_paths: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: '!!python/name:pymdownx.superfences.fence_code_format'
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist
+  - toc:
+      permalink: true
 
 plugins:
   - search

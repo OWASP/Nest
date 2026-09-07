@@ -46,7 +46,7 @@ class CommitteeIndex(IndexBase):
         ],
         "searchableAttributes": [
             "unordered(idx_name)",
-            "unordered(idx_leaders)"
+            "unordered(idx_leaders)",
             "unordered(idx_top_contributors.login, idx_top_contributors.name)",
             "unordered(idx_tags)",
         ],
