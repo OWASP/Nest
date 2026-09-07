@@ -154,6 +154,33 @@ class TestIssueModel:
         issue.generate_summary()
 
         assert issue.summary == "Test Body"
+    
+    def test_save_generates_summary_after_persisting_new_issue(self, issue):
+        """Generate summary only after a new issue receives a database ID."""
+        issue.id = None
+        issue.hint = "Existing hint"
+        issue.summary = ""
+
+        def generate_summary():
+            assert issue.id == 1
+            issue.summary = "Generated issue summary"
+
+        issue.generate_summary = Mock(side_effect=generate_summary)
+
+        def assign_database_id(*args, **kwargs):
+            issue.id = 1
+
+        with patch(
+            "apps.github.models.issue.BulkSaveModel.save",
+            side_effect=assign_database_id,
+        ) as mock_parent_save:
+            issue.save()
+
+        issue.generate_summary.assert_called_once()
+        assert mock_parent_save.call_count == 2
+        assert mock_parent_save.call_args_list[1].kwargs == {
+            "update_fields": ["summary"],
+        }
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_hint")

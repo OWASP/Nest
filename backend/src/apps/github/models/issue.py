@@ -197,15 +197,29 @@ class Issue(GenericIssueModel):
             self.summary = fallback_summary
 
     def save(self, *args, **kwargs) -> None:
-        """Save issue."""
-        if self.is_open:
-            if not self.hint:
-                self.generate_hint()
+        """Save issue and generate missing AI fields after it has a database ID."""
+        missing_hint = self.is_open and not self.hint
+        missing_summary = self.is_open and not self.summary
 
-            if not self.summary:
-                self.generate_summary()
-
+        # A new instance receives its database ID here.
         super().save(*args, **kwargs)
+
+        generated_fields = []
+
+        if missing_hint:
+            previous_hint = self.hint
+            self.generate_hint()
+            if self.hint != previous_hint:
+                generated_fields.append("hint")
+
+        if missing_summary:
+            previous_summary = self.summary
+            self.generate_summary()
+            if self.summary != previous_summary:
+                generated_fields.append("summary")
+
+        if generated_fields:
+            super().save(update_fields=generated_fields)
 
     @staticmethod
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
