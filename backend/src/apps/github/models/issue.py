@@ -185,7 +185,12 @@ class Issue(GenericIssueModel):
         open_ai = open_ai or OpenAi()
         open_ai.set_input(f"{self.title}\r\n{self.body}")
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
-        self.summary = open_ai.complete() or ""
+        ai_summary = open_ai.complete()
+
+        if not ai_summary:
+            self.summary = self.body if self.body else "No summary available"
+        else:
+            self.summary = ai_summary
 
     def save(self, *args, **kwargs) -> None:
         """Save issue."""
