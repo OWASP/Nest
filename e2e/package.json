@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@playwright/test": "1.62.1",
-    "dayjs": "1.11.21",
+    "dayjs": "1.11.23",
     "millify": "6.1.0"
   },
   "engines": {
