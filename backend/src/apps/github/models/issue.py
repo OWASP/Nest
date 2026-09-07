@@ -36,6 +36,9 @@ class Issue(GenericIssueModel):
     summary = models.TextField(
         verbose_name="Summary", default="", blank=True
     )  # AI generated summary
+    is_summary_generated = models.BooleanField(
+        verbose_name="Is summary generated", default=False
+    )
     hint = models.TextField(verbose_name="Hint", default="", blank=True)  # AI generated hint
 
     state_reason = models.CharField(
@@ -189,8 +192,10 @@ class Issue(GenericIssueModel):
 
         if not ai_summary:
             self.summary = self.body or "No summary available"
+            self.is_summary_generated = False
         else:
             self.summary = ai_summary
+            self.is_summary_generated = True
 
     def save(self, *args, **kwargs) -> None:
         """Save issue."""
@@ -198,7 +203,7 @@ class Issue(GenericIssueModel):
             if not self.hint:
                 self.generate_hint()
 
-            if not self.summary:
+            if not self.is_summary_generated:
                 self.generate_summary()
 
         super().save(*args, **kwargs)
@@ -206,6 +211,8 @@ class Issue(GenericIssueModel):
     @staticmethod
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
         """Bulk save issues."""
+        if fields and "summary" in fields and "is_summary_generated" not in fields:
+            fields = list(fields) + ["is_summary_generated"]
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
 
     @staticmethod

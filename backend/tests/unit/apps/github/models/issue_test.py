@@ -240,6 +240,7 @@ class TestIssueModel:
 
         issue.hint = "Test Hint" if has_hint else ""
         issue.summary = "Test Summary" if has_summary else ""
+        issue.is_summary_generated = has_summary
 
         with patch("apps.github.models.issue.BulkSaveModel.save"):
             issue.save()
@@ -265,6 +266,36 @@ class TestIssueModel:
 
         issue.generate_hint.assert_not_called()
         issue.generate_summary.assert_not_called()
+
+    @patch("apps.github.models.issue.OpenAi")
+    @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
+    def test_save_regenerates_summary_after_failed_generation(
+        self, mock_get_prompt, mock_openai, issue
+    ):
+        """Test that a failed summary is regenerated on a later save."""
+        mock_get_prompt.return_value = "Summarize the following issue"
+
+        mock_openai_instance = mock_openai.return_value
+        mock_openai_instance.set_input.return_value = mock_openai_instance
+        mock_openai_instance.set_max_tokens.return_value = mock_openai_instance
+        mock_openai_instance.set_prompt.return_value = mock_openai_instance
+        mock_openai_instance.complete.return_value = ""
+
+        issue.hint = "Test hint"
+
+        with patch("apps.github.models.issue.BulkSaveModel.save"):
+            issue.save()
+
+        assert issue.summary == "Test Body"
+        assert not issue.is_summary_generated
+
+        mock_openai_instance.complete.return_value = "This is a summary."
+
+        with patch("apps.github.models.issue.BulkSaveModel.save"):
+            issue.save()
+
+        assert issue.summary == "This is a summary."
+        assert issue.is_summary_generated
 
     def test_latest_comment_property(self, mock_repository):
         """Test latest_comment property returns the expected query result."""
