@@ -687,8 +687,8 @@ describe('<SearchPageLayout />', () => {
     expect(filterSkeleton).not.toHaveClass('rounded-r-none')
   })
 
-  // -------- Mobile spacing below search --------
-  it('adds mobile bottom margin on search toolbar when no mobile filter/sort controls', () => {
+  // -------- Consistent spacing below search header --------
+  it('search header wrapper always has mb-4 regardless of filter controls', () => {
     const { container } = render(
       <SearchPageLayout
         isLoaded={true}
@@ -706,13 +706,12 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    const searchToolbar = container.querySelector(
-      String.raw`div.flex.w-full.flex-col.md\:flex-row.md\:items-center.md\:justify-center`
-    )
-    expect(searchToolbar).toHaveClass('mb-4', 'md:mb-0')
+    // The outer search header wrapper always carries mb-4
+    const searchHeader = container.querySelector('div.mb-4.w-full')
+    expect(searchHeader).toBeInTheDocument()
   })
 
-  it('does not add search toolbar bottom margin when mobile filter controls are present', () => {
+  it('search header wrapper also has mb-4 when filter controls are present', () => {
     const { container } = render(
       <SearchPageLayout
         isLoaded={true}
@@ -732,15 +731,15 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    const searchToolbar = container.querySelector(
-      String.raw`div.flex.w-full.flex-col.md\:flex-row.md\:items-center.md\:justify-center`
-    )
-    expect(searchToolbar).not.toHaveClass('mb-4')
-    expect(searchToolbar).not.toHaveClass('md:mb-0')
+    // mb-4 is on the wrapper, not conditionally absent when controls exist
+    const searchHeader = container.querySelector('div.mb-4.w-full')
+    expect(searchHeader).toBeInTheDocument()
 
+    // Mobile controls row has mt-2 but no longer its own mb-4
     const mobileControls = container.querySelector(
-      String.raw`div.mx-auto.mt-2.mb-4.flex.w-full.max-w-md.items-stretch.md\:hidden`
+      String.raw`div.mx-auto.mt-2.flex.w-full.max-w-md.items-stretch.md\:hidden`
     )
     expect(mobileControls).toBeInTheDocument()
+    expect(mobileControls).not.toHaveClass('mb-4')
   })
 })

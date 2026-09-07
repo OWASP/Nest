@@ -53,81 +53,87 @@ const SearchPageLayout = ({
     searchBarClassName = 'md:rounded-r-none'
   }
 
-  const hasMobileToolbar = Boolean(filterChildren || (inlineSort && sortChildren))
+  // True when entity-level filter/sort controls exist (shown on desktop in the unified bar,
+  // and stacked below the search input on mobile).
+  const hasFilterControls = Boolean(filterChildren || (inlineSort && sortChildren))
 
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-      <div
-        className={`flex w-full flex-col md:flex-row md:items-center md:justify-center ${
-          inlineSort ? 'md:gap-0' : 'md:gap-2'
-        } ${hasMobileToolbar ? '' : 'mb-4 md:mb-0'}`}
-      >
-        {filterChildren &&
-          (isFirstLoad ? (
-            <Skeleton
-              className={`hidden h-12 w-60 shrink-0 md:block ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
-              aria-hidden="true"
-            />
-          ) : (
-            <div
-              className={`hidden shrink-0 md:block md:w-fit ${inlineSort ? '[&>div]:rounded-r-none md:[&>div]:border-r-0' : ''}`}
-            >
-              {filterChildren}
-            </div>
-          ))}
-        <div className="flex w-full justify-center md:w-[28rem] md:shrink-0">
-          <SearchBar
-            isLoaded={!isFirstLoad}
-            onSearch={onSearch}
-            placeholder={searchPlaceholder}
-            initialValue={searchQuery}
-            className={searchBarClassName}
-          />
-        </div>
-        {inlineSort &&
-          sortChildren &&
-          (isFirstLoad ? (
-            <div className="hidden shrink-0 md:flex md:w-fit md:items-center">
-              <Skeleton className="h-12 w-48 rounded-none" aria-hidden="true" />
-            </div>
-          ) : (
-            <div className="hidden shrink-0 md:flex md:w-fit [&>div>div:first-child]:rounded-l-none">
-              {sortChildren}
-            </div>
-          ))}
-      </div>
-
-      {/* Mobile layout — max-w-md matches SearchBar so stacked controls align with search */}
-      {hasMobileToolbar && (
+      {/* Search header: search bar + optional stacked mobile controls.
+          The mb-4 wrapper gives every page type a consistent gap before results. */}
+      <div className="mb-4 w-full">
         <div
-          className={`mx-auto mt-2 mb-4 flex w-full max-w-md items-stretch md:hidden ${
-            inlineSort ? 'gap-0' : 'justify-between gap-4'
+          className={`flex w-full flex-col md:flex-row md:items-center md:justify-center ${
+            inlineSort ? 'md:gap-0' : 'md:gap-2'
           }`}
         >
           {filterChildren &&
             (isFirstLoad ? (
               <Skeleton
-                className={`h-12 min-w-0 flex-1 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'max-w-40 rounded-lg'}`}
+                className={`hidden h-12 w-60 shrink-0 md:block ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
                 aria-hidden="true"
               />
             ) : (
               <div
-                className={`min-w-0 ${inlineSort && sortChildren ? 'flex-1' : 'max-w-40'} ${inlineSort ? '[&>div]:rounded-r-none' : ''}`}
+                className={`hidden shrink-0 md:block md:w-fit ${inlineSort ? '[&>div]:rounded-r-none md:[&>div]:border-r-0' : ''}`}
               >
                 {filterChildren}
               </div>
             ))}
+          <div className="flex w-full justify-center md:w-[28rem] md:shrink-0">
+            <SearchBar
+              isLoaded={!isFirstLoad}
+              onSearch={onSearch}
+              placeholder={searchPlaceholder}
+              initialValue={searchQuery}
+              className={searchBarClassName}
+            />
+          </div>
           {inlineSort &&
             sortChildren &&
             (isFirstLoad ? (
-              <Skeleton className="h-12 min-w-0 flex-1 rounded-none" aria-hidden="true" />
+              <div className="hidden shrink-0 md:flex md:w-fit md:items-center">
+                <Skeleton className="h-12 w-48 rounded-none" aria-hidden="true" />
+              </div>
             ) : (
-              <div className="min-w-0 flex-1 [&>div>div:first-child]:rounded-l-none">
+              <div className="hidden shrink-0 md:flex md:w-fit [&>div>div:first-child]:rounded-l-none">
                 {sortChildren}
               </div>
             ))}
         </div>
-      )}
+
+        {/* Mobile layout — max-w-md matches SearchBar so stacked controls align with search */}
+        {hasFilterControls && (
+          <div
+            className={`mx-auto mt-2 flex w-full max-w-md items-stretch md:hidden ${
+              inlineSort ? 'gap-0' : 'justify-between gap-4'
+            }`}
+          >
+            {filterChildren &&
+              (isFirstLoad ? (
+                <Skeleton
+                  className={`h-12 min-w-0 flex-1 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'max-w-40 rounded-lg'}`}
+                  aria-hidden="true"
+                />
+              ) : (
+                <div
+                  className={`min-w-0 ${inlineSort && sortChildren ? 'flex-1' : 'max-w-40'} ${inlineSort ? '[&>div]:rounded-r-none' : ''}`}
+                >
+                  {filterChildren}
+                </div>
+              ))}
+            {inlineSort &&
+              sortChildren &&
+              (isFirstLoad ? (
+                <Skeleton className="h-12 min-w-0 flex-1 rounded-none" aria-hidden="true" />
+              ) : (
+                <div className="min-w-0 flex-1 [&>div>div:first-child]:rounded-l-none">
+                  {sortChildren}
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
       {isLoaded ? (
         <>
           <div>
