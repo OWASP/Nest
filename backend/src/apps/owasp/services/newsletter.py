@@ -316,11 +316,11 @@ class SnapshotDigestService:
             qs = getattr(snapshot, attr).filter(repository__in=repositories).order_by("created_at")
             total = qs.count()
             if total > 0:
+                items = list(qs[:limit])
                 content.append(
                     {
                         "type": content_type,
-                        "items": list(qs[:limit]),
-                        "rows": self._chunk_rows(list(qs[:limit])),
+                        "items": items,
                         "total": total,
                         "extra": max(0, total - limit),
                     }
