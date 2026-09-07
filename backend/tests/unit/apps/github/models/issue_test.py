@@ -112,7 +112,7 @@ class TestIssueModel:
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
     def test_generate_summary_ai_returns_none(self, mock_get_prompt, mock_openai, issue):
-        """Test generate_summary when the AI returns None - should fall back to body."""
+        """Test generate_summary when the AI returns None."""
         mock_get_prompt.return_value = "Summarize the following issue"
 
         mock_openai_instance = mock_openai.return_value
@@ -127,8 +127,10 @@ class TestIssueModel:
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
-    def test_generate_summary_fallback_with_empty_body(self, mock_get_prompt, mock_openai, mock_repository):
-        """Test generate_summary when AI fails and body is empty - should fall back to placeholder."""
+    def test_generate_summary_fallback_with_empty_body(
+        self, mock_get_prompt, mock_openai, mock_repository
+    ):
+        """Test generate_summary when AI fails and body is empty."""
         mock_get_prompt.return_value = "Summarize the following issue"
 
         mock_openai_instance = mock_openai.return_value

@@ -188,7 +188,7 @@ class Issue(GenericIssueModel):
         ai_summary = open_ai.complete()
 
         if not ai_summary:
-            self.summary = self.body if self.body else "No summary available"
+            self.summary = self.body or "No summary available"
         else:
             self.summary = ai_summary
 
