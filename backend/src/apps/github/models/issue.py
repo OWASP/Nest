@@ -200,36 +200,38 @@ class Issue(GenericIssueModel):
         missing_hint = self.is_open and not self.hint
         missing_summary = self.is_open and not self.summary
         requested_fields = kwargs.get("update_fields")
-
+        if requested_fields is not None:
+            requested_fields = list(requested_fields)
+            kwargs["update_fields"] = requested_fields
         # A new instance receives its database ID here.
         super().save(*args, **kwargs)
 
         generated_fields = []
 
-        if missing_hint:
+        should_generate_hint = missing_hint and (
+            requested_fields is None or "hint" in requested_fields
+        )
+        should_generate_summary = missing_summary and (
+            requested_fields is None or "summary" in requested_fields
+        )
+
+        if should_generate_hint:
             previous_hint = self.hint
             self.generate_hint()
             if self.hint != previous_hint:
                 generated_fields.append("hint")
 
-        if missing_summary:
+        if should_generate_summary:
             previous_summary = self.summary
             self.generate_summary()
             if self.summary != previous_summary:
                 generated_fields.append("summary")
 
         if generated_fields:
-            fields_to_save = (
-                [field for field in generated_fields if field in requested_fields]
-                if requested_fields is not None
-                else generated_fields
+            super().save(
+                using=self._state.db,
+                update_fields=generated_fields,
             )
-
-            if fields_to_save:
-                super().save(
-                    using=self._state.db,
-                    update_fields=fields_to_save,
-                )
 
     @staticmethod
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]

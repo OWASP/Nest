@@ -380,4 +380,27 @@ describe('Contribute Component', () => {
       expect(screen.getByText('No summary available')).toBeInTheDocument()
     })
   })
+
+  test('shows no summary or description message in the modal when both are unavailable', async () => {
+    const issueWithoutContent = {
+      ...mockContributeData.issues[0],
+      body: '   ',
+      summary: '   ',
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [issueWithoutContent],
+      totalPages: 1,
+    })
+
+    render(<ContributePage />)
+    const readMoreButton = await screen.findByText('Read More')
+    fireEvent.click(readMoreButton)
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('No summary or description is available for this issue.')
+      ).toBeInTheDocument()
+    })
+  })
 })

@@ -195,8 +195,8 @@ class TestIssueModel:
             "update_fields": ["summary"],
         }
 
-    def test_save_does_not_persist_generated_fields_outside_update_fields(self, issue):
-        """Do not persist generated AI fields outside update_fields."""
+    def test_save_does_not_generate_fields_outside_update_fields(self, issue):
+        """Do not generate AI fields outside update_fields."""
         issue.hint = ""
         issue.summary = ""
 
@@ -206,9 +206,24 @@ class TestIssueModel:
         with patch("apps.github.models.issue.BulkSaveModel.save") as mock_parent_save:
             issue.save(update_fields=["body"])
 
-        issue.generate_hint.assert_called_once()
+        issue.generate_hint.assert_not_called()
+        issue.generate_summary.assert_not_called()
+        mock_parent_save.assert_called_once()
+
+    def test_save_generates_requested_summary(self, issue):
+        """Generate summary when it is included in update_fields."""
+        issue.hint = "Existing hint"
+        issue.summary = ""
+
+        issue.generate_summary = Mock(
+            side_effect=lambda: setattr(issue, "summary", "Generated summary")
+        )
+
+        with patch("apps.github.models.issue.BulkSaveModel.save") as mock_parent_save:
+            issue.save(update_fields=["summary"])
+
         issue.generate_summary.assert_called_once()
-        assert mock_parent_save.call_count == 1
+        assert mock_parent_save.call_count == 2
 
     def test_save_uses_original_database_alias(self, issue):
         """Use the database alias from the initial save for generated fields."""
