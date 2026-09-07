@@ -39,7 +39,7 @@ minimumReleaseAgeExclude:
   - electron-to-chromium@1.5.396
   - enhanced-resolve@5.24.3
   - es-module-lexer@2.3.1
-  - fast-uri@3.1.5
+  - fast-uri@3.1.6
   - immutable@5.1.8
   - ip-address@10.3.1
   - js-yaml@4.3.1
@@ -66,8 +66,9 @@ overrides:
   '@opentelemetry/core': 2.8.0
   body-parser: 1.20.6
   brace-expansion@5: 5.0.9
+  browserslist: 4.28.7
   dompurify: 3.4.13
-  fast-uri: 3.1.5
+  fast-uri: 3.1.6
   glob: 11.1.0
   immutable: 5.1.8
   ip-address: 10.3.1
