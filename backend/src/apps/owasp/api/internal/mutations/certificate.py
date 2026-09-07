@@ -1,14 +1,12 @@
 """OWASP Certificate GraphQL Mutations."""
 
 import logging
-import operator
-from functools import reduce
 
 import strawberry
-from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Q
 from graphql import GraphQLError
+from pydantic import BaseModel, ValidationError, field_validator, model_validator
 
 from apps.github.models.user import User as GithubUser
 from apps.nest.api.internal.permissions import IsAuthenticated
@@ -18,6 +16,82 @@ from apps.owasp.models.crp.certificate import Certificate
 from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
+
+MAX_MESSAGE_LENGTH = 280
+MAX_TITLE_LENGTH = 50
+
+
+class IssueCertificateSchema(BaseModel):
+    """Pydantic schema for validating certificate issuance input."""
+
+    recipient_login: str | None = None
+    recipient_logins: list[str] | None = None
+    title: str
+    message: str = ""
+    project_key: str | None = None
+    chapter_key: str | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str) -> str:
+        """Validate and strip certificate title."""
+        v = v.strip()
+        if not v:
+            msg = "Certificate title cannot be empty."
+            raise ValueError(msg)
+        if len(v) > MAX_TITLE_LENGTH:
+            msg = f"Certificate title cannot exceed {MAX_TITLE_LENGTH} characters."
+            raise ValueError(msg)
+        return v
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        """Validate and strip certificate message."""
+        v = v.strip()
+        if len(v) > MAX_MESSAGE_LENGTH:
+            msg = f"Certificate body message cannot exceed {MAX_MESSAGE_LENGTH} characters."
+            raise ValueError(msg)
+        return v
+
+    @model_validator(mode="after")
+    def validate_recipients_and_keys(self) -> "IssueCertificateSchema":
+        """Deduplicate logins and validate project/chapter keys."""
+        logins: list[str] = []
+        if self.recipient_logins:
+            seen: set[str] = set()
+            for raw in self.recipient_logins:
+                clean = (raw or "").strip()
+                if clean and clean.lower() not in seen:
+                    seen.add(clean.lower())
+                    logins.append(clean)
+        elif self.recipient_login and self.recipient_login.strip():
+            logins = [self.recipient_login.strip()]
+
+        if not logins:
+            msg = "Recipient login cannot be empty."
+            raise ValueError(msg)
+        self.recipient_logins = logins
+
+        self.project_key = (
+            self.project_key.strip().removeprefix("www-project-")
+            if self.project_key and self.project_key.strip()
+            else None
+        )
+        self.chapter_key = (
+            self.chapter_key.strip().removeprefix("www-chapter-")
+            if self.chapter_key and self.chapter_key.strip()
+            else None
+        )
+
+        if self.project_key and self.chapter_key:
+            msg = "Provide either project or chapter, not both."
+            raise ValueError(msg)
+        if not self.project_key and not self.chapter_key:
+            msg = "Either project or chapter must be provided."
+            raise ValueError(msg)
+
+        return self
 
 
 @strawberry.input
@@ -30,10 +104,6 @@ class IssueCertificateInput:
     message: str = ""
     project_key: str | None = None
     chapter_key: str | None = None
-
-
-MAX_TITLE_LENGTH = 50
-MAX_MESSAGE_LENGTH = 280
 
 
 @strawberry.type
@@ -53,67 +123,30 @@ class CertificateMutation:
             not github_user.is_project_leader and not github_user.chapters.exists()
         ):
             msg = "You must be a project leader or chapter leader to issue certificates."
-            logger.warning(
-                "Permission denied for user '%s' to issue a certificate.",
-                user.username,
+            raise GraphQLError(msg, extensions={"code": "FORBIDDEN"})
+
+        try:
+            validated = IssueCertificateSchema(
+                chapter_key=input_data.chapter_key,
+                message=input_data.message,
+                project_key=input_data.project_key,
+                recipient_login=input_data.recipient_login,
+                recipient_logins=input_data.recipient_logins,
+                title=input_data.title,
             )
-            raise PermissionDenied(msg)
-
-        logins = []
-        if input_data.recipient_logins:
-            seen_logins = set()
-            for raw_login in input_data.recipient_logins:
-                if raw_login and (clean_login := raw_login.strip()):
-                    lower_login = clean_login.lower()
-                    if lower_login not in seen_logins:
-                        seen_logins.add(lower_login)
-                        logins.append(clean_login)
-        elif input_data.recipient_login and input_data.recipient_login.strip():
-            logins = [input_data.recipient_login.strip()]
-
-        if not logins:
-            msg = "Recipient login cannot be empty."
-            raise ValidationError(msg)
-
-        title = input_data.title.strip()
-        if not title:
-            msg = "Certificate title cannot be empty."
-            raise ValidationError(msg)
-
-        if len(title) > MAX_TITLE_LENGTH:
-            msg = f"Certificate title cannot exceed {MAX_TITLE_LENGTH} characters."
-            raise ValidationError(msg)
-
-        message = input_data.message.strip()
-        if len(message) > MAX_MESSAGE_LENGTH:
-            msg = f"Certificate body message cannot exceed {MAX_MESSAGE_LENGTH} characters."
-            raise ValidationError(msg)
-
-        clean_project_key = (
-            input_data.project_key.strip().removeprefix("www-project-")
-            if input_data.project_key and input_data.project_key.strip()
-            else None
-        )
-        clean_chapter_key = (
-            input_data.chapter_key.strip().removeprefix("www-chapter-")
-            if input_data.chapter_key and input_data.chapter_key.strip()
-            else None
-        )
-
-        if clean_project_key and clean_chapter_key:
-            msg = "Provide either project or chapter, not both."
-            raise ValidationError(msg)
-
-        if not clean_project_key and not clean_chapter_key:
-            msg = "Either project or chapter must be provided."
-            raise ValidationError(msg)
+        except ValidationError as exc:
+            first_error = exc.errors()[0]
+            raise GraphQLError(
+                first_error["msg"],
+                extensions={"code": "VALIDATION_ERROR"},
+            ) from exc
 
         project = None
         chapter = None
 
-        if clean_project_key:
+        if validated.project_key:
             try:
-                project = Project.objects.get(key=f"www-project-{clean_project_key}")
+                project = Project.objects.get(key=f"www-project-{validated.project_key}")
             except Project.DoesNotExist as err:
                 msg = f"Project with key '{input_data.project_key}' not found."
                 raise GraphQLError(
@@ -121,9 +154,9 @@ class CertificateMutation:
                     extensions={"code": "NOT_FOUND", "field": "projectKey"},
                 ) from err
 
-        if clean_chapter_key:
+        if validated.chapter_key:
             try:
-                chapter = Chapter.objects.get(key=f"www-chapter-{clean_chapter_key}")
+                chapter = Chapter.objects.get(key=f"www-chapter-{validated.chapter_key}")
             except Chapter.DoesNotExist as err:
                 msg = f"Chapter with key '{input_data.chapter_key}' not found."
                 raise GraphQLError(
@@ -131,7 +164,11 @@ class CertificateMutation:
                     extensions={"code": "NOT_FOUND", "field": "chapterKey"},
                 ) from err
 
-        filter_q = reduce(operator.or_, (Q(login__iexact=login_name) for login_name in logins))
+        logins = validated.recipient_logins or []
+        filter_q = Q()
+        for login_name in logins:
+            filter_q |= Q(login__iexact=login_name)
+
         recipients = GithubUser.objects.filter(filter_q)
         found = {r.login.lower(): r for r in recipients}
 
@@ -154,8 +191,8 @@ class CertificateMutation:
             certificate = Certificate.objects.create(
                 recipient=recipient,
                 issuer=github_user,
-                title=title,
-                message=message,
+                title=validated.title,
+                message=validated.message,
                 project=project,
                 chapter=chapter,
             )

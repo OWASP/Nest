@@ -62,7 +62,7 @@ class ChapterQuery:
     @strawberry_django.field
     def is_chapter_leader(self, login: str) -> bool:
         """Check if a GitHub login is an active, reviewed OWASP chapter leader."""
-        github_user = GithubUser.objects.filter(login__iexact=login).first()
+        github_user = GithubUser.objects.filter(login__iexact=login.strip()).first()
         if github_user is None:
             return False
 

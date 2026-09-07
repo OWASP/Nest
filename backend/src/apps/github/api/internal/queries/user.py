@@ -92,14 +92,14 @@ class UserQuery:
         limit: int = 15,
     ) -> list[UserNode]:
         """Fetch top contributors for a project or chapter in a single JOIN query."""
-        if not project_key and not chapter_key:
+        clean_project_key = (project_key or "").strip().removeprefix("www-project-")
+        clean_chapter_key = (chapter_key or "").strip().removeprefix("www-chapter-")
+
+        if not clean_project_key and not clean_chapter_key:
             return []
 
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
-
-        clean_project_key = (project_key or "").strip().removeprefix("www-project-")
-        clean_chapter_key = (chapter_key or "").strip().removeprefix("www-chapter-")
 
         if clean_project_key:
             logins = [
