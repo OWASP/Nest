@@ -3,6 +3,11 @@
 from django.db import migrations, models
 
 
+def mark_existing_summaries(apps, schema_editor):
+    Issue = apps.get_model("github", "Issue")
+    Issue.objects.exclude(summary="").update(is_summary_generated=True)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,4 +20,5 @@ class Migration(migrations.Migration):
             name='is_summary_generated',
             field=models.BooleanField(default=False, verbose_name='Is summary generated'),
         ),
+        migrations.RunPython(mark_existing_summaries, migrations.RunPython.noop),
     ]

@@ -190,8 +190,10 @@ class Issue(GenericIssueModel):
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         ai_summary = open_ai.complete()
 
-        if not ai_summary:
-            self.summary = self.body or "No summary available"
+        if not ai_summary or not ai_summary.strip():
+            self.summary = (
+                self.body if self.body and self.body.strip() else "No summary available"
+            )
             self.is_summary_generated = False
         else:
             self.summary = ai_summary
