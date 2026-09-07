@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 def mark_existing_summaries(apps, schema_editor):
     Issue = apps.get_model("github", "Issue")
-    Issue.objects.exclude(summary="").update(is_summary_generated=True)
+    Issue.objects.exclude(summary__regex=r"^\s*$").update(is_summary_generated=True)
 
 
 class Migration(migrations.Migration):
