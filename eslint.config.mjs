@@ -187,7 +187,7 @@ export default [
       'nest/no-global-nan': 'error',
       'nest/no-global-parsefloat': 'error',
       'nest/no-global-parseint': 'error',
-      'no-console': 'error',
+      'no-console': ['error', { allow: ['warn'] }],
       'no-restricted-imports': [
         'error',
         {
