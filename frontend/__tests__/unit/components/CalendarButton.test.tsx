@@ -155,6 +155,25 @@ describe('CalendarButton', () => {
       expect(addToast).toHaveBeenCalledTimes(1)
       consoleSpy.mockRestore()
     })
+
+    it('logs the raw value when a non-Error is thrown', async () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      ;(getIcsFileUrl as jest.Mock).mockRejectedValueOnce('some string error')
+
+      render(<CalendarButton event={mockEvent} />)
+      const button = screen.getByRole('button')
+
+      fireEvent.click(button)
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to download ICS file:',
+          'some string error'
+        )
+      })
+
+      consoleSpy.mockRestore()
+    })
   })
 
   describe('accessibility', () => {

@@ -31,6 +31,7 @@ export const calculateDistance = (
 export const getUserLocationFromBrowser = (): Promise<UserLocation | null> => {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
+      // eslint-disable-next-line no-console
       console.warn('Geolocation API not supported')
       resolve(null)
       return
@@ -49,6 +50,7 @@ export const getUserLocationFromBrowser = (): Promise<UserLocation | null> => {
         })
       },
       (error) => {
+        // eslint-disable-next-line no-console
         console.warn('Browser geolocation error:', error.message)
         resolve(null)
       },

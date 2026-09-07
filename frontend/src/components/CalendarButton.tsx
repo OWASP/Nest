@@ -41,7 +41,7 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
         variant: 'solid',
       })
     } catch (err) {
-      console.warn('Failed to download ICS file:', (err as Error)?.message)
+      console.warn('Failed to download ICS file:', err instanceof Error ? err.message : err)
       addToast({
         description: 'Failed to download ICS file',
         title: 'Download Failed',

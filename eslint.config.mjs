@@ -187,7 +187,7 @@ export default [
       'nest/no-global-nan': 'error',
       'nest/no-global-parsefloat': 'error',
       'nest/no-global-parseint': 'error',
-      'no-console': ['error', { allow: ['warn'] }],
+      'no-console': 'error',
       'no-restricted-imports': [
         'error',
         {
@@ -206,6 +206,12 @@ export default [
     files: ['frontend/src/utils/logger.ts'],
     rules: {
       'no-console': 'off',
+    },
+  },
+  {
+    files: ['frontend/src/components/CalendarButton.tsx'],
+    rules: {
+      'no-console': ['error', { allow: ['warn'] }],
     },
   },
   {
