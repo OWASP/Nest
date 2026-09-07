@@ -342,4 +342,42 @@ describe('Contribute Component', () => {
       expect(screen.getByText('No summary available')).toBeInTheDocument()
     })
   })
+
+  test('falls back to the issue description when the summary contains only whitespace', async () => {
+    const issueWithWhitespaceSummary = {
+      ...mockContributeData.issues[0],
+      body: 'This is the original issue description.',
+      summary: '   ',
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [issueWithWhitespaceSummary],
+      totalPages: 1,
+    })
+
+    render(<ContributePage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('This is the original issue description.')).toBeInTheDocument()
+    })
+  })
+
+  test('shows no summary when both summary and description contain only whitespace', async () => {
+    const issueWithWhitespaceContent = {
+      ...mockContributeData.issues[0],
+      body: '   ',
+      summary: '   ',
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [issueWithWhitespaceContent],
+      totalPages: 1,
+    })
+
+    render(<ContributePage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('No summary available')).toBeInTheDocument()
+    })
+  })
 })

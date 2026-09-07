@@ -173,10 +173,12 @@ class Issue(GenericIssueModel):
             max_tokens (int, optional): The maximum number of tokens for the AI response.
 
         """
-
         fallback_summary = self.body.strip() or "No summary available"
 
-        if not self.is_indexable or not (
+        if not self.is_indexable:
+            return
+
+        if not (
             prompt := (
                 Prompt.get_github_issue_documentation_project_summary()
                 if self.project.is_documentation_type
@@ -186,20 +188,18 @@ class Issue(GenericIssueModel):
             self.summary = fallback_summary
             return
 
-        try:
-            open_ai = open_ai or OpenAi()
-            open_ai.set_input(f"{self.title}\r\n{self.body}")
-            open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
+        open_ai = open_ai or OpenAi()
+        open_ai.set_input(f"{self.title}\r\n{self.body}")
+        open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
 
-            summary = open_ai.complete()
-            self.summary = summary.strip() if summary and summary.strip() else fallback_summary
-        except Exception:
-            self.summary = fallback_summary
+        summary = open_ai.complete()
+        self.summary = summary.strip() if summary and summary.strip() else fallback_summary
 
     def save(self, *args, **kwargs) -> None:
         """Save issue and generate missing AI fields after it has a database ID."""
         missing_hint = self.is_open and not self.hint
         missing_summary = self.is_open and not self.summary
+        requested_fields = kwargs.get("update_fields")
 
         # A new instance receives its database ID here.
         super().save(*args, **kwargs)
@@ -219,7 +219,17 @@ class Issue(GenericIssueModel):
                 generated_fields.append("summary")
 
         if generated_fields:
-            super().save(update_fields=generated_fields)
+            fields_to_save = (
+                [field for field in generated_fields if field in requested_fields]
+                if requested_fields is not None
+                else generated_fields
+            )
+
+            if fields_to_save:
+                super().save(
+                    using=self._state.db,
+                    update_fields=fields_to_save,
+                )
 
     @staticmethod
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
