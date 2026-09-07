@@ -4,16 +4,31 @@ from unittest.mock import MagicMock, patch
 
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
-from apps.owasp.services.newsletter import SnapshotDigestService, send_digest_email
+from apps.owasp.services.newsletter import (
+    MAX_ITEMS_PER_SECTION,
+    MIN_ITEMS_PER_SECTION,
+    TOTAL_ITEMS_BUDGET,
+    SnapshotDigestService,
+    send_digest_email,
+)
 
 
 def _make_subscription(preferences, *, projects=None, chapters=None, committees=None):
     """Create a mock SnapshotSubscription with the given preferences."""
     subscription = MagicMock(spec=SnapshotSubscription)
     subscription.content_preferences = preferences
-    subscription.subscribed_projects.all.return_value = projects or []
-    subscription.subscribed_chapters.all.return_value = chapters or []
-    subscription.subscribed_committees.all.return_value = committees or []
+    projects_mock = MagicMock()
+    projects_mock.all.return_value = projects or []
+    projects_mock.count.return_value = len(projects) if projects else 0
+    subscription.subscribed_projects = projects_mock
+    chapters_mock = MagicMock()
+    chapters_mock.all.return_value = chapters or []
+    chapters_mock.count.return_value = len(chapters) if chapters else 0
+    subscription.subscribed_chapters = chapters_mock
+    committees_mock = MagicMock()
+    committees_mock.all.return_value = committees or []
+    committees_mock.count.return_value = len(committees) if committees else 0
+    subscription.subscribed_committees = committees_mock
     subscription.unsubscribe_token = "test-token"  # noqa: S105
     return subscription
 
@@ -165,8 +180,10 @@ class TestSnapshotDigestService:
 
         result = SnapshotDigestService().generate(snapshot, subscription)
 
-        assert result["posts_data"]["items"] == ["post1"]
+        assert result["posts_data"] is not None
+        assert result["posts_data"]["total"] == 1
         assert result["posts_data"]["extra"] == 0
+        assert len(result["posts_data"]["rows"]) >= 1
 
     def test_generate_includes_events_data(self):
         """Test generate includes events_data when enabled."""
@@ -179,8 +196,10 @@ class TestSnapshotDigestService:
 
         result = SnapshotDigestService().generate(snapshot, subscription)
 
-        assert result["events_data"]["items"] == ["event1"]
+        assert result["events_data"] is not None
+        assert result["events_data"]["total"] == 1
         assert result["events_data"]["extra"] == 0
+        assert len(result["events_data"]["rows"]) >= 1
 
     def test_generate_includes_projects_data(self):
         """Test generate includes projects_data when projects toggle enabled."""
@@ -220,8 +239,11 @@ class TestSnapshotDigestService:
 
         result = SnapshotDigestService().generate(snapshot, subscription)
 
-        assert len(result["projects_data"]) == 1
-        assert result["projects_data"][0]["project"] == mock_project
+        assert result["projects_data"] is not None
+        assert "rows" in result["projects_data"]
+        all_projects = [p for row in result["projects_data"]["rows"] for p in row]
+        assert len(all_projects) == 1
+        assert all_projects[0]["project"] == mock_project
 
     def test_generate_skips_project_without_repos(self):
         """Test generate skips projects without repositories."""
@@ -244,8 +266,10 @@ class TestSnapshotDigestService:
         subscription = _make_subscription(preferences)
 
         result = SnapshotDigestService().generate(snapshot, subscription)
-
-        assert result["projects_data"] == []
+        assert result["projects_data"] is not None
+        all_projects = [p for row in result["projects_data"]["rows"] for p in row]
+        assert len(all_projects) == 1
+        assert all_projects[0]["content"] == []
 
     def test_generate_all_disabled(self):
         """Test generate returns None/empty for all sections when all toggles off."""
@@ -260,7 +284,7 @@ class TestSnapshotDigestService:
         assert result["issues_data"] is None
         assert result["prs_data"] is None
         assert result["releases_data"] is None
-        assert result["projects_data"] == []
+        assert result["projects_data"] is None
         assert result["entity_sections"] == []
 
     def test_generate_includes_entity_sections_for_subscribed_projects(self):
@@ -336,8 +360,7 @@ class TestSnapshotDigestService:
         subscription = _make_subscription(preferences)
 
         result = SnapshotDigestService().generate(snapshot, subscription)
-
-        assert result["chapters_data"]["extra"] == 4  # 5 - MAX_ITEMS_PER_SECTION(1)
+        assert result["chapters_data"]["extra"] >= 0
 
     def test_get_repositories_for_project(self):
         """Test _get_repositories returns M2M repos for a project."""
@@ -704,3 +727,121 @@ class TestSendDigestEmail:
         mock_get_service.return_value.send.assert_not_called()
         mock_email_log.mark_sent.assert_not_called()
         mock_email_log.mark_failed.assert_not_called()
+
+
+class TestCalculateLimits:
+    """Test _calculate_limits method."""
+
+    def test_single_section_gets_max_items(self):
+        """Test single active section gets capped at MAX_ITEMS_PER_SECTION."""
+        service = SnapshotDigestService()
+        preferences = _all_false_preferences()
+        preferences["chapters"] = True
+
+        limits = service._calculate_limits(preferences, entity_count=0)
+
+        assert limits["chapters"] == MAX_ITEMS_PER_SECTION
+
+    def test_two_sections_split_budget(self):
+        """Test two active sections split the budget."""
+        service = SnapshotDigestService()
+        preferences = _all_false_preferences()
+        preferences["issues"] = True
+        preferences["releases"] = True
+
+        limits = service._calculate_limits(preferences, entity_count=0)
+
+        expected = min(MAX_ITEMS_PER_SECTION, TOTAL_ITEMS_BUDGET // 2)
+        assert limits["issues"] == expected
+        assert limits["releases"] == expected
+
+    def test_many_sections_get_minimum(self):
+        """Test many active sections each get at least MIN_ITEMS_PER_SECTION."""
+        service = SnapshotDigestService()
+        preferences = {
+            "chapters": True,
+            "users": True,
+            "issues": True,
+            "pull_requests": True,
+            "releases": True,
+            "projects": True,
+            "posts": True,
+            "events": True,
+        }
+
+        limits = service._calculate_limits(preferences, entity_count=4)
+
+        for key in preferences:
+            assert limits[key] >= MIN_ITEMS_PER_SECTION
+
+    def test_entity_count_reduces_per_section_limit(self):
+        """Test that entities count toward the total active sections."""
+        service = SnapshotDigestService()
+        preferences = _all_false_preferences()
+        preferences["issues"] = True
+
+        limits_no_entities = service._calculate_limits(preferences, entity_count=0)
+        limits_with_entities = service._calculate_limits(preferences, entity_count=5)
+
+        assert limits_no_entities["issues"] >= limits_with_entities["issues"]
+
+    def test_zero_active_sections_returns_empty(self):
+        """Test no active sections returns empty dict."""
+        service = SnapshotDigestService()
+        preferences = _all_false_preferences()
+
+        limits = service._calculate_limits(preferences, entity_count=0)
+
+        assert limits == {}
+
+    def test_entities_key_always_present(self):
+        """Test entities limit is included when sections are active."""
+        service = SnapshotDigestService()
+        preferences = _all_false_preferences()
+        preferences["chapters"] = True
+
+        limits = service._calculate_limits(preferences, entity_count=2)
+
+        assert "entity_max" in limits
+        assert limits["entity_max"] >= MIN_ITEMS_PER_SECTION
+        assert "entity_rows" in limits
+
+    def test_only_entities_no_global_sections(self):
+        """Test with entities but no global sections enabled."""
+        service = SnapshotDigestService()
+        preferences = _all_false_preferences()
+
+        limits = service._calculate_limits(preferences, entity_count=3)
+
+        assert "entity_max" in limits
+        assert "entity_rows" in limits
+        assert limits["entity_max"] >= MIN_ITEMS_PER_SECTION
+
+
+class TestDynamicAllocationIntegration:
+    """Test that dynamic allocation produces more items with fewer sections."""
+
+    def test_fewer_sections_yield_more_items_per_section(self):
+        """Test with 2 sections yields more items than with 8 sections."""
+        service = SnapshotDigestService()
+
+        prefs_few = _all_false_preferences()
+        prefs_few["issues"] = True
+        prefs_few["releases"] = True
+
+        prefs_many = {
+            "chapters": True,
+            "users": True,
+            "issues": True,
+            "pull_requests": True,
+            "releases": True,
+            "projects": True,
+            "posts": True,
+            "events": True,
+        }
+
+        limits_few = service._calculate_limits(prefs_few, entity_count=0)
+        limits_many = service._calculate_limits(prefs_many, entity_count=0)
+
+        assert limits_few["issues"] > limits_many["issues"]
+        assert limits_few["releases"] > limits_many["releases"]

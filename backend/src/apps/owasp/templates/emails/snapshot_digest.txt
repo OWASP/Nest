@@ -1,13 +1,22 @@
 {% autoescape off %}OWASP Nest — Community Snapshot
 ================================
-{{ snapshot.title }}
-{% if snapshot.start_at and snapshot.end_at %}{{ snapshot.start_at|date:"M d" }} – {{ snapshot.end_at|date:"M d, Y" }}{% endif %}
 {% if chapters_data %}
 CHAPTERS ({{ chapters_data.total }} total)
 --------
 {% for chapter in chapters_data.items %}• {{ chapter.name }}{% if chapter.suggested_location or chapter.country %} — {{ chapter.suggested_location|default:chapter.country }}{% endif %}
 {% if chapter.summary %}  {{ chapter.summary|truncatewords:25 }}{% endif %}
 {% endfor %}{% if chapters_data.extra %}  + {{ chapters_data.extra }} more chapters{% endif %}
+
+{% endif %}{% if projects_data %}
+PROJECTS
+--------
+{% for row in projects_data.rows %}
+{% for project_entry in row %}
+{{ project_entry.project.name }}
+{% for content in project_entry.content %}{% if content.type == "issues" %}  Issues ({{ content.total }}):{% elif content.type == "pull_requests" %}  Pull Requests ({{ content.total }}):{% elif content.type == "releases" %}  Releases ({{ content.total }}):{% endif %}
+{% for row_items in content.rows %}{% for item in row_items %}{% if item %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
+      {{ item.url }}
+{% endif %}{% endfor %}{% endfor %}{% endfor %}{% endfor %}{% endfor %}{% if projects_data.extra %}  + {{ projects_data.extra }} more projects{% endif %}
 
 {% endif %}{% if users_data %}
 USERS ({{ users_data.total }} new members)
@@ -36,16 +45,6 @@ RELEASES ({{ releases_data.total }} total)
     {{ release.url }}
 {% endfor %}{% if releases_data.extra %}  + {{ releases_data.extra }} more releases{% endif %}
 
-{% endif %}{% if projects_data %}
-PROJECTS
---------
-{% for project_entry in projects_data %}
-{{ project_entry.project.name }}
-{% for content in project_entry.content %}{% if content.type == "issues" %}  Issues ({{ content.total }}):{% elif content.type == "pull_requests" %}  Pull Requests ({{ content.total }}):{% elif content.type == "releases" %}  Releases ({{ content.total }}):{% endif %}
-{% for item in content.items %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
-      {{ item.url }}
-{% endfor %}{% endfor %}{% endfor %}{% if projects_extra %}  + {{ projects_extra }} more projects{% endif %}
-
 {% endif %}{% if posts_data %}
 BLOG POSTS ({{ posts_data.total }} total)
 ----------
@@ -67,9 +66,9 @@ YOUR SUBSCRIBED ENTITIES
 {% for entity_section in entity_sections %}
 {{ entity_section.entity.name }} ({{ entity_section.entity_type }})
 {% for content in entity_section.content %}{% if content.type == "issues" %}  Issues ({{ content.total }}):{% elif content.type == "pull_requests" %}  Pull Requests ({{ content.total }}):{% elif content.type == "releases" %}  Releases ({{ content.total }}):{% endif %}
-{% for item in content.items %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
+{% for row_items in content.rows %}{% for item in row_items %}{% if item %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
       {{ item.url }}
-{% endfor %}{% endfor %}{% endfor %}{% endif %}
+{% endif %}{% endfor %}{% endfor %}{% endfor %}{% endfor %}{% endif %}
 ---
 View Full Snapshot: {{ snapshot_url }}
 Manage Preferences: {{ site_url }}/settings
