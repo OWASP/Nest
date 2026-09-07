@@ -137,8 +137,8 @@ variable "min_count" {
   }
 }
 
-variable "parameters_arns" {
-  description = "Map of environment variable names to the ARNs of SSM parameters."
+variable "container_secrets" {
+  description = "Environment variable names mapped to SSM or Secrets Manager valueFrom references."
   type        = map(string)
   default     = {}
 }
@@ -151,6 +151,12 @@ variable "private_subnet_ids" {
     condition     = length(var.private_subnet_ids) > 0
     error_message = "private_subnet_ids must contain at least one subnet."
   }
+}
+
+variable "secretsmanager_secret_arns" {
+  description = "Bare secrets manager ARNs that the ECS execution role may read"
+  type        = set(string)
+  default     = []
 }
 
 variable "project_name" {
