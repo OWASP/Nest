@@ -701,19 +701,41 @@ describe('Header Component', () => {
   })
 
   describe('Responsive Behavior', () => {
-    it('shows header actions in the bar and drawer footer containers', () => {
+    it('shows drawer actions after opening the menu below lg', async () => {
+      Object.defineProperty(globalThis, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 768,
+      })
+
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(document.getElementById('header-bar-actions')).toBeInTheDocument()
-      expect(document.getElementById('mobile-drawer-actions')).toBeInTheDocument()
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      const drawerActions = document.getElementById('mobile-drawer-actions')
+      expect(drawerActions).not.toBeNull()
+      expect(within(drawerActions!).getByText('Star On Github')).toBeInTheDocument()
+      expect(within(drawerActions!).getByText('Sponsor Us')).toBeInTheDocument()
     })
 
-    it('keeps inline nav, mobile toggle, and drawer in header structure', () => {
+    it('shows bar actions and inline nav at desktop nav width', () => {
+      Object.defineProperty(globalThis, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 1024,
+      })
+
       renderWithSession(<Header isGitHubAuthEnabled />)
 
       expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /open main menu/i })).toBeInTheDocument()
-      expect(document.getElementById('mobile-drawer')).toBeInTheDocument()
+
+      const headerBarActions = document.getElementById('header-bar-actions')
+      expect(headerBarActions).not.toBeNull()
+      expect(within(headerBarActions!).getByText('Star')).toBeInTheDocument()
+      expect(within(headerBarActions!).getByText('Sponsor')).toBeInTheDocument()
     })
 
     it('has proper responsive navigation structure', () => {
@@ -992,7 +1014,15 @@ describe('Header Component', () => {
     })
 
     it('does not close mobile menu when clicking inside sidebar', async () => {
-      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+      const clickHandlers: EventListener[] = []
+
+      const addEventListenerSpy = jest
+        .spyOn(globalThis, 'addEventListener')
+        .mockImplementation((type, handler) => {
+          if (type === 'click') {
+            clickHandlers.push(handler as EventListener)
+          }
+        })
 
       renderWithSession(<Header isGitHubAuthEnabled />)
 
@@ -1004,16 +1034,15 @@ describe('Header Component', () => {
 
       expect(isMobileMenuOpen()).toBe(true)
 
-      // Get the click handler
-      const clickCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'click')
-      const clickHandler = clickCall![1] as EventListener
+      const latestClickHandler = clickHandlers.at(-1)
+      expect(latestClickHandler).toBeDefined()
 
       // Click inside mobile drawer
       const drawer = document.getElementById('mobile-drawer')
       expect(drawer).not.toBeNull()
 
       await act(async () => {
-        clickHandler({ target: drawer } as unknown as Event)
+        latestClickHandler!({ target: drawer } as unknown as Event)
       })
 
       // Menu should still be open

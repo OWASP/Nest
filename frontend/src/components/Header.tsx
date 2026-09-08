@@ -13,6 +13,7 @@ import {
   FaTimes,
 } from 'react-icons/fa'
 import { headerLinks } from 'utils/constants'
+import { acquireBodyScrollLock, releaseBodyScrollLock } from 'utils/bodyScrollLock'
 import { cn } from 'utils/utility'
 import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
@@ -37,15 +38,12 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   }, [pathname])
 
   useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!mobileMenuOpen) {
+      return
     }
 
-    return () => {
-      document.body.style.overflow = ''
-    }
+    acquireBodyScrollLock()
+    return () => releaseBodyScrollLock()
   }, [mobileMenuOpen])
 
   useEffect(() => {
@@ -81,7 +79,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
       <div
-        className="flex h-16 w-full min-w-0 items-center gap-2 px-3 sm:gap-3 sm:px-4 max-lg:justify-between"
+        className="relative z-50 flex h-16 w-full min-w-0 items-center gap-2 px-3 sm:gap-3 sm:px-4 max-lg:justify-between"
         id="navbar-sticky"
       >
         {/* Logo */}
@@ -166,7 +164,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity lg:hidden"
+          data-testid="mobile-drawer-backdrop"
+          className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity lg:hidden"
           onClick={closeMobileMenu}
           aria-hidden="true"
         />

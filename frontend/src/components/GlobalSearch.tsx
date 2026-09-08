@@ -9,6 +9,7 @@ import { FaTimes, FaSearch } from 'react-icons/fa'
 import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
 import { SiAlgolia } from 'react-icons/si'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import { acquireBodyScrollLock, releaseBodyScrollLock } from 'utils/bodyScrollLock'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { Organization } from 'types/organization'
@@ -53,18 +54,19 @@ export default function GlobalSearch() {
   }, [])
 
   useEffect(() => {
-    if (isOpen) {
-      previousFocusRef.current = document.activeElement as HTMLElement
-      const timer = shouldAutoFocus ? setTimeout(() => inputRef.current?.focus(), 50) : undefined
-      document.body.style.overflow = 'hidden'
-      return () => {
-        if (timer !== undefined) clearTimeout(timer)
-        document.body.style.overflow = ''
-      }
-    } else {
-      document.body.style.overflow = ''
+    if (!isOpen) {
       previousFocusRef.current?.focus()
       previousFocusRef.current = null
+      return
+    }
+
+    previousFocusRef.current = document.activeElement as HTMLElement
+    const timer = shouldAutoFocus ? setTimeout(() => inputRef.current?.focus(), 50) : undefined
+    acquireBodyScrollLock()
+
+    return () => {
+      if (timer !== undefined) clearTimeout(timer)
+      releaseBodyScrollLock()
     }
   }, [isOpen, shouldAutoFocus])
 
