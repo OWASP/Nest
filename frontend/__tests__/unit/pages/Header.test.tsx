@@ -711,7 +711,7 @@ describe('Header Component', () => {
       expect(drawerActions).toHaveClass('lg:hidden')
     })
 
-    it('shows drawer actions when the mobile menu is open', async () => {
+    it('shows drawer actions when the mobile menu is open', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
