@@ -52,58 +52,21 @@ RUN --mount=type=secret,id=RELEASE_VERSION \
     export RELEASE_VERSION && \
     pnpm run build
 
-# Production image, copy all the files and run next.
-FROM base AS runner
+# Production image: Alpine OS + Node binary only (no npm/corepack/yarn).
+FROM alpine:3.23@sha256:fd791d74b68913cbb027c6546007b3f0d3bc45125f797758156952bc2d6daf40 AS runner
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-RUN apk --no-cache update && apk --no-cache upgrade
-
-WORKDIR /tmp
-
-# Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786, CVE-2026-31802: Update npm's bundled tar to 7.5.11
-# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
-# Fix CVE-2026-27903, CVE-2026-27904: Update npm's bundled minimatch to 10.2.3
-# Fix CVE-2026-33671: Update npm's bundled picomatch (under tinyglobby) to 4.0.4
-# Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
-RUN npm pack tar@7.5.11 && \
-    tar -xzf tar-7.5.11.tgz && \
-    TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
-    rm -rf "${TAR_DIR}" && \
-    cp -r package "${TAR_DIR}" && \
-    chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.11.tgz && \
-    grep -q 'version.*7.5.11' "${TAR_DIR}/package.json" && \
-    npm pack @isaacs/brace-expansion@5.0.1 && \
-    tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
-    BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
-    rm -rf "${BRACE_DIR}" && \
-    mkdir -p /usr/local/lib/node_modules/npm/node_modules/@isaacs && \
-    cp -r package "${BRACE_DIR}" && \
-    chmod -R 755 "${BRACE_DIR}" && \
-    rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
-    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json" && \
-    npm pack minimatch@10.2.3 && \
-    tar -xzf minimatch-10.2.3.tgz && \
-    MINIMATCH_DIR="/usr/local/lib/node_modules/npm/node_modules/minimatch" && \
-    rm -rf "${MINIMATCH_DIR}" && \
-    cp -r package "${MINIMATCH_DIR}" && \
-    chmod -R 755 "${MINIMATCH_DIR}" && \
-    rm -rf package minimatch-10.2.3.tgz && \
-    grep -q '"version": "10.2.3"' "${MINIMATCH_DIR}/package.json" && \
-    npm pack picomatch@4.0.4 && \
-    tar -xzf picomatch-4.0.4.tgz && \
-    PICOMATCH_DIR="/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch" && \
-    rm -rf "${PICOMATCH_DIR}" && \
-    mkdir -p "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules" && \
-    cp -r package "${PICOMATCH_DIR}" && \
-    chmod -R 755 "${PICOMATCH_DIR}" && \
-    rm -rf package picomatch-4.0.4.tgz && \
-    grep -q '"version": "4.0.4"' "${PICOMATCH_DIR}/package.json" && \
+# libstdc++ is required by the Node binary (ldd); busybox wget/shell cover ECS health checks.
+RUN apk --no-cache update && \
+    apk --no-cache upgrade && \
+    apk --no-cache add libstdc++ && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs && \
     rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
+
+COPY --from=base --chmod=555 /usr/local/bin/node /usr/local/bin/node
 
 WORKDIR /app
 
