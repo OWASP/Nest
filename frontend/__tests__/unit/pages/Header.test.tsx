@@ -701,13 +701,17 @@ describe('Header Component', () => {
   })
 
   describe('Responsive Behavior', () => {
-    it('shows drawer actions after opening the menu below lg', async () => {
-      Object.defineProperty(globalThis, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 768,
-      })
+    it('uses lg breakpoint class contracts for bar and drawer action containers', () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
 
+      const headerBarActions = document.getElementById('header-bar-actions')
+      const drawerActions = document.getElementById('mobile-drawer-actions')
+
+      expect(headerBarActions).toHaveClass('hidden', 'lg:flex')
+      expect(drawerActions).toHaveClass('lg:hidden')
+    })
+
+    it('shows drawer actions when the mobile menu is open', async () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
@@ -721,16 +725,10 @@ describe('Header Component', () => {
       expect(within(drawerActions!).getByText('Sponsor Us')).toBeInTheDocument()
     })
 
-    it('shows bar actions and inline nav at desktop nav width', () => {
-      Object.defineProperty(globalThis, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 1024,
-      })
-
+    it('renders bar actions and inline nav with the desktop layout contract', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
+      expect(screen.getByRole('navigation', { name: 'Main' })).toHaveClass('lg:flex')
 
       const headerBarActions = document.getElementById('header-bar-actions')
       expect(headerBarActions).not.toBeNull()

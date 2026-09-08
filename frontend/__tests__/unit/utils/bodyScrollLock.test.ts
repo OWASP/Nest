@@ -18,4 +18,14 @@ describe('bodyScrollLock', () => {
     releaseBodyScrollLock()
     expect(document.body.style.overflow).toBe('')
   })
+
+  it('restores a pre-existing inline overflow value after the final release', () => {
+    document.body.style.overflow = 'auto'
+
+    acquireBodyScrollLock()
+    expect(document.body.style.overflow).toBe('hidden')
+
+    releaseBodyScrollLock()
+    expect(document.body.style.overflow).toBe('auto')
+  })
 })
