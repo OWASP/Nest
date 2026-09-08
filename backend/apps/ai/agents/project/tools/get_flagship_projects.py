@@ -10,7 +10,7 @@ from apps.owasp.models.enums.project import ProjectLevel
 
 
 @tool("Get all OWASP flagship projects")
-def get_flagship_projects(limit: int = 30) -> str:
+def get_flagship_projects(limit: int = 15) -> str:
     """Get all OWASP flagship projects.
 
     Flagship projects are the highest maturity level in OWASP,
