@@ -715,9 +715,7 @@ describe('Header Component', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      await act(async () => {
-        fireEvent.click(toggleButton)
-      })
+      fireEvent.click(toggleButton)
 
       const drawerActions = document.getElementById('mobile-drawer-actions')
       expect(drawerActions).not.toBeNull()
@@ -894,9 +892,7 @@ describe('Header Component', () => {
       const resizeHandler = resizeCall![1] as EventListener
 
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      await act(async () => {
-        fireEvent.click(toggleButton)
-      })
+      fireEvent.click(toggleButton)
 
       expect(isMobileMenuOpen()).toBe(true)
 
