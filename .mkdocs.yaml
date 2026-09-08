@@ -16,6 +16,9 @@ theme:
   name: material
   logo: assets/images/owasp_icon_white_sm.png
   favicon: assets/images/favicon.png
+  font:
+    text: Geist
+    code: Geist Mono
   features:
     - navigation.tabs
     - navigation.instant
@@ -38,14 +41,14 @@ theme:
       toggle:
         icon: material/lightbulb-outline
         name: Switch to dark mode
-      primary: teal
-      accent: amber
+      primary: custom
+      accent: custom
     - scheme: slate
       toggle:
         icon: material/weather-night
         name: Switch to light mode
-      primary: teal
-      accent: cyan
+      primary: custom
+      accent: custom
 markdown_extensions:
   - abbr
   - admonition
@@ -82,3 +85,6 @@ plugins:
   - mkdocstrings:
       default_handler: python
   - tags
+
+extra_css:
+  - stylesheets/extra.css
