@@ -59,9 +59,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 # libstdc++ is required by the Node binary (ldd); busybox wget/shell cover ECS health checks.
-RUN apk --no-cache update && \
-    apk --no-cache upgrade && \
-    apk --no-cache add libstdc++ && \
+RUN apk --no-cache upgrade && \
+    apk --no-cache add libstdc++=15.2.0-r2 && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs && \
     rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
