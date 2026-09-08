@@ -184,7 +184,7 @@ class SnapshotSubscription(models.Model):
             raise ValidationError(msg)
 
         if not name:
-            name = cls._generate_default_name(user)
+            name = cls.generate_default_name(user)
 
         try:
             return cls.objects.create(
@@ -198,7 +198,7 @@ class SnapshotSubscription(models.Model):
             raise ValidationError(msg) from e
 
     @classmethod
-    def _generate_default_name(cls, user):
+    def generate_default_name(cls, user):
         """Generate a default subscription name like 'Subscription 1'.
 
         Finds the next available number by checking existing subscription names.

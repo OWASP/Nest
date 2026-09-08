@@ -16,6 +16,14 @@ jest.mock('@apollo/client/react', () => ({
   useMutation: jest.fn(() => [jest.fn(), { loading: false }]),
 }))
 
+jest.mock('lodash/debounce', () => {
+  return () => {
+    const debounced = () => {}
+    debounced.cancel = jest.fn()
+    return debounced
+  }
+})
+
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))

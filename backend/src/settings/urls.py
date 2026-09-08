@@ -16,6 +16,7 @@ from apps.core.api.internal.algolia import algolia_search
 from apps.core.api.internal.csrf import get_csrf_token
 from apps.core.api.internal.status import get_status
 from apps.owasp.api.internal.views.urls import urlpatterns as owasp_urls
+from apps.owasp.views.unsubscribe import OneClickUnsubscribeView
 from apps.slack.apps import SlackConfig
 from settings.graphql import schema
 
@@ -34,6 +35,11 @@ urlpatterns = [
     path("api/v0/", api_v0.urls),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),
+    path(
+        "unsubscribe/<uuid:token>/",
+        OneClickUnsubscribeView.as_view(),
+        name="one-click-unsubscribe",
+    ),
     path("status/", get_status),
     path("", include("apps.sitemap.urls")),
     path("django-rq/", include("django_rq.urls")),

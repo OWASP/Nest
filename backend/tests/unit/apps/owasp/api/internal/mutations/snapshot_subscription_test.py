@@ -140,6 +140,39 @@ class TestCreateSnapshotSubscription:
         assert not result.ok
         assert "same setup" in result.message
 
+    def test_name_too_long(self, mutations):
+        """Test create fails when name exceeds 100 characters."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency=SnapshotFrequency.WEEKLY,
+            name="x" * 101,
+            include_chapters=True,
+        )
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert not result.ok
+        assert "100 characters" in result.message
+
+    @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
+    def test_name_whitespace_stripped(self, mock_create, mutations):
+        """Test create strips whitespace from name."""
+        info = mock_info()
+        input_data = CreateSnapshotSubscriptionInput(
+            frequency=SnapshotFrequency.WEEKLY,
+            name="  My Sub  ",
+            include_chapters=True,
+        )
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        mock_create.return_value = mock_sub
+
+        result = mutations.create_snapshot_subscription(info, input_data=input_data)
+
+        assert result.ok
+        mock_create.assert_called_once()
+        call_kwargs = mock_create.call_args
+        assert call_kwargs.kwargs["name"] == "My Sub"
+
 
 class TestUpdateSnapshotSubscription:
     """Test cases for updateSnapshotSubscription mutation."""
@@ -231,6 +264,35 @@ class TestUpdateSnapshotSubscription:
             assert not result.ok
             assert "same setup" in result.message
 
+    def test_name_too_long(self, mutations):
+        """Test update fails when name exceeds 100 characters."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(name="x" * 101)
+
+        result = mutations.update_snapshot_subscription(
+            info, subscription_id=1, input_data=input_data
+        )
+
+        assert not result.ok
+        assert "100 characters" in result.message
+
+    def test_name_whitespace_stripped(self, mutations):
+        """Test update strips whitespace from name."""
+        info = mock_info()
+        input_data = UpdateSnapshotSubscriptionInput(name="  Updated  ")
+        mock_sub = MagicMock(spec=SnapshotSubscription)
+        with patch(
+            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
+        ) as mock_objects:
+            mock_objects.get.return_value = mock_sub
+            result = mutations.update_snapshot_subscription(
+                info, subscription_id=1, input_data=input_data
+            )
+            assert result.ok
+            mock_sub.update.assert_called_once()
+            call_kwargs = mock_sub.update.call_args
+            assert call_kwargs.kwargs["name"] == "Updated"
+
 
 class TestCancelSnapshotSubscription:
     """Test cases for cancelSnapshotSubscription mutation."""
@@ -311,29 +373,39 @@ class TestUnsubscribeByToken:
             assert not result.ok
             assert result.message == "Invalid unsubscribe token."
 
-    def test_already_inactive(self, mutations):
-        """Test unsubscribe fails when already inactive."""
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.is_active = False
+    def test_validation_error_token(self, mutations):
+        """Test unsubscribe fails with validation error."""
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.unsubscribe_by_token(token=str(uuid.uuid4()))
+            mock_objects.get.side_effect = ValidationError("Invalid UUID")
+            result = mutations.unsubscribe_by_token(token="not-a-uuid")  # noqa: S106
             assert not result.ok
-            assert result.message == "Subscription is already inactive."
+            assert result.message == "Invalid unsubscribe token."
 
     def test_success(self, mutations):
         """Test successful unsubscribe by token."""
         mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.is_active = True
         with patch(
             "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
         ) as mock_objects:
             mock_objects.get.return_value = mock_sub
             result = mutations.unsubscribe_by_token(token=str(uuid.uuid4()))
             assert result.ok
-            mock_sub.deactivate.assert_called_once()
+            assert result.message == "Successfully unsubscribed."
+            mock_sub.delete.assert_called_once()
+
+    def test_empty_token(self, mutations):
+        """Test unsubscribe fails with empty token."""
+        result = mutations.unsubscribe_by_token(token="")
+        assert not result.ok
+        assert result.message == "Invalid unsubscribe token."
+
+    def test_whitespace_only_token(self, mutations):
+        """Test unsubscribe fails with whitespace-only token."""
+        result = mutations.unsubscribe_by_token(token="   ")  # noqa: S106
+        assert not result.ok
+        assert result.message == "Invalid unsubscribe token."
 
 
 class TestReactivateSnapshotSubscription:

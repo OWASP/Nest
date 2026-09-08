@@ -185,6 +185,16 @@ export type EntityMemberNode = Node & {
   role: Scalars['String']['output'];
 };
 
+export type EntitySectionNode = {
+  __typename?: 'EntitySectionNode';
+  entityKey: Scalars['String']['output'];
+  entityName: Scalars['String']['output'];
+  entityType: Scalars['String']['output'];
+  issues: Array<IssueNode>;
+  pullRequests: Array<PullRequestNode>;
+  releases: Array<ReleaseNode>;
+};
+
 export type EventNode = Node & {
   __typename?: 'EventNode';
   category: Scalars['String']['output'];
@@ -824,6 +834,7 @@ export type Query = {
   snapshots: Array<SnapshotNode>;
   sponsors: Array<SponsorNode>;
   statsOverview: StatsNode;
+  subscriptionByToken?: Maybe<SnapshotSubscriptionNode>;
   topContributedRepositories: Array<RepositoryNode>;
   topContributors: Array<RepositoryContributorNode>;
   upcomingEvents: Array<EventNode>;
@@ -1047,6 +1058,11 @@ export type QuerySnapshotsArgs = {
 };
 
 
+export type QuerySubscriptionByTokenArgs = {
+  token: Scalars['String']['input'];
+};
+
+
 export type QueryTopContributedRepositoriesArgs = {
   login: Scalars['String']['input'];
 };
@@ -1180,6 +1196,7 @@ export type SnapshotNodeEventsArgs = {
 export type SnapshotNodeIssuesArgs = {
   limit?: Scalars['Int']['input'];
   offset?: Scalars['Int']['input'];
+  repositoryNames?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 
@@ -1192,6 +1209,7 @@ export type SnapshotNodePostsArgs = {
 export type SnapshotNodePullRequestsArgs = {
   limit?: Scalars['Int']['input'];
   offset?: Scalars['Int']['input'];
+  repositoryNames?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 
@@ -1203,6 +1221,7 @@ export type SnapshotNodeUsersArgs = {
 export type SnapshotSubscriptionNode = Node & {
   __typename?: 'SnapshotSubscriptionNode';
   createdAt: Scalars['DateTime']['output'];
+  entitySections: Array<EntitySectionNode>;
   frequency: Scalars['String']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
@@ -1220,6 +1239,11 @@ export type SnapshotSubscriptionNode = Node & {
   subscribedCommittees: Array<SubscribedEntityNode>;
   subscribedProjects: Array<SubscribedEntityNode>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type SnapshotSubscriptionNodeEntitySectionsArgs = {
+  snapshotKey: Scalars['String']['input'];
 };
 
 export type SnapshotSubscriptionResult = {
@@ -1251,7 +1275,9 @@ export type StatsNode = {
 export type SubscribedEntityNode = {
   __typename?: 'SubscribedEntityNode';
   id: Scalars['Int']['output'];
+  key: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  repositoryNames: Array<Scalars['String']['output']>;
 };
 
 export type UpdateModuleInput = {

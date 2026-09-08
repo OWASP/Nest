@@ -23,6 +23,7 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ id: '2024-12' }),
+  useSearchParams: () => new URLSearchParams(),
 }))
 
 const mockError = {
@@ -966,6 +967,78 @@ describe('SnapshotDetailsPage', () => {
     })
     await waitFor(() => {
       expect(addToast).toHaveBeenCalled()
+    })
+  })
+
+  test('PR Show more paginates locally when data already loaded and hasMorePRs is false', async () => {
+    const mockFetchMorePRs = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          pullRequests: [],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchMorePRs])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    })
+
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
+    expect(prShowMore).toBeDefined()
+    if (prShowMore) fireEvent.click(prShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMorePRs).toHaveBeenCalled()
+    })
+
+    await waitFor(() => {
+      const prShowMore2 = findButtonInSection('Show more', 'Pull Requests')
+      expect(prShowMore2).toBeDefined()
+      if (prShowMore2) fireEvent.click(prShowMore2)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('PR Seven')).toBeInTheDocument()
+    })
+  })
+
+  test('Issue Show more paginates locally when data already loaded and hasMoreIssues is false', async () => {
+    const mockFetchMoreIssues = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          issues: [],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock)
+      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([mockFetchMoreIssues])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+    })
+
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
+    expect(issueShowMore).toBeDefined()
+    if (issueShowMore) fireEvent.click(issueShowMore)
+
+    await waitFor(() => {
+      expect(mockFetchMoreIssues).toHaveBeenCalled()
+    })
+
+    await waitFor(() => {
+      const issueShowMore2 = findButtonInSection('Show more', 'Issues')
+      expect(issueShowMore2).toBeDefined()
+      if (issueShowMore2) fireEvent.click(issueShowMore2)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Issue Seven')).toBeInTheDocument()
     })
   })
 })

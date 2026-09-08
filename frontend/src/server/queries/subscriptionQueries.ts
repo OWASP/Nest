@@ -16,14 +16,18 @@ const SNAPSHOT_SUBSCRIPTION_FIELDS = gql`
     includeUsers
     subscribedProjects {
       id
+      key
       name
+      repositoryNames
     }
     subscribedChapters {
       id
+      key
       name
     }
     subscribedCommittees {
       id
+      key
       name
     }
     createdAt
@@ -35,6 +39,67 @@ export const GET_MY_SNAPSHOT_SUBSCRIPTIONS = gql`
   query GetMySnapshotSubscriptions {
     mySnapshotSubscriptions {
       ...SnapshotSubscriptionFields
+    }
+  }
+  ${SNAPSHOT_SUBSCRIPTION_FIELDS}
+`
+
+export const GET_SUBSCRIPTION_BY_TOKEN = gql`
+  query GetSubscriptionByToken($token: String!, $snapshotKey: String!) {
+    subscriptionByToken(token: $token) {
+      ...SnapshotSubscriptionFields
+      entitySections(snapshotKey: $snapshotKey) {
+        entityKey
+        entityName
+        entityType
+        pullRequests {
+          id
+          author {
+            avatarUrl
+            id
+            login
+            name
+          }
+          createdAt
+          mergedAt
+          organizationName
+          repositoryName
+          state
+          title
+          url
+        }
+        issues {
+          id
+          author {
+            avatarUrl
+            id
+            login
+            name
+          }
+          createdAt
+          isMerged
+          organizationName
+          repositoryName
+          state
+          title
+          url
+        }
+        releases {
+          id
+          name
+          organizationName
+          projectName
+          publishedAt
+          repositoryName
+          tagName
+          author {
+            avatarUrl
+            id
+            login
+            name
+          }
+        }
+      }
     }
   }
   ${SNAPSHOT_SUBSCRIPTION_FIELDS}
@@ -100,6 +165,15 @@ export const REACTIVATE_SNAPSHOT_SUBSCRIPTION = gql`
         id
         isActive
       }
+    }
+  }
+`
+
+export const UNSUBSCRIBE_BY_TOKEN = gql`
+  mutation UnsubscribeByToken($token: String!) {
+    unsubscribeByToken(token: $token) {
+      ok
+      message
     }
   }
 `

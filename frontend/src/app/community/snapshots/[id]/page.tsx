@@ -1,12 +1,11 @@
 'use client'
+
 import { useQuery, useLazyQuery, useApolloClient } from '@apollo/client/react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import React, { useEffect, useState, useMemo } from 'react'
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa'
 import {
   FaCalendar,
-  FaChevronDown,
-  FaChevronUp,
   FaCircleExclamation,
   FaCodePullRequest,
   FaFolder,
@@ -16,12 +15,14 @@ import {
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
+import { GET_SUBSCRIPTION_BY_TOKEN } from 'server/queries/subscriptionQueries'
 import {
   GetSnapshotDetailsDocument,
   GetSnapshotPullRequestsDocument,
   GetSnapshotIssuesDocument,
 } from 'types/__generated__/snapshotQueries.generated'
 import type { GetSnapshotDetailsQuery } from 'types/__generated__/snapshotQueries.generated'
+import type { GetSubscriptionByTokenQuery } from 'types/__generated__/subscriptionQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import type { Issue } from 'types/issue'
@@ -31,16 +32,19 @@ import type { Release as ReleaseType } from 'types/release'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
+import AnchorTitle from 'components/AnchorTitle'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import ContributorsList from 'components/ContributorsList'
 import EventCard from 'components/EventCard'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PaginationButtons from 'components/PaginationButtons'
 import PostCard from 'components/PostCard'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import SecondaryCard from 'components/SecondaryCard'
 import ShowMoreButton from 'components/ShowMoreButton'
+import SnapshotEntitySection from 'components/SnapshotEntitySection'
 import { ReleasesSection } from 'components/SnapshotReleaseSection'
 
 const PR_LIMIT = 6
@@ -54,6 +58,25 @@ const POSTS_INITIAL = 5
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams<{ id: string }>()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const subscriptionToken = searchParams.get('subscription')
+
+  const { data: subscriptionData } = useQuery<GetSubscriptionByTokenQuery>(
+    GET_SUBSCRIPTION_BY_TOKEN,
+    {
+      variables: { token: subscriptionToken ?? '', snapshotKey },
+      skip: !subscriptionToken,
+    }
+  )
+  const subscription = subscriptionData?.subscriptionByToken
+  const showChapters = !subscription || subscription.includeChapters
+  const showEvents = !subscription || subscription.includeEvents
+  const showIssues = !subscription || subscription.includeIssues
+  const showPosts = !subscription || subscription.includePosts
+  const showProjects = !subscription || subscription.includeProjects
+  const showPullRequests = !subscription || subscription.includePullRequests
+  const showReleases = !subscription || subscription.includeReleases
+  const showUsers = !subscription || subscription.includeUsers
 
   const [showAllReleases, setShowAllReleases] = useState(false)
   const [showAllChapters, setShowAllChapters] = useState(false)
@@ -238,8 +261,8 @@ const SnapshotDetailsPage: React.FC = () => {
       </div>
 
       {/* Community Impact */}
-      {snapshot.chapters && snapshot.chapters.length > 0 && (
-        <SecondaryCard icon={FaMapMarkerAlt} title="Chapters">
+      {showChapters && snapshot.chapters && snapshot.chapters.length > 0 && (
+        <SecondaryCard icon={FaMapMarkerAlt} title={<AnchorTitle title="Chapters" />}>
           <div className="mb-4">
             <ChapterMapWrapper
               geoLocData={snapshot.chapters as unknown as Chapter[]}
@@ -267,8 +290,8 @@ const SnapshotDetailsPage: React.FC = () => {
         </SecondaryCard>
       )}
 
-      {snapshot.events && snapshot.events.length > 0 && (
-        <SecondaryCard icon={FaCalendarAlt} title="Events">
+      {showEvents && snapshot.events && snapshot.events.length > 0 && (
+        <SecondaryCard icon={FaCalendarAlt} title={<AnchorTitle title="Events" />}>
           <div className="flex flex-col gap-4">
             {sortedEvents.slice(0, showAllEvents ? undefined : EVENTS_INITIAL).map((event) => (
               <EventCard key={event.id} event={event} />
@@ -284,8 +307,8 @@ const SnapshotDetailsPage: React.FC = () => {
       )}
 
       {/* Deliverables */}
-      {snapshot.projects && snapshot.projects.length > 0 && (
-        <SecondaryCard icon={FaFolder} title="Projects">
+      {showProjects && snapshot.projects && snapshot.projects.length > 0 && (
+        <SecondaryCard icon={FaFolder} title={<AnchorTitle title="Projects" />}>
           <div className="flex flex-col gap-6">
             {snapshot.projects
               .filter((project) => project.isActive)
@@ -303,8 +326,8 @@ const SnapshotDetailsPage: React.FC = () => {
         </SecondaryCard>
       )}
 
-      {snapshot.releases && snapshot.releases.length > 0 && (
-        <SecondaryCard icon={FaTag} title="Releases">
+      {showReleases && snapshot.releases && snapshot.releases.length > 0 && (
+        <SecondaryCard icon={FaTag} title={<AnchorTitle title="Releases" />}>
           <ReleasesSection
             releases={snapshot.releases as ReleaseType[]}
             showAll={showAllReleases}
@@ -314,7 +337,7 @@ const SnapshotDetailsPage: React.FC = () => {
       )}
 
       {/* Activity */}
-      {snapshot.users && snapshot.users.length > 0 && (
+      {showUsers && snapshot.users && snapshot.users.length > 0 && (
         <ContributorsList
           contributors={snapshot.users as Contributor[]}
           title="Contributors"
@@ -325,187 +348,144 @@ const SnapshotDetailsPage: React.FC = () => {
         />
       )}
 
-      {snapshot.pullRequests && snapshot.pullRequests.length > 0 && (
-        <SecondaryCard icon={FaCodePullRequest} title="Pull Requests">
+      {showPullRequests && snapshot.pullRequests && snapshot.pullRequests.length > 0 && (
+        <SecondaryCard icon={FaCodePullRequest} title={<AnchorTitle title="Pull Requests" />}>
           <RecentPullRequests
             data={snapshot.pullRequests.slice(0, prVisibleCount) as PullRequest[]}
             showBadge
             showSingleColumn={false}
             bare
           />
-          {(hasMorePRs ||
-            snapshot.pullRequests.length > prVisibleCount ||
-            prVisibleCount > PR_LIMIT) && (
-            <div className="mt-4 flex justify-start gap-4">
-              {(hasMorePRs || snapshot.pullRequests.length > prVisibleCount) && (
-                <button
-                  disabled={isFetchingMorePRs}
-                  onClick={() => {
-                    if (isFetchingMorePRs) return
-                    const currentLength = snapshot.pullRequests?.length || 0
-                    if (hasMorePRs && currentLength < prVisibleCount + PR_LIMIT) {
-                      setIsFetchingMorePRs(true)
-                      fetchMorePRs({
-                        variables: {
-                          key: snapshotKey,
-                          offset: currentLength,
-                          limit: PR_LIMIT,
+          <PaginationButtons
+            onShowMore={() => {
+              if (isFetchingMorePRs) return
+              const currentLength = snapshot.pullRequests?.length || 0
+              if (hasMorePRs && currentLength < prVisibleCount + PR_LIMIT) {
+                setIsFetchingMorePRs(true)
+                fetchMorePRs({
+                  variables: {
+                    key: snapshotKey,
+                    offset: currentLength,
+                    limit: PR_LIMIT,
+                  },
+                })
+                  .then(({ data: prData }) => {
+                    const newPRs = prData?.snapshot?.pullRequests || []
+                    if (newPRs.length < PR_LIMIT) setHasMorePRs(false)
+                    if (newPRs.length > 0) {
+                      client.cache.updateQuery(
+                        {
+                          query: GetSnapshotDetailsDocument,
+                          variables: {
+                            key: snapshotKey,
+                            prLimit: PR_LIMIT,
+                            prOffset: 0,
+                            issueLimit: ISSUE_LIMIT,
+                            issueOffset: 0,
+                          },
                         },
-                      })
-                        .then(({ data: prData }) => {
-                          const newPRs = prData?.snapshot?.pullRequests || []
-                          if (newPRs.length < PR_LIMIT) setHasMorePRs(false)
-                          if (newPRs.length > 0) {
-                            client.cache.updateQuery(
-                              {
-                                query: GetSnapshotDetailsDocument,
-                                variables: {
-                                  key: snapshotKey,
-                                  prLimit: PR_LIMIT,
-                                  prOffset: 0,
-                                  issueLimit: ISSUE_LIMIT,
-                                  issueOffset: 0,
+                        (prev: GetSnapshotDetailsQuery | null) =>
+                          prev?.snapshot
+                            ? {
+                                ...prev,
+                                snapshot: {
+                                  ...prev.snapshot,
+                                  pullRequests: [...(prev.snapshot.pullRequests || []), ...newPRs],
                                 },
-                              },
-                              (prev: GetSnapshotDetailsQuery | null) =>
-                                prev?.snapshot
-                                  ? {
-                                      ...prev,
-                                      snapshot: {
-                                        ...prev.snapshot,
-                                        pullRequests: [
-                                          ...(prev.snapshot.pullRequests || []),
-                                          ...newPRs,
-                                        ],
-                                      },
-                                    }
-                                  : prev
-                            )
-                            setPrVisibleCount((prev) => prev + newPRs.length)
-                          }
-                        })
-                        .catch((err) => handleAppError(err))
-                        .finally(() => setIsFetchingMorePRs(false))
-                      return
+                              }
+                            : prev
+                      )
+                      setPrVisibleCount((prev) => prev + newPRs.length)
                     }
-                    setPrVisibleCount((prev) =>
-                      Math.min(snapshot.pullRequests.length, prev + PR_LIMIT)
-                    )
-                  }}
-                  type="button"
-                  className={`flex items-center bg-transparent px-2 py-1 text-sm text-blue-400 ${isFetchingMorePRs ? 'cursor-not-allowed opacity-50' : 'hover:underline'}`}
-                >
-                  {isFetchingMorePRs ? 'Loading...' : 'Show more'}{' '}
-                  <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
-                </button>
-              )}
-              {!isFetchingMorePRs &&
-                prVisibleCount > PR_LIMIT &&
-                snapshot.pullRequests.length > PR_LIMIT && (
-                  <button
-                    disabled={isFetchingMorePRs}
-                    onClick={() => setPrVisibleCount(PR_LIMIT)}
-                    type="button"
-                    className={`flex items-center bg-transparent px-2 py-1 text-sm text-blue-400 hover:underline ${isFetchingMorePRs ? 'cursor-not-allowed opacity-50' : ''}`}
-                  >
-                    Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
-                  </button>
-                )}
-            </div>
-          )}
+                  })
+                  .catch((err) => handleAppError(err))
+                  .finally(() => setIsFetchingMorePRs(false))
+                return
+              }
+              setPrVisibleCount((prev) => Math.min(snapshot.pullRequests.length, prev + PR_LIMIT))
+            }}
+            onShowLess={() => setPrVisibleCount(PR_LIMIT)}
+            showMore={hasMorePRs || snapshot.pullRequests.length > prVisibleCount}
+            showLess={
+              !isFetchingMorePRs &&
+              prVisibleCount > PR_LIMIT &&
+              snapshot.pullRequests.length > PR_LIMIT
+            }
+            isLoading={isFetchingMorePRs}
+          />
         </SecondaryCard>
       )}
 
-      {snapshot.issues && snapshot.issues.length > 0 && (
-        <SecondaryCard icon={FaCircleExclamation} title="Issues">
+      {showIssues && snapshot.issues && snapshot.issues.length > 0 && (
+        <SecondaryCard icon={FaCircleExclamation} title={<AnchorTitle title="Issues" />}>
           <RecentIssues
             data={snapshot.issues.slice(0, issueVisibleCount) as Issue[]}
             showBadge
             showSingleColumn={false}
             bare
           />
-          {(hasMoreIssues ||
-            snapshot.issues.length > issueVisibleCount ||
-            issueVisibleCount > ISSUE_LIMIT) && (
-            <div className="mt-4 flex justify-start gap-4">
-              {(hasMoreIssues || snapshot.issues.length > issueVisibleCount) && (
-                <button
-                  disabled={isFetchingMoreIssues}
-                  onClick={() => {
-                    if (isFetchingMoreIssues) return
-                    const currentLength = snapshot.issues?.length || 0
-                    if (hasMoreIssues && currentLength < issueVisibleCount + ISSUE_LIMIT) {
-                      setIsFetchingMoreIssues(true)
-                      fetchMoreIssues({
-                        variables: {
-                          key: snapshotKey,
-                          offset: currentLength,
-                          limit: ISSUE_LIMIT,
+          <PaginationButtons
+            onShowMore={() => {
+              if (isFetchingMoreIssues) return
+              const currentLength = snapshot.issues?.length || 0
+              if (hasMoreIssues && currentLength < issueVisibleCount + ISSUE_LIMIT) {
+                setIsFetchingMoreIssues(true)
+                fetchMoreIssues({
+                  variables: {
+                    key: snapshotKey,
+                    offset: currentLength,
+                    limit: ISSUE_LIMIT,
+                  },
+                })
+                  .then(({ data: issueData }) => {
+                    const newIssues = issueData?.snapshot?.issues || []
+                    if (newIssues.length < ISSUE_LIMIT) setHasMoreIssues(false)
+                    if (newIssues.length > 0) {
+                      client.cache.updateQuery(
+                        {
+                          query: GetSnapshotDetailsDocument,
+                          variables: {
+                            key: snapshotKey,
+                            prLimit: PR_LIMIT,
+                            prOffset: 0,
+                            issueLimit: ISSUE_LIMIT,
+                            issueOffset: 0,
+                          },
                         },
-                      })
-                        .then(({ data: issueData }) => {
-                          const newIssues = issueData?.snapshot?.issues || []
-                          if (newIssues.length < ISSUE_LIMIT) setHasMoreIssues(false)
-                          if (newIssues.length > 0) {
-                            client.cache.updateQuery(
-                              {
-                                query: GetSnapshotDetailsDocument,
-                                variables: {
-                                  key: snapshotKey,
-                                  prLimit: PR_LIMIT,
-                                  prOffset: 0,
-                                  issueLimit: ISSUE_LIMIT,
-                                  issueOffset: 0,
+                        (prev: GetSnapshotDetailsQuery | null) =>
+                          prev?.snapshot
+                            ? {
+                                ...prev,
+                                snapshot: {
+                                  ...prev.snapshot,
+                                  issues: [...(prev.snapshot.issues || []), ...newIssues],
                                 },
-                              },
-                              (prev: GetSnapshotDetailsQuery | null) =>
-                                prev?.snapshot
-                                  ? {
-                                      ...prev,
-                                      snapshot: {
-                                        ...prev.snapshot,
-                                        issues: [...(prev.snapshot.issues || []), ...newIssues],
-                                      },
-                                    }
-                                  : prev
-                            )
-                            setIssueVisibleCount((prev) => prev + newIssues.length)
-                          }
-                        })
-                        .catch((err) => handleAppError(err))
-                        .finally(() => setIsFetchingMoreIssues(false))
-                      return
+                              }
+                            : prev
+                      )
+                      setIssueVisibleCount((prev) => prev + newIssues.length)
                     }
-                    setIssueVisibleCount((prev) =>
-                      Math.min(snapshot.issues.length, prev + ISSUE_LIMIT)
-                    )
-                  }}
-                  type="button"
-                  className={`flex items-center bg-transparent px-2 py-1 text-sm text-blue-400 ${isFetchingMoreIssues ? 'cursor-not-allowed opacity-50' : 'hover:underline'}`}
-                >
-                  {isFetchingMoreIssues ? 'Loading...' : 'Show more'}{' '}
-                  <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
-                </button>
-              )}
-              {!isFetchingMoreIssues &&
-                issueVisibleCount > ISSUE_LIMIT &&
-                snapshot.issues.length > ISSUE_LIMIT && (
-                  <button
-                    disabled={isFetchingMoreIssues}
-                    onClick={() => setIssueVisibleCount(ISSUE_LIMIT)}
-                    type="button"
-                    className={`flex items-center bg-transparent px-2 py-1 text-sm text-blue-400 hover:underline ${isFetchingMoreIssues ? 'cursor-not-allowed opacity-50' : ''}`}
-                  >
-                    Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
-                  </button>
-                )}
-            </div>
-          )}
+                  })
+                  .catch((err) => handleAppError(err))
+                  .finally(() => setIsFetchingMoreIssues(false))
+                return
+              }
+              setIssueVisibleCount((prev) => Math.min(snapshot.issues.length, prev + ISSUE_LIMIT))
+            }}
+            onShowLess={() => setIssueVisibleCount(ISSUE_LIMIT)}
+            showMore={hasMoreIssues || snapshot.issues.length > issueVisibleCount}
+            showLess={
+              !isFetchingMoreIssues &&
+              issueVisibleCount > ISSUE_LIMIT &&
+              snapshot.issues.length > ISSUE_LIMIT
+            }
+            isLoading={isFetchingMoreIssues}
+          />
         </SecondaryCard>
       )}
 
-      {snapshot.posts && snapshot.posts.length > 0 && (
-        <SecondaryCard icon={FaNewspaper} title="Posts">
+      {showPosts && snapshot.posts && snapshot.posts.length > 0 && (
+        <SecondaryCard icon={FaNewspaper} title={<AnchorTitle title="Posts" />}>
           <div className="flex flex-col gap-4">
             {snapshot.posts.slice(0, showAllPosts ? undefined : POSTS_INITIAL).map((post) => (
               <PostCard key={post.id} post={post} />
@@ -518,6 +498,32 @@ const SnapshotDetailsPage: React.FC = () => {
             />
           )}
         </SecondaryCard>
+      )}
+
+      {subscription?.entitySections && subscription.entitySections.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-6 text-2xl font-bold text-gray-700 dark:text-gray-200">
+            Your Subscribed Entities
+          </h2>
+          {subscription.entitySections.map((section) => {
+            const repoNames = subscription.subscribedProjects?.find(
+              (p) => p.key === section.entityKey
+            )?.repositoryNames || [section.entityKey]
+
+            return (
+              <SnapshotEntitySection
+                key={section.entityKey}
+                snapshotKey={snapshotKey}
+                entityName={section.entityName}
+                entityType={section.entityType}
+                repositoryNames={repoNames}
+                releases={section.releases as ReleaseType[]}
+                initialPRs={section.pullRequests as PullRequest[]}
+                initialIssues={section.issues as Issue[]}
+              />
+            )
+          })}
+        </div>
       )}
     </div>
   )
