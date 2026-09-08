@@ -403,4 +403,30 @@ describe('Contribute Component', () => {
       ).toBeInTheDocument()
     })
   })
+
+  test('does not describe a backend body fallback as AI-generated', async () => {
+    const issueWithBackendBodyFallback = {
+      ...mockContributeData.issues[0],
+      body: 'This is the original issue description.',
+      summary: 'This is the original issue description.',
+      summaryIsAiGenerated: false,
+    }
+
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [issueWithBackendBodyFallback],
+      totalPages: 1,
+    })
+
+    render(<ContributePage />)
+
+    fireEvent.click(await screen.findByText('Read More'))
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'The issue description is shown because an AI-generated summary is unavailable.'
+        )
+      ).toBeInTheDocument()
+    })
+  })
 })

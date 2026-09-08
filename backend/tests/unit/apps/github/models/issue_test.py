@@ -83,6 +83,7 @@ class TestIssueModel:
         mock_openai_instance.set_max_tokens.assert_called_once_with(500)
         mock_openai_instance.set_prompt.assert_called_once_with("Summarize the following issue")
         assert issue.summary == "This is a summary."
+        assert issue.summary_is_ai_generated is True
 
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
     def test_generate_summary_no_prompt(self, mock_get_prompt, issue):
@@ -92,6 +93,7 @@ class TestIssueModel:
         issue.generate_summary()
 
         assert issue.summary == "Test Body"
+        assert issue.summary_is_ai_generated is False
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
@@ -108,6 +110,7 @@ class TestIssueModel:
         issue.generate_summary()
 
         assert issue.summary == "Test Body"
+        assert issue.summary_is_ai_generated is False
 
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
     def test_generate_summary_uses_explicit_message_when_body_is_empty(
@@ -138,6 +141,7 @@ class TestIssueModel:
         issue.generate_summary()
 
         assert issue.summary == "Test Body"
+        assert issue.summary_is_ai_generated is False
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
@@ -156,6 +160,7 @@ class TestIssueModel:
         issue.generate_summary()
 
         assert issue.summary == "Test Body"
+        assert issue.summary_is_ai_generated is False
 
     def test_generate_summary_skips_non_indexable_issue(self, issue):
         issue.id = None
@@ -165,6 +170,7 @@ class TestIssueModel:
 
         mock_openai.assert_not_called()
         assert issue.summary == ""
+        assert issue.summary_is_ai_generated is False
 
     def test_save_generates_summary_after_persisting_new_issue(self, issue):
         """Generate summary only after a new issue receives a database ID."""
@@ -176,6 +182,7 @@ class TestIssueModel:
         def generate_summary():
             assert issue.id == 1
             issue.summary = "Generated issue summary"
+            issue.summary_is_ai_generated = True
 
         issue.generate_summary = Mock(side_effect=generate_summary)
 
@@ -192,7 +199,7 @@ class TestIssueModel:
         assert mock_parent_save.call_count == 2
         assert mock_parent_save.call_args_list[1].kwargs == {
             "using": "default",
-            "update_fields": ["summary"],
+            "update_fields": ["summary", "summary_is_ai_generated"],
         }
 
     def test_save_does_not_generate_fields_outside_update_fields(self, issue):
@@ -216,14 +223,20 @@ class TestIssueModel:
         issue.summary = ""
 
         issue.generate_summary = Mock(
-            side_effect=lambda: setattr(issue, "summary", "Generated summary")
+            side_effect=lambda: (
+                setattr(issue, "summary", "Generated summary"),
+                setattr(issue, "summary_is_ai_generated", True),
+            )
         )
 
         with patch("apps.github.models.issue.BulkSaveModel.save") as mock_parent_save:
             issue.save(update_fields=["summary"])
 
         issue.generate_summary.assert_called_once()
-        assert mock_parent_save.call_count == 2
+        assert mock_parent_save.call_args_list[1].kwargs == {
+            "using": issue._state.db,
+            "update_fields": ["summary", "summary_is_ai_generated"],
+        }
 
     def test_save_uses_original_database_alias(self, issue):
         """Use the database alias from the initial save for generated fields."""
@@ -231,7 +244,10 @@ class TestIssueModel:
         issue.summary = ""
 
         issue.generate_summary = Mock(
-            side_effect=lambda: setattr(issue, "summary", "Generated summary")
+            side_effect=lambda: (
+                setattr(issue, "summary", "Generated summary"),
+                setattr(issue, "summary_is_ai_generated", True),
+            )
         )
 
         def save_and_set_db(*_args, **kwargs):
@@ -247,7 +263,7 @@ class TestIssueModel:
         assert mock_parent_save.call_count == 2
         assert mock_parent_save.call_args_list[1].kwargs == {
             "using": "replica",
-            "update_fields": ["summary"],
+            "update_fields": ["summary", "summary_is_ai_generated"],
         }
 
     @patch("apps.github.models.issue.OpenAi")
@@ -346,6 +362,7 @@ class TestIssueModel:
 
         issue.hint = "Test Hint" if has_hint else ""
         issue.summary = "Test Summary" if has_summary else ""
+        issue.summary_is_ai_generated = has_summary
 
         with patch("apps.github.models.issue.BulkSaveModel.save"):
             issue.save()

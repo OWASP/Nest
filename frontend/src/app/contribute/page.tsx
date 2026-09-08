@@ -9,6 +9,8 @@ import Card from 'components/Card'
 import DialogComp from 'components/Modal'
 import SearchPageLayout from 'components/SearchPageLayout'
 
+const FALLBACK_SUMMARY_TEXT = 'No summary available'
+
 const ContributePage = () => {
   const {
     items: issues,
@@ -28,10 +30,15 @@ const ContributePage = () => {
   const renderContributeCard = (issue: Issue, index: number) => {
     const params: string[] = ['createdAt', 'commentsCount']
     const filteredIcons = getFilteredIcons(issue, params)
-    const issueSummary = issue.summary?.trim() || issue.body?.trim() || 'No summary available'
 
-    const hasSummary = Boolean(issue.summary?.trim())
-    const hasDescription = Boolean(issue.body?.trim())
+    const trimmedSummary = issue.summary?.trim() ?? ''
+    const trimmedBody = issue.body?.trim() ?? ''
+
+    const issueSummary = trimmedSummary || trimmedBody || FALLBACK_SUMMARY_TEXT
+
+    const hasSummary = issue.summaryIsAiGenerated === true
+    const hasDescription = Boolean(trimmedBody)
+
     let dialogDescription = 'No summary or description is available for this issue.'
 
     if (hasSummary) {
