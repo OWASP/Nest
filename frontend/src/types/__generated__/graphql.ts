@@ -336,7 +336,7 @@ export type ModuleNode = {
   interestedUsers: Array<UserNode>;
   issueByNumber?: Maybe<IssueNode>;
   issueMentees: Array<UserNode>;
-  issues: Array<IssueNode>;
+  recentIssues: Array<IssueNode>;
   issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
@@ -1049,7 +1049,7 @@ export type RepositoryNode = Node & {
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   isArchived: Scalars['Boolean']['output'];
-  issues: Array<IssueNode>;
+  recentIssues: Array<IssueNode>;
   key: Scalars['String']['output'];
   languages: Array<Scalars['String']['output']>;
   latestRelease?: Maybe<Scalars['String']['output']>;
