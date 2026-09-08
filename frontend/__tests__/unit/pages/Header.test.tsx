@@ -716,6 +716,7 @@ describe('Header Component', () => {
 
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       fireEvent.click(toggleButton)
+      expect(isMobileMenuOpen()).toBe(true)
 
       const drawerActions = document.getElementById('mobile-drawer-actions')
       expect(drawerActions).not.toBeNull()
