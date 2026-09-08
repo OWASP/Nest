@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from apps.common.utils import truncate
+
+BODY_MAX_LENGTH = 1000
+
 
 class IssueIndexMixin:
     """Issue index mixin."""
@@ -126,8 +130,8 @@ class IssueIndexMixin:
 
     @property
     def idx_body(self) -> str:
-        """Return issue description for indexing."""
-        return self.body
+        """Return truncated issue description for indexing."""
+        return truncate(self.body, limit=BODY_MAX_LENGTH)
 
     @property
     def idx_title(self) -> str:
