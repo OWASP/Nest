@@ -10,7 +10,7 @@ from apps.owasp.models.enums.project import ProjectLevel
 
 
 @tool("Get all OWASP flagship projects")
-def get_flagship_projects(limit: int = 10) -> str:
+def get_flagship_projects(limit: int = 30) -> str:
     """Get all OWASP flagship projects.
 
     Flagship projects are the highest maturity level in OWASP,
@@ -40,5 +40,5 @@ def get_flagship_projects(limit: int = 10) -> str:
             isinstance(level_value, str) and level_value.lower() == ProjectLevel.FLAGSHIP.lower()  # type: ignore[attr-defined]
         ):
             flagship.append(p)
-
-    return format_project_results(flagship[:limit], "Flagship")
+    safe_limit = max(1, min(limit , 30))  # edge case
+    return format_project_results(flagship[:safe_limit], "Flagship")
