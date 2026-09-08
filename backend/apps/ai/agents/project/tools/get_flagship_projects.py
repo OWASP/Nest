@@ -40,5 +40,5 @@ def get_flagship_projects(limit: int = 15) -> str:
             isinstance(level_value, str) and level_value.lower() == ProjectLevel.FLAGSHIP.lower()  # type: ignore[attr-defined]
         ):
             flagship.append(p)
-    safe_limit = max(1, min(limit , 30))  # edge case
+    safe_limit = max(1, min(limit, 30))  # edge case
     return format_project_results(flagship[:safe_limit], "Flagship")
