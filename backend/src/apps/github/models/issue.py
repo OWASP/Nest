@@ -202,7 +202,7 @@ class Issue(GenericIssueModel):
     def save(self, *args, **kwargs) -> None:
         """Save issue and generate missing AI fields after it has a database ID."""
         missing_hint = self.is_open and not self.hint
-        missing_summary = self.is_open and not self.summary
+        missing_summary = self.is_open and not self.summary.strip()
         requested_fields = kwargs.get("update_fields")
         if requested_fields is not None:
             requested_fields = list(requested_fields)
