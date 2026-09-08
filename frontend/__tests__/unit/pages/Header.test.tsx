@@ -1205,7 +1205,7 @@ describe('Header Component', () => {
 
       // Verify they have click handlers
       const mobileSubmenuLink = submenuLinks.find(
-        (link) => link.closest('.fixed.inset-y-0') !== null
+        (link) => link.closest('#mobile-drawer') !== null
       )
       expect(mobileSubmenuLink).toBeDefined()
     })

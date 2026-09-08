@@ -174,7 +174,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       <div
         id="mobile-drawer"
         className={cn(
-          'bg-owasp-blue fixed inset-y-0 left-0 z-40 w-64 transform shadow-md transition-transform lg:hidden dark:bg-slate-800',
+          'bg-owasp-blue fixed top-16 bottom-0 left-0 z-40 w-64 transform shadow-md transition-transform lg:hidden dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
