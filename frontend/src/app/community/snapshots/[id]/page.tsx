@@ -61,22 +61,21 @@ const SnapshotDetailsPage: React.FC = () => {
   const searchParams = useSearchParams()
   const subscriptionToken = searchParams.get('subscription')
 
-  const { data: subscriptionData } = useQuery<GetSubscriptionByTokenQuery>(
-    GET_SUBSCRIPTION_BY_TOKEN,
-    {
+  const { data: subscriptionData, loading: subscriptionLoading } =
+    useQuery<GetSubscriptionByTokenQuery>(GET_SUBSCRIPTION_BY_TOKEN, {
       variables: { token: subscriptionToken ?? '', snapshotKey },
       skip: !subscriptionToken,
-    }
-  )
+    })
   const subscription = subscriptionData?.subscriptionByToken
-  const showChapters = !subscription || subscription.includeChapters
-  const showEvents = !subscription || subscription.includeEvents
-  const showIssues = !subscription || subscription.includeIssues
-  const showPosts = !subscription || subscription.includePosts
-  const showProjects = !subscription || subscription.includeProjects
-  const showPullRequests = !subscription || subscription.includePullRequests
-  const showReleases = !subscription || subscription.includeReleases
-  const showUsers = !subscription || subscription.includeUsers
+  const isSubscriptionReady = !subscriptionToken || !subscriptionLoading
+  const showChapters = !isSubscriptionReady || !subscription || subscription.includeChapters
+  const showEvents = !isSubscriptionReady || !subscription || subscription.includeEvents
+  const showIssues = !isSubscriptionReady || !subscription || subscription.includeIssues
+  const showPosts = !isSubscriptionReady || !subscription || subscription.includePosts
+  const showProjects = !isSubscriptionReady || !subscription || subscription.includeProjects
+  const showPullRequests = !isSubscriptionReady || !subscription || subscription.includePullRequests
+  const showReleases = !isSubscriptionReady || !subscription || subscription.includeReleases
+  const showUsers = !isSubscriptionReady || !subscription || subscription.includeUsers
 
   const [showAllReleases, setShowAllReleases] = useState(false)
   const [showAllChapters, setShowAllChapters] = useState(false)
@@ -506,20 +505,24 @@ const SnapshotDetailsPage: React.FC = () => {
             Your Subscribed Entities
           </h2>
           {subscription.entitySections.map((section) => {
-            const repoNames = subscription.subscribedProjects?.find(
+            const matchedRepoNames = subscription.subscribedProjects?.find(
               (p) => p.key === section.entityKey
-            )?.repositoryNames || [section.entityKey]
+            )?.repositoryNames
+            const repoNames =
+              matchedRepoNames && matchedRepoNames.length > 0
+                ? matchedRepoNames
+                : [section.entityKey]
 
             return (
               <SnapshotEntitySection
-                key={section.entityKey}
+                key={`${section.entityType}-${section.entityKey}`}
                 snapshotKey={snapshotKey}
                 entityName={section.entityName}
                 entityType={section.entityType}
                 repositoryNames={repoNames}
-                releases={section.releases as ReleaseType[]}
-                initialPRs={section.pullRequests as PullRequest[]}
-                initialIssues={section.issues as Issue[]}
+                releases={showReleases ? (section.releases as ReleaseType[]) : []}
+                initialPRs={showPullRequests ? (section.pullRequests as PullRequest[]) : []}
+                initialIssues={showIssues ? (section.issues as Issue[]) : []}
               />
             )
           })}

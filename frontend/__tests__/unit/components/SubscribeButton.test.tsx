@@ -605,7 +605,7 @@ describe('SubscribeButton', () => {
     })
   })
 
-  describe('Modal Close Handler', () => {
+  describe('Subscription Modal Form State', () => {
     test('does not add when no subscription is selected', async () => {
       const existingSubscriptions = [
         {
@@ -625,6 +625,9 @@ describe('SubscribeButton', () => {
 
       const addButton = screen.getByText('Add to Subscription')
       expect(addButton.closest('button')).toBeDisabled()
+      fireEvent.click(addButton)
+      expect(mockUpdateMutation).not.toHaveBeenCalled()
+      expect(mockCreateMutation).not.toHaveBeenCalled()
     })
 
     test('allows typing in the name input field', () => {

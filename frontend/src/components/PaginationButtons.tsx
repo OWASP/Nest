@@ -6,6 +6,7 @@ interface PaginationButtonsProps {
   showMore: boolean
   showLess: boolean
   isLoading: boolean
+  isExpanded?: boolean
 }
 
 const PaginationButtons = ({
@@ -14,13 +15,17 @@ const PaginationButtons = ({
   showMore,
   showLess,
   isLoading,
+  isExpanded,
 }: PaginationButtonsProps) => {
   if (!showMore && !showLess) return null
+
+  const expandedState = isExpanded ?? showLess
 
   return (
     <div className="mt-4 flex justify-start gap-4">
       {showMore && (
         <button
+          aria-expanded={expandedState}
           disabled={isLoading}
           onClick={onShowMore}
           type="button"
@@ -32,6 +37,7 @@ const PaginationButtons = ({
       )}
       {showLess && (
         <button
+          aria-expanded={expandedState}
           disabled={isLoading}
           onClick={onShowLess}
           type="button"

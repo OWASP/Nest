@@ -1,6 +1,10 @@
 import { useLazyQuery } from '@apollo/client/react'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
+import {
+  GetSnapshotEntityIssuesDocument,
+  GetSnapshotEntityPullRequestsDocument,
+} from 'types/__generated__/snapshotQueries.generated'
 import SnapshotEntitySection from 'components/SnapshotEntitySection'
 
 jest.mock('@apollo/client/react', () => ({
@@ -114,14 +118,14 @@ describe('SnapshotEntitySection', () => {
     render(<SnapshotEntitySection {...defaultProps} />)
     const prSection = screen.getByText('Pull Requests').closest('div')
     expect(prSection).toBeTruthy()
-    const showMoreButtons = screen.getAllByText('Show more')
-    expect(showMoreButtons.length).toBeGreaterThanOrEqual(1)
+    expect(within(prSection!).getByText('Show more')).toBeInTheDocument()
   })
 
   it('shows Show more button for issues when there are more than 6', () => {
     render(<SnapshotEntitySection {...defaultProps} />)
-    const showMoreButtons = screen.getAllByText('Show more')
-    expect(showMoreButtons.length).toBeGreaterThanOrEqual(1)
+    const issueSection = screen.getByText('Issues').closest('div')
+    expect(issueSection).toBeTruthy()
+    expect(within(issueSection!).getByText('Show more')).toBeInTheDocument()
   })
 
   it('hides sections when data arrays are empty', () => {
@@ -209,7 +213,11 @@ describe('SnapshotEntitySection', () => {
         },
       },
     })
-    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchPRs])
+    ;(useLazyQuery as unknown as jest.Mock).mockImplementation((document) =>
+      document === GetSnapshotEntityPullRequestsDocument
+        ? [mockFetchPRs]
+        : [jest.fn().mockResolvedValue({ data: {} })]
+    )
 
     render(
       <SnapshotEntitySection
@@ -229,6 +237,14 @@ describe('SnapshotEntitySection', () => {
 
     await waitFor(() => {
       expect(mockFetchPRs).toHaveBeenCalled()
+    })
+    expect(mockFetchPRs).toHaveBeenCalledWith({
+      variables: {
+        key: '2024-12',
+        limit: 6,
+        offset: 6,
+        repositoryNames: ['nest'],
+      },
     })
     await waitFor(() => {
       expect(screen.getByText('New Fetched PR')).toBeInTheDocument()
@@ -253,9 +269,11 @@ describe('SnapshotEntitySection', () => {
         },
       },
     })
-    ;(useLazyQuery as unknown as jest.Mock)
-      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
-      .mockReturnValueOnce([mockFetchIssues])
+    ;(useLazyQuery as unknown as jest.Mock).mockImplementation((document) =>
+      document === GetSnapshotEntityIssuesDocument
+        ? [mockFetchIssues]
+        : [jest.fn().mockResolvedValue({ data: {} })]
+    )
 
     render(
       <SnapshotEntitySection
@@ -305,13 +323,20 @@ describe('SnapshotEntitySection', () => {
     await waitFor(() => {
       expect(mockFetchPRs).toHaveBeenCalled()
     })
+
+    await waitFor(() => {
+      expect(screen.getByText('Show more')).toBeInTheDocument()
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    })
   })
 
   it('handles issue fetch error gracefully', async () => {
     const mockFetchIssues = jest.fn().mockRejectedValue(new Error('Network error'))
-    ;(useLazyQuery as unknown as jest.Mock)
-      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
-      .mockReturnValueOnce([mockFetchIssues])
+    ;(useLazyQuery as unknown as jest.Mock).mockImplementation((document) =>
+      document === GetSnapshotEntityIssuesDocument
+        ? [mockFetchIssues]
+        : [jest.fn().mockResolvedValue({ data: {} })]
+    )
 
     render(
       <SnapshotEntitySection
@@ -331,6 +356,11 @@ describe('SnapshotEntitySection', () => {
 
     await waitFor(() => {
       expect(mockFetchIssues).toHaveBeenCalled()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Show more')).toBeInTheDocument()
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
     })
   })
 
@@ -482,9 +512,11 @@ describe('SnapshotEntitySection', () => {
     const mockFetchIssues = jest.fn().mockResolvedValue({
       data: { snapshot: { issues: [] } },
     })
-    ;(useLazyQuery as unknown as jest.Mock)
-      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
-      .mockReturnValueOnce([mockFetchIssues])
+    ;(useLazyQuery as unknown as jest.Mock).mockImplementation((document) =>
+      document === GetSnapshotEntityIssuesDocument
+        ? [mockFetchIssues]
+        : [jest.fn().mockResolvedValue({ data: {} })]
+    )
 
     render(
       <SnapshotEntitySection
@@ -534,9 +566,11 @@ describe('SnapshotEntitySection', () => {
     const mockFetchIssues = jest.fn().mockResolvedValue({
       data: { snapshot: { issues: null } },
     })
-    ;(useLazyQuery as unknown as jest.Mock)
-      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
-      .mockReturnValueOnce([mockFetchIssues])
+    ;(useLazyQuery as unknown as jest.Mock).mockImplementation((document) =>
+      document === GetSnapshotEntityIssuesDocument
+        ? [mockFetchIssues]
+        : [jest.fn().mockResolvedValue({ data: {} })]
+    )
 
     render(
       <SnapshotEntitySection

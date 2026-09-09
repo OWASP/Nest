@@ -61,8 +61,8 @@ class SnapshotNode(strawberry.relay.Node):
         queryset = root.issues.prefetch_related(MERGED_PULL_REQUESTS_PREFETCH).order_by(
             "-created_at"
         )
-        if repository_names:
-            queryset = queryset.filter(repository__name__in=repository_names)
+        if repository_names is not None:
+            queryset = queryset.filter(repository__name__in=repository_names[:MAX_LIMIT])
         return SnapshotNode._slice_related(queryset, limit, offset)
 
     @strawberry_django.field(prefetch_related=["posts"])
@@ -85,8 +85,8 @@ class SnapshotNode(strawberry.relay.Node):
     ) -> list[PullRequestNode]:
         """Resolve pull requests."""
         queryset = root.pull_requests.order_by("-created_at")
-        if repository_names:
-            queryset = queryset.filter(repository__name__in=repository_names)
+        if repository_names is not None:
+            queryset = queryset.filter(repository__name__in=repository_names[:MAX_LIMIT])
         return SnapshotNode._slice_related(queryset, limit, offset)
 
     @strawberry_django.field(prefetch_related=["releases"])

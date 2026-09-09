@@ -2,6 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
+from django.core.exceptions import ValidationError
+
 from apps.owasp.api.internal.queries.snapshot_subscription import SnapshotSubscriptionQuery
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
@@ -30,6 +32,7 @@ class TestSnapshotSubscriptionQuery:
             field.name for field in SnapshotSubscriptionQuery.__strawberry_definition__.fields
         ]
         assert "my_snapshot_subscriptions" in field_names
+        assert "subscription_by_token" in field_names
 
     def test_my_snapshot_subscriptions_unauthenticated(self):
         """Test my_snapshot_subscriptions returns empty list for unauthenticated user."""
@@ -54,8 +57,7 @@ class TestSnapshotSubscriptionQuery:
 
     def _resolve_subscription_by_token(self, token):
         """Invoke the underlying resolver for subscription_by_token."""
-        field = SnapshotSubscriptionQuery.__dict__["subscription_by_token"]
-        return field(self.query, token=token)
+        return self.query.subscription_by_token(token=token)
 
     @patch("apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects")
     def test_subscription_by_token_found(self, mock_objects):
@@ -78,4 +80,11 @@ class TestSnapshotSubscriptionQuery:
         """Test subscription_by_token returns None for invalid UUID."""
         mock_objects.get.side_effect = ValueError("invalid UUID")
         result = self._resolve_subscription_by_token("not-a-uuid")
+        assert result is None
+
+    @patch("apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects")
+    def test_subscription_by_token_validation_error(self, mock_objects):
+        """Test subscription_by_token returns None when ValidationError is raised."""
+        mock_objects.get.side_effect = ValidationError("Invalid UUID")
+        result = self._resolve_subscription_by_token("not-a-valid-uuid")
         assert result is None

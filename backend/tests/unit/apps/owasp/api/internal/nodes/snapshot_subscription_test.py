@@ -214,9 +214,53 @@ class TestSnapshotSubscriptionNodeResolvers:
         for attr in ("pull_requests", "issues", "releases"):
             qs = MagicMock()
             qs_prefetch = qs.filter.return_value.order_by.return_value.prefetch_related
-            qs_prefetch.return_value.__getitem__ = lambda _, _s: []
             qs_prefetch.return_value = []
             setattr(mock_snapshot, attr, qs)
 
         result = resolver(None, mock_sub, snapshot_key="2025")
         assert result == []
+
+    @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
+    def test_entity_sections_with_chapter_and_committee(self, mock_snapshot_model):
+        """Test entity_sections resolver handles chapters and committees."""
+        resolver = self._get_resolver("entity_sections")
+
+        mock_snapshot = MagicMock()
+        mock_snapshot_model.objects.get.return_value = mock_snapshot
+
+        mock_sub = MagicMock()
+        mock_sub.subscribed_projects.all.return_value = []
+
+        mock_chapter = MagicMock()
+        mock_chapter.key = "www-chapter-london"
+        mock_chapter.name = "OWASP London"
+        mock_chapter.owasp_repository = MagicMock()
+        mock_chapter.owasp_repository.name = "www-chapter-london"
+        mock_sub.subscribed_chapters.all.return_value = [mock_chapter]
+
+        mock_committee = MagicMock()
+        mock_committee.key = "www-committee-test"
+        mock_committee.name = "Women in AppSec"
+        mock_committee.owasp_repository = MagicMock()
+        mock_committee.owasp_repository.name = "www-committee-test"
+        mock_sub.subscribed_committees.all.return_value = [mock_committee]
+
+        mock_release = MagicMock()
+        for attr in ("pull_requests", "issues"):
+            qs = MagicMock()
+            qs_prefetch = qs.filter.return_value.order_by.return_value.prefetch_related
+            qs_prefetch.return_value.__getitem__ = lambda _, _s: []
+            setattr(mock_snapshot, attr, qs)
+
+        release_qs = MagicMock()
+        release_prefetch = release_qs.filter.return_value.order_by.return_value.prefetch_related
+        release_prefetch.return_value.__getitem__ = lambda _, _s: [mock_release]
+        mock_snapshot.releases = release_qs
+
+        result = resolver(None, mock_sub, snapshot_key="2025")
+        assert len(result) == 2
+        assert result[0].entity_key == "www-chapter-london"
+        assert result[0].entity_type == "Chapter"
+        assert result[0].releases == [mock_release]
+        assert result[1].entity_key == "www-committee-test"
+        assert result[1].entity_type == "Committee"

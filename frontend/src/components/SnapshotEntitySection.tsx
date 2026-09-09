@@ -47,17 +47,15 @@ const SnapshotEntitySection = ({
   const [isFetchingMoreIssues, setIsFetchingMoreIssues] = useState(false)
 
   useEffect(() => {
-    if (initialPRs.length > 0) {
-      setEntityPRs(initialPRs)
-      setHasMorePRs(initialPRs.length >= PR_LIMIT)
-    }
+    setEntityPRs(initialPRs)
+    setPrVisibleCount(PR_LIMIT)
+    setHasMorePRs(initialPRs.length >= PR_LIMIT)
   }, [initialPRs])
 
   useEffect(() => {
-    if (initialIssues.length > 0) {
-      setEntityIssues(initialIssues)
-      setHasMoreIssues(initialIssues.length >= ISSUE_LIMIT)
-    }
+    setEntityIssues(initialIssues)
+    setIssueVisibleCount(ISSUE_LIMIT)
+    setHasMoreIssues(initialIssues.length >= ISSUE_LIMIT)
   }, [initialIssues])
   const [showAllReleases, setShowAllReleases] = useState(false)
 

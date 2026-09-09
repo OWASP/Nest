@@ -994,11 +994,12 @@ describe('SnapshotDetailsPage', () => {
       expect(mockFetchMorePRs).toHaveBeenCalled()
     })
 
-    await waitFor(() => {
-      const prShowMore2 = findButtonInSection('Show more', 'Pull Requests')
-      expect(prShowMore2).toBeDefined()
-      if (prShowMore2) fireEvent.click(prShowMore2)
+    const prShowMore2 = await waitFor(() => {
+      const btn = findButtonInSection('Show more', 'Pull Requests')
+      expect(btn).toBeDefined()
+      return btn
     })
+    if (prShowMore2) fireEvent.click(prShowMore2)
 
     await waitFor(() => {
       expect(screen.getByText('PR Seven')).toBeInTheDocument()
@@ -1031,11 +1032,12 @@ describe('SnapshotDetailsPage', () => {
       expect(mockFetchMoreIssues).toHaveBeenCalled()
     })
 
-    await waitFor(() => {
-      const issueShowMore2 = findButtonInSection('Show more', 'Issues')
-      expect(issueShowMore2).toBeDefined()
-      if (issueShowMore2) fireEvent.click(issueShowMore2)
+    const issueShowMore2 = await waitFor(() => {
+      const btn = findButtonInSection('Show more', 'Issues')
+      expect(btn).toBeDefined()
+      return btn
     })
+    if (issueShowMore2) fireEvent.click(issueShowMore2)
 
     await waitFor(() => {
       expect(screen.getByText('Issue Seven')).toBeInTheDocument()

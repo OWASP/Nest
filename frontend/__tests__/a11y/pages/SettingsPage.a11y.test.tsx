@@ -17,9 +17,10 @@ jest.mock('@apollo/client/react', () => ({
 }))
 
 jest.mock('lodash/debounce', () => {
-  return () => {
+  return (_fn: (...args: unknown[]) => unknown) => {
     const debounced = () => {}
     debounced.cancel = jest.fn()
+    debounced.flush = jest.fn()
     return debounced
   }
 })

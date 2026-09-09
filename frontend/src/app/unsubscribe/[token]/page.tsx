@@ -16,6 +16,7 @@ const UnsubscribePage = () => {
   const router = useRouter()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
+  const [errorCode, setErrorCode] = useState(500)
   const hasRun = useRef(false)
 
   const [unsubscribe] = useMutation<{
@@ -33,11 +34,13 @@ const UnsubscribePage = () => {
           setMessage('You have been successfully unsubscribed.')
         } else {
           setStatus('error')
+          setErrorCode(400)
           setMessage(data?.unsubscribeByToken?.message || 'Failed to unsubscribe.')
         }
       })
       .catch(() => {
         setStatus('error')
+        setErrorCode(500)
         setMessage('Something went wrong. Please try again later.')
       })
   }, [token, unsubscribe])
@@ -47,7 +50,7 @@ const UnsubscribePage = () => {
   }
 
   if (status === 'error') {
-    return <ErrorDisplay statusCode={500} title="Unsubscribe Failed" message={message} />
+    return <ErrorDisplay statusCode={errorCode} title="Unsubscribe Failed" message={message} />
   }
 
   return (

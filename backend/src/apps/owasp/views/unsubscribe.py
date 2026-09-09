@@ -18,8 +18,21 @@ class OneClickUnsubscribeView(View):
         return self.unsubscribe(token)
 
     def get(self, request, token):
-        """Handle GET request for browser-based unsubscribe."""
-        return self.unsubscribe(token)
+        """Return a confirmation page for browser-based unsubscribe."""
+        subscription = self.find_subscription(token)
+        if subscription is None:
+            return HttpResponse(status=404)
+
+        return HttpResponse(
+            "<html><body>"
+            "<h2>Confirm Unsubscribe</h2>"
+            "<p>Click the button below to unsubscribe from OWASP Nest snapshots.</p>"
+            f'<form method="post" action="/unsubscribe/{token}/">'
+            '<button type="submit">Unsubscribe</button>'
+            "</form>"
+            "</body></html>",
+            content_type="text/html",
+        )
 
     def unsubscribe(self, token):
         """Delete the subscription matching the given token."""

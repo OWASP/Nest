@@ -87,8 +87,8 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
     @strawberry_django.field(
         prefetch_related=[
             "subscribed_projects__repositories",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "subscribed_chapters__owasp_repository",
+            "subscribed_committees__owasp_repository",
         ]
     )
     def entity_sections(
@@ -115,11 +115,23 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
             entities.append(("Project", p.key, p.name, repo_names))
 
         entities.extend(
-            ("Chapter", c.key, c.name, [c.key]) for c in root.subscribed_chapters.all()
+            (
+                "Chapter",
+                c.key,
+                c.name,
+                [c.owasp_repository.name] if c.owasp_repository else [],
+            )
+            for c in root.subscribed_chapters.all()
         )
 
         entities.extend(
-            ("Committee", c.key, c.name, [c.key]) for c in root.subscribed_committees.all()
+            (
+                "Committee",
+                c.key,
+                c.name,
+                [c.owasp_repository.name] if c.owasp_repository else [],
+            )
+            for c in root.subscribed_committees.all()
         )
 
         if not entities:
@@ -127,22 +139,36 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
 
         sections = []
         for entity_type, key, name, repo_names in entities:
-            prs = list(
-                snapshot.pull_requests.filter(repository__name__in=repo_names)
-                .order_by("-created_at")
-                .prefetch_related("author", "repository__organization")[:ENTITY_ITEMS_LIMIT]
+            prs = (
+                list(
+                    snapshot.pull_requests.filter(repository__name__in=repo_names)
+                    .order_by("-created_at")
+                    .prefetch_related("author", "repository__organization")[:ENTITY_ITEMS_LIMIT]
+                )
+                if root.include_pull_requests
+                else []
             )
-            issues = list(
-                snapshot.issues.filter(repository__name__in=repo_names)
-                .order_by("-created_at")
-                .prefetch_related(
-                    MERGED_PULL_REQUESTS_PREFETCH, "author", "repository__organization"
-                )[:ENTITY_ITEMS_LIMIT]
+            issues = (
+                list(
+                    snapshot.issues.filter(repository__name__in=repo_names)
+                    .order_by("-created_at")
+                    .prefetch_related(
+                        MERGED_PULL_REQUESTS_PREFETCH, "author", "repository__organization"
+                    )[:ENTITY_ITEMS_LIMIT]
+                )
+                if root.include_issues
+                else []
             )
-            releases = list(
-                snapshot.releases.filter(repository__name__in=repo_names)
-                .order_by("-published_at")
-                .prefetch_related("author", "repository__organization", "repository__project_set")
+            releases = (
+                list(
+                    snapshot.releases.filter(repository__name__in=repo_names)
+                    .order_by("-published_at")
+                    .prefetch_related(
+                        "author", "repository__organization", "repository__project_set"
+                    )[:ENTITY_ITEMS_LIMIT]
+                )
+                if root.include_releases
+                else []
             )
 
             if not prs and not issues and not releases:

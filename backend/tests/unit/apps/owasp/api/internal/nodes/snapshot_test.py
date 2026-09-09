@@ -83,6 +83,34 @@ class TestSnapshotNodeResolvers:
         prefetch_mock.order_by.assert_called_once_with("-created_at")
         assert result == mock_issues
 
+    def test_issues_resolver_with_repository_names(self):
+        """Test issues resolver filters by repository_names."""
+        resolver = self._get_resolver("issues")
+        mock_snapshot = MagicMock()
+        prefetch_mock = mock_snapshot.issues.prefetch_related.return_value
+        order_mock = prefetch_mock.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = ["filtered_issue"]
+
+        result = resolver(None, mock_snapshot, repository_names=["nest"])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=["nest"])
+        assert result == ["filtered_issue"]
+
+    def test_issues_resolver_with_empty_repository_names(self):
+        """Test issues resolver filters with empty repository_names list."""
+        resolver = self._get_resolver("issues")
+        mock_snapshot = MagicMock()
+        prefetch_mock = mock_snapshot.issues.prefetch_related.return_value
+        order_mock = prefetch_mock.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = []
+
+        result = resolver(None, mock_snapshot, repository_names=[])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=[])
+        assert result == []
+
     def test_posts_resolver(self):
         """Test posts resolver returns ordered posts."""
         resolver = self._get_resolver("posts")
@@ -118,6 +146,32 @@ class TestSnapshotNodeResolvers:
 
         mock_snapshot.pull_requests.order_by.assert_called_once_with("-created_at")
         assert result == mock_prs
+
+    def test_pull_requests_resolver_with_repository_names(self):
+        """Test pull_requests resolver filters by repository_names."""
+        resolver = self._get_resolver("pull_requests")
+        mock_snapshot = MagicMock()
+        order_mock = mock_snapshot.pull_requests.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = ["filtered_pr"]
+
+        result = resolver(None, mock_snapshot, repository_names=["nest"])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=["nest"])
+        assert result == ["filtered_pr"]
+
+    def test_pull_requests_resolver_with_empty_repository_names(self):
+        """Test pull_requests resolver filters with empty repository_names list."""
+        resolver = self._get_resolver("pull_requests")
+        mock_snapshot = MagicMock()
+        order_mock = mock_snapshot.pull_requests.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = []
+
+        result = resolver(None, mock_snapshot, repository_names=[])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=[])
+        assert result == []
 
     def test_releases_resolver(self):
         """Test releases resolver returns ordered releases."""

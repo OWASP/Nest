@@ -86,4 +86,24 @@ describe('PaginationButtons', () => {
     const button = screen.getByText('Show more').closest('button')
     expect(button).not.toBeDisabled()
   })
+
+  it('sets aria-expanded attribute on buttons matching expansion state', () => {
+    const { rerender } = render(<PaginationButtons {...defaultProps} showLess={false} />)
+    expect(screen.getByRole('button', { name: /show more/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    )
+
+    rerender(<PaginationButtons {...defaultProps} showLess={true} />)
+    expect(screen.getByRole('button', { name: /show more/i })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+
+    rerender(<PaginationButtons {...defaultProps} isExpanded={true} />)
+    expect(screen.getByRole('button', { name: /show more/i })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+  })
 })
