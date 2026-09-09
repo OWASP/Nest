@@ -23,18 +23,13 @@ from apps.owasp.parsers.board_activity.schemas import (
 
 @contextmanager
 def noop_transaction():
-    """No-op replacement for django.db.transaction.atomic in unit tests."""
+    """Replace django.db.transaction.atomic with a no-op for unit tests."""
     yield
 
 
 @pytest.fixture(autouse=True)
 def stub_transaction_atomic(mocker):
-    """Stub out transaction.atomic so tests don't open a real DB connection.
-
-    The @transaction.atomic decorator on translator.upsert calls
-    connection.get_autocommit(), which requires a real DB. Replace it with a
-    no-op context manager for unit tests.
-    """
+    """Stub transaction.atomic to avoid opening a real DB connection."""
     mocker.patch(
         "apps.owasp.parsers.board_activity.translator.transaction.atomic",
         side_effect=noop_transaction,
