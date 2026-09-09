@@ -16,6 +16,9 @@ theme:
   name: material
   logo: assets/images/owasp_icon_white_sm.png
   favicon: assets/images/favicon.png
+  font:
+    text: Geist
+    code: Geist Mono
   features:
     - navigation.tabs
     - navigation.instant
@@ -77,8 +80,12 @@ markdown_extensions:
 
 plugins:
   - search
+  - privacy
   - minify:
       minify_html: true
   - mkdocstrings:
       default_handler: python
   - tags
+
+extra_css:
+  - assets/stylesheets/nest-theme.css
