@@ -59,10 +59,12 @@ export function useSearchPage<T>({
 
   // Adopt URL params into state on actual navigation (back/forward, direct links).
   const lastUrl = useRef(searchParams.toString())
+  const adopting = useRef(false)
   useEffect(() => {
     const url = searchParams.toString()
     if (url === lastUrl.current) return
     lastUrl.current = url
+    adopting.current = true
 
     setSearchQuery(searchParams.get('q') || '')
     setSortBy(searchParams.get('sortBy') || defaultSortBy)
@@ -74,6 +76,11 @@ export function useSearchPage<T>({
   }, [searchParams, defaultSortBy, defaultOrder])
   // Sync URL with state changes
   useEffect(() => {
+    if (adopting.current) {
+      adopting.current = false
+      return
+    }
+
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
     if (currentPage > 1) params.set('page', currentPage.toString())
@@ -86,8 +93,10 @@ export function useSearchPage<T>({
       params.set('order', order)
     }
 
-    router.push(`?${params.toString()}`)
-  }, [searchQuery, order, currentPage, sortBy, router])
+    const serialized = params.toString()
+    if (serialized === searchParams.toString()) return
+    router.push(`?${serialized}`)
+  }, [searchQuery, order, currentPage, sortBy, searchParams, router])
   // Update URL when state changes
   useEffect(() => {
     const requestVersion = ++fetchVersion.current
@@ -123,6 +132,7 @@ export function useSearchPage<T>({
           handleAppError(response)
         }
       } catch (error) {
+        if (requestVersion !== fetchVersion.current) return
         handleAppError(error)
       }
       setIsLoaded(true)

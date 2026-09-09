@@ -7,7 +7,12 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
+jest.mock('app/global-error', () => ({
+  handleAppError: jest.fn(),
+}))
+
 const mockFetchAlgoliaData = fetchAlgoliaData as jest.Mock
+const mockHandleAppError = jest.requireMock('app/global-error').handleAppError as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
 const mockUseSearchParams = useSearchParams as jest.Mock
 
@@ -42,6 +47,7 @@ describe('useSearchPage', () => {
   it('resets to page 1 and fetches the replica index when sort changes on a later page', async () => {
     const { result } = renderSearchPage()
     await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1))
+    expect(mockPush).not.toHaveBeenCalled()
 
     await act(async () => {
       result.current.handlePageChange(2)
@@ -49,6 +55,7 @@ describe('useSearchPage', () => {
     await waitFor(() =>
       expect(mockFetchAlgoliaData).toHaveBeenLastCalledWith('programs', '', 2, 24, [])
     )
+    expect(mockPush).toHaveBeenLastCalledWith('?page=2')
 
     await act(async () => {
       result.current.handleSortChange('name')
@@ -71,6 +78,7 @@ describe('useSearchPage', () => {
     await waitFor(() =>
       expect(mockFetchAlgoliaData).toHaveBeenLastCalledWith('programs_name_desc', '', 1, 24, [])
     )
+    expect(mockPush).not.toHaveBeenCalled()
 
     await act(async () => {
       mockSearchParams = new URLSearchParams()
@@ -82,6 +90,13 @@ describe('useSearchPage', () => {
     await waitFor(() =>
       expect(mockFetchAlgoliaData).toHaveBeenLastCalledWith('programs', '', 1, 24, [])
     )
+    expect(mockPush).not.toHaveBeenCalled()
+
+    await act(async () => {
+      result.current.handleSortChange('date_created')
+    })
+    expect(mockPush).toHaveBeenCalledWith('?sortBy=date_created&order=desc')
+    expect(result.current.sortBy).toBe('date_created')
   })
 
   it('ignores stale responses superseded by a newer request', async () => {
@@ -113,5 +128,41 @@ describe('useSearchPage', () => {
       resolveInitial({ hits: [{ key: 'stale' }], totalPages: 1 })
     })
     await waitFor(() => expect(result.current.items).toEqual([{ key: 'new' }]))
+  })
+
+  it('ignores stale failures superseded by a newer request', async () => {
+    let rejectInitial!: (reason?: object) => void
+    let resolveNewer!: (value: { hits: { key: string }[]; totalPages: number }) => void
+    const initial = new Promise<{ hits: { key: string }[]; totalPages: number }>(
+      (_resolve, reject) => {
+        rejectInitial = reject
+      }
+    )
+    const newer = new Promise<{ hits: { key: string }[]; totalPages: number }>((resolve) => {
+      resolveNewer = resolve
+    })
+
+    mockFetchAlgoliaData.mockReturnValueOnce(initial).mockReturnValueOnce(newer)
+
+    const { result } = renderSearchPage()
+    await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1))
+
+    await act(async () => {
+      result.current.handleSearch('owasp')
+    })
+    await waitFor(() => expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(2))
+
+    await act(async () => {
+      resolveNewer({ hits: [{ key: 'new' }], totalPages: 1 })
+    })
+    await waitFor(() => expect(result.current.items).toEqual([{ key: 'new' }]))
+    expect(result.current.isLoaded).toBe(true)
+
+    await act(async () => {
+      rejectInitial(new Error('stale failure'))
+    })
+    expect(mockHandleAppError).not.toHaveBeenCalled()
+    expect(result.current.items).toEqual([{ key: 'new' }])
+    expect(result.current.isLoaded).toBe(true)
   })
 })
