@@ -1,4 +1,4 @@
-FROM node:24.20-alpine3.23@sha256:0388af2af070cd4736a1567cfed02469ba117848845b4165d87a333edb53d2ca AS base
+FROM node:24.20-alpine3.24@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -60,7 +60,7 @@ ENV NODE_ENV=production
 
 # libstdc++ is required by the Node binary (ldd); busybox wget/shell cover ECS health checks.
 RUN apk --no-cache upgrade && \
-    apk --no-cache add libstdc++=15.2.0-r2 && \
+    apk --no-cache add libstdc++=15.2.0-r5 && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs && \
     rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
