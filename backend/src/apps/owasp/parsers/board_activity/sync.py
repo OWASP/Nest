@@ -27,6 +27,7 @@ DEFAULT_MODEL = "gpt-4o"
 DEFAULT_MAX_TOKENS = 16000
 DEFAULT_TEMPERATURE = 0.1
 DEFAULT_TIMEOUT = 60
+GITHUB_TIMEOUT = 30
 
 REPO_OWNER = "OWASP"
 REPO_NAME = "www-board"
@@ -302,12 +303,12 @@ def fetch_tree() -> dict[str, str]:
     if token := os.getenv("GITHUB_TOKEN"):
         headers["Authorization"] = f"Bearer {token}"
 
-    response = requests.get(TREE_URL, headers=headers, timeout=30)
+    response = requests.get(TREE_URL, headers=headers, timeout=GITHUB_TIMEOUT)
     response.raise_for_status()
-    payload = response.json()
-
     return {
-        item["path"]: item["sha"] for item in payload.get("tree", []) if item["type"] == "blob"
+        item["path"]: item["sha"]
+        for item in response.json().get("tree", [])
+        if item["type"] == "blob"
     }
 
 
@@ -377,7 +378,7 @@ def fetch_file_content(path: str) -> str:
     """
     url = RAW_FILE_URL_TEMPLATE.format(path=path)
     try:
-        response = requests.get(url, timeout=30)
+        response = requests.get(url, timeout=GITHUB_TIMEOUT)
     except RequestException:
         logger.exception("Failed to fetch %s", url)
         return ""
