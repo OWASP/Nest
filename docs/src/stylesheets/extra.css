@@ -47,17 +47,31 @@
 }
 
 /* ------------ Scrollbar ------------ */
+html[data-md-color-scheme='default']::-webkit-scrollbar-track,
 [data-md-color-scheme='default'] ::-webkit-scrollbar-track {
   background: #94a3b8;
 }
+html[data-md-color-scheme='default']::-webkit-scrollbar-thumb,
 [data-md-color-scheme='default'] ::-webkit-scrollbar-thumb {
   background: #334155;
 }
+html[data-md-color-scheme='slate']::-webkit-scrollbar-track,
 [data-md-color-scheme='slate'] ::-webkit-scrollbar-track {
   background: #1f2937;
 }
+html[data-md-color-scheme='slate']::-webkit-scrollbar-thumb,
 [data-md-color-scheme='slate'] ::-webkit-scrollbar-thumb {
   background: #94a3b8;
+}
+
+/* Firefox fallback (standardized scrollbar properties) */
+html[data-md-color-scheme='default'] {
+  scrollbar-color: #334155 #94a3b8;
+  scrollbar-width: auto;
+}
+html[data-md-color-scheme='slate'] {
+  scrollbar-color: #94a3b8 #1f2937;
+  scrollbar-width: auto;
 }
 
 /* Header colors to match Nest */
