@@ -14,7 +14,7 @@
   --md-accent-fg-color: hsl(210 76% 38%);
   --md-accent-fg-color--transparent: hsl(210 76% 38% / 0.1);
 
-  --md-typeset-a-color: #1d7bd7;
+  --md-typeset-a-color: #1d4ed8;
 
   --md-code-bg-color: #e5e5e5;
   --md-code-fg-color: oklch(58.8% 0.158 241.966);
@@ -37,7 +37,7 @@
   --md-accent-fg-color: hsl(210 76% 60%);
   --md-accent-fg-color--transparent: hsl(210 76% 60% / 0.15);
 
-  --md-typeset-a-color: #1d7bd7;
+  --md-typeset-a-color: #60a5fa;
 
   --md-code-bg-color: #333539;
   --md-code-fg-color: oklch(74.6% 0.16 232.661);
@@ -46,18 +46,18 @@
   --md-footer-fg-color: hsl(0 0% 98%);
 }
 
-/* ------------ Scrollbar ------------*/
+/* ------------ Scrollbar ------------ */
 [data-md-color-scheme='default'] ::-webkit-scrollbar-track {
-  background: #7689ad;
+  background: #94a3b8;
 }
 [data-md-color-scheme='default'] ::-webkit-scrollbar-thumb {
-  background: #3d4554;
+  background: #334155;
 }
 [data-md-color-scheme='slate'] ::-webkit-scrollbar-track {
-  background: #2d3748;
+  background: #1f2937;
 }
 [data-md-color-scheme='slate'] ::-webkit-scrollbar-thumb {
-  background: #4a5568;
+  background: #94a3b8;
 }
 
 /* Header colors to match Nest */
