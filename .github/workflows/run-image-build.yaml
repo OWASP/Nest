@@ -92,6 +92,7 @@ jobs:
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
       RELEASE_VERSION: ${{ inputs.release_version }}
+      GRAFANA_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-grafana:${{ inputs.release_version }}
     permissions:
       contents: read
     runs-on: ubuntu-24.04-arm
@@ -118,6 +119,28 @@ jobs:
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2.1.6
+
+      - name: Check Grafana repository exists
+        if: vars.ENABLE_GRAFANA_IMAGE == 'true'
+        env:
+          GRAFANA_REPOSITORY: nest-${{ inputs.environment }}-grafana
+        run: |
+          if ! aws ecr describe-repositories --repository-names "$GRAFANA_REPOSITORY" >/dev/null; then
+            echo "::error::Provision the Grafana ECR repository before enabling ENABLE_GRAFANA_IMAGE."
+            exit 1
+          fi
+
+      - name: Build Grafana image
+        if: vars.ENABLE_GRAFANA_IMAGE == 'true'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7.3.0
+        with:
+          context: .
+          file: docker/grafana/Dockerfile
+          platforms: linux/arm64
+          provenance: mode=min
+          push: true
+          sbom: true
+          tags: ${{ env.GRAFANA_IMAGE }}
 
       - name: Build backend image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7.3.0

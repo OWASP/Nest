@@ -142,6 +142,7 @@ jobs:
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
         }}
       TF_IN_AUTOMATION: true
+      GRAFANA_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-grafana:${{ inputs.release_version }}
       TF_INPUT: false
     permissions:
       contents: read
@@ -182,6 +183,12 @@ jobs:
         run: |
           bash .github/scripts/verify-ecr-image-sbom.sh verify "$BACKEND_IMAGE"
           bash .github/scripts/verify-ecr-image-sbom.sh verify "$FRONTEND_IMAGE"
+
+      - name: Verify Grafana release image
+        if: vars.ENABLE_GRAFANA_IMAGE == 'true'
+        run: |
+          bash .github/scripts/cosign-image-by-digest.sh verify "$GRAFANA_IMAGE"
+          bash .github/scripts/verify-ecr-image-sbom.sh verify "$GRAFANA_IMAGE"
 
       - name: Apply infrastructure changes
         uses: ./.github/actions/apply-infrastructure-changes

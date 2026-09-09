@@ -7,7 +7,32 @@ The existing Terraform CI role can publish to this repository through its
 environment-scoped ECR permissions. A separate Grafana ECS execution role has
 pull-only access to this repository. Its logging and secret permissions will be
 added with the Grafana service. The repository must exist before the first CI
-image push; these resources do not yet deploy Grafana or publish an image.
+image push; these Terraform resources do not themselves deploy Grafana or publish
+an image.
+
+## Grafana image releases
+
+The existing image build, scan, sign, and deployment workflows include optional
+Grafana steps. Set the GitHub environment variable `ENABLE_GRAFANA_IMAGE` to
+`true` for staging or production only after that environment's Grafana ECR
+repository exists. Leave it unset while preparing the infrastructure; the
+backend and frontend release process then runs without Grafana.
+
+The build checks the repository exists, builds `docker/grafana/Dockerfile` for
+ARM64, and pushes `nest-<environment>-grafana:<release_version>`. Dashboard JSON
+and provisioning files are bundled in the image. The VictoriaMetrics URL and
+admin password are runtime configuration, not build inputs.
+
+Trivy scans the published image using the repository's existing security policy.
+Only after scanning succeeds does Cosign sign the image by digest. The signing
+job verifies the signature and checks the embedded BuildKit SBOM. Deployment
+repeats both checks before applying Terraform. Grafana's SBOM is embedded in the
+image manifest; it is not currently included in the separate backend/frontend
+CycloneDX release attachments.
+
+Publishing does not start a Grafana ECS service. That task definition and service
+are separate work, as are application OTLP settings and egress rules in #5406.
+The opt-in flag does not enable Terraform's `enable_observability` setting.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

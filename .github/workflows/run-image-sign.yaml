@@ -54,6 +54,7 @@ jobs:
     name: Sign images
     environment: ${{ inputs.environment }}
     env:
+      GRAFANA_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-grafana:${{ inputs.release_version }}
       BACKEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.backend_ecr_repo }}:${{ inputs.release_version
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
@@ -89,6 +90,17 @@ jobs:
         run: |
           bash .github/scripts/cosign-image-by-digest.sh sign "$BACKEND_IMAGE"
           bash .github/scripts/cosign-image-by-digest.sh sign "$FRONTEND_IMAGE"
+
+      - name: Set up Docker buildx for Grafana SBOM verification
+        if: vars.ENABLE_GRAFANA_IMAGE == 'true'
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4.2.0
+
+      - name: Sign and verify Grafana image
+        if: vars.ENABLE_GRAFANA_IMAGE == 'true'
+        run: |
+          bash .github/scripts/cosign-image-by-digest.sh sign "$GRAFANA_IMAGE"
+          bash .github/scripts/cosign-image-by-digest.sh verify "$GRAFANA_IMAGE"
+          bash .github/scripts/verify-ecr-image-sbom.sh verify "$GRAFANA_IMAGE"
     timeout-minutes: 5
 
   sign-sbom:
