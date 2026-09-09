@@ -1,3 +1,14 @@
+The Grafana release repository is created with the observability module when
+`enable_observability` is enabled in the live configuration. It uses the name
+`<project>-<environment>-grafana`, immutable tags, push scanning, and the same
+seven-image retention policy as the application repositories.
+
+The existing Terraform CI role can publish to this repository through its
+environment-scoped ECR permissions. A separate Grafana ECS execution role has
+pull-only access to this repository. Its logging and secret permissions will be
+added with the Grafana service. The repository must exist before the first CI
+image push; these resources do not yet deploy Grafana or publish an image.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -21,6 +32,8 @@ No modules.
 | Name | Type |
 | ---- | ---- |
 | [aws_cloudwatch_log_group.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_ecr_lifecycle_policy.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_lifecycle_policy) | resource |
+| [aws_ecr_repository.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecs_cluster.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
 | [aws_ecs_service.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
@@ -29,8 +42,11 @@ No modules.
 | [aws_efs_file_system.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system) | resource |
 | [aws_efs_mount_target.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
 | [aws_iam_policy.ecs_task_execution_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.grafana_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.ecs_task_execution_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.grafana_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.ecs_task_execution_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.grafana_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_security_group.efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.efs_from_vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
@@ -66,6 +82,8 @@ No modules.
 | Name | Description |
 | ---- | ----------- |
 | <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | The ID of the EFS file system backing VictoriaMetrics storage. |
+| <a name="output_grafana_ecr_repository_arn"></a> [grafana\_ecr\_repository\_arn](#output\_grafana\_ecr\_repository\_arn) | The ARN of the repository for the Grafana image. |
+| <a name="output_grafana_ecr_repository_url"></a> [grafana\_ecr\_repository\_url](#output\_grafana\_ecr\_repository\_url) | The URL used to publish and pull the Grafana image. |
 | <a name="output_vm_cluster_name"></a> [vm\_cluster\_name](#output\_vm\_cluster\_name) | The name of the ECS cluster running VictoriaMetrics. |
 | <a name="output_vm_endpoint"></a> [vm\_endpoint](#output\_vm\_endpoint) | The private host:port endpoint for reaching VictoriaMetrics. |
 | <a name="output_vm_security_group_id"></a> [vm\_security\_group\_id](#output\_vm\_security\_group\_id) | The ID of the VictoriaMetrics security group. |

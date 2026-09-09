@@ -1,3 +1,13 @@
+output "grafana_ecr_repository_arn" {
+  description = "The ARN of the repository for the Grafana image."
+  value       = aws_ecr_repository.grafana.arn
+}
+
+output "grafana_ecr_repository_url" {
+  description = "The URL used to publish and pull the Grafana image."
+  value       = aws_ecr_repository.grafana.repository_url
+}
+
 output "efs_file_system_id" {
   description = "The ID of the EFS file system backing VictoriaMetrics storage."
   value       = aws_efs_file_system.vm.id
