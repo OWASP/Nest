@@ -69,7 +69,7 @@ export function useSearchPage<T>({
       // Reset page if search query changes (all indices) or if sort/order changes (projects/chapters)
       if (
         searchQueryChanged ||
-        (['projects', 'chapters'].includes(indexName) && sortOrOrderChanged)
+        (['projects', 'chapters', 'programs'].includes(indexName) && sortOrOrderChanged)
       ) {
         setCurrentPage(1)
       }

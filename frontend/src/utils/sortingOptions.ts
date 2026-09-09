@@ -4,6 +4,14 @@ export const sortOptionsChapter = [
   { label: 'Last Updated', key: 'updated_at' },
 ]
 
+export const sortOptionsProgram = [
+  { label: 'Relevancy', key: 'default' },
+  { label: 'Name', key: 'name' },
+  { label: 'Date Created', key: 'created_at' },
+  { label: 'Last Updated', key: 'updated_at' },
+  { label: 'End Date', key: 'ended_at' },
+]
+
 export const sortOptionsProject = [
   { label: 'Relevancy', key: 'default' },
   { label: 'Contributors', key: 'contributors_count' },
