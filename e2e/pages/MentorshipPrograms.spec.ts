@@ -64,6 +64,13 @@ test.describe('Mentorship Programs Page', () => {
     await expect.poll(() => requestedIndexes).toContain('programs_name_asc')
 
     await expect(page).toHaveURL(/sortBy=name/)
+    await expect(page.getByRole('heading', { name: 'Program 1' })).toBeVisible()
+
+    await page.goBack()
+    await expect(page).toHaveURL(/sortBy=name&order=desc/)
+
+    await page.goForward()
+    await expect(page).toHaveURL(/sortBy=name&order=asc/)
   })
 
   test('displays "No programs found" when there are no programs', async ({ page }) => {
