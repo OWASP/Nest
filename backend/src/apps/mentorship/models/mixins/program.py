@@ -22,9 +22,19 @@ class ProgramIndexMixin:
         return self.key
 
     @property
+    def idx_created_at(self) -> str:
+        """Formatted created datetime for sorting."""
+        return self.nest_created_at.isoformat()
+
+    @property
     def idx_status(self) -> str:
         """Status for Algolia indexing."""
         return self.status
+
+    @property
+    def idx_updated_at(self) -> str:
+        """Formatted updated datetime for sorting."""
+        return self.nest_updated_at.isoformat()
 
     @property
     def idx_description(self) -> str:
