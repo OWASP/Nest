@@ -95,6 +95,8 @@ export function useSearchPage<T>({
   useEffect(() => {
     setIsLoaded(false)
 
+    const controller = new AbortController()
+
     const fetchData = async () => {
       try {
         let computedIndexName = indexName
@@ -113,8 +115,11 @@ export function useSearchPage<T>({
           searchQuery,
           currentPage,
           hitsPerPage,
-          [...stableFacetFilters]
+          [...stableFacetFilters],
+          controller.signal
         )
+
+        if (controller.signal.aborted) return
 
         if ('hits' in response) {
           setItems(response.hits)
@@ -123,12 +128,21 @@ export function useSearchPage<T>({
           handleAppError(response)
         }
       } catch (error) {
-        handleAppError(error)
+        if ((error as Error).name !== 'AbortError') {
+          handleAppError(error)
+        }
       }
-      setIsLoaded(true)
+
+      if (!controller.signal.aborted) {
+        setIsLoaded(true)
+      }
     }
 
     fetchData()
+
+    return () => {
+      controller.abort()
+    }
   }, [
     currentPage,
     searchQuery,
