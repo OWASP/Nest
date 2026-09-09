@@ -52,6 +52,7 @@ jobs:
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
       RELEASE_VERSION: ${{ inputs.release_version }}
+      GRAFANA_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-grafana:${{ inputs.release_version }}
     permissions:
       actions: write
       contents: read
@@ -88,6 +89,22 @@ jobs:
               FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
             make backend-image-sbom BACKEND_IMAGE_NAME="$BACKEND_IMAGE"
             make frontend-image-sbom FRONTEND_IMAGE_NAME="$FRONTEND_IMAGE"
+
+      - name: Scan Grafana image
+        if: vars.ENABLE_GRAFANA_IMAGE == 'true'
+        uses: ./.github/actions/run-trivy-check
+        with:
+          command: |
+            set -euo pipefail
+            docker pull "$GRAFANA_IMAGE"
+            trivy_image=$(sed -n 's/^FROM //p' docker/trivy/Dockerfile)
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$PWD/.trivy.yaml:/.trivy.yaml:ro" \
+              -v "$PWD/.trivyignore.yaml:/.trivyignore.yaml:ro" \
+              -v "$PWD/.trivy-cache:/root/.cache/trivy" \
+              "$trivy_image" image --config /.trivy.yaml \
+              --image-config-scanners misconfig,secret "$GRAFANA_IMAGE"
 
       - name: Upload unsigned SBOM as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1

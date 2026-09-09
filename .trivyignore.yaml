@@ -14,6 +14,8 @@ misconfigurations:
       - docker/osv-scanner/Dockerfile
       - docker/semgrep/Dockerfile
       - docker/trivy/Dockerfile
+      # Container runs as non-root (user 65532) via the ECS task definition; the image is a thin version-pin for dependabot.
+      - docker/victoriametrics/Dockerfile
       - docker/zap/Dockerfile
   - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
     paths:
