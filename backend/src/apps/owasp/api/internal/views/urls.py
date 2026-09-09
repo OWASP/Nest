@@ -6,6 +6,7 @@ from apps.owasp.api.internal.views.project_health_metrics import (
     generate_overview_pdf,
     generate_project_health_metrics_pdf,
 )
+from apps.owasp.views.unsubscribe import OneClickUnsubscribeView
 
 urlpatterns = [
     path(
@@ -17,5 +18,10 @@ urlpatterns = [
         "project-health-metrics/<str:project_key>/pdf/",
         generate_project_health_metrics_pdf,
         name="project_health_metrics_pdf",
+    ),
+    path(
+        "unsubscribe/<uuid:token>/",
+        OneClickUnsubscribeView.as_view(),
+        name="one-click-unsubscribe",
     ),
 ]

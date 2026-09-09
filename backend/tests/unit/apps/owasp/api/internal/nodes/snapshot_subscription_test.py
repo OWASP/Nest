@@ -170,6 +170,99 @@ class TestSnapshotSubscriptionNodeResolvers:
         assert result[0].issues == [mock_issue]
 
     @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
+    def test_entity_sections_excludes_disabled_pull_requests(self, mock_snapshot_model):
+        """Test entity_sections excludes PRs if include_pull_requests is False."""
+        resolver = self._get_resolver("entity_sections")
+        mock_snapshot = MagicMock()
+        mock_snapshot_model.objects.get.return_value = mock_snapshot
+
+        mock_sub = MagicMock()
+        mock_sub.include_pull_requests = False
+        mock_project = MagicMock()
+        mock_project.repositories.all.return_value = [MagicMock()]
+        mock_sub.subscribed_projects.all.return_value = [mock_project]
+        mock_sub.subscribed_chapters.all.return_value = []
+        mock_sub.subscribed_committees.all.return_value = []
+
+        mock_issue = MagicMock()
+        issue_qs = MagicMock()
+        issue_prefetch = issue_qs.filter.return_value.order_by.return_value.prefetch_related
+        issue_prefetch.return_value.__getitem__ = lambda _, _s: [mock_issue]
+        mock_snapshot.issues = issue_qs
+
+        mock_pr_qs = mock_snapshot.pull_requests.filter.return_value.order_by.return_value
+        mock_pr_qs.prefetch_related.return_value = []
+        mock_rel_qs = mock_snapshot.releases.filter.return_value.order_by.return_value
+        mock_rel_qs.prefetch_related.return_value = []
+
+        result = resolver(None, mock_sub, snapshot_key="2025")
+        assert len(result) == 1
+        assert result[0].pull_requests == []
+        assert result[0].issues == [mock_issue]
+
+    @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
+    def test_entity_sections_excludes_disabled_issues(self, mock_snapshot_model):
+        """Test entity_sections excludes issues if include_issues is False."""
+        resolver = self._get_resolver("entity_sections")
+        mock_snapshot = MagicMock()
+        mock_snapshot_model.objects.get.return_value = mock_snapshot
+
+        mock_sub = MagicMock()
+        mock_sub.include_issues = False
+        mock_project = MagicMock()
+        mock_project.repositories.all.return_value = [MagicMock()]
+        mock_sub.subscribed_projects.all.return_value = [mock_project]
+        mock_sub.subscribed_chapters.all.return_value = []
+        mock_sub.subscribed_committees.all.return_value = []
+
+        mock_pr = MagicMock()
+        pr_qs = MagicMock()
+        pr_prefetch = pr_qs.filter.return_value.order_by.return_value.prefetch_related
+        pr_prefetch.return_value.__getitem__ = lambda _, _s: [mock_pr]
+        mock_snapshot.pull_requests = pr_qs
+
+        mock_issue_qs = mock_snapshot.issues.filter.return_value.order_by.return_value
+        mock_issue_qs.prefetch_related.return_value = []
+        mock_rel_qs = mock_snapshot.releases.filter.return_value.order_by.return_value
+        mock_rel_qs.prefetch_related.return_value = []
+
+        result = resolver(None, mock_sub, snapshot_key="2025")
+        assert len(result) == 1
+        assert result[0].pull_requests == [mock_pr]
+        assert result[0].issues == []
+
+    @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
+    def test_entity_sections_excludes_disabled_releases(self, mock_snapshot_model):
+        """Test entity_sections excludes releases if include_releases is False."""
+        resolver = self._get_resolver("entity_sections")
+        mock_snapshot = MagicMock()
+        mock_snapshot_model.objects.get.return_value = mock_snapshot
+
+        mock_sub = MagicMock()
+        mock_sub.include_releases = False
+        mock_project = MagicMock()
+        mock_project.repositories.all.return_value = [MagicMock()]
+        mock_sub.subscribed_projects.all.return_value = [mock_project]
+        mock_sub.subscribed_chapters.all.return_value = []
+        mock_sub.subscribed_committees.all.return_value = []
+
+        mock_pr = MagicMock()
+        pr_qs = MagicMock()
+        pr_prefetch = pr_qs.filter.return_value.order_by.return_value.prefetch_related
+        pr_prefetch.return_value.__getitem__ = lambda _, _s: [mock_pr]
+        mock_snapshot.pull_requests = pr_qs
+
+        mock_issue_qs = mock_snapshot.issues.filter.return_value.order_by.return_value
+        mock_issue_qs.prefetch_related.return_value = []
+        mock_rel_qs = mock_snapshot.releases.filter.return_value.order_by.return_value
+        mock_rel_qs.prefetch_related.return_value = []
+
+        result = resolver(None, mock_sub, snapshot_key="2025")
+        assert len(result) == 1
+        assert result[0].pull_requests == [mock_pr]
+        assert result[0].releases == []
+
+    @patch("apps.owasp.api.internal.nodes.snapshot_subscription.Snapshot")
     def test_entity_sections_snapshot_not_found(self, mock_snapshot_model):
         """Test entity_sections returns empty list when snapshot not found."""
         resolver = self._get_resolver("entity_sections")

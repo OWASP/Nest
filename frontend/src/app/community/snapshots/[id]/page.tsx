@@ -61,21 +61,22 @@ const SnapshotDetailsPage: React.FC = () => {
   const searchParams = useSearchParams()
   const subscriptionToken = searchParams.get('subscription')
 
-  const { data: subscriptionData, loading: subscriptionLoading } =
-    useQuery<GetSubscriptionByTokenQuery>(GET_SUBSCRIPTION_BY_TOKEN, {
+  const { data: subscriptionData } = useQuery<GetSubscriptionByTokenQuery>(
+    GET_SUBSCRIPTION_BY_TOKEN,
+    {
       variables: { token: subscriptionToken ?? '', snapshotKey },
       skip: !subscriptionToken,
-    })
+    }
+  )
   const subscription = subscriptionData?.subscriptionByToken
-  const isSubscriptionReady = !subscriptionToken || !subscriptionLoading
-  const showChapters = !isSubscriptionReady || !subscription || subscription.includeChapters
-  const showEvents = !isSubscriptionReady || !subscription || subscription.includeEvents
-  const showIssues = !isSubscriptionReady || !subscription || subscription.includeIssues
-  const showPosts = !isSubscriptionReady || !subscription || subscription.includePosts
-  const showProjects = !isSubscriptionReady || !subscription || subscription.includeProjects
-  const showPullRequests = !isSubscriptionReady || !subscription || subscription.includePullRequests
-  const showReleases = !isSubscriptionReady || !subscription || subscription.includeReleases
-  const showUsers = !isSubscriptionReady || !subscription || subscription.includeUsers
+  const showChapters = subscription ? subscription.includeChapters : true
+  const showEvents = subscription ? subscription.includeEvents : true
+  const showIssues = subscription ? subscription.includeIssues : true
+  const showPosts = subscription ? subscription.includePosts : true
+  const showProjects = subscription ? subscription.includeProjects : true
+  const showPullRequests = subscription ? subscription.includePullRequests : true
+  const showReleases = subscription ? subscription.includeReleases : true
+  const showUsers = subscription ? subscription.includeUsers : true
 
   const [showAllReleases, setShowAllReleases] = useState(false)
   const [showAllChapters, setShowAllChapters] = useState(false)

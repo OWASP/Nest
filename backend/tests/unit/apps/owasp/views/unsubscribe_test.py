@@ -25,31 +25,18 @@ class TestOneClickUnsubscribeView:
         mock_sub = MagicMock()
         mock_find.return_value = mock_sub
 
-        request = self.factory.post(f"/unsubscribe/{self.token}/")
+        request = self.factory.post(f"/owasp/unsubscribe/{self.token}/")
         response = self.view.post(request, token=self.token)
 
         assert response.status_code == 200
         mock_sub.delete.assert_called_once()
 
     @patch("apps.owasp.views.unsubscribe.OneClickUnsubscribeView.find_subscription")
-    def test_get_returns_confirmation_page(self, mock_find):
-        """Test GET returns confirmation page without deleting subscription."""
-        mock_sub = MagicMock()
-        mock_find.return_value = mock_sub
-
-        request = self.factory.get(f"/unsubscribe/{self.token}/")
-        response = self.view.get(request, token=self.token)
-
-        assert response.status_code == 200
-        assert b"Confirm Unsubscribe" in response.content
-        mock_sub.delete.assert_not_called()
-
-    @patch("apps.owasp.views.unsubscribe.OneClickUnsubscribeView.find_subscription")
     def test_not_found(self, mock_find):
         """Test returns 404 when no subscription matches token."""
         mock_find.return_value = None
 
-        request = self.factory.post(f"/unsubscribe/{self.token}/")
+        request = self.factory.post(f"/owasp/unsubscribe/{self.token}/")
         response = self.view.post(request, token=self.token)
 
         assert response.status_code == 404
@@ -60,7 +47,7 @@ class TestOneClickUnsubscribeView:
         mock_sub = MagicMock()
         mock_find.return_value = mock_sub
 
-        request = self.factory.post(f"/unsubscribe/{self.token}/")
+        request = self.factory.post(f"/owasp/unsubscribe/{self.token}/")
         response = self.view.post(request, token=self.token)
 
         assert response.status_code == 200

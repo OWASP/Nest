@@ -264,6 +264,9 @@ class SnapshotDigestService:
         entities_extra = max(0, len(all_entity_sections) - entity_max)
 
         unsubscribe_url = f"{settings.SITE_URL}/unsubscribe/{subscription.unsubscribe_token}/"
+        list_unsubscribe_url = (
+            f"{settings.SITE_URL}/owasp/unsubscribe/{subscription.unsubscribe_token}/"
+        )
         snapshot_url = (
             f"{settings.SITE_URL}/community/snapshots/{snapshot.key}"
             f"?subscription={subscription.unsubscribe_token}"
@@ -285,6 +288,7 @@ class SnapshotDigestService:
             "entities_extra": entities_extra,
             "site_url": settings.SITE_URL,
             "unsubscribe_url": unsubscribe_url,
+            "list_unsubscribe_url": list_unsubscribe_url,
             "snapshot_url": snapshot_url,
         }
 
@@ -442,7 +446,7 @@ def send_digest_email(snapshot_id: int, subscription_id: int):
         plain_body = render_to_string(SNAPSHOT_TEMPLATE_TXT, digest)
 
         headers = {
-            "List-Unsubscribe": f"<{digest['unsubscribe_url']}>",
+            "List-Unsubscribe": f"<{digest['list_unsubscribe_url']}>",
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         }
 

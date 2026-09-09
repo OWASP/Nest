@@ -554,6 +554,7 @@ class TestSendDigestEmail:
             "posts_data": None,
             "events_data": None,
             "unsubscribe_url": "https://example.com/unsubscribe",
+            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
             "snapshot_url": "https://example.com/snapshot",
         }
         mock_render.return_value = "<html>body</html>"
@@ -598,6 +599,7 @@ class TestSendDigestEmail:
             "posts_data": None,
             "events_data": None,
             "unsubscribe_url": "https://example.com/unsubscribe",
+            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
             "snapshot_url": "https://example.com/snapshot",
         }
 
@@ -638,6 +640,7 @@ class TestSendDigestEmail:
             "posts_data": None,
             "events_data": None,
             "unsubscribe_url": "https://example.com/unsubscribe",
+            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
             "snapshot_url": "https://example.com/snapshot",
         }
         mock_render.return_value = "<html>body</html>"
@@ -683,6 +686,7 @@ class TestSendDigestEmail:
             "posts_data": None,
             "events_data": None,
             "unsubscribe_url": "https://example.com/unsubscribe",
+            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
             "snapshot_url": "https://example.com/snapshot",
         }
         mock_render.return_value = "<html>body</html>"

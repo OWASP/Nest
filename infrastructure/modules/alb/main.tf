@@ -27,12 +27,12 @@ locals {
     "/idx/*",
     "/integrations",
     "/integrations/*",
+    "/owasp",
+    "/owasp/*",
     "/sitemap",
     "/sitemap.xml",
     "/status",
     "/status/*",
-    "/unsubscribe",
-    "/unsubscribe/*",
   ]
   backend_path_chunks = chunklist(local.backend_paths, 5)
   content_security_policy = join("; ", [
