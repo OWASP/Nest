@@ -686,4 +686,60 @@ describe('<SearchPageLayout />', () => {
     expect(filterSkeleton).toHaveClass('h-12', 'w-60', 'rounded-lg')
     expect(filterSkeleton).not.toHaveClass('rounded-r-none')
   })
+
+  // -------- Consistent spacing below search header --------
+  it('search header wrapper has mb-4 md:mb-0 when no filter controls are present', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={1}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        sortChildren={<div>Sort</div>}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const searchHeader = container.querySelector('div.mb-4.w-full')
+    expect(searchHeader).toBeInTheDocument()
+    expect(searchHeader).toHaveClass('mb-4', 'md:mb-0')
+  })
+
+  it('search header wrapper has mb-4 md:mb-0 when filter controls are present', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={1}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const searchHeader = container.querySelector('div.mb-4.w-full')
+    expect(searchHeader).toBeInTheDocument()
+    expect(searchHeader).toHaveClass('mb-4', 'md:mb-0')
+
+    // Mobile controls row has mt-2 but no longer its own mb-4
+    const mobileControls = container.querySelector(
+      String.raw`div.mx-auto.mt-2.flex.w-full.max-w-md.items-stretch.md\:hidden`
+    )
+    expect(mobileControls).toBeInTheDocument()
+    expect(mobileControls).not.toHaveClass('mb-4')
+  })
 })
