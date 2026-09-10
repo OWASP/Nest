@@ -1,0 +1,1386 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=700">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>{{ snapshot.title }} — OWASP Nest</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:AllowPNG/>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <style>
+    body,table,td,p,a,li,span { font-family: Arial, Helvetica, sans-serif !important; }
+  </style>
+  <![endif]-->
+  <style type="text/css">
+    html,
+    body,
+    table,
+    td,
+    div,
+    p,
+    a,
+    span,
+    h1,
+    li {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    html,
+    body {
+      margin: 0 auto !important;
+      padding: 0 !important;
+      width: 700px !important;
+      min-width: 700px !important;
+      max-width: 700px !important;
+      background-color: transparent;
+    }
+
+    table {
+      border-spacing: 0;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    td {
+      padding: 0;
+      mso-line-height-rule: exactly;
+    }
+
+    img {
+      border: 0;
+      outline: none;
+      text-decoration: none;
+      max-width: 100%;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    p {
+      margin: 0;
+      padding: 0;
+    }
+
+    a[x-apple-data-detectors] {
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+  </style>
+</head>
+
+<body
+  style="margin: 0 auto; padding: 0; width: 700px; min-width: 700px; max-width: 700px; background-color: transparent; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+  <div
+    style="display: none; max-height: 0; max-width: 0; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: transparent;">
+    Your personalized OWASP community update — {{ snapshot.title }}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="700" cellpadding="0" cellspacing="0" border="0"
+    style="width: 700px; min-width: 700px; max-width: 700px; border-collapse: separate; border-spacing: 0;">
+    <tr>
+      <td align="center" style="padding: 0;">
+        <table role="presentation" width="700" align="center" cellpadding="0" cellspacing="0" border="0"
+          style="width: 700px; min-width: 700px; max-width: 700px; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; border: 1px solid #dadce0; background-color: #1e293b;">
+          <tr>
+            <td bgcolor="#1e293b" style="background-color: #1e293b; border-radius: 12px 12px 0 0; overflow: hidden;">
+              <!--[if gte mso 9]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false"
+                style="width:700px;" arcsize="4%" fillcolor="#1e293b">
+                <v:fill type="solid" color="#1e293b" />
+                <v:textbox inset="0,0,0,0">
+              <![endif]-->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#1e293b"
+                style="width: 100%; background-color: #1e293b; border-collapse: separate; border-spacing: 0; border-radius: 12px 12px 0 0; overflow: hidden;">
+                <tr>
+                  <td class="px" style="padding: 47px 24px 48px 24px; background-color: #1e293b; border-radius: 12px 12px 0 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td align="center" style="padding-bottom: 24px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                            <tr>
+                              <td valign="middle" style="padding-right: 12px;">
+                                <img src="{{ site_url }}/img/logo_dark.png" alt="OWASP Nest" width="36" height="36"
+                                  style="display: block; width: 36px; height: 36px; max-width: 36px; border: 0;">
+                              </td>
+                              <td valign="middle"
+                                style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #ffffff; line-height: 1.2; letter-spacing: -0.3px; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+                                OWASP&nbsp;Nest
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center"
+                          style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; word-break: break-word; overflow-wrap: break-word; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+                          <h1
+                            style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 26px; font-weight: 800; color: #ffffff; line-height: 1.2; letter-spacing: -0.4px; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+                            {{ subscription.name }}
+                          </h1>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <!--[if gte mso 9]>
+                </v:textbox>
+              </v:roundrect>
+              <![endif]-->
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #ffffff;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                {% if chapters_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Chapters
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for row in chapters_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if chapters_data.extra %}5{% else %}3{% endif %}" height="8" style="height: 8px; line-height: 8px; font-size: 0;">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if chapters_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                      <p style="margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                        <a href="{{ site_url }}/chapters/{{ row.0.nest_key }}" target="_blank"
+                                          style="color: #111827; text-decoration: none;">{{ row.0.name }}</a>
+                                      </p>
+                                      {% if row.0.summary %}
+                                      <p style="margin: 0 0 4px; font-size: 12px; color: #4b5563; line-height: 1.4;">
+                                        {{ row.0.summary|truncatewords:16 }}</p>
+                                      {% elif row.0.description %}
+                                      <p style="margin: 0 0 4px; font-size: 12px; color: #4b5563; line-height: 1.4;">
+                                        {{ row.0.description|truncatewords:16 }}</p>
+                                      {% endif %}
+                                      {% if row.0.suggested_location or row.0.country %}
+                                      <p style="margin: 0; font-size: 11px; color: #1D7BD7; line-height: 1.3;">
+                                        &#127760; {{ row.0.suggested_location|default:row.0.country }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    <td width="8" style="width: 8px;">&nbsp;</td>
+                                    <td width="{% if chapters_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                      <p style="margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                        <a href="{{ site_url }}/chapters/{{ row.1.nest_key }}" target="_blank"
+                                          style="color: #111827; text-decoration: none;">{{ row.1.name }}</a>
+                                      </p>
+                                      {% if row.1.summary %}
+                                      <p style="margin: 0 0 4px; font-size: 12px; color: #4b5563; line-height: 1.4;">
+                                        {{ row.1.summary|truncatewords:16 }}</p>
+                                      {% elif row.1.description %}
+                                      <p style="margin: 0 0 4px; font-size: 12px; color: #4b5563; line-height: 1.4;">
+                                        {{ row.1.description|truncatewords:16 }}</p>
+                                      {% endif %}
+                                      {% if row.1.suggested_location or row.1.country %}
+                                      <p style="margin: 0; font-size: 11px; color: #1D7BD7; line-height: 1.3;">
+                                        &#127760; {{ row.1.suggested_location|default:row.1.country }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% else %}
+                                    <td colspan="3" width="{% if chapters_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                      style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                      <p style="margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                        <a href="{{ site_url }}/chapters/{{ row.0.nest_key }}" target="_blank"
+                                          style="color: #111827; text-decoration: none;">{{ row.0.name }}</a>
+                                      </p>
+                                      {% if row.0.summary %}
+                                      <p style="margin: 0 0 4px; font-size: 12px; color: #4b5563; line-height: 1.4;">
+                                        {{ row.0.summary|truncatewords:16 }}</p>
+                                      {% elif row.0.description %}
+                                      <p style="margin: 0 0 4px; font-size: 12px; color: #4b5563; line-height: 1.4;">
+                                        {{ row.0.description|truncatewords:16 }}</p>
+                                      {% endif %}
+                                      {% if row.0.suggested_location or row.0.country %}
+                                      <p style="margin: 0; font-size: 11px; color: #1D7BD7; line-height: 1.3;">
+                                        &#127760; {{ row.0.suggested_location|default:row.0.country }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    {% if chapters_data.extra %}
+                                    <td width="8" style="width: 8px;">&nbsp;</td>
+                                    <td width="{% if chapters_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                      {% if forloop.last %}
+                                      <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                        +{{ chapters_data.extra }}<br>more
+                                      </p>
+                                      {% else %}&nbsp;{% endif %}
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if projects_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Projects
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for row in projects_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if projects_data.extra %}5{% else %}3{% endif %}" height="8" style="height: 8px; line-height: 8px; font-size: 0;">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if projects_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p
+                                         style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 15px; font-weight: 700; color: #111827; line-height: 1.35; overflow-wrap: break-word; word-wrap: break-word;">
+                                         <a href="{{ site_url }}/projects/{{ row.0.project.nest_key }}" target="_blank"
+                                           style="color: #111827; text-decoration: none;">{{ row.0.project.name }}</a>
+                                       </p>
+                                       {% if row.0.project.summary %}
+                                       <p
+                                         style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 12px; color: #4b5563; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
+                                         {{ row.0.project.summary|truncatewords:20 }}</p>
+                                       {% endif %}
+                                       {% if row.0.project.stars_count or row.0.project.forks_count or row.0.project.contributors_count %}
+                                       <p
+                                         style="margin: 6px 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #111827; line-height: 1;">
+                                         Statistics</p>
+                                       <div style="margin-bottom: 8px;">
+                                         {% if row.0.project.stars_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #fef08a; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.0.project.stars_count }} Stars</span>{% endif %}
+                                         {% if row.0.project.forks_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #bfdbfe; color: #1e40af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.0.project.forks_count }} Forks</span>{% endif %}
+                                         {% if row.0.project.contributors_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #e9d5ff; color: #6b21a8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.0.project.contributors_count }} Contributors</span>{% endif %}
+                                       </div>
+                                       {% endif %}
+                                       {% if row.0.content %}
+                                       <p
+                                         style="margin: 6px 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #111827; line-height: 1;">
+                                         Contribution Activity</p>
+                                       <div>
+                                         {% for content in row.0.content %}
+                                         <span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; {% if content.type == 'issues' %}background-color: #fecaca; color: #b91c1c;{% elif content.type == 'pull_requests' %}background-color: #bbf7d0; color: #15803d;{% elif content.type == 'releases' %}background-color: #fed7aa; color: #c2410c;{% endif %}">
+                                           {% if content.type == "issues" %}{{ content.total }} Issues{% elif content.type == "pull_requests" %}{{ content.total }} Pull Requests{% elif content.type == "releases" %}{{ content.total }} Releases{% endif %}</span>
+                                         {% endfor %}
+                                       </div>
+                                       {% endif %}
+                                     </td>
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if projects_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p
+                                         style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 15px; font-weight: 700; color: #111827; line-height: 1.35; overflow-wrap: break-word; word-wrap: break-word;">
+                                         <a href="{{ site_url }}/projects/{{ row.1.project.nest_key }}" target="_blank"
+                                           style="color: #111827; text-decoration: none;">{{ row.1.project.name }}</a>
+                                       </p>
+                                       {% if row.1.project.summary %}
+                                       <p
+                                         style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 12px; color: #4b5563; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
+                                         {{ row.1.project.summary|truncatewords:20 }}</p>
+                                       {% endif %}
+                                       {% if row.1.project.stars_count or row.1.project.forks_count or row.1.project.contributors_count %}
+                                       <p
+                                         style="margin: 6px 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #111827; line-height: 1;">
+                                         Statistics</p>
+                                       <div style="margin-bottom: 8px;">
+                                         {% if row.1.project.stars_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #fef08a; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.1.project.stars_count }} Stars</span>{% endif %}
+                                         {% if row.1.project.forks_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #bfdbfe; color: #1e40af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.1.project.forks_count }} Forks</span>{% endif %}
+                                         {% if row.1.project.contributors_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #e9d5ff; color: #6b21a8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.1.project.contributors_count }} Contributors</span>{% endif %}
+                                       </div>
+                                       {% endif %}
+                                       {% if row.1.content %}
+                                       <p
+                                         style="margin: 6px 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #111827; line-height: 1;">
+                                         Contribution Activity</p>
+                                       <div>
+                                         {% for content in row.1.content %}
+                                         <span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; {% if content.type == 'issues' %}background-color: #fecaca; color: #b91c1c;{% elif content.type == 'pull_requests' %}background-color: #bbf7d0; color: #15803d;{% elif content.type == 'releases' %}background-color: #fed7aa; color: #c2410c;{% endif %}">
+                                           {% if content.type == "issues" %}{{ content.total }} Issues{% elif content.type == "pull_requests" %}{{ content.total }} Pull Requests{% elif content.type == "releases" %}{{ content.total }} Releases{% endif %}</span>
+                                         {% endfor %}
+                                       </div>
+                                       {% endif %}
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if projects_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p
+                                         style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 15px; font-weight: 700; color: #111827; line-height: 1.35; overflow-wrap: break-word; word-wrap: break-word;">
+                                         <a href="{{ site_url }}/projects/{{ row.0.project.nest_key }}" target="_blank"
+                                           style="color: #111827; text-decoration: none;">{{ row.0.project.name }}</a>
+                                       </p>
+                                       {% if row.0.project.summary %}
+                                       <p
+                                         style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 12px; color: #4b5563; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
+                                         {{ row.0.project.summary|truncatewords:20 }}</p>
+                                       {% endif %}
+                                       {% if row.0.project.stars_count or row.0.project.forks_count or row.0.project.contributors_count %}
+                                       <p
+                                         style="margin: 6px 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #111827; line-height: 1;">
+                                         Statistics</p>
+                                       <div style="margin-bottom: 8px;">
+                                         {% if row.0.project.stars_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #fef08a; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.0.project.stars_count }} Stars</span>{% endif %}
+                                         {% if row.0.project.forks_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #bfdbfe; color: #1e40af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.0.project.forks_count }} Forks</span>{% endif %}
+                                         {% if row.0.project.contributors_count %}<span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; background-color: #e9d5ff; color: #6b21a8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3;">
+                                           {{ row.0.project.contributors_count }} Contributors</span>{% endif %}
+                                       </div>
+                                       {% endif %}
+                                       {% if row.0.content %}
+                                       <p
+                                         style="margin: 6px 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #111827; line-height: 1;">
+                                         Contribution Activity</p>
+                                       <div>
+                                         {% for content in row.0.content %}
+                                         <span
+                                           style="display: inline-block; white-space: nowrap; padding: 2px 8px; margin: 0 4px 4px 0; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; {% if content.type == 'issues' %}background-color: #fecaca; color: #b91c1c;{% elif content.type == 'pull_requests' %}background-color: #bbf7d0; color: #15803d;{% elif content.type == 'releases' %}background-color: #fed7aa; color: #c2410c;{% endif %}">
+                                           {% if content.type == "issues" %}{{ content.total }} Issues{% elif content.type == "pull_requests" %}{{ content.total }} Pull Requests{% elif content.type == "releases" %}{{ content.total }} Releases{% endif %}</span>
+                                         {% endfor %}
+                                       </div>
+                                       {% endif %}
+                                     </td>
+                                     {% endif %}
+                                     {% if projects_data.extra %}
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if projects_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                       {% if forloop.last %}
+                                       <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                         +{{ projects_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                   </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if issues_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Issues
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for row in issues_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if issues_data.extra %}5{% else %}3{% endif %}" height="8" style="height: 8px; line-height: 8px; font-size: 0;">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if issues_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" style="padding-right: 6px;">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               style="display: block; border-radius: 50%;" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                               <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.title|truncatewords:5 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if issues_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.1.author and row.1.author.avatar_url %}
+                                           <td width="18" valign="middle" style="padding-right: 6px;">
+                                             <img src="{{ row.1.author.avatar_url }}" width="18" height="18"
+                                               style="display: block; border-radius: 50%;" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                               <a href="{{ row.1.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.1.title|truncatewords:5 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.1.repository %}
+                                       <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.1.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.1.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if issues_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" style="padding-right: 6px;">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               style="display: block; border-radius: 50%;" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                               <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.title|truncatewords:10 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% endif %}
+                                     {% if issues_data.extra %}
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if issues_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                       {% if forloop.last %}
+                                       <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                         +{{ issues_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                   </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if prs_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Pull Requests
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for row in prs_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if prs_data.extra %}5{% else %}3{% endif %}" height="8" style="height: 8px; line-height: 8px; font-size: 0;">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if prs_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          {% if row.0.author and row.0.author.avatar_url %}
+                                          <td width="18" valign="middle" style="padding-right: 6px;">
+                                            <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                              style="display: block; border-radius: 50%;" alt="">
+                                          </td>
+                                          {% endif %}
+                                          <td valign="middle">
+                                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                              <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.title|truncatewords:4 }}</a>
+                                            </p>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% if row.0.repository %}
+                                      <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                        📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    <td width="8" style="width: 8px;">&nbsp;</td>
+                                    <td width="{% if prs_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          {% if row.1.author and row.1.author.avatar_url %}
+                                          <td width="18" valign="middle" style="padding-right: 6px;">
+                                            <img src="{{ row.1.author.avatar_url }}" width="18" height="18"
+                                              style="display: block; border-radius: 50%;" alt="">
+                                          </td>
+                                          {% endif %}
+                                          <td valign="middle">
+                                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                              <a href="{{ row.1.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.1.title|truncatewords:4 }}</a>
+                                            </p>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% if row.1.repository %}
+                                      <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                        📅 {{ row.1.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.1.repository.name|default:"" }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% else %}
+                                    <td colspan="3" width="{% if prs_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                      style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          {% if row.0.author and row.0.author.avatar_url %}
+                                          <td width="18" valign="middle" style="padding-right: 6px;">
+                                            <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                              style="display: block; border-radius: 50%;" alt="">
+                                          </td>
+                                          {% endif %}
+                                          <td valign="middle">
+                                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                              <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.title|truncatewords:8 }}</a>
+                                            </p>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% if row.0.repository %}
+                                      <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                        📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    {% if prs_data.extra %}
+                                    <td width="8" style="width: 8px;">&nbsp;</td>
+                                    <td width="{% if prs_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                      {% if forloop.last %}
+                                      <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                        +{{ prs_data.extra }}<br>more
+                                      </p>
+                                      {% else %}&nbsp;{% endif %}
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if releases_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Releases
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for row in releases_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if releases_data.extra %}5{% else %}3{% endif %}" height="8" style="height: 8px; line-height: 8px; font-size: 0;">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if releases_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" style="padding-right: 6px;">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               style="display: block; border-radius: 50%;" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                               <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if releases_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.1.author and row.1.author.avatar_url %}
+                                           <td width="18" valign="middle" style="padding-right: 6px;">
+                                             <img src="{{ row.1.author.avatar_url }}" width="18" height="18"
+                                               style="display: block; border-radius: 50%;" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                               <a href="{{ row.1.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.1.name|default:row.1.tag_name|truncatewords:12 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.1.repository %}
+                                       <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.1.published_at|default:row.1.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.1.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if releases_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" style="padding-right: 6px;">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               style="display: block; border-radius: 50%;" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                               <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p style="margin: 4px 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% endif %}
+                                     {% if releases_data.extra %}
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if releases_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                       {% if forloop.last %}
+                                       <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                         +{{ releases_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                   </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if users_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                New Contributors
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  <tr>
+                                    <td width="{% if users_data.extra %}90%{% else %}100%{% endif %}" valign="middle">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                          {% for user in users_data.items %}
+                                          <td valign="middle" style="padding-right: 13px;">
+                                            <a href="https://github.com/{{ user.login }}" target="_blank" style="text-decoration: none;">
+                                              {% if user.avatar_url %}
+                                              <img src="{{ user.avatar_url }}" width="44" height="44" alt="{{ user.login }}"
+                                                style="display: block; width: 44px; height: 44px; border-radius: 50%; border: 2px solid #ffffff;">
+                                              {% else %}
+                                              <span style="display: inline-block; width: 44px; height: 44px; border-radius: 50%; background-color: #d1d5db; text-align: center; line-height: 44px; font-size: 16px;">&#128100;</span>
+                                              {% endif %}
+                                            </a>
+                                          </td>
+                                          {% endfor %}
+                                        </tr>
+                                      </table>
+                                    </td>
+                                    {% if users_data.extra %}
+                                    <td width="8" style="width: 8px;">&nbsp;</td>
+                                    <td width="{% if users_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                      <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                        +{{ users_data.extra }}<br>more
+                                      </p>
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if posts_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Blog Posts
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for row in posts_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if posts_data.extra %}5{% else %}3{% endif %}" height="8" style="height: 8px; line-height: 8px; font-size: 0;">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if posts_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                         <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.title|truncatewords:5 }}</a>
+                                       </p>
+                                       <p style="margin: 0; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.0.published_at|date:"M d, Y" }}{% if row.0.author_name %} &nbsp;✎ {{ row.0.author_name|truncatewords:2 }}{% endif %}
+                                       </p>
+                                     </td>
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if posts_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                         <a href="{{ row.1.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.1.title|truncatewords:5 }}</a>
+                                       </p>
+                                       <p style="margin: 0; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.1.published_at|date:"M d, Y" }}{% if row.1.author_name %} &nbsp;✎ {{ row.1.author_name|truncatewords:2 }}{% endif %}
+                                       </p>
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if posts_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                         <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{{ row.0.title|truncatewords:14 }}</a>
+                                       </p>
+                                       <p style="margin: 0; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         📅 {{ row.0.published_at|date:"M d, Y" }}{% if row.0.author_name %} &nbsp;✎ {{ row.0.author_name|truncatewords:2 }}{% endif %}
+                                       </p>
+                                     </td>
+                                     {% endif %}
+                                     {% if posts_data.extra %}
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if posts_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                       {% if forloop.last %}
+                                       <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                         +{{ posts_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if events_data %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Upcoming Events
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for row in events_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if events_data.extra %}5{% else %}3{% endif %}" height="8" style="height: 8px; line-height: 8px; font-size: 0;">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if events_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                         {{ row.0.name|truncatewords:5 }}
+                                       </p>
+                                       <p style="margin: 0; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.city or row.0.country %} &nbsp;📍 {% if row.0.city %}{{ row.0.city }}{% if row.0.country %}, {% endif %}{% endif %}{{ row.0.country }}{% endif %}
+                                       </p>
+                                     </td>
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if events_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                         {{ row.1.name|truncatewords:5 }}
+                                       </p>
+                                       <p style="margin: 0; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         {% if row.1.start_date %}📅 {{ row.1.start_date|date:"M d, Y" }}{% endif %}{% if row.1.city or row.1.country %} &nbsp;📍 {% if row.1.city %}{{ row.1.city }}{% if row.1.country %}, {% endif %}{% endif %}{{ row.1.country }}{% endif %}
+                                       </p>
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if events_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       style="padding: 10px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                       <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #111827; line-height: 1.35;">
+                                         {{ row.0.name|truncatewords:14 }}
+                                       </p>
+                                       <p style="margin: 0; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.city or row.0.country %} &nbsp;📍 {% if row.0.city %}{{ row.0.city }}{% if row.0.country %}, {% endif %}{% endif %}{{ row.0.country }}{% endif %}
+                                       </p>
+                                     </td>
+                                     {% endif %}
+                                     {% if events_data.extra %}
+                                     <td width="8" style="width: 8px;">&nbsp;</td>
+                                     <td width="{% if events_data.extra %}8%{% endif %}" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                       {% if forloop.last %}
+                                       <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                         +{{ events_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if entity_sections %}
+                <tr>
+                  <td class="px" style="padding: 24px 24px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      style="width: 100%;">
+                      <tr>
+                        <td class="card-px" style="padding: 0;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            style="width: 100%;">
+                            <tr>
+                              <td
+                                style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827; line-height: 1.3;">
+                                Subscribed Entities
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding-bottom: 12px;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      style="width: 44px; height: 3px; line-height: 3px; font-size: 0; background-color: #c0d130;">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
+                                  {% for section in entity_sections %}
+                                  {% if not forloop.first %}
+                                  <tr>
+                                    <td colspan="{% if entities_extra > 0 %}3{% else %}1{% endif %}" height="12" style="height: 12px; line-height: 12px; font-size: 0;">&nbsp;</td>
+                                  </tr>
+                                  {% endif %}
+                                  <tr>
+                                    <td width="{% if entities_extra > 0 %}90%{% else %}100%{% endif %}" valign="top"
+                                      style="padding: 14px 12px; background-color: #f8f9fa; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          <td valign="middle"
+                                            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 16px; font-weight: 700; color: #111827; line-height: 1.4;">
+                                            {{ section.entity.name }}
+                                          </td>
+                                          <td valign="middle" align="right" style="padding-left: 8px; white-space: nowrap;">
+                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; text-transform: capitalize; letter-spacing: 0.3px;
+                                              {% if section.entity_type == 'project' %}background-color: #dbeafe; color: #1d4ed8;
+                                              {% elif section.entity_type == 'chapter' %}background-color: #dcfce7; color: #15803d;
+                                              {% else %}background-color: #fef3c7; color: #b45309;{% endif %}">
+                                              {{ section.entity_type|capfirst }}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% for content in section.content %}
+                                      <p
+                                        style="margin: 10px 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #111827;">
+                                        {% if content.type == "issues" %}Issues{% elif content.type == "pull_requests" %}Pull
+                                        Requests{% elif content.type == "releases" %}Releases{% endif %}
+                                      </p>
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width: 100%; table-layout: fixed;">
+                                        {% for row in content.rows %}
+                                        {% if not forloop.first %}
+                                        <tr><td colspan="{% if content.extra > 0 %}5{% else %}3{% endif %}" height="6" style="height: 6px; line-height: 6px; font-size: 0;">&nbsp;</td></tr>
+                                        {% endif %}
+                                        <tr>
+                                          {% if row.1 %}
+                                          <td width="{% if content.extra > 0 %}43%{% else %}49.5%{% endif %}" valign="top"
+                                             style="padding: 8px; background-color: #ffffff; border-radius: 6px;">
+                                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                               <tr>
+                                                 {% if row.0.author and row.0.author.avatar_url %}
+                                                 <td width="16" valign="middle" style="padding-right: 5px;">
+                                                   <img src="{{ row.0.author.avatar_url }}" width="16" height="16"
+                                                     style="display: block; border-radius: 50%;" alt="">
+                                                 </td>
+                                                 {% endif %}
+                                                 <td valign="middle">
+                                                   <p style="margin: 0; font-size: 12px; font-weight: 600; color: #111827; line-height: 1.3;">
+                                                     <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                   </p>
+                                                 </td>
+                                               </tr>
+                                             </table>
+                                             {% if row.0.repository %}
+                                             <p style="margin: 3px 0 0; font-size: 10px; color: #6b7280; line-height: 1.3;">
+                                               {% if content.type == "releases" %}📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }}{% else %}📅 {{ row.0.created_at|date:"M d, Y" }}{% endif %}
+                                             </p>
+                                             {% endif %}
+                                           </td>
+                                           <td width="6" style="width: 6px;">&nbsp;</td>
+                                           <td width="{% if content.extra > 0 %}43%{% else %}49.5%{% endif %}" valign="top"
+                                             style="padding: 8px; background-color: #ffffff; border-radius: 6px;">
+                                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                               <tr>
+                                                 {% if row.1.author and row.1.author.avatar_url %}
+                                                 <td width="16" valign="middle" style="padding-right: 5px;">
+                                                   <img src="{{ row.1.author.avatar_url }}" width="16" height="16"
+                                                     style="display: block; border-radius: 50%;" alt="">
+                                                 </td>
+                                                 {% endif %}
+                                                 <td valign="middle">
+                                                   <p style="margin: 0; font-size: 12px; font-weight: 600; color: #111827; line-height: 1.3;">
+                                                     <a href="{{ row.1.url }}" target="_blank" style="color: #111827; text-decoration: none;">{% if content.type == "releases" %}{{ row.1.name|default:row.1.tag_name|truncatewords:10 }}{% else %}{{ row.1.title|truncatewords:10 }}{% endif %}</a>
+                                                   </p>
+                                                 </td>
+                                               </tr>
+                                             </table>
+                                             {% if row.1.repository %}
+                                             <p style="margin: 3px 0 0; font-size: 10px; color: #6b7280; line-height: 1.3;">
+                                               {% if content.type == "releases" %}📅 {{ row.1.published_at|default:row.1.created_at|date:"M d, Y" }}{% else %}📅 {{ row.1.created_at|date:"M d, Y" }}{% endif %}
+                                             </p>
+                                             {% endif %}
+                                           </td>
+                                           {% else %}
+                                           <td colspan="3" width="{% if content.extra > 0 %}90%{% else %}100%{% endif %}" valign="top"
+                                             style="padding: 8px; background-color: #ffffff; border-radius: 6px;">
+                                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                               <tr>
+                                                 {% if row.0.author and row.0.author.avatar_url %}
+                                                 <td width="16" valign="middle" style="padding-right: 5px;">
+                                                   <img src="{{ row.0.author.avatar_url }}" width="16" height="16"
+                                                     style="display: block; border-radius: 50%;" alt="">
+                                                 </td>
+                                                 {% endif %}
+                                                 <td valign="middle">
+                                                   <p style="margin: 0; font-size: 12px; font-weight: 600; color: #111827; line-height: 1.3;">
+                                                     <a href="{{ row.0.url }}" target="_blank" style="color: #111827; text-decoration: none;">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                   </p>
+                                                 </td>
+                                               </tr>
+                                             </table>
+                                             {% if row.0.repository %}
+                                             <p style="margin: 3px 0 0; font-size: 10px; color: #6b7280; line-height: 1.3;">
+                                               {% if content.type == "releases" %}📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }}{% else %}📅 {{ row.0.created_at|date:"M d, Y" }}{% endif %}
+                                             </p>
+                                             {% endif %}
+                                           </td>
+                                           {% endif %}
+                                           {% if content.extra > 0 %}
+                                           <td width="6" style="width: 6px;">&nbsp;</td>
+                                           <td width="8%" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                             {% if forloop.last %}
+                                             <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                               +{{ content.extra }}<br>more
+                                             </p>
+                                             {% else %}&nbsp;{% endif %}
+                                           </td>
+                                           {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                      </table>
+                                      {% endfor %}
+                                    </td>
+                                    {% if entities_extra > 0 %}
+                                    <td width="8" style="width: 8px;">&nbsp;</td>
+                                    <td width="8%" valign="middle" align="center" style="width: 8%; text-align: center; vertical-align: middle; white-space: nowrap;">
+                                      {% if forloop.last %}
+                                      <p style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.2; text-align: center; width: 100%; display: block;">
+                                        +{{ entities_extra }}<br>more
+                                      </p>
+                                      {% else %}&nbsp;{% endif %}
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                <tr>
+                  <td align="center" class="px" style="padding: 28px 24px;">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ snapshot_url }}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="16%" stroke="false" fillcolor="#1D7BD7">
+                      <w:anchorlock/>
+                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View More &rarr;</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-- -->
+                    <a href="{{ snapshot_url }}" target="_blank"
+                      style="display: inline-block; padding: 14px 32px; background-color: #1D7BD7; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none; border-radius: 8px; letter-spacing: 0.2px; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+                      View More &rarr;
+                    </a>
+                    <!--<![endif]-->
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="px" bgcolor="#1e293b"
+              style="background-color: #1e293b; padding: 26px 24px; border-radius: 0 0 12px 12px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                <tr>
+                  <td align="center" style="padding-bottom: 16px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                      <tr>
+                        <td style="padding: 0 16px;">
+                          <a href="https://bsky.app/profile/nest.owasp.org" target="_blank"
+                            style="text-decoration: none;">
+                            <img src="{{ site_url }}/img/bluesky.png" alt="Bluesky" width="20" height="20"
+                              style="display: block; width: 20px; height: 20px; max-width: 20px; border: 0;">
+                          </a>
+                        </td>
+                        <td style="padding: 0 16px;">
+                          <a href="https://github.com/owasp/nest" target="_blank" style="text-decoration: none;">
+                            <img src="{{ site_url }}/img/github.png" alt="GitHub" width="20" height="20"
+                              style="display: block; width: 20px; height: 20px; max-width: 20px; border: 0;">
+                          </a>
+                        </td>
+                        <td style="padding: 0 16px;">
+                          <a href="https://www.linkedin.com/groups/14656108/" target="_blank"
+                            style="text-decoration: none;">
+                            <img src="{{ site_url }}/img/linkedin.png" alt="LinkedIn" width="20" height="20"
+                              style="display: block; width: 20px; height: 20px; max-width: 20px; border: 0;">
+                          </a>
+                        </td>
+                        <td style="padding: 0 16px;">
+                          <a href="https://owasp.slack.com/archives/project-nest" target="_blank"
+                            style="text-decoration: none;">
+                            <img src="{{ site_url }}/img/slack.png" alt="Slack" width="20" height="20"
+                              style="display: block; width: 20px; height: 20px; max-width: 20px; border: 0;">
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom: 14px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                      <tr>
+                        <td align="right" valign="middle" style="padding-right: 12px;">
+                          <a href="https://owasp.org" target="_blank" style="text-decoration: none;">
+                            <img src="{{ site_url }}/img/OWASP_logo.png" alt="OWASP" width="104"
+                              style="display: block; width: 104px; max-width: 104px; height: auto; border: 0;">
+                          </a>
+                        </td>
+                        <td align="center" valign="middle" width="1"
+                          style="width: 1px; background-color: #4b5563; font-size: 0; line-height: 0;">&nbsp;</td>
+                        <td align="left" valign="middle" style="padding-left: 12px;">
+                          <a href="{{ site_url }}" target="_blank" style="text-decoration: none;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                              <tr>
+                                <td valign="middle" style="padding-right: 8px;">
+                                  <img src="{{ site_url }}/img/logo_dark.png" alt="Nest" width="31" height="31"
+                                    style="display: block; width: 31px; height: 31px; max-width: 31px; border: 0;">
+                                </td>
+                                <td valign="middle"
+                                  style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 18px; font-weight: 600; color: #ffffff; line-height: 1.2; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+                                  Nest
+                                </td>
+                              </tr>
+                            </table>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom: 12px;">
+                    <p
+                      style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; color: #6b7280; line-height: 1.6; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+                      <a href="{{ site_url }}/settings" target="_blank"
+                        style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; color: #94a3b8; text-decoration: underline;">Manage
+                        Preferences</a>
+                      &nbsp;&nbsp;&nbsp;
+                      <a href="{{ unsubscribe_url }}" target="_blank"
+                        style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; color: #94a3b8; text-decoration: underline;">Unsubscribe</a>
+                      &nbsp;&nbsp;&nbsp;
+                      <a href="https://owasp.org/contact/" target="_blank"
+                        style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; color: #94a3b8; text-decoration: underline;">Contact
+                        Us</a>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center"
+                    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 13px; color: #6b7280; line-height: 1.5; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">
+                    &copy; {% now "Y" %} OWASP Nest. All rights reserved.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

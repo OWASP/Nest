@@ -350,7 +350,7 @@ class TestSnapshotSubscriptionCreateEdgeCases:
         ):
             yield
 
-    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription._generate_default_name")
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.generate_default_name")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_create_skips_select_for_update_when_no_user_pk(self, mock_objects, mock_gen_name):
         """Test create skips select_for_update when user has no pk."""
@@ -365,7 +365,7 @@ class TestSnapshotSubscriptionCreateEdgeCases:
 
         assert result == mock_sub
 
-    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription._generate_default_name")
+    @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.generate_default_name")
     @patch("apps.owasp.models.snapshot_subscription.User.objects")
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_create_raises_on_integrity_error(
@@ -703,7 +703,7 @@ class TestCheckDuplicateSetupEdgeCases:
 
 
 class TestGenerateDefaultName:
-    """Test SnapshotSubscription._generate_default_name method."""
+    """Test SnapshotSubscription.generate_default_name method."""
 
     @patch("apps.owasp.models.snapshot_subscription.SnapshotSubscription.objects")
     def test_first_subscription(self, mock_objects):
@@ -711,7 +711,7 @@ class TestGenerateDefaultName:
         mock_objects.filter.return_value.values_list.return_value = []
         user = MagicMock()
 
-        result = SnapshotSubscription._generate_default_name(user)
+        result = SnapshotSubscription.generate_default_name(user)
 
         assert result == "Subscription 1"
 
@@ -725,7 +725,7 @@ class TestGenerateDefaultName:
         ]
         user = MagicMock()
 
-        result = SnapshotSubscription._generate_default_name(user)
+        result = SnapshotSubscription.generate_default_name(user)
 
         assert result == "Subscription 4"
 
@@ -738,7 +738,7 @@ class TestGenerateDefaultName:
         ]
         user = MagicMock()
 
-        result = SnapshotSubscription._generate_default_name(user)
+        result = SnapshotSubscription.generate_default_name(user)
 
         assert result == "Subscription 4"
 
@@ -751,6 +751,6 @@ class TestGenerateDefaultName:
         ]
         user = MagicMock()
 
-        result = SnapshotSubscription._generate_default_name(user)
+        result = SnapshotSubscription.generate_default_name(user)
 
         assert result == "Subscription 3"

@@ -11,6 +11,8 @@ from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
 
+MAX_NAME_LENGTH = 100
+
 
 @strawberry.enum
 class SnapshotFrequency(enum.Enum):
@@ -80,6 +82,13 @@ class SnapshotSubscriptionMutations:
         """Create a new snapshot subscription for the logged-in user."""
         user = info.context.request.user
 
+        name = input_data.name.strip() if input_data.name else ""
+        if len(name) > MAX_NAME_LENGTH:
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message=f"Subscription name must be {MAX_NAME_LENGTH} characters or fewer.",
+            )
+
         kwargs = {
             "include_chapters": input_data.include_chapters,
             "include_events": input_data.include_events,
@@ -96,7 +105,7 @@ class SnapshotSubscriptionMutations:
                 subscription = SnapshotSubscription.create(
                     user=user,
                     frequency=input_data.frequency.value,
-                    name=input_data.name,
+                    name=name,
                     **kwargs,
                 )
 
@@ -132,6 +141,16 @@ class SnapshotSubscriptionMutations:
         """Update a specific snapshot subscription."""
         user = info.context.request.user
 
+        if input_data.name is not None:
+            name = input_data.name.strip()
+            if len(name) > MAX_NAME_LENGTH:
+                return SnapshotSubscriptionResult(
+                    ok=False,
+                    message=f"Subscription name must be {MAX_NAME_LENGTH} characters or fewer.",
+                )
+        else:
+            name = None
+
         try:
             subscription = SnapshotSubscription.objects.get(
                 id=subscription_id,
@@ -163,7 +182,7 @@ class SnapshotSubscriptionMutations:
                 frequency_value = input_data.frequency.value if input_data.frequency else None
                 subscription.update(
                     frequency=frequency_value,
-                    name=input_data.name,
+                    name=name,
                     **update_kwargs,
                 )
 
@@ -286,6 +305,12 @@ class SnapshotSubscriptionMutations:
     @strawberry.mutation
     def unsubscribe_by_token(self, token: str) -> SnapshotSubscriptionResult:
         """Unsubscribe using a token from an email link. No auth required."""
+        if not token or not token.strip():
+            return SnapshotSubscriptionResult(
+                ok=False,
+                message="Invalid unsubscribe token.",
+            )
+
         try:
             subscription = SnapshotSubscription.objects.get(unsubscribe_token=token)
         except (SnapshotSubscription.DoesNotExist, ValidationError):
@@ -294,16 +319,9 @@ class SnapshotSubscriptionMutations:
                 message="Invalid unsubscribe token.",
             )
 
-        if not subscription.is_active:
-            return SnapshotSubscriptionResult(
-                ok=False,
-                message="Subscription is already inactive.",
-            )
-
-        subscription.deactivate()
+        subscription.delete()
 
         return SnapshotSubscriptionResult(
             ok=True,
             message="Successfully unsubscribed.",
-            subscription=subscription,
         )

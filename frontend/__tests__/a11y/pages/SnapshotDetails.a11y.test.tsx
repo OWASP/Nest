@@ -15,6 +15,7 @@ jest.mock('@apollo/client/react', () => ({
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({ push: jest.fn() })),
   useParams: jest.fn(() => ({ id: '2024-12' })),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
 jest.mock('@/components/MarkdownWrapper', () => {

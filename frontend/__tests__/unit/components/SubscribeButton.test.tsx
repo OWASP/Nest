@@ -604,4 +604,40 @@ describe('SubscribeButton', () => {
       })
     })
   })
+
+  describe('Subscription Modal Form State', () => {
+    test('does not add when no subscription is selected', async () => {
+      const existingSubscriptions = [
+        {
+          id: 'sub-1',
+          name: 'My Weekly Digest',
+          frequency: 'weekly',
+          isActive: true,
+          subscribedProjects: [],
+          subscribedChapters: [],
+          subscribedCommittees: [],
+        },
+      ]
+
+      setupMocks({ subscriptions: existingSubscriptions })
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      const addButton = screen.getByText('Add to Subscription')
+      expect(addButton.closest('button')).toBeDisabled()
+      fireEvent.click(addButton)
+      expect(mockUpdateMutation).not.toHaveBeenCalled()
+      expect(mockCreateMutation).not.toHaveBeenCalled()
+    })
+
+    test('allows typing in the name input field', () => {
+      setupMocks()
+      render(<SubscribeButton {...defaultProps} />)
+      fireEvent.click(screen.getByText('Subscribe'))
+
+      const nameInput = screen.getByPlaceholderText('e.g., My Weekly Digest')
+      fireEvent.change(nameInput, { target: { value: 'Custom Name' } })
+      expect(nameInput).toHaveValue('Custom Name')
+    })
+  })
 })
