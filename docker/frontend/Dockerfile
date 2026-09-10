@@ -1,4 +1,4 @@
-FROM node:24.20-alpine3.23@sha256:0388af2af070cd4736a1567cfed02469ba117848845b4165d87a333edb53d2ca AS base
+FROM node:24.20-alpine3.24@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -53,14 +53,14 @@ RUN --mount=type=secret,id=RELEASE_VERSION \
     pnpm run build
 
 # Production image: Alpine OS + Node binary only (no npm/corepack/yarn).
-FROM alpine:3.23@sha256:fd791d74b68913cbb027c6546007b3f0d3bc45125f797758156952bc2d6daf40 AS runner
+FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS runner
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 # libstdc++ is required by the Node binary (ldd); busybox wget/shell cover ECS health checks.
 RUN apk --no-cache upgrade && \
-    apk --no-cache add libstdc++=15.2.0-r2 && \
+    apk --no-cache add libstdc++=15.2.0-r5 && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs && \
     rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
