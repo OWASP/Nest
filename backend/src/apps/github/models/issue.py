@@ -196,9 +196,10 @@ class Issue(GenericIssueModel):
 
         if self.is_open and not self.summary:
             self.generate_summary()
-            super().save(update_fields=["summary"])
-
-    @staticmethod
+        if self.is_open and not self.summary:
+            self.generate_summary()
+            if self.summary:
+                super().save(update_fields=["summary"])
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
         """Bulk save issues."""
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
