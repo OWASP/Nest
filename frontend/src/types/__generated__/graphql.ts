@@ -1049,7 +1049,6 @@ export type RepositoryNode = Node & {
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   isArchived: Scalars['Boolean']['output'];
-  issues: Array<IssueNode>;
   key: Scalars['String']['output'];
   languages: Array<Scalars['String']['output']>;
   latestRelease?: Maybe<Scalars['String']['output']>;
@@ -1058,6 +1057,7 @@ export type RepositoryNode = Node & {
   openIssuesCount: Scalars['Int']['output'];
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
+  recentIssues: Array<IssueNode>;
   recentMilestones: Array<MilestoneNode>;
   releases: Array<ReleaseNode>;
   size: Scalars['Int']['output'];

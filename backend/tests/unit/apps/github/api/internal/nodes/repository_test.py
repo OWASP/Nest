@@ -25,7 +25,6 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
             "description",
             "forks_count",
             "is_archived",
-            "issues",
             "key",
             "languages",
             "latest_release",
@@ -34,6 +33,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
             "open_issues_count",
             "organization",
             "project",
+            "recent_issues",
             "recent_milestones",
             "releases",
             "size",
@@ -45,9 +45,10 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
             "url",
         }
         assert expected_field_names.issubset(field_names)
+        assert "issues" not in field_names
 
-    def test_resolve_issues(self):
-        field = self._get_field_by_name("issues", RepositoryNode)
+    def test_resolve_recent_issues(self):
+        field = self._get_field_by_name("recent_issues", RepositoryNode)
         assert field is not None
         assert field.type.of_type is IssueNode
 
@@ -91,14 +92,14 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         assert field is not None
         assert field.type is str
 
-    def test_issues_method(self):
-        """Test issues method resolution."""
+    def test_recent_issues_method(self):
+        """Test recent_issues method resolution."""
         mock_repository = Mock()
         mock_issues = Mock()
         mock_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.issues = mock_issues
 
-        field = self._get_field_by_name("issues", RepositoryNode)
+        field = self._get_field_by_name("recent_issues", RepositoryNode)
         field.base_resolver.wrapped_func(None, mock_repository)
         mock_issues.order_by.assert_called_with("-created_at")
 
