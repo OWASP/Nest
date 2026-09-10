@@ -190,8 +190,11 @@ class TestSnapshotSubscriptionNodeResolvers:
         issue_prefetch.return_value.__getitem__ = lambda _, _s: [mock_issue]
         mock_snapshot.issues = issue_qs
 
-        mock_pr_qs = mock_snapshot.pull_requests.filter.return_value.order_by.return_value
-        mock_pr_qs.prefetch_related.return_value = []
+        mock_pr = MagicMock()
+        pr_qs = MagicMock()
+        pr_prefetch = pr_qs.filter.return_value.order_by.return_value.prefetch_related
+        pr_prefetch.return_value.__getitem__ = lambda _, _s: [mock_pr]
+        mock_snapshot.pull_requests = pr_qs
         mock_rel_qs = mock_snapshot.releases.filter.return_value.order_by.return_value
         mock_rel_qs.prefetch_related.return_value = []
 
