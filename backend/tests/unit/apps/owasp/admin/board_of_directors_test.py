@@ -11,10 +11,10 @@ class TestBoardOfDirectorsAdmin:
     """Tests for BoardOfDirectorsAdmin."""
 
     def test_filter_horizontal(self):
-        """Test filter_horizontal includes reviewers."""
+        """Test filter_horizontal includes claim_reviewers."""
         admin_instance = BoardOfDirectorsAdmin(BoardOfDirectors, AdminSite())
 
-        assert admin_instance.filter_horizontal == ("reviewers",)
+        assert admin_instance.filter_horizontal == ("claim_reviewers",)
 
     def test_list_filter(self):
         """Test list_filter includes year."""

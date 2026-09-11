@@ -6,6 +6,10 @@ export const CREATE_CLAIM_REVIEW = gql`
       ok
       code
       message
+      fieldErrors {
+        field
+        message
+      }
       review {
         id
         createdAt

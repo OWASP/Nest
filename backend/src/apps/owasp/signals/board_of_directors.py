@@ -24,12 +24,10 @@ def board_post_save_re_evaluate_claims(sender, instance, **kwargs):  # noqa: ARG
         ).count()
 
         if approved_count >= threshold:
-            claim.status = BoardCandidateClaim.Status.APPROVED
-            claim.is_locked = True
             claims_to_approve.append(claim)
 
     if claims_to_approve:
-        BoardCandidateClaim.objects.bulk_update(claims_to_approve, ["is_locked", "status"])
+        BoardCandidateClaim.bulk_set_status_approved(claims_to_approve)
         logger.info(
             "Approved %d claims after threshold change on board %d.",
             len(claims_to_approve),

@@ -15,7 +15,6 @@ import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.g
 import { ClaimStatusEnum, ReviewStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
@@ -43,15 +42,11 @@ const ClaimDetailsPage = () => {
   })
 
   const isReviewer = graphQLData?.boardOfDirectors?.reviewer != null
-  const isOwner = session?.user?.login === login
+  const isSelf = session?.user?.login === login
   const claim = graphQLData?.boardCandidateClaim
   const evidences = graphQLData?.boardCandidateClaimEvidences ?? []
   const hasReviewed =
     claim?.reviews?.some((r) => r.reviewer?.login === session?.user?.login) ?? false
-
-  const publicClaimStatuses = [ClaimStatusEnum.Approved, ClaimStatusEnum.Rejected]
-  const canView =
-    isOwner || isReviewer || (claim?.status != null && publicClaimStatuses.includes(claim.status))
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -90,15 +85,6 @@ const ClaimDetailsPage = () => {
     )
   }
 
-  if (!canView) {
-    return (
-      <AccessDeniedDisplay
-        title="Access Denied"
-        message="You do not have permission to view this claim."
-      />
-    )
-  }
-
   const claimDetails = [
     { label: 'Name', value: titleCaseWord(claim.name) },
     { label: 'Description', value: claim.description },
@@ -121,21 +107,20 @@ const ClaimDetailsPage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">@{login}</p>
           </div>
           <div className="flex items-center gap-2">
-            {claim.status === ClaimStatusEnum.Draft && isOwner && (
+            {claim.status === ClaimStatusEnum.Draft && isSelf && (
               <ActionButton onClick={handleAddEvidence}>
                 <FaPlus className="mr-2" />
                 {'Add Evidence'}
               </ActionButton>
             )}
-            {(isOwner || isReviewer) && (
-              <ClaimActions
-                claim={claim}
-                hasReviewed={hasReviewed}
-                isReviewer={isReviewer}
-                login={login}
-                year={year}
-              />
-            )}
+            <ClaimActions
+              claim={claim}
+              hasReviewed={hasReviewed}
+              isReviewer={isReviewer}
+              isSelf={isSelf}
+              login={login}
+              year={year}
+            />
           </div>
         </div>
         <Metadata details={claimDetails} detailsTitle="Claim Details" />

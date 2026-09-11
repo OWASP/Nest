@@ -173,15 +173,17 @@ describe('CreateEvidencePage', () => {
   })
 
   test('shows backend validation errors from GraphQL', async () => {
-    const gqlError = {
-      graphQLErrors: [
-        {
-          message: 'Name is required',
-          extensions: { code: 'VALIDATION_ERROR', field: 'name' },
+    mockCreateFn.mockResolvedValue({
+      data: {
+        createBoardCandidateClaimEvidence: {
+          ok: false,
+          code: 'VALIDATION_ERROR',
+          message: 'Some fields are invalid.',
+          fieldErrors: [{ field: 'name', message: 'Name is required' }],
+          evidence: null,
         },
-      ],
-    }
-    mockCreateFn.mockRejectedValue(gqlError)
+      },
+    })
 
     render(<CreateEvidencePage />)
 
@@ -210,15 +212,17 @@ describe('CreateEvidencePage', () => {
   })
 
   test('clears backend error when user types after validation error', async () => {
-    const gqlError = {
-      graphQLErrors: [
-        {
-          message: 'Name is required',
-          extensions: { code: 'VALIDATION_ERROR', field: 'name' },
+    mockCreateFn.mockResolvedValue({
+      data: {
+        createBoardCandidateClaimEvidence: {
+          ok: false,
+          code: 'VALIDATION_ERROR',
+          message: 'Some fields are invalid.',
+          fieldErrors: [{ field: 'name', message: 'Name is required' }],
+          evidence: null,
         },
-      ],
-    }
-    mockCreateFn.mockRejectedValue(gqlError)
+      },
+    })
 
     render(<CreateEvidencePage />)
 

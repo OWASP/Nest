@@ -2,7 +2,6 @@
 
 import type React from 'react'
 import { useState } from 'react'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormFileInput } from 'components/forms/shared/FormFileInput'
@@ -35,6 +34,8 @@ interface EvidenceFormProps {
       sourceUrl: string
     }>
   >
+  backendErrors: Record<string, string>
+  setBackendErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>
   onSubmit: (e: React.FormEvent) => Promise<void>
   loading: boolean
   title: string
@@ -44,13 +45,14 @@ interface EvidenceFormProps {
 const EvidenceForm = ({
   formData,
   setFormData,
+  backendErrors,
+  setBackendErrors,
   onSubmit,
   loading,
   title,
   submitText = 'Add Evidence',
 }: EvidenceFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
   const [fileError, setFileError] = useState<string | undefined>()
 
   const handleInputChange = (name: string, value: string) => {
@@ -136,14 +138,7 @@ const EvidenceForm = ({
       return
     }
 
-    try {
-      await onSubmit(e)
-    } catch (error) {
-      const { validationErrors, hasValidationErrors } = extractGraphQLErrors(error)
-      if (hasValidationErrors) {
-        setBackendErrors(validationErrors)
-      }
-    }
+    await onSubmit(e)
   }
 
   return (

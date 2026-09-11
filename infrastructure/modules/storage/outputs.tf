@@ -13,6 +13,16 @@ output "fixtures_s3_bucket_name" {
   value       = module.fixtures_bucket.bucket.id
 }
 
+output "media_read_write_policy_arn" {
+  description = "The ARN of the media files read/write IAM policy."
+  value       = aws_iam_policy.media_read_write.arn
+}
+
+output "media_s3_bucket_name" {
+  description = "The name of the S3 bucket for media files."
+  value       = module.media_bucket.bucket.id
+}
+
 output "shared_data_bucket_name" {
   description = "The name of the global shared public data S3 bucket (e.g. nest.dump)."
   value       = module.shared_data_bucket.bucket_id

@@ -43,6 +43,8 @@ class BoardOfDirectorsNode(strawberry.relay.Node):
     def reviewer(self, root: BoardOfDirectors, login: str) -> UserNode | None:
         """Resolve board election reviewer."""
         user = (
-            root.reviewers.select_related("github_user").filter(github_user__login=login).first()
+            root.claim_reviewers.select_related("github_user")
+            .filter(github_user__login=login)
+            .first()
         )
         return user.github_user if user else None

@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import { CreateBoardCandidateClaimEvidenceDocument } from 'types/__generated__/evidenceMutations.generated'
-import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
+import { handleMutationPayloadErrors } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import EvidenceForm from 'components/EvidenceForm'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -25,6 +25,7 @@ const CreateEvidencePage = () => {
     file: null as File | null,
     sourceUrl: '',
   })
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   if (isSyncing) {
     return <LoadingSpinner />
@@ -42,16 +43,16 @@ const CreateEvidencePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      const input = {
-        claimKey: claimKey,
-        description: formData.description,
-        file: formData.file,
-        name: formData.name,
-        sourceUrl: formData.sourceUrl,
-        year: Number.parseInt(year),
-      }
+    const input = {
+      claimKey: claimKey,
+      description: formData.description,
+      file: formData.file,
+      name: formData.name,
+      sourceUrl: formData.sourceUrl.trim() || null,
+      year: Number.parseInt(year),
+    }
 
+    try {
       const result = await createEvidence({
         variables: { input },
         update(cache, { data }) {
@@ -87,10 +88,9 @@ const CreateEvidencePage = () => {
         },
       })
 
-      if (!result.data?.createBoardCandidateClaimEvidence?.ok) {
-        throw new Error(
-          result.data?.createBoardCandidateClaimEvidence?.message ?? 'Evidence creation failed.'
-        )
+      const payload = result.data?.createBoardCandidateClaimEvidence
+      if (!handleMutationPayloadErrors(payload, 'Evidence creation failed.', setBackendErrors)) {
+        return
       }
 
       addToast({
@@ -102,18 +102,13 @@ const CreateEvidencePage = () => {
       })
 
       router.push(`/board/${year}/candidates/${login}/claims/${claimKey}`)
-    } catch (err) {
-      const { hasValidationErrors } = extractGraphQLErrors(err)
-      if (!hasValidationErrors) {
-        addToast({
-          description:
-            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'danger',
-        })
-      }
-      throw err
+    } catch (error) {
+      addToast({
+        description: error instanceof Error ? error.message : 'Evidence creation failed.',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+      })
     }
   }
 
@@ -121,6 +116,8 @@ const CreateEvidencePage = () => {
     <EvidenceForm
       formData={formData}
       setFormData={setFormData}
+      backendErrors={backendErrors}
+      setBackendErrors={setBackendErrors}
       onSubmit={handleSubmit}
       loading={loading}
       title="Add Evidence"

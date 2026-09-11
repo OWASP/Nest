@@ -3,13 +3,19 @@
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+import pydantic
 import pytest
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
 from apps.owasp.api.internal.mutations.board_candidate_claim import (
     BoardCandidateClaimMutations,
-    _validate_reorder_claims,
+    CreateClaimPydanticInput,
+    DiscardClaimPydanticInput,
+    ReorderClaimsPydanticInput,
+    SubmitClaimPydanticInput,
+    UpdateClaimPydanticInput,
+    WithdrawClaimPydanticInput,
 )
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_of_directors import BoardOfDirectors
@@ -35,7 +41,9 @@ class TestDiscardBoardCandidateClaim:
     """Tests for discard_board_candidate_claim mutation."""
 
     def _make_input_data(self, key, year=2025):
-        return MagicMock(key=key, year=year)
+        data = MagicMock(key=key, year=year)
+        data.to_pydantic.return_value = data
+        return data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_discard_claim_success(self, mock_claim_model):
@@ -108,7 +116,9 @@ class TestSubmitBoardCandidateClaim:
     """Tests for submit_board_candidate_claim mutation."""
 
     def _make_input_data(self, key, year=2025):
-        return MagicMock(key=key, year=year)
+        data = MagicMock(key=key, year=year)
+        data.to_pydantic.return_value = data
+        return data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_submit_claim_success(self, mock_claim_model):
@@ -183,11 +193,13 @@ class TestWithdrawBoardCandidateClaim:
     """Tests for withdraw_board_candidate_claim mutation."""
 
     def _make_input_data(self, key, withdrawn_reason="No longer relevant", year=2025):
-        return MagicMock(
+        data = MagicMock(
             key=key,
             withdrawn_reason=withdrawn_reason,
             year=year,
         )
+        data.to_pydantic.return_value = data
+        return data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.timezone")
@@ -268,67 +280,13 @@ class TestWithdrawBoardCandidateClaim:
         assert result.code == "INVALID_STATUS"
 
 
-class TestValidateReorderClaims:
-    """Tests for _validate_reorder_claims helper."""
-
-    def _make_input_data(self, keys, year=2025):
-        return MagicMock(keys=list(keys), year=year)
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_validate_success(self, mock_claim_model):
-        login = "alice"
-        input_data = self._make_input_data(["k1", "k2", "k3"])
-        mock_claim_model.objects.filter.return_value.count.return_value = 3
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        mock_claim_model.objects.filter.assert_called_once_with(
-            candidate__member__login=login, key__in=["k1", "k2", "k3"], board__year=input_data.year
-        )
-        assert keys == ["k1", "k2", "k3"]
-        assert error is None
-
-    def test_validate_empty_input(self):
-        login = "alice"
-        input_data = self._make_input_data([])
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        assert keys == []
-        assert error is not None
-        assert not error.ok
-        assert error.code == "VALIDATION_ERROR"
-
-    def test_validate_duplicate_keys(self):
-        login = "alice"
-        input_data = self._make_input_data(["k1", "k1", "k2"])
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        assert keys == ["k1", "k1", "k2"]
-        assert error is not None
-        assert not error.ok
-        assert error.code == "VALIDATION_ERROR"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_validate_missing_keys(self, mock_claim_model):
-        login = "alice"
-        input_data = self._make_input_data(["k1", "k2"])
-        mock_claim_model.objects.filter.return_value.count.return_value = 1
-
-        keys, error = _validate_reorder_claims(login, input_data)
-
-        assert keys == ["k1", "k2"]
-        assert error is not None
-        assert not error.ok
-        assert error.code == "NOT_FOUND"
-
-
 class TestReorderBoardCandidateClaims:
     """Tests for reorder_board_candidate_claims mutation."""
 
     def _make_input_data(self, keys, year=2025):
-        return MagicMock(keys=list(keys), year=year)
+        data = MagicMock(keys=list(keys), year=year)
+        data.to_pydantic.return_value = data
+        return data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_reorder_claims_success(self, mock_claim_model):
@@ -379,42 +337,20 @@ class TestReorderBoardCandidateClaims:
         )
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_reorder_claims_empty_input(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        user = MagicMock()
-        user.is_authenticated = True
-        info = _make_info(user)
-        input_data = self._make_input_data([])
-
-        mutation = BoardCandidateClaimMutations()
-        result = mutation.reorder_board_candidate_claims(info, input_data)
-
-        assert not result.ok
-        assert result.code == "VALIDATION_ERROR"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
-    def test_reorder_claims_duplicate_keys(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        user = MagicMock()
-        user.is_authenticated = True
-        info = _make_info(user)
-        input_data = self._make_input_data(["k1", "k1", "k2"])
-
-        mutation = BoardCandidateClaimMutations()
-        result = mutation.reorder_board_candidate_claims(info, input_data)
-
-        assert not result.ok
-        assert result.code == "VALIDATION_ERROR"
-
-    @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
     def test_reorder_claims_missing_keys(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
         user = MagicMock()
         user.is_authenticated = True
+        mock_github_user = MagicMock()
+        user.github_user = mock_github_user
         info = _make_info(user)
         input_data = self._make_input_data(["k1", "k2"])
 
-        mock_claim_model.objects.filter.return_value.count.return_value = 1
+        mock_queryset = MagicMock()
+        mock_queryset.select_related.return_value = [
+            MagicMock(id=1, key="k1", status=BoardCandidateClaim.Status.APPROVED)
+        ]
+        mock_claim_model.objects.filter.return_value.select_for_update.return_value = mock_queryset
 
         mutation = BoardCandidateClaimMutations()
         result = mutation.reorder_board_candidate_claims(info, input_data)
@@ -524,6 +460,7 @@ class TestCreateBoardCandidateClaim:
         data.description = description
         data.year = year
         data.source_text = source_text
+        data.to_pydantic.return_value = data
         return data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardOfDirectors")
@@ -664,6 +601,31 @@ class TestCreateBoardCandidateClaim:
         assert "required" in result.message
 
 
+class TestCreateClaimPydanticValidation:
+    """Tests for CreateClaimPydanticInput validation and its resolver handling."""
+
+    def test_pydantic_rejects_name_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            CreateClaimPydanticInput(description="ok", name="x" * 201, year=2025)
+
+        assert any(err["loc"] == ("name",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            CreateClaimPydanticInput(description="ok", name="x" * 201, year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimMutations().create_board_candidate_claim(info, data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"name"}
+
+
 class TestUpdateBoardCandidateClaim:
     """Tests for update_board_candidate_claim mutation."""
 
@@ -675,6 +637,7 @@ class TestUpdateBoardCandidateClaim:
         data.name = name
         data.description = description
         data.year = year
+        data.to_pydantic.return_value = data
         return data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim.BoardCandidateClaim")
@@ -712,6 +675,7 @@ class TestUpdateBoardCandidateClaim:
         info = _make_info(user)
         input_data = MagicMock(key="test-key", description=None, year=2025, source_text=None)
         input_data.name = "Updated Name"
+        input_data.to_pydantic.return_value = input_data
 
         claim = MagicMock()
         claim.candidate.member = mock_github_user
@@ -738,6 +702,7 @@ class TestUpdateBoardCandidateClaim:
         input_data = MagicMock(key="test-key", description=None, year=2024)
         input_data.name = "Updated Name"
         input_data.source_text = "Exact text from profile"
+        input_data.to_pydantic.return_value = input_data
 
         claim = MagicMock()
         claim.candidate.member = mock_github_user
@@ -764,6 +729,7 @@ class TestUpdateBoardCandidateClaim:
         input_data = MagicMock(key="test-key", description=None, year=2024)
         input_data.name = None
         input_data.source_text = ""
+        input_data.to_pydantic.return_value = input_data
 
         claim = MagicMock()
         claim.candidate.member = mock_github_user
@@ -864,3 +830,143 @@ class TestUpdateBoardCandidateClaim:
 
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
+
+
+class TestUpdateClaimPydanticValidation:
+    """Tests for UpdateClaimPydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_name_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            UpdateClaimPydanticInput(key="k", name="x" * 201, year=2025)
+
+        assert any(err["loc"] == ("name",) for err in exc_info.value.errors())
+
+    def test_pydantic_rejects_key_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            UpdateClaimPydanticInput(key="x" * 101, year=2025)
+
+        assert any(err["loc"] == ("key",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            UpdateClaimPydanticInput(key="x" * 101, year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimMutations().update_board_candidate_claim(info, data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"key"}
+
+
+class TestDiscardClaimPydanticValidation:
+    """Tests for DiscardClaimPydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_key_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            DiscardClaimPydanticInput(key="x" * 101, year=2025)
+
+        assert any(err["loc"] == ("key",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            DiscardClaimPydanticInput(key="x" * 101, year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimMutations().discard_board_candidate_claim(info, data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"key"}
+
+
+class TestSubmitClaimPydanticValidation:
+    """Tests for SubmitClaimPydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_key_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            SubmitClaimPydanticInput(key="x" * 101, year=2025)
+
+        assert any(err["loc"] == ("key",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            SubmitClaimPydanticInput(key="x" * 101, year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimMutations().submit_board_candidate_claim(info, data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"key"}
+
+
+class TestWithdrawClaimPydanticValidation:
+    """Tests for WithdrawClaimPydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_key_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            WithdrawClaimPydanticInput(key="x" * 101, withdrawn_reason="ok", year=2025)
+
+        assert any(err["loc"] == ("key",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            WithdrawClaimPydanticInput(key="x" * 101, withdrawn_reason="ok", year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimMutations().withdraw_board_candidate_claim(info, data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"key"}
+
+
+class TestReorderClaimsPydanticValidation:
+    """Tests for ReorderClaimsPydanticInput and its resolver handling."""
+
+    def test_pydantic_accepts_valid_input(self):
+        ReorderClaimsPydanticInput(keys=["k1", "k2"], year=2025)
+
+    def test_pydantic_rejects_empty_keys(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            ReorderClaimsPydanticInput(keys=[], year=2025)
+
+        assert any(err["loc"] == ("keys",) for err in exc_info.value.errors())
+
+    def test_pydantic_rejects_duplicate_keys(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            ReorderClaimsPydanticInput(keys=["k1", "k1"], year=2025)
+
+        assert any(err["loc"] == ("keys",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            ReorderClaimsPydanticInput(keys=["k1"], year="not-an-int")  # type: ignore[arg-type]
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimMutations().reorder_board_candidate_claims(info, data)
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"year"}

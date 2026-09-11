@@ -1,8 +1,14 @@
+import { addToast } from '@heroui/toast'
 import {
   extractGraphQLErrors,
+  handleMutationPayloadErrors,
   isForbiddenGraphQLError,
   isAccessDeniedGraphQLError,
 } from 'utils/helpers/handleGraphQLError'
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
 
 describe('extractGraphQLErrors', () => {
   describe('ApolloError-like errors with graphQLErrors', () => {
@@ -250,6 +256,92 @@ describe('extractGraphQLErrors', () => {
       expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual([])
     })
+  })
+})
+
+describe('handleMutationPayloadErrors', () => {
+  const setBackendErrors = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('returns true and does nothing when payload is ok', () => {
+    const result = handleMutationPayloadErrors({ ok: true }, 'Failed.', setBackendErrors)
+
+    expect(result).toBe(true)
+    expect(setBackendErrors).not.toHaveBeenCalled()
+    expect(addToast).not.toHaveBeenCalled()
+  })
+
+  it('maps fieldErrors to backendErrors when present', () => {
+    const payload = {
+      ok: false,
+      fieldErrors: [
+        { field: 'name', message: 'Name is required.' },
+        { field: 'sourceUrl', message: 'Invalid URL.' },
+      ],
+    }
+
+    const result = handleMutationPayloadErrors(payload, 'Failed.', setBackendErrors)
+
+    expect(result).toBe(false)
+    expect(setBackendErrors).toHaveBeenCalledWith({
+      name: 'Name is required.',
+      sourceUrl: 'Invalid URL.',
+    })
+    expect(addToast).not.toHaveBeenCalled()
+  })
+
+  it('shows a toast with payload.message when no fieldErrors', () => {
+    const result = handleMutationPayloadErrors(
+      { ok: false, message: 'Server rejected the request.' },
+      'Fallback.',
+      setBackendErrors
+    )
+
+    expect(result).toBe(false)
+    expect(setBackendErrors).not.toHaveBeenCalled()
+    expect(addToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Server rejected the request.', color: 'danger' })
+    )
+  })
+
+  it('falls back to the provided fallback message when payload.message is missing', () => {
+    handleMutationPayloadErrors({ ok: false }, 'Fallback used.', setBackendErrors)
+
+    expect(addToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Fallback used.', color: 'danger' })
+    )
+  })
+
+  it('falls back to the provided fallback message when payload is null', () => {
+    handleMutationPayloadErrors(null, 'Null fallback.', setBackendErrors)
+
+    expect(addToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Null fallback.' })
+    )
+  })
+
+  it('falls back to the provided fallback message when payload is undefined', () => {
+    handleMutationPayloadErrors(undefined, 'Undefined fallback.', setBackendErrors)
+
+    expect(addToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Undefined fallback.' })
+    )
+  })
+
+  it('shows a toast when fieldErrors is an empty array', () => {
+    handleMutationPayloadErrors(
+      { ok: false, fieldErrors: [], message: 'Nothing to map.' },
+      'Fallback.',
+      setBackendErrors
+    )
+
+    expect(setBackendErrors).not.toHaveBeenCalled()
+    expect(addToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Nothing to map.' })
+    )
   })
 })
 

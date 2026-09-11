@@ -15,11 +15,10 @@ def _make_info(user):
 class TestBoardCandidateClaimQuery:
     """Tests for board_candidate_claims query."""
 
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardOfDirectors")
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claims_self(self, mock_claim_model, mock_board_model):
+    def test_board_candidate_claims_self(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_board_model.objects.filter.return_value.exists.return_value = False
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
@@ -42,13 +41,10 @@ class TestBoardCandidateClaimQuery:
         base_qs.filter.assert_called_once_with(candidate__member__login="alice")
         assert result == claims
 
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardOfDirectors")
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claims_non_self_filters_approved_and_rejected(
-        self, mock_claim_model, mock_board_model
-    ):
+    def test_board_candidate_claims_non_self_filters_public(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_board_model.objects.filter.return_value.exists.return_value = False
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = True
         user.github_user = MagicMock()
@@ -69,21 +65,13 @@ class TestBoardCandidateClaimQuery:
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
         base_qs.filter.assert_called_once_with(candidate__member__login="alice")
-        login_qs.filter.assert_called_once_with(
-            status__in=[
-                BoardCandidateClaim.Status.APPROVED,
-                BoardCandidateClaim.Status.REJECTED,
-            ]
-        )
+        login_qs.filter.assert_called_once_with(status__in=BoardCandidateClaim.PUBLIC_STATUSES)
         assert result == filtered_qs
 
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardOfDirectors")
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claims_anonymous_filters_approved_and_rejected(
-        self, mock_claim_model, mock_board_model
-    ):
+    def test_board_candidate_claims_anonymous_filters_public(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_board_model.objects.filter.return_value.exists.return_value = False
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         user = MagicMock()
         user.is_authenticated = False
         info = _make_info(user)
@@ -102,48 +90,7 @@ class TestBoardCandidateClaimQuery:
         result = query.board_candidate_claims(info, login="alice", year=2025)
 
         base_qs.filter.assert_called_once_with(candidate__member__login="alice")
-        login_qs.filter.assert_called_once_with(
-            status__in=[
-                BoardCandidateClaim.Status.APPROVED,
-                BoardCandidateClaim.Status.REJECTED,
-            ]
-        )
-        assert result == filtered_qs
-
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardOfDirectors")
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claims_reviewer_sees_submitted_approved_and_rejected(
-        self, mock_claim_model, mock_board_model
-    ):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        user.github_user.login = "bob"
-        mock_board_model.objects.filter.return_value.exists.return_value = True
-        info = _make_info(user)
-
-        filtered_qs = MagicMock()
-        filtered_qs.annotate.return_value.select_related.return_value.order_by.return_value = (
-            filtered_qs
-        )
-        login_qs = MagicMock()
-        login_qs.filter.return_value = filtered_qs
-        base_qs = MagicMock()
-        base_qs.filter.return_value = login_qs
-        mock_claim_model.objects.filter.return_value = base_qs
-
-        query = BoardCandidateClaimQuery()
-        result = query.board_candidate_claims(info, login="alice", year=2025)
-
-        base_qs.filter.assert_called_once_with(candidate__member__login="alice")
-        login_qs.filter.assert_called_once_with(
-            status__in=[
-                BoardCandidateClaim.Status.SUBMITTED,
-                BoardCandidateClaim.Status.APPROVED,
-                BoardCandidateClaim.Status.REJECTED,
-            ]
-        )
+        login_qs.filter.assert_called_once_with(status__in=BoardCandidateClaim.PUBLIC_STATUSES)
         assert result == filtered_qs
 
 
@@ -153,6 +100,7 @@ class TestBoardCandidateClaimSingleQuery:
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
     def test_board_candidate_claim_self(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
         user.is_authenticated = True
@@ -182,6 +130,7 @@ class TestBoardCandidateClaimSingleQuery:
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
     def test_board_candidate_claim_non_self_approved(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
         user.is_authenticated = True
@@ -189,7 +138,6 @@ class TestBoardCandidateClaimSingleQuery:
         info = _make_info(user)
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = False
         claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.APPROVED
         mock_qs = MagicMock()
@@ -199,12 +147,12 @@ class TestBoardCandidateClaimSingleQuery:
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
 
-        mock_claim_model.objects.select_related.return_value.annotate.assert_called_once()
         assert result == claim
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claim_non_self_not_approved(self, mock_claim_model):
+    def test_board_candidate_claim_non_self_submitted(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
         user.is_authenticated = True
@@ -212,9 +160,52 @@ class TestBoardCandidateClaimSingleQuery:
         info = _make_info(user)
 
         claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = False
         claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.SUBMITTED
+        mock_qs = MagicMock()
+        mock_qs.get.return_value = claim
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
+
+        query = BoardCandidateClaimQuery()
+        result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
+
+        assert result == claim
+
+    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
+    def test_board_candidate_claim_non_self_rejected(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
+        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
+        user = MagicMock()
+        user.is_authenticated = True
+        user.github_user = MagicMock()
+        info = _make_info(user)
+
+        claim = MagicMock()
+        claim.candidate.member = None
+        claim.status = BoardCandidateClaim.Status.REJECTED
+        mock_qs = MagicMock()
+        mock_qs.get.return_value = claim
+        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
+
+        query = BoardCandidateClaimQuery()
+        result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
+
+        assert result == claim
+
+    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
+    def test_board_candidate_claim_non_self_draft_hidden(self, mock_claim_model):
+        mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
+        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
+        user = MagicMock()
+        user.is_authenticated = True
+        user.github_user = MagicMock()
+        info = _make_info(user)
+
+        claim = MagicMock()
+        claim.candidate.member = None
+        claim.status = BoardCandidateClaim.Status.DRAFT
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim
         mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
@@ -227,6 +218,7 @@ class TestBoardCandidateClaimSingleQuery:
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
     def test_board_candidate_claim_not_found(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
         user.is_authenticated = True
@@ -245,6 +237,7 @@ class TestBoardCandidateClaimSingleQuery:
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
     def test_board_candidate_claim_anonymous_approved(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
         user.is_authenticated = False
@@ -259,106 +252,18 @@ class TestBoardCandidateClaimSingleQuery:
         query = BoardCandidateClaimQuery()
         result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
 
-        mock_claim_model.objects.select_related.return_value.annotate.assert_called_once()
         assert result == claim
 
     @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claim_reviewer_sees_submitted(self, mock_claim_model):
+    def test_board_candidate_claim_anonymous_draft_hidden(self, mock_claim_model):
         mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-
-        claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = True
-        claim.candidate.member = None
-        claim.status = BoardCandidateClaim.Status.SUBMITTED
-        mock_qs = MagicMock()
-        mock_qs.get.return_value = claim
-        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
-
-        query = BoardCandidateClaimQuery()
-        result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
-
-        assert result == claim
-
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claim_non_self_rejected(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-
-        claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = False
-        claim.candidate.member = None
-        claim.status = BoardCandidateClaim.Status.REJECTED
-        mock_qs = MagicMock()
-        mock_qs.get.return_value = claim
-        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
-
-        query = BoardCandidateClaimQuery()
-        result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
-
-        assert result == claim
-
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claim_anonymous_rejected(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
+        mock_claim_model.PUBLIC_STATUSES = BoardCandidateClaim.PUBLIC_STATUSES
         mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
         user = MagicMock()
         user.is_authenticated = False
         info = _make_info(user)
 
         claim = MagicMock()
-        claim.status = BoardCandidateClaim.Status.REJECTED
-        mock_qs = MagicMock()
-        mock_qs.get.return_value = claim
-        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
-
-        query = BoardCandidateClaimQuery()
-        result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
-
-        assert result == claim
-
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claim_reviewer_sees_rejected(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-
-        claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = True
-        claim.candidate.member = None
-        claim.status = BoardCandidateClaim.Status.REJECTED
-        mock_qs = MagicMock()
-        mock_qs.get.return_value = claim
-        mock_claim_model.objects.select_related.return_value.annotate.return_value = mock_qs
-
-        query = BoardCandidateClaimQuery()
-        result = query.board_candidate_claim(info, login="alice", key="test-key", year=2025)
-
-        assert result == claim
-
-    @patch("apps.owasp.api.internal.queries.board_candidate_claim.BoardCandidateClaim")
-    def test_board_candidate_claim_reviewer_blocked_from_draft(self, mock_claim_model):
-        mock_claim_model.Status = BoardCandidateClaim.Status
-        mock_claim_model.DoesNotExist = BoardCandidateClaim.DoesNotExist
-        user = MagicMock()
-        user.is_authenticated = True
-        user.github_user = MagicMock()
-        info = _make_info(user)
-
-        claim = MagicMock()
-        claim.board.reviewers.filter.return_value.exists.return_value = True
-        claim.candidate.member = None
         claim.status = BoardCandidateClaim.Status.DRAFT
         mock_qs = MagicMock()
         mock_qs.get.return_value = claim

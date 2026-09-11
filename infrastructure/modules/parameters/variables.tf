@@ -20,6 +20,11 @@ variable "django_allowed_origins" {
   type        = string
 }
 
+variable "django_aws_media_bucket_name" {
+  description = "The name of the S3 bucket for Django media files."
+  type        = string
+}
+
 variable "django_aws_static_bucket_name" {
   description = "The name of the S3 bucket for Django static files."
   type        = string

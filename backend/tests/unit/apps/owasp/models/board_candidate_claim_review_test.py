@@ -86,7 +86,7 @@ class TestBoardCandidateClaimReviewModel:
         board.get_candidate = MagicMock(return_value=None)
 
         with (
-            patch.object(BoardOfDirectors, "reviewers") as mock_reviewers,
+            patch.object(BoardOfDirectors, "claim_reviewers") as mock_reviewers,
             patch.object(User, "github_user", new_callable=PropertyMock) as mock_github_user,
         ):
             mock_reviewers.filter.return_value.exists.return_value = True
@@ -125,13 +125,20 @@ class TestBoardCandidateClaimReviewModel:
     def test_clean_user_not_reviewer_raises(self):
         """Test that clean raises ValidationError when user is not a reviewer."""
         reviewer_user = User()
-        review = self._build_review(
-            claim_status=BoardCandidateClaim.Status.SUBMITTED,
-            reviewer_user=reviewer_user,
-        )
+        board = BoardOfDirectors()
 
-        with patch.object(User, "github_user") as mock_github_user:
+        with (
+            patch.object(BoardOfDirectors, "claim_reviewers") as mock_reviewers,
+            patch.object(User, "github_user") as mock_github_user,
+        ):
+            mock_reviewers.filter.return_value.exists.return_value = False
             mock_github_user.login = "alice"
+            review = self._build_review(
+                claim_status=BoardCandidateClaim.Status.SUBMITTED,
+                reviewer_user=reviewer_user,
+                claim_board=board,
+            )
+
             with pytest.raises(ValidationError) as exc_info:
                 review.clean()
 
@@ -144,7 +151,7 @@ class TestBoardCandidateClaimReviewModel:
         board.get_candidate = MagicMock(return_value=MagicMock())  # candidate found
 
         with (
-            patch.object(BoardOfDirectors, "reviewers") as mock_reviewers,
+            patch.object(BoardOfDirectors, "claim_reviewers") as mock_reviewers,
             patch.object(User, "github_user") as mock_github_user,
         ):
             mock_reviewers.filter.return_value.exists.return_value = True
@@ -169,7 +176,7 @@ class TestBoardCandidateClaimReviewModel:
         """Test that clean raises ValidationError when when reviewer has no linked github user."""
         reviewer_user = User()
         board = BoardOfDirectors()
-        with patch.object(BoardOfDirectors, "reviewers") as mock_reviewers:
+        with patch.object(BoardOfDirectors, "claim_reviewers") as mock_reviewers:
             mock_reviewers.filter.return_value.exists.return_value = True
             review = self._build_review(
                 claim_status=BoardCandidateClaim.Status.SUBMITTED,

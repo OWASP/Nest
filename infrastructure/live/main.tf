@@ -65,8 +65,11 @@ module "backend" {
   service_name                    = "backend"
   subnet_ids                      = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn                = module.alb.backend_target_group_arn
-  task_role_policy_arns           = [module.storage.static_read_write_policy_arn]
-  use_fargate_spot                = var.backend_use_fargate_spot
+  task_role_policy_arns = [
+    module.storage.media_read_write_policy_arn,
+    module.storage.static_read_write_policy_arn,
+  ]
+  use_fargate_spot = var.backend_use_fargate_spot
 }
 
 module "cache" {
@@ -187,6 +190,7 @@ module "parameters" {
   django_configuration          = var.django_configuration
   django_allowed_hosts          = var.domain_name
   django_allowed_origins        = "https://${var.domain_name}"
+  django_aws_media_bucket_name  = module.storage.media_s3_bucket_name
   django_aws_static_bucket_name = module.storage.static_s3_bucket_name
   django_db_host                = module.database.db_proxy_endpoint
   django_db_name                = var.db_name

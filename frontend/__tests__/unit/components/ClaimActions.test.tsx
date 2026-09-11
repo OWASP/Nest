@@ -55,6 +55,7 @@ const renderClaimActions = (claim: Claim) =>
       year="2025"
       hasReviewed={false}
       isReviewer={undefined}
+      isSelf={true}
     />
   )
 
@@ -66,6 +67,7 @@ const renderAsReviewer = (claim: Claim) =>
       year="2025"
       hasReviewed={false}
       isReviewer={true}
+      isSelf={false}
     />
   )
 
@@ -162,23 +164,36 @@ describe('ClaimActions', () => {
           year="2025"
           hasReviewed={true}
           isReviewer={true}
+          isSelf={false}
         />
       )
 
       expect(screen.queryByRole('button', { name: /actions menu/i })).not.toBeInTheDocument()
     })
 
-    it('shows only edit option for DRAFT when reviewer', () => {
+    it('hides dropdown for DRAFT when reviewer is not the owner', () => {
       renderAsReviewer(baseClaim)
 
-      fireEvent.click(screen.getByRole('button', { name: /actions menu/i }))
-      expect(screen.getByText('Edit Claim')).toBeInTheDocument()
-      expect(screen.queryByText('Submit Claim')).not.toBeInTheDocument()
-      expect(screen.queryByText('Discard Claim')).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /actions menu/i })).not.toBeInTheDocument()
     })
 
     it('hides dropdown for non-DRAFT non-SUBMITTED statuses when reviewer', () => {
       renderAsReviewer({ ...baseClaim, status: ClaimStatusEnum.Rejected })
+
+      expect(screen.queryByRole('button', { name: /actions menu/i })).not.toBeInTheDocument()
+    })
+
+    it('hides dropdown for a non-self public viewer', () => {
+      render(
+        <ClaimActions
+          claim={{ ...baseClaim, status: ClaimStatusEnum.Submitted }}
+          login="testuser"
+          year="2025"
+          hasReviewed={false}
+          isReviewer={false}
+          isSelf={false}
+        />
+      )
 
       expect(screen.queryByRole('button', { name: /actions menu/i })).not.toBeInTheDocument()
     })

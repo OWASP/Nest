@@ -29,8 +29,7 @@ class TestReviewPostSaveFinalizeClaimStatus:
         claim.reviews.filter.assert_called_once_with(
             status=BoardCandidateClaimReview.Status.APPROVED,
         )
-        assert claim.status == BoardCandidateClaim.Status.APPROVED
-        claim.save.assert_called_once()
+        claim.set_status_approved.assert_called_once()
         mock_logger.info.assert_called_once_with(
             "Claim '%s' auto-approved with %d approvals (threshold: %d).",
             "test-claim",
@@ -55,7 +54,7 @@ class TestReviewPostSaveFinalizeClaimStatus:
             status=BoardCandidateClaimReview.Status.APPROVED,
         )
         assert claim.status == BoardCandidateClaim.Status.SUBMITTED
-        claim.save.assert_not_called()
+        claim.set_status_approved.assert_not_called()
         mock_logger.info.assert_not_called()
 
     @patch("apps.owasp.signals.board_candidate_claim_review.logger")
@@ -68,7 +67,7 @@ class TestReviewPostSaveFinalizeClaimStatus:
 
         review_post_save_finalize_claim_status(sender=None, instance=instance)
 
-        claim.save.assert_not_called()
+        claim.set_status_approved.assert_not_called()
         mock_logger.info.assert_not_called()
 
     @patch("apps.owasp.signals.board_candidate_claim_review.logger")
@@ -88,6 +87,5 @@ class TestReviewPostSaveFinalizeClaimStatus:
         claim.reviews.filter.assert_called_once_with(
             status=BoardCandidateClaimReview.Status.APPROVED,
         )
-        assert claim.status == BoardCandidateClaim.Status.APPROVED
-        claim.save.assert_called_once()
+        claim.set_status_approved.assert_called_once()
         mock_logger.info.assert_called_once()

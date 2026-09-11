@@ -3,12 +3,16 @@
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+import pydantic
 import pytest
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
 from apps.owasp.api.internal.mutations.board_candidate_claim_evidence import (
     BoardCandidateClaimEvidenceMutations,
+    CreateEvidencePydanticInput,
+    RemoveEvidencePydanticInput,
+    UpdateEvidencePydanticInput,
 )
 from apps.owasp.models.board_candidate_claim import BoardCandidateClaim
 from apps.owasp.models.board_candidate_claim_evidence import BoardCandidateClaimEvidence
@@ -49,6 +53,7 @@ class TestCreateBoardCandidateClaimEvidence:
         )
         input_data.name = name
         input_data.year = year
+        input_data.to_pydantic.return_value = input_data
         return input_data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
@@ -209,6 +214,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         input_data.name = name
         input_data.claim_key = claim_key
         input_data.year = year
+        input_data.to_pydantic.return_value = input_data
         return input_data
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
@@ -262,6 +268,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         input_data.name = "Updated Name"
         input_data.claim_key = "test-claim-key"
         input_data.year = 2025
+        input_data.to_pydantic.return_value = input_data
 
         evidence = MagicMock()
         evidence.claim.candidate.member = mock_github_user
@@ -275,7 +282,8 @@ class TestUpdateBoardCandidateClaimEvidence:
         assert result.ok
         assert result.code == "SUCCESS"
         assert evidence.name == "Updated Name"
-        evidence.save.assert_called_once_with(update_fields=["name", "key"])
+        assert evidence.source_url == ""
+        evidence.save.assert_called_once_with(update_fields=["name", "key", "source_url"])
 
     @patch("apps.owasp.api.internal.mutations.board_candidate_claim_evidence.BoardCandidateClaim")
     @patch(
@@ -300,6 +308,7 @@ class TestUpdateBoardCandidateClaimEvidence:
         )
         input_data.claim_key = "test-claim-key"
         input_data.year = 2025
+        input_data.to_pydantic.return_value = input_data
 
         evidence = MagicMock()
         evidence.claim.candidate.member = mock_github_user
@@ -434,12 +443,14 @@ class TestRemoveBoardCandidateClaimEvidence:
         claim_key="test-claim-key",
         year=2025,
     ):
-        return MagicMock(
+        data = MagicMock(
             key=evidence_key,
             removed_reason=removed_reason,
             claim_key=claim_key,
             year=year,
         )
+        data.to_pydantic.return_value = data
+        return data
 
     @pytest.mark.parametrize(
         "status",
@@ -639,3 +650,119 @@ class TestRemoveBoardCandidateClaimEvidence:
 
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
+
+
+class TestCreateEvidencePydanticValidation:
+    """Tests for CreateEvidencePydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_name_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            CreateEvidencePydanticInput(claim_key="k", description="d", name="x" * 201, year=2025)
+
+        assert any(err["loc"] == ("name",) for err in exc_info.value.errors())
+
+    @pytest.mark.parametrize("bad_url", ["not a url", "javascript:alert(1)", "ftp:/host", "://x"])
+    def test_pydantic_rejects_invalid_source_url(self, bad_url):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            CreateEvidencePydanticInput(
+                claim_key="k", description="d", name="n", source_url=bad_url, year=2025
+            )
+
+        assert any(err["loc"] == ("source_url",) for err in exc_info.value.errors())
+
+    @pytest.mark.parametrize("url", [None, "https://example.com/path?q=1"])
+    def test_pydantic_accepts_absent_or_valid_source_url(self, url):
+        model = CreateEvidencePydanticInput(
+            claim_key="k", description="d", name="n", source_url=url, year=2025
+        )
+
+        if url:
+            assert model.source_url.host == "example.com"
+            assert model.source_url.scheme == "https"
+        else:
+            assert model.source_url is None
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            CreateEvidencePydanticInput(claim_key="x" * 101, description="d", name="n", year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimEvidenceMutations().create_board_candidate_claim_evidence(
+            info, data
+        )
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"claimKey"}
+
+
+class TestUpdateEvidencePydanticValidation:
+    """Tests for UpdateEvidencePydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_key_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            UpdateEvidencePydanticInput(claim_key="k", key="x" * 101, year=2025)
+
+        assert any(err["loc"] == ("key",) for err in exc_info.value.errors())
+
+    def test_pydantic_rejects_invalid_source_url(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            UpdateEvidencePydanticInput(claim_key="k", key="e", source_url="not-a-url", year=2025)
+
+        assert any(err["loc"] == ("source_url",) for err in exc_info.value.errors())
+
+    def test_pydantic_accepts_valid_source_url(self):
+        model = UpdateEvidencePydanticInput(
+            claim_key="k", key="e", source_url="https://example.com/x", year=2025
+        )
+
+        assert model.source_url.host == "example.com"
+        assert model.source_url.scheme == "https"
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            UpdateEvidencePydanticInput(claim_key="k", key="x" * 101, year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimEvidenceMutations().update_board_candidate_claim_evidence(
+            info, data
+        )
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"key"}
+
+
+class TestRemoveEvidencePydanticValidation:
+    """Tests for RemoveEvidencePydanticInput and its resolver handling."""
+
+    def test_pydantic_rejects_key_over_max_length(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            RemoveEvidencePydanticInput(claim_key="k", key="x" * 101, year=2025)
+
+        assert any(err["loc"] == ("key",) for err in exc_info.value.errors())
+
+    def test_resolver_returns_field_errors_when_pydantic_fails(self):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            RemoveEvidencePydanticInput(claim_key="k", key="x" * 101, year=2025)
+
+        data = MagicMock()
+        data.to_pydantic.side_effect = exc_info.value
+        info = _make_info(MagicMock())
+
+        result = BoardCandidateClaimEvidenceMutations().remove_board_candidate_claim_evidence(
+            info, data
+        )
+
+        assert not result.ok
+        assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert {fe.field for fe in result.field_errors} == {"key"}

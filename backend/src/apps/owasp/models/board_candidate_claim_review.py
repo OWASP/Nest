@@ -64,16 +64,11 @@ class BoardCandidateClaimReview(TimestampedModel):
             err = "Review can only be added to submitted claims."
             raise ValidationError(err)
 
-        if (
-            not self.claim.board
-            or not self.claim.board.reviewers.filter(id=self.reviewer.id).exists()
-        ):
+        if not self.claim.board.claim_reviewers.filter(id=self.reviewer.id).exists():
             err = "Only Claim Reviewers can review claims."
             raise ValidationError(err)
 
-        if self.claim.board and self.claim.board.get_candidate(
-            login=self.reviewer.github_user.login
-        ):
+        if self.claim.board.get_candidate(login=self.reviewer.github_user.login):
             err = "A candidate cannot review claims in the same election year."
             raise ValidationError(err)
 

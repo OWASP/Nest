@@ -61,6 +61,16 @@ class TestBoardCandidateClaimModel:
 
         assert expected == BoardCandidateClaim.FINALIZED_STATUSES
 
+    def test_public_statuses(self):
+        """Test PUBLIC_STATUSES contains the correct statuses."""
+        expected = {
+            BoardCandidateClaim.Status.APPROVED,
+            BoardCandidateClaim.Status.REJECTED,
+            BoardCandidateClaim.Status.SUBMITTED,
+        }
+
+        assert expected == BoardCandidateClaim.PUBLIC_STATUSES
+
     def test_default_status_is_draft(self):
         """Test default status is DRAFT."""
         field = BoardCandidateClaim._meta.get_field("status")
@@ -79,12 +89,12 @@ class TestBoardCandidateClaimModel:
 
         assert field.default == 0
 
-    def test_board_field_nullable(self):
-        """Test board field is nullable."""
+    def test_board_field_required(self):
+        """Test board field is required."""
         field = BoardCandidateClaim._meta.get_field("board")
 
-        assert field.null
-        assert field.blank
+        assert not field.null
+        assert not field.blank
 
     def test_withdrawn_at_field_nullable(self):
         """Test withdrawn_at field is nullable."""
@@ -332,6 +342,7 @@ class TestBoardCandidateClaimModel:
     def test_save_calls_full_clean(self, mock_super_save, mock_full_clean):
         """Test that save calls full_clean before saving."""
         claim = BoardCandidateClaim(name="Test Claim", status=BoardCandidateClaim.Status.DRAFT)
+        claim.pk = 1
 
         claim.save()
 
@@ -353,6 +364,7 @@ class TestBoardCandidateClaimModel:
         """Test that save sets is_locked=True for finalized statuses."""
         claim = BoardCandidateClaim(name="Test Claim", status=status)
         claim.is_locked = False
+        claim.pk = 1
 
         claim.save()
 
@@ -373,10 +385,21 @@ class TestBoardCandidateClaimModel:
         """Test that save does not set is_locked=True for non-finalized statuses."""
         claim = BoardCandidateClaim(name="Test Claim", status=status)
         claim.is_locked = False
+        claim.pk = 1
 
         claim.save()
 
         assert claim.is_locked is False
+
+    @patch.object(BoardCandidateClaim, "save")
+    def test_set_status_approved_sets_status_and_saves(self, mock_save):
+        """Test set_status_approved flips status to APPROVED and saves."""
+        claim = BoardCandidateClaim(name="Test Claim", status=BoardCandidateClaim.Status.SUBMITTED)
+
+        claim.set_status_approved()
+
+        assert claim.status == BoardCandidateClaim.Status.APPROVED
+        mock_save.assert_called_once()
 
     @patch("apps.owasp.models.board_candidate_claim.BulkSaveModel.bulk_save")
     def test_bulk_save_delegates(self, mock_bulk_save):
@@ -386,6 +409,22 @@ class TestBoardCandidateClaimModel:
         BoardCandidateClaim.bulk_save(claims, fields=["order"])
 
         mock_bulk_save.assert_called_once_with(BoardCandidateClaim, claims, fields=["order"])
+
+    @patch("apps.owasp.models.board_candidate_claim.BoardCandidateClaim.objects")
+    def test_bulk_set_status_approved_updates_status_lock_and_calls_bulk_update(
+        self, mock_objects
+    ):
+        """Test bulk_set_status_approved flips status, locks, and issues one bulk_update."""
+        claim_a = BoardCandidateClaim(name="Claim A", status=BoardCandidateClaim.Status.SUBMITTED)
+        claim_b = BoardCandidateClaim(name="Claim B", status=BoardCandidateClaim.Status.SUBMITTED)
+        claims = [claim_a, claim_b]
+
+        BoardCandidateClaim.bulk_set_status_approved(claims)
+
+        for claim in claims:
+            assert claim.status == BoardCandidateClaim.Status.APPROVED
+            assert claim.is_locked is True
+        mock_objects.bulk_update.assert_called_once_with(claims, ["is_locked", "status"])
 
     @patch.object(BoardCandidateClaim, "full_clean")
     @patch("apps.owasp.models.board_candidate_claim.TimestampedModel.save")

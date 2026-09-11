@@ -45,6 +45,7 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
     FINALIZED_STATUSES = frozenset(
         {Status.APPROVED, Status.DISCARDED, Status.REJECTED, Status.WITHDRAWN}
     )
+    PUBLIC_STATUSES = frozenset({Status.APPROVED, Status.REJECTED, Status.SUBMITTED})
     VALID_TRANSITIONS = {
         Status.DRAFT: {Status.SUBMITTED, Status.DISCARDED},
         Status.SUBMITTED: {Status.APPROVED, Status.REJECTED, Status.WITHDRAWN},
@@ -55,9 +56,7 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
     }
     WITHDRAWAL_ALLOWED_FIELDS = frozenset({"status", "withdrawn_reason", "withdrawn_at"})
 
-    board = models.ForeignKey(
-        BoardOfDirectors, blank=True, null=True, on_delete=models.SET_NULL, related_name="claims"
-    )
+    board = models.ForeignKey(BoardOfDirectors, on_delete=models.CASCADE, related_name="claims")
     candidate = models.ForeignKey(EntityMember, on_delete=models.CASCADE, related_name="claims")
     description = models.TextField(default="", verbose_name="Description")
     is_locked = models.BooleanField(
@@ -145,7 +144,7 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
         self.full_clean()
 
-        if not self.pk and self.candidate_id and self.board_id:
+        if not self.pk:
             max_order = (
                 BoardCandidateClaim.objects.filter(
                     candidate_id=self.candidate_id,
@@ -161,6 +160,11 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
         super().save(*args, **kwargs)
 
+    def set_status_approved(self) -> None:
+        """Set claim status to approved."""
+        self.status = self.Status.APPROVED
+        self.save()
+
     @staticmethod
     def bulk_save(claims: list, fields: list | None = None) -> None:  # type: ignore[override]
         """Bulk save claims.
@@ -171,3 +175,16 @@ class BoardCandidateClaim(BulkSaveModel, TimestampedModel):
 
         """
         BulkSaveModel.bulk_save(BoardCandidateClaim, claims, fields=fields)
+
+    @classmethod
+    def bulk_set_status_approved(cls, claims: list[BoardCandidateClaim]) -> None:
+        """Bulk-approve and lock claims.
+
+        Args:
+            claims (list[BoardCandidateClaim]): Claims to approve.
+
+        """
+        for claim in claims:
+            claim.status = cls.Status.APPROVED
+            claim.is_locked = True
+        cls.objects.bulk_update(claims, ["is_locked", "status"])

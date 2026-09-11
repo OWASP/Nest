@@ -11,10 +11,8 @@ import { FaDownload } from 'react-icons/fa6'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetClaimAndEvidencesDocument } from 'types/__generated__/claimQueries.generated'
 import { GetBoardCandidateClaimEvidenceFileUrlDocument } from 'types/__generated__/evidenceQueries.generated'
-import { ClaimStatusEnum } from 'types/__generated__/graphql'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
@@ -40,8 +38,7 @@ const EvidenceDetailsPage = () => {
     },
   })
 
-  const isReviewer = data?.boardOfDirectors?.reviewer != null
-  const isOwner = session?.user?.login === login
+  const isSelf = session?.user?.login === login
   const [fetchFileUrl] = useLazyQuery(GetBoardCandidateClaimEvidenceFileUrlDocument)
 
   const claim = data?.boardCandidateClaim
@@ -55,19 +52,6 @@ const EvidenceDetailsPage = () => {
   }, [error])
 
   if (loading || isSyncing) return <LoadingSpinner />
-
-  const publicClaimStatuses = [ClaimStatusEnum.Approved, ClaimStatusEnum.Rejected]
-  const canView =
-    isOwner || isReviewer || (claim?.status != null && publicClaimStatuses.includes(claim.status))
-
-  if (!canView) {
-    return (
-      <AccessDeniedDisplay
-        title="Access Denied"
-        message="You do not have permission to view this claim."
-      />
-    )
-  }
 
   if (error) {
     return (
@@ -144,7 +128,7 @@ const EvidenceDetailsPage = () => {
                 {'Download Evidence'}
               </ActionButton>
             )}
-            {isOwner && (
+            {isSelf && (
               <EvidenceActions
                 evidence={evidence}
                 claim={claim}

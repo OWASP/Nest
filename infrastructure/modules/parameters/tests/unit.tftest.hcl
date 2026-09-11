@@ -5,6 +5,7 @@ variables {
   db_password_arn               = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_DB_PASSWORD"
   django_allowed_hosts          = "nest.owasp.dev"
   django_allowed_origins        = "https://nest.owasp.dev"
+  django_aws_media_bucket_name  = "nest-test-media-abcd1234"
   django_aws_static_bucket_name = "nest-test-static-abcd1234"
   django_configuration          = "Staging"
   django_db_host                = "db.example.com"
@@ -84,6 +85,22 @@ run "test_django_allowed_origins_is_string" {
   assert {
     condition     = aws_ssm_parameter.django_allowed_origins.type == "String"
     error_message = "DJANGO_ALLOWED_ORIGINS must be stored as String."
+  }
+}
+
+run "test_django_aws_media_bucket_name_path_format" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_aws_media_bucket_name.name == "/${var.project_name}/${var.environment}/DJANGO_AWS_MEDIA_BUCKET_NAME"
+    error_message = "DJANGO_AWS_MEDIA_BUCKET_NAME must follow path: /{project}/{environment}/DJANGO_AWS_MEDIA_BUCKET_NAME."
+  }
+}
+
+run "test_django_aws_media_bucket_name_is_string" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_aws_media_bucket_name.type == "String"
+    error_message = "DJANGO_AWS_MEDIA_BUCKET_NAME must be stored as String."
   }
 }
 

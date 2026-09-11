@@ -30,9 +30,9 @@ class BoardOfDirectors(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    reviewers = models.ManyToManyField(
+    claim_reviewers = models.ManyToManyField(
         "nest.User",
-        verbose_name="Reviewers",
+        verbose_name="Claim reviewers",
         related_name="+",
         blank=True,
         help_text="Reviewers for this year's board election claims.",
