@@ -26,6 +26,7 @@ class TestStaticSitemap:
     def test_items(self, sitemap):
         assert sitemap.items() == sitemap.STATIC_ROUTES
 
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
     @patch("apps.sitemap.views.static.Chapter.objects.aggregate")
     @patch("apps.sitemap.views.static.Committee.objects.aggregate")
     @patch("apps.sitemap.views.static.Organization.objects.aggregate")
@@ -39,6 +40,7 @@ class TestStaticSitemap:
         mock_organization,
         mock_committee,
         mock_chapter,
+        mock_repository,
         sitemap,
     ):
         dt = timezone.now()
@@ -47,6 +49,7 @@ class TestStaticSitemap:
         mock_organization.return_value = {"latest": dt}
         mock_project.return_value = {"latest": dt}
         mock_user.return_value = {"latest": dt}
+        mock_repository.return_value = {"latest": dt}
 
         for item in sitemap.STATIC_ROUTES:
             result = sitemap.lastmod(item)
@@ -73,6 +76,17 @@ class TestStaticSitemap:
 
         item = {"path": "/projects"}
         result = sitemap.lastmod(item)
+
+        mock_aggregate.assert_called_once_with(latest=ANY)
+        assert result == dt
+
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
+    def test_lastmod_repositories_uses_repository_model(self, mock_aggregate, sitemap):
+        """Test lastmod resolves /repositories via the Repository model."""
+        dt = timezone.now()
+        mock_aggregate.return_value = {"latest": dt}
+
+        result = sitemap.lastmod({"path": "/repositories"})
 
         mock_aggregate.assert_called_once_with(latest=ANY)
         assert result == dt
