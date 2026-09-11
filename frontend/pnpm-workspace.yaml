@@ -1,4 +1,7 @@
-auditConfig: {}
+audit:
+  ignore:
+    # extract-zip: no patched npm release (latest 2.0.1); only via @lhci/cli → puppeteer browsers.
+    - GHSA-jmr9-qjv8-65gv
 
 ignoreScripts: true
 
@@ -18,16 +21,16 @@ minimumReleaseAgeExclude:
   - '@graphql-codegen/typescript@6.1.0'
   - '@graphql-codegen/visitor-plugin-common@7.2.0'
   - '@graphql-tools/utils@11.2.0'
-  - '@next/env@16.2.12'
-  - '@next/swc-darwin-arm64@16.2.12'
-  - '@next/swc-darwin-x64@16.2.12'
-  - '@next/swc-linux-arm64-gnu@16.2.12'
-  - '@next/swc-linux-arm64-musl@16.2.12'
-  - '@next/swc-linux-x64-gnu@16.2.12'
-  - '@next/swc-linux-x64-musl@16.2.12'
-  - '@next/swc-win32-arm64-msvc@16.2.12'
-  - '@next/swc-win32-x64-msvc@16.2.12'
-  - '@next/third-parties@16.2.11'
+  - '@next/env@16.3.4'
+  - '@next/swc-darwin-arm64@16.3.4'
+  - '@next/swc-darwin-x64@16.3.4'
+  - '@next/swc-linux-arm64-gnu@16.3.4'
+  - '@next/swc-linux-arm64-musl@16.3.4'
+  - '@next/swc-linux-x64-gnu@16.3.4'
+  - '@next/swc-linux-x64-musl@16.3.4'
+  - '@next/swc-win32-arm64-msvc@16.3.4'
+  - '@next/swc-win32-x64-msvc@16.3.4'
+  - '@next/third-parties@16.3.4'
   - '@opentelemetry/core@2.8.0'
   - '@opentelemetry/semantic-conventions@1.43.0'
   - baseline-browser-mapping@2.11.1
@@ -39,17 +42,17 @@ minimumReleaseAgeExclude:
   - electron-to-chromium@1.5.396
   - enhanced-resolve@5.24.3
   - es-module-lexer@2.3.1
-  - fast-uri@3.1.5
+  - fast-uri@3.1.6
   - immutable@5.1.8
   - ip-address@10.3.1
   - js-yaml@4.3.1
   - nanoid@3.3.18
   - next-auth@4.24.15
-  - next@16.2.12
+  - next@16.3.4
   - node-releases@2.0.51
   - postcss@8.5.23
   - protobufjs@7.6.4
-  - qs@6.15.2
+  - qs@6.16.0
   - react-is@19.2.8
   - rxjs@7.8.2
   - sharp@0.35.0
@@ -66,8 +69,9 @@ overrides:
   '@opentelemetry/core': 2.8.0
   body-parser: 1.20.6
   brace-expansion@5: 5.0.9
+  browserslist: 4.28.7
   dompurify: 3.4.13
-  fast-uri: 3.1.5
+  fast-uri: 3.1.6
   glob: 11.1.0
   immutable: 5.1.8
   ip-address: 10.3.1
@@ -75,7 +79,7 @@ overrides:
   nanoid@3: 3.3.18
   postcss: 8.5.23
   protobufjs: 7.6.4
-  qs: 6.15.2
+  qs: 6.16.0
   rxjs: 7.8.2
   serialize-javascript: 7.0.5
   sharp: 0.35.0
