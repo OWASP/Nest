@@ -1,12 +1,13 @@
 """OWASP Certificate GraphQL Mutations."""
 
 import logging
+from typing import Annotated
 
 import strawberry
 from django.db import transaction
 from django.db.models import Q
 from graphql import GraphQLError
-from pydantic import BaseModel, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, StringConstraints, ValidationError, model_validator
 
 from apps.github.models.user import User as GithubUser
 from apps.nest.api.internal.permissions import IsAuthenticated
@@ -26,33 +27,14 @@ class IssueCertificateSchema(BaseModel):
 
     recipient_login: str | None = None
     recipient_logins: list[str] | None = None
-    title: str
-    message: str = ""
+    title: Annotated[
+        str, StringConstraints(min_length=1, max_length=MAX_TITLE_LENGTH, strip_whitespace=True)
+    ]
+    message: Annotated[
+        str, StringConstraints(max_length=MAX_MESSAGE_LENGTH, strip_whitespace=True)
+    ] = ""
     project_key: str | None = None
     chapter_key: str | None = None
-
-    @field_validator("title")
-    @classmethod
-    def validate_title(cls, v: str) -> str:
-        """Validate and strip certificate title."""
-        v = v.strip()
-        if not v:
-            msg = "Certificate title cannot be empty."
-            raise ValueError(msg)
-        if len(v) > MAX_TITLE_LENGTH:
-            msg = f"Certificate title cannot exceed {MAX_TITLE_LENGTH} characters."
-            raise ValueError(msg)
-        return v
-
-    @field_validator("message")
-    @classmethod
-    def validate_message(cls, v: str) -> str:
-        """Validate and strip certificate message."""
-        v = v.strip()
-        if len(v) > MAX_MESSAGE_LENGTH:
-            msg = f"Certificate body message cannot exceed {MAX_MESSAGE_LENGTH} characters."
-            raise ValueError(msg)
-        return v
 
     @model_validator(mode="after")
     def validate_recipients_and_keys(self) -> "IssueCertificateSchema":
