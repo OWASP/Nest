@@ -63,7 +63,7 @@ const MyMentorshipPage: React.FC = () => {
     variables: { search: debouncedQuery, page, limit: 24 },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
-    skip: isSyncing,
+    skip: isSyncing || !isProjectLeader,
   })
 
   useEffect(() => {
