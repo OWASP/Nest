@@ -78,7 +78,11 @@ const BarChart: React.FC<{
               const idx = opts?.dataPointIndex ?? 0
               const requirement = requirements[idx]
               if (requirement !== undefined) {
-                const displayVal = typeof val === 'number' ? val : Array.isArray(val) ? val[0] : val
+                const displayVal = (() => {
+                  if (typeof val === 'number') return val
+                  if (Array.isArray(val)) return val[0]
+                  return val
+                })()
                 return `${displayVal} / ${requirement}`
               }
               return typeof val === 'number'
