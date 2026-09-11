@@ -23,6 +23,7 @@ from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
+from apps.owasp.models.activity_event import ActivityEvent
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -115,6 +116,7 @@ def sync_repository(
                 if (latest_updated_issue := repository.latest_updated_issue)
                 else month_ago
             )
+            issues = []
             for gh_issue in gh_repository.get_issues(**kwargs):
                 if gh_issue.pull_request:  # Skip pull requests.
                     continue
@@ -138,6 +140,7 @@ def sync_repository(
                     milestone=milestone,
                     repository=repository,
                 )
+                issues.append(issue)
 
                 # Assignees.
                 issue.assignees.clear()
@@ -152,6 +155,7 @@ def sync_repository(
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
+            ActivityEvent.bulk_save_for_sources(issues)
         else:
             logger.info("Skipping issues sync for %s", repository.name)
 
@@ -166,6 +170,7 @@ def sync_repository(
             if (latest_updated_pull_request := repository.latest_updated_pull_request)
             else month_ago
         )
+        pull_requests = []
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
             if gh_pull_request.updated_at < until:
                 break
@@ -186,6 +191,7 @@ def sync_repository(
                 milestone=milestone,
                 repository=repository,
             )
+            pull_requests.append(pull_request)
 
             # Assignees.
             pull_request.assignees.clear()
@@ -200,12 +206,16 @@ def sync_repository(
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
                     logger.exception("Couldn't get GitHub pull request label %s", pull_request.url)
+        ActivityEvent.bulk_save_for_sources(pull_requests)
 
     # GitHub repository releases.
     releases = []
     if not is_owasp_site_repository:
         existing_release_node_ids = set(
-            Release.objects.filter(repository=repository).values_list("node_id", flat=True)
+            Release.objects.filter(
+                repository=repository,
+                published_at__isnull=False,
+            ).values_list("node_id", flat=True)
             if repository.id
             else ()
         )
@@ -215,8 +225,11 @@ def sync_repository(
                 break
 
             author = User.update_data(gh_release.author)
-            releases.append(Release.update_data(gh_release, author=author, repository=repository))
+            release = Release.update_data(gh_release, author=author, repository=repository)
+            releases.append(release)
+    releases_for_events = list(releases)
     Release.bulk_save(releases)
+    ActivityEvent.bulk_save_for_sources(releases_for_events)
 
     # GitHub repository contributors.
     RepositoryContributor.bulk_save(

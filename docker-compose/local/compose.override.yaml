@@ -1,0 +1,13 @@
+volumes:
+  backend-venv:
+    name: backend-venv-pulse
+  cache-data:
+    name: cache-data-pulse
+  db-data:
+    name: db-data-pulse
+  docs-venv:
+    name: docs-venv-pulse
+  frontend-next:
+    name: frontend-next-pulse
+  frontend-node-modules:
+    name: frontend-node-modules-pulse
