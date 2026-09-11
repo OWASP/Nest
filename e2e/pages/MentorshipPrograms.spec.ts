@@ -41,6 +41,38 @@ test.describe('Mentorship Programs Page', () => {
     await expect(page.getByPlaceholder('Search for programs...')).toBeVisible()
   })
 
+  test('sort dropdown exposes all sort options', async ({ page }) => {
+    await page.getByRole('button', { name: 'Sort by' }).click()
+    for (const option of ['Relevancy', 'Name', 'Date Created', 'Last Updated', 'End Date']) {
+      await expect(page.getByRole('option', { name: option })).toBeVisible()
+    }
+  })
+
+  test('sorting by name requests the name replica index', async ({ page }) => {
+    const requestedIndexes: string[] = []
+    page.on('request', (request) => {
+      if (request.url().includes('/idx/')) {
+        requestedIndexes.push(request.postDataJSON()?.indexName)
+      }
+    })
+
+    await page.getByRole('button', { name: 'Sort by' }).click()
+    await page.getByRole('option', { name: 'Name' }).click()
+    await expect.poll(() => requestedIndexes).toContain('programs_name_desc')
+
+    await page.getByRole('button', { name: /Sort in descending order/i }).click()
+    await expect.poll(() => requestedIndexes).toContain('programs_name_asc')
+
+    await expect(page).toHaveURL(/sortBy=name/)
+    await expect(page.getByRole('heading', { name: 'Program 1' })).toBeVisible()
+
+    await page.goBack()
+    await expect(page).toHaveURL(/sortBy=name&order=desc/)
+
+    await page.goForward()
+    await expect(page).toHaveURL(/sortBy=name&order=asc/)
+  })
+
   test('displays "No programs found" when there are no programs', async ({ page }) => {
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
