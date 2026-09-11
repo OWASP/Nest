@@ -58,7 +58,7 @@ export const footerSections: Section[] = [
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
       {
         text: 'GSoC 2026',
-        href: 'https://owasp.org/www-community/initiatives/gsoc/gsoc2026ideas#owasp-nest',
+        href: 'https://owasp.github.io/www-community/initiatives/gsoc/gsoc2026ideas#owasp-nest',
       },
       {
         text: 'Sponsor',
@@ -81,8 +81,8 @@ export const footerSections: Section[] = [
   {
     title: 'Community',
     links: [
-      { text: 'Community Content', href: 'https://owasp.org/www-community/' },
-      { text: 'Google Summer of Code', href: 'https://owasp.org/gsoc' },
+      { text: 'Community Content', href: 'https://owasp.org/community' },
+      { text: 'Google Summer of Code', href: 'https://owasp.github.io/www-community/initiatives/gsoc/' },
       {
         text: 'Start a Local Chapter',
         href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/8/group/20/create/90',
@@ -97,7 +97,7 @@ export const footerSections: Section[] = [
     title: 'OWASP',
     links: [
       { text: 'About', href: 'https://owasp.org/about/' },
-      { text: 'Contact', href: 'https://owasp.org/contact/' },
+      { text: 'Contact', href: 'https://owasp.github.io/contact/' },
       { text: 'Events', href: 'https://owasp.glueup.com/organization/6727/events/' },
       { text: 'Team', href: 'https://owasp.org/corporate/' },
     ],
