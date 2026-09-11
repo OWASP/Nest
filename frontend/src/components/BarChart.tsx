@@ -12,6 +12,12 @@ const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
+function getDisplayVal(val: string | number | number[]): string | number {
+  if (typeof val === 'number') return val
+  if (Array.isArray(val)) return val[0]
+  return val
+}
+
 const BarChart: React.FC<{
   title: string
   icon?: IconType
@@ -78,14 +84,10 @@ const BarChart: React.FC<{
               const idx = opts?.dataPointIndex ?? 0
               const requirement = requirements[idx]
               if (requirement !== undefined) {
-                const displayVal = typeof val === 'number' ? val : Array.isArray(val) ? val[0] : val
+                const displayVal = getDisplayVal(val) 
                 return `${displayVal} / ${requirement}`
               }
-              return typeof val === 'number'
-                ? String(val)
-                : Array.isArray(val)
-                  ? String(val[0])
-                  : String(val)
+              return String(getDisplayVal(val))
             },
           },
           colors: [
