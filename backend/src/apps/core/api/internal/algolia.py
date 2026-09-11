@@ -87,6 +87,7 @@ def get_search_results(
     page: int,
     hits_per_page: int,
     facet_filters: list,
+    *,
     ip_address=None,
 ) -> dict[str, Any]:
     """Return search results for the given parameters.

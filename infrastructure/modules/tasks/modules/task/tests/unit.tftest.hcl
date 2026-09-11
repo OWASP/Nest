@@ -12,9 +12,9 @@ variables {
   image_url                    = "123456789012.dkr.ecr.us-east-2.amazonaws.com/test:latest"
   kms_key_arn                  = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   memory                       = "512"
+  private_subnet_ids           = ["subnet-12345678"]
   project_name                 = "nest"
   security_group_ids           = ["sg-12345678"]
-  subnet_ids                   = ["subnet-12345678"]
   task_name                    = "test-task"
 }
 
@@ -177,5 +177,33 @@ run "test_capacity_provider_fargate_spot" {
   assert {
     condition     = one(aws_cloudwatch_event_target.task[0].ecs_target[0].capacity_provider_strategy).capacity_provider == "FARGATE_SPOT"
     error_message = "Capacity provider must be FARGATE_SPOT when use_fargate_spot is true."
+  }
+}
+
+run "test_task_assign_public_ip_disabled" {
+  command = plan
+
+  variables {
+    schedule_expression   = "cron(0 12 * * ? *)"
+    event_bridge_role_arn = "arn:aws:iam::123456789012:role/test-eventbridge-role"
+  }
+
+  assert {
+    condition     = one(aws_cloudwatch_event_target.task[0].ecs_target[0].network_configuration).assign_public_ip == false
+    error_message = "ECS task must not assign a public IP. Use a NAT Gateway instead."
+  }
+}
+
+run "test_task_uses_private_subnets" {
+  command = plan
+
+  variables {
+    schedule_expression   = "cron(0 12 * * ? *)"
+    event_bridge_role_arn = "arn:aws:iam::123456789012:role/test-eventbridge-role"
+  }
+
+  assert {
+    condition     = one(aws_cloudwatch_event_target.task[0].ecs_target[0].network_configuration).subnets == toset(var.private_subnet_ids)
+    error_message = "ECS task must be deployed into the configured private subnets."
   }
 }

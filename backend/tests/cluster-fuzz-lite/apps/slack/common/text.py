@@ -5,7 +5,13 @@ import sys
 import atheris
 
 with atheris.instrument_imports():
-    from apps.slack.common.text import escape, format_links_for_slack, strip_markdown
+    from apps.slack.common.text import (
+        escape,
+        format_links_for_slack,
+        preview_text,
+        sanitize_mrkdwn,
+        strip_markdown,
+    )
 
 
 def test_one_input(data: bytes) -> None:
@@ -13,12 +19,16 @@ def test_one_input(data: bytes) -> None:
     text = data.decode("utf-8", errors="surrogateescape")
     escape(text)
     format_links_for_slack(text)
+    preview_text(text)
+    sanitize_mrkdwn(text)
     strip_markdown(text)
 
     fdp = atheris.FuzzedDataProvider(data)
     structured_text = fdp.ConsumeUnicodeNoSurrogates(512)
     escape(structured_text)
     format_links_for_slack(structured_text)
+    preview_text(structured_text)
+    sanitize_mrkdwn(structured_text)
     strip_markdown(structured_text)
 
 

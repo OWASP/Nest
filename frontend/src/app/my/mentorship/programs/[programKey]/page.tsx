@@ -145,6 +145,10 @@ const ProgramDetailsPage = () => {
       : []),
   ]
 
+  const summaryDetailsGridClass = program?.description
+    ? 'grid grid-cols-1 gap-x-6 md:grid-cols-3'
+    : 'grid grid-cols-1 gap-x-6'
+
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
       <PageWrapper>
@@ -161,9 +165,17 @@ const ProgramDetailsPage = () => {
           showProgramActions={isPrivileged}
         />
 
-        <Summary summary={program?.description ?? ''} />
+        {/* Summary and details share a row; details take the full width when
+            there is no description to pair them with. */}
+        <div className={summaryDetailsGridClass}>
+          <Summary summary={program?.description ?? ''} className="md:col-span-2" />
 
-        <Metadata details={programDetails} detailsTitle="Program Details" />
+          <Metadata
+            details={programDetails}
+            detailsTitle="Program Details"
+            className="md:col-span-1"
+          />
+        </div>
 
         <Tags tags={program?.tags ?? undefined} domains={program?.domains ?? undefined} />
 

@@ -84,7 +84,7 @@ jest.mock('components/EntityActions', () => ({
 }))
 
 const mockPush = jest.fn()
-const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
+const mockUseRouter = useRouter as jest.Mock
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
 
@@ -133,12 +133,12 @@ describe('SingleModuleCard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({
-      push: mockPush,
       back: jest.fn(),
       forward: jest.fn(),
+      prefetch: jest.fn(),
+      push: mockPush,
       refresh: jest.fn(),
       replace: jest.fn(),
-      prefetch: jest.fn(),
     })
     mockUsePathname.mockReturnValue('/my/mentorship/programs/test-program')
     mockUseSession.mockReturnValue({

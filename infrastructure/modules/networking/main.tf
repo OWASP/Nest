@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.55.0"
+      version = "~> 6.59.0"
     }
   }
 }
@@ -49,7 +49,6 @@ resource "aws_internet_gateway" "main" {
 }
 
 resource "aws_eip" "nat" {
-  count      = var.enable_nat_gateway ? 1 : 0
   depends_on = [aws_internet_gateway.main]
   domain     = "vpc"
   tags = merge(var.common_tags, {
@@ -58,8 +57,7 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-  count         = var.enable_nat_gateway ? 1 : 0
-  allocation_id = aws_eip.nat[0].id
+  allocation_id = aws_eip.nat.id
   depends_on    = [aws_internet_gateway.main]
   subnet_id     = aws_subnet.public[0].id
   tags = merge(var.common_tags, {
@@ -85,12 +83,9 @@ resource "aws_route_table" "private" {
   })
   vpc_id = aws_vpc.main.id
 
-  dynamic "route" {
-    for_each = var.enable_nat_gateway ? [1] : []
-    content {
-      cidr_block     = "0.0.0.0/0"
-      nat_gateway_id = aws_nat_gateway.main[0].id
-    }
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main.id
   }
 }
 

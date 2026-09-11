@@ -15,14 +15,20 @@ jest.mock('components/ToggleableList', () => {
     label,
     items,
     isDisabled,
+    className,
   }: {
     entityKey: string
     label: React.ReactNode
     items: string[]
     isDisabled?: boolean
+    className?: string
   }) {
     return (
-      <div data-testid={`toggleable-list-${entityKey}`} data-disabled={isDisabled}>
+      <div
+        data-testid={`toggleable-list-${entityKey}`}
+        data-disabled={isDisabled}
+        className={className}
+      >
         {label}
         <ul>
           {items.map((item) => (
@@ -75,18 +81,30 @@ describe('Tags', () => {
       expect(container.querySelector(String.raw`.md\:grid-cols-2`)).toBeInTheDocument()
     })
 
-    it('should render tags only with md:col-span-1', () => {
-      const { container } = render(<Tags entityKey="test" tags={['Bug']} />)
+    it('should render tags only spanning the full row', () => {
+      render(<Tags entityKey="test" tags={['Bug']} />)
 
-      expect(screen.getByTestId('toggleable-list-test-tags')).toBeInTheDocument()
-      expect(container.querySelector(String.raw`.md\:col-span-1`)).toBeInTheDocument()
+      expect(screen.getByTestId('toggleable-list-test-tags')).toHaveClass('md:col-span-2')
     })
 
-    it('should render domains only with md:col-span-1', () => {
-      const { container } = render(<Tags entityKey="test" domains={['Security']} />)
+    it('should render domains only spanning the full row', () => {
+      render(<Tags entityKey="test" domains={['Security']} />)
 
-      expect(screen.getByTestId('toggleable-list-test-domains')).toBeInTheDocument()
-      expect(container.querySelector(String.raw`.md\:col-span-1`)).toBeInTheDocument()
+      expect(screen.getByTestId('toggleable-list-test-domains')).toHaveClass('md:col-span-2')
+    })
+
+    it('should pair tags and labels on one row when domains are missing', () => {
+      render(<Tags entityKey="test" tags={['Bug']} labels={['Help']} />)
+
+      expect(screen.getByTestId('toggleable-list-test-tags')).not.toHaveClass('md:col-span-2')
+      expect(screen.getByTestId('toggleable-list-test-labels')).not.toHaveClass('md:col-span-2')
+    })
+
+    it('should pair domains and labels on one row when tags are missing', () => {
+      render(<Tags entityKey="test" domains={['Security']} labels={['Help']} />)
+
+      expect(screen.getByTestId('toggleable-list-test-domains')).not.toHaveClass('md:col-span-2')
+      expect(screen.getByTestId('toggleable-list-test-labels')).not.toHaveClass('md:col-span-2')
     })
 
     it('should render labels with isDisabled={true}', () => {
@@ -105,17 +123,18 @@ describe('Tags', () => {
       expect(domainsList).toHaveAttribute('data-disabled', 'true')
     })
 
-    it('should render all three sections: tags/domains and labels', () => {
+    it('should pair tags with domains and drop labels to a full-width second row', () => {
       render(<Tags entityKey="test" tags={['Bug']} domains={['Security']} labels={['Help']} />)
 
-      expect(screen.getByTestId('toggleable-list-test-tags')).toBeInTheDocument()
-      expect(screen.getByTestId('toggleable-list-test-domains')).toBeInTheDocument()
-      expect(screen.getByTestId('toggleable-list-test-labels')).toBeInTheDocument()
+      expect(screen.getByTestId('toggleable-list-test-tags')).not.toHaveClass('md:col-span-2')
+      expect(screen.getByTestId('toggleable-list-test-domains')).not.toHaveClass('md:col-span-2')
+      expect(screen.getByTestId('toggleable-list-test-labels')).toHaveClass('md:col-span-2')
     })
 
-    it('should render labels only', () => {
+    it('should render labels only spanning the full row', () => {
       render(<Tags entityKey="test" labels={['Good First Issue']} />)
-      expect(screen.getByTestId('toggleable-list-test-labels')).toBeInTheDocument()
+
+      expect(screen.getByTestId('toggleable-list-test-labels')).toHaveClass('md:col-span-2')
     })
   })
 

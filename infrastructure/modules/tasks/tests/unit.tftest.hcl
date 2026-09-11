@@ -13,8 +13,8 @@ variables {
   fixtures_read_only_policy_arn = "arn:aws:iam::123456789012:policy/test-fixtures-policy"
   image_tag                     = "test-tag"
   kms_key_arn                   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+  private_subnet_ids            = ["subnet-12345678"]
   project_name                  = "nest"
-  subnet_ids                    = ["subnet-12345678"]
 }
 
 run "test_cron_tasks_disabled_removes_schedules" {

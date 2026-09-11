@@ -1,7 +1,10 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from urllib.parse import urljoin
 
 import pytest
+import yaml
+from django.core.cache import cache
+from lxml.etree import ParserError
 from requests.exceptions import RequestException
 
 from apps.common.constants import OWASP_NEWS_URL
@@ -10,12 +13,11 @@ from apps.slack.utils import (
     format_links_for_slack,
     get_gsoc_projects,
     get_news_data,
-    get_posts_data,
-    get_sponsors_data,
     get_staff_data,
     get_text,
     strip_markdown,
 )
+from apps.slack.utils.content import STAFF_YAML_URL
 
 MOCK_GSOC_PROJECTS = {
     "2023": [
@@ -106,6 +108,10 @@ class TestGetText:
             (
                 [{"type": "section", "text": {"type": "mrkdwn", "text": "Hello world"}}],
                 "Hello world",
+            ),
+            (
+                [{"type": "section", "text": {"type": "plain_text", "text": "Plain section"}}],
+                "Plain section",
             ),
             (
                 [
@@ -262,15 +268,19 @@ class TestGetGsocProjects:
 
 
 class TestGetNewsData:
+    def setup_method(self):
+        """Clear Django cache before each news test."""
+        cache.clear()
+
     def test_get_news_data(self, monkeypatch):
         """Test getting news data with mocked response."""
         mock_response = Mock()
         mock_response.content = MOCK_HTML_CONTENT.encode()
+        mock_response.raise_for_status = Mock()
 
         mock_get = Mock(return_value=mock_response)
 
         monkeypatch.setattr("requests.get", mock_get)
-        get_news_data.cache_clear()
 
         result = get_news_data()
         length = 3
@@ -302,25 +312,71 @@ class TestGetNewsData:
         """
         mock_response = Mock()
         mock_response.content = mock_html.encode()
+        mock_response.raise_for_status = Mock()
         mock_get = Mock(return_value=mock_response)
 
         monkeypatch.setattr("requests.get", mock_get)
-        get_news_data.cache_clear()
 
         result = get_news_data()
 
         assert len(result) == 1
         assert result[0]["title"] == "Title with anchor"
 
+    @pytest.mark.parametrize("limit", [0, -1])
+    def test_get_news_data_rejects_non_positive_limit(self, limit, monkeypatch):
+        """Test get_news_data returns [] for non-positive limits without fetching."""
+        mock_get = Mock()
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data(limit=limit) == []
+        mock_get.assert_not_called()
+
+    def test_get_news_data_request_exception(self, monkeypatch):
+        """Test get_news_data returns [] on request failures and does not cache them."""
+        mock_get = Mock(side_effect=RequestException("Network error"))
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data() == []
+        assert get_news_data() == []
+        assert mock_get.call_count == 2
+
+    def test_get_news_data_empty_response_body(self, monkeypatch):
+        """Test get_news_data returns [] for HTTP 200 with an empty body."""
+        mock_response = Mock()
+        mock_response.content = b""
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data() == []
+        mock_get.assert_called_once_with(OWASP_NEWS_URL, timeout=30)
+
+    def test_get_news_data_parser_error(self, monkeypatch):
+        """Test get_news_data returns [] when HTML parsing fails."""
+        mock_response = Mock()
+        mock_response.content = b"<html>"
+        mock_response.raise_for_status = Mock()
+        monkeypatch.setattr("requests.get", Mock(return_value=mock_response))
+        monkeypatch.setattr(
+            "apps.slack.utils.content.html.fromstring",
+            Mock(side_effect=ParserError("bad html")),
+        )
+
+        assert get_news_data() == []
+
 
 class TestGetStaffData:
+    def setup_method(self):
+        """Clear Django cache before each staff test."""
+        cache.clear()
+
     def test_get_staff_data(self, monkeypatch):
         """Test getting staff data with mocked response."""
         mock_response = Mock()
         mock_response.text = MOCK_STAFF_YAML
+        mock_response.raise_for_status = Mock()
         mock_get = Mock(return_value=mock_response)
         monkeypatch.setattr("requests.get", mock_get)
-        get_staff_data.cache_clear()
 
         length = 3
         result = get_staff_data()
@@ -329,64 +385,47 @@ class TestGetStaffData:
         assert result[1]["name"] == "Bob Wilson"
         assert result[2]["name"] == "John Doe"
 
-        mock_get.assert_called_once_with(
-            "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml",
-            timeout=30,
-        )
+        mock_get.assert_called_once_with(STAFF_YAML_URL, timeout=30)
+
+        result2 = get_staff_data()
+        assert mock_get.call_count == 1
+        assert result == result2
 
     def test_get_staff_data_request_exception(self, monkeypatch):
-        """Test get_staff_data handles RequestException gracefully."""
+        """Test get_staff_data handles RequestException gracefully without caching None."""
         mock_get = Mock(side_effect=RequestException("Network error"))
         monkeypatch.setattr("requests.get", mock_get)
-        get_staff_data.cache_clear()
 
-        result = get_staff_data()
-        assert result is None
+        assert get_staff_data() is None
+        assert get_staff_data() is None
+        assert mock_get.call_count == 2
 
+    def test_get_staff_data_yaml_error(self, monkeypatch):
+        """Test get_staff_data handles YAML parse errors."""
+        mock_response = Mock()
+        mock_response.text = "invalid: [\n  - broken"
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
 
-class TestGetSponsorsData:
-    def test_get_sponsors_data(self):
-        """Test get_sponsors_data returns sponsors queryset."""
-        mock_sponsor = Mock()
-        mock_queryset = Mock()
-        mock_queryset.__getitem__ = Mock(return_value=[mock_sponsor])
+        assert get_staff_data() is None
 
-        with patch("apps.owasp.models.sponsor.Sponsor.objects") as mock_objects:
-            mock_objects.all.return_value = mock_queryset
+    def test_get_staff_data_invalid_shape(self, monkeypatch):
+        """Test get_staff_data rejects YAML that is not a list of named dicts."""
+        mock_response = Mock()
+        mock_response.text = yaml.dump({"name": "not a list"})
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
 
-            result = get_sponsors_data(limit=5)
-            mock_objects.all.assert_called_once()
-            assert result is not None
+        assert get_staff_data() is None
 
-    def test_get_sponsors_data_exception(self):
-        """Test get_sponsors_data handles exceptions gracefully."""
-        with patch("apps.owasp.models.sponsor.Sponsor.objects") as mock_objects:
-            mock_objects.all.side_effect = Exception("Database error")
+    def test_get_staff_data_missing_name(self, monkeypatch):
+        """Test get_staff_data rejects staff entries without a name."""
+        mock_response = Mock()
+        mock_response.text = yaml.dump([{"title": "Developer"}])
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
 
-            result = get_sponsors_data()
-            assert result is None
-
-
-class TestGetPostsData:
-    def test_get_posts_data(self):
-        """Test get_posts_data returns posts queryset."""
-        mock_post = Mock()
-        mock_queryset = Mock()
-        mock_queryset.__getitem__ = Mock(return_value=[mock_post])
-
-        with patch("apps.owasp.models.post.Post.recent_posts") as mock_recent:
-            mock_recent.return_value = mock_queryset
-            get_posts_data.cache_clear()
-
-            result = get_posts_data(limit=3)
-            mock_recent.assert_called_once()
-            assert result is not None
-
-    def test_get_posts_data_exception(self):
-        """Test get_posts_data handles exceptions gracefully."""
-        with patch("apps.owasp.models.post.Post.recent_posts") as mock_recent:
-            mock_recent.side_effect = Exception("Database error")
-            get_posts_data.cache_clear()
-
-            result = get_posts_data()
-            assert result is None
+        assert get_staff_data() is None
