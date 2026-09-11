@@ -21,7 +21,7 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
     class Meta:
         """Model options."""
 
-        db_table = "github_activity_events"
+        db_table = "owasp_activity_events"
         verbose_name_plural = "Activity Events"
 
         constraints = [
