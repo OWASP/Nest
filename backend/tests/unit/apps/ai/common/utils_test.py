@@ -383,8 +383,9 @@ class TestGetFunctions:
             result = get_fallback_response()
 
         assert result == (
-            "I'm sorry, I encountered an issue processing your request. "
-            "Please try again or rephrasing your question."
+            "I'm sorry, I encountered an issue processing your request. Please try "
+            "again or rephrase your question. For further help, join #owasp-community "
+            "on Slack, or visit https://nest.owasp.org."
         )
 
     def test_get_intent_to_agent_map_contains_expected(self):

@@ -28,8 +28,8 @@ build: ## Build Docker images
 
 run: ## Run Nest application locally
 	@DOCKER_BUILDKIT=1 \
-	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
-	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
+	docker compose -f docker-compose/local/compose.yaml build && \
+	docker compose -f docker-compose/local/compose.yaml up --remove-orphans
 
 ##@ Testing
 

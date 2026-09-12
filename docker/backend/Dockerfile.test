@@ -1,6 +1,6 @@
-# Docker Hardened Images (DHI) - requires: docker login dhi.io
-# Use -dev variant for builder stage (includes build tools and shell)
-FROM dhi.io/python:3.13-dev AS builder
+ARG PYTHON_SLIM_IMAGE=python:3.13.12-slim
+
+FROM ${PYTHON_SLIM_IMAGE} AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -8,6 +8,7 @@ ENV OWASP_GID=1000 \
     OWASP_UID=1000 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
+    POETRY_HTTP_TIMEOUT=300 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
@@ -15,6 +16,7 @@ ENV OWASP_GID=1000 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libffi-dev \
+        libpq-dev \
         libssl-dev \
         passwd \
         && rm -rf /var/lib/apt/lists/* && \
@@ -53,9 +55,8 @@ COPY templates templates
 COPY apps apps
 COPY tests/unit tests/unit
 
-# Use -dev variant for runtime stage to allow installing runtime dependencies
-# Still hardened, just includes shell and package manager for flexibility
-FROM dhi.io/python:3.13-dev
+# Runtime stage using python:slim
+FROM ${PYTHON_SLIM_IMAGE}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
