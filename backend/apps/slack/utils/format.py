@@ -108,6 +108,13 @@ def format_ai_response_for_slack(text: str) -> str:
     # Pattern: `text` but not part of Slack link syntax
     text = re.sub(r"`([^`<]+)`", r"\1", text)
 
+    # Convert markdown headings (# Heading, ## Heading, etc.) to Slack bold (*Heading*)
+    text = re.sub(r"^#{1,6}\s+(.+)$", r"*\1*", text, flags=re.MULTILINE)
+
+    # Convert markdown bold (**text** or __text__) to Slack bold (*text*)
+    text = re.sub(r"\*\*(.+?)\*\*", r"*\1*", text)
+    text = re.sub(r"__(.+?)__", r"*\1*", text)
+
     # Preserve Slack channel links (format: <#channel_id|channel_name>)
     # These should not be modified by format_links_for_slack
     # Convert markdown links to Slack format (but preserve existing Slack links)

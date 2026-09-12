@@ -13,6 +13,7 @@ from apps.owasp.utils.staff import get_staff_data
 from apps.slack.utils import (
     download_file,
     escape,
+    format_ai_response_for_slack,
     format_links_for_slack,
     get_posts_data,
     get_sponsors_data,
@@ -100,6 +101,54 @@ class TestFormatLinksForSlack:
     def test_format_links_for_slack(self, input_text, expected_output):
         """Test format_links_for_slack with various inputs including empty text."""
         assert format_links_for_slack(input_text) == expected_output
+
+class TestFormatAiResponseForSlack:
+    @pytest.mark.parametrize(
+        ("input_text", "expected_output"),
+        [
+            ("", ""),
+            (None, None),
+            (
+                "**OWASP ZAP** is a flagship project.",
+                "*OWASP ZAP* is a flagship project.",
+            ),
+            (
+                "This is __bold text__ in markdown.",
+                "This is *bold text* in markdown.",
+            ),
+            (
+                "### OWASP Top 10",
+                "*OWASP Top 10*",
+            ),
+            (
+                "## Chapter Meetings\nJoin our **local** chapters.",
+                "*Chapter Meetings*\nJoin our *local* chapters.",
+            ),
+            (
+                "Check out [OWASP](https://owasp.org) for details.",
+                "Check out <https://owasp.org|OWASP> for details.",
+            ),
+            (
+                "```\nEntire block wrapped\n```",
+                "Entire block wrapped",
+            ),
+            (
+                "Here is code:\n```python\nprint('hello')\n```\nDone.",
+                "Here is code:\nprint('hello')\nDone.",
+            ),
+            (
+                "Run `poetry run pytest` now.",
+                "Run poetry run pytest now.",
+            ),
+            (
+                "Contact <#C123|community> or <@U456>.",
+                "Contact <#C123|community> or <@U456>.",
+            ),
+        ],
+    )
+    def test_format_ai_response_for_slack(self, input_text, expected_output):
+        """Test format_ai_response_for_slack with various markdown inputs."""
+        assert format_ai_response_for_slack(input_text) == expected_output
 
 
 class TestGetText:
