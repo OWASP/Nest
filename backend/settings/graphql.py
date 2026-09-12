@@ -5,6 +5,7 @@ from collections.abc import Callable
 import strawberry
 from django.conf import settings
 from strawberry.extensions import DisableIntrospection, QueryDepthLimiter, SchemaExtension
+from strawberry.types.execution import ExecutionContext
 from strawberry_django.optimizer import DjangoOptimizerExtension
 
 from apps.api.internal.mutations import ApiMutations
@@ -48,9 +49,11 @@ class Query(
 class NestQueryDepthLimiter(QueryDepthLimiter):
     """Query depth limiter configured for the Nest schema."""
 
-    def __init__(self) -> None:
+    def __init__(self, execution_context: ExecutionContext | None = None) -> None:
         """Initialize with the Nest schema max query depth."""
         super().__init__(max_depth=5)
+        if execution_context is not None:
+            self.execution_context = execution_context
 
 
 extensions: list[type[SchemaExtension] | Callable[[], SchemaExtension]] = [
