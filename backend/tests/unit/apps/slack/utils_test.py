@@ -102,6 +102,7 @@ class TestFormatLinksForSlack:
         """Test format_links_for_slack with various inputs including empty text."""
         assert format_links_for_slack(input_text) == expected_output
 
+
 class TestFormatAiResponseForSlack:
     @pytest.mark.parametrize(
         ("input_text", "expected_output"),
