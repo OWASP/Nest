@@ -202,9 +202,7 @@ describe('EntitySelectorInput', () => {
 
     mockOnChange.mockClear()
 
-    await act(async () => {
-      fireEvent.change(input, { target: { value: '' } })
-    })
+    fireEvent.change(input, { target: { value: '' } })
 
     expect(mockOnChange).toHaveBeenCalledWith('')
   })
@@ -218,26 +216,18 @@ describe('EntitySelectorInput', () => {
       jest.advanceTimersByTime(350)
     })
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('select-item'))
-    })
+    fireEvent.click(screen.getByTestId('select-item'))
     expect(mockOnChange).toHaveBeenCalledWith('nest')
     expect(input).toHaveValue('OWASP Nest')
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('select-item-by-id'))
-    })
+    fireEvent.click(screen.getByTestId('select-item-by-id'))
     expect(input).toHaveValue('Custom Project')
 
     mockOnChange.mockClear()
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('select-unmatched-key'))
-    })
+    fireEvent.click(screen.getByTestId('select-unmatched-key'))
     expect(mockOnChange).not.toHaveBeenCalled()
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('clear-selection'))
-    })
+    fireEvent.click(screen.getByTestId('clear-selection'))
     expect(mockOnChange).toHaveBeenCalledWith('')
   })
 
@@ -252,9 +242,7 @@ describe('EntitySelectorInput', () => {
       jest.advanceTimersByTime(350)
     })
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('select-item'))
-    })
+    fireEvent.click(screen.getByTestId('select-item'))
 
     expect(input).toHaveValue('OWASP Nest')
 

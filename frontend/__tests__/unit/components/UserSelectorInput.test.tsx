@@ -116,6 +116,10 @@ describe('UserSelectorInput', () => {
       <UserSelectorInput logins={[]} onChange={mockOnChange} disabled touched error="Required" />
     )
     expect(screen.getByPlaceholderText('Select a Project or Chapter first...')).toBeInTheDocument()
+    const disabledInput = screen.getByTestId('autocomplete-input')
+    expect(disabledInput).toBeDisabled()
+    expect(disabledInput).toHaveAttribute('data-invalid', 'true')
+    expect(screen.getByText('Required')).toBeInTheDocument()
 
     let resolveActive: (v: unknown) => void
     let rejectActive: (r?: unknown) => void

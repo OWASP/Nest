@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { addToast } from '@heroui/toast'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 
 import IssueCertificatePage from 'app/my/certificates/issue/page'
@@ -84,7 +85,11 @@ describe('IssueCertificatePage', () => {
     mockUseSession.mockReturnValue({ data: { user: { isLeader: true } }, status: 'authenticated' })
     rerender(<IssueCertificatePage />)
 
+    expect(screen.getByRole('button', { name: 'Dismiss notice' })).toBeInTheDocument()
+    expect(screen.getByText(/At least one of/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss notice' }))
+    expect(screen.queryByRole('button', { name: 'Dismiss notice' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/At least one of/)).not.toBeInTheDocument()
   })
 
   it('handles form validation, GraphQL errors, submission rejections, and successful issuance', async () => {
@@ -109,10 +114,26 @@ describe('IssueCertificatePage', () => {
     fireEvent.change(messageInput, { target: { value: 'Valid Message' } })
     fireEvent.click(addUserBtn)
     fireEvent.click(submitBtn)
+    expect(addToast).toHaveBeenCalledWith({
+      title: 'Validation Error',
+      description: 'Please select either a Project Name or a Chapter Name.',
+      color: 'danger',
+      variant: 'solid',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+    })
 
     fireEvent.change(projectInput, { target: { value: 'nest' } })
     fireEvent.change(chapterInput, { target: { value: 'london' } })
     fireEvent.click(submitBtn)
+    expect(addToast).toHaveBeenCalledWith({
+      title: 'Validation Error',
+      description: 'Please select only one of Project Name or Chapter Name, not both.',
+      color: 'danger',
+      variant: 'solid',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
+    })
 
     mockIssueCertificate.mockRejectedValueOnce(new Error('Validation failed'))
     ;(extractGraphQLErrors as jest.Mock).mockReturnValueOnce({
@@ -120,27 +141,49 @@ describe('IssueCertificatePage', () => {
       hasValidationErrors: true,
     })
     fireEvent.change(chapterInput, { target: { value: '' } })
-    await act(async () => {
-      fireEvent.click(submitBtn)
-    })
+    fireEvent.click(submitBtn)
+    await waitFor(() => expect(extractGraphQLErrors).toHaveBeenCalled())
 
     fireEvent.change(titleInput, { target: { value: 'New Title' } })
+    expect(titleInput).toHaveValue('New Title')
 
     mockIssueCertificate.mockRejectedValueOnce(new Error('Server failure'))
-    await act(async () => {
-      fireEvent.click(submitBtn)
+    fireEvent.click(submitBtn)
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        title: 'Failed to Issue Certificates',
+        description: 'Server failure',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
     })
 
     mockIssueCertificate.mockRejectedValueOnce('String rejection')
-    await act(async () => {
-      fireEvent.click(submitBtn)
+    fireEvent.click(submitBtn)
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        title: 'Failed to Issue Certificates',
+        description: 'Unable to complete the requested operation.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
     })
 
     mockIssueCertificate.mockResolvedValueOnce({ data: { issueCertificate: { success: true } } })
-    await act(async () => {
-      fireEvent.click(submitBtn)
-    })
+    fireEvent.click(submitBtn)
     await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        title: 'Success',
+        description: 'Certificate(s) successfully issued to @testuser.',
+        color: 'success',
+        variant: 'solid',
+        timeout: 4000,
+        shouldShowTimeoutProgress: true,
+      })
       expect(mockIssueCertificate).toHaveBeenCalledWith({
         variables: {
           inputData: {
@@ -159,9 +202,7 @@ describe('IssueCertificatePage', () => {
     fireEvent.change(chapterInput, { target: { value: 'london' } })
     fireEvent.click(addUserBtn)
 
-    await act(async () => {
-      fireEvent.click(submitBtn)
-    })
+    fireEvent.click(submitBtn)
     await waitFor(() => {
       expect(mockIssueCertificate).toHaveBeenCalledWith({
         variables: {

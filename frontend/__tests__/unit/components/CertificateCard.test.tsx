@@ -300,12 +300,17 @@ describe('CertificateCard', () => {
       const originalInnerWidth = window.innerWidth
       Object.defineProperty(window, 'innerWidth', { value: 421, configurable: true })
 
-      render(<CertificateCard certificate={mockCertificate} />)
+      try {
+        render(<CertificateCard certificate={mockCertificate} />)
 
-      const card = document.getElementById('certificate-card')
-      expect(card).toHaveStyle({ transform: 'scale(0.5)' })
-
-      Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, configurable: true })
+        const card = document.getElementById('certificate-card')
+        expect(card).toHaveStyle({ transform: 'scale(0.5)' })
+      } finally {
+        Object.defineProperty(window, 'innerWidth', {
+          value: originalInnerWidth,
+          configurable: true,
+        })
+      }
     })
 
     it('handles environment where ResizeObserver is not in window', () => {
@@ -389,32 +394,33 @@ describe('CertificateCard', () => {
     it('renders title with medium and long title size classes', () => {
       const mediumTitleCert = { ...mockCertificate, title: 'A Medium Length Title 35 Chars' }
       const { rerender } = render(<CertificateCard certificate={mediumTitleCert} />)
-      expect(screen.getByText('A Medium Length Title 35 Chars')).toBeInTheDocument()
+      const mediumHeading = screen.getByRole('heading', { level: 1 })
+      expect(mediumHeading).toHaveClass('text-[24px]', 'leading-snug')
 
       const longTitleCert = {
         ...mockCertificate,
         title: 'A Very Long Certificate Title That Exceeds Forty Five Characters In Length',
       }
       rerender(<CertificateCard certificate={longTitleCert} />)
-      expect(
-        screen.getByText(
-          'A Very Long Certificate Title That Exceeds Forty Five Characters In Length'
-        )
-      ).toBeInTheDocument()
+      const longHeading = screen.getByRole('heading', { level: 1 })
+      expect(longHeading).toHaveClass('text-[18px]', 'leading-snug')
     })
 
     it('renders custom message with different length threshold styling and null message', () => {
       const shortMsgCert = { ...mockCertificate, title: 'Custom', message: 'Short message' }
       const { rerender } = render(<CertificateCard certificate={shortMsgCert} />)
-      expect(screen.getByText('"Short message"')).toBeInTheDocument()
+      const shortMsgEl = screen.getByText('"Short message"')
+      expect(shortMsgEl).toHaveClass('text-[15px]', 'leading-[1.8]')
 
       const mediumMsgCert = { ...mockCertificate, title: 'Custom', message: 'M'.repeat(150) }
       rerender(<CertificateCard certificate={mediumMsgCert} />)
-      expect(screen.getByText(`"${'M'.repeat(150)}"`)).toBeInTheDocument()
+      const mediumMsgEl = screen.getByText(`"${'M'.repeat(150)}"`)
+      expect(mediumMsgEl).toHaveClass('text-[14px]', 'leading-[1.75]')
 
       const longMsgCert = { ...mockCertificate, title: 'Custom', message: 'L'.repeat(250) }
       rerender(<CertificateCard certificate={longMsgCert} />)
-      expect(screen.getByText(`"${'L'.repeat(250)}"`)).toBeInTheDocument()
+      const longMsgEl = screen.getByText(`"${'L'.repeat(250)}"`)
+      expect(longMsgEl).toHaveClass('text-[13px]', 'leading-[1.7]')
 
       const noMsgCert = { ...mockCertificate, title: 'Custom', message: null }
       rerender(<CertificateCard certificate={noMsgCert} />)
@@ -455,12 +461,17 @@ describe('CertificateCard', () => {
       const originalInnerWidth = window.innerWidth
       Object.defineProperty(window, 'innerWidth', { value: 0, configurable: true })
 
-      render(<CertificateCard certificate={mockCertificate} />)
+      try {
+        render(<CertificateCard certificate={mockCertificate} />)
 
-      const card = document.getElementById('certificate-card')
-      expect(card).toHaveStyle({ transform: 'scale(0)' })
-
-      Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, configurable: true })
+        const card = document.getElementById('certificate-card')
+        expect(card).toHaveStyle({ transform: 'scale(0)' })
+      } finally {
+        Object.defineProperty(window, 'innerWidth', {
+          value: originalInnerWidth,
+          configurable: true,
+        })
+      }
     })
   })
 })

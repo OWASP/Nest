@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from graphql import GraphQLError
+from pydantic import ValidationError
 
 from apps.owasp.api.internal.mutations.certificate import (
     CertificateMutation,
@@ -87,15 +88,11 @@ class TestIssueCertificateSchema:
 
     def test_no_recipient_raises_value_error(self):
         """Omitting both recipient fields must raise ValidationError."""
-        from pydantic import ValidationError
-
         with pytest.raises(ValidationError, match="Recipient login cannot be empty"):
             IssueCertificateSchema(title="Award", project_key="juice-shop")
 
     def test_title_too_long_raises_validation_error(self):
         """Title exceeding MAX_TITLE_LENGTH must raise ValidationError."""
-        from pydantic import ValidationError
-
         with pytest.raises(ValidationError):
             IssueCertificateSchema(
                 recipient_login="alice",
@@ -105,8 +102,6 @@ class TestIssueCertificateSchema:
 
     def test_message_too_long_raises_validation_error(self):
         """Message exceeding MAX_MESSAGE_LENGTH must raise ValidationError."""
-        from pydantic import ValidationError
-
         with pytest.raises(ValidationError):
             IssueCertificateSchema(
                 recipient_login="alice",
@@ -135,8 +130,6 @@ class TestIssueCertificateSchema:
 
     def test_both_project_and_chapter_raises_value_error(self):
         """Providing both project_key and chapter_key must raise ValidationError."""
-        from pydantic import ValidationError
-
         with pytest.raises(ValidationError, match="Provide either project or chapter, not both"):
             IssueCertificateSchema(
                 recipient_login="alice",
@@ -147,8 +140,6 @@ class TestIssueCertificateSchema:
 
     def test_neither_project_nor_chapter_raises_value_error(self):
         """Omitting both project_key and chapter_key must raise ValidationError."""
-        from pydantic import ValidationError
-
         with pytest.raises(ValidationError, match="Either project or chapter must be provided"):
             IssueCertificateSchema(
                 recipient_login="alice",
@@ -163,23 +154,25 @@ class TestIssueCertificateMutation:
         """Users without a linked github_user should get FORBIDDEN."""
         info = MagicMock()
         info.context.request.user.github_user = None
+        input_data = _make_input()
 
         with pytest.raises(GraphQLError) as exc_info:
-            mutation.issue_certificate(info, _make_input())
+            mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "FORBIDDEN"
 
     def test_not_leader_or_chapter_leader_raises_forbidden(self, mutation):
         """Users who are neither project nor chapter leaders should get FORBIDDEN."""
         info = _make_info(is_project_leader=False, has_chapters=False)
+        input_data = _make_input()
 
         with pytest.raises(GraphQLError) as exc_info:
-            mutation.issue_certificate(info, _make_input())
+            mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "FORBIDDEN"
 
     def test_validation_error_raises_graphql_validation_error(self, mutation):
-        """A Pydantic ValidationError during schema construction should produce VALIDATION_ERROR."""
+        """ValidationError during schema construction produces VALIDATION_ERROR."""
         info = _make_info(is_project_leader=True)
         bad_input = _make_input(title="", recipient_login="alice", project_key="juice-shop")
 
@@ -195,10 +188,10 @@ class TestIssueCertificateMutation:
         mock_project.objects.get.side_effect = mock_project.DoesNotExist("not found")
 
         info = _make_info(is_project_leader=True)
+        input_data = _make_input(project_key="www-project-missing", chapter_key=None)
+
         with pytest.raises(GraphQLError) as exc_info:
-            mutation.issue_certificate(
-                info, _make_input(project_key="www-project-missing", chapter_key=None)
-            )
+            mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
         assert exc_info.value.extensions["field"] == "projectKey"
@@ -210,11 +203,10 @@ class TestIssueCertificateMutation:
         mock_chapter.objects.get.side_effect = mock_chapter.DoesNotExist("not found")
 
         info = _make_info(is_project_leader=True)
+        input_data = _make_input(project_key=None, chapter_key="www-chapter-missing")
+
         with pytest.raises(GraphQLError) as exc_info:
-            mutation.issue_certificate(
-                info,
-                _make_input(project_key=None, chapter_key="www-chapter-missing"),
-            )
+            mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
         assert exc_info.value.extensions["field"] == "chapterKey"
@@ -227,11 +219,10 @@ class TestIssueCertificateMutation:
         mock_gh_user.objects.filter.return_value = []
 
         info = _make_info(is_project_leader=True)
+        input_data = _make_input(recipient_login="ghost", project_key="www-project-juice-shop")
+
         with pytest.raises(GraphQLError) as exc_info:
-            mutation.issue_certificate(
-                info,
-                _make_input(recipient_login="ghost", project_key="www-project-juice-shop"),
-            )
+            mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
         assert exc_info.value.extensions["field"] == "recipientLogins"
@@ -250,15 +241,14 @@ class TestIssueCertificateMutation:
         mock_gh_user.objects.filter.return_value = [found_user]
 
         info = _make_info(is_project_leader=True)
+        input_data = _make_input(
+            recipient_login=None,
+            recipient_logins=["alice", "ghost"],
+            project_key="www-project-juice-shop",
+        )
+
         with pytest.raises(GraphQLError) as exc_info:
-            mutation.issue_certificate(
-                info,
-                _make_input(
-                    recipient_login=None,
-                    recipient_logins=["alice", "ghost"],
-                    project_key="www-project-juice-shop",
-                ),
-            )
+            mutation.issue_certificate(info, input_data)
 
         assert exc_info.value.extensions["code"] == "NOT_FOUND"
         assert "ghost" in exc_info.value.message
@@ -270,7 +260,8 @@ class TestIssueCertificateMutation:
         self, mock_project, mock_gh_user, mock_cert, mutation
     ):
         """Happy path: issue a certificate linked to a project."""
-        mock_project.objects.get.return_value = MagicMock()
+        mock_proj_obj = MagicMock()
+        mock_project.objects.get.return_value = mock_proj_obj
 
         recipient = MagicMock()
         recipient.login = "alice"
@@ -285,13 +276,21 @@ class TestIssueCertificateMutation:
             _make_input(
                 recipient_login="alice",
                 title="Contributor Award",
+                message="Thank you!",
                 project_key="www-project-juice-shop",
                 chapter_key=None,
             ),
         )
 
         assert result == [cert]
-        mock_cert.objects.create.assert_called_once()
+        mock_cert.objects.create.assert_called_once_with(
+            recipient=recipient,
+            issuer=info.context.request.user.github_user,
+            title="Contributor Award",
+            message="Thank you!",
+            project=mock_proj_obj,
+            chapter=None,
+        )
 
     @patch("apps.owasp.api.internal.mutations.certificate.Certificate")
     @patch("apps.owasp.api.internal.mutations.certificate.GithubUser")
@@ -300,7 +299,8 @@ class TestIssueCertificateMutation:
         self, mock_chapter, mock_gh_user, mock_cert, mutation
     ):
         """Happy path: issue a certificate linked to a chapter."""
-        mock_chapter.objects.get.return_value = MagicMock()
+        mock_chap_obj = MagicMock()
+        mock_chapter.objects.get.return_value = mock_chap_obj
 
         recipient = MagicMock()
         recipient.login = "bob"
@@ -315,11 +315,18 @@ class TestIssueCertificateMutation:
             _make_input(
                 recipient_login="bob",
                 title="Chapter Leader Award",
+                message="Thank you!",
                 project_key=None,
                 chapter_key="www-chapter-london",
             ),
         )
 
         assert result == [cert]
-        mock_cert.objects.create.assert_called_once()
-
+        mock_cert.objects.create.assert_called_once_with(
+            recipient=recipient,
+            issuer=info.context.request.user.github_user,
+            title="Chapter Leader Award",
+            message="Thank you!",
+            project=None,
+            chapter=mock_chap_obj,
+        )
