@@ -173,7 +173,7 @@ const MyCertificatePage: React.FC = () => {
         { url: verifyUrl }
       )
 
-      const linkEl = cardRef.current?.querySelector('[data-github-link="true"]')
+      const linkEl = cardRef.current!.querySelector('[data-github-link="true"]')
       if (linkEl) {
         let x = 0
         let y = 0

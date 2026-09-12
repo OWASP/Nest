@@ -174,7 +174,7 @@ interface IssuedByBadgeProps {
   chapterKey?: string | null
 }
 
-const IssuedByBadge: React.FC<IssuedByBadgeProps> = ({
+export const IssuedByBadge: React.FC<IssuedByBadgeProps> = ({
   projectName,
   projectKey,
   chapterName,

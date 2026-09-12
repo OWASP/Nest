@@ -67,12 +67,11 @@ jest.mock('components/CertificateCard', () => {
       <div data-testid="certificate-card" ref={cardRef} data-public-view={isPublicView}>
         <span data-testid="cert-id">{certificate.id}</span>
         <span data-testid="cert-tier">{certificate.tier}</span>
-        <a
-          data-github-link="true"
-          href={`https://github.com/${certificate.githubUser?.login ?? 'testuser'}`}
-        >
-          @{certificate.githubUser?.login ?? 'testuser'}
-        </a>
+        {certificate.githubUser?.login ? (
+          <a data-github-link="true" href={`https://github.com/${certificate.githubUser.login}`}>
+            @{certificate.githubUser.login}
+          </a>
+        ) : null}
       </div>
     )
   )
@@ -268,7 +267,31 @@ describe('MyCertificatePage', () => {
   describe('Multiple Certificates', () => {
     it('renders "Previous Certificates" section when there are multiple certificates', async () => {
       mockUseQuery.mockReturnValue({
-        data: mockMyCertificatesMultipleData,
+        data: {
+          myCertificates: [
+            mockCertificate,
+            {
+              ...mockCertificate,
+              id: 'R2ST6YC1ZYXW',
+              title: 'Custom Title',
+              tier: 'level 3',
+              chapter: { name: 'OWASP London', key: 'london' },
+              project: null,
+              issuedAt: '2023-05-15T10:00:00.000Z',
+              score: 80,
+            },
+            {
+              ...mockCertificate,
+              id: 'R2ST6YC1ZYX2',
+              title: 'Custom Title No Tier',
+              tier: null,
+              project: { name: 'OWASP Nest', key: 'nest' },
+              chapter: null,
+              issuedAt: '2022-05-15T10:00:00.000Z',
+              score: 0,
+            },
+          ],
+        },
         loading: false,
         error: null,
       })
@@ -277,7 +300,10 @@ describe('MyCertificatePage', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Previous Certificates')).toBeInTheDocument()
-        expect(screen.getByText('View Certificate')).toBeInTheDocument()
+        expect(screen.getByText('Custom Title')).toBeInTheDocument()
+        expect(screen.getByText('OWASP London')).toBeInTheDocument()
+        expect(screen.getByText('Custom Title No Tier')).toBeInTheDocument()
+        expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
       })
     })
 
@@ -349,11 +375,39 @@ describe('MyCertificatePage', () => {
       consoleSpy.mockRestore()
     })
 
-    it('saves certificate as PDF successfully', async () => {
-      render(<MyCertificatePage />)
+    it('saves certificate as PDF successfully with and without github link', async () => {
+      const { unmount } = render(<MyCertificatePage />)
 
       const savePdfButton = await screen.findByText('Save as PDF')
       fireEvent.click(savePdfButton)
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Downloaded',
+          description: 'Certificate saved as PDF.',
+          color: 'success',
+        })
+      })
+
+      unmount()
+
+      mockUseQuery.mockReturnValue({
+        data: {
+          myCertificates: [
+            {
+              ...mockCertificate,
+              githubUser: { login: '', name: undefined, avatarUrl: '' },
+            },
+          ],
+        },
+        loading: false,
+        error: null,
+      })
+
+      render(<MyCertificatePage />)
+
+      const savePdfBtn2 = await screen.findByText('Save as PDF')
+      fireEvent.click(savePdfBtn2)
 
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith({
