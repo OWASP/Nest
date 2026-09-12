@@ -973,7 +973,7 @@ describe('UserMenu Component', () => {
       expect(mockGetMyCertificate).toHaveBeenCalledTimes(1)
     })
 
-    it('renders My Certificate link when user has certificates and closes dropdown when clicked', async () => {
+    it('renders My Certificates link when user has certificates and closes dropdown when clicked', async () => {
       const mockGetMyCertificate = jest.fn()
       ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
         mockGetMyCertificate,
@@ -999,11 +999,11 @@ describe('UserMenu Component', () => {
       fireEvent.click(avatarButton)
 
       await waitFor(() => {
-        expect(screen.getByText('My Certificate')).toBeInTheDocument()
+        expect(screen.getByText('My Certificates')).toBeInTheDocument()
       })
 
-      const certificateLink = screen.getByText('My Certificate')
-      expect(certificateLink).toHaveAttribute('href', '/certificate')
+      const certificateLink = screen.getByText('My Certificates')
+      expect(certificateLink).toHaveAttribute('href', '/my/certificates')
 
       fireEvent.click(certificateLink)
 
@@ -1012,7 +1012,7 @@ describe('UserMenu Component', () => {
       })
     })
 
-    it('does not render My Certificate link when user has no certificates', async () => {
+    it('does not render My Certificates link when user has no certificates', async () => {
       ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
         jest.fn(),
         {
@@ -1036,7 +1036,7 @@ describe('UserMenu Component', () => {
         expect(screen.getByText('Sign out')).toBeInTheDocument()
       })
 
-      expect(screen.queryByText('My Certificate')).not.toBeInTheDocument()
+      expect(screen.queryByText('My Certificates')).not.toBeInTheDocument()
     })
   })
 })

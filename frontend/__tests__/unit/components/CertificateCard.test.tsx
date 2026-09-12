@@ -5,7 +5,7 @@ import {
 } from '@mockData/mockCertificateData'
 import { act, cleanup, render, screen } from '@testing-library/react'
 import React from 'react'
-import { CERTIFICATE_LAYOUT, CertificateCard } from 'components/CertificateCard'
+import { CERTIFICATE_LAYOUT, CertificateCard, IssuedByBadge } from 'components/CertificateCard'
 
 jest.mock('next/image', () => ({
   __esModule: true,
@@ -31,6 +31,10 @@ jest.mock('react-icons/fa6', () => ({
   ),
   FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-github" {...props} />,
   FaGlobe: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-globe" {...props} />,
+  FaLayerGroup: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-layer-group" {...props} />
+  ),
+  FaMap: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-map" {...props} />,
   FaShieldHalved: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="icon-shield" {...props} />
   ),
@@ -176,7 +180,7 @@ describe('CertificateCard', () => {
       render(<CertificateCard certificate={mockCertificate} />)
 
       const verifyLink = screen.getByRole('link', { name: /nest\.owasp\.org/i })
-      expect(verifyLink).toHaveAttribute('href', '/certificate/F9DD2BJ9ZYXW')
+      expect(verifyLink).toHaveAttribute('href', '/certificates/F9DD2BJ9ZYXW')
       expect(verifyLink).toHaveAttribute('target', '_blank')
     })
 
@@ -296,12 +300,17 @@ describe('CertificateCard', () => {
       const originalInnerWidth = window.innerWidth
       Object.defineProperty(window, 'innerWidth', { value: 421, configurable: true })
 
-      render(<CertificateCard certificate={mockCertificate} />)
+      try {
+        render(<CertificateCard certificate={mockCertificate} />)
 
-      const card = document.getElementById('certificate-card')
-      expect(card).toHaveStyle({ transform: 'scale(0.5)' })
-
-      Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, configurable: true })
+        const card = document.getElementById('certificate-card')
+        expect(card).toHaveStyle({ transform: 'scale(0.5)' })
+      } finally {
+        Object.defineProperty(window, 'innerWidth', {
+          value: originalInnerWidth,
+          configurable: true,
+        })
+      }
     })
 
     it('handles environment where ResizeObserver is not in window', () => {
@@ -359,6 +368,110 @@ describe('CertificateCard', () => {
       render(<CertificateCard certificate={lowerTierCert} />)
 
       expect(screen.getByText('LEVEL 2')).toBeInTheDocument()
+    })
+
+    it('handles null score and null tier fallbacks when only one metric is present', () => {
+      const nullScoreCert = { ...mockCertificate, score: null, tier: 'Level 1' }
+      const { rerender } = render(<CertificateCard certificate={nullScoreCert} />)
+
+      expect(screen.getByText('0')).toBeInTheDocument()
+      expect(screen.getByText('LEVEL 1')).toBeInTheDocument()
+
+      const nullTierCert = { ...mockCertificate, score: 100, tier: null }
+      rerender(<CertificateCard certificate={nullTierCert} />)
+
+      expect(screen.getByText('100')).toBeInTheDocument()
+      expect(screen.getByText('N/A')).toBeInTheDocument()
+    })
+
+    it('handles certificate with no score and no tier', () => {
+      const noMetricsCert = { ...mockCertificate, score: null, tier: null }
+      render(<CertificateCard certificate={noMetricsCert} />)
+
+      expect(screen.queryByText('Contribution Score')).not.toBeInTheDocument()
+    })
+
+    it('renders title with medium and long title size classes', () => {
+      const mediumTitleCert = { ...mockCertificate, title: 'A Medium Length Title 35 Chars' }
+      const { rerender } = render(<CertificateCard certificate={mediumTitleCert} />)
+      const mediumHeading = screen.getByRole('heading', { level: 1 })
+      expect(mediumHeading).toHaveClass('text-[24px]', 'leading-snug')
+
+      const longTitleCert = {
+        ...mockCertificate,
+        title: 'A Very Long Certificate Title That Exceeds Forty Five Characters In Length',
+      }
+      rerender(<CertificateCard certificate={longTitleCert} />)
+      const longHeading = screen.getByRole('heading', { level: 1 })
+      expect(longHeading).toHaveClass('text-[18px]', 'leading-snug')
+    })
+
+    it('renders custom message with different length threshold styling and null message', () => {
+      const shortMsgCert = { ...mockCertificate, title: 'Custom', message: 'Short message' }
+      const { rerender } = render(<CertificateCard certificate={shortMsgCert} />)
+      const shortMsgEl = screen.getByText('"Short message"')
+      expect(shortMsgEl).toHaveClass('text-[15px]', 'leading-[1.8]')
+
+      const mediumMsgCert = { ...mockCertificate, title: 'Custom', message: 'M'.repeat(150) }
+      rerender(<CertificateCard certificate={mediumMsgCert} />)
+      const mediumMsgEl = screen.getByText(`"${'M'.repeat(150)}"`)
+      expect(mediumMsgEl).toHaveClass('text-[14px]', 'leading-[1.75]')
+
+      const longMsgCert = { ...mockCertificate, title: 'Custom', message: 'L'.repeat(250) }
+      rerender(<CertificateCard certificate={longMsgCert} />)
+      const longMsgEl = screen.getByText(`"${'L'.repeat(250)}"`)
+      expect(longMsgEl).toHaveClass('text-[13px]', 'leading-[1.7]')
+
+      const noMsgCert = { ...mockCertificate, title: 'Custom', message: null }
+      rerender(<CertificateCard certificate={noMsgCert} />)
+      expect(screen.queryByText('"Short message"')).not.toBeInTheDocument()
+    })
+
+    it('renders IssuedByBadge for project, chapter, and null entities', () => {
+      const projectCert = {
+        ...mockCertificate,
+        project: { name: 'OWASP Nest', key: 'nest' },
+        chapter: null,
+      }
+      const { rerender } = render(<CertificateCard certificate={projectCert} />)
+
+      const projectLink = screen.getByRole('link', { name: /OWASP Nest Project/i })
+      expect(projectLink).toHaveAttribute('href', '/projects/nest')
+
+      const chapterCert = {
+        ...mockCertificate,
+        project: null,
+        chapter: { name: 'OWASP London', key: 'london' },
+      }
+      rerender(<CertificateCard certificate={chapterCert} />)
+
+      const chapterLink = screen.getByRole('link', { name: /OWASP London Chapter/i })
+      expect(chapterLink).toHaveAttribute('href', '/chapters/london')
+
+      const noEntityCert = { ...mockCertificate, project: null, chapter: null }
+      rerender(<CertificateCard certificate={noEntityCert} />)
+
+      expect(screen.queryByText(/Issued under the/i)).not.toBeInTheDocument()
+
+      const { container } = render(<IssuedByBadge />)
+      expect(container.firstChild).toBeNull()
+    })
+
+    it('handles scaling when container clientWidth and innerWidth are zero', () => {
+      const originalInnerWidth = window.innerWidth
+      Object.defineProperty(window, 'innerWidth', { value: 0, configurable: true })
+
+      try {
+        render(<CertificateCard certificate={mockCertificate} />)
+
+        const card = document.getElementById('certificate-card')
+        expect(card).toHaveStyle({ transform: 'scale(0)' })
+      } finally {
+        Object.defineProperty(window, 'innerWidth', {
+          value: originalInnerWidth,
+          configurable: true,
+        })
+      }
     })
   })
 })

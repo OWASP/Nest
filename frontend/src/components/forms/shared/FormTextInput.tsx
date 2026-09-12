@@ -24,6 +24,8 @@ interface FormTextInputProps {
   min?: number | string
   className?: string
   onBlur?: () => void
+  maxLength?: number
+  showCharCount?: boolean
 }
 
 export const FormTextInput = ({
@@ -39,7 +41,15 @@ export const FormTextInput = ({
   min,
   className,
   onBlur,
+  maxLength,
+  showCharCount = false,
 }: FormTextInputProps) => {
+  const charCount = value.length
+  const isNearLimit = maxLength !== undefined && charCount >= maxLength - 10
+  const isAtLimit = maxLength !== undefined && charCount >= maxLength
+  let counterColorClass = 'text-gray-400 dark:text-gray-500'
+  if (isAtLimit) counterColorClass = 'text-red-500'
+  else if (isNearLimit) counterColorClass = 'text-amber-500'
   return (
     <div className={className || 'w-full min-w-0'} style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <Input
@@ -55,8 +65,15 @@ export const FormTextInput = ({
         isInvalid={touched && !!error}
         errorMessage={touched ? error : undefined}
         min={min}
+        maxLength={maxLength}
         classNames={COMMON_INPUT_CLASS_NAMES}
       />
+      {showCharCount && maxLength !== undefined && (
+        <p className={`mt-1 text-right text-xs font-medium transition-colors ${counterColorClass}`}>
+          {charCount}/{maxLength} characters
+          {isAtLimit && <span className="ml-1 font-semibold">- limit reached</span>}
+        </p>
+      )}
     </div>
   )
 }
