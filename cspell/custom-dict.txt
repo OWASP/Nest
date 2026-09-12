@@ -238,6 +238,7 @@ shrivastava
 skillstruck
 slackbot
 slideshare
+smol
 someid
 speakerdeck
 subgrp
