@@ -2,7 +2,6 @@ import { within, render, fireEvent, screen, cleanup } from '@testing-library/rea
 import '@testing-library/jest-dom'
 import Pagination from 'components/Pagination'
 
-
 afterEach(cleanup)
 
 describe('<Pagination />', () => {
@@ -24,15 +23,8 @@ describe('<Pagination />', () => {
     return render(<Pagination {...props} />)
   }
 
-
   beforeEach(() => {
     onPageChange.mockClear()
-  })
-
-  it('shows a trailing ellipsis when page 7 is omitted', () => {
-    const { container } = renderComponent({ currentPage: 5, totalPages: 8 })
-
-    expect(container.querySelectorAll('svg')).toHaveLength(2)
   })
 
   it('does not render when isLoaded is false', () => {
@@ -89,24 +81,17 @@ describe('<Pagination />', () => {
   it('renders ellipses and correct pages for large totalPages', () => {
     renderComponent({ currentPage: 10, totalPages: 20 })
 
-    // Should show first 3 pages
-    for (const n of [1, 2, 3]) {
+    for (const n of [1, 2, 9, 10, 11, 19, 20]) {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
+    expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Go to page 18' })).not.toBeInTheDocument()
 
     const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
     const ellipses = Array.from(ellipsisContainers).filter((el) =>
       el.querySelector('svg[aria-hidden="true"]')
     )
     expect(ellipses).toHaveLength(2)
-
-    // Should show pages around currentPage: 9, 10, 11
-    for (const n of [9, 10, 11]) {
-      expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
-    }
-
-    // Last page
-    expect(screen.getByRole('button', { name: 'Go to page 20' })).toBeInTheDocument()
   })
 
   it('applies active styles and aria-current on the selected page', () => {
@@ -131,12 +116,17 @@ describe('<Pagination />', () => {
   // Edge-case: currentPage near the start of a large set
   it('shows correct pages when currentPage = 4 of 10', () => {
     renderComponent({ currentPage: 4, totalPages: 10 })
-    // Should show 1,2,3,4,5 then ellipsis and 10
-    for (const n of [1, 2, 3, 4, 5]) {
+
+    for (const n of [1, 2, 3, 4, 5, 9, 10]) {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
+    expect(screen.queryByRole('button', { name: 'Go to page 8' })).not.toBeInTheDocument()
 
-    expect(screen.getByRole('button', { name: 'Go to page 10' })).toBeInTheDocument()
+    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
+    const ellipses = Array.from(ellipsisContainers).filter((el) =>
+      el.querySelector('svg[aria-hidden="true"]')
+    )
+    expect(ellipses).toHaveLength(1)
   })
 
   // Edge-case: very small totalPages (2)
@@ -144,18 +134,74 @@ describe('<Pagination />', () => {
     renderComponent({ totalPages: 2, currentPage: 2 })
     expect(screen.getAllByRole('button', { name: /^Go to page [12]$/ })).toHaveLength(2)
   })
+
   it('does not render trailing ellipsis when currentPage is near the end', () => {
     renderComponent({ currentPage: 18, totalPages: 20 })
 
-    for (const n of [1, 2, 3]) {
+    for (const n of [1, 2, 17, 18, 19, 20]) {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
+    expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
 
-    for (const n of [17, 18, 19]) {
+    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
+    const ellipses = Array.from(ellipsisContainers).filter((el) =>
+      el.querySelector('svg[aria-hidden="true"]')
+    )
+    expect(ellipses).toHaveLength(1)
+  })
+
+  it('mirrors start and end ellipsis behavior', () => {
+    const { unmount } = renderComponent({ currentPage: 5, totalPages: 20 })
+
+    for (const n of [1, 2, 4, 5, 6, 19, 20]) {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
+    expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Go to page 18' })).not.toBeInTheDocument()
+    expect(
+      Array.from(document.querySelectorAll('div.flex.h-10.w-10')).filter((el) =>
+        el.querySelector('svg[aria-hidden="true"]')
+      )
+    ).toHaveLength(2)
 
-    expect(screen.getByRole('button', { name: 'Go to page 20' })).toBeInTheDocument()
+    unmount()
+    renderComponent({ currentPage: 16, totalPages: 20 })
+
+    for (const n of [1, 2, 15, 16, 17, 19, 20]) {
+      expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
+    }
+    expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Go to page 18' })).not.toBeInTheDocument()
+    expect(
+      Array.from(document.querySelectorAll('div.flex.h-10.w-10')).filter((el) =>
+        el.querySelector('svg[aria-hidden="true"]')
+      )
+    ).toHaveLength(2)
+  })
+
+  it('shows only a leading ellipsis when the end pages are consecutive', () => {
+    renderComponent({ currentPage: 5, totalPages: 8 })
+
+    for (const n of [1, 2, 4, 5, 6, 7, 8]) {
+      expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
+    }
+    expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
+
+    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
+    const ellipses = Array.from(ellipsisContainers).filter((el) =>
+      el.querySelector('svg[aria-hidden="true"]')
+    )
+    expect(ellipses).toHaveLength(1)
+  })
+
+  it('shows a leading ellipsis when pages 3 and 4 are omitted', () => {
+    renderComponent({ currentPage: 6, totalPages: 8 })
+
+    for (const n of [1, 2, 5, 6, 7, 8]) {
+      expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
+    }
+    expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Go to page 4' })).not.toBeInTheDocument()
 
     const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
     const ellipses = Array.from(ellipsisContainers).filter((el) =>
@@ -164,4 +210,3 @@ describe('<Pagination />', () => {
     expect(ellipses).toHaveLength(1)
   })
 })
-

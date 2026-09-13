@@ -1,9 +1,10 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+
 interface UseSearchPageOptions {
   indexName: string
   pageTitle: string
@@ -40,7 +41,7 @@ export function useSearchPage<T>({
 
   const [items, setItems] = useState<T[]>([])
   const [currentPage, setCurrentPage] = useState<number>(
-    Number.parseInt(searchParams.get('page') || '1')
+    Number.parseInt(searchParams.get('page') || '1', 10)
   )
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
@@ -51,30 +52,17 @@ export function useSearchPage<T>({
   const facetFiltersKey = JSON.stringify(facetFilters)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableFacetFilters = useMemo(() => facetFilters, [facetFiltersKey])
+  const prevFacetFiltersKeyRef = useRef(facetFiltersKey)
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [stableFacetFilters])
-
-  // Sync state with URL changes
-  useEffect(() => {
-    if (searchParams) {
-      const searchQueryParam = searchParams.get('q') || ''
-      const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'desc'
-
-      const searchQueryChanged = searchQuery !== searchQueryParam
-      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
-
-      // Reset page if search query changes (all indices) or if sort/order changes (projects/chapters)
-      if (
-        searchQueryChanged ||
-        (['projects', 'chapters'].includes(indexName) && sortOrOrderChanged)
-      ) {
-        setCurrentPage(1)
-      }
+    // Only reset when filters actually change (Strict Mode safe — skips mount / re-invoke).
+    if (prevFacetFiltersKeyRef.current === facetFiltersKey) {
+      return
     }
-  }, [searchParams, order, searchQuery, sortBy, indexName])
+    prevFacetFiltersKeyRef.current = facetFiltersKey
+    setCurrentPage(1)
+  }, [facetFiltersKey])
+
   // Sync URL with state changes
   useEffect(() => {
     const params = new URLSearchParams()
@@ -89,9 +77,16 @@ export function useSearchPage<T>({
       params.set('order', order)
     }
 
-    router.push(`?${params.toString()}`)
-  }, [searchQuery, order, currentPage, sortBy, router])
-  // Update URL when state changes
+    const nextQuery = params.toString()
+    const currentQuery = searchParams.toString()
+    if (nextQuery === currentQuery) {
+      return
+    }
+
+    router.push(nextQuery ? `?${nextQuery}` : '?')
+  }, [searchQuery, order, currentPage, sortBy, router, searchParams])
+
+  // Fetch data when state changes
   useEffect(() => {
     setIsLoaded(false)
 
@@ -142,6 +137,7 @@ export function useSearchPage<T>({
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
+    setCurrentPage(1)
   }
 
   const handlePageChange = (page: number) => {
@@ -150,11 +146,19 @@ export function useSearchPage<T>({
   }
 
   const handleSortChange = (sort: string) => {
+    if (sort === sortBy) {
+      return
+    }
     setSortBy(sort)
+    setCurrentPage(1)
   }
 
-  const handleOrderChange = (order: string) => {
-    setOrder(order)
+  const handleOrderChange = (nextOrder: string) => {
+    if (nextOrder === order) {
+      return
+    }
+    setOrder(nextOrder)
+    setCurrentPage(1)
   }
 
   return {
