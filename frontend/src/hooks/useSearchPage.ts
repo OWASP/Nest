@@ -53,6 +53,7 @@ export function useSearchPage<T>({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableFacetFilters = useMemo(() => facetFilters, [facetFiltersKey])
   const prevFacetFiltersKeyRef = useRef(facetFiltersKey)
+  const prevSearchParamsRef = useRef(searchParams.toString())
 
   useEffect(() => {
     // Only reset when filters actually change (Strict Mode safe — skips mount / re-invoke).
@@ -63,7 +64,21 @@ export function useSearchPage<T>({
     setCurrentPage(1)
   }, [facetFiltersKey])
 
-  // Sync URL with state changes
+  // Sync state from URL on back/forward before the URL-push effect can restore stale state.
+  useEffect(() => {
+    const query = searchParams.toString()
+    if (query === prevSearchParamsRef.current) {
+      return
+    }
+    prevSearchParamsRef.current = query
+
+    setCurrentPage(Number.parseInt(searchParams.get('page') || '1', 10))
+    setSearchQuery(searchParams.get('q') || '')
+    setSortBy(searchParams.get('sortBy') || defaultSortBy)
+    setOrder(searchParams.get('order') || defaultOrder)
+  }, [searchParams, defaultSortBy, defaultOrder])
+
+  // Sync URL with state changes (do not depend on searchParams — avoids clobbering back/forward).
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
@@ -78,13 +93,20 @@ export function useSearchPage<T>({
     }
 
     const nextQuery = params.toString()
-    const currentQuery = searchParams.toString()
-    if (nextQuery === currentQuery) {
+    const previousParams = new URLSearchParams(prevSearchParamsRef.current)
+    const sameQuery =
+      (params.get('q') || '') === (previousParams.get('q') || '') &&
+      (params.get('page') || '') === (previousParams.get('page') || '') &&
+      (params.get('sortBy') || '') === (previousParams.get('sortBy') || '') &&
+      (params.get('order') || '') === (previousParams.get('order') || '')
+
+    if (sameQuery) {
       return
     }
 
+    prevSearchParamsRef.current = nextQuery
     router.push(nextQuery ? `?${nextQuery}` : '?')
-  }, [searchQuery, order, currentPage, sortBy, router, searchParams])
+  }, [searchQuery, order, currentPage, sortBy, router])
 
   // Fetch data when state changes
   useEffect(() => {

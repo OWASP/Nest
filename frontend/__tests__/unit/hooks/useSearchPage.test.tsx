@@ -128,6 +128,111 @@ describe('useSearchPage', () => {
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true)
+      expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', 'owasp', 1, undefined, [])
     })
+  })
+
+  it('resets to page 1 when the sort option changes', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
+
+    const { result } = renderHook(() =>
+      useSearchPage({
+        indexName: 'projects',
+        pageTitle: 'OWASP Projects',
+        defaultSortBy: 'default',
+        defaultOrder: 'desc',
+      })
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.currentPage).toBe(3)
+    })
+
+    act(() => {
+      result.current.handleSortChange('stars_count')
+    })
+
+    expect(result.current.currentPage).toBe(1)
+    expect(result.current.sortBy).toBe('stars_count')
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(mockFetchAlgoliaData).toHaveBeenCalledWith(
+        'projects_stars_count_desc',
+        '',
+        1,
+        undefined,
+        []
+      )
+    })
+  })
+
+  it('resets to page 1 when the sort order changes', async () => {
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams('page=3&sortBy=stars_count&order=desc')
+    )
+
+    const { result } = renderHook(() =>
+      useSearchPage({
+        indexName: 'projects',
+        pageTitle: 'OWASP Projects',
+        defaultSortBy: 'default',
+        defaultOrder: 'desc',
+      })
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.currentPage).toBe(3)
+      expect(result.current.sortBy).toBe('stars_count')
+    })
+
+    act(() => {
+      result.current.handleOrderChange('asc')
+    })
+
+    expect(result.current.currentPage).toBe(1)
+    expect(result.current.order).toBe('asc')
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(mockFetchAlgoliaData).toHaveBeenCalledWith(
+        'projects_stars_count_asc',
+        '',
+        1,
+        undefined,
+        []
+      )
+    })
+  })
+
+  it('synchronizes state from URL on back/forward without restoring the stale query', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
+
+    const { result, rerender } = renderHook(() =>
+      useSearchPage({
+        indexName: 'projects',
+        pageTitle: 'OWASP Projects',
+        defaultSortBy: 'default',
+        defaultOrder: 'desc',
+      })
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.currentPage).toBe(3)
+    })
+
+    push.mockClear()
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2&q=nest'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(2)
+      expect(result.current.searchQuery).toBe('nest')
+    })
+
+    expect(push).not.toHaveBeenCalled()
   })
 })

@@ -24,29 +24,27 @@ const Pagination: React.FC<PaginationProps> = ({
       return Array.from({ length: totalPages }, (_, i) => i + 1)
     }
 
-    pageNumbers.push(1, 2)
+    for (let i = 1; i <= 3; i++) {
+      pageNumbers.push(i)
+    }
 
-    if (currentPage > 4) {
+    if (currentPage > 5) {
       pageNumbers.push('...')
-    } else {
-      pageNumbers.push(3)
     }
 
     for (
       let i = Math.max(4, currentPage - 1);
-      i <= Math.min(totalPages - 3, currentPage + 1);
+      i <= Math.min(totalPages - 1, currentPage + 1);
       i++
     ) {
       pageNumbers.push(i)
     }
 
-    if (currentPage < totalPages - 3) {
+    if (currentPage <= totalPages - 3) {
       pageNumbers.push('...')
-    } else {
-      pageNumbers.push(totalPages - 2)
     }
 
-    pageNumbers.push(totalPages - 1, totalPages)
+    pageNumbers.push(totalPages)
 
     return pageNumbers
   }
