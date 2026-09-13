@@ -28,6 +28,16 @@ interface UseSearchPageReturn<T> {
   handleOrderChange: (order: string) => void
 }
 
+const parsePageParam = (value: string | null): number => {
+  const page = Number.parseInt(value || '1', 10)
+  return Number.isFinite(page) && page > 0 ? page : 1
+}
+
+const normalizedPageParam = (params: URLSearchParams): string => {
+  const page = params.get('page')
+  return !page || page === '1' ? '' : page
+}
+
 export function useSearchPage<T>({
   indexName,
   pageTitle,
@@ -40,9 +50,7 @@ export function useSearchPage<T>({
   const searchParams = useSearchParams()
 
   const [items, setItems] = useState<T[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(
-    Number.parseInt(searchParams.get('page') || '1', 10)
-  )
+  const [currentPage, setCurrentPage] = useState<number>(parsePageParam(searchParams.get('page')))
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
@@ -72,7 +80,7 @@ export function useSearchPage<T>({
     }
     prevSearchParamsRef.current = query
 
-    setCurrentPage(Number.parseInt(searchParams.get('page') || '1', 10))
+    setCurrentPage(parsePageParam(searchParams.get('page')))
     setSearchQuery(searchParams.get('q') || '')
     setSortBy(searchParams.get('sortBy') || defaultSortBy)
     setOrder(searchParams.get('order') || defaultOrder)
@@ -96,7 +104,7 @@ export function useSearchPage<T>({
     const previousParams = new URLSearchParams(prevSearchParamsRef.current)
     const sameQuery =
       (params.get('q') || '') === (previousParams.get('q') || '') &&
-      (params.get('page') || '') === (previousParams.get('page') || '') &&
+      normalizedPageParam(params) === normalizedPageParam(previousParams) &&
       (params.get('sortBy') || '') === (previousParams.get('sortBy') || '') &&
       (params.get('order') || '') === (previousParams.get('order') || '')
 

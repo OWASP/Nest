@@ -169,9 +169,7 @@ describe('useSearchPage', () => {
   })
 
   it('resets to page 1 when the sort order changes', async () => {
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams('page=3&sortBy=stars_count&order=desc')
-    )
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3&sortBy=stars_count&order=desc'))
 
     const { result } = renderHook(() =>
       useSearchPage({
@@ -234,5 +232,67 @@ describe('useSearchPage', () => {
     })
 
     expect(push).not.toHaveBeenCalled()
+  })
+
+  it('does not push when back/forward lands on an equivalent page=1 URL', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2&q=foo'))
+
+    const { result, rerender } = renderHook(() =>
+      useSearchPage({
+        indexName: 'projects',
+        pageTitle: 'OWASP Projects',
+        defaultSortBy: 'default',
+        defaultOrder: 'desc',
+      })
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.currentPage).toBe(2)
+    })
+
+    push.mockClear()
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=1&q=foo'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(1)
+      expect(result.current.searchQuery).toBe('foo')
+    })
+
+    expect(push).not.toHaveBeenCalled()
+  })
+
+  it('falls back to page 1 for non-numeric or non-positive page params', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=abc'))
+
+    const { result, rerender } = renderHook(() =>
+      useSearchPage({
+        indexName: 'projects',
+        pageTitle: 'OWASP Projects',
+        defaultSortBy: 'default',
+        defaultOrder: 'desc',
+      })
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.currentPage).toBe(1)
+      expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 1, undefined, [])
+    })
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=0'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(1)
+    })
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=-2'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(1)
+    })
   })
 })
