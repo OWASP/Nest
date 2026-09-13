@@ -24,6 +24,7 @@ Emay
 FOSS
 GBP
 GFKs
+GHSA
 GPG
 GRC
 GSOC
@@ -155,6 +156,7 @@ jaraco
 jumpstart
 kasya
 langgraph
+ldd
 lhci
 libexpat
 libfuzzer

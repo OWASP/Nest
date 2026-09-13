@@ -5,7 +5,6 @@ include e2e/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 include make/check.mk
-include make/check-test.mk
 include make/help.mk
 include make/maintenance.mk
 include make/run.mk
