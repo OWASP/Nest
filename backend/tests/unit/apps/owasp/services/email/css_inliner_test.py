@@ -15,7 +15,6 @@ class TestInlineCss:
 
         result = inline_css(html)
 
-        assert "color" in result
-        assert "#111827" in result
+        assert 'style="color: #111827"' in result or 'style="color:#111827"' in result
         assert 'class="title"' not in result
         assert "Hello" in result
