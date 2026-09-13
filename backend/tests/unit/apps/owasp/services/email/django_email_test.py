@@ -1,5 +1,6 @@
 """Tests for Django email service implementation."""
 
+from smtplib import SMTPException
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -78,10 +79,10 @@ class TestDjangoEmailService:
     def test_send_with_exception(self, mock_email_class, service):
         """Test send raises exception after logging."""
         mock_msg = MagicMock()
-        mock_msg.send.side_effect = Exception("Send failed")
+        mock_msg.send.side_effect = SMTPException("Send failed")
         mock_email_class.return_value = mock_msg
 
-        with pytest.raises(Exception, match="Send failed"):
+        with pytest.raises(SMTPException, match="Send failed"):
             service.send(
                 to="test@example.com",
                 subject="Test Subject",
@@ -181,7 +182,7 @@ class TestDjangoEmailService:
         mock_get_conn.return_value = mock_conn
 
         mock_msg = MagicMock()
-        mock_msg.send.side_effect = [1, Exception("SMTP Error")]
+        mock_msg.send.side_effect = [1, SMTPException("SMTP Error")]
         mock_email_class.return_value = mock_msg
 
         messages = [
@@ -208,7 +209,7 @@ class TestDjangoEmailService:
     def test_send_bulk_connection_failure(self, mock_get_conn, service):
         """Test bulk sending when connection fails to open."""
         mock_conn = MagicMock()
-        mock_conn.open.side_effect = Exception("Connection refused")
+        mock_conn.open.side_effect = ConnectionRefusedError("Connection refused")
         mock_get_conn.return_value = mock_conn
 
         messages = [
@@ -225,7 +226,7 @@ class TestDjangoEmailService:
     def test_send_bulk_close_failure_after_send(self, mock_email_class, mock_get_conn, service):
         """Test that results are returned even when connection.close() fails after sending."""
         mock_conn = MagicMock()
-        mock_conn.close.side_effect = Exception("Close failed")
+        mock_conn.close.side_effect = SMTPException("Close failed")
         mock_get_conn.return_value = mock_conn
 
         mock_msg = MagicMock()
@@ -245,8 +246,8 @@ class TestDjangoEmailService:
     def test_send_bulk_open_and_close_failure(self, mock_get_conn, service):
         """Test that results are returned when both open() and close() fail."""
         mock_conn = MagicMock()
-        mock_conn.open.side_effect = Exception("Open failed")
-        mock_conn.close.side_effect = Exception("Close failed")
+        mock_conn.open.side_effect = ConnectionRefusedError("Open failed")
+        mock_conn.close.side_effect = SMTPException("Close failed")
         mock_get_conn.return_value = mock_conn
 
         messages = [

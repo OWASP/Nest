@@ -3,12 +3,15 @@
 import logging
 
 from django.conf import settings
+from django.template import TemplateDoesNotExist, TemplateSyntaxError
 from django.template.loader import render_to_string
 from django_rq import job
 
 from apps.owasp.models.email_log import EmailLog
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
+from apps.owasp.services.email.base import EMAIL_SEND_ERRORS
+from apps.owasp.services.email.css_inliner import inline_css
 from apps.owasp.services.email.factory import get_email_service
 
 logger = logging.getLogger(__name__)
@@ -56,10 +59,10 @@ class SnapshotDigestService:
         card_sections = [s for s in global_sections if s != "users"]
 
         has_entities = entity_count > 0
-        active_count = len(global_sections) + (1 if has_entities else 0)
-
-        if active_count == 0:
+        active_count = len(global_sections) + has_entities
+        if not active_count:
             return {}
+
         per_section = max(
             MIN_ITEMS_PER_SECTION,
             min(MAX_ITEMS_PER_SECTION, TOTAL_ITEMS_BUDGET // active_count),
@@ -270,22 +273,22 @@ class SnapshotDigestService:
         )
 
         return {
-            "snapshot": snapshot,
-            "subscription": subscription,
             "chapters_data": chapters_data,
-            "users_data": users_data,
+            "entities_extra": entities_extra,
+            "entity_sections": entity_sections,
+            "events_data": events_data,
             "issues_data": issues_data,
-            "prs_data": prs_data,
-            "releases_data": releases_data,
+            "posts_data": posts_data,
             "projects_data": projects_data,
             "projects_extra": projects_extra,
-            "posts_data": posts_data,
-            "events_data": events_data,
-            "entity_sections": entity_sections,
-            "entities_extra": entities_extra,
+            "prs_data": prs_data,
+            "releases_data": releases_data,
             "site_url": settings.SITE_URL,
-            "unsubscribe_url": unsubscribe_url,
+            "snapshot": snapshot,
             "snapshot_url": snapshot_url,
+            "subscription": subscription,
+            "unsubscribe_url": unsubscribe_url,
+            "users_data": users_data,
         }
 
     def _get_project_content(self, snapshot, project, preferences, limit=MIN_ITEMS_PER_SECTION):
@@ -389,7 +392,7 @@ class SnapshotDigestService:
         return []
 
 
-@job("ai")
+@job("emails")
 def send_digest_email(snapshot_id: int, subscription_id: int):
     """Send a single snapshot digest email. Called by the RQ worker.
 
@@ -423,22 +426,25 @@ def send_digest_email(snapshot_id: int, subscription_id: int):
     try:
         digest = SnapshotDigestService().generate(snapshot, subscription)
 
-        has_content = (
-            digest.get("chapters_data")
-            or digest.get("users_data")
-            or digest.get("issues_data")
-            or digest.get("prs_data")
-            or digest.get("releases_data")
-            or digest.get("projects_data")
-            or digest["entity_sections"]
-            or digest.get("posts_data")
-            or digest.get("events_data")
+        has_content = any(
+            digest.get(key)
+            for key in (
+                "chapters_data",
+                "entity_sections",
+                "events_data",
+                "issues_data",
+                "posts_data",
+                "projects_data",
+                "prs_data",
+                "releases_data",
+                "users_data",
+            )
         )
         if not has_content:
             logger.info("No content for snapshot %s, skipping email.", snapshot.key)
             return
 
-        html_body = render_to_string(SNAPSHOT_TEMPLATE_HTML, digest)
+        html_body = inline_css(render_to_string(SNAPSHOT_TEMPLATE_HTML, digest))
         plain_body = render_to_string(SNAPSHOT_TEMPLATE_TXT, digest)
 
         headers = {
@@ -465,7 +471,7 @@ def send_digest_email(snapshot_id: int, subscription_id: int):
                 error_message="Failed to send email.",
             )
 
-    except Exception as exc:
+    except (*EMAIL_SEND_ERRORS, TemplateDoesNotExist, TemplateSyntaxError) as exc:
         logger.exception("Failed to send digest for snapshot %s.", snapshot.key)
         EmailLog.mark_failed(
             snapshot=snapshot,

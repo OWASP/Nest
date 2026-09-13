@@ -1,5 +1,6 @@
 """Tests for newsletter digest generation and sending service."""
 
+from smtplib import SMTPException
 from unittest.mock import MagicMock, patch
 
 from django.template.loader import render_to_string
@@ -641,7 +642,7 @@ class TestSendDigestEmail:
             "snapshot_url": "https://example.com/snapshot",
         }
         mock_render.return_value = "<html>body</html>"
-        mock_get_service.return_value.send.side_effect = Exception("Send failed")
+        mock_get_service.return_value.send.side_effect = SMTPException("Send failed")
 
         send_digest_email(snapshot_id=1, subscription_id=1)
 
