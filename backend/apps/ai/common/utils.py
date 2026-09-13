@@ -89,14 +89,16 @@ def get_fallback_response() -> str:
     # Only show detailed error message in local/development environment
     if settings.IS_LOCAL_ENVIRONMENT or settings.DEBUG:
         return (
-            "⚠️ I encountered an error processing your request. "
-            "Please try rephrasing your question or contact support if the issue persists."
+            "⚠️ I encountered an error processing your request. Please try rephrasing "
+            "your question. For further help, join #owasp-community on "
+            "Slack, or visit https://nest.owasp.org."
         )
 
     # Generic message for production
     return (
-        "I'm sorry, I encountered an issue processing your request. "
-        "Please try again or rephrasing your question."
+        "I'm sorry, I encountered an issue processing your request. Please try "
+        "again or rephrase your question. For further help, join #owasp-community "
+        "on Slack, or visit https://nest.owasp.org."
     )
 
 

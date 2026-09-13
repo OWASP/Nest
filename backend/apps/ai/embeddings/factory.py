@@ -3,8 +3,6 @@
 import os
 
 from apps.ai.embeddings.base import Embedder
-from apps.ai.embeddings.google import GoogleEmbedder
-from apps.ai.embeddings.openai import OpenAIEmbedder
 
 
 def get_embedder() -> Embedder:
@@ -18,8 +16,12 @@ def get_embedder() -> Embedder:
 
     match provider:
         case "openai":
+            from apps.ai.embeddings.openai import OpenAIEmbedder  # noqa: PLC0415
+
             return OpenAIEmbedder()
         case "google":
+            from apps.ai.embeddings.google import GoogleEmbedder  # noqa: PLC0415
+
             return GoogleEmbedder()
         case _:
             error_msg = f"Unsupported LLM provider: {provider}"

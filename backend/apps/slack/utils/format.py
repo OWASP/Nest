@@ -72,46 +72,32 @@ def format_ai_response_for_slack(text: str) -> str:
     if not text:
         return text
 
-    # Strip leading/trailing whitespace
-    text = text.strip()
+    # Strip existing bold in headings (e.g., # **Title**) to avoid nested asterisks
+    def replace_heading(match: re.Match[str]) -> str:
+        content = re.sub(r"^(\*\*|__|\*)(.*?)\1$", r"\2", match.group(1).strip())
+        return f"*{content}*"
 
-    # Check if the entire response is wrapped in code blocks
-    # Pattern: starts with ``` and ends with ```
-    if text.startswith("```") and text.endswith("```"):
-        # Extract content from code block wrapper
-        # Remove first ``` and optional language identifier
-        text = re.sub(r"^```[\w]*\n?", "", text, count=1)
-        # Remove trailing ```
-        text = re.sub(r"\n?```$", "", text)
-        text = text.strip()
+    def format_text_section(content: str) -> str:
+        content = re.sub(r"```+", "", content)
+        content = re.sub(r"`([^`<]+)`", r"\1", content)
+        content = re.sub(
+            r"^#{1,6}[ \t]+(\S[^\r\n]*)$", replace_heading, content, flags=re.MULTILINE
+        )
+        content = re.sub(r"\*\*(.+?)\*\*", r"*\1*", content)
+        content = re.sub(r"__(.+?)__", r"*\1*", content)
+        return format_links_for_slack(content)
 
-    # Remove markdown code blocks (```language\ncode\n```) and convert to plain text
-    # This regex matches code blocks with optional language identifier
-    # Pattern: ```optional_lang\ncontent\n```
-    code_block_pattern = re.compile(r"```[\w]*\n(.*?)```", re.DOTALL)
+    # Split on markdown code blocks; odd indices are code blocks, even indices are regular text
+    parts = re.split(r"(```[^\n]*\n?.*?```)", text.strip(), flags=re.DOTALL)
+    for i, part in enumerate(parts):
+        if i % 2:
+            # Code block: strip fences to plain text, leaving code content untouched
+            parts[i] = re.sub(r"^```[^\n]*\n?(.*?)\n?```$", r"\1", part, flags=re.DOTALL).strip()
+        else:
+            # Non-code text: format headings, bold, and links
+            parts[i] = format_text_section(part)
 
-    def replace_code_block(match):
-        # Convert code block content to plain text
-        # This prevents Slack from rendering it as a code block
-        # Preserve Slack channel links that might be inside code blocks
-        return match.group(1).strip()
-
-    text = code_block_pattern.sub(replace_code_block, text)
-
-    # Remove any remaining triple backticks that might have been missed
-    # (handles edge cases where regex didn't match)
-    # Also handle cases where backticks are on separate lines
-    text = re.sub(r"```+", "", text)
-
-    # Remove single backticks that might wrap inline code
-    # But preserve Slack channel/user links (format: <#...|...> or <@...|...>)
-    # Pattern: `text` but not part of Slack link syntax
-    text = re.sub(r"`([^`<]+)`", r"\1", text)
-
-    # Preserve Slack channel links (format: <#channel_id|channel_name>)
-    # These should not be modified by format_links_for_slack
-    # Convert markdown links to Slack format (but preserve existing Slack links)
-    return format_links_for_slack(text)
+    return "".join(parts).strip()
 
 
 def format_links_for_slack(text: str) -> str:
