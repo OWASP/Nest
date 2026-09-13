@@ -334,4 +334,46 @@ describe('useSearchPage', () => {
       expect(push).toHaveBeenCalledWith('?page=4')
     })
   })
+
+  it('keeps the latest search when a second change happens before searchParams update', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
+
+    const { result, rerender } = renderHook(() =>
+      useSearchPage({
+        indexName: 'projects',
+        pageTitle: 'OWASP Projects',
+        defaultSortBy: 'default',
+        defaultOrder: 'desc',
+      })
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.currentPage).toBe(3)
+    })
+
+    act(() => {
+      result.current.handleSearch('foo')
+    })
+    act(() => {
+      result.current.handleSearch('bar')
+    })
+
+    expect(result.current.searchQuery).toBe('bar')
+    expect(result.current.currentPage).toBe(1)
+
+    // Stale acknowledgment of the first push must not restore the older query.
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('q=foo'))
+    rerender()
+
+    expect(result.current.searchQuery).toBe('bar')
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('q=bar'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.searchQuery).toBe('bar')
+      expect(result.current.currentPage).toBe(1)
+    })
+  })
 })
