@@ -126,6 +126,10 @@ class TestFormatAiResponseForSlack:
                 "*Chapter Meetings*\nJoin our *local* chapters.",
             ),
             (
+                "### \nordinary text",
+                "### \nordinary text",
+            ),
+            (
                 "Check out [OWASP](https://owasp.org) for details.",
                 "Check out <https://owasp.org|OWASP> for details.",
             ),
@@ -136,6 +140,14 @@ class TestFormatAiResponseForSlack:
             (
                 "Here is code:\n```python\nprint('hello')\n```\nDone.",
                 "Here is code:\nprint('hello')\nDone.",
+            ),
+            (
+                "# **Bold heading**",
+                "*Bold heading*",
+            ),
+            (
+                "Here is code:\n```python\n# This is a comment\nx = 1\n```\nDone.",
+                "Here is code:\n# This is a comment\nx = 1\nDone.",
             ),
             (
                 "Run `poetry run pytest` now.",

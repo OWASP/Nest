@@ -85,18 +85,16 @@ def format_ai_response_for_slack(text: str) -> str:
         text = re.sub(r"\n?```$", "", text)
         text = text.strip()
 
-    # Remove markdown code blocks (```language\ncode\n```) and convert to plain text
-    # This regex matches code blocks with optional language identifier
-    # Pattern: ```optional_lang\ncontent\n```
+    # Preserve markdown code blocks (```language\ncode\n```) as plain text placeholders
+    # so headings and bold conversions do not alter code contents (e.g., # comments).
+    code_blocks: list[str] = []
+
+    def preserve_code_block(match: re.Match[str]) -> str:
+        code_blocks.append(match.group(1).strip())
+        return f"\x00CODE_BLOCK_{len(code_blocks) - 1}\x00"
+
     code_block_pattern = re.compile(r"```[\w]*\n(.*?)```", re.DOTALL)
-
-    def replace_code_block(match):
-        # Convert code block content to plain text
-        # This prevents Slack from rendering it as a code block
-        # Preserve Slack channel links that might be inside code blocks
-        return match.group(1).strip()
-
-    text = code_block_pattern.sub(replace_code_block, text)
+    text = code_block_pattern.sub(preserve_code_block, text)
 
     # Remove any remaining triple backticks that might have been missed
     # (handles edge cases where regex didn't match)
@@ -109,11 +107,26 @@ def format_ai_response_for_slack(text: str) -> str:
     text = re.sub(r"`([^`<]+)`", r"\1", text)
 
     # Convert markdown headings (# Heading, ## Heading, etc.) to Slack bold (*Heading*)
-    text = re.sub(r"^#{1,6}\s+(.+)$", r"*\1*", text, flags=re.MULTILINE)
+    # Strip any existing bold markers to avoid nested double asterisks (e.g., # **Bold**)
+    def replace_heading(match: re.Match[str]) -> str:
+        content = match.group(1).strip()
+        if content.startswith("**") and content.endswith("**") and len(content) >= 4:
+            content = content[2:-2].strip()
+        elif content.startswith("__") and content.endswith("__") and len(content) >= 4:
+            content = content[2:-2].strip()
+        elif content.startswith("*") and content.endswith("*") and len(content) >= 2:
+            content = content[1:-1].strip()
+        return f"*{content}*"
+
+    text = re.sub(r"^#{1,6}[ \t]+(\S[^\r\n]*)$", replace_heading, text, flags=re.MULTILINE)
 
     # Convert markdown bold (**text** or __text__) to Slack bold (*text*)
     text = re.sub(r"\*\*(.+?)\*\*", r"*\1*", text)
     text = re.sub(r"__(.+?)__", r"*\1*", text)
+
+    # Restore preserved code blocks as plain text
+    for i, block in enumerate(code_blocks):
+        text = text.replace(f"\x00CODE_BLOCK_{i}\x00", block)
 
     # Preserve Slack channel links (format: <#channel_id|channel_name>)
     # These should not be modified by format_links_for_slack
