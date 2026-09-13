@@ -62,6 +62,7 @@ export function useSearchPage<T>({
   const stableFacetFilters = useMemo(() => facetFilters, [facetFiltersKey])
   const prevFacetFiltersKeyRef = useRef(facetFiltersKey)
   const prevSearchParamsRef = useRef(searchParams.toString())
+  const skipNextUrlPushRef = useRef(false)
 
   useEffect(() => {
     // Only reset when filters actually change (Strict Mode safe — skips mount / re-invoke).
@@ -80,14 +81,35 @@ export function useSearchPage<T>({
     }
     prevSearchParamsRef.current = query
 
-    setCurrentPage(parsePageParam(searchParams.get('page')))
-    setSearchQuery(searchParams.get('q') || '')
-    setSortBy(searchParams.get('sortBy') || defaultSortBy)
-    setOrder(searchParams.get('order') || defaultOrder)
-  }, [searchParams, defaultSortBy, defaultOrder])
+    const nextPage = parsePageParam(searchParams.get('page'))
+    const nextSearchQuery = searchParams.get('q') || ''
+    const nextSortBy = searchParams.get('sortBy') || defaultSortBy
+    const nextOrder = searchParams.get('order') || defaultOrder
+
+    // Avoid leaving a stale suppress flag if React bails out of unchanged state updates.
+    if (
+      nextPage === currentPage &&
+      nextSearchQuery === searchQuery &&
+      nextSortBy === sortBy &&
+      nextOrder === order
+    ) {
+      return
+    }
+
+    skipNextUrlPushRef.current = true
+    setCurrentPage(nextPage)
+    setSearchQuery(nextSearchQuery)
+    setSortBy(nextSortBy)
+    setOrder(nextOrder)
+  }, [searchParams, defaultSortBy, defaultOrder, currentPage, searchQuery, sortBy, order])
 
   // Sync URL with state changes (do not depend on searchParams — avoids clobbering back/forward).
   useEffect(() => {
+    if (skipNextUrlPushRef.current) {
+      skipNextUrlPushRef.current = false
+      return
+    }
+
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
     if (currentPage > 1) params.set('page', currentPage.toString())

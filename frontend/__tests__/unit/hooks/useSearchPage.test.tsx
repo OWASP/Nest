@@ -295,4 +295,43 @@ describe('useSearchPage', () => {
       expect(result.current.currentPage).toBe(1)
     })
   })
+
+  it('still pushes URL updates for user-driven page changes after back/forward sync', async () => {
+    const scrollTo = jest.fn()
+    window.scrollTo = scrollTo
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
+
+    const { result, rerender } = renderHook(() =>
+      useSearchPage({
+        indexName: 'projects',
+        pageTitle: 'OWASP Projects',
+        defaultSortBy: 'default',
+        defaultOrder: 'desc',
+      })
+    )
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true)
+      expect(result.current.currentPage).toBe(3)
+    })
+
+    push.mockClear()
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(2)
+    })
+    expect(push).not.toHaveBeenCalled()
+
+    act(() => {
+      result.current.handlePageChange(4)
+    })
+
+    expect(result.current.currentPage).toBe(4)
+    expect(scrollTo).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith('?page=4')
+    })
+  })
 })
