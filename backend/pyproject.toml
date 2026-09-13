@@ -122,7 +122,6 @@ ini_options.DJANGO_CONFIGURATION = "Test"
 ini_options.DJANGO_SETTINGS_MODULE = "settings.test"
 
 [tool.coverage]
-run.branch = true
 run.omit = [
   "**/migrations/*",
   "__init__.py",
@@ -131,3 +130,4 @@ run.omit = [
   "src/wsgi.py",
   "tests/*",
 ]
+run.branch = true

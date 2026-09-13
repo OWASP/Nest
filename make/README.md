@@ -25,8 +25,7 @@ belong in their component's `make/` directory.
 
 Use one singular, goal-based filename for each target group:
 
-- `check.mk`
-- `check-test.mk`
+- `check.mk` — quality checks and `check-test*` compositions
 - `help.mk`
 - `maintenance.mk`
 - `run.mk`
