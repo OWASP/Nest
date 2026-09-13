@@ -1,0 +1,78 @@
+{% autoescape off %}OWASP Nest — Community Snapshot
+================================
+{% if chapters_data %}
+CHAPTERS ({{ chapters_data.total }} total)
+--------
+{% for row in chapters_data.rows %}{% for chapter in row %}{% if chapter %}• {{ chapter.name }}{% if chapter.suggested_location or chapter.country %} — {{ chapter.suggested_location|default:chapter.country }}{% endif %}
+{% if chapter.summary %}  {{ chapter.summary|truncatewords:25 }}{% endif %}
+{% endif %}{% endfor %}{% endfor %}{% if chapters_data.extra %}  + {{ chapters_data.extra }} more chapters{% endif %}
+
+{% endif %}{% if projects_data %}
+PROJECTS
+--------
+{% for row in projects_data.rows %}
+{% for project_entry in row %}
+{{ project_entry.project.name }}
+{% for content in project_entry.content %}{% if content.type == "issues" %}  Issues ({{ content.total }}):{% elif content.type == "pull_requests" %}  Pull Requests ({{ content.total }}):{% elif content.type == "releases" %}  Releases ({{ content.total }}):{% endif %}
+{% for item in content.items %}{% if item %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
+      {{ item.url }}
+{% endif %}{% endfor %}{% endfor %}{% endfor %}{% endfor %}{% if projects_data.extra %}  + {{ projects_data.extra }} more projects{% endif %}
+
+{% endif %}{% if users_data %}
+USERS ({{ users_data.total }} new members)
+-----
+{% for user in users_data.items %}• {{ user.name|default:user.login }}
+{% endfor %}{% if users_data.extra %}  + {{ users_data.extra }} more members{% endif %}
+
+{% endif %}{% if issues_data %}
+ISSUES ({{ issues_data.total }} total)
+------
+{% for row in issues_data.rows %}{% for issue in row %}{% if issue %}• {{ issue.title|truncatewords:10 }}
+    {{ issue.url }}
+{% endif %}{% endfor %}{% endfor %}{% if issues_data.extra %}  + {{ issues_data.extra }} more issues{% endif %}
+
+{% endif %}{% if prs_data %}
+PULL REQUESTS ({{ prs_data.total }} total)
+-------------
+{% for row in prs_data.rows %}{% for pr in row %}{% if pr %}• {{ pr.title|truncatewords:10 }}
+    {{ pr.url }}
+{% endif %}{% endfor %}{% endfor %}{% if prs_data.extra %}  + {{ prs_data.extra }} more pull requests{% endif %}
+
+{% endif %}{% if releases_data %}
+RELEASES ({{ releases_data.total }} total)
+--------
+{% for row in releases_data.rows %}{% for release in row %}{% if release %}• {{ release.name }}{% if release.tag_name %} ({{ release.tag_name }}){% endif %}
+    {{ release.url }}
+{% endif %}{% endfor %}{% endfor %}{% if releases_data.extra %}  + {{ releases_data.extra }} more releases{% endif %}
+
+{% endif %}{% if posts_data %}
+BLOG POSTS ({{ posts_data.total }} total)
+----------
+{% for row in posts_data.rows %}{% for post in row %}{% if post %}• {{ post.title }}{% if post.author_name %} — {{ post.author_name }}{% endif %}
+  {{ post.url }}
+{% endif %}{% endfor %}{% endfor %}{% if posts_data.extra %}  + {{ posts_data.extra }} more articles{% endif %}
+
+{% endif %}{% if events_data %}
+UPCOMING EVENTS ({{ events_data.total }} total)
+---------------
+{% for row in events_data.rows %}{% for event in row %}{% if event %}• {{ event.name }}
+  📅 {{ event.start_date|date:"M d, Y" }}{% if event.suggested_location %}
+  📍 {{ event.suggested_location }}{% endif %}
+{% endif %}{% endfor %}{% endfor %}{% if events_data.extra %}  + {{ events_data.extra }} more events{% endif %}
+
+{% endif %}{% if entity_sections %}
+YOUR SUBSCRIBED ENTITIES
+========================
+{% for entity_section in entity_sections %}
+{{ entity_section.entity.name }} ({{ entity_section.entity_type }})
+{% for content in entity_section.content %}{% if content.type == "issues" %}  Issues ({{ content.total }}):{% elif content.type == "pull_requests" %}  Pull Requests ({{ content.total }}):{% elif content.type == "releases" %}  Releases ({{ content.total }}):{% endif %}
+{% for row_items in content.rows %}{% for item in row_items %}{% if item %}    {% if content.type == "releases" %}• {{ item.name }}{% if item.tag_name %} ({{ item.tag_name }}){% endif %}{% else %}• {{ item.title|truncatewords:10 }}{% endif %}
+      {{ item.url }}
+{% endif %}{% endfor %}{% endfor %}{% endfor %}{% endfor %}{% endif %}
+---
+View Full Snapshot: {{ snapshot_url }}
+Manage Preferences: {{ site_url }}/settings
+Unsubscribe: {{ unsubscribe_url }}
+
+© OWASP Foundation. All rights reserved.
+{% endautoescape %}

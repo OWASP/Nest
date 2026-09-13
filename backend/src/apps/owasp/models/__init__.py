@@ -1,6 +1,7 @@
 from .board_of_directors import BoardOfDirectors
 from .chapter import Chapter
 from .committee import Committee
+from .email_log import EmailLog
 from .entity_channel import EntityChannel
 from .entity_member import EntityMember
 from .event import Event

@@ -8,6 +8,7 @@
 # Backend (djlint for templates; vendored static assets)
 backend/static/**
 backend/templates/**
+backend/src/**/templates/**
 
 # Frontend artifacts
 frontend/.pnpm-store/
