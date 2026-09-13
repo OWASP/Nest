@@ -48,7 +48,6 @@ class TestProjectTools:
             "apps.ai.agents.project.tools.get_flagship_projects.get_projects",
             return_value={"hits": mock_hits},
         ) as mock_get_projects:
-        
             result_25 = get_flagship_projects.run(limit=25)
             assert "Project 24" in result_25
             assert "Project 25" not in result_25
@@ -58,7 +57,7 @@ class TestProjectTools:
             assert "Project 29" in result_capped
             assert "Project 30" not in result_capped
 
-            # Test boundary inputs 
+            # Test boundary inputs
             result_zero = get_flagship_projects.run(limit=0)
             assert "No projects found at Flagship level." in result_zero
 

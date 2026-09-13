@@ -110,12 +110,7 @@ def format_ai_response_for_slack(text: str) -> str:
     # Strip any existing bold markers to avoid nested double asterisks (e.g., # **Bold**)
     def replace_heading(match: re.Match[str]) -> str:
         content = match.group(1).strip()
-        if content.startswith("**") and content.endswith("**") and len(content) >= 4:
-            content = content[2:-2].strip()
-        elif content.startswith("__") and content.endswith("__") and len(content) >= 4:
-            content = content[2:-2].strip()
-        elif content.startswith("*") and content.endswith("*") and len(content) >= 2:
-            content = content[1:-1].strip()
+        content = re.sub(r"^(\*\*|__|\*)(.*?)\1$", r"\2", content).strip()
         return f"*{content}*"
 
     text = re.sub(r"^#{1,6}[ \t]+(\S[^\r\n]*)$", replace_heading, text, flags=re.MULTILINE)
