@@ -157,6 +157,14 @@ class TestFormatAiResponseForSlack:
                 "Contact <#C123|community> or <@U456>.",
                 "Contact <#C123|community> or <@U456>.",
             ),
+            (
+                "```python\n# This is a comment\n**not bold**\nx = [1](https://example.com)\n```",
+                "# This is a comment\n**not bold**\nx = [1](https://example.com)",
+            ),
+            (
+                "Visit [OWASP](https://owasp.org):\n```markdown\n[example](https://example.com)\n```\nDone.",
+                "Visit <https://owasp.org|OWASP>:\n[example](https://example.com)\nDone.",
+            ),
         ],
     )
     def test_format_ai_response_for_slack(self, input_text, expected_output):
