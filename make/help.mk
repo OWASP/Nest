@@ -7,8 +7,7 @@
 HELP_MAKEFILES := make/help.mk make/run.mk make/check.mk make/terraform.mk make/test.mk \
 	backend/make/test.mk backend/make/clusterfuzz.mk frontend/make/test.mk \
 	e2e/make/test.mk infrastructure/make/test.mk docs/make/test.mk tools/make/test.mk \
-	make/check-test.mk backend/make/django.mk \
-	backend/make/data.mk make/maintenance.mk tools/make/maintenance.mk \
+	backend/make/django.mk backend/make/data.mk make/maintenance.mk tools/make/maintenance.mk \
 	backend/make/maintenance.mk make/shell.mk make/security.mk
 
 help: ## Display this help
