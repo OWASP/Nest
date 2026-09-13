@@ -24,6 +24,7 @@ Emay
 FOSS
 GBP
 GFKs
+GHSA
 GPG
 GRC
 GSOC
@@ -155,6 +156,7 @@ jaraco
 jumpstart
 kasya
 langgraph
+ldd
 lhci
 libexpat
 libfuzzer
@@ -236,6 +238,7 @@ shrivastava
 skillstruck
 slackbot
 slideshare
+smol
 someid
 speakerdeck
 subgrp
