@@ -24,8 +24,9 @@ const Pagination: React.FC<PaginationProps> = ({
     }
 
     const pagesToShow = new Set<number>([1, totalPages])
-    for (let page = currentPage - 1; page <= currentPage + 1; page++) {
-      if (page >= 1 && page <= totalPages) {
+    for (const offset of [-1, 0, 1]) {
+      const page = currentPage + offset
+      if (Number.isSafeInteger(page) && page >= 1 && page <= totalPages) {
         pagesToShow.add(page)
       }
     }

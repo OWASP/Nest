@@ -125,6 +125,8 @@ export function useSearchPage<T>({
   useEffect(() => {
     const query = searchParams.toString()
     if (query === prevSearchParamsRef.current) {
+      // Push acknowledgments hit this branch because prev was updated optimistically.
+      pendingUrlPushRef.current = null
       return
     }
 

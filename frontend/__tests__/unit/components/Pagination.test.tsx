@@ -37,6 +37,14 @@ describe('<Pagination />', () => {
     expect(container.firstChild).toBeNull()
   })
 
+  it('renders safely when currentPage is not a safe integer', () => {
+    renderComponent({ currentPage: Number.MAX_VALUE, totalPages: 20 })
+
+    expect(screen.getByRole('button', { name: 'Go to page 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Go to page 20' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Go to page Infinity' })).not.toBeInTheDocument()
+  })
+
   it('renders Prev and Next buttons and page numbers for small totalPages', () => {
     renderComponent({ currentPage: 2, totalPages: 4 })
 

@@ -297,9 +297,49 @@ describe('useSearchPage', () => {
   })
 
   it('still pushes URL updates for user-driven page changes after back/forward sync', async () => {
-    const scrollTo = jest.fn()
-    window.scrollTo = scrollTo
+    const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
     mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
+
+    try {
+      const { result, rerender } = renderHook(() =>
+        useSearchPage({
+          indexName: 'projects',
+          pageTitle: 'OWASP Projects',
+          defaultSortBy: 'default',
+          defaultOrder: 'desc',
+        })
+      )
+
+      await waitFor(() => {
+        expect(result.current.isLoaded).toBe(true)
+        expect(result.current.currentPage).toBe(3)
+      })
+
+      push.mockClear()
+      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
+      rerender()
+
+      await waitFor(() => {
+        expect(result.current.currentPage).toBe(2)
+      })
+      expect(push).not.toHaveBeenCalled()
+
+      act(() => {
+        result.current.handlePageChange(4)
+      })
+
+      expect(result.current.currentPage).toBe(4)
+      expect(scrollTo).toHaveBeenCalled()
+      await waitFor(() => {
+        expect(push).toHaveBeenCalledWith('?page=4')
+      })
+    } finally {
+      scrollTo.mockRestore()
+    }
+  })
+
+  it('clears pending URL pushes so back/forward works after a local navigation', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
 
     const { result, rerender } = renderHook(() =>
       useSearchPage({
@@ -312,8 +352,19 @@ describe('useSearchPage', () => {
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(3)
+      expect(result.current.currentPage).toBe(2)
     })
+
+    act(() => {
+      result.current.handleSearch('nest')
+    })
+
+    expect(result.current.searchQuery).toBe('nest')
+    expect(result.current.currentPage).toBe(1)
+
+    // Acknowledge the local push (prev already matches, pending must still clear).
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('q=nest'))
+    rerender()
 
     push.mockClear()
     mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
@@ -321,18 +372,9 @@ describe('useSearchPage', () => {
 
     await waitFor(() => {
       expect(result.current.currentPage).toBe(2)
+      expect(result.current.searchQuery).toBe('')
     })
     expect(push).not.toHaveBeenCalled()
-
-    act(() => {
-      result.current.handlePageChange(4)
-    })
-
-    expect(result.current.currentPage).toBe(4)
-    expect(scrollTo).toHaveBeenCalled()
-    await waitFor(() => {
-      expect(push).toHaveBeenCalledWith('?page=4')
-    })
   })
 
   it('keeps the latest search when a second change happens before searchParams update', async () => {
