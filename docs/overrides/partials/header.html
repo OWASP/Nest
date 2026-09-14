@@ -4,6 +4,9 @@ md-header--shadow md-header--lifted" %} {% elif "navigation.tabs" not in feature
 class ~ " md-header--shadow" %} {% endif %}
 <header class="{{ class }}" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="{{ lang.t('header') }}">
+    {#- Homepage from mkdocs.yaml / nav (trusted config), not request input. MkDocs | url keeps
+    nested pages resolving correctly (e.g. ..). -#}
+    <!-- nosemgrep: generic.html-templates.security.var-in-href.var-in-href -->
     <a
       href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}"
       class="md-header__button md-logo"
