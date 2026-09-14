@@ -252,11 +252,12 @@ const IssueCertificatePage: React.FC = () => {
           <EntitySelectorInput
             entityType="project"
             value={formData.projectKey}
-            onChange={(key) =>
-              setFormData((prev) =>
-                prev.projectKey === key ? prev : { ...prev, projectKey: key, recipientLogins: [] }
-              )
-            }
+            onChange={(key) => {
+              if (key === formData.projectKey) return
+              setFormData((prev) => ({ ...prev, projectKey: key, recipientLogins: [] }))
+              setTouched((prev) => ({ ...prev, recipientLogins: false }))
+              setBackendErrors(({ recipientLogins: _, recipientLogin: __, ...rest }) => rest)
+            }}
             error={
               formData.projectKey && formData.chapterKey
                 ? 'Only one of Project or Chapter can be selected.'
@@ -266,11 +267,12 @@ const IssueCertificatePage: React.FC = () => {
           <EntitySelectorInput
             entityType="chapter"
             value={formData.chapterKey}
-            onChange={(key) =>
-              setFormData((prev) =>
-                prev.chapterKey === key ? prev : { ...prev, chapterKey: key, recipientLogins: [] }
-              )
-            }
+            onChange={(key) => {
+              if (key === formData.chapterKey) return
+              setFormData((prev) => ({ ...prev, chapterKey: key, recipientLogins: [] }))
+              setTouched((prev) => ({ ...prev, recipientLogins: false }))
+              setBackendErrors(({ recipientLogins: _, recipientLogin: __, ...rest }) => rest)
+            }}
             error={
               formData.projectKey && formData.chapterKey
                 ? 'Only one of Project or Chapter can be selected.'

@@ -244,8 +244,10 @@ describe('IssueCertificatePage', () => {
 
     fireEvent.change(projectInput, { target: { value: 'nest' } })
     fireEvent.click(addUserBtn)
-
     fireEvent.change(projectInput, { target: { value: 'owasp' } })
+    expect(
+      screen.queryByText('At least one Recipient GitHub Username is required.')
+    ).not.toBeInTheDocument()
     fireEvent.click(submitBtn)
     expect(mockIssueCertificate).not.toHaveBeenCalled()
 
@@ -254,6 +256,9 @@ describe('IssueCertificatePage', () => {
     fireEvent.click(addUserBtn)
 
     fireEvent.change(chapterInput, { target: { value: 'paris' } })
+    expect(
+      screen.queryByText('At least one Recipient GitHub Username is required.')
+    ).not.toBeInTheDocument()
     fireEvent.click(submitBtn)
     expect(mockIssueCertificate).not.toHaveBeenCalled()
   })
