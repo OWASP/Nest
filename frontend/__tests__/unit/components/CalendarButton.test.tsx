@@ -121,7 +121,7 @@ describe('CalendarButton', () => {
     })
 
     it('handles errors gracefully when generation fails', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
       const errorMock = new Error('Failed to generate')
       ;(getIcsFileUrl as jest.Mock).mockRejectedValueOnce(errorMock)
 
@@ -139,10 +139,7 @@ describe('CalendarButton', () => {
           color: 'danger',
           variant: 'solid',
         })
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to download ICS file'),
-          errorMock
-        )
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to download ICS file:', errorMock.message)
       })
 
       await waitFor(() => {
@@ -156,6 +153,25 @@ describe('CalendarButton', () => {
         })
       )
       expect(addToast).toHaveBeenCalledTimes(1)
+      consoleSpy.mockRestore()
+    })
+
+    it('logs the raw value when a non-Error is thrown', async () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      ;(getIcsFileUrl as jest.Mock).mockRejectedValueOnce('some string error')
+
+      render(<CalendarButton event={mockEvent} />)
+      const button = screen.getByRole('button')
+
+      fireEvent.click(button)
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to download ICS file:',
+          'some string error'
+        )
+      })
+
       consoleSpy.mockRestore()
     })
   })
