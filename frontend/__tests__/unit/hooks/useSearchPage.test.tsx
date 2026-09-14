@@ -231,6 +231,20 @@ describe('useSearchPage', () => {
     await waitFor(() => {
       expect(result.current.currentPage).toBe(1)
     })
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2foo'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(1)
+    })
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=12'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(12)
+    })
   })
 
   it('still pushes URL updates for user-driven page changes after back/forward sync', async () => {

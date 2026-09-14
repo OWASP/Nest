@@ -36,8 +36,8 @@ interface SearchUrlState {
 }
 
 const parsePageParam = (value: string | null): number => {
-  const page = Number.parseInt(value || '1', 10)
-  return Number.isFinite(page) && page > 0 ? page : 1
+  const page = (value || '').trim()
+  return /^[1-9]\d*$/.test(page) ? Number(page) : 1
 }
 
 const normalizedPageParam = (params: URLSearchParams): string => {
