@@ -186,13 +186,30 @@ describe('<Pagination />', () => {
     expect(ellipses).toHaveLength(2)
   })
 
-  it('shows an ellipsis before the last page when current ± 1 does not reach it', () => {
+  it('shows leading and trailing ellipses when current ± 1 reaches neither end', () => {
     renderComponent({ currentPage: 8, totalPages: 11 })
 
     for (const n of [1, 7, 8, 9, 11]) {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
     expect(screen.queryByRole('button', { name: 'Go to page 10' })).not.toBeInTheDocument()
+
+    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
+    const ellipses = Array.from(ellipsisContainers).filter((el) =>
+      el.querySelector('svg[aria-hidden="true"]')
+    )
+    expect(ellipses).toHaveLength(2)
+  })
+
+  it('shows both ellipses just above the max visible page window', () => {
+    renderComponent({ currentPage: 5, totalPages: 8 })
+
+    for (const n of [1, 4, 5, 6, 8]) {
+      expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
+    }
+    expect(screen.queryByRole('button', { name: 'Go to page 2' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Go to page 7' })).not.toBeInTheDocument()
 
     const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
     const ellipses = Array.from(ellipsisContainers).filter((el) =>
