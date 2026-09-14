@@ -506,7 +506,7 @@ const SnapshotDetailsPage: React.FC = () => {
             Your Subscribed Entities
           </h2>
           {subscription.entitySections.map((section) => {
-            const matchedRepoNames = subscription.subscribedProjects?.find(
+            const matchedRepoNames = subscription.projects?.find(
               (p) => p.key === section.entityKey
             )?.repositoryNames
             const repoNames =
@@ -521,9 +521,9 @@ const SnapshotDetailsPage: React.FC = () => {
                 entityName={section.entityName}
                 entityType={section.entityType}
                 repositoryNames={repoNames}
-                releases={showReleases ? (section.releases as ReleaseType[]) : []}
-                initialPRs={showPullRequests ? (section.pullRequests as PullRequest[]) : []}
-                initialIssues={showIssues ? (section.issues as Issue[]) : []}
+                releases={section.releases as ReleaseType[]}
+                initialPRs={section.pullRequests as PullRequest[]}
+                initialIssues={section.issues as Issue[]}
               />
             )
           })}

@@ -124,7 +124,7 @@ describe('UnsubscribePage', () => {
 
     await waitFor(() => {
       expect(mockUnsubscribe).toHaveBeenCalledWith({
-        variables: { token: 'test-token-123' },
+        variables: { inputData: { token: 'test-token-123' } },
       })
     })
   })

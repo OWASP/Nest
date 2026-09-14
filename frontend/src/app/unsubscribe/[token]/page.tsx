@@ -27,7 +27,7 @@ const UnsubscribePage = () => {
     if (!token || hasRun.current) return
     hasRun.current = true
 
-    unsubscribe({ variables: { token } })
+    unsubscribe({ variables: { inputData: { token } } })
       .then(({ data }) => {
         if (data?.unsubscribeByToken?.ok) {
           setStatus('success')

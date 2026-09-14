@@ -24,15 +24,15 @@ def _make_subscription(preferences, *, projects=None, chapters=None, committees=
     projects_mock = MagicMock()
     projects_mock.all.return_value = projects or []
     projects_mock.count.return_value = len(projects) if projects else 0
-    subscription.subscribed_projects = projects_mock
+    subscription.projects = projects_mock
     chapters_mock = MagicMock()
     chapters_mock.all.return_value = chapters or []
     chapters_mock.count.return_value = len(chapters) if chapters else 0
-    subscription.subscribed_chapters = chapters_mock
+    subscription.chapters = chapters_mock
     committees_mock = MagicMock()
     committees_mock.all.return_value = committees or []
     committees_mock.count.return_value = len(committees) if committees else 0
-    subscription.subscribed_committees = committees_mock
+    subscription.committees = committees_mock
     subscription.unsubscribe_token = "test-token"  # noqa: S105
     return subscription
 
@@ -116,6 +116,101 @@ class TestSnapshotDigestService:
         result = SnapshotDigestService().generate(snapshot, subscription)
 
         assert result["chapters_data"] is None
+
+    def test_generate_users_data_none_when_empty(self):
+        """Test generate returns None users_data when no items."""
+        preferences = _all_false_preferences()
+        preferences["users"] = True
+
+        snapshot = _make_base_snapshot()
+        snapshot.users = _make_orderable_qs([], total=0)
+        subscription = _make_subscription(preferences)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert result["users_data"] is None
+
+    def test_generate_issues_data_none_when_empty(self):
+        """Test generate returns None issues_data when no items."""
+        preferences = _all_false_preferences()
+        preferences["issues"] = True
+
+        snapshot = _make_base_snapshot()
+        snapshot.issues = _make_orderable_qs([], total=0)
+        subscription = _make_subscription(preferences)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert result["issues_data"] is None
+
+    def test_generate_prs_data_none_when_empty(self):
+        """Test generate returns None prs_data when no items."""
+        preferences = _all_false_preferences()
+        preferences["pull_requests"] = True
+
+        snapshot = _make_base_snapshot()
+        snapshot.pull_requests = _make_orderable_qs([], total=0)
+        subscription = _make_subscription(preferences)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert result["prs_data"] is None
+
+    def test_generate_releases_data_none_when_empty(self):
+        """Test generate returns None releases_data when no items."""
+        preferences = _all_false_preferences()
+        preferences["releases"] = True
+
+        snapshot = _make_base_snapshot()
+        snapshot.releases = _make_orderable_qs([], total=0)
+        subscription = _make_subscription(preferences)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert result["releases_data"] is None
+
+    def test_generate_posts_data_none_when_empty(self):
+        """Test generate returns None posts_data when no items."""
+        preferences = _all_false_preferences()
+        preferences["posts"] = True
+
+        snapshot = _make_base_snapshot()
+        snapshot.posts = _make_orderable_qs([], total=0)
+        subscription = _make_subscription(preferences)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert result["posts_data"] is None
+
+    def test_generate_events_data_none_when_empty(self):
+        """Test generate returns None events_data when no items."""
+        preferences = _all_false_preferences()
+        preferences["events"] = True
+
+        snapshot = _make_base_snapshot()
+        snapshot.events = _make_orderable_qs([], total=0)
+        subscription = _make_subscription(preferences)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert result["events_data"] is None
+
+    def test_generate_projects_data_none_when_no_projects(self):
+        """Test generate returns None projects_data when project list is empty."""
+        preferences = _all_false_preferences()
+        preferences["projects"] = True
+
+        snapshot = _make_base_snapshot()
+        projects_qs = MagicMock()
+        projects_qs.count.return_value = 0
+        projects_qs.all.return_value = MagicMock()
+        projects_qs.all.return_value.__getitem__ = lambda _, s: []  # noqa: ARG005
+        snapshot.projects = projects_qs
+        subscription = _make_subscription(preferences)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert result["projects_data"] is None
 
     def test_generate_includes_users_data(self):
         """Test generate includes users_data when enabled and items exist."""
@@ -291,7 +386,7 @@ class TestSnapshotDigestService:
         assert result["projects_data"] is None
         assert result["entity_sections"] == []
 
-    def test_generate_includes_entity_sections_for_subscribed_projects(self):
+    def test_generate_includes_entity_sections_for_projects(self):
         """Test generate includes entity sections for subscribed projects."""
         preferences = _all_false_preferences()
         snapshot = _make_base_snapshot()

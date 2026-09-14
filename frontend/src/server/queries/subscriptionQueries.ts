@@ -14,18 +14,18 @@ const SNAPSHOT_SUBSCRIPTION_FIELDS = gql`
     includePullRequests
     includeReleases
     includeUsers
-    subscribedProjects {
+    projects {
       id
       key
       name
       repositoryNames
     }
-    subscribedChapters {
+    chapters {
       id
       key
       name
     }
-    subscribedCommittees {
+    committees {
       id
       key
       name
@@ -170,8 +170,8 @@ export const REACTIVATE_SNAPSHOT_SUBSCRIPTION = gql`
 `
 
 export const UNSUBSCRIBE_BY_TOKEN = gql`
-  mutation UnsubscribeByToken($token: String!) {
-    unsubscribeByToken(token: $token) {
+  mutation UnsubscribeByToken($inputData: UnsubscribeTokenInput!) {
+    unsubscribeByToken(inputData: $inputData) {
       ok
       message
     }

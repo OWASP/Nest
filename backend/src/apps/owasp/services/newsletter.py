@@ -116,7 +116,7 @@ class SnapshotDigestService:
 
         entity_count = sum(
             getattr(subscription, field).count()
-            for field in ("subscribed_projects", "subscribed_chapters", "subscribed_committees")
+            for field in ("projects", "chapters", "committees")
         )
         limits = self._calculate_limits(preferences, entity_count)
 
@@ -248,9 +248,9 @@ class SnapshotDigestService:
         entity_max = limits.get("entity_max", entity_count)
         all_entity_sections = []
         for entity_type, m2m_field in (
-            ("project", "subscribed_projects"),
-            ("chapter", "subscribed_chapters"),
-            ("committee", "subscribed_committees"),
+            ("project", "projects"),
+            ("chapter", "chapters"),
+            ("committee", "committees"),
         ):
             for entity in getattr(subscription, m2m_field).all():
                 content = self._get_entity_content(snapshot, entity, rows_limit=entity_rows_limit)
