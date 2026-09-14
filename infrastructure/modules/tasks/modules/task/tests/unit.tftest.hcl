@@ -4,7 +4,7 @@ variables {
   aws_region                   = "us-east-2"
   command                      = ["/bin/sh", "-c", "echo test"]
   common_tags                  = { Environment = "test", Project = "nest" }
-  container_parameters_arns    = {}
+  container_secrets            = {}
   cpu                          = "256"
   ecs_cluster_arn              = "arn:aws:ecs:us-east-2:123456789012:cluster/test-cluster"
   ecs_tasks_execution_role_arn = "arn:aws:iam::123456789012:role/test-execution-role"

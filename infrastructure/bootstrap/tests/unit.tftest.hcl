@@ -70,6 +70,24 @@ run "test_part_three_policy_size" {
   }
 }
 
+run "test_secrets_manager_namespace" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      strcontains(
+        data.aws_iam_policy_document.part_three.json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:${var.project_name}-${var.environment}-*",
+      ),
+      strcontains(
+        data.aws_iam_policy_document.part_three.json,
+        "arn:aws:secretsmanager:${var.aws_region}:160885282306:secret:/${var.project_name}/${var.environment}/*",
+      ),
+    ])
+    error_message = "The Terraform policy must allow management of the Secrets Manager namespace."
+  }
+}
+
 run "test_minified_json_is_smaller_than_pretty_json" {
   command = plan
 

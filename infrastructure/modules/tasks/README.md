@@ -51,7 +51,7 @@
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region. | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
-| <a name="input_container_parameters_arns"></a> [container\_parameters\_arns](#input\_container\_parameters\_arns) | Map of environment variable names to the ARNs of all SSM parameters. | `map(string)` | `{}` | no |
+| <a name="input_container_secrets"></a> [container\_secrets](#input\_container\_secrets) | Environment variable names mapped to SSM or Secrets Manager valueFrom references. | `map(string)` | `{}` | no |
 | <a name="input_ecr_repository_arn"></a> [ecr\_repository\_arn](#input\_ecr\_repository\_arn) | The ARN of the ECR repository for the backend image. | `string` | n/a | yes |
 | <a name="input_ecr_repository_url"></a> [ecr\_repository\_url](#input\_ecr\_repository\_url) | The URL of the ECR repository for the backend image. | `string` | n/a | yes |
 | <a name="input_ecs_sg_id"></a> [ecs\_sg\_id](#input\_ecs\_sg\_id) | The ID of the security group for the ECS tasks. | `string` | n/a | yes |
@@ -71,6 +71,7 @@
 | <a name="input_migrate_task_memory"></a> [migrate\_task\_memory](#input\_migrate\_task\_memory) | The memory for the migrate task. | `string` | `"1024"` | no |
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | Private subnet IDs for ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
+| <a name="input_secretsmanager_secret_arns"></a> [secretsmanager\_secret\_arns](#input\_secretsmanager\_secret\_arns) | Bare Secrets Manager ARNs that the ECS execution role may read. | `set(string)` | `[]` | no |
 | <a name="input_slack_sync_data_task_cpu"></a> [slack\_sync\_data\_task\_cpu](#input\_slack\_sync\_data\_task\_cpu) | The CPU for the slack-sync-data scheduled task. | `string` | `"1024"` | no |
 | <a name="input_slack_sync_data_task_memory"></a> [slack\_sync\_data\_task\_memory](#input\_slack\_sync\_data\_task\_memory) | The memory for the slack-sync-data scheduled task. | `string` | `"2048"` | no |
 | <a name="input_sync_data_task_cpu"></a> [sync\_data\_task\_cpu](#input\_sync\_data\_task\_cpu) | The CPU for the sync-data task. | `string` | `"256"` | no |

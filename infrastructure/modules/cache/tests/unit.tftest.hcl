@@ -10,6 +10,7 @@ variables {
   redis_node_type       = "cache.t3.micro"
   redis_num_cache_nodes = 1
   redis_port            = 6379
+  runtime_secrets_mode  = "prepare"
   security_group_ids    = ["sg-12345678"]
   subnet_ids            = ["subnet-12345678"]
 }
@@ -29,6 +30,19 @@ run "test_auth_token_length" {
   assert {
     condition     = random_password.redis_auth_token[0].length == 32
     error_message = "Redis auth token must be 32 characters."
+  }
+}
+
+run "test_complete_mode_removes_legacy_ssm_parameter" {
+  command = plan
+
+  variables {
+    runtime_secrets_mode = "complete"
+  }
+
+  assert {
+    condition     = length(aws_ssm_parameter.django_redis_password) == 0
+    error_message = "Complete mode must remove the legacy Redis SSM parameter."
   }
 }
 
@@ -94,6 +108,19 @@ run "test_log_groups_created" {
     error_message = "Slow log group must be created with correct retention."
   }
 }
+run "test_redis_secret_configuration" {
+  command = plan
+
+  assert {
+    condition     = aws_secretsmanager_secret.django_redis_password.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
+    error_message = "Redis password secret must use the expected name."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret.django_redis_password.kms_key_id == var.kms_key_arn
+    error_message = "Redis password secret must use the environment KMS key."
+  }
+}
 
 run "test_replication_group_id_format" {
   command = plan
@@ -108,7 +135,7 @@ run "test_ssm_parameter_is_secure_string" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_redis_password.type == "SecureString"
+    condition     = aws_ssm_parameter.django_redis_password[0].type == "SecureString"
     error_message = "Redis password must be stored as SecureString."
   }
 }
@@ -117,7 +144,7 @@ run "test_ssm_parameter_path_format" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_redis_password.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
+    condition     = aws_ssm_parameter.django_redis_password[0].name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
     error_message = "SSM parameter must follow path: /{project}/{environment}/DJANGO_REDIS_PASSWORD."
   }
 }
