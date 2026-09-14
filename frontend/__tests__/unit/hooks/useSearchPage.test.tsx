@@ -239,6 +239,13 @@ describe('useSearchPage', () => {
       expect(result.current.currentPage).toBe(1)
     })
 
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(`page=${'9'.repeat(400)}`))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(1)
+    })
+
     mockUseSearchParams.mockReturnValue(new URLSearchParams('page=12'))
     rerender()
 
