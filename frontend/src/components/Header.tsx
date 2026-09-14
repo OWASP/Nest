@@ -12,7 +12,8 @@ import {
   FaBars,
   FaTimes,
 } from 'react-icons/fa'
-import { desktopViewMinWidth, headerLinks } from 'utils/constants'
+import { headerLinks } from 'utils/constants'
+import { acquireBodyScrollLock, releaseBodyScrollLock } from 'utils/bodyScrollLock'
 import { cn } from 'utils/utility'
 import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
@@ -20,28 +21,47 @@ import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
 
+const DESKTOP_NAV_MIN_WIDTH = 1024 // Tailwind lg
+
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const closeMobileMenu = () => setMobileMenuOpen(false)
   const logoSrc = '/img/logo_dark.png'
+  const visibleLinks = headerLinks.filter(
+    (link) => !link.requiresGitHubAuth || isGitHubAuthEnabled
+  )
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return
+    }
+
+    acquireBodyScrollLock()
+    return () => releaseBodyScrollLock()
+  }, [mobileMenuOpen])
 
   useEffect(() => {
     const handleResize = () => {
-      if (globalThis.innerWidth >= desktopViewMinWidth) {
+      if (globalThis.innerWidth >= DESKTOP_NAV_MIN_WIDTH) {
         setMobileMenuOpen(false)
       }
     }
 
     const handleOutsideClick = (event: Event) => {
       const navbar = document.getElementById('navbar-sticky')
-      const sidebar = document.querySelector('.fixed.inset-y-0')
+      const drawer = document.getElementById('mobile-drawer')
       if (
         mobileMenuOpen &&
         navbar &&
         !navbar.contains(event.target as Node) &&
-        sidebar &&
-        !sidebar.contains(event.target as Node)
+        drawer &&
+        !drawer.contains(event.target as Node)
       ) {
         setMobileMenuOpen(false)
       }
@@ -58,15 +78,18 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
-      <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
+      <div
+        className="relative z-50 flex h-16 w-full min-w-0 items-center gap-2 px-3 sm:gap-3 sm:px-4 max-lg:justify-between"
+        id="navbar-sticky"
+      >
         {/* Logo */}
         <Link
           href="/"
-          onClick={() => setMobileMenuOpen(false)}
-          className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          onClick={closeMobileMenu}
+          className="shrink-0 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <div className="flex h-full items-center">
-            <div className="flex h-16 w-16 items-center justify-center py-2">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center py-1 xl:h-16 xl:w-16 xl:py-2">
               <Image
                 width={64}
                 height={64}
@@ -76,43 +99,38 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 alt="OWASP Logo"
               />
             </div>
-            <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+            <div className="hidden text-xl font-semibold text-slate-800 sm:block xl:text-2xl dark:text-slate-300 dark:hover:text-slate-200">
               Nest
             </div>
           </div>
         </Link>
-        {/* Desktop Header Links */}
-        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
-          <div className="flex justify-start pl-6">
-            {headerLinks
-              .filter((link) => {
-                if (link.requiresGitHubAuth) {
-                  return isGitHubAuthEnabled
-                }
-                return true
-              })
-              .map((link) => {
-                return link.submenu ? (
-                  <NavDropdown link={link} pathname={pathname} key={`${link.text}-${link.href}`} />
-                ) : (
-                  <Link
-                    key={link.text}
-                    href={link.href || '/'}
-                    className={cn(
-                      'navlink px-3 py-2 text-slate-700 transition-colors duration-200 hover:text-white dark:text-slate-300 dark:hover:text-blue-400',
-                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                    )}
-                    aria-current={pathname === link.href ? 'page' : undefined}
-                  >
-                    {link.text}
-                  </Link>
-                )
-              })}
+        <nav
+          aria-label="Main"
+          className="hidden flex-1 items-center pl-2 font-medium lg:flex"
+        >
+          <div className="flex items-center gap-1">
+            {visibleLinks.map((link) => {
+              return link.submenu ? (
+                <NavDropdown link={link} pathname={pathname} key={`${link.text}-${link.href}`} />
+              ) : (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink shrink-0 whitespace-nowrap px-2 py-2 text-sm text-slate-700 transition-colors duration-200 hover:text-white xl:px-3 xl:text-base dark:text-slate-300 dark:hover:text-blue-400',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  aria-current={pathname === link.href ? 'page' : undefined}
+                >
+                  {link.text}
+                </Link>
+              )
+            })}
           </div>
-        </div>
-        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+        </nav>
+        <div className="flex min-w-0 shrink items-center gap-2 sm:gap-3 lg:gap-2 xl:gap-3">
           <GlobalSearch />
-          <div className="hidden md:flex">
+          <div id="header-bar-actions" className="hidden shrink-0 items-center gap-2 lg:flex">
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={FaRegStar}
@@ -121,9 +139,6 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               hoverIconColor="#FDCE2D"
               text="Star"
             />
-          </div>
-
-          <div className="hidden md:flex">
             <NavButton
               href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
               defaultIcon={FaRegHeart}
@@ -132,12 +147,10 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               hoverIconColor="#d9156c"
               text="Sponsor"
             />
-          </div>
-          <div className="hidden md:flex">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
           <ModeToggle />
-          <div className="lg:hidden">
+          <div className="shrink-0 lg:hidden">
             <Button
               onPress={toggleMobileMenu}
               className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -148,18 +161,28 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div
+          data-testid="mobile-drawer-backdrop"
+          className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity lg:hidden"
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
+      )}
+
       <div
+        id="mobile-drawer"
         className={cn(
-          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
+          'bg-owasp-blue fixed top-16 bottom-0 left-0 z-40 w-64 transform shadow-md transition-transform lg:hidden dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
-          {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
             <Link
               href="/"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={closeMobileMenu}
               className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <div className="flex h-full items-center">
@@ -178,53 +201,46 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 </div>
               </div>
             </Link>
-            {headerLinks
-              .filter((link) => {
-                if (link.requiresGitHubAuth) {
-                  return isGitHubAuthEnabled
-                }
-                return true
-              })
-              .map((link) =>
-                link.submenu ? (
-                  <div key={link.text} className="flex flex-col gap-2">
-                    <div className="block px-3 py-3 font-medium text-slate-700 dark:text-slate-300">
-                      {link.text}
-                    </div>
-                    <div className="ml-4">
-                      {link.submenu.map((sub) => (
-                        <Link
-                          key={`${sub.text}-${sub.href}`}
-                          href={sub.href || '/'}
-                          className={cn(
-                            'block w-full px-4 py-3 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
-                            pathname === sub.href &&
-                              'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
-                          )}
-                          onClick={toggleMobileMenu}
-                        >
-                          {sub.text}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={link.text}
-                    href={link.href || '/'}
-                    className={cn(
-                      'navlink block px-3 py-2 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
-                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                    )}
-                    onClick={toggleMobileMenu}
-                  >
+            {visibleLinks.map((link) =>
+              link.submenu ? (
+                <div key={link.text} className="flex flex-col gap-2">
+                  <div className="block px-3 py-3 font-medium text-slate-700 dark:text-slate-300">
                     {link.text}
-                  </Link>
-                )
-              )}
+                  </div>
+                  <div className="ml-4">
+                    {link.submenu.map((sub) => (
+                      <Link
+                        key={`${sub.text}-${sub.href}`}
+                        href={sub.href || '/'}
+                        className={cn(
+                          'block w-full px-4 py-3 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                          pathname === sub.href &&
+                            'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
+                        )}
+                        onClick={closeMobileMenu}
+                      >
+                        {sub.text}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink block px-3 py-2 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  onClick={closeMobileMenu}
+                >
+                  {link.text}
+                </Link>
+              )
+            )}
           </div>
 
-          <div className="flex flex-col gap-y-2 md:hidden">
+          <div id="mobile-drawer-actions" className="flex flex-col gap-y-2 lg:hidden">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
             <NavButton
               href="https://github.com/OWASP/Nest"
