@@ -133,7 +133,7 @@ describe('RepositoryDetailsPage', () => {
     render(<RepositoryDetailsPage />)
 
     await waitFor(() => {
-      const issues = mockRepositoryData.repository.issues
+      const issues = mockRepositoryData.repository.recentIssues
 
       for (const issue of issues) {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
@@ -235,7 +235,7 @@ describe('RepositoryDetailsPage', () => {
       ...mockRepositoryData,
       repository: {
         ...mockRepositoryData.repository,
-        issues: [
+        recentIssues: [
           {
             title: 'Issue without author',
             createdAt: 1727390000,
@@ -264,7 +264,7 @@ describe('RepositoryDetailsPage', () => {
       ...mockRepositoryData,
       repository: {
         ...mockRepositoryData.repository,
-        issues: null,
+        recentIssues: null,
       },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
