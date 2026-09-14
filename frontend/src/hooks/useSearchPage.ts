@@ -147,14 +147,36 @@ export function useSearchPage<T>({
     }
 
     // External navigation (e.g. back/forward) cancels any in-flight push.
-    pendingUrlPushRef.current = null
-    supersededUrlPushesRef.current.clear()
+    // Keep the canceled target in superseded so a late acknowledgment cannot
+    // overwrite the restored URL state.
+    if (pendingUrlPushRef.current !== null) {
+      supersededUrlPushesRef.current.add(pendingUrlPushRef.current)
+      pendingUrlPushRef.current = null
+    }
     prevSearchParamsRef.current = query
 
     const nextPage = parsePageParam(searchParams.get('page'))
     const nextSearchQuery = searchParams.get('q') || ''
     const nextSortBy = searchParams.get('sortBy') || defaultSortBy
     const nextOrder = searchParams.get('order') || defaultOrder
+
+    const {
+      currentPage: page,
+      searchQuery: queryText,
+      sortBy: sort,
+      order: sortOrder,
+    } = stateRef.current
+    const stateChanged =
+      nextPage !== page ||
+      nextSearchQuery !== queryText ||
+      nextSortBy !== sort ||
+      nextOrder !== sortOrder
+
+    // Only suppress the next push when state will actually update. Non-canonical
+    // URLs that resolve to the same state must not leave a stale skip flag.
+    if (!stateChanged) {
+      return
+    }
 
     skipNextUrlPushRef.current = true
     setCurrentPage(nextPage)

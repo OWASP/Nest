@@ -4,6 +4,12 @@ import Pagination from 'components/Pagination'
 
 afterEach(cleanup)
 
+const countEllipses = (): number => {
+  const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
+  return Array.from(ellipsisContainers).filter((el) => el.querySelector('svg[aria-hidden="true"]'))
+    .length
+}
+
 describe('<Pagination />', () => {
   const onPageChange = jest.fn()
 
@@ -93,12 +99,7 @@ describe('<Pagination />', () => {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
     expect(screen.queryByRole('button', { name: 'Go to page 2' })).not.toBeInTheDocument()
-
-    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
-    const ellipses = Array.from(ellipsisContainers).filter((el) =>
-      el.querySelector('svg[aria-hidden="true"]')
-    )
-    expect(ellipses).toHaveLength(2)
+    expect(countEllipses()).toBe(2)
   })
 
   it('applies active styles and aria-current on the selected page', () => {
@@ -127,12 +128,7 @@ describe('<Pagination />', () => {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
     expect(screen.queryByRole('button', { name: 'Go to page 2' })).not.toBeInTheDocument()
-
-    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
-    const ellipses = Array.from(ellipsisContainers).filter((el) =>
-      el.querySelector('svg[aria-hidden="true"]')
-    )
-    expect(ellipses).toHaveLength(2)
+    expect(countEllipses()).toBe(2)
   })
 
   it('uses an ellipsis after the first pages when currentPage is at the start', () => {
@@ -142,12 +138,7 @@ describe('<Pagination />', () => {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
     expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
-
-    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
-    const ellipses = Array.from(ellipsisContainers).filter((el) =>
-      el.querySelector('svg[aria-hidden="true"]')
-    )
-    expect(ellipses).toHaveLength(1)
+    expect(countEllipses()).toBe(1)
   })
 
   // Edge-case: very small totalPages (2)
@@ -162,12 +153,7 @@ describe('<Pagination />', () => {
     for (const n of [1, 17, 18, 19, 20]) {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
-
-    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
-    const ellipses = Array.from(ellipsisContainers).filter((el) =>
-      el.querySelector('svg[aria-hidden="true"]')
-    )
-    expect(ellipses).toHaveLength(1)
+    expect(countEllipses()).toBe(1)
   })
 
   it('keeps current ± 1 with ellipses when pages are omitted on each side', () => {
@@ -178,12 +164,7 @@ describe('<Pagination />', () => {
     }
     expect(screen.queryByRole('button', { name: 'Go to page 9' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Go to page 10' })).not.toBeInTheDocument()
-
-    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
-    const ellipses = Array.from(ellipsisContainers).filter((el) =>
-      el.querySelector('svg[aria-hidden="true"]')
-    )
-    expect(ellipses).toHaveLength(2)
+    expect(countEllipses()).toBe(2)
   })
 
   it('shows leading and trailing ellipses when current ± 1 reaches neither end', () => {
@@ -193,12 +174,7 @@ describe('<Pagination />', () => {
       expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
     }
     expect(screen.queryByRole('button', { name: 'Go to page 10' })).not.toBeInTheDocument()
-
-    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
-    const ellipses = Array.from(ellipsisContainers).filter((el) =>
-      el.querySelector('svg[aria-hidden="true"]')
-    )
-    expect(ellipses).toHaveLength(2)
+    expect(countEllipses()).toBe(2)
   })
 
   it('shows both ellipses just above the max visible page window', () => {
@@ -210,11 +186,6 @@ describe('<Pagination />', () => {
     expect(screen.queryByRole('button', { name: 'Go to page 2' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Go to page 3' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Go to page 7' })).not.toBeInTheDocument()
-
-    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
-    const ellipses = Array.from(ellipsisContainers).filter((el) =>
-      el.querySelector('svg[aria-hidden="true"]')
-    )
-    expect(ellipses).toHaveLength(2)
+    expect(countEllipses()).toBe(2)
   })
 })

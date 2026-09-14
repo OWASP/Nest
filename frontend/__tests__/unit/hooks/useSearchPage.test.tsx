@@ -16,8 +16,45 @@ const mockFetchAlgoliaData = fetchAlgoliaData as jest.Mock
 const mockUseSearchParams = useSearchParams as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
 
+const defaultOptions = {
+  indexName: 'projects',
+  pageTitle: 'OWASP Projects',
+  defaultSortBy: 'default',
+  defaultOrder: 'desc',
+} as const
+
 describe('useSearchPage', () => {
   const push = jest.fn()
+
+  const renderSearchPage = async (
+    queryString = '',
+    options: {
+      facetFilters?: string[]
+      indexName?: string
+      pageTitle?: string
+      wrapper?: React.ComponentType<{ children: React.ReactNode }>
+    } = {}
+  ) => {
+    const { facetFilters, indexName, pageTitle, wrapper } = options
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(queryString))
+
+    const rendered = renderHook(
+      () =>
+        useSearchPage({
+          ...defaultOptions,
+          ...(indexName ? { indexName } : {}),
+          ...(pageTitle ? { pageTitle } : {}),
+          ...(facetFilters ? { facetFilters } : {}),
+        }),
+      wrapper ? { wrapper } : undefined
+    )
+
+    await waitFor(() => {
+      expect(rendered.result.current.isLoaded).toBe(true)
+    })
+
+    return rendered
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -29,48 +66,18 @@ describe('useSearchPage', () => {
   })
 
   it('preserves the page query param on initial load', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
-
-    const { result } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
+    const { result } = await renderSearchPage('page=3')
 
     expect(result.current.currentPage).toBe(3)
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 3, undefined, [])
-    })
-
-    expect(result.current.currentPage).toBe(3)
+    expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 3, undefined, [])
     expect(push).not.toHaveBeenCalled()
   })
 
   it('preserves the page query param under Strict Mode double effects', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
-
-    const { result } = renderHook(
-      () =>
-        useSearchPage({
-          indexName: 'projects',
-          pageTitle: 'OWASP Projects',
-          defaultSortBy: 'default',
-          defaultOrder: 'desc',
-        }),
-      { wrapper: React.StrictMode }
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 3, undefined, [])
-    })
+    const { result } = await renderSearchPage('page=3', { wrapper: React.StrictMode })
 
     expect(result.current.currentPage).toBe(3)
+    expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 3, undefined, [])
     expect(push).not.toHaveBeenCalled()
   })
 
@@ -104,21 +111,7 @@ describe('useSearchPage', () => {
   })
 
   it('resets to page 1 when the search query changes', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
-
-    const { result } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(3)
-    })
+    const { result } = await renderSearchPage('page=3')
 
     act(() => {
       result.current.handleSearch('owasp')
@@ -133,21 +126,7 @@ describe('useSearchPage', () => {
   })
 
   it('resets to page 1 when the sort option changes', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
-
-    const { result } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(3)
-    })
+    const { result } = await renderSearchPage('page=3')
 
     act(() => {
       result.current.handleSortChange('stars_count')
@@ -169,22 +148,10 @@ describe('useSearchPage', () => {
   })
 
   it('resets to page 1 when the sort order changes', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3&sortBy=stars_count&order=desc'))
+    const { result } = await renderSearchPage('page=3&sortBy=stars_count&order=desc')
 
-    const { result } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(3)
-      expect(result.current.sortBy).toBe('stars_count')
-    })
+    expect(result.current.currentPage).toBe(3)
+    expect(result.current.sortBy).toBe('stars_count')
 
     act(() => {
       result.current.handleOrderChange('asc')
@@ -206,21 +173,7 @@ describe('useSearchPage', () => {
   })
 
   it('synchronizes state from URL on back/forward without restoring the stale query', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
-
-    const { result, rerender } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(3)
-    })
+    const { result, rerender } = await renderSearchPage('page=3')
 
     push.mockClear()
     mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2&q=nest'))
@@ -235,21 +188,7 @@ describe('useSearchPage', () => {
   })
 
   it('does not push when back/forward lands on an equivalent page=1 URL', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2&q=foo'))
-
-    const { result, rerender } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(2)
-    })
+    const { result, rerender } = await renderSearchPage('page=2&q=foo')
 
     push.mockClear()
     mockUseSearchParams.mockReturnValue(new URLSearchParams('page=1&q=foo'))
@@ -264,22 +203,10 @@ describe('useSearchPage', () => {
   })
 
   it('falls back to page 1 for non-numeric or non-positive page params', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=abc'))
+    const { result, rerender } = await renderSearchPage('page=abc')
 
-    const { result, rerender } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(1)
-      expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 1, undefined, [])
-    })
+    expect(result.current.currentPage).toBe(1)
+    expect(mockFetchAlgoliaData).toHaveBeenCalledWith('projects', '', 1, undefined, [])
 
     mockUseSearchParams.mockReturnValue(new URLSearchParams('page=0'))
     rerender()
@@ -298,22 +225,9 @@ describe('useSearchPage', () => {
 
   it('still pushes URL updates for user-driven page changes after back/forward sync', async () => {
     const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
 
     try {
-      const { result, rerender } = renderHook(() =>
-        useSearchPage({
-          indexName: 'projects',
-          pageTitle: 'OWASP Projects',
-          defaultSortBy: 'default',
-          defaultOrder: 'desc',
-        })
-      )
-
-      await waitFor(() => {
-        expect(result.current.isLoaded).toBe(true)
-        expect(result.current.currentPage).toBe(3)
-      })
+      const { result, rerender } = await renderSearchPage('page=3')
 
       push.mockClear()
       mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
@@ -339,21 +253,7 @@ describe('useSearchPage', () => {
   })
 
   it('clears pending URL pushes so back/forward works after a local navigation', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
-
-    const { result, rerender } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(2)
-    })
+    const { result, rerender } = await renderSearchPage('page=2')
 
     act(() => {
       result.current.handleSearch('nest')
@@ -378,21 +278,7 @@ describe('useSearchPage', () => {
   })
 
   it('keeps the latest search when a second change happens before searchParams update', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=3'))
-
-    const { result, rerender } = renderHook(() =>
-      useSearchPage({
-        indexName: 'projects',
-        pageTitle: 'OWASP Projects',
-        defaultSortBy: 'default',
-        defaultOrder: 'desc',
-      })
-    )
-
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true)
-      expect(result.current.currentPage).toBe(3)
-    })
+    const { result, rerender } = await renderSearchPage('page=3')
 
     act(() => {
       result.current.handleSearch('foo')
@@ -423,21 +309,7 @@ describe('useSearchPage', () => {
     const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
 
     try {
-      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
-
-      const { result, rerender } = renderHook(() =>
-        useSearchPage({
-          indexName: 'projects',
-          pageTitle: 'OWASP Projects',
-          defaultSortBy: 'default',
-          defaultOrder: 'desc',
-        })
-      )
-
-      await waitFor(() => {
-        expect(result.current.isLoaded).toBe(true)
-        expect(result.current.currentPage).toBe(2)
-      })
+      const { result, rerender } = await renderSearchPage('page=2')
 
       act(() => {
         result.current.handlePageChange(4)
@@ -465,5 +337,55 @@ describe('useSearchPage', () => {
     } finally {
       scrollTo.mockRestore()
     }
+  })
+
+  it('ignores a late push acknowledgment after back cancels the in-flight navigation', async () => {
+    const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+
+    try {
+      const { result, rerender } = await renderSearchPage('page=2')
+
+      act(() => {
+        result.current.handlePageChange(4)
+      })
+      expect(result.current.currentPage).toBe(4)
+
+      push.mockClear()
+      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
+      rerender()
+
+      await waitFor(() => {
+        expect(result.current.currentPage).toBe(2)
+      })
+
+      // Late acknowledgment of the canceled page=4 push must not overwrite Back.
+      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=4'))
+      rerender()
+
+      expect(result.current.currentPage).toBe(2)
+      expect(push).not.toHaveBeenCalled()
+    } finally {
+      scrollTo.mockRestore()
+    }
+  })
+
+  it('still pushes after a no-op sync from noncanonical default sort params', async () => {
+    const { result, rerender } = await renderSearchPage('')
+
+    push.mockClear()
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('sortBy=default&order=desc'))
+    rerender()
+
+    expect(result.current.sortBy).toBe('default')
+    expect(result.current.order).toBe('desc')
+    expect(push).not.toHaveBeenCalled()
+
+    act(() => {
+      result.current.handleSearch('nest')
+    })
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith('?q=nest')
+    })
   })
 })
