@@ -172,7 +172,7 @@ describe('useSearchPage', () => {
     })
   })
 
-  it('synchronizes state from URL on back/forward without restoring the stale query', async () => {
+  it('synchronizes state from URL on back/forward without pushing', async () => {
     const { result, rerender } = await renderSearchPage('page=3')
 
     push.mockClear()
@@ -252,7 +252,7 @@ describe('useSearchPage', () => {
     }
   })
 
-  it('clears pending URL pushes so back/forward works after a local navigation', async () => {
+  it('applies back/forward after a local navigation is acknowledged', async () => {
     const { result, rerender } = await renderSearchPage('page=2')
 
     act(() => {
@@ -262,7 +262,6 @@ describe('useSearchPage', () => {
     expect(result.current.searchQuery).toBe('nest')
     expect(result.current.currentPage).toBe(1)
 
-    // Acknowledge the local push (prev already matches, pending must still clear).
     mockUseSearchParams.mockReturnValue(new URLSearchParams('q=nest'))
     rerender()
 
@@ -277,34 +276,6 @@ describe('useSearchPage', () => {
     expect(push).not.toHaveBeenCalled()
   })
 
-  it('keeps the latest search when a second change happens before searchParams update', async () => {
-    const { result, rerender } = await renderSearchPage('page=3')
-
-    act(() => {
-      result.current.handleSearch('foo')
-    })
-    act(() => {
-      result.current.handleSearch('bar')
-    })
-
-    expect(result.current.searchQuery).toBe('bar')
-    expect(result.current.currentPage).toBe(1)
-
-    // Stale acknowledgment of the first push must not restore the older query.
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('q=foo'))
-    rerender()
-
-    expect(result.current.searchQuery).toBe('bar')
-
-    mockUseSearchParams.mockReturnValue(new URLSearchParams('q=bar'))
-    rerender()
-
-    await waitFor(() => {
-      expect(result.current.searchQuery).toBe('bar')
-      expect(result.current.currentPage).toBe(1)
-    })
-  })
-
   it('applies back/forward when it happens before a local push is acknowledged', async () => {
     const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
 
@@ -317,7 +288,6 @@ describe('useSearchPage', () => {
       expect(result.current.currentPage).toBe(4)
       expect(push).toHaveBeenCalledWith('?page=4')
 
-      // Back before the page=4 push is acknowledged.
       push.mockClear()
       mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
       rerender()
@@ -325,44 +295,6 @@ describe('useSearchPage', () => {
       await waitFor(() => {
         expect(result.current.currentPage).toBe(2)
       })
-      expect(push).not.toHaveBeenCalled()
-
-      // A later back/forward still works (pending was cleared, not stuck).
-      mockUseSearchParams.mockReturnValue(new URLSearchParams())
-      rerender()
-
-      await waitFor(() => {
-        expect(result.current.currentPage).toBe(1)
-      })
-    } finally {
-      scrollTo.mockRestore()
-    }
-  })
-
-  it('ignores a late push acknowledgment after back cancels the in-flight navigation', async () => {
-    const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
-
-    try {
-      const { result, rerender } = await renderSearchPage('page=2')
-
-      act(() => {
-        result.current.handlePageChange(4)
-      })
-      expect(result.current.currentPage).toBe(4)
-
-      push.mockClear()
-      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
-      rerender()
-
-      await waitFor(() => {
-        expect(result.current.currentPage).toBe(2)
-      })
-
-      // Late acknowledgment of the canceled page=4 push must not overwrite Back.
-      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=4'))
-      rerender()
-
-      expect(result.current.currentPage).toBe(2)
       expect(push).not.toHaveBeenCalled()
     } finally {
       scrollTo.mockRestore()

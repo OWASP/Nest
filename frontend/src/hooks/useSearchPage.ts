@@ -103,8 +103,6 @@ export function useSearchPage<T>({
   const prevFacetFiltersKeyRef = useRef(facetFiltersKey)
   const prevSearchParamsRef = useRef(searchParams.toString())
   const skipNextUrlPushRef = useRef(false)
-  const pendingUrlPushRef = useRef<string | null>(null)
-  const supersededUrlPushesRef = useRef<Set<string>>(new Set())
   const stateRef = useRef<SearchUrlState>({
     currentPage,
     searchQuery,
@@ -122,37 +120,19 @@ export function useSearchPage<T>({
     setCurrentPage(1)
   }, [facetFiltersKey])
 
-  // Sync state from URL only when searchParams change (back/forward or push acknowledgment).
+  // Sync state from URL when searchParams change (back/forward or push acknowledgment).
   useEffect(() => {
     const query = searchParams.toString()
     if (query === prevSearchParamsRef.current) {
-      // Push acknowledgments hit this branch because prev was updated optimistically.
-      pendingUrlPushRef.current = null
       return
     }
 
-    const expectedQuery = buildSearchQueryString(stateRef.current)
-    if (isSameSearchQuery(query, expectedQuery) || query === pendingUrlPushRef.current) {
+    // Local push already updated prev optimistically — treat matching URLs as acks.
+    if (isSameSearchQuery(query, buildSearchQueryString(stateRef.current))) {
       prevSearchParamsRef.current = query
-      pendingUrlPushRef.current = null
       return
     }
 
-    // Ignore stale snapshots from pushes superseded by a newer local navigation.
-    for (const supersededQuery of supersededUrlPushesRef.current) {
-      if (isSameSearchQuery(query, supersededQuery)) {
-        supersededUrlPushesRef.current.delete(supersededQuery)
-        return
-      }
-    }
-
-    // External navigation (e.g. back/forward) cancels any in-flight push.
-    // Keep the canceled target in superseded so a late acknowledgment cannot
-    // overwrite the restored URL state.
-    if (pendingUrlPushRef.current !== null) {
-      supersededUrlPushesRef.current.add(pendingUrlPushRef.current)
-      pendingUrlPushRef.current = null
-    }
     prevSearchParamsRef.current = query
 
     const nextPage = parsePageParam(searchParams.get('page'))
@@ -172,8 +152,7 @@ export function useSearchPage<T>({
       nextSortBy !== sort ||
       nextOrder !== sortOrder
 
-    // Only suppress the next push when state will actually update. Non-canonical
-    // URLs that resolve to the same state must not leave a stale skip flag.
+    // Avoid a stale skip flag when the URL is non-canonical but state is unchanged.
     if (!stateChanged) {
       return
     }
@@ -203,11 +182,7 @@ export function useSearchPage<T>({
       return
     }
 
-    if (pendingUrlPushRef.current !== null) {
-      supersededUrlPushesRef.current.add(pendingUrlPushRef.current)
-    }
     prevSearchParamsRef.current = nextQuery
-    pendingUrlPushRef.current = nextQuery
     router.push(nextQuery ? `?${nextQuery}` : '?')
   }, [searchQuery, order, currentPage, sortBy, router])
 
