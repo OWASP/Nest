@@ -303,7 +303,7 @@ export const CertificateCard: React.FC<CertificateCardProps> = ({
   const [scale, setScale] = useState(1)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const hasCustomContent = Boolean(title)
+  const hasCustomContent = Boolean(title || message)
   const hasIssuedBy = Boolean(project?.name || chapter?.name)
   const hasScoreOrTier = Boolean(score) || Boolean(tier)
 

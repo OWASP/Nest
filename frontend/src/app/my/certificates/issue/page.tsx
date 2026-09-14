@@ -238,7 +238,7 @@ const IssueCertificatePage: React.FC = () => {
             placeholder="Write a personalized recognition message for the contributor..."
             value={formData.message}
             onChange={(e) => handleFieldChange('message', e.target.value)}
-            error={errors.message}
+            error={errors.message || backendErrors.message}
             touched={touched.message}
             required
             maxLength={280}
@@ -252,7 +252,11 @@ const IssueCertificatePage: React.FC = () => {
           <EntitySelectorInput
             entityType="project"
             value={formData.projectKey}
-            onChange={(key) => setFormData((prev) => ({ ...prev, projectKey: key }))}
+            onChange={(key) =>
+              setFormData((prev) =>
+                prev.projectKey === key ? prev : { ...prev, projectKey: key, recipientLogins: [] }
+              )
+            }
             error={
               formData.projectKey && formData.chapterKey
                 ? 'Only one of Project or Chapter can be selected.'
@@ -262,7 +266,11 @@ const IssueCertificatePage: React.FC = () => {
           <EntitySelectorInput
             entityType="chapter"
             value={formData.chapterKey}
-            onChange={(key) => setFormData((prev) => ({ ...prev, chapterKey: key }))}
+            onChange={(key) =>
+              setFormData((prev) =>
+                prev.chapterKey === key ? prev : { ...prev, chapterKey: key, recipientLogins: [] }
+              )
+            }
             error={
               formData.projectKey && formData.chapterKey
                 ? 'Only one of Project or Chapter can be selected.'

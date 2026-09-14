@@ -106,10 +106,18 @@ describe('IssueCertificatePage', () => {
 
     fireEvent.change(titleInput, { target: { value: 'A'.repeat(51) } })
     fireEvent.click(submitBtn)
+    expect(
+      screen.getByText('Certificate title must be 50 characters or fewer.')
+    ).toBeInTheDocument()
+    expect(mockIssueCertificate).not.toHaveBeenCalled()
 
     fireEvent.change(titleInput, { target: { value: 'Valid Title' } })
     fireEvent.change(messageInput, { target: { value: 'B'.repeat(281) } })
     fireEvent.click(submitBtn)
+    expect(
+      screen.getByText('Certificate body message must be 280 characters or fewer.')
+    ).toBeInTheDocument()
+    expect(mockIssueCertificate).not.toHaveBeenCalled()
 
     fireEvent.change(messageInput, { target: { value: 'Valid Message' } })
     fireEvent.click(addUserBtn)
@@ -125,6 +133,7 @@ describe('IssueCertificatePage', () => {
 
     fireEvent.change(projectInput, { target: { value: 'nest' } })
     fireEvent.change(chapterInput, { target: { value: 'london' } })
+    fireEvent.click(addUserBtn)
     fireEvent.click(submitBtn)
     expect(addToast).toHaveBeenCalledWith({
       title: 'Validation Error',
@@ -137,12 +146,14 @@ describe('IssueCertificatePage', () => {
 
     mockIssueCertificate.mockRejectedValueOnce(new Error('Validation failed'))
     ;(extractGraphQLErrors as jest.Mock).mockReturnValueOnce({
-      validationErrors: { title: 'Title already exists' },
+      validationErrors: { title: 'Title already exists', message: 'Message inappropriate' },
       hasValidationErrors: true,
     })
     fireEvent.change(chapterInput, { target: { value: '' } })
+    fireEvent.click(addUserBtn)
     fireEvent.click(submitBtn)
     await waitFor(() => expect(extractGraphQLErrors).toHaveBeenCalled())
+    expect(screen.getByText('Message inappropriate')).toBeInTheDocument()
 
     fireEvent.change(titleInput, { target: { value: 'New Title' } })
     expect(titleInput).toHaveValue('New Title')
@@ -216,5 +227,34 @@ describe('IssueCertificatePage', () => {
         },
       })
     })
+  })
+
+  it('resets recipient logins when project or chapter entity key changes', () => {
+    render(<IssueCertificatePage />)
+
+    const projectInput = screen.getByTestId('entity-input-project')
+    const chapterInput = screen.getByTestId('entity-input-chapter')
+    const addUserBtn = screen.getByTestId('add-user-btn')
+    const submitBtn = screen.getByRole('button', { name: 'Issue Certificates' })
+
+    fireEvent.change(screen.getByLabelText(/Certificate Title/), { target: { value: 'Title' } })
+    fireEvent.change(screen.getByLabelText(/Certificate Body Message/), {
+      target: { value: 'Message' },
+    })
+
+    fireEvent.change(projectInput, { target: { value: 'nest' } })
+    fireEvent.click(addUserBtn)
+
+    fireEvent.change(projectInput, { target: { value: 'owasp' } })
+    fireEvent.click(submitBtn)
+    expect(mockIssueCertificate).not.toHaveBeenCalled()
+
+    fireEvent.change(projectInput, { target: { value: '' } })
+    fireEvent.change(chapterInput, { target: { value: 'london' } })
+    fireEvent.click(addUserBtn)
+
+    fireEvent.change(chapterInput, { target: { value: 'paris' } })
+    fireEvent.click(submitBtn)
+    expect(mockIssueCertificate).not.toHaveBeenCalled()
   })
 })

@@ -407,8 +407,21 @@ describe('CertificateCard', () => {
     })
 
     it('renders custom message with different length threshold styling and null message', () => {
+      const msgWithoutTitleCert = {
+        ...mockCertificate,
+        title: null,
+        message: 'Message without title',
+      }
+      const { rerender } = render(<CertificateCard certificate={msgWithoutTitleCert} />)
+      expect(screen.getByText('"Message without title"')).toBeInTheDocument()
+      expect(
+        screen.queryByText(
+          /In recognition of exceptional contributions to the global OWASP open-source ecosystem/
+        )
+      ).not.toBeInTheDocument()
+
       const shortMsgCert = { ...mockCertificate, title: 'Custom', message: 'Short message' }
-      const { rerender } = render(<CertificateCard certificate={shortMsgCert} />)
+      rerender(<CertificateCard certificate={shortMsgCert} />)
       const shortMsgEl = screen.getByText('"Short message"')
       expect(shortMsgEl).toHaveClass('text-[15px]', 'leading-[1.8]')
 
