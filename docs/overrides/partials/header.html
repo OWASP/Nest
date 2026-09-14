@@ -9,8 +9,8 @@ class ~ " md-header--shadow" %} {% endif %}
     <!-- nosemgrep: generic.html-templates.security.var-in-href.var-in-href -->
     <a
       href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}"
+      title="{{ config.site_name | e }}"
       class="md-header__button md-logo"
-      aria-label="{{ config.site_name }}"
       data-md-component="logo"
     >
       {% include "partials/logo.html" %}
