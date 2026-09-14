@@ -38,16 +38,14 @@ class TestOpenIssueManager:
             mock_queryset.filter.assert_called_once()
             assert result == mock_queryset
 
-    def test_without_summary_property_filters_empty_summary(self):
+    def test_without_summary_property_filters_non_ai_generated_summary(self):
         manager = OpenIssueManager()
         manager.model = mock.Mock()
-
         mock_queryset = mock.Mock()
 
         with mock.patch.object(manager, "get_queryset", return_value=mock_queryset):
             mock_queryset.filter.return_value = mock_queryset
-
             result = manager.without_summary
 
-            mock_queryset.filter.assert_called_once_with(summary="")
+            mock_queryset.filter.assert_called_once_with(summary_is_ai_generated=False)
             assert result == mock_queryset

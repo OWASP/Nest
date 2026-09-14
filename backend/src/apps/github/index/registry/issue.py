@@ -30,6 +30,8 @@ class IssueIndex(IndexBase):
         "idx_repository_stars_count",
         "idx_repository_topics",
         "idx_summary",
+        "idx_summary_is_ai_generated",
+        "idx_body",
         "idx_title",
         "idx_updated_at",
         "idx_url",
@@ -69,7 +71,7 @@ class IssueIndex(IndexBase):
             "unordered(idx_project_description, idx_repository_description)",
             "unordered(idx_project_tags, idx_repository_topics)",
             "unordered(idx_author_login, idx_author_name)",
-            "unordered(idx_summary)",
+            "unordered(idx_summary, idx_body)",
             "unordered(idx_project_level)",
         ],
     }
