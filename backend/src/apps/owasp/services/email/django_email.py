@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
 
-from apps.owasp.services.email.base import EmailService
+from apps.owasp.services.email.base import EMAIL_SEND_ERRORS, EmailService
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class DjangoEmailService(EmailService):
             )
             msg.attach_alternative(html_body, "text/html")
             sent_count = msg.send()
-        except Exception:
+        except EMAIL_SEND_ERRORS:
             logger.exception("Failed to send email")
             raise
         return sent_count > 0
@@ -48,7 +48,7 @@ class DjangoEmailService(EmailService):
         if connection:
             try:
                 connection.close()
-            except Exception:
+            except EMAIL_SEND_ERRORS:
                 logger.exception("Failed to close email connection")
 
     def send_bulk(self, messages: list[dict]) -> dict:
@@ -61,7 +61,7 @@ class DjangoEmailService(EmailService):
         try:
             connection = get_connection()
             connection.open()
-        except Exception:
+        except EMAIL_SEND_ERRORS:
             logger.exception("Failed to open email connection")
             self._close_connection_safely(connection)
             return {"sent": 0, "failed": len(messages)}
@@ -82,7 +82,7 @@ class DjangoEmailService(EmailService):
                         results["sent"] += 1
                     else:
                         results["failed"] += 1
-                except Exception:
+                except EMAIL_SEND_ERRORS:
                     logger.exception("Failed to send email")
                     results["failed"] += 1
         finally:

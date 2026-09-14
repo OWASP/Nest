@@ -91,7 +91,7 @@ class TestSendSnapshotEmailsCommand:
         stdout = StringIO()
         call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30", stdout=stdout)
 
-        mock_rq.get_queue.assert_called_with("ai")
+        mock_rq.get_queue.assert_called_with("emails")
         mock_rq.get_queue.return_value.enqueue.assert_called_once()
         assert "ENQUEUED" in stdout.getvalue()
 

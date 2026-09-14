@@ -1,6 +1,14 @@
 """Abstract base class for email service providers."""
 
 from abc import ABC, abstractmethod
+from smtplib import SMTPException
+
+EMAIL_SEND_ERRORS = (
+    OSError,
+    SMTPException,
+    UnicodeEncodeError,
+    ValueError,
+)
 
 
 class EmailService(ABC):

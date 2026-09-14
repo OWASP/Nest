@@ -95,7 +95,7 @@ class Command(BaseCommand):
                 stats["enqueued"] += 1
                 continue
 
-            django_rq.get_queue("ai").enqueue(
+            django_rq.get_queue("emails").enqueue(
                 send_digest_email,
                 snapshot_id=snapshot.id,
                 subscription_id=subscription.id,
