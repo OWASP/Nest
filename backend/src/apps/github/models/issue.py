@@ -185,20 +185,21 @@ class Issue(GenericIssueModel):
         open_ai = open_ai or OpenAi()
         open_ai.set_input(f"{self.title}\r\n{self.body}")
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
-        self.summary = open_ai.complete() or ""
+        self.summary = open_ai.complete() or self.body or ""
 
     def save(self, *args, **kwargs) -> None:
         """Save issue."""
-        if self.is_open:
-            if not self.hint:
-                self.generate_hint()
-
-            if not self.summary:
-                self.generate_summary()
+        if self.is_open and not self.hint:
+            self.generate_hint()
 
         super().save(*args, **kwargs)
 
-    @staticmethod
+        if self.is_open and not self.summary:
+            self.generate_summary()
+        if self.is_open and not self.summary:
+            self.generate_summary()
+            if self.summary:
+                super().save(update_fields=["summary"])
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
         """Bulk save issues."""
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
