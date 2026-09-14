@@ -4,6 +4,7 @@ docs_dir: docs/src
 
 extra:
   generator: false
+  homepage: .
   social:
     - icon: fontawesome/brands/bluesky
       link: https://bsky.app/profile/nest.owasp.org

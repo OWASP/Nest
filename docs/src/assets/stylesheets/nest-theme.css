@@ -4,10 +4,11 @@
   --nest-header: #98afc7;
   --nest-link: #1565c0;
   --nest-header-link: #334155;
-  --nest-header-link-hover: #ffffff;
+  --nest-header-link-hover: #0f172a;
   --nest-footer-link: #334155;
   --nest-footer-link-hover: #0f172a;
-  --nest-search-form: rgba(0, 0, 0, 0.35);
+  /* Match Nest header controls (ModeToggle / NavButton). */
+  --nest-search-form: #87a1bc;
   --md-primary-fg-color: var(--nest-link);
   --md-accent-fg-color: var(--nest-link);
   --md-default-bg-color: var(--nest-bg);
@@ -25,7 +26,8 @@
   --nest-header-link-hover: #60a5fa;
   --nest-footer-link: #94a3b8;
   --nest-footer-link-hover: #f1f5f9;
-  --nest-search-form: rgba(0, 0, 0, 0.25);
+  /* Match Nest header controls (ModeToggle / NavButton). */
+  --nest-search-form: #0f172a;
   /* Keep primary readable; header bg is set separately via --nest-header. */
   --md-primary-fg-color: var(--nest-link);
   --md-primary-fg-color--light: #90caf9;
@@ -124,9 +126,6 @@
   display: none;
 }
 
-.md-header .md-header__button.md-logo,
-.md-header .md-header__button.md-logo img,
-.md-header .md-header__button.md-logo svg,
 .md-header .md-header__title,
 .md-header .md-header__title * {
   cursor: default !important;
@@ -158,6 +157,11 @@
   width: 1.1rem;
   height: 1.1rem;
   fill: currentColor;
+}
+
+/* Tabs already name the section; hide the duplicate title above sidebar items. */
+.md-nav--primary.md-nav--lifted > .md-nav__list > .md-nav__item--section > label.md-nav__link {
+  display: none;
 }
 
 /* Footer */
