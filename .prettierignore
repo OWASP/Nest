@@ -9,6 +9,9 @@
 backend/static/**
 backend/templates/**
 
+# Docs (MkDocs/Jinja overrides; Prettier mangles template attributes)
+docs/overrides/**
+
 # Frontend artifacts
 frontend/.pnpm-store/
 frontend/pnpm-lock.yaml

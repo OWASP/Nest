@@ -1,0 +1,42 @@
+{#- Nest docs header: site title with documentation icon; no repo source -#} {% set class =
+"md-header" %} {% if "navigation.tabs.sticky" in features %} {% set class = class ~ "
+md-header--shadow md-header--lifted" %} {% elif "navigation.tabs" not in features %} {% set class =
+class ~ " md-header--shadow" %} {% endif %}
+<header class="{{ class }}" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="{{ lang.t('header') }}">
+    {#- Homepage from mkdocs.yaml / nav (trusted config), not request input.
+        MkDocs | url keeps nested pages resolving correctly (e.g. ..). -#}
+    <!-- nosemgrep: generic.html-templates.security.var-in-href.var-in-href -->
+    <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}" class="md-header__button md-logo" data-md-component="logo">
+      {% include "partials/logo.html" %}
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      {% set icon = config.theme.icon.menu or "material/menu" %} {% include ".icons/" ~ icon ~
+      ".svg" %}
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis nest-header__site-name">
+            {{ config.site_name }}
+            <span class="nest-header__docs-icon" aria-hidden="true">
+              {% include ".icons/material/book-open-page-variant-outline.svg" %}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+    {% if config.extra.alternate %} {% include "partials/alternate.html" %} {% endif %} {% if
+    "material/search" in config.plugins or "search" in config.plugins %}
+    <label class="md-header__button md-icon" for="__search">
+      {% set icon = config.theme.icon.search or "material/magnify" %} {% include ".icons/" ~ icon ~
+      ".svg" %}
+    </label>
+    {% include "partials/search.html" %} {% endif %} {% if config.theme.palette %} {% if not
+    config.theme.palette is mapping %} {% include "partials/palette.html" %} {% endif %} {% endif %}
+    {% if not config.theme.palette is mapping %} {% include "partials/javascripts/palette.html" %}
+    {% endif %}
+  </nav>
+  {% if "navigation.tabs.sticky" in features %} {% if "navigation.tabs" in features %} {% include
+  "partials/tabs.html" %} {% endif %} {% endif %}
+</header>
