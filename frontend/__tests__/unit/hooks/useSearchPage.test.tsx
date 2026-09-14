@@ -418,4 +418,52 @@ describe('useSearchPage', () => {
       expect(result.current.currentPage).toBe(1)
     })
   })
+
+  it('applies back/forward when it happens before a local push is acknowledged', async () => {
+    const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+
+    try {
+      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
+
+      const { result, rerender } = renderHook(() =>
+        useSearchPage({
+          indexName: 'projects',
+          pageTitle: 'OWASP Projects',
+          defaultSortBy: 'default',
+          defaultOrder: 'desc',
+        })
+      )
+
+      await waitFor(() => {
+        expect(result.current.isLoaded).toBe(true)
+        expect(result.current.currentPage).toBe(2)
+      })
+
+      act(() => {
+        result.current.handlePageChange(4)
+      })
+      expect(result.current.currentPage).toBe(4)
+      expect(push).toHaveBeenCalledWith('?page=4')
+
+      // Back before the page=4 push is acknowledged.
+      push.mockClear()
+      mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2'))
+      rerender()
+
+      await waitFor(() => {
+        expect(result.current.currentPage).toBe(2)
+      })
+      expect(push).not.toHaveBeenCalled()
+
+      // A later back/forward still works (pending was cleared, not stuck).
+      mockUseSearchParams.mockReturnValue(new URLSearchParams())
+      rerender()
+
+      await waitFor(() => {
+        expect(result.current.currentPage).toBe(1)
+      })
+    } finally {
+      scrollTo.mockRestore()
+    }
+  })
 })

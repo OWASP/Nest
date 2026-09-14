@@ -104,6 +104,7 @@ export function useSearchPage<T>({
   const prevSearchParamsRef = useRef(searchParams.toString())
   const skipNextUrlPushRef = useRef(false)
   const pendingUrlPushRef = useRef<string | null>(null)
+  const supersededUrlPushesRef = useRef<Set<string>>(new Set())
   const stateRef = useRef<SearchUrlState>({
     currentPage,
     searchQuery,
@@ -137,11 +138,17 @@ export function useSearchPage<T>({
       return
     }
 
-    // Ignore superseded snapshots while a newer local push is still in flight.
-    if (pendingUrlPushRef.current !== null) {
-      return
+    // Ignore stale snapshots from pushes superseded by a newer local navigation.
+    for (const supersededQuery of supersededUrlPushesRef.current) {
+      if (isSameSearchQuery(query, supersededQuery)) {
+        supersededUrlPushesRef.current.delete(supersededQuery)
+        return
+      }
     }
 
+    // External navigation (e.g. back/forward) cancels any in-flight push.
+    pendingUrlPushRef.current = null
+    supersededUrlPushesRef.current.clear()
     prevSearchParamsRef.current = query
 
     const nextPage = parsePageParam(searchParams.get('page'))
@@ -174,6 +181,9 @@ export function useSearchPage<T>({
       return
     }
 
+    if (pendingUrlPushRef.current !== null) {
+      supersededUrlPushesRef.current.add(pendingUrlPushRef.current)
+    }
     prevSearchParamsRef.current = nextQuery
     pendingUrlPushRef.current = nextQuery
     router.push(nextQuery ? `?${nextQuery}` : '?')
