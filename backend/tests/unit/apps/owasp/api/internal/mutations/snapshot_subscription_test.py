@@ -554,6 +554,16 @@ class TestPydanticValidation:
         with pytest.raises(_pydantic.ValidationError):
             CreateSubscriptionPydanticInput(frequency="daily")
 
+    def test_create_input_normalizes_uppercase_frequency(self):
+        """Test Pydantic normalizes uppercase frequency to lowercase."""
+        model = CreateSubscriptionPydanticInput(frequency="WEEKLY")
+        assert model.frequency == "weekly"
+
+    def test_create_input_normalizes_mixed_case_frequency(self):
+        """Test Pydantic normalizes mixed-case frequency to lowercase."""
+        model = CreateSubscriptionPydanticInput(frequency="Monthly")
+        assert model.frequency == "monthly"
+
     def test_unsubscribe_rejects_empty_token(self):
         """Test Pydantic rejects empty token."""
         with pytest.raises(_pydantic.ValidationError):
