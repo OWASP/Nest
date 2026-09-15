@@ -62,6 +62,7 @@ class CreateSubscriptionPydanticInput(pydantic.BaseModel):
     @classmethod
     def validate_frequency(cls, v: str) -> str:
         """Validate frequency is weekly or monthly."""
+        v = v.lower()
         if v not in ("weekly", "monthly"):
             message = "Frequency must be 'weekly' or 'monthly'."
             raise ValueError(message)
@@ -97,9 +98,11 @@ class UpdateSubscriptionPydanticInput(pydantic.BaseModel):
     @classmethod
     def validate_frequency(cls, v: str | None) -> str | None:
         """Validate frequency is weekly or monthly."""
-        if v is not None and v not in ("weekly", "monthly"):
-            message = "Frequency must be 'weekly' or 'monthly'."
-            raise ValueError(message)
+        if v is not None:
+            v = v.lower()
+            if v not in ("weekly", "monthly"):
+                message = "Frequency must be 'weekly' or 'monthly'."
+                raise ValueError(message)
         return v
 
 

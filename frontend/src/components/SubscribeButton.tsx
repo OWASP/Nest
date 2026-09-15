@@ -163,7 +163,7 @@ export default function SubscribeButton({
       variables: {
         inputData: {
           name: newName || undefined,
-          frequency: newFrequency.toUpperCase(),
+          frequency: newFrequency,
           [inputField]: [decodedEntityId],
         },
       },
