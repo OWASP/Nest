@@ -1,5 +1,6 @@
 'use client'
 import { sendGAEvent } from '@next/third-parties/google'
+import useRecentSearches from 'hooks/useRecentSearches'
 import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
@@ -21,6 +22,7 @@ type SearchHit = Chapter | Event | Organization | Project | User
 const INDEXES = ['chapters', 'events', 'organizations', 'projects', 'users']
 const SUGGESTION_COUNT = 3
 const EMPTY_STATE_EXAMPLES = 'Try searches like "OWASP", "London", "AppSec", "Nest", or "John".'
+const MAX_RECENT_SEARCHES = 5
 
 export default function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false)
@@ -32,6 +34,7 @@ export default function GlobalSearch() {
     subIndex: number
   } | null>(null)
   const [searchError, setSearchError] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
 
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -39,6 +42,7 @@ export default function GlobalSearch() {
   const searchVersionRef = useRef(0)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const shouldAutoFocus = useShouldAutoFocusSearch()
+  const { recentSearchResults, setRecentSearch, removeRecentSearch } = useRecentSearches()
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -72,6 +76,7 @@ export default function GlobalSearch() {
     if (!isOpen) {
       searchVersionRef.current++
       setSearchQuery('')
+      setIsSearching(false)
       setSuggestions([])
       setShowSuggestions(false)
       setHighlightedIndex(null)
@@ -109,6 +114,7 @@ export default function GlobalSearch() {
             })
           )
           if (version !== searchVersionRef.current) return
+          setIsSearching(false)
           if (failedCount === INDEXES.length) {
             setSuggestions([])
             setShowSuggestions(false)
@@ -119,11 +125,30 @@ export default function GlobalSearch() {
           }
         } else {
           searchVersionRef.current++
+          setIsSearching(false)
           setSuggestions([])
           setShowSuggestions(false)
         }
       }, 300),
     []
+  )
+
+  // Function to add a search query to recent searches
+
+  const handleAddRecentSearch = useCallback(
+    (query: string) => {
+      if (query && query.trim() !== '') {
+        const trimmedQuery = query.trim()
+        setRecentSearch((prev: string[]) => {
+          const current = Array.isArray(prev)
+            ? prev.filter((item): item is string => typeof item === 'string')
+            : []
+          const filtered = current.filter((item) => item !== trimmedQuery)
+          return [trimmedQuery, ...filtered].slice(0, MAX_RECENT_SEARCHES)
+        })
+      }
+    },
+    [setRecentSearch]
   )
 
   useEffect(() => {
@@ -135,6 +160,12 @@ export default function GlobalSearch() {
   const handleSuggestionClick = useCallback(
     (suggestion: SearchHit, indexName: string) => {
       setIsOpen(false)
+
+      const hitRecord = suggestion as unknown as Record<string, string | undefined>
+      const label = hitRecord.name || hitRecord.login
+      if (label) {
+        handleAddRecentSearch(label)
+      }
 
       switch (indexName) {
         case 'chapters':
@@ -163,7 +194,7 @@ export default function GlobalSearch() {
           break
       }
     },
-    [router]
+    [router, handleAddRecentSearch]
   )
 
   useEffect(() => {
@@ -243,6 +274,7 @@ export default function GlobalSearch() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
     setSearchQuery(newQuery)
+    setIsSearching(newQuery.trim() !== '')
     debouncedSearch(newQuery)
     setHighlightedIndex(null)
   }
@@ -250,9 +282,11 @@ export default function GlobalSearch() {
   const handleClearSearch = () => {
     searchVersionRef.current++
     setSearchQuery('')
+    setIsSearching(false)
     setSuggestions([])
     setShowSuggestions(false)
     setHighlightedIndex(null)
+    setSearchError(false)
     if (shouldAutoFocus) {
       inputRef.current?.focus()
     }
@@ -346,6 +380,13 @@ export default function GlobalSearch() {
   )
 
   const renderSearchContent = () => {
+    if (isSearching) {
+      return (
+        <div className="px-4 py-3 text-center text-sm text-gray-400 dark:text-gray-500">
+          Searching...
+        </div>
+      )
+    }
     if (showSuggestions && suggestions.length > 0) {
       return (
         <>
@@ -380,11 +421,50 @@ export default function GlobalSearch() {
       )
     }
 
-    return (
-      <div className="px-4 py-2 text-center text-sm text-gray-400 dark:text-gray-500">
-        {EMPTY_STATE_EXAMPLES}
-      </div>
-    )
+    if (!searchQuery && Array.isArray(recentSearchResults) && recentSearchResults.length > 0) {
+      return (
+        <div>
+          <div className="px-4 pt-3 pb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            Recent Searches
+          </div>
+          <ul>
+            {recentSearchResults.map((result: string) => (
+              <li
+                key={result}
+                className="mx-2 mb-2 flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(result)
+                    debouncedSearch(result)
+                  }}
+                  className="flex-1 truncate overflow-hidden border-none bg-transparent text-left"
+                >
+                  {result}
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Remove ${result} from recent searches`}
+                  className="ml-2 shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  onClick={() => removeRecentSearch(result)}
+                >
+                  <FaTimes className="h-3 w-3" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+
+    if (!searchQuery && (!Array.isArray(recentSearchResults) || recentSearchResults.length === 0)) {
+      return (
+        <div className="px-4 py-2 text-center text-sm text-gray-400 dark:text-gray-500">
+          {EMPTY_STATE_EXAMPLES}
+        </div>
+      )
+    }
   }
 
   return (
@@ -422,15 +502,20 @@ export default function GlobalSearch() {
           />
           <div
             ref={panelRef}
-            className="relative mx-4 w-full max-w-xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+            className="relative mx-4 w-full max-w-xl rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800"
           >
-            <div className="relative flex items-center border-b border-gray-200 dark:border-gray-700">
+            <div className="relative flex items-center rounded-t-xl border-b border-gray-200 dark:border-gray-700">
               <FaSearch className="pointer-events-none absolute left-4 h-4 w-4 text-gray-400" />
               <input
                 ref={inputRef}
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && highlightedIndex === null && searchQuery.trim() !== '') {
+                    handleAddRecentSearch(searchQuery)
+                  }
+                }}
                 placeholder="Search the OWASP community..."
                 aria-label="Search the OWASP community"
                 className="h-14 w-full bg-transparent pr-10 pl-11 text-base text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white dark:placeholder-gray-500"
