@@ -77,6 +77,18 @@ class TestStaticSitemap:
         mock_aggregate.assert_called_once_with(latest=ANY)
         assert result == dt
 
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
+    def test_lastmod_with_repositories_path(self, mock_aggregate, sitemap):
+        """Test repositories route uses repository latest updated_at."""
+        dt = timezone.now()
+        mock_aggregate.return_value = {"latest": dt}
+
+        item = {"path": "/repositories"}
+        result = sitemap.lastmod(item)
+
+        mock_aggregate.assert_called_once_with(latest=ANY)
+        assert result == dt
+
     def test_limit(self, sitemap):
         assert sitemap.limit == 50000
 
