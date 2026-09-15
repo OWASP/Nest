@@ -182,6 +182,40 @@ export const GET_SNAPSHOT_ISSUES = gql`
   ${SNAPSHOT_ISSUE_FIELDS}
 `
 
+export const GET_SNAPSHOT_ENTITY_PULL_REQUESTS = gql`
+  query GetSnapshotEntityPullRequests(
+    $key: String!
+    $limit: Int = 6
+    $offset: Int = 0
+    $repositoryNames: [String!]
+  ) {
+    snapshot(key: $key) {
+      id
+      pullRequests(limit: $limit, offset: $offset, repositoryNames: $repositoryNames) {
+        ...SnapshotPullRequestFields
+      }
+    }
+  }
+  ${SNAPSHOT_PULL_REQUEST_FIELDS}
+`
+
+export const GET_SNAPSHOT_ENTITY_ISSUES = gql`
+  query GetSnapshotEntityIssues(
+    $key: String!
+    $limit: Int = 6
+    $offset: Int = 0
+    $repositoryNames: [String!]
+  ) {
+    snapshot(key: $key) {
+      id
+      issues(limit: $limit, offset: $offset, repositoryNames: $repositoryNames) {
+        ...SnapshotIssueFields
+      }
+    }
+  }
+  ${SNAPSHOT_ISSUE_FIELDS}
+`
+
 export const GET_COMMUNITY_SNAPSHOTS = gql`
   query GetCommunitySnapshots {
     snapshots(limit: 12) {
