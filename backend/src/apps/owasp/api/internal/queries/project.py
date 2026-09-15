@@ -3,14 +3,16 @@
 import strawberry
 import strawberry_django
 
+from apps.common.constants import (
+    MAX_SEARCH_QUERY_LENGTH,
+    MIN_SEARCH_QUERY_LENGTH,
+)
 from apps.common.utils import normalize_limit
 from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
 
 MAX_RECENT_PROJECTS_LIMIT = 1000
-MAX_SEARCH_QUERY_LENGTH = 100
-MIN_SEARCH_QUERY_LENGTH = 3
 SEARCH_PROJECTS_LIMIT = 3
 
 

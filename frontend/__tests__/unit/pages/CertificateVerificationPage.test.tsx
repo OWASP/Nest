@@ -6,7 +6,7 @@ import {
 import { screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
-import CertificateVerificationPage from 'app/certificate/[certificateId]/page'
+import CertificateVerificationPage from 'app/certificates/[certificateId]/page'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),

@@ -19,7 +19,7 @@ export async function generateMetadata({
     if (certificate) {
       const displayName = certificate.githubUser.name || certificate.githubUser.login
       return generateSeoMetadata({
-        canonicalPath: `/certificate/${certificateId}`,
+        canonicalPath: `/certificates/${certificateId}`,
         description: `Verify the OWASP Contributor Recognition Certificate of ${displayName} (@${certificate.githubUser.login}).`,
         title: `${displayName}'s Certificate Verification`,
       })
@@ -30,7 +30,7 @@ export async function generateMetadata({
   }
 
   return generateSeoMetadata({
-    canonicalPath: `/certificate/${certificateId}`,
+    canonicalPath: `/certificates/${certificateId}`,
     description: 'Verify OWASP Contributor Recognition Certificate.',
     title: 'Certificate Verification',
   })
