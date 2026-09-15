@@ -5,6 +5,9 @@ ignoreScripts: true
 # 21 days (in minutes)
 minimumReleaseAge: 30240
 
+overrides:
+  smol-toml: 1.7.1
+
 saveExact: true
 
 strictDepBuilds: true
