@@ -1,0 +1,33 @@
+services:
+  backend:
+    volumes:
+      - bod-activity-backend-venv:/home/owasp/.venv
+
+  cache:
+    volumes:
+      - bod-activity-cache-data:/data
+
+  db:
+    volumes:
+      - bod-activity-db-data:/var/lib/postgresql/data
+
+  docs:
+    volumes:
+      - bod-activity-docs-venv:/home/owasp/.venv
+
+  frontend:
+    volumes:
+      - bod-activity-frontend-next:/home/owasp/.next
+      - bod-activity-frontend-node-modules:/home/owasp/node_modules
+
+  worker:
+    volumes:
+      - bod-activity-backend-venv:/home/owasp/.venv
+
+volumes:
+  bod-activity-backend-venv:
+  bod-activity-cache-data:
+  bod-activity-db-data:
+  bod-activity-docs-venv:
+  bod-activity-frontend-next:
+  bod-activity-frontend-node-modules:
