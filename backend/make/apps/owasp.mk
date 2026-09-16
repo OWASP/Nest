@@ -44,19 +44,27 @@ owasp-enrich-projects:
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) backend-exec-command
 
 owasp-generate-community-snapshot-video:
-	@docker build \
-		-f docker/backend/Dockerfile \
-		--target video \
-		backend/ \
-		-t nest-snapshot-video
-	@mkdir -p backend/generated_videos
-	@docker run \
-		--env-file backend/.env \
-		--mount type=bind,src="$(CURDIR)/backend/generated_videos",dst=/home/owasp/generated_videos \
-		--network nest-local_nest-network \
-		--rm \
-		nest-snapshot-video \
-		python manage.py owasp_generate_community_snapshot_video $(snapshot_key) /home/owasp/generated_videos
+	@args=(
+		'-f=docker/backend/Dockerfile'
+		'--target=video'
+		backend/
+		'-t=nest-snapshot-video'
+	)
+	docker build "$${args[@]}"
+	mkdir -p backend/generated_videos
+	args=(
+		'--env-file=backend/.env'
+		"--mount=type=bind,src=$(CURDIR)/backend/generated_videos,dst=/home/owasp/generated_videos"
+		'--network=nest-local_nest-network'
+		'--rm'
+		nest-snapshot-video
+		python
+		manage.py
+		owasp_generate_community_snapshot_video
+		$(snapshot_key)
+		/home/owasp/generated_videos
+	)
+	docker run "$${args[@]}"
 
 owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
