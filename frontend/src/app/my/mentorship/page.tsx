@@ -11,6 +11,7 @@ import { FaPlus } from 'react-icons/fa6'
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 
 import type { Program } from 'types/mentorship'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
@@ -89,6 +90,9 @@ const MyMentorshipPage: React.FC = () => {
 
   if (isSyncing || !userName) {
     return <LoadingSpinner />
+  }
+  if (!isProjectLeader) {
+    return <AccessDeniedDisplay />
   }
 
   return (
