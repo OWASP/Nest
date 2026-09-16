@@ -89,8 +89,9 @@ minimumReleaseAgeExclude:
 overrides:
   # Drop extract-zip (unfixed GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv) from
   # @lhci/cli → lighthouse → puppeteer-core@24 (which pins browsers 2.x).
-  '@puppeteer/browsers': 3.2.1
   '@opentelemetry/core': 2.8.0
+  '@puppeteer/browsers': 3.2.1
+  # browsers 3.x peer is proxy-agent >=8.0.1; @lhci/cli still declares ^6.4.0.
   body-parser: 1.20.6
   brace-expansion@5: 5.0.9
   browserslist: 4.28.7
@@ -103,6 +104,7 @@ overrides:
   nanoid@3: 3.3.18
   postcss: 8.5.23
   protobufjs: 7.6.4
+  proxy-agent: 8.0.2
   qs: 6.16.0
   rxjs: 7.8.2
   serialize-javascript: 7.0.5
