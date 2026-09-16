@@ -7,6 +7,7 @@ from apps.owasp.models.project_health_requirements import ProjectHealthRequireme
 from .board_of_directors import BoardOfDirectorsAdmin
 from .chapter import ChapterAdmin
 from .committee import CommitteeAdmin
+from .email_log import EmailLogAdmin
 from .entity_channel import EntityChannelAdmin
 from .entity_member import EntityMemberAdmin
 from .event import EventAdmin

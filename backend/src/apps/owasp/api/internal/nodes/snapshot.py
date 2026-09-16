@@ -50,11 +50,19 @@ class SnapshotNode(strawberry.relay.Node):
         return SnapshotNode._slice_related(root.events.order_by("-start_date"), limit, offset)
 
     @strawberry_django.field(prefetch_related=["issues"])
-    def issues(self, root: Snapshot, limit: int = 6, offset: int = 0) -> list[IssueNode]:
+    def issues(
+        self,
+        root: Snapshot,
+        limit: int = 6,
+        offset: int = 0,
+        repository_names: list[str] | None = None,
+    ) -> list[IssueNode]:
         """Resolve issues."""
         queryset = root.issues.prefetch_related(MERGED_PULL_REQUESTS_PREFETCH).order_by(
             "-created_at"
         )
+        if repository_names is not None:
+            queryset = queryset.filter(repository__name__in=repository_names[:MAX_LIMIT])
         return SnapshotNode._slice_related(queryset, limit, offset)
 
     @strawberry_django.field(prefetch_related=["posts"])
@@ -69,12 +77,17 @@ class SnapshotNode(strawberry.relay.Node):
 
     @strawberry_django.field(prefetch_related=["pull_requests"])
     def pull_requests(
-        self, root: Snapshot, limit: int = 6, offset: int = 0
+        self,
+        root: Snapshot,
+        limit: int = 6,
+        offset: int = 0,
+        repository_names: list[str] | None = None,
     ) -> list[PullRequestNode]:
         """Resolve pull requests."""
-        return SnapshotNode._slice_related(
-            root.pull_requests.order_by("-created_at"), limit, offset
-        )
+        queryset = root.pull_requests.order_by("-created_at")
+        if repository_names is not None:
+            queryset = queryset.filter(repository__name__in=repository_names[:MAX_LIMIT])
+        return SnapshotNode._slice_related(queryset, limit, offset)
 
     @strawberry_django.field(prefetch_related=["releases"])
     def releases(self, root: Snapshot) -> list[ReleaseNode]:

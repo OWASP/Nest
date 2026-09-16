@@ -104,7 +104,7 @@ services:
     container_name: nest-worker
     command: >
       sh -c '
-        python manage.py rqworker ai --with-scheduler
+        python manage.py rqworker ai emails --with-scheduler
       '
     image: nest-local-backend
     depends_on:
