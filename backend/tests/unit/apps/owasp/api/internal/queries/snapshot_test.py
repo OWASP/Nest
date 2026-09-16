@@ -219,3 +219,22 @@ class TestFilteredSnapshots:
 
             assert result == mock_qs
             mock_qs.filter.assert_not_called()
+
+    def test_with_malformed_gte_valid_lte_applies_lte(self):
+        """Test _filtered_snapshots applies valid lte even when gte is malformed."""
+        with patch(
+            "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
+        ) as mock_filter:
+            mock_qs = MagicMock()
+            mock_filter.return_value.order_by.return_value = mock_qs
+            mock_qs.filter.return_value = mock_qs
+
+            result = _filtered_snapshots(
+                start_at_gte="not-a-date",
+                start_at_lte="2025-12-31T23:59:59",
+            )
+
+            assert result == mock_qs
+            mock_qs.filter.assert_called_once_with(
+                start_at__lte=datetime.fromisoformat("2025-12-31T23:59:59")
+            )

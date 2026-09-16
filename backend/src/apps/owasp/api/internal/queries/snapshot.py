@@ -1,5 +1,6 @@
 """OWASP snapshot GraphQL queries."""
 
+import contextlib
 from datetime import datetime
 
 import strawberry
@@ -18,13 +19,12 @@ def _filtered_snapshots(start_at_gte=None, start_at_lte=None):
         status=Snapshot.Status.COMPLETED,
     ).order_by("-created_at")
 
-    try:
-        if start_at_gte:
+    if start_at_gte:
+        with contextlib.suppress(ValueError):
             queryset = queryset.filter(start_at__gte=datetime.fromisoformat(start_at_gte))
-        if start_at_lte:
+    if start_at_lte:
+        with contextlib.suppress(ValueError):
             queryset = queryset.filter(start_at__lte=datetime.fromisoformat(start_at_lte))
-    except ValueError:
-        pass
 
     return queryset
 

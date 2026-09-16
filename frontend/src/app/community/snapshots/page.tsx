@@ -13,6 +13,11 @@ import SnapshotCard from 'components/SnapshotCard'
 
 const SNAPSHOTS_PER_PAGE = 12
 
+const getLocalToday = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
 const SnapshotsPage: React.FC = () => {
   const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
   const [totalCount, setTotalCount] = useState(0)
@@ -123,7 +128,7 @@ const SnapshotsPage: React.FC = () => {
                 'h-12 rounded-lg border border-gray-300 bg-white shadow-none hover:bg-white data-[hover=true]:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-800 dark:data-[hover=true]:bg-gray-800',
               input: 'text-sm font-medium text-gray-800 dark:text-gray-200',
             }}
-            max={endDate || new Date().toISOString().split('T')[0]}
+            max={endDate || getLocalToday()}
             onValueChange={handleStartDateChange}
             placeholder="Start date"
             type="date"
@@ -138,7 +143,7 @@ const SnapshotsPage: React.FC = () => {
                 'h-12 rounded-lg border border-gray-300 bg-white shadow-none hover:bg-white data-[hover=true]:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-800 dark:data-[hover=true]:bg-gray-800',
               input: 'text-sm font-medium text-gray-800 dark:text-gray-200',
             }}
-            max={new Date().toISOString().split('T')[0]}
+            max={getLocalToday()}
             min={startDate || undefined}
             onValueChange={handleEndDateChange}
             placeholder="End date"
