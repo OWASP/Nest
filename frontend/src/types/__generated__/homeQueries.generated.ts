@@ -6,7 +6,7 @@ import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type GetMainPageDataQueryVariables = Exact<{
-  distinct?: boolean | null | undefined;
+  distinct?: boolean | null;
 }>;
 
 

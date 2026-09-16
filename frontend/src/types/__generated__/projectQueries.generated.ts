@@ -20,10 +20,10 @@ export type GetProjectMetadataQueryVariables = Exact<{
 export type GetProjectMetadataQuery = { project: { __typename: 'ProjectNode', id: string, contributorsCount: number, forksCount: number, issuesCount: number, name: string, starsCount: number, summary: string, recentMilestones: Array<{ __typename: 'MilestoneNode', id: string, title: string, url: string, body: string, progress: number, state: string }> } | null };
 
 export type GetTopContributorsQueryVariables = Exact<{
-  excludedUsernames?: Array<string> | string | null | undefined;
-  hasFullName?: boolean | null | undefined;
+  excludedUsernames?: Array<string> | string | null;
+  hasFullName?: boolean | null;
   key: string;
-  limit?: number | null | undefined;
+  limit?: number | null;
 }>;
 
 

@@ -7,30 +7,30 @@ import * as Types from './graphql';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type FloatComparisonFilterLookup = {
   /** Exact match. Filter will be skipped on `null` value */
-  exact?: number | null | undefined;
+  exact?: number | null;
   /** Greater than. Filter will be skipped on `null` value */
-  gt?: number | null | undefined;
+  gt?: number | null;
   /** Greater than or equal to. Filter will be skipped on `null` value */
-  gte?: number | null | undefined;
+  gte?: number | null;
   /** Exact match of items in a given list. Filter will be skipped on `null` value */
-  inList?: Array<number> | null | undefined;
+  inList?: Array<number> | null;
   /** Assignment test. Filter will be skipped on `null` value */
-  isNull?: boolean | null | undefined;
+  isNull?: boolean | null;
   /** Less than. Filter will be skipped on `null` value */
-  lt?: number | null | undefined;
+  lt?: number | null;
   /** Less than or equal to. Filter will be skipped on `null` value */
-  lte?: number | null | undefined;
+  lte?: number | null;
   /** Inclusive range test (between) */
-  range?: FloatRangeLookup | null | undefined;
+  range?: FloatRangeLookup | null;
 };
 
 export type FloatRangeLookup = {
-  end?: number | null | undefined;
-  start?: number | null | undefined;
+  end?: number | null;
+  start?: number | null;
 };
 
 export type OffsetPaginationInput = {
-  limit?: number | null | undefined;
+  limit?: number | null;
   offset?: number;
 };
 
@@ -43,21 +43,21 @@ export type Ordering =
   | 'DESC_NULLS_LAST';
 
 export type ProjectHealthMetricsFilter = {
-  AND?: ProjectHealthMetricsFilter | null | undefined;
-  DISTINCT?: boolean | null | undefined;
-  NOT?: ProjectHealthMetricsFilter | null | undefined;
-  OR?: ProjectHealthMetricsFilter | null | undefined;
-  level?: ProjectLevel | null | undefined;
-  score?: FloatComparisonFilterLookup | null | undefined;
+  AND?: ProjectHealthMetricsFilter | null;
+  DISTINCT?: boolean | null;
+  NOT?: ProjectHealthMetricsFilter | null;
+  OR?: ProjectHealthMetricsFilter | null;
+  level?: ProjectLevel | null;
+  score?: FloatComparisonFilterLookup | null;
 };
 
 export type ProjectHealthMetricsOrder = {
-  contributorsCount?: Ordering | null | undefined;
-  createdAt?: Ordering | null | undefined;
-  forksCount?: Ordering | null | undefined;
-  project_Name?: Ordering | null | undefined;
-  score?: Ordering | null | undefined;
-  starsCount?: Ordering | null | undefined;
+  contributorsCount?: Ordering | null;
+  createdAt?: Ordering | null;
+  forksCount?: Ordering | null;
+  project_Name?: Ordering | null;
+  score?: Ordering | null;
+  starsCount?: Ordering | null;
 };
 
 export type ProjectLevel =
@@ -75,7 +75,7 @@ export type GetProjectHealthStatsQuery = { projectHealthStats: { __typename: 'Pr
 export type GetProjectHealthMetricsQueryVariables = Exact<{
   filters: Types.ProjectHealthMetricsFilter;
   pagination: Types.OffsetPaginationInput;
-  ordering?: Array<Types.ProjectHealthMetricsOrder> | Types.ProjectHealthMetricsOrder | null | undefined;
+  ordering?: Array<Types.ProjectHealthMetricsOrder> | Types.ProjectHealthMetricsOrder | null;
 }>;
 
 

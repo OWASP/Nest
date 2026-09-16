@@ -12,7 +12,7 @@ export type CreateModuleInput = {
   experienceLevel: ExperienceLevelEnum;
   labels?: Array<string>;
   menteeCanManageDeadlines?: boolean;
-  mentorLogins?: Array<string> | null | undefined;
+  mentorLogins?: Array<string> | null;
   name: string;
   programKey: string;
   projectId: string | number;
@@ -39,8 +39,8 @@ export type UpdateModuleInput = {
   experienceLevel: ExperienceLevelEnum;
   key: string;
   labels?: Array<string>;
-  menteeCanManageDeadlines?: boolean | null | undefined;
-  mentorLogins?: Array<string> | null | undefined;
+  menteeCanManageDeadlines?: boolean | null;
+  mentorLogins?: Array<string> | null;
   name: string;
   programKey: string;
   projectId: string | number;

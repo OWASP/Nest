@@ -17,9 +17,9 @@ export type ProgramStatusEnum =
   | 'PUBLISHED';
 
 export type GetMyProgramsQueryVariables = Exact<{
-  search?: string | null | undefined;
-  page?: number | null | undefined;
-  limit?: number | null | undefined;
+  search?: string | null;
+  page?: number | null;
+  limit?: number | null;
 }>;
 
 
