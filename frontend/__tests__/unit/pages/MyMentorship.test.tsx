@@ -53,6 +53,7 @@ jest.mock('components/AccessDeniedDisplay', () => {
   }
 })
 
+
 jest.mock('next/navigation', () => {
   const actual = jest.requireActual('next/navigation')
   return {
