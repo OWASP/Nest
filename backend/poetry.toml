@@ -15,6 +15,7 @@ min-release-age-exclude = [
     "starlette",           # 1.0.1
     "strawberry-graphql",  # 0.316.0
     "urllib3",             # 2.7.0
+    "weasyprint",          # 70.0
 ]
 
 [virtualenvs]
