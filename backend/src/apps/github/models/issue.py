@@ -189,6 +189,9 @@ class Issue(GenericIssueModel):
 
     def save(self, *args, **kwargs) -> None:
         """Save issue."""
+        if "update_fields" in kwargs and not kwargs["update_fields"]:
+            return
+
         if self.is_open and not self.hint:
             self.generate_hint()
 

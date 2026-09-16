@@ -229,6 +229,7 @@ class TestIssueModel:
             repository=mock_repository,
             state=Issue.IssueState.OPEN,
         )
+        issue.generate_hint = Mock()
 
         assert issue.id is None
 
@@ -254,23 +255,39 @@ class TestIssueModel:
             issue.save()
 
         assert issue.id == 1
+        issue.generate_hint.assert_called_once()
         mock_summary.assert_called_once()
         assert issue.summary == "This is a summary."
         assert len(save_calls) == 2
         assert save_calls[1] == {"update_fields": ["summary"]}
 
-
-    def test_save_method_when_issue_not_open(self, mock_repository):
-        """Test save method when issue is not open."""
-        issue = Issue(repository=mock_repository, state=Issue.IssueState.CLOSED)
+    def test_save_method_with_empty_update_fields(self, mock_repository):
+        """Test that an empty update_fields preserves Django's no-op behavior."""
+        issue = Issue(
+            title="Test Title",
+            body="Test Body",
+            repository=mock_repository,
+            state=Issue.IssueState.OPEN,
+        )
         issue.generate_hint = Mock()
         issue.generate_summary = Mock()
 
-        with patch("apps.github.models.issue.BulkSaveModel.save"):
-            issue.save()
+        with patch("apps.github.models.issue.BulkSaveModel.save") as mock_save:
+            issue.save(update_fields=[])
 
+        mock_save.assert_not_called()
         issue.generate_hint.assert_not_called()
         issue.generate_summary.assert_not_called()
+
+    def test_is_indexable_without_repository(self):
+        issue = Issue(
+            title="Test Title",
+            body="Test Body",
+            state=Issue.IssueState.OPEN,
+            repository=None,
+        )
+
+        assert not issue.is_indexable
 
     def test_latest_comment_property(self, mock_repository):
         """Test latest_comment property returns the expected query result."""
