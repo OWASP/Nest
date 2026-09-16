@@ -217,13 +217,19 @@ export const GET_SNAPSHOT_ENTITY_ISSUES = gql`
 `
 
 export const GET_COMMUNITY_SNAPSHOTS = gql`
-  query GetCommunitySnapshots {
-    snapshots(limit: 12) {
+  query GetCommunitySnapshots(
+    $limit: Int = 12
+    $offset: Int = 0
+    $startAtGte: String
+    $startAtLte: String
+  ) {
+    snapshots(limit: $limit, offset: $offset, startAtGte: $startAtGte, startAtLte: $startAtLte) {
       id
       key
       title
       startAt
       endAt
     }
+    snapshotsCount(startAtGte: $startAtGte, startAtLte: $startAtLte)
   }
 `

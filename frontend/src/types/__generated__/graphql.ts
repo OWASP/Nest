@@ -838,6 +838,7 @@ export type Query = {
   searchProjects: Array<ProjectNode>;
   snapshot?: Maybe<SnapshotNode>;
   snapshots: Array<SnapshotNode>;
+  snapshotsCount: Scalars['Int']['output'];
   sponsors: Array<SponsorNode>;
   statsOverview: StatsNode;
   subscriptionByToken?: Maybe<SnapshotSubscriptionNode>;
@@ -1061,6 +1062,15 @@ export type QuerySnapshotArgs = {
 
 export type QuerySnapshotsArgs = {
   limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+  startAtGte?: InputMaybe<Scalars['String']['input']>;
+  startAtLte?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySnapshotsCountArgs = {
+  startAtGte?: InputMaybe<Scalars['String']['input']>;
+  startAtLte?: InputMaybe<Scalars['String']['input']>;
 };
 
 

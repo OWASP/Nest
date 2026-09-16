@@ -43,6 +43,7 @@ import PostCard from 'components/PostCard'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import SecondaryCard from 'components/SecondaryCard'
+import ShareButtons from 'components/ShareButtons'
 import ShowMoreButton from 'components/ShowMoreButton'
 import SnapshotEntitySection from 'components/SnapshotEntitySection'
 import { ReleasesSection } from 'components/SnapshotReleaseSection'
@@ -243,7 +244,7 @@ const SnapshotDetailsPage: React.FC = () => {
   return (
     <div className="mx-auto min-h-screen max-w-6xl p-4">
       <div className="mt-8 mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
               {snapshot.title}
@@ -257,6 +258,12 @@ const SnapshotDetailsPage: React.FC = () => {
               </div>
             </div>
           </div>
+          {!subscriptionToken && (
+            <ShareButtons
+              title={snapshot.title}
+              url={`https://nest.owasp.org/community/snapshots/${snapshotKey}`}
+            />
+          )}
         </div>
       </div>
 
