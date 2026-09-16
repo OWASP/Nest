@@ -49,6 +49,8 @@ const SnapshotsPage: React.FC = () => {
       setTotalCount(graphQLData.snapshotsCount)
     }
     if (graphQLRequestError) {
+      setSnapshots(null)
+      setTotalCount(0)
       addToast({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
@@ -121,7 +123,7 @@ const SnapshotsPage: React.FC = () => {
                 'h-12 rounded-lg border border-gray-300 bg-white shadow-none hover:bg-white data-[hover=true]:bg-white dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-800 dark:data-[hover=true]:bg-gray-800',
               input: 'text-sm font-medium text-gray-800 dark:text-gray-200',
             }}
-            max={endDate || undefined}
+            max={endDate || new Date().toISOString().split('T')[0]}
             onValueChange={handleStartDateChange}
             placeholder="Start date"
             type="date"

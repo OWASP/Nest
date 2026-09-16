@@ -1,6 +1,7 @@
 """Tests for SnapshotQuery."""
 
-from unittest.mock import MagicMock, patch
+from datetime import datetime
+from unittest.mock import MagicMock, call, patch
 
 from apps.owasp.api.internal.queries.snapshot import SnapshotQuery, _filtered_snapshots
 from apps.owasp.models.snapshot import Snapshot
@@ -78,10 +79,13 @@ class TestSnapshotQuery:
         with patch(
             "apps.owasp.api.internal.queries.snapshot._filtered_snapshots"
         ) as mock_filtered:
-            mock_filtered.return_value.__getitem__ = MagicMock(return_value=mock_snapshots)
+            mock_qs = MagicMock()
+            mock_qs.__getitem__ = MagicMock(return_value=mock_snapshots)
+            mock_filtered.return_value = mock_qs
 
             result = self.query.__class__.__dict__["snapshots"](self.query, limit=500)
             assert result == mock_snapshots
+            mock_qs.__getitem__.assert_called_once_with(slice(0, 100))
 
     def test_snapshots_with_offset(self):
         """Test snapshots uses offset for pagination."""
@@ -160,6 +164,8 @@ class TestFilteredSnapshots:
 
             assert result == mock_qs
             mock_filter.assert_called_once_with(status=Snapshot.Status.COMPLETED)
+            mock_filter.return_value.order_by.assert_called_once_with("-created_at")
+            mock_qs.filter.assert_not_called()
 
     def test_with_start_at_gte(self):
         """Test _filtered_snapshots filters by start_at_gte."""
@@ -173,6 +179,10 @@ class TestFilteredSnapshots:
             result = _filtered_snapshots(start_at_gte="2025-01-01T00:00:00")
 
             assert result == mock_qs
+            mock_filter.return_value.order_by.assert_called_once_with("-created_at")
+            mock_qs.filter.assert_called_once_with(
+                start_at__gte=datetime.fromisoformat("2025-01-01T00:00:00")
+            )
 
     def test_with_both_filters(self):
         """Test _filtered_snapshots filters by both date bounds."""
@@ -189,3 +199,23 @@ class TestFilteredSnapshots:
             )
 
             assert result == mock_qs
+            mock_filter.return_value.order_by.assert_called_once_with("-created_at")
+            mock_qs.filter.assert_has_calls(
+                [
+                    call(start_at__gte=datetime.fromisoformat("2025-01-01T00:00:00")),
+                    call(start_at__lte=datetime.fromisoformat("2025-12-31T23:59:59")),
+                ]
+            )
+
+    def test_with_malformed_date_ignores_filter(self):
+        """Test _filtered_snapshots ignores malformed date strings."""
+        with patch(
+            "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
+        ) as mock_filter:
+            mock_qs = MagicMock()
+            mock_filter.return_value.order_by.return_value = mock_qs
+
+            result = _filtered_snapshots(start_at_gte="not-a-date")
+
+            assert result == mock_qs
+            mock_qs.filter.assert_not_called()

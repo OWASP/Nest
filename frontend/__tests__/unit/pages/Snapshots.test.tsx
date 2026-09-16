@@ -168,11 +168,28 @@ describe('SnapshotsPage', () => {
       loading: false,
     })
 
+    window.scrollTo = jest.fn()
+
     render(<SnapshotsPage />)
 
     await waitFor(() => {
       expect(screen.getByLabelText('Go to next page')).toBeInTheDocument()
       expect(screen.getByLabelText('Go to previous page')).toBeInTheDocument()
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Go to next page'))
+    })
+
+    await waitFor(() => {
+      expect(useQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            offset: 12,
+          }),
+        })
+      )
     })
   })
 

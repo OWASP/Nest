@@ -18,10 +18,13 @@ def _filtered_snapshots(start_at_gte=None, start_at_lte=None):
         status=Snapshot.Status.COMPLETED,
     ).order_by("-created_at")
 
-    if start_at_gte:
-        queryset = queryset.filter(start_at__gte=datetime.fromisoformat(start_at_gte))
-    if start_at_lte:
-        queryset = queryset.filter(start_at__lte=datetime.fromisoformat(start_at_lte))
+    try:
+        if start_at_gte:
+            queryset = queryset.filter(start_at__gte=datetime.fromisoformat(start_at_gte))
+        if start_at_lte:
+            queryset = queryset.filter(start_at__lte=datetime.fromisoformat(start_at_lte))
+    except ValueError:
+        pass
 
     return queryset
 
