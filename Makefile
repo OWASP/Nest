@@ -1,3 +1,8 @@
+SHELL := bash
+
+.ONESHELL:
+.SHELLFLAGS := -eu -o pipefail -c
+
 include backend/Makefile
 include cspell/Makefile
 include docs/Makefile

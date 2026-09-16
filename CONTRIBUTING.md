@@ -17,6 +17,8 @@ The project uses a **containerized approach** for both development and productio
 Before contributing, ensure you have the following installed:
 
 1. [Docker](https://docs.docker.com/engine/install/) for running the Nest containers and local code quality checks and tests (e.g. `make check`, `make test`).
+2. [GNU Make](https://www.gnu.org/software/make/) **4.0+** for running project targets (`make --version`).
+3. [Bash](https://www.gnu.org/software/bash/) for running Make recipes (`bash --version`).
 
 Optional steps for Windows:
 
