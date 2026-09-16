@@ -11,8 +11,8 @@ export type GetManagementModuleIssueViewQueryVariables = Exact<{
   programKey: string;
   moduleKey: string;
   number: number;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+  limit?: number | null;
+  offset?: number | null;
 }>;
 
 
@@ -22,8 +22,8 @@ export type GetModuleIssueViewQueryVariables = Exact<{
   programKey: string;
   moduleKey: string;
   number: number;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+  limit?: number | null;
+  offset?: number | null;
 }>;
 
 

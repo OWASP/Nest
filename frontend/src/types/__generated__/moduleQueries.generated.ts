@@ -33,8 +33,8 @@ export type ModuleDetailWithRecentPrsFragment = { __typename: 'ModuleNode', id: 
 export type GetManagementProgramAdminsAndModulesQueryVariables = Exact<{
   programKey: string;
   moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+  limit?: number | null;
+  offset?: number | null;
 }>;
 
 
@@ -43,8 +43,8 @@ export type GetManagementProgramAdminsAndModulesQuery = { managementProgram: { _
 export type GetProgramAdminsAndModulesQueryVariables = Exact<{
   programKey: string;
   moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
+  limit?: number | null;
+  offset?: number | null;
 }>;
 
 
@@ -55,9 +55,9 @@ export type ModuleIssuesListFragment = { __typename: 'ModuleNode', name: string,
 export type GetManagementModuleIssuesQueryVariables = Exact<{
   programKey: string;
   moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
-  label?: string | null | undefined;
+  limit?: number | null;
+  offset?: number | null;
+  label?: string | null;
 }>;
 
 
@@ -66,9 +66,9 @@ export type GetManagementModuleIssuesQuery = { managementModule: { __typename: '
 export type GetModuleIssuesQueryVariables = Exact<{
   programKey: string;
   moduleKey: string;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
-  label?: string | null | undefined;
+  limit?: number | null;
+  offset?: number | null;
+  label?: string | null;
 }>;
 
 

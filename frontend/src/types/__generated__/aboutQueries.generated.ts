@@ -7,9 +7,9 @@ import * as Types from './graphql';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type GetAboutPageDataQueryVariables = Exact<{
   projectKey: string;
-  excludedUsernames?: Array<string> | string | null | undefined;
-  hasFullName?: boolean | null | undefined;
-  limit?: number | null | undefined;
+  excludedUsernames?: Array<string> | string | null;
+  hasFullName?: boolean | null;
+  limit?: number | null;
   leader1: string;
   leader2: string;
   leader3: string;

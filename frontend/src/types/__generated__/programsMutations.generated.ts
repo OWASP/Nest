@@ -27,16 +27,16 @@ export type ProgramStatusEnum =
   | 'PUBLISHED';
 
 export type UpdateProgramInput = {
-  adminLogins?: Array<string> | null | undefined;
+  adminLogins?: Array<string> | null;
   description: string;
-  domains?: Array<string> | null | undefined;
+  domains?: Array<string> | null;
   endedAt: any;
   key: string;
   menteesLimit: number;
   name: string;
   startedAt: any;
   status: ProgramStatusEnum;
-  tags?: Array<string> | null | undefined;
+  tags?: Array<string> | null;
 };
 
 export type UpdateProgramStatusInput = {
