@@ -98,7 +98,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - strawberry-graphql==0.324.0
-          - strawberry-graphql-django==0.87.0
+          - strawberry-graphql-django==0.87.1
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260807
           - types-PyYAML==6.0.12.20260815
