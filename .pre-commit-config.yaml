@@ -3,6 +3,7 @@ repos:
     rev: 6e7504451511eaeb62a3e7f14d63b0296cbf86eb  # v2.15.1
     hooks:
       - id: hadolint
+        exclude: \.dockerignore$
         args:
           - --failure-threshold=warning
         name: hadolint

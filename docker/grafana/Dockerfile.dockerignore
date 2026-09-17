@@ -1,0 +1,9 @@
+# grafana only needs its provisioned dashboards & datasource configs
+**
+!docker-compose/
+!docker-compose/local/
+!docker-compose/local/grafana/
+!docker-compose/local/grafana/dashboards/
+!docker-compose/local/grafana/dashboards/**
+!docker-compose/local/grafana/provisioning/
+!docker-compose/local/grafana/provisioning/**

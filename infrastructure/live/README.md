@@ -60,6 +60,7 @@ No providers.
 | <a name="module_frontend_build_cache"></a> [frontend\_build\_cache](#module\_frontend\_build\_cache) | ../modules/ecr-cache | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
+| <a name="module_observability"></a> [observability](#module\_observability) | ../modules/observability | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |
 | <a name="module_security"></a> [security](#module\_security) | ../modules/security | n/a |
 | <a name="module_storage"></a> [storage](#module\_storage) | ../modules/storage | n/a |
@@ -102,6 +103,7 @@ No resources.
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name for the site. | `string` | n/a | yes |
 | <a name="input_enable_additional_parameters"></a> [enable\_additional\_parameters](#input\_enable\_additional\_parameters) | Whether to enable additional parameters (e.g. for production). | `bool` | `false` | no |
 | <a name="input_enable_cron_tasks"></a> [enable\_cron\_tasks](#input\_enable\_cron\_tasks) | Whether to enable scheduled cron tasks. | `bool` | n/a | yes |
+| <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Whether to create the observability stack. | `bool` | `false` | no |
 | <a name="input_enable_rds_proxy"></a> [enable\_rds\_proxy](#input\_enable\_rds\_proxy) | Whether to create an RDS proxy. | `bool` | `false` | no |
 | <a name="input_enable_vpc_cloudwatch_logs_endpoint"></a> [enable\_vpc\_cloudwatch\_logs\_endpoint](#input\_enable\_vpc\_cloudwatch\_logs\_endpoint) | Whether to create CloudWatch Logs VPC endpoint. | `bool` | `false` | no |
 | <a name="input_enable_vpc_ecr_api_endpoint"></a> [enable\_vpc\_ecr\_api\_endpoint](#input\_enable\_vpc\_ecr\_api\_endpoint) | Whether to create ECR API VPC endpoint. | `bool` | `false` | no |
@@ -117,6 +119,8 @@ No resources.
 | <a name="input_frontend_max_count"></a> [frontend\_max\_count](#input\_frontend\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_frontend_min_count"></a> [frontend\_min\_count](#input\_frontend\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_frontend_use_fargate_spot"></a> [frontend\_use\_fargate\_spot](#input\_frontend\_use\_fargate\_spot) | Whether to use Fargate Spot for frontend tasks. | `bool` | `true` | no |
+| <a name="input_grafana_desired_count"></a> [grafana\_desired\_count](#input\_grafana\_desired\_count) | Grafana task count; leave zero until credentials and access are configured. | `number` | `0` | no |
+| <a name="input_grafana_image"></a> [grafana\_image](#input\_grafana\_image) | Digest-pinned Grafana image; null leaves the Grafana runtime disabled. | `string` | `null` | no |
 | <a name="input_private_subnet_cidrs"></a> [private\_subnet\_cidrs](#input\_private\_subnet\_cidrs) | A list of CIDR blocks for the private subnets. | `list(string)` | <pre>[<br/>  "10.0.11.0/24",<br/>  "10.0.12.0/24",<br/>  "10.0.13.0/24"<br/>]</pre> | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | `"nest"` | no |
 | <a name="input_public_subnet_cidrs"></a> [public\_subnet\_cidrs](#input\_public\_subnet\_cidrs) | A list of CIDR blocks for the public subnets. | `list(string)` | <pre>[<br/>  "10.0.1.0/24",<br/>  "10.0.2.0/24",<br/>  "10.0.3.0/24"<br/>]</pre> | no |

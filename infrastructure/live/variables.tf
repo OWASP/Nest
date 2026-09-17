@@ -193,6 +193,24 @@ variable "enable_cron_tasks" {
   type        = bool
 }
 
+variable "grafana_image" {
+  description = "Digest-pinned Grafana image; null leaves the Grafana runtime disabled."
+  type        = string
+  default     = null
+}
+
+variable "grafana_desired_count" {
+  description = "Grafana task count; leave zero until credentials and access are configured."
+  type        = number
+  default     = 0
+}
+
+variable "enable_observability" {
+  description = "Whether to create the observability stack."
+  type        = bool
+  default     = false
+}
+
 variable "enable_rds_proxy" {
   description = "Whether to create an RDS proxy."
   type        = bool
