@@ -1,5 +1,3 @@
-auditConfig: {}
-
 ignoreScripts: true
 
 # 21 days (in minutes)
@@ -18,16 +16,42 @@ minimumReleaseAgeExclude:
   - '@graphql-codegen/typescript@6.1.0'
   - '@graphql-codegen/visitor-plugin-common@7.2.0'
   - '@graphql-tools/utils@11.2.0'
-  - '@next/env@16.2.12'
-  - '@next/swc-darwin-arm64@16.2.12'
-  - '@next/swc-darwin-x64@16.2.12'
-  - '@next/swc-linux-arm64-gnu@16.2.12'
-  - '@next/swc-linux-arm64-musl@16.2.12'
-  - '@next/swc-linux-x64-gnu@16.2.12'
-  - '@next/swc-linux-x64-musl@16.2.12'
-  - '@next/swc-win32-arm64-msvc@16.2.12'
-  - '@next/swc-win32-x64-msvc@16.2.12'
-  - '@next/third-parties@16.2.11'
+  - '@img/sharp-darwin-arm64@0.35.4'
+  - '@img/sharp-darwin-x64@0.35.4'
+  - '@img/sharp-freebsd-wasm32@0.35.4'
+  - '@img/sharp-libvips-darwin-arm64@1.3.3'
+  - '@img/sharp-libvips-darwin-x64@1.3.3'
+  - '@img/sharp-libvips-linux-arm@1.3.3'
+  - '@img/sharp-libvips-linux-arm64@1.3.3'
+  - '@img/sharp-libvips-linux-ppc64@1.3.3'
+  - '@img/sharp-libvips-linux-riscv64@1.3.3'
+  - '@img/sharp-libvips-linux-s390x@1.3.3'
+  - '@img/sharp-libvips-linux-x64@1.3.3'
+  - '@img/sharp-libvips-linuxmusl-arm64@1.3.3'
+  - '@img/sharp-libvips-linuxmusl-x64@1.3.3'
+  - '@img/sharp-linux-arm@0.35.4'
+  - '@img/sharp-linux-arm64@0.35.4'
+  - '@img/sharp-linux-ppc64@0.35.4'
+  - '@img/sharp-linux-riscv64@0.35.4'
+  - '@img/sharp-linux-s390x@0.35.4'
+  - '@img/sharp-linux-x64@0.35.4'
+  - '@img/sharp-linuxmusl-arm64@0.35.4'
+  - '@img/sharp-linuxmusl-x64@0.35.4'
+  - '@img/sharp-wasm32@0.35.4'
+  - '@img/sharp-webcontainers-wasm32@0.35.4'
+  - '@img/sharp-win32-arm64@0.35.4'
+  - '@img/sharp-win32-ia32@0.35.4'
+  - '@img/sharp-win32-x64@0.35.4'
+  - '@next/env@16.3.4'
+  - '@next/swc-darwin-arm64@16.3.4'
+  - '@next/swc-darwin-x64@16.3.4'
+  - '@next/swc-linux-arm64-gnu@16.3.4'
+  - '@next/swc-linux-arm64-musl@16.3.4'
+  - '@next/swc-linux-x64-gnu@16.3.4'
+  - '@next/swc-linux-x64-musl@16.3.4'
+  - '@next/swc-win32-arm64-msvc@16.3.4'
+  - '@next/swc-win32-x64-msvc@16.3.4'
+  - '@next/third-parties@16.3.4'
   - '@opentelemetry/core@2.8.0'
   - '@opentelemetry/semantic-conventions@1.43.0'
   - baseline-browser-mapping@2.11.1
@@ -39,20 +63,20 @@ minimumReleaseAgeExclude:
   - electron-to-chromium@1.5.396
   - enhanced-resolve@5.24.3
   - es-module-lexer@2.3.1
-  - fast-uri@3.1.5
+  - fast-uri@3.1.6
   - immutable@5.1.8
   - ip-address@10.3.1
-  - js-yaml@4.3.1
+  - js-yaml@4.3.2
   - nanoid@3.3.18
   - next-auth@4.24.15
-  - next@16.2.12
+  - next@16.3.4
   - node-releases@2.0.51
   - postcss@8.5.23
   - protobufjs@7.6.4
-  - qs@6.15.2
+  - qs@6.16.0
   - react-is@19.2.8
   - rxjs@7.8.2
-  - sharp@0.35.0
+  - sharp@0.35.4
   - shell-quote@1.9.0
   - terser@5.49.0
   - tmp@0.2.7
@@ -63,22 +87,28 @@ minimumReleaseAgeExclude:
   - ws@8.21.0
 
 overrides:
+  # Drop extract-zip (unfixed GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv) from
+  # @lhci/cli → lighthouse → puppeteer-core@24 (which pins browsers 2.x).
   '@opentelemetry/core': 2.8.0
+  '@puppeteer/browsers': 3.2.1
+  # browsers 3.x peer is proxy-agent >=8.0.1; @lhci/cli still declares ^6.4.0.
   body-parser: 1.20.6
   brace-expansion@5: 5.0.9
+  browserslist: 4.28.7
   dompurify: 3.4.13
-  fast-uri: 3.1.5
+  fast-uri: 3.1.6
   glob: 11.1.0
   immutable: 5.1.8
   ip-address: 10.3.1
-  js-yaml: 4.3.1
+  js-yaml: 4.3.2
   nanoid@3: 3.3.18
   postcss: 8.5.23
   protobufjs: 7.6.4
-  qs: 6.15.2
+  proxy-agent: 8.0.2
+  qs: 6.16.0
   rxjs: 7.8.2
   serialize-javascript: 7.0.5
-  sharp: 0.35.0
+  sharp: 0.35.4
   shell-quote: 1.9.0
   test-exclude: 7.0.2
   tmp: 0.2.7

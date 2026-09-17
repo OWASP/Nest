@@ -34,7 +34,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: bf9dd9c695ddaf238af36f179049202358ec22b7  # v1.108.1
+    rev: 581213484f4262600d17c71e272176d4eb6724a5  # v1.109.0
     hooks:
       - id: terraform_providers_lock
         args:
@@ -52,7 +52,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 7c55798a78262d14b2074abf623d8a992ebb70d4  # v0.16.2
+    rev: aab412d509121cb5f7533134b7e67f9fab59c682  # v0.16.4
     hooks:
       - id: ruff-check
         args:
@@ -93,7 +93,7 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 41e691678310dfd3833f7ab4e180ddb014310356  # v2.3.0
+    rev: 7ff8d35ae36a7d2b968f2f90b4c723e292e594ee  # v2.3.1
     hooks:
       - id: mypy
         additional_dependencies:
@@ -101,7 +101,7 @@ repos:
           - strawberry-graphql-django==0.87.0
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260807
-          - types-PyYAML==6.0.12.20260724
+          - types-PyYAML==6.0.12.20260815
           - types-requests==2.33.0.20260712
         entry: bash -c 'cd backend && mypy --config-file pyproject.toml src tests'
 
@@ -157,7 +157,7 @@ repos:
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: 807836a33bb2d3f17df12e8a6d10e4e24cd80564  # v2.27.1
+    rev: cc0b0f8d4107cfe80d6571644e639b05aee29128  # v2.28.1
     hooks:
       - id: pyproject-fmt
         additional_dependencies:
