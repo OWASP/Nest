@@ -1,3 +1,13 @@
+output "grafana_security_group_id" {
+  description = "Grafana security group ID for ALB integration, or null when the runtime is disabled."
+  value       = one(aws_security_group.grafana[*].id)
+}
+
+output "grafana_service_name" {
+  description = "Grafana ECS service name, or null when the runtime is disabled."
+  value       = one(aws_ecs_service.grafana[*].name)
+}
+
 output "grafana_ecr_repository_arn" {
   description = "The ARN of the repository for the Grafana image."
   value       = aws_ecr_repository.grafana.arn

@@ -5,10 +5,10 @@ seven-image retention policy as the application repositories.
 
 The existing Terraform CI role can publish to this repository through its
 environment-scoped ECR permissions. A separate Grafana ECS execution role has
-pull-only access to this repository. Its logging and secret permissions will be
-added with the Grafana service. The repository must exist before the first CI
-image push; these Terraform resources do not themselves deploy Grafana or publish
-an image.
+pull-only access to this repository. Logging permissions are added when the
+Grafana runtime is configured; secret permissions remain pending. The repository
+must exist before the first CI image push. Image publishing is handled by CI;
+runtime resources are configured as described below.
 
 ## Grafana image releases
 
@@ -30,9 +30,39 @@ repeats both checks before applying Terraform. Grafana's SBOM is embedded in the
 image manifest; it is not currently included in the separate backend/frontend
 CycloneDX release attachments.
 
-Publishing does not start a Grafana ECS service. That task definition and service
-are separate work, as are application OTLP settings and egress rules in #5406.
+Publishing does not start a Grafana ECS service. The task definition and service
+are configured separately, as are application OTLP settings and egress rules in #5406.
 The opt-in flag does not enable Terraform's `enable_observability` setting.
+
+## Grafana runtime (draft)
+
+`grafana_image` defaults to null, so existing observability deployments do not
+create Grafana runtime resources. Supply the published ECR image pinned by digest
+to create its task definition, service, log group, security group, and EFS access
+point. `grafana_desired_count` defaults to zero. Both inputs are exposed in the
+live Terraform configuration; the release workflow does not yet supply them.
+
+The service shares the observability ECS cluster and private subnets. It uses
+on-demand ARM64 Fargate with 0.25 vCPU and 512 MiB RAM, runs as UID/GID 472, and
+checks `/api/health`. CloudWatch receives console logs with the module's retention
+and encryption settings. A deployment circuit breaker rolls back failed
+deployments when a previous successful deployment exists.
+
+Grafana stores its own data in `/var/lib/grafana`, backed by a separate `/grafana`
+access point on the existing encrypted observability EFS filesystem. This path
+is distinct from VictoriaMetrics' metrics storage. SQLite WAL is disabled for
+the network filesystem. Only one Grafana task is allowed, and deployments stop
+the old task before starting its replacement, which causes brief downtime.
+This single-instance SQLite/EFS choice needs staging restart and locking tests
+before production; use an external PostgreSQL/MySQL database for a future HA
+design. It is not a backup strategy.
+
+The datasource uses VictoriaMetrics' private Cloud Map name, with security-group
+rules allowing Grafana to query the metrics port. No application OTLP settings
+are changed. No Grafana ingress is opened yet; ALB/HTTPS integration remains
+pending. Anonymous access, self-signup, and initial default admin creation are
+disabled. Keep the service stopped until the agreed credential bootstrap is
+implemented. No SSM parameter or Secrets Manager secret is created here.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -56,13 +86,17 @@ No modules.
 
 | Name | Type |
 | ---- | ---- |
+| [aws_cloudwatch_log_group.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ecr_lifecycle_policy.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_lifecycle_policy) | resource |
 | [aws_ecr_repository.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecs_cluster.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
+| [aws_ecs_service.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_service.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
+| [aws_ecs_task_definition.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_efs_access_point.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
 | [aws_efs_access_point.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
 | [aws_efs_file_system.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system) | resource |
 | [aws_efs_mount_target.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
@@ -70,11 +104,18 @@ No modules.
 | [aws_iam_policy.grafana_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.ecs_task_execution_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.grafana_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.grafana_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy_attachment.ecs_task_execution_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.grafana_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_security_group.efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.efs_from_grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.efs_from_vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.grafana_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.grafana_to_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.grafana_to_metrics](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.metrics_from_grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.vm_egress_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.vm_ingest_from_apps](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.vm_to_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
@@ -90,6 +131,8 @@ No modules.
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the module is deployed. | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_grafana_desired_count"></a> [grafana\_desired\_count](#input\_grafana\_desired\_count) | Grafana task count (0 or 1). Keep zero until credentials and access are configured. | `number` | `0` | no |
+| <a name="input_grafana_image"></a> [grafana\_image](#input\_grafana\_image) | Digest-pinned Grafana image; null omits Grafana runtime resources. | `string` | `null` | no |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key used to encrypt the EFS file system. | `string` | n/a | yes |
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The number of days to retain VictoriaMetrics container logs. | `number` | `90` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
@@ -109,6 +152,8 @@ No modules.
 | <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | The ID of the EFS file system backing VictoriaMetrics storage. |
 | <a name="output_grafana_ecr_repository_arn"></a> [grafana\_ecr\_repository\_arn](#output\_grafana\_ecr\_repository\_arn) | The ARN of the repository for the Grafana image. |
 | <a name="output_grafana_ecr_repository_url"></a> [grafana\_ecr\_repository\_url](#output\_grafana\_ecr\_repository\_url) | The URL used to publish and pull the Grafana image. |
+| <a name="output_grafana_security_group_id"></a> [grafana\_security\_group\_id](#output\_grafana\_security\_group\_id) | Grafana security group ID for ALB integration, or null when the runtime is disabled. |
+| <a name="output_grafana_service_name"></a> [grafana\_service\_name](#output\_grafana\_service\_name) | Grafana ECS service name, or null when the runtime is disabled. |
 | <a name="output_vm_cluster_name"></a> [vm\_cluster\_name](#output\_vm\_cluster\_name) | The name of the ECS cluster running VictoriaMetrics. |
 | <a name="output_vm_endpoint"></a> [vm\_endpoint](#output\_vm\_endpoint) | The private host:port endpoint for reaching VictoriaMetrics. |
 | <a name="output_vm_security_group_id"></a> [vm\_security\_group\_id](#output\_vm\_security\_group\_id) | The ID of the VictoriaMetrics security group. |

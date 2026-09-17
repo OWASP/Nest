@@ -142,7 +142,8 @@ jobs:
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
         }}
       TF_IN_AUTOMATION: true
-      GRAFANA_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-grafana:${{ inputs.release_version }}
+      GRAFANA_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-grafana:${{ inputs.release_version
+        }}
       TF_INPUT: false
     permissions:
       contents: read

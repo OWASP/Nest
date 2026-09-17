@@ -30,6 +30,26 @@ variable "environment" {
   type        = string
 }
 
+variable "grafana_image" {
+  description = "Digest-pinned Grafana image; null omits Grafana runtime resources."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.grafana_image == null ? true : can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.grafana_image))
+    error_message = "grafana_image must be null or an image reference pinned by SHA256 digest."
+  }
+}
+
+variable "grafana_desired_count" {
+  description = "Grafana task count (0 or 1). Keep zero until credentials and access are configured."
+  type        = number
+  default     = 0
+  validation {
+    condition     = contains([0, 1], var.grafana_desired_count) && (var.grafana_desired_count == 0 || var.grafana_image != null)
+    error_message = "Grafana supports zero or one task, and starting a task requires grafana_image."
+  }
+}
+
 variable "kms_key_arn" {
   description = "The ARN of the KMS key used to encrypt the EFS file system."
   type        = string
