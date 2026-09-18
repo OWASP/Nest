@@ -83,9 +83,9 @@ class TestProjectSerializerValidation:
         assert project.description == project_data["description"]
         assert project.key == project_data["key"]
         assert len(project.leaders) == 2
-        assert project.leaders[0].id == 1
-        assert project.leaders[0].name == "alice"
-        assert project.leaders[1].id == 2
+        assert project.leaders[0].key == "alice"
+        assert project.leaders[0].name == "Alice"
+        assert project.leaders[1].key is None
         assert project.leaders[1].name == "Bob"
         assert project.level == project_data["level"]
         assert project.name == project_data["name"]

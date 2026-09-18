@@ -32,6 +32,13 @@ def annotate_meeting_date(
     )
 
 
+class Leader(Schema):
+    """Schema for Leader."""
+
+    key: str | None = None
+    name: str
+
+
 class LocationFilter(FilterSchema):
     """Filter for Location."""
 

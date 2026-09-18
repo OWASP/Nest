@@ -63,9 +63,9 @@ class TestChapterSerializerValidation:
         assert chapter.latitude == chapter_data["latitude"]
         assert chapter.longitude == chapter_data["longitude"]
         assert len(chapter.leaders) == 2
-        assert chapter.leaders[0].id == 1
-        assert chapter.leaders[0].name == "alice"
-        assert chapter.leaders[1].id == 2
+        assert chapter.leaders[0].key == "alice"
+        assert chapter.leaders[0].name == "Alice"
+        assert chapter.leaders[1].key is None
         assert chapter.leaders[1].name == "Bob"
         assert chapter.name == chapter_data["name"]
         assert chapter.region == chapter_data["region"]
