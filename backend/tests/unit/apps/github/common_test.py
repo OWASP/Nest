@@ -26,6 +26,7 @@ def mock_common_deps(mocker):
             "apps.github.common.check_owasp_site_repository", return_value=False
         ),
         "logger": mocker.patch("apps.github.common.logger"),
+        "transaction": mocker.patch("apps.github.common.transaction"),
     }
 
     mock_repository = mocks["Repository"].update_data.return_value
