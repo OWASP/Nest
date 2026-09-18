@@ -2,10 +2,10 @@
 
 from datetime import datetime
 from http import HTTPStatus
-from typing import Literal
+from typing import Annotated, Literal
 
 from django.http import HttpRequest
-from ninja import Field, FilterSchema, Path, Query, Schema
+from ninja import Field, FilterLookup, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
@@ -99,16 +99,14 @@ class BoardMeetingError(Schema):
 class BoardMeetingFilter(FilterSchema):
     """Filter for BoardMeeting."""
 
-    date_gte: datetime | None = Field(
-        None,
-        description="Meeting date greater than or equal to (ISO 8601)",
-        q="date__gte",
-    )
-    date_lte: datetime | None = Field(
-        None,
-        description="Meeting date less than or equal to (ISO 8601)",
-        q="date__lte",
-    )
+    date_gte: Annotated[
+        datetime | None,
+        FilterLookup(q="date__gte"),
+    ] = Field(None, description="Meeting date greater than or equal to (ISO 8601)")
+    date_lte: Annotated[
+        datetime | None,
+        FilterLookup(q="date__lte"),
+    ] = Field(None, description="Meeting date less than or equal to (ISO 8601)")
     quorum_present: bool | None = Field(
         None,
         description="Whether quorum was reached at the meeting",

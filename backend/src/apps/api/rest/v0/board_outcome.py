@@ -2,10 +2,10 @@
 
 from datetime import date, datetime
 from http import HTTPStatus
-from typing import Literal
+from typing import Annotated, Literal
 
 from django.http import HttpRequest
-from ninja import Field, FilterSchema, Path, Query, Schema
+from ninja import Field, FilterLookup, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
@@ -64,20 +64,26 @@ class BoardOutcomeError(Schema):
 class BoardOutcomeFilter(FilterSchema):
     """Filter for BoardOutcome."""
 
-    assignee: int | None = Field(
+    assignee: Annotated[
+        int | None,
+        FilterLookup(q="assignees__id"),
+    ] = Field(
         None,
         description="Assignee EntityMember id",
-        q="assignees__id",
     )
-    date_gte: datetime | None = Field(
+    date_gte: Annotated[
+        datetime | None,
+        FilterLookup(q="meeting_date__gte"),
+    ] = Field(
         None,
         description="Parent meeting date greater than or equal to (ISO 8601)",
-        q="meeting_date__gte",
     )
-    date_lte: datetime | None = Field(
+    date_lte: Annotated[
+        datetime | None,
+        FilterLookup(q="meeting_date__lte"),
+    ] = Field(
         None,
         description="Parent meeting date less than or equal to (ISO 8601)",
-        q="meeting_date__lte",
     )
     status: BoardOutcomeModel.Status | None = Field(
         None,
