@@ -23,6 +23,10 @@ class EmailLogAdmin(admin.ModelAdmin):
         """Prevent manual creation of email logs."""
         return False
 
+    def has_delete_permission(self, request, obj=None):
+        """Prevent deletion of email logs to preserve duplicate-send protection."""
+        return False
+
     @admin.display(description="User")
     def get_user(self, obj):
         """Return the user from the subscription."""

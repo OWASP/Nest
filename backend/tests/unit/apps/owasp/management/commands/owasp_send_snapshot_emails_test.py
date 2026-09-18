@@ -8,6 +8,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from apps.owasp.models.snapshot import Snapshot
+from apps.owasp.services.newsletter import send_digest_email
 
 
 class TestSendSnapshotEmailsCommand:
@@ -61,6 +62,7 @@ class TestSendSnapshotEmailsCommand:
 
         output = stdout.getvalue()
         assert "DRY RUN" in output
+        assert "[DRY RUN] Would enqueue digest for testuser" in output
         mock_rq.get_queue.return_value.enqueue.assert_not_called()
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
@@ -92,7 +94,12 @@ class TestSendSnapshotEmailsCommand:
         call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30", stdout=stdout)
 
         mock_rq.get_queue.assert_called_with("emails")
-        mock_rq.get_queue.return_value.enqueue.assert_called_once()
+        mock_rq.get_queue.return_value.enqueue.assert_called_once_with(
+            send_digest_email,
+            snapshot_id=42,
+            subscription_id=7,
+            expected_frequency="weekly",
+        )
         assert "ENQUEUED" in stdout.getvalue()
 
     @patch(

@@ -22,10 +22,14 @@ class TestEmailLogAdmin:
         site = AdminSite()
         admin_instance = EmailLogAdmin(EmailLog, site)
 
-        assert "get_user" in admin_instance.list_display
-        assert "snapshot" in admin_instance.list_display
-        assert "status" in admin_instance.list_display
+        assert admin_instance.list_display == (
+            "get_user",
+            "snapshot",
+            "status",
+            "created_at",
+        )
         assert admin_instance.list_filter == ("status", "created_at")
+        assert admin_instance.search_fields == ("snapshot_subscription__user__email",)
 
     def test_has_no_add_permission(self):
         """Test admin prevents manual creation."""
@@ -34,6 +38,15 @@ class TestEmailLogAdmin:
         request = MagicMock()
 
         assert admin_instance.has_add_permission(request) is False
+
+    def test_has_no_delete_permission(self):
+        """Test admin prevents deletion to preserve duplicate-send protection."""
+        site = AdminSite()
+        admin_instance = EmailLogAdmin(EmailLog, site)
+        request = MagicMock()
+
+        assert admin_instance.has_delete_permission(request) is False
+        assert admin_instance.has_delete_permission(request, obj=MagicMock()) is False
 
     def test_readonly_fields(self):
         """Test all fields are readonly."""

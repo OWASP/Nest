@@ -39,15 +39,23 @@ class EmailService(ABC):
         Returns:
             True if the email was sent successfully.
 
+        Raises:
+            Exception: Implementations must raise appropriate exceptions (like
+                SMTPException or OSError) if sending fails, allowing the caller
+                to handle the error.
+
         """
 
     @abstractmethod
     def send_bulk(self, messages: list[dict]) -> dict:
         """Send multiple emails.
 
+        Unlike `send()`, this method must catch individual email sending errors
+        and report them in the `failed` count rather than raising exceptions.
+
         Args:
             messages: List of dicts, each containing 'to', 'subject',
-                     'html_body', and 'plain_body' keys.
+                     'html_body', 'plain_body', and optionally 'headers' keys.
 
         Returns:
             Dict with 'sent' and 'failed' counts.
