@@ -49,6 +49,25 @@ class Certificate(TimestampedModel):
                 name="unique_active_cert_per_tier",
                 violation_error_message="Cannot have multiple active certificates for same tier",
             ),
+            models.CheckConstraint(
+                condition=(
+                    Q(tier__in=TierChoices.values)
+                    | (
+                        Q(tier="")
+                        & ~Q(title="")
+                        & Q(title__isnull=False)
+                        & (
+                            (Q(project__isnull=False) & Q(chapter__isnull=True))
+                            | (Q(project__isnull=True) & Q(chapter__isnull=False))
+                        )
+                    )
+                ),
+                name="valid_certificate_type",
+                violation_error_message=(
+                    "Certificate must be either a valid tier certificate or a generic certificate"
+                    " with a title and associated project/chapter."
+                ),
+            ),
         ]
 
     id = models.CharField(
@@ -74,7 +93,7 @@ class Certificate(TimestampedModel):
     )
     title = models.CharField(
         verbose_name="Title",
-        max_length=255,
+        max_length=50,
         blank=True,
         default="",
         help_text="Certificate title",
@@ -87,7 +106,7 @@ class Certificate(TimestampedModel):
     )
     project = models.ForeignKey(
         "owasp.Project",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="certificates",
         blank=True,
         null=True,
@@ -95,7 +114,7 @@ class Certificate(TimestampedModel):
     )
     chapter = models.ForeignKey(
         "owasp.Chapter",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="certificates",
         blank=True,
         null=True,

@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
-import MyCertificatePage from 'app/certificate/page'
+import MyCertificatePage from 'app/my/certificates/page'
 import { CertificateCard } from 'components/CertificateCard'
 
 jest.mock('@apollo/client/react', () => ({
@@ -210,7 +210,7 @@ describe('MyCertificatePage', () => {
       render(<MyCertificatePage />)
 
       await waitFor(() => {
-        expect(screen.getByText('No Certificate Found')).toBeInTheDocument()
+        expect(screen.getByText('No Certificates Found')).toBeInTheDocument()
         expect(screen.getByText('Start Contributing')).toBeInTheDocument()
       })
     })
@@ -222,7 +222,7 @@ describe('MyCertificatePage', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('certificate-card')).toBeInTheDocument()
-        expect(screen.getByText("Test User's Certificate")).toBeInTheDocument()
+        expect(screen.getByText("Test User's Certificates")).toBeInTheDocument()
         expect(screen.getByText('Save as Image')).toBeInTheDocument()
       })
 
@@ -246,7 +246,7 @@ describe('MyCertificatePage', () => {
       render(<MyCertificatePage />)
 
       await waitFor(() => {
-        expect(screen.getByText("loginonly's Certificate")).toBeInTheDocument()
+        expect(screen.getByText("loginonly's Certificates")).toBeInTheDocument()
       })
     })
 
@@ -268,7 +268,31 @@ describe('MyCertificatePage', () => {
   describe('Multiple Certificates', () => {
     it('renders "Previous Certificates" section when there are multiple certificates', async () => {
       mockUseQuery.mockReturnValue({
-        data: mockMyCertificatesMultipleData,
+        data: {
+          myCertificates: [
+            mockCertificate,
+            {
+              ...mockCertificate,
+              id: 'R2ST6YC1ZYXW',
+              title: 'Custom Title',
+              tier: 'level 3',
+              chapter: { name: 'OWASP London', key: 'london' },
+              project: null,
+              issuedAt: '2023-05-15T10:00:00.000Z',
+              score: 80,
+            },
+            {
+              ...mockCertificate,
+              id: 'R2ST6YC1ZYX2',
+              title: 'Custom Title No Tier',
+              tier: null,
+              project: { name: 'OWASP Nest', key: 'nest' },
+              chapter: null,
+              issuedAt: '2022-05-15T10:00:00.000Z',
+              score: 0,
+            },
+          ],
+        },
         loading: false,
         error: null,
       })
@@ -277,7 +301,10 @@ describe('MyCertificatePage', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Previous Certificates')).toBeInTheDocument()
-        expect(screen.getByText('View Certificate')).toBeInTheDocument()
+        expect(screen.getByText('Custom Title')).toBeInTheDocument()
+        expect(screen.getByText('OWASP London')).toBeInTheDocument()
+        expect(screen.getByText('Custom Title No Tier')).toBeInTheDocument()
+        expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
       })
     })
 
@@ -419,7 +446,7 @@ describe('MyCertificatePage', () => {
 
       await waitFor(() => {
         expect(writeTextMock).toHaveBeenCalledWith(
-          expect.stringContaining('/certificate/F9DD2BJ9ZYXW')
+          expect.stringContaining('/certificates/F9DD2BJ9ZYXW')
         )
         expect(addToast).toHaveBeenCalledWith({
           title: 'Link Copied',
