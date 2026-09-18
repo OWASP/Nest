@@ -27,12 +27,10 @@ class MockMember:
 
 
 class MockEntityMember:
-    """Mock for an entity member with an optional matched login."""
+    """Mock for entity leader with optional member login."""
 
-    def __init__(self, entity_id: int, name: str, login: str | None = None) -> None:
-        self.id = entity_id
+    def __init__(self, name: str, login: str | None = None) -> None:
         self.member = MockMember(login) if login else None
-        self.member_id = login or None
         self.member_name = name
 
 
@@ -44,8 +42,8 @@ class MockProject:
             setattr(self, key, value)
         self.nest_key = data["key"]
         self.entity_leaders = [
-            MockEntityMember(1, "Alice", "alice"),
-            MockEntityMember(2, "Bob"),
+            MockEntityMember("Alice", "alice"),
+            MockEntityMember("Bob"),
         ]
 
 

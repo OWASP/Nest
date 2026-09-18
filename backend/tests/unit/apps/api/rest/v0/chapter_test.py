@@ -39,10 +39,8 @@ class TestChapterSerializerValidation:
                 self.login = login
 
         class MockEntityMember:
-            def __init__(self, entity_id, name, login=None):
-                self.id = entity_id
+            def __init__(self, name, login=None):
                 self.member = MockMember(login) if login else None
-                self.member_id = login or None
                 self.member_name = name
 
         class MockChapter:
@@ -51,8 +49,8 @@ class TestChapterSerializerValidation:
                     setattr(self, key, value)
                 self.nest_key = data["key"]
                 self.entity_leaders = [
-                    MockEntityMember(1, "Alice", "alice"),
-                    MockEntityMember(2, "Bob"),
+                    MockEntityMember("Alice", "alice"),
+                    MockEntityMember("Bob"),
                 ]
 
         chapter = ChapterDetail.from_orm(MockChapter(chapter_data))

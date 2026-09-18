@@ -43,9 +43,9 @@ def annotate_meeting_date(
     """
     return queryset.annotate(
         meeting_date=Subquery(
-            BoardMeetingAction.objects.filter(**{action_field: OuterRef(outer_ref)}).values(
-                "meeting__date"
-            )[:1]
+            BoardMeetingAction.objects.filter(**{action_field: OuterRef(outer_ref)})
+            .order_by("pk")
+            .values("meeting__date")[:1]
         )
     )
 
