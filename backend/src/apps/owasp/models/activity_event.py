@@ -130,6 +130,9 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
     @staticmethod
     def update_data(source) -> list["ActivityEvent"]:
         """Return unsaved ActivityEvent instances for a GitHub model object."""
+        if source.repository is None:
+            return []
+
         handler_name = ActivityEvent.HANDLERS.get(type(source).__name__)
         if handler_name is None:
             logger.error(
