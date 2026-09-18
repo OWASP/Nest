@@ -41,7 +41,7 @@ class TestChapterSerializerValidation:
         class MockEntityMember:
             def __init__(self, entity_id, name, login=None):
                 self.id = entity_id
-                self.member = MockMember(login)
+                self.member = MockMember(login) if login else None
                 self.member_id = login or None
                 self.member_name = name
 

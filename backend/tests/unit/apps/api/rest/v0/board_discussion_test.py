@@ -88,10 +88,11 @@ class TestGetBoardDiscussion:
         """Return a 404 error response when the discussion does not exist."""
         mock_request = MagicMock()
         mock_qs = mock_discussion_model.objects.annotate.return_value
-        mock_qs = mock_qs.prefetch_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = None
+        mock_prefetched_qs = mock_qs.prefetch_related.return_value
+        mock_filtered_qs = mock_prefetched_qs.filter.return_value
+        mock_filtered_qs.first.return_value = None
 
         result = get_board_discussion(mock_request, 999)
 
+        mock_prefetched_qs.filter.assert_called_once_with(id=999)
         assert result.status_code == HTTPStatus.NOT_FOUND

@@ -54,7 +54,7 @@ class TestListBoardMotions:
 
         result = list_board_motions(mock_request, mock_filters, ordering=None)
 
-        mock_queryset.filter.assert_called_once()
+        assert dict(mock_queryset.filter.call_args[0][0].children)["sponsor_id"] == 7
         assert result == mock_queryset
 
 

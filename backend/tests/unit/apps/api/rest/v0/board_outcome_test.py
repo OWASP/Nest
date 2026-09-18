@@ -58,7 +58,10 @@ class TestListBoardOutcomes:
 
         result = list_board_outcomes(mock_request, mock_filters, ordering=None)
 
-        mock_queryset.filter.assert_called_once()
+        assert dict(mock_queryset.filter.call_args[0][0].children) == {
+            "assignees__id": 1,
+            "status": "pending",
+        }
         assert result == mock_queryset
 
 
@@ -71,12 +74,13 @@ class TestGetBoardOutcome:
         mock_request = MagicMock()
         mock_outcome = MagicMock()
         mock_qs = mock_outcome_model.objects.annotate.return_value
-        mock_qs = mock_qs.prefetch_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = mock_outcome
+        mock_prefetched_qs = mock_qs.prefetch_related.return_value
+        mock_filtered_qs = mock_prefetched_qs.filter.return_value
+        mock_filtered_qs.first.return_value = mock_outcome
 
         result = get_board_outcome(mock_request, 1)
 
+        mock_prefetched_qs.filter.assert_called_once_with(id=1)
         assert result == mock_outcome
 
     @patch("apps.api.rest.v0.board_outcome.BoardOutcomeModel")
@@ -84,10 +88,11 @@ class TestGetBoardOutcome:
         """Return a 404 error response when the outcome does not exist."""
         mock_request = MagicMock()
         mock_qs = mock_outcome_model.objects.annotate.return_value
-        mock_qs = mock_qs.prefetch_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = None
+        mock_prefetched_qs = mock_qs.prefetch_related.return_value
+        mock_filtered_qs = mock_prefetched_qs.filter.return_value
+        mock_filtered_qs.first.return_value = None
 
         result = get_board_outcome(mock_request, 999)
 
+        mock_prefetched_qs.filter.assert_called_once_with(id=999)
         assert result.status_code == HTTPStatus.NOT_FOUND
