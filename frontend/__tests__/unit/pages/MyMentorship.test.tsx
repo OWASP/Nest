@@ -53,7 +53,6 @@ jest.mock('components/AccessDeniedDisplay', () => {
   }
 })
 
-
 jest.mock('next/navigation', () => {
   const actual = jest.requireActual('next/navigation')
   return {
@@ -135,7 +134,7 @@ describe('MyMentorshipPage', () => {
     expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
   })
 
-  it('renders AccessDeniedDisplay for a non-leader user and skips query execution', async () => {
+  it('renders AccessDeniedDisplay for an unauthorized user and skips query execution', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
@@ -144,7 +143,7 @@ describe('MyMentorshipPage', () => {
           login: 'user1',
           isLeader: false,
           isMentor: false,
-          isMentee: true,
+          isMentee: false,
         },
         expires: '2099-01-01T00:00:00.000Z',
       },
@@ -193,6 +192,34 @@ describe('MyMentorshipPage', () => {
     render(<MyMentorshipPage />)
     expect(await screen.findByText('My Mentorship')).toBeInTheDocument()
     expect(await screen.findByText('Test Program')).toBeInTheDocument()
+  })
+
+  it('renders mentorship programs for mentee', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Mentee User',
+          email: 'mentee@example.com',
+          login: 'mentee1',
+          isLeader: false,
+          isMentor: false,
+          isMentee: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: mockProgramData,
+      loading: false,
+      error: undefined,
+    })
+
+    render(<MyMentorshipPage />)
+    expect(await screen.findByText('My Mentorship')).toBeInTheDocument()
+    expect(await screen.findByText('Test Program')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /create program/i })).not.toBeInTheDocument()
   })
 
   it('shows empty state when no programs found', async () => {
@@ -502,40 +529,16 @@ describe('MyMentorshipPage', () => {
     }
   })
 
-  it('shows AccessDeniedDisplay for a mentee program view attempt', async () => {
+  it('shows AccessDeniedDisplay for a user without mentorship roles', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
-          name: 'Mentee User',
-          email: 'mentee@example.com',
-          login: 'mentee1',
-          isLeader: false,
-          isMentor: false,
-          isMentee: true,
-        },
-        expires: '2099-01-01T00:00:00.000Z',
-      },
-      status: 'authenticated',
-    })
-    mockUseQuery.mockReturnValue({
-      data: undefined,
-      loading: false,
-      error: undefined,
-    })
-    render(<MyMentorshipPage />)
-    expect(await screen.findByTestId('access-denied-display')).toBeInTheDocument()
-  })
-
-  it('shows AccessDeniedDisplay for a user with no programs who is not a leader', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
-      data: {
-        user: {
-          name: 'User',
+          name: 'Regular User',
           email: 'user@example.com',
           login: 'user1',
           isLeader: false,
           isMentor: false,
-          isMentee: true,
+          isMentee: false,
         },
         expires: '2099-01-01T00:00:00.000Z',
       },
