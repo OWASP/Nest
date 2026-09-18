@@ -418,9 +418,9 @@ def send_digest_email(snapshot_id: int, subscription_id: int, expected_frequency
         subscription = (
             SnapshotSubscription.objects.select_related("user")
             .prefetch_related(
-                "subscribed_projects",
-                "subscribed_chapters",
-                "subscribed_committees",
+                "projects",
+                "chapters",
+                "committees",
             )
             .get(id=subscription_id)
         )
