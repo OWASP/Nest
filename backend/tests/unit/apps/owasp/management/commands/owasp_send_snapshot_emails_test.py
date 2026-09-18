@@ -102,12 +102,13 @@ class TestSendSnapshotEmailsCommand:
         )
         assert "ENQUEUED" in stdout.getvalue()
 
+    @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(
         "apps.owasp.management.commands.owasp_send_snapshot_emails.SnapshotSubscription.objects"
     )
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.EmailLog")
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.Snapshot.objects")
-    def test_skips_already_sent(self, mock_snap_objects, mock_email_log, mock_snap_sub):
+    def test_skips_already_sent(self, mock_snap_objects, mock_email_log, mock_snap_sub, mock_rq):
         """Test command skips already-sent subscribers."""
         mock_snapshot = MagicMock(spec=Snapshot)
         mock_snapshot.status = Snapshot.Status.COMPLETED
@@ -128,3 +129,4 @@ class TestSendSnapshotEmailsCommand:
         call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30", stdout=stdout)
 
         assert "SKIP" in stdout.getvalue()
+        mock_rq.get_queue.return_value.enqueue.assert_not_called()

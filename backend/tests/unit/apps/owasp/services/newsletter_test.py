@@ -546,7 +546,8 @@ class TestSendDigestEmail:
     def test_skips_duplicate(self, mock_snapshot_cls, mock_sub_cls, mock_email_log):
         """Test job exits early on duplicate EmailLog."""
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_cls.objects.get.return_value = MagicMock()
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = MagicMock()
         mock_email_log.is_duplicate.return_value = True
 
         send_digest_email(snapshot_id=1, subscription_id=1)
@@ -574,7 +575,8 @@ class TestSendDigestEmail:
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
         mock_sub.user.email = "test@example.com"
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
         mock_render.return_value = "<html>body</html>"
@@ -606,7 +608,8 @@ class TestSendDigestEmail:
     ):
         """Test job skips sending when all content is empty."""
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_cls.objects.get.return_value = MagicMock()
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = MagicMock()
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_empty_digest()
 
@@ -634,7 +637,8 @@ class TestSendDigestEmail:
         mock_snapshot = MagicMock()
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
         mock_render.return_value = "<html>body</html>"
@@ -667,7 +671,8 @@ class TestSendDigestEmail:
         mock_snapshot = MagicMock()
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
         mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
         mock_render.return_value = "<html>body</html>"
@@ -689,7 +694,10 @@ class TestSendDigestEmail:
         mock_snapshot_cls.DoesNotExist = Snapshot.DoesNotExist
         mock_sub_cls.DoesNotExist = SnapshotSubscription.DoesNotExist
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_cls.objects.get.side_effect = SnapshotSubscription.DoesNotExist
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.side_effect = (
+            SnapshotSubscription.DoesNotExist
+        )
 
         send_digest_email(snapshot_id=1, subscription_id=999)
 
@@ -708,7 +716,8 @@ class TestSendDigestEmail:
         mock_snapshot_cls.objects.get.return_value = MagicMock()
         mock_sub = MagicMock()
         mock_sub.is_active = False
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
 
         send_digest_email(snapshot_id=1, subscription_id=1)
 
@@ -732,7 +741,8 @@ class TestSendDigestEmail:
         mock_sub = MagicMock()
         mock_sub.is_active = True
         mock_sub.frequency = "monthly"
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
 
         send_digest_email(snapshot_id=1, subscription_id=1, expected_frequency="weekly")
 

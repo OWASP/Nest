@@ -29,6 +29,10 @@ class TestEmailLogAdmin:
             "created_at",
         )
         assert admin_instance.list_filter == ("status", "created_at")
+        assert admin_instance.list_select_related == (
+            "snapshot",
+            "snapshot_subscription__user",
+        )
         assert admin_instance.search_fields == ("snapshot_subscription__user__email",)
 
     def test_has_no_add_permission(self):

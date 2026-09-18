@@ -10,6 +10,7 @@ class EmailLogAdmin(admin.ModelAdmin):
 
     list_display = ("get_user", "snapshot", "status", "created_at")
     list_filter = ("status", "created_at")
+    list_select_related = ("snapshot", "snapshot_subscription__user")
     search_fields = ("snapshot_subscription__user__email",)
     readonly_fields = (
         "snapshot_subscription",

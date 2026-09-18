@@ -411,7 +411,15 @@ def send_digest_email(snapshot_id: int, subscription_id: int, expected_frequency
     """
     try:
         snapshot = Snapshot.objects.get(id=snapshot_id)
-        subscription = SnapshotSubscription.objects.get(id=subscription_id)
+        subscription = (
+            SnapshotSubscription.objects.select_related("user")
+            .prefetch_related(
+                "subscribed_projects",
+                "subscribed_chapters",
+                "subscribed_committees",
+            )
+            .get(id=subscription_id)
+        )
     except (Snapshot.DoesNotExist, SnapshotSubscription.DoesNotExist):
         logger.warning(
             "send_digest_email: snapshot %s or subscription %s not found.",
