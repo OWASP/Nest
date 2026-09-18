@@ -99,7 +99,7 @@ def list_board_discussions(
     discussions = filters.filter(
         annotate_meeting_date(BoardDiscussionModel.objects.all(), action_field="discussion")
     )
-    return discussions.order_by(ordering or "-meeting_date")
+    return discussions.order_by(ordering or "-meeting_date", "-id")
 
 
 @router.get(

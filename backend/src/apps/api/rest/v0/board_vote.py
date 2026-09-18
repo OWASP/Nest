@@ -119,7 +119,7 @@ def list_board_votes(
             BoardVoteModel.objects.all(), action_field="motion", outer_ref="motion_id"
         )
     )
-    return votes.order_by(ordering or "-meeting_date")
+    return votes.order_by(ordering or "-meeting_date", "-id")
 
 
 @router.get(

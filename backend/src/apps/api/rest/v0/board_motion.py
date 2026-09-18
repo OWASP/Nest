@@ -108,7 +108,7 @@ def list_board_motions(
             action_field="motion",
         )
     )
-    return motions.order_by(ordering or "-meeting_date")
+    return motions.order_by(ordering or "-meeting_date", "-id")
 
 
 @router.get(

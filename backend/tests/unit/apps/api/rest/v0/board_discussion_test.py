@@ -26,7 +26,7 @@ class TestListBoardDiscussions:
 
         result = list_board_discussions(mock_request, mock_filters, ordering=None)
 
-        mock_queryset.order_by.assert_called_once_with("-meeting_date")
+        mock_queryset.order_by.assert_called_once_with("-meeting_date", "-id")
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_discussion.BoardDiscussionModel")
@@ -42,7 +42,7 @@ class TestListBoardDiscussions:
 
         result = list_board_discussions(mock_request, mock_filters, ordering="meeting_date")
 
-        mock_queryset.order_by.assert_called_once_with("meeting_date")
+        mock_queryset.order_by.assert_called_once_with("meeting_date", "-id")
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_discussion.BoardDiscussionModel")

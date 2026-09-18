@@ -24,7 +24,7 @@ class TestListBoardMeetings:
 
         result = list_board_meetings(mock_request, mock_filters, ordering=None)
 
-        mock_meeting_model.objects.order_by.assert_called_once_with("-date")
+        mock_meeting_model.objects.order_by.assert_called_once_with("-date", "-id")
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_meeting.BoardMeetingModel")
@@ -38,7 +38,7 @@ class TestListBoardMeetings:
 
         result = list_board_meetings(mock_request, mock_filters, ordering="date")
 
-        mock_meeting_model.objects.order_by.assert_called_once_with("date")
+        mock_meeting_model.objects.order_by.assert_called_once_with("date", "-id")
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_meeting.BoardMeetingModel")

@@ -111,7 +111,7 @@ def list_board_outcomes(
     outcomes = filters.filter(
         annotate_meeting_date(BoardOutcomeModel.objects.all(), action_field="outcome")
     )
-    return outcomes.order_by(ordering or "-meeting_date")
+    return outcomes.order_by(ordering or "-meeting_date", "-id")
 
 
 @router.get(

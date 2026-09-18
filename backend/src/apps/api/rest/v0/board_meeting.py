@@ -134,7 +134,7 @@ def list_board_meetings(
     ),
 ) -> list[BoardMeeting]:
     """List board meetings."""
-    return filters.filter(BoardMeetingModel.objects.order_by(ordering or "-date"))
+    return filters.filter(BoardMeetingModel.objects.order_by(ordering or "-date", "-id"))
 
 
 @router.get(
