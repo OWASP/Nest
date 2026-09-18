@@ -13,6 +13,16 @@ export const GET_CERTIFICATE = gql`
       isVerified
       score
       tier
+      title
+      message
+      project {
+        name
+        key
+      }
+      chapter {
+        name
+        key
+      }
     }
   }
 `
@@ -30,6 +40,16 @@ export const GET_MY_CERTIFICATE = gql`
       isVerified
       score
       tier
+      title
+      message
+      project {
+        name
+        key
+      }
+      chapter {
+        name
+        key
+      }
     }
   }
 `

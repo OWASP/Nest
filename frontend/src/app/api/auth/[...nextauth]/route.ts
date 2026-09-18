@@ -2,6 +2,7 @@ import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
+import { IsChapterLeaderDocument } from 'types/__generated__/chapterQueries.generated'
 import {
   IsMenteeDocument,
   IsMentorDocument,
@@ -41,6 +42,14 @@ const checkIfProjectLeader = (login: string) =>
     login,
     (data) => data?.isProjectLeader ?? false,
     'project leader'
+  )
+
+const checkIfChapterLeader = (login: string) =>
+  checkRole(
+    IsChapterLeaderDocument,
+    login,
+    (data) => data?.isChapterLeader ?? false,
+    'chapter leader'
   )
 
 const checkIfMentor = (login: string) =>
@@ -88,12 +97,26 @@ const authOptions: AuthOptions = {
         const login = (profile as ExtendedProfile).login
         token.login = login
 
-        const isLeader = await checkIfProjectLeader(login)
-        const isMentor = await checkIfMentor(login)
-        const isMentee = await checkIfMentee(login)
+        const [isLeader, isChapterLeader, isMentor, isMentee] = await Promise.all([
+          checkIfProjectLeader(login),
+          checkIfChapterLeader(login),
+          checkIfMentor(login),
+          checkIfMentee(login),
+        ])
         token.isLeader = isLeader
+        token.isChapterLeader = isChapterLeader
         token.isMentor = isMentor
         token.isMentee = isMentee
+      } else if (token.login && typeof token.isChapterLeader !== 'boolean') {
+        try {
+          token.isChapterLeader = await checkIfChapterLeader(token.login as string)
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'Failed to fetch chapter leader status; will retry on next session refresh:',
+            err
+          )
+        }
       }
 
       if (trigger === 'update' && session) {
@@ -112,6 +135,7 @@ const authOptions: AuthOptions = {
         extSession.user!.isMentor = token.isMentor as boolean
         extSession.user!.isMentee = token.isMentee as boolean
         extSession.user!.isLeader = token.isLeader as boolean
+        extSession.user!.isChapterLeader = token.isChapterLeader as boolean
         extSession.user!.isOwaspStaff = token.isOwaspStaff as boolean
       }
       return session
