@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 
-from apps.owasp.admin.email_log import EmailLogAdmin
+from apps.owasp.admin import EmailLogAdmin
 from apps.owasp.models.email_log import EmailLog
 
 
