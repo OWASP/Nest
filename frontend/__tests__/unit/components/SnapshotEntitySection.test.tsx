@@ -457,7 +457,7 @@ describe('SnapshotEntitySection', () => {
     expect(screen.queryByText('Issues')).not.toBeInTheDocument()
   })
 
-  it('does not fetch more PRs when hasMorePRs is false', async () => {
+  it('does not render Show more when hasMorePRs is false', async () => {
     const fewPRs = mockPRs.slice(0, 3)
     const mockFetchPRs = jest.fn().mockResolvedValue({ data: {} })
     ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchPRs])
@@ -475,7 +475,7 @@ describe('SnapshotEntitySection', () => {
     expect(screen.queryByText('Show more')).not.toBeInTheDocument()
   })
 
-  it('does not fetch more issues when hasMoreIssues is false', async () => {
+  it('does not render Show more when hasMoreIssues is false', async () => {
     const fewIssues = mockIssues.slice(0, 3)
     ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
       jest.fn().mockResolvedValue({ data: {} }),
