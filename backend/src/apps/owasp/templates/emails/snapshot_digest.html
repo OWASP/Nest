@@ -9,8 +9,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
   <meta name="x-apple-disable-message-reformatting">
-  <meta name="color-scheme" content="light dark">
-  <meta name="supported-color-schemes" content="light dark">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>{{ snapshot.title }} — OWASP Nest</title>
   <!--[if mso]>
   <noscript>
@@ -609,6 +609,7 @@
     }
   </style>
 </head>
+{% load url_filters %}
 
 <body
   class="email-body">
@@ -714,6 +715,7 @@
                                     <td width="{% if chapters_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
                                       class="card">
                                       <p class="card-heading">
+                                        {# nosemgrep #}
                                         <a href="{{ site_url }}/chapters/{{ row.0.nest_key }}" target="_blank"
                                           class="card-link">{{ row.0.name }}</a>
                                       </p>
@@ -734,6 +736,7 @@
                                     <td width="{% if chapters_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
                                       class="card">
                                       <p class="card-heading">
+                                        {# nosemgrep #}
                                         <a href="{{ site_url }}/chapters/{{ row.1.nest_key }}" target="_blank"
                                           class="card-link">{{ row.1.name }}</a>
                                       </p>
@@ -754,6 +757,7 @@
                                     <td colspan="3" width="{% if chapters_data.extra %}90%{% else %}100%{% endif %}" valign="top"
                                       class="card">
                                       <p class="card-heading">
+                                        {# nosemgrep #}
                                         <a href="{{ site_url }}/chapters/{{ row.0.nest_key }}" target="_blank"
                                           class="card-link">{{ row.0.name }}</a>
                                       </p>
@@ -832,6 +836,7 @@
                                        class="card">
                                        <p
                                          class="project-heading">
+                                         {# nosemgrep #}
                                          <a href="{{ site_url }}/projects/{{ row.0.project.nest_key }}" target="_blank"
                                            class="card-link">{{ row.0.project.name }}</a>
                                        </p>
@@ -874,6 +879,7 @@
                                        class="card">
                                        <p
                                          class="project-heading">
+                                         {# nosemgrep #}
                                          <a href="{{ site_url }}/projects/{{ row.1.project.nest_key }}" target="_blank"
                                            class="card-link">{{ row.1.project.name }}</a>
                                        </p>
@@ -916,6 +922,7 @@
                                        class="card">
                                        <p
                                          class="project-heading">
+                                         {# nosemgrep #}
                                          <a href="{{ site_url }}/projects/{{ row.0.project.nest_key }}" target="_blank"
                                            class="card-link">{{ row.0.project.name }}</a>
                                        </p>
@@ -1023,7 +1030,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1047,7 +1055,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1071,7 +1080,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1152,7 +1162,8 @@
                                           {% endif %}
                                           <td valign="middle">
                                             <p class="entry-heading">
-                                              <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:4 }}</a>
+                                              {# nosemgrep #}
+                                              <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:4 }}</a>
                                             </p>
                                           </td>
                                         </tr>
@@ -1176,7 +1187,8 @@
                                           {% endif %}
                                           <td valign="middle">
                                             <p class="entry-heading">
-                                              <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:4 }}</a>
+                                              {# nosemgrep #}
+                                              <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:4 }}</a>
                                             </p>
                                           </td>
                                         </tr>
@@ -1200,7 +1212,8 @@
                                           {% endif %}
                                           <td valign="middle">
                                             <p class="entry-heading">
-                                              <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:8 }}</a>
+                                              {# nosemgrep #}
+                                              <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:8 }}</a>
                                             </p>
                                           </td>
                                         </tr>
@@ -1281,7 +1294,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1305,7 +1319,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.name|default:row.1.tag_name|truncatewords:12 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.name|default:row.1.tag_name|truncatewords:12 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1329,7 +1344,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1477,7 +1493,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1501,7 +1518,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1525,7 +1543,8 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1597,30 +1616,33 @@
                                     <td width="{% if events_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
                                        class="card">
                                        <p class="card-heading-sm">
-                                         {{ row.0.name|truncatewords:5 }}
+                                         {# nosemgrep #}
+                                         <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|truncatewords:5 }}</a>
                                        </p>
                                        <p class="card-meta">
-                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.city or row.0.country %} &nbsp;📍 {% if row.0.city %}{{ row.0.city }}{% if row.0.country %}, {% endif %}{% endif %}{{ row.0.country }}{% endif %}
+                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.suggested_location %} &nbsp;📍 {{ row.0.suggested_location }}{% endif %}
                                        </p>
                                      </td>
                                      <td width="8" class="grid-gutter">&nbsp;</td>
                                      <td width="{% if events_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
                                        class="card">
                                        <p class="card-heading-sm">
-                                         {{ row.1.name|truncatewords:5 }}
+                                         {# nosemgrep #}
+                                         <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.name|truncatewords:5 }}</a>
                                        </p>
                                        <p class="card-meta">
-                                         {% if row.1.start_date %}📅 {{ row.1.start_date|date:"M d, Y" }}{% endif %}{% if row.1.city or row.1.country %} &nbsp;📍 {% if row.1.city %}{{ row.1.city }}{% if row.1.country %}, {% endif %}{% endif %}{{ row.1.country }}{% endif %}
+                                         {% if row.1.start_date %}📅 {{ row.1.start_date|date:"M d, Y" }}{% endif %}{% if row.1.suggested_location %} &nbsp;📍 {{ row.1.suggested_location }}{% endif %}
                                        </p>
                                      </td>
                                      {% else %}
                                      <td colspan="3" width="{% if events_data.extra %}90%{% else %}100%{% endif %}" valign="top"
                                        class="card">
                                        <p class="card-heading-sm">
-                                         {{ row.0.name|truncatewords:14 }}
+                                         {# nosemgrep #}
+                                         <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|truncatewords:14 }}</a>
                                        </p>
                                        <p class="card-meta">
-                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.city or row.0.country %} &nbsp;📍 {% if row.0.city %}{{ row.0.city }}{% if row.0.country %}, {% endif %}{% endif %}{{ row.0.country }}{% endif %}
+                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.suggested_location %} &nbsp;📍 {{ row.0.suggested_location }}{% endif %}
                                        </p>
                                      </td>
                                      {% endif %}
@@ -1722,7 +1744,8 @@
                                                  {% endif %}
                                                  <td valign="middle">
                                                    <p class="entity-item-heading">
-                                                     <a href="{{ row.0.url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                     {# nosemgrep #}
+                                                     <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
                                                    </p>
                                                  </td>
                                                </tr>
@@ -1746,7 +1769,8 @@
                                                  {% endif %}
                                                  <td valign="middle">
                                                    <p class="entity-item-heading">
-                                                     <a href="{{ row.1.url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.1.name|default:row.1.tag_name|truncatewords:10 }}{% else %}{{ row.1.title|truncatewords:10 }}{% endif %}</a>
+                                                     {# nosemgrep #}
+                                                     <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.1.name|default:row.1.tag_name|truncatewords:10 }}{% else %}{{ row.1.title|truncatewords:10 }}{% endif %}</a>
                                                    </p>
                                                  </td>
                                                </tr>
@@ -1770,7 +1794,8 @@
                                                  {% endif %}
                                                  <td valign="middle">
                                                    <p class="entity-item-heading">
-                                                     <a href="{{ row.0.url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                     {# nosemgrep #}
+                                                     <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
                                                    </p>
                                                  </td>
                                                </tr>
@@ -1822,13 +1847,15 @@
                 <tr>
                   <td align="center" class="px cta-cell">
                     <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ snapshot_url }}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="16%" stroke="false" fillcolor="#1D7BD7">
-                      <w:anchorlock/>
+                    {# nosemgrep #}
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ snapshot_url|safe_url }}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="16%" stroke="false" fillcolor="#1D7BD7">
+                      <w:anchorlock xmlns:w="urn:schemas-microsoft-com:office:word"/>
                       <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View More &rarr;</center>
                     </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-- -->
-                    <a href="{{ snapshot_url }}" target="_blank"
+                    {# nosemgrep #}
+                    <a href="{{ snapshot_url|safe_url }}" target="_blank"
                       class="cta-button">
                       View More &rarr;
                     </a>
@@ -1890,7 +1917,8 @@
                         <td align="center" valign="middle" width="1"
                           class="footer-divider">&nbsp;</td>
                         <td align="left" valign="middle" class="footer-nest-cell">
-                          <a href="{{ site_url }}" target="_blank" class="bare-link">
+                          {# nosemgrep #}
+                          <a href="{{ site_url|safe_url }}" target="_blank" class="bare-link">
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                               <tr>
                                 <td valign="middle" class="footer-nest-logo-cell">
@@ -1917,7 +1945,8 @@
                         class="footer-link">Manage
                         Preferences</a>
                       &nbsp;&nbsp;&nbsp;
-                      <a href="{{ unsubscribe_url }}" target="_blank"
+                      {# nosemgrep #}
+                      <a href="{{ unsubscribe_url|safe_url }}" target="_blank"
                         class="footer-link">Unsubscribe</a>
                       &nbsp;&nbsp;&nbsp;
                       <a href="https://owasp.org/contact/" target="_blank"

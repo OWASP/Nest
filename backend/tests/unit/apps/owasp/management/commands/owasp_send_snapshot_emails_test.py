@@ -8,6 +8,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from apps.owasp.models.snapshot import Snapshot
+from apps.owasp.services.newsletter import send_digest_email
 
 
 class TestSendSnapshotEmailsCommand:
@@ -21,6 +22,8 @@ class TestSendSnapshotEmailsCommand:
         with pytest.raises(CommandError, match="not found"):
             call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W99")
 
+        mock_objects.get.assert_called_once_with(key="2026-W99")
+
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.Snapshot.objects")
     def test_snapshot_not_completed(self, mock_objects):
         """Test command raises CommandError when snapshot is not completed."""
@@ -30,6 +33,8 @@ class TestSendSnapshotEmailsCommand:
 
         with pytest.raises(CommandError, match="not completed"):
             call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30")
+
+        mock_objects.get.assert_called_once_with(key="2026-W30")
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(
@@ -61,7 +66,20 @@ class TestSendSnapshotEmailsCommand:
 
         output = stdout.getvalue()
         assert "DRY RUN" in output
+        assert "[DRY RUN] Would enqueue digest for testuser" in output
+
+        mock_snap_objects.get.assert_called_once_with(key="2026-W30")
+        mock_email_log.is_duplicate.assert_called_once_with(
+            snapshot=mock_snapshot, snapshot_subscription=mock_sub
+        )
         mock_rq.get_queue.return_value.enqueue.assert_not_called()
+        mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
+        mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
+        prefetch_result.prefetch_related.assert_called_once_with(
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(
@@ -92,15 +110,33 @@ class TestSendSnapshotEmailsCommand:
         call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30", stdout=stdout)
 
         mock_rq.get_queue.assert_called_with("emails")
-        mock_rq.get_queue.return_value.enqueue.assert_called_once()
+        mock_rq.get_queue.return_value.enqueue.assert_called_once_with(
+            send_digest_email,
+            snapshot_id=42,
+            subscription_id=7,
+            expected_frequency="weekly",
+        )
         assert "ENQUEUED" in stdout.getvalue()
 
+        mock_snap_objects.get.assert_called_once_with(key="2026-W30")
+        mock_email_log.is_duplicate.assert_called_once_with(
+            snapshot=mock_snapshot, snapshot_subscription=mock_sub
+        )
+        mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
+        mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
+        prefetch_result.prefetch_related.assert_called_once_with(
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
+
+    @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(
         "apps.owasp.management.commands.owasp_send_snapshot_emails.SnapshotSubscription.objects"
     )
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.EmailLog")
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.Snapshot.objects")
-    def test_skips_already_sent(self, mock_snap_objects, mock_email_log, mock_snap_sub):
+    def test_skips_already_sent(self, mock_snap_objects, mock_email_log, mock_snap_sub, mock_rq):
         """Test command skips already-sent subscribers."""
         mock_snapshot = MagicMock(spec=Snapshot)
         mock_snapshot.status = Snapshot.Status.COMPLETED
@@ -121,3 +157,16 @@ class TestSendSnapshotEmailsCommand:
         call_command("owasp_send_snapshot_emails", "--snapshot-key=2026-W30", stdout=stdout)
 
         assert "SKIP" in stdout.getvalue()
+        mock_rq.get_queue.return_value.enqueue.assert_not_called()
+
+        mock_snap_objects.get.assert_called_once_with(key="2026-W30")
+        mock_email_log.is_duplicate.assert_called_once_with(
+            snapshot=mock_snapshot, snapshot_subscription=mock_sub
+        )
+        mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
+        mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
+        prefetch_result.prefetch_related.assert_called_once_with(
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )

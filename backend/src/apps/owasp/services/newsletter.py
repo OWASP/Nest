@@ -125,7 +125,7 @@ class SnapshotDigestService:
         if preferences.get("chapters"):
             rows_limit = limits.get("chapters", MIN_ITEMS_PER_SECTION)
             items_limit = rows_limit * ITEMS_PER_ROW
-            items = list(snapshot.chapters.order_by("created_at")[:items_limit])
+            items = list(snapshot.chapters.order_by("-created_at")[:items_limit])
             total = snapshot.chapters.count()
             if items:
                 chapters_data = {
@@ -138,7 +138,7 @@ class SnapshotDigestService:
         users_data = None
         if preferences.get("users"):
             limit = limits.get("users", MIN_ITEMS_PER_SECTION)
-            items = list(snapshot.users.order_by("created_at")[:limit])
+            items = list(snapshot.users.order_by("-created_at")[:limit])
             total = snapshot.users.count()
             if items:
                 users_data = {
@@ -152,7 +152,7 @@ class SnapshotDigestService:
         if preferences.get("issues"):
             rows_limit = limits.get("issues", MIN_ITEMS_PER_SECTION)
             items_limit = rows_limit * ITEMS_PER_ROW
-            items = list(snapshot.issues.order_by("created_at")[:items_limit])
+            items = list(snapshot.issues.order_by("-created_at")[:items_limit])
             total = snapshot.issues.count()
             if items:
                 issues_data = {
@@ -166,7 +166,7 @@ class SnapshotDigestService:
         if preferences.get("pull_requests"):
             rows_limit = limits.get("pull_requests", MIN_ITEMS_PER_SECTION)
             items_limit = rows_limit * ITEMS_PER_ROW
-            items = list(snapshot.pull_requests.order_by("created_at")[:items_limit])
+            items = list(snapshot.pull_requests.order_by("-created_at")[:items_limit])
             total = snapshot.pull_requests.count()
             if items:
                 prs_data = {
@@ -180,7 +180,7 @@ class SnapshotDigestService:
         if preferences.get("releases"):
             rows_limit = limits.get("releases", MIN_ITEMS_PER_SECTION)
             items_limit = rows_limit * ITEMS_PER_ROW
-            items = list(snapshot.releases.order_by("created_at")[:items_limit])
+            items = list(snapshot.releases.order_by("-created_at")[:items_limit])
             total = snapshot.releases.count()
             if items:
                 releases_data = {
@@ -199,7 +199,7 @@ class SnapshotDigestService:
             total_projects = snapshot.projects.count()
             projects_extra = max(0, total_projects - items_limit)
             project_list = []
-            for project in snapshot.projects.all()[:items_limit]:
+            for project in snapshot.projects.order_by("-created_at")[:items_limit]:
                 content = self._get_project_content(
                     snapshot, project, preferences, limit=project_content_limit
                 )
@@ -220,7 +220,7 @@ class SnapshotDigestService:
         if preferences.get("posts"):
             rows_limit = limits.get("posts", MIN_ITEMS_PER_SECTION)
             items_limit = rows_limit * ITEMS_PER_ROW
-            items = list(snapshot.posts.order_by("published_at")[:items_limit])
+            items = list(snapshot.posts.order_by("-published_at")[:items_limit])
             total = snapshot.posts.count()
             if items:
                 posts_data = {
@@ -320,7 +320,9 @@ class SnapshotDigestService:
         ):
             if not preferences.get(attr, True):
                 continue
-            qs = getattr(snapshot, attr).filter(repository__in=repositories).order_by("created_at")
+            qs = (
+                getattr(snapshot, attr).filter(repository__in=repositories).order_by("-created_at")
+            )
             total = qs.count()
             if total > 0:
                 items = list(qs[:limit])
@@ -360,7 +362,9 @@ class SnapshotDigestService:
             ("pull_requests", "pull_requests"),
             ("releases", "releases"),
         ):
-            qs = getattr(snapshot, attr).filter(repository__in=repositories).order_by("created_at")
+            qs = (
+                getattr(snapshot, attr).filter(repository__in=repositories).order_by("-created_at")
+            )
             total = qs.count()
             if total > 0:
                 content.append(
@@ -397,7 +401,7 @@ class SnapshotDigestService:
 
 
 @job("emails")
-def send_digest_email(snapshot_id: int, subscription_id: int):
+def send_digest_email(snapshot_id: int, subscription_id: int, expected_frequency: str = ""):
     """Send a single snapshot digest email. Called by the RQ worker.
 
     This is the RQ job function enqueued by owasp_send_snapshot_emails.
@@ -406,11 +410,20 @@ def send_digest_email(snapshot_id: int, subscription_id: int):
     Args:
         snapshot_id: The primary key of the Snapshot to send.
         subscription_id: The primary key of the SnapshotSubscription to send to.
+        expected_frequency: The frequency that was active when this job was enqueued.
 
     """
     try:
         snapshot = Snapshot.objects.get(id=snapshot_id)
-        subscription = SnapshotSubscription.objects.get(id=subscription_id)
+        subscription = (
+            SnapshotSubscription.objects.select_related("user")
+            .prefetch_related(
+                "subscribed_projects",
+                "subscribed_chapters",
+                "subscribed_committees",
+            )
+            .get(id=subscription_id)
+        )
     except (Snapshot.DoesNotExist, SnapshotSubscription.DoesNotExist):
         logger.warning(
             "send_digest_email: snapshot %s or subscription %s not found.",
@@ -421,6 +434,15 @@ def send_digest_email(snapshot_id: int, subscription_id: int):
 
     if not subscription.is_active:
         logger.info("Subscription %s is inactive, skipping.", subscription_id)
+        return
+
+    if expected_frequency and subscription.frequency != expected_frequency:
+        logger.info(
+            "Subscription %s frequency changed from %s to %s, skipping.",
+            subscription_id,
+            expected_frequency,
+            subscription.frequency,
+        )
         return
 
     if EmailLog.is_duplicate(snapshot=snapshot, snapshot_subscription=subscription):

@@ -34,6 +34,7 @@ class TestDjangoEmailService:
         assert result is True
         mock_email_class.assert_called_once()
         call_kwargs = mock_email_class.call_args[1]
+        assert call_kwargs["subject"] == "Test Subject"
         assert call_kwargs["from_email"] == settings.DEFAULT_FROM_EMAIL
         assert call_kwargs["to"] == ["test@example.com"]
         assert call_kwargs["body"] == "Hello"
@@ -122,8 +123,12 @@ class TestDjangoEmailService:
         mock_conn.open.assert_called_once()
         mock_conn.close.assert_called_once()
         assert mock_email_class.call_count == 2
-        for call in mock_email_class.call_args_list:
-            assert call[1]["connection"] is mock_conn
+        for call, message in zip(mock_email_class.call_args_list, messages, strict=True):
+            call_kwargs = call[1]
+            assert call_kwargs["subject"] == message["subject"]
+            assert call_kwargs["body"] == message["plain_body"]
+            assert call_kwargs["to"] == [message["to"]]
+            assert call_kwargs["connection"] is mock_conn
 
     @patch("apps.owasp.services.email.django_email.get_connection")
     @patch("apps.owasp.services.email.django_email.EmailMultiAlternatives")
