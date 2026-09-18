@@ -113,5 +113,15 @@ describe('PaginationButtons', () => {
       'aria-expanded',
       'true'
     )
+
+    rerender(<PaginationButtons {...defaultProps} showLess={true} isExpanded={false} />)
+    expect(screen.getByRole('button', { name: /show more/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    )
+    expect(screen.getByRole('button', { name: /show less/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    )
   })
 })

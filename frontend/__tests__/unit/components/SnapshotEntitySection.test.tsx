@@ -20,6 +20,14 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => mockRouter),
 }))
 
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
+
+jest.mock('@sentry/nextjs', () => ({
+  captureException: jest.fn(),
+}))
+
 const mockPRs = Array.from({ length: 7 }, (_, i) => ({
   id: `pr-${i}`,
   author: {
@@ -294,6 +302,7 @@ describe('SnapshotEntitySection', () => {
   })
 
   it('handles PR fetch error gracefully', async () => {
+    const { addToast } = jest.requireMock('@heroui/toast')
     const mockFetchPRs = jest.fn().mockRejectedValue(new Error('Network error'))
     ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchPRs])
 
@@ -321,9 +330,19 @@ describe('SnapshotEntitySection', () => {
       expect(screen.getByText('Show more')).toBeInTheDocument()
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
     })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Server Error',
+          color: 'danger',
+        })
+      )
+    })
   })
 
   it('handles issue fetch error gracefully', async () => {
+    const { addToast } = jest.requireMock('@heroui/toast')
     const mockFetchIssues = jest.fn().mockRejectedValue(new Error('Network error'))
     ;(useLazyQuery as unknown as jest.Mock).mockImplementation((document) =>
       document === GetSnapshotEntityIssuesDocument
@@ -354,6 +373,15 @@ describe('SnapshotEntitySection', () => {
     await waitFor(() => {
       expect(screen.getByText('Show more')).toBeInTheDocument()
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Server Error',
+          color: 'danger',
+        })
+      )
     })
   })
 
@@ -415,7 +443,7 @@ describe('SnapshotEntitySection', () => {
     })
   })
 
-  it('does not sync when initial data is empty', () => {
+  it('hides empty PR and Issue sections but renders populated Releases', () => {
     render(
       <SnapshotEntitySection
         {...defaultProps}

@@ -101,7 +101,10 @@ class SnapshotSubscriptionNode(strawberry.relay.Node):
 
         """
         try:
-            snapshot = Snapshot.objects.get(key=snapshot_key)
+            snapshot = Snapshot.objects.get(
+                key=snapshot_key,
+                status=Snapshot.Status.COMPLETED,
+            )
         except Snapshot.DoesNotExist:
             return []
 

@@ -17,18 +17,22 @@ const UnsubscribePage = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
   const [errorCode, setErrorCode] = useState(500)
-  const hasRun = useRef(false)
+  const processedToken = useRef<string | null>(null)
 
   const [unsubscribe] = useMutation<{
     unsubscribeByToken: { ok: boolean; message: string }
   }>(UNSUBSCRIBE_BY_TOKEN)
 
   useEffect(() => {
-    if (!token || hasRun.current) return
-    hasRun.current = true
+    if (!token || processedToken.current === token) return
+    processedToken.current = token
+
+    setStatus('loading')
+    let active = true
 
     unsubscribe({ variables: { inputData: { token } } })
       .then(({ data }) => {
+        if (!active) return
         if (data?.unsubscribeByToken?.ok) {
           setStatus('success')
           setMessage('You have been successfully unsubscribed.')
@@ -39,10 +43,15 @@ const UnsubscribePage = () => {
         }
       })
       .catch(() => {
+        if (!active) return
         setStatus('error')
         setErrorCode(500)
         setMessage('Something went wrong. Please try again later.')
       })
+
+    return () => {
+      active = false
+    }
   }, [token, unsubscribe])
 
   if (status === 'loading') {

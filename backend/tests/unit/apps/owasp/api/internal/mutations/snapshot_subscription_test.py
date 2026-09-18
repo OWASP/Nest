@@ -461,6 +461,7 @@ class TestUnsubscribeByToken:
             assert result.ok
             assert result.message == "Successfully unsubscribed."
             mock_sub.delete.assert_called_once()
+            mock_objects.get.assert_called_once_with(unsubscribe_token=input_data.token)
 
     def test_empty_token(self, mutations):
         """Test unsubscribe fails with empty token via Pydantic validation."""

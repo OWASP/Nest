@@ -11,10 +11,12 @@ const mockRouter = {
   push: jest.fn(),
 }
 
+const mockUseParams = jest.fn(() => ({ token: 'test-token-123' }))
+
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
-  useParams: () => ({ token: 'test-token-123' }),
+  useParams: () => mockUseParams(),
 }))
 
 describe('UnsubscribePage', () => {
@@ -126,6 +128,7 @@ describe('UnsubscribePage', () => {
       expect(mockUnsubscribe).toHaveBeenCalledWith({
         variables: { inputData: { token: 'test-token-123' } },
       })
+      expect(mockUnsubscribe).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -152,5 +155,32 @@ describe('UnsubscribePage', () => {
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/')
     })
+  })
+
+  test('processes new token when navigated without remounting', async () => {
+    const mockUnsubscribe = jest.fn().mockResolvedValue({
+      data: { unsubscribeByToken: { ok: true, message: 'Done' } },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUnsubscribe])
+
+    mockUseParams.mockReturnValue({ token: 'token-1' })
+    const { rerender } = render(<UnsubscribePage />)
+
+    await waitFor(() => {
+      expect(mockUnsubscribe).toHaveBeenCalledWith({
+        variables: { inputData: { token: 'token-1' } },
+      })
+    })
+
+    mockUseParams.mockReturnValue({ token: 'token-2' })
+    rerender(<UnsubscribePage />)
+
+    await waitFor(() => {
+      expect(mockUnsubscribe).toHaveBeenCalledWith({
+        variables: { inputData: { token: 'token-2' } },
+      })
+    })
+
+    expect(mockUnsubscribe).toHaveBeenCalledTimes(2)
   })
 })

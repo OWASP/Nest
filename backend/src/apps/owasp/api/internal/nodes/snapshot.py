@@ -62,7 +62,7 @@ class SnapshotNode(strawberry.relay.Node):
             "-created_at"
         )
         if repository_names is not None:
-            queryset = queryset.filter(repository__name__in=repository_names[:MAX_LIMIT])
+            queryset = queryset.filter(repository__name__in=repository_names)
         return SnapshotNode._slice_related(queryset, limit, offset)
 
     @strawberry_django.field(prefetch_related=["posts"])
@@ -86,7 +86,7 @@ class SnapshotNode(strawberry.relay.Node):
         """Resolve pull requests."""
         queryset = root.pull_requests.order_by("-created_at")
         if repository_names is not None:
-            queryset = queryset.filter(repository__name__in=repository_names[:MAX_LIMIT])
+            queryset = queryset.filter(repository__name__in=repository_names)
         return SnapshotNode._slice_related(queryset, limit, offset)
 
     @strawberry_django.field(prefetch_related=["releases"])
