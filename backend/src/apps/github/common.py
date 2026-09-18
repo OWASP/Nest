@@ -6,6 +6,7 @@ import logging
 from datetime import timedelta as td
 from typing import TYPE_CHECKING
 
+from django.db import transaction
 from django.utils import timezone
 from github.GithubException import UnknownObjectException
 
@@ -155,7 +156,8 @@ def sync_repository(
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
-            ActivityEvent.bulk_save_for_sources(issues)
+            with transaction.atomic():
+                ActivityEvent.bulk_save_for_sources(issues)
         else:
             logger.info("Skipping issues sync for %s", repository.name)
 
@@ -206,7 +208,8 @@ def sync_repository(
                     pull_request.labels.add(Label.update_data(gh_pull_request_label))
                 except UnknownObjectException:
                     logger.exception("Couldn't get GitHub pull request label %s", pull_request.url)
-        ActivityEvent.bulk_save_for_sources(pull_requests)
+        with transaction.atomic():
+            ActivityEvent.bulk_save_for_sources(pull_requests)
 
     # GitHub repository releases.
     releases = []
@@ -227,9 +230,9 @@ def sync_repository(
             author = User.update_data(gh_release.author)
             release = Release.update_data(gh_release, author=author, repository=repository)
             releases.append(release)
-    releases_for_events = list(releases)
-    Release.bulk_save(releases)
-    ActivityEvent.bulk_save_for_sources(releases_for_events)
+    with transaction.atomic():
+        Release.bulk_save(releases)
+        ActivityEvent.bulk_save_for_sources(releases)
 
     # GitHub repository contributors.
     RepositoryContributor.bulk_save(
