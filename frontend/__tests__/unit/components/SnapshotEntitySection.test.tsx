@@ -630,6 +630,7 @@ describe('SnapshotEntitySection', () => {
     )
 
     expect(screen.getByText('Releases')).toBeInTheDocument()
+    expect(screen.queryByText('v9.0.0')).not.toBeInTheDocument()
     const toggleButton = screen.getByText('Show more')
     fireEvent.click(toggleButton)
     await waitFor(() => {
