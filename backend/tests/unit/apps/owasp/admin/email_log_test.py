@@ -26,6 +26,7 @@ class TestEmailLogAdmin:
             "get_user",
             "snapshot",
             "status",
+            "error_message",
             "created_at",
         )
         assert admin_instance.list_filter == ("status", "created_at")
@@ -57,10 +58,13 @@ class TestEmailLogAdmin:
         site = AdminSite()
         admin_instance = EmailLogAdmin(EmailLog, site)
 
-        assert "snapshot_subscription" in admin_instance.readonly_fields
-        assert "snapshot" in admin_instance.readonly_fields
-        assert "status" in admin_instance.readonly_fields
-        assert "error_message" in admin_instance.readonly_fields
+        assert admin_instance.readonly_fields == (
+            "snapshot_subscription",
+            "snapshot",
+            "status",
+            "error_message",
+            "created_at",
+        )
 
     def test_get_user_with_subscription(self):
         """Test get_user returns user from snapshot subscription."""

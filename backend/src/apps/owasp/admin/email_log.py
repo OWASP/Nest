@@ -8,7 +8,7 @@ from apps.owasp.models.email_log import EmailLog
 class EmailLogAdmin(admin.ModelAdmin):
     """Admin for EmailLog model."""
 
-    list_display = ("get_user", "snapshot", "status", "created_at")
+    list_display = ("get_user", "snapshot", "status", "error_message", "created_at")
     list_filter = ("status", "created_at")
     list_select_related = ("snapshot", "snapshot_subscription__user")
     search_fields = ("snapshot_subscription__user__email",)

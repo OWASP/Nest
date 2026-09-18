@@ -64,6 +64,13 @@ class TestSendSnapshotEmailsCommand:
         assert "DRY RUN" in output
         assert "[DRY RUN] Would enqueue digest for testuser" in output
         mock_rq.get_queue.return_value.enqueue.assert_not_called()
+        mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
+        mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
+        prefetch_result.prefetch_related.assert_called_once_with(
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(
@@ -101,6 +108,13 @@ class TestSendSnapshotEmailsCommand:
             expected_frequency="weekly",
         )
         assert "ENQUEUED" in stdout.getvalue()
+        mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
+        mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
+        prefetch_result.prefetch_related.assert_called_once_with(
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
 
     @patch("apps.owasp.management.commands.owasp_send_snapshot_emails.django_rq")
     @patch(
@@ -130,3 +144,10 @@ class TestSendSnapshotEmailsCommand:
 
         assert "SKIP" in stdout.getvalue()
         mock_rq.get_queue.return_value.enqueue.assert_not_called()
+        mock_snap_sub.filter.assert_called_once_with(is_active=True, frequency="weekly")
+        mock_snap_sub.filter.return_value.select_related.assert_called_once_with("user")
+        prefetch_result.prefetch_related.assert_called_once_with(
+            "subscribed_projects",
+            "subscribed_chapters",
+            "subscribed_committees",
+        )
