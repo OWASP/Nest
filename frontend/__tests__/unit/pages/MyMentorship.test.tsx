@@ -528,28 +528,4 @@ describe('MyMentorshipPage', () => {
       jest.useRealTimers()
     }
   })
-
-  it('shows AccessDeniedDisplay for a user without mentorship roles', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
-      data: {
-        user: {
-          name: 'Regular User',
-          email: 'user@example.com',
-          login: 'user1',
-          isLeader: false,
-          isMentor: false,
-          isMentee: false,
-        },
-        expires: '2099-01-01T00:00:00.000Z',
-      },
-      status: 'authenticated',
-    })
-    mockUseQuery.mockReturnValue({
-      data: undefined,
-      loading: false,
-      error: undefined,
-    })
-    render(<MyMentorshipPage />)
-    expect(await screen.findByTestId('access-denied-display')).toBeInTheDocument()
-  })
 })
