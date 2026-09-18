@@ -42,6 +42,13 @@ class BoardMotion(BoardMotionBase):
     """Schema for BoardMotion (minimal fields for list display)."""
 
 
+class BoardMotionReference(Schema):
+    """Supporting document referenced by a motion."""
+
+    label: str
+    url: str
+
+
 class BoardMotionDetail(BoardMotionBase):
     """Detail schema for BoardMotion (used in single item endpoints)."""
 
@@ -49,7 +56,7 @@ class BoardMotionDetail(BoardMotionBase):
     background: str
     description: str
     metadata: dict
-    references: list[dict]
+    references: list[BoardMotionReference]
     second: Person | None = None
 
 

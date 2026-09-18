@@ -2,10 +2,10 @@
 
 from datetime import datetime
 from http import HTTPStatus
-from typing import Literal
+from typing import Annotated, Literal
 
 from django.http import HttpRequest
-from ninja import Field, FilterSchema, Path, Query, Schema
+from ninja import Field, FilterLookup, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
@@ -83,6 +83,20 @@ class BoardVoteError(Schema):
 class BoardVoteFilter(FilterSchema):
     """Filter for BoardVote."""
 
+    date_gte: Annotated[
+        datetime | None,
+        FilterLookup(q="meeting_date__gte"),
+    ] = Field(
+        None,
+        description="Parent meeting date greater than or equal to (ISO 8601)",
+    )
+    date_lte: Annotated[
+        datetime | None,
+        FilterLookup(q="meeting_date__lte"),
+    ] = Field(
+        None,
+        description="Parent meeting date less than or equal to (ISO 8601)",
+    )
     motion_id: int | None = Field(
         None,
         description="Motion the vote belongs to",

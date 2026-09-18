@@ -4,6 +4,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Annotated, Literal
 
+from django.db.models import Prefetch
 from django.http import HttpRequest
 from ninja import Field, FilterLookup, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -13,6 +14,7 @@ from ninja.responses import Response
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Person, ValidationErrorSchema
 from apps.owasp.models.board_meeting import BoardMeeting as BoardMeetingModel
+from apps.owasp.models.board_meeting_action import BoardMeetingAction as BoardMeetingActionModel
 
 router = RouterPaginated(tags=["Board Meetings"])
 
@@ -54,16 +56,23 @@ class BoardMeetingAction(Schema):
     outcome_id: int | None = None
 
 
+class BoardMeetingAttachment(Schema):
+    """Titled link attached to a meeting."""
+
+    label: str
+    url: str
+
+
 class BoardMeetingDetail(BoardMeetingBase):
     """Detail schema for BoardMeeting (used in single item endpoints)."""
 
     absentees: list[Person]
     actions: list[BoardMeetingAction]
-    attachments: list
+    attachments: list[BoardMeetingAttachment]
     attendees: list[Person]
     board_year: int
     call_in_url: str
-    guests: list
+    guests: list[str]
     location: str
     metadata: dict
     recording_url: str
@@ -77,7 +86,7 @@ class BoardMeetingDetail(BoardMeetingBase):
     @staticmethod
     def resolve_actions(obj: BoardMeetingModel) -> list:
         """Resolve ordered action rows for the meeting."""
-        return list(obj.actions.order_by("order"))
+        return list(obj.actions.all())
 
     @staticmethod
     def resolve_attendees(obj: BoardMeetingModel) -> list:
@@ -161,7 +170,10 @@ def get_board_meeting(
             "absentees__member",
             "attendees",
             "attendees__member",
-            "actions",
+            Prefetch(
+                "actions",
+                queryset=BoardMeetingActionModel.objects.order_by("order"),
+            ),
         )
         .filter(id=meeting_id)
         .first()
