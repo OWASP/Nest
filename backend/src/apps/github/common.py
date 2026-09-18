@@ -231,7 +231,7 @@ def sync_repository(
             release = Release.update_data(gh_release, author=author, repository=repository)
             releases.append(release)
     with transaction.atomic():
-        Release.bulk_save(releases)
+        Release.bulk_save(releases.copy())
         ActivityEvent.bulk_save_for_sources(releases)
 
     # GitHub repository contributors.
