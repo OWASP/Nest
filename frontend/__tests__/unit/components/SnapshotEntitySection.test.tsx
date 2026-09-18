@@ -89,20 +89,13 @@ describe('SnapshotEntitySection', () => {
     expect(screen.getByText('Project')).toBeInTheDocument()
   })
 
-  it('renders Issues section when issues are provided', () => {
-    render(<SnapshotEntitySection {...defaultProps} />)
-    expect(screen.getByText('Issues')).toBeInTheDocument()
-  })
-
-  it('renders Pull Requests section when PRs are provided', () => {
-    render(<SnapshotEntitySection {...defaultProps} />)
-    expect(screen.getByText('Pull Requests')).toBeInTheDocument()
-  })
-
-  it('renders Releases section when releases are provided', () => {
-    render(<SnapshotEntitySection {...defaultProps} />)
-    expect(screen.getByText('Releases')).toBeInTheDocument()
-  })
+  it.each([['Issues'], ['Pull Requests'], ['Releases']])(
+    'renders %s section when data is provided',
+    (sectionName) => {
+      render(<SnapshotEntitySection {...defaultProps} />)
+      expect(screen.getByText(sectionName)).toBeInTheDocument()
+    }
+  )
 
   it('returns null when no PRs, issues, or releases', () => {
     render(
