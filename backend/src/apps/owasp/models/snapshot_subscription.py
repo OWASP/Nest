@@ -77,17 +77,17 @@ class SnapshotSubscription(models.Model):
     include_users = models.BooleanField(default=False)
 
     # Specific entity subscriptions.
-    subscribed_projects = models.ManyToManyField(
+    projects = models.ManyToManyField(
         "owasp.Project",
         blank=True,
         related_name="snapshot_subscriptions",
     )
-    subscribed_chapters = models.ManyToManyField(
+    chapters = models.ManyToManyField(
         "owasp.Chapter",
         blank=True,
         related_name="snapshot_subscriptions",
     )
-    subscribed_committees = models.ManyToManyField(
+    committees = models.ManyToManyField(
         "owasp.Committee",
         blank=True,
         related_name="snapshot_subscriptions",
@@ -138,9 +138,9 @@ class SnapshotSubscription(models.Model):
         if self.pk:
             has_entities = any(
                 [
-                    self.subscribed_projects.exists(),
-                    self.subscribed_chapters.exists(),
-                    self.subscribed_committees.exists(),
+                    self.projects.exists(),
+                    self.chapters.exists(),
+                    self.committees.exists(),
                 ]
             )
 
@@ -184,7 +184,7 @@ class SnapshotSubscription(models.Model):
             raise ValidationError(msg)
 
         if not name:
-            name = cls._generate_default_name(user)
+            name = cls.generate_default_name(user)
 
         try:
             return cls.objects.create(
@@ -198,7 +198,7 @@ class SnapshotSubscription(models.Model):
             raise ValidationError(msg) from e
 
     @classmethod
-    def _generate_default_name(cls, user):
+    def generate_default_name(cls, user):
         """Generate a default subscription name like 'Subscription 1'.
 
         Finds the next available number by checking existing subscription names.
@@ -247,13 +247,13 @@ class SnapshotSubscription(models.Model):
 
         """
         if project_ids is not None:
-            self.subscribed_projects.set(Project.objects.filter(pk__in=project_ids))
+            self.projects.set(Project.objects.filter(pk__in=project_ids))
 
         if chapter_ids is not None:
-            self.subscribed_chapters.set(Chapter.objects.filter(pk__in=chapter_ids))
+            self.chapters.set(Chapter.objects.filter(pk__in=chapter_ids))
 
         if committee_ids is not None:
-            self.subscribed_committees.set(Committee.objects.filter(pk__in=committee_ids))
+            self.committees.set(Committee.objects.filter(pk__in=committee_ids))
 
     def deactivate(self):
         """Deactivate this subscription."""
@@ -323,9 +323,9 @@ class SnapshotSubscription(models.Model):
             include_releases=include_releases,
             include_users=include_users,
         ).prefetch_related(
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "projects",
+            "chapters",
+            "committees",
         )
 
         if exclude_pk is not None:
@@ -339,9 +339,9 @@ class SnapshotSubscription(models.Model):
         current_committee_ids = set(entity_ids.get("committees", []))
 
         return any(
-            {p.pk for p in other.subscribed_projects.all()} == current_project_ids
-            and {c.pk for c in other.subscribed_chapters.all()} == current_chapter_ids
-            and {c.pk for c in other.subscribed_committees.all()} == current_committee_ids
+            {p.pk for p in other.projects.all()} == current_project_ids
+            and {c.pk for c in other.chapters.all()} == current_chapter_ids
+            and {c.pk for c in other.committees.all()} == current_committee_ids
             for other in other_subs
         )
 
@@ -366,9 +366,9 @@ class SnapshotSubscription(models.Model):
             include_releases=self.include_releases,
             include_users=self.include_users,
             entity_ids={
-                "projects": self.subscribed_projects.values_list("pk", flat=True),
-                "chapters": self.subscribed_chapters.values_list("pk", flat=True),
-                "committees": self.subscribed_committees.values_list("pk", flat=True),
+                "projects": self.projects.values_list("pk", flat=True),
+                "chapters": self.chapters.values_list("pk", flat=True),
+                "committees": self.committees.values_list("pk", flat=True),
             },
             exclude_pk=self.pk,
         )
