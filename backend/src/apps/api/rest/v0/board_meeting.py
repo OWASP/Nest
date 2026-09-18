@@ -10,9 +10,10 @@ from ninja import Field, FilterLookup, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
+from pydantic import AfterValidator
 
 from apps.api.decorators.cache import cache_response
-from apps.api.rest.v0.common import Person, ValidationErrorSchema
+from apps.api.rest.v0.common import Person, ValidationErrorSchema, normalize_datetime
 from apps.owasp.models.board_meeting import BoardMeeting as BoardMeetingModel
 from apps.owasp.models.board_meeting_action import BoardMeetingAction as BoardMeetingActionModel
 
@@ -111,10 +112,12 @@ class BoardMeetingFilter(FilterSchema):
     date_gte: Annotated[
         datetime | None,
         FilterLookup(q="date__gte"),
+        AfterValidator(normalize_datetime),
     ] = Field(None, description="Meeting date greater than or equal to (ISO 8601)")
     date_lte: Annotated[
         datetime | None,
         FilterLookup(q="date__lte"),
+        AfterValidator(normalize_datetime),
     ] = Field(None, description="Meeting date less than or equal to (ISO 8601)")
     quorum_present: bool | None = Field(
         None,

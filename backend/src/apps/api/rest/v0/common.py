@@ -1,10 +1,28 @@
 """Common schemas and filters for the API."""
 
+from datetime import UTC, datetime
+
 from django.db.models import OuterRef, QuerySet, Subquery
 from ninja import Field, FilterSchema, Schema
 
 from apps.owasp.models.board_meeting_action import BoardMeetingAction
 from apps.owasp.models.entity_member import EntityMember
+
+
+def normalize_datetime(value: datetime | None) -> datetime | None:
+    """Normalize aware datetimes to UTC so PostgreSQL accepts the offset.
+
+    Args:
+        value (datetime, optional): The datetime to normalize.
+
+    Returns:
+        datetime: The datetime normalized to UTC, or the original value when it is
+            ``None`` or timezone-naive.
+
+    """
+    if value is None or value.tzinfo is None:
+        return value
+    return value.astimezone(UTC)
 
 
 def annotate_meeting_date(

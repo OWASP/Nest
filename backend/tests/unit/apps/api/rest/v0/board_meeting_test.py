@@ -1,5 +1,6 @@
 """Tests for the board meeting API."""
 
+from datetime import UTC, datetime
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
@@ -8,6 +9,16 @@ from apps.api.rest.v0.board_meeting import (
     get_board_meeting,
     list_board_meetings,
 )
+
+
+class TestBoardMeetingFilter:
+    """Tests for the BoardMeetingFilter datetime handling."""
+
+    def test_extreme_timezone_offset_is_normalized_to_utc(self):
+        """Convert offsets outside PostgreSQL's range to UTC."""
+        filters = BoardMeetingFilter(date_lte="8292-12-23T16:24:08.050762+21:14")
+
+        assert filters.date_lte == datetime(8292, 12, 22, 19, 10, 8, 50762, tzinfo=UTC)
 
 
 class TestListBoardMeetings:

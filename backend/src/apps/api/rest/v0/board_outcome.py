@@ -9,9 +9,15 @@ from ninja import Field, FilterLookup, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
+from pydantic import AfterValidator
 
 from apps.api.decorators.cache import cache_response
-from apps.api.rest.v0.common import Person, ValidationErrorSchema, annotate_meeting_date
+from apps.api.rest.v0.common import (
+    Person,
+    ValidationErrorSchema,
+    annotate_meeting_date,
+    normalize_datetime,
+)
 from apps.owasp.models.board_outcome import BoardOutcome as BoardOutcomeModel
 
 router = RouterPaginated(tags=["Board Outcomes"])
@@ -74,6 +80,7 @@ class BoardOutcomeFilter(FilterSchema):
     date_gte: Annotated[
         datetime | None,
         FilterLookup(q="meeting_date__gte"),
+        AfterValidator(normalize_datetime),
     ] = Field(
         None,
         description="Parent meeting date greater than or equal to (ISO 8601)",
@@ -81,6 +88,7 @@ class BoardOutcomeFilter(FilterSchema):
     date_lte: Annotated[
         datetime | None,
         FilterLookup(q="meeting_date__lte"),
+        AfterValidator(normalize_datetime),
     ] = Field(
         None,
         description="Parent meeting date less than or equal to (ISO 8601)",
