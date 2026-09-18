@@ -68,11 +68,12 @@ class TestGetBoardMotion:
         mock_motion = MagicMock()
         mock_qs = mock_motion_model.objects.annotate.return_value
         mock_qs = mock_qs.select_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = mock_motion
+        mock_filtered_qs = mock_qs.filter.return_value
+        mock_filtered_qs.first.return_value = mock_motion
 
         result = get_board_motion(mock_request, 1)
 
+        mock_qs.filter.assert_called_once_with(id=1)
         assert result == mock_motion
 
     @patch("apps.api.rest.v0.board_motion.BoardMotionModel")
@@ -81,9 +82,10 @@ class TestGetBoardMotion:
         mock_request = MagicMock()
         mock_qs = mock_motion_model.objects.annotate.return_value
         mock_qs = mock_qs.select_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = None
+        mock_filtered_qs = mock_qs.filter.return_value
+        mock_filtered_qs.first.return_value = None
 
         result = get_board_motion(mock_request, 999)
 
+        mock_qs.filter.assert_called_once_with(id=999)
         assert result.status_code == HTTPStatus.NOT_FOUND

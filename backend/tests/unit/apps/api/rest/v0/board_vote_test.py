@@ -55,6 +55,10 @@ class TestListBoardVotes:
         result = list_board_votes(mock_request, mock_filters, ordering=None)
 
         mock_queryset.filter.assert_called_once()
+        filter_children = dict(mock_queryset.filter.call_args[0][0].children)
+        assert filter_children["motion_id"] == 5
+        assert filter_children["result"] == "passed"
+        assert filter_children["type"] == "vote"
         assert result == mock_queryset
 
 
@@ -68,11 +72,12 @@ class TestGetBoardVote:
         mock_vote = MagicMock()
         mock_qs = mock_vote_model.objects.annotate.return_value
         mock_qs = mock_qs.prefetch_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = mock_vote
+        mock_filtered_qs = mock_qs.filter.return_value
+        mock_filtered_qs.first.return_value = mock_vote
 
         result = get_board_vote(mock_request, 1)
 
+        mock_qs.filter.assert_called_once_with(id=1)
         assert result == mock_vote
 
     @patch("apps.api.rest.v0.board_vote.BoardVoteModel")

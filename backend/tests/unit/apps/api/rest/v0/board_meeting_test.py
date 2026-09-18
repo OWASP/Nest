@@ -53,6 +53,7 @@ class TestListBoardMeetings:
         result = list_board_meetings(mock_request, mock_filters, ordering=None)
 
         mock_queryset.filter.assert_called_once()
+        assert dict(mock_queryset.filter.call_args[0][0].children)["type"] == "public"
         assert result == mock_queryset
 
 
@@ -66,11 +67,12 @@ class TestGetBoardMeeting:
         mock_meeting = MagicMock()
         mock_qs = mock_meeting_model.objects.select_related.return_value
         mock_qs = mock_qs.prefetch_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = mock_meeting
+        mock_filtered_qs = mock_qs.filter.return_value
+        mock_filtered_qs.first.return_value = mock_meeting
 
         result = get_board_meeting(mock_request, 1)
 
+        mock_qs.filter.assert_called_once_with(id=1)
         assert result == mock_meeting
 
     @patch("apps.api.rest.v0.board_meeting.BoardMeetingModel")
@@ -79,9 +81,10 @@ class TestGetBoardMeeting:
         mock_request = MagicMock()
         mock_qs = mock_meeting_model.objects.select_related.return_value
         mock_qs = mock_qs.prefetch_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = None
+        mock_filtered_qs = mock_qs.filter.return_value
+        mock_filtered_qs.first.return_value = None
 
         result = get_board_meeting(mock_request, 999)
 
+        mock_qs.filter.assert_called_once_with(id=999)
         assert result.status_code == HTTPStatus.NOT_FOUND

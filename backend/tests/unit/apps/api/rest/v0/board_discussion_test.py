@@ -1,5 +1,6 @@
 """Tests for the board discussion API."""
 
+from datetime import UTC, datetime
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
@@ -49,7 +50,8 @@ class TestListBoardDiscussions:
     def test_list_discussions_applies_filters(self, mock_discussion_model):
         """FilterSchema filters the discussion queryset."""
         mock_request = MagicMock()
-        mock_filters = BoardDiscussionFilter()
+        date_gte = datetime(2024, 1, 1, tzinfo=UTC)
+        mock_filters = BoardDiscussionFilter(date_gte=date_gte)
         mock_queryset = MagicMock()
         mock_queryset.annotate.return_value = mock_queryset
         mock_queryset.filter.return_value = mock_queryset
@@ -59,6 +61,7 @@ class TestListBoardDiscussions:
         result = list_board_discussions(mock_request, mock_filters, ordering=None)
 
         mock_queryset.filter.assert_called_once()
+        assert dict(mock_queryset.filter.call_args[0][0].children)["meeting_date__gte"] == date_gte
         assert result == mock_queryset
 
 
@@ -72,11 +75,12 @@ class TestGetBoardDiscussion:
         mock_discussion = MagicMock()
         mock_qs = mock_discussion_model.objects.annotate.return_value
         mock_qs = mock_qs.prefetch_related.return_value
-        mock_qs = mock_qs.filter.return_value
-        mock_qs.first.return_value = mock_discussion
+        mock_filtered_qs = mock_qs.filter.return_value
+        mock_filtered_qs.first.return_value = mock_discussion
 
         result = get_board_discussion(mock_request, 1)
 
+        mock_qs.filter.assert_called_once_with(id=1)
         assert result == mock_discussion
 
     @patch("apps.api.rest.v0.board_discussion.BoardDiscussionModel")
