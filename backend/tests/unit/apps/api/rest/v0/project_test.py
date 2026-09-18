@@ -27,10 +27,12 @@ class MockMember:
 
 
 class MockEntityMember:
-    """Mock for entity leader with optional member login."""
+    """Mock for an entity member with an optional matched login."""
 
-    def __init__(self, name: str, login: str | None = None) -> None:
-        self.member = MockMember(login) if login else None
+    def __init__(self, entity_id: int, name: str, login: str | None = None) -> None:
+        self.id = entity_id
+        self.member = MockMember(login)
+        self.member_id = login or None
         self.member_name = name
 
 
@@ -42,8 +44,8 @@ class MockProject:
             setattr(self, key, value)
         self.nest_key = data["key"]
         self.entity_leaders = [
-            MockEntityMember("Alice", "alice"),
-            MockEntityMember("Bob"),
+            MockEntityMember(1, "Alice", "alice"),
+            MockEntityMember(2, "Bob"),
         ]
 
 
@@ -81,9 +83,9 @@ class TestProjectSerializerValidation:
         assert project.description == project_data["description"]
         assert project.key == project_data["key"]
         assert len(project.leaders) == 2
-        assert project.leaders[0].key == "alice"
-        assert project.leaders[0].name == "Alice"
-        assert project.leaders[1].key is None
+        assert project.leaders[0].id == 1
+        assert project.leaders[0].name == "alice"
+        assert project.leaders[1].id == 2
         assert project.leaders[1].name == "Bob"
         assert project.level == project_data["level"]
         assert project.name == project_data["name"]

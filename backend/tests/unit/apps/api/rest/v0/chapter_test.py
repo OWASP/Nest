@@ -39,8 +39,10 @@ class TestChapterSerializerValidation:
                 self.login = login
 
         class MockEntityMember:
-            def __init__(self, name, login=None):
-                self.member = MockMember(login) if login else None
+            def __init__(self, entity_id, name, login=None):
+                self.id = entity_id
+                self.member = MockMember(login)
+                self.member_id = login or None
                 self.member_name = name
 
         class MockChapter:
@@ -49,8 +51,8 @@ class TestChapterSerializerValidation:
                     setattr(self, key, value)
                 self.nest_key = data["key"]
                 self.entity_leaders = [
-                    MockEntityMember("Alice", "alice"),
-                    MockEntityMember("Bob"),
+                    MockEntityMember(1, "Alice", "alice"),
+                    MockEntityMember(2, "Bob"),
                 ]
 
         chapter = ChapterDetail.from_orm(MockChapter(chapter_data))
@@ -61,9 +63,9 @@ class TestChapterSerializerValidation:
         assert chapter.latitude == chapter_data["latitude"]
         assert chapter.longitude == chapter_data["longitude"]
         assert len(chapter.leaders) == 2
-        assert chapter.leaders[0].key == "alice"
-        assert chapter.leaders[0].name == "Alice"
-        assert chapter.leaders[1].key is None
+        assert chapter.leaders[0].id == 1
+        assert chapter.leaders[0].name == "alice"
+        assert chapter.leaders[1].id == 2
         assert chapter.leaders[1].name == "Bob"
         assert chapter.name == chapter_data["name"]
         assert chapter.region == chapter_data["region"]
