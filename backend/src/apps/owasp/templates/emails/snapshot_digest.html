@@ -609,6 +609,7 @@
     }
   </style>
 </head>
+{% load url_filters %}
 
 <body
   class="email-body">
@@ -1023,7 +1024,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1047,7 +1048,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1071,7 +1072,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1152,7 +1153,7 @@
                                           {% endif %}
                                           <td valign="middle">
                                             <p class="entry-heading">
-                                              <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:4 }}</a>
+                                              <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:4 }}</a>
                                             </p>
                                           </td>
                                         </tr>
@@ -1176,7 +1177,7 @@
                                           {% endif %}
                                           <td valign="middle">
                                             <p class="entry-heading">
-                                              <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:4 }}</a>
+                                              <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:4 }}</a>
                                             </p>
                                           </td>
                                         </tr>
@@ -1200,7 +1201,7 @@
                                           {% endif %}
                                           <td valign="middle">
                                             <p class="entry-heading">
-                                              <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:8 }}</a>
+                                              <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:8 }}</a>
                                             </p>
                                           </td>
                                         </tr>
@@ -1281,7 +1282,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1305,7 +1306,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.name|default:row.1.tag_name|truncatewords:12 }}</a>
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.name|default:row.1.tag_name|truncatewords:12 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1329,7 +1330,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1477,7 +1478,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1501,7 +1502,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.1.url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1525,7 +1526,7 @@
                                            {% endif %}
                                            <td valign="middle">
                                              <p class="entry-heading">
-                                               <a href="{{ row.0.url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
                                              </p>
                                            </td>
                                          </tr>
@@ -1722,7 +1723,7 @@
                                                  {% endif %}
                                                  <td valign="middle">
                                                    <p class="entity-item-heading">
-                                                     <a href="{{ row.0.url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                     <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
                                                    </p>
                                                  </td>
                                                </tr>
@@ -1746,7 +1747,7 @@
                                                  {% endif %}
                                                  <td valign="middle">
                                                    <p class="entity-item-heading">
-                                                     <a href="{{ row.1.url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.1.name|default:row.1.tag_name|truncatewords:10 }}{% else %}{{ row.1.title|truncatewords:10 }}{% endif %}</a>
+                                                     <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.1.name|default:row.1.tag_name|truncatewords:10 }}{% else %}{{ row.1.title|truncatewords:10 }}{% endif %}</a>
                                                    </p>
                                                  </td>
                                                </tr>
@@ -1770,7 +1771,7 @@
                                                  {% endif %}
                                                  <td valign="middle">
                                                    <p class="entity-item-heading">
-                                                     <a href="{{ row.0.url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                     <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
                                                    </p>
                                                  </td>
                                                </tr>
@@ -1822,13 +1823,13 @@
                 <tr>
                   <td align="center" class="px cta-cell">
                     <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ snapshot_url }}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="16%" stroke="false" fillcolor="#1D7BD7">
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ snapshot_url|safe_url }}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="16%" stroke="false" fillcolor="#1D7BD7">
                       <w:anchorlock/>
                       <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View More &rarr;</center>
                     </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-- -->
-                    <a href="{{ snapshot_url }}" target="_blank"
+                    <a href="{{ snapshot_url|safe_url }}" target="_blank"
                       class="cta-button">
                       View More &rarr;
                     </a>
@@ -1890,7 +1891,7 @@
                         <td align="center" valign="middle" width="1"
                           class="footer-divider">&nbsp;</td>
                         <td align="left" valign="middle" class="footer-nest-cell">
-                          <a href="{{ site_url }}" target="_blank" class="bare-link">
+                          <a href="{{ site_url|safe_url }}" target="_blank" class="bare-link">
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                               <tr>
                                 <td valign="middle" class="footer-nest-logo-cell">
@@ -1917,7 +1918,7 @@
                         class="footer-link">Manage
                         Preferences</a>
                       &nbsp;&nbsp;&nbsp;
-                      <a href="{{ unsubscribe_url }}" target="_blank"
+                      <a href="{{ unsubscribe_url|safe_url }}" target="_blank"
                         class="footer-link">Unsubscribe</a>
                       &nbsp;&nbsp;&nbsp;
                       <a href="https://owasp.org/contact/" target="_blank"
