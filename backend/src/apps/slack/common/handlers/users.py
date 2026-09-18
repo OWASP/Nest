@@ -78,8 +78,8 @@ def get_blocks(
 
         bio = truncate(escape(user.get("idx_bio", "") or ""), presentation.summary_truncation)
 
-        location = escape(user.get("idx_location", ""))
-        company = escape(user.get("idx_company", ""))
+        location = escape(user.get("idx_location", "") or "")
+        company = escape(user.get("idx_company", "") or "")
         followers_count = user.get("idx_followers_count", 0)
         following_count = user.get("idx_following_count", 0)
         public_repositories = user.get("idx_public_repositories_count", 0)
