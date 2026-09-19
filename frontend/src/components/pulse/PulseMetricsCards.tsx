@@ -1,6 +1,6 @@
 import { Skeleton } from '@heroui/skeleton'
 import { FaCodeBranch, FaRocket, FaUsers, FaWaveSquare } from 'react-icons/fa6'
-import { GoIssueOpened } from 'react-icons/go'
+import { GoIssueOpened, GoRepo } from 'react-icons/go'
 import type { PulseMetricsCardsProps } from 'types/pulse'
 
 export default function PulseMetricsCards({
@@ -49,10 +49,16 @@ export default function PulseMetricsCards({
       title: 'Release Activities',
       value: stats?.releases,
     },
+    {
+      color: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-500 dark:text-cyan-400',
+      icon: GoRepo,
+      title: 'Active Repositories',
+      value: stats?.activeRepos,
+    },
   ]
 
   return (
-    <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
       {cards.map(({ color, icon: Icon, title, value }) => (
         <div
           key={title}

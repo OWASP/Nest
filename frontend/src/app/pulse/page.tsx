@@ -4,7 +4,7 @@ import { useApolloClient, useQuery } from '@apollo/client/react'
 import { Skeleton } from '@heroui/skeleton'
 import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { FaCodeBranch, FaWaveSquare } from 'react-icons/fa6'
 import { SearchChapterNamesDocument } from 'types/__generated__/chapterQueries.generated'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
@@ -139,69 +139,87 @@ export default function PulsePage() {
     setPage(Math.max(1, Number.parseInt(searchParams.get('page') || '1') || 1))
   }, [searchParams, debouncedSetSearch])
 
-  const fetchProjectSuggestions = useCallback(
-    async (queryText: string) => {
-      const cleanQuery = queryText.trim()
-      const gen = ++projectFetchGen.current
-      setIsSearchingProjects(true)
-      try {
-        const { data } = await client.query({
-          query: SearchProjectNamesDocument,
-          variables: { query: cleanQuery },
-        })
-        if (gen === projectFetchGen.current) {
-          setProjectSuggestions((data?.searchProjects || []) as Array<{ id: string; name: string }>)
+  const debouncedFetchProjectSuggestions = useMemo(
+    () =>
+      debounce(async (queryText: string) => {
+        const cleanQuery = queryText.trim()
+        const gen = ++projectFetchGen.current
+        setIsSearchingProjects(true)
+        try {
+          const { data } = await client.query({
+            query: SearchProjectNamesDocument,
+            variables: { query: cleanQuery },
+          })
+          if (gen === projectFetchGen.current) {
+            setProjectSuggestions(
+              (data?.searchProjects || []) as Array<{ id: string; name: string }>
+            )
+          }
+        } catch {
+          if (gen === projectFetchGen.current) {
+            setProjectSuggestions([])
+          }
+        } finally {
+          if (gen === projectFetchGen.current) {
+            setIsSearchingProjects(false)
+          }
         }
-      } catch {
-        if (gen === projectFetchGen.current) {
-          setProjectSuggestions([])
-        }
-      } finally {
-        if (gen === projectFetchGen.current) {
-          setIsSearchingProjects(false)
-        }
-      }
-    },
+      }, 300),
     [client]
   )
 
   useEffect(() => {
     if (showProjectSuggestions) {
-      fetchProjectSuggestions(projectSearchInput)
+      debouncedFetchProjectSuggestions(projectSearchInput)
+    } else {
+      debouncedFetchProjectSuggestions.cancel()
     }
-  }, [projectSearchInput, showProjectSuggestions, fetchProjectSuggestions])
+  }, [projectSearchInput, showProjectSuggestions, debouncedFetchProjectSuggestions])
 
-  const fetchChapterSuggestions = useCallback(
-    async (queryText: string) => {
-      const cleanQuery = queryText.trim()
-      const gen = ++chapterFetchGen.current
-      setIsSearchingChapters(true)
-      try {
-        const { data } = await client.query({
-          query: SearchChapterNamesDocument,
-          variables: { query: cleanQuery },
-        })
-        if (gen === chapterFetchGen.current) {
-          setChapterSuggestions((data?.searchChapters || []) as Array<{ id: string; name: string }>)
+  useEffect(() => {
+    return () => debouncedFetchProjectSuggestions.cancel()
+  }, [debouncedFetchProjectSuggestions])
+
+  const debouncedFetchChapterSuggestions = useMemo(
+    () =>
+      debounce(async (queryText: string) => {
+        const cleanQuery = queryText.trim()
+        const gen = ++chapterFetchGen.current
+        setIsSearchingChapters(true)
+        try {
+          const { data } = await client.query({
+            query: SearchChapterNamesDocument,
+            variables: { query: cleanQuery },
+          })
+          if (gen === chapterFetchGen.current) {
+            setChapterSuggestions(
+              (data?.searchChapters || []) as Array<{ id: string; name: string }>
+            )
+          }
+        } catch {
+          if (gen === chapterFetchGen.current) {
+            setChapterSuggestions([])
+          }
+        } finally {
+          if (gen === chapterFetchGen.current) {
+            setIsSearchingChapters(false)
+          }
         }
-      } catch {
-        if (gen === chapterFetchGen.current) {
-          setChapterSuggestions([])
-        }
-      } finally {
-        if (gen === chapterFetchGen.current) {
-          setIsSearchingChapters(false)
-        }
-      }
-    },
+      }, 300),
     [client]
   )
 
   useEffect(() => {
     if (showChapterSuggestions) {
-      fetchChapterSuggestions(chapterSearchInput)
+      debouncedFetchChapterSuggestions(chapterSearchInput)
+    } else {
+      debouncedFetchChapterSuggestions.cancel()
     }
-  }, [chapterSearchInput, showChapterSuggestions, fetchChapterSuggestions])
+  }, [chapterSearchInput, showChapterSuggestions, debouncedFetchChapterSuggestions])
+
+  useEffect(() => {
+    return () => debouncedFetchChapterSuggestions.cancel()
+  }, [debouncedFetchChapterSuggestions])
 
   useEffect(() => {
     const params = new URLSearchParams()

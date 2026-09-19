@@ -6,6 +6,8 @@ import type { PulseTimelineItemProps } from 'types/pulse'
 const formatRelativeTime = (dateStr: string) => {
   try {
     const eventDate = new Date(dateStr)
+    if (Number.isNaN(eventDate.getTime())) return dateStr
+
     const now = new Date()
     const hoursAgo = Math.floor((now.getTime() - eventDate.getTime()) / 3600000)
 

@@ -42,6 +42,7 @@ const SortBy = ({
           id={id}
           aria-label={ariaLabel}
           aria-labelledby={id}
+          disallowEmptySelection
           className="min-w-0 flex-1"
           size="md"
           label={showLabel ? 'Sort By :' : undefined}
@@ -58,7 +59,10 @@ const SortBy = ({
             .filter((item: { key: string; label: string }) => item.key === selectedSortOption)
             .map((item) => item.key)}
           onChange={(e) => {
-            onSortChange((e.target as HTMLSelectElement).value)
+            const val = (e.target as HTMLSelectElement).value
+            if (val !== undefined && val !== '') {
+              onSortChange(val)
+            }
           }}
         >
           {sortOptions.map((option: { label: string; key: string }) => (
