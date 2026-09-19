@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { FaCode, FaCodeBranch, FaCodeMerge, FaGithub, FaUser } from 'react-icons/fa6'
+import { GoIssueClosed, GoIssueOpened } from 'react-icons/go'
 import type { PulseTimelineItemProps } from 'types/pulse'
 
 const formatRelativeTime = (dateStr: string) => {
@@ -98,10 +99,15 @@ const renderTimelineIcon = (activityType: string) => {
         </div>
       )
     case 'issue_opened':
-    case 'issue_closed':
       return (
         <div className="flex h-9 w-9 items-center justify-center rounded-full border border-amber-500/60 bg-white text-amber-600 shadow-md dark:bg-gray-800 dark:text-amber-400">
-          <div className="h-3 w-3 rounded-full border-2 border-amber-500 dark:border-amber-400" />
+          <GoIssueOpened className="h-4 w-4" />
+        </div>
+      )
+    case 'issue_closed':
+      return (
+        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-red-500/60 bg-white text-red-600 shadow-md dark:bg-gray-800 dark:text-red-400">
+          <GoIssueClosed className="h-4 w-4" />
         </div>
       )
     default:
@@ -118,7 +124,7 @@ export default function PulseTimelineItem({ event }: Readonly<PulseTimelineItemP
     <div className="group relative">
       <div className="absolute top-3 -left-[43px]">{renderTimelineIcon(event.activityType)}</div>
 
-      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-gray-300 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600">
+      <div className="flex flex-col gap-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-gray-300 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600">
         <div className="flex items-start gap-4">
           {event.githubUser?.avatarUrl ? (
             <Image
@@ -134,7 +140,7 @@ export default function PulseTimelineItem({ event }: Readonly<PulseTimelineItemP
             </div>
           )}
 
-          <div className="space-y-1">
+          <div className="flex flex-col gap-1">
             <div className="text-sm text-gray-600 dark:text-gray-300">
               <span className="font-bold text-gray-900 dark:text-white">
                 {event.githubUser?.name || event.githubUser?.login || 'OWASP Contributor'}
@@ -159,9 +165,12 @@ export default function PulseTimelineItem({ event }: Readonly<PulseTimelineItemP
             </div>
 
             <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-1 font-mono text-gray-700 dark:text-gray-300">
+              <span className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
                 <FaCodeBranch className="h-3 w-3" />
-                {event.githubRepository?.key || event.githubRepository?.name || 'nest'}
+                {(() => {
+                  const name = event.githubRepository?.key || event.githubRepository?.name || 'nest'
+                  return name.charAt(0).toUpperCase() + name.slice(1)
+                })()}
               </span>
               <span>&bull;</span>
               <span>{formatRelativeTime(event.occurredAt)}</span>
