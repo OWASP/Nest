@@ -526,8 +526,6 @@ describe('GlobalSearch', () => {
     })
   })
 
-  // test for recent searches functionality
-
   test('persists selected suggestion to localStorage across a remount', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
@@ -562,7 +560,6 @@ describe('GlobalSearch', () => {
     })
   })
 
-  // test for saving typed query to recent searches when pressing Enter without selecting a suggestion
   test('saves typed query to recent searches when pressing Enter without selecting a suggestion', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
 
@@ -585,8 +582,6 @@ describe('GlobalSearch', () => {
     })
   })
 
-  //test for saving a query containing spaces to recent searches on Enter
-
   test('saves a query containing spaces to recent searches on Enter', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
 
@@ -607,8 +602,6 @@ describe('GlobalSearch', () => {
       expect(screen.getByText('OWASP JAPAN')).toBeInTheDocument()
     })
   })
-
-  //test for does not save an invalid query to recent searches on Enter
 
   test('does not save an invalid query to recent searches on Enter', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
@@ -632,7 +625,6 @@ describe('GlobalSearch', () => {
     expect(screen.queryByText('React.JS')).not.toBeInTheDocument()
   })
 
-  // test for removing a recent search from the list
   test('removes a recent search from the list', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
 
@@ -660,8 +652,6 @@ describe('GlobalSearch', () => {
       expect(screen.queryByText('japan')).not.toBeInTheDocument()
     })
   })
-
-  //keeps only the most recent 5 searches
 
   test('keeps only the most recent 5 searches', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
