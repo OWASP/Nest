@@ -521,8 +521,13 @@ export default function GlobalSearch() {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && highlightedIndex === null && searchQuery.trim() !== '') {
-                    addRecentSearch(searchQuery)
+                  if (
+                    e.key === 'Enter' &&
+                    highlightedIndex === null &&
+                    cleanQuery &&
+                    isValidQuery
+                  ) {
+                    addRecentSearch(cleanQuery)
                   }
                 }}
                 placeholder="Search the OWASP community..."
