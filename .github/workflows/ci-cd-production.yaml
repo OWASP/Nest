@@ -19,7 +19,7 @@ jobs:
     name: Run production CI/CD
     if: github.event.repository.fork == false
     permissions:
-      actions: write
+      actions: read
       attestations: write
       contents: write
       id-token: write
