@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import GlobalSearch from 'components/GlobalSearch'
+import { EMPTY_STATE_EXAMPLES } from 'utils/searchConstants'
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
@@ -582,6 +583,53 @@ describe('GlobalSearch', () => {
       expect(screen.getByText('Recent Searches')).toBeInTheDocument()
       expect(screen.getByText('japan')).toBeInTheDocument()
     })
+  })
+
+  //test for saving a query containing spaces to recent searches on Enter
+
+  test('saves a query containing spaces to recent searches on Enter', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'OWASP JAPAN')
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+      expect(screen.getByText('OWASP JAPAN')).toBeInTheDocument()
+    })
+  })
+
+  //test for does not save an invalid query to recent searches on Enter
+
+  test('does not save an invalid query to recent searches on Enter', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'React.JS')
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText(EMPTY_STATE_EXAMPLES)).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Recent Searches')).not.toBeInTheDocument()
+    expect(screen.queryByText('React.JS')).not.toBeInTheDocument()
   })
 
   // test for removing a recent search from the list
