@@ -10,6 +10,8 @@ import { FaTimes, FaSearch } from 'react-icons/fa'
 import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
 import { SiAlgolia } from 'react-icons/si'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import { INDEXES, SUGGESTION_COUNT, EMPTY_STATE_EXAMPLES } from 'utils/searchConstants'
+import { isValidSearchQuery } from 'utils/helpers/searchHelpers'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { Organization } from 'types/organization'
@@ -18,12 +20,6 @@ import type { Suggestion } from 'types/search'
 import type { User } from 'types/user'
 
 type SearchHit = Chapter | Event | Organization | Project | User
-
-const INDEXES = ['chapters', 'events', 'organizations', 'projects', 'users']
-const SUGGESTION_COUNT = 3
-const EMPTY_STATE_EXAMPLES = 'Try searches like "OWASP", "London", "AppSec", "Nest", or "John".'
-const MAX_RECENT_SEARCHES = 5
-const isValidSearchQuery = (query: string) => /^[a-zA-Z0-9\s\-_]+$/.test(query)
 
 export default function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false)
@@ -43,7 +39,7 @@ export default function GlobalSearch() {
   const searchVersionRef = useRef(0)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const shouldAutoFocus = useShouldAutoFocusSearch()
-  const { recentSearchResults, setRecentSearch, removeRecentSearch } = useRecentSearches()
+  const { recentSearchResults, removeRecentSearch, addRecentSearch } = useRecentSearches()
 
   const cleanQuery = searchQuery.trim()
   const isValidQuery = isValidSearchQuery(cleanQuery)
@@ -92,7 +88,6 @@ export default function GlobalSearch() {
     () =>
       debounce(async (query: string) => {
         const currentClearQuery = query.trim()
-        const curruntValidQuery = isValidSearchQuery(currentClearQuery)
 
         if (!currentClearQuery) {
           searchVersionRef.current++
@@ -103,7 +98,7 @@ export default function GlobalSearch() {
           return
         }
 
-        if (!curruntValidQuery) {
+        if (!isValidSearchQuery(currentClearQuery)) {
           setIsSearching(false)
           setSuggestions([])
           setShowSuggestions(false)
@@ -156,24 +151,6 @@ export default function GlobalSearch() {
     []
   )
 
-  // Function to add a search query to recent searches
-
-  const handleAddRecentSearch = useCallback(
-    (query: string) => {
-      if (query && query.trim() !== '') {
-        const trimmedQuery = query.trim()
-        setRecentSearch((prev: string[]) => {
-          const current = Array.isArray(prev)
-            ? prev.filter((item): item is string => typeof item === 'string')
-            : []
-          const filtered = current.filter((item) => item !== trimmedQuery)
-          return [trimmedQuery, ...filtered].slice(0, MAX_RECENT_SEARCHES)
-        })
-      }
-    },
-    [setRecentSearch]
-  )
-
   useEffect(() => {
     return () => {
       debouncedSearch.cancel()
@@ -187,7 +164,7 @@ export default function GlobalSearch() {
       const hitRecord = suggestion as unknown as Record<string, string | undefined>
       const label = hitRecord.name || hitRecord.login
       if (label) {
-        handleAddRecentSearch(label)
+        addRecentSearch(label)
       }
 
       switch (indexName) {
@@ -217,7 +194,7 @@ export default function GlobalSearch() {
           break
       }
     },
-    [router, handleAddRecentSearch]
+    [router, addRecentSearch]
   )
 
   useEffect(() => {
@@ -545,7 +522,7 @@ export default function GlobalSearch() {
                 onChange={handleSearchChange}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && highlightedIndex === null && searchQuery.trim() !== '') {
-                    handleAddRecentSearch(searchQuery)
+                    addRecentSearch(searchQuery)
                   }
                 }}
                 placeholder="Search the OWASP community..."
