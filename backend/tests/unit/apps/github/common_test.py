@@ -21,6 +21,7 @@ def mock_common_deps(mocker):
         "Label": mocker.patch("apps.github.common.Label"),
         "Release": mocker.patch("apps.github.common.Release"),
         "RepositoryContributor": mocker.patch("apps.github.common.RepositoryContributor"),
+        "ActivityEvent": mocker.patch("apps.github.common.ActivityEvent"),
         "check_owasp": mocker.patch(
             "apps.github.common.check_owasp_site_repository", return_value=False
         ),

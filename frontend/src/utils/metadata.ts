@@ -60,4 +60,15 @@ export const METADATA_CONFIG = {
     pageTitle: 'Organizations',
     type: 'website',
   },
+  pulse: {
+    description: 'A unified real-time view of activity across the OWASP community.',
+    keywords: [
+      'OWASP pulse',
+      'activity stream',
+      'open source security',
+      'OWASP community activity',
+    ],
+    pageTitle: 'Pulse',
+    type: 'website',
+  },
 }

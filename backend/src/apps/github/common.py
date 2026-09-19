@@ -23,6 +23,7 @@ from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
+from apps.owasp.models.activity_event import ActivityEvent
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -138,6 +139,7 @@ def sync_repository(
                     milestone=milestone,
                     repository=repository,
                 )
+                ActivityEvent.update_data(issue)
 
                 # Assignees.
                 issue.assignees.clear()
@@ -186,6 +188,7 @@ def sync_repository(
                 milestone=milestone,
                 repository=repository,
             )
+            ActivityEvent.update_data(pull_request)
 
             # Assignees.
             pull_request.assignees.clear()
@@ -217,6 +220,8 @@ def sync_repository(
             author = User.update_data(gh_release.author)
             releases.append(Release.update_data(gh_release, author=author, repository=repository))
     Release.bulk_save(releases)
+    for release in releases:
+        ActivityEvent.update_data(release)
 
     # GitHub repository contributors.
     RepositoryContributor.bulk_save(
