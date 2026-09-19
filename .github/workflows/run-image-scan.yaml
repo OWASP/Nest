@@ -53,7 +53,6 @@ jobs:
         }}
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:
-      actions: write
       contents: read
     runs-on: ubuntu-24.04-arm
     steps:

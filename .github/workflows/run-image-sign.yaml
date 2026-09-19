@@ -95,7 +95,7 @@ jobs:
     name: Sign SBOM
     environment: ${{ inputs.environment }}
     permissions:
-      actions: write
+      actions: read
       attestations: write
       contents: read
       id-token: write
