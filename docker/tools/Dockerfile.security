@@ -1,0 +1,36 @@
+ARG OWASP_GID=1000
+ARG OWASP_UID=1000
+
+FROM python:3.13.15-alpine3.23@sha256:75f27d686432419c9d42420b2b9ef605868c7a0682a6be10a6601fad46c2df01
+
+ARG OWASP_GID
+ARG OWASP_UID
+
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-tools-security" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    OWASP_GID=${OWASP_GID} \
+    OWASP_UID=${OWASP_UID} \
+    PYTHONUNBUFFERED=1
+
+RUN mkdir -p "${APK_CACHE_DIR}" && \
+    ln -fns "${APK_CACHE_DIR}" "${APK_SYMLINK_DIR}"
+
+# hadolint ignore=DL3018
+RUN --mount=type=cache,target="${APK_CACHE_DIR}" \
+    apk --no-cache update && \
+    apk --no-cache upgrade && \
+    apk --no-cache add gnupg && \
+    addgroup -S -g "${OWASP_GID}" owasp && \
+    adduser -S -h /home/owasp -u "${OWASP_UID}" -G owasp owasp && \
+    chown -R owasp:owasp /home/owasp
+
+WORKDIR /work
+
+COPY --chown=root:root --chmod=555 tools/security/renew_security_txt.py \
+    /usr/local/bin/renew_security_txt.py
+
+USER owasp
+
+ENTRYPOINT ["python", "/usr/local/bin/renew_security_txt.py"]

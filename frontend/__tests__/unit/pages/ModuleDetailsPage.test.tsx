@@ -66,6 +66,12 @@ jest.mock('components/cards/Contributors', () => {
   }
 })
 
+jest.mock('components/cards/ModuleIssues', () => {
+  return function MockModuleIssues() {
+    return <div data-testid="module-issues" />
+  }
+})
+
 jest.mock('components/cards/IssuesMilestones', () => {
   return function MockIssuesMilestones(props: { onLoadMorePullRequests?: () => void }) {
     return (
@@ -144,6 +150,7 @@ describe('ModuleDetailsPage', () => {
 
     expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
     expect(screen.getByTestId('summary')).toHaveTextContent('A beginner friendly module.')
+    expect(screen.getByTestId('module-issues')).toBeInTheDocument()
   })
 
   it('renders module without admins (uses undefined fallback)', async () => {

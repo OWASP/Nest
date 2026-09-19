@@ -24,6 +24,7 @@ Emay
 FOSS
 GBP
 GFKs
+GHSA
 GPG
 GRC
 GSOC
@@ -120,6 +121,7 @@ dismissable
 dkr
 dsn
 dvo
+eddsa
 elevenlabs
 env
 envsubst
@@ -127,6 +129,7 @@ ephemerals
 euo
 facebookexternalhit
 fdp
+fpr
 gamesec
 geocoders
 geoloc
@@ -153,6 +156,7 @@ jaraco
 jumpstart
 kasya
 langgraph
+ldd
 lhci
 libexpat
 libfuzzer
@@ -170,6 +174,7 @@ mamicidal
 markdownit
 markercluster
 mastg
+mcp
 mcr
 mdfile
 mentee
@@ -233,6 +238,7 @@ shrivastava
 skillstruck
 slackbot
 slideshare
+smol
 someid
 speakerdeck
 subgrp

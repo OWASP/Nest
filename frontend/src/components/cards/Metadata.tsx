@@ -19,6 +19,7 @@ interface MetadataProps {
   showGeolocation?: boolean
   showSocialLinks?: boolean
   detailsTitle?: string
+  className?: string
 }
 
 const Metadata = ({
@@ -31,12 +32,13 @@ const Metadata = ({
   showGeolocation = false,
   showSocialLinks = false,
   detailsTitle = 'Details',
+  className = '',
 }: MetadataProps) => {
   const statistics = stats ?? []
   const hasStatistics = showStatistics && statistics.length > 0
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
+    <div className={`grid grid-cols-1 gap-6 md:grid-cols-7 ${className}`}>
       <SecondaryCard
         icon={FaRectangleList}
         title={<AnchorTitle title={detailsTitle} />}
