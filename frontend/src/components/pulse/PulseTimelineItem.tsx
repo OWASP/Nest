@@ -1,19 +1,23 @@
 import Image from 'next/image'
 import { FaCode, FaCodeBranch, FaCodeMerge, FaGithub, FaUser } from 'react-icons/fa6'
-import { GoIssueClosed, GoIssueOpened } from 'react-icons/go'
+import { GoGitPullRequestClosed, GoIssueClosed, GoIssueOpened, GoTag } from 'react-icons/go'
 import type { PulseTimelineItemProps } from 'types/pulse'
 
 const formatRelativeTime = (dateStr: string) => {
   try {
     const eventDate = new Date(dateStr)
-    const currentDate = new Date()
-    const timeDifferenceMs = currentDate.getTime() - eventDate.getTime()
-    const hoursAgo = Math.floor(timeDifferenceMs / (1000 * 60 * 60))
-    const daysAgo = Math.floor(hoursAgo / 24)
+    const now = new Date()
+    const hoursAgo = Math.floor((now.getTime() - eventDate.getTime()) / 3600000)
 
     if (hoursAgo < 1) return 'just now'
     if (hoursAgo === 1) return '1 hour ago'
     if (hoursAgo < 24) return `${hoursAgo} hours ago`
+
+    const daysAgo = Math.round(
+      (new Date(now.toDateString()).getTime() - new Date(eventDate.toDateString()).getTime()) /
+        86400000
+    )
+
     if (daysAgo === 1) return 'yesterday'
     if (daysAgo < 30) return `${daysAgo} days ago`
     return eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -50,10 +54,15 @@ const renderBadge = (activityType: string) => {
         </span>
       )
     case 'pr_closed':
+      return (
+        <span className="rounded-md border border-red-500/40 bg-red-500/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-red-600 uppercase dark:text-red-400">
+          PR CLOSED
+        </span>
+      )
     case 'pr_merged':
       return (
         <span className="rounded-md border border-purple-500/40 bg-purple-500/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-purple-600 uppercase dark:text-purple-400">
-          {activityType === 'pr_merged' ? 'PR MERGED' : 'PR CLOSED'}
+          PR MERGED
         </span>
       )
     case 'issue_opened':
@@ -92,6 +101,11 @@ const renderTimelineIcon = (activityType: string) => {
         </div>
       )
     case 'pr_closed':
+      return (
+        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-red-500/60 bg-white text-red-600 shadow-md dark:bg-gray-800 dark:text-red-400">
+          <GoGitPullRequestClosed className="h-4 w-4" />
+        </div>
+      )
     case 'pr_merged':
       return (
         <div className="flex h-9 w-9 items-center justify-center rounded-full border border-purple-500/60 bg-white text-purple-600 shadow-md dark:bg-gray-800 dark:text-purple-400">
@@ -108,6 +122,12 @@ const renderTimelineIcon = (activityType: string) => {
       return (
         <div className="flex h-9 w-9 items-center justify-center rounded-full border border-red-500/60 bg-white text-red-600 shadow-md dark:bg-gray-800 dark:text-red-400">
           <GoIssueClosed className="h-4 w-4" />
+        </div>
+      )
+    case 'release_published':
+      return (
+        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-pink-500/60 bg-white text-pink-600 shadow-md dark:bg-gray-800 dark:text-pink-400">
+          <GoTag className="h-4 w-4" />
         </div>
       )
     default:

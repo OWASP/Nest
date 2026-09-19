@@ -46,6 +46,11 @@ const formatTimelineDate = (dateStr: string) => {
   }
 }
 
+const normalizeOrder = (paramVal: string | null): string => {
+  const val = paramVal?.toLowerCase()
+  return val === 'asc' || val === 'desc' ? val : 'desc'
+}
+
 export default function PulsePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -73,7 +78,7 @@ export default function PulsePage() {
   const [isSearchingChapters, setIsSearchingChapters] = useState<boolean>(false)
 
   const [timeRange, setTimeRange] = useState<string>(searchParams.get('timeRange') || '')
-  const [order, setOrder] = useState<string>(searchParams.get('order') || 'desc')
+  const [order, setOrder] = useState<string>(normalizeOrder(searchParams.get('order')))
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('search') || '')
   const [page, setPage] = useState<number>(
     Math.max(1, Number.parseInt(searchParams.get('page') || '1') || 1)
@@ -126,7 +131,7 @@ export default function PulsePage() {
     setIsSearchingChapters(false)
 
     setTimeRange(searchParams.get('timeRange') || '')
-    setOrder(searchParams.get('order') || 'desc')
+    setOrder(normalizeOrder(searchParams.get('order')))
     const search = searchParams.get('search') || ''
     debouncedSetSearch.cancel()
     setSearchQuery(search)

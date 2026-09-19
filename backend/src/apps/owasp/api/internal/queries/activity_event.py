@@ -3,7 +3,7 @@
 import strawberry
 import strawberry_django
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 
 from apps.common.utils import normalize_limit
 from apps.github.models.issue import Issue
@@ -57,7 +57,7 @@ class ActivityEventQuery:
                 "github_repository",
             )
             .prefetch_related(
-                "source_object",
+                Prefetch("source_object", queryset=Release.objects.select_related("repository")),
             )
             .order_by(*order_clauses)
         )
@@ -92,10 +92,14 @@ class ActivityEventQuery:
             )
 
         if project_key and (cleaned := project_key.strip()):
-            project_repo_ids = Project.objects.filter(name__iexact=cleaned).values_list(
-                "repositories", flat=True
+            project_repo_ids = Project.objects.filter(
+                Q(name__iexact=cleaned) | Q(key__iexact=cleaned)
+            ).values_list("repositories", flat=True)
+            queryset = queryset.filter(
+                Q(github_repository__in=project_repo_ids)
+                | Q(github_repository__name__iexact=cleaned)
+                | Q(github_repository__key__iexact=cleaned)
             )
-            queryset = queryset.filter(github_repository__in=project_repo_ids)
 
         if chapter_key and (cleaned := chapter_key.strip()):
             chapter_repo_ids = (
@@ -132,7 +136,7 @@ class ActivityEventQuery:
                 "github_repository",
             )
             .prefetch_related(
-                "source_object",
+                Prefetch("source_object", queryset=Release.objects.select_related("repository")),
             )
             .order_by("-occurred_at", "-pk")
         )

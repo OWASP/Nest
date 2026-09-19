@@ -78,14 +78,10 @@ class Migration(migrations.Migration):
                 "db_table": "github_activity_events",
                 "indexes": [
                     models.Index(fields=["activity_type"], name="activity_event_type_idx"),
-                    models.Index(fields=["github_user"], name="activity_event_github_user_idx"),
                     models.Index(
                         fields=["content_type", "object_id"], name="activity_event_source_idx"
                     ),
                     models.Index(fields=["occurred_at"], name="activity_event_occurred_at_idx"),
-                    models.Index(
-                        fields=["github_repository"], name="activity_event_github_repo_idx"
-                    ),
                 ],
                 "constraints": [
                     models.UniqueConstraint(

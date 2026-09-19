@@ -1,15 +1,11 @@
-import type { GetActivityEventsQuery } from 'types/__generated__/pulseQueries.generated'
+import type {
+  GetActivityEventsQuery,
+  GetActivityEventStatsQuery,
+} from 'types/__generated__/pulseQueries.generated'
 
 export type ActivityEventItem = GetActivityEventsQuery['activityEvents']['events'][number]
 
-export type ActivityEventStats = {
-  activeRepos?: number
-  contributors?: number
-  issues?: number
-  pullRequests?: number
-  releases?: number
-  totalActivities?: number
-}
+export type ActivityEventStats = GetActivityEventStatsQuery['activityEventStats']
 
 export type PulseFiltersProps = {
   activityType: string

@@ -22,19 +22,19 @@ export default function PulseMetricsCards({
     {
       color: 'border-blue-500/30 bg-blue-500/10 text-blue-500 dark:text-blue-400',
       icon: FaWaveSquare,
-      title: 'Activities',
+      title: 'Total Activities',
       value: stats?.totalActivities,
     },
     {
       color: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400',
       icon: FaCodeBranch,
-      title: 'Pull Requests',
+      title: 'PR Activities',
       value: stats?.pullRequests,
     },
     {
       color: 'border-amber-500/30 bg-amber-500/10 text-amber-500 dark:text-amber-400',
       icon: GoIssueOpened,
-      title: 'Issues',
+      title: 'Issue Activities',
       value: stats?.issues,
     },
     {
@@ -46,7 +46,7 @@ export default function PulseMetricsCards({
     {
       color: 'border-pink-500/30 bg-pink-500/10 text-pink-500 dark:text-pink-400',
       icon: FaRocket,
-      title: 'Releases',
+      title: 'Release Activities',
       value: stats?.releases,
     },
   ]

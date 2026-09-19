@@ -122,11 +122,16 @@ export default function PulseFilters({
     ))
   }
 
+  const hasActiveFilters = Boolean(
+    searchQuery || activityType || projectKey || chapterKey || timeRange
+  )
+
   return (
     <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="relative">
         <FaMagnifyingGlass className="absolute top-3.5 left-3.5 h-4 w-4 text-gray-400" />
         <input
+          aria-label="Search activity"
           type="text"
           placeholder="Search activity..."
           value={searchQuery}
@@ -238,69 +243,87 @@ export default function PulseFilters({
         />
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4 text-xs dark:border-gray-700">
-        <span className="font-medium text-gray-500 dark:text-gray-400">Active filters:</span>
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-          {activityType
-            ? ACTIVITY_TYPES.find((t) => t.value === activityType)?.label
-            : 'All Activity Types'}
-          <FilterDismissButton
-            label="Clear activity type filter"
-            onPress={() => {
-              setActivityType('')
-              setPage(1)
-            }}
-          />
-        </span>
+      {hasActiveFilters && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4 text-xs dark:border-gray-700">
+          <span className="font-medium text-gray-500 dark:text-gray-400">Active filters:</span>
 
-        {projectKey && (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-            Project: {projectKey}
-            <FilterDismissButton
-              label="Clear project filter"
-              onPress={() => {
-                setProjectKey('')
-                setProjectSearchInput('')
-                setPage(1)
-              }}
-            />
-          </span>
-        )}
+          {searchQuery && (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              Search: {searchQuery}
+              <FilterDismissButton
+                label="Clear search filter"
+                onPress={() => {
+                  setSearchQuery('')
+                  setPage(1)
+                }}
+              />
+            </span>
+          )}
 
-        {chapterKey && (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-            Chapter: {chapterKey}
-            <FilterDismissButton
-              label="Clear chapter filter"
-              onPress={() => {
-                setChapterKey('')
-                setChapterSearchInput('')
-                setPage(1)
-              }}
-            />
-          </span>
-        )}
+          {activityType && (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              Type: {ACTIVITY_TYPES.find((t) => t.value === activityType)?.label || activityType}
+              <FilterDismissButton
+                label="Clear activity type filter"
+                onPress={() => {
+                  setActivityType('')
+                  setPage(1)
+                }}
+              />
+            </span>
+          )}
 
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-          {TIME_RANGES.find((tr) => tr.value === timeRange)?.label || 'All Time'}
-          <FilterDismissButton
-            label="Clear time range filter"
-            onPress={() => {
-              setTimeRange('')
-              setPage(1)
-            }}
-          />
-        </span>
+          {projectKey && (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              Project: {projectKey}
+              <FilterDismissButton
+                label="Clear project filter"
+                onPress={() => {
+                  setProjectKey('')
+                  setProjectSearchInput('')
+                  setPage(1)
+                }}
+              />
+            </span>
+          )}
 
-        <Button
-          size="sm"
-          variant="light"
-          onPress={clearAllFilters}
-          className="ml-2 h-auto min-w-0 bg-transparent p-0 font-semibold text-blue-600 hover:underline dark:text-blue-400"
-        >
-          Clear all
-        </Button>
-      </div>
+          {chapterKey && (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              Chapter: {chapterKey}
+              <FilterDismissButton
+                label="Clear chapter filter"
+                onPress={() => {
+                  setChapterKey('')
+                  setChapterSearchInput('')
+                  setPage(1)
+                }}
+              />
+            </span>
+          )}
+
+          {timeRange && (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-gray-100 px-2.5 py-1 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              Time: {TIME_RANGES.find((tr) => tr.value === timeRange)?.label || timeRange}
+              <FilterDismissButton
+                label="Clear time range filter"
+                onPress={() => {
+                  setTimeRange('')
+                  setPage(1)
+                }}
+              />
+            </span>
+          )}
+
+          <Button
+            size="sm"
+            variant="light"
+            onPress={clearAllFilters}
+            className="ml-2 h-auto min-w-0 bg-transparent p-0 font-semibold text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Clear all
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
