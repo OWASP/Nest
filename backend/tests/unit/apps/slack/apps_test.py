@@ -59,7 +59,12 @@ class TestSlackAppHandlers:
             with patch.object(module, "logger") as mock_logger:
                 error_handler(test_error, test_body)
 
-            mock_logger.exception.assert_called_once_with(test_error, extra={"body": test_body})
+            mock_logger.error.assert_called_once_with(
+                "%s",
+                test_error,
+                extra={"body": test_body},
+                exc_info=test_error,
+            )
         finally:
             self._restore_module(orig)
 

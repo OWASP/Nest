@@ -5,6 +5,7 @@ def configure_slack_events():
         app_home_opened,
         app_mention,
         message_posted,
+        reaction_added,
         team_join,
         url_verification,
     )

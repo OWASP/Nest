@@ -1,5 +1,56 @@
-site_name: OWASP Nest Documentation
+copyright: Copyright &copy; 2026 OWASP Nest
+
 docs_dir: docs/src
+
+extra:
+  generator: false
+  homepage: .
+  social:
+    - icon: fontawesome/brands/bluesky
+      link: https://bsky.app/profile/nest.owasp.org
+      name: OWASP Nest on Bluesky
+    - icon: fontawesome/brands/github
+      link: https://github.com/OWASP/Nest
+      name: OWASP Nest on GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/owasp-nest
+      name: OWASP Nest on LinkedIn
+    - icon: fontawesome/brands/slack
+      link: https://owasp.slack.com/archives/project-nest
+      name: OWASP Nest on Slack
+
+extra_css:
+  - assets/stylesheets/nest-theme.css
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets:
+      base_path: [.]
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: '!!python/name:pymdownx.superfences.fence_code_format'
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist
+  - toc:
+      permalink: true
+
 nav:
   - Home:
       - OWASP Nest: index.md
@@ -11,11 +62,28 @@ nav:
   - NestBot: nestbot/index.md
   - Schema: schema/index.md
   - Maintenance: maintenance/index.md
+
+plugins:
+  - minify:
+      minify_html: true
+  - mkdocstrings:
+      default_handler: python
+  - privacy
+  - search
+  - tags
+
 repo_url: https://github.com/OWASP/Nest
+
+site_name: OWASP Nest
+
 theme:
   name: material
-  logo: assets/images/owasp_icon_white_sm.png
+  custom_dir: docs/overrides
+  logo: assets/images/logo.png
   favicon: assets/images/favicon.png
+  font:
+    code: Geist Mono
+    text: Geist
   features:
     - navigation.tabs
     - navigation.instant
@@ -34,49 +102,15 @@ theme:
     - content.tooltips
   language: en
   palette:
-    - scheme: default
+    - scheme: dark
       toggle:
-        icon: material/lightbulb-outline
-        name: Switch to dark mode
-      primary: teal
-      accent: amber
-    - scheme: slate
-      toggle:
-        icon: material/weather-night
-        name: Switch to light mode
+        icon: material/weather-sunny
+        name: Enable light mode
       primary: teal
       accent: cyan
-markdown_extensions:
-  - pymdownx.tasklist
-  - pymdownx.tabbed:
-      alternate_style: true
-  - md_in_html
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets:
-      check_paths: true
-      base_path: [.]
-  - admonition
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.critic
-  - pymdownx.caret
-  - pymdownx.keys
-  - footnotes
-  - attr_list
-  - def_list
-  - abbr
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: '!!python/name:pymdownx.superfences.fence_code_format'
-
-plugins:
-  - search
-  - minify:
-      minify_html: true
-  - mkdocstrings:
-      default_handler: python
-  - tags
+    - scheme: light
+      toggle:
+        icon: material/weather-night
+        name: Enable dark mode
+      primary: teal
+      accent: amber

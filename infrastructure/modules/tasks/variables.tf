@@ -1,9 +1,3 @@
-variable "assign_public_ip" {
-  description = "Whether to assign public IPs to ECS tasks (required for public subnets)."
-  type        = bool
-  default     = false
-}
-
 variable "aws_region" {
   description = "The AWS region."
   type        = string
@@ -114,13 +108,13 @@ variable "migrate_task_memory" {
   default     = "1024"
 }
 
-variable "subnet_ids" {
-  description = "Subnet IDs for ECS tasks (can be public or private)."
+variable "private_subnet_ids" {
+  description = "Private subnet IDs for ECS tasks."
   type        = list(string)
 
   validation {
-    condition     = length(var.subnet_ids) > 0
-    error_message = "subnet_ids must contain at least one subnet."
+    condition     = length(var.private_subnet_ids) > 0
+    error_message = "private_subnet_ids must contain at least one subnet."
   }
 }
 
