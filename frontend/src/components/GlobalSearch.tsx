@@ -396,7 +396,7 @@ export default function GlobalSearch() {
         aria-label="Open search"
       >
         <FaSearch className="h-4 w-4 shrink-0" />
-        <span className="hidden flex-1 text-left sm:inline">
+        <span className="hidden select-none flex-1 text-left sm:inline">
           Type{' '}
           <kbd className="mx-1 rounded border border-slate-500/30 bg-transparent px-1.5 py-0.5 text-xs dark:border-slate-500/50 dark:bg-transparent">
             /
