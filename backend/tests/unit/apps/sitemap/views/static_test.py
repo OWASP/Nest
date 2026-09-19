@@ -31,10 +31,12 @@ class TestStaticSitemap:
     @patch("apps.sitemap.views.static.Organization.objects.aggregate")
     @patch("apps.sitemap.views.static.Snapshot.objects.aggregate")
     @patch("apps.sitemap.views.static.Project.objects.aggregate")
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
     @patch("apps.sitemap.views.static.User.objects.aggregate")
     def test_lastmod(
         self,
         mock_user,
+        mock_repository,
         mock_project,
         mock_organization,
         mock_committee,
@@ -46,6 +48,7 @@ class TestStaticSitemap:
         mock_committee.return_value = {"latest": dt}
         mock_organization.return_value = {"latest": dt}
         mock_project.return_value = {"latest": dt}
+        mock_repository.return_value = {"latest": dt}
         mock_user.return_value = {"latest": dt}
 
         for item in sitemap.STATIC_ROUTES:
@@ -76,6 +79,18 @@ class TestStaticSitemap:
 
         mock_aggregate.assert_called_once_with(latest=ANY)
         assert result == dt
+
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
+    def test_lastmod_with_repositories_path(self, mock_aggregate, sitemap):
+        """Test lastmod uses Repository's latest updated_at."""
+        latest = timezone.now()
+        mock_aggregate.return_value = {"latest": latest}
+
+        item = {"path": "/repositories"}
+        result = sitemap.lastmod(item)
+
+        mock_aggregate.assert_called_once_with(latest=ANY)
+        assert result == latest
 
     def test_limit(self, sitemap):
         assert sitemap.limit == 50000
