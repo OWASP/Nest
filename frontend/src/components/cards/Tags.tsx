@@ -13,8 +13,14 @@ interface TagsProps {
 
 const Tags = ({ entityKey, languages, topics, tags, domains, labels }: TagsProps) => {
   const hasLanguagesOrTopics = (languages?.length || 0) > 0 || (topics?.length || 0) > 0
-  const hasTagsDomainsOrLabels =
-    (tags?.length || 0) > 0 || (domains?.length || 0) > 0 || (labels?.length || 0) > 0
+
+  const tagSections = [
+    { icon: FaTags, items: tags, name: 'tags', title: 'Tags' },
+    { icon: FaChartPie, items: domains, name: 'domains', title: 'Domains' },
+    { icon: FaTags, items: labels, name: 'labels', title: 'Labels' },
+  ].filter((section) => (section.items?.length || 0) > 0)
+
+  const fullWidthIndex = tagSections.length % 2 === 1 ? tagSections.length - 1 : -1
 
   // Languages and Topics section
   if (hasLanguagesOrTopics) {
@@ -43,45 +49,21 @@ const Tags = ({ entityKey, languages, topics, tags, domains, labels }: TagsProps
   }
 
   // Tags, Domains, and Labels section
-  if (hasTagsDomainsOrLabels) {
+  if (tagSections.length > 0) {
     return (
-      <>
-        {((tags?.length || 0) > 0 || (domains?.length || 0) > 0) && (
-          <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
-          >
-            {tags && tags.length > 0 && (
-              <ToggleableList
-                entityKey={`${entityKey}-tags`}
-                items={tags}
-                icon={FaTags}
-                label={<AnchorTitle title="Tags" />}
-                isDisabled={true}
-              />
-            )}
-            {domains && domains.length > 0 && (
-              <ToggleableList
-                entityKey={`${entityKey}-domains`}
-                items={domains}
-                icon={FaChartPie}
-                label={<AnchorTitle title="Domains" />}
-                isDisabled={true}
-              />
-            )}
-          </div>
-        )}
-        {labels && labels.length > 0 && (
-          <div className="mb-8">
-            <ToggleableList
-              entityKey={`${entityKey}-labels`}
-              items={labels}
-              icon={FaTags}
-              label={<AnchorTitle title="Labels" />}
-              isDisabled={true}
-            />
-          </div>
-        )}
-      </>
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        {tagSections.map((section, index) => (
+          <ToggleableList
+            key={section.name}
+            entityKey={`${entityKey}-${section.name}`}
+            items={section.items ?? []}
+            icon={section.icon}
+            label={<AnchorTitle title={section.title} />}
+            isDisabled={true}
+            className={index === fullWidthIndex ? 'md:col-span-2' : ''}
+          />
+        ))}
+      </div>
     )
   }
 

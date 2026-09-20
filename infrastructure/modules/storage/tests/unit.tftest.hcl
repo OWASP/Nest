@@ -59,3 +59,25 @@ run "test_static_iam_policy_name_format" {
     error_message = "Static IAM policy name must follow format: {project}-{environment}-static-read-write."
   }
 }
+
+run "test_shared_data_bucket_not_created_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(module.shared_data_bucket) == 0
+    error_message = "Shared data bucket must not be created when create_shared_data_bucket is false."
+  }
+}
+
+run "test_shared_data_bucket_created_when_enabled" {
+  command = plan
+
+  variables {
+    create_shared_data_bucket = true
+  }
+
+  assert {
+    condition     = length(module.shared_data_bucket) == 1
+    error_message = "Shared data bucket must be created when create_shared_data_bucket is true."
+  }
+}
