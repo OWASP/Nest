@@ -29,6 +29,7 @@ class TestStaticSitemap:
     @patch("apps.sitemap.views.static.Chapter.objects.aggregate")
     @patch("apps.sitemap.views.static.Committee.objects.aggregate")
     @patch("apps.sitemap.views.static.Organization.objects.aggregate")
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
     @patch("apps.sitemap.views.static.Snapshot.objects.aggregate")
     @patch("apps.sitemap.views.static.Project.objects.aggregate")
     @patch("apps.sitemap.views.static.User.objects.aggregate")
@@ -37,6 +38,7 @@ class TestStaticSitemap:
         mock_user,
         mock_project,
         mock_organization,
+        mock_repository,
         mock_committee,
         mock_chapter,
         sitemap,
@@ -45,6 +47,7 @@ class TestStaticSitemap:
         mock_chapter.return_value = {"latest": dt}
         mock_committee.return_value = {"latest": dt}
         mock_organization.return_value = {"latest": dt}
+        mock_repository.return_value = {"latest": dt}
         mock_project.return_value = {"latest": dt}
         mock_user.return_value = {"latest": dt}
 
