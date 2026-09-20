@@ -1,9 +1,10 @@
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
 
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "~> 6.62.0"
     }
   }
 }
@@ -155,9 +156,9 @@ resource "aws_ecs_service" "main" {
   }
 
   network_configuration {
-    assign_public_ip = var.assign_public_ip
+    assign_public_ip = false
     security_groups  = [var.security_group_id]
-    subnets          = var.subnet_ids
+    subnets          = var.private_subnet_ids
   }
 }
 

@@ -29,9 +29,11 @@ class TestUpdateSynonymsCommand:
             (
                 3,
                 2,
-                "\nThe following models synonyms were reindexed:\n"
-                "        * Issues --> 3\n"
-                "        * Projects --> 2\n",
+                (
+                    "\nThe following models synonyms were reindexed:\n"
+                    "        * Issues --> 3\n"
+                    "        * Projects --> 2\n"
+                ),
             ),
             (
                 0,

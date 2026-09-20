@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
+import { formatDate } from 'utils/dateFormatter'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
 import { LabelList } from 'components/LabelList'
 
@@ -669,6 +670,54 @@ describe('<IssuesTable />', () => {
       render(<IssuesTable issues={[issueWithDeadline]} showDeadline={true} />)
       const dueSoonElements = screen.getAllByText('Due Soon')
       expect(dueSoonElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows the due date alongside the status for an open issue', () => {
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 10)
+      const issueWithFutureDeadline: IssueRow = {
+        objectID: '18',
+        number: 141,
+        title: 'Dated Upcoming Issue',
+        state: 'open',
+        labels: [],
+        deadline: futureDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithFutureDeadline]} showDeadline={true} />)
+      expect(screen.getAllByText('Upcoming').length).toBeGreaterThan(0)
+      expect(screen.getAllByText(formatDate(futureDate.toISOString())).length).toBeGreaterThan(0)
+    })
+
+    it('shows no due date for an open issue without a deadline', () => {
+      const issueWithoutDeadline: IssueRow = {
+        objectID: '19',
+        number: 142,
+        title: 'Undated Issue',
+        state: 'open',
+        labels: [],
+        deadline: null,
+      }
+      const { container } = render(
+        <IssuesTable issues={[issueWithoutDeadline]} showDeadline={true} />
+      )
+      expect(screen.getAllByText('No Deadline').length).toBeGreaterThan(0)
+      expect(container.textContent).not.toMatch(/\d{4}/)
+    })
+
+    it('shows the date only once for a closed issue', () => {
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 10)
+      const closedIssue: IssueRow = {
+        objectID: '20',
+        number: 143,
+        title: 'Closed Dated Issue',
+        state: 'closed',
+        labels: [],
+        deadline: pastDate.toISOString(),
+      }
+      render(<IssuesTable issues={[closedIssue]} showDeadline={true} />)
+      expect(screen.getAllByText(formatDate(pastDate.toISOString()))).toHaveLength(1)
+      expect(screen.queryByText('Overdue')).not.toBeInTheDocument()
     })
 
     it('calculates correct column count with deadline column', () => {

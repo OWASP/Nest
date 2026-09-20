@@ -306,8 +306,10 @@ class TestRepositoryContentExtractor:
     def test_extract_tab_files_without_tab_prefix(self, mock_get_content, mock_sleep):
         """Test that files without tab_ prefix are not added to tab_files."""
         mock_get_content.side_effect = [
-            '[{"name": "readme.md"}, {"name": "notab.md"},'
-            ' {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]',
+            (
+                '[{"name": "readme.md"}, {"name": "notab.md"},'
+                ' {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]'
+            ),
             "README content",
             None,
             None,
