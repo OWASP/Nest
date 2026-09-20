@@ -4,7 +4,7 @@ volumes:
   cache-data:
     name: cache-data-pulse
   db-data:
-    name: db-data-pulse-model
+    name: db-data-pulse
   docs-venv:
     name: docs-venv-pulse
   frontend-next:
