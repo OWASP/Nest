@@ -29,9 +29,15 @@ const SortBy = ({
   }
   const showOrderButton = !hideOrderButton && selectedSortOption !== 'default'
   const ariaLabel = customAriaLabel || (showLabel ? 'Sort By' : 'Sort by')
+  const labelId = id ? `${id}-label` : undefined
 
   return (
     <div className={`flex w-full min-w-0 items-center ${className}`}>
+      {id && (
+        <span id={labelId} className="sr-only">
+          {ariaLabel}
+        </span>
+      )}
       {/* Sort Attribute Dropdown */}
       <div
         className={`-ml-px flex min-w-0 flex-1 items-center border pl-3 shadow-none ${containerClassName} ${
@@ -41,7 +47,7 @@ const SortBy = ({
         <Select
           id={id}
           aria-label={ariaLabel}
-          aria-labelledby={id}
+          aria-labelledby={labelId}
           disallowEmptySelection
           className="min-w-0 flex-1"
           size="md"
