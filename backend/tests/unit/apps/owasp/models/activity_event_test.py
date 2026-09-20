@@ -36,9 +36,7 @@ def _make_issue(*, state=GenericIssueModel.IssueState.OPEN, closed_at=None):
     return issue
 
 
-def _make_pull_request(
-    *, merged_at=None, state=GenericIssueModel.IssueState.OPEN, closed_at=None
-):
+def _make_pull_request(*, merged_at=None, state=GenericIssueModel.IssueState.OPEN, closed_at=None):
     """Return a mock PullRequest."""
     pr = Mock()
     pr.__class__.__name__ = "PullRequest"
@@ -52,7 +50,10 @@ def _make_pull_request(
     return pr
 
 
-def _make_release(*, published_at=datetime(2024, 3, 1, tzinfo=UTC)):
+_DEFAULT_PUBLISHED_AT = datetime(2024, 3, 1, tzinfo=UTC)
+
+
+def _make_release(*, published_at=_DEFAULT_PUBLISHED_AT):
     """Return a mock Release."""
     release = Mock()
     release.__class__.__name__ = "Release"
@@ -86,13 +87,9 @@ class TestActivityEventBulkSave:
     def test_bulk_save_delegates_to_base(self):
         """bulk_save should call BulkSaveModel.bulk_save with the correct args."""
         events = [Mock(), Mock()]
-        with patch(
-            "apps.owasp.models.activity_event.BulkSaveModel.bulk_save"
-        ) as mock_bulk_save:
+        with patch("apps.owasp.models.activity_event.BulkSaveModel.bulk_save") as mock_bulk_save:
             ActivityEvent.bulk_save(events, fields=["activity_type"])
-            mock_bulk_save.assert_called_once_with(
-                ActivityEvent, events, fields=["activity_type"]
-            )
+            mock_bulk_save.assert_called_once_with(ActivityEvent, events, fields=["activity_type"])
 
 
 class TestBuildForIssue:
@@ -233,7 +230,7 @@ class TestUpdateData:
         assert kwargs["object_id"] == issue.pk
 
     def test_update_data_for_release(self):
-        """update_data for a published Release should construct one RELEASE_PUBLISHED event."""
+        """update_data for a published Release constructs a RELEASE_PUBLISHED event."""
         release = _make_release()
 
         with (
@@ -289,7 +286,7 @@ class TestBulkSaveForSources:
         mock_bulk_create.assert_not_called()
 
     def test_sources_with_events_calls_bulk_create(self):
-        """bulk_save_for_sources with valid sources should call bulk_create with ignore_conflicts."""
+        """Call bulk_create with ignore_conflicts for valid sources."""
         issue = _make_issue()
         mock_event = Mock(spec=ActivityEvent)
 
