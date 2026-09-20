@@ -60,7 +60,7 @@ const SortBy = ({
             .map((item) => item.key)}
           onChange={(e) => {
             const val = (e.target as HTMLSelectElement).value
-            if (val !== undefined && val !== '') {
+            if (val !== undefined) {
               onSortChange(val)
             }
           }}
