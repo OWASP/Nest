@@ -69,6 +69,7 @@ repos:
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
+        exclude: backend/src/apps/owasp/templates/emails/snapshot_digest.html
         entry: djlint --reformat
         types:
           - html

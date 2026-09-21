@@ -1,0 +1,1973 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=700">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>{{ snapshot.title }} — OWASP Nest</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:AllowPNG/>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <style>
+    body,table,td,p,a,li,span { font-family: Arial, Helvetica, sans-serif !important; }
+  </style>
+  <![endif]-->
+  <style type="text/css" data-premailer="ignore">
+    html,
+    body,
+    table,
+    td,
+    div,
+    p,
+    a,
+    span,
+    h1,
+    li {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    html,
+    body {
+      margin: 0 auto !important;
+      padding: 0 !important;
+      width: 700px !important;
+      min-width: 700px !important;
+      max-width: 700px !important;
+      background-color: transparent;
+    }
+
+    table {
+      border-spacing: 0;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    td {
+      padding: 0;
+      mso-line-height-rule: exactly;
+    }
+
+    img {
+      border: 0;
+      outline: none;
+      text-decoration: none;
+      max-width: 100%;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    p {
+      margin: 0;
+      padding: 0;
+    }
+
+    a[x-apple-data-detectors] {
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+  </style>
+  <style type="text/css">
+    /* Shell */
+    .email-body {
+      margin: 0 auto;
+      padding: 0;
+      width: 700px;
+      min-width: 700px;
+      max-width: 700px;
+      background-color: transparent;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    .preheader {
+      display: none;
+      max-height: 0;
+      max-width: 0;
+      overflow: hidden;
+      mso-hide: all;
+      font-size: 1px;
+      line-height: 1px;
+      color: transparent;
+    }
+    .email-shell {
+      width: 700px;
+      min-width: 700px;
+      max-width: 700px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .cell-flush {
+      padding: 0;
+    }
+    .email-card {
+      width: 700px;
+      min-width: 700px;
+      max-width: 700px;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #dadce0;
+      background-color: #1e293b;
+    }
+
+    /* Header */
+    .header-shell {
+      background-color: #1e293b;
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+    }
+    .header-table {
+      width: 100%;
+      background-color: #1e293b;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+    }
+    .header-cell {
+      padding: 47px 24px 48px 24px;
+      background-color: #1e293b;
+      border-radius: 12px 12px 0 0;
+    }
+    .table-full {
+      width: 100%;
+    }
+    .header-logo-row {
+      padding-bottom: 24px;
+    }
+    .header-logo-cell {
+      padding-right: 12px;
+    }
+    .header-logo {
+      display: block;
+      width: 36px;
+      height: 36px;
+      max-width: 36px;
+      border: 0;
+    }
+    .header-brand {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+      letter-spacing: -0.3px;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    .header-title-cell {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    .header-title {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+      letter-spacing: -0.4px;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    /* Sections */
+    .content-bg {
+      background-color: #ffffff;
+    }
+    .section {
+      padding: 24px 24px 0;
+    }
+    .section-heading {
+      padding-bottom: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.3;
+    }
+    .section-rule-cell {
+      padding-bottom: 12px;
+    }
+    .section-rule {
+      width: 44px;
+      height: 3px;
+      line-height: 3px;
+      font-size: 0;
+      background-color: #c0d130;
+    }
+    .grid {
+      width: 100%;
+      table-layout: fixed;
+    }
+    .grid-row-gap {
+      height: 8px;
+      line-height: 8px;
+      font-size: 0;
+    }
+
+    /* Cards */
+    .card {
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+    .card-heading {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.3;
+    }
+    .card-link {
+      color: #111827;
+      text-decoration: none;
+    }
+    .card-summary {
+      margin: 0 0 4px;
+      font-size: 12px;
+      color: #4b5563;
+      line-height: 1.4;
+    }
+    .card-location {
+      margin: 0;
+      font-size: 11px;
+      color: #1D7BD7;
+      line-height: 1.3;
+    }
+    .grid-gutter {
+      width: 8px;
+    }
+    .more-cell {
+      width: 8%;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .more-text {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      line-height: 1.2;
+      text-align: center;
+      width: 100%;
+      display: block;
+    }
+    .project-heading {
+      margin: 0 0 6px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.35;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+    .project-summary {
+      margin: 0 0 6px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 12px;
+      color: #4b5563;
+      line-height: 1.4;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+    .project-stats-label {
+      margin: 6px 0 4px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1;
+    }
+    .project-stats-row {
+      margin-bottom: 8px;
+    }
+
+    /* Pills */
+    .pill {
+      display: inline-block;
+      white-space: nowrap;
+      padding: 2px 8px;
+      margin: 0 4px 4px 0;
+      border-radius: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .pill-stars {
+      background-color: #fef08a;
+      color: #92400e;
+    }
+    .pill-forks {
+      background-color: #bfdbfe;
+      color: #1e40af;
+    }
+    .pill-contributors {
+      background-color: #e9d5ff;
+      color: #6b21a8;
+    }
+    .pill-issues {
+      background-color: #fecaca;
+      color: #b91c1c;
+    }
+    .pill-pull-requests {
+      background-color: #bbf7d0;
+      color: #15803d;
+    }
+    .pill-releases {
+      background-color: #fed7aa;
+      color: #c2410c;
+    }
+
+    /* Card entries */
+    .author-avatar-cell {
+      padding-right: 6px;
+    }
+    .author-avatar {
+      display: block;
+      border-radius: 50%;
+    }
+    .entry-heading {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.35;
+    }
+    .entry-meta {
+      margin: 4px 0 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 11px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+    .user-cell {
+      padding-right: 13px;
+    }
+    .bare-link {
+      text-decoration: none;
+    }
+    .user-avatar {
+      display: block;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+    }
+    .user-avatar-fallback {
+      display: inline-block;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: #d1d5db;
+      text-align: center;
+      line-height: 44px;
+      font-size: 16px;
+    }
+    .card-heading-sm {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.35;
+    }
+    .card-meta {
+      margin: 0;
+      font-size: 11px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    /* Subscribed entity sections */
+    .entity-row-gap {
+      height: 12px;
+      line-height: 12px;
+      font-size: 0;
+    }
+    .entity-card {
+      padding: 14px 12px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+    .entity-name {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.4;
+    }
+    .entity-badge-cell {
+      padding-left: 8px;
+      white-space: nowrap;
+    }
+    .entity-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+      letter-spacing: 0.3px;
+    }
+    .entity-badge-project {
+      background-color: #dbeafe;
+      color: #1d4ed8;
+    }
+    .entity-badge-chapter {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+    .entity-badge-committee {
+      background-color: #fef3c7;
+      color: #b45309;
+    }
+    .entity-content-label {
+      margin: 10px 0 6px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #111827;
+    }
+    .entity-item-gap {
+      height: 6px;
+      line-height: 6px;
+      font-size: 0;
+    }
+    .entity-item {
+      padding: 8px;
+      background-color: #ffffff;
+      border-radius: 6px;
+    }
+    .entity-avatar-cell {
+      padding-right: 5px;
+    }
+    .entity-item-heading {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.3;
+    }
+    .entity-item-meta {
+      margin: 3px 0 0;
+      font-size: 10px;
+      color: #6b7280;
+      line-height: 1.3;
+    }
+    .entity-gutter {
+      width: 6px;
+    }
+
+    /* Call to action */
+    .cta-cell {
+      padding: 28px 24px;
+    }
+    .cta-button {
+      display: inline-block;
+      padding: 14px 32px;
+      background-color: #1D7BD7;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+      border-radius: 8px;
+      letter-spacing: 0.2px;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    /* Footer */
+    .footer-shell {
+      background-color: #1e293b;
+      padding: 26px 24px;
+      border-radius: 0 0 12px 12px;
+    }
+    .footer-social-row {
+      padding-bottom: 16px;
+    }
+    .footer-social-cell {
+      padding: 0 16px;
+    }
+    .footer-social-icon {
+      display: block;
+      width: 20px;
+      height: 20px;
+      max-width: 20px;
+      border: 0;
+    }
+    .footer-logos-row {
+      padding-bottom: 14px;
+    }
+    .footer-owasp-logo {
+      display: block;
+      width: 104px;
+      max-width: 104px;
+      height: auto;
+      border: 0;
+    }
+    .footer-divider {
+      width: 1px;
+      background-color: #4b5563;
+      font-size: 0;
+      line-height: 0;
+    }
+    .footer-nest-cell {
+      padding-left: 12px;
+    }
+    .footer-nest-logo-cell {
+      padding-right: 8px;
+    }
+    .footer-nest-logo {
+      display: block;
+      width: 31px;
+      height: 31px;
+      max-width: 31px;
+      border: 0;
+    }
+    .footer-nest-name {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    .footer-text {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.6;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    .footer-link {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #94a3b8;
+      text-decoration: underline;
+    }
+    .footer-copyright {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+  </style>
+</head>
+{% load url_filters %}
+
+<body
+  class="email-body">
+  <div
+    class="preheader">
+    Your personalized OWASP community update — {{ snapshot.title }}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="700" cellpadding="0" cellspacing="0" border="0"
+    class="email-shell">
+    <tr>
+      <td align="center" class="cell-flush">
+        <table role="presentation" width="700" align="center" cellpadding="0" cellspacing="0" border="0"
+          class="email-card">
+          <tr>
+            <td bgcolor="#1e293b" class="header-shell">
+              <!--[if gte mso 9]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false"
+                style="width:700px;" arcsize="4%" fillcolor="#1e293b">
+                <v:fill type="solid" color="#1e293b" />
+                <v:textbox inset="0,0,0,0">
+              <![endif]-->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#1e293b"
+                class="header-table">
+                <tr>
+                  <td class="px header-cell">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td align="center" class="header-logo-row">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                            <tr>
+                              <td valign="middle" class="header-logo-cell">
+                                <img src="{{ site_url }}/img/logo_dark.png" alt="OWASP Nest" width="36" height="36"
+                                  class="header-logo">
+                              </td>
+                              <td valign="middle"
+                                class="header-brand">
+                                OWASP&nbsp;Nest
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center"
+                          class="header-title-cell">
+                          <h1
+                            class="header-title">
+                            {{ subscription.name }}
+                          </h1>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <!--[if gte mso 9]>
+                </v:textbox>
+              </v:roundrect>
+              <![endif]-->
+            </td>
+          </tr>
+          <tr>
+            <td class="content-bg">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="table-full">
+                {% if chapters_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Chapters
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for row in chapters_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if chapters_data.extra %}5{% else %}3{% endif %}" height="8" class="grid-row-gap">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if chapters_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      class="card">
+                                      <p class="card-heading">
+                                        {# nosemgrep #}
+                                        <a href="{{ site_url }}/chapters/{{ row.0.nest_key }}" target="_blank"
+                                          class="card-link">{{ row.0.name }}</a>
+                                      </p>
+                                      {% if row.0.summary %}
+                                      <p class="card-summary">
+                                        {{ row.0.summary|truncatewords:16 }}</p>
+                                      {% elif row.0.description %}
+                                      <p class="card-summary">
+                                        {{ row.0.description|truncatewords:16 }}</p>
+                                      {% endif %}
+                                      {% if row.0.suggested_location or row.0.country %}
+                                      <p class="card-location">
+                                        &#127760; {{ row.0.suggested_location|default:row.0.country }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    <td width="8" class="grid-gutter">&nbsp;</td>
+                                    <td width="{% if chapters_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      class="card">
+                                      <p class="card-heading">
+                                        {# nosemgrep #}
+                                        <a href="{{ site_url }}/chapters/{{ row.1.nest_key }}" target="_blank"
+                                          class="card-link">{{ row.1.name }}</a>
+                                      </p>
+                                      {% if row.1.summary %}
+                                      <p class="card-summary">
+                                        {{ row.1.summary|truncatewords:16 }}</p>
+                                      {% elif row.1.description %}
+                                      <p class="card-summary">
+                                        {{ row.1.description|truncatewords:16 }}</p>
+                                      {% endif %}
+                                      {% if row.1.suggested_location or row.1.country %}
+                                      <p class="card-location">
+                                        &#127760; {{ row.1.suggested_location|default:row.1.country }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% else %}
+                                    <td colspan="3" width="{% if chapters_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                      class="card">
+                                      <p class="card-heading">
+                                        {# nosemgrep #}
+                                        <a href="{{ site_url }}/chapters/{{ row.0.nest_key }}" target="_blank"
+                                          class="card-link">{{ row.0.name }}</a>
+                                      </p>
+                                      {% if row.0.summary %}
+                                      <p class="card-summary">
+                                        {{ row.0.summary|truncatewords:16 }}</p>
+                                      {% elif row.0.description %}
+                                      <p class="card-summary">
+                                        {{ row.0.description|truncatewords:16 }}</p>
+                                      {% endif %}
+                                      {% if row.0.suggested_location or row.0.country %}
+                                      <p class="card-location">
+                                        &#127760; {{ row.0.suggested_location|default:row.0.country }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    {% if chapters_data.extra %}
+                                    <td width="8" class="grid-gutter">&nbsp;</td>
+                                    <td width="{% if chapters_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                      {% if forloop.last %}
+                                      <p class="more-text">
+                                        +{{ chapters_data.extra }}<br>more
+                                      </p>
+                                      {% else %}&nbsp;{% endif %}
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if projects_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Projects
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for row in projects_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if projects_data.extra %}5{% else %}3{% endif %}" height="8" class="grid-row-gap">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if projects_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <p
+                                         class="project-heading">
+                                         {# nosemgrep #}
+                                         <a href="{{ site_url }}/projects/{{ row.0.project.nest_key }}" target="_blank"
+                                           class="card-link">{{ row.0.project.name }}</a>
+                                       </p>
+                                       {% if row.0.project.summary %}
+                                       <p
+                                         class="project-summary">
+                                         {{ row.0.project.summary|truncatewords:20 }}</p>
+                                       {% endif %}
+                                       {% if row.0.project.stars_count or row.0.project.forks_count or row.0.project.contributors_count %}
+                                       <p
+                                         class="project-stats-label">
+                                         Statistics</p>
+                                       <div class="project-stats-row">
+                                         {% if row.0.project.stars_count %}<span
+                                           class="pill pill-stars">
+                                           {{ row.0.project.stars_count }} Stars</span>{% endif %}
+                                         {% if row.0.project.forks_count %}<span
+                                           class="pill pill-forks">
+                                           {{ row.0.project.forks_count }} Forks</span>{% endif %}
+                                         {% if row.0.project.contributors_count %}<span
+                                           class="pill pill-contributors">
+                                           {{ row.0.project.contributors_count }} Contributors</span>{% endif %}
+                                       </div>
+                                       {% endif %}
+                                       {% if row.0.content %}
+                                       <p
+                                         class="project-stats-label">
+                                         Contribution Activity</p>
+                                       <div>
+                                         {% for content in row.0.content %}
+                                         <span
+                                           class="pill {% if content.type == 'issues' %}pill-issues{% elif content.type == 'pull_requests' %}pill-pull-requests{% elif content.type == 'releases' %}pill-releases{% endif %}">
+                                           {% if content.type == "issues" %}{{ content.total }} Issues{% elif content.type == "pull_requests" %}{{ content.total }} Pull Requests{% elif content.type == "releases" %}{{ content.total }} Releases{% endif %}</span>
+                                         {% endfor %}
+                                       </div>
+                                       {% endif %}
+                                     </td>
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if projects_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <p
+                                         class="project-heading">
+                                         {# nosemgrep #}
+                                         <a href="{{ site_url }}/projects/{{ row.1.project.nest_key }}" target="_blank"
+                                           class="card-link">{{ row.1.project.name }}</a>
+                                       </p>
+                                       {% if row.1.project.summary %}
+                                       <p
+                                         class="project-summary">
+                                         {{ row.1.project.summary|truncatewords:20 }}</p>
+                                       {% endif %}
+                                       {% if row.1.project.stars_count or row.1.project.forks_count or row.1.project.contributors_count %}
+                                       <p
+                                         class="project-stats-label">
+                                         Statistics</p>
+                                       <div class="project-stats-row">
+                                         {% if row.1.project.stars_count %}<span
+                                           class="pill pill-stars">
+                                           {{ row.1.project.stars_count }} Stars</span>{% endif %}
+                                         {% if row.1.project.forks_count %}<span
+                                           class="pill pill-forks">
+                                           {{ row.1.project.forks_count }} Forks</span>{% endif %}
+                                         {% if row.1.project.contributors_count %}<span
+                                           class="pill pill-contributors">
+                                           {{ row.1.project.contributors_count }} Contributors</span>{% endif %}
+                                       </div>
+                                       {% endif %}
+                                       {% if row.1.content %}
+                                       <p
+                                         class="project-stats-label">
+                                         Contribution Activity</p>
+                                       <div>
+                                         {% for content in row.1.content %}
+                                         <span
+                                           class="pill {% if content.type == 'issues' %}pill-issues{% elif content.type == 'pull_requests' %}pill-pull-requests{% elif content.type == 'releases' %}pill-releases{% endif %}">
+                                           {% if content.type == "issues" %}{{ content.total }} Issues{% elif content.type == "pull_requests" %}{{ content.total }} Pull Requests{% elif content.type == "releases" %}{{ content.total }} Releases{% endif %}</span>
+                                         {% endfor %}
+                                       </div>
+                                       {% endif %}
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if projects_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       class="card">
+                                       <p
+                                         class="project-heading">
+                                         {# nosemgrep #}
+                                         <a href="{{ site_url }}/projects/{{ row.0.project.nest_key }}" target="_blank"
+                                           class="card-link">{{ row.0.project.name }}</a>
+                                       </p>
+                                       {% if row.0.project.summary %}
+                                       <p
+                                         class="project-summary">
+                                         {{ row.0.project.summary|truncatewords:20 }}</p>
+                                       {% endif %}
+                                       {% if row.0.project.stars_count or row.0.project.forks_count or row.0.project.contributors_count %}
+                                       <p
+                                         class="project-stats-label">
+                                         Statistics</p>
+                                       <div class="project-stats-row">
+                                         {% if row.0.project.stars_count %}<span
+                                           class="pill pill-stars">
+                                           {{ row.0.project.stars_count }} Stars</span>{% endif %}
+                                         {% if row.0.project.forks_count %}<span
+                                           class="pill pill-forks">
+                                           {{ row.0.project.forks_count }} Forks</span>{% endif %}
+                                         {% if row.0.project.contributors_count %}<span
+                                           class="pill pill-contributors">
+                                           {{ row.0.project.contributors_count }} Contributors</span>{% endif %}
+                                       </div>
+                                       {% endif %}
+                                       {% if row.0.content %}
+                                       <p
+                                         class="project-stats-label">
+                                         Contribution Activity</p>
+                                       <div>
+                                         {% for content in row.0.content %}
+                                         <span
+                                           class="pill {% if content.type == 'issues' %}pill-issues{% elif content.type == 'pull_requests' %}pill-pull-requests{% elif content.type == 'releases' %}pill-releases{% endif %}">
+                                           {% if content.type == "issues" %}{{ content.total }} Issues{% elif content.type == "pull_requests" %}{{ content.total }} Pull Requests{% elif content.type == "releases" %}{{ content.total }} Releases{% endif %}</span>
+                                         {% endfor %}
+                                       </div>
+                                       {% endif %}
+                                     </td>
+                                     {% endif %}
+                                     {% if projects_data.extra %}
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if projects_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                       {% if forloop.last %}
+                                       <p class="more-text">
+                                         +{{ projects_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                   </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if issues_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Issues
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for row in issues_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if issues_data.extra %}5{% else %}3{% endif %}" height="8" class="grid-row-gap">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if issues_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if issues_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.1.author and row.1.author.avatar_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.1.author.avatar_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.1.repository %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.1.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.1.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if issues_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% endif %}
+                                     {% if issues_data.extra %}
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if issues_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                       {% if forloop.last %}
+                                       <p class="more-text">
+                                         +{{ issues_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                   </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if prs_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Pull Requests
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for row in prs_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if prs_data.extra %}5{% else %}3{% endif %}" height="8" class="grid-row-gap">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if prs_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      class="card">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          {% if row.0.author and row.0.author.avatar_url %}
+                                          <td width="18" valign="middle" class="author-avatar-cell">
+                                            <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                              class="author-avatar" alt="">
+                                          </td>
+                                          {% endif %}
+                                          <td valign="middle">
+                                            <p class="entry-heading">
+                                              {# nosemgrep #}
+                                              <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:4 }}</a>
+                                            </p>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% if row.0.repository %}
+                                      <p class="entry-meta">
+                                        📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    <td width="8" class="grid-gutter">&nbsp;</td>
+                                    <td width="{% if prs_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                      class="card">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          {% if row.1.author and row.1.author.avatar_url %}
+                                          <td width="18" valign="middle" class="author-avatar-cell">
+                                            <img src="{{ row.1.author.avatar_url }}" width="18" height="18"
+                                              class="author-avatar" alt="">
+                                          </td>
+                                          {% endif %}
+                                          <td valign="middle">
+                                            <p class="entry-heading">
+                                              {# nosemgrep #}
+                                              <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:4 }}</a>
+                                            </p>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% if row.1.repository %}
+                                      <p class="entry-meta">
+                                        📅 {{ row.1.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.1.repository.name|default:"" }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% else %}
+                                    <td colspan="3" width="{% if prs_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                      class="card">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          {% if row.0.author and row.0.author.avatar_url %}
+                                          <td width="18" valign="middle" class="author-avatar-cell">
+                                            <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                              class="author-avatar" alt="">
+                                          </td>
+                                          {% endif %}
+                                          <td valign="middle">
+                                            <p class="entry-heading">
+                                              {# nosemgrep #}
+                                              <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:8 }}</a>
+                                            </p>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% if row.0.repository %}
+                                      <p class="entry-meta">
+                                        📅 {{ row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                      </p>
+                                      {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    {% if prs_data.extra %}
+                                    <td width="8" class="grid-gutter">&nbsp;</td>
+                                    <td width="{% if prs_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                      {% if forloop.last %}
+                                      <p class="more-text">
+                                        +{{ prs_data.extra }}<br>more
+                                      </p>
+                                      {% else %}&nbsp;{% endif %}
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if releases_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Releases
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for row in releases_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if releases_data.extra %}5{% else %}3{% endif %}" height="8" class="grid-row-gap">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if releases_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if releases_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.1.author and row.1.author.avatar_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.1.author.avatar_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.name|default:row.1.tag_name|truncatewords:12 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.1.repository %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.1.published_at|default:row.1.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.1.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if releases_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author and row.0.author.avatar_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.0.author.avatar_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|default:row.0.tag_name|truncatewords:12 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.repository %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }} &nbsp;📂 {{ row.0.repository.name|default:"" }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% endif %}
+                                     {% if releases_data.extra %}
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if releases_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                       {% if forloop.last %}
+                                       <p class="more-text">
+                                         +{{ releases_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                   </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if users_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                New Contributors
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  <tr>
+                                    <td width="{% if users_data.extra %}90%{% else %}100%{% endif %}" valign="middle">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                          {% for user in users_data.items %}
+                                          <td valign="middle" class="user-cell">
+                                            <a href="https://github.com/{{ user.login }}" target="_blank" class="bare-link">
+                                              {% if user.avatar_url %}
+                                              <img src="{{ user.avatar_url }}" width="44" height="44" alt="{{ user.login }}"
+                                                class="user-avatar">
+                                              {% else %}
+                                              <span class="user-avatar-fallback">&#128100;</span>
+                                              {% endif %}
+                                            </a>
+                                          </td>
+                                          {% endfor %}
+                                        </tr>
+                                      </table>
+                                    </td>
+                                    {% if users_data.extra %}
+                                    <td width="8" class="grid-gutter">&nbsp;</td>
+                                    <td width="{% if users_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                      <p class="more-text">
+                                        +{{ users_data.extra }}<br>more
+                                      </p>
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if posts_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Blog Posts
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for row in posts_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if posts_data.extra %}5{% else %}3{% endif %}" height="8" class="grid-row-gap">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if posts_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author_image_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.0.author_image_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:5 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.author_name %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.0.published_at|date:"M d, Y" }} &nbsp;✎ {{ row.0.author_name|truncatewords:2 }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if posts_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.1.author_image_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.1.author_image_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.title|truncatewords:5 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.1.author_name %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.1.published_at|date:"M d, Y" }} &nbsp;✎ {{ row.1.author_name|truncatewords:2 }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if posts_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       class="card">
+                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                         <tr>
+                                           {% if row.0.author_image_url %}
+                                           <td width="18" valign="middle" class="author-avatar-cell">
+                                             <img src="{{ row.0.author_image_url }}" width="18" height="18"
+                                               class="author-avatar" alt="">
+                                           </td>
+                                           {% endif %}
+                                           <td valign="middle">
+                                             <p class="entry-heading">
+                                               {# nosemgrep #}
+                                               <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.title|truncatewords:10 }}</a>
+                                             </p>
+                                           </td>
+                                         </tr>
+                                       </table>
+                                       {% if row.0.author_name %}
+                                       <p class="entry-meta">
+                                         📅 {{ row.0.published_at|date:"M d, Y" }} &nbsp;✎ {{ row.0.author_name|truncatewords:2 }}
+                                       </p>
+                                       {% endif %}
+                                     </td>
+                                     {% endif %}
+                                     {% if posts_data.extra %}
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if posts_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                       {% if forloop.last %}
+                                       <p class="more-text">
+                                         +{{ posts_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if events_data %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Upcoming Events
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for row in events_data.rows %}
+                                  {% if not forloop.first %}
+                                  <tr><td colspan="{% if events_data.extra %}5{% else %}3{% endif %}" height="8" class="grid-row-gap">&nbsp;</td></tr>
+                                  {% endif %}
+                                  <tr>
+                                    {% if row.1 %}
+                                    <td width="{% if events_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <p class="card-heading-sm">
+                                         {# nosemgrep #}
+                                         <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|truncatewords:5 }}</a>
+                                       </p>
+                                       <p class="card-meta">
+                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.suggested_location %} &nbsp;📍 {{ row.0.suggested_location }}{% endif %}
+                                       </p>
+                                     </td>
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if events_data.extra %}43%{% else %}49.5%{% endif %}" valign="top"
+                                       class="card">
+                                       <p class="card-heading-sm">
+                                         {# nosemgrep #}
+                                         <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{{ row.1.name|truncatewords:5 }}</a>
+                                       </p>
+                                       <p class="card-meta">
+                                         {% if row.1.start_date %}📅 {{ row.1.start_date|date:"M d, Y" }}{% endif %}{% if row.1.suggested_location %} &nbsp;📍 {{ row.1.suggested_location }}{% endif %}
+                                       </p>
+                                     </td>
+                                     {% else %}
+                                     <td colspan="3" width="{% if events_data.extra %}90%{% else %}100%{% endif %}" valign="top"
+                                       class="card">
+                                       <p class="card-heading-sm">
+                                         {# nosemgrep #}
+                                         <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{{ row.0.name|truncatewords:14 }}</a>
+                                       </p>
+                                       <p class="card-meta">
+                                         {% if row.0.start_date %}📅 {{ row.0.start_date|date:"M d, Y" }}{% endif %}{% if row.0.suggested_location %} &nbsp;📍 {{ row.0.suggested_location }}{% endif %}
+                                       </p>
+                                     </td>
+                                     {% endif %}
+                                     {% if events_data.extra %}
+                                     <td width="8" class="grid-gutter">&nbsp;</td>
+                                     <td width="{% if events_data.extra %}8%{% endif %}" valign="middle" align="center" class="more-cell">
+                                       {% if forloop.last %}
+                                       <p class="more-text">
+                                         +{{ events_data.extra }}<br>more
+                                       </p>
+                                       {% else %}&nbsp;{% endif %}
+                                     </td>
+                                     {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                {% if entity_sections %}
+                <tr>
+                  <td class="px section">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                      class="table-full">
+                      <tr>
+                        <td class="card-px cell-flush">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                            class="table-full">
+                            <tr>
+                              <td
+                                class="section-heading">
+                                Subscribed Entities
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="section-rule-cell">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                  <tr>
+                                    <td width="44" height="3"
+                                      class="section-rule">
+                                      &nbsp;</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="grid">
+                                  {% for section in entity_sections %}
+                                  {% if not forloop.first %}
+                                  <tr>
+                                    <td colspan="{% if entities_extra > 0 %}3{% else %}1{% endif %}" height="12" class="entity-row-gap">&nbsp;</td>
+                                  </tr>
+                                  {% endif %}
+                                  <tr>
+                                    <td width="{% if entities_extra > 0 %}90%{% else %}100%{% endif %}" valign="top"
+                                      class="entity-card">
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                        <tr>
+                                          <td valign="middle"
+                                            class="entity-name">
+                                            {{ section.entity.name }}
+                                          </td>
+                                          <td valign="middle" align="right" class="entity-badge-cell">
+                                            <span class="entity-badge {% if section.entity_type == 'project' %}entity-badge-project{% elif section.entity_type == 'chapter' %}entity-badge-chapter{% else %}entity-badge-committee{% endif %}">
+                                              {{ section.entity_type|capfirst }}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      {% for content in section.content %}
+                                      <p
+                                        class="entity-content-label">
+                                        {% if content.type == "issues" %}Issues{% elif content.type == "pull_requests" %}Pull
+                                        Requests{% elif content.type == "releases" %}Releases{% endif %}
+                                      </p>
+                                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="grid">
+                                        {% for row in content.rows %}
+                                        {% if not forloop.first %}
+                                        <tr><td colspan="{% if content.extra > 0 %}5{% else %}3{% endif %}" height="6" class="entity-item-gap">&nbsp;</td></tr>
+                                        {% endif %}
+                                        <tr>
+                                          {% if row.1 %}
+                                          <td width="{% if content.extra > 0 %}43%{% else %}49.5%{% endif %}" valign="top"
+                                             class="entity-item">
+                                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                               <tr>
+                                                 {% if row.0.author and row.0.author.avatar_url %}
+                                                 <td width="16" valign="middle" class="entity-avatar-cell">
+                                                   <img src="{{ row.0.author.avatar_url }}" width="16" height="16"
+                                                     class="author-avatar" alt="">
+                                                 </td>
+                                                 {% endif %}
+                                                 <td valign="middle">
+                                                   <p class="entity-item-heading">
+                                                     {# nosemgrep #}
+                                                     <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                   </p>
+                                                 </td>
+                                               </tr>
+                                             </table>
+                                             {% if row.0.repository %}
+                                             <p class="entity-item-meta">
+                                               {% if content.type == "releases" %}📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }}{% else %}📅 {{ row.0.created_at|date:"M d, Y" }}{% endif %}
+                                             </p>
+                                             {% endif %}
+                                           </td>
+                                           <td width="6" class="entity-gutter">&nbsp;</td>
+                                           <td width="{% if content.extra > 0 %}43%{% else %}49.5%{% endif %}" valign="top"
+                                             class="entity-item">
+                                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                               <tr>
+                                                 {% if row.1.author and row.1.author.avatar_url %}
+                                                 <td width="16" valign="middle" class="entity-avatar-cell">
+                                                   <img src="{{ row.1.author.avatar_url }}" width="16" height="16"
+                                                     class="author-avatar" alt="">
+                                                 </td>
+                                                 {% endif %}
+                                                 <td valign="middle">
+                                                   <p class="entity-item-heading">
+                                                     {# nosemgrep #}
+                                                     <a href="{{ row.1.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.1.name|default:row.1.tag_name|truncatewords:10 }}{% else %}{{ row.1.title|truncatewords:10 }}{% endif %}</a>
+                                                   </p>
+                                                 </td>
+                                               </tr>
+                                             </table>
+                                             {% if row.1.repository %}
+                                             <p class="entity-item-meta">
+                                               {% if content.type == "releases" %}📅 {{ row.1.published_at|default:row.1.created_at|date:"M d, Y" }}{% else %}📅 {{ row.1.created_at|date:"M d, Y" }}{% endif %}
+                                             </p>
+                                             {% endif %}
+                                           </td>
+                                           {% else %}
+                                           <td colspan="3" width="{% if content.extra > 0 %}90%{% else %}100%{% endif %}" valign="top"
+                                             class="entity-item">
+                                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                               <tr>
+                                                 {% if row.0.author and row.0.author.avatar_url %}
+                                                 <td width="16" valign="middle" class="entity-avatar-cell">
+                                                   <img src="{{ row.0.author.avatar_url }}" width="16" height="16"
+                                                     class="author-avatar" alt="">
+                                                 </td>
+                                                 {% endif %}
+                                                 <td valign="middle">
+                                                   <p class="entity-item-heading">
+                                                     {# nosemgrep #}
+                                                     <a href="{{ row.0.url|safe_url }}" target="_blank" class="card-link">{% if content.type == "releases" %}{{ row.0.name|default:row.0.tag_name|truncatewords:10 }}{% else %}{{ row.0.title|truncatewords:10 }}{% endif %}</a>
+                                                   </p>
+                                                 </td>
+                                               </tr>
+                                             </table>
+                                             {% if row.0.repository %}
+                                             <p class="entity-item-meta">
+                                               {% if content.type == "releases" %}📅 {{ row.0.published_at|default:row.0.created_at|date:"M d, Y" }}{% else %}📅 {{ row.0.created_at|date:"M d, Y" }}{% endif %}
+                                             </p>
+                                             {% endif %}
+                                           </td>
+                                           {% endif %}
+                                           {% if content.extra > 0 %}
+                                           <td width="6" class="entity-gutter">&nbsp;</td>
+                                           <td width="8%" valign="middle" align="center" class="more-cell">
+                                             {% if forloop.last %}
+                                             <p class="more-text">
+                                               +{{ content.extra }}<br>more
+                                             </p>
+                                             {% else %}&nbsp;{% endif %}
+                                           </td>
+                                           {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                      </table>
+                                      {% endfor %}
+                                    </td>
+                                    {% if entities_extra > 0 %}
+                                    <td width="8" class="grid-gutter">&nbsp;</td>
+                                    <td width="8%" valign="middle" align="center" class="more-cell">
+                                      {% if forloop.last %}
+                                      <p class="more-text">
+                                        +{{ entities_extra }}<br>more
+                                      </p>
+                                      {% else %}&nbsp;{% endif %}
+                                    </td>
+                                    {% endif %}
+                                  </tr>
+                                  {% endfor %}
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {% endif %}
+                <tr>
+                  <td align="center" class="px cta-cell">
+                    <!--[if mso]>
+                    {# nosemgrep #}
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ snapshot_url|safe_url }}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="16%" stroke="false" fillcolor="#1D7BD7">
+                      <w:anchorlock xmlns:w="urn:schemas-microsoft-com:office:word"/>
+                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View More &rarr;</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-- -->
+                    {# nosemgrep #}
+                    <a href="{{ snapshot_url|safe_url }}" target="_blank"
+                      class="cta-button">
+                      View More &rarr;
+                    </a>
+                    <!--<![endif]-->
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="px footer-shell" bgcolor="#1e293b">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="table-full">
+                <tr>
+                  <td align="center" class="footer-social-row">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                      <tr>
+                        <td class="footer-social-cell">
+                          <a href="https://bsky.app/profile/nest.owasp.org" target="_blank"
+                            class="bare-link">
+                            <img src="{{ site_url }}/img/bluesky.png" alt="Bluesky" width="20" height="20"
+                              class="footer-social-icon">
+                          </a>
+                        </td>
+                        <td class="footer-social-cell">
+                          <a href="https://github.com/owasp/nest" target="_blank" class="bare-link">
+                            <img src="{{ site_url }}/img/github.png" alt="GitHub" width="20" height="20"
+                              class="footer-social-icon">
+                          </a>
+                        </td>
+                        <td class="footer-social-cell">
+                          <a href="https://www.linkedin.com/groups/14656108/" target="_blank"
+                            class="bare-link">
+                            <img src="{{ site_url }}/img/linkedin.png" alt="LinkedIn" width="20" height="20"
+                              class="footer-social-icon">
+                          </a>
+                        </td>
+                        <td class="footer-social-cell">
+                          <a href="https://owasp.slack.com/archives/project-nest" target="_blank"
+                            class="bare-link">
+                            <img src="{{ site_url }}/img/slack.png" alt="Slack" width="20" height="20"
+                              class="footer-social-icon">
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" class="footer-logos-row">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                      <tr>
+                        <td align="right" valign="middle" class="header-logo-cell">
+                          <a href="https://owasp.org" target="_blank" class="bare-link">
+                            <img src="{{ site_url }}/img/OWASP_logo.png" alt="OWASP" width="104"
+                              class="footer-owasp-logo">
+                          </a>
+                        </td>
+                        <td align="center" valign="middle" width="1"
+                          class="footer-divider">&nbsp;</td>
+                        <td align="left" valign="middle" class="footer-nest-cell">
+                          {# nosemgrep #}
+                          <a href="{{ site_url|safe_url }}" target="_blank" class="bare-link">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                              <tr>
+                                <td valign="middle" class="footer-nest-logo-cell">
+                                  <img src="{{ site_url }}/img/logo_dark.png" alt="Nest" width="31" height="31"
+                                    class="footer-nest-logo">
+                                </td>
+                                <td valign="middle"
+                                  class="footer-nest-name">
+                                  Nest
+                                </td>
+                              </tr>
+                            </table>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" class="section-rule-cell">
+                    <p
+                      class="footer-text">
+                      <a href="{{ site_url }}/settings" target="_blank"
+                        class="footer-link">Manage
+                        Preferences</a>
+                      &nbsp;&nbsp;&nbsp;
+                      {# nosemgrep #}
+                      <a href="{{ unsubscribe_url|safe_url }}" target="_blank"
+                        class="footer-link">Unsubscribe</a>
+                      &nbsp;&nbsp;&nbsp;
+                      <a href="https://owasp.org/contact/" target="_blank"
+                        class="footer-link">Contact
+                        Us</a>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center"
+                    class="footer-copyright">
+                    &copy; {% now "Y" %} OWASP Nest. All rights reserved.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

@@ -41,7 +41,7 @@ class Base(Configuration):
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
-    DEFAULT_FROM_EMAIL = "OWASP Nest <noreply@owasp.org>"
+    DEFAULT_FROM_EMAIL = "OWASP Nest <nest@owasp.org>"
 
     DJANGO_APPS = (
         "django.contrib.admin",
@@ -167,15 +167,18 @@ class Base(Configuration):
         }
     }
 
+    RQ_QUEUE_OPTIONS: dict = {
+        "HOST": REDIS_HOST,
+        "PORT": 6379,
+        "PASSWORD": REDIS_PASSWORD,
+        "DB": 1,
+        "DEFAULT_TIMEOUT": 300,
+        **({"SSL": True, "SSL_CERT_REQS": "required"} if REDIS_USE_TLS else {}),
+    }
+
     RQ_QUEUES = {
-        "ai": {
-            "HOST": REDIS_HOST,
-            "PORT": 6379,
-            "PASSWORD": REDIS_PASSWORD,
-            "DB": 1,
-            "DEFAULT_TIMEOUT": 300,
-            **({"SSL": True, "SSL_CERT_REQS": "required"} if REDIS_USE_TLS else {}),
-        }
+        "ai": RQ_QUEUE_OPTIONS,
+        "emails": RQ_QUEUE_OPTIONS,
     }
 
     # Database

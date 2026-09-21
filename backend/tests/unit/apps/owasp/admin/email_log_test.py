@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 
-from apps.owasp.admin.email_log import EmailLogAdmin
+from apps.owasp.admin import EmailLogAdmin
 from apps.owasp.models.email_log import EmailLog
 
 
@@ -22,10 +22,19 @@ class TestEmailLogAdmin:
         site = AdminSite()
         admin_instance = EmailLogAdmin(EmailLog, site)
 
-        assert "get_user" in admin_instance.list_display
-        assert "snapshot" in admin_instance.list_display
-        assert "status" in admin_instance.list_display
+        assert admin_instance.list_display == (
+            "get_user",
+            "snapshot",
+            "status",
+            "error_message",
+            "created_at",
+        )
         assert admin_instance.list_filter == ("status", "created_at")
+        assert admin_instance.list_select_related == (
+            "snapshot",
+            "snapshot_subscription__user",
+        )
+        assert admin_instance.search_fields == ("snapshot_subscription__user__email",)
 
     def test_has_no_add_permission(self):
         """Test admin prevents manual creation."""
@@ -35,15 +44,27 @@ class TestEmailLogAdmin:
 
         assert admin_instance.has_add_permission(request) is False
 
+    def test_has_no_delete_permission(self):
+        """Test admin prevents deletion to preserve duplicate-send protection."""
+        site = AdminSite()
+        admin_instance = EmailLogAdmin(EmailLog, site)
+        request = MagicMock()
+
+        assert admin_instance.has_delete_permission(request) is False
+        assert admin_instance.has_delete_permission(request, obj=MagicMock()) is False
+
     def test_readonly_fields(self):
         """Test all fields are readonly."""
         site = AdminSite()
         admin_instance = EmailLogAdmin(EmailLog, site)
 
-        assert "snapshot_subscription" in admin_instance.readonly_fields
-        assert "snapshot" in admin_instance.readonly_fields
-        assert "status" in admin_instance.readonly_fields
-        assert "error_message" in admin_instance.readonly_fields
+        assert admin_instance.readonly_fields == (
+            "snapshot_subscription",
+            "snapshot",
+            "status",
+            "error_message",
+            "created_at",
+        )
 
     def test_get_user_with_subscription(self):
         """Test get_user returns user from snapshot subscription."""
