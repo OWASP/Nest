@@ -358,37 +358,6 @@ class TestUpdateSnapshotSubscription:
             assert "already exists" in result.message
 
 
-class TestCancelSnapshotSubscription:
-    """Test cases for cancelSnapshotSubscription mutation."""
-
-    @pytest.fixture
-    def mutations(self):
-        return SnapshotSubscriptionMutations()
-
-    def test_not_found(self, mutations):
-        """Test cancel fails when subscription doesn't exist."""
-        info = mock_info()
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
-            result = mutations.cancel_snapshot_subscription(info, subscription_id=1)
-            assert not result.ok
-            assert result.message == "Subscription not found."
-
-    def test_success(self, mutations):
-        """Test successful subscription cancellation."""
-        info = mock_info()
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.cancel_snapshot_subscription(info, subscription_id=1)
-            assert result.ok
-            mock_sub.deactivate.assert_called_once()
-
-
 class TestDeleteSnapshotSubscription:
     """Test cases for deleteSnapshotSubscription mutation."""
 
@@ -476,65 +445,6 @@ class TestUnsubscribeByToken:
         result = mutations.unsubscribe_by_token(input_data=input_data)
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
-
-
-class TestReactivateSnapshotSubscription:
-    """Test cases for reactivateSnapshotSubscription mutation."""
-
-    @pytest.fixture
-    def mutations(self):
-        return SnapshotSubscriptionMutations()
-
-    def test_not_found(self, mutations):
-        """Test reactivate fails when subscription doesn't exist."""
-        info = mock_info()
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.side_effect = SnapshotSubscription.DoesNotExist
-            result = mutations.reactivate_snapshot_subscription(info, subscription_id=1)
-            assert not result.ok
-            assert result.message == "Subscription not found."
-
-    def test_already_active(self, mutations):
-        """Test reactivate fails when already active."""
-        info = mock_info()
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.reactivate.side_effect = ValidationError("Subscription is already active.")
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.reactivate_snapshot_subscription(info, subscription_id=1)
-            assert not result.ok
-            assert result.message == "Subscription is already active."
-
-    def test_max_active_reached(self, mutations):
-        """Test reactivate fails when max active subscriptions reached."""
-        info = mock_info()
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        mock_sub.reactivate.side_effect = ValidationError(
-            f"Maximum number of active subscriptions ({MAX_SUBSCRIPTIONS}) reached."
-        )
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.reactivate_snapshot_subscription(info, subscription_id=1)
-            assert not result.ok
-            assert str(MAX_SUBSCRIPTIONS) in result.message
-
-    def test_success(self, mutations):
-        """Test successful reactivation."""
-        info = mock_info()
-        mock_sub = MagicMock(spec=SnapshotSubscription)
-        with patch(
-            "apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.objects"
-        ) as mock_objects:
-            mock_objects.get.return_value = mock_sub
-            result = mutations.reactivate_snapshot_subscription(info, subscription_id=1)
-            assert result.ok
-            mock_sub.reactivate.assert_called_once()
 
 
 class TestPydanticValidation:

@@ -6,6 +6,7 @@ import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 export type { BreadcrumbItem } from 'types/breadcrumb'
 
 const HIDDEN_SEGMENTS = new Set(['mentees', 'modules', 'programs', 'repositories'])
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function buildBreadcrumbItems(
   pathname: string | null,
@@ -35,6 +36,8 @@ function buildBreadcrumbItems(
     const registeredItem = registeredMap.get(currentPath)
     if (registeredItem) {
       items.push(registeredItem)
+    } else if (UUID_PATTERN.test(segment)) {
+      continue
     } else {
       items.push({
         title: formatBreadcrumbTitle(segment),

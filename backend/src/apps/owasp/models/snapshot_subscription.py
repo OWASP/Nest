@@ -255,37 +255,6 @@ class SnapshotSubscription(models.Model):
         if committee_ids is not None:
             self.committees.set(Committee.objects.filter(pk__in=committee_ids))
 
-    def deactivate(self):
-        """Deactivate this subscription."""
-        self.is_active = False
-        self.save(update_fields=("is_active",))
-
-    @transaction.atomic
-    def reactivate(self):
-        """Reactivate an inactive subscription with limit enforcement.
-
-        Raises:
-            ValidationError: If already active or max subscriptions reached.
-
-        """
-        if self.is_active:
-            msg = "Subscription is already active."
-            raise ValidationError(msg)
-
-        if getattr(self.user, "pk", None):
-            User.objects.select_for_update().filter(pk=self.user.pk).exists()
-
-        active_count = SnapshotSubscription.objects.filter(
-            user=self.user,
-            is_active=True,
-        ).count()
-        if active_count >= MAX_SUBSCRIPTIONS:
-            msg = f"Maximum number of active subscriptions ({MAX_SUBSCRIPTIONS}) reached."
-            raise ValidationError(msg)
-
-        self.is_active = True
-        self.save(update_fields=("is_active",))
-
     @classmethod
     def check_duplicate_setup(
         cls,
