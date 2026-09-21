@@ -1,9 +1,11 @@
 """Common schemas and filters for the API."""
 
 from datetime import UTC, datetime
+from typing import Annotated
 
 from django.db.models import F, OuterRef, QuerySet, Subquery
-from ninja import Field, FilterSchema, Schema
+from ninja import Field, FilterLookup, FilterSchema, Schema
+from pydantic import AfterValidator
 
 from apps.owasp.models.board_meeting_action import BoardMeetingAction
 from apps.owasp.models.entity_member import EntityMember
@@ -102,6 +104,27 @@ class LocationFilter(FilterSchema):
     )
     longitude_lte: float | None = Field(
         None, description="Longitude less than or equal to", q="longitude__lte"
+    )
+
+
+class MeetingDateFilter(FilterSchema):
+    """Filter for board activity by parent meeting date."""
+
+    date_gte: Annotated[
+        datetime | None,
+        FilterLookup(q="meeting_date__gte"),
+        AfterValidator(normalize_datetime),
+    ] = Field(
+        None,
+        description="Parent meeting date greater than or equal to (ISO 8601)",
+    )
+    date_lte: Annotated[
+        datetime | None,
+        FilterLookup(q="meeting_date__lte"),
+        AfterValidator(normalize_datetime),
+    ] = Field(
+        None,
+        description="Parent meeting date less than or equal to (ISO 8601)",
     )
 
 

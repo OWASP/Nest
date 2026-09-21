@@ -84,26 +84,30 @@ class TestGetBoardMeeting:
         """Return the matching meeting when found."""
         mock_request = MagicMock()
         mock_meeting = MagicMock()
-        mock_qs = mock_meeting_model.objects.select_related.return_value
-        mock_qs = mock_qs.prefetch_related.return_value
-        mock_filtered_qs = mock_qs.filter.return_value
+        mock_select_related = mock_meeting_model.objects.select_related
+        mock_prefetched_qs = mock_select_related.return_value.prefetch_related.return_value
+        mock_filtered_qs = mock_prefetched_qs.filter.return_value
         mock_filtered_qs.first.return_value = mock_meeting
 
         result = get_board_meeting(mock_request, 1)
 
-        mock_qs.filter.assert_called_once_with(id=1)
+        mock_select_related.assert_called_once_with("board")
+        mock_select_related.return_value.prefetch_related.assert_called_once()
+        mock_prefetched_qs.filter.assert_called_once_with(id=1)
         assert result == mock_meeting
 
     @patch("apps.api.rest.v0.board_meeting.BoardMeetingModel")
     def test_get_meeting_not_found(self, mock_meeting_model):
         """Return a 404 error response when the meeting does not exist."""
         mock_request = MagicMock()
-        mock_qs = mock_meeting_model.objects.select_related.return_value
-        mock_qs = mock_qs.prefetch_related.return_value
-        mock_filtered_qs = mock_qs.filter.return_value
+        mock_select_related = mock_meeting_model.objects.select_related
+        mock_prefetched_qs = mock_select_related.return_value.prefetch_related.return_value
+        mock_filtered_qs = mock_prefetched_qs.filter.return_value
         mock_filtered_qs.first.return_value = None
 
         result = get_board_meeting(mock_request, 999)
 
-        mock_qs.filter.assert_called_once_with(id=999)
+        mock_select_related.assert_called_once_with("board")
+        mock_select_related.return_value.prefetch_related.assert_called_once()
+        mock_prefetched_qs.filter.assert_called_once_with(id=999)
         assert result.status_code == HTTPStatus.NOT_FOUND

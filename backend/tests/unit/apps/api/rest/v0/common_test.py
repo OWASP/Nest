@@ -6,6 +6,7 @@ from django.db.models import F
 
 from apps.api.rest.v0.common import (
     LocationFilter,
+    MeetingDateFilter,
     Person,
     annotate_meeting_date,
     normalize_datetime,
@@ -131,6 +132,24 @@ class TestLocationFilter:
         assert location_filter.latitude_lte == location_data["latitude_lte"]
         assert location_filter.longitude_gte == location_data["longitude_gte"]
         assert location_filter.longitude_lte == location_data["longitude_lte"]
+
+
+class TestMeetingDateFilter:
+    """Tests for the shared meeting date filter."""
+
+    def test_date_filters_map_to_meeting_date_lookups(self):
+        """Date filters target the annotated meeting date and normalize offsets."""
+        filters = MeetingDateFilter(
+            date_gte="1447-05-09T03:57:07.246491-22:14",
+            date_lte="8292-12-23T16:24:08.050762+21:14",
+        )
+
+        children = dict(filters.get_filter_expression().children)
+
+        assert children["meeting_date__gte"] == datetime(1447, 5, 10, 2, 11, 7, 246491, tzinfo=UTC)
+        assert children["meeting_date__lte"] == datetime(
+            8292, 12, 22, 19, 10, 8, 50762, tzinfo=UTC
+        )
 
 
 class TestPerson:

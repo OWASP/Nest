@@ -2,21 +2,20 @@
 
 from datetime import datetime
 from http import HTTPStatus
-from typing import Annotated, Literal
+from typing import Literal
 
 from django.http import HttpRequest
-from ninja import Field, FilterLookup, FilterSchema, Path, Query, Schema
+from ninja import Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
-from pydantic import AfterValidator
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import (
+    MeetingDateFilter,
     Person,
     ValidationErrorSchema,
     annotate_meeting_date,
-    normalize_datetime,
     order_by_date_field,
 )
 from apps.owasp.models.board_discussion import BoardDiscussion as BoardDiscussionModel
@@ -67,25 +66,8 @@ class BoardDiscussionError(Schema):
     message: str
 
 
-class BoardDiscussionFilter(FilterSchema):
+class BoardDiscussionFilter(MeetingDateFilter):
     """Filter for BoardDiscussion."""
-
-    date_gte: Annotated[
-        datetime | None,
-        FilterLookup(q="meeting_date__gte"),
-        AfterValidator(normalize_datetime),
-    ] = Field(
-        None,
-        description="Parent meeting date greater than or equal to (ISO 8601)",
-    )
-    date_lte: Annotated[
-        datetime | None,
-        FilterLookup(q="meeting_date__lte"),
-        AfterValidator(normalize_datetime),
-    ] = Field(
-        None,
-        description="Parent meeting date less than or equal to (ISO 8601)",
-    )
 
 
 @router.get(
