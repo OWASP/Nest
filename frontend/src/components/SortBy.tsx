@@ -5,38 +5,56 @@ import { FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
 import type { SortByProps } from 'types/sortBy'
 
 const SortBy = ({
+  id,
   sortOptions,
   selectedSortOption,
   selectedOrder,
   onSortChange,
   onOrderChange,
   showLabel = false,
+  hideOrderButton = false,
+  className = '',
+  containerClassName = 'h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 md:inline-flex md:flex-none',
+  triggerClassName = 'md:w-32',
+  buttonClassName = 'h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600',
+  'aria-label': customAriaLabel,
 }: SortByProps) => {
   if (!sortOptions || sortOptions.length === 0) return null
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')
+      onOrderChange?.(selectedOrder === 'asc' ? 'desc' : 'asc')
     }
   }
-  const showOrderButton = selectedSortOption !== 'default'
+  const showOrderButton = !hideOrderButton && selectedSortOption !== 'default'
+  const ariaLabel = customAriaLabel || (showLabel ? 'Sort By' : 'Sort by')
+  const labelId = id ? `${id}-label` : undefined
+
   return (
-    <div className="flex w-full min-w-0 items-center">
+    <div className={`flex w-full min-w-0 items-center ${className}`}>
+      {id && (
+        <span id={labelId} className="sr-only">
+          {ariaLabel}
+        </span>
+      )}
       {/* Sort Attribute Dropdown */}
       <div
-        className={`-ml-px flex h-12 min-w-0 flex-1 items-center border border-gray-300 bg-white pl-3 shadow-none md:inline-flex md:flex-none dark:border-gray-600 dark:bg-gray-800 ${showOrderButton ? 'rounded-l-lg rounded-r-none border-r-0' : 'rounded-lg'}`}
+        className={`-ml-px flex min-w-0 flex-1 items-center border pl-3 shadow-none ${containerClassName} ${
+          showOrderButton ? 'rounded-l-lg rounded-r-none border-r-0' : 'rounded-lg'
+        }`}
       >
         <Select
-          className="min-w-0 flex-1 md:flex-none"
-          labelPlacement="outside-left"
+          id={id}
+          aria-label={ariaLabel}
+          aria-labelledby={labelId}
+          disallowEmptySelection
+          className="min-w-0 flex-1"
           size="md"
           label={showLabel ? 'Sort By :' : undefined}
-          aria-label={showLabel ? undefined : 'Sort by'}
           classNames={{
             label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
-            trigger:
-              'bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:underline border-none shadow-none w-full min-w-0 text-nowrap md:w-32 min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0',
+            trigger: `bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:underline border-none shadow-none w-full min-w-0 text-nowrap min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0 ${triggerClassName}`,
             value: 'text-gray-800 dark:text-gray-200 font-medium',
             selectorIcon: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
             popoverContent:
@@ -47,7 +65,10 @@ const SortBy = ({
             .filter((item: { key: string; label: string }) => item.key === selectedSortOption)
             .map((item) => item.key)}
           onChange={(e) => {
-            onSortChange((e.target as HTMLSelectElement).value)
+            const val = (e.target as HTMLSelectElement).value
+            if (val !== undefined) {
+              onSortChange(val)
+            }
           }}
         >
           {sortOptions.map((option: { label: string; key: string }) => (
@@ -74,9 +95,9 @@ const SortBy = ({
         >
           <button
             type="button"
-            onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
+            onClick={() => onOrderChange?.(selectedOrder === 'asc' ? 'desc' : 'asc')}
             onKeyDown={handleKeyDown}
-            className="inline-flex h-12 w-10 shrink-0 items-center justify-center rounded-l-none rounded-r-lg border border-l-0 border-gray-300 bg-white p-0 shadow-none transition-[background-color] duration-200 hover:bg-gray-100 focus:ring-0 focus:ring-offset-0 focus:outline-none active:ring-0 active:outline-none dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className={`inline-flex w-10 shrink-0 items-center justify-center rounded-l-none rounded-r-lg border border-l-0 p-0 shadow-none transition-[background-color] duration-200 hover:bg-gray-100 focus:ring-0 focus:ring-offset-0 focus:outline-none active:ring-0 active:outline-none dark:hover:bg-gray-700 ${buttonClassName}`}
             aria-label={
               selectedOrder === 'asc' ? 'Sort in ascending order' : 'Sort in descending order'
             }
