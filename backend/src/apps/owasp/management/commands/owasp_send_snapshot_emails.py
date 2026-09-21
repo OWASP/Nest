@@ -74,9 +74,9 @@ class Command(BaseCommand):
             )
             .select_related("user")
             .prefetch_related(
-                "subscribed_projects",
-                "subscribed_chapters",
-                "subscribed_committees",
+                "projects",
+                "chapters",
+                "committees",
             )
         )
 

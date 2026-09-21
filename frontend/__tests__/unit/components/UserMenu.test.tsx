@@ -943,5 +943,29 @@ describe('UserMenu Component', () => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
       })
     })
+
+    it('closes dropdown when Settings link is clicked', async () => {
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('Settings')).toBeInTheDocument()
+      })
+
+      const settingsLink = screen.getByText('Settings')
+      fireEvent.click(settingsLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
   })
 })

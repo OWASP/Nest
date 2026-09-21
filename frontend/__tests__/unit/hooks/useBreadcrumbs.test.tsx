@@ -139,4 +139,58 @@ describe('useBreadcrumbs', () => {
       ])
     })
   })
+
+  describe('UUID segment handling', () => {
+    test('hides unregistered UUID segments from breadcrumbs', () => {
+      ;(usePathname as jest.Mock).mockReturnValue(
+        '/unsubscribe/ae5476d1-2676-4a79-8ada-ac2f0c36ff4a'
+      )
+
+      const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
+
+      expect(result.current).toEqual([
+        { title: 'Home', path: '/' },
+        { title: 'Unsubscribe', path: '/unsubscribe' },
+      ])
+    })
+
+    test('shows registered UUID segments with custom title', () => {
+      ;(usePathname as jest.Mock).mockReturnValue(
+        '/unsubscribe/ae5476d1-2676-4a79-8ada-ac2f0c36ff4a'
+      )
+
+      const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
+
+      let unregister: () => void
+      act(() => {
+        unregister = registerBreadcrumb({
+          title: 'My Weekly Digest',
+          path: '/unsubscribe/ae5476d1-2676-4a79-8ada-ac2f0c36ff4a',
+        })
+      })
+
+      expect(result.current).toEqual([
+        { title: 'Home', path: '/' },
+        { title: 'Unsubscribe', path: '/unsubscribe' },
+        { title: 'My Weekly Digest', path: '/unsubscribe/ae5476d1-2676-4a79-8ada-ac2f0c36ff4a' },
+      ])
+
+      act(() => {
+        unregister()
+      })
+    })
+
+    test('hides uppercase UUID segments', () => {
+      ;(usePathname as jest.Mock).mockReturnValue('/page/AE5476D1-2676-4A79-8ADA-AC2F0C36FF4A')
+
+      const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
+
+      const titles = result.current.map((item) => item.title)
+      expect(titles).not.toContain('AE5476D1-2676-4A79-8ADA-AC2F0C36FF4A')
+      expect(result.current).toEqual([
+        { title: 'Home', path: '/' },
+        { title: 'Page', path: '/page' },
+      ])
+    })
+  })
 })
