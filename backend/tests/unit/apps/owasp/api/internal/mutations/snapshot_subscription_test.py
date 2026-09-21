@@ -172,6 +172,7 @@ class TestCreateSnapshotSubscription:
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
         assert result.field_errors is not None
+        assert result.field_errors[0].field == "name"
 
     @patch("apps.owasp.api.internal.mutations.snapshot_subscription.SnapshotSubscription.create")
     def test_name_whitespace_stripped(self, mock_create, mutations):
@@ -205,6 +206,7 @@ class TestCreateSnapshotSubscription:
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
         assert result.field_errors is not None
+        assert result.field_errors[0].field == "frequency"
 
 
 class TestUpdateSnapshotSubscription:
@@ -309,6 +311,7 @@ class TestUpdateSnapshotSubscription:
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
         assert result.field_errors is not None
+        assert result.field_errors[0].field == "name"
 
     def test_name_whitespace_stripped(self, mutations):
         """Test update strips whitespace from name via Pydantic."""
@@ -339,6 +342,7 @@ class TestUpdateSnapshotSubscription:
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
         assert result.field_errors is not None
+        assert result.field_errors[0].field == "frequency"
 
     def test_integrity_error(self, mutations):
         """Test update fails on IntegrityError (duplicate name)."""

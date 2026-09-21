@@ -12,11 +12,9 @@ from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
-from apps.owasp.models.snapshot_subscription import SnapshotSubscription
+from apps.owasp.models.snapshot_subscription import MAX_NAME_LENGTH, SnapshotSubscription
 
 logger = logging.getLogger(__name__)
-
-MAX_NAME_LENGTH = 100
 
 
 @strawberry.enum

@@ -10,6 +10,7 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
 
+MAX_NAME_LENGTH = 100
 MAX_SUBSCRIPTIONS = 5
 
 
@@ -53,7 +54,7 @@ class SnapshotSubscription(models.Model):
         on_delete=models.CASCADE,
         related_name="snapshot_subscriptions",
     )
-    name = models.CharField(max_length=100, default="", blank=True)
+    name = models.CharField(max_length=MAX_NAME_LENGTH, default="", blank=True)
     frequency = models.CharField(
         max_length=10,
         choices=Frequency.choices,
