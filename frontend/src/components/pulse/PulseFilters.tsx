@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@heroui/button'
-import { type ReactNode, useRef } from 'react'
+import { type ReactNode } from 'react'
 import { FaFolder, FaGlobe, FaMagnifyingGlass, FaXmark } from 'react-icons/fa6'
 import type { PulseFiltersProps } from 'types/pulse'
 import { sortOptionsPulse } from 'utils/sortingOptions'
@@ -68,9 +68,6 @@ export default function PulseFilters({
   showProjectSuggestions,
   timeRange,
 }: Readonly<PulseFiltersProps>) {
-  const projectBlurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const chapterBlurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   let projectSuggestionsContent: ReactNode
 
   if (isSearchingProjects) {
@@ -88,7 +85,6 @@ export default function PulseFilters({
         type="button"
         onMouseDown={(e) => {
           e.preventDefault()
-          handleSelectProject(proj)
         }}
         onClick={() => handleSelectProject(proj)}
         className="flex w-full items-center justify-between px-3.5 py-2 text-left text-xs font-medium text-gray-700 hover:bg-blue-50 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -115,7 +111,6 @@ export default function PulseFilters({
         type="button"
         onMouseDown={(e) => {
           e.preventDefault()
-          handleSelectChapter(chap)
         }}
         onClick={() => handleSelectChapter(chap)}
         className="flex w-full items-center justify-between px-3.5 py-2 text-left text-xs font-medium text-gray-700 hover:bg-blue-50 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -160,19 +155,20 @@ export default function PulseFilters({
           triggerClassName="w-full"
         />
 
-        <div className="relative">
+        <div
+          className="relative"
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+              setShowProjectSuggestions(false)
+            }
+          }}
+        >
           <input
             aria-label="Filter by project"
             type="text"
             placeholder="All Projects"
             value={projectSearchInput}
-            onFocus={() => {
-              clearTimeout(projectBlurTimer.current ?? undefined)
-              setShowProjectSuggestions(true)
-            }}
-            onBlur={() => {
-              projectBlurTimer.current = setTimeout(() => setShowProjectSuggestions(false), 200)
-            }}
+            onFocus={() => setShowProjectSuggestions(true)}
             onChange={(e) => {
               setProjectSearchInput(e.target.value)
               setShowProjectSuggestions(true)
@@ -190,19 +186,20 @@ export default function PulseFilters({
           )}
         </div>
 
-        <div className="relative">
+        <div
+          className="relative"
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+              setShowChapterSuggestions(false)
+            }
+          }}
+        >
           <input
             aria-label="Filter by chapter"
             type="text"
             placeholder="All Chapters"
             value={chapterSearchInput}
-            onFocus={() => {
-              clearTimeout(chapterBlurTimer.current ?? undefined)
-              setShowChapterSuggestions(true)
-            }}
-            onBlur={() => {
-              chapterBlurTimer.current = setTimeout(() => setShowChapterSuggestions(false), 200)
-            }}
+            onFocus={() => setShowChapterSuggestions(true)}
             onChange={(e) => {
               setChapterSearchInput(e.target.value)
               setShowChapterSuggestions(true)
