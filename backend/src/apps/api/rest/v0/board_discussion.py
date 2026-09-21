@@ -17,6 +17,7 @@ from apps.api.rest.v0.common import (
     ValidationErrorSchema,
     annotate_meeting_date,
     normalize_datetime,
+    order_by_date_field,
 )
 from apps.owasp.models.board_discussion import BoardDiscussion as BoardDiscussionModel
 
@@ -107,7 +108,7 @@ def list_board_discussions(
     discussions = filters.filter(
         annotate_meeting_date(BoardDiscussionModel.objects.all(), action_field="discussion")
     )
-    return discussions.order_by(ordering or "-meeting_date", "-id")
+    return order_by_date_field(discussions, ordering or "-meeting_date")
 
 
 @router.get(

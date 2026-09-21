@@ -17,6 +17,7 @@ from apps.api.rest.v0.common import (
     ValidationErrorSchema,
     annotate_meeting_date,
     normalize_datetime,
+    order_by_date_field,
 )
 from apps.owasp.models.board_vote import BoardVote as BoardVoteModel
 
@@ -141,7 +142,7 @@ def list_board_votes(
             BoardVoteModel.objects.all(), action_field="motion", outer_ref="motion_id"
         )
     )
-    return votes.order_by(ordering or "-meeting_date", "-id")
+    return order_by_date_field(votes, ordering or "-meeting_date")
 
 
 @router.get(

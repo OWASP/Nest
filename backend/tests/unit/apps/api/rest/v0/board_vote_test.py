@@ -3,6 +3,8 @@
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
+from django.db.models import F
+
 from apps.api.rest.v0.board_vote import BoardVoteFilter, get_board_vote, list_board_votes
 
 
@@ -22,7 +24,9 @@ class TestListBoardVotes:
 
         result = list_board_votes(mock_request, mock_filters, ordering=None)
 
-        mock_queryset.order_by.assert_called_once_with("-meeting_date", "-id")
+        mock_queryset.order_by.assert_called_once_with(
+            F("meeting_date").desc(nulls_last=True), "-id"
+        )
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_vote.BoardVoteModel")
@@ -38,7 +42,9 @@ class TestListBoardVotes:
 
         result = list_board_votes(mock_request, mock_filters, ordering="meeting_date")
 
-        mock_queryset.order_by.assert_called_once_with("meeting_date", "-id")
+        mock_queryset.order_by.assert_called_once_with(
+            F("meeting_date").asc(nulls_last=True), "-id"
+        )
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_vote.BoardVoteModel")

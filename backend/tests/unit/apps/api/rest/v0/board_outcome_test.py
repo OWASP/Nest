@@ -5,6 +5,7 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.db.models import F
 
 from apps.api.rest.v0.board_outcome import (
     BoardOutcomeFilter,
@@ -29,20 +30,22 @@ class TestListBoardOutcomes:
 
         result = list_board_outcomes(mock_request, mock_filters, ordering=None)
 
-        mock_queryset.order_by.assert_called_once_with("-meeting_date", "-id")
+        mock_queryset.order_by.assert_called_once_with(
+            F("meeting_date").desc(nulls_last=True), "-id"
+        )
         assert result == mock_queryset
 
     @pytest.mark.parametrize(
-        ("ordering", "expected"),
+        ("ordering", "field", "descending"),
         [
-            ("due_date", "due_date"),
-            ("-due_date", "-due_date"),
-            ("meeting_date", "meeting_date"),
-            ("-meeting_date", "-meeting_date"),
+            ("due_date", "due_date", False),
+            ("-due_date", "due_date", True),
+            ("meeting_date", "meeting_date", False),
+            ("-meeting_date", "meeting_date", True),
         ],
     )
     @patch("apps.api.rest.v0.board_outcome.BoardOutcomeModel")
-    def test_list_outcomes_ordering(self, mock_outcome_model, ordering, expected):
+    def test_list_outcomes_ordering(self, mock_outcome_model, ordering, field, descending):
         """Each supported ordering maps to its nullable-aware column ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
@@ -54,6 +57,7 @@ class TestListBoardOutcomes:
 
         result = list_board_outcomes(mock_request, mock_filters, ordering=ordering)
 
+        expected = F(field).desc(nulls_last=True) if descending else F(field).asc(nulls_last=True)
         mock_queryset.order_by.assert_called_once_with(expected, "-id")
         assert result == mock_queryset
 
@@ -80,7 +84,10 @@ class TestListBoardOutcomes:
     def test_list_outcomes_normalizes_date_filters(self, mock_outcome_model):
         """Extreme offsets in date filters are normalized before reaching the ORM."""
         mock_request = MagicMock()
-        mock_filters = BoardOutcomeFilter(date_gte="1447-05-09T03:57:07.246491-22:14")
+        mock_filters = BoardOutcomeFilter(
+            date_gte="1447-05-09T03:57:07.246491-22:14",
+            date_lte="8292-12-23T16:24:08.050762+21:14",
+        )
         mock_queryset = MagicMock()
         mock_queryset.annotate.return_value = mock_queryset
         mock_queryset.filter.return_value = mock_queryset
@@ -91,6 +98,9 @@ class TestListBoardOutcomes:
 
         children = dict(mock_queryset.filter.call_args[0][0].children)
         assert children["meeting_date__gte"] == datetime(1447, 5, 10, 2, 11, 7, 246491, tzinfo=UTC)
+        assert children["meeting_date__lte"] == datetime(
+            8292, 12, 22, 19, 10, 8, 50762, tzinfo=UTC
+        )
         assert result == mock_queryset
 
 

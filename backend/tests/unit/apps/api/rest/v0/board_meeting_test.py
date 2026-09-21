@@ -4,6 +4,9 @@ from datetime import UTC, datetime
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
+import pytest
+from pydantic import ValidationError
+
 from apps.api.rest.v0.board_meeting import (
     BoardMeetingFilter,
     get_board_meeting,
@@ -19,6 +22,11 @@ class TestBoardMeetingFilter:
         filters = BoardMeetingFilter(date_lte="8292-12-23T16:24:08.050762+21:14")
 
         assert filters.date_lte == datetime(8292, 12, 22, 19, 10, 8, 50762, tzinfo=UTC)
+
+    def test_boundary_offset_overflow_is_rejected(self):
+        """A boundary datetime that overflows UTC conversion fails validation."""
+        with pytest.raises(ValidationError):
+            BoardMeetingFilter(date_lte="9999-12-31T23:59:59-14:00")
 
 
 class TestListBoardMeetings:

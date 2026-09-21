@@ -2,12 +2,14 @@ from datetime import UTC, datetime, timedelta, timezone
 from unittest.mock import MagicMock
 
 import pytest
+from django.db.models import F
 
 from apps.api.rest.v0.common import (
     LocationFilter,
     Person,
     annotate_meeting_date,
     normalize_datetime,
+    order_by_date_field,
 )
 from apps.owasp.models.board_motion import BoardMotion
 from apps.owasp.models.board_vote import BoardVote
@@ -51,6 +53,13 @@ class TestNormalizeDatetime:
 
         assert normalize_datetime(value) == datetime(2024, 1, 1, 6, 30, tzinfo=UTC)
 
+    def test_utc_conversion_overflow_raises_value_error(self):
+        """Boundary datetimes that overflow the supported range are rejected."""
+        value = datetime(1, 1, 1, tzinfo=timezone(timedelta(hours=14)))
+
+        with pytest.raises(ValueError, match="outside the supported range"):
+            normalize_datetime(value)
+
 
 class TestAnnotateMeetingDate:
     """Tests for the annotate_meeting_date correlation."""
@@ -73,6 +82,28 @@ class TestAnnotateMeetingDate:
         )
 
         assert '"motion_id" = ("owasp_board_votes"."motion_id")' in query
+
+
+class TestOrderByDateField:
+    """Tests for the order_by_date_field helper."""
+
+    def test_ascending_orders_nulls_last(self):
+        """Ascending order keeps rows without a date last."""
+        queryset = MagicMock()
+
+        result = order_by_date_field(queryset, "meeting_date")
+
+        queryset.order_by.assert_called_once_with(F("meeting_date").asc(nulls_last=True), "-id")
+        assert result == queryset.order_by.return_value
+
+    def test_descending_orders_nulls_last(self):
+        """Descending order keeps rows without a date last."""
+        queryset = MagicMock()
+
+        result = order_by_date_field(queryset, "-due_date")
+
+        queryset.order_by.assert_called_once_with(F("due_date").desc(nulls_last=True), "-id")
+        assert result == queryset.order_by.return_value
 
 
 class TestLocationFilter:

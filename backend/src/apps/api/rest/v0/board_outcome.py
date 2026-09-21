@@ -17,6 +17,7 @@ from apps.api.rest.v0.common import (
     ValidationErrorSchema,
     annotate_meeting_date,
     normalize_datetime,
+    order_by_date_field,
 )
 from apps.owasp.models.board_outcome import BoardOutcome as BoardOutcomeModel
 
@@ -119,7 +120,7 @@ def list_board_outcomes(
     outcomes = filters.filter(
         annotate_meeting_date(BoardOutcomeModel.objects.all(), action_field="outcome")
     )
-    return outcomes.order_by(ordering or "-meeting_date", "-id")
+    return order_by_date_field(outcomes, ordering or "-meeting_date")
 
 
 @router.get(

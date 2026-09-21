@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
+from django.db.models import F
+
 from apps.api.rest.v0.board_discussion import (
     BoardDiscussionFilter,
     get_board_discussion,
@@ -27,7 +29,9 @@ class TestListBoardDiscussions:
 
         result = list_board_discussions(mock_request, mock_filters, ordering=None)
 
-        mock_queryset.order_by.assert_called_once_with("-meeting_date", "-id")
+        mock_queryset.order_by.assert_called_once_with(
+            F("meeting_date").desc(nulls_last=True), "-id"
+        )
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_discussion.BoardDiscussionModel")
@@ -43,7 +47,9 @@ class TestListBoardDiscussions:
 
         result = list_board_discussions(mock_request, mock_filters, ordering="meeting_date")
 
-        mock_queryset.order_by.assert_called_once_with("meeting_date", "-id")
+        mock_queryset.order_by.assert_called_once_with(
+            F("meeting_date").asc(nulls_last=True), "-id"
+        )
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.board_discussion.BoardDiscussionModel")

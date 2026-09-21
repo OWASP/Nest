@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from django.db.models import OuterRef, QuerySet, Subquery
+from django.db.models import F, OuterRef, QuerySet, Subquery
 from ninja import Field, FilterSchema, Schema
 
 from apps.owasp.models.board_meeting_action import BoardMeetingAction
@@ -19,10 +19,20 @@ def normalize_datetime(value: datetime | None) -> datetime | None:
         datetime: The datetime normalized to UTC, or the original value when it is
             ``None`` or timezone-naive.
 
+    Raises:
+        ValueError: If the UTC conversion moves the datetime outside the supported
+            date range.
+
     """
     if value is None or value.tzinfo is None:
         return value
-    return value.astimezone(UTC)
+    try:
+        return value.astimezone(UTC)
+    except OverflowError as exc:
+        msg = (
+            f"Datetime {value.isoformat()} is outside the supported range after UTC normalization"
+        )
+        raise ValueError(msg) from exc
 
 
 def annotate_meeting_date(
@@ -48,6 +58,27 @@ def annotate_meeting_date(
             .values("meeting__date")[:1]
         )
     )
+
+
+def order_by_date_field(queryset: QuerySet, ordering: str) -> QuerySet:
+    """Order rows by a nullable date field, keeping rows without a date last.
+
+    Args:
+        queryset (QuerySet): The queryset to order.
+        ordering (str): The date field to order by, prefixed with ``-`` for
+            descending order.
+
+    Returns:
+        QuerySet: The queryset ordered by the date field and then by descending id.
+
+    """
+    date_field = F(ordering.removeprefix("-"))
+    order_by = (
+        date_field.desc(nulls_last=True)
+        if ordering.startswith("-")
+        else date_field.asc(nulls_last=True)
+    )
+    return queryset.order_by(order_by, "-id")
 
 
 class Leader(Schema):

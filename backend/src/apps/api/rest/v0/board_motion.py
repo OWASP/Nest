@@ -17,6 +17,7 @@ from apps.api.rest.v0.common import (
     ValidationErrorSchema,
     annotate_meeting_date,
     normalize_datetime,
+    order_by_date_field,
 )
 from apps.owasp.models.board_motion import BoardMotion as BoardMotionModel
 
@@ -123,7 +124,7 @@ def list_board_motions(
             action_field="motion",
         )
     )
-    return motions.order_by(ordering or "-meeting_date", "-id")
+    return order_by_date_field(motions, ordering or "-meeting_date")
 
 
 @router.get(
