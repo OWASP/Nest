@@ -152,7 +152,6 @@ export default function PulseFilters({
             setActivityType(value)
             setPage(1)
           }}
-          onOrderChange={() => {}}
           hideOrderButton
           containerClassName="h-[42px] bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700"
           triggerClassName="w-full"
@@ -218,7 +217,6 @@ export default function PulseFilters({
             setTimeRange(value)
             setPage(1)
           }}
-          onOrderChange={() => {}}
           hideOrderButton
           containerClassName="h-[42px] bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700"
           triggerClassName="w-full"

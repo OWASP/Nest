@@ -24,7 +24,7 @@ const SortBy = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')
+      onOrderChange?.(selectedOrder === 'asc' ? 'desc' : 'asc')
     }
   }
   const showOrderButton = !hideOrderButton && selectedSortOption !== 'default'
@@ -95,7 +95,7 @@ const SortBy = ({
         >
           <button
             type="button"
-            onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
+            onClick={() => onOrderChange?.(selectedOrder === 'asc' ? 'desc' : 'asc')}
             onKeyDown={handleKeyDown}
             className={`inline-flex w-10 shrink-0 items-center justify-center rounded-l-none rounded-r-lg border border-l-0 p-0 shadow-none transition-[background-color] duration-200 hover:bg-gray-100 focus:ring-0 focus:ring-offset-0 focus:outline-none active:ring-0 active:outline-none dark:hover:bg-gray-700 ${buttonClassName}`}
             aria-label={

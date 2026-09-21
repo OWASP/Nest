@@ -5,7 +5,7 @@ export type SortByProps = {
   selectedSortOption: string
   selectedOrder: string
   onSortChange: (value: string) => void
-  onOrderChange: (order: string) => void
+  onOrderChange?: (order: string) => void
   showLabel?: boolean
   hideOrderButton?: boolean
   className?: string

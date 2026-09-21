@@ -21,7 +21,7 @@ describe('<PulseMetricsCards />', () => {
 
     const { rerender } = render(<PulseMetricsCards stats={mockStats} />)
     expect(screen.getByText('Total Activities')).toBeInTheDocument()
-    expect(screen.getByText('1,200')).toBeInTheDocument()
+    expect(screen.getByText((1200).toLocaleString('en-US'))).toBeInTheDocument()
     expect(screen.getAllByText('All time')).toHaveLength(6)
 
     rerender(<PulseMetricsCards loading />)

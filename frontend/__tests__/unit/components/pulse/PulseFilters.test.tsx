@@ -43,12 +43,14 @@ jest.mock('components/SortBy', () => {
     selectedSortOption,
     onSortChange,
     onOrderChange,
+    hideOrderButton,
   }: {
     id: string
     sortOptions: Array<{ key: string; label: string }>
     selectedSortOption: string
     onSortChange: (value: string) => void
     onOrderChange?: (value: string) => void
+    hideOrderButton?: boolean
   }) => (
     <div>
       <select
@@ -62,10 +64,12 @@ jest.mock('components/SortBy', () => {
           </option>
         ))}
       </select>
-      <button
-        data-testid={`${id}-order-toggle`}
-        onClick={() => onOrderChange?.(selectedSortOption === 'asc' ? 'desc' : 'asc')}
-      />
+      {!hideOrderButton && (
+        <button
+          data-testid={`${id}-order-toggle`}
+          onClick={() => onOrderChange?.(selectedSortOption === 'asc' ? 'desc' : 'asc')}
+        />
+      )}
     </div>
   )
   MockSortBy.displayName = 'MockSortBy'
@@ -184,19 +188,21 @@ describe('<PulseFilters />', () => {
       target: { value: 'pr_opened' },
     })
     expect(defaultProps.setActivityType).toHaveBeenCalledWith('pr_opened')
-    fireEvent.click(screen.getByTestId('pulse-activity-type-select-order-toggle'))
+    // pulse-activity-type-select uses hideOrderButton, so no order toggle exists in real component
 
     fireEvent.change(screen.getByTestId('pulse-time-range-select'), {
       target: { value: '30d' },
     })
     expect(defaultProps.setTimeRange).toHaveBeenCalledWith('30d')
-    fireEvent.click(screen.getByTestId('pulse-time-range-select-order-toggle'))
+    // pulse-time-range-select uses hideOrderButton, so no order toggle exists in real component
 
     fireEvent.change(screen.getByTestId('pulse-sort-order-select'), {
       target: { value: 'asc' },
     })
     expect(defaultProps.setOrder).toHaveBeenCalledWith('asc')
+    // Toggle inverts the current order prop ('desc' → 'asc'); assert setOrder was called again
     fireEvent.click(screen.getByTestId('pulse-sort-order-select-order-toggle'))
+    expect(defaultProps.setOrder).toHaveBeenLastCalledWith('asc')
 
     const projInput = screen.getByRole('textbox', { name: 'Filter by project' })
     fireEvent.focus(projInput)
