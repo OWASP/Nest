@@ -3,6 +3,7 @@
 from smtplib import SMTPException
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.template.loader import render_to_string
 
 from apps.owasp.models.snapshot import Snapshot
@@ -41,7 +42,7 @@ def _make_orderable_qs(items, total=None):
     """Create a mock queryset that supports order_by(), slicing, and count()."""
     qs = MagicMock()
     qs.order_by.return_value = qs
-    qs.__getitem__ = lambda _, s: items  # noqa: ARG005
+    qs.__getitem__ = lambda _, s: items[s] if isinstance(s, slice) else items
     qs.count.return_value = total if total is not None else len(items)
     return qs
 
@@ -73,12 +74,43 @@ def _all_false_preferences():
     )
 
 
+def _make_base_digest(**overrides):
+    """Return a digest result dict with default empty sections."""
+    base = {
+        "chapters_data": None,
+        "users_data": None,
+        "issues_data": None,
+        "prs_data": None,
+        "releases_data": None,
+        "projects_data": [],
+        "entity_sections": [],
+        "posts_data": None,
+        "events_data": None,
+        "unsubscribe_url": "https://example.com/unsubscribe",
+        "list_unsubscribe_url": "https://example.com/list-unsubscribe",
+        "snapshot_url": "https://example.com/snapshot",
+    }
+    base.update(overrides)
+    return base
+
+
+def _make_digest_with_content():
+    """Return a digest result dict with minimal chapter content."""
+    return _make_base_digest(
+        chapters_data={"items": ["ch1"], "total": 1, "extra": 0},
+    )
+
+
+def _make_empty_digest():
+    """Return a digest result dict with all sections empty."""
+    return _make_base_digest()
+
+
 def _make_base_snapshot():
     """Create a snapshot with posts, events, and projects returning empty by default."""
     snapshot = MagicMock(spec=Snapshot)
     snapshot.posts = _make_orderable_qs([])
     snapshot.events = _make_orderable_qs([])
-    # projects stub needed because issues/PRs/releases prefs trigger the projects block
     projects_qs = MagicMock()
     projects_qs.count.return_value = 0
     projects_qs.all.return_value = MagicMock()
@@ -117,83 +149,29 @@ class TestSnapshotDigestService:
 
         assert result["chapters_data"] is None
 
-    def test_generate_users_data_none_when_empty(self):
-        """Test generate returns None users_data when no items."""
+    @pytest.mark.parametrize(
+        ("pref_key", "snapshot_attr", "result_key"),
+        [
+            ("users", "users", "users_data"),
+            ("issues", "issues", "issues_data"),
+            ("pull_requests", "pull_requests", "prs_data"),
+            ("releases", "releases", "releases_data"),
+            ("posts", "posts", "posts_data"),
+            ("events", "events", "events_data"),
+        ],
+    )
+    def test_generate_data_none_when_empty(self, pref_key, snapshot_attr, result_key):
+        """Test generate returns None data when no items exist."""
         preferences = _all_false_preferences()
-        preferences["users"] = True
+        preferences[pref_key] = True
 
         snapshot = _make_base_snapshot()
-        snapshot.users = _make_orderable_qs([], total=0)
+        setattr(snapshot, snapshot_attr, _make_orderable_qs([], total=0))
         subscription = _make_subscription(preferences)
 
         result = SnapshotDigestService().generate(snapshot, subscription)
 
-        assert result["users_data"] is None
-
-    def test_generate_issues_data_none_when_empty(self):
-        """Test generate returns None issues_data when no items."""
-        preferences = _all_false_preferences()
-        preferences["issues"] = True
-
-        snapshot = _make_base_snapshot()
-        snapshot.issues = _make_orderable_qs([], total=0)
-        subscription = _make_subscription(preferences)
-
-        result = SnapshotDigestService().generate(snapshot, subscription)
-
-        assert result["issues_data"] is None
-
-    def test_generate_prs_data_none_when_empty(self):
-        """Test generate returns None prs_data when no items."""
-        preferences = _all_false_preferences()
-        preferences["pull_requests"] = True
-
-        snapshot = _make_base_snapshot()
-        snapshot.pull_requests = _make_orderable_qs([], total=0)
-        subscription = _make_subscription(preferences)
-
-        result = SnapshotDigestService().generate(snapshot, subscription)
-
-        assert result["prs_data"] is None
-
-    def test_generate_releases_data_none_when_empty(self):
-        """Test generate returns None releases_data when no items."""
-        preferences = _all_false_preferences()
-        preferences["releases"] = True
-
-        snapshot = _make_base_snapshot()
-        snapshot.releases = _make_orderable_qs([], total=0)
-        subscription = _make_subscription(preferences)
-
-        result = SnapshotDigestService().generate(snapshot, subscription)
-
-        assert result["releases_data"] is None
-
-    def test_generate_posts_data_none_when_empty(self):
-        """Test generate returns None posts_data when no items."""
-        preferences = _all_false_preferences()
-        preferences["posts"] = True
-
-        snapshot = _make_base_snapshot()
-        snapshot.posts = _make_orderable_qs([], total=0)
-        subscription = _make_subscription(preferences)
-
-        result = SnapshotDigestService().generate(snapshot, subscription)
-
-        assert result["posts_data"] is None
-
-    def test_generate_events_data_none_when_empty(self):
-        """Test generate returns None events_data when no items."""
-        preferences = _all_false_preferences()
-        preferences["events"] = True
-
-        snapshot = _make_base_snapshot()
-        snapshot.events = _make_orderable_qs([], total=0)
-        subscription = _make_subscription(preferences)
-
-        result = SnapshotDigestService().generate(snapshot, subscription)
-
-        assert result["events_data"] is None
+        assert result[result_key] is None
 
     def test_generate_projects_data_none_when_no_projects(self):
         """Test generate returns None projects_data when project list is empty."""
@@ -317,16 +295,14 @@ class TestSnapshotDigestService:
 
         projects_qs = MagicMock()
         projects_qs.count.return_value = 1
-        projects_qs.all.return_value = MagicMock()
-        projects_qs.all.return_value.__getitem__ = lambda _, s: [mock_project]  # noqa: ARG005
+        order_qs = MagicMock()
+        order_qs.__getitem__ = lambda _, s: [mock_project]  # noqa: ARG005
+        projects_qs.order_by.return_value = order_qs
         snapshot.projects = projects_qs
 
-        # Setup snapshot querysets for global sections AND _get_project_content
         for attr in ("issues", "pull_requests", "releases"):
             qs = MagicMock()
-            # Global section: order_by() -> sliceable -> count()
             qs.order_by.return_value = _make_orderable_qs(["item1"], total=1)
-            # _get_project_content: filter() -> order_by() -> count()
             filter_qs = MagicMock()
             order_qs = _make_orderable_qs(["item1"], total=1)
             filter_qs.order_by.return_value = order_qs
@@ -358,8 +334,9 @@ class TestSnapshotDigestService:
 
         projects_qs = MagicMock()
         projects_qs.count.return_value = 1
-        projects_qs.all.return_value = MagicMock()
-        projects_qs.all.return_value.__getitem__ = lambda _, s: [mock_project]  # noqa: ARG005
+        order_qs = MagicMock()
+        order_qs.__getitem__ = lambda _, s: [mock_project]  # noqa: ARG005
+        projects_qs.order_by.return_value = order_qs
         snapshot.projects = projects_qs
 
         subscription = _make_subscription(preferences)
@@ -392,7 +369,8 @@ class TestSnapshotDigestService:
         snapshot = _make_base_snapshot()
 
         project = MagicMock()
-        project.repositories.all.return_value = [MagicMock()]
+        mock_repo = MagicMock()
+        project.repositories.all.return_value = [mock_repo]
         subscription = _make_subscription(preferences, projects=[project])
 
         # Setup snapshot querysets for entity content
@@ -410,6 +388,9 @@ class TestSnapshotDigestService:
         assert section["entity_type"] == "project"
         content_types = [c["type"] for c in section["content"]]
         assert "issues" in content_types
+
+        for attr in ("issues", "pull_requests", "releases"):
+            getattr(snapshot, attr).filter.assert_called_once_with(repository__in=[mock_repo])
 
     def test_generate_skips_entities_without_updates(self):
         """Test generate skips entities that have no matching data."""
@@ -434,7 +415,8 @@ class TestSnapshotDigestService:
         snapshot = _make_base_snapshot()
 
         chapter = MagicMock(spec=[])
-        chapter.owasp_repository = MagicMock()
+        mock_repo = MagicMock()
+        chapter.owasp_repository = mock_repo
         subscription = _make_subscription(preferences, chapters=[chapter])
 
         for attr in ("issues", "pull_requests", "releases"):
@@ -448,6 +430,34 @@ class TestSnapshotDigestService:
 
         assert len(result["entity_sections"]) == 1
         assert result["entity_sections"][0]["entity_type"] == "chapter"
+
+        for attr in ("issues", "pull_requests", "releases"):
+            getattr(snapshot, attr).filter.assert_called_once_with(repository__in=[mock_repo])
+
+    def test_generate_entity_sections_for_committee(self):
+        """Test generate includes entity sections for subscribed committees."""
+        preferences = _all_false_preferences()
+        snapshot = _make_base_snapshot()
+
+        committee = MagicMock(spec=[])
+        mock_repo = MagicMock()
+        committee.owasp_repository = mock_repo
+        subscription = _make_subscription(preferences, committees=[committee])
+
+        for attr in ("issues", "pull_requests", "releases"):
+            outer_qs, _ = _make_filterable_qs(
+                ["item1"] if attr == "releases" else [],
+                total=1 if attr == "releases" else 0,
+            )
+            setattr(snapshot, attr, outer_qs)
+
+        result = SnapshotDigestService().generate(snapshot, subscription)
+
+        assert len(result["entity_sections"]) == 1
+        assert result["entity_sections"][0]["entity_type"] == "committee"
+
+        for attr in ("issues", "pull_requests", "releases"):
+            getattr(snapshot, attr).filter.assert_called_once_with(repository__in=[mock_repo])
 
     def test_generate_extra_calculation(self):
         """Test extra count is calculated correctly when total exceeds limit."""
@@ -601,7 +611,7 @@ class TestSendDigestEmail:
 
         send_digest_email(snapshot_id=999, subscription_id=1)
 
-        mock_sub_cls.objects.get.assert_not_called()
+        mock_sub_cls.objects.select_related.assert_not_called()
 
     @patch("apps.owasp.services.newsletter.EmailLog")
     @patch("apps.owasp.services.newsletter.SnapshotSubscription")
@@ -609,7 +619,8 @@ class TestSendDigestEmail:
     def test_skips_duplicate(self, mock_snapshot_cls, mock_sub_cls, mock_email_log):
         """Test job exits early on duplicate EmailLog."""
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_cls.objects.get.return_value = MagicMock()
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = MagicMock()
         mock_email_log.is_duplicate.return_value = True
 
         send_digest_email(snapshot_id=1, subscription_id=1)
@@ -637,22 +648,10 @@ class TestSendDigestEmail:
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
         mock_sub.user.email = "test@example.com"
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
-        mock_digest_cls.return_value.generate.return_value = {
-            "chapters_data": {"items": ["ch1"], "total": 1, "extra": 0},
-            "users_data": None,
-            "issues_data": None,
-            "prs_data": None,
-            "releases_data": None,
-            "projects_data": [],
-            "entity_sections": [],
-            "posts_data": None,
-            "events_data": None,
-            "unsubscribe_url": "https://example.com/unsubscribe",
-            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
-            "snapshot_url": "https://example.com/snapshot",
-        }
+        mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
         mock_render.return_value = "<html>body</html>"
         mock_service = MagicMock()
         mock_service.send.return_value = True
@@ -682,22 +681,10 @@ class TestSendDigestEmail:
     ):
         """Test job skips sending when all content is empty."""
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_cls.objects.get.return_value = MagicMock()
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = MagicMock()
         mock_email_log.is_duplicate.return_value = False
-        mock_digest_cls.return_value.generate.return_value = {
-            "chapters_data": None,
-            "users_data": None,
-            "issues_data": None,
-            "prs_data": None,
-            "releases_data": None,
-            "projects_data": [],
-            "entity_sections": [],
-            "posts_data": None,
-            "events_data": None,
-            "unsubscribe_url": "https://example.com/unsubscribe",
-            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
-            "snapshot_url": "https://example.com/snapshot",
-        }
+        mock_digest_cls.return_value.generate.return_value = _make_empty_digest()
 
         send_digest_email(snapshot_id=1, subscription_id=1)
 
@@ -723,22 +710,10 @@ class TestSendDigestEmail:
         mock_snapshot = MagicMock()
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
-        mock_digest_cls.return_value.generate.return_value = {
-            "chapters_data": {"items": ["ch1"], "total": 1, "extra": 0},
-            "users_data": None,
-            "issues_data": None,
-            "prs_data": None,
-            "releases_data": None,
-            "projects_data": [],
-            "entity_sections": [],
-            "posts_data": None,
-            "events_data": None,
-            "unsubscribe_url": "https://example.com/unsubscribe",
-            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
-            "snapshot_url": "https://example.com/snapshot",
-        }
+        mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
         mock_render.return_value = "<html>body</html>"
         mock_get_service.return_value.send.side_effect = SMTPException("Send failed")
 
@@ -769,22 +744,10 @@ class TestSendDigestEmail:
         mock_snapshot = MagicMock()
         mock_snapshot_cls.objects.get.return_value = mock_snapshot
         mock_sub = MagicMock()
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
         mock_email_log.is_duplicate.return_value = False
-        mock_digest_cls.return_value.generate.return_value = {
-            "chapters_data": {"items": ["ch1"], "total": 1, "extra": 0},
-            "users_data": None,
-            "issues_data": None,
-            "prs_data": None,
-            "releases_data": None,
-            "projects_data": [],
-            "entity_sections": [],
-            "posts_data": None,
-            "events_data": None,
-            "unsubscribe_url": "https://example.com/unsubscribe",
-            "list_unsubscribe_url": "https://example.com/list-unsubscribe",
-            "snapshot_url": "https://example.com/snapshot",
-        }
+        mock_digest_cls.return_value.generate.return_value = _make_digest_with_content()
         mock_render.return_value = "<html>body</html>"
         mock_get_service.return_value.send.return_value = False
 
@@ -804,7 +767,10 @@ class TestSendDigestEmail:
         mock_snapshot_cls.DoesNotExist = Snapshot.DoesNotExist
         mock_sub_cls.DoesNotExist = SnapshotSubscription.DoesNotExist
         mock_snapshot_cls.objects.get.return_value = MagicMock()
-        mock_sub_cls.objects.get.side_effect = SnapshotSubscription.DoesNotExist
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.side_effect = (
+            SnapshotSubscription.DoesNotExist
+        )
 
         send_digest_email(snapshot_id=1, subscription_id=999)
 
@@ -823,9 +789,35 @@ class TestSendDigestEmail:
         mock_snapshot_cls.objects.get.return_value = MagicMock()
         mock_sub = MagicMock()
         mock_sub.is_active = False
-        mock_sub_cls.objects.get.return_value = mock_sub
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
 
         send_digest_email(snapshot_id=1, subscription_id=1)
+
+        mock_get_service.return_value.send.assert_not_called()
+        mock_email_log.mark_sent.assert_not_called()
+        mock_email_log.mark_failed.assert_not_called()
+
+    @patch("apps.owasp.services.newsletter.get_email_service")
+    @patch("apps.owasp.services.newsletter.EmailLog")
+    @patch("apps.owasp.services.newsletter.SnapshotSubscription")
+    @patch("apps.owasp.services.newsletter.Snapshot")
+    def test_skips_if_frequency_changed(
+        self,
+        mock_snapshot_cls,
+        mock_sub_cls,
+        mock_email_log,
+        mock_get_service,
+    ):
+        """Test job skips sending when expected frequency does not match current."""
+        mock_snapshot_cls.objects.get.return_value = MagicMock()
+        mock_sub = MagicMock()
+        mock_sub.is_active = True
+        mock_sub.frequency = "monthly"
+        mock_sub_qs = mock_sub_cls.objects.select_related.return_value
+        mock_sub_qs.prefetch_related.return_value.get.return_value = mock_sub
+
+        send_digest_email(snapshot_id=1, subscription_id=1, expected_frequency="weekly")
 
         mock_get_service.return_value.send.assert_not_called()
         mock_email_log.mark_sent.assert_not_called()

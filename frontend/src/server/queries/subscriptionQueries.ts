@@ -134,19 +134,6 @@ export const UPDATE_SNAPSHOT_SUBSCRIPTION = gql`
   ${SNAPSHOT_SUBSCRIPTION_FIELDS}
 `
 
-export const CANCEL_SNAPSHOT_SUBSCRIPTION = gql`
-  mutation CancelSnapshotSubscription($subscriptionId: Int!) {
-    cancelSnapshotSubscription(subscriptionId: $subscriptionId) {
-      ok
-      message
-      subscription {
-        id
-        isActive
-      }
-    }
-  }
-`
-
 export const DELETE_SNAPSHOT_SUBSCRIPTION = gql`
   mutation DeleteSnapshotSubscription($subscriptionId: Int!) {
     deleteSnapshotSubscription(subscriptionId: $subscriptionId) {
@@ -156,24 +143,19 @@ export const DELETE_SNAPSHOT_SUBSCRIPTION = gql`
   }
 `
 
-export const REACTIVATE_SNAPSHOT_SUBSCRIPTION = gql`
-  mutation ReactivateSnapshotSubscription($subscriptionId: Int!) {
-    reactivateSnapshotSubscription(subscriptionId: $subscriptionId) {
-      ok
-      message
-      subscription {
-        id
-        isActive
-      }
-    }
-  }
-`
-
 export const UNSUBSCRIBE_BY_TOKEN = gql`
   mutation UnsubscribeByToken($inputData: UnsubscribeTokenInput!) {
     unsubscribeByToken(inputData: $inputData) {
       ok
       message
+    }
+  }
+`
+
+export const GET_SUBSCRIPTION_NAME_BY_TOKEN = gql`
+  query GetSubscriptionNameByToken($token: String!) {
+    subscriptionByToken(token: $token) {
+      name
     }
   }
 `

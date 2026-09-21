@@ -10,6 +10,7 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
 
+MAX_NAME_LENGTH = 100
 MAX_SUBSCRIPTIONS = 5
 
 
@@ -53,7 +54,7 @@ class SnapshotSubscription(models.Model):
         on_delete=models.CASCADE,
         related_name="snapshot_subscriptions",
     )
-    name = models.CharField(max_length=100, default="", blank=True)
+    name = models.CharField(max_length=MAX_NAME_LENGTH, default="", blank=True)
     frequency = models.CharField(
         max_length=10,
         choices=Frequency.choices,
@@ -254,37 +255,6 @@ class SnapshotSubscription(models.Model):
 
         if committee_ids is not None:
             self.committees.set(Committee.objects.filter(pk__in=committee_ids))
-
-    def deactivate(self):
-        """Deactivate this subscription."""
-        self.is_active = False
-        self.save(update_fields=("is_active",))
-
-    @transaction.atomic
-    def reactivate(self):
-        """Reactivate an inactive subscription with limit enforcement.
-
-        Raises:
-            ValidationError: If already active or max subscriptions reached.
-
-        """
-        if self.is_active:
-            msg = "Subscription is already active."
-            raise ValidationError(msg)
-
-        if getattr(self.user, "pk", None):
-            User.objects.select_for_update().filter(pk=self.user.pk).exists()
-
-        active_count = SnapshotSubscription.objects.filter(
-            user=self.user,
-            is_active=True,
-        ).count()
-        if active_count >= MAX_SUBSCRIPTIONS:
-            msg = f"Maximum number of active subscriptions ({MAX_SUBSCRIPTIONS}) reached."
-            raise ValidationError(msg)
-
-        self.is_active = True
-        self.save(update_fields=("is_active",))
 
     @classmethod
     def check_duplicate_setup(

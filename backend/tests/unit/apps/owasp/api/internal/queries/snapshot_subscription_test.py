@@ -64,9 +64,10 @@ class TestSnapshotSubscriptionQuery:
         """Test subscription_by_token returns subscription when token matches."""
         mock_sub = MagicMock()
         mock_objects.get.return_value = mock_sub
-        result = self._resolve_subscription_by_token("abc-123-uuid")
+        token = "550e8400-e29b-41d4-a716-446655440000"  # noqa: S105
+        result = self._resolve_subscription_by_token(token)
         assert result == mock_sub
-        mock_objects.get.assert_called_once_with(unsubscribe_token="abc-123-uuid")  # noqa: S106
+        mock_objects.get.assert_called_once_with(unsubscribe_token=token)
 
     @patch("apps.owasp.api.internal.queries.snapshot_subscription.SnapshotSubscription.objects")
     def test_subscription_by_token_not_found(self, mock_objects):

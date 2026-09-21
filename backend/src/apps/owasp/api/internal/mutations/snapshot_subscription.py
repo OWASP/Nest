@@ -12,11 +12,9 @@ from strawberry.types import Info
 
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.snapshot_subscription import SnapshotSubscriptionNode
-from apps.owasp.models.snapshot_subscription import SnapshotSubscription
+from apps.owasp.models.snapshot_subscription import MAX_NAME_LENGTH, SnapshotSubscription
 
 logger = logging.getLogger(__name__)
-
-MAX_NAME_LENGTH = 100
 
 
 @strawberry.enum
@@ -317,36 +315,6 @@ class SnapshotSubscriptionMutations:
         )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def cancel_snapshot_subscription(
-        self,
-        info: Info,
-        subscription_id: int,
-    ) -> SnapshotSubscriptionResult:
-        """Cancel a specific snapshot subscription."""
-        user = info.context.request.user
-
-        try:
-            subscription = SnapshotSubscription.objects.get(
-                id=subscription_id,
-                user=user,
-            )
-        except SnapshotSubscription.DoesNotExist:
-            return SnapshotSubscriptionResult(
-                ok=False,
-                code="NOT_FOUND",
-                message="Subscription not found.",
-            )
-
-        subscription.deactivate()
-
-        return SnapshotSubscriptionResult(
-            ok=True,
-            code="SUCCESS",
-            message="Subscription cancelled successfully.",
-            subscription=subscription,
-        )
-
-    @strawberry.mutation(permission_classes=[IsAuthenticated])
     def delete_snapshot_subscription(
         self,
         info: Info,
@@ -373,43 +341,6 @@ class SnapshotSubscriptionMutations:
             ok=True,
             code="SUCCESS",
             message="Subscription deleted successfully.",
-        )
-
-    @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def reactivate_snapshot_subscription(
-        self,
-        info: Info,
-        subscription_id: int,
-    ) -> SnapshotSubscriptionResult:
-        """Reactivate an inactive snapshot subscription."""
-        user = info.context.request.user
-
-        try:
-            subscription = SnapshotSubscription.objects.get(
-                id=subscription_id,
-                user=user,
-            )
-        except SnapshotSubscription.DoesNotExist:
-            return SnapshotSubscriptionResult(
-                ok=False,
-                code="NOT_FOUND",
-                message="Subscription not found.",
-            )
-
-        try:
-            subscription.reactivate()
-        except ValidationError as e:
-            return SnapshotSubscriptionResult(
-                ok=False,
-                code="VALIDATION_ERROR",
-                message=e.message,
-            )
-
-        return SnapshotSubscriptionResult(
-            ok=True,
-            code="SUCCESS",
-            message="Subscription reactivated successfully.",
-            subscription=subscription,
         )
 
     @strawberry.mutation

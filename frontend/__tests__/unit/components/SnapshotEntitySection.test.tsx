@@ -20,6 +20,14 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => mockRouter),
 }))
 
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
+
+jest.mock('@sentry/nextjs', () => ({
+  captureException: jest.fn(),
+}))
+
 const mockPRs = Array.from({ length: 7 }, (_, i) => ({
   id: `pr-${i}`,
   author: {
@@ -89,20 +97,13 @@ describe('SnapshotEntitySection', () => {
     expect(screen.getByText('Project')).toBeInTheDocument()
   })
 
-  it('renders Issues section when issues are provided', () => {
-    render(<SnapshotEntitySection {...defaultProps} />)
-    expect(screen.getByText('Issues')).toBeInTheDocument()
-  })
-
-  it('renders Pull Requests section when PRs are provided', () => {
-    render(<SnapshotEntitySection {...defaultProps} />)
-    expect(screen.getByText('Pull Requests')).toBeInTheDocument()
-  })
-
-  it('renders Releases section when releases are provided', () => {
-    render(<SnapshotEntitySection {...defaultProps} />)
-    expect(screen.getByText('Releases')).toBeInTheDocument()
-  })
+  it.each([['Issues'], ['Pull Requests'], ['Releases']])(
+    'renders %s section when data is provided',
+    (sectionName) => {
+      render(<SnapshotEntitySection {...defaultProps} />)
+      expect(screen.getByText(sectionName)).toBeInTheDocument()
+    }
+  )
 
   it('returns null when no PRs, issues, or releases', () => {
     render(
@@ -301,6 +302,7 @@ describe('SnapshotEntitySection', () => {
   })
 
   it('handles PR fetch error gracefully', async () => {
+    const { addToast } = jest.requireMock('@heroui/toast')
     const mockFetchPRs = jest.fn().mockRejectedValue(new Error('Network error'))
     ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchPRs])
 
@@ -328,9 +330,19 @@ describe('SnapshotEntitySection', () => {
       expect(screen.getByText('Show more')).toBeInTheDocument()
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
     })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Server Error',
+          color: 'danger',
+        })
+      )
+    })
   })
 
   it('handles issue fetch error gracefully', async () => {
+    const { addToast } = jest.requireMock('@heroui/toast')
     const mockFetchIssues = jest.fn().mockRejectedValue(new Error('Network error'))
     ;(useLazyQuery as unknown as jest.Mock).mockImplementation((document) =>
       document === GetSnapshotEntityIssuesDocument
@@ -361,6 +373,15 @@ describe('SnapshotEntitySection', () => {
     await waitFor(() => {
       expect(screen.getByText('Show more')).toBeInTheDocument()
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Server Error',
+          color: 'danger',
+        })
+      )
     })
   })
 
@@ -422,7 +443,7 @@ describe('SnapshotEntitySection', () => {
     })
   })
 
-  it('does not sync when initial data is empty', () => {
+  it('hides empty PR and Issue sections but renders populated Releases', () => {
     render(
       <SnapshotEntitySection
         {...defaultProps}
@@ -436,7 +457,7 @@ describe('SnapshotEntitySection', () => {
     expect(screen.queryByText('Issues')).not.toBeInTheDocument()
   })
 
-  it('does not fetch more PRs when hasMorePRs is false', async () => {
+  it('does not render Show more when hasMorePRs is false', async () => {
     const fewPRs = mockPRs.slice(0, 3)
     const mockFetchPRs = jest.fn().mockResolvedValue({ data: {} })
     ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchPRs])
@@ -454,7 +475,7 @@ describe('SnapshotEntitySection', () => {
     expect(screen.queryByText('Show more')).not.toBeInTheDocument()
   })
 
-  it('does not fetch more issues when hasMoreIssues is false', async () => {
+  it('does not render Show more when hasMoreIssues is false', async () => {
     const fewIssues = mockIssues.slice(0, 3)
     ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([
       jest.fn().mockResolvedValue({ data: {} }),
@@ -609,6 +630,7 @@ describe('SnapshotEntitySection', () => {
     )
 
     expect(screen.getByText('Releases')).toBeInTheDocument()
+    expect(screen.queryByText('v9.0.0')).not.toBeInTheDocument()
     const toggleButton = screen.getByText('Show more')
     fireEvent.click(toggleButton)
     await waitFor(() => {

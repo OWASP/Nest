@@ -99,13 +99,16 @@ class Command(BaseCommand):
                 send_digest_email,
                 snapshot_id=snapshot.id,
                 subscription_id=subscription.id,
+                expected_frequency=snapshot.frequency,
             )
             stats["enqueued"] += 1
             self.stdout.write(f"    [ENQUEUED] {subscription.user}")
 
+        action_word = "Would Enqueue" if dry_run else "Enqueued"
+
         self.stdout.write(
             self.style.SUCCESS(
-                f"Done. Enqueued: {stats['enqueued']}, Skipped: {stats['skipped']}, "
+                f"Done. {action_word}: {stats['enqueued']}, Skipped: {stats['skipped']}, "
                 f"Total: {stats['total']}."
             )
         )

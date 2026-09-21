@@ -433,7 +433,6 @@ export type ModuleNodeTaskDeadlineArgs = {
 export type Mutation = {
   __typename?: 'Mutation';
   assignIssueToUser: ModuleNode;
-  cancelSnapshotSubscription: SnapshotSubscriptionResult;
   clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
@@ -443,7 +442,6 @@ export type Mutation = {
   deleteSnapshotSubscription: SnapshotSubscriptionResult;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
-  reactivateSnapshotSubscription: SnapshotSubscriptionResult;
   reorderModules: Array<ModuleNode>;
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
@@ -461,11 +459,6 @@ export type MutationAssignIssueToUserArgs = {
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
-};
-
-
-export type MutationCancelSnapshotSubscriptionArgs = {
-  subscriptionId: Scalars['Int']['input'];
 };
 
 
@@ -510,11 +503,6 @@ export type MutationDeleteSnapshotSubscriptionArgs = {
 
 export type MutationGithubAuthArgs = {
   accessToken: Scalars['String']['input'];
-};
-
-
-export type MutationReactivateSnapshotSubscriptionArgs = {
-  subscriptionId: Scalars['Int']['input'];
 };
 
 

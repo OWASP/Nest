@@ -29,6 +29,7 @@ class TestOneClickUnsubscribeView:
         response = self.view.post(request, token=self.token)
 
         assert response.status_code == 200
+        mock_find.assert_called_once_with(self.token)
         mock_sub.delete.assert_called_once()
 
     @patch("apps.owasp.views.unsubscribe.OneClickUnsubscribeView.find_subscription")
@@ -84,7 +85,7 @@ class TestFindSubscription:
     def test_returns_none_on_validation_error(self, mock_snapshot_model):
         """Test returns None when token causes ValidationError."""
         invalid_uuid = "not-a-valid-uuid"
-        mock_snapshot_model.DoesNotExist = Exception
+        mock_snapshot_model.DoesNotExist = SnapshotSubscription.DoesNotExist
         mock_snapshot_model.objects.get.side_effect = ValidationError("Invalid UUID")
 
         result = OneClickUnsubscribeView.find_subscription(invalid_uuid)

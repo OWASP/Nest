@@ -8,8 +8,9 @@ from apps.owasp.models.email_log import EmailLog
 class EmailLogAdmin(admin.ModelAdmin):
     """Admin for EmailLog model."""
 
-    list_display = ("get_user", "snapshot", "status", "created_at")
+    list_display = ("get_user", "snapshot", "status", "error_message", "created_at")
     list_filter = ("status", "created_at")
+    list_select_related = ("snapshot", "snapshot_subscription__user")
     search_fields = ("snapshot_subscription__user__email",)
     readonly_fields = (
         "snapshot_subscription",
@@ -21,6 +22,10 @@ class EmailLogAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         """Prevent manual creation of email logs."""
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        """Prevent deletion of email logs to preserve duplicate-send protection."""
         return False
 
     @admin.display(description="User")

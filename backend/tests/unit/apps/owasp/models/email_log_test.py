@@ -2,6 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
+from django.db import models
+
 from apps.owasp.models.email_log import EmailLog
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.snapshot_subscription import SnapshotSubscription
@@ -138,10 +140,16 @@ class TestEmailLogMeta:
     """Test EmailLog Meta configuration."""
 
     def test_unique_constraint_exists(self):
-        """Test unique constraint for subscription + snapshot."""
+        """Test unique constraint for subscription + snapshot with sent-only condition."""
         constraints = EmailLog._meta.constraints
         constraint_names = {c.name for c in constraints}
         assert "unique_email_per_subscription_snapshot" in constraint_names
+
+        constraint = next(
+            c for c in constraints if c.name == "unique_email_per_subscription_snapshot"
+        )
+        assert set(constraint.fields) == {"snapshot_subscription", "snapshot"}
+        assert constraint.condition == models.Q(status="sent")
 
     def test_db_table(self):
         """Test database table name."""
