@@ -19,6 +19,7 @@ from apps.api.rest.v0.common import (
     order_by_date_field,
 )
 from apps.owasp.models.board_discussion import BoardDiscussion as BoardDiscussionModel
+from apps.owasp.models.entity_member import EntityMember
 
 router = RouterPaginated(tags=["Board Discussions"])
 
@@ -55,7 +56,7 @@ class BoardDiscussionDetail(BoardDiscussionBase):
     participants: list[Person]
 
     @staticmethod
-    def resolve_participants(obj: BoardDiscussionModel) -> list:
+    def resolve_participants(obj: BoardDiscussionModel) -> list[EntityMember]:
         """Resolve participant EntityMember rows."""
         return list(obj.participants.all())
 

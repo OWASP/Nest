@@ -19,6 +19,7 @@ from apps.api.rest.v0.common import (
     order_by_date_field,
 )
 from apps.owasp.models.board_vote import BoardVote as BoardVoteModel
+from apps.owasp.models.entity_member import EntityMember
 
 router = RouterPaginated(tags=["Board Votes"])
 
@@ -60,22 +61,22 @@ class BoardVoteDetail(BoardVoteBase):
     recused: list[Person]
 
     @staticmethod
-    def resolve_abstain(obj: BoardVoteModel) -> list:
+    def resolve_abstain(obj: BoardVoteModel) -> list[EntityMember]:
         """Resolve abstaining EntityMember rows."""
         return list(obj.abstain.all())
 
     @staticmethod
-    def resolve_against(obj: BoardVoteModel) -> list:
+    def resolve_against(obj: BoardVoteModel) -> list[EntityMember]:
         """Resolve against EntityMember rows."""
         return list(obj.against.all())
 
     @staticmethod
-    def resolve_in_favor(obj: BoardVoteModel) -> list:
+    def resolve_in_favor(obj: BoardVoteModel) -> list[EntityMember]:
         """Resolve in-favor EntityMember rows."""
         return list(obj.in_favor.all())
 
     @staticmethod
-    def resolve_recused(obj: BoardVoteModel) -> list:
+    def resolve_recused(obj: BoardVoteModel) -> list[EntityMember]:
         """Resolve recused EntityMember rows."""
         return list(obj.recused.all())
 

@@ -16,6 +16,7 @@ from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Person, ValidationErrorSchema, normalize_datetime
 from apps.owasp.models.board_meeting import BoardMeeting as BoardMeetingModel
 from apps.owasp.models.board_meeting_action import BoardMeetingAction as BoardMeetingActionModel
+from apps.owasp.models.entity_member import EntityMember
 
 router = RouterPaginated(tags=["Board Meetings"])
 
@@ -80,17 +81,17 @@ class BoardMeetingDetail(BoardMeetingBase):
     source_checksum: str
 
     @staticmethod
-    def resolve_absentees(obj: BoardMeetingModel) -> list:
+    def resolve_absentees(obj: BoardMeetingModel) -> list[EntityMember]:
         """Resolve absentee EntityMember rows."""
         return list(obj.absentees.all())
 
     @staticmethod
-    def resolve_actions(obj: BoardMeetingModel) -> list:
+    def resolve_actions(obj: BoardMeetingModel) -> list[BoardMeetingActionModel]:
         """Resolve ordered action rows for the meeting."""
         return list(obj.actions.all())
 
     @staticmethod
-    def resolve_attendees(obj: BoardMeetingModel) -> list:
+    def resolve_attendees(obj: BoardMeetingModel) -> list[EntityMember]:
         """Resolve attendee EntityMember rows."""
         return list(obj.attendees.all())
 

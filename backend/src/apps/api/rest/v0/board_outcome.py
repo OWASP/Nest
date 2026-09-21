@@ -19,6 +19,7 @@ from apps.api.rest.v0.common import (
     order_by_date_field,
 )
 from apps.owasp.models.board_outcome import BoardOutcome as BoardOutcomeModel
+from apps.owasp.models.entity_member import EntityMember
 
 router = RouterPaginated(tags=["Board Outcomes"])
 
@@ -56,7 +57,7 @@ class BoardOutcomeDetail(BoardOutcomeBase):
     metadata: dict
 
     @staticmethod
-    def resolve_assignees(obj: BoardOutcomeModel) -> list:
+    def resolve_assignees(obj: BoardOutcomeModel) -> list[EntityMember]:
         """Resolve assignee EntityMember rows."""
         return list(obj.assignees.all())
 
