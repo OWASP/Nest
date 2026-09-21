@@ -58,6 +58,7 @@ class SnapshotFeedbackResult:
     """Result payload for snapshot feedback mutations."""
 
     ok: bool
+    code: str | None = None
     message: str
     feedback: SnapshotFeedbackNode | None = None
     field_errors: list[FieldError] | None = None
@@ -89,13 +90,11 @@ class SnapshotFeedbackMutations:
                 message="Snapshot not found.",
             )
 
-        feedback, created = SnapshotFeedback.objects.update_or_create(
+        feedback, created = SnapshotFeedback.submit(
             snapshot=snapshot,
             user=user,
-            defaults={
-                "comment": validated.comment,
-                "rating": validated.rating,
-            },
+            rating=validated.rating,
+            comment=validated.comment,
         )
 
         return SnapshotFeedbackResult(

@@ -34,7 +34,19 @@ const feedbackEntry = {
   username: 'alice',
 }
 
-const setupMocks = (session: string, myFeedback: typeof feedbackEntry | null) => {
+const setupMocks = (
+  session: string,
+  myFeedback: typeof feedbackEntry | null,
+  {
+    feedback = [feedbackEntry],
+    averageRating = 4.5,
+    feedbackCount = 1,
+  }: {
+    feedback?: (typeof feedbackEntry)[]
+    averageRating?: number
+    feedbackCount?: number
+  } = {}
+) => {
   ;(useDjangoSession as jest.Mock).mockReturnValue({
     isSyncing: false,
     session: { user: { name: 'testuser' } },
@@ -44,10 +56,10 @@ const setupMocks = (session: string, myFeedback: typeof feedbackEntry | null) =>
     data: {
       snapshot: {
         id: 'snapshot-1',
-        averageRating: 4.5,
-        feedbackCount: 2,
+        averageRating,
+        feedbackCount,
         myFeedback,
-        feedback: [feedbackEntry],
+        feedback,
       },
     },
     loading: false,
@@ -68,7 +80,7 @@ describe.each([
   })
 
   it('should not have any accessibility violations when rating for the first time', async () => {
-    setupMocks('authenticated', null)
+    setupMocks('authenticated', null, { feedback: [], averageRating: 0, feedbackCount: 0 })
 
     const { container } = render(<SnapshotFeedback snapshotKey="2024-12" />)
 
@@ -84,7 +96,7 @@ describe.each([
   })
 
   it('should not have any accessibility violations for anonymous visitors', async () => {
-    setupMocks('unauthenticated', null)
+    setupMocks('unauthenticated', null, { feedback: [], averageRating: 0, feedbackCount: 0 })
 
     const { container } = render(<SnapshotFeedback snapshotKey="2024-12" />)
 

@@ -27,21 +27,27 @@ class TestSnapshotQuery:
         """Test snapshot returns snapshot when found."""
         mock_snapshot = MagicMock(spec=Snapshot)
 
-        with patch("apps.owasp.api.internal.queries.snapshot.Snapshot.objects.get") as mock_get:
-            mock_get.return_value = mock_snapshot
+        with patch(
+            "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
+        ) as mock_filter:
+            mock_annotate = mock_filter.return_value.annotate.return_value
+            mock_annotate.get.return_value = mock_snapshot
 
             result = self.query.__class__.__dict__["snapshot"](self.query, key="test-key")
 
             assert result == mock_snapshot
-            mock_get.assert_called_once_with(
+            mock_filter.assert_called_once_with(
                 key="test-key",
                 status=Snapshot.Status.COMPLETED,
             )
 
     def test_snapshot_not_exists(self):
         """Test snapshot returns None when not found."""
-        with patch("apps.owasp.api.internal.queries.snapshot.Snapshot.objects.get") as mock_get:
-            mock_get.side_effect = Snapshot.DoesNotExist
+        with patch(
+            "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
+        ) as mock_filter:
+            mock_annotate = mock_filter.return_value.annotate.return_value
+            mock_annotate.get.side_effect = Snapshot.DoesNotExist
 
             result = self.query.__class__.__dict__["snapshot"](self.query, key="nonexistent")
 
@@ -158,11 +164,13 @@ class TestFilteredSnapshots:
             "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
         ) as mock_filter:
             mock_qs = MagicMock()
+            mock_annotated = MagicMock()
             mock_filter.return_value.order_by.return_value = mock_qs
+            mock_qs.annotate.return_value = mock_annotated
 
             result = _filtered_snapshots()
 
-            assert result == mock_qs
+            assert result == mock_annotated
             mock_filter.assert_called_once_with(status=Snapshot.Status.COMPLETED)
             mock_filter.return_value.order_by.assert_called_once_with("-created_at")
             mock_qs.filter.assert_not_called()
@@ -173,12 +181,14 @@ class TestFilteredSnapshots:
             "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
         ) as mock_filter:
             mock_qs = MagicMock()
+            mock_annotated = MagicMock()
             mock_filter.return_value.order_by.return_value = mock_qs
             mock_qs.filter.return_value = mock_qs
+            mock_qs.annotate.return_value = mock_annotated
 
             result = _filtered_snapshots(start_at_gte="2025-01-01T00:00:00")
 
-            assert result == mock_qs
+            assert result == mock_annotated
             mock_filter.return_value.order_by.assert_called_once_with("-created_at")
             mock_qs.filter.assert_called_once_with(
                 start_at__gte=datetime.fromisoformat("2025-01-01T00:00:00")
@@ -190,15 +200,17 @@ class TestFilteredSnapshots:
             "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
         ) as mock_filter:
             mock_qs = MagicMock()
+            mock_annotated = MagicMock()
             mock_filter.return_value.order_by.return_value = mock_qs
             mock_qs.filter.return_value = mock_qs
+            mock_qs.annotate.return_value = mock_annotated
 
             result = _filtered_snapshots(
                 start_at_gte="2025-01-01T00:00:00",
                 start_at_lte="2025-12-31T23:59:59",
             )
 
-            assert result == mock_qs
+            assert result == mock_annotated
             mock_filter.return_value.order_by.assert_called_once_with("-created_at")
             mock_qs.filter.assert_has_calls(
                 [
@@ -213,11 +225,13 @@ class TestFilteredSnapshots:
             "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
         ) as mock_filter:
             mock_qs = MagicMock()
+            mock_annotated = MagicMock()
             mock_filter.return_value.order_by.return_value = mock_qs
+            mock_qs.annotate.return_value = mock_annotated
 
             result = _filtered_snapshots(start_at_gte="not-a-date")
 
-            assert result == mock_qs
+            assert result == mock_annotated
             mock_qs.filter.assert_not_called()
 
     def test_with_malformed_gte_valid_lte_applies_lte(self):
@@ -226,15 +240,17 @@ class TestFilteredSnapshots:
             "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
         ) as mock_filter:
             mock_qs = MagicMock()
+            mock_annotated = MagicMock()
             mock_filter.return_value.order_by.return_value = mock_qs
             mock_qs.filter.return_value = mock_qs
+            mock_qs.annotate.return_value = mock_annotated
 
             result = _filtered_snapshots(
                 start_at_gte="not-a-date",
                 start_at_lte="2025-12-31T23:59:59",
             )
 
-            assert result == mock_qs
+            assert result == mock_annotated
             mock_qs.filter.assert_called_once_with(
                 start_at__lte=datetime.fromisoformat("2025-12-31T23:59:59")
             )

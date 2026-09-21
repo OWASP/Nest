@@ -58,7 +58,8 @@ const StarRating = ({
   const displayed = previewed || value
 
   return (
-    <div className="flex items-center gap-1" role="group" aria-label={label}>
+    <fieldset className="flex items-center gap-1 border-none p-0" aria-label={label}>
+      <legend className="sr-only">{label}</legend>
       {STARS.map((star) => (
         <span
           key={star}
@@ -85,7 +86,7 @@ const StarRating = ({
           </Button>
         </span>
       ))}
-    </div>
+    </fieldset>
   )
 }
 

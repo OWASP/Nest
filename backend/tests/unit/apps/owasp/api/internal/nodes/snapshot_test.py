@@ -205,6 +205,7 @@ class TestSnapshotNodeResolvers:
         """Test average_rating resolver rounds the aggregated average."""
         resolver = self._get_resolver("average_rating")
         mock_snapshot = MagicMock()
+        del mock_snapshot._average_rating
         mock_snapshot.feedback.aggregate.return_value = {"average": 4.333333}
 
         assert resolver(None, mock_snapshot) == 4.33
@@ -213,6 +214,7 @@ class TestSnapshotNodeResolvers:
         """Test average_rating resolver returns 0 when there is no feedback."""
         resolver = self._get_resolver("average_rating")
         mock_snapshot = MagicMock()
+        del mock_snapshot._average_rating
         mock_snapshot.feedback.aggregate.return_value = {"average": None}
 
         assert resolver(None, mock_snapshot) == 0.0
@@ -221,6 +223,7 @@ class TestSnapshotNodeResolvers:
         """Test feedback_count resolver returns the number of entries."""
         resolver = self._get_resolver("feedback_count")
         mock_snapshot = MagicMock()
+        del mock_snapshot._feedback_count
         mock_snapshot.feedback.count.return_value = 7
 
         assert resolver(None, mock_snapshot) == 7

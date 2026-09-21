@@ -28,6 +28,10 @@ class SnapshotFeedback(models.Model):
                 fields=["snapshot", "user"],
                 name="unique_snapshot_user_feedback",
             ),
+            models.CheckConstraint(
+                condition=models.Q(rating__gte=MIN_RATING, rating__lte=MAX_RATING),
+                name="valid_feedback_rating_range",
+            ),
         ]
         indexes = [
             models.Index(fields=["snapshot", "-created_at"], name="owasp_feedback_snapshot_idx"),
@@ -62,8 +66,8 @@ class SnapshotFeedback(models.Model):
     def submit(cls, *, snapshot, user, rating, comment=""):
         """Create or update feedback. Returns (instance, created)."""
         comment = comment or ""
-        if not isinstance(rating, (int, float)):
-            raise ValidationError({"rating": "Rating must be a number."})
+        if not isinstance(rating, int) or isinstance(rating, bool):
+            raise ValidationError({"rating": "Rating must be a whole number."})
         rating_field = cls._meta.get_field("rating")
         for validator in rating_field.validators:
             validator(rating)

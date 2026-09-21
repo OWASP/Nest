@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { signIn } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FaStar } from 'react-icons/fa6'
 import {
   DeleteSnapshotFeedbackDocument,
@@ -16,9 +16,11 @@ import ActionButton from 'components/ActionButton'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { AuthorAvatar } from 'components/ItemCardList'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import StarRating, { MAX_RATING } from 'components/StarRating'
 
 export const MAX_COMMENT_LENGTH = 1000
+const FEEDBACK_INITIAL = 10
 
 type SnapshotFeedbackProps = {
   snapshotKey: string
@@ -27,6 +29,7 @@ type SnapshotFeedbackProps = {
 const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
   const { isSyncing, status } = useDjangoSession()
   const isAuthenticated = status === 'authenticated'
+  const isSessionLoading = status === 'loading'
 
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
@@ -44,10 +47,17 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
   const hasExistingFeedback = myFeedback != null
   const averageRating = snapshot?.averageRating ?? 0
   const feedbackCount = snapshot?.feedbackCount ?? 0
+  const [showAllFeedback, setShowAllFeedback] = useState(false)
+
+  const seededRef = useRef<string | null>(null)
   useEffect(() => {
-    setRating(myFeedback?.rating ?? 0)
-    setComment(myFeedback?.comment ?? '')
-  }, [myFeedback?.rating, myFeedback?.comment])
+    if (seededRef.current === snapshotKey) return
+    if (data) {
+      setRating(myFeedback?.rating ?? 0)
+      setComment(myFeedback?.comment ?? '')
+      seededRef.current = snapshotKey
+    }
+  }, [data, snapshotKey, myFeedback?.rating, myFeedback?.comment])
 
   const [submitFeedback, { loading: isSubmitting }] = useMutation(SubmitSnapshotFeedbackDocument, {
     onCompleted: (result) => {
@@ -91,7 +101,7 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
     },
   })
 
-  const isBusy = isSubmitting || isDeleting
+  const isBusy = isSubmitting || isDeleting || isSyncing
 
   const handleSubmit = () => {
     if (rating < 1) {
@@ -133,6 +143,7 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
   }
 
   const renderForm = () => {
+    if (isSessionLoading) return null
     if (!isAuthenticated) {
       return (
         <div className="mb-6 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
@@ -204,7 +215,7 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
 
       {entries.length > 0 && (
         <div className="flex flex-col gap-4">
-          {entries.map((entry) => (
+          {(showAllFeedback ? entries : entries.slice(0, FEEDBACK_INITIAL)).map((entry) => (
             <div
               key={entry.id}
               className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
@@ -231,6 +242,12 @@ const SnapshotFeedback = ({ snapshotKey }: SnapshotFeedbackProps) => {
               )}
             </div>
           ))}
+          {entries.length > FEEDBACK_INITIAL && (
+            <ShowMoreButton
+              expanded={showAllFeedback}
+              onToggle={() => setShowAllFeedback((prev) => !prev)}
+            />
+          )}
         </div>
       )}
     </SecondaryCard>

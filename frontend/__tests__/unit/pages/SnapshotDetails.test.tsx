@@ -1,7 +1,7 @@
 import { useQuery, useLazyQuery, useApolloClient } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, act } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
 
@@ -993,11 +993,11 @@ describe('SnapshotDetailsPage', () => {
 
     const prShowMore = findButtonInSection('Show more', 'Pull Requests')
     expect(prShowMore).toBeDefined()
-    if (prShowMore) fireEvent.click(prShowMore)
-
-    await waitFor(() => {
-      expect(mockFetchMorePRs).toHaveBeenCalled()
+    await act(async () => {
+      if (prShowMore) fireEvent.click(prShowMore)
     })
+
+    expect(mockFetchMorePRs).toHaveBeenCalledTimes(1)
 
     const prShowMore2 = await waitFor(() => {
       const btn = findButtonInSection('Show more', 'Pull Requests')
@@ -1009,6 +1009,7 @@ describe('SnapshotDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('PR Seven')).toBeInTheDocument()
     })
+    expect(mockFetchMorePRs).toHaveBeenCalledTimes(1)
   })
 
   test('Issue Show more paginates locally when data already loaded and hasMoreIssues is false', async () => {
@@ -1031,11 +1032,11 @@ describe('SnapshotDetailsPage', () => {
 
     const issueShowMore = findButtonInSection('Show more', 'Issues')
     expect(issueShowMore).toBeDefined()
-    if (issueShowMore) fireEvent.click(issueShowMore)
-
-    await waitFor(() => {
-      expect(mockFetchMoreIssues).toHaveBeenCalled()
+    await act(async () => {
+      if (issueShowMore) fireEvent.click(issueShowMore)
     })
+
+    expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
 
     const issueShowMore2 = await waitFor(() => {
       const btn = findButtonInSection('Show more', 'Issues')
@@ -1047,5 +1048,6 @@ describe('SnapshotDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Issue Seven')).toBeInTheDocument()
     })
+    expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
   })
 })

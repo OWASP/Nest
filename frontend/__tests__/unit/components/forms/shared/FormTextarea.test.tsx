@@ -70,11 +70,12 @@ describe('FormTextarea', () => {
     expect(textarea).toHaveClass('disabled:cursor-not-allowed')
   })
 
-  it('does not call onChange when disabled', () => {
+  it('applies disabled styling and attributes when disabled', () => {
     const handleChange = jest.fn()
     render(<FormTextarea {...defaultProps} disabled={true} onChange={handleChange} />)
     const textarea = screen.getByRole('textbox')
     expect(textarea).toBeDisabled()
+    expect(textarea).toHaveClass('disabled:cursor-not-allowed')
   })
 
   it('renders with maxLength', () => {

@@ -125,12 +125,11 @@ class TestSnapshotFeedbackSubmit:
     @patch("apps.owasp.models.snapshot_feedback.SnapshotFeedback.objects")
     def test_submit_rejects_out_of_range_rating(self, mock_objects, rating):
         """Test submit raises before touching the database for bad ratings."""
+        snapshot = MagicMock()
+        user = MagicMock()
+
         with pytest.raises(ValidationError):
-            SnapshotFeedback.submit(
-                snapshot=MagicMock(),
-                user=MagicMock(),
-                rating=rating,
-            )
+            SnapshotFeedback.submit(snapshot=snapshot, user=user, rating=rating)
 
         mock_objects.update_or_create.assert_not_called()
 
@@ -147,11 +146,10 @@ class TestSnapshotFeedbackSubmit:
     @patch("apps.owasp.models.snapshot_feedback.SnapshotFeedback.objects")
     def test_submit_rejects_non_numeric_rating(self, mock_objects):
         """Test a non-numeric rating is rejected."""
+        snapshot = MagicMock()
+        user = MagicMock()
+
         with pytest.raises(ValidationError):
-            SnapshotFeedback.submit(
-                snapshot=MagicMock(),
-                user=MagicMock(),
-                rating="five",
-            )
+            SnapshotFeedback.submit(snapshot=snapshot, user=user, rating="five")
 
         mock_objects.update_or_create.assert_not_called()

@@ -5,6 +5,7 @@ from datetime import datetime
 
 import strawberry
 import strawberry_django
+from django.db.models import Avg, Count
 
 from apps.common.utils import normalize_limit
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
@@ -26,7 +27,10 @@ def _filtered_snapshots(start_at_gte=None, start_at_lte=None):
         with contextlib.suppress(ValueError):
             queryset = queryset.filter(start_at__lte=datetime.fromisoformat(start_at_lte))
 
-    return queryset
+    return queryset.annotate(
+        _average_rating=Avg("feedback__rating"),
+        _feedback_count=Count("feedback"),
+    )
 
 
 @strawberry.type
@@ -37,9 +41,16 @@ class SnapshotQuery:
     def snapshot(self, key: str) -> SnapshotNode | None:
         """Resolve snapshot by key."""
         try:
-            return Snapshot.objects.get(
-                key=key,
-                status=Snapshot.Status.COMPLETED,
+            return (
+                Snapshot.objects.filter(
+                    key=key,
+                    status=Snapshot.Status.COMPLETED,
+                )
+                .annotate(
+                    _average_rating=Avg("feedback__rating"),
+                    _feedback_count=Count("feedback"),
+                )
+                .get()
             )
         except Snapshot.DoesNotExist:
             return None

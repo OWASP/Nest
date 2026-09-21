@@ -51,13 +51,16 @@ class SnapshotNode(strawberry.relay.Node):
     @strawberry_django.field
     def average_rating(self, root: Snapshot) -> float:
         """Resolve the average community rating, or 0 when there is no feedback yet."""
-        average = root.feedback.aggregate(average=Avg("rating"))["average"]
+        average = getattr(root, "_average_rating", None)
+        if average is None:
+            average = root.feedback.aggregate(average=Avg("rating"))["average"]
         return round(average, RATING_PRECISION) if average is not None else 0.0
 
     @strawberry_django.field
     def feedback_count(self, root: Snapshot) -> int:
         """Resolve the number of feedback entries."""
-        return root.feedback.count()
+        count = getattr(root, "_feedback_count", None)
+        return count if count is not None else root.feedback.count()
 
     @strawberry_django.field(prefetch_related=["feedback"])
     def feedback(

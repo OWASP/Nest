@@ -62,7 +62,11 @@ class Migration(migrations.Migration):
                 "constraints": [
                     models.UniqueConstraint(
                         fields=("snapshot", "user"), name="unique_snapshot_user_feedback"
-                    )
+                    ),
+                    models.CheckConstraint(
+                        condition=models.Q(rating__gte=1, rating__lte=5),
+                        name="valid_feedback_rating_range",
+                    ),
                 ],
             },
         ),

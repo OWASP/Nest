@@ -82,9 +82,13 @@ describe('SnapshotFeedback', () => {
     mockUseMutation.mockImplementation((document, options) => {
       const isSubmit = document?.definitions?.[0]?.name?.value === 'SubmitSnapshotFeedback'
       const trigger = jest.fn(async (vars) => {
-        const result = isSubmit ? await mockSubmit(vars) : await mockDelete(vars)
-        options?.onCompleted?.(result.data)
-        return result
+        try {
+          const result = isSubmit ? await mockSubmit(vars) : await mockDelete(vars)
+          options?.onCompleted?.(result.data)
+          return result
+        } catch (error) {
+          options?.onError?.(error)
+        }
       })
       return [trigger, { loading }]
     })
@@ -507,6 +511,54 @@ describe('SnapshotFeedback', () => {
 
       expect(screen.getByTestId('snapshot-feedback-entry')).toBeInTheDocument()
       expect(screen.queryByText('Really useful digest.')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('mutation error handling', () => {
+    it('shows a danger toast when submit fails with a network error', async () => {
+      setupMocks()
+      mockSubmit.mockRejectedValue(new Error('Network error'))
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      fireEvent.click(screen.getByRole('button', { name: '4 stars' }))
+      fireEvent.click(screen.getByText('Submit Feedback'))
+
+      await waitFor(() => {
+        expect(mockAddToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            description: 'Failed to submit your feedback.',
+            color: 'danger',
+          })
+        )
+      })
+      expect(mockRefetch).not.toHaveBeenCalled()
+    })
+
+    it('shows a danger toast when delete fails with a network error', async () => {
+      const withMyFeedback = {
+        id: 'snapshot-1',
+        averageRating: 5,
+        feedbackCount: 1,
+        myFeedback: feedbackEntry,
+        feedback: [feedbackEntry],
+      }
+      setupMocks({ snapshot: withMyFeedback })
+      mockDelete.mockRejectedValue(new Error('Network error'))
+      render(<SnapshotFeedback snapshotKey={SNAPSHOT_KEY} />)
+
+      fireEvent.click(screen.getByText('Remove'))
+
+      await waitFor(() => {
+        expect(mockAddToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            description: 'Failed to remove your feedback.',
+            color: 'danger',
+          })
+        )
+      })
+      expect(mockRefetch).not.toHaveBeenCalled()
     })
   })
 })

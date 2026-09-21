@@ -136,14 +136,14 @@ class TestSubmitSnapshotFeedback:
     def mutations(self):
         return SnapshotFeedbackMutations()
 
-    @patch("apps.owasp.api.internal.mutations.snapshot_feedback.SnapshotFeedback.objects")
+    @patch("apps.owasp.api.internal.mutations.snapshot_feedback.SnapshotFeedback.submit")
     @patch("apps.owasp.api.internal.mutations.snapshot_feedback.Snapshot.objects.get")
-    def test_submit_creates_feedback(self, mock_get, mock_objects, mutations):
+    def test_submit_creates_feedback(self, mock_get, mock_submit, mutations):
         """Test a first-time submission returns a thank-you message."""
         snapshot = MagicMock()
         mock_get.return_value = snapshot
         feedback = MagicMock()
-        mock_objects.update_or_create.return_value = (feedback, True)
+        mock_submit.return_value = (feedback, True)
         info = mock_info()
 
         result = mutations.submit_snapshot_feedback(
@@ -158,18 +158,19 @@ class TestSubmitSnapshotFeedback:
             key=SNAPSHOT_KEY,
             status=Snapshot.Status.COMPLETED,
         )
-        mock_objects.update_or_create.assert_called_once_with(
+        mock_submit.assert_called_once_with(
             snapshot=snapshot,
             user=info.context.request.user,
-            defaults={"comment": "Nice", "rating": 5},
+            rating=5,
+            comment="Nice",
         )
 
-    @patch("apps.owasp.api.internal.mutations.snapshot_feedback.SnapshotFeedback.objects")
+    @patch("apps.owasp.api.internal.mutations.snapshot_feedback.SnapshotFeedback.submit")
     @patch("apps.owasp.api.internal.mutations.snapshot_feedback.Snapshot.objects.get")
-    def test_submit_updates_existing_feedback(self, mock_get, mock_objects, mutations):
+    def test_submit_updates_existing_feedback(self, mock_get, mock_submit, mutations):
         """Test resubmitting reports an update rather than a creation."""
         mock_get.return_value = MagicMock()
-        mock_objects.update_or_create.return_value = (MagicMock(), False)
+        mock_submit.return_value = (MagicMock(), False)
 
         result = mutations.submit_snapshot_feedback(
             mock_info(),
@@ -193,12 +194,12 @@ class TestSubmitSnapshotFeedback:
         assert result.message == "Snapshot not found."
         assert result.feedback is None
 
-    @patch("apps.owasp.api.internal.mutations.snapshot_feedback.SnapshotFeedback.objects")
+    @patch("apps.owasp.api.internal.mutations.snapshot_feedback.SnapshotFeedback.submit")
     @patch("apps.owasp.api.internal.mutations.snapshot_feedback.Snapshot.objects.get")
-    def test_submit_uses_request_user(self, mock_get, mock_objects, mutations):
+    def test_submit_uses_request_user(self, mock_get, mock_submit, mutations):
         """Test feedback is attributed to the requesting user."""
         mock_get.return_value = MagicMock()
-        mock_objects.update_or_create.return_value = (MagicMock(), True)
+        mock_submit.return_value = (MagicMock(), True)
         info = mock_info()
 
         mutations.submit_snapshot_feedback(
@@ -206,8 +207,7 @@ class TestSubmitSnapshotFeedback:
             _make_validated_input(rating=1),
         )
 
-        assert mock_objects.update_or_create.call_args.kwargs["snapshot"] is not None
-        assert mock_objects.update_or_create.call_args[1]["user"] == info.context.request.user
+        assert mock_submit.call_args.kwargs["user"] == info.context.request.user
 
 
 class TestDeleteSnapshotFeedback:
