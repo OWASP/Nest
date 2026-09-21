@@ -14,16 +14,20 @@ const SNAPSHOT_SUBSCRIPTION_FIELDS = gql`
     includePullRequests
     includeReleases
     includeUsers
-    subscribedProjects {
+    projects {
       id
+      key
+      name
+      repositoryNames
+    }
+    chapters {
+      id
+      key
       name
     }
-    subscribedChapters {
+    committees {
       id
-      name
-    }
-    subscribedCommittees {
-      id
+      key
       name
     }
     createdAt
@@ -35,6 +39,67 @@ export const GET_MY_SNAPSHOT_SUBSCRIPTIONS = gql`
   query GetMySnapshotSubscriptions {
     mySnapshotSubscriptions {
       ...SnapshotSubscriptionFields
+    }
+  }
+  ${SNAPSHOT_SUBSCRIPTION_FIELDS}
+`
+
+export const GET_SUBSCRIPTION_BY_TOKEN = gql`
+  query GetSubscriptionByToken($token: String!, $snapshotKey: String!) {
+    subscriptionByToken(token: $token) {
+      ...SnapshotSubscriptionFields
+      entitySections(snapshotKey: $snapshotKey) {
+        entityKey
+        entityName
+        entityType
+        pullRequests {
+          id
+          author {
+            avatarUrl
+            id
+            login
+            name
+          }
+          createdAt
+          mergedAt
+          organizationName
+          repositoryName
+          state
+          title
+          url
+        }
+        issues {
+          id
+          author {
+            avatarUrl
+            id
+            login
+            name
+          }
+          createdAt
+          isMerged
+          organizationName
+          repositoryName
+          state
+          title
+          url
+        }
+        releases {
+          id
+          name
+          organizationName
+          projectName
+          publishedAt
+          repositoryName
+          tagName
+          author {
+            avatarUrl
+            id
+            login
+            name
+          }
+        }
+      }
     }
   }
   ${SNAPSHOT_SUBSCRIPTION_FIELDS}
@@ -69,19 +134,6 @@ export const UPDATE_SNAPSHOT_SUBSCRIPTION = gql`
   ${SNAPSHOT_SUBSCRIPTION_FIELDS}
 `
 
-export const CANCEL_SNAPSHOT_SUBSCRIPTION = gql`
-  mutation CancelSnapshotSubscription($subscriptionId: Int!) {
-    cancelSnapshotSubscription(subscriptionId: $subscriptionId) {
-      ok
-      message
-      subscription {
-        id
-        isActive
-      }
-    }
-  }
-`
-
 export const DELETE_SNAPSHOT_SUBSCRIPTION = gql`
   mutation DeleteSnapshotSubscription($subscriptionId: Int!) {
     deleteSnapshotSubscription(subscriptionId: $subscriptionId) {
@@ -91,15 +143,19 @@ export const DELETE_SNAPSHOT_SUBSCRIPTION = gql`
   }
 `
 
-export const REACTIVATE_SNAPSHOT_SUBSCRIPTION = gql`
-  mutation ReactivateSnapshotSubscription($subscriptionId: Int!) {
-    reactivateSnapshotSubscription(subscriptionId: $subscriptionId) {
+export const UNSUBSCRIBE_BY_TOKEN = gql`
+  mutation UnsubscribeByToken($inputData: UnsubscribeTokenInput!) {
+    unsubscribeByToken(inputData: $inputData) {
       ok
       message
-      subscription {
-        id
-        isActive
-      }
+    }
+  }
+`
+
+export const GET_SUBSCRIPTION_NAME_BY_TOKEN = gql`
+  query GetSubscriptionNameByToken($token: String!) {
+    subscriptionByToken(token: $token) {
+      name
     }
   }
 `

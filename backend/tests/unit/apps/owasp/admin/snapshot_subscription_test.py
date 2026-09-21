@@ -43,9 +43,9 @@ class TestSnapshotSubscriptionAdmin:
         assert admin_instance.raw_id_fields == ("user",)
         assert admin_instance.readonly_fields == ("unsubscribe_token", "created_at", "updated_at")
         assert admin_instance.autocomplete_fields == (
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "projects",
+            "chapters",
+            "committees",
         )
         assert len(admin_instance.fieldsets) == 4
 
@@ -68,9 +68,9 @@ class TestSnapshotSubscriptionAdmin:
         entity_fieldset = admin_instance.fieldsets[2]
         assert entity_fieldset[0] == "Subscribed Entities"
         assert entity_fieldset[1]["fields"] == (
-            "subscribed_projects",
-            "subscribed_chapters",
-            "subscribed_committees",
+            "projects",
+            "chapters",
+            "committees",
         )
 
         system_fieldset = admin_instance.fieldsets[3]
@@ -99,9 +99,9 @@ class TestSnapshotSubscriptionAdminForm:
             "user": MagicMock(),
             "frequency": "weekly",
             "include_chapters": True,
-            "subscribed_projects": [],
-            "subscribed_chapters": [],
-            "subscribed_committees": [],
+            "projects": [],
+            "chapters": [],
+            "committees": [],
         }
 
         mock_check_duplicate_setup.return_value = False
@@ -118,9 +118,9 @@ class TestSnapshotSubscriptionAdminForm:
         form.cleaned_data = {
             "user": MagicMock(),
             "frequency": "weekly",
-            "subscribed_projects": [MagicMock(pk=1)],
-            "subscribed_chapters": [],
-            "subscribed_committees": [],
+            "projects": [MagicMock(pk=1)],
+            "chapters": [],
+            "committees": [],
         }
 
         mock_check_duplicate_setup.return_value = True
@@ -145,9 +145,9 @@ class TestSnapshotSubscriptionAdminForm:
             "include_pull_requests": False,
             "include_releases": False,
             "include_users": False,
-            "subscribed_projects": None,
-            "subscribed_chapters": None,
-            "subscribed_committees": None,
+            "projects": None,
+            "chapters": None,
+            "committees": None,
         }
         mock_check_duplicate_setup.return_value = False
 
@@ -164,9 +164,9 @@ class TestSnapshotSubscriptionAdminForm:
             "user": MagicMock(),
             "frequency": "weekly",
             "include_chapters": True,
-            "subscribed_projects": [],
-            "subscribed_chapters": [],
-            "subscribed_committees": [],
+            "projects": [],
+            "chapters": [],
+            "committees": [],
         }
         mock_check_duplicate_setup.return_value = False
 
@@ -183,9 +183,9 @@ class TestSnapshotSubscriptionAdminForm:
             "user": MagicMock(),
             "frequency": "weekly",
             "include_chapters": True,
-            "subscribed_projects": [],
-            "subscribed_chapters": [],
-            "subscribed_committees": [],
+            "projects": [],
+            "chapters": [],
+            "committees": [],
         }
         mock_check_duplicate_setup.return_value = False
 
