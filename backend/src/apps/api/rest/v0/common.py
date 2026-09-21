@@ -12,7 +12,7 @@ from apps.owasp.models.entity_member import EntityMember
 
 
 def normalize_datetime(value: datetime | None) -> datetime | None:
-    """Normalize aware datetimes to UTC so PostgreSQL accepts the offset.
+    """Normalize aware datetimes to UTC.
 
     Args:
         value (datetime, optional): The datetime to normalize.
