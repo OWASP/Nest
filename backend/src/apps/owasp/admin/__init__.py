@@ -15,6 +15,7 @@ from .certificate import CertificateAdmin
 from .chapter import ChapterAdmin
 from .committee import CommitteeAdmin
 from .contribution_score import ContributionScoreAdmin
+from .email_log import EmailLogAdmin
 from .entity_channel import EntityChannelAdmin
 from .entity_member import EntityMemberAdmin
 from .event import EventAdmin

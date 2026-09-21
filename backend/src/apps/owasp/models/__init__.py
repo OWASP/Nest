@@ -12,6 +12,7 @@ from .crp.contribution_score import ContributionScore
 from .crp.leaderboard_snapshot import LeaderboardSnapshot
 from .crp.recognition_enums import EventTypeChoices, TierChoices
 from .crp.scoring_weight import ScoringWeight
+from .email_log import EmailLog
 from .entity_channel import EntityChannel
 from .entity_member import EntityMember
 from .event import Event

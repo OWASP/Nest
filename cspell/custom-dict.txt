@@ -190,6 +190,7 @@ millify
 misconfig
 mkv
 mpim
+mso
 navlink
 nestbot
 ngx
@@ -262,6 +263,7 @@ unhover
 unrs
 usefixtures
 vcodec
+vml
 webgoat
 winsrdf
 wrk
