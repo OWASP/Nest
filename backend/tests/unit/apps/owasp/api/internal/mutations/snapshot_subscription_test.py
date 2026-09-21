@@ -442,6 +442,8 @@ class TestUnsubscribeByToken:
         result = mutations.unsubscribe_by_token(input_data=input_data)
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "token"
 
     def test_whitespace_only_token(self, mutations):
         """Test unsubscribe fails with whitespace-only token via Pydantic validation."""
@@ -449,6 +451,8 @@ class TestUnsubscribeByToken:
         result = mutations.unsubscribe_by_token(input_data=input_data)
         assert not result.ok
         assert result.code == "VALIDATION_ERROR"
+        assert result.field_errors is not None
+        assert result.field_errors[0].field == "token"
 
 
 class TestPydanticValidation:
