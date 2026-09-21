@@ -218,6 +218,15 @@ describe('<PulseFilters />', () => {
     })
     expect(defaultProps.setShowProjectSuggestions).toHaveBeenCalledWith(false)
 
+    jest.clearAllMocks()
+    fireEvent.blur(projInput)
+    fireEvent.focus(projInput)
+    act(() => {
+      jest.advanceTimersByTime(250)
+    })
+    expect(defaultProps.setShowProjectSuggestions).toHaveBeenCalledWith(true)
+    expect(defaultProps.setShowProjectSuggestions).not.toHaveBeenCalledWith(false)
+
     const chapInput = screen.getByRole('textbox', { name: 'Filter by chapter' })
     fireEvent.focus(chapInput)
     expect(defaultProps.setShowChapterSuggestions).toHaveBeenCalledWith(true)
@@ -231,6 +240,15 @@ describe('<PulseFilters />', () => {
       jest.advanceTimersByTime(250)
     })
     expect(defaultProps.setShowChapterSuggestions).toHaveBeenCalledWith(false)
+
+    jest.clearAllMocks()
+    fireEvent.blur(chapInput)
+    fireEvent.focus(chapInput)
+    act(() => {
+      jest.advanceTimersByTime(250)
+    })
+    expect(defaultProps.setShowChapterSuggestions).toHaveBeenCalledWith(true)
+    expect(defaultProps.setShowChapterSuggestions).not.toHaveBeenCalledWith(false)
 
     rerender(
       <PulseFilters

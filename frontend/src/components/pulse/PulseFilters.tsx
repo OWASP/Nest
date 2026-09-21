@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@heroui/button'
-import { type ReactNode } from 'react'
+import { type ReactNode, useRef } from 'react'
 import { FaFolder, FaGlobe, FaMagnifyingGlass, FaXmark } from 'react-icons/fa6'
 import type { PulseFiltersProps } from 'types/pulse'
 import { sortOptionsPulse } from 'utils/sortingOptions'
@@ -68,6 +68,9 @@ export default function PulseFilters({
   showProjectSuggestions,
   timeRange,
 }: Readonly<PulseFiltersProps>) {
+  const projectBlurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const chapterBlurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   let projectSuggestionsContent: ReactNode
 
   if (isSearchingProjects) {
@@ -163,8 +166,13 @@ export default function PulseFilters({
             type="text"
             placeholder="All Projects"
             value={projectSearchInput}
-            onFocus={() => setShowProjectSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowProjectSuggestions(false), 200)}
+            onFocus={() => {
+              clearTimeout(projectBlurTimer.current ?? undefined)
+              setShowProjectSuggestions(true)
+            }}
+            onBlur={() => {
+              projectBlurTimer.current = setTimeout(() => setShowProjectSuggestions(false), 200)
+            }}
             onChange={(e) => {
               setProjectSearchInput(e.target.value)
               setShowProjectSuggestions(true)
@@ -188,8 +196,13 @@ export default function PulseFilters({
             type="text"
             placeholder="All Chapters"
             value={chapterSearchInput}
-            onFocus={() => setShowChapterSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowChapterSuggestions(false), 200)}
+            onFocus={() => {
+              clearTimeout(chapterBlurTimer.current ?? undefined)
+              setShowChapterSuggestions(true)
+            }}
+            onBlur={() => {
+              chapterBlurTimer.current = setTimeout(() => setShowChapterSuggestions(false), 200)
+            }}
             onChange={(e) => {
               setChapterSearchInput(e.target.value)
               setShowChapterSuggestions(true)
