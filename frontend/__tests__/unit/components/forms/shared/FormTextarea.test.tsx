@@ -55,4 +55,30 @@ describe('FormTextarea', () => {
     fireEvent.change(textarea, { target: { value: 'New Value' } })
     expect(handleChange).toHaveBeenCalledTimes(1)
   })
+
+  it('is enabled and unbounded by default', () => {
+    render(<FormTextarea {...defaultProps} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toBeEnabled()
+    expect(textarea).not.toHaveAttribute('maxlength')
+  })
+
+  it('renders with disabled=true', () => {
+    render(<FormTextarea {...defaultProps} disabled={true} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toBeDisabled()
+    expect(textarea).toHaveClass('disabled:cursor-not-allowed')
+  })
+
+  it('does not call onChange when disabled', () => {
+    const handleChange = jest.fn()
+    render(<FormTextarea {...defaultProps} disabled={true} onChange={handleChange} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toBeDisabled()
+  })
+
+  it('renders with maxLength', () => {
+    render(<FormTextarea {...defaultProps} maxLength={100} />)
+    expect(screen.getByRole('textbox')).toHaveAttribute('maxlength', '100')
+  })
 })

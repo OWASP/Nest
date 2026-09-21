@@ -36,6 +36,11 @@ jest.mock('@/components/MarkdownWrapper', () => {
   ))
 })
 
+jest.mock('@/components/SnapshotFeedback', () => ({
+  __esModule: true,
+  default: () => <div data-testid="snapshot-feedback" />,
+}))
+
 const findButtonInSection = (buttonText: string, sectionTitle: string) => {
   const heading = screen.getByText(sectionTitle)
   let container: Element | null = null

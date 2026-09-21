@@ -2,6 +2,8 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Avg
+from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH, IssueNode
@@ -12,9 +14,11 @@ from apps.owasp.api.internal.nodes.chapter import ChapterNode
 from apps.owasp.api.internal.nodes.event import EventNode
 from apps.owasp.api.internal.nodes.post import PostNode
 from apps.owasp.api.internal.nodes.project import ProjectNode
+from apps.owasp.api.internal.nodes.snapshot_feedback import SnapshotFeedbackNode
 from apps.owasp.models.snapshot import Snapshot
 
 MAX_LIMIT = 1000
+RATING_PRECISION = 2
 
 
 @strawberry_django.type(
@@ -43,6 +47,33 @@ class SnapshotNode(strawberry.relay.Node):
     def key(self, root: Snapshot) -> str:
         """Resolve key."""
         return root.key
+
+    @strawberry_django.field
+    def average_rating(self, root: Snapshot) -> float:
+        """Resolve the average community rating, or 0 when there is no feedback yet."""
+        average = root.feedback.aggregate(average=Avg("rating"))["average"]
+        return round(average, RATING_PRECISION) if average is not None else 0.0
+
+    @strawberry_django.field
+    def feedback_count(self, root: Snapshot) -> int:
+        """Resolve the number of feedback entries."""
+        return root.feedback.count()
+
+    @strawberry_django.field(prefetch_related=["feedback"])
+    def feedback(
+        self, root: Snapshot, limit: int = 10, offset: int = 0
+    ) -> list[SnapshotFeedbackNode]:
+        """Resolve feedback entries, most recent first."""
+        queryset = root.feedback.select_related("user__github_user").order_by("-created_at")
+        return SnapshotNode._slice_related(queryset, limit, offset)
+
+    @strawberry_django.field
+    def my_feedback(self, root: Snapshot, info: Info) -> SnapshotFeedbackNode | None:
+        """Resolve the current user's own feedback, if any."""
+        user = info.context.request.user
+        if not user.is_authenticated:
+            return None
+        return root.feedback.filter(user=user).first()
 
     @strawberry_django.field(prefetch_related=["events"])
     def events(self, root: Snapshot, limit: int = 100, offset: int = 0) -> list[EventNode]:

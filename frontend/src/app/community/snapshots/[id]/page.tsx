@@ -46,6 +46,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import ShareButtons from 'components/ShareButtons'
 import ShowMoreButton from 'components/ShowMoreButton'
 import SnapshotEntitySection from 'components/SnapshotEntitySection'
+import SnapshotFeedback from 'components/SnapshotFeedback'
 import { ReleasesSection } from 'components/SnapshotReleaseSection'
 
 const PR_LIMIT = 6
@@ -536,6 +537,7 @@ const SnapshotDetailsPage: React.FC = () => {
           })}
         </div>
       )}
+      <SnapshotFeedback snapshotKey={snapshotKey} />
     </div>
   )
 }

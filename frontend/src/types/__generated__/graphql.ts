@@ -439,12 +439,14 @@ export type Mutation = {
   createProgram: ProgramNode;
   createSnapshotSubscription: SnapshotSubscriptionResult;
   deleteModule: Scalars['String']['output'];
+  deleteSnapshotFeedback: SnapshotFeedbackResult;
   deleteSnapshotSubscription: SnapshotSubscriptionResult;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
   reorderModules: Array<ModuleNode>;
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
+  submitSnapshotFeedback: SnapshotFeedbackResult;
   unassignIssueFromUser: ModuleNode;
   unsubscribeByToken: SnapshotSubscriptionResult;
   updateModule: ModuleNode;
@@ -496,6 +498,11 @@ export type MutationDeleteModuleArgs = {
 };
 
 
+export type MutationDeleteSnapshotFeedbackArgs = {
+  snapshotKey: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteSnapshotSubscriptionArgs = {
   subscriptionId: Scalars['Int']['input'];
 };
@@ -521,6 +528,11 @@ export type MutationSetTaskDeadlineArgs = {
   issueNumber: Scalars['Int']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
+};
+
+
+export type MutationSubmitSnapshotFeedbackArgs = {
+  inputData: SubmitSnapshotFeedbackInput;
 };
 
 
@@ -1166,16 +1178,41 @@ export type RevokeApiKeyResult = {
   ok: Scalars['Boolean']['output'];
 };
 
+export type SnapshotFeedbackNode = Node & {
+  __typename?: 'SnapshotFeedbackNode';
+  avatarUrl: Scalars['String']['output'];
+  comment: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  login: Scalars['String']['output'];
+  rating: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  username: Scalars['String']['output'];
+};
+
+export type SnapshotFeedbackResult = {
+  __typename?: 'SnapshotFeedbackResult';
+  feedback?: Maybe<SnapshotFeedbackNode>;
+  fieldErrors?: Maybe<Array<FieldError>>;
+  message: Scalars['String']['output'];
+  ok: Scalars['Boolean']['output'];
+};
+
 export type SnapshotNode = Node & {
   __typename?: 'SnapshotNode';
+  averageRating: Scalars['Float']['output'];
   chapters: Array<ChapterNode>;
   createdAt: Scalars['DateTime']['output'];
   endAt: Scalars['DateTime']['output'];
   events: Array<EventNode>;
+  feedback: Array<SnapshotFeedbackNode>;
+  feedbackCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   issues: Array<IssueNode>;
   key: Scalars['String']['output'];
+  myFeedback?: Maybe<SnapshotFeedbackNode>;
   posts: Array<PostNode>;
   projects: Array<ProjectNode>;
   pullRequests: Array<PullRequestNode>;
@@ -1187,6 +1224,12 @@ export type SnapshotNode = Node & {
 
 
 export type SnapshotNodeEventsArgs = {
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
+
+export type SnapshotNodeFeedbackArgs = {
   limit?: Scalars['Int']['input'];
   offset?: Scalars['Int']['input'];
 };
@@ -1271,6 +1314,12 @@ export type StatsNode = {
   contributorsStats: Scalars['Int']['output'];
   countriesStats: Scalars['Int']['output'];
   slackWorkspaceStats: Scalars['Int']['output'];
+};
+
+export type SubmitSnapshotFeedbackInput = {
+  comment?: Scalars['String']['input'];
+  rating: Scalars['Int']['input'];
+  snapshotKey: Scalars['String']['input'];
 };
 
 export type SubscribedEntityNode = {
