@@ -2,23 +2,15 @@
 
 import strawberry
 import strawberry_django
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Prefetch, Q
 
 from apps.common.utils import normalize_limit
-from apps.github.models.issue import Issue
-from apps.github.models.pull_request import PullRequest
-from apps.github.models.release import Release
 from apps.owasp.api.internal.nodes.activity_event import (
     ActivityEventNode,
     ActivityEventStatsNode,
     PaginatedActivityEvents,
 )
 from apps.owasp.models.activity_event import ActivityEvent
-from apps.owasp.models.chapter import Chapter
-from apps.owasp.models.project import Project
 
-MAX_LIMIT = 1000
 PAGE_SIZE = 20
 
 
@@ -41,76 +33,24 @@ class ActivityEventQuery:
         limit: int = PAGE_SIZE,
     ) -> PaginatedActivityEvents:
         """Resolve activity events with optional filtering and pagination."""
-        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
-            normalized_limit = PAGE_SIZE
-
+        normalized_limit = normalize_limit(limit, ActivityEvent.MAX_LIMIT) or PAGE_SIZE
         page = max(1, page)
 
-        if order not in {"asc", "desc"}:
-            return PaginatedActivityEvents(current_page=1, events=[], total_pages=1, total_count=0)
+        if order not in ActivityEvent.VALID_ORDER_VALUES:
+            order = "desc"
 
         order_clauses = ("occurred_at", "pk") if order == "asc" else ("-occurred_at", "-pk")
 
-        queryset = (
-            ActivityEvent.objects.select_related(
-                "github_user",
-                "github_repository",
-            )
-            .prefetch_related(
-                Prefetch("source_object", queryset=Release.objects.select_related("repository")),
-            )
-            .order_by(*order_clauses)
+        queryset = ActivityEvent.base_queryset().order_by(*order_clauses)
+        queryset = ActivityEvent.filter_queryset(
+            queryset,
+            activity_type=activity_type.strip() if activity_type else None,
+            chapter_key=chapter_key.strip() if chapter_key else None,
+            github_user=github_user.strip() if github_user else None,
+            include_bots=include_bots,
+            project_key=project_key.strip() if project_key else None,
+            time_range=time_range.strip() if time_range else None,
         )
-
-        if not include_bots:
-            queryset = ActivityEvent.exclude_bots(queryset)
-
-        if activity_type:
-            queryset = queryset.filter(activity_type=activity_type)
-
-        if github_user and (cleaned := github_user.strip()):
-            issue_ct = ContentType.objects.get_for_model(Issue)
-            pr_ct = ContentType.objects.get_for_model(PullRequest)
-            release_ct = ContentType.objects.get_for_model(Release)
-
-            issue_ids = Issue.objects.filter(title__icontains=cleaned).values_list("pk", flat=True)
-            pr_ids = PullRequest.objects.filter(title__icontains=cleaned).values_list(
-                "pk", flat=True
-            )
-            release_ids = Release.objects.filter(
-                Q(name__icontains=cleaned) | Q(tag_name__icontains=cleaned)
-            ).values_list("pk", flat=True)
-
-            queryset = queryset.filter(
-                Q(github_user__login__icontains=cleaned)
-                | Q(github_user__name__icontains=cleaned)
-                | Q(github_repository__name__icontains=cleaned)
-                | Q(github_repository__key__icontains=cleaned)
-                | Q(content_type=issue_ct, object_id__in=issue_ids)
-                | Q(content_type=pr_ct, object_id__in=pr_ids)
-                | Q(content_type=release_ct, object_id__in=release_ids)
-            )
-
-        if project_key and (cleaned := project_key.strip()):
-            project_repo_ids = Project.objects.filter(
-                Q(name__iexact=cleaned) | Q(key__iexact=cleaned)
-            ).values_list("repositories", flat=True)
-            queryset = queryset.filter(
-                Q(github_repository__in=project_repo_ids)
-                | Q(github_repository__name__iexact=cleaned)
-                | Q(github_repository__key__iexact=cleaned)
-            )
-
-        if chapter_key and (cleaned := chapter_key.strip()):
-            chapter_repo_ids = (
-                Chapter.objects.filter(name__iexact=cleaned)
-                .exclude(owasp_repository__isnull=True)
-                .values_list("owasp_repository_id", flat=True)
-            )
-            queryset = queryset.filter(github_repository__in=chapter_repo_ids)
-
-        if time_range and (cleaned := time_range.strip()):
-            queryset = ActivityEvent.filter_time_range(queryset, cleaned)
 
         total_count = queryset.count()
         total_pages = max(1, (total_count + normalized_limit - 1) // normalized_limit)
@@ -127,20 +67,10 @@ class ActivityEventQuery:
     @strawberry_django.field
     def recent_activity_events(self, limit: int = 10) -> list[ActivityEventNode]:
         """Resolve recent activity events."""
-        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+        if (normalized_limit := normalize_limit(limit, ActivityEvent.MAX_LIMIT)) is None:
             return []
 
-        queryset = (
-            ActivityEvent.objects.select_related(
-                "github_user",
-                "github_repository",
-            )
-            .prefetch_related(
-                Prefetch("source_object", queryset=Release.objects.select_related("repository")),
-            )
-            .order_by("-occurred_at", "-pk")
-        )
-
+        queryset = ActivityEvent.base_queryset().order_by("-occurred_at", "-pk")
         return list(ActivityEvent.exclude_bots(queryset)[:normalized_limit])
 
     @strawberry_django.field
@@ -150,15 +80,15 @@ class ActivityEventQuery:
         total_activities = qs.count()
         pull_requests = qs.filter(
             activity_type__in=[
-                ActivityEvent.ActivityType.PR_OPENED,
-                ActivityEvent.ActivityType.PR_MERGED,
                 ActivityEvent.ActivityType.PR_CLOSED,
+                ActivityEvent.ActivityType.PR_MERGED,
+                ActivityEvent.ActivityType.PR_OPENED,
             ]
         ).count()
         issues = qs.filter(
             activity_type__in=[
-                ActivityEvent.ActivityType.ISSUE_OPENED,
                 ActivityEvent.ActivityType.ISSUE_CLOSED,
+                ActivityEvent.ActivityType.ISSUE_OPENED,
             ]
         ).count()
         contributors = (

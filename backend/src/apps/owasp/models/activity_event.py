@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -91,6 +91,8 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
         "Release": "build_for_release",
     }
 
+    MAX_LIMIT: int = 1000
+
     TIME_RANGES: dict[str, timedelta] = {
         "24h": timedelta(hours=24),
         "7d": timedelta(days=7),
@@ -100,6 +102,8 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
         "1y": timedelta(days=365),
         "2y": timedelta(days=730),
     }
+
+    VALID_ORDER_VALUES: frozenset = frozenset({"asc", "desc"})
 
     def __str__(self) -> str:
         """Return human-readable representation."""
@@ -123,11 +127,96 @@ class ActivityEvent(BulkSaveModel, TimestampedModel):
         return getattr(self.source_object, "url", "") if self.source_object else ""
 
     @classmethod
+    def base_queryset(cls):
+        """Return the standard queryset with select_related and prefetch_related applied."""
+        from apps.github.models.release import Release  # noqa: PLC0415
+
+        return cls.objects.select_related(
+            "github_repository",
+            "github_user",
+        ).prefetch_related(
+            Prefetch("source_object", queryset=Release.objects.select_related("repository")),
+        )
+
+    @classmethod
     def exclude_bots(cls, queryset):
         """Exclude bot accounts from the given queryset."""
         return queryset.exclude(
             Q(github_user__is_bot=True) | Q(github_user__login__in=User.get_non_indexable_logins())
         )
+
+    @classmethod
+    def filter_queryset(
+        cls,
+        queryset,
+        *,
+        activity_type: str | None = None,
+        chapter_key: str | None = None,
+        github_user: str | None = None,
+        include_bots: bool = False,
+        project_key: str | None = None,
+        time_range: str | None = None,
+    ):
+        """Apply validated filter parameters to the queryset and return it."""
+        from apps.github.models.issue import Issue  # noqa: PLC0415
+        from apps.github.models.pull_request import PullRequest  # noqa: PLC0415
+        from apps.github.models.release import Release  # noqa: PLC0415
+        from apps.owasp.models.chapter import Chapter  # noqa: PLC0415
+        from apps.owasp.models.project import Project  # noqa: PLC0415
+
+        if not include_bots:
+            queryset = cls.exclude_bots(queryset)
+
+        if activity_type:
+            queryset = queryset.filter(activity_type=activity_type)
+
+        if github_user:
+            issue_ct = ContentType.objects.get_for_model(Issue)
+            pr_ct = ContentType.objects.get_for_model(PullRequest)
+            release_ct = ContentType.objects.get_for_model(Release)
+
+            issue_ids = Issue.objects.filter(title__icontains=github_user).values_list(
+                "pk", flat=True
+            )
+            pr_ids = PullRequest.objects.filter(title__icontains=github_user).values_list(
+                "pk", flat=True
+            )
+            release_ids = Release.objects.filter(
+                Q(name__icontains=github_user) | Q(tag_name__icontains=github_user)
+            ).values_list("pk", flat=True)
+
+            queryset = queryset.filter(
+                Q(github_user__login__icontains=github_user)
+                | Q(github_user__name__icontains=github_user)
+                | Q(github_repository__name__icontains=github_user)
+                | Q(github_repository__key__icontains=github_user)
+                | Q(content_type=issue_ct, object_id__in=issue_ids)
+                | Q(content_type=pr_ct, object_id__in=pr_ids)
+                | Q(content_type=release_ct, object_id__in=release_ids)
+            )
+
+        if project_key:
+            project_repo_ids = Project.objects.filter(
+                Q(name__iexact=project_key) | Q(key__iexact=project_key)
+            ).values_list("repositories", flat=True)
+            queryset = queryset.filter(
+                Q(github_repository__in=project_repo_ids)
+                | Q(github_repository__name__iexact=project_key)
+                | Q(github_repository__key__iexact=project_key)
+            )
+
+        if chapter_key:
+            chapter_repo_ids = (
+                Chapter.objects.filter(name__iexact=chapter_key)
+                .exclude(owasp_repository__isnull=True)
+                .values_list("owasp_repository_id", flat=True)
+            )
+            queryset = queryset.filter(github_repository__in=chapter_repo_ids)
+
+        if time_range:
+            queryset = cls.filter_time_range(queryset, time_range)
+
+        return queryset
 
     @classmethod
     def filter_time_range(cls, queryset, time_range: str):
