@@ -15,6 +15,7 @@ jest.mock('@apollo/client/react', () => ({
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({ push: jest.fn() })),
   useParams: jest.fn(() => ({ id: '2024-12' })),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
 jest.mock('@/components/MarkdownWrapper', () => {
@@ -22,6 +23,11 @@ jest.mock('@/components/MarkdownWrapper', () => {
     <div className={`md-wrapper ${className}`} dangerouslySetInnerHTML={{ __html: content }} />
   ))
 })
+
+jest.mock('@/components/SnapshotFeedback', () => ({
+  __esModule: true,
+  default: () => <div data-testid="snapshot-feedback" />,
+}))
 
 describe.each([
   { theme: 'light', name: 'light' },

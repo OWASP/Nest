@@ -27,6 +27,8 @@ locals {
     "/idx/*",
     "/integrations",
     "/integrations/*",
+    "/owasp",
+    "/owasp/*",
     "/sitemap",
     "/sitemap.xml",
     "/status",

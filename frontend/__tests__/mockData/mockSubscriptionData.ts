@@ -7,9 +7,9 @@ const createBaseSubscription = () => ({
   includePullRequests: true,
   includeReleases: true,
   includeUsers: true,
-  subscribedProjects: [] as { id: number; name: string }[],
-  subscribedChapters: [] as { id: number; name: string }[],
-  subscribedCommittees: [] as { id: number; name: string }[],
+  projects: [] as { id: number; name: string }[],
+  chapters: [] as { id: number; name: string }[],
+  committees: [] as { id: number; name: string }[],
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-06-01T00:00:00Z',
 })
@@ -22,8 +22,8 @@ export const mockActiveSubscriptions = {
       name: 'My Weekly Digest',
       frequency: 'weekly',
       isActive: true,
-      subscribedProjects: [{ id: 1, name: 'OWASP Nest' }],
-      subscribedChapters: [{ id: 2, name: 'OWASP Aarhus' }],
+      projects: [{ id: 1, name: 'OWASP Nest' }],
+      chapters: [{ id: 2, name: 'OWASP Aarhus' }],
     },
   ],
 }
@@ -36,7 +36,7 @@ export const mockMultipleSubscriptions = {
       name: 'My Weekly Digest',
       frequency: 'weekly',
       isActive: true,
-      subscribedProjects: [{ id: 1, name: 'OWASP Nest' }],
+      projects: [{ id: 1, name: 'OWASP Nest' }],
     },
     {
       ...createBaseSubscription(),

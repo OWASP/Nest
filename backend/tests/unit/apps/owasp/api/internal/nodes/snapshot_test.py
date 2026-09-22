@@ -18,12 +18,16 @@ class TestSnapshotNode(GraphQLNodeBaseTest):
         """Test expected fields are present."""
         field_names = {field.name for field in SnapshotNode.__strawberry_definition__.fields}
         expected_field_names = {
+            "average_rating",
             "chapters",
             "created_at",
             "end_at",
             "events",
+            "feedback",
+            "feedback_count",
             "issues",
             "key",
+            "my_feedback",
             "posts",
             "projects",
             "pull_requests",
@@ -83,6 +87,34 @@ class TestSnapshotNodeResolvers:
         prefetch_mock.order_by.assert_called_once_with("-created_at")
         assert result == mock_issues
 
+    def test_issues_resolver_with_repository_names(self):
+        """Test issues resolver filters by repository_names."""
+        resolver = self._get_resolver("issues")
+        mock_snapshot = MagicMock()
+        prefetch_mock = mock_snapshot.issues.prefetch_related.return_value
+        order_mock = prefetch_mock.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = ["filtered_issue"]
+
+        result = resolver(None, mock_snapshot, repository_names=["nest"])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=["nest"])
+        assert result == ["filtered_issue"]
+
+    def test_issues_resolver_with_empty_repository_names(self):
+        """Test issues resolver filters with empty repository_names list."""
+        resolver = self._get_resolver("issues")
+        mock_snapshot = MagicMock()
+        prefetch_mock = mock_snapshot.issues.prefetch_related.return_value
+        order_mock = prefetch_mock.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = []
+
+        result = resolver(None, mock_snapshot, repository_names=[])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=[])
+        assert result == []
+
     def test_posts_resolver(self):
         """Test posts resolver returns ordered posts."""
         resolver = self._get_resolver("posts")
@@ -119,6 +151,32 @@ class TestSnapshotNodeResolvers:
         mock_snapshot.pull_requests.order_by.assert_called_once_with("-created_at")
         assert result == mock_prs
 
+    def test_pull_requests_resolver_with_repository_names(self):
+        """Test pull_requests resolver filters by repository_names."""
+        resolver = self._get_resolver("pull_requests")
+        mock_snapshot = MagicMock()
+        order_mock = mock_snapshot.pull_requests.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = ["filtered_pr"]
+
+        result = resolver(None, mock_snapshot, repository_names=["nest"])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=["nest"])
+        assert result == ["filtered_pr"]
+
+    def test_pull_requests_resolver_with_empty_repository_names(self):
+        """Test pull_requests resolver filters with empty repository_names list."""
+        resolver = self._get_resolver("pull_requests")
+        mock_snapshot = MagicMock()
+        order_mock = mock_snapshot.pull_requests.order_by.return_value
+        filter_mock = order_mock.filter.return_value
+        filter_mock.__getitem__.return_value = []
+
+        result = resolver(None, mock_snapshot, repository_names=[])
+
+        order_mock.filter.assert_called_once_with(repository__name__in=[])
+        assert result == []
+
     def test_releases_resolver(self):
         """Test releases resolver returns ordered releases."""
         resolver = self._get_resolver("releases")
@@ -142,3 +200,90 @@ class TestSnapshotNodeResolvers:
 
         mock_snapshot.users.order_by.assert_called_once_with("-created_at")
         assert result == mock_users
+
+    def test_average_rating_resolver(self):
+        """Test average_rating resolver rounds the aggregated average."""
+        resolver = self._get_resolver("average_rating")
+        mock_snapshot = MagicMock()
+        del mock_snapshot._average_rating
+        mock_snapshot.feedback.aggregate.return_value = {"average": 4.333333}
+
+        assert resolver(None, mock_snapshot) == 4.33
+
+    def test_average_rating_resolver_without_feedback(self):
+        """Test average_rating resolver returns 0 when there is no feedback."""
+        resolver = self._get_resolver("average_rating")
+        mock_snapshot = MagicMock()
+        del mock_snapshot._average_rating
+        mock_snapshot.feedback.aggregate.return_value = {"average": None}
+
+        assert resolver(None, mock_snapshot) == 0.0
+
+    def test_feedback_count_resolver(self):
+        """Test feedback_count resolver returns the number of entries."""
+        resolver = self._get_resolver("feedback_count")
+        mock_snapshot = MagicMock()
+        del mock_snapshot._feedback_count
+        mock_snapshot.feedback.count.return_value = 7
+
+        assert resolver(None, mock_snapshot) == 7
+
+    def test_average_rating_resolver_uses_annotated_value(self):
+        """Test average_rating resolver uses pre-annotated value without querying."""
+        resolver = self._get_resolver("average_rating")
+        mock_snapshot = MagicMock()
+        mock_snapshot._average_rating = 4.25
+
+        result = resolver(None, mock_snapshot)
+
+        assert result == 4.25
+        mock_snapshot.feedback.aggregate.assert_not_called()
+
+    def test_feedback_count_resolver_uses_annotated_value(self):
+        """Test feedback_count resolver uses pre-annotated value without querying."""
+        resolver = self._get_resolver("feedback_count")
+        mock_snapshot = MagicMock()
+        mock_snapshot._feedback_count = 12
+
+        result = resolver(None, mock_snapshot)
+
+        assert result == 12
+        mock_snapshot.feedback.count.assert_not_called()
+
+    def test_feedback_resolver(self):
+        """Test feedback resolver returns entries newest first."""
+        resolver = self._get_resolver("feedback")
+        mock_snapshot = MagicMock()
+        mock_feedback = [MagicMock(), MagicMock()]
+        select_related_mock = mock_snapshot.feedback.select_related.return_value
+        select_related_mock.order_by.return_value.__getitem__.return_value = mock_feedback
+
+        result = resolver(None, mock_snapshot)
+
+        mock_snapshot.feedback.select_related.assert_called_once_with("user__github_user")
+        select_related_mock.order_by.assert_called_once_with("-created_at")
+        assert result == mock_feedback
+
+    def test_my_feedback_resolver(self):
+        """Test my_feedback resolver returns the requesting user's entry."""
+        resolver = self._get_resolver("my_feedback")
+        mock_snapshot = MagicMock()
+        mock_feedback = MagicMock()
+        mock_snapshot.feedback.filter.return_value.first.return_value = mock_feedback
+        info = MagicMock()
+        info.context.request.user.is_authenticated = True
+
+        result = resolver(None, mock_snapshot, info)
+
+        mock_snapshot.feedback.filter.assert_called_once_with(user=info.context.request.user)
+        assert result == mock_feedback
+
+    def test_my_feedback_resolver_anonymous(self):
+        """Test my_feedback resolver returns None for anonymous users."""
+        resolver = self._get_resolver("my_feedback")
+        mock_snapshot = MagicMock()
+        info = MagicMock()
+        info.context.request.user.is_authenticated = False
+
+        assert resolver(None, mock_snapshot, info) is None
+        mock_snapshot.feedback.filter.assert_not_called()

@@ -149,6 +149,58 @@ export const GET_SNAPSHOT_DETAILS = gql`
   ${SNAPSHOT_ISSUE_FIELDS}
 `
 
+export const SNAPSHOT_FEEDBACK_FIELDS = gql`
+  fragment SnapshotFeedbackFields on SnapshotFeedbackNode {
+    id
+    avatarUrl
+    comment
+    createdAt
+    login
+    rating
+    updatedAt
+    username
+  }
+`
+
+export const GET_SNAPSHOT_FEEDBACK = gql`
+  query GetSnapshotFeedback($key: String!, $limit: Int = 10, $offset: Int = 0) {
+    snapshot(key: $key) {
+      id
+      averageRating
+      feedbackCount
+      myFeedback {
+        ...SnapshotFeedbackFields
+      }
+      feedback(limit: $limit, offset: $offset) {
+        ...SnapshotFeedbackFields
+      }
+    }
+  }
+  ${SNAPSHOT_FEEDBACK_FIELDS}
+`
+
+export const SUBMIT_SNAPSHOT_FEEDBACK = gql`
+  mutation SubmitSnapshotFeedback($inputData: SubmitSnapshotFeedbackInput!) {
+    submitSnapshotFeedback(inputData: $inputData) {
+      ok
+      message
+      feedback {
+        ...SnapshotFeedbackFields
+      }
+    }
+  }
+  ${SNAPSHOT_FEEDBACK_FIELDS}
+`
+
+export const DELETE_SNAPSHOT_FEEDBACK = gql`
+  mutation DeleteSnapshotFeedback($snapshotKey: String!) {
+    deleteSnapshotFeedback(snapshotKey: $snapshotKey) {
+      ok
+      message
+    }
+  }
+`
+
 export const GET_SNAPSHOT_DETAILS_METADATA = gql`
   query GetSnapshotDetailsMetadata($key: String!) {
     snapshot(key: $key) {
@@ -182,14 +234,54 @@ export const GET_SNAPSHOT_ISSUES = gql`
   ${SNAPSHOT_ISSUE_FIELDS}
 `
 
+export const GET_SNAPSHOT_ENTITY_PULL_REQUESTS = gql`
+  query GetSnapshotEntityPullRequests(
+    $key: String!
+    $limit: Int = 6
+    $offset: Int = 0
+    $repositoryNames: [String!]
+  ) {
+    snapshot(key: $key) {
+      id
+      pullRequests(limit: $limit, offset: $offset, repositoryNames: $repositoryNames) {
+        ...SnapshotPullRequestFields
+      }
+    }
+  }
+  ${SNAPSHOT_PULL_REQUEST_FIELDS}
+`
+
+export const GET_SNAPSHOT_ENTITY_ISSUES = gql`
+  query GetSnapshotEntityIssues(
+    $key: String!
+    $limit: Int = 6
+    $offset: Int = 0
+    $repositoryNames: [String!]
+  ) {
+    snapshot(key: $key) {
+      id
+      issues(limit: $limit, offset: $offset, repositoryNames: $repositoryNames) {
+        ...SnapshotIssueFields
+      }
+    }
+  }
+  ${SNAPSHOT_ISSUE_FIELDS}
+`
+
 export const GET_COMMUNITY_SNAPSHOTS = gql`
-  query GetCommunitySnapshots {
-    snapshots(limit: 12) {
+  query GetCommunitySnapshots(
+    $limit: Int = 12
+    $offset: Int = 0
+    $startAtGte: String
+    $startAtLte: String
+  ) {
+    snapshots(limit: $limit, offset: $offset, startAtGte: $startAtGte, startAtLte: $startAtLte) {
       id
       key
       title
       startAt
       endAt
     }
+    snapshotsCount(startAtGte: $startAtGte, startAtLte: $startAtLte)
   }
 `

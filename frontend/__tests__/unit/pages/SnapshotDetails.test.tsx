@@ -4,6 +4,7 @@ import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
+import { GET_SUBSCRIPTION_BY_TOKEN } from 'server/queries/subscriptionQueries'
 
 jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
@@ -19,10 +20,13 @@ const mockRouter = {
   push: jest.fn(),
 }
 
+const mockUseSearchParams = jest.fn(() => new URLSearchParams())
+
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ id: '2024-12' }),
+  useSearchParams: () => mockUseSearchParams(),
 }))
 
 const mockError = {
@@ -34,6 +38,11 @@ jest.mock('@/components/MarkdownWrapper', () => {
     <div className={`md-wrapper ${className}`} dangerouslySetInnerHTML={{ __html: content }} />
   ))
 })
+
+jest.mock('@/components/SnapshotFeedback', () => ({
+  __esModule: true,
+  default: () => <div data-testid="snapshot-feedback" />,
+}))
 
 const findButtonInSection = (buttonText: string, sectionTitle: string) => {
   const heading = screen.getByText(sectionTitle)
@@ -56,6 +65,7 @@ const findButtonInSection = (buttonText: string, sectionTitle: string) => {
 
 describe('SnapshotDetailsPage', () => {
   beforeEach(() => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       loading: false,
@@ -966,6 +976,134 @@ describe('SnapshotDetailsPage', () => {
     })
     await waitFor(() => {
       expect(addToast).toHaveBeenCalled()
+    })
+  })
+
+  test('PR Show more paginates locally when data already loaded and hasMorePRs is false', async () => {
+    const mockFetchMorePRs = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          pullRequests: [],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock).mockReturnValue([mockFetchMorePRs])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Requests')).toBeInTheDocument()
+    })
+
+    const prShowMore = findButtonInSection('Show more', 'Pull Requests')
+    expect(prShowMore).toBeDefined()
+    if (prShowMore) fireEvent.click(prShowMore)
+
+    expect(mockFetchMorePRs).toHaveBeenCalledTimes(1)
+
+    const prShowMore2 = await waitFor(() => {
+      const btn = findButtonInSection('Show more', 'Pull Requests')
+      expect(btn).toBeDefined()
+      return btn
+    })
+    if (prShowMore2) fireEvent.click(prShowMore2)
+
+    await waitFor(() => {
+      expect(screen.getByText('PR Seven')).toBeInTheDocument()
+    })
+    expect(mockFetchMorePRs).toHaveBeenCalledTimes(1)
+  })
+
+  test('Issue Show more paginates locally when data already loaded and hasMoreIssues is false', async () => {
+    const mockFetchMoreIssues = jest.fn().mockResolvedValue({
+      data: {
+        snapshot: {
+          issues: [],
+        },
+      },
+    })
+    ;(useLazyQuery as unknown as jest.Mock)
+      .mockReturnValueOnce([jest.fn().mockResolvedValue({ data: {} })])
+      .mockReturnValueOnce([mockFetchMoreIssues])
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues')).toBeInTheDocument()
+    })
+
+    const issueShowMore = findButtonInSection('Show more', 'Issues')
+    expect(issueShowMore).toBeDefined()
+    if (issueShowMore) fireEvent.click(issueShowMore)
+
+    expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
+
+    const issueShowMore2 = await waitFor(() => {
+      const btn = findButtonInSection('Show more', 'Issues')
+      expect(btn).toBeDefined()
+      return btn
+    })
+    if (issueShowMore2) fireEvent.click(issueShowMore2)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issue Seven')).toBeInTheDocument()
+    })
+    expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
+  })
+  test('shows SnapshotFeedback when no subscription token is present', async () => {
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snapshot-feedback')).toBeInTheDocument()
+    })
+  })
+
+  test('hides SnapshotFeedback when a valid subscription token resolves', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=valid-token'))
+    ;(useQuery as unknown as jest.Mock).mockImplementation((document: unknown) => {
+      if (document === GET_SUBSCRIPTION_BY_TOKEN) {
+        return {
+          data: { subscriptionByToken: { includeProjects: true } },
+          loading: false,
+          error: null,
+        }
+      }
+      return {
+        data: mockSnapshotDetailsData,
+        loading: false,
+        error: null,
+      }
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId('snapshot-feedback')).not.toBeInTheDocument()
+  })
+
+  test('shows SnapshotFeedback when subscription token is invalid or expired', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=expired-token'))
+    ;(useQuery as unknown as jest.Mock).mockImplementation((document: unknown) => {
+      if (document === GET_SUBSCRIPTION_BY_TOKEN) {
+        return {
+          data: { subscriptionByToken: null },
+          loading: false,
+          error: null,
+        }
+      }
+      return {
+        data: mockSnapshotDetailsData,
+        loading: false,
+        error: null,
+      }
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snapshot-feedback')).toBeInTheDocument()
     })
   })
 })

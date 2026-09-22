@@ -66,4 +66,10 @@ export const METADATA_CONFIG = {
     pageTitle: 'Settings',
     type: 'website',
   },
+  unsubscribe: {
+    description: 'Unsubscribe from OWASP Nest snapshot digest emails.',
+    keywords: ['OWASP Nest', 'unsubscribe', 'email'],
+    pageTitle: 'Unsubscribe',
+    type: 'website',
+  },
 }

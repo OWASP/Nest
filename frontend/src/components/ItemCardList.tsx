@@ -21,7 +21,7 @@ interface AuthorAvatarProps {
   }
 }
 
-const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
+export const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
   const hasAuthorInfo = author?.name || author?.login
   const hasLogin = author?.login
   const hasAvatarUrl = Boolean(author?.avatarUrl)
