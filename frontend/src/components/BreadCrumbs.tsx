@@ -10,9 +10,10 @@ type BreadCrumbRendererProps = Readonly<{
 
 export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
   return (
-    <div className="mt-16 w-full pt-4">
+    <nav aria-label="breadcrumb" className="mt-16 w-full pt-4">
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
         <Breadcrumbs
+          as="div"
           aria-label="breadcrumb"
           separator={<FaChevronRight className="mx-1 text-xs text-gray-400 dark:text-gray-500" />}
           className="text-gray-800 dark:text-gray-200"
@@ -53,6 +54,6 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
           })}
         </Breadcrumbs>
       </div>
-    </div>
+    </nav>
   )
 }
