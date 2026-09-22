@@ -4,6 +4,7 @@ import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
+import { GET_SUBSCRIPTION_BY_TOKEN } from 'server/queries/subscriptionQueries'
 
 jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
@@ -64,6 +65,7 @@ const findButtonInSection = (buttonText: string, sectionTitle: string) => {
 
 describe('SnapshotDetailsPage', () => {
   beforeEach(() => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       loading: false,
@@ -1049,13 +1051,6 @@ describe('SnapshotDetailsPage', () => {
     expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
   })
   test('shows SnapshotFeedback when no subscription token is present', async () => {
-    mockUseSearchParams.mockReturnValue(new URLSearchParams())
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockSnapshotDetailsData,
-      loading: false,
-      error: null,
-    })
-
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
@@ -1065,17 +1060,20 @@ describe('SnapshotDetailsPage', () => {
 
   test('hides SnapshotFeedback when a valid subscription token resolves', async () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=valid-token'))
-    ;(useQuery as unknown as jest.Mock)
-      .mockReturnValueOnce({
-        data: { subscriptionByToken: { includeProjects: true } },
-        loading: false,
-        error: null,
-      })
-      .mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockImplementation((document: unknown) => {
+      if (document === GET_SUBSCRIPTION_BY_TOKEN) {
+        return {
+          data: { subscriptionByToken: { includeProjects: true } },
+          loading: false,
+          error: null,
+        }
+      }
+      return {
         data: mockSnapshotDetailsData,
         loading: false,
         error: null,
-      })
+      }
+    })
 
     render(<SnapshotDetailsPage />)
 
@@ -1087,17 +1085,20 @@ describe('SnapshotDetailsPage', () => {
 
   test('shows SnapshotFeedback when subscription token is invalid or expired', async () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=expired-token'))
-    ;(useQuery as unknown as jest.Mock)
-      .mockReturnValueOnce({
-        data: { subscriptionByToken: null },
-        loading: false,
-        error: null,
-      })
-      .mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockImplementation((document: unknown) => {
+      if (document === GET_SUBSCRIPTION_BY_TOKEN) {
+        return {
+          data: { subscriptionByToken: null },
+          loading: false,
+          error: null,
+        }
+      }
+      return {
         data: mockSnapshotDetailsData,
         loading: false,
         error: null,
-      })
+      }
+    })
 
     render(<SnapshotDetailsPage />)
 
