@@ -44,7 +44,7 @@ class TestOwaspScraper:
         return response
 
     def test_initialization_parser_error(self, mock_session):
-        """Test initialization with parser error."""
+        """Test initialization with parser error sets is_request_failed."""
         response = Mock()
         response.status_code = HTTPStatus.OK
         response.content = b"<completely invalid>> html"
@@ -55,6 +55,27 @@ class TestOwaspScraper:
             scraper = OwaspScraper("https://test.org")
 
         assert scraper.page_tree is None
+        assert scraper.is_request_failed is True
+
+    def test_initialization_server_error(self, mock_session):
+        """Test initialization with server error sets is_request_failed."""
+        response = Mock()
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        mock_session.get.return_value = response
+
+        scraper = OwaspScraper("https://test.org")
+
+        assert scraper.page_tree is None
+        assert scraper.is_request_failed is True
+
+    def test_initialization_success_sets_no_failed_flag(self, mock_session, mock_response):
+        """Test that a successful fetch leaves is_request_failed False."""
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+
+        assert scraper.page_tree is not None
+        assert scraper.is_request_failed is False
 
     def test_verify_url_redirect_chain(self, mock_session, mock_response):
         """Test URL verification with redirect chain."""
@@ -107,6 +128,7 @@ class TestOwaspScraper:
         scraper = OwaspScraper("https://test.org")
 
         assert scraper.page_tree is None
+        assert scraper.is_request_failed is False
 
     def test_verify_url_invalid_url(self, mock_session):
         response = Mock()
@@ -163,6 +185,7 @@ class TestOwaspScraper:
         scraper = OwaspScraper("https://test.org")
 
         assert scraper.page_tree is None
+        assert scraper.is_request_failed is True
 
     def test_get_urls_no_domain(self, mock_session, sample_html):
         """Test get_urls without providing a domain."""
@@ -212,6 +235,7 @@ class TestOwaspScraper:
         scraper = OwaspScraper("https://test.org")
 
         assert scraper.page_tree is None
+        assert scraper.is_request_failed is True
 
     def test_get_audience_with_none_page_tree(self, mock_session):
         """Test get_audience returns empty list when page_tree is None."""
