@@ -78,7 +78,7 @@ describe.each([
   it('should not have any accessibility violations', async () => {
     const { container } = render(<ContributionHeatmap {...defaultProps} />)
 
-    await screen.findByTestId('mock-heatmap-chart')
+    await screen.findAllByTestId('mock-heatmap-chart')
 
     const results = await axe(container)
 

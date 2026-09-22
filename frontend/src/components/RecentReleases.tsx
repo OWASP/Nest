@@ -27,7 +27,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
     >
       {data && data.length > 0 ? (
         <div
-          className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+          className={`grid gap-4 ${showSingleColumn ? 'grid-cols-1' : 'sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
         >
           {data.map((item) => (
             <Release
