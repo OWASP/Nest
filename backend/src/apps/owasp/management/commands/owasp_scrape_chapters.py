@@ -36,7 +36,8 @@ class Command(BaseCommand):
 
             scraper = OwaspScraper(chapter.owasp_url)
             if scraper.page_tree is None:
-                chapter.deactivate()
+                if not scraper.is_request_failed:
+                    chapter.deactivate()
                 continue
 
             chapter.leaders_raw = chapter.get_leaders()
