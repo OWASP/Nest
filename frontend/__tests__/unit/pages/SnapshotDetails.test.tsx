@@ -1,7 +1,7 @@
 import { useQuery, useLazyQuery, useApolloClient } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
-import { fireEvent, screen, waitFor, act } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
 
@@ -19,11 +19,13 @@ const mockRouter = {
   push: jest.fn(),
 }
 
+const mockUseSearchParams = jest.fn(() => new URLSearchParams())
+
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ id: '2024-12' }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockUseSearchParams(),
 }))
 
 const mockError = {
@@ -993,9 +995,7 @@ describe('SnapshotDetailsPage', () => {
 
     const prShowMore = findButtonInSection('Show more', 'Pull Requests')
     expect(prShowMore).toBeDefined()
-    await act(async () => {
-      if (prShowMore) fireEvent.click(prShowMore)
-    })
+    if (prShowMore) fireEvent.click(prShowMore)
 
     expect(mockFetchMorePRs).toHaveBeenCalledTimes(1)
 
@@ -1032,9 +1032,7 @@ describe('SnapshotDetailsPage', () => {
 
     const issueShowMore = findButtonInSection('Show more', 'Issues')
     expect(issueShowMore).toBeDefined()
-    await act(async () => {
-      if (issueShowMore) fireEvent.click(issueShowMore)
-    })
+    if (issueShowMore) fireEvent.click(issueShowMore)
 
     expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
 
@@ -1049,5 +1047,62 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.getByText('Issue Seven')).toBeInTheDocument()
     })
     expect(mockFetchMoreIssues).toHaveBeenCalledTimes(1)
+  })
+  test('shows SnapshotFeedback when no subscription token is present', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockSnapshotDetailsData,
+      loading: false,
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snapshot-feedback')).toBeInTheDocument()
+    })
+  })
+
+  test('hides SnapshotFeedback when a valid subscription token resolves', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=valid-token'))
+    ;(useQuery as unknown as jest.Mock)
+      .mockReturnValueOnce({
+        data: { subscriptionByToken: { includeProjects: true } },
+        loading: false,
+        error: null,
+      })
+      .mockReturnValue({
+        data: mockSnapshotDetailsData,
+        loading: false,
+        error: null,
+      })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId('snapshot-feedback')).not.toBeInTheDocument()
+  })
+
+  test('shows SnapshotFeedback when subscription token is invalid or expired', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('subscription=expired-token'))
+    ;(useQuery as unknown as jest.Mock)
+      .mockReturnValueOnce({
+        data: { subscriptionByToken: null },
+        loading: false,
+        error: null,
+      })
+      .mockReturnValue({
+        data: mockSnapshotDetailsData,
+        loading: false,
+        error: null,
+      })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snapshot-feedback')).toBeInTheDocument()
+    })
   })
 })

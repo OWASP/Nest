@@ -158,8 +158,11 @@ class TestSnapshotFeedbackSubmit:
     @patch("apps.owasp.models.snapshot_feedback.SnapshotFeedback.objects")
     def test_submit_rejects_boolean_rating(self, mock_objects, rating):
         """Test boolean ratings are rejected even though bool is a subclass of int."""
+        snapshot = MagicMock()
+        user = MagicMock()
+
         with pytest.raises(ValidationError):
-            SnapshotFeedback.submit(snapshot=MagicMock(), user=MagicMock(), rating=rating)
+            SnapshotFeedback.submit(snapshot=snapshot, user=user, rating=rating)
 
         mock_objects.update_or_create.assert_not_called()
 
@@ -167,7 +170,10 @@ class TestSnapshotFeedbackSubmit:
     @patch("apps.owasp.models.snapshot_feedback.SnapshotFeedback.objects")
     def test_submit_rejects_float_rating(self, mock_objects, rating):
         """Test float ratings are rejected to enforce whole numbers."""
+        snapshot = MagicMock()
+        user = MagicMock()
+
         with pytest.raises(ValidationError):
-            SnapshotFeedback.submit(snapshot=MagicMock(), user=MagicMock(), rating=rating)
+            SnapshotFeedback.submit(snapshot=snapshot, user=user, rating=rating)
 
         mock_objects.update_or_create.assert_not_called()
