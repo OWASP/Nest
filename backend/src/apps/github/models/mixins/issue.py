@@ -13,6 +13,7 @@ class IssueIndexMixin:
             self.id
             and self.state == self.IssueState.OPEN
             and not self.is_locked
+            and self.repository
             and self.repository.is_indexable
             and self.repository.track_issues
             and self.project
