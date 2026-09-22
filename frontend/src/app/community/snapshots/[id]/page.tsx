@@ -537,7 +537,9 @@ const SnapshotDetailsPage: React.FC = () => {
           })}
         </div>
       )}
-      {!subscriptionToken && <SnapshotFeedback snapshotKey={snapshotKey} />}
+      {(!subscriptionToken || (!isSubscriptionLoading && !subscription)) && (
+        <SnapshotFeedback snapshotKey={snapshotKey} />
+      )}
     </div>
   )
 }

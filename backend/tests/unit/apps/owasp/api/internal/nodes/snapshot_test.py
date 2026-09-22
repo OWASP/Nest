@@ -228,6 +228,28 @@ class TestSnapshotNodeResolvers:
 
         assert resolver(None, mock_snapshot) == 7
 
+    def test_average_rating_resolver_uses_annotated_value(self):
+        """Test average_rating resolver uses pre-annotated value without querying."""
+        resolver = self._get_resolver("average_rating")
+        mock_snapshot = MagicMock()
+        mock_snapshot._average_rating = 4.25
+
+        result = resolver(None, mock_snapshot)
+
+        assert result == 4.25
+        mock_snapshot.feedback.aggregate.assert_not_called()
+
+    def test_feedback_count_resolver_uses_annotated_value(self):
+        """Test feedback_count resolver uses pre-annotated value without querying."""
+        resolver = self._get_resolver("feedback_count")
+        mock_snapshot = MagicMock()
+        mock_snapshot._feedback_count = 12
+
+        result = resolver(None, mock_snapshot)
+
+        assert result == 12
+        mock_snapshot.feedback.count.assert_not_called()
+
     def test_feedback_resolver(self):
         """Test feedback resolver returns entries newest first."""
         resolver = self._get_resolver("feedback")

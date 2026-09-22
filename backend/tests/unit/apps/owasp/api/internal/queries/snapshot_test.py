@@ -3,6 +3,8 @@
 from datetime import datetime
 from unittest.mock import MagicMock, call, patch
 
+from django.db.models import Avg, Count
+
 from apps.owasp.api.internal.queries.snapshot import SnapshotQuery, _filtered_snapshots
 from apps.owasp.models.snapshot import Snapshot
 
@@ -39,6 +41,10 @@ class TestSnapshotQuery:
             mock_filter.assert_called_once_with(
                 key="test-key",
                 status=Snapshot.Status.COMPLETED,
+            )
+            mock_filter.return_value.annotate.assert_called_once_with(
+                _average_rating=Avg("feedback__rating"),
+                _feedback_count=Count("feedback"),
             )
 
     def test_snapshot_not_exists(self):
@@ -173,6 +179,10 @@ class TestFilteredSnapshots:
             assert result == mock_annotated
             mock_filter.assert_called_once_with(status=Snapshot.Status.COMPLETED)
             mock_filter.return_value.order_by.assert_called_once_with("-created_at")
+            mock_qs.annotate.assert_called_once_with(
+                _average_rating=Avg("feedback__rating"),
+                _feedback_count=Count("feedback"),
+            )
             mock_qs.filter.assert_not_called()
 
     def test_with_start_at_gte(self):
