@@ -9,15 +9,16 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { FaTimes, FaSearch } from 'react-icons/fa'
 import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
 import { SiAlgolia } from 'react-icons/si'
+
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { INDEXES, SUGGESTION_COUNT, EMPTY_STATE_EXAMPLES } from 'utils/searchConstants'
-import { isValidSearchQuery } from 'utils/helpers/searchHelpers'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { Suggestion } from 'types/search'
 import type { User } from 'types/user'
+import { isValidSearchQuery } from 'utils/helpers/searchHelpers'
+import { INDEXES, SUGGESTION_COUNT, EMPTY_STATE_EXAMPLES } from 'utils/searchConstants'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 

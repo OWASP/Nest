@@ -2,9 +2,10 @@ import { screen, render, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import GlobalSearch from 'components/GlobalSearch'
 import { EMPTY_STATE_EXAMPLES } from 'utils/searchConstants'
+import GlobalSearch from 'components/GlobalSearch'
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
