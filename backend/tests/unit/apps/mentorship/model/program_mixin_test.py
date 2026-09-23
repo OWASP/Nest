@@ -88,6 +88,28 @@ class TestProgramIndexMixin:
         mock = self._make_program_mock(started_at=None)
         assert ProgramIndexMixin.idx_started_at.fget(mock) is None
 
+    def test_idx_created_at(self):
+        """Test idx_created_at returns ISO formatted created datetime."""
+        created = datetime(2025, 1, 1, 9, 0, 0, tzinfo=UTC)
+        mock = self._make_program_mock(nest_created_at=created)
+        assert ProgramIndexMixin.idx_created_at.fget(mock) == created.isoformat()
+
+    def test_idx_created_at_none(self):
+        """Test idx_created_at returns None when nest_created_at is None."""
+        mock = self._make_program_mock(nest_created_at=None)
+        assert ProgramIndexMixin.idx_created_at.fget(mock) is None
+
+    def test_idx_updated_at(self):
+        """Test idx_updated_at returns ISO formatted updated datetime."""
+        updated = datetime(2025, 6, 15, 12, 30, 0, tzinfo=UTC)
+        mock = self._make_program_mock(nest_updated_at=updated)
+        assert ProgramIndexMixin.idx_updated_at.fget(mock) == updated.isoformat()
+
+    def test_idx_updated_at_none(self):
+        """Test idx_updated_at returns None when nest_updated_at is None."""
+        mock = self._make_program_mock(nest_updated_at=None)
+        assert ProgramIndexMixin.idx_updated_at.fget(mock) is None
+
     def test_idx_ended_at(self):
         """Test idx_ended_at returns ISO formatted end datetime."""
         ended = datetime(2025, 12, 31, 18, 0, 0, tzinfo=UTC)
