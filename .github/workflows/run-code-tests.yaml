@@ -15,7 +15,6 @@ jobs:
   run-backend-tests:
     name: Backend tests
     permissions:
-      actions: write
       contents: read
     uses: ./.github/workflows/run-backend-tests.yaml
 
@@ -38,7 +37,6 @@ jobs:
   run-frontend-tests:
     name: Frontend tests
     permissions:
-      actions: write
       contents: read
     uses: ./.github/workflows/run-frontend-tests.yaml
 
