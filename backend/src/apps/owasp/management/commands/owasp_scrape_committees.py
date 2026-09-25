@@ -36,7 +36,8 @@ class Command(BaseCommand):
 
             scraper = OwaspScraper(committee.owasp_url)
             if scraper.page_tree is None:
-                committee.deactivate()
+                if not scraper.is_request_failed:
+                    committee.deactivate()
                 continue
 
             committee.leaders_raw = committee.get_leaders()

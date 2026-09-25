@@ -101,10 +101,39 @@ class TestOwaspScrapeCommittees:
 
     @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
     @mock.patch.object(Committee, "bulk_save", autospec=True)
-    def test_handle_page_tree_none(self, mock_bulk_save, command, mock_committee):
-        """Test handle when scraper page_tree is None - committee gets deactivated."""
-        mock_scraper = mock.Mock(spec=OwaspScraper)
+    def test_handle_page_tree_none_with_request_failure(self, mock_bulk_save, command, mock_committee):
+        """Test handle when scraper fails due to network error - committee is NOT deactivated."""
+        mock_scraper = mock.Mock()
         mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = True
+
+        mock_committees_list = [mock_committee]
+        mock_active_committees = mock.MagicMock()
+        mock_active_committees.__iter__.return_value = iter(mock_committees_list)
+        mock_active_committees.count.return_value = 1
+        mock_active_committees.__getitem__.return_value = mock_committees_list
+        mock_active_committees.order_by.return_value = mock_active_committees
+
+        with (
+            mock.patch.object(Committee, "active_committees", mock_active_committees),
+            mock.patch("builtins.print"),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_committee.deactivate.assert_not_called()
+
+    @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
+    @mock.patch.object(Committee, "bulk_save", autospec=True)
+    def test_handle_page_tree_none_without_request_failure(self, mock_bulk_save, command, mock_committee):
+        """Test handle when scraper page_tree is None (e.g. 404) - committee IS deactivated."""
+        mock_scraper = mock.Mock()
+        mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = False
 
         mock_committees_list = [mock_committee]
         mock_active_committees = mock.MagicMock()
