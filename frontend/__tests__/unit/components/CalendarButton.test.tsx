@@ -166,10 +166,7 @@ describe('CalendarButton', () => {
       fireEvent.click(button)
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Failed to download ICS file:',
-          'some string error'
-        )
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to download ICS file:', 'some string error')
       })
 
       consoleSpy.mockRestore()
