@@ -13,9 +13,7 @@ test-infrastructure-unit:
 
 # Implementation targets.
 
-INFRASTRUCTURE_COMPOSE = docker compose \
-	--project-name nest-infrastructure \
-	-f docker-compose/infrastructure/compose.yaml
+INFRASTRUCTURE_COMPOSE = docker compose --project-name nest-infrastructure -f docker-compose/infrastructure/compose.yaml
 
 INFRASTRUCTURE_TEST_IMAGE = nest-test-infrastructure
 
@@ -29,40 +27,47 @@ infrastructure-test:
 	@$(MAKE) infrastructure-test-integration
 
 infrastructure-test-image-build:
-	@DOCKER_BUILDKIT=1 docker build -q \
-		--cache-from $(INFRASTRUCTURE_TEST_IMAGE) \
-		-f docker/infrastructure/Dockerfile.tests . \
-		-t $(INFRASTRUCTURE_TEST_IMAGE) 1>/dev/null
+	@args=(
+		'-q'
+		'--cache-from=$(INFRASTRUCTURE_TEST_IMAGE)'
+		'-f=docker/infrastructure/Dockerfile.tests'
+		.
+		'-t=$(INFRASTRUCTURE_TEST_IMAGE)'
+	)
+	DOCKER_BUILDKIT=1 docker build "$${args[@]}" 1>/dev/null
 
 infrastructure-test-unit:
 	@$(MAKE) infrastructure-test-image-build
-	@docker run --rm \
-		-v "$(CURDIR)/docker:/home/owasp/docker:ro" \
-		-v "$(CURDIR)/infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap" \
-		-v "$(CURDIR)/infrastructure/live:/home/owasp/infrastructure/live" \
-		-v "$(CURDIR)/infrastructure/modules:/home/owasp/infrastructure/modules" \
-		-v "$(CURDIR)/infrastructure/scripts:/home/owasp/infrastructure/scripts:ro" \
-		-v "$(CURDIR)/infrastructure/state:/home/owasp/infrastructure/state" \
-		-v "$(CURDIR)/infrastructure/tests:/home/owasp/infrastructure/tests:ro" \
+	args=(
+		'--rm'
+		"-v=$(CURDIR)/docker:/home/owasp/docker:ro"
+		"-v=$(CURDIR)/infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap"
+		"-v=$(CURDIR)/infrastructure/live:/home/owasp/infrastructure/live"
+		"-v=$(CURDIR)/infrastructure/modules:/home/owasp/infrastructure/modules"
+		"-v=$(CURDIR)/infrastructure/scripts:/home/owasp/infrastructure/scripts:ro"
+		"-v=$(CURDIR)/infrastructure/state:/home/owasp/infrastructure/state"
+		"-v=$(CURDIR)/infrastructure/tests:/home/owasp/infrastructure/tests:ro"
 		$(INFRASTRUCTURE_TEST_IMAGE)
+	)
+	docker run "$${args[@]}"
 
 infrastructure-test-integration:
-	@if [ -z "$$LOCALSTACK_AUTH_TOKEN" ]; then \
-		if [ -t 2 ]; then \
-			printf '\033[1;33mWarning:\033[0m Skipping infrastructure integration tests: LOCALSTACK_AUTH_TOKEN is not set.\n' >&2; \
-		else \
-			echo "Warning: Skipping infrastructure integration tests: LOCALSTACK_AUTH_TOKEN is not set." >&2; \
-		fi; \
-		exit 0; \
-	fi; \
-	$(MAKE) infrastructure-test-image-build || exit $$?; \
-	status=0; \
-	trap '$(INFRASTRUCTURE_COMPOSE) down --volumes --remove-orphans >/dev/null 2>&1 || true; rm -f $(INFRASTRUCTURE_TEST_OVERRIDES)' EXIT; \
-	rm -f $(INFRASTRUCTURE_TEST_OVERRIDES); \
-	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-		$(INFRASTRUCTURE_COMPOSE) up \
-			--abort-on-container-exit \
-			--build \
-			--exit-code-from tests \
-		|| status=$$?; \
+	@if [ -z "$${LOCALSTACK_AUTH_TOKEN:-}" ]; then
+		if [ -t 2 ]; then
+			printf '\033[1;33mWarning:\033[0m Skipping infrastructure integration tests: LOCALSTACK_AUTH_TOKEN is not set.\n' >&2
+		else
+			echo "Warning: Skipping infrastructure integration tests: LOCALSTACK_AUTH_TOKEN is not set." >&2
+		fi
+		exit 0
+	fi
+	$(MAKE) infrastructure-test-image-build || exit $$?
+	status=0
+	trap '$(INFRASTRUCTURE_COMPOSE) down --volumes --remove-orphans >/dev/null 2>&1 || true; rm -f $(INFRASTRUCTURE_TEST_OVERRIDES)' EXIT
+	rm -f $(INFRASTRUCTURE_TEST_OVERRIDES)
+	up_args=(
+		'--abort-on-container-exit'
+		'--build'
+		'--exit-code-from=tests'
+	)
+	COMPOSE_BAKE=true DOCKER_BUILDKIT=1 $(INFRASTRUCTURE_COMPOSE) up "$${up_args[@]}" || status=$$?
 	exit $$status
