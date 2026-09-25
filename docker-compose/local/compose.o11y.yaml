@@ -35,7 +35,9 @@ services:
     command:
       - -retentionPeriod=5y
       - -storageDataPath=/data
-    image: victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70
+    build:
+      context: ../../docker/victoriametrics
+      dockerfile: Dockerfile
     healthcheck:
       interval: 5s
       retries: 5
@@ -50,6 +52,9 @@ services:
 
   o11y-grafana:
     container_name: nest-o11y-grafana
+    build:
+      context: ../../
+      dockerfile: docker/grafana/Dockerfile
     depends_on:
       o11y-metrics:
         condition: service_healthy
@@ -60,7 +65,6 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_USERS_DEFAULT_THEME=light
       - O11Y_METRICS_URL=http://o11y-metrics:8428
-    image: grafana/grafana-oss:13.0.2@sha256:5dad0df181cb644a14e13617b913b261a54f7d4fd4510721dba420929f35bea2
     healthcheck:
       interval: 5s
       retries: 5
@@ -71,8 +75,6 @@ services:
     ports:
       - 127.0.0.1:3001:3000
     volumes:
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - o11y-grafana-data:/var/lib/grafana
 
 volumes:
