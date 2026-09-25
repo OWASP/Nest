@@ -14,6 +14,8 @@ misconfigurations:
       - docker/osv-scanner/Dockerfile
       - docker/semgrep/Dockerfile
       - docker/trivy/Dockerfile
+      # Container runs as non-root (user 65532) via the ECS task definition; the image is a thin version-pin for dependabot.
+      - docker/victoriametrics/Dockerfile
       - docker/zap/Dockerfile
   - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
     paths:
@@ -43,6 +45,9 @@ misconfigurations:
   - id: AVD-AWS-0176  # IAM DB auth deferred; app uses Secrets Manager credentials today
     paths:
       - infrastructure/modules/database/main.tf
+  - id: AVD-AWS-0178  # Throwaway VPC fixture for module tests; flow logs are not applicable
+    paths:
+      - infrastructure/modules/observability/tests/setup/main.tf
   - id: AVD-AWS-0342  # EventBridge PassRole required to run ECS tasks
     paths:
       - infrastructure/modules/tasks/main.tf
