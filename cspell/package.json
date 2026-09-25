@@ -7,10 +7,10 @@
     "@cspell/dict-golang": "6.0.27",
     "@cspell/dict-k8s": "1.0.13",
     "@cspell/dict-people-names": "1.1.16",
-    "@cspell/dict-software-terms": "5.4.1",
+    "@cspell/dict-software-terms": "5.4.2",
     "@cspell/dict-terraform": "1.1.4",
     "@cspell/dict-win32": "2.0.10",
-    "cspell": "10.1.1"
+    "cspell": "10.2.1"
   },
   "packageManager": "pnpm@11.17.0"
 }
