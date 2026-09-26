@@ -601,6 +601,10 @@ describe('GlobalSearch', () => {
 
     const suggestionButton = screen.getByText('Test Project').closest('button')
     fireEvent.keyDown(suggestionButton!, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(mockRouter.push).toHaveBeenCalledWith('/projects/test-project')
+    })
   })
 
   test('persists selected suggestion to localStorage across a remount', async () => {
@@ -788,6 +792,8 @@ describe('GlobalSearch', () => {
     await waitFor(() => {
       expect(screen.getByText('Recent Searches')).toBeInTheDocument()
     })
+
+    ;(fetchAlgoliaData as jest.Mock).mockClear()
 
     fireEvent.click(screen.getByText('japan'))
 
