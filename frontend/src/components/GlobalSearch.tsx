@@ -9,6 +9,7 @@ import { FaTimes, FaSearch } from 'react-icons/fa'
 import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
 import { SiAlgolia } from 'react-icons/si'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import { acquireBodyScrollLock, releaseBodyScrollLock } from 'utils/bodyScrollLock'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { Organization } from 'types/organization'
@@ -53,18 +54,19 @@ export default function GlobalSearch() {
   }, [])
 
   useEffect(() => {
-    if (isOpen) {
-      previousFocusRef.current = document.activeElement as HTMLElement
-      const timer = shouldAutoFocus ? setTimeout(() => inputRef.current?.focus(), 50) : undefined
-      document.body.style.overflow = 'hidden'
-      return () => {
-        if (timer !== undefined) clearTimeout(timer)
-        document.body.style.overflow = ''
-      }
-    } else {
-      document.body.style.overflow = ''
+    if (!isOpen) {
       previousFocusRef.current?.focus()
       previousFocusRef.current = null
+      return
+    }
+
+    previousFocusRef.current = document.activeElement as HTMLElement
+    const timer = shouldAutoFocus ? setTimeout(() => inputRef.current?.focus(), 50) : undefined
+    acquireBodyScrollLock()
+
+    return () => {
+      if (timer !== undefined) clearTimeout(timer)
+      releaseBodyScrollLock()
     }
   }, [isOpen, shouldAutoFocus])
 
@@ -392,11 +394,11 @@ export default function GlobalSearch() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-lg border border-slate-600/30 bg-transparent px-2.5 py-2 text-sm text-slate-600 transition-colors hover:border-slate-500/50 hover:bg-slate-200/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 sm:w-60 sm:px-4 dark:border-slate-600/50 dark:bg-transparent dark:text-slate-300 dark:hover:border-slate-500/50 dark:hover:bg-slate-600/30 dark:hover:text-slate-100 dark:focus-visible:outline-slate-400"
+        className="flex w-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-600/30 bg-transparent px-2.5 py-2 text-sm text-slate-600 transition-colors hover:border-slate-500/50 hover:bg-slate-200/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 lg:w-44 xl:w-60 xl:px-4 dark:border-slate-600/50 dark:bg-transparent dark:text-slate-300 dark:hover:border-slate-500/50 dark:hover:bg-slate-600/30 dark:hover:text-slate-100 dark:focus-visible:outline-slate-400"
         aria-label="Open search"
       >
         <FaSearch className="h-4 w-4 shrink-0" />
-        <span className="hidden flex-1 text-left sm:inline">
+        <span className="hidden min-w-0 flex-1 truncate text-left lg:inline">
           Type{' '}
           <kbd className="mx-1 rounded border border-slate-500/30 bg-transparent px-1.5 py-0.5 text-xs dark:border-slate-500/50 dark:bg-transparent">
             /
