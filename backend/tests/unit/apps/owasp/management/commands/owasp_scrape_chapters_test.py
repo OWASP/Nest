@@ -101,10 +101,39 @@ class TestOwaspScrapeChapters:
 
     @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
     @mock.patch.object(Chapter, "bulk_save", autospec=True)
-    def test_handle_page_tree_none(self, mock_bulk_save, command, mock_chapter):
-        """Test handle when scraper page_tree is None - chapter gets deactivated."""
-        mock_scraper = mock.Mock(spec=OwaspScraper)
+    def test_handle_page_tree_none_with_request_failure(self, mock_bulk_save, command, mock_chapter):
+        """Test handle when scraper fails due to network error - chapter is NOT deactivated."""
+        mock_scraper = mock.Mock()
         mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = True
+
+        mock_chapters_list = [mock_chapter]
+        mock_active_chapters = mock.MagicMock()
+        mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
+        mock_active_chapters.count.return_value = 1
+        mock_active_chapters.__getitem__.return_value = mock_chapters_list
+        mock_active_chapters.order_by.return_value = mock_active_chapters
+
+        with (
+            mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
+            mock.patch("builtins.print"),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_chapters.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_chapter.deactivate.assert_not_called()
+
+    @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
+    @mock.patch.object(Chapter, "bulk_save", autospec=True)
+    def test_handle_page_tree_none_without_request_failure(self, mock_bulk_save, command, mock_chapter):
+        """Test handle when scraper page_tree is None (e.g. 404) - chapter IS deactivated."""
+        mock_scraper = mock.Mock()
+        mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = False
 
         mock_chapters_list = [mock_chapter]
         mock_active_chapters = mock.MagicMock()

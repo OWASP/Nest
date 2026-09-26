@@ -1,6 +1,7 @@
 import logging
 from http import HTTPStatus
 from unittest.mock import Mock, patch
+from unittest import mock
 
 import pytest
 import requests
@@ -144,6 +145,7 @@ class TestOwaspScraper:
     def test_get_urls_with_domain(self, mock_session, sample_html):
         mock_response = Mock()
         mock_response.content = sample_html
+        mock_response.status_code = 200 
         mock_session.get.return_value = mock_response
 
         scraper = OwaspScraper("https://test.org")
@@ -168,6 +170,7 @@ class TestOwaspScraper:
         """Test get_urls without providing a domain."""
         mock_response = Mock()
         mock_response.content = sample_html
+        mock_response.status_code = 200  # Added status code
         mock_session.get.return_value = mock_response
 
         scraper = OwaspScraper("https://test.org")
@@ -363,3 +366,31 @@ class TestOwaspScraper:
         assert scraper.page_tree is None
         assert scraper.get_urls() == set()
         mock_session.get.assert_called_once()
+
+    @mock.patch("requests.Session.get")
+    def test_request_exception_sets_failure_flag(self, mock_get):
+        """Test that a network exception sets is_request_failed to True."""
+        mock_get.side_effect = requests.exceptions.RequestException()
+        scraper = OwaspScraper("https://example.com")
+
+        assert scraper.is_request_failed is True
+
+    @mock.patch("requests.Session.get")
+    def test_5xx_server_error_sets_failure_flag(self, mock_get):
+        """Test that a 500 server error sets is_request_failed to True."""
+        mock_response = mock.Mock()
+        mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        mock_get.return_value = mock_response
+        scraper = OwaspScraper("https://example.com")
+
+        assert scraper.is_request_failed is True
+
+    @mock.patch("requests.Session.get")
+    def test_404_not_found_leaves_failure_flag_false(self, mock_get):
+        """Test that a 404 Not Found leaves is_request_failed as False."""
+        mock_response = mock.Mock()
+        mock_response.status_code = HTTPStatus.NOT_FOUND
+        mock_get.return_value = mock_response
+        scraper = OwaspScraper("https://example.com")
+
+        assert scraper.is_request_failed is False
