@@ -56,7 +56,12 @@ ENV FORCE_COLOR=1 \
 
 EXPOSE 8001
 
-USER owasp
 WORKDIR /home/owasp
 
 COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
+# Recreate .cache writable for Material privacy plugin (builder copy is mode 555).
+RUN rm -rf /home/owasp/.cache && \
+    mkdir -p /home/owasp/.cache && \
+    chown owasp:owasp /home/owasp/.cache
+
+USER owasp

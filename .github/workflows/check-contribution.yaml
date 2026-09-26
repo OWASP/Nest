@@ -8,6 +8,8 @@ on:
       - reopened
       - synchronize
 
+permissions: {}
+
 jobs:
   check-contribution:
     if: github.event.pull_request.base.repo.full_name == github.repository
