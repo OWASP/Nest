@@ -372,7 +372,7 @@ class TestOwaspScraper:
         """Test that a network exception sets is_request_failed to True."""
         mock_get.side_effect = requests.exceptions.RequestException()
         scraper = OwaspScraper("https://example.com")
-        
+
         assert scraper.is_request_failed is True
 
     @mock.patch("requests.Session.get")
@@ -382,7 +382,7 @@ class TestOwaspScraper:
         mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
         mock_get.return_value = mock_response
         scraper = OwaspScraper("https://example.com")
-        
+
         assert scraper.is_request_failed is True
 
     @mock.patch("requests.Session.get")
@@ -392,5 +392,5 @@ class TestOwaspScraper:
         mock_response.status_code = HTTPStatus.NOT_FOUND
         mock_get.return_value = mock_response
         scraper = OwaspScraper("https://example.com")
-            
+
         assert scraper.is_request_failed is False
