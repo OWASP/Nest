@@ -111,6 +111,7 @@ describe('BoardCandidatesPage', () => {
   })
 
   afterEach(() => {
+    jest.restoreAllMocks()
     jest.clearAllMocks()
   })
 
@@ -264,6 +265,43 @@ describe('BoardCandidatesPage', () => {
       expect(screen.getByText('Alice Smith')).toBeInTheDocument()
     })
     fireEvent.click(screen.getByText(/@alice/))
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  test('opens the board elections page for a candidate without a GitHub login', async () => {
+    const noLoginBoardData = {
+      ...mockBoardData,
+      boardOfDirectors: {
+        ...mockBoardData.boardOfDirectors,
+        candidates: [
+          {
+            ...mockBoardData.boardOfDirectors.candidates[0],
+            member: null,
+          },
+        ],
+      },
+    }
+
+    mockUseQuery.mockImplementation((document: unknown) => {
+      if (document === GetBoardCandidatesDocument) {
+        return { data: noLoginBoardData, loading: false, error: null }
+      }
+      return { data: { memberSnapshot: null }, loading: false, error: null }
+    })
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
+
+    render(<BoardCandidatesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Alice Smith')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Alice Smith/ }))
+
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://owasp.org/board/elections/2025/alice_smith',
+      '_blank',
+      'noopener,noreferrer'
+    )
     expect(mockPush).not.toHaveBeenCalled()
   })
 })
