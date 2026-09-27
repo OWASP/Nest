@@ -560,59 +560,58 @@ describe('MyMentorshipPage', () => {
     expect(await screen.findByText(/No programs found/i)).toBeInTheDocument()
   })
 
-  it('shows AccessDeniedDisplay for a user with no mentorship role', async () => { 
+  it('shows AccessDeniedDisplay for a user with no mentorship role', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
-    data: {
-      user: {
-        name: 'Plain User',
-        email: 'plain@example.com',
-        login: 'plainuser',
-        isLeader: false,
-        isMentor: false,
-        isMentee: false,
+      data: {
+        user: {
+          name: 'Plain User',
+          email: 'plain@example.com',
+          login: 'plainuser',
+          isLeader: false,
+          isMentor: false,
+          isMentee: false,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
       },
-      expires: '2099-01-01T00:00:00.000Z',
-    },
-    status: 'authenticated',
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+    render(<MyMentorshipPage />)
+
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Only project leaders, mentors, or mentees can access this page/i)
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Test Program')).not.toBeInTheDocument()
   })
 
-  mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
-
-  render(<MyMentorshipPage />)
-
-  expect(await screen.findByText('Access Denied')).toBeInTheDocument()
-  expect(
-    screen.getByText(/Only project leaders, mentors, or mentees can access this page/i)
-  ).toBeInTheDocument()
-  expect(screen.queryByText('Test Program')).not.toBeInTheDocument()
-})
-
-it('skips GetMyPrograms query for a user with no mentorship role', async () => {
-  ;(mockUseSession as jest.Mock).mockReturnValue({
-    data: {
-      user: {
-        name: 'Plain User',
-        email: 'plain@example.com',
-        login: 'plainuser',
-        isLeader: false,
-        isMentor: false,
-        isMentee: false,
+  it('skips GetMyPrograms query for a user with no mentorship role', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Plain User',
+          email: 'plain@example.com',
+          login: 'plainuser',
+          isLeader: false,
+          isMentor: false,
+          isMentee: false,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
       },
-      expires: '2099-01-01T00:00:00.000Z',
-    },
-    status: 'authenticated',
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+    render(<MyMentorshipPage />)
+
+    await waitFor(() => {
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ skip: true })
+      )
+    })
   })
-
-  mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
-
-  render(<MyMentorshipPage />)
-
-  await waitFor(() => {
-    expect(mockUseQuery).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ skip: true })
-    )
-  })
-})
-
 })
