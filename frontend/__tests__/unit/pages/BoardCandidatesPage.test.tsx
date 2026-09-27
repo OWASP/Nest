@@ -111,6 +111,7 @@ describe('BoardCandidatesPage', () => {
   })
 
   afterEach(() => {
+    jest.restoreAllMocks()
     jest.clearAllMocks()
   })
 
@@ -302,7 +303,5 @@ describe('BoardCandidatesPage', () => {
       'noopener,noreferrer'
     )
     expect(mockPush).not.toHaveBeenCalled()
-
-    openSpy.mockRestore()
   })
 })
