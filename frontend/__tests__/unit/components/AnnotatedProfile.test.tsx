@@ -360,6 +360,12 @@ describe('AnnotatedProfile', () => {
     expect(document.querySelector('img')?.getAttribute('src')).toBe('https://example.com/pic.jpg')
   })
 
+  it('leaves non-http scheme image URLs unchanged', () => {
+    const dataUri = 'data:image/png;base64,iVBORw0KGgo='
+    render(<AnnotatedProfile {...baseProps} rawMarkdown={`<img src="${dataUri}" alt="x">`} />)
+    expect(document.querySelector('img')?.getAttribute('src')).toBe(dataUri)
+  })
+
   it('does not render the Create claim button when there is no selection', () => {
     render(<AnnotatedProfile {...baseProps} isCandidate />)
     expect(screen.queryByRole('button', { name: /Create claim/i })).not.toBeInTheDocument()

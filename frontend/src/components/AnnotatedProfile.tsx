@@ -75,7 +75,7 @@ const BOARD_CANDIDATES_ASSET_BASE_URL =
 
 const getBoardCandidateAssetUrl = <T,>(src: T): T | string => {
   if (typeof src !== 'string' || !src) return src
-  if (/^([a-z][a-z0-9+.-]*:)?\/\//i.test(src)) return src
+  if (/^[a-z][a-z0-9+.-]*:/i.test(src) || src.startsWith('//')) return src
   const path = src.replace(/^(\.\.?\/)+/, '').replace(/^\/?www-board-candidates\//, '')
   return `${BOARD_CANDIDATES_ASSET_BASE_URL}/${path}`
 }
