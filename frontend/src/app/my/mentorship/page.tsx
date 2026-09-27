@@ -11,11 +11,11 @@ import { FaPlus } from 'react-icons/fa6'
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 
 import type { Program } from 'types/mentorship'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
 import SearchPageLayout from 'components/SearchPageLayout'
-import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 
 const MyMentorshipPage: React.FC = () => {
   const router = useRouter()
@@ -96,10 +96,11 @@ const MyMentorshipPage: React.FC = () => {
   }
 
   if (hasNoProgramRole) {
-  return (
-    <AccessDeniedDisplay message="Only project leaders, mentors, or mentees can access this page." />
-  )}
-  
+    return (
+      <AccessDeniedDisplay message="Only project leaders, mentors, or mentees can access this page." />
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 dark:bg-[#212529]">
       <div className="mb-6 flex items-center justify-between">
