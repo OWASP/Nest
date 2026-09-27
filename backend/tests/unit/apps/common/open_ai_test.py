@@ -2,8 +2,14 @@ from unittest.mock import MagicMock, patch
 
 import openai as openai_module
 import pytest
+from pydantic import BaseModel
 
 from apps.common.open_ai import OpenAi
+
+
+class ParseSchema(BaseModel):
+    value: str
+
 
 # Constants to replace magic values
 DEFAULT_MAX_TOKENS = 1000
@@ -30,6 +36,15 @@ class TestOpenAi:
         assert instance.max_tokens == DEFAULT_MAX_TOKENS
         assert instance.model == DEFAULT_MODEL
         assert instance.temperature == DEFAULT_TEMPERATURE
+
+    @patch("apps.common.open_ai.settings")
+    @patch("openai.OpenAI")
+    def test_init_custom_timeout(self, mock_openai, mock_settings):
+        mock_settings.OPEN_AI_SECRET_KEY = DEFAULT_API_KEY
+
+        OpenAi(timeout=90)
+
+        mock_openai.assert_called_once_with(api_key=DEFAULT_API_KEY, timeout=90)
 
     @pytest.mark.parametrize(
         ("input_content", "expected_input"), [("Test input content", "Test input content")]
@@ -186,6 +201,133 @@ class TestOpenAi:
         openai_instance = OpenAi()
         openai_instance.set_prompt("Test prompt").set_input("Test input")
         response = openai_instance.complete()
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "Unexpected OpenAI API error: %s",
+            "ValueError",
+        )
+
+    @patch("openai.OpenAI")
+    def test_parse_success(self, mock_openai):
+        """Test successful parse returns the parsed schema instance."""
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        parsed_value = ParseSchema(value="parsed")
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.parsed = parsed_value
+        mock_client.beta.chat.completions.parse.return_value = mock_response
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
+
+        assert response is parsed_value
+        mock_client.beta.chat.completions.parse.assert_called_once()
+        _, kwargs = mock_client.beta.chat.completions.parse.call_args
+        assert kwargs["response_format"] is ParseSchema
+        assert kwargs["model"] == DEFAULT_MODEL
+        assert kwargs["max_tokens"] == DEFAULT_MAX_TOKENS
+        assert kwargs["temperature"] == DEFAULT_TEMPERATURE
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_parse_authentication_error(self, mock_openai, mock_logger):
+        """Test that AuthenticationError is caught and logged."""
+        mock_client = MagicMock()
+        auth_error = openai_module.AuthenticationError(
+            "Invalid API key",
+            response=MagicMock(),
+            body={},
+        )
+        mock_client.beta.chat.completions.parse.side_effect = auth_error
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "OpenAI authentication failed: invalid or missing API key. "
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_parse_rate_limit_error(self, mock_openai, mock_logger):
+        """Test that RateLimitError is caught and logged as a warning."""
+        mock_client = MagicMock()
+        rate_limit_error = openai_module.RateLimitError(
+            "Rate limit exceeded",
+            response=MagicMock(),
+            body={},
+        )
+        mock_client.beta.chat.completions.parse.side_effect = rate_limit_error
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
+
+        assert response is None
+        mock_logger.warning.assert_called_once_with(
+            "OpenAI rate limit exceeded: %s. Request may be retried with backoff.",
+            rate_limit_error,
+        )
+        mock_logger.exception.assert_not_called()
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_parse_bad_request_error(self, mock_openai, mock_logger):
+        """Test that BadRequestError is caught and logged."""
+        mock_client = MagicMock()
+        bad_request_error = openai_module.BadRequestError(
+            "Invalid request",
+            response=MagicMock(),
+            body={},
+        )
+        mock_client.beta.chat.completions.parse.side_effect = bad_request_error
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "OpenAI invalid request. Check model name, message format, and input size."
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_parse_api_connection_error(self, mock_openai, mock_logger):
+        """Test that APIConnectionError is caught and logged."""
+        mock_client = MagicMock()
+        api_error = openai_module.APIConnectionError(request=MagicMock())
+        mock_client.beta.chat.completions.parse.side_effect = api_error
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "OpenAI connection failed. Check network connectivity and firewall/proxy settings."
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_parse_generic_exception_includes_type(self, mock_openai, mock_logger):
+        """Test that generic exceptions are caught with error type in log message."""
+        mock_client = MagicMock()
+        mock_client.beta.chat.completions.parse.side_effect = ValueError("Custom error")
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.parse(ParseSchema)
 
         assert response is None
         mock_logger.exception.assert_called_once_with(
