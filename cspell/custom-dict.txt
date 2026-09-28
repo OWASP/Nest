@@ -224,6 +224,7 @@ relativedelta
 replicationgroup
 repositorycontributor
 requirepass
+rhysd
 rqworker
 rsc
 rudransh
@@ -270,5 +271,6 @@ xsser
 xzf
 zapconfig
 zaproxy
+zizmor
 zsc
 éàëîôû
