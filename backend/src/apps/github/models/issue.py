@@ -36,10 +36,6 @@ class Issue(GenericIssueModel):
     summary = models.TextField(
         verbose_name="Summary", default="", blank=True
     )  # AI generated summary
-    summary_is_ai_generated = models.BooleanField(
-        verbose_name="Summary is AI generated",
-        default=False,
-    )
     hint = models.TextField(verbose_name="Hint", default="", blank=True)  # AI generated hint
 
     state_reason = models.CharField(
@@ -170,9 +166,7 @@ class Issue(GenericIssueModel):
         self.hint = open_ai.complete() or ""
 
     def generate_summary(self, open_ai: OpenAi | None = None, max_tokens: int = 500) -> None:
-        """Generate an issue summary and record whether AI generated it."""
-        fallback_summary = self.body.strip() or "No summary available"
-
+        """Generate a summary for the issue using AI."""
         if not self.is_indexable:
             return
 
@@ -183,8 +177,7 @@ class Issue(GenericIssueModel):
                 else Prompt.get_github_issue_project_summary()
             )
         ):
-            self.summary = fallback_summary
-            self.summary_is_ai_generated = False
+            self.summary = self.body.strip()
             return
 
         open_ai = open_ai or OpenAi()
@@ -192,12 +185,7 @@ class Issue(GenericIssueModel):
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
 
         summary = open_ai.complete()
-        if summary and summary.strip():
-            self.summary = summary.strip()
-            self.summary_is_ai_generated = True
-        else:
-            self.summary = fallback_summary
-            self.summary_is_ai_generated = False
+        self.summary = summary.strip() if summary and summary.strip() else self.body.strip()
 
     def save(self, *args, **kwargs) -> None:
         """Save issue and generate missing AI fields after it has a database ID."""
@@ -227,15 +215,9 @@ class Issue(GenericIssueModel):
 
         if should_generate_summary:
             previous_summary = self.summary
-            previous_summary_is_ai_generated = self.summary_is_ai_generated
-
             self.generate_summary()
-
             if self.summary != previous_summary:
                 generated_fields.append("summary")
-
-            if self.summary_is_ai_generated != previous_summary_is_ai_generated:
-                generated_fields.append("summary_is_ai_generated")
 
         if generated_fields:
             super().save(
@@ -246,8 +228,6 @@ class Issue(GenericIssueModel):
     @staticmethod
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
         """Bulk save issues."""
-        if fields and "summary" in fields and "summary_is_ai_generated" not in fields:
-            fields = [*fields, "summary_is_ai_generated"]
         BulkSaveModel.bulk_save(Issue, issues, fields=fields)
 
     @staticmethod

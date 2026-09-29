@@ -21,5 +21,4 @@ export type Issue = {
   title: string
   updatedAt?: string
   url: string
-  summaryIsAiGenerated?: boolean
 }
