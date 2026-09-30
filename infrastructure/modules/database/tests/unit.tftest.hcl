@@ -12,7 +12,41 @@ variables {
   environment          = "test"
   kms_key_arn          = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name         = "nest"
+  runtime_secrets_mode = "prepare"
   security_group_ids   = ["sg-12345678"]
+}
+
+
+run "test_complete_mode_removes_legacy_ssm_parameter" {
+  command = plan
+
+  variables {
+    runtime_secrets_mode = "complete"
+  }
+
+  assert {
+    condition     = length(aws_ssm_parameter.django_db_password) == 0
+    error_message = "Complete mode must remove the legacy database password parameter."
+  }
+
+  assert {
+    condition     = output.db_password_arn == null
+    error_message = "Complete mode must not expose a legacy SSM database password ARN."
+  }
+}
+
+run "test_database_credentials_secret" {
+  command = plan
+
+  assert {
+    condition     = aws_secretsmanager_secret.db_credentials.kms_key_id == var.kms_key_arn
+    error_message = "Database credentials must use the environment KMS key."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret.db_credentials.name == "${var.project_name}-${var.environment}-db-credentials"
+    error_message = "Database credentials secret must use the expected name."
+  }
 }
 
 run "test_database_not_publicly_accessible" {
@@ -137,7 +171,7 @@ run "test_ssm_parameter_is_secure_string" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_db_password.type == "SecureString"
+    condition     = aws_ssm_parameter.django_db_password[0].type == "SecureString"
     error_message = "Database password must be stored as SecureString."
   }
 }
@@ -146,7 +180,7 @@ run "test_ssm_parameter_path_format" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_db_password.name == "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
+    condition     = aws_ssm_parameter.django_db_password[0].name == "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
     error_message = "SSM parameter must follow path: /{project}/{environment}/DJANGO_DB_PASSWORD."
   }
 }
