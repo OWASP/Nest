@@ -209,6 +209,12 @@ export default [
     },
   },
   {
+    files: ['frontend/src/components/CalendarButton.tsx'],
+    rules: {
+      'no-console': ['error', { allow: ['warn'] }],
+    },
+  },
+  {
     files: ['frontend/**/skeletons/**/*.{ts,tsx,js,jsx}', 'frontend/**/*.skeleton.{ts,tsx,js,jsx}'],
     rules: {
       'react/no-array-index-key': 'off',
