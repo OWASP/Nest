@@ -74,7 +74,7 @@ export default function UserMenu({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
-        className="w-auto cursor-pointer focus:outline-hidden"
+        className="flex cursor-pointer items-center gap-2 focus:outline-hidden"
         disabled={isLoggingOut}
       >
         <div className="h-10 w-10 overflow-hidden rounded-full">
@@ -86,6 +86,22 @@ export default function UserMenu({
             className="h-full w-full object-cover"
           />
         </div>
+         <div className="flex flex-col items-start leading-tight">
+          <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            {session?.user?.name}
+          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            @{session?.user?.login ?? session?.user?.email?.split('@')[0]}
+          </span>
+        </div>
+          <svg
+          className={`h-4 w-4 text-slate-500 transition-transform dark:text-slate-400 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
       </button>
 
       {isOpen && (
