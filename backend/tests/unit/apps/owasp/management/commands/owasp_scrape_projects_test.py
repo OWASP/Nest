@@ -131,10 +131,39 @@ class TestOwaspScrapeProjects:
     @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Project, "bulk_save", autospec=True)
     @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
-    def test_handle_page_tree_none(self, mock_github, mock_bulk_save, command, mock_project):
-        """Test handle when scraper page_tree is None - project gets deactivated."""
-        mock_scraper = mock.Mock(spec=OwaspScraper)
+    def test_handle_page_tree_none_with_request_failure(self, mock_github, mock_bulk_save, command, mock_project):
+        """Test handle when scraper fails due to network error - project is NOT deactivated."""
+        mock_scraper = mock.Mock()
         mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = True
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        command.stdout = mock.MagicMock()
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_project.deactivate.assert_not_called()
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_page_tree_none_without_request_failure(self, mock_github, mock_bulk_save, command, mock_project):
+        """Test handle when scraper page_tree is None (e.g. 404) - project IS deactivated."""
+        mock_scraper = mock.Mock()
+        mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = False
 
         mock_projects_list = [mock_project]
         mock_active_projects = mock.MagicMock()
@@ -155,10 +184,10 @@ class TestOwaspScrapeProjects:
             command.handle(offset=0)
 
         mock_project.deactivate.assert_called_once()
-
     @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Project, "bulk_save", autospec=True)
     @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+
     def test_handle_no_leaders_emails(self, mock_github, mock_bulk_save, command, mock_project):
         """Test handle when project has no leaders emails."""
         mock_scraper = mock.Mock(spec=OwaspScraper)
