@@ -105,6 +105,7 @@ class TestOwaspScrapeCommittees:
         """Test handle when scraper page_tree is None - committee gets deactivated."""
         mock_scraper = mock.Mock(spec=OwaspScraper)
         mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = False
 
         mock_committees_list = [mock_committee]
         mock_active_committees = mock.MagicMock()
@@ -125,6 +126,36 @@ class TestOwaspScrapeCommittees:
             command.handle(offset=0)
 
         mock_committee.deactivate.assert_called_once()
+
+    @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
+    @mock.patch.object(Committee, "bulk_save", autospec=True)
+    def test_handle_request_exception_does_not_deactivate(
+        self, mock_bulk_save, command, mock_committee
+    ):
+        """Test that a transient error does not deactivate the committee."""
+        mock_scraper = mock.Mock(spec=OwaspScraper)
+        mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = True
+
+        mock_committees_list = [mock_committee]
+        mock_active_committees = mock.MagicMock()
+        mock_active_committees.__iter__.return_value = iter(mock_committees_list)
+        mock_active_committees.count.return_value = 1
+        mock_active_committees.__getitem__.return_value = mock_committees_list
+        mock_active_committees.order_by.return_value = mock_active_committees
+
+        with (
+            mock.patch.object(Committee, "active_committees", mock_active_committees),
+            mock.patch("builtins.print"),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_committee.deactivate.assert_not_called()
 
     @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
     @mock.patch.object(Committee, "bulk_save", autospec=True)
