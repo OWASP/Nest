@@ -36,8 +36,9 @@ interface SearchUrlState {
 }
 
 const parsePageParam = (value: string | null): number => {
-  const page = Number.parseInt(value || '1', 10)
-  return Number.isFinite(page) && page > 0 ? page : 1
+  const page = (value || '').trim()
+  const parsed = Number(page)
+  return /^[1-9]\d*$/.test(page) && Number.isFinite(parsed) ? parsed : 1
 }
 
 const normalizedPageParam = (params: URLSearchParams): string => {
@@ -110,6 +111,7 @@ export function useSearchPage<T>({
     order,
   })
   stateRef.current = { currentPage, searchQuery, sortBy, order }
+  const fetchVersion = useRef(0)
 
   useEffect(() => {
     // Only reset when filters actually change (Strict Mode safe — skips mount / re-invoke).
@@ -188,6 +190,7 @@ export function useSearchPage<T>({
 
   // Fetch data when state changes
   useEffect(() => {
+    const requestVersion = ++fetchVersion.current
     setIsLoaded(false)
 
     const fetchData = async () => {
@@ -211,6 +214,8 @@ export function useSearchPage<T>({
           [...stableFacetFilters]
         )
 
+        if (requestVersion !== fetchVersion.current) return
+
         if ('hits' in response) {
           setItems(response.hits)
           setTotalPages(response.totalPages ?? 0)
@@ -218,6 +223,7 @@ export function useSearchPage<T>({
           handleAppError(response)
         }
       } catch (error) {
+        if (requestVersion !== fetchVersion.current) return
         handleAppError(error)
       }
       setIsLoaded(true)
