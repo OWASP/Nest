@@ -478,6 +478,134 @@ describe('UserMenu Component', () => {
       expect(screen.getByTestId('github-icon')).toBeInTheDocument()
     })
 
+    it('renders user display name and handle when authenticated', () => {
+      mockUseSession.mockReturnValue({
+        session: {
+          ...mockSession,
+          user: {
+            ...mockSession.user,
+            name: 'John Doe',
+            login: 'johndoe',
+          },
+        },
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('@johndoe')).toBeInTheDocument()
+    })
+
+    it('falls back to login when name is absent and does not duplicate handle', () => {
+      mockUseSession.mockReturnValue({
+        session: {
+          ...mockSession,
+          user: {
+            ...mockSession.user,
+            name: undefined,
+            login: 'johndoe',
+          },
+        },
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      expect(screen.getByText('johndoe')).toBeInTheDocument()
+      expect(screen.queryByText('@johndoe')).not.toBeInTheDocument()
+    })
+
+    it('does not render handle when display name matches handle case-insensitively', () => {
+      mockUseSession.mockReturnValue({
+        session: {
+          ...mockSession,
+          user: {
+            ...mockSession.user,
+            name: 'JohnDoe',
+            login: 'johndoe',
+          },
+        },
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      expect(screen.getByText('JohnDoe')).toBeInTheDocument()
+      expect(screen.queryByText('@johndoe')).not.toBeInTheDocument()
+    })
+
+    it('renders handle derived from email when name and login are absent', () => {
+      mockUseSession.mockReturnValue({
+        session: {
+          ...mockSession,
+          user: {
+            ...mockSession.user,
+            name: undefined,
+            login: undefined,
+            email: 'john@example.com',
+          },
+        },
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      expect(screen.getByText('User')).toBeInTheDocument()
+      expect(screen.getByText('@john')).toBeInTheDocument()
+    })
+
+    it('falls back to User when neither name nor login is present', () => {
+      mockUseSession.mockReturnValue({
+        session: {
+          ...mockSession,
+          user: {
+            ...mockSession.user,
+            name: undefined,
+            login: undefined,
+            email: undefined,
+          },
+        },
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      expect(screen.getByText('User')).toBeInTheDocument()
+      expect(screen.queryByText(/^@/)).not.toBeInTheDocument()
+    })
+
+    it('toggles chevron rotation class when dropdown opens and closes', async () => {
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      const { container } = render(<UserMenu isGitHubAuthEnabled={true} />)
+      const chevron = container.querySelector('svg.transition-transform')
+      expect(chevron).toBeInTheDocument()
+      expect(chevron).not.toHaveClass('rotate-180')
+
+      const button = screen.getByRole('button')
+      fireEvent.click(button)
+
+      await waitFor(() => {
+        expect(chevron).toHaveClass('rotate-180')
+      })
+
+      fireEvent.click(button)
+
+      await waitFor(() => {
+        expect(chevron).not.toHaveClass('rotate-180')
+      })
+    })
+
     it('renders correct sign out button text', async () => {
       mockUseSession.mockReturnValue({
         session: mockSession,

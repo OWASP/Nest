@@ -66,6 +66,10 @@ export default function UserMenu({
   const userMenuItemClasses =
     'block w-full cursor-pointer px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
 
+  const displayName = session?.user?.name || session?.user?.login || 'User'
+  const userHandle = session?.user?.login ?? session?.user?.email?.split('@')[0]
+  const showHandle = Boolean(userHandle && userHandle.toLowerCase() !== displayName.toLowerCase())
+
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
@@ -74,10 +78,10 @@ export default function UserMenu({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
-        className="w-auto cursor-pointer focus:outline-hidden"
+        className="flex w-auto cursor-pointer items-center gap-2 focus:outline-hidden"
         disabled={isLoggingOut}
       >
-        <div className="h-10 w-10 overflow-hidden rounded-full">
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
           <Image
             src={session?.user?.image ?? '/default-avatar.png'}
             alt="User avatar"
@@ -86,8 +90,28 @@ export default function UserMenu({
             className="h-full w-full object-cover"
           />
         </div>
+        <div className="flex min-w-0 flex-col items-start leading-tight">
+          <span className="max-w-28 truncate text-sm font-semibold text-slate-800 sm:max-w-36 dark:text-slate-200">
+            {displayName}
+          </span>
+          {showHandle && (
+            <span className="max-w-28 truncate text-xs text-slate-500 sm:max-w-36 dark:text-slate-400">
+              @{userHandle}
+            </span>
+          )}
+        </div>
+        <svg
+          className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 dark:text-slate-400 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
-
       {isOpen && (
         <div
           id={dropdownId}
