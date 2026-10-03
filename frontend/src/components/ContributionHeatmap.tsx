@@ -278,21 +278,21 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
     const weeksCount = heatmapSeries[0]?.data?.length || 0
 
     if (variant === 'compact') {
-      const pixelPerWeek = 13.4
-      const padding = 40
+      const pixelPerWeek = 14
+      const padding = 60
       const calculatedWidth = weeksCount * pixelPerWeek + padding
       return Math.max(400, calculatedWidth)
     }
 
     if (variant === 'medium') {
-      const pixelPerWeek = 16
-      const padding = 45
+      const pixelPerWeek = 17
+      const padding = 70
       const calculatedWidth = weeksCount * pixelPerWeek + padding
       return Math.max(500, calculatedWidth)
     }
 
-    const pixelPerWeek = 19.5
-    const padding = 50
+    const pixelPerWeek = 20
+    const padding = 80
     const calculatedWidth = weeksCount * pixelPerWeek + padding
     return Math.max(600, calculatedWidth)
   }, [heatmapSeries, variant])
@@ -312,7 +312,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       )}
 
       {/* scroll wrapper for small screens */}
-      <div className="scrollbar-default w-full overflow-x-auto overflow-y-hidden">
+      <div className="scrollbar-hidden w-full overflow-x-auto overflow-y-hidden">
         <style>
           {`
             .apexcharts-tooltip {
@@ -323,20 +323,35 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             .apexcharts-tooltip * {
               border: none !important;
             }
-            .scrollbar-default {
-              scrollbar-width: thin;
+            .scrollbar-hidden {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
             }
-
+            .scrollbar-hidden::-webkit-scrollbar {
+              display: none;
+            }
           `}
         </style>
 
-        <div className="inline-block">
+        <div className="mx-auto w-max px-2 md:hidden">
           <Chart
             height={getChartHeight()}
             options={options}
             series={heatmapSeries}
             type="heatmap"
             width={chartWidth}
+          />
+        </div>
+        <div
+          className="hidden w-full px-2 md:block"
+          style={{ aspectRatio: `${chartWidth} / ${getChartHeight()}` }}
+        >
+          <Chart
+            height="100%"
+            options={options}
+            series={heatmapSeries}
+            type="heatmap"
+            width="100%"
           />
         </div>
       </div>
