@@ -151,6 +151,7 @@ class TestDumpDataCommand:
             "--no-owner",
             "--no-privileges",
             "--format=custom",
+            "--table=public.django_content_type",
             "--table=public.owasp_*",
             "--table=public.github_*",
             "--table=public.slack_members",
