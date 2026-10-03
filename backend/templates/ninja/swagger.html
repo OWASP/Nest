@@ -4,12 +4,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link type="text/css"
-              rel="stylesheet"
-              href="{% static 'ninja/swagger-ui.css' %}">
-        <link type="text/css"
-              rel="stylesheet"
-              href="{% static 'css/swagger-custom-ui.css' %}">
+        <link rel="stylesheet" href="{% static 'ninja/swagger-ui.css' %}">
+        <link rel="stylesheet" href="{% static 'css/swagger-custom-ui.css' %}">
         {% include "ninja/favicons.html" %}
         <title>{{ api.title }}</title>
         <script>
