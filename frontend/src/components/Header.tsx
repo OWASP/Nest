@@ -12,8 +12,8 @@ import {
   FaBars,
   FaTimes,
 } from 'react-icons/fa'
-import { headerLinks } from 'utils/constants'
 import { acquireBodyScrollLock, releaseBodyScrollLock } from 'utils/bodyScrollLock'
+import { headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
@@ -29,9 +29,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
   const closeMobileMenu = () => setMobileMenuOpen(false)
   const logoSrc = '/img/logo_dark.png'
-  const visibleLinks = headerLinks.filter(
-    (link) => !link.requiresGitHubAuth || isGitHubAuthEnabled
-  )
+  const visibleLinks = headerLinks.filter((link) => !link.requiresGitHubAuth || isGitHubAuthEnabled)
 
   useEffect(() => {
     setMobileMenuOpen(false)
@@ -79,7 +77,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
       <div
-        className="relative z-50 flex h-16 w-full min-w-0 items-center gap-2 px-3 sm:gap-3 sm:px-4 max-lg:justify-between"
+        className="relative z-50 flex h-16 w-full min-w-0 items-center gap-2 px-3 max-lg:justify-between sm:gap-3 sm:px-4"
         id="navbar-sticky"
       >
         {/* Logo */}
@@ -104,10 +102,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             </div>
           </div>
         </Link>
-        <nav
-          aria-label="Main"
-          className="hidden flex-1 items-center pl-2 font-medium lg:flex"
-        >
+        <nav aria-label="Main" className="hidden flex-1 items-center pl-2 font-medium lg:flex">
           <div className="flex items-center gap-1">
             {visibleLinks.map((link) => {
               return link.submenu ? (
@@ -117,7 +112,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                   key={link.text}
                   href={link.href || '/'}
                   className={cn(
-                    'navlink shrink-0 whitespace-nowrap px-2 py-2 text-sm text-slate-700 transition-colors duration-200 hover:text-white xl:px-3 xl:text-base dark:text-slate-300 dark:hover:text-blue-400',
+                    'navlink shrink-0 px-2 py-2 text-sm whitespace-nowrap text-slate-700 transition-colors duration-200 hover:text-white xl:px-3 xl:text-base dark:text-slate-300 dark:hover:text-blue-400',
                     pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                   )}
                   aria-current={pathname === link.href ? 'page' : undefined}

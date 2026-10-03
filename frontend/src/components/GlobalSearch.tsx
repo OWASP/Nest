@@ -9,13 +9,13 @@ import { FaTimes, FaSearch } from 'react-icons/fa'
 import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
 import { SiAlgolia } from 'react-icons/si'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { acquireBodyScrollLock, releaseBodyScrollLock } from 'utils/bodyScrollLock'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { Suggestion } from 'types/search'
 import type { User } from 'types/user'
+import { acquireBodyScrollLock, releaseBodyScrollLock } from 'utils/bodyScrollLock'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 
