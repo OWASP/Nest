@@ -1,13 +1,18 @@
 """GraphQL node for Admin model."""
 
+from typing import TYPE_CHECKING
+
 import strawberry
 
+if TYPE_CHECKING:
+    from apps.github.models.user import User as GitHubUser
 
 @strawberry.type
 class AdminNode:
     """A GraphQL node representing a mentorship admin."""
 
     id: strawberry.ID
+    github_user: GitHubUser | None
 
     @strawberry.field(name="avatarUrl")
     def avatar_url(self) -> str:
