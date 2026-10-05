@@ -1,2 +1,2 @@
 pre-commit==4.6.2
-virtualenv==21.14.4
+virtualenv==21.14.5
