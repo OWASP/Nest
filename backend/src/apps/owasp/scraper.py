@@ -24,6 +24,7 @@ class OwaspScraper:
 
     def __init__(self, url: bytes | str) -> None:
         """Create OWASP site scraper."""
+        self.is_request_failed = False
         self.page_tree = None
 
         http_adapter = HTTPAdapter(
@@ -41,15 +42,27 @@ class OwaspScraper:
         try:
             page_response = self.session.get(url, timeout=TIMEOUT)
         except requests.exceptions.RequestException:
-            logger.exception("Request failed", extra={"url": url})
+            logger.exception("Transient request failure for %s, skipping deactivation", url)
+            self.is_request_failed = True
             return
 
         if page_response.status_code == HTTPStatus.NOT_FOUND:
             return
 
+        if page_response.status_code != HTTPStatus.OK:
+            logger.warning(
+                "Unexpected status code %s for %s, skipping deactivation",
+                page_response.status_code,
+                url,
+            )
+            self.is_request_failed = True
+            return
+
         try:
             self.page_tree = html.fromstring(page_response.content)
         except etree.ParserError:
+            logger.warning("Failed to parse response for %s, skipping deactivation", url)
+            self.is_request_failed = True
             return
 
     def get_audience(self) -> list[str]:
