@@ -15,7 +15,6 @@ minimumReleaseAgeExclude:
   - '@graphql-codegen/typescript-operations@6.1.0'
   - '@graphql-codegen/typescript@6.1.0'
   - '@graphql-codegen/visitor-plugin-common@7.2.0'
-  - '@graphql-tools/utils@11.2.0'
   - '@img/sharp-darwin-arm64@0.35.4'
   - '@img/sharp-darwin-x64@0.35.4'
   - '@img/sharp-freebsd-wasm32@0.35.4'
@@ -74,11 +73,13 @@ minimumReleaseAgeExclude:
   - node-releases@2.0.51
   - postcss@8.5.23
   - protobufjs@7.6.4
+  - proxy-addr@2.0.8
   - qs@6.16.0
   - react-is@19.2.8
   - rxjs@7.8.2
   - sharp@0.35.4
   - shell-quote@1.9.0
+  - source-map-js@1.2.2
   - terser@5.49.0
   - tmp@0.2.7
   - uuid@11.1.1
@@ -87,6 +88,8 @@ minimumReleaseAgeExclude:
   - ws@8.21.0
 
 overrides:
+  # CVE-2026-104852 is fixed only in 12.0.1. 11.2.x and 12.0.0 are affected.
+  '@graphql-tools/utils': 12.0.1
   # Drop extract-zip (unfixed GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv) from
   # @lhci/cli → lighthouse → puppeteer-core@24 (which pins browsers 2.x).
   '@opentelemetry/core': 2.8.0
@@ -96,6 +99,7 @@ overrides:
   body-parser: 1.20.6
   brace-expansion@5: 5.0.12
   browserslist: 4.28.7
+  compression: 1.8.2
   dompurify: 3.4.16
   fast-uri: 3.1.8
   glob: 11.1.0
@@ -105,12 +109,14 @@ overrides:
   nanoid@3: 3.3.18
   postcss: 8.5.23
   protobufjs: 7.6.4
+  proxy-addr: 2.0.8
   proxy-agent: 8.0.2
   qs: 6.16.0
   rxjs: 7.8.2
   serialize-javascript: 7.0.5
   sharp: 0.35.4
   shell-quote: 1.9.0
+  source-map-js: 1.2.2
   test-exclude: 7.0.2
   tmp: 0.2.7
   undici: 7.29.1

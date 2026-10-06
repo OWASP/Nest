@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  smol-toml: 1.7.1
+  smol-toml: 1.9.0
 
 importers:
 
@@ -419,8 +419,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  smol-toml@1.7.1:
-    resolution: {integrity: sha512-PPlsspAZ4jbMBu5DMFhfUGDQLu/vrL4SyBROVS37x8ynnVmFIs1VPBz1Co8Xks3TvpIaZXmU85y4DrQ+UyVFoQ==}
+  smol-toml@1.9.0:
+    resolution: {integrity: sha512-hpd+HLON7HdZXqYchMM/+LaTTbdK0AU3NngIJ4KVyWbY9bfQqdL9cD+4yf6dUoU2Ap4VsU0JkQi6FxAI1B2mXQ==}
     engines: {node: '>= 18'}
 
   tinyglobby@0.2.17:
@@ -693,7 +693,7 @@ snapshots:
     dependencies:
       '@cspell/cspell-types': 10.1.1
       comment-json: 5.0.0
-      smol-toml: 1.7.1
+      smol-toml: 1.9.0
       yaml: 2.9.0
 
   cspell-dictionary@10.1.1:
@@ -815,7 +815,7 @@ snapshots:
 
   semver@7.8.5: {}
 
-  smol-toml@1.7.1: {}
+  smol-toml@1.9.0: {}
 
   tinyglobby@0.2.17:
     dependencies:
