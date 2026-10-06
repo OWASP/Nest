@@ -164,6 +164,7 @@ libgobject
 libharfbuzz
 libpango
 libpangoft
+librsvg
 libx
 lighthouseci
 lighthouserc

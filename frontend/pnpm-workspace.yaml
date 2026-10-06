@@ -15,33 +15,32 @@ minimumReleaseAgeExclude:
   - '@graphql-codegen/typescript-operations@6.1.0'
   - '@graphql-codegen/typescript@6.1.0'
   - '@graphql-codegen/visitor-plugin-common@7.2.0'
-  - '@graphql-tools/utils@11.2.0'
-  - '@img/sharp-darwin-arm64@0.35.4'
-  - '@img/sharp-darwin-x64@0.35.4'
-  - '@img/sharp-freebsd-wasm32@0.35.4'
-  - '@img/sharp-libvips-darwin-arm64@1.3.3'
-  - '@img/sharp-libvips-darwin-x64@1.3.3'
-  - '@img/sharp-libvips-linux-arm@1.3.3'
-  - '@img/sharp-libvips-linux-arm64@1.3.3'
-  - '@img/sharp-libvips-linux-ppc64@1.3.3'
-  - '@img/sharp-libvips-linux-riscv64@1.3.3'
-  - '@img/sharp-libvips-linux-s390x@1.3.3'
-  - '@img/sharp-libvips-linux-x64@1.3.3'
-  - '@img/sharp-libvips-linuxmusl-arm64@1.3.3'
-  - '@img/sharp-libvips-linuxmusl-x64@1.3.3'
-  - '@img/sharp-linux-arm@0.35.4'
-  - '@img/sharp-linux-arm64@0.35.4'
-  - '@img/sharp-linux-ppc64@0.35.4'
-  - '@img/sharp-linux-riscv64@0.35.4'
-  - '@img/sharp-linux-s390x@0.35.4'
-  - '@img/sharp-linux-x64@0.35.4'
-  - '@img/sharp-linuxmusl-arm64@0.35.4'
-  - '@img/sharp-linuxmusl-x64@0.35.4'
-  - '@img/sharp-wasm32@0.35.4'
-  - '@img/sharp-webcontainers-wasm32@0.35.4'
-  - '@img/sharp-win32-arm64@0.35.4'
-  - '@img/sharp-win32-ia32@0.35.4'
-  - '@img/sharp-win32-x64@0.35.4'
+  - '@img/sharp-darwin-arm64@0.35.5'
+  - '@img/sharp-darwin-x64@0.35.5'
+  - '@img/sharp-freebsd-wasm32@0.35.5'
+  - '@img/sharp-libvips-darwin-arm64@1.3.4'
+  - '@img/sharp-libvips-darwin-x64@1.3.4'
+  - '@img/sharp-libvips-linux-arm@1.3.4'
+  - '@img/sharp-libvips-linux-arm64@1.3.4'
+  - '@img/sharp-libvips-linux-ppc64@1.3.4'
+  - '@img/sharp-libvips-linux-riscv64@1.3.4'
+  - '@img/sharp-libvips-linux-s390x@1.3.4'
+  - '@img/sharp-libvips-linux-x64@1.3.4'
+  - '@img/sharp-libvips-linuxmusl-arm64@1.3.4'
+  - '@img/sharp-libvips-linuxmusl-x64@1.3.4'
+  - '@img/sharp-linux-arm@0.35.5'
+  - '@img/sharp-linux-arm64@0.35.5'
+  - '@img/sharp-linux-ppc64@0.35.5'
+  - '@img/sharp-linux-riscv64@0.35.5'
+  - '@img/sharp-linux-s390x@0.35.5'
+  - '@img/sharp-linux-x64@0.35.5'
+  - '@img/sharp-linuxmusl-arm64@0.35.5'
+  - '@img/sharp-linuxmusl-x64@0.35.5'
+  - '@img/sharp-wasm32@0.35.5'
+  - '@img/sharp-webcontainers-wasm32@0.35.5'
+  - '@img/sharp-win32-arm64@0.35.5'
+  - '@img/sharp-win32-ia32@0.35.5'
+  - '@img/sharp-win32-x64@0.35.5'
   - '@next/env@16.3.8'
   - '@next/swc-darwin-arm64@16.3.8'
   - '@next/swc-darwin-x64@16.3.8'
@@ -74,11 +73,13 @@ minimumReleaseAgeExclude:
   - node-releases@2.0.51
   - postcss@8.5.23
   - protobufjs@7.6.4
+  - proxy-addr@2.0.8
   - qs@6.16.0
   - react-is@19.2.8
   - rxjs@7.8.2
-  - sharp@0.35.4
-  - shell-quote@1.9.0
+  - sharp@0.35.5
+  - shell-quote@1.11.0
+  - source-map-js@1.2.2
   - terser@5.49.0
   - tmp@0.2.7
   - uuid@11.1.1
@@ -87,6 +88,9 @@ minimumReleaseAgeExclude:
   - ws@8.21.0
 
 overrides:
+  '@graphql-tools/executor-legacy-ws': 1.1.35
+  # CVE-2026-104852 is fixed only in 12.0.1. 11.2.x and 12.0.0 are affected.
+  '@graphql-tools/utils': 12.0.1
   # Drop extract-zip (unfixed GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv) from
   # @lhci/cli → lighthouse → puppeteer-core@24 (which pins browsers 2.x).
   '@opentelemetry/core': 2.8.0
@@ -96,6 +100,7 @@ overrides:
   body-parser: 1.20.6
   brace-expansion@5: 5.0.12
   browserslist: 4.28.7
+  compression: 1.8.2
   dompurify: 3.4.16
   fast-uri: 3.1.8
   glob: 11.1.0
@@ -105,12 +110,16 @@ overrides:
   nanoid@3: 3.3.18
   postcss: 8.5.23
   protobufjs: 7.6.4
+  proxy-addr: 2.0.8
   proxy-agent: 8.0.2
   qs: 6.16.0
   rxjs: 7.8.2
   serialize-javascript: 7.0.5
-  sharp: 0.35.4
-  shell-quote: 1.9.0
+  # GHSA-wq5f-xc86-pv6w: librsvg in the 0.35.4 prebuilds, fixed in 0.35.5.
+  sharp: 0.35.5
+  # GHSA-pqg4-j6r4-53mv: quote() injection after a comment token, fixed in 1.11.0.
+  shell-quote: 1.11.0
+  source-map-js: 1.2.2
   test-exclude: 7.0.2
   tmp: 0.2.7
   undici: 7.29.1
