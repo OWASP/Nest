@@ -6,7 +6,7 @@ from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
-from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.api.internal.nodes.repository import RECENT_ISSUES_LIMIT, RepositoryNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -25,7 +25,6 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
             "description",
             "forks_count",
             "is_archived",
-            "issues",
             "key",
             "languages",
             "latest_release",
@@ -34,6 +33,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
             "open_issues_count",
             "organization",
             "project",
+            "recent_issues",
             "recent_milestones",
             "releases",
             "size",
@@ -46,8 +46,8 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         }
         assert expected_field_names.issubset(field_names)
 
-    def test_resolve_issues(self):
-        field = self._get_field_by_name("issues", RepositoryNode)
+    def test_resolve_recent_issues(self):
+        field = self._get_field_by_name("recent_issues", RepositoryNode)
         assert field is not None
         assert field.type.of_type is IssueNode
 
@@ -91,16 +91,26 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         assert field is not None
         assert field.type is str
 
-    def test_issues_method(self):
-        """Test issues method resolution."""
+    def test_recent_issues_method(self):
+        """Test recent_issues method resolution."""
         mock_repository = Mock()
         mock_issues = Mock()
         mock_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.issues = mock_issues
+        field = self._get_field_by_name("recent_issues", RepositoryNode)
+        result = field.base_resolver.wrapped_func(None, mock_repository)
 
-        field = self._get_field_by_name("issues", RepositoryNode)
-        field.base_resolver.wrapped_func(None, mock_repository)
+        assert result == []
         mock_issues.order_by.assert_called_with("-created_at")
+        requested_slice = mock_issues.order_by.return_value.__getitem__.call_args.args[0]
+        assert requested_slice.start is None
+        assert requested_slice.stop == RECENT_ISSUES_LIMIT
+        assert requested_slice.step is None
+
+    def test_issues_field_removed(self):
+        """Ensure the old misleading 'issues' field name no longer exists."""
+        field = self._get_field_by_name("issues", RepositoryNode)
+        assert field is None
 
     def test_recent_milestones_with_invalid_limit(self):
         """Test recent_milestones returns empty list for invalid limit."""

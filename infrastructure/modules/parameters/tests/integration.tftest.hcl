@@ -10,7 +10,6 @@ provider "aws" {
 
 variables {
   common_tags                    = { Environment = "test", Project = "nest" }
-  db_credentials_secret_arn      = "arn:aws:secretsmanager:us-east-1:000000000000:secret:nest-test-db-credentials"
   db_password_arn                = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_DB_PASSWORD"
   django_allowed_hosts           = "nest.owasp.dev"
   django_allowed_origins         = "https://nest.owasp.dev"
@@ -30,8 +29,6 @@ variables {
   nextauth_url                   = "https://nest.owasp.dev"
   project_name                   = "nest"
   redis_password_arn             = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_REDIS_PASSWORD"
-  redis_password_secret_arn      = "arn:aws:secretsmanager:us-east-1:000000000000:secret:/nest/test/DJANGO_REDIS_PASSWORD"
-  runtime_secrets_mode           = "prepare"
   secret_recovery_window_in_days = 0
   slack_bot_token_suffix         = "T04T40NHX"
 }
@@ -70,17 +67,25 @@ run "parameters_integration_apply" {
   }
 
   assert {
-    condition     = aws_secretsmanager_secret.django_secret_key.name == "/${var.project_name}/${var.environment}/DJANGO_SECRET_KEY"
-    error_message = "Secrets Manager django_secret_key name format is incorrect."
+    condition     = aws_ssm_parameter.django_secret_key.name == "/${var.project_name}/${var.environment}/DJANGO_SECRET_KEY"
+    error_message = "SSM django_secret_key parameter path format is incorrect."
   }
 
   assert {
-    condition     = aws_secretsmanager_secret.django_secret_key.kms_key_id == var.kms_key_arn
-    error_message = "Secrets Manager django_secret_key KMS key ID is incorrect."
+    condition     = aws_ssm_parameter.django_secret_key.type == "SecureString"
+    error_message = "SSM django_secret_key parameter type must be SecureString."
+  }
+
+  assert {
+    condition = (
+      aws_secretsmanager_secret_version.django_secret_key.secret_string == aws_ssm_parameter.django_secret_key.value &&
+      aws_secretsmanager_secret_version.nextauth_secret.secret_string == aws_ssm_parameter.nextauth_secret.value
+    )
+    error_message = "Secrets Manager must receive the existing Django and NextAuth values while SSM is retained."
   }
 
   assert {
     condition     = aws_secretsmanager_secret.external_runtime["GITHUB_TOKEN"].name == "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
-    error_message = "Secrets Manager GITHUB_TOKEN name format is incorrect."
+    error_message = "External runtime secrets must be provisioned in the existing environment namespace."
   }
 }

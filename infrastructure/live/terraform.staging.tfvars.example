@@ -23,5 +23,4 @@ frontend_max_count              = 3
 frontend_min_count              = 1
 frontend_use_fargate_spot       = true
 project_name                  = "nest"
-runtime_secrets_mode = "prepare"
 tasks_use_fargate_spot        = true

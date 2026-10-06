@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.58.0"
+      version = "~> 6.64.0"
     }
   }
 }
@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "task" {
         }
       }
       name = "backend"
-      secrets = [for name, valueFrom in var.container_secrets : {
+      secrets = [for name, valueFrom in var.container_parameters_arns : {
         name      = name
         valueFrom = valueFrom
       }]

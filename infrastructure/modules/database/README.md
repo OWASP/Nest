@@ -3,16 +3,16 @@
 
 | Name | Version |
 | ---- | ------- |
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.58.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.16.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.64.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.9.0 |
 
 ## Providers
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.58.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.64.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.9.1 |
 
 ## Modules
 
@@ -58,7 +58,6 @@ No modules.
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key. | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_proxy_security_group_ids"></a> [proxy\_security\_group\_ids](#input\_proxy\_security\_group\_ids) | A list of security group IDs to associate with the RDS proxy. | `list(string)` | `[]` | no |
-| <a name="input_runtime_secrets_mode"></a> [runtime\_secrets\_mode](#input\_runtime\_secrets\_mode) | Runtime secret migration phase: 'prepare' retains SSM injection, while 'complete' uses Secrets Manager. | `string` | n/a | yes |
 | <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately. | `number` | `7` | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | A list of security group IDs to associate with the RDS database. | `list(string)` | n/a | yes |
 
@@ -66,7 +65,6 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_db_credentials_secret_arn"></a> [db\_credentials\_secret\_arn](#output\_db\_credentials\_secret\_arn) | The Secrets Manager ARN containing the database credentials. |
-| <a name="output_db_password_arn"></a> [db\_password\_arn](#output\_db\_password\_arn) | The legacy SSM parameter ARN for the database password. |
+| <a name="output_db_password_arn"></a> [db\_password\_arn](#output\_db\_password\_arn) | The SSM Parameter ARN of password of the RDS database. |
 | <a name="output_db_proxy_endpoint"></a> [db\_proxy\_endpoint](#output\_db\_proxy\_endpoint) | The endpoint of the RDS proxy. |
 <!-- END_TF_DOCS -->

@@ -72,32 +72,13 @@ variable "redis_port" {
   }
 }
 
-variable "runtime_secrets_mode" {
-  description = "Runtime secret migration phase: 'prepare' retains SSM injection, while 'complete' uses Secrets Manager."
-  type        = string
-
-  validation {
-    condition = contains(
-      ["prepare", "complete"],
-      var.runtime_secrets_mode,
-    )
-    error_message = "runtime_secrets_mode must be either prepare or complete."
-  }
-}
-
 variable "secret_recovery_window_in_days" {
-  description = "The number of days Secrets Manager waits before deleting the Redis secret."
+  description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
 
   validation {
-    condition = (
-      var.secret_recovery_window_in_days == 0 ||
-      (
-        var.secret_recovery_window_in_days >= 7 &&
-        var.secret_recovery_window_in_days <= 30
-      )
-    )
+    condition     = var.secret_recovery_window_in_days == 0 || (var.secret_recovery_window_in_days >= 7 && var.secret_recovery_window_in_days <= 30)
     error_message = "secret_recovery_window_in_days must be 0 or between 7 and 30."
   }
 }

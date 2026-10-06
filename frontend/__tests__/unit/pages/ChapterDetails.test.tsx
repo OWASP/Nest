@@ -9,6 +9,15 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
+jest.mock('react-apexcharts', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      return <div data-testid="mock-apexcharts">Mock ApexChart</div>
+    },
+  }
+})
+
 const mockRouter = {
   push: jest.fn(),
 }

@@ -24,6 +24,7 @@ Emay
 FOSS
 GBP
 GFKs
+GHSA
 GPG
 GRC
 GSOC
@@ -155,6 +156,7 @@ jaraco
 jumpstart
 kasya
 langgraph
+ldd
 lhci
 libexpat
 libfuzzer
@@ -222,6 +224,7 @@ relativedelta
 replicationgroup
 repositorycontributor
 requirepass
+rhysd
 rqworker
 rsc
 rudransh
@@ -236,6 +239,7 @@ shrivastava
 skillstruck
 slackbot
 slideshare
+smol
 someid
 speakerdeck
 subgrp
@@ -267,5 +271,6 @@ xsser
 xzf
 zapconfig
 zaproxy
+zizmor
 zsc
 éàëîôû

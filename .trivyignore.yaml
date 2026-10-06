@@ -46,3 +46,26 @@ misconfigurations:
   - id: AVD-AWS-0342  # EventBridge PassRole required to run ECS tasks
     paths:
       - infrastructure/modules/tasks/main.tf
+
+vulnerabilities:
+  # pip ships an embedded CycloneDX SBOM (pip/_vendor/bom.cdx.json); Trivy
+  # synthesizes packages with no PkgPath — scope by versioned PURL only.
+  # Upstream: https://github.com/pypa/pip/issues/14224
+  - id: CVE-2025-47273
+    purls:
+      - pkg:pypi/setuptools@70.3.0
+    statement: >-
+      setuptools PackageIndex path traversal; pip vendors only pkg_resources, not
+      package_index. False positive for pip's vendor tree.
+  - id: CVE-2026-59890
+    purls:
+      - pkg:pypi/setuptools@70.3.0
+    statement: >-
+      setuptools MANIFEST.in / Unicode sdist issue; pip vendors only pkg_resources.
+      False positive for pip's vendor tree.
+  - id: GHSA-6v7p-g79w-8964
+    purls:
+      - pkg:pypi/msgpack@1.1.2
+    statement: >-
+      msgpack 1.1.2 is only inside pip/_vendor (Nest uses ormsgpack). Accept until
+      pip vendors >=1.2.1.

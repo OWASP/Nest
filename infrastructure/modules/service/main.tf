@@ -1,10 +1,10 @@
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.58.0"
+      version = "~> 6.64.0"
     }
   }
 }
@@ -39,7 +39,7 @@ locals {
           protocol      = "tcp"
         }
       ]
-      secrets = [for name, valueFrom in var.container_secrets : {
+      secrets = [for name, valueFrom in var.parameters_arns : {
         name      = name
         valueFrom = valueFrom
       }]
@@ -260,12 +260,12 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
 }
 
 resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
-  description = "Policy to allow ECS tasks to read SSM parameters and Secrets Manager secrets."
+  description = "Policy to allow ECS tasks to read SSM parameters."
   name        = "${local.name_prefix}-ssm-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = concat([
+    Statement = [
       {
         Action = [
           "ssm:GetParameter",
@@ -274,24 +274,7 @@ resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
         Effect   = "Allow"
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
       }
-      ], length(var.secretsmanager_secret_arns) > 0 ? [
-      {
-        Action   = ["secretsmanager:GetSecretValue"]
-        Effect   = "Allow"
-        Resource = var.secretsmanager_secret_arns
-      }
-      ] : [], length(var.secretsmanager_secret_arns) > 0 ? [
-      {
-        Action = ["kms:Decrypt"]
-        Condition = {
-          StringEquals = {
-            "kms:ViaService" = "secretsmanager.${var.aws_region}.amazonaws.com"
-          }
-        }
-        Effect   = "Allow"
-        Resource = var.kms_key_arn
-      }
-    ] : [])
+    ]
   })
 }
 

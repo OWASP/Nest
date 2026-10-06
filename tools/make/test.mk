@@ -14,7 +14,11 @@ tools-test:
 	@docker run --rm $(TOOLS_TEST_IMAGE)
 
 tools-test-image-build:
-	@DOCKER_BUILDKIT=1 docker build -q \
-		--cache-from $(TOOLS_TEST_IMAGE) \
-		-f docker/tools/Dockerfile.tests . \
-		-t $(TOOLS_TEST_IMAGE) 1>/dev/null
+	@args=(
+		'-q'
+		'--cache-from=$(TOOLS_TEST_IMAGE)'
+		'-f=docker/tools/Dockerfile.tests'
+		.
+		'-t=$(TOOLS_TEST_IMAGE)'
+	)
+	DOCKER_BUILDKIT=1 docker build "$${args[@]}" 1>/dev/null
