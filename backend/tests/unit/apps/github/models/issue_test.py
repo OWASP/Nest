@@ -107,7 +107,7 @@ class TestIssueModel:
 
         issue.generate_summary()
 
-        assert issue.summary == ""
+        assert issue.summary == "Test Body"
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_hint")
@@ -218,6 +218,47 @@ class TestIssueModel:
             issue.generate_summary.assert_not_called()
         else:
             issue.generate_summary.assert_called_once()
+
+    def test_save_method_generates_summary_after_issue_is_saved(
+        self, mock_repository
+    ):
+        """Test that summary generation occurs after a new issue is saved."""
+        issue = Issue(
+            title="Test Title",
+            body="Test Body",
+            repository=mock_repository,
+            state=Issue.IssueState.OPEN,
+        )
+
+        assert issue.id is None
+
+        save_calls = []
+
+        def save_and_assign_id(*args, **kwargs):
+            save_calls.append(kwargs)
+            issue.id = 1
+
+        def generate_summary():
+            assert issue.id == 1
+            issue.summary = "This is a summary."
+
+        with (
+            patch(
+                "apps.github.models.issue.BulkSaveModel.save",
+                side_effect=save_and_assign_id,
+            ),
+            patch.object(
+                issue, "generate_summary", side_effect=generate_summary
+            ) as mock_summary,
+        ):
+            issue.save()
+
+        assert issue.id == 1
+        mock_summary.assert_called_once()
+        assert issue.summary == "This is a summary."
+        assert len(save_calls) == 2
+        assert save_calls[1] == {"update_fields": ["summary"]}
+
 
     def test_save_method_when_issue_not_open(self, mock_repository):
         """Test save method when issue is not open."""
