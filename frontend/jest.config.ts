@@ -44,6 +44,7 @@ const config: Config = {
     '^.+\\.tsx?$': '@swc/jest',
   },
   moduleNameMapper: {
+    '^graphql$': '<rootDir>/node_modules/graphql/index.js',
     '^@mockData/(.*)$': '<rootDir>/__tests__/mockData/$1',
     '^@unit/(.*)$': '<rootDir>/__tests__/unit/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
