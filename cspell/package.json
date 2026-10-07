@@ -10,7 +10,7 @@
     "@cspell/dict-software-terms": "5.4.4",
     "@cspell/dict-terraform": "1.1.4",
     "@cspell/dict-win32": "2.0.10",
-    "cspell": "10.3.1"
+    "cspell": "10.3.2"
   },
   "packageManager": "pnpm@11.17.0"
 }
