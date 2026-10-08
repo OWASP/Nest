@@ -193,6 +193,24 @@ variable "enable_cron_tasks" {
   type        = bool
 }
 
+variable "grafana_admin_password_parameter_arn" {
+  description = "Externally managed SSM SecureString ARN for the initial Grafana admin password."
+  type        = string
+  default     = null
+}
+
+variable "grafana_admin_password_kms_key_arn" {
+  description = "Customer-managed password encryption key ARN; null uses the AWS-managed SSM key."
+  type        = string
+  default     = null
+}
+
+variable "grafana_domain_name" {
+  description = "Public Grafana hostname, without scheme or path; null leaves public URL configuration unset."
+  type        = string
+  default     = null
+}
+
 variable "grafana_image" {
   description = "Digest-pinned Grafana image; null leaves the Grafana runtime disabled."
   type        = string

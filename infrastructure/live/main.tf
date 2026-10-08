@@ -188,17 +188,20 @@ module "observability" {
     module.security.frontend_sg_id,
     module.security.tasks_sg_id,
   ]
-  assign_public_ip      = false
-  aws_region            = var.aws_region
-  common_tags           = local.common_tags
-  environment           = var.environment
-  grafana_desired_count = var.grafana_desired_count
-  grafana_image         = var.grafana_image
-  kms_key_arn           = module.kms.key_arn
-  project_name          = var.project_name
-  subnet_ids            = module.networking.private_subnet_ids
-  vm_image              = local.observability_vm_image
-  vpc_id                = module.networking.vpc_id
+  assign_public_ip                     = false
+  aws_region                           = var.aws_region
+  common_tags                          = local.common_tags
+  environment                          = var.environment
+  grafana_desired_count                = var.grafana_desired_count
+  grafana_admin_password_parameter_arn = var.grafana_admin_password_parameter_arn
+  grafana_admin_password_kms_key_arn   = var.grafana_admin_password_kms_key_arn
+  grafana_image                        = var.grafana_image
+  grafana_domain_name                  = var.grafana_domain_name
+  kms_key_arn                          = module.kms.key_arn
+  project_name                         = var.project_name
+  subnet_ids                           = module.networking.private_subnet_ids
+  vm_image                             = local.observability_vm_image
+  vpc_id                               = module.networking.vpc_id
 }
 
 module "parameters" {

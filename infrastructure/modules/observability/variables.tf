@@ -30,6 +30,39 @@ variable "environment" {
   type        = string
 }
 
+variable "grafana_admin_password_parameter_arn" {
+  description = "ARN of an externally managed SSM SecureString containing the initial Grafana admin password."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.grafana_admin_password_parameter_arn == null ? true : can(regex("^arn:aws[a-z-]*:ssm:[a-z0-9-]+:[0-9]{12}:parameter/.+$", var.grafana_admin_password_parameter_arn))
+    error_message = "Provide an SSM parameter ARN, not a plaintext password."
+  }
+}
+
+variable "grafana_admin_password_kms_key_arn" {
+  description = "Customer-managed KMS key ARN for the password parameter; null uses the AWS-managed SSM key."
+  type        = string
+  default     = null
+  validation {
+    condition = var.grafana_admin_password_kms_key_arn == null ? true : (
+      var.grafana_admin_password_parameter_arn != null &&
+      can(regex("^arn:aws[a-z-]*:kms:[a-z0-9-]+:[0-9]{12}:key/.+$", var.grafana_admin_password_kms_key_arn))
+    )
+    error_message = "A password KMS key requires a password parameter ARN and must be a KMS key ARN."
+  }
+}
+
+variable "grafana_domain_name" {
+  description = "Public Grafana hostname, without scheme or path; null leaves public URL configuration unset."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.grafana_domain_name == null ? true : can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.grafana_domain_name))
+    error_message = "Provide a lowercase DNS hostname, without https://, port, or path."
+  }
+}
+
 variable "grafana_image" {
   description = "Digest-pinned Grafana image; null omits Grafana runtime resources."
   type        = string
@@ -45,8 +78,8 @@ variable "grafana_desired_count" {
   type        = number
   default     = 0
   validation {
-    condition     = contains([0, 1], var.grafana_desired_count) && (var.grafana_desired_count == 0 || var.grafana_image != null)
-    error_message = "Grafana supports zero or one task, and starting a task requires grafana_image."
+    condition     = contains([0, 1], var.grafana_desired_count) && (var.grafana_desired_count == 0 || (var.grafana_image != null && var.grafana_admin_password_parameter_arn != null))
+    error_message = "Grafana supports zero or one task; starting requires an image and admin password parameter ARN."
   }
 }
 

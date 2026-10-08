@@ -6,15 +6,23 @@ locals {
     image     = var.grafana_image
     essential = true
     user      = "472:472"
-    environment = [
+    environment = concat([
       { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "false" },
       { name = "GF_USERS_ALLOW_SIGN_UP", value = "false" },
-      # Credentials will be wired separately; never bootstrap admin/admin.
-      { name = "GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION", value = "true" },
+      # Never bootstrap admin/admin when the password parameter is absent.
+      { name = "GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION", value = var.grafana_admin_password_parameter_arn == null ? "true" : "false" },
       { name = "GF_DATABASE_WAL", value = "false" },
       { name = "GF_LOG_MODE", value = "console" },
       { name = "O11Y_METRICS_URL", value = "http://${aws_service_discovery_service.vm.name}.${aws_service_discovery_private_dns_namespace.vm.name}:${var.vm_port}" }
-    ]
+      ], var.grafana_domain_name == null ? [] : [
+      { name = "GF_SERVER_DOMAIN", value = var.grafana_domain_name },
+      { name = "GF_SERVER_ROOT_URL", value = "https://${var.grafana_domain_name}/" },
+      { name = "GF_SECURITY_COOKIE_SECURE", value = "true" }
+    ])
+    secrets = var.grafana_admin_password_parameter_arn == null ? [] : [{
+      name      = "GF_SECURITY_ADMIN_PASSWORD"
+      valueFrom = var.grafana_admin_password_parameter_arn
+    }]
     portMappings = [{ containerPort = 3000, hostPort = 3000, protocol = "tcp" }]
     healthCheck = {
       command     = ["CMD-SHELL", "wget --spider -q http://127.0.0.1:3000/api/health || exit 1"]
@@ -33,6 +41,24 @@ locals {
       }
     }
   }
+}
+
+resource "aws_iam_role_policy" "grafana_password" {
+  count = local.grafana_enabled && var.grafana_admin_password_parameter_arn != null ? 1 : 0
+  name  = "grafana-password"
+  role  = aws_iam_role.grafana_execution.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat([{
+      Effect   = "Allow"
+      Action   = ["ssm:GetParameters"]
+      Resource = var.grafana_admin_password_parameter_arn
+      }], var.grafana_admin_password_kms_key_arn == null ? [] : [{
+      Effect   = "Allow"
+      Action   = ["kms:Decrypt"]
+      Resource = var.grafana_admin_password_kms_key_arn
+    }])
+  })
 }
 
 resource "aws_cloudwatch_log_group" "grafana" {
@@ -190,6 +216,7 @@ resource "aws_ecs_service" "grafana" {
     aws_efs_mount_target.vm,
     aws_iam_role_policy_attachment.grafana_image_pull,
     aws_iam_role_policy.grafana_logs,
+    aws_iam_role_policy.grafana_password,
     aws_security_group_rule.grafana_https,
     aws_security_group_rule.grafana_to_efs,
     aws_security_group_rule.efs_from_grafana,

@@ -5,8 +5,8 @@ seven-image retention policy as the application repositories.
 
 The existing Terraform CI role can publish to this repository through its
 environment-scoped ECR permissions. A separate Grafana ECS execution role has
-pull-only access to this repository. Logging permissions are added when the
-Grafana runtime is configured; secret permissions remain pending. The repository
+pull-only access to this repository. Logging and parameter-read permissions are
+added when the corresponding Grafana runtime settings are configured. The repository
 must exist before the first CI image push. Image publishing is handled by CI;
 runtime resources are configured as described below.
 
@@ -34,6 +34,29 @@ Publishing does not start a Grafana ECS service. The task definition and service
 are configured separately, as are application OTLP settings and egress rules in #5406.
 The opt-in flag does not enable Terraform's `enable_observability` setting.
 
+## Grafana public URL (pending ingress)
+
+Use a dedicated subdomain, for example `grafana.nest.owasp.dev` for staging.
+Set `grafana_domain_name` to the hostname only. This configures Grafana's HTTPS
+root URL, domain, and secure session cookies; it does **not** create DNS, a
+certificate, or an ALB route. TLS must terminate at the ingress while the private
+container continues listening on HTTP port 3000.
+
+Before adding a shared-ALB route, resolve the listener-wide Content Security
+Policy in `infrastructure/modules/alb/main.tf`. It also applies to Grafana and
+differs from Grafana's documented policy (including script evaluation and blob
+styles). Browser compatibility is not yet verified. Do not weaken Nest's policy
+globally to make Grafana work. A separate ingress would need maintainer agreement
+on architecture and additional cost.
+
+Remaining rollout work: agree on ingress/security policy, add HTTPS routing and
+scoped ALB security-group access, wire the verified image digest and settings into
+deployment, and verify login, datasource health, provisioned dashboards, and data
+persistence after a task restart in staging. Maintainers must supply the hostname,
+DNS/certificate setup, and externally managed SSM password parameter ARN. Keep
+the task count at zero until access is configured. App metrics export belongs to
+the separate metrics-wiring PR.
+
 ## Grafana runtime (draft)
 
 `grafana_image` defaults to null, so existing observability deployments do not
@@ -60,22 +83,47 @@ design. It is not a backup strategy.
 The datasource uses VictoriaMetrics' private Cloud Map name, with security-group
 rules allowing Grafana to query the metrics port. No application OTLP settings
 are changed. No Grafana ingress is opened yet; ALB/HTTPS integration remains
-pending. Anonymous access, self-signup, and initial default admin creation are
-disabled. Keep the service stopped until the agreed credential bootstrap is
-implemented. No SSM parameter or Secrets Manager secret is created here.
+pending. Anonymous access and self-signup are disabled. Keep the service stopped
+until credentials and browser access are configured.
+
+### Initial admin credentials
+
+Use an externally managed SSM **SecureString**, following the existing runtime
+parameter approach. Supply its ARN through `grafana_admin_password_parameter_arn`
+in the live configuration. The module does not create or read the parameter
+value; ECS injects it as `GF_SECURITY_ADMIN_PASSWORD` at task startup. The initial
+username is Grafana's default `admin`. Choose a strong, non-default password.
+
+For a customer-managed encryption key, also supply
+`grafana_admin_password_kms_key_arn` and ensure its key policy permits the Grafana
+execution role. Leave that input null for the AWS-managed SSM key. Permissions
+are scoped to the supplied parameter and optional key. The parameter must be
+reachable from the private task over HTTPS (through the configured network path).
+
+Without a parameter ARN, initial admin creation remains disabled and Terraform
+rejects a nonzero Grafana task count. Supplying an ARN does not verify that the
+parameter exists, is SecureString, or contains a strong password; those are
+deployment prerequisites. No password value belongs in Git, image build inputs,
+Terraform variables, or Terraform outputs.
+
+This password is for first-time database bootstrap. Changing the SSM value does
+not rotate an existing Grafana user's password; use Grafana's supported password
+reset procedure. ECS reads secret values when a task starts, not continuously.
+Preserve the EFS database and test login/restart behavior in staging. The release
+workflow still needs to pass the parameter ARN alongside the image settings.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.53.0 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.53.0 |
 
 ## Modules
@@ -85,7 +133,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [aws_cloudwatch_log_group.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ecr_lifecycle_policy.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_lifecycle_policy) | resource |
@@ -105,6 +153,7 @@ No modules.
 | [aws_iam_role.ecs_task_execution_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.grafana_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.grafana_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.grafana_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy_attachment.ecs_task_execution_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.grafana_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_security_group.efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
@@ -125,13 +174,16 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_app_security_group_ids"></a> [app\_security\_group\_ids](#input\_app\_security\_group\_ids) | Security group IDs of the application tasks allowed to send metrics to VictoriaMetrics. | `list(string)` | n/a | yes |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether to assign a public IP to the VictoriaMetrics task. | `bool` | `false` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the module is deployed. | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_grafana_admin_password_kms_key_arn"></a> [grafana\_admin\_password\_kms\_key\_arn](#input\_grafana\_admin\_password\_kms\_key\_arn) | Customer-managed KMS key ARN for the password parameter; null uses the AWS-managed SSM key. | `string` | `null` | no |
+| <a name="input_grafana_admin_password_parameter_arn"></a> [grafana\_admin\_password\_parameter\_arn](#input\_grafana\_admin\_password\_parameter\_arn) | ARN of an externally managed SSM SecureString containing the initial Grafana admin password. | `string` | `null` | no |
 | <a name="input_grafana_desired_count"></a> [grafana\_desired\_count](#input\_grafana\_desired\_count) | Grafana task count (0 or 1). Keep zero until credentials and access are configured. | `number` | `0` | no |
+| <a name="input_grafana_domain_name"></a> [grafana\_domain\_name](#input\_grafana\_domain\_name) | Public Grafana hostname, without scheme or path; null leaves public URL configuration unset. | `string` | `null` | no |
 | <a name="input_grafana_image"></a> [grafana\_image](#input\_grafana\_image) | Digest-pinned Grafana image; null omits Grafana runtime resources. | `string` | `null` | no |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key used to encrypt the EFS file system. | `string` | n/a | yes |
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The number of days to retain VictoriaMetrics container logs. | `number` | `90` | no |
@@ -148,7 +200,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | The ID of the EFS file system backing VictoriaMetrics storage. |
 | <a name="output_grafana_ecr_repository_arn"></a> [grafana\_ecr\_repository\_arn](#output\_grafana\_ecr\_repository\_arn) | The ARN of the repository for the Grafana image. |
 | <a name="output_grafana_ecr_repository_url"></a> [grafana\_ecr\_repository\_url](#output\_grafana\_ecr\_repository\_url) | The URL used to publish and pull the Grafana image. |

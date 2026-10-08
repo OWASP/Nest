@@ -12,6 +12,30 @@ variables {
   vpc_id                 = "vpc-12345"
 }
 
+run "grafana_https_public_url" {
+  command = plan
+  variables {
+    grafana_image       = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    grafana_domain_name = "grafana.nest.owasp.dev"
+  }
+  assert {
+    condition = (
+      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SERVER_DOMAIN"] == "grafana.nest.owasp.dev" &&
+      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SERVER_ROOT_URL"] == "https://grafana.nest.owasp.dev/" &&
+      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SECURITY_COOKIE_SECURE"] == "true"
+    )
+    error_message = "Grafana must generate HTTPS links and secure cookies for its configured subdomain."
+  }
+}
+
+run "grafana_rejects_url_in_hostname" {
+  command = plan
+  variables {
+    grafana_domain_name = "https://grafana.nest.owasp.dev/grafana"
+  }
+  expect_failures = [var.grafana_domain_name]
+}
+
 run "grafana_release_repository" {
   command = plan
 
@@ -97,6 +121,67 @@ run "grafana_private_single_instance_runtime" {
     )
     error_message = "Grafana must query private service discovery without enabling anonymous access or default admin credentials."
   }
+}
+
+run "grafana_bootstraps_with_ssm_password" {
+  command = plan
+  variables {
+    grafana_image                        = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    grafana_desired_count                = 1
+    grafana_admin_password_parameter_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/grafana/admin-password"
+  }
+  assert {
+    condition = (
+      aws_ecs_service.grafana[0].desired_count == 1 &&
+      one(local.grafana_container_definition.secrets).name == "GF_SECURITY_ADMIN_PASSWORD" &&
+      one(local.grafana_container_definition.secrets).valueFrom == var.grafana_admin_password_parameter_arn &&
+      !contains([for e in local.grafana_container_definition.environment : e.name], "GF_SECURITY_ADMIN_PASSWORD") &&
+      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION"] == "false"
+    )
+    error_message = "ECS must inject the bootstrap password by reference, never as a plaintext environment setting."
+  }
+  assert {
+    condition = (
+      length(jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement) == 1 &&
+      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[0].Resource == var.grafana_admin_password_parameter_arn &&
+      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[0].Action == ["ssm:GetParameters"]
+    )
+    error_message = "Read permission must cover only the supplied parameter; the default SSM key needs no custom key grant."
+  }
+}
+
+run "grafana_password_custom_key" {
+  command = plan
+  variables {
+    grafana_image                        = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    grafana_admin_password_parameter_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/grafana/admin-password"
+    grafana_admin_password_kms_key_arn   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+  }
+  assert {
+    condition = (
+      length(jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement) == 2 &&
+      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[1].Resource == var.grafana_admin_password_kms_key_arn &&
+      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[1].Action == ["kms:Decrypt"]
+    )
+    error_message = "Decryption must be scoped to the supplied customer-managed key."
+  }
+}
+
+run "grafana_rejects_start_without_password" {
+  command = plan
+  variables {
+    grafana_image         = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    grafana_desired_count = 1
+  }
+  expect_failures = [var.grafana_desired_count]
+}
+
+run "grafana_rejects_plaintext_password" {
+  command = plan
+  variables {
+    grafana_admin_password_parameter_arn = "not-an-arn"
+  }
+  expect_failures = [var.grafana_admin_password_parameter_arn]
 }
 
 run "grafana_rejects_multiple_writers" {
