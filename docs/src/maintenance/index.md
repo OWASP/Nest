@@ -13,7 +13,7 @@ Configuration lives in [`.github/dependabot.yml`](https://github.com/OWASP/Nest/
 
 ### Dependabot version updates
 
-Dependabot opens daily, grouped version-update PRs on `main` for:
+Dependabot opens weekly, grouped version-update PRs on `main` each Thursday for:
 
 - docker
 - docker-compose
