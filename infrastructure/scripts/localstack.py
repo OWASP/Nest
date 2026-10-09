@@ -257,6 +257,10 @@ class OverrideManager:
     # Temporary Terraform overrides that disable prevent_destroy during integration tests.
     OVERRIDES: list[tuple[str, str]] = [
         (
+            "infrastructure/modules/observability/test_override.tf",
+            "aws_efs_file_system.vm",
+        ),
+        (
             "infrastructure/modules/storage/modules/s3-bucket/test_override.tf",
             "aws_s3_bucket.this",
         ),

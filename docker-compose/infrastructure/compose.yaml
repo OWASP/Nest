@@ -31,6 +31,7 @@ services:
     network_mode: service:localstack
     pull_policy: never
     volumes:
+      - ../../docker:/home/owasp/docker:ro
       - ../../infrastructure/bootstrap:/home/owasp/infrastructure/bootstrap
       - ../../infrastructure/modules:/home/owasp/infrastructure/modules
       - ../../infrastructure/scripts:/home/owasp/infrastructure/scripts:ro
