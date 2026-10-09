@@ -38,7 +38,7 @@ Examples include `github-update-users`, `owasp-enrich-projects`, and
 ## Files
 
 Use singular, goal-based filenames such as `maintenance.mk`, `image.mk`, and
-`test.mk`. Keep `backend/Makefile` as a thin aggregator that includes shared and
+`test.mk`. Keep `backend/makefile` as a thin aggregator that includes shared and
 app-specific files. Backend test tooling is included through `test.mk`;
 `test.mk` includes `clusterfuzz.mk`.
 

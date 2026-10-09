@@ -18,9 +18,9 @@ repos:
         args:
           - --config
           - .bake.toml
-        # Component Makefiles use root-relative includes and call shared targets; mbake
+        # Component makefiles use root-relative includes and call shared targets; mbake
         # validates each file in isolation from its own directory, so only the root
-        # Makefile can be checked.
+        # makefile can be checked.
         exclude: ^(backend|cspell|docs|e2e|frontend|infrastructure|make|tools)/
 
   - repo: https://github.com/adrienverge/yamllint.git
@@ -52,7 +52,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: e8f7d69b957a30acb2c875078d5fd012de24b64c  # v0.16.7
+    rev: 2eeb5678de71a00c0902cbda7105d328432f72cb  # v0.16.8
     hooks:
       - id: ruff-check
         args:
