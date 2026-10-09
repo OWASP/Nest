@@ -1,5 +1,4 @@
-.PHONY: backend-dependency-audit backend-security-image-scan \
-	backend-security-build-image
+.PHONY: backend-dependency-audit backend-security-image-scan
 
 backend-dependency-audit:
 	@echo "Auditing backend Python dependencies..."
@@ -8,13 +7,7 @@ backend-dependency-audit:
 		poetry export -f requirements.txt --all-groups -o "$$req" && \
 		pip-audit --disable-pip -r "$$req"'
 
-# Keep $(MAKE) out of the scan recipe so `make -n` does not run docker under .ONESHELL.
-backend-security-build-image:
-	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then
-		$(MAKE) backend-image-build
-	fi
-
-backend-security-image-scan: backend-security-build-image
+backend-security-image-scan: backend-image-build-local
 	@echo "Scanning image: $(BACKEND_IMAGE_NAME)..."
 	image="$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //; s/ AS .*//' | head -1)"
 	args=(
