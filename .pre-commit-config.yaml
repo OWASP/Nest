@@ -18,9 +18,9 @@ repos:
         args:
           - --config
           - .bake.toml
-        # Component Makefiles use root-relative includes and call shared targets; mbake
+        # Component makefiles use root-relative includes and call shared targets; mbake
         # validates each file in isolation from its own directory, so only the root
-        # Makefile can be checked.
+        # makefile can be checked.
         exclude: ^(backend|cspell|docs|e2e|frontend|infrastructure|make|tools)/
 
   - repo: https://github.com/adrienverge/yamllint.git

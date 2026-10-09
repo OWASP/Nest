@@ -1,4 +1,4 @@
-.PHONY: backend-image-build backend-image-sbom backend-image-maybe-build-local
+.PHONY: backend-image-build backend-image-sbom backend-image-build-local
 
 BACKEND_IMAGE_NAME ?= nest-backend-local
 SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
@@ -14,12 +14,12 @@ backend-image-build:
 	DOCKER_BUILDKIT=1 docker build "$${args[@]}"
 
 # Keep $(MAKE) out of the SBOM recipe so `make -n` does not run docker under .ONESHELL.
-backend-image-maybe-build-local:
+backend-image-build-local:
 	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then
 		$(MAKE) backend-image-build
 	fi
 
-backend-image-sbom: backend-image-maybe-build-local
+backend-image-sbom: backend-image-build-local
 	@echo "Generating SBOM for image: $(BACKEND_IMAGE_NAME)..."
 	image="$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')"
 	args=(
