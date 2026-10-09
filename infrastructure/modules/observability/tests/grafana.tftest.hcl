@@ -8,21 +8,21 @@ variables {
   kms_key_arn            = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name           = "nest"
   subnet_ids             = ["subnet-1", "subnet-2"]
-  vm_image               = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
+  image                  = "victoriametrics/victoria-metrics:v1.145.0@sha256:c014fb5a711d38cb24fd0673197592cd1394bb903dbb16aea565620c9c8a3d70"
   vpc_id                 = "vpc-12345"
 }
 
 run "grafana_https_public_url" {
   command = plan
   variables {
-    grafana_image       = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    grafana_domain_name = "grafana.nest.owasp.dev"
+    dashboard_image       = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    dashboard_domain_name = "grafana.nest.owasp.dev"
   }
   assert {
     condition = (
-      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SERVER_DOMAIN"] == "grafana.nest.owasp.dev" &&
-      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SERVER_ROOT_URL"] == "https://grafana.nest.owasp.dev/" &&
-      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SECURITY_COOKIE_SECURE"] == "true"
+      { for e in local.dashboard_container_definition.environment : e.name => e.value }["GF_SERVER_DOMAIN"] == "grafana.nest.owasp.dev" &&
+      { for e in local.dashboard_container_definition.environment : e.name => e.value }["GF_SERVER_ROOT_URL"] == "https://grafana.nest.owasp.dev/" &&
+      { for e in local.dashboard_container_definition.environment : e.name => e.value }["GF_SECURITY_COOKIE_SECURE"] == "true"
     )
     error_message = "Grafana must generate HTTPS links and secure cookies for its configured subdomain."
   }
@@ -31,9 +31,9 @@ run "grafana_https_public_url" {
 run "grafana_rejects_url_in_hostname" {
   command = plan
   variables {
-    grafana_domain_name = "https://grafana.nest.owasp.dev/grafana"
+    dashboard_domain_name = "https://grafana.nest.owasp.dev/grafana"
   }
-  expect_failures = [var.grafana_domain_name]
+  expect_failures = [var.dashboard_domain_name]
 }
 
 run "grafana_release_repository" {
@@ -74,7 +74,7 @@ run "grafana_runtime_is_opt_in" {
 run "grafana_private_single_instance_runtime" {
   command = plan
   variables {
-    grafana_image = "123456789012.dkr.ecr.us-east-2.amazonaws.com/nest-test-grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    dashboard_image = "123456789012.dkr.ecr.us-east-2.amazonaws.com/nest-test-grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   }
 
   assert {
@@ -94,7 +94,7 @@ run "grafana_private_single_instance_runtime" {
     condition = (
       aws_ecs_task_definition.grafana[0].runtime_platform[0].cpu_architecture == "ARM64" &&
       jsondecode(aws_ecs_task_definition.grafana[0].container_definitions)[0].user == "472:472" &&
-      jsondecode(aws_ecs_task_definition.grafana[0].container_definitions)[0].image == var.grafana_image &&
+      jsondecode(aws_ecs_task_definition.grafana[0].container_definitions)[0].image == var.dashboard_image &&
       jsondecode(aws_ecs_task_definition.grafana[0].container_definitions)[0].healthCheck.command[1] == "wget --spider -q http://127.0.0.1:3000/api/health || exit 1"
     )
     error_message = "The task must run the supplied ARM64 image as Grafana's non-root user with a health check."
@@ -113,9 +113,9 @@ run "grafana_private_single_instance_runtime" {
 
   assert {
     condition = (
-      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_AUTH_ANONYMOUS_ENABLED"] == "false" &&
-      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION"] == "true" &&
-      { for e in local.grafana_container_definition.environment : e.name => e.value }["O11Y_METRICS_URL"] == "http://victoriametrics.nest-test-observability.internal:8428" &&
+      { for e in local.dashboard_container_definition.environment : e.name => e.value }["GF_AUTH_ANONYMOUS_ENABLED"] == "false" &&
+      { for e in local.dashboard_container_definition.environment : e.name => e.value }["GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION"] == "true" &&
+      { for e in local.dashboard_container_definition.environment : e.name => e.value }["O11Y_METRICS_URL"] == "http://victoriametrics.nest-test-observability.internal:8428" &&
       aws_security_group_rule.grafana_to_metrics[0].from_port == 8428 &&
       aws_security_group_rule.metrics_from_grafana[0].type == "ingress"
     )
@@ -126,24 +126,24 @@ run "grafana_private_single_instance_runtime" {
 run "grafana_bootstraps_with_ssm_password" {
   command = plan
   variables {
-    grafana_image                        = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    grafana_desired_count                = 1
-    grafana_admin_password_parameter_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/grafana/admin-password"
+    dashboard_image                        = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    dashboard_desired_count                = 1
+    dashboard_admin_password_parameter_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/grafana/admin-password"
   }
   assert {
     condition = (
       aws_ecs_service.grafana[0].desired_count == 1 &&
-      one(local.grafana_container_definition.secrets).name == "GF_SECURITY_ADMIN_PASSWORD" &&
-      one(local.grafana_container_definition.secrets).valueFrom == var.grafana_admin_password_parameter_arn &&
-      !contains([for e in local.grafana_container_definition.environment : e.name], "GF_SECURITY_ADMIN_PASSWORD") &&
-      { for e in local.grafana_container_definition.environment : e.name => e.value }["GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION"] == "false"
+      one(local.dashboard_container_definition.secrets).name == "GF_SECURITY_ADMIN_PASSWORD" &&
+      one(local.dashboard_container_definition.secrets).valueFrom == var.dashboard_admin_password_parameter_arn &&
+      !contains([for e in local.dashboard_container_definition.environment : e.name], "GF_SECURITY_ADMIN_PASSWORD") &&
+      { for e in local.dashboard_container_definition.environment : e.name => e.value }["GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION"] == "false"
     )
     error_message = "ECS must inject the bootstrap password by reference, never as a plaintext environment setting."
   }
   assert {
     condition = (
       length(jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement) == 1 &&
-      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[0].Resource == var.grafana_admin_password_parameter_arn &&
+      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[0].Resource == var.dashboard_admin_password_parameter_arn &&
       jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[0].Action == ["ssm:GetParameters"]
     )
     error_message = "Read permission must cover only the supplied parameter; the default SSM key needs no custom key grant."
@@ -153,14 +153,14 @@ run "grafana_bootstraps_with_ssm_password" {
 run "grafana_password_custom_key" {
   command = plan
   variables {
-    grafana_image                        = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    grafana_admin_password_parameter_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/grafana/admin-password"
-    grafana_admin_password_kms_key_arn   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+    dashboard_image                        = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    dashboard_admin_password_parameter_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/grafana/admin-password"
+    dashboard_admin_password_kms_key_arn   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   }
   assert {
     condition = (
       length(jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement) == 2 &&
-      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[1].Resource == var.grafana_admin_password_kms_key_arn &&
+      jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[1].Resource == var.dashboard_admin_password_kms_key_arn &&
       jsondecode(aws_iam_role_policy.grafana_password[0].policy).Statement[1].Action == ["kms:Decrypt"]
     )
     error_message = "Decryption must be scoped to the supplied customer-managed key."
@@ -170,35 +170,35 @@ run "grafana_password_custom_key" {
 run "grafana_rejects_start_without_password" {
   command = plan
   variables {
-    grafana_image         = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    grafana_desired_count = 1
+    dashboard_image         = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    dashboard_desired_count = 1
   }
-  expect_failures = [var.grafana_desired_count]
+  expect_failures = [var.dashboard_desired_count]
 }
 
 run "grafana_rejects_plaintext_password" {
   command = plan
   variables {
-    grafana_admin_password_parameter_arn = "not-an-arn"
+    dashboard_admin_password_parameter_arn = "not-an-arn"
   }
-  expect_failures = [var.grafana_admin_password_parameter_arn]
+  expect_failures = [var.dashboard_admin_password_parameter_arn]
 }
 
 run "grafana_rejects_multiple_writers" {
   command = plan
   variables {
-    grafana_image         = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    grafana_desired_count = 2
+    dashboard_image         = "example.com/grafana@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    dashboard_desired_count = 2
   }
-  expect_failures = [var.grafana_desired_count]
+  expect_failures = [var.dashboard_desired_count]
 }
 
 run "grafana_rejects_mutable_image" {
   command = plan
   variables {
-    grafana_image = "example.com/grafana:latest"
+    dashboard_image = "example.com/grafana:latest"
   }
-  expect_failures = [var.grafana_image]
+  expect_failures = [var.dashboard_image]
 }
 
 run "grafana_pull_permissions_are_repository_scoped" {
@@ -236,8 +236,8 @@ run "grafana_pull_permissions_are_repository_scoped" {
 
   assert {
     condition = (
-      output.grafana_ecr_repository_arn == aws_ecr_repository.grafana.arn &&
-      output.grafana_ecr_repository_url == aws_ecr_repository.grafana.repository_url
+      output.dashboard_ecr_repository_arn == aws_ecr_repository.grafana.arn &&
+      output.dashboard_ecr_repository_url == aws_ecr_repository.grafana.repository_url
     )
     error_message = "Repository outputs must identify Grafana's release repository."
   }

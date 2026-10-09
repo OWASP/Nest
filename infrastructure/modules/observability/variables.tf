@@ -1,5 +1,5 @@
 variable "app_security_group_ids" {
-  description = "Security group IDs of the application tasks allowed to send metrics to VictoriaMetrics."
+  description = "Security group IDs of the application tasks allowed to send metrics to the observability backend."
   type        = list(string)
 
   validation {
@@ -9,7 +9,7 @@ variable "app_security_group_ids" {
 }
 
 variable "assign_public_ip" {
-  description = "Whether to assign a public IP to the VictoriaMetrics task."
+  description = "Whether to assign a public IP to the observability task."
   type        = bool
   default     = false
 }
@@ -30,56 +30,56 @@ variable "environment" {
   type        = string
 }
 
-variable "grafana_admin_password_parameter_arn" {
-  description = "ARN of an externally managed SSM SecureString containing the initial Grafana admin password."
+variable "dashboard_admin_password_parameter_arn" {
+  description = "ARN of an externally managed SSM SecureString containing the initial dashboard admin password."
   type        = string
   default     = null
   validation {
-    condition     = var.grafana_admin_password_parameter_arn == null ? true : can(regex("^arn:aws[a-z-]*:ssm:[a-z0-9-]+:[0-9]{12}:parameter/.+$", var.grafana_admin_password_parameter_arn))
+    condition     = var.dashboard_admin_password_parameter_arn == null ? true : can(regex("^arn:aws[a-z-]*:ssm:[a-z0-9-]+:[0-9]{12}:parameter/.+$", var.dashboard_admin_password_parameter_arn))
     error_message = "Provide an SSM parameter ARN, not a plaintext password."
   }
 }
 
-variable "grafana_admin_password_kms_key_arn" {
+variable "dashboard_admin_password_kms_key_arn" {
   description = "Customer-managed KMS key ARN for the password parameter; null uses the AWS-managed SSM key."
   type        = string
   default     = null
   validation {
-    condition = var.grafana_admin_password_kms_key_arn == null ? true : (
-      var.grafana_admin_password_parameter_arn != null &&
-      can(regex("^arn:aws[a-z-]*:kms:[a-z0-9-]+:[0-9]{12}:key/.+$", var.grafana_admin_password_kms_key_arn))
+    condition = var.dashboard_admin_password_kms_key_arn == null ? true : (
+      var.dashboard_admin_password_parameter_arn != null &&
+      can(regex("^arn:aws[a-z-]*:kms:[a-z0-9-]+:[0-9]{12}:key/.+$", var.dashboard_admin_password_kms_key_arn))
     )
     error_message = "A password KMS key requires a password parameter ARN and must be a KMS key ARN."
   }
 }
 
-variable "grafana_domain_name" {
-  description = "Public Grafana hostname, without scheme or path; null leaves public URL configuration unset."
+variable "dashboard_domain_name" {
+  description = "Public dashboard hostname, without scheme or path; null leaves public URL configuration unset."
   type        = string
   default     = null
   validation {
-    condition     = var.grafana_domain_name == null ? true : can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.grafana_domain_name))
+    condition     = var.dashboard_domain_name == null ? true : can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.dashboard_domain_name))
     error_message = "Provide a lowercase DNS hostname, without https://, port, or path."
   }
 }
 
-variable "grafana_image" {
-  description = "Digest-pinned Grafana image; null omits Grafana runtime resources."
+variable "dashboard_image" {
+  description = "Digest-pinned dashboard image; null omits dashboard runtime resources."
   type        = string
   default     = null
   validation {
-    condition     = var.grafana_image == null ? true : can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.grafana_image))
-    error_message = "grafana_image must be null or an image reference pinned by SHA256 digest."
+    condition     = var.dashboard_image == null ? true : can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.dashboard_image))
+    error_message = "dashboard_image must be null or an image reference pinned by SHA256 digest."
   }
 }
 
-variable "grafana_desired_count" {
-  description = "Grafana task count (0 or 1). Keep zero until credentials and access are configured."
+variable "dashboard_desired_count" {
+  description = "Dashboard task count (0 or 1). Keep zero until credentials and access are configured."
   type        = number
   default     = 0
   validation {
-    condition     = contains([0, 1], var.grafana_desired_count) && (var.grafana_desired_count == 0 || (var.grafana_image != null && var.grafana_admin_password_parameter_arn != null))
-    error_message = "Grafana supports zero or one task; starting requires an image and admin password parameter ARN."
+    condition     = contains([0, 1], var.dashboard_desired_count) && (var.dashboard_desired_count == 0 || (var.dashboard_image != null && var.dashboard_admin_password_parameter_arn != null))
+    error_message = "The dashboard supports zero or one task; starting requires an image and admin password parameter ARN."
   }
 }
 
@@ -89,7 +89,7 @@ variable "kms_key_arn" {
 }
 
 variable "log_retention_in_days" {
-  description = "The number of days to retain VictoriaMetrics container logs."
+  description = "The number of days to retain observability container logs."
   type        = number
   default     = 90
 }
@@ -100,7 +100,7 @@ variable "project_name" {
 }
 
 variable "subnet_ids" {
-  description = "The private subnet IDs for the EFS mount targets and the VictoriaMetrics task."
+  description = "The private subnet IDs for the EFS mount targets and the observability task."
   type        = list(string)
 
   validation {
@@ -109,57 +109,57 @@ variable "subnet_ids" {
   }
 }
 
-variable "vm_cpu" {
-  description = "The CPU units for the VictoriaMetrics Fargate task."
+variable "cpu" {
+  description = "The CPU units for the observability Fargate task."
   type        = number
   default     = 512
 }
 
-variable "vm_desired_count" {
-  description = "The number of VictoriaMetrics tasks to run (0 or 1; it is a single-node store)."
+variable "desired_count" {
+  description = "The number of observability tasks to run (0 or 1; the current backend is a single-node store)."
   type        = number
   default     = 1
 
   validation {
-    condition     = contains([0, 1], var.vm_desired_count)
-    error_message = "vm_desired_count must be 0 or 1 (VictoriaMetrics is a single-node store)."
+    condition     = contains([0, 1], var.desired_count)
+    error_message = "desired_count must be 0 or 1 because the current observability backend is a single-node store."
   }
 }
 
-variable "vm_image" {
-  description = "The VictoriaMetrics container image (including digest)."
+variable "image" {
+  description = "The observability backend container image (including digest)."
   type        = string
 
   validation {
-    condition     = can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.vm_image))
-    error_message = "vm_image must be an image reference pinned to an immutable digest (e.g., repo:tag@sha256:...)."
+    condition     = can(regex("^[^@]+@sha256:[0-9a-f]{64}$", var.image))
+    error_message = "image must be an image reference pinned to an immutable digest (e.g., repo:tag@sha256:...)."
   }
 }
 
-variable "vm_memory" {
-  description = "The memory (in MiB) for the VictoriaMetrics Fargate task."
+variable "memory" {
+  description = "The memory (in MiB) for the observability Fargate task."
   type        = number
   default     = 1024
 }
 
-variable "vm_port" {
-  description = "The port VictoriaMetrics listens on for ingest and queries."
+variable "port" {
+  description = "The port the observability backend listens on for ingest and queries."
   type        = number
   default     = 8428
 
   validation {
-    condition     = var.vm_port > 0 && var.vm_port < 65536 && floor(var.vm_port) == var.vm_port
-    error_message = "vm_port must be a whole number between 1 and 65535."
+    condition     = var.port > 0 && var.port < 65536 && floor(var.port) == var.port
+    error_message = "port must be a whole number between 1 and 65535."
   }
 }
 
-variable "vm_retention_period" {
-  description = "The VictoriaMetrics data retention period (e.g., 12, 5y)."
+variable "retention_period" {
+  description = "The VictoriaMetrics data retention period. A value without a suffix is in months, so the default \"12\" means 12 months (duration suffixes like 1y, 30d, 1w are also supported)."
   type        = string
-  default     = "12"
+  default     = "12" # 12 months
 }
 
 variable "vpc_id" {
-  description = "The VPC ID where the VictoriaMetrics security group is created."
+  description = "The VPC ID where the observability backend security group is created."
   type        = string
 }

@@ -21,10 +21,7 @@ locals {
     Project     = var.project_name
   }
   fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
-  observability_vm_image = trimspace(trimprefix(
-    one([for line in split("\n", file("${path.root}/../../docker/victoriametrics/Dockerfile")) : line if startswith(line, "FROM ")]),
-    "FROM "
-  ))
+  observability_image  = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("${path.root}/../../docker/victoriametrics/Dockerfile"))[0]
 }
 
 module "alb" {
@@ -188,20 +185,20 @@ module "observability" {
     module.security.frontend_sg_id,
     module.security.tasks_sg_id,
   ]
-  assign_public_ip                     = false
-  aws_region                           = var.aws_region
-  common_tags                          = local.common_tags
-  environment                          = var.environment
-  grafana_desired_count                = var.grafana_desired_count
-  grafana_admin_password_parameter_arn = var.grafana_admin_password_parameter_arn
-  grafana_admin_password_kms_key_arn   = var.grafana_admin_password_kms_key_arn
-  grafana_image                        = var.grafana_image
-  grafana_domain_name                  = var.grafana_domain_name
-  kms_key_arn                          = module.kms.key_arn
-  project_name                         = var.project_name
-  subnet_ids                           = module.networking.private_subnet_ids
-  vm_image                             = local.observability_vm_image
-  vpc_id                               = module.networking.vpc_id
+  assign_public_ip                       = false
+  aws_region                             = var.aws_region
+  common_tags                            = local.common_tags
+  dashboard_admin_password_kms_key_arn   = var.observability_dashboard_admin_password_kms_key_arn
+  dashboard_admin_password_parameter_arn = var.observability_dashboard_admin_password_parameter_arn
+  dashboard_desired_count                = var.observability_dashboard_desired_count
+  dashboard_domain_name                  = var.observability_dashboard_domain_name
+  dashboard_image                        = var.observability_dashboard_image
+  environment                            = var.environment
+  image                                  = local.observability_image
+  kms_key_arn                            = module.kms.key_arn
+  project_name                           = var.project_name
+  subnet_ids                             = module.networking.private_subnet_ids
+  vpc_id                                 = module.networking.vpc_id
 }
 
 module "parameters" {

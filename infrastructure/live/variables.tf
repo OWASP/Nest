@@ -193,36 +193,6 @@ variable "enable_cron_tasks" {
   type        = bool
 }
 
-variable "grafana_admin_password_parameter_arn" {
-  description = "Externally managed SSM SecureString ARN for the initial Grafana admin password."
-  type        = string
-  default     = null
-}
-
-variable "grafana_admin_password_kms_key_arn" {
-  description = "Customer-managed password encryption key ARN; null uses the AWS-managed SSM key."
-  type        = string
-  default     = null
-}
-
-variable "grafana_domain_name" {
-  description = "Public Grafana hostname, without scheme or path; null leaves public URL configuration unset."
-  type        = string
-  default     = null
-}
-
-variable "grafana_image" {
-  description = "Digest-pinned Grafana image; null leaves the Grafana runtime disabled."
-  type        = string
-  default     = null
-}
-
-variable "grafana_desired_count" {
-  description = "Grafana task count; leave zero until credentials and access are configured."
-  type        = number
-  default     = 0
-}
-
 variable "enable_observability" {
   description = "Whether to create the observability stack."
   type        = bool
@@ -319,6 +289,36 @@ variable "frontend_use_fargate_spot" {
   description = "Whether to use Fargate Spot for frontend tasks."
   type        = bool
   default     = true
+}
+
+variable "observability_dashboard_admin_password_kms_key_arn" {
+  description = "Customer-managed KMS key ARN for the dashboard admin password parameter; null uses the AWS-managed SSM key."
+  type        = string
+  default     = null
+}
+
+variable "observability_dashboard_admin_password_parameter_arn" {
+  description = "Externally managed SSM SecureString ARN for the initial observability dashboard admin password."
+  type        = string
+  default     = null
+}
+
+variable "observability_dashboard_desired_count" {
+  description = "Observability dashboard task count; leave zero until credentials and access are configured."
+  type        = number
+  default     = 0
+}
+
+variable "observability_dashboard_domain_name" {
+  description = "Public observability dashboard hostname, without scheme or path; null leaves public URL configuration unset."
+  type        = string
+  default     = null
+}
+
+variable "observability_dashboard_image" {
+  description = "Digest-pinned observability dashboard image; null leaves the dashboard runtime disabled."
+  type        = string
+  default     = null
 }
 
 variable "private_subnet_cidrs" {

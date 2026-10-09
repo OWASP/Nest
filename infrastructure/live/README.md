@@ -50,7 +50,7 @@ No providers.
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_alb"></a> [alb](#module\_alb) | ../modules/alb | n/a |
 | <a name="module_backend"></a> [backend](#module\_backend) | ../modules/service | n/a |
 | <a name="module_backend_build_cache"></a> [backend\_build\_cache](#module\_backend\_build\_cache) | ../modules/ecr-cache | n/a |
@@ -73,7 +73,7 @@ No resources.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_auto_scaling_cpu_target"></a> [auto\_scaling\_cpu\_target](#input\_auto\_scaling\_cpu\_target) | Target average CPU utilization percentage for ECS service auto scaling. | `number` | `70` | no |
 | <a name="input_auto_scaling_scale_in_cooldown"></a> [auto\_scaling\_scale\_in\_cooldown](#input\_auto\_scaling\_scale\_in\_cooldown) | Cooldown period in seconds after an ECS service scale-in activity. | `number` | `300` | no |
 | <a name="input_auto_scaling_scale_out_cooldown"></a> [auto\_scaling\_scale\_out\_cooldown](#input\_auto\_scaling\_scale\_out\_cooldown) | Cooldown period in seconds after an ECS service scale-out activity. | `number` | `60` | no |
@@ -119,11 +119,11 @@ No resources.
 | <a name="input_frontend_max_count"></a> [frontend\_max\_count](#input\_frontend\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_frontend_min_count"></a> [frontend\_min\_count](#input\_frontend\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_frontend_use_fargate_spot"></a> [frontend\_use\_fargate\_spot](#input\_frontend\_use\_fargate\_spot) | Whether to use Fargate Spot for frontend tasks. | `bool` | `true` | no |
-| <a name="input_grafana_admin_password_kms_key_arn"></a> [grafana\_admin\_password\_kms\_key\_arn](#input\_grafana\_admin\_password\_kms\_key\_arn) | Customer-managed password encryption key ARN; null uses the AWS-managed SSM key. | `string` | `null` | no |
-| <a name="input_grafana_admin_password_parameter_arn"></a> [grafana\_admin\_password\_parameter\_arn](#input\_grafana\_admin\_password\_parameter\_arn) | Externally managed SSM SecureString ARN for the initial Grafana admin password. | `string` | `null` | no |
-| <a name="input_grafana_desired_count"></a> [grafana\_desired\_count](#input\_grafana\_desired\_count) | Grafana task count; leave zero until credentials and access are configured. | `number` | `0` | no |
-| <a name="input_grafana_domain_name"></a> [grafana\_domain\_name](#input\_grafana\_domain\_name) | Public Grafana hostname, without scheme or path; null leaves public URL configuration unset. | `string` | `null` | no |
-| <a name="input_grafana_image"></a> [grafana\_image](#input\_grafana\_image) | Digest-pinned Grafana image; null leaves the Grafana runtime disabled. | `string` | `null` | no |
+| <a name="input_observability_dashboard_admin_password_kms_key_arn"></a> [observability\_dashboard\_admin\_password\_kms\_key\_arn](#input\_observability\_dashboard\_admin\_password\_kms\_key\_arn) | Customer-managed KMS key ARN for the dashboard admin password parameter; null uses the AWS-managed SSM key. | `string` | `null` | no |
+| <a name="input_observability_dashboard_admin_password_parameter_arn"></a> [observability\_dashboard\_admin\_password\_parameter\_arn](#input\_observability\_dashboard\_admin\_password\_parameter\_arn) | Externally managed SSM SecureString ARN for the initial observability dashboard admin password. | `string` | `null` | no |
+| <a name="input_observability_dashboard_desired_count"></a> [observability\_dashboard\_desired\_count](#input\_observability\_dashboard\_desired\_count) | Observability dashboard task count; leave zero until credentials and access are configured. | `number` | `0` | no |
+| <a name="input_observability_dashboard_domain_name"></a> [observability\_dashboard\_domain\_name](#input\_observability\_dashboard\_domain\_name) | Public observability dashboard hostname, without scheme or path; null leaves public URL configuration unset. | `string` | `null` | no |
+| <a name="input_observability_dashboard_image"></a> [observability\_dashboard\_image](#input\_observability\_dashboard\_image) | Digest-pinned observability dashboard image; null leaves the dashboard runtime disabled. | `string` | `null` | no |
 | <a name="input_private_subnet_cidrs"></a> [private\_subnet\_cidrs](#input\_private\_subnet\_cidrs) | A list of CIDR blocks for the private subnets. | `list(string)` | <pre>[<br/>  "10.0.11.0/24",<br/>  "10.0.12.0/24",<br/>  "10.0.13.0/24"<br/>]</pre> | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | `"nest"` | no |
 | <a name="input_public_subnet_cidrs"></a> [public\_subnet\_cidrs](#input\_public\_subnet\_cidrs) | A list of CIDR blocks for the public subnets. | `list(string)` | <pre>[<br/>  "10.0.1.0/24",<br/>  "10.0.2.0/24",<br/>  "10.0.3.0/24"<br/>]</pre> | no |
@@ -139,7 +139,7 @@ No resources.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_acm_certificate_domain_validation_options"></a> [acm\_certificate\_domain\_validation\_options](#output\_acm\_certificate\_domain\_validation\_options) | The DNS validation options for ACM certificate. |
 | <a name="output_acm_certificate_status"></a> [acm\_certificate\_status](#output\_acm\_certificate\_status) | The status of the ACM certificate. |
 | <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | The DNS name of the ALB. |
