@@ -70,16 +70,17 @@ module "backend" {
 module "cache" {
   source = "../modules/cache"
 
-  common_tags           = local.common_tags
-  environment           = var.environment
-  kms_key_arn           = module.kms.key_arn
-  project_name          = var.project_name
-  redis_engine_version  = var.redis_engine_version
-  redis_node_type       = var.redis_node_type
-  redis_num_cache_nodes = var.redis_num_cache_nodes
-  redis_port            = var.redis_port
-  security_group_ids    = [module.security.redis_sg_id]
-  subnet_ids            = module.networking.private_subnet_ids
+  common_tags                    = local.common_tags
+  environment                    = var.environment
+  kms_key_arn                    = module.kms.key_arn
+  project_name                   = var.project_name
+  redis_engine_version           = var.redis_engine_version
+  redis_node_type                = var.redis_node_type
+  redis_num_cache_nodes          = var.redis_num_cache_nodes
+  redis_port                     = var.redis_port
+  secret_recovery_window_in_days = var.secret_recovery_window_in_days
+  security_group_ids             = [module.security.redis_sg_id]
+  subnet_ids                     = module.networking.private_subnet_ids
 }
 
 module "database" {
@@ -178,27 +179,29 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  common_tags                   = local.common_tags
-  db_password_arn               = module.database.db_password_arn
-  django_configuration          = var.django_configuration
-  django_allowed_hosts          = var.domain_name
-  django_allowed_origins        = "https://${var.domain_name}"
-  django_aws_static_bucket_name = module.storage.static_s3_bucket_name
-  django_db_host                = module.database.db_proxy_endpoint
-  django_db_name                = var.db_name
-  django_db_port                = var.db_port
-  django_db_user                = var.db_user
-  django_redis_host             = module.cache.redis_primary_endpoint
-  django_release_version        = var.django_release_version
-  django_settings_module        = var.django_settings_module
-  enable_additional_parameters  = var.enable_additional_parameters
-  environment                   = var.environment
-  next_server_csrf_url          = "https://${var.domain_name}/csrf/"
-  next_server_graphql_url       = "https://${var.domain_name}/graphql/"
-  nextauth_url                  = "https://${var.domain_name}"
-  project_name                  = var.project_name
-  redis_password_arn            = module.cache.redis_password_arn
-  slack_bot_token_suffix        = var.slack_bot_token_suffix
+  common_tags                    = local.common_tags
+  db_password_arn                = module.database.db_password_arn
+  django_configuration           = var.django_configuration
+  django_allowed_hosts           = var.domain_name
+  django_allowed_origins         = "https://${var.domain_name}"
+  django_aws_static_bucket_name  = module.storage.static_s3_bucket_name
+  django_db_host                 = module.database.db_proxy_endpoint
+  django_db_name                 = var.db_name
+  django_db_port                 = var.db_port
+  django_db_user                 = var.db_user
+  django_redis_host              = module.cache.redis_primary_endpoint
+  django_release_version         = var.django_release_version
+  django_settings_module         = var.django_settings_module
+  enable_additional_parameters   = var.enable_additional_parameters
+  environment                    = var.environment
+  kms_key_arn                    = module.kms.key_arn
+  next_server_csrf_url           = "https://${var.domain_name}/csrf/"
+  next_server_graphql_url        = "https://${var.domain_name}/graphql/"
+  nextauth_url                   = "https://${var.domain_name}"
+  project_name                   = var.project_name
+  redis_password_arn             = module.cache.redis_password_arn
+  secret_recovery_window_in_days = var.secret_recovery_window_in_days
+  slack_bot_token_suffix         = var.slack_bot_token_suffix
 }
 
 module "security" {

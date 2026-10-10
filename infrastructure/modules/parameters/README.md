@@ -22,6 +22,11 @@ No modules.
 
 | Name | Type |
 | ---- | ---- |
+| [aws_secretsmanager_secret.django_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret.external_runtime](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret.nextauth_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret_version.django_secret_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_secretsmanager_secret_version.nextauth_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_ssm_parameter.django_algolia_application_id](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_algolia_write_api_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.django_allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -76,11 +81,13 @@ No modules.
 | <a name="input_django_settings_module"></a> [django\_settings\_module](#input\_django\_settings\_module) | The location of the Django settings module to use (e.g., settings.staging, settings.production). | `string` | n/a | yes |
 | <a name="input_enable_additional_parameters"></a> [enable\_additional\_parameters](#input\_enable\_additional\_parameters) | Whether to create additional parameters (e.g. for production). | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key used to encrypt runtime secrets. | `string` | n/a | yes |
 | <a name="input_next_server_csrf_url"></a> [next\_server\_csrf\_url](#input\_next\_server\_csrf\_url) | The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/). | `string` | n/a | yes |
 | <a name="input_next_server_graphql_url"></a> [next\_server\_graphql\_url](#input\_next\_server\_graphql\_url) | The server-side GraphQL URL for Next.js SSR (e.g., https://nest.owasp.dev/graphql/). | `string` | n/a | yes |
 | <a name="input_nextauth_url"></a> [nextauth\_url](#input\_nextauth\_url) | The NextAuth base URL (frontend URL with protocol). | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_redis_password_arn"></a> [redis\_password\_arn](#input\_redis\_password\_arn) | The SSM Parameter ARN of password of the Redis cache. | `string` | n/a | yes |
+| <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately. | `number` | `7` | no |
 | <a name="input_slack_bot_token_suffix"></a> [slack\_bot\_token\_suffix](#input\_slack\_bot\_token\_suffix) | The Suffix for the Slack bot token. | `string` | n/a | yes |
 
 ## Outputs

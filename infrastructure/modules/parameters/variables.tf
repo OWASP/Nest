@@ -82,6 +82,11 @@ variable "environment" {
   type        = string
 }
 
+variable "kms_key_arn" {
+  description = "The ARN of the KMS key used to encrypt runtime secrets."
+  type        = string
+}
+
 variable "next_server_csrf_url" {
   description = "The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/)."
   type        = string
@@ -106,6 +111,17 @@ variable "redis_password_arn" {
   description = "The SSM Parameter ARN of password of the Redis cache."
   type        = string
   sensitive   = true
+}
+
+variable "secret_recovery_window_in_days" {
+  description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.secret_recovery_window_in_days == 0 || (var.secret_recovery_window_in_days >= 7 && var.secret_recovery_window_in_days <= 30)
+    error_message = "secret_recovery_window_in_days must be 0 or between 7 and 30."
+  }
 }
 
 variable "slack_bot_token_suffix" {
