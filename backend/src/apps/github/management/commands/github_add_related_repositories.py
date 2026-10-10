@@ -55,9 +55,15 @@ class Command(BaseCommand):
                 try:
                     gh_repository = gh.get_repo(repository_path)
                 except UnknownObjectException as e:
-                    if e.data["status"] == "404" and "Not Found" in e.data["message"]:
-                        project.invalid_urls.add(repository_url)
-                        project.related_urls.remove(repository_url)
+                    if e.data.get("status") == "404" and "Not Found" in e.data.get("message", ""):
+                        if project.invalid_urls is None:
+                            project.invalid_urls = []
+                        if repository_url not in project.invalid_urls:
+                            project.invalid_urls.append(repository_url)
+
+                        if project.related_urls and repository_url in project.related_urls:
+                            project.related_urls.remove(repository_url)
+
                         project.save(update_fields=("invalid_urls", "related_urls"))
                     else:
                         logger.exception("Unexpected error fetching repository %s", repository_url)

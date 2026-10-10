@@ -18,9 +18,8 @@ class TestGithubAddRelatedRepositories:
     def mock_project(self):
         project = mock.Mock(spec=Project)
         project.owasp_url = "https://owasp.org/www-project-test"
-        project.related_urls = mock.MagicMock()
-        project.related_urls.copy.return_value = ["https://github.com/OWASP/test-repo"]
-        project.invalid_urls = mock.MagicMock()
+        project.related_urls = ["https://github.com/OWASP/test-repo"]
+        project.invalid_urls = []
         project.repositories = mock.Mock()
         project.repositories.add = mock.MagicMock()
         project.save = mock.MagicMock()
@@ -97,6 +96,7 @@ class TestGithubAddRelatedRepositories:
 
             assert command.stdout.write.call_count > 0
 
+    @pytest.mark.parametrize("initial_invalid_urls", [[], None])
     @mock.patch(
         "apps.github.management.commands.github_add_related_repositories.get_github_client"
     )
@@ -113,14 +113,11 @@ class TestGithubAddRelatedRepositories:
         mock_get_github_client,
         command,
         mock_project,
+        initial_invalid_urls,
     ):
         """Test handling of a 404 Not Found error from GitHub."""
-        mock_projects_list = [mock_project]
-        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
-        mock_active_projects.count.return_value = len(mock_projects_list)
-
-        mock_active_projects.__getitem__.side_effect = lambda idx: mock_projects_list[idx]
-        mock_active_projects.order_by.return_value = mock_active_projects
+        mock_project.invalid_urls = initial_invalid_urls
+        self._configure_active_projects(mock_active_projects, [mock_project])
 
         mock_gh_client = mock.Mock()
         mock_get_github_client.return_value = mock_gh_client
@@ -138,10 +135,8 @@ class TestGithubAddRelatedRepositories:
         with mock.patch.object(Project, "bulk_save") as mock_project_bulk_save:
             command.handle(offset=0)
 
-        mock_project.related_urls.remove.assert_called_once_with(
-            "https://github.com/OWASP/test-repo"
-        )
-        mock_project.invalid_urls.add.assert_called_once_with("https://github.com/OWASP/test-repo")
+        assert mock_project.invalid_urls == ["https://github.com/OWASP/test-repo"]
+        assert mock_project.related_urls == []
         mock_project.save.assert_called_once_with(update_fields=("invalid_urls", "related_urls"))
 
         mock_sync_repository.assert_not_called()
@@ -292,8 +287,9 @@ class TestGithubAddRelatedRepositories:
         mock_logger.exception.assert_called_once_with(
             "Unexpected error fetching repository %s", "https://github.com/OWASP/test-repo"
         )
-        mock_sync_repository.assert_not_called()
-        mock_project.invalid_urls.add.assert_not_called()
+        assert mock_project.invalid_urls == []
+        assert mock_project.related_urls == ["https://github.com/OWASP/test-repo"]
+        mock_project.save.assert_not_called()
 
     @mock.patch(
         "apps.github.management.commands.github_add_related_repositories.get_github_client"
@@ -332,3 +328,66 @@ class TestGithubAddRelatedRepositories:
             command.handle(offset=0)
 
         mock_project.repositories.add.assert_called_once_with(mock_repository)
+
+    def _configure_active_projects(self, mock_active_projects, projects_list):
+        mock_active_projects.__iter__.return_value = iter(projects_list)
+        mock_active_projects.count.return_value = len(projects_list)
+        mock_active_projects.__getitem__.side_effect = lambda idx: projects_list[idx]
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+    @mock.patch(
+        "apps.github.management.commands.github_add_related_repositories.get_github_client"
+    )
+    @mock.patch("apps.github.management.commands.github_add_related_repositories.sync_repository")
+    @mock.patch(
+        "apps.github.management.commands.github_add_related_repositories.get_repository_path"
+    )
+    @mock.patch("apps.owasp.models.project.Project.active_projects")
+    def test_handle_unknown_object_exception_continues_processing(
+        self,
+        mock_active_projects,
+        mock_get_repository_path,
+        mock_sync_repository,
+        mock_get_github_client,
+        command,
+        mock_project,
+    ):
+        """Test that processing continues for subsequent repositories after a 404."""
+        mock_project.related_urls = [
+            "https://github.com/OWASP/invalid-repo",
+            "https://github.com/OWASP/valid-repo",
+        ]
+        mock_project.invalid_urls = []
+        self._configure_active_projects(mock_active_projects, [mock_project])
+
+        mock_gh_client = mock.Mock()
+        mock_get_github_client.return_value = mock_gh_client
+
+        def get_repo_side_effect(repo_path):
+            if repo_path == "OWASP/invalid-repo":
+                raise UnknownObjectException(
+                    status=404,
+                    data={"message": "Not Found", "status": "404"},
+                    headers={},
+                )
+            return mock.Mock(name="valid-repo")
+
+        mock_gh_client.get_repo.side_effect = get_repo_side_effect
+        mock_get_repository_path.side_effect = lambda url: (
+            "OWASP/invalid-repo" if "invalid-repo" in url else "OWASP/valid-repo"
+        )
+
+        mock_organization = mock.Mock()
+        mock_repository = mock.Mock()
+        mock_sync_repository.return_value = (mock_organization, mock_repository)
+
+        with mock.patch.object(Project, "bulk_save") as mock_project_bulk_save:
+            command.handle(offset=0)
+
+        assert "https://github.com/OWASP/invalid-repo" in mock_project.invalid_urls
+        assert "https://github.com/OWASP/invalid-repo" not in mock_project.related_urls
+        assert "https://github.com/OWASP/valid-repo" in mock_project.related_urls
+        mock_project.save.assert_called_once_with(update_fields=("invalid_urls", "related_urls"))
+        mock_sync_repository.assert_called_once()
+        mock_project.repositories.add.assert_called_once_with(mock_repository)
+        mock_project_bulk_save.assert_called_once_with([mock_project])
