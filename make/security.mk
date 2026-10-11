@@ -1,14 +1,15 @@
 ##@ Security
 
 .PHONY: security-dependency-audit security-dependency-check security-dependency-scan \
-	security-scan security-sast-scan security-dast-scan security-image-scan \
-	security-repository-scan security-sast-scan-semgrep \
+	security-scan security-sast-scan security-dast-scan security-docksec-scan \
+	security-image-scan security-repository-scan security-sast-scan-semgrep \
 	security-dependency-check-osv security-dependency-check-trivy \
 	security-repository-scan-trivy security-dast-scan-zap tooling-dependency-audit
 
 security-scan: ## Run security scans
 	@$(MAKE) security-sast-scan
 	@$(MAKE) security-repository-scan
+	@$(MAKE) security-docksec-scan
 	@$(MAKE) security-dependency-scan
 	@$(MAKE) security-image-scan
 	@$(MAKE) security-dast-scan
@@ -59,6 +60,24 @@ security-dast-scan: ## Run DAST security scan
 security-image-scan: ## Run image security scan
 	@$(MAKE) backend-security-image-scan
 	@$(MAKE) frontend-security-image-scan
+
+security-docksec-scan: ## Report DockSec findings for Dockerfiles
+	@echo "Running DockSec file scan..."
+	image="$$(grep -E '^FROM ghcr.io/owasp/docksec:' docker/docksec/Dockerfile | sed 's/^FROM //')"
+	args=(
+		'--rm'
+		'--entrypoint'
+		'python'
+		'-e'
+		'FORCE_COLOR=1'
+		"-v=$(CURDIR):/src"
+		'-w=/src'
+		"$$image"
+		'/src/tools/security/docksec_scan.py'
+		'--repository-root'
+		'/src'
+	)
+	docker run "$${args[@]}"
 
 security-sast-scan: ## Run SAST security scan
 	@$(MAKE) security-sast-scan-semgrep

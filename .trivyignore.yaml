@@ -9,6 +9,7 @@ misconfigurations:
     paths:
       - .clusterfuzzlite/Dockerfile
       - docker/code-checks/Dockerfile
+      - docker/docksec/Dockerfile
       - docker/e2e/Dockerfile
       - docker/localstack/Dockerfile
       - docker/semgrep/Dockerfile
