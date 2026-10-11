@@ -184,9 +184,9 @@ class TestMain:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         def fail(_scanner: DocksecFileScanner) -> None:
-            message = "No Dockerfiles found."
-            raise DocksecScanError(message)
+            message = "DockSec failed for docker/backend/Dockerfile (exit 3)."
+            raise DocksecScanError(message, exit_code=3)
 
         monkeypatch.setattr(DocksecFileScanner, "scan", fail)
 
-        assert main(["--repository-root", str(tmp_path)]) == 1
+        assert main(["--repository-root", str(tmp_path)]) == 3
