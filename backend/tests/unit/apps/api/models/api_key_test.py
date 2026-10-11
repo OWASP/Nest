@@ -1,12 +1,12 @@
 import hashlib
-import secrets
+import re
 from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils import timezone
 
-from apps.api.models.api_key import ApiKey
+from apps.api.models.api_key import API_KEY_LENGTH, ApiKey
 
 USER_ACTIVE_KEYS_PATH = "apps.nest.models.user.User.active_api_keys"
 
@@ -23,11 +23,21 @@ class TestApiKeyModel:
     """Test suite for the ApiKey model."""
 
     def test_generate_raw_key(self):
-        """Test that generate_raw_key creates a sufficiently long, random string."""
+        """Test that generate_raw_key creates a sufficiently long, URL-safe string."""
         raw_key = ApiKey.generate_raw_key()
         assert isinstance(raw_key, str)
         assert len(raw_key) > 40
-        assert secrets.token_urlsafe(32) != secrets.token_urlsafe(32)
+        assert re.fullmatch(r"[A-Za-z0-9_-]+", raw_key)
+
+    def test_generate_raw_key_is_unique(self):
+        """Test that consecutive calls to generate_raw_key return different keys."""
+        assert len({ApiKey.generate_raw_key() for _ in range(10)}) == 10
+
+    @patch("apps.api.models.api_key.secrets.token_urlsafe", return_value="secure_token")
+    def test_generate_raw_key_uses_secrets(self, mock_token_urlsafe):
+        """Test that generate_raw_key delegates to secrets.token_urlsafe."""
+        assert ApiKey.generate_raw_key() == "secure_token"
+        mock_token_urlsafe.assert_called_once_with(API_KEY_LENGTH)
 
     def test_generate_hash_key(self):
         """Test that generate_hash_key produces a correct SHA-256 hash."""
