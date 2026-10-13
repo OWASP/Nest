@@ -73,12 +73,17 @@ backend-data-enrich:
 	@$(MAKE) owasp-enrich-projects
 
 backend-data-fetch-nest-dump:
-	@DOCKER_BUILDKIT=1 docker compose \
-		-f docker-compose/e2e/compose.yaml \
-		run \
-		--no-deps \
-		--rm \
-		backend python -m scripts.fetch_nest_dump
+	@args=(
+		'-f=docker-compose/e2e/compose.yaml'
+		run
+		'--no-deps'
+		'--rm'
+		backend
+		python
+		'-m'
+		scripts.fetch_nest_dump
+	)
+	DOCKER_BUILDKIT=1 docker compose "$${args[@]}"
 
 backend-data-index:
 	@echo "Indexing Nest data"

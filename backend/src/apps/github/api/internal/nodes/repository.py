@@ -45,12 +45,6 @@ class RepositoryNode(strawberry.relay.Node):
 
     organization: OrganizationNode | None = strawberry_django.field()
 
-    @strawberry_django.field(prefetch_related=["issues"])
-    def issues(self, root: Repository) -> list[IssueNode]:
-        """Resolve recent issues."""
-        # TODO(arkid15r): rename this to recent_issues.
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
-
     @strawberry_django.field
     def languages(self, root: Repository) -> list[str]:
         """Resolve languages."""
@@ -67,6 +61,11 @@ class RepositoryNode(strawberry.relay.Node):
     ) -> Annotated["ProjectNode", strawberry.lazy("apps.owasp.api.internal.nodes.project")] | None:
         """Resolve project."""
         return root.project
+
+    @strawberry_django.field(prefetch_related=["issues"])
+    def recent_issues(self, root: Repository) -> list[IssueNode]:
+        """Resolve recent issues."""
+        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
     @strawberry_django.field(prefetch_related=["milestones"])
     def recent_milestones(self, root: Repository, limit: int = 5) -> list[MilestoneNode]:

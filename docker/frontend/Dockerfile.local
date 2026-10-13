@@ -1,4 +1,4 @@
-FROM node:24.20-alpine3.23@sha256:0388af2af070cd4736a1567cfed02469ba117848845b4165d87a333edb53d2ca AS builder
+FROM node:24.21-alpine3.24@sha256:be80f76cf40ec8e42b9bec49f60a55e0660f30af58d3e5a25530785b30ea67e2 AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -28,7 +28,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile
 
-FROM node:24.20-alpine3.23@sha256:0388af2af070cd4736a1567cfed02469ba117848845b4165d87a333edb53d2ca
+FROM node:24.21-alpine3.24@sha256:be80f76cf40ec8e42b9bec49f60a55e0660f30af58d3e5a25530785b30ea67e2
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 

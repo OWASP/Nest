@@ -17,6 +17,8 @@ The project uses a **containerized approach** for both development and productio
 Before contributing, ensure you have the following installed:
 
 1. [Docker](https://docs.docker.com/engine/install/) for running the Nest containers and local code quality checks and tests (e.g. `make check`, `make test`).
+2. [GNU Make](https://www.gnu.org/software/make/) **4.0+** for running project targets (`make --version`).
+3. [Bash](https://www.gnu.org/software/bash/) for running Make recipes (`bash --version`).
 
 Optional steps for Windows:
 
@@ -118,7 +120,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Run the Application**:
 
-   - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
+   - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related makefiles in corresponding directories and all of them are included in the main [makefile](https://github.com/OWASP/Nest/blob/main/makefile) in the project root directory. Run the following command to start the application:
 
      ```bash
      make run
