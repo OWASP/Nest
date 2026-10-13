@@ -5,7 +5,7 @@ variable "common_tags" {
 }
 
 variable "db_password_arn" {
-  description = "The SSM Parameter ARN of password of the database."
+  description = "The ECS secret reference for the database password."
   type        = string
   sensitive   = true
 }
@@ -103,7 +103,7 @@ variable "project_name" {
 }
 
 variable "redis_password_arn" {
-  description = "The SSM Parameter ARN of password of the Redis cache."
+  description = "The ARN of the Redis password secret."
   type        = string
   sensitive   = true
 }

@@ -4,12 +4,12 @@ output "django_secret_key" {
   value       = random_string.django_secret_key.result
 }
 
-output "django_ssm_parameter_arns" {
-  description = "Map of environment variable names to the ARNs of all SSM parameters (Required by Django)."
+output "django_runtime_parameter_arns" {
+  description = "Map of backend environment variable names to SSM and Secrets Manager references."
   sensitive   = true
   value = merge({
     "DJANGO_ALGOLIA_APPLICATION_ID"  = aws_ssm_parameter.django_algolia_application_id.arn
-    "DJANGO_ALGOLIA_WRITE_API_KEY"   = aws_ssm_parameter.django_algolia_write_api_key.arn
+    "DJANGO_ALGOLIA_WRITE_API_KEY"   = aws_secretsmanager_secret.external_runtime["DJANGO_ALGOLIA_WRITE_API_KEY"].arn
     "DJANGO_ALLOWED_HOSTS"           = aws_ssm_parameter.django_allowed_hosts.arn
     "DJANGO_ALLOWED_ORIGINS"         = aws_ssm_parameter.django_allowed_origins.arn
     "DJANGO_AWS_STORAGE_BUCKET_NAME" = aws_ssm_parameter.django_aws_storage_bucket_name.arn
@@ -19,17 +19,17 @@ output "django_ssm_parameter_arns" {
     "DJANGO_DB_PASSWORD"             = var.db_password_arn
     "DJANGO_DB_PORT"                 = aws_ssm_parameter.django_db_port.arn
     "DJANGO_DB_USER"                 = aws_ssm_parameter.django_db_user.arn
-    "DJANGO_OPEN_AI_SECRET_KEY"      = aws_ssm_parameter.django_open_ai_secret_key.arn
+    "DJANGO_OPEN_AI_SECRET_KEY"      = aws_secretsmanager_secret.external_runtime["DJANGO_OPEN_AI_SECRET_KEY"].arn
     "DJANGO_REDIS_HOST"              = aws_ssm_parameter.django_redis_host.arn
     "DJANGO_REDIS_PASSWORD"          = var.redis_password_arn
     "DJANGO_REDIS_USE_TLS"           = aws_ssm_parameter.django_redis_use_tls.arn
     "DJANGO_RELEASE_VERSION"         = aws_ssm_parameter.django_release_version.arn
-    "DJANGO_SECRET_KEY"              = aws_ssm_parameter.django_secret_key.arn
-    "DJANGO_SENTRY_DSN"              = aws_ssm_parameter.django_sentry_dsn.arn
+    "DJANGO_SECRET_KEY"              = aws_secretsmanager_secret.django_secret_key.arn
+    "DJANGO_SENTRY_DSN"              = aws_secretsmanager_secret.external_runtime["DJANGO_SENTRY_DSN"].arn
     "DJANGO_SETTINGS_MODULE"         = aws_ssm_parameter.django_settings_module.arn
-    "DJANGO_SLACK_BOT_TOKEN"         = aws_ssm_parameter.django_slack_bot_token.arn
-    "DJANGO_SLACK_SIGNING_SECRET"    = aws_ssm_parameter.django_slack_signing_secret.arn
-    "GITHUB_TOKEN"                   = aws_ssm_parameter.github_token.arn
+    "DJANGO_SLACK_BOT_TOKEN"         = aws_secretsmanager_secret.external_runtime["DJANGO_SLACK_BOT_TOKEN"].arn
+    "DJANGO_SLACK_SIGNING_SECRET"    = aws_secretsmanager_secret.external_runtime["DJANGO_SLACK_SIGNING_SECRET"].arn
+    "GITHUB_TOKEN"                   = aws_secretsmanager_secret.external_runtime["GITHUB_TOKEN"].arn
     },
     var.enable_additional_parameters ? {
       "DJANGO_GITHUB_APP_ID"                          = aws_ssm_parameter.django_github_app_id[0].arn
