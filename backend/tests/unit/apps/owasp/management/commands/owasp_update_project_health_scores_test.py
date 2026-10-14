@@ -22,7 +22,8 @@ class TestUpdateProjectHealthMetricsScoreCommand:
                 "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter"
             ) as metrics_patch,
             patch(
-                "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all"
+                "apps.owasp.models.project_health_requirements."
+                "ProjectHealthRequirements.objects.all"
             ) as requirements_patch,
             patch(
                 "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
@@ -82,3 +83,118 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         assert mock_metric.score == EXPECTED_SCORE
         assert "Updated project health scores successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
+
+    def test_handle_missing_requirements_skips_project(self):
+        """Test missing health requirements skips project with a warning without raising error."""
+        mock_metric = MagicMock(spec=ProjectHealthMetrics)
+        mock_metric.project.level = "unknown_level"
+        mock_metric.project.name = "Unknown Level Project"
+
+        self.mock_metrics.return_value.select_related.return_value = [mock_metric]
+        self.mock_requirements.return_value = []
+
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_scores")
+
+        self.mock_requirements.assert_called_once()
+        self.mock_bulk_save.assert_called_once_with(
+            [],
+            fields=[
+                "score",
+            ],
+        )
+        output = self.stdout.getvalue()
+        expected_warning = (
+            "Health requirements not found for level 'unknown_level' "
+            "(project: Unknown Level Project). Skipping."
+        )
+        assert expected_warning in output
+        assert "Updating score for project: Unknown Level Project" not in output
+        assert "Updated project health scores successfully." in output
+
+    def test_handle_mixed_projects_updates_valid_and_skips_missing(self):
+        """Test mixed projects where valid level is updated and missing level is skipped."""
+        mock_metric_skipped = MagicMock(spec=ProjectHealthMetrics)
+        mock_metric_skipped.project.level = "missing_level"
+        mock_metric_skipped.project.name = "Skipped Project"
+
+        mock_metric_valid = MagicMock(spec=ProjectHealthMetrics)
+        mock_metric_valid.project.level = "valid_level"
+        mock_metric_valid.project.name = "Valid Project"
+        mock_metric_valid.is_funding_requirements_compliant = True
+        mock_metric_valid.is_leader_requirements_compliant = True
+
+        mock_requirements = MagicMock(spec=ProjectHealthRequirements)
+        mock_requirements.level = "valid_level"
+
+        for field in [
+            "age_days",
+            "contributors_count",
+            "forks_count",
+            "open_pull_requests_count",
+            "recent_releases_count",
+            "stars_count",
+            "total_pull_requests_count",
+            "total_releases_count",
+            "last_commit_days",
+            "last_pull_request_days",
+            "last_release_days",
+            "open_issues_count",
+            "owasp_page_last_update_days",
+            "unanswered_issues_count",
+            "unassigned_issues_count",
+        ]:
+            setattr(mock_metric_valid, field, 10)
+            setattr(mock_requirements, field, 10)
+
+        self.mock_metrics.return_value.select_related.return_value = [
+            mock_metric_skipped,
+            mock_metric_valid,
+        ]
+        self.mock_requirements.return_value = [mock_requirements]
+
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_scores")
+
+        self.mock_requirements.assert_called_once()
+        self.mock_bulk_save.assert_called_once_with(
+            [mock_metric_valid],
+            fields=[
+                "score",
+            ],
+        )
+        output = self.stdout.getvalue()
+        expected_warning = (
+            "Health requirements not found for level 'missing_level' "
+            "(project: Skipped Project). Skipping."
+        )
+        assert expected_warning in output
+        assert "Updating score for project: Valid Project" in output
+        assert "Updating score for project: Skipped Project" not in output
+        assert "Updated project health scores successfully." in output
+
+    def test_handle_no_requirements_in_db(self):
+        """Test command runs without raising KeyError when requirements table is empty."""
+        mock_metric = MagicMock(spec=ProjectHealthMetrics)
+        mock_metric.project.level = "other"
+        mock_metric.project.name = "Default Other Project"
+
+        self.mock_metrics.return_value.select_related.return_value = [mock_metric]
+        self.mock_requirements.return_value = []
+
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_scores")
+
+        self.mock_bulk_save.assert_called_once_with(
+            [],
+            fields=[
+                "score",
+            ],
+        )
+        output = self.stdout.getvalue()
+        expected_warning = (
+            "Health requirements not found for level 'other' "
+            "(project: Default Other Project). Skipping."
+        )
+        assert expected_warning in output
+        assert "Updated project health scores successfully." in output

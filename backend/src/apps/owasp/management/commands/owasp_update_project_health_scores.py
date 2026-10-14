@@ -41,12 +41,20 @@ class Command(BaseCommand):
         ).select_related(
             "project",
         ):
+            requirements = project_health_requirements.get(metric.project.level)
+            if not requirements:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Health requirements not found for level '{metric.project.level}' "
+                        f"(project: {metric.project.name}). Skipping."
+                    )
+                )
+                continue
+
             # Calculate the score based on requirements.
             self.stdout.write(
                 self.style.NOTICE(f"Updating score for project: {metric.project.name}")
             )
-
-            requirements = project_health_requirements[metric.project.level]
 
             score = 0.0
             for field, weight in forward_fields.items():
