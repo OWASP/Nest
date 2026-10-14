@@ -166,37 +166,64 @@ class Issue(GenericIssueModel):
         self.hint = open_ai.complete() or ""
 
     def generate_summary(self, open_ai: OpenAi | None = None, max_tokens: int = 500) -> None:
-        """Generate a summary for the issue using AI.
+        """Generate a summary for the issue using AI."""
+        if not self.is_indexable:
+            return
 
-        Args:
-            open_ai (OpenAi, optional): The OpenAI instance.
-            max_tokens (int, optional): The maximum number of tokens for the AI response.
-
-        """
-        if not self.is_indexable or not (
+        if not (
             prompt := (
                 Prompt.get_github_issue_documentation_project_summary()
                 if self.project.is_documentation_type
                 else Prompt.get_github_issue_project_summary()
             )
         ):
+            self.summary = self.body.strip()
             return
 
         open_ai = open_ai or OpenAi()
         open_ai.set_input(f"{self.title}\r\n{self.body}")
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
-        self.summary = open_ai.complete() or ""
+
+        summary = open_ai.complete()
+        self.summary = summary.strip() if summary and summary.strip() else self.body.strip()
 
     def save(self, *args, **kwargs) -> None:
-        """Save issue."""
-        if self.is_open:
-            if not self.hint:
-                self.generate_hint()
-
-            if not self.summary:
-                self.generate_summary()
-
+        """Save issue and generate missing AI fields after it has a database ID."""
+        missing_hint = self.is_open and not self.hint
+        missing_summary = self.is_open and not self.summary.strip()
+        requested_fields = kwargs.get("update_fields")
+        if requested_fields is not None:
+            requested_fields = list(requested_fields)
+            kwargs["update_fields"] = requested_fields
+        # A new instance receives its database ID here.
         super().save(*args, **kwargs)
+
+        generated_fields = []
+
+        should_generate_hint = missing_hint and (
+            requested_fields is None or "hint" in requested_fields
+        )
+        should_generate_summary = missing_summary and (
+            requested_fields is None or "summary" in requested_fields
+        )
+
+        if should_generate_hint:
+            previous_hint = self.hint
+            self.generate_hint()
+            if self.hint != previous_hint:
+                generated_fields.append("hint")
+
+        if should_generate_summary:
+            previous_summary = self.summary
+            self.generate_summary()
+            if self.summary != previous_summary:
+                generated_fields.append("summary")
+
+        if generated_fields:
+            super().save(
+                using=self._state.db,
+                update_fields=generated_fields,
+            )
 
     @staticmethod
     def bulk_save(issues, fields=None) -> None:  # type: ignore[override]
