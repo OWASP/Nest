@@ -261,7 +261,7 @@ describe('Header Component', () => {
       expect(logoImages.length).toBe(2)
 
       for (const logo of logoImages) {
-        expect(logo).toHaveAttribute('src', '/img/logo_dark.png')
+        expect(logo).toHaveAttribute('src', '/img/logo_light.png')
         expect(logo).toBeInTheDocument()
       }
     })

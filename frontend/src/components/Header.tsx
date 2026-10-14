@@ -3,6 +3,7 @@ import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import {
   FaRegHeart,
@@ -22,7 +23,16 @@ import UserMenu from 'components/UserMenu'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const logoSrc = mounted && resolvedTheme === 'dark' ? '/img/logo_dark.png' : '/img/logo_light.png'
+
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
   const logoSrc = '/img/logo_dark.png'
 
