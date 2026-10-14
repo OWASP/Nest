@@ -383,7 +383,8 @@ class ContributionScoreCalculator:
             },
         )
 
-        Certificate.issue_certificate(user, total_score, TierChoices(tier))
+        if total_score > 0:
+            Certificate.issue_certificate(user, total_score, TierChoices(tier))
 
         logger.info(
             "Recalculated score for %s: %s points (%s)",
