@@ -38,6 +38,8 @@ class Base(Configuration):
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
 
+    SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
