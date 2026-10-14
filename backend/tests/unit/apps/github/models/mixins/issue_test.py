@@ -88,3 +88,68 @@ class TestIssueIndexMixin:
     )
     def test_issue_index(self, issue_index_mixin_instance, attr, expected):
         assert getattr(issue_index_mixin_instance, attr) == expected
+
+    def test_is_indexable_true(self, issue_index_mixin_instance):
+        """Test is_indexable returns True when all indexing criteria are met."""
+        issue_index_mixin_instance.id = 1
+        issue_index_mixin_instance.state = "open"
+        issue_index_mixin_instance.IssueState = MagicMock(OPEN="open")
+        issue_index_mixin_instance.is_locked = False
+        issue_index_mixin_instance.repository.is_indexable = True
+        issue_index_mixin_instance.repository.track_issues = True
+        issue_index_mixin_instance.project.track_issues = True
+
+        assert issue_index_mixin_instance.is_indexable is True
+
+    @pytest.mark.parametrize(
+        (
+            "issue_id",
+            "state",
+            "is_locked",
+            "has_repository",
+            "repo_indexable",
+            "repo_track_issues",
+            "has_project",
+            "project_track_issues",
+        ),
+        [
+            (1, "open", False, False, True, True, True, True),
+            (None, "open", False, True, True, True, True, True),
+            (1, "closed", False, True, True, True, True, True),
+            (1, "open", True, True, True, True, True, True),
+            (1, "open", False, True, False, True, True, True),
+            (1, "open", False, True, True, False, True, True),
+            (1, "open", False, True, True, True, False, True),
+            (1, "open", False, True, True, True, True, False),
+        ],
+    )
+    def test_is_indexable_false(
+        self,
+        issue_index_mixin_instance,
+        issue_id,
+        state,
+        is_locked,
+        has_repository,
+        repo_indexable,
+        repo_track_issues,
+        has_project,
+        project_track_issues,
+    ):
+        """Test is_indexable returns False under non-indexable conditions."""
+        issue_index_mixin_instance.id = issue_id
+        issue_index_mixin_instance.state = state
+        issue_index_mixin_instance.IssueState = MagicMock(OPEN="open")
+        issue_index_mixin_instance.is_locked = is_locked
+
+        if not has_repository:
+            issue_index_mixin_instance.repository = None
+        else:
+            issue_index_mixin_instance.repository.is_indexable = repo_indexable
+            issue_index_mixin_instance.repository.track_issues = repo_track_issues
+
+        if not has_project:
+            issue_index_mixin_instance.project = None
+        else:
+            issue_index_mixin_instance.project.track_issues = project_track_issues
+
+        assert issue_index_mixin_instance.is_indexable is False
