@@ -57,7 +57,7 @@ module "backend" {
   kms_key_arn                     = module.kms.key_arn
   max_count                       = var.backend_max_count
   min_count                       = var.backend_min_count
-  parameters_arns                 = module.parameters.django_ssm_parameter_arns
+  parameters_arns                 = module.parameters.django_runtime_parameter_arns
   private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.backend_sg_id
@@ -124,7 +124,7 @@ module "frontend" {
   kms_key_arn                     = module.kms.key_arn
   max_count                       = var.frontend_max_count
   min_count                       = var.frontend_min_count
-  parameters_arns                 = module.parameters.frontend_ssm_parameter_arns
+  parameters_arns                 = module.parameters.frontend_runtime_parameter_arns
   private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.frontend_sg_id
@@ -247,7 +247,7 @@ module "tasks" {
 
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
-  container_parameters_arns     = module.parameters.django_ssm_parameter_arns
+  container_parameters_arns     = module.parameters.django_runtime_parameter_arns
   ecr_repository_arn            = module.backend.ecr_repository_arn
   ecr_repository_url            = module.backend.ecr_repository_url
   ecs_sg_id                     = module.security.tasks_sg_id

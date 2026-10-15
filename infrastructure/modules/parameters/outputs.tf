@@ -34,8 +34,8 @@ output "django_runtime_parameter_arns" {
     var.enable_additional_parameters ? {
       "DJANGO_GITHUB_APP_ID"                          = aws_ssm_parameter.django_github_app_id[0].arn
       "DJANGO_GITHUB_APP_INSTALLATION_ID"             = aws_ssm_parameter.django_github_app_installation_id[0].arn
-      "NEST_GITHUB_APP_PRIVATE_KEY"                   = aws_ssm_parameter.nest_github_app_private_key[0].arn
-      "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_ssm_parameter.slack_bot_token[0].arn
+      "NEST_GITHUB_APP_PRIVATE_KEY"                   = aws_secretsmanager_secret.external_runtime["NEST_GITHUB_APP_PRIVATE_KEY"].arn
+      "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_secretsmanager_secret.external_runtime["SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"].arn
     } : {}
   )
 }
@@ -59,16 +59,16 @@ output "external_secret_values" {
   )
 }
 
-output "frontend_ssm_parameter_arns" {
-  description = "Map of frontend environment variable names to the ARNs of all SSM parameters."
+output "frontend_runtime_parameter_arns" {
+  description = "Map of frontend environment variable names to SSM and Secrets Manager references."
   sensitive   = true
   value = {
     "NEXT_SERVER_CSRF_URL"             = aws_ssm_parameter.next_server_csrf_url.arn
     "NEXT_SERVER_DISABLE_SSR"          = aws_ssm_parameter.next_server_disable_ssr.arn
     "NEXT_SERVER_GITHUB_CLIENT_ID"     = aws_ssm_parameter.next_server_github_client_id.arn
-    "NEXT_SERVER_GITHUB_CLIENT_SECRET" = aws_ssm_parameter.next_server_github_client_secret.arn
+    "NEXT_SERVER_GITHUB_CLIENT_SECRET" = aws_secretsmanager_secret.external_runtime["NEXT_SERVER_GITHUB_CLIENT_SECRET"].arn
     "NEXT_SERVER_GRAPHQL_URL"          = aws_ssm_parameter.next_server_graphql_url.arn
-    "NEXTAUTH_SECRET"                  = aws_ssm_parameter.nextauth_secret.arn
+    "NEXTAUTH_SECRET"                  = aws_secretsmanager_secret.nextauth_secret.arn
     "NEXTAUTH_URL"                     = aws_ssm_parameter.nextauth_url.arn
   }
 }
