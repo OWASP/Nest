@@ -119,6 +119,7 @@ defectdojo
 demojize
 dismissable
 dkr
+docksec
 dsn
 dvo
 eddsa
@@ -164,6 +165,7 @@ libgobject
 libharfbuzz
 libpango
 libpangoft
+librsvg
 libx
 lighthouseci
 lighthouserc
@@ -224,6 +226,7 @@ relativedelta
 replicationgroup
 repositorycontributor
 requirepass
+rhysd
 rqworker
 rsc
 rudransh
@@ -238,6 +241,7 @@ shrivastava
 skillstruck
 slackbot
 slideshare
+smol
 someid
 speakerdeck
 subgrp
@@ -269,5 +273,6 @@ xsser
 xzf
 zapconfig
 zaproxy
+zizmor
 zsc
 éàëîôû
