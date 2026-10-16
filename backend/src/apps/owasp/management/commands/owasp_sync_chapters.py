@@ -125,7 +125,14 @@ class Command(BaseCommand):
             offset (int): Number of catalog records to skip.
 
         """
-        local_chapters = {chapter.key.lower(): chapter for chapter in Chapter.objects.all()}
+        if any(not str(record.get("slug") or "").strip() for record in records):
+            logger.warning("OWASP chapters catalog row has no slug")
+            return
+
+        local_chapters = {
+            chapter.key.lower(): chapter
+            for chapter in Chapter.objects.select_related("owasp_repository")
+        }
         retained_keys = set()
         for record in records:
             slug = str(record.get("slug") or "").strip()

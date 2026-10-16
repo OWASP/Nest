@@ -55,7 +55,7 @@ class TestProjectResolution:
             result = query.__class__.__dict__["project"](query, key="test-project")
 
             assert result == mock_project
-            mock_get.assert_called_once_with("test-project")
+            mock_get.assert_called_once_with("test-project", active_only=False)
 
     def test_resolve_project_not_found(self, mock_info):
         """Test resolving a non-existent project."""

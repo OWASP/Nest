@@ -117,11 +117,11 @@ class TestProjectIndexMixin:
 
     def test_idx_key(self):
         """Test idx_key returns the project key."""
-        mock_project = self.create_mock_project(key="zap")
+        mock_project = self.create_mock_project(key="www-project-zap")
 
         result = ProjectIndexMixin.idx_key.fget(mock_project)
 
-        assert result == "zap"
+        assert result == "www-project-zap"
 
     def test_idx_languages(self):
         """Test idx_languages returns languages list."""

@@ -144,6 +144,10 @@ class Command(BaseCommand):
             offset (int): Number of catalog records to skip.
 
         """
+        if any(not str(record.get("slug") or "").strip() for record in records):
+            logger.warning("OWASP projects catalog row has no slug")
+            return
+
         local_projects = {
             project.key.lower(): project
             for project in Project.objects.prefetch_related("repositories")

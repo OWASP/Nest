@@ -148,7 +148,9 @@ class TestGithubUpdateOwaspOrganization:
                 )
 
             if repository_name:
-                if repository_name.startswith("www-project-"):
+                if repository_name.startswith("www-committee-"):
+                    mock_sync_repository.assert_not_called()
+                elif repository_name.startswith("www-project-"):
                     assert mock_project_update.call_count == expected_calls["project"]
                 elif repository_name.startswith("www-chapter-"):
                     assert mock_chapter_update.call_count == expected_calls["chapter"]

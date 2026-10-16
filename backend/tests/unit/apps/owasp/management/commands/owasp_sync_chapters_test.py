@@ -100,7 +100,7 @@ class TestOwaspSyncChapters:
         )
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -125,7 +125,7 @@ class TestOwaspSyncChapters:
         mock_get.return_value = response([chapter_record()])
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -140,7 +140,7 @@ class TestOwaspSyncChapters:
         mock_get.return_value = response([chapter_record()])
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = []
+            mock_objects.select_related.return_value = []
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -164,7 +164,7 @@ class TestOwaspSyncChapters:
         stale.is_active = True
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter, stale]
+            mock_objects.select_related.return_value = [mock_chapter, stale]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -180,7 +180,7 @@ class TestOwaspSyncChapters:
         mock_get.side_effect = requests.exceptions.RequestException("offline")
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -188,6 +188,22 @@ class TestOwaspSyncChapters:
         mock_chapter.deactivate.assert_not_called()
         mock_chapter.sync_leaders.assert_not_called()
         assert mock_chapter.leaders_raw == ["Existing Leader"]
+
+    @mock.patch.object(Chapter, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.api_client.requests.get")
+    def test_leaves_chapters_unchanged_when_a_row_has_no_slug(
+        self, mock_get, mock_bulk_save, command, mock_chapter
+    ):
+        """Test a catalog row without a slug does not deactivate chapters."""
+        mock_get.return_value = response([chapter_record(slug="")])
+
+        with mock.patch.object(Chapter, "objects") as mock_objects:
+            mock_objects.select_related.return_value = [mock_chapter]
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+
+        mock_bulk_save.assert_not_called()
+        mock_chapter.deactivate.assert_not_called()
 
     @mock.patch.object(Chapter, "bulk_save", autospec=True)
     @mock.patch("apps.owasp.api_client.requests.get")
@@ -200,7 +216,7 @@ class TestOwaspSyncChapters:
         mock_get.return_value = response([record])
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -225,7 +241,7 @@ class TestOwaspSyncChapters:
         slug_chapter.owasp_repository_id = 4
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter, slug_chapter]
+            mock_objects.select_related.return_value = [mock_chapter, slug_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -247,7 +263,7 @@ class TestOwaspSyncChapters:
         mock_chapter.region = "Europe"
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -275,7 +291,7 @@ class TestOwaspSyncChapters:
         mock_chapter.generate_geo_location.side_effect = set_coordinates
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -305,7 +321,7 @@ class TestOwaspSyncChapters:
         mock_chapter.generate_geo_location.side_effect = geocode
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -328,7 +344,7 @@ class TestOwaspSyncChapters:
         mock_get.return_value = response([chapter_record()])
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = []
+            mock_objects.select_related.return_value = []
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
@@ -390,7 +406,7 @@ class TestOwaspSyncChapters:
         stub.is_active = True
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.all.return_value = [stub, mock_chapter]
+            mock_objects.select_related.return_value = [stub, mock_chapter]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 

@@ -167,7 +167,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         elif chapter:
             from apps.owasp.models.chapter import Chapter  # noqa: PLC0415
 
-            matched = Chapter.get_by_key(chapter, active_only=False)
+            matched = Chapter.get_by_key(chapter)
             repository_id = matched.owasp_repository_id if matched is not None else None
             queryset = (
                 queryset.filter(repository_id=repository_id) if repository_id else queryset.none()
@@ -175,7 +175,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         elif committee:
             from apps.owasp.models.committee import Committee  # noqa: PLC0415
 
-            matched = Committee.get_by_key(committee, active_only=False)
+            matched = Committee.get_by_key(committee)
             repository_id = matched.owasp_repository_id if matched is not None else None
             queryset = (
                 queryset.filter(repository_id=repository_id) if repository_id else queryset.none()

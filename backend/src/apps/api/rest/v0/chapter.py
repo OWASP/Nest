@@ -32,6 +32,16 @@ class ChapterBase(Schema):
         """Resolve key."""
         return obj.nest_key
 
+    @staticmethod
+    def resolve_created_at(obj: ChapterModel) -> datetime:
+        """Return the source timestamp, or when Nest stored the chapter."""
+        return obj.created_at or obj.nest_created_at
+
+    @staticmethod
+    def resolve_updated_at(obj: ChapterModel) -> datetime:
+        """Return the source timestamp, or when Nest last stored the chapter."""
+        return obj.updated_at or obj.nest_updated_at
+
 
 class Chapter(ChapterBase):
     """Schema for Chapter (minimal fields for list display)."""

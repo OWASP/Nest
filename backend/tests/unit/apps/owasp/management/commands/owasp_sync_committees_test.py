@@ -186,8 +186,9 @@ class TestOwaspSyncCommittees:
             mock.patch(
                 "apps.owasp.management.commands.owasp_sync_committees.OwaspSync",
                 return_value=mock_sync,
-            ),
+            ) as sync_class,
         ):
+            sync_class.apply_leaders = OwaspSync.apply_leaders
             command.handle(offset=0)
 
         mock_committee.sync_leaders.assert_not_called()

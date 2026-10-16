@@ -146,6 +146,7 @@ backend-data-sync:
 backend-data-update:
 	@$(MAKE) owasp-sync-projects
 	@$(MAKE) owasp-sync-chapters
+	@$(MAKE) owasp-sync-committees
 	@$(MAKE) github-update-owasp-organization
 	@$(MAKE) github-add-related-repositories
 	@$(MAKE) github-update-related-organizations

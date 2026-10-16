@@ -66,7 +66,7 @@ class TestPullRequestQuery:
         assert result == [mock_pull_request]
         mock_queryset.filter.assert_called_with(repository__organization__login="owasp")
 
-    @patch("apps.owasp.models.project.Project.active_projects")
+    @patch("apps.owasp.models.project.Project.objects")
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_project(
         self, mock_pr_objects, mock_project_objects, mock_queryset, mock_pull_request
@@ -185,7 +185,7 @@ class TestPullRequestQuery:
         mock_queryset.annotate.assert_called_once()
         assert mock_queryset.filter.call_count == 3
 
-    @patch("apps.owasp.models.project.Project.active_projects")
+    @patch("apps.owasp.models.project.Project.objects")
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_project_not_found(
         self, mock_pr_objects, mock_project_objects, mock_queryset

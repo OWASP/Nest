@@ -114,11 +114,11 @@ class TestChapterIndexMixin:
 
     def test_idx_key(self):
         """Test idx_key returns the chapter key."""
-        mock_chapter = self.create_mock_chapter(key="london")
+        mock_chapter = self.create_mock_chapter(key="www-chapter-london")
 
         result = ChapterIndexMixin.idx_key.fget(mock_chapter)
 
-        assert result == "london"
+        assert result == "www-chapter-london"
 
     def test_idx_meetup_group(self):
         """Test idx_meetup_group returns meetup group."""

@@ -105,9 +105,14 @@ class TestCommitteeModel:
         committee = Committee(key="chapter")
         assert committee.nest_key == "chapter"
 
+    def test_nest_key_strips_the_legacy_prefix(self):
+        """Test a stored www-committee key becomes the public group slug."""
+        committee = Committee(key="www-committee-events")
+        assert committee.nest_key == "events"
+
     def test_nest_key_complex(self):
         """Test nest_key with a multi-word key."""
-        committee = Committee(key="web-security")
+        committee = Committee(key="www-committee-web-security")
         assert committee.nest_key == "web-security"
 
     def test_update_data_creates_new(self):

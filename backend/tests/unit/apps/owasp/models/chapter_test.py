@@ -223,7 +223,6 @@ class TestChapterModel:
                 is_active=True,
                 latitude__isnull=False,
                 longitude__isnull=False,
-                owasp_repository__is_empty=False,
             )
 
     @pytest.mark.parametrize(

@@ -156,10 +156,12 @@ class TestRepositoryContributor(TestCase):
             mock_queryset = self._setup_mock_queryset(mock_objects)
             with patch(
                 "apps.owasp.models.project.Project.get_by_key",
-                return_value=Mock(key="my-project"),
+                return_value=Mock(key="www-project-my-project"),
             ):
                 RepositoryContributor.get_top_contributors(project="my-project")
-            mock_queryset.filter.assert_any_call(repository__project__key__iexact="my-project")
+            mock_queryset.filter.assert_any_call(
+                repository__project__key__iexact="www-project-my-project"
+            )
 
     def test_get_top_contributors_chapter_filter(self):
         """Test the chapter filtering logic in get_top_contributors."""
@@ -168,8 +170,9 @@ class TestRepositoryContributor(TestCase):
             with patch(
                 "apps.owasp.models.chapter.Chapter.get_by_key",
                 return_value=Mock(owasp_repository_id=7),
-            ):
+            ) as mock_get:
                 RepositoryContributor.get_top_contributors(chapter="my-chapter")
+            mock_get.assert_called_once_with("my-chapter")
             mock_queryset.filter.assert_any_call(repository_id=7)
 
     def test_get_top_contributors_committee_filter(self):
@@ -179,8 +182,9 @@ class TestRepositoryContributor(TestCase):
             with patch(
                 "apps.owasp.models.committee.Committee.get_by_key",
                 return_value=Mock(owasp_repository_id=8),
-            ):
+            ) as mock_get:
                 RepositoryContributor.get_top_contributors(committee="my-committee")
+            mock_get.assert_called_once_with("my-committee")
             mock_queryset.filter.assert_any_call(repository_id=8)
 
     def test_get_top_contributors_repository_filter(self):

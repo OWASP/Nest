@@ -118,7 +118,8 @@ class Chapter(
     def get_by_key(cls, key: str, *, active_only: bool = True) -> Chapter | None:
         """Return the chapter stored under this key.
 
-        A slug also matches a stored ``www-chapter-`` key when that row has not been renamed yet.
+        A slug matches a stored ``www-chapter-`` key, and that prefixed key matches the slug,
+        until synchronization has renamed the row.
 
         Args:
             key (str): Chapter key.
@@ -132,9 +133,14 @@ class Chapter(
         queryset = cls.active_chapters if active_only else cls.objects
         normalized = key.strip()
         chapter = queryset.filter(key__iexact=normalized).first()
-        if chapter is not None or normalized.lower().startswith("www-chapter-"):
+        if chapter is not None:
             return chapter
-        return queryset.filter(key__iexact=f"www-chapter-{normalized}").first()
+        prefix = "www-chapter-"
+        lowered = normalized.lower()
+        alternate = (
+            lowered.removeprefix(prefix) if lowered.startswith(prefix) else f"{prefix}{normalized}"
+        )
+        return queryset.filter(key__iexact=alternate).first()
 
     def adopt_key(self, key: str, occupant: Chapter | None = None) -> bool:
         """Store this chapter under ``key``.
@@ -172,7 +178,6 @@ class Chapter(
             is_active=True,
             latitude__isnull=False,
             longitude__isnull=False,
-            owasp_repository__is_empty=False,
         ).count()
 
     def from_github(self, repository) -> None:

@@ -58,15 +58,25 @@ class Committee(
         super().save(*args, **kwargs)
 
     @property
-    def nest_key(self):
-        """Get Nest key."""
+    def nest_key(self) -> str:
+        """Return the public group slug.
+
+        Stored keys may still start with ``www-committee-``. The group page does not.
+
+        Returns:
+            str: Committee slug used in the owasp.org group URL.
+
+        """
+        prefix = "www-committee-"
+        if self.key.lower().startswith(prefix):
+            return self.key[len(prefix) :]
         return self.key
 
     @classmethod
     def get_by_key(cls, key: str, *, active_only: bool = True) -> Committee | None:
         """Return the committee stored under this key.
 
-        A slug also matches a stored ``www-committee-`` key when that row has not been renamed yet.
+        A slug matches a stored ``www-committee-`` key, and that prefixed key matches the slug.
 
         Args:
             key (str): Committee key.
@@ -80,9 +90,14 @@ class Committee(
         queryset = cls.active_committees if active_only else cls.objects
         normalized = key.strip()
         committee = queryset.filter(key__iexact=normalized).first()
-        if committee is not None or normalized.lower().startswith("www-committee-"):
+        if committee is not None:
             return committee
-        return queryset.filter(key__iexact=f"www-committee-{normalized}").first()
+        prefix = "www-committee-"
+        lowered = normalized.lower()
+        alternate = (
+            lowered.removeprefix(prefix) if lowered.startswith(prefix) else f"{prefix}{normalized}"
+        )
+        return queryset.filter(key__iexact=alternate).first()
 
     @staticmethod
     @lru_cache

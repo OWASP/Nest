@@ -29,7 +29,7 @@ class ProjectQuery:
             ProjectNode | None: The project node if found, otherwise None.
 
         """
-        return Project.get_by_key(key)
+        return Project.get_by_key(key, active_only=False)
 
     @strawberry_django.field
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:

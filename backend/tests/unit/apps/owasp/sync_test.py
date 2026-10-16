@@ -80,6 +80,37 @@ class TestOwaspSync:
 
         assert sync.verify_url("https://old-url.org") == "https://new-url.org"
 
+    def test_verify_url_resolves_a_relative_redirect(self, mock_session, mock_response):
+        """Test a relative Location is resolved against the current URL."""
+        mock_session.get.return_value = mock_response
+        sync = OwaspSync("https://test.org")
+        mock_session.get.reset_mock()
+
+        redirect_response = Mock()
+        redirect_response.status_code = HTTPStatus.FOUND
+        redirect_response.headers = {"Location": "/groups/events-committee"}
+        final_response = Mock()
+        final_response.status_code = HTTPStatus.OK
+        mock_session.get.side_effect = [redirect_response, final_response]
+
+        assert (
+            sync.verify_url("https://owasp.org/old") == "https://owasp.org/groups/events-committee"
+        )
+
+    def test_verify_url_stops_following_a_redirect_loop(self, mock_session, mock_response):
+        """Test a redirect loop is left unverified instead of recursing forever."""
+        mock_session.get.return_value = mock_response
+        sync = OwaspSync("https://test.org")
+        mock_session.get.reset_mock()
+
+        redirect_response = Mock()
+        redirect_response.status_code = HTTPStatus.FOUND
+        redirect_response.headers = {"Location": "https://loop.example/a"}
+        mock_session.get.return_value = redirect_response
+
+        assert sync.verify_url("https://loop.example/a") == "https://loop.example/a"
+        assert mock_session.get.call_count == 6
+
     @pytest.mark.parametrize(
         "status_code",
         [
@@ -310,7 +341,7 @@ class TestOwaspSync:
         with caplog.at_level(logging.ERROR):
             result = sync.verify_url("https://example.org")
 
-        assert result is None
+        assert result == "https://example.org"
         assert "Request failed" in caplog.text
 
     def test_urls_with_none_page_tree(self, mock_session):

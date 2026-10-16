@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Literal
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import requests
 from lxml import etree, html
@@ -204,34 +204,53 @@ class OwaspSync:
             urls.add(href)
         return urls
 
-    def verify_url(self, url):
-        """Verify URL."""
+    def verify_url(self, url: str, *, redirects_remaining: int = 5) -> str | None:
+        """Verify URL.
+
+        A request failure or an exhausted redirect chain leaves the URL in place. Those
+        outcomes do not show that the URL is invalid.
+
+        Args:
+            url (str): URL to verify.
+            redirects_remaining (int): Redirects still allowed for this chain.
+
+        Returns:
+            str | None: The verified URL, the original URL when it could not be checked,
+            or None when the URL is invalid.
+
+        """
         location = urlparse(url).netloc.lower()
         if not location:
             return None
-
         if location.endswith(("linkedin.com", "slack.com", "youtube.com")):
             return url
 
         try:
-            # Check for redirects.
             response = self.session.get(url, allow_redirects=False, timeout=TIMEOUT)
         except requests.exceptions.RequestException:
             logger.exception("Request failed", extra={"url": url})
-            return None
-
-        if response.status_code == HTTPStatus.OK:
             return url
 
-        if response.status_code in {
-            HTTPStatus.MOVED_PERMANENTLY,  # 301
-            HTTPStatus.FOUND,  # 302
-            HTTPStatus.SEE_OTHER,  # 303
-            HTTPStatus.TEMPORARY_REDIRECT,  # 307
-            HTTPStatus.PERMANENT_REDIRECT,  # 308
-        }:
-            return self.verify_url(response.headers["Location"])
+        redirect_codes = {
+            HTTPStatus.MOVED_PERMANENTLY,
+            HTTPStatus.FOUND,
+            HTTPStatus.SEE_OTHER,
+            HTTPStatus.TEMPORARY_REDIRECT,
+            HTTPStatus.PERMANENT_REDIRECT,
+        }
+        target = response.headers.get("Location") if response.status_code in redirect_codes else ""
+        redirect_finished = response.status_code in redirect_codes and (
+            redirects_remaining <= 0 or not target
+        )
+        if response.status_code == HTTPStatus.OK or redirect_finished:
+            if response.status_code in redirect_codes and redirects_remaining <= 0:
+                logger.warning("Stopped following redirects for %s", url)
+            return url
+        if target:
+            return self.verify_url(
+                urljoin(url, target),
+                redirects_remaining=redirects_remaining - 1,
+            )
 
         logger.warning("Couldn't verify URL %s", url)
-
         return None

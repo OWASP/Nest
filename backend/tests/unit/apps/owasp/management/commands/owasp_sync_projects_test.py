@@ -195,6 +195,22 @@ class TestOwaspSyncProjects:
 
     @mock.patch.object(Project, "bulk_save", autospec=True)
     @mock.patch("apps.owasp.api_client.requests.get")
+    def test_leaves_projects_unchanged_when_a_row_has_no_slug(
+        self, mock_get, mock_bulk_save, command, mock_project
+    ):
+        """Test a catalog row without a slug does not deactivate projects."""
+        mock_get.return_value = response([project_record(slug="")])
+
+        with mock.patch.object(Project, "objects") as mock_objects:
+            mock_objects.prefetch_related.return_value = [mock_project]
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+
+        mock_bulk_save.assert_not_called()
+        mock_project.deactivate.assert_not_called()
+
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.api_client.requests.get")
     def test_renames_project_that_owns_the_github_repository(
         self, mock_get, mock_bulk_save, command
     ):
