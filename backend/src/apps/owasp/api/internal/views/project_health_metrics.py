@@ -24,7 +24,7 @@ def generate_overview_pdf(request):  # noqa: ARG001
 @require_GET
 def generate_project_health_metrics_pdf(request, project_key: str):  # noqa: ARG001
     """Generate and return a PDF report of project health metrics."""
-    if not (project := Project.objects.filter(key=f"www-project-{project_key}").first()):
+    if not (project := Project.get_by_key(project_key)):
         raise Http404
 
     if pdf := generate_latest_metrics_pdf(

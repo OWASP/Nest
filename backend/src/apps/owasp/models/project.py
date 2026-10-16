@@ -30,6 +30,26 @@ if TYPE_CHECKING:
     from apps.owasp.models.entity_member import EntityMember
     from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
+
+def compact_key(value: str) -> str:
+    """Return a name with case and punctuation removed.
+
+    Args:
+        value (str): Project or repository name.
+
+    Returns:
+        str: Letters and digits from ``value``, lowercased.
+
+    """
+    return "".join(character for character in value.lower() if character.isalnum())
+
+
+LEVEL_MAPPING = {
+    2: ProjectLevel.INCUBATOR,
+    3: ProjectLevel.LAB,
+    3.5: ProjectLevel.PRODUCTION,
+    4: ProjectLevel.FLAGSHIP,
+}
 MAX_LEADERS_COUNT = 5
 
 
@@ -282,14 +302,43 @@ class Project(
         return len(self.leaders_raw)
 
     @property
-    def nest_key(self) -> str:
-        """Get the Nest-specific project key.
+    def github_url(self) -> str:
+        """Return the GitHub URL for the repository this project is named after.
 
         Returns:
-            str: The project key with the "www-project-" prefix removed.
+            str: URL of the linked repository whose name matches the project key.
 
         """
-        return self.key.replace("www-project-", "")
+        if self.pk:
+            name = compact_key(self.nest_key)
+            for repository in self.repositories.all():
+                if compact_key(repository.key) == name:
+                    return repository.url
+
+        if self.owasp_repository_id:
+            return self.owasp_repository.url
+
+        return f"https://github.com/owasp/{self.key}"
+
+    @property
+    def nest_key(self) -> str:
+        """Return the project key.
+
+        Returns:
+            str: The project key.
+
+        """
+        return self.key
+
+    @property
+    def owasp_url(self) -> str:
+        """Return the public project page.
+
+        Returns:
+            str: Absolute owasp.org project URL.
+
+        """
+        return f"https://owasp.org/projects/{self.nest_key}"
 
     @property
     def nest_url(self) -> str:
@@ -468,6 +517,65 @@ class Project(
         self.is_active = False
         self.save(update_fields=("is_active",))
 
+    def adopt_key(self, key: str, occupant: Project | None = None) -> bool:
+        """Store this project under ``key``.
+
+        An occupant with no repositories is deleted. An occupant that already has repositories
+        keeps the key, and this project is left unchanged.
+
+        Args:
+            key (str): Key this project should use.
+            occupant (Project | None): Project already stored under ``key``.
+
+        Returns:
+            bool: True when this project is stored under ``key``.
+
+        """
+        if self.key.lower() == key.lower():
+            return True
+
+        if occupant is not None and occupant is not self:
+            if occupant.pk and occupant.repositories.exists():
+                return False
+            if occupant.pk:
+                occupant.delete()
+
+        self.key = key
+        return True
+
+    @staticmethod
+    def index_by_repository(projects: dict[str, Project]) -> dict[str, list[Project]]:
+        """Index projects by the compact name of each linked repository.
+
+        Args:
+            projects (dict[str, Project]): Projects keyed by lowercase project key.
+
+        Returns:
+            dict[str, list[Project]]: Compact repository name to the projects that include it.
+
+        """
+        indexed: dict[str, list[Project]] = {}
+        for project in projects.values():
+            for repository in project.repositories.all():
+                indexed.setdefault(compact_key(repository.key), []).append(project)
+        return indexed
+
+    @classmethod
+    def get_by_key(cls, key: str, *, active_only: bool = True) -> Project | None:
+        """Return the project stored under this key.
+
+        Args:
+            key (str): Project key.
+            active_only (bool): Limit the lookup to active projects. Pass False to include
+                inactive projects.
+
+        Returns:
+            Project | None: The matching project, if one exists.
+
+        """
+        queryset = cls.active_projects if active_only else cls.objects
+        return queryset.filter(key__iexact=key.strip()).first()
+
     def from_github(self, repository) -> None:
         """Update instance based on GitHub repository data.
 
@@ -489,13 +597,7 @@ class Project(
         # Level.
         project_level = project_metadata.get("level")
         if project_level:
-            level_mapping = {
-                2: ProjectLevel.INCUBATOR,
-                3: ProjectLevel.LAB,
-                3.5: ProjectLevel.PRODUCTION,
-                4: ProjectLevel.FLAGSHIP,
-            }
-            self.level = level_mapping.get(project_level) or ProjectLevel.OTHER
+            self.level = LEVEL_MAPPING.get(project_level) or ProjectLevel.OTHER
             self.level_raw = project_level
 
         # Type.

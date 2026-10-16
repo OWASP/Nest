@@ -1,5 +1,7 @@
 """OWASP app committee model."""
 
+from __future__ import annotations
+
 from functools import lru_cache
 
 from django.db import models
@@ -58,7 +60,23 @@ class Committee(
     @property
     def nest_key(self):
         """Get Nest key."""
-        return self.key.replace("www-committee-", "")
+        return self.key
+
+    @classmethod
+    def get_by_key(cls, key: str, *, active_only: bool = True) -> Committee | None:
+        """Return the committee stored under this key.
+
+        Args:
+            key (str): Committee key.
+            active_only (bool): Limit the lookup to active committees. Pass False to include
+                inactive committees.
+
+        Returns:
+            Committee | None: The matching committee, if one exists.
+
+        """
+        queryset = cls.active_committees if active_only else cls.objects
+        return queryset.filter(key__iexact=key.strip()).first()
 
     @staticmethod
     @lru_cache
@@ -74,7 +92,7 @@ class Committee(
         BulkSaveModel.bulk_save(Committee, committees, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, *, save: bool = True) -> "Committee":
+    def update_data(gh_repository, repository, *, save: bool = True) -> Committee:
         """Update committee data."""
         key = gh_repository.name.lower()
         try:

@@ -82,14 +82,53 @@ class Chapter(
         return f"{self.name or self.key}"
 
     @property
-    def nest_key(self):
-        """Get Nest key."""
-        return self.key.replace("www-chapter-", "")
+    def github_url(self) -> str:
+        """Return the GitHub URL for this chapter's linked repository.
+
+        Returns:
+            str: URL of the linked repository, or an empty string when the chapter has none.
+
+        """
+        if self.owasp_repository_id:
+            return self.owasp_repository.url
+
+        return ""
+
+    @property
+    def nest_key(self) -> str:
+        """Return the chapter key."""
+        return self.key
+
+    @property
+    def owasp_url(self) -> str:
+        """Return the public chapter page.
+
+        Returns:
+            str: Absolute owasp.org chapter URL.
+
+        """
+        return f"https://owasp.org/chapters/{self.nest_key}"
 
     @property
     def nest_url(self) -> str:
         """Get Nest URL for chapter."""
         return get_absolute_url(f"chapters/{self.nest_key}")
+
+    @classmethod
+    def get_by_key(cls, key: str, *, active_only: bool = True) -> Chapter | None:
+        """Return the chapter stored under this key.
+
+        Args:
+            key (str): Chapter key.
+            active_only (bool): Limit the lookup to active chapters. Pass False to include
+                inactive chapters.
+
+        Returns:
+            Chapter | None: The matching chapter, if one exists.
+
+        """
+        queryset = cls.active_chapters if active_only else cls.objects
+        return queryset.filter(key__iexact=key.strip()).first()
 
     @staticmethod
     @lru_cache

@@ -121,19 +121,50 @@ class TestChapterModel:
     @pytest.mark.parametrize(
         ("key", "expected_nest_key"),
         [
-            ("www-chapter-test", "test"),
-            ("www-chapter-new-york", "new-york"),
-            ("www-chapter-", ""),
+            ("algiers", "algiers"),
+            ("new-york", "new-york"),
         ],
     )
     def test_nest_key_property(self, key, expected_nest_key):
-        """Test nest_key property strips www-chapter- prefix."""
+        """Test nest_key is the chapter key."""
         chapter = Chapter(key=key)
         assert chapter.nest_key == expected_nest_key
 
+    def test_owasp_url_uses_the_chapter_slug(self):
+        """Test the public page URL uses the chapter slug."""
+        assert Chapter(key="algiers").owasp_url == "https://owasp.org/chapters/algiers"
+        assert Chapter(key="london").owasp_url == "https://owasp.org/chapters/london"
+
+    def test_github_url_uses_the_linked_repository(self, mocker):
+        """Test the GitHub URL is the linked repository."""
+        chapter = Chapter(key="algiers")
+        assert chapter.github_url == ""
+
+        repository = mocker.Mock()
+        repository.url = "https://github.com/OWASP/chapter-site"
+        chapter.owasp_repository_id = 1
+        mocker.patch.object(
+            Chapter,
+            "owasp_repository",
+            new_callable=mocker.PropertyMock,
+            return_value=repository,
+        )
+
+        assert chapter.github_url == "https://github.com/OWASP/chapter-site"
+
+    def test_get_by_key_checks_the_slug_before_the_legacy_key(self, mocker):
+        """Test lookup matches the chapter key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.return_value = found
+        mocker.patch.object(Chapter, "active_chapters", manager)
+
+        assert Chapter.get_by_key("algiers") is found
+        manager.filter.assert_called_once_with(key__iexact="algiers")
+
     def test_nest_url_property(self):
         """Test nest_url property returns correct URL."""
-        chapter = Chapter(key="www-chapter-new-york")
+        chapter = Chapter(key="new-york")
         with patch("apps.owasp.models.chapter.get_absolute_url") as mock_get_url:
             mock_get_url.return_value = "https://nest.owasp.org/chapters/new-york"
             url = chapter.nest_url

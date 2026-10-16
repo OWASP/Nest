@@ -80,6 +80,53 @@ class TestProjectModel:
         assert not project.is_active
         mock_save.assert_called_once_with(update_fields=("is_active",))
 
+    def test_adopt_key_renames_the_project(self):
+        project = Project(key="www-project-nest")
+
+        assert project.adopt_key("nest")
+
+        assert project.key == "nest"
+
+    def test_adopt_key_leaves_a_matching_key(self):
+        project = Project(key="nest")
+        occupant = Mock()
+
+        assert project.adopt_key("Nest", occupant)
+
+        assert project.key == "nest"
+        occupant.delete.assert_not_called()
+
+    def test_adopt_key_removes_an_empty_occupant(self):
+        project = Project(key="www-project-nest")
+        occupant = Mock()
+        occupant.pk = 2
+        occupant.repositories.exists.return_value = False
+
+        assert project.adopt_key("nest", occupant)
+
+        occupant.delete.assert_called_once_with()
+        assert project.key == "nest"
+
+    def test_adopt_key_keeps_the_key_when_the_occupant_has_repositories(self):
+        project = Project(key="www-project-nest")
+        occupant = Mock()
+        occupant.pk = 1
+        occupant.repositories.exists.return_value = True
+
+        assert not project.adopt_key("nest", occupant)
+
+        assert project.key == "www-project-nest"
+        occupant.delete.assert_not_called()
+
+    def test_index_by_repository(self):
+        repository = Mock(key="CheatSheetSeries")
+        project = Mock()
+        project.repositories.all.return_value = [repository]
+
+        indexed = Project.index_by_repository({"cheat-sheets": project})
+
+        assert indexed["cheatsheetseries"] == [project]
+
     @patch("apps.owasp.models.project.Project.objects.get")
     @patch("apps.github.utils.requests.get")
     def test_update_data_project_does_not_exist(self, mock_requests_get, mock_get):
@@ -253,9 +300,45 @@ class TestProjectProperties:
         assert project.leaders_count == 3
 
     def test_nest_key(self):
-        """Test nest_key removes www-project- prefix."""
-        project = Project(key="www-project-juice-shop")
+        """Test nest_key is the project key."""
+        project = Project(key="juice-shop")
         assert project.nest_key == "juice-shop"
+
+    def test_owasp_url_uses_the_project_slug(self):
+        """Test the public page URL drops the legacy www-project prefix."""
+        assert Project(key="cheat-sheet-series").owasp_url == (
+            "https://owasp.org/projects/cheat-sheet-series"
+        )
+        assert Project(key="nest").owasp_url == "https://owasp.org/projects/nest"
+
+    def test_github_url_uses_the_matching_repository(self, mocker):
+        """Test github_url follows the repository whose name matches the project."""
+        repository = mocker.Mock()
+        repository.key = "CheatSheetSeries"
+        repository.url = "https://github.com/OWASP/CheatSheetSeries"
+        repositories = mocker.Mock()
+        repositories.all.return_value = [repository]
+        mocker.patch.object(
+            Project,
+            "repositories",
+            new_callable=mocker.PropertyMock,
+            return_value=repositories,
+        )
+
+        project = Project(key="cheat-sheet-series")
+        project.pk = 1
+
+        assert project.github_url == "https://github.com/OWASP/CheatSheetSeries"
+
+    def test_get_by_key_checks_the_slug_before_the_legacy_key(self, mocker):
+        """Test lookup matches the project key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.return_value = found
+        mocker.patch.object(Project, "active_projects", manager)
+
+        assert Project.get_by_key("cheat-sheet-series") is found
+        manager.filter.assert_called_once_with(key__iexact="cheat-sheet-series")
 
     def test_nest_url(self, mocker):
         """Test nest_url returns full URL."""
@@ -435,7 +518,7 @@ class TestProjectProperties:
 
     def test_get_absolute_url(self):
         """Test get_absolute_url returns project URL."""
-        project = Project(key="www-project-test")
+        project = Project(key="test")
         assert project.get_absolute_url() == "/projects/test"
 
     def test_save_generates_summary(self, mocker):

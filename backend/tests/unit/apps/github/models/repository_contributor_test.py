@@ -155,25 +155,27 @@ class TestRepositoryContributor(TestCase):
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
             RepositoryContributor.get_top_contributors(project="my-project")
-            mock_queryset.filter.assert_any_call(
-                repository__project__key__iexact="www-project-my-project"
-            )
+            mock_queryset.filter.assert_any_call(repository__project__key__iexact="my-project")
 
     def test_get_top_contributors_chapter_filter(self):
         """Test the chapter filtering logic in get_top_contributors."""
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
-            RepositoryContributor.get_top_contributors(chapter="my-chapter")
-            mock_queryset.filter.assert_any_call(repository__key__iexact="www-chapter-my-chapter")
+            with patch("apps.owasp.models.chapter.Chapter.objects") as mock_chapters:
+                mock_chapters.filter.return_value.values_list.return_value.first.return_value = 7
+                RepositoryContributor.get_top_contributors(chapter="my-chapter")
+            mock_chapters.filter.assert_called_once_with(key__iexact="my-chapter")
+            mock_queryset.filter.assert_any_call(repository_id=7)
 
     def test_get_top_contributors_committee_filter(self):
         """Test the committee filtering logic in get_top_contributors."""
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
-            RepositoryContributor.get_top_contributors(committee="my-committee")
-            mock_queryset.filter.assert_any_call(
-                repository__key__iexact="www-committee-my-committee"
-            )
+            with patch("apps.owasp.models.committee.Committee.objects") as mock_committees:
+                mock_committees.filter.return_value.values_list.return_value.first.return_value = 8
+                RepositoryContributor.get_top_contributors(committee="my-committee")
+            mock_committees.filter.assert_called_once_with(key__iexact="my-committee")
+            mock_queryset.filter.assert_any_call(repository_id=8)
 
     def test_get_top_contributors_repository_filter(self):
         """Test the repository filtering logic in get_top_contributors."""

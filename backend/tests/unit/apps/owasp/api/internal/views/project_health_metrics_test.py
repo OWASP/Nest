@@ -55,7 +55,7 @@ class TestProjectHealthMetricsViews:
         mock_project = mocker.Mock()
 
         mocker.patch(
-            "apps.owasp.models.project.Project.objects.filter",
+            "apps.owasp.models.project.Project.active_projects.filter",
             return_value=mocker.Mock(first=lambda: mock_project),
         )
 
@@ -98,7 +98,7 @@ class TestProjectHealthMetricsViews:
         self, user_with_permission, mocker
     ):
         mocker.patch(
-            "apps.owasp.models.project.Project.objects.filter",
+            "apps.owasp.models.project.Project.active_projects.filter",
             return_value=mocker.Mock(first=lambda: None),
         )
         mocker.patch(
@@ -122,7 +122,7 @@ class TestProjectHealthMetricsViews:
     ):
         mock_project = mocker.Mock()
         mocker.patch(
-            "apps.owasp.models.project.Project.objects.filter",
+            "apps.owasp.models.project.Project.active_projects.filter",
             return_value=mocker.Mock(first=lambda: mock_project),
         )
 

@@ -5,7 +5,6 @@ import pytest
 from apps.github.management.commands.github_update_owasp_organization import (
     Chapter,
     Command,
-    Committee,
     Project,
     Repository,
 )
@@ -43,25 +42,25 @@ class TestGithubUpdateOwaspOrganization:
             (
                 "www-project-test",
                 0,
-                {"project": 1, "chapter": 0, "committee": 0},
+                {"project": 0, "chapter": 0, "committee": 0},
             ),
             (
                 "www-chapter-test",
                 0,
-                {"project": 0, "chapter": 1, "committee": 0},
+                {"project": 0, "chapter": 0, "committee": 0},
             ),
             (
                 "www-committee-test",
                 0,
-                {"project": 0, "chapter": 0, "committee": 1},
+                {"project": 0, "chapter": 0},
             ),
             (
                 "www-event-test",
                 0,
                 {"project": 0, "chapter": 0, "committee": 0},
             ),
-            (None, 0, {"project": 1, "chapter": 1, "committee": 1, "event": 1}),
-            (None, 1, {"project": 0, "chapter": 1, "committee": 1, "event": 1}),
+            (None, 0, {"project": 0, "chapter": 0, "event": 1}),
+            (None, 1, {"project": 0, "chapter": 0, "event": 1}),
         ],
     )
     @mock.patch(
@@ -122,22 +121,17 @@ class TestGithubUpdateOwaspOrganization:
         with (
             mock.patch.object(Project, "bulk_save") as mock_project_bulk_save,
             mock.patch.object(Chapter, "bulk_save") as mock_chapter_bulk_save,
-            mock.patch.object(Committee, "bulk_save") as mock_committee_bulk_save,
             mock.patch.object(Project, "update_data") as mock_project_update,
             mock.patch.object(Chapter, "update_data") as mock_chapter_update,
-            mock.patch.object(Committee, "update_data") as mock_committee_update,
             mock.patch.object(Project, "objects") as mock_project_objects,
             mock.patch.object(Chapter, "objects") as mock_chapter_objects,
-            mock.patch.object(Committee, "objects") as mock_committee_objects,
             mock.patch.object(Repository, "objects") as mock_repository_objects,
         ):
             mock_project_update.return_value = mock_repository
             mock_chapter_update.return_value = mock_repository
-            mock_committee_update.return_value = mock_repository
 
             mock_project_objects.all.return_value = []
             mock_chapter_objects.all.return_value = []
-            mock_committee_objects.all.return_value = []
             mock_repository_objects.filter.return_value.count.return_value = 1
 
             command.stdout = mock.MagicMock()
@@ -158,17 +152,13 @@ class TestGithubUpdateOwaspOrganization:
                     assert mock_project_update.call_count == expected_calls["project"]
                 elif repository_name.startswith("www-chapter-"):
                     assert mock_chapter_update.call_count == expected_calls["chapter"]
-                elif repository_name.startswith("www-committee-"):
-                    assert mock_committee_update.call_count == expected_calls["committee"]
             else:
                 assert mock_project_update.call_count == expected_calls["project"]
                 assert mock_chapter_update.call_count == expected_calls["chapter"]
-                assert mock_committee_update.call_count == expected_calls["committee"]
                 assert command.stdout.write.call_count > 0
 
             mock_project_bulk_save.assert_called_once()
             mock_chapter_bulk_save.assert_called_once()
-            mock_committee_bulk_save.assert_called_once()
 
     @mock.patch(
         "apps.github.management.commands.github_update_owasp_organization.get_github_client"
@@ -211,24 +201,18 @@ class TestGithubUpdateOwaspOrganization:
         repos = [
             create_mock_repo("www-project-test"),
             create_mock_repo("www-chapter-error"),
-            create_mock_repo("www-committee-test"),
+            create_mock_repo("www-event-test"),
         ]
         mock_repos = PaginatedListMock(repos)
         mock_org.get_repos.return_value = mock_repos
         mock_repos.totalCount = 3
-        mock_sync_repository.side_effect = [
-            (mock.Mock(), mock.Mock()),
-            Exception("Sync failed"),
-            (mock.Mock(), mock.Mock()),
-        ]
+        mock_sync_repository.side_effect = [Exception("Sync failed")]
 
         with (
             mock.patch.object(Project, "bulk_save"),
             mock.patch.object(Chapter, "bulk_save"),
-            mock.patch.object(Committee, "bulk_save"),
             mock.patch.object(Project, "update_data"),
             mock.patch.object(Chapter, "update_data"),
-            mock.patch.object(Committee, "update_data"),
             mock.patch.object(Project, "objects") as mock_project_objects,
             mock.patch.object(Repository, "objects") as mock_repository_objects,
         ):
@@ -240,9 +224,9 @@ class TestGithubUpdateOwaspOrganization:
             mock_repository_objects.filter.return_value.count.return_value = 2
             command.stdout = mock.MagicMock()
             command.handle(repository=None, offset=0)
-            assert mock_sync_repository.call_count == 3
+            assert mock_sync_repository.call_count == 1
             mock_logger.exception.assert_called_once_with(
-                "Error syncing repository %s", "https://github.com/OWASP/www-chapter-error"
+                "Error syncing repository %s", "https://github.com/OWASP/www-event-test"
             )
             command.stdout.write.assert_any_call(
                 "\nOWASP GitHub repositories count != synced repositories count: 3 != 2"

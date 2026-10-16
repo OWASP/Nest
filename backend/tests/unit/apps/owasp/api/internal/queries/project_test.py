@@ -48,25 +48,22 @@ class TestProjectResolution:
 
     def test_resolve_project_existing(self, mock_project, mock_info):
         """Test resolving an existing project."""
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_get:
+        with patch("apps.owasp.models.project.Project.get_by_key") as mock_get:
             mock_get.return_value = mock_project
 
             query = ProjectQuery()
             result = query.__class__.__dict__["project"](query, key="test-project")
 
             assert result == mock_project
-            mock_get.assert_called_once_with(key="www-project-test-project")
+            mock_get.assert_called_once_with("test-project")
 
     def test_resolve_project_not_found(self, mock_info):
         """Test resolving a non-existent project."""
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_get:
-            mock_get.side_effect = Project.DoesNotExist
-
+        with patch("apps.owasp.models.project.Project.get_by_key", return_value=None):
             query = ProjectQuery()
             result = query.__class__.__dict__["project"](query, key="non-existent")
 
             assert result is None
-            mock_get.assert_called_once_with(key="www-project-non-existent")
 
 
 class TestRecentProjectsResolution:

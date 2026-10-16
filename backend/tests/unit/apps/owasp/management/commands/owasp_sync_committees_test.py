@@ -3,15 +3,15 @@ from unittest import mock
 
 import pytest
 
-from apps.owasp.management.commands.owasp_scrape_committees import (
+from apps.owasp.management.commands.owasp_sync_committees import (
     Command,
     Committee,
-    OwaspScraper,
+    OwaspSync,
     normalize_url,
 )
 
 
-class TestOwaspScrapeCommittees:
+class TestOwaspSyncCommittees:
     @pytest.fixture
     def command(self):
         return Command()
@@ -27,6 +27,8 @@ class TestOwaspScrapeCommittees:
     def mock_committee(self):
         committee = mock.Mock(spec=Committee)
         committee.owasp_url = "https://owasp.org/www-committee-test"
+        committee.nest_key = "test"
+        committee.leaders_raw = ["Existing Leader"]
         committee.github_url = "https://github.com/owasp/test-committee"
         committee.get_related_url.side_effect = lambda url, **_: url
         committee.invalid_urls = []
@@ -45,14 +47,15 @@ class TestOwaspScrapeCommittees:
     @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
     @mock.patch.object(Committee, "bulk_save", autospec=True)
     def test_handle(self, mock_bulk_save, command, mock_committee, offset, committees):
-        mock_scraper = mock.Mock(spec=OwaspScraper)
-        mock_committee.get_urls.return_value = [
+        mock_sync = mock.Mock(spec=OwaspSync)
+        mock_sync.get_leaders.return_value = {}
+        mock_sync.get_urls.return_value = [
             "https://example.com/repo1",
             "https://example.com/repo2",
             "https://invalid.com/repo3",
         ]
-        mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
-        mock_scraper.page_tree = True
+        mock_sync.verify_url.side_effect = lambda url: None if "invalid" in url else url
+        mock_sync.page_tree = True
 
         mock_committee.get_related_url.side_effect = lambda url, **_: url
 
@@ -72,14 +75,15 @@ class TestOwaspScrapeCommittees:
             mock.patch.object(Committee, "active_committees", mock_active_committees),
             mock.patch("time.sleep", return_value=None),
             mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
-                return_value=mock_scraper,
-            ),
+                "apps.owasp.management.commands.owasp_sync_committees.OwaspSync",
+                return_value=mock_sync,
+            ) as sync_class,
             mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.normalize_url",
+                "apps.owasp.management.commands.owasp_sync_committees.normalize_url",
                 side_effect=normalize_url,
             ),
         ):
+            sync_class.page_url.side_effect = OwaspSync.page_url
             command.stdout = mock.MagicMock()
             command.handle(offset=offset)
 
@@ -91,7 +95,7 @@ class TestOwaspScrapeCommittees:
 
         for call in command.stdout.write.call_args_list:
             args = call[0]
-            assert "https://owasp.org/www-committee-test" in args[0]
+            assert "https://owasp.org/groups/test-committee" in args[0]
 
         for committee in mock_committees_list:
             expected_invalid_urls = ["https://invalid.com/repo3"]
@@ -101,11 +105,13 @@ class TestOwaspScrapeCommittees:
 
     @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
     @mock.patch.object(Committee, "bulk_save", autospec=True)
-    def test_handle_page_tree_none_with_request_failure(self, mock_bulk_save, command, mock_committee):
-        """Test handle when scraper fails due to network error - committee is NOT deactivated."""
-        mock_scraper = mock.Mock()
-        mock_scraper.page_tree = None
-        mock_scraper.is_request_failed = True
+    def test_handle_page_tree_none_with_request_failure(
+        self, mock_bulk_save, command, mock_committee
+    ):
+        """A failed request leaves the committee active."""
+        mock_sync = mock.Mock()
+        mock_sync.page_tree = None
+        mock_sync.is_request_failed = True
 
         mock_committees_list = [mock_committee]
         mock_active_committees = mock.MagicMock()
@@ -119,8 +125,8 @@ class TestOwaspScrapeCommittees:
             mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
-                return_value=mock_scraper,
+                "apps.owasp.management.commands.owasp_sync_committees.OwaspSync",
+                return_value=mock_sync,
             ),
         ):
             command.handle(offset=0)
@@ -129,11 +135,13 @@ class TestOwaspScrapeCommittees:
 
     @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
     @mock.patch.object(Committee, "bulk_save", autospec=True)
-    def test_handle_page_tree_none_without_request_failure(self, mock_bulk_save, command, mock_committee):
-        """Test handle when scraper page_tree is None (e.g. 404) - committee IS deactivated."""
-        mock_scraper = mock.Mock()
-        mock_scraper.page_tree = None
-        mock_scraper.is_request_failed = False
+    def test_handle_page_tree_none_without_request_failure(
+        self, mock_bulk_save, command, mock_committee
+    ):
+        """Test handle when the page is None (e.g. 404) - committee IS deactivated."""
+        mock_sync = mock.Mock()
+        mock_sync.page_tree = None
+        mock_sync.is_request_failed = False
 
         mock_committees_list = [mock_committee]
         mock_active_committees = mock.MagicMock()
@@ -147,8 +155,8 @@ class TestOwaspScrapeCommittees:
             mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
-                return_value=mock_scraper,
+                "apps.owasp.management.commands.owasp_sync_committees.OwaspSync",
+                return_value=mock_sync,
             ),
         ):
             command.handle(offset=0)
@@ -159,11 +167,10 @@ class TestOwaspScrapeCommittees:
     @mock.patch.object(Committee, "bulk_save", autospec=True)
     def test_handle_no_leaders_emails(self, mock_bulk_save, command, mock_committee):
         """Test handle when committee has no leaders emails."""
-        mock_scraper = mock.Mock(spec=OwaspScraper)
-        mock_scraper.page_tree = True
-
-        mock_committee.get_leaders_emails.return_value = {}
-        mock_committee.get_urls.return_value = []
+        mock_sync = mock.Mock(spec=OwaspSync)
+        mock_sync.page_tree = True
+        mock_sync.get_leaders.return_value = {}
+        mock_sync.get_urls.return_value = []
 
         mock_committees_list = [mock_committee]
         mock_active_committees = mock.MagicMock()
@@ -177,24 +184,24 @@ class TestOwaspScrapeCommittees:
             mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
-                return_value=mock_scraper,
+                "apps.owasp.management.commands.owasp_sync_committees.OwaspSync",
+                return_value=mock_sync,
             ),
         ):
             command.handle(offset=0)
 
         mock_committee.sync_leaders.assert_not_called()
+        assert mock_committee.leaders_raw == ["Existing Leader"]
 
     @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
     @mock.patch.object(Committee, "bulk_save", autospec=True)
     def test_handle_skipped_related_url(self, mock_bulk_save, command, mock_committee):
         """Test handle when get_related_url returns None for verified URL."""
-        mock_scraper = mock.Mock(spec=OwaspScraper)
-        mock_scraper.page_tree = True
-        mock_scraper.verify_url.return_value = "https://example.com/verified"
-
-        mock_committee.get_leaders_emails.return_value = {}
-        mock_committee.get_urls.return_value = ["https://example.com/repo"]
+        mock_sync = mock.Mock(spec=OwaspSync)
+        mock_sync.page_tree = True
+        mock_sync.get_leaders.return_value = {}
+        mock_sync.get_urls.return_value = ["https://example.com/repo"]
+        mock_sync.verify_url.return_value = "https://example.com/verified"
         mock_committee.get_related_url.side_effect = [
             "https://example.com/repo",
             None,
@@ -212,11 +219,11 @@ class TestOwaspScrapeCommittees:
             mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
-                return_value=mock_scraper,
+                "apps.owasp.management.commands.owasp_sync_committees.OwaspSync",
+                return_value=mock_sync,
             ),
             mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.normalize_url",
+                "apps.owasp.management.commands.owasp_sync_committees.normalize_url",
                 side_effect=normalize_url,
             ),
         ):

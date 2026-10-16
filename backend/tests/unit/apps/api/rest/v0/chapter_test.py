@@ -110,13 +110,11 @@ class TestGetChapter:
         """Test getting a chapter when found."""
         mock_request = MagicMock()
         mock_chapter = MagicMock()
-        mock_chapter_model.active_chapters.filter.return_value.first.return_value = mock_chapter
+        mock_chapter_model.get_by_key.return_value = mock_chapter
 
         result = get_chapter(mock_request, "London")
 
-        mock_chapter_model.active_chapters.filter.assert_called_with(
-            key__iexact="www-chapter-London"
-        )
+        mock_chapter_model.get_by_key.assert_called_once_with("London")
         assert result == mock_chapter
 
     @patch("apps.api.rest.v0.chapter.ChapterModel")
@@ -124,20 +122,18 @@ class TestGetChapter:
         """Test getting a chapter with www-chapter- prefix."""
         mock_request = MagicMock()
         mock_chapter = MagicMock()
-        mock_chapter_model.active_chapters.filter.return_value.first.return_value = mock_chapter
+        mock_chapter_model.get_by_key.return_value = mock_chapter
 
         result = get_chapter(mock_request, "www-chapter-London")
 
-        mock_chapter_model.active_chapters.filter.assert_called_with(
-            key__iexact="www-chapter-London"
-        )
+        mock_chapter_model.get_by_key.assert_called_once_with("www-chapter-London")
         assert result == mock_chapter
 
     @patch("apps.api.rest.v0.chapter.ChapterModel")
     def test_get_chapter_not_found(self, mock_chapter_model):
         """Test getting a chapter when not found."""
         mock_request = MagicMock()
-        mock_chapter_model.active_chapters.filter.return_value.first.return_value = None
+        mock_chapter_model.get_by_key.return_value = None
 
         result = get_chapter(mock_request, "NonExistent")
 

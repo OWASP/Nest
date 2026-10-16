@@ -232,7 +232,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
         try {
           const { data } = await client.query({
             query: GetChapterByKeyDocument,
-            variables: { key: key.replace('www-chapter-', '') },
+            variables: { key },
           })
 
           if (data?.chapter) {
@@ -261,7 +261,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
         try {
           const { data } = await client.query({
             query: GetProjectByKeyDocument,
-            variables: { key: key.replace('www-project-', '') },
+            variables: { key },
           })
 
           if (data?.project) {
@@ -478,19 +478,12 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             ) : (
               <div className="flex flex-wrap gap-2">
                 {ledChapters.map((chapter) => {
-                  // Strip prefix if present to get bare key
-                  const bareKey = chapter.key.startsWith('www-chapter-')
-                    ? chapter.key.replace('www-chapter-', '')
-                    : chapter.key
-                  // Check both key formats for compatibility
-                  const directKey = snapshot?.chapterContributions?.[bareKey]
-                  const withPrefix = snapshot?.chapterContributions?.[`www-chapter-${bareKey}`]
-                  const contributionCount = directKey || withPrefix || 0
+                  const contributionCount = snapshot?.chapterContributions?.[chapter.key] || 0
 
                   return (
                     <Link
                       key={chapter.id}
-                      href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
+                      href={`/chapters/${chapter.key}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
@@ -516,18 +509,11 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                   )
                 })}
                 {ledProjects.map((project) => {
-                  // Strip prefix if present to get bare key
-                  const bareKey = project.key.startsWith('www-project-')
-                    ? project.key.replace('www-project-', '')
-                    : project.key
-                  // Check both key formats for compatibility
-                  const directKey = snapshot?.projectContributions?.[bareKey]
-                  const withPrefix = snapshot?.projectContributions?.[`www-project-${bareKey}`]
-                  const contributionCount = directKey || withPrefix || 0
+                  const contributionCount = snapshot?.projectContributions?.[project.key] || 0
                   return (
                     <Link
                       key={project.id}
-                      href={`/projects/${project.key.replace('www-project-', '')}`}
+                      href={`/projects/${project.key}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${

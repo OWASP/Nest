@@ -112,11 +112,7 @@ def get_chapter(
     chapter_id: str = Path(example="London"),
 ) -> ChapterDetail | ChapterError:
     """Get chapter."""
-    if chapter := ChapterModel.active_chapters.filter(
-        key__iexact=(
-            chapter_id if chapter_id.startswith("www-chapter-") else f"www-chapter-{chapter_id}"
-        )
-    ).first():
+    if chapter := ChapterModel.get_by_key(chapter_id):
         return chapter
 
     return Response({"message": "Chapter not found"}, status=HTTPStatus.NOT_FOUND)
