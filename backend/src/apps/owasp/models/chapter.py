@@ -118,6 +118,8 @@ class Chapter(
     def get_by_key(cls, key: str, *, active_only: bool = True) -> Chapter | None:
         """Return the chapter stored under this key.
 
+        A slug also matches a stored ``www-chapter-`` key when that row has not been renamed yet.
+
         Args:
             key (str): Chapter key.
             active_only (bool): Limit the lookup to active chapters. Pass False to include
@@ -128,7 +130,39 @@ class Chapter(
 
         """
         queryset = cls.active_chapters if active_only else cls.objects
-        return queryset.filter(key__iexact=key.strip()).first()
+        normalized = key.strip()
+        chapter = queryset.filter(key__iexact=normalized).first()
+        if chapter is not None or normalized.lower().startswith("www-chapter-"):
+            return chapter
+        return queryset.filter(key__iexact=f"www-chapter-{normalized}").first()
+
+    def adopt_key(self, key: str, occupant: Chapter | None = None) -> bool:
+        """Store this chapter under ``key``.
+
+        A saved occupant with no linked repository is a stub. An occupant that already has a
+        repository keeps the key, and this chapter is left unchanged. The caller removes a stub.
+
+        Args:
+            key (str): Key this chapter should use.
+            occupant (Chapter | None): Chapter already stored under ``key``.
+
+        Returns:
+            bool: True when this chapter is stored under ``key``.
+
+        """
+        if self.key.lower() == key.lower():
+            return True
+
+        if (
+            occupant is not None
+            and occupant is not self
+            and occupant.pk
+            and occupant.owasp_repository_id
+        ):
+            return False
+
+        self.key = key
+        return True
 
     @staticmethod
     @lru_cache

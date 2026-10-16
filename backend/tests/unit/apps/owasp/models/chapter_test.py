@@ -135,6 +135,44 @@ class TestChapterModel:
         assert Chapter(key="algiers").owasp_url == "https://owasp.org/chapters/algiers"
         assert Chapter(key="london").owasp_url == "https://owasp.org/chapters/london"
 
+    def test_adopt_key_renames_the_chapter(self):
+        chapter = Chapter(key="www-chapter-london")
+
+        assert chapter.adopt_key("london")
+
+        assert chapter.key == "london"
+
+    def test_adopt_key_leaves_a_matching_key(self):
+        chapter = Chapter(key="london")
+        occupant = Mock()
+
+        assert chapter.adopt_key("London", occupant)
+
+        assert chapter.key == "london"
+        occupant.delete.assert_not_called()
+
+    def test_adopt_key_takes_the_key_from_a_stub(self):
+        chapter = Chapter(key="www-chapter-london")
+        occupant = Mock()
+        occupant.pk = 2
+        occupant.owasp_repository_id = None
+
+        assert chapter.adopt_key("london", occupant)
+
+        assert chapter.key == "london"
+        occupant.delete.assert_not_called()
+
+    def test_adopt_key_keeps_the_key_when_the_occupant_has_a_repository(self):
+        chapter = Chapter(key="www-chapter-london")
+        occupant = Mock()
+        occupant.pk = 1
+        occupant.owasp_repository_id = 9
+
+        assert not chapter.adopt_key("london", occupant)
+
+        assert chapter.key == "www-chapter-london"
+        occupant.delete.assert_not_called()
+
     def test_github_url_uses_the_linked_repository(self, mocker):
         """Test the GitHub URL is the linked repository."""
         chapter = Chapter(key="algiers")

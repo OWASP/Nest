@@ -201,7 +201,7 @@ class TestPullRequestQuery:
         result = PullRequestQuery().recent_pull_requests(project="nonexistent-project")
 
         assert result == []
-        assert mock_project_objects.filter.call_count == 1
+        assert mock_project_objects.filter.call_count == 2
         mock_queryset.none.assert_called_once()
 
     @patch("apps.github.models.pull_request.PullRequest.objects")

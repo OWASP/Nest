@@ -101,13 +101,13 @@ class TestCommitteeModel:
         assert committee.updated_at == owasp_repository.updated_at
 
     def test_nest_key(self):
-        """Test nest_key property strips www-committee- prefix."""
-        committee = Committee(key="www-committee-chapter")
+        """Test nest_key is the committee key."""
+        committee = Committee(key="chapter")
         assert committee.nest_key == "chapter"
 
     def test_nest_key_complex(self):
-        """Test nest_key with multi-word key."""
-        committee = Committee(key="www-committee-web-security")
+        """Test nest_key with a multi-word key."""
+        committee = Committee(key="web-security")
         assert committee.nest_key == "web-security"
 
     def test_update_data_creates_new(self):

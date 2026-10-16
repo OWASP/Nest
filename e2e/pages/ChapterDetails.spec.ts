@@ -16,7 +16,7 @@ test.describe('Chapter Details Page', () => {
     await expect(page.getByText('Location: Rosario, Santa Fe, Argentina')).toBeVisible()
     await expect(page.getByText('Region: South America')).toBeVisible()
     await expect(
-      page.getByRole('link', { name: 'https://owasp.org/www-chapter-rosario' })
+      page.getByRole('link', { name: 'https://owasp.org/chapters/www-chapter-rosario' })
     ).toBeVisible()
   })
 

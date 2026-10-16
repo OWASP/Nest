@@ -564,6 +564,8 @@ class Project(
     def get_by_key(cls, key: str, *, active_only: bool = True) -> Project | None:
         """Return the project stored under this key.
 
+        A slug also matches a stored ``www-project-`` key when that row has not been renamed yet.
+
         Args:
             key (str): Project key.
             active_only (bool): Limit the lookup to active projects. Pass False to include
@@ -574,7 +576,11 @@ class Project(
 
         """
         queryset = cls.active_projects if active_only else cls.objects
-        return queryset.filter(key__iexact=key.strip()).first()
+        normalized = key.strip()
+        project = queryset.filter(key__iexact=normalized).first()
+        if project is not None or normalized.lower().startswith("www-project-"):
+            return project
+        return queryset.filter(key__iexact=f"www-project-{normalized}").first()
 
     def from_github(self, repository) -> None:
         """Update instance based on GitHub repository data.

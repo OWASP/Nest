@@ -153,7 +153,7 @@ class OwaspApiClient:
             return None
 
         page = payload.get(collection) if isinstance(payload, dict) else None
-        if not isinstance(page, list):
+        if not isinstance(page, list) or any(not isinstance(item, dict) for item in page):
             logger.warning("OWASP %s list had an unexpected shape", collection)
             return None
 

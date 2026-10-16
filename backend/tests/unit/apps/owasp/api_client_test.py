@@ -133,6 +133,16 @@ class TestOwaspApiClient:
 
         assert OwaspApiClient().list_projects() == []
 
+    @pytest.mark.parametrize("item", ["london", None])
+    @mock.patch("apps.owasp.api_client.requests.get")
+    def test_list_projects_returns_none_when_an_item_is_not_a_dict(self, mock_get, item):
+        """Test a page item that is not an object is a failed read."""
+        response = page([])
+        response.json.return_value = {"projects": [{"slug": "nest"}, item]}
+        mock_get.return_value = response
+
+        assert OwaspApiClient().list_projects() is None
+
     @mock.patch("apps.owasp.api_client.requests.get")
     def test_list_projects_returns_none_when_the_collection_is_missing(self, mock_get):
         """Test a body without the collection field is a failed read."""

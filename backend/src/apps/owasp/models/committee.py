@@ -66,6 +66,8 @@ class Committee(
     def get_by_key(cls, key: str, *, active_only: bool = True) -> Committee | None:
         """Return the committee stored under this key.
 
+        A slug also matches a stored ``www-committee-`` key when that row has not been renamed yet.
+
         Args:
             key (str): Committee key.
             active_only (bool): Limit the lookup to active committees. Pass False to include
@@ -76,7 +78,11 @@ class Committee(
 
         """
         queryset = cls.active_committees if active_only else cls.objects
-        return queryset.filter(key__iexact=key.strip()).first()
+        normalized = key.strip()
+        committee = queryset.filter(key__iexact=normalized).first()
+        if committee is not None or normalized.lower().startswith("www-committee-"):
+            return committee
+        return queryset.filter(key__iexact=f"www-committee-{normalized}").first()
 
     @staticmethod
     @lru_cache

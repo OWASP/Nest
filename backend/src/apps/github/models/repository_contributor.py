@@ -159,26 +159,24 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             queryset = queryset.filter(user__name__regex=CONTRIBUTOR_FULL_NAME_REGEX)
 
         if project:
-            queryset = queryset.filter(repository__project__key__iexact=project)
+            from apps.owasp.models.project import Project  # noqa: PLC0415
+
+            matched = Project.get_by_key(project, active_only=False)
+            project_key = matched.key if matched is not None else project
+            queryset = queryset.filter(repository__project__key__iexact=project_key)
         elif chapter:
             from apps.owasp.models.chapter import Chapter  # noqa: PLC0415
 
-            repository_id = (
-                Chapter.objects.filter(key__iexact=chapter)
-                .values_list("owasp_repository_id", flat=True)
-                .first()
-            )
+            matched = Chapter.get_by_key(chapter, active_only=False)
+            repository_id = matched.owasp_repository_id if matched is not None else None
             queryset = (
                 queryset.filter(repository_id=repository_id) if repository_id else queryset.none()
             )
         elif committee:
             from apps.owasp.models.committee import Committee  # noqa: PLC0415
 
-            repository_id = (
-                Committee.objects.filter(key__iexact=committee)
-                .values_list("owasp_repository_id", flat=True)
-                .first()
-            )
+            matched = Committee.get_by_key(committee, active_only=False)
+            repository_id = matched.owasp_repository_id if matched is not None else None
             queryset = (
                 queryset.filter(repository_id=repository_id) if repository_id else queryset.none()
             )
