@@ -194,15 +194,42 @@ class TestOwaspSyncChapters:
     def test_leaves_chapters_unchanged_when_a_row_has_no_slug(
         self, mock_get, mock_bulk_save, command, mock_chapter
     ):
-        """Test a catalog row without a slug does not deactivate chapters."""
-        mock_get.return_value = response([chapter_record(slug="")])
+        """Test a blank slug aborts reconciliation even when other rows are valid."""
+        mock_get.return_value = response([chapter_record(), chapter_record(slug="")])
+        stale = mock.Mock(spec=Chapter)
+        stale.id = 2
+        stale.key = "www-chapter-retired"
+        stale.is_active = True
 
         with mock.patch.object(Chapter, "objects") as mock_objects:
-            mock_objects.select_related.return_value = [mock_chapter]
+            mock_objects.select_related.return_value = [mock_chapter, stale]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
         mock_bulk_save.assert_not_called()
+        mock_chapter.deactivate.assert_not_called()
+        stale.deactivate.assert_not_called()
+
+    @mock.patch.object(Chapter, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.api_client.requests.get")
+    def test_skips_deactivation_when_offset_is_set(
+        self, mock_get, mock_bulk_save, command, mock_chapter
+    ):
+        """Test a partial run updates from the offset without reconciling absences."""
+        mock_get.return_value = response([chapter_record(slug="paris"), chapter_record()])
+        stale = mock.Mock(spec=Chapter)
+        stale.id = 2
+        stale.key = "www-chapter-retired"
+        stale.is_active = True
+
+        with mock.patch.object(Chapter, "objects") as mock_objects:
+            mock_objects.select_related.return_value = [mock_chapter, stale]
+            command.stdout = mock.MagicMock()
+            command.handle(offset=1)
+
+        assert mock_bulk_save.called
+        assert mock_chapter.key == "london"
+        stale.deactivate.assert_not_called()
         mock_chapter.deactivate.assert_not_called()
 
     @mock.patch.object(Chapter, "bulk_save", autospec=True)
@@ -267,6 +294,30 @@ class TestOwaspSyncChapters:
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
+        assert mock_chapter.latitude == 51.5
+        assert mock_chapter.longitude == -0.12
+        mock_chapter.generate_geo_location.assert_not_called()
+
+    @mock.patch.object(Chapter, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.api_client.requests.get")
+    def test_keeps_coordinates_when_only_the_region_changes(
+        self, mock_get, mock_bulk_save, command, mock_chapter
+    ):
+        """Test a region change does not force a geocode."""
+        mock_get.return_value = response([chapter_record()])
+        mock_chapter.latitude = 51.5
+        mock_chapter.longitude = -0.12
+        mock_chapter.country = "United Kingdom"
+        mock_chapter.region = "Asia"
+        mock_chapter.suggested_location = "London, United Kingdom"
+
+        with mock.patch.object(Chapter, "objects") as mock_objects:
+            mock_objects.select_related.return_value = [mock_chapter]
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+
+        assert mock_chapter.region == "Europe"
+        assert mock_chapter.suggested_location == "London, United Kingdom"
         assert mock_chapter.latitude == 51.5
         assert mock_chapter.longitude == -0.12
         mock_chapter.generate_geo_location.assert_not_called()

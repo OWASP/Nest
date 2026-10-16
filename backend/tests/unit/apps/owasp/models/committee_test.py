@@ -115,6 +115,32 @@ class TestCommitteeModel:
         committee = Committee(key="www-committee-web-security")
         assert committee.nest_key == "web-security"
 
+    def test_get_by_key_matches_a_legacy_key(self, mocker):
+        """Test a slug looks up a stored www-committee key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Committee, "active_committees", manager)
+
+        assert Committee.get_by_key("events") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="events"),
+            mocker.call(key__iexact="www-committee-events"),
+        ]
+
+    def test_get_by_key_matches_a_slug_from_a_prefixed_key(self, mocker):
+        """Test a www-committee key looks up a stored slug."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Committee, "active_committees", manager)
+
+        assert Committee.get_by_key("www-committee-events") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="www-committee-events"),
+            mocker.call(key__iexact="events"),
+        ]
+
     def test_update_data_creates_new(self):
         """Test update_data creates new committee when not found."""
         mock_gh_repository = Mock()

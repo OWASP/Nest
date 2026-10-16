@@ -200,6 +200,32 @@ class TestChapterModel:
         assert Chapter.get_by_key("algiers") is found
         manager.filter.assert_called_once_with(key__iexact="algiers")
 
+    def test_get_by_key_matches_a_legacy_key(self, mocker):
+        """Test a slug looks up a stored www-chapter key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Chapter, "active_chapters", manager)
+
+        assert Chapter.get_by_key("algiers") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="algiers"),
+            mocker.call(key__iexact="www-chapter-algiers"),
+        ]
+
+    def test_get_by_key_matches_a_slug_from_a_prefixed_key(self, mocker):
+        """Test a www-chapter key looks up a stored slug."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Chapter, "active_chapters", manager)
+
+        assert Chapter.get_by_key("www-chapter-algiers") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="www-chapter-algiers"),
+            mocker.call(key__iexact="algiers"),
+        ]
+
     def test_nest_url_property(self):
         """Test nest_url property returns correct URL."""
         chapter = Chapter(key="new-york")

@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.db.models.functions import Coalesce
 
 from apps.api.rest.v0.chapter import ChapterDetail, get_chapter, list_chapters
 
@@ -69,6 +70,31 @@ class TestChapterSerializerValidation:
         assert chapter.region == chapter_data["region"]
         assert chapter.updated_at == datetime.fromisoformat(chapter_data["updated_at"])
 
+    def test_chapter_serializer_uses_nest_timestamps_when_source_is_null(self):
+        """Test null source timestamps fall back to when Nest stored the chapter."""
+        stored_at = datetime(2024, 1, 15, tzinfo=UTC)
+        updated_at = datetime(2024, 2, 20, tzinfo=UTC)
+
+        class MockChapter:
+            def __init__(self):
+                self.country = "United Kingdom"
+                self.created_at = None
+                self.key = "london"
+                self.latitude = 51.5074
+                self.longitude = -0.1278
+                self.name = "OWASP London"
+                self.nest_created_at = stored_at
+                self.nest_key = "london"
+                self.nest_updated_at = updated_at
+                self.region = "Europe"
+                self.updated_at = None
+                self.entity_leaders = []
+
+        chapter = ChapterDetail.from_orm(MockChapter())
+
+        assert chapter.created_at == stored_at
+        assert chapter.updated_at == updated_at
+
 
 class TestListChapters:
     """Tests for list_chapters endpoint."""
@@ -84,7 +110,9 @@ class TestListChapters:
 
         result = list_chapters(mock_request, mock_filters, ordering=None)
 
-        mock_chapter_model.active_chapters.order_by.assert_called_with("-created_at")
+        mock_chapter_model.active_chapters.order_by.assert_called_with(
+            Coalesce("created_at", "nest_created_at").desc()
+        )
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.chapter.ChapterModel")
@@ -99,6 +127,22 @@ class TestListChapters:
         result = list_chapters(mock_request, mock_filters, ordering="latitude")
 
         mock_chapter_model.active_chapters.order_by.assert_called_with("latitude")
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.chapter.ChapterModel")
+    def test_list_chapters_orders_updated_at_with_nest_fallback(self, mock_chapter_model):
+        """Test updated_at ordering uses the same Nest timestamp fallback as serialization."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+        mock_chapter_model.active_chapters.order_by.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_chapters(mock_request, mock_filters, ordering="updated_at")
+
+        mock_chapter_model.active_chapters.order_by.assert_called_with(
+            Coalesce("updated_at", "nest_updated_at")
+        )
         assert result == mock_queryset
 
 

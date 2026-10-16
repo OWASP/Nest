@@ -340,6 +340,32 @@ class TestProjectProperties:
         assert Project.get_by_key("cheat-sheet-series") is found
         manager.filter.assert_called_once_with(key__iexact="cheat-sheet-series")
 
+    def test_get_by_key_matches_a_legacy_key(self, mocker):
+        """Test a slug looks up a stored www-project key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Project, "active_projects", manager)
+
+        assert Project.get_by_key("cheat-sheet-series") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="cheat-sheet-series"),
+            mocker.call(key__iexact="www-project-cheat-sheet-series"),
+        ]
+
+    def test_get_by_key_matches_a_slug_from_a_prefixed_key(self, mocker):
+        """Test a www-project key looks up a stored slug."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Project, "active_projects", manager)
+
+        assert Project.get_by_key("www-project-cheat-sheet-series") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="www-project-cheat-sheet-series"),
+            mocker.call(key__iexact="cheat-sheet-series"),
+        ]
+
     def test_nest_url(self, mocker):
         """Test nest_url returns full URL."""
         mocker.patch(

@@ -133,8 +133,9 @@ class Command(BaseCommand):
             chapter.key.lower(): chapter
             for chapter in Chapter.objects.select_related("owasp_repository")
         }
+        catalog = records[offset:]
         retained_keys = set()
-        for record in records:
+        for record in catalog:
             slug = str(record.get("slug") or "").strip()
             if not slug:
                 continue
@@ -147,7 +148,7 @@ class Command(BaseCommand):
 
         chapters = []
         removed_chapters = []
-        for idx, record in enumerate(records[offset:]):
+        for idx, record in enumerate(catalog):
             slug = str(record.get("slug") or "").strip()
             if not slug:
                 continue
@@ -173,7 +174,8 @@ class Command(BaseCommand):
             location_changed = False
             for field in ("country", "region"):
                 value = str(record.get(field) or "").strip()
-                if value and getattr(chapter, field) != value:
+                # Coordinates come from name, country, and postal code, not region.
+                if field == "country" and value and chapter.country != value:
                     location_changed = True
                     chapter.suggested_location = ""
                 if value:
@@ -234,6 +236,8 @@ class Command(BaseCommand):
 
             Chapter.bulk_save([chapter for chapter, _leaders, _changed in chapters])
 
-            for chapter in local_chapters.values():
-                if chapter.is_active and chapter.key not in retained_keys:
-                    chapter.deactivate()
+            # A partial run resumes writes. Only a full catalog pass reconciles absences.
+            if offset == 0:
+                for chapter in local_chapters.values():
+                    if chapter.is_active and chapter.key not in retained_keys:
+                        chapter.deactivate()

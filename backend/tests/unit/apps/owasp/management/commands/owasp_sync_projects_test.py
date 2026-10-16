@@ -198,15 +198,44 @@ class TestOwaspSyncProjects:
     def test_leaves_projects_unchanged_when_a_row_has_no_slug(
         self, mock_get, mock_bulk_save, command, mock_project
     ):
-        """Test a catalog row without a slug does not deactivate projects."""
-        mock_get.return_value = response([project_record(slug="")])
+        """Test a blank slug aborts reconciliation even when other rows are valid."""
+        mock_get.return_value = response([project_record(), project_record(slug="")])
+        stale = mock.Mock(spec=Project)
+        stale.id = 2
+        stale.key = "www-project-retired"
+        stale.is_active = True
+        stale.repositories.all.return_value = []
 
         with mock.patch.object(Project, "objects") as mock_objects:
-            mock_objects.prefetch_related.return_value = [mock_project]
+            mock_objects.prefetch_related.return_value = [mock_project, stale]
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
         mock_bulk_save.assert_not_called()
+        mock_project.deactivate.assert_not_called()
+        stale.deactivate.assert_not_called()
+
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.api_client.requests.get")
+    def test_skips_deactivation_when_offset_is_set(
+        self, mock_get, mock_bulk_save, command, mock_project
+    ):
+        """Test a partial run updates from the offset without reconciling absences."""
+        mock_get.return_value = response([project_record(slug="other"), project_record()])
+        stale = mock.Mock(spec=Project)
+        stale.id = 2
+        stale.key = "www-project-retired"
+        stale.is_active = True
+        stale.repositories.all.return_value = []
+
+        with mock.patch.object(Project, "objects") as mock_objects:
+            mock_objects.prefetch_related.return_value = [mock_project, stale]
+            command.stdout = mock.MagicMock()
+            command.handle(offset=1)
+
+        assert mock_bulk_save.called
+        assert mock_project.key == "cyclonedx"
+        stale.deactivate.assert_not_called()
         mock_project.deactivate.assert_not_called()
 
     @mock.patch.object(Project, "bulk_save", autospec=True)

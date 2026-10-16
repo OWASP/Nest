@@ -153,8 +153,9 @@ class Command(BaseCommand):
             for project in Project.objects.prefetch_related("repositories")
         }
         repository_index = Project.index_by_repository(local_projects)
+        catalog = records[offset:]
         retained_keys = set()
-        for record in records:
+        for record in catalog:
             slug = str(record.get("slug") or "").strip()
             if not slug:
                 continue
@@ -168,7 +169,7 @@ class Command(BaseCommand):
         raw_levels = {level: raw for raw, level in LEVEL_MAPPING.items()}
         claimed_ids: set[int] = set()
         projects = []
-        for idx, record in enumerate(records[offset:]):
+        for idx, record in enumerate(catalog):
             slug = str(record.get("slug") or "").strip()
             if not slug:
                 continue
@@ -240,6 +241,8 @@ class Command(BaseCommand):
 
         Project.bulk_save([project for project, _leaders in projects])
 
-        for project in local_projects.values():
-            if project.is_active and project.key not in retained_keys:
-                project.deactivate()
+        # A partial run resumes writes. Only a full catalog pass reconciles absences.
+        if offset == 0:
+            for project in local_projects.values():
+                if project.is_active and project.key not in retained_keys:
+                    project.deactivate()
