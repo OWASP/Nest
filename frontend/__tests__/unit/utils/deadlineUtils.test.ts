@@ -79,22 +79,11 @@ describe('deadlineUtils', () => {
 
     it('should ignore time component and only compare dates', () => {
       const today = new Date()
-      const earlyMorning = new Date(
-        today.getUTCFullYear(),
-        today.getUTCMonth(),
-        today.getUTCDate(),
-        0,
-        0,
-        0
-      )
-      const lateNight = new Date(
-        today.getUTCFullYear(),
-        today.getUTCMonth(),
-        today.getUTCDate(),
-        23,
-        59,
-        59
-      )
+      const year = today.getUTCFullYear()
+      const month = today.getUTCMonth()
+      const date = today.getUTCDate()
+      const earlyMorning = new Date(Date.UTC(year, month, date, 0, 0, 0))
+      const lateNight = new Date(Date.UTC(year, month, date, 23, 59, 59))
 
       expect(getDeadlineCategory(earlyMorning.toISOString())).toBe('due-soon')
       expect(getDeadlineCategory(lateNight.toISOString())).toBe('due-soon')
@@ -104,9 +93,7 @@ describe('deadlineUtils', () => {
       const tomorrow = new Date()
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
       const deadline = new Date(
-        tomorrow.getUTCFullYear(),
-        tomorrow.getUTCMonth(),
-        tomorrow.getUTCDate()
+        Date.UTC(tomorrow.getUTCFullYear(), tomorrow.getUTCMonth(), tomorrow.getUTCDate())
       ).toISOString()
 
       expect(getDeadlineCategory(deadline)).toBe('due-soon')
