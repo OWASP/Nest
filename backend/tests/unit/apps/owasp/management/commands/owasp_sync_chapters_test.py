@@ -229,6 +229,7 @@ class TestOwaspSyncChapters:
 
         assert mock_bulk_save.called
         assert mock_chapter.key == "london"
+        command.stdout.write.assert_called_once_with("2 of 2 london\n")
         stale.deactivate.assert_not_called()
         mock_chapter.deactivate.assert_not_called()
 

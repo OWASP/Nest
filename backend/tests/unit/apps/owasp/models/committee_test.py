@@ -115,6 +115,16 @@ class TestCommitteeModel:
         committee = Committee(key="www-committee-web-security")
         assert committee.nest_key == "web-security"
 
+    def test_get_by_key_prefers_an_exact_key(self, mocker):
+        """Test an exact hit is returned without the legacy fallback query."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.return_value = found
+        mocker.patch.object(Committee, "active_committees", manager)
+
+        assert Committee.get_by_key("events") is found
+        manager.filter.assert_called_once_with(key__iexact="events")
+
     def test_get_by_key_matches_a_legacy_key(self, mocker):
         """Test a slug looks up a stored www-committee key."""
         found = mocker.Mock()

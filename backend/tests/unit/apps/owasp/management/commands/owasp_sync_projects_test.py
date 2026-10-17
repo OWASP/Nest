@@ -235,6 +235,7 @@ class TestOwaspSyncProjects:
 
         assert mock_bulk_save.called
         assert mock_project.key == "cyclonedx"
+        command.stdout.write.assert_called_once_with("2 of 2 cyclonedx\n")
         stale.deactivate.assert_not_called()
         mock_project.deactivate.assert_not_called()
 
