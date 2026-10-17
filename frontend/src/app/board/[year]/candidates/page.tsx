@@ -18,6 +18,7 @@ import {
   GetChapterByKeyDocument,
   GetProjectByKeyDocument,
 } from 'types/__generated__/boardQueries.generated'
+import { contributionCount } from 'utils/contributionDataUtils'
 import { formatDate } from 'utils/dateFormatter'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -79,23 +80,6 @@ type Project = {
   level: string
   type: string
   url: string
-}
-
-function contributionCount(
-  contributions: Record<string, number> | undefined,
-  key: string,
-  legacyPrefix: string
-): number {
-  if (!contributions) {
-    return 0
-  }
-  if (Object.hasOwn(contributions, key)) {
-    return contributions[key]
-  }
-  const alternate = key.toLowerCase().startsWith(legacyPrefix)
-    ? key.slice(legacyPrefix.length)
-    : `${legacyPrefix}${key}`
-  return contributions[alternate] ?? 0
 }
 
 type CandidateWithSnapshot = Candidate & {

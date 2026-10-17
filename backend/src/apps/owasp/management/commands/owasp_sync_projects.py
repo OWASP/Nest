@@ -149,8 +149,8 @@ class Command(BaseCommand):
                 if project.owasp_repository_id and not existing.owasp_repository_id:
                     existing.owasp_repository_id = project.owasp_repository_id
                     project.owasp_repository_id = None
-                project.is_active = False
-                project.save(update_fields=["is_active", "owasp_repository"])
+                    project.save(update_fields=("owasp_repository_id",))
+                project.deactivate()
 
             projects.pop(previous_key, None)
             projects[slug.lower()] = existing
