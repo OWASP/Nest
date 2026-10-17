@@ -36,4 +36,8 @@ describe('contributionCount', () => {
   test('prefers the exact key over the alternate form', () => {
     expect(contributionCount({ nest: 2, 'www-project-nest': 8 }, 'nest', 'www-project-')).toBe(2)
   })
+
+  test('ignores inherited Object.prototype properties on the alternate key', () => {
+    expect(contributionCount({}, 'www-project-toString', 'www-project-')).toBe(0)
+  })
 })

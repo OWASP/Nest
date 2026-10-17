@@ -62,5 +62,8 @@ export function contributionCount(
   const alternate = key.toLowerCase().startsWith(legacyPrefix)
     ? key.slice(legacyPrefix.length)
     : `${legacyPrefix}${key}`
-  return contributions[alternate] ?? 0
+  if (Object.hasOwn(contributions, alternate)) {
+    return contributions[alternate]
+  }
+  return 0
 }
