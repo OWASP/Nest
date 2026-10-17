@@ -195,7 +195,7 @@ describe('BoardCandidatesPage', () => {
     })
   })
 
-    describe('contribution labels for led chapters and projects', () => {
+  describe('contribution labels for led chapters and projects', () => {
     const buildSnapshot = (
       chapterContributions: Record<string, number>,
       projectContributions: Record<string, number>
@@ -278,9 +278,24 @@ describe('BoardCandidatesPage', () => {
     }
 
     const chapterCases: Array<[string, Record<string, number>, string, string]> = [
-      ['prefixed snapshot key, bare chapter key', { 'www-chapter-london': 7 }, 'london', '7 contributions'],
-      ['bare snapshot key, prefixed chapter key', { london: 4 }, 'www-chapter-london', '4 contributions'],
-      ['exact key with a zero count', { 'www-chapter-london': 0 }, 'www-chapter-london', 'no contributions'],
+      [
+        'prefixed snapshot key, bare chapter key',
+        { 'www-chapter-london': 7 },
+        'london',
+        '7 contributions',
+      ],
+      [
+        'bare snapshot key, prefixed chapter key',
+        { london: 4 },
+        'www-chapter-london',
+        '4 contributions',
+      ],
+      [
+        'exact key with a zero count',
+        { 'www-chapter-london': 0 },
+        'www-chapter-london',
+        'no contributions',
+      ],
       ['no matching key', { 'www-chapter-paris': 3 }, 'london', 'no contributions'],
     ]
 
@@ -295,9 +310,24 @@ describe('BoardCandidatesPage', () => {
     )
 
     const projectCases: Array<[string, Record<string, number>, string, string]> = [
-      ['prefixed snapshot key, bare project key', { 'www-project-nest': 5 }, 'nest', '5 contributions'],
-      ['bare snapshot key, prefixed project key', { nest: 2 }, 'www-project-nest', '2 contributions'],
-      ['exact key with a zero count', { 'www-project-nest': 0 }, 'www-project-nest', 'no contributions'],
+      [
+        'prefixed snapshot key, bare project key',
+        { 'www-project-nest': 5 },
+        'nest',
+        '5 contributions',
+      ],
+      [
+        'bare snapshot key, prefixed project key',
+        { nest: 2 },
+        'www-project-nest',
+        '2 contributions',
+      ],
+      [
+        'exact key with a zero count',
+        { 'www-project-nest': 0 },
+        'www-project-nest',
+        'no contributions',
+      ],
       ['no matching key', { 'www-project-zap': 3 }, 'nest', 'no contributions'],
     ]
 
