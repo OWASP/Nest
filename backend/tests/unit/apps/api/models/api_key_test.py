@@ -23,12 +23,14 @@ class TestApiKeyModel:
 
     def test_generate_raw_key(self):
         """Test that generate_raw_key creates a sufficiently long, random string."""
-        raw_key = ApiKey.generate_raw_key()
-        another_raw_key = ApiKey.generate_raw_key()
+        first_key = ApiKey.generate_raw_key()
+        second_key = ApiKey.generate_raw_key()
 
-        assert isinstance(raw_key, str)
-        assert len(raw_key) > 40
-        assert raw_key != another_raw_key
+        for key in (first_key, second_key):
+            assert isinstance(key, str)
+            assert len(key) > 40
+
+        assert first_key != second_key
 
     def test_generate_hash_key(self):
         """Test that generate_hash_key produces a correct SHA-256 hash."""
