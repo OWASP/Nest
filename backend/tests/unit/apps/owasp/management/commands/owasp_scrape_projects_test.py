@@ -135,6 +135,7 @@ class TestOwaspScrapeProjects:
         """Test handle when scraper page_tree is None - project gets deactivated."""
         mock_scraper = mock.Mock(spec=OwaspScraper)
         mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = False
 
         mock_projects_list = [mock_project]
         mock_active_projects = mock.MagicMock()
@@ -155,6 +156,37 @@ class TestOwaspScrapeProjects:
             command.handle(offset=0)
 
         mock_project.deactivate.assert_called_once()
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_request_exception_does_not_deactivate(
+        self, mock_github, mock_bulk_save, command, mock_project
+    ):
+        """Test that a transient RequestException does not deactivate the project."""
+        mock_scraper = mock.Mock(spec=OwaspScraper)
+        mock_scraper.page_tree = None
+        mock_scraper.is_request_failed = True
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        command.stdout = mock.MagicMock()
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_project.deactivate.assert_not_called()
 
     @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Project, "bulk_save", autospec=True)
