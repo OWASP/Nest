@@ -82,14 +82,94 @@ class Chapter(
         return f"{self.name or self.key}"
 
     @property
-    def nest_key(self):
-        """Get Nest key."""
-        return self.key.replace("www-chapter-", "")
+    def github_url(self) -> str:
+        """Return the GitHub URL for this chapter's linked repository.
+
+        Returns:
+            str: URL of the linked repository, or an empty string when the chapter has none.
+
+        """
+        if self.owasp_repository_id:
+            return self.owasp_repository.url
+
+        return ""
+
+    @property
+    def nest_key(self) -> str:
+        """Return the chapter key."""
+        return self.key
+
+    @property
+    def owasp_url(self) -> str:
+        """Return the public chapter page.
+
+        Returns:
+            str: Absolute owasp.org chapter URL.
+
+        """
+        return f"https://owasp.org/chapters/{self.nest_key}"
 
     @property
     def nest_url(self) -> str:
         """Get Nest URL for chapter."""
         return get_absolute_url(f"chapters/{self.nest_key}")
+
+    @classmethod
+    def get_by_key(cls, key: str, *, active_only: bool = True) -> Chapter | None:
+        """Return the chapter stored under this key.
+
+        A slug matches a stored ``www-chapter-`` key, and that prefixed key matches the slug,
+        until synchronization has renamed the row.
+
+        Args:
+            key (str): Chapter key.
+            active_only (bool): Limit the lookup to active chapters. Pass False to include
+                inactive chapters.
+
+        Returns:
+            Chapter | None: The matching chapter, if one exists.
+
+        """
+        queryset = cls.active_chapters if active_only else cls.objects
+        normalized = key.strip()
+        chapter = queryset.filter(key__iexact=normalized).first()
+        if chapter is not None:
+            return chapter
+        prefix = "www-chapter-"
+        lowered = normalized.lower()
+        alternate = (
+            lowered.removeprefix(prefix) if lowered.startswith(prefix) else f"{prefix}{normalized}"
+        )
+        return queryset.filter(key__iexact=alternate).first()
+
+    def adopt_key(self, key: str, existing: Chapter | None = None) -> bool:
+        """Store this chapter under ``key``.
+
+        A saved chapter with no linked repository under ``key`` is a stub. An existing chapter
+        that already has a repository keeps the key, and this chapter is left unchanged. The
+        caller removes a stub.
+
+        Args:
+            key (str): Key this chapter should use.
+            existing (Chapter | None): Chapter already stored under ``key``.
+
+        Returns:
+            bool: True when this chapter is stored under ``key``.
+
+        """
+        if self.key.lower() == key.lower():
+            return True
+
+        if (
+            existing is not None
+            and existing is not self
+            and existing.pk
+            and existing.owasp_repository_id
+        ):
+            return False
+
+        self.key = key
+        return True
 
     @staticmethod
     @lru_cache
@@ -99,7 +179,6 @@ class Chapter(
             is_active=True,
             latitude__isnull=False,
             longitude__isnull=False,
-            owasp_repository__is_empty=False,
         ).count()
 
     def from_github(self, repository) -> None:
