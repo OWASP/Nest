@@ -48,6 +48,7 @@ SKIP_DIR_NAMES = frozenset(
 SKIP_FILE_NAMES = frozenset(
     {
         "Makefile",
+        "makefile",
         "poetry.lock",
         "poetry.toml",
         "pyproject.toml",
@@ -59,7 +60,9 @@ SNIPPET_INCLUDE_RE = re.compile(
 )  # pymdownx snippet path, optional section after colon
 WATCHED_SUFFIXES = frozenset(
     {
+        ".css",
         ".gif",
+        ".html",
         ".jpeg",
         ".jpg",
         ".md",
@@ -72,6 +75,7 @@ WATCHED_SUFFIXES = frozenset(
 )
 WATCH_PATHS = (
     ROOT / ".mkdocs.yaml",
+    ROOT / "docs" / "overrides",
     DOCS_SRC,
 )
 

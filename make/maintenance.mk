@@ -35,27 +35,25 @@ clean-trivy-cache:
 	@rm -rf $(CURDIR)/.trivy-cache
 
 dependency-compile-requirements:
-	@docker run \
-		--rm \
-		--user $$(id -u):$$(id -g) \
-		-e HOME=/tmp \
-		-e PIP_ROOT_USER_ACTION=ignore \
-		-v "$(CURDIR):/work" \
-		-w /work \
-		$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1) \
-		sh -c 'python -m pip install --no-warn-script-location --quiet pip-tools && \
-		python -m piptools compile --no-strip-extras --generate-hashes \
-		--output-file=.github/requirements/scripts.txt \
-		.github/requirements/scripts.in && \
-		python -m piptools compile --no-strip-extras --generate-hashes \
-		--output-file=backend/requirements/build.txt \
-		backend/requirements/build.in && \
-		python -m piptools compile --no-strip-extras --generate-hashes \
-		--output-file=backend/requirements/cluster-fuzz-lite.txt \
-		backend/requirements/cluster-fuzz-lite.in && \
-		python -m piptools compile --no-strip-extras --generate-hashes \
-		--output-file=tools/requirements/pre-commit.txt \
-		tools/requirements/pre-commit.in && \
-		python -m piptools compile --no-strip-extras --generate-hashes \
-		--output-file=tools/requirements/test.txt \
-		tools/requirements/test.in'
+	@image="$$(grep -E '^FROM python:' docker/backend/Dockerfile.local | sed 's/^FROM //; s/ AS .*//' | head -1)"
+	args=(
+		'--rm'
+		"--user=$$(id -u):$$(id -g)"
+		'-e=HOME=/tmp'
+		'-e=PIP_ROOT_USER_ACTION=ignore'
+		"-v=$(CURDIR):/work"
+		'-w=/work'
+		"$$image"
+		sh
+		'-c'
+		'
+		set -e
+		python -m pip install --no-warn-script-location --quiet pip-tools
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=.github/requirements/scripts.txt .github/requirements/scripts.in
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/build.txt backend/requirements/build.in
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=backend/requirements/cluster-fuzz-lite.txt backend/requirements/cluster-fuzz-lite.in
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=tools/requirements/pre-commit.txt tools/requirements/pre-commit.in
+		python -m piptools compile --no-strip-extras --generate-hashes --output-file=tools/requirements/test.txt tools/requirements/test.in
+		'
+	)
+	docker run "$${args[@]}"

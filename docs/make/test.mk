@@ -12,7 +12,11 @@ docs-test:
 	@docker run --rm $(DOCS_TEST_IMAGE)
 
 docs-test-image-build:
-	@DOCKER_BUILDKIT=1 docker build -q \
-		--cache-from $(DOCS_TEST_IMAGE) \
-		-f docker/docs/Dockerfile.tests . \
-		-t $(DOCS_TEST_IMAGE) 1>/dev/null
+	@args=(
+		'-q'
+		'--cache-from=$(DOCS_TEST_IMAGE)'
+		'-f=docker/docs/Dockerfile.tests'
+		.
+		'-t=$(DOCS_TEST_IMAGE)'
+	)
+	DOCKER_BUILDKIT=1 docker build "$${args[@]}" 1>/dev/null

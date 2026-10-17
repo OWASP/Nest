@@ -1,51 +1,27 @@
-site_name: OWASP Nest Documentation
+copyright: Copyright &copy; 2026 OWASP Nest
+
 docs_dir: docs/src
-nav:
-  - Home:
-      - OWASP Nest: index.md
-      - Code of Conduct: code-of-conduct.md
-      - Contributing: contributing.md
-  - API: api/index.md
-  - Backend: backend/index.md
-  - Frontend: frontend/index.md
-  - NestBot: nestbot/index.md
-  - Schema: schema/index.md
-  - Maintenance: maintenance/index.md
-repo_url: https://github.com/OWASP/Nest
-theme:
-  name: material
-  logo: assets/images/owasp_icon_white_sm.png
-  favicon: assets/images/favicon.png
-  features:
-    - navigation.tabs
-    - navigation.instant
-    - navigation.sections
-    - navigation.expand
-    - navigation.top
-    - navigation.tracking
-    - toc.integrate
-    - search.suggest
-    - search.highlight
-    - content.code.annotation
-    - content.code.copy
-    - content.code.select
-    - content.code.annotate
-    - content.tabs.link
-    - content.tooltips
-  language: en
-  palette:
-    - scheme: default
-      toggle:
-        icon: material/lightbulb-outline
-        name: Switch to dark mode
-      primary: teal
-      accent: amber
-    - scheme: slate
-      toggle:
-        icon: material/weather-night
-        name: Switch to light mode
-      primary: teal
-      accent: cyan
+
+extra:
+  generator: false
+  homepage: .
+  social:
+    - icon: fontawesome/brands/bluesky
+      link: https://bsky.app/profile/nest.owasp.org
+      name: OWASP Nest on Bluesky
+    - icon: fontawesome/brands/github
+      link: https://github.com/OWASP/Nest
+      name: OWASP Nest on GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/owasp-nest
+      name: OWASP Nest on LinkedIn
+    - icon: fontawesome/brands/slack
+      link: https://owasp.slack.com/archives/project-nest
+      name: OWASP Nest on Slack
+
+extra_css:
+  - assets/stylesheets/nest-theme.css
+
 markdown_extensions:
   - abbr
   - admonition
@@ -75,10 +51,66 @@ markdown_extensions:
   - toc:
       permalink: true
 
+nav:
+  - Home:
+      - OWASP Nest: index.md
+      - Code of Conduct: code-of-conduct.md
+      - Contributing: contributing.md
+  - API: api/index.md
+  - Backend: backend/index.md
+  - Frontend: frontend/index.md
+  - NestBot: nestbot/index.md
+  - Schema: schema/index.md
+  - Maintenance: maintenance/index.md
+
 plugins:
-  - search
   - minify:
       minify_html: true
   - mkdocstrings:
       default_handler: python
+  - privacy
+  - search
   - tags
+
+repo_url: https://github.com/OWASP/Nest
+
+site_name: OWASP Nest
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  logo: assets/images/logo.png
+  favicon: assets/images/favicon.png
+  font:
+    code: Geist Mono
+    text: Geist
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.annotation
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+  language: en
+  palette:
+    - scheme: dark
+      toggle:
+        icon: material/weather-sunny
+        name: Enable light mode
+      primary: teal
+      accent: cyan
+    - scheme: light
+      toggle:
+        icon: material/weather-night
+        name: Enable dark mode
+      primary: teal
+      accent: amber

@@ -1,10 +1,11 @@
 .PHONY: run
 
-LOCAL_COMPOSE_FILES = \
-	-f docker-compose/local/compose.yaml \
-	-f docker-compose/local/compose.override.yaml
-
 run: ## Run Nest application
-	@DOCKER_BUILDKIT=1 \
-	docker compose $(LOCAL_COMPOSE_FILES) --project-name nest-local build && \
-	docker compose $(LOCAL_COMPOSE_FILES) --project-name nest-local up --remove-orphans
+	@export DOCKER_BUILDKIT=1
+	compose_args=(
+		'-f=docker-compose/local/compose.yaml'
+		'-f=docker-compose/local/compose.override.yaml'
+		'--project-name=nest-local'
+	)
+	docker compose "$${compose_args[@]}" build --quiet
+	docker compose "$${compose_args[@]}" up --remove-orphans

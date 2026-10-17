@@ -45,7 +45,7 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --only main
 
 # Less likely to cause cache invalidation items go first.
-COPY entrypoint.sh manage.py Makefile ./
+COPY entrypoint.sh makefile manage.py ./
 COPY make make
 COPY scripts scripts
 COPY templates templates
@@ -96,7 +96,7 @@ ARG OWASP_UID
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --no-root --verbose --only main --only video
 
-COPY entrypoint.sh manage.py Makefile ./
+COPY entrypoint.sh manage.py makefile ./
 COPY make make
 COPY scripts scripts
 COPY src src
