@@ -293,7 +293,10 @@ class TestOwaspSyncProjects:
         stub.delete.assert_not_called()
         stub.repositories.add.assert_called_once_with(repository)
         project.repositories.clear.assert_called_once()
-        project.deactivate.assert_called_once()
+        project.deactivate.assert_not_called()
+        project.save.assert_called_once_with(update_fields=["is_active", "owasp_repository"])
+        assert project.is_active is False
+        assert project.owasp_repository_id is None
         assert stub.key == "cheat-sheet-series"
         assert stub.name == "OWASP Cheat Sheet Series"
         assert stub.owasp_repository_id == 9
