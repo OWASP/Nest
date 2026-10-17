@@ -17,7 +17,7 @@ class ChapterQuery:
     @strawberry_django.field
     def chapter(self, key: str) -> ChapterNode | None:
         """Resolve chapter."""
-        return Chapter.get_by_key(key)
+        return Chapter.get_by_key(key, active_only=False)
 
     @strawberry_django.field
     def chapter_countries(self) -> list[str]:

@@ -4,7 +4,9 @@ import { render } from 'wrappers/testUtil'
 import BoardCandidatesPage from 'app/board/[year]/candidates/page'
 import {
   GetBoardCandidatesDocument,
+  GetChapterByKeyDocument,
   GetMemberSnapshotDocument,
+  GetProjectByKeyDocument,
 } from 'types/__generated__/boardQueries.generated'
 
 jest.mock('@apollo/client/react', () => ({
@@ -191,5 +193,122 @@ describe('BoardCandidatesPage', () => {
     await waitFor(() => {
       expect(handleAppError).toHaveBeenCalledWith(graphQLError)
     })
+  })
+
+    describe('contribution labels for led chapters and projects', () => {
+    const buildSnapshot = (
+      chapterContributions: Record<string, number>,
+      projectContributions: Record<string, number>
+    ) => ({
+      id: 'snapshot-1',
+      githubUser: { login: 'alice' },
+      chapterContributions,
+      projectContributions,
+      channelCommunications: {},
+      communicationHeatmapData: {},
+      contributionHeatmapData: {},
+      repositoryContributions: {},
+      commitsCount: 0,
+      issuesCount: 0,
+      messagesCount: 0,
+      pullRequestsCount: 0,
+      totalContributions: 0,
+      startAt: '2025-01-01T00:00:00Z',
+      endAt: '2025-12-31T00:00:00Z',
+    })
+
+    const renderWithSnapshot = ({
+      chapterContributions = {},
+      projectContributions = {},
+      chapterKey = 'london',
+      projectKey = 'nest',
+    }: {
+      chapterContributions?: Record<string, number>
+      projectContributions?: Record<string, number>
+      chapterKey?: string
+      projectKey?: string
+    }) => {
+      const boardResult = { data: mockBoardData, loading: false, error: null }
+      const snapshotResult = {
+        data: { memberSnapshot: buildSnapshot(chapterContributions, projectContributions) },
+        loading: false,
+        error: null,
+      }
+      mockUseQuery.mockImplementation((document: unknown) => {
+        if (document === GetBoardCandidatesDocument) {
+          return boardResult
+        }
+        if (document === GetMemberSnapshotDocument) {
+          return snapshotResult
+        }
+        return { data: null, loading: false, error: null }
+      })
+      mockUseApolloClient.mockReturnValue({
+        query: jest.fn().mockImplementation(({ query }: { query: unknown }) => {
+          if (query === GetChapterByKeyDocument) {
+            return Promise.resolve({
+              data: {
+                chapter: {
+                  id: 'chapter-1',
+                  key: chapterKey,
+                  name: 'London Chapter',
+                  url: 'https://owasp.org/www-chapter-london',
+                },
+              },
+            })
+          }
+          if (query === GetProjectByKeyDocument) {
+            return Promise.resolve({
+              data: {
+                project: {
+                  id: 'project-1',
+                  key: projectKey,
+                  level: 'flagship',
+                  name: 'Nest Project',
+                  type: 'code',
+                  url: 'https://owasp.org/www-project-nest',
+                },
+              },
+            })
+          }
+          return Promise.resolve({ data: {} })
+        }),
+      })
+      render(<BoardCandidatesPage />)
+    }
+
+    const chapterCases: Array<[string, Record<string, number>, string, string]> = [
+      ['prefixed snapshot key, bare chapter key', { 'www-chapter-london': 7 }, 'london', '7 contributions'],
+      ['bare snapshot key, prefixed chapter key', { london: 4 }, 'www-chapter-london', '4 contributions'],
+      ['exact key with a zero count', { 'www-chapter-london': 0 }, 'www-chapter-london', 'no contributions'],
+      ['no matching key', { 'www-chapter-paris': 3 }, 'london', 'no contributions'],
+    ]
+
+    test.each(chapterCases)(
+      'chapter: %s',
+      async (_name, chapterContributions, chapterKey, expected) => {
+        renderWithSnapshot({ chapterContributions, chapterKey })
+
+        const link = await screen.findByRole('link', { name: /London Chapter/ })
+        expect(link).toHaveTextContent(expected)
+      }
+    )
+
+    const projectCases: Array<[string, Record<string, number>, string, string]> = [
+      ['prefixed snapshot key, bare project key', { 'www-project-nest': 5 }, 'nest', '5 contributions'],
+      ['bare snapshot key, prefixed project key', { nest: 2 }, 'www-project-nest', '2 contributions'],
+      ['exact key with a zero count', { 'www-project-nest': 0 }, 'www-project-nest', 'no contributions'],
+      ['no matching key', { 'www-project-zap': 3 }, 'nest', 'no contributions'],
+    ]
+
+    test.each(projectCases)(
+      'project: %s',
+      async (_name, projectContributions, projectKey, expected) => {
+        renderWithSnapshot({ projectContributions, projectKey })
+
+        const link = await screen.findByRole('link', { name: /Nest Project/ })
+        expect(link).toHaveTextContent(expected)
+      }
+    )
   })
 })

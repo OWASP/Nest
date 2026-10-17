@@ -40,7 +40,7 @@ class TestChapterResolution:
             result = ChapterQuery().chapter(key="test-chapter")
 
             assert result == mock_chapter
-            mock_get.assert_called_once_with("test-chapter")
+            mock_get.assert_called_once_with("test-chapter", active_only=False)
 
     def test_chapter_not_found(self, mock_info):
         """Test if None is returned when the chapter is not found."""
