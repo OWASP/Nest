@@ -21,7 +21,7 @@ test.describe('Project Details Page', () => {
     await expect(
       page.getByText('Leaders: Arkadii Yakovets, Kate Golovanova, Starr Brown')
     ).toBeVisible()
-    await expect(page.getByText('URL: https://owasp.org/www-project-nest')).toBeVisible()
+    await expect(page.getByText('URL: https://owasp.org/projects/www-project-nest')).toBeVisible()
   })
 
   test('should have project statistics block', async ({ page }) => {
