@@ -47,6 +47,12 @@ jest.mock('components/SearchPageLayout', () => {
   }
 })
 
+jest.mock('components/AccessDeniedDisplay', () => {
+  return function MockAccessDeniedDisplay() {
+    return <div data-testid="access-denied-display">Access Denied</div>
+  }
+})
+
 jest.mock('next/navigation', () => {
   const actual = jest.requireActual('next/navigation')
   return {
@@ -64,8 +70,6 @@ jest.mock('next-auth/react', () => {
   }
 })
 
-// The page reads its session through useDjangoSession; adapt the existing
-// useSession mocks to that hook's shape so tests can keep setting `{ data, status }`.
 jest.mock('hooks/useDjangoSession', () => ({
   useDjangoSession: () => {
     const { useSession } = jest.requireMock('next-auth/react')
@@ -77,6 +81,7 @@ jest.mock('hooks/useDjangoSession', () => ({
     }
   },
 }))
+
 jest.mock('components/ProgramCard', () => {
   return function MockProgramCard({ program }: { program: { name: string } }) {
     return <div data-testid="program-card">{program.name}</div>
@@ -106,8 +111,8 @@ const mockProgramData = {
         name: 'Test Program',
         description: 'Test Description',
         status: 'draft',
-        startedAt: 1753660800, // 2025-07-28
-        endedAt: 1754784000, // 2025-08-10
+        startedAt: 1753660800,
+        endedAt: 1754784000,
         experienceLevels: ['beginner'],
         menteesLimit: 10,
         admins: [],
@@ -129,7 +134,7 @@ describe('MyMentorshipPage', () => {
     expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
   })
 
-  it('renders the unified program list for a non-leader (e.g., mentee)', async () => {
+  it('renders AccessDeniedDisplay for an unauthorized user and skips query execution', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
@@ -138,7 +143,7 @@ describe('MyMentorshipPage', () => {
           login: 'user1',
           isLeader: false,
           isMentor: false,
-          isMentee: true,
+          isMentee: false,
         },
         expires: '2099-01-01T00:00:00.000Z',
       },
@@ -146,21 +151,22 @@ describe('MyMentorshipPage', () => {
     })
 
     mockUseQuery.mockReturnValue({
-      data: {
-        myPrograms: {
-          programs: [{ ...mockProgramData.myPrograms.programs[0], userRole: 'mentee' }],
-          totalPages: 1,
-        },
-      },
+      data: undefined,
       loading: false,
       error: undefined,
     })
 
     render(<MyMentorshipPage />)
-    expect(await screen.findByText('Test Program')).toBeInTheDocument()
-    expect(screen.queryByText(/Access Denied/i)).not.toBeInTheDocument()
-    // Non-leaders don't get the Create Program button.
+
+    expect(await screen.findByTestId('access-denied-display')).toBeInTheDocument()
+    expect(screen.queryByText('Test Program')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /create program/i })).not.toBeInTheDocument()
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        skip: true,
+      })
+    )
   })
 
   it('renders mentorship programs if user is leader', async () => {
@@ -186,6 +192,34 @@ describe('MyMentorshipPage', () => {
     render(<MyMentorshipPage />)
     expect(await screen.findByText('My Mentorship')).toBeInTheDocument()
     expect(await screen.findByText('Test Program')).toBeInTheDocument()
+  })
+
+  it('renders mentorship programs for mentee', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Mentee User',
+          email: 'mentee@example.com',
+          login: 'mentee1',
+          isLeader: false,
+          isMentor: false,
+          isMentee: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: mockProgramData,
+      loading: false,
+      error: undefined,
+    })
+
+    render(<MyMentorshipPage />)
+    expect(await screen.findByText('My Mentorship')).toBeInTheDocument()
+    expect(await screen.findByText('Test Program')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /create program/i })).not.toBeInTheDocument()
   })
 
   it('shows empty state when no programs found', async () => {
@@ -313,7 +347,6 @@ describe('MyMentorshipPage', () => {
         expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
       })
     } finally {
-      // Restore original scrollTo to avoid leaking mock into other tests
       globalThis.scrollTo = originalScrollTo
     }
   })
@@ -373,7 +406,7 @@ describe('MyMentorshipPage', () => {
       data: {
         myPrograms: {
           programs: mockProgramData.myPrograms.programs,
-          totalPages: null, // Test fallback
+          totalPages: null,
         },
       },
       loading: false,
@@ -494,69 +527,5 @@ describe('MyMentorshipPage', () => {
       globalThis.history.replaceState(null, '', '/')
       jest.useRealTimers()
     }
-  })
-  it("renders a mentee's program in the unified list", async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
-      data: {
-        user: {
-          name: 'Mentee User',
-          email: 'mentee@example.com',
-          login: 'mentee1',
-          isLeader: false,
-          isMentor: false,
-          isMentee: true,
-        },
-        expires: '2099-01-01T00:00:00.000Z',
-      },
-      status: 'authenticated',
-    })
-    mockUseQuery.mockReturnValue({
-      data: {
-        myPrograms: {
-          programs: [
-            {
-              id: '1',
-              key: 'gsoc-2025',
-              name: 'GSoC 2025',
-              status: 'ACTIVE',
-              description: 'Google Summer of Code 2025',
-              startedAt: '2025-01-01',
-              endedAt: '2025-12-31',
-              userRole: 'mentee',
-            },
-          ],
-          totalPages: 1,
-          currentPage: 1,
-        },
-      },
-      loading: false,
-      error: undefined,
-    })
-    render(<MyMentorshipPage />)
-    expect(await screen.findByText('GSoC 2025')).toBeInTheDocument()
-  })
-
-  it('shows empty state for a user with no programs', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
-      data: {
-        user: {
-          name: 'User',
-          email: 'user@example.com',
-          login: 'user1',
-          isLeader: false,
-          isMentor: false,
-          isMentee: true,
-        },
-        expires: '2099-01-01T00:00:00.000Z',
-      },
-      status: 'authenticated',
-    })
-    mockUseQuery.mockReturnValue({
-      data: { myPrograms: { programs: [], totalPages: 0, currentPage: 1 } },
-      loading: false,
-      error: undefined,
-    })
-    render(<MyMentorshipPage />)
-    expect(await screen.findByText(/No programs found/i)).toBeInTheDocument()
   })
 })
