@@ -3,8 +3,10 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Program } from 'types/mentorship'
+import { sortOptionsProgram } from 'utils/sortingOptions'
 import ProgramCard from 'components/ProgramCard'
 import SearchPageLayout from 'components/SearchPageLayout'
+import SortBy from 'components/SortBy'
 
 const ProgramsPage = () => {
   const {
@@ -13,12 +15,18 @@ const ProgramsPage = () => {
     currentPage,
     totalPages,
     searchQuery,
+    sortBy,
+    order,
     handleSearch,
     handlePageChange,
+    handleSortChange,
+    handleOrderChange,
   } = useSearchPage<Program>({
     indexName: 'programs',
     pageTitle: 'OWASP Programs',
     hitsPerPage: 24,
+    defaultSortBy: 'default',
+    defaultOrder: 'desc',
   })
 
   const renderProgramCard = (program: Program) => {
@@ -43,6 +51,15 @@ const ProgramsPage = () => {
       onSearch={handleSearch}
       searchPlaceholder="Search for programs..."
       searchQuery={searchQuery}
+      sortChildren={
+        <SortBy
+          onOrderChange={handleOrderChange}
+          onSortChange={handleSortChange}
+          selectedOrder={order}
+          selectedSortOption={sortBy}
+          sortOptions={sortOptionsProgram}
+        />
+      }
       totalPages={totalPages}
     >
       <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
