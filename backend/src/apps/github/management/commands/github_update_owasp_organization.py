@@ -10,7 +10,6 @@ from apps.github.common import sync_repository
 from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.chapter import Chapter
-from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -51,9 +50,8 @@ class Command(BaseCommand):
             owasp_organization = None
             owasp_user = None
 
-            chapters = []
-            committees = []
-            projects = []
+            chapters: list[Chapter] = []
+            projects: list[Project] = []
 
             offset = options["offset"]
             repository = options["repository"]
@@ -72,39 +70,23 @@ class Command(BaseCommand):
             for idx, gh_repository in enumerate(gh_repositories[offset:]):
                 prefix = f"{idx + offset + 1} of {gh_repositories_count}"
                 entity_key = gh_repository.name.lower()
+                if entity_key.startswith(("www-chapter-", "www-committee-", "www-project-")):
+                    continue
+
                 repository_url = f"https://github.com/OWASP/{entity_key}"
                 self.stdout.write(f"{prefix:<12} {repository_url}\n")
 
                 try:
-                    owasp_organization, owasp_repository = sync_repository(
+                    owasp_organization = sync_repository(
                         gh_repository,
                         organization=owasp_organization,
                         user=owasp_user,
-                    )
-
-                    # OWASP chapters.
-                    if entity_key.startswith("www-chapter-"):
-                        chapters.append(
-                            Chapter.update_data(gh_repository, owasp_repository, save=False)
-                        )
-
-                    # OWASP projects.
-                    elif entity_key.startswith("www-project-"):
-                        projects.append(
-                            Project.update_data(gh_repository, owasp_repository, save=False)
-                        )
-
-                    # OWASP committees.
-                    elif entity_key.startswith("www-committee-"):
-                        committees.append(
-                            Committee.update_data(gh_repository, owasp_repository, save=False)
-                        )
+                    )[0]
                 except Exception:
                     logger.exception("Error syncing repository %s", repository_url)
                     continue
 
             Chapter.bulk_save(chapters)
-            Committee.bulk_save(committees)
             Project.bulk_save(projects)
 
             if not repository:  # The entire organization is being synced.

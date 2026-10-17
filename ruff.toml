@@ -95,5 +95,5 @@ ignore = [
 
 [lint.isort]
 detect-same-package = false
-known-first-party = ["apps", "docker_compose_check", "renew_security_txt", "scripts", "serve", "tests"]
+known-first-party = ["apps", "docker_compose_check", "docksec_scan", "renew_security_txt", "scripts", "serve", "tests"]
 known-third-party = ["github"]
