@@ -2,7 +2,7 @@ ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
 # Shared builder setup for Production/Staging (builder-backend) and video (builder-video) images.
-FROM python:3.13.15-alpine3.23@sha256:75f27d686432419c9d42420b2b9ef605868c7a0682a6be10a6601fad46c2df01 AS builder-base
+FROM python:3.13.15-alpine3.23@sha256:6438599575cca0d1df94aeee0d2ae088d4d8846eab554b2ee7784a3a6df0d516 AS builder-base
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -60,7 +60,7 @@ RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + &&
     (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
 
 # Runtime for Production/Staging backend.
-FROM python:3.13.15-alpine3.23@sha256:75f27d686432419c9d42420b2b9ef605868c7a0682a6be10a6601fad46c2df01 AS backend
+FROM python:3.13.15-alpine3.23@sha256:6438599575cca0d1df94aeee0d2ae088d4d8846eab554b2ee7784a3a6df0d516 AS backend
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -111,7 +111,7 @@ RUN find /home/owasp/.venv -depth -type d -name __pycache__ -exec rm -rf {} + &&
     (find /home/owasp/.venv -depth -type d -name tests -exec rm -rf {} + 2>/dev/null || true)
 
 # Runtime for video generation: ffmpeg for encoding and WeasyPrint libs for slide rendering.
-FROM python:3.13.15-alpine3.23@sha256:75f27d686432419c9d42420b2b9ef605868c7a0682a6be10a6601fad46c2df01 AS video
+FROM python:3.13.15-alpine3.23@sha256:6438599575cca0d1df94aeee0d2ae088d4d8846eab554b2ee7784a3a6df0d516 AS video
 
 ARG OWASP_GID
 ARG OWASP_UID
