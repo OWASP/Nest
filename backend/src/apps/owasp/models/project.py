@@ -517,15 +517,16 @@ class Project(
         self.is_active = False
         self.save(update_fields=("is_active",))
 
-    def adopt_key(self, key: str, occupant: Project | None = None) -> bool:
+    def adopt_key(self, key: str, existing: Project | None = None) -> bool:
         """Store this project under ``key``.
 
-        An occupant with no repositories is deleted. An occupant that already has repositories
-        keeps the key, and this project is left unchanged.
+        An existing project that already has repositories keeps the key, and this project is
+        left unchanged. A repositoryless row under ``key`` is handled by the sync command, which
+        reuses that row instead of renaming onto it.
 
         Args:
             key (str): Key this project should use.
-            occupant (Project | None): Project already stored under ``key``.
+            existing (Project | None): Project already stored under ``key``.
 
         Returns:
             bool: True when this project is stored under ``key``.
@@ -534,11 +535,13 @@ class Project(
         if self.key.lower() == key.lower():
             return True
 
-        if occupant is not None and occupant is not self:
-            if occupant.pk and occupant.repositories.exists():
-                return False
-            if occupant.pk:
-                occupant.delete()
+        if (
+            existing is not None
+            and existing is not self
+            and existing.pk
+            and existing.repositories.exists()
+        ):
+            return False
 
         self.key = key
         return True

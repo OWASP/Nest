@@ -142,15 +142,16 @@ class Chapter(
         )
         return queryset.filter(key__iexact=alternate).first()
 
-    def adopt_key(self, key: str, occupant: Chapter | None = None) -> bool:
+    def adopt_key(self, key: str, existing: Chapter | None = None) -> bool:
         """Store this chapter under ``key``.
 
-        A saved occupant with no linked repository is a stub. An occupant that already has a
-        repository keeps the key, and this chapter is left unchanged. The caller removes a stub.
+        A saved chapter with no linked repository under ``key`` is a stub. An existing chapter
+        that already has a repository keeps the key, and this chapter is left unchanged. The
+        caller removes a stub.
 
         Args:
             key (str): Key this chapter should use.
-            occupant (Chapter | None): Chapter already stored under ``key``.
+            existing (Chapter | None): Chapter already stored under ``key``.
 
         Returns:
             bool: True when this chapter is stored under ``key``.
@@ -160,10 +161,10 @@ class Chapter(
             return True
 
         if (
-            occupant is not None
-            and occupant is not self
-            and occupant.pk
-            and occupant.owasp_repository_id
+            existing is not None
+            and existing is not self
+            and existing.pk
+            and existing.owasp_repository_id
         ):
             return False
 

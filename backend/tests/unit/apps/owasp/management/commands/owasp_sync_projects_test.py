@@ -29,8 +29,8 @@ def project_record(**overrides):
 
 def use_real_adopt_key(project):
     """Run Project.adopt_key when the project under test is a mock."""
-    project.adopt_key.side_effect = lambda key, occupant=None: Project.adopt_key(
-        project, key, occupant
+    project.adopt_key.side_effect = lambda key, existing=None: Project.adopt_key(
+        project, key, existing
     )
 
 
@@ -241,10 +241,8 @@ class TestOwaspSyncProjects:
 
     @mock.patch.object(Project, "bulk_save", autospec=True)
     @mock.patch("apps.owasp.api_client.requests.get")
-    def test_renames_project_that_owns_the_github_repository(
-        self, mock_get, mock_bulk_save, command
-    ):
-        """Test a slug with hyphens takes over the project that owns that repository."""
+    def test_reuses_the_slug_stub_instead_of_deleting_it(self, mock_get, mock_bulk_save, command):
+        """Test a repositoryless slug row receives the matched project's repositories."""
         repository = mock.Mock()
         repository.key = "CheatSheetSeries"
         project = mock.Mock(spec=Project)
@@ -254,9 +252,10 @@ class TestOwaspSyncProjects:
         project.name = "OWASP Cheat Sheet Series"
         project.github_url = "https://github.com/owasp/www-project-cheat-sheets"
         project.owasp_url = "https://owasp.org/www-project-cheat-sheets"
+        project.owasp_repository_id = 9
         project.get_related_url.side_effect = lambda url, **_: url
         project.leaders_raw = ["Jim Manico"]
-        project.is_active = False
+        project.is_active = True
         project.repositories.all.return_value = [repository]
         project.repositories.exists.return_value = True
         use_real_adopt_key(project)
@@ -265,6 +264,12 @@ class TestOwaspSyncProjects:
         stub.id = 2
         stub.pk = 2
         stub.key = "cheat-sheet-series"
+        stub.name = "Stub"
+        stub.github_url = ""
+        stub.owasp_url = "https://owasp.org/projects/cheat-sheet-series"
+        stub.owasp_repository_id = None
+        stub.get_related_url.side_effect = lambda url, **_: url
+        stub.leaders_raw = []
         stub.is_active = True
         stub.repositories.all.return_value = []
         stub.repositories.exists.return_value = False
@@ -275,6 +280,7 @@ class TestOwaspSyncProjects:
                     github_url="https://github.com/OWASP/CheatSheetSeries",
                     project_url="https://owasp.org/www-project-cheat-sheets/",
                     slug="cheat-sheet-series",
+                    title="OWASP Cheat Sheet Series",
                 )
             ]
         )
@@ -284,7 +290,11 @@ class TestOwaspSyncProjects:
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
-        stub.delete.assert_called_once()
-        assert project.key == "cheat-sheet-series"
-        project.deactivate.assert_not_called()
+        stub.delete.assert_not_called()
+        stub.repositories.add.assert_called_once_with(repository)
+        project.repositories.clear.assert_called_once()
+        project.deactivate.assert_called_once()
+        assert stub.key == "cheat-sheet-series"
+        assert stub.name == "OWASP Cheat Sheet Series"
+        assert stub.owasp_repository_id == 9
         assert mock_bulk_save.called

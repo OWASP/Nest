@@ -81,6 +81,23 @@ type Project = {
   url: string
 }
 
+function contributionCount(
+  contributions: Record<string, number> | undefined,
+  key: string,
+  legacyPrefix: string
+): number {
+  if (!contributions) {
+    return 0
+  }
+  if (Object.hasOwn(contributions, key)) {
+    return contributions[key]
+  }
+  const alternate = key.toLowerCase().startsWith(legacyPrefix)
+    ? key.slice(legacyPrefix.length)
+    : `${legacyPrefix}${key}`
+  return contributions[alternate] ?? 0
+}
+
 type CandidateWithSnapshot = Candidate & {
   snapshot?: MemberSnapshot
 }
@@ -478,7 +495,11 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             ) : (
               <div className="flex flex-wrap gap-2">
                 {ledChapters.map((chapter) => {
-                  const contributionCount = snapshot?.chapterContributions?.[chapter.key] || 0
+                  const count = contributionCount(
+                    snapshot?.chapterContributions,
+                    chapter.key,
+                    'www-chapter-'
+                  )
 
                   return (
                     <Link
@@ -487,7 +508,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                        contributionCount === 0
+                        count === 0
                           ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
                           : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
                       }`}
@@ -496,20 +517,22 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                       <span>{chapter.name}</span>
                       <span
                         className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                          contributionCount === 0
+                          count === 0
                             ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
                         }`}
                       >
-                        {contributionCount === 0
-                          ? 'no contributions'
-                          : `${contributionCount} contributions`}
+                        {count === 0 ? 'no contributions' : `${count} contributions`}
                       </span>
                     </Link>
                   )
                 })}
                 {ledProjects.map((project) => {
-                  const contributionCount = snapshot?.projectContributions?.[project.key] || 0
+                  const count = contributionCount(
+                    snapshot?.projectContributions,
+                    project.key,
+                    'www-project-'
+                  )
                   return (
                     <Link
                       key={project.id}
@@ -517,7 +540,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                        contributionCount === 0
+                        count === 0
                           ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
                           : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
                       }`}
@@ -526,14 +549,12 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                       <span>{project.name}</span>
                       <span
                         className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                          contributionCount === 0
+                          count === 0
                             ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
                         }`}
                       >
-                        {contributionCount === 0
-                          ? 'no contributions'
-                          : `${contributionCount} contributions`}
+                        {count === 0 ? 'no contributions' : `${count} contributions`}
                       </span>
                     </Link>
                   )

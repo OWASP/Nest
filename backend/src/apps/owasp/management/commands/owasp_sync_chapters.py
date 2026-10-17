@@ -99,8 +99,8 @@ class Command(BaseCommand):
         if previous_key == slug.lower():
             return None
 
-        occupant = chapters.get(slug.lower())
-        if not chapter.adopt_key(slug, occupant):
+        existing = chapters.get(slug.lower())
+        if not chapter.adopt_key(slug, existing):
             logger.warning(
                 "Left chapter %s unchanged because %s already has a repository",
                 chapter.key,
@@ -109,8 +109,8 @@ class Command(BaseCommand):
             return None
 
         removed = None
-        if occupant is not None and occupant is not chapter and occupant.pk:
-            removed = occupant
+        if existing is not None and existing is not chapter and existing.pk:
+            removed = existing
             chapters.pop(slug.lower(), None)
 
         chapters.pop(previous_key, None)

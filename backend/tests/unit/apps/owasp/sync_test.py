@@ -59,10 +59,16 @@ class TestOwaspSync:
         mock_session.get.return_value = response
         mock_parser = Mock(side_effect=etree.ParserError("Parser error"))
 
-        with patch("lxml.html.fromstring", mock_parser):
+        with (
+            patch("lxml.html.fromstring", mock_parser),
+            patch("apps.owasp.sync.logger") as mock_logger,
+        ):
             sync = OwaspSync("https://test.org")
 
         assert sync.page_tree is None
+        assert sync.is_request_failed is True
+        mock_logger.exception.assert_called_once()
+        assert mock_logger.exception.call_args.kwargs["extra"] == {"url": "https://test.org"}
 
     def test_verify_url_redirect_chain(self, mock_session, mock_response):
         """Test URL verification with redirect chain."""
@@ -381,3 +387,14 @@ class TestOwaspSync:
         sync = OwaspSync("https://example.com")
 
         assert sync.is_request_failed is False
+
+    @mock.patch("requests.Session.get")
+    def test_410_gone_leaves_failure_flag_false(self, mock_get):
+        """Test that a 410 Gone leaves is_request_failed as False."""
+        mock_response = mock.Mock()
+        mock_response.status_code = HTTPStatus.GONE
+        mock_get.return_value = mock_response
+        sync = OwaspSync("https://example.com")
+
+        assert sync.is_request_failed is False
+        assert sync.page_tree is None

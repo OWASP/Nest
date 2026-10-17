@@ -122,7 +122,7 @@ class OwaspSync:
             self.is_request_failed = True
             return
 
-        if page_response.status_code == HTTPStatus.NOT_FOUND:
+        if page_response.status_code in {HTTPStatus.GONE, HTTPStatus.NOT_FOUND}:
             return
 
         if page_response.status_code != HTTPStatus.OK:
@@ -133,6 +133,7 @@ class OwaspSync:
         try:
             self.page_tree = html.fromstring(page_response.content)
         except etree.ParserError:
+            logger.exception("Failed to parse page", extra={"url": url})
             self.is_request_failed = True
             return
 

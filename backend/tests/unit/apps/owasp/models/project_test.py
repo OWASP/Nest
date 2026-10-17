@@ -89,34 +89,34 @@ class TestProjectModel:
 
     def test_adopt_key_leaves_a_matching_key(self):
         project = Project(key="nest")
-        occupant = Mock()
+        existing = Mock()
 
-        assert project.adopt_key("Nest", occupant)
+        assert project.adopt_key("Nest", existing)
 
         assert project.key == "nest"
-        occupant.delete.assert_not_called()
+        existing.delete.assert_not_called()
 
-    def test_adopt_key_removes_an_empty_occupant(self):
+    def test_adopt_key_leaves_an_empty_existing_for_the_caller(self):
         project = Project(key="www-project-nest")
-        occupant = Mock()
-        occupant.pk = 2
-        occupant.repositories.exists.return_value = False
+        existing = Mock()
+        existing.pk = 2
+        existing.repositories.exists.return_value = False
 
-        assert project.adopt_key("nest", occupant)
+        assert project.adopt_key("nest", existing)
 
-        occupant.delete.assert_called_once_with()
+        existing.delete.assert_not_called()
         assert project.key == "nest"
 
-    def test_adopt_key_keeps_the_key_when_the_occupant_has_repositories(self):
+    def test_adopt_key_keeps_the_key_when_the_existing_has_repositories(self):
         project = Project(key="www-project-nest")
-        occupant = Mock()
-        occupant.pk = 1
-        occupant.repositories.exists.return_value = True
+        existing = Mock()
+        existing.pk = 1
+        existing.repositories.exists.return_value = True
 
-        assert not project.adopt_key("nest", occupant)
+        assert not project.adopt_key("nest", existing)
 
         assert project.key == "www-project-nest"
-        occupant.delete.assert_not_called()
+        existing.delete.assert_not_called()
 
     def test_index_by_repository(self):
         repository = Mock(key="CheatSheetSeries")

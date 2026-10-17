@@ -11,8 +11,8 @@ from apps.owasp.management.commands.owasp_sync_chapters import Chapter, Command
 
 def use_real_adopt_key(chapter):
     """Run Chapter.adopt_key when the chapter under test is a mock."""
-    chapter.adopt_key.side_effect = lambda key, occupant=None: Chapter.adopt_key(
-        chapter, key, occupant
+    chapter.adopt_key.side_effect = lambda key, existing=None: Chapter.adopt_key(
+        chapter, key, existing
     )
 
 

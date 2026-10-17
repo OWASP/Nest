@@ -112,29 +112,60 @@ class Command(BaseCommand):
         slug = str(record.get("slug") or "").strip().lower()
         return projects.get(slug) or projects.get(f"www-project-{slug}")
 
-    def adopt_slug(self, project: Project, slug: str, projects: dict[str, Project]) -> None:
-        """Store the project under the website slug in the local index.
+    def adopt_slug(self, project: Project, slug: str, projects: dict[str, Project]) -> Project:
+        """Return the project that should receive this catalog row under ``slug``.
+
+        A repositoryless row already stored under the slug is reused: repositories move onto
+        that row and ``project`` is deactivated. A free slug is taken by renaming ``project``.
+        A slug held by a project that already has repositories is left unchanged.
 
         Args:
-            project (Project): Project that should keep this catalog row.
+            project (Project): Project matched for this catalog row.
             slug (str): Website slug.
             projects (dict[str, Project]): Local projects keyed by lowercase project key.
+
+        Returns:
+            Project: Project that should be updated for this catalog row.
 
         """
         previous_key = project.key.lower()
         if previous_key == slug.lower():
-            return
+            return project
 
-        if not project.adopt_key(slug, projects.get(slug.lower())):
+        existing = projects.get(slug.lower())
+        if existing is not None and existing is not project and existing.pk:
+            if existing.repositories.exists():
+                logger.warning(
+                    "Left project %s unchanged because %s already has repositories",
+                    project.key,
+                    slug,
+                )
+                return project
+
+            if project.pk:
+                for repository in project.repositories.all():
+                    existing.repositories.add(repository)
+                project.repositories.clear()
+                if project.owasp_repository_id and not existing.owasp_repository_id:
+                    existing.owasp_repository_id = project.owasp_repository_id
+                    project.owasp_repository_id = None
+                project.deactivate()
+
+            projects.pop(previous_key, None)
+            projects[slug.lower()] = existing
+            return existing
+
+        if not project.adopt_key(slug, existing):
             logger.warning(
                 "Left project %s unchanged because %s already has repositories",
                 project.key,
                 slug,
             )
-            return
+            return project
 
         projects.pop(previous_key, None)
         projects[slug.lower()] = project
+        return project
 
     def sync_records(self, records: list[dict[str, Any]], offset: int) -> None:
         """Update local projects from a complete catalog read.
@@ -184,7 +215,7 @@ class Command(BaseCommand):
                 project = Project(key=slug)
                 local_projects[slug.lower()] = project
             else:
-                self.adopt_slug(project, slug, local_projects)
+                project = self.adopt_slug(project, slug, local_projects)
             if project.pk:
                 claimed_ids.add(project.pk)
 
