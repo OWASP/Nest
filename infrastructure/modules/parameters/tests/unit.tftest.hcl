@@ -15,6 +15,7 @@ variables {
   django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
   environment                   = "test"
+  kms_key_arn                   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   next_server_csrf_url          = "https://nest.owasp.dev/csrf"
   next_server_graphql_url       = "https://nest.owasp.dev/graphql"
   nextauth_url                  = "https://nest.owasp.dev"
@@ -604,5 +605,88 @@ run "test_nextauth_secret_has_special_chars" {
   assert {
     condition     = random_string.nextauth_secret.special == true
     error_message = "NextAuth secret must include special characters."
+  }
+}
+
+run "test_runtime_secret_inventory" {
+  command = plan
+
+  variables {
+    secret_recovery_window_in_days = 30
+  }
+
+  assert {
+    condition = toset(keys(aws_secretsmanager_secret.external_runtime)) == toset([
+      "DJANGO_ALGOLIA_WRITE_API_KEY",
+      "DJANGO_OPEN_AI_SECRET_KEY",
+      "DJANGO_SENTRY_DSN",
+      "DJANGO_SLACK_BOT_TOKEN",
+      "DJANGO_SLACK_SIGNING_SECRET",
+      "GITHUB_TOKEN",
+      "NEXT_SERVER_GITHUB_CLIENT_SECRET",
+    ])
+    error_message = "Provision the external runtime secrets without production-only credentials."
+  }
+
+  assert {
+    condition = alltrue([
+      for name, secret in aws_secretsmanager_secret.external_runtime :
+      secret.name == "/${var.project_name}/${var.environment}/${name}" &&
+      secret.kms_key_id == var.kms_key_arn &&
+      secret.recovery_window_in_days == var.secret_recovery_window_in_days
+      ]) && alltrue([
+      for secret in [aws_secretsmanager_secret.django_secret_key, aws_secretsmanager_secret.nextauth_secret] :
+      secret.kms_key_id == var.kms_key_arn &&
+      secret.recovery_window_in_days == var.secret_recovery_window_in_days
+    ])
+    error_message = "Runtime secrets must use the environment namespace, configured KMS key, and recovery window."
+  }
+}
+
+run "test_generated_runtime_secrets_preserve_ssm_values" {
+  command = apply
+
+  assert {
+    condition = (
+      aws_secretsmanager_secret_version.django_secret_key.secret_string == aws_ssm_parameter.django_secret_key.value &&
+      aws_secretsmanager_secret_version.nextauth_secret.secret_string == aws_ssm_parameter.nextauth_secret.value
+    )
+    error_message = "Provisioning must copy the existing Django and NextAuth keys without rotating them."
+  }
+
+  assert {
+    condition = (
+      output.django_ssm_parameter_arns["DJANGO_SECRET_KEY"] == aws_ssm_parameter.django_secret_key.arn &&
+      output.django_ssm_parameter_arns["DJANGO_DB_PASSWORD"] == var.db_password_arn &&
+      output.django_ssm_parameter_arns["DJANGO_REDIS_PASSWORD"] == var.redis_password_arn &&
+      output.frontend_ssm_parameter_arns["NEXTAUTH_SECRET"] == aws_ssm_parameter.nextauth_secret.arn &&
+      output.frontend_ssm_parameter_arns["NEXT_SERVER_GITHUB_CLIENT_SECRET"] == aws_ssm_parameter.next_server_github_client_secret.arn
+    )
+    error_message = "Provisioning must leave backend and frontend credential references on SSM."
+  }
+}
+
+run "test_additional_runtime_secrets_preserve_ssm_references" {
+  command = apply
+
+  variables {
+    enable_additional_parameters = true
+  }
+
+  assert {
+    condition = (
+      length(aws_secretsmanager_secret.external_runtime) == 9 &&
+      aws_secretsmanager_secret.external_runtime["NEST_GITHUB_APP_PRIVATE_KEY"].name == "/${var.project_name}/${var.environment}/NEST_GITHUB_APP_PRIVATE_KEY" &&
+      aws_secretsmanager_secret.external_runtime["SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"].name == "/${var.project_name}/${var.environment}/SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"
+    )
+    error_message = "Additional runtime secrets must follow the existing GitHub App and Slack token names."
+  }
+
+  assert {
+    condition = (
+      output.django_ssm_parameter_arns["NEST_GITHUB_APP_PRIVATE_KEY"] == aws_ssm_parameter.nest_github_app_private_key[0].arn &&
+      output.django_ssm_parameter_arns["SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"] == aws_ssm_parameter.slack_bot_token[0].arn
+    )
+    error_message = "Additional credentials must continue to use their existing SSM references."
   }
 }
