@@ -10,7 +10,6 @@ provider "aws" {
 
 variables {
   common_tags                   = { Environment = "test", Project = "nest" }
-  db_password_arn               = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_DB_PASSWORD"
   django_allowed_hosts          = "nest.owasp.dev"
   django_allowed_origins        = "https://nest.owasp.dev"
   django_aws_static_bucket_name = "nest-test-static-abcd1234"
@@ -22,12 +21,12 @@ variables {
   django_redis_host             = "redis.example.com"
   django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
+  enable_additional_parameters  = true
   environment                   = "test"
   next_server_csrf_url          = "https://nest.owasp.dev/csrf"
   next_server_graphql_url       = "https://nest.owasp.dev/graphql"
   nextauth_url                  = "https://nest.owasp.dev"
   project_name                  = "nest"
-  redis_password_arn            = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_REDIS_PASSWORD"
   slack_bot_token_suffix        = "T04T40NHX"
 }
 
@@ -65,12 +64,78 @@ run "parameters_integration_apply" {
   }
 
   assert {
-    condition     = aws_ssm_parameter.django_secret_key.name == "/${var.project_name}/${var.environment}/DJANGO_SECRET_KEY"
+    condition     = aws_ssm_parameter.django_secret_key[0].name == "/${var.project_name}/${var.environment}/DJANGO_SECRET_KEY"
     error_message = "SSM django_secret_key parameter path format is incorrect."
   }
 
   assert {
-    condition     = aws_ssm_parameter.django_secret_key.type == "SecureString"
+    condition     = aws_ssm_parameter.django_secret_key[0].type == "SecureString"
     error_message = "SSM django_secret_key parameter type must be SecureString."
+  }
+
+  assert {
+    condition = (
+      output.django_secret_key == aws_ssm_parameter.django_secret_key[0].value &&
+      output.nextauth_secret == aws_ssm_parameter.nextauth_secret[0].value
+    )
+    error_message = "Export the existing Django and NextAuth values while preserving their SSM parameters."
+  }
+}
+
+run "parameters_integration_cleanup" {
+  command = apply
+
+  variables {
+    enable_additional_parameters        = true
+    retain_legacy_credential_parameters = false
+  }
+
+  assert {
+    condition = (
+      length(aws_ssm_parameter.django_algolia_write_api_key) == 0 &&
+      length(aws_ssm_parameter.django_open_ai_secret_key) == 0 &&
+      length(aws_ssm_parameter.django_secret_key) == 0 &&
+      length(aws_ssm_parameter.django_sentry_dsn) == 0 &&
+      length(aws_ssm_parameter.django_slack_bot_token) == 0 &&
+      length(aws_ssm_parameter.django_slack_signing_secret) == 0 &&
+      length(aws_ssm_parameter.github_token) == 0 &&
+      length(aws_ssm_parameter.next_server_github_client_secret) == 0 &&
+      length(aws_ssm_parameter.nextauth_secret) == 0 &&
+      length(aws_ssm_parameter.nest_github_app_private_key) == 0 &&
+      length(aws_ssm_parameter.slack_bot_token) == 0
+    )
+    error_message = "Explicit cleanup must remove all common and optional migrated SSM credentials."
+  }
+
+  assert {
+    condition = (
+      aws_ssm_parameter.django_algolia_application_id.type == "SecureString" &&
+      output.django_ssm_parameter_arns["DJANGO_ALGOLIA_APPLICATION_ID"] == aws_ssm_parameter.django_algolia_application_id.arn &&
+      output.django_ssm_parameter_arns["DJANGO_ALLOWED_HOSTS"] == aws_ssm_parameter.django_allowed_hosts.arn &&
+      output.django_ssm_parameter_arns["DJANGO_GITHUB_APP_ID"] == aws_ssm_parameter.django_github_app_id[0].arn &&
+      output.frontend_ssm_parameter_arns["NEXT_SERVER_GITHUB_CLIENT_ID"] == aws_ssm_parameter.next_server_github_client_id.arn &&
+      output.django_secret_key == random_string.django_secret_key.result &&
+      output.nextauth_secret == random_string.nextauth_secret.result
+    )
+    error_message = "Cleanup must retain configuration parameters and the generated values used by the secrets module."
+  }
+}
+
+run "parameters_integration_after_cleanup" {
+  command = plan
+
+  variables {
+    retain_legacy_credential_parameters = false
+  }
+
+  assert {
+    condition = (
+      output.django_ssm_parameter_arns == run.parameters_integration_apply.django_ssm_parameter_arns &&
+      output.frontend_ssm_parameter_arns == run.parameters_integration_apply.frontend_ssm_parameter_arns &&
+      length(aws_ssm_parameter.django_secret_key) == 0 &&
+      length(aws_ssm_parameter.nextauth_secret) == 0 &&
+      length(aws_ssm_parameter.slack_bot_token) == 0
+    )
+    error_message = "Later deployments with cleanup persisted must keep runtime references and must not recreate legacy credentials."
   }
 }

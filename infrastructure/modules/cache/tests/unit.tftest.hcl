@@ -108,7 +108,7 @@ run "test_ssm_parameter_is_secure_string" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_redis_password.type == "SecureString"
+    condition     = aws_ssm_parameter.django_redis_password[0].type == "SecureString"
     error_message = "Redis password must be stored as SecureString."
   }
 }
@@ -117,7 +117,7 @@ run "test_ssm_parameter_path_format" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_redis_password.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
+    condition     = aws_ssm_parameter.django_redis_password[0].name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
     error_message = "SSM parameter must follow path: /{project}/{environment}/DJANGO_REDIS_PASSWORD."
   }
 }
@@ -140,7 +140,7 @@ run "test_redis_secret_preserves_auth_token_and_ssm_reference" {
 
   assert {
     condition = (
-      aws_secretsmanager_secret.django_redis_password.name == aws_ssm_parameter.django_redis_password.name &&
+      aws_secretsmanager_secret.django_redis_password.name == aws_ssm_parameter.django_redis_password[0].name &&
       aws_secretsmanager_secret.django_redis_password.kms_key_id == var.kms_key_arn &&
       aws_secretsmanager_secret.django_redis_password.recovery_window_in_days == var.secret_recovery_window_in_days
     )
@@ -150,13 +150,40 @@ run "test_redis_secret_preserves_auth_token_and_ssm_reference" {
   assert {
     condition = (
       aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_elasticache_replication_group.main.auth_token &&
-      aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_ssm_parameter.django_redis_password.value
+      aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_ssm_parameter.django_redis_password[0].value
     )
     error_message = "Provisioning must copy the current Redis auth token without changing the cache password."
   }
 
   assert {
-    condition     = output.redis_password_arn == aws_ssm_parameter.django_redis_password.arn
-    error_message = "The Redis password output must continue to reference SSM."
+    condition     = output.redis_password_secret_arn == aws_secretsmanager_secret.django_redis_password.arn
+    error_message = "The Redis password output must reference the existing Secrets Manager secret."
+  }
+}
+
+run "test_retained_password_matches_secret" {
+  command = apply
+
+  assert {
+    condition     = aws_ssm_parameter.django_redis_password[0].value == local.redis_auth_token
+    error_message = "The retained legacy parameter must keep the working credential."
+  }
+}
+
+run "test_cleanup_preserves_generated_password" {
+  command = apply
+
+  variables {
+    retain_legacy_credential_parameters = false
+  }
+
+  assert {
+    condition     = length(aws_ssm_parameter.django_redis_password) == 0
+    error_message = "Only explicit cleanup may remove the legacy password parameter."
+  }
+
+  assert {
+    condition     = aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_elasticache_replication_group.main.auth_token
+    error_message = "Cleanup must preserve the password used by the service and Secrets Manager."
   }
 }

@@ -21,6 +21,30 @@ locals {
     Project     = var.project_name
   }
   fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
+  django_runtime_parameter_arns = merge(
+    module.parameters.django_ssm_parameter_arns,
+    module.secrets.django_secret_arns,
+    {
+      DJANGO_DB_PASSWORD    = "${module.database.db_credentials_secret_arn}:password::"
+      DJANGO_REDIS_PASSWORD = module.cache.redis_password_secret_arn
+    }
+  )
+  frontend_runtime_parameter_arns = merge(module.parameters.frontend_ssm_parameter_arns, module.secrets.frontend_secret_arns)
+}
+
+# Read existing names during planning, even if a secret container is changing.
+# PR 1 must be deployed and external values populated before this cutover.
+data "aws_secretsmanager_secret_versions" "external_runtime" {
+  for_each = module.secrets.external_secret_names
+
+  secret_id = each.value
+
+  lifecycle {
+    postcondition {
+      condition     = anytrue([for version in coalesce(self.versions, []) : contains(coalesce(version.version_stages, []), "AWSCURRENT")])
+      error_message = "Populate ${each.value} with an AWSCURRENT version before switching ECS or deleting SSM credentials."
+    }
+  }
 }
 
 module "alb" {
@@ -38,6 +62,8 @@ module "alb" {
 }
 
 module "backend" {
+  depends_on = [data.aws_secretsmanager_secret_versions.external_runtime]
+
   source = "../modules/service"
 
   auto_scaling_cpu_target         = var.auto_scaling_cpu_target
@@ -57,7 +83,7 @@ module "backend" {
   kms_key_arn                     = module.kms.key_arn
   max_count                       = var.backend_max_count
   min_count                       = var.backend_min_count
-  parameters_arns                 = module.parameters.django_runtime_parameter_arns
+  parameters_arns                 = local.django_runtime_parameter_arns
   private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.backend_sg_id
@@ -70,44 +96,48 @@ module "backend" {
 module "cache" {
   source = "../modules/cache"
 
-  common_tags                    = local.common_tags
-  environment                    = var.environment
-  kms_key_arn                    = module.kms.key_arn
-  project_name                   = var.project_name
-  redis_engine_version           = var.redis_engine_version
-  redis_node_type                = var.redis_node_type
-  redis_num_cache_nodes          = var.redis_num_cache_nodes
-  redis_port                     = var.redis_port
-  secret_recovery_window_in_days = var.secret_recovery_window_in_days
-  security_group_ids             = [module.security.redis_sg_id]
-  subnet_ids                     = module.networking.private_subnet_ids
+  common_tags                         = local.common_tags
+  environment                         = var.environment
+  kms_key_arn                         = module.kms.key_arn
+  project_name                        = var.project_name
+  redis_engine_version                = var.redis_engine_version
+  redis_node_type                     = var.redis_node_type
+  redis_num_cache_nodes               = var.redis_num_cache_nodes
+  redis_port                          = var.redis_port
+  retain_legacy_credential_parameters = var.retain_legacy_credential_parameters
+  secret_recovery_window_in_days      = var.secret_recovery_window_in_days
+  security_group_ids                  = [module.security.redis_sg_id]
+  subnet_ids                          = module.networking.private_subnet_ids
 }
 
 module "database" {
   source = "../modules/database"
 
-  common_tags                    = local.common_tags
-  db_allocated_storage           = var.db_allocated_storage
-  db_backup_retention_period     = var.db_backup_retention_period
-  db_deletion_protection         = var.db_deletion_protection
-  db_engine_version              = var.db_engine_version
-  db_instance_class              = var.db_instance_class
-  db_name                        = var.db_name
-  db_password                    = var.db_password
-  db_skip_final_snapshot         = var.db_skip_final_snapshot
-  db_storage_type                = var.db_storage_type
-  db_subnet_ids                  = module.networking.private_subnet_ids
-  db_user                        = var.db_user
-  enable_rds_proxy               = var.enable_rds_proxy
-  environment                    = var.environment
-  kms_key_arn                    = module.kms.key_arn
-  project_name                   = var.project_name
-  proxy_security_group_ids       = [module.security.rds_proxy_sg_id]
-  secret_recovery_window_in_days = var.secret_recovery_window_in_days
-  security_group_ids             = [module.security.rds_sg_id]
+  common_tags                         = local.common_tags
+  db_allocated_storage                = var.db_allocated_storage
+  db_backup_retention_period          = var.db_backup_retention_period
+  db_deletion_protection              = var.db_deletion_protection
+  db_engine_version                   = var.db_engine_version
+  db_instance_class                   = var.db_instance_class
+  db_name                             = var.db_name
+  db_password                         = var.db_password
+  db_skip_final_snapshot              = var.db_skip_final_snapshot
+  db_storage_type                     = var.db_storage_type
+  db_subnet_ids                       = module.networking.private_subnet_ids
+  db_user                             = var.db_user
+  enable_rds_proxy                    = var.enable_rds_proxy
+  environment                         = var.environment
+  kms_key_arn                         = module.kms.key_arn
+  project_name                        = var.project_name
+  proxy_security_group_ids            = [module.security.rds_proxy_sg_id]
+  retain_legacy_credential_parameters = var.retain_legacy_credential_parameters
+  secret_recovery_window_in_days      = var.secret_recovery_window_in_days
+  security_group_ids                  = [module.security.rds_sg_id]
 }
 
 module "frontend" {
+  depends_on = [data.aws_secretsmanager_secret_versions.external_runtime]
+
   source = "../modules/service"
 
   auto_scaling_cpu_target         = var.auto_scaling_cpu_target
@@ -124,7 +154,7 @@ module "frontend" {
   kms_key_arn                     = module.kms.key_arn
   max_count                       = var.frontend_max_count
   min_count                       = var.frontend_min_count
-  parameters_arns                 = module.parameters.frontend_runtime_parameter_arns
+  parameters_arns                 = local.frontend_runtime_parameter_arns
   private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.frontend_sg_id
@@ -179,27 +209,26 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  common_tags                   = local.common_tags
-  db_password_arn               = "${module.database.db_credentials_secret_arn}:password::"
-  django_configuration          = var.django_configuration
-  django_allowed_hosts          = var.domain_name
-  django_allowed_origins        = "https://${var.domain_name}"
-  django_aws_static_bucket_name = module.storage.static_s3_bucket_name
-  django_db_host                = module.database.db_proxy_endpoint
-  django_db_name                = var.db_name
-  django_db_port                = var.db_port
-  django_db_user                = var.db_user
-  django_redis_host             = module.cache.redis_primary_endpoint
-  django_release_version        = var.django_release_version
-  django_settings_module        = var.django_settings_module
-  enable_additional_parameters  = var.enable_additional_parameters
-  environment                   = var.environment
-  next_server_csrf_url          = "https://${var.domain_name}/csrf/"
-  next_server_graphql_url       = "https://${var.domain_name}/graphql/"
-  nextauth_url                  = "https://${var.domain_name}"
-  project_name                  = var.project_name
-  redis_password_arn            = module.cache.redis_password_secret_arn
-  slack_bot_token_suffix        = var.slack_bot_token_suffix
+  common_tags                         = local.common_tags
+  django_configuration                = var.django_configuration
+  django_allowed_hosts                = var.domain_name
+  django_allowed_origins              = "https://${var.domain_name}"
+  django_aws_static_bucket_name       = module.storage.static_s3_bucket_name
+  django_db_host                      = module.database.db_proxy_endpoint
+  django_db_name                      = var.db_name
+  django_db_port                      = var.db_port
+  django_db_user                      = var.db_user
+  django_redis_host                   = module.cache.redis_primary_endpoint
+  django_release_version              = var.django_release_version
+  django_settings_module              = var.django_settings_module
+  enable_additional_parameters        = var.enable_additional_parameters
+  environment                         = var.environment
+  next_server_csrf_url                = "https://${var.domain_name}/csrf/"
+  next_server_graphql_url             = "https://${var.domain_name}/graphql/"
+  nextauth_url                        = "https://${var.domain_name}"
+  project_name                        = var.project_name
+  retain_legacy_credential_parameters = var.retain_legacy_credential_parameters
+  slack_bot_token_suffix              = var.slack_bot_token_suffix
 }
 
 module "secrets" {
@@ -243,11 +272,13 @@ module "storage" {
 }
 
 module "tasks" {
+  depends_on = [data.aws_secretsmanager_secret_versions.external_runtime]
+
   source = "../modules/tasks"
 
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
-  container_parameters_arns     = module.parameters.django_runtime_parameter_arns
+  container_parameters_arns     = local.django_runtime_parameter_arns
   ecr_repository_arn            = module.backend.ecr_repository_arn
   ecr_repository_url            = module.backend.ecr_repository_url
   ecs_sg_id                     = module.security.tasks_sg_id

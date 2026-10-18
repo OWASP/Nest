@@ -4,12 +4,6 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "db_password_arn" {
-  description = "The ECS secret reference for the database password."
-  type        = string
-  sensitive   = true
-}
-
 variable "django_allowed_hosts" {
   description = "Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev)."
   type        = string
@@ -102,10 +96,10 @@ variable "project_name" {
   type        = string
 }
 
-variable "redis_password_arn" {
-  description = "The ARN of the Redis password secret."
-  type        = string
-  sensitive   = true
+variable "retain_legacy_credential_parameters" {
+  description = "Keep migrated SSM credential parameters until the Secrets Manager cutover is verified."
+  type        = bool
+  default     = true
 }
 
 variable "slack_bot_token_suffix" {

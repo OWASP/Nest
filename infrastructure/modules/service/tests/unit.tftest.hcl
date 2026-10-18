@@ -369,3 +369,74 @@ run "test_service_uses_private_subnets" {
     error_message = "ECS service must be deployed into the configured private subnets."
   }
 }
+
+run "test_execution_policy_without_secrets" {
+  command = plan
+
+  variables {
+    parameters_arns = {}
+  }
+
+  assert {
+    condition     = length(jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement) == 1
+    error_message = "Empty runtime maps must not produce invalid empty Secrets Manager policy statements."
+  }
+}
+
+run "test_execution_policy_with_ssm_only" {
+  command = plan
+
+  variables {
+    parameters_arns = {
+      CONFIG = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/CONFIG"
+    }
+  }
+
+  assert {
+    condition     = length(jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement) == 1
+    error_message = "SSM-only maps must preserve the existing SSM policy without granting secret access."
+  }
+}
+
+run "test_execution_policy_scopes_secrets_and_strips_selectors" {
+  command = plan
+
+  override_resource {
+    override_during = plan
+    target          = aws_ecr_repository.main
+    values = {
+      repository_url = "123456789012.dkr.ecr.us-east-2.amazonaws.com/test"
+    }
+  }
+
+  variables {
+    parameters_arns = {
+      CONFIG             = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/CONFIG"
+      DJANGO_DB_PASSWORD = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf:password::"
+      DUPLICATE          = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf"
+      NEXTAUTH_SECRET    = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/NEXTAUTH_SECRET-AbCdEf"
+    }
+  }
+
+  assert {
+    condition = (
+      length(jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement) == 3 &&
+      toset(jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement[1].Resource) == toset([
+        "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf",
+        "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/NEXTAUTH_SECRET-AbCdEf"
+      ]) &&
+      jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement[1].Action == ["secretsmanager:GetSecretValue"] &&
+      jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement[2].Resource == [var.kms_key_arn] &&
+      jsondecode(aws_iam_policy.ecs_task_execution_ssm_policy.policy).Statement[2].Action == ["kms:Decrypt"]
+    )
+    error_message = "Execution permissions must deduplicate exact secret ARNs, strip selectors, exclude SSM references, and use only the configured KMS key."
+  }
+
+  assert {
+    condition = tomap({
+      for secret in jsondecode(aws_ecs_task_definition.main.container_definitions)[0].secrets :
+      secret.name => secret.valueFrom
+    }) == var.parameters_arns
+    error_message = "ECS must preserve every environment name and valueFrom reference, including the database password selector."
+  }
+}

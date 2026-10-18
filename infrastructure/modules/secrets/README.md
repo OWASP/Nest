@@ -44,5 +44,9 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_django_secret_arns"></a> [django\_secret\_arns](#output\_django\_secret\_arns) | Map of backend credential names to Secrets Manager ARNs. |
+| <a name="output_external_secret_names"></a> [external\_secret\_names](#output\_external\_secret\_names) | Map of external credential names to their Secrets Manager names for cutover validation. |
+| <a name="output_frontend_secret_arns"></a> [frontend\_secret\_arns](#output\_frontend\_secret\_arns) | Map of frontend credential names to Secrets Manager ARNs. |
 <!-- END_TF_DOCS -->

@@ -46,6 +46,7 @@ No modules.
 | <a name="input_redis_node_type"></a> [redis\_node\_type](#input\_redis\_node\_type) | The node type for the Redis cache. | `string` | n/a | yes |
 | <a name="input_redis_num_cache_nodes"></a> [redis\_num\_cache\_nodes](#input\_redis\_num\_cache\_nodes) | The number of cache nodes in the Redis cluster. | `number` | n/a | yes |
 | <a name="input_redis_port"></a> [redis\_port](#input\_redis\_port) | The port for the Redis cache. | `number` | n/a | yes |
+| <a name="input_retain_legacy_credential_parameters"></a> [retain\_legacy\_credential\_parameters](#input\_retain\_legacy\_credential\_parameters) | Keep migrated SSM credential parameters until the Secrets Manager cutover is verified. | `bool` | `true` | no |
 | <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately. | `number` | `7` | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | A list of security group IDs to associate with the Redis cache. | `list(string)` | n/a | yes |
 | <a name="input_snapshot_retention_limit"></a> [snapshot\_retention\_limit](#input\_snapshot\_retention\_limit) | The number of days for which automatic snapshots are retained. | `number` | `5` | no |
@@ -56,6 +57,6 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_redis_password_arn"></a> [redis\_password\_arn](#output\_redis\_password\_arn) | The SSM Parameter ARN of password of Redis. |
+| <a name="output_redis_password_secret_arn"></a> [redis\_password\_secret\_arn](#output\_redis\_password\_secret\_arn) | The ARN of the Redis password secret. |
 | <a name="output_redis_primary_endpoint"></a> [redis\_primary\_endpoint](#output\_redis\_primary\_endpoint) | The primary endpoint of the Redis replication group. |
 <!-- END_TF_DOCS -->

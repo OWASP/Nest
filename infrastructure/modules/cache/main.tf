@@ -86,6 +86,7 @@ resource "aws_elasticache_replication_group" "main" {
 }
 
 resource "aws_ssm_parameter" "django_redis_password" {
+  count       = var.retain_legacy_credential_parameters ? 1 : 0
   description = "The password of Redis cache (Required by Django)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
   tags        = var.common_tags

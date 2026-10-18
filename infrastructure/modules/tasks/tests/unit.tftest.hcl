@@ -154,3 +154,58 @@ run "test_eventbridge_policy_name_format" {
     error_message = "EventBridge policy name must follow format: {project}-{environment}-event-bridge-ecs-policy."
   }
 }
+
+run "test_execution_policy_without_secrets" {
+  command = plan
+
+  variables {
+    container_parameters_arns = {}
+  }
+
+  assert {
+    condition     = length(jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement) == 1
+    error_message = "Empty runtime maps must not produce invalid empty Secrets Manager policy statements."
+  }
+}
+
+run "test_execution_policy_with_ssm_only" {
+  command = plan
+
+  variables {
+    container_parameters_arns = {
+      CONFIG = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/CONFIG"
+    }
+  }
+
+  assert {
+    condition     = length(jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement) == 1
+    error_message = "SSM-only maps must preserve the existing SSM policy without granting secret access."
+  }
+}
+
+run "test_execution_policy_scopes_secrets_and_strips_selectors" {
+  command = plan
+
+  variables {
+    container_parameters_arns = {
+      CONFIG             = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/CONFIG"
+      DJANGO_DB_PASSWORD = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf:password::"
+      DUPLICATE          = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf"
+      NEXTAUTH_SECRET    = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/NEXTAUTH_SECRET-AbCdEf"
+    }
+  }
+
+  assert {
+    condition = (
+      length(jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement) == 3 &&
+      toset(jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement[1].Resource) == toset([
+        "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf",
+        "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/NEXTAUTH_SECRET-AbCdEf"
+      ]) &&
+      jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement[1].Action == ["secretsmanager:GetSecretValue"] &&
+      jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement[2].Resource == [var.kms_key_arn] &&
+      jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement[2].Action == ["kms:Decrypt"]
+    )
+    error_message = "Execution permissions must deduplicate exact secret ARNs, strip selectors, exclude SSM references, and use only the configured KMS key."
+  }
+}
