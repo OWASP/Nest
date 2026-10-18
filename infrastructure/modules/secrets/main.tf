@@ -1,3 +1,14 @@
+terraform {
+  required_version = "~> 1.16.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.64.0"
+    }
+  }
+}
+
 locals {
   external_runtime_secrets = merge(
     {
@@ -9,7 +20,7 @@ locals {
       GITHUB_TOKEN                     = "GitHub API token."
       NEXT_SERVER_GITHUB_CLIENT_SECRET = "GitHub OAuth client secret."
     },
-    var.enable_additional_parameters ? {
+    var.enable_additional_secrets ? {
       NEST_GITHUB_APP_PRIVATE_KEY                     = "GitHub App private key."
       "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = "Slack workspace bot token."
     } : {}
@@ -36,7 +47,7 @@ resource "aws_secretsmanager_secret" "django_secret_key" {
 
 resource "aws_secretsmanager_secret_version" "django_secret_key" {
   secret_id     = aws_secretsmanager_secret.django_secret_key.id
-  secret_string = random_string.django_secret_key.result
+  secret_string = var.django_secret_key
 }
 
 resource "aws_secretsmanager_secret" "nextauth_secret" {
@@ -49,5 +60,5 @@ resource "aws_secretsmanager_secret" "nextauth_secret" {
 
 resource "aws_secretsmanager_secret_version" "nextauth_secret" {
   secret_id     = aws_secretsmanager_secret.nextauth_secret.id
-  secret_string = random_string.nextauth_secret.result
+  secret_string = var.nextauth_secret
 }

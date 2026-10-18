@@ -9,28 +9,26 @@ provider "aws" {
 }
 
 variables {
-  common_tags                    = { Environment = "test", Project = "nest" }
-  db_password_arn                = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_DB_PASSWORD"
-  django_allowed_hosts           = "nest.owasp.dev"
-  django_allowed_origins         = "https://nest.owasp.dev"
-  django_aws_static_bucket_name  = "nest-test-static-abcd1234"
-  django_configuration           = "Staging"
-  django_db_host                 = "db.example.com"
-  django_db_name                 = "nest_db"
-  django_db_port                 = "5432"
-  django_db_user                 = "nest_user"
-  django_redis_host              = "redis.example.com"
-  django_release_version         = "1.0.0"
-  django_settings_module         = "settings.staging"
-  environment                    = "test"
-  kms_key_arn                    = "arn:aws:kms:us-east-1:000000000000:key/12345678-1234-1234-1234-123456789012"
-  next_server_csrf_url           = "https://nest.owasp.dev/csrf"
-  next_server_graphql_url        = "https://nest.owasp.dev/graphql"
-  nextauth_url                   = "https://nest.owasp.dev"
-  project_name                   = "nest"
-  redis_password_arn             = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_REDIS_PASSWORD"
-  secret_recovery_window_in_days = 0
-  slack_bot_token_suffix         = "T04T40NHX"
+  common_tags                   = { Environment = "test", Project = "nest" }
+  db_password_arn               = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_DB_PASSWORD"
+  django_allowed_hosts          = "nest.owasp.dev"
+  django_allowed_origins        = "https://nest.owasp.dev"
+  django_aws_static_bucket_name = "nest-test-static-abcd1234"
+  django_configuration          = "Staging"
+  django_db_host                = "db.example.com"
+  django_db_name                = "nest_db"
+  django_db_port                = "5432"
+  django_db_user                = "nest_user"
+  django_redis_host             = "redis.example.com"
+  django_release_version        = "1.0.0"
+  django_settings_module        = "settings.staging"
+  environment                   = "test"
+  next_server_csrf_url          = "https://nest.owasp.dev/csrf"
+  next_server_graphql_url       = "https://nest.owasp.dev/graphql"
+  nextauth_url                  = "https://nest.owasp.dev"
+  project_name                  = "nest"
+  redis_password_arn            = "arn:aws:ssm:us-east-1:000000000000:parameter/nest/test/DJANGO_REDIS_PASSWORD"
+  slack_bot_token_suffix        = "T04T40NHX"
 }
 
 run "parameters_integration_apply" {
@@ -78,14 +76,18 @@ run "parameters_integration_apply" {
 
   assert {
     condition = (
-      aws_secretsmanager_secret_version.django_secret_key.secret_string == aws_ssm_parameter.django_secret_key.value &&
-      aws_secretsmanager_secret_version.nextauth_secret.secret_string == aws_ssm_parameter.nextauth_secret.value
+      output.django_secret_key == aws_ssm_parameter.django_secret_key.value &&
+      output.nextauth_secret == aws_ssm_parameter.nextauth_secret.value
     )
-    error_message = "Secrets Manager must receive the existing Django and NextAuth values while SSM is retained."
+    error_message = "Export the existing Django and NextAuth values while preserving their SSM parameters."
   }
 
   assert {
-    condition     = aws_secretsmanager_secret.external_runtime["GITHUB_TOKEN"].name == "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
-    error_message = "External runtime secrets must be provisioned in the existing environment namespace."
+    condition = (
+      output.django_ssm_parameter_arns["DJANGO_SECRET_KEY"] == aws_ssm_parameter.django_secret_key.arn &&
+      output.django_ssm_parameter_arns["GITHUB_TOKEN"] == aws_ssm_parameter.github_token.arn &&
+      output.frontend_ssm_parameter_arns["NEXTAUTH_SECRET"] == aws_ssm_parameter.nextauth_secret.arn
+    )
+    error_message = "Provisioning must keep runtime consumers on their existing SSM references."
   }
 }

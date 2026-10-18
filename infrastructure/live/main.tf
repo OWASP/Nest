@@ -179,27 +179,39 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
+  common_tags                   = local.common_tags
+  db_password_arn               = module.database.db_password_arn
+  django_configuration          = var.django_configuration
+  django_allowed_hosts          = var.domain_name
+  django_allowed_origins        = "https://${var.domain_name}"
+  django_aws_static_bucket_name = module.storage.static_s3_bucket_name
+  django_db_host                = module.database.db_proxy_endpoint
+  django_db_name                = var.db_name
+  django_db_port                = var.db_port
+  django_db_user                = var.db_user
+  django_redis_host             = module.cache.redis_primary_endpoint
+  django_release_version        = var.django_release_version
+  django_settings_module        = var.django_settings_module
+  enable_additional_parameters  = var.enable_additional_parameters
+  environment                   = var.environment
+  next_server_csrf_url          = "https://${var.domain_name}/csrf/"
+  next_server_graphql_url       = "https://${var.domain_name}/graphql/"
+  nextauth_url                  = "https://${var.domain_name}"
+  project_name                  = var.project_name
+  redis_password_arn            = module.cache.redis_password_arn
+  slack_bot_token_suffix        = var.slack_bot_token_suffix
+}
+
+module "secrets" {
+  source = "../modules/secrets"
+
   common_tags                    = local.common_tags
-  db_password_arn                = module.database.db_password_arn
-  django_configuration           = var.django_configuration
-  django_allowed_hosts           = var.domain_name
-  django_allowed_origins         = "https://${var.domain_name}"
-  django_aws_static_bucket_name  = module.storage.static_s3_bucket_name
-  django_db_host                 = module.database.db_proxy_endpoint
-  django_db_name                 = var.db_name
-  django_db_port                 = var.db_port
-  django_db_user                 = var.db_user
-  django_redis_host              = module.cache.redis_primary_endpoint
-  django_release_version         = var.django_release_version
-  django_settings_module         = var.django_settings_module
-  enable_additional_parameters   = var.enable_additional_parameters
+  django_secret_key              = module.parameters.django_secret_key
+  enable_additional_secrets      = var.enable_additional_parameters
   environment                    = var.environment
   kms_key_arn                    = module.kms.key_arn
-  next_server_csrf_url           = "https://${var.domain_name}/csrf/"
-  next_server_graphql_url        = "https://${var.domain_name}/graphql/"
-  nextauth_url                   = "https://${var.domain_name}"
+  nextauth_secret                = module.parameters.nextauth_secret
   project_name                   = var.project_name
-  redis_password_arn             = module.cache.redis_password_arn
   secret_recovery_window_in_days = var.secret_recovery_window_in_days
   slack_bot_token_suffix         = var.slack_bot_token_suffix
 }
@@ -247,4 +259,29 @@ module "tasks" {
   private_subnet_ids            = module.networking.private_subnet_ids
   project_name                  = var.project_name
   use_fargate_spot              = var.tasks_use_fargate_spot
+}
+
+moved {
+  from = module.parameters.aws_secretsmanager_secret.external_runtime
+  to   = module.secrets.aws_secretsmanager_secret.external_runtime
+}
+
+moved {
+  from = module.parameters.aws_secretsmanager_secret.django_secret_key
+  to   = module.secrets.aws_secretsmanager_secret.django_secret_key
+}
+
+moved {
+  from = module.parameters.aws_secretsmanager_secret_version.django_secret_key
+  to   = module.secrets.aws_secretsmanager_secret_version.django_secret_key
+}
+
+moved {
+  from = module.parameters.aws_secretsmanager_secret.nextauth_secret
+  to   = module.secrets.aws_secretsmanager_secret.nextauth_secret
+}
+
+moved {
+  from = module.parameters.aws_secretsmanager_secret_version.nextauth_secret
+  to   = module.secrets.aws_secretsmanager_secret_version.nextauth_secret
 }

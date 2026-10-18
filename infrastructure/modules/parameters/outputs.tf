@@ -1,3 +1,9 @@
+output "django_secret_key" {
+  description = "The generated Django secret key used by the SSM parameter."
+  sensitive   = true
+  value       = random_string.django_secret_key.result
+}
+
 output "django_ssm_parameter_arns" {
   description = "Map of environment variable names to the ARNs of all SSM parameters (Required by Django)."
   sensitive   = true
@@ -46,4 +52,10 @@ output "frontend_ssm_parameter_arns" {
     "NEXTAUTH_SECRET"                  = aws_ssm_parameter.nextauth_secret.arn
     "NEXTAUTH_URL"                     = aws_ssm_parameter.nextauth_url.arn
   }
+}
+
+output "nextauth_secret" {
+  description = "The generated NextAuth secret used by the SSM parameter."
+  sensitive   = true
+  value       = random_string.nextauth_secret.result
 }
