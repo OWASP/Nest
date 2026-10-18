@@ -956,14 +956,14 @@ files = [
 
 [[package]]
 name = "django"
-version = "6.0.8"
+version = "6.0.9"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "django-6.0.8-py3-none-any.whl", hash = "sha256:9b98b7e1902e0e575ea4f42c175fc9512784f7f2580898286aee3388b322219d"},
-    {file = "django-6.0.8.tar.gz", hash = "sha256:cb0bd962d27fc866f3c514b20aae6a7df56ec80b488f9899da46d675cd051526"},
+    {file = "django-6.0.9-py3-none-any.whl", hash = "sha256:5c6473d05bbea9c43359cc36701b5deec3c925f5311963786e1346544c1a68c0"},
+    {file = "django-6.0.9.tar.gz", hash = "sha256:8ce037c971f421cfb47d38c097ca233a8f6dd42d9e9501a37e02dd7d08c5cb3f"},
 ]
 
 [package.dependencies]
@@ -2276,7 +2276,7 @@ version = "3.0.3"
 description = "Safely add untrusted strings to HTML/XML markup."
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "dev", "fuzz"]
+groups = ["main", "fuzz"]
 files = [
     {file = "markupsafe-3.0.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:2f981d352f04553a7171b8e44369f2af4055f888dfb147d55e42d29e29e74559"},
     {file = "markupsafe-3.0.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:e1c1493fb6e50ab01d20a22826e57520f1284df32f2d8601fdd90b6304601419"},
@@ -4333,34 +4333,34 @@ starlette = ">=0.20.1"
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.316.0"
+version = "0.327.2"
 description = "A library for creating GraphQL APIs"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "strawberry_graphql-0.316.0-py3-none-any.whl", hash = "sha256:222e16fbbf953f5a1fa75f62bf9a8e95f274180f928f70bec459b566053aa2cb"},
-    {file = "strawberry_graphql-0.316.0.tar.gz", hash = "sha256:bee5ce0e20d522325bd1ed2db186c812c03c2ea7db29f997b35e7d694649820c"},
+    {file = "strawberry_graphql-0.327.2-py3-none-any.whl", hash = "sha256:fb058028319367032aeb91d8620222c581e85e9de2a2d69309579332632b8c4a"},
+    {file = "strawberry_graphql-0.327.2.tar.gz", hash = "sha256:ea9ce282d7407939650d6db252c85f100ccfcc608e5a8a4233ab77df24da52a2"},
 ]
 
 [package.dependencies]
 asgiref = {version = ">=3.2", optional = true, markers = "extra == \"django\""}
 cross-web = ">=0.6.0"
-django = {version = ">=3.2", optional = true, markers = "extra == \"django\""}
+django = {version = ">=5.2", optional = true, markers = "extra == \"django\""}
 graphql-core = ">=3.2.0,<3.4.0"
 packaging = ">=23"
 python-dateutil = ">=2.7"
-typing-extensions = ">=4.5.0"
+typing-extensions = ">=4.14.0"
 
 [package.extras]
 aiohttp = ["aiohttp (>=3.7.4.post0,<4)"]
 apollo-federation = ["protobuf (>=3.20)"]
 asgi = ["python-multipart (>=0.0.7)", "starlette (>=0.18.0)"]
 chalice = ["chalice (>=1.22)"]
-channels = ["asgiref (>=3.2)", "channels (>=3.0.5)"]
-cli = ["libcst", "pygments (>=2.3)", "python-multipart (>=0.0.7)", "rich (>=12.0.0)", "starlette (>=0.18.0)", "typer (>=0.12.4)", "uvicorn (>=0.11.6)", "websockets (>=15.0.1,<17)"]
-debug = ["libcst", "rich (>=12.0.0)"]
-django = ["asgiref (>=3.2)", "django (>=3.2)"]
+channels = ["asgiref (>=3.2)", "channels (>=4.0.0)", "django (>=5.2)"]
+cli = ["libcst (>=1.9.0)", "pygments (>=2.3)", "python-multipart (>=0.0.7)", "rich (>=12.0.0)", "starlette (>=0.18.0)", "typer (>=0.12.4)", "uvicorn (>=0.11.6)", "websockets (>=15.0.1,<17)"]
+debug = ["libcst (>=1.9.0)", "rich (>=12.0.0)"]
+django = ["asgiref (>=3.2)", "django (>=5.2)"]
 fastapi = ["fastapi (>=0.65.2)", "python-multipart (>=0.0.7)"]
 flask = ["flask (>=1.1)"]
 litestar = ["litestar (>=2) ; python_full_version >= \"3.10.0\" and python_full_version < \"4.0.0\""]
@@ -4780,7 +4780,7 @@ version = "3.1.9"
 description = "The comprehensive WSGI web application library."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev", "fuzz"]
+groups = ["fuzz"]
 files = [
     {file = "werkzeug-3.1.9-py3-none-any.whl", hash = "sha256:6392e50c78460ba618e5b21f08a71f59c99ce99cdc6cf6e3dd7e6ccca8754fab"},
     {file = "werkzeug-3.1.9.tar.gz", hash = "sha256:55ca7c70a75689be937aa27f8ff4b018f06ff4838fc73045560bf0f5a1291060"},
@@ -5249,4 +5249,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "0c739137c37df6afc03b0f2825e6d5975060d9ca733bddbcacd9f754272b0002"
+content-hash = "38e57e71bbcf2075f660316192ce891d128df3d3a413675226ab5f66fa652000"

@@ -119,6 +119,7 @@ defectdojo
 demojize
 dismissable
 dkr
+docksec
 dsn
 dvo
 eddsa
@@ -164,6 +165,7 @@ libgobject
 libharfbuzz
 libpango
 libpangoft
+librsvg
 libx
 lighthouseci
 lighthouserc

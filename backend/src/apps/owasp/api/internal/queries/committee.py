@@ -23,7 +23,4 @@ class CommitteeQuery:
             CommitteeNode: The committee object if found, otherwise None.
 
         """
-        try:
-            return Committee.objects.get(key=f"www-committee-{key}")
-        except Committee.DoesNotExist:
-            return None
+        return Committee.get_by_key(key)
