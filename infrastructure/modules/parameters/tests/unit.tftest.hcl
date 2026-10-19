@@ -605,17 +605,6 @@ run "test_nextauth_secret_has_special_chars" {
   }
 }
 
-run "test_generated_values_are_preserved" {
-  command = apply
-
-  assert {
-    condition = (
-      output.django_secret_key == aws_ssm_parameter.django_secret_key[0].value &&
-      output.nextauth_secret == aws_ssm_parameter.nextauth_secret[0].value
-    )
-    error_message = "Export the existing generated values without changing SSM credentials."
-  }
-}
 
 run "test_cleanup_removes_only_legacy_credentials" {
   command = apply

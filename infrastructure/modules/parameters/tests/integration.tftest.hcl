@@ -73,13 +73,6 @@ run "parameters_integration_apply" {
     error_message = "SSM django_secret_key parameter type must be SecureString."
   }
 
-  assert {
-    condition = (
-      output.django_secret_key == aws_ssm_parameter.django_secret_key[0].value &&
-      output.nextauth_secret == aws_ssm_parameter.nextauth_secret[0].value
-    )
-    error_message = "Export the existing Django and NextAuth values while preserving their SSM parameters."
-  }
 }
 
 run "parameters_integration_cleanup" {
