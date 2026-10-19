@@ -21,6 +21,12 @@ variable "environment" {
   type        = string
 }
 
+variable "external_secret_values" {
+  description = "Existing SSM credential values used to initialize externally managed secret versions."
+  type        = map(string)
+  sensitive   = true
+}
+
 variable "kms_key_arn" {
   description = "The ARN of the KMS key used to encrypt runtime secrets."
   type        = string

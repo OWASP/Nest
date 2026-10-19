@@ -209,6 +209,7 @@ module "secrets" {
   django_secret_key              = module.parameters.django_secret_key
   enable_additional_secrets      = var.enable_additional_parameters
   environment                    = var.environment
+  external_secret_values         = module.parameters.external_secret_values
   kms_key_arn                    = module.kms.key_arn
   nextauth_secret                = module.parameters.nextauth_secret
   project_name                   = var.project_name
@@ -259,29 +260,4 @@ module "tasks" {
   private_subnet_ids            = module.networking.private_subnet_ids
   project_name                  = var.project_name
   use_fargate_spot              = var.tasks_use_fargate_spot
-}
-
-moved {
-  from = module.parameters.aws_secretsmanager_secret.external_runtime
-  to   = module.secrets.aws_secretsmanager_secret.external_runtime
-}
-
-moved {
-  from = module.parameters.aws_secretsmanager_secret.django_secret_key
-  to   = module.secrets.aws_secretsmanager_secret.django_secret_key
-}
-
-moved {
-  from = module.parameters.aws_secretsmanager_secret_version.django_secret_key
-  to   = module.secrets.aws_secretsmanager_secret_version.django_secret_key
-}
-
-moved {
-  from = module.parameters.aws_secretsmanager_secret.nextauth_secret
-  to   = module.secrets.aws_secretsmanager_secret.nextauth_secret
-}
-
-moved {
-  from = module.parameters.aws_secretsmanager_secret_version.nextauth_secret
-  to   = module.secrets.aws_secretsmanager_secret_version.nextauth_secret
 }

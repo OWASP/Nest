@@ -1,9 +1,20 @@
 mock_provider "aws" {}
 
 variables {
-  common_tags            = { Environment = "test", Project = "nest" }
-  django_secret_key      = "existing-django-secret-key"
-  environment            = "test"
+  common_tags       = { Environment = "test", Project = "nest" }
+  django_secret_key = "existing-django-secret-key"
+  environment       = "test"
+  external_secret_values = {
+    DJANGO_ALGOLIA_WRITE_API_KEY     = "existing-algolia-write-key"
+    DJANGO_OPEN_AI_SECRET_KEY        = "existing-openai-key"
+    DJANGO_SENTRY_DSN                = "existing-sentry-dsn"
+    DJANGO_SLACK_BOT_TOKEN           = "existing-slack-token"
+    DJANGO_SLACK_SIGNING_SECRET      = "existing-slack-signing-secret"
+    GITHUB_TOKEN                     = "existing-github-token"
+    NEXT_SERVER_GITHUB_CLIENT_SECRET = "existing-github-client-secret"
+    NEST_GITHUB_APP_PRIVATE_KEY      = "existing-github-private-key\nsecond-line\n"
+    SLACK_BOT_TOKEN_CUSTOM_WORKSPACE = "existing-workspace-token"
+  }
   kms_key_arn            = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   nextauth_secret        = "existing-nextauth-secret"
   project_name           = "nest"
@@ -65,6 +76,15 @@ run "test_generated_secrets_preserve_supplied_values" {
     )
     error_message = "Secrets Manager must store the supplied Django and NextAuth credentials without generating replacements."
   }
+
+  assert {
+    condition = alltrue([
+      for name, version in aws_secretsmanager_secret_version.external_runtime :
+      version.secret_id == aws_secretsmanager_secret.external_runtime[name].id &&
+      version.secret_string == var.external_secret_values[name]
+    ])
+    error_message = "External secret versions must copy their existing SSM credential values."
+  }
 }
 
 run "test_additional_runtime_secret_names" {
@@ -82,6 +102,39 @@ run "test_additional_runtime_secret_names" {
       aws_secretsmanager_secret.external_runtime["SLACK_BOT_TOKEN_CUSTOM_WORKSPACE"].name == "/${var.project_name}/${var.environment}/SLACK_BOT_TOKEN_CUSTOM_WORKSPACE"
     )
     error_message = "Additional secrets must preserve the GitHub App name and configured Slack workspace suffix."
+  }
+
+  assert {
+    condition = (
+      length(aws_secretsmanager_secret_version.external_runtime) == 9 &&
+      aws_secretsmanager_secret_version.external_runtime["NEST_GITHUB_APP_PRIVATE_KEY"].secret_string == var.external_secret_values["NEST_GITHUB_APP_PRIVATE_KEY"] &&
+      aws_secretsmanager_secret_version.external_runtime["SLACK_BOT_TOKEN_CUSTOM_WORKSPACE"].secret_string == var.external_secret_values["SLACK_BOT_TOKEN_CUSTOM_WORKSPACE"]
+    )
+    error_message = "Optional credential versions must preserve multiline private keys and the configured Slack workspace."
+  }
+}
+
+run "test_external_versions_keep_initial_values" {
+  command = apply
+
+  variables {
+    external_secret_values = {
+      DJANGO_ALGOLIA_WRITE_API_KEY     = "changed-source-algolia-key"
+      DJANGO_OPEN_AI_SECRET_KEY        = "changed-source-openai-key"
+      DJANGO_SENTRY_DSN                = "changed-source-sentry-dsn"
+      DJANGO_SLACK_BOT_TOKEN           = "changed-source-slack-token"
+      DJANGO_SLACK_SIGNING_SECRET      = "changed-source-signing-secret"
+      GITHUB_TOKEN                     = "changed-source-github-token"
+      NEXT_SERVER_GITHUB_CLIENT_SECRET = "changed-source-client-secret"
+    }
+  }
+
+  assert {
+    condition = (
+      aws_secretsmanager_secret_version.external_runtime["GITHUB_TOKEN"].secret_string == "existing-github-token" &&
+      aws_secretsmanager_secret_version.external_runtime["DJANGO_SLACK_BOT_TOKEN"].secret_string == "existing-slack-token"
+    )
+    error_message = "Later SSM changes must not overwrite externally managed Secrets Manager values."
   }
 }
 
