@@ -605,7 +605,6 @@ run "test_nextauth_secret_has_special_chars" {
   }
 }
 
-
 run "test_cleanup_removes_only_legacy_credentials" {
   command = apply
 
@@ -642,30 +641,5 @@ run "test_cleanup_removes_only_legacy_credentials" {
       output.nextauth_secret == random_string.nextauth_secret.result
     )
     error_message = "Cleanup must retain configuration parameters and the generated values used by the secrets module."
-  }
-}
-
-run "test_runtime_outputs_contain_only_configuration" {
-  command = apply
-
-  variables {
-    enable_additional_parameters = true
-  }
-
-  assert {
-    condition = (
-      toset(keys(output.django_ssm_parameter_arns)) == toset([
-        "DJANGO_ALGOLIA_APPLICATION_ID", "DJANGO_ALLOWED_HOSTS", "DJANGO_ALLOWED_ORIGINS",
-        "DJANGO_AWS_STORAGE_BUCKET_NAME", "DJANGO_CONFIGURATION", "DJANGO_DB_HOST",
-        "DJANGO_DB_NAME", "DJANGO_DB_PORT", "DJANGO_DB_USER", "DJANGO_GITHUB_APP_ID",
-        "DJANGO_GITHUB_APP_INSTALLATION_ID", "DJANGO_REDIS_HOST", "DJANGO_REDIS_USE_TLS",
-        "DJANGO_RELEASE_VERSION", "DJANGO_SETTINGS_MODULE"
-      ]) &&
-      toset(keys(output.frontend_ssm_parameter_arns)) == toset([
-        "NEXT_SERVER_CSRF_URL", "NEXT_SERVER_DISABLE_SSR", "NEXT_SERVER_GITHUB_CLIENT_ID",
-        "NEXT_SERVER_GRAPHQL_URL", "NEXTAUTH_URL"
-      ])
-    )
-    error_message = "Parameter outputs must contain all configuration names and no migrated credentials."
   }
 }

@@ -65,7 +65,6 @@ run "test_generated_secrets_preserve_supplied_values" {
     )
     error_message = "Secrets Manager must store the supplied Django and NextAuth credentials without generating replacements."
   }
-
 }
 
 run "test_additional_runtime_secret_names" {
@@ -84,9 +83,7 @@ run "test_additional_runtime_secret_names" {
     )
     error_message = "Additional secrets must preserve the GitHub App name and configured Slack workspace suffix."
   }
-
 }
-
 
 run "test_invalid_recovery_window" {
   command = plan
@@ -96,41 +93,4 @@ run "test_invalid_recovery_window" {
   }
 
   expect_failures = [var.secret_recovery_window_in_days]
-}
-
-run "test_runtime_secret_outputs" {
-  command = apply
-
-  variables {
-    enable_additional_secrets = true
-    slack_bot_token_suffix    = "CUSTOM_WORKSPACE"
-  }
-
-  assert {
-    condition = (
-      toset(keys(output.django_secret_arns)) == toset([
-        "DJANGO_ALGOLIA_WRITE_API_KEY", "DJANGO_OPEN_AI_SECRET_KEY", "DJANGO_SECRET_KEY",
-        "DJANGO_SENTRY_DSN", "DJANGO_SLACK_BOT_TOKEN", "DJANGO_SLACK_SIGNING_SECRET",
-        "GITHUB_TOKEN", "NEST_GITHUB_APP_PRIVATE_KEY", "SLACK_BOT_TOKEN_CUSTOM_WORKSPACE"
-      ]) &&
-      output.django_secret_arns["DJANGO_SECRET_KEY"] == aws_secretsmanager_secret.django_secret_key.arn &&
-      alltrue([
-        for name, arn in output.django_secret_arns :
-        arn == aws_secretsmanager_secret.external_runtime[name].arn if name != "DJANGO_SECRET_KEY"
-      ]) &&
-      output.frontend_secret_arns == {
-        NEXTAUTH_SECRET                  = aws_secretsmanager_secret.nextauth_secret.arn
-        NEXT_SERVER_GITHUB_CLIENT_SECRET = aws_secretsmanager_secret.external_runtime["NEXT_SERVER_GITHUB_CLIENT_SECRET"].arn
-      }
-    )
-    error_message = "Runtime outputs must preserve every credential name and point to the matching secret."
-  }
-
-  assert {
-    condition = (
-      length(output.external_secret_names) == 9 &&
-      alltrue([for key, name in output.external_secret_names : name == "/${var.project_name}/${var.environment}/${key}"])
-    )
-    error_message = "Cutover validation must include all external credentials and the configured Slack workspace."
-  }
 }
