@@ -21,12 +21,6 @@ variable "environment" {
   type        = string
 }
 
-variable "external_secret_values" {
-  description = "Current SSM credential values to copy into Secrets Manager until runtime cutover."
-  type        = map(string)
-  sensitive   = true
-}
-
 variable "kms_key_arn" {
   description = "The ARN of the KMS key used to encrypt runtime secrets."
   type        = string

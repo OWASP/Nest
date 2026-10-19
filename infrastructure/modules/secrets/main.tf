@@ -37,11 +37,14 @@ resource "aws_secretsmanager_secret" "external_runtime" {
   tags                    = var.common_tags
 }
 
-resource "aws_secretsmanager_secret_version" "external_runtime" {
-  for_each = local.external_runtime_secrets
+# PR1 populated these versions from SSM. Keep them in AWS at runtime cutover,
+# when operators take ownership of their values in Secrets Manager.
+removed {
+  from = aws_secretsmanager_secret_version.external_runtime
 
-  secret_id     = aws_secretsmanager_secret.external_runtime[each.key].id
-  secret_string = var.external_secret_values[each.key]
+  lifecycle {
+    destroy = false
+  }
 }
 
 resource "aws_secretsmanager_secret" "django_secret_key" {

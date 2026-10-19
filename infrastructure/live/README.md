@@ -72,7 +72,7 @@ Use the following inline permissions for the `nest-staging` IAM User.
 
 | Name | Type |
 | ---- | ---- |
-| [aws_secretsmanager_secret_versions.external_runtime](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret_versions) | data source |
+| [aws_secretsmanager_secret_version.external_runtime](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret_version) | data source |
 
 ## Inputs
 

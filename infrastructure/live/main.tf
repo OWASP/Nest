@@ -33,16 +33,22 @@ locals {
 }
 
 # Read existing names during planning, even if a secret container is changing.
-# PR 1 must be deployed and external values populated before this cutover.
-data "aws_secretsmanager_secret_versions" "external_runtime" {
+# PR1 must be deployed with working SSM credentials before this cutover.
+data "aws_secretsmanager_secret_version" "external_runtime" {
   for_each = module.secrets.external_secret_names
 
-  secret_id = each.value
+  secret_id     = each.value
+  version_stage = "AWSCURRENT"
 
   lifecycle {
     postcondition {
-      condition     = anytrue([for version in coalesce(self.versions, []) : contains(coalesce(version.version_stages, []), "AWSCURRENT")])
-      error_message = "Populate ${each.value} with an AWSCURRENT version before switching ECS or deleting SSM credentials."
+      condition     = try(trimspace(self.secret_string) != "" && trimspace(self.secret_string) != "to-be-set-in-aws-console", false)
+      error_message = "Populate ${each.value} with a nonempty, non-placeholder AWSCURRENT credential before switching ECS or deleting SSM credentials."
+    }
+
+    postcondition {
+      condition     = var.retain_legacy_credential_parameters ? self.secret_string == module.parameters.external_secret_values[each.key] : true
+      error_message = "The AWSCURRENT credential in ${each.value} must match its retained SSM value before cutover. Apply PR1 with the working SSM credentials, then retry."
     }
   }
 }
@@ -62,7 +68,7 @@ module "alb" {
 }
 
 module "backend" {
-  depends_on = [data.aws_secretsmanager_secret_versions.external_runtime]
+  depends_on = [data.aws_secretsmanager_secret_version.external_runtime]
 
   source = "../modules/service"
 
@@ -136,7 +142,7 @@ module "database" {
 }
 
 module "frontend" {
-  depends_on = [data.aws_secretsmanager_secret_versions.external_runtime]
+  depends_on = [data.aws_secretsmanager_secret_version.external_runtime]
 
   source = "../modules/service"
 
@@ -238,7 +244,6 @@ module "secrets" {
   django_secret_key              = module.parameters.django_secret_key
   enable_additional_secrets      = var.enable_additional_parameters
   environment                    = var.environment
-  external_secret_values         = module.parameters.external_secret_values
   kms_key_arn                    = module.kms.key_arn
   nextauth_secret                = module.parameters.nextauth_secret
   project_name                   = var.project_name
@@ -272,7 +277,7 @@ module "storage" {
 }
 
 module "tasks" {
-  depends_on = [data.aws_secretsmanager_secret_versions.external_runtime]
+  depends_on = [data.aws_secretsmanager_secret_version.external_runtime]
 
   source = "../modules/tasks"
 

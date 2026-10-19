@@ -600,7 +600,6 @@ data "aws_iam_policy_document" "part_three" {
       "secretsmanager:DeleteSecret",
       "secretsmanager:GetResourcePolicy",
       "secretsmanager:GetSecretValue",
-      "secretsmanager:ListSecretVersionIds",
       "secretsmanager:PutSecretValue",
       "secretsmanager:RestoreSecret",
       "secretsmanager:RotateSecret",
