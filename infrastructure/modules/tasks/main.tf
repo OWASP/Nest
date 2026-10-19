@@ -12,11 +12,12 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
-  secretsmanager_secret_arns = distinct([
+  # Only canonical secret ARNs are exposed in IAM plans, never credential values.
+  secretsmanager_secret_arns = nonsensitive(distinct([
     for arn in values(var.container_parameters_arns) :
     join(":", slice(split(":", arn), 0, 7))
     if can(regex("^arn:[^:]+:secretsmanager:", arn))
-  ])
+  ]))
 
   mentorship_sync_modules_data_schedule_expression  = var.enable_cron_tasks ? "cron(30 06 * * ? *)" : null
   slack_sync_data_schedule_expression               = var.enable_cron_tasks ? "cron(0 */6 ? * MON-FRI *)" : null

@@ -94,3 +94,13 @@ run "test_invalid_recovery_window" {
 
   expect_failures = [var.secret_recovery_window_in_days]
 }
+
+run "test_fractional_recovery_window_is_rejected" {
+  command = plan
+
+  variables {
+    secret_recovery_window_in_days = 7.5
+  }
+
+  expect_failures = [var.secret_recovery_window_in_days]
+}

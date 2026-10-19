@@ -43,8 +43,12 @@ variable "secret_recovery_window_in_days" {
   default     = 7
 
   validation {
-    condition     = var.secret_recovery_window_in_days == 0 || (var.secret_recovery_window_in_days >= 7 && var.secret_recovery_window_in_days <= 30)
-    error_message = "secret_recovery_window_in_days must be 0 or between 7 and 30."
+    condition = var.secret_recovery_window_in_days == 0 || (
+      var.secret_recovery_window_in_days >= 7 &&
+      var.secret_recovery_window_in_days <= 30 &&
+      var.secret_recovery_window_in_days == floor(var.secret_recovery_window_in_days)
+    )
+    error_message = "secret_recovery_window_in_days must be 0 or an integer between 7 and 30."
   }
 }
 

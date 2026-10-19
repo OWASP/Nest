@@ -12,11 +12,12 @@ terraform {
 locals {
   name_prefix = "${var.project_name}-${var.environment}-${var.service_name}"
 
-  secretsmanager_secret_arns = distinct([
+  # Only canonical secret ARNs are exposed in IAM plans, never credential values.
+  secretsmanager_secret_arns = nonsensitive(distinct([
     for arn in values(var.parameters_arns) :
     join(":", slice(split(":", arn), 0, 7))
     if can(regex("^arn:[^:]+:secretsmanager:", arn))
-  ])
+  ]))
 
   container_definition = merge(
     {

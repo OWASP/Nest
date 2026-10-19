@@ -187,16 +187,17 @@ run "test_execution_policy_scopes_secrets_and_strips_selectors" {
   command = plan
 
   variables {
-    container_parameters_arns = {
+    container_parameters_arns = sensitive({
       CONFIG             = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/CONFIG"
       DJANGO_DB_PASSWORD = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf:password::"
       DUPLICATE          = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf"
       NEXTAUTH_SECRET    = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/NEXTAUTH_SECRET-AbCdEf"
-    }
+    })
   }
 
   assert {
     condition = (
+      !issensitive(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy) &&
       length(jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement) == 3 &&
       toset(jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement[1].Resource) == toset([
         "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf",
@@ -206,6 +207,6 @@ run "test_execution_policy_scopes_secrets_and_strips_selectors" {
       jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement[2].Resource == [var.kms_key_arn] &&
       jsondecode(aws_iam_policy.ecs_tasks_execution_role_ssm_policy.policy).Statement[2].Action == ["kms:Decrypt"]
     )
-    error_message = "Execution permissions must deduplicate exact secret ARNs, strip selectors, exclude SSM references, and use only the configured KMS key."
+    error_message = "Execution permissions must remain visible for sensitive reference maps, deduplicate exact secret ARNs, strip selectors, exclude SSM references, and use only the configured KMS key."
   }
 }
