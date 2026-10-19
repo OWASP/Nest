@@ -42,10 +42,6 @@ resource "aws_secretsmanager_secret_version" "external_runtime" {
 
   secret_id     = aws_secretsmanager_secret.external_runtime[each.key].id
   secret_string = var.external_secret_values[each.key]
-
-  lifecycle {
-    ignore_changes = [secret_string]
-  }
 }
 
 resource "aws_secretsmanager_secret" "django_secret_key" {

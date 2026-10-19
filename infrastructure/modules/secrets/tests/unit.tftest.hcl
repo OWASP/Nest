@@ -114,7 +114,7 @@ run "test_additional_runtime_secret_names" {
   }
 }
 
-run "test_external_versions_keep_initial_values" {
+run "test_external_versions_copy_updated_ssm_values" {
   command = apply
 
   variables {
@@ -130,11 +130,11 @@ run "test_external_versions_keep_initial_values" {
   }
 
   assert {
-    condition = (
-      aws_secretsmanager_secret_version.external_runtime["GITHUB_TOKEN"].secret_string == "existing-github-token" &&
-      aws_secretsmanager_secret_version.external_runtime["DJANGO_SLACK_BOT_TOKEN"].secret_string == "existing-slack-token"
-    )
-    error_message = "Later SSM changes must not overwrite externally managed Secrets Manager values."
+    condition = alltrue([
+      for name, version in aws_secretsmanager_secret_version.external_runtime :
+      version.secret_string == var.external_secret_values[name]
+    ])
+    error_message = "Updated SSM credentials must propagate to Secrets Manager before runtime cutover."
   }
 }
 

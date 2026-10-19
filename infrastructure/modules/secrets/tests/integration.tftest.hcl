@@ -85,3 +85,41 @@ run "secrets_integration_additional" {
     error_message = "Optional secret versions must preserve the private key and Slack workspace credential values."
   }
 }
+
+run "secrets_integration_placeholders" {
+  command = apply
+
+  variables {
+    external_secret_values = {
+      DJANGO_ALGOLIA_WRITE_API_KEY     = "to-be-set-in-aws-console"
+      DJANGO_OPEN_AI_SECRET_KEY        = "to-be-set-in-aws-console"
+      DJANGO_SENTRY_DSN                = "to-be-set-in-aws-console"
+      DJANGO_SLACK_BOT_TOKEN           = "to-be-set-in-aws-console"
+      DJANGO_SLACK_SIGNING_SECRET      = "to-be-set-in-aws-console"
+      GITHUB_TOKEN                     = "to-be-set-in-aws-console"
+      NEXT_SERVER_GITHUB_CLIENT_SECRET = "to-be-set-in-aws-console"
+    }
+  }
+
+  assert {
+    condition = alltrue([
+      for name, version in aws_secretsmanager_secret_version.external_runtime :
+      version.secret_string == var.external_secret_values[name]
+    ])
+    error_message = "A fresh environment must reflect its initial SSM values."
+  }
+}
+
+run "secrets_integration_populate_credentials" {
+  command = apply
+
+  assert {
+    condition = alltrue([
+      for name, version in aws_secretsmanager_secret_version.external_runtime :
+      version.secret_string == var.external_secret_values[name] &&
+      version.secret_string != "to-be-set-in-aws-console" &&
+      contains(version.version_stages, "AWSCURRENT")
+    ])
+    error_message = "Populating SSM credentials must replace placeholder versions with current working values."
+  }
+}

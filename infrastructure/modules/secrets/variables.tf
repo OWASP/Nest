@@ -22,7 +22,7 @@ variable "environment" {
 }
 
 variable "external_secret_values" {
-  description = "Existing SSM credential values used to initialize externally managed secret versions."
+  description = "Current SSM credential values to copy into Secrets Manager until runtime cutover."
   type        = map(string)
   sensitive   = true
 }

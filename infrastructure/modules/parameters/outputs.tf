@@ -41,7 +41,7 @@ output "django_ssm_parameter_arns" {
 }
 
 output "external_secret_values" {
-  description = "Existing externally managed SSM credentials used to initialize Secrets Manager versions."
+  description = "Current externally managed SSM credentials to copy into Secrets Manager until runtime cutover."
   sensitive   = true
   value = merge({
     DJANGO_ALGOLIA_WRITE_API_KEY     = aws_ssm_parameter.django_algolia_write_api_key.value
