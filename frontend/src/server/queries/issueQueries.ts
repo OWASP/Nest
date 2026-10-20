@@ -4,6 +4,7 @@ const MODULE_ISSUE_VIEW_FIELDS = gql`
   fragment ModuleIssueViewFields on ModuleNode {
     id
     userRole
+    userIsModuleMentor
     menteeCanManageDeadlines
     startedAt
     endedAt

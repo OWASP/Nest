@@ -353,6 +353,7 @@ export type ModuleNode = {
   tags?: Maybe<Array<Scalars['String']['output']>>;
   taskAssignedAt?: Maybe<Scalars['DateTime']['output']>;
   taskDeadline?: Maybe<Scalars['DateTime']['output']>;
+  userIsModuleMentor: Scalars['Boolean']['output'];
   userRole?: Maybe<Scalars['String']['output']>;
 };
 

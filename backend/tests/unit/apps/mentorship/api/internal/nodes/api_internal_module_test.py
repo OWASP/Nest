@@ -506,6 +506,28 @@ class TestModuleNodeResolvers:
         mock_module_node.program.has_admin.assert_called_once_with(info.context.request.user)
         mock_module_node.has_mentor.assert_called_once_with(info.context.request.user)
 
+    def test_module_node_user_is_module_mentor(self, mock_module_node):
+        """Test the user_is_module_mentor resolver for a module mentor."""
+        info = MagicMock()
+        info.context.request.user = MagicMock()
+
+        result = _call_module_resolver(mock_module_node, "user_is_module_mentor", info)
+
+        assert result is True
+        mock_module_node.has_mentor.assert_called_once_with(info.context.request.user)
+
+    def test_module_node_user_is_module_mentor_false(self):
+        """Test user_is_module_mentor when the caller is not a module mentor."""
+        module_node = FakeModuleNode()
+        module_node.has_mentor.return_value = False
+        info = MagicMock()
+        info.context.request.user = MagicMock()
+
+        result = _call_module_resolver(module_node, "user_is_module_mentor", info)
+
+        assert result is False
+        module_node.has_mentor.assert_called_once_with(info.context.request.user)
+
 
 class TestModuleNodeInput:
     def test_create_update_input_defaults(self):

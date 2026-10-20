@@ -48,6 +48,11 @@ class ModuleNode:
         return getattr(self, "user_role", None)
 
     @strawberry.field
+    def user_is_module_mentor(self, info: Info) -> bool:
+        """Return whether the caller is a mentor of this module."""
+        return self.has_mentor(info.context.request.user)
+``
+    @strawberry.field
     def mentors(self) -> list[MentorNode]:
         """Get the list of mentors for this module."""
         return self.mentors.order_by("github_user__login")

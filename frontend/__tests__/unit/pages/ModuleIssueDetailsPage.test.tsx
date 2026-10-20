@@ -98,6 +98,7 @@ const mockIssueData = {
       ],
     },
     userRole: 'mentor',
+    userIsModuleMentor: true,
     menteeCanManageDeadlines: false,
     startedAt: null,
     endedAt: null,
@@ -120,6 +121,7 @@ const menteeIssueView = (
 ) => ({
   managementModule: {
     userRole: 'mentee',
+    userIsModuleMentor: false,
     menteeCanManageDeadlines: false,
     startedAt: null,
     endedAt: null,
@@ -990,7 +992,7 @@ describe('Mentee deadline management', () => {
     })
   })
 
-  it('enables the deadline control when the module allows it and the mentee is assigned', async () => {
+  it('keeps the deadline control disabled for a mentee even when the module allows it', async () => {
     setupQueryMock(
       menteeIssueView({ title: 'Editable Deadline Issue' }, { menteeCanManageDeadlines: true })
     )
@@ -998,7 +1000,7 @@ describe('Mentee deadline management', () => {
     await waitFor(() => {
       expect(screen.getByText('Editable Deadline Issue')).toBeInTheDocument()
     })
-    expect(screen.getByRole('button', { name: /No deadline set/i })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /No deadline set/i })).toBeDisabled()
   })
 
   it('keeps the deadline control disabled when the module disallows it', async () => {
@@ -1010,14 +1012,12 @@ describe('Mentee deadline management', () => {
     expect(screen.getByRole('button', { name: /No deadline set/i })).toBeDisabled()
   })
 
-  it('enters edit mode when an allowed mentee clicks the deadline', async () => {
+  it('does not enter edit mode when a mentee clicks the deadline', async () => {
     const setIsEditingDeadline = jest.fn()
-    const setDeadlineInput = jest.fn()
     const baseMocks = (useIssueMutations as jest.Mock)()
     mockUseIssueMutations.mockReturnValue({
       ...baseMocks,
       setIsEditingDeadline,
-      setDeadlineInput,
     })
     setupQueryMock(
       menteeIssueView({ title: 'Edit Deadline Issue' }, { menteeCanManageDeadlines: true })
@@ -1027,9 +1027,7 @@ describe('Mentee deadline management', () => {
       expect(screen.getByText('Edit Deadline Issue')).toBeInTheDocument()
     })
     fireEvent.click(screen.getByRole('button', { name: /No deadline set/i }))
-    await waitFor(() => {
-      expect(setIsEditingDeadline).toHaveBeenCalledWith(true)
-    })
+    expect(setIsEditingDeadline).not.toHaveBeenCalled()
   })
 
   it('does not let a mentee clear the deadline', async () => {
@@ -1051,11 +1049,11 @@ describe('Mentee deadline management', () => {
     await waitFor(() => {
       expect(screen.getByText('No Clear Issue')).toBeInTheDocument()
     })
-    fireEvent.change(screen.getByDisplayValue('2026-12-25'), { target: { value: '' } })
+    expect(screen.queryByDisplayValue('2026-12-25')).not.toBeInTheDocument()
     expect(clearTaskDeadlineMutation).not.toHaveBeenCalled()
   })
 
-  it('saves the deadline when the mentee picks a date', async () => {
+  it('does not let a mentee save a deadline', async () => {
     const setTaskDeadlineMutation = jest.fn()
     const baseMocks = (useIssueMutations as jest.Mock)()
     mockUseIssueMutations.mockReturnValue({
@@ -1071,32 +1069,94 @@ describe('Mentee deadline management', () => {
     await waitFor(() => {
       expect(screen.getByText('Save Deadline Issue')).toBeInTheDocument()
     })
-    fireEvent.change(screen.getByDisplayValue(''), { target: { value: '2026-12-25' } })
-    await waitFor(() => {
-      expect(setTaskDeadlineMutation).toHaveBeenCalledWith({
-        variables: expect.objectContaining({
-          deadlineAt: new Date(Date.UTC(2026, 11, 25, 23, 59, 59, 999)).toISOString(),
-        }),
-      })
+    expect(screen.queryByRole('button', { name: /No deadline set/i })).toBeDisabled()
+    expect(setTaskDeadlineMutation).not.toHaveBeenCalled()
+  })
+})
+
+describe('Module mentor deadline permissions', () => {
+  const adminNotMentorView = (moduleOverrides: Record<string, unknown> = {}) => ({
+    managementModule: {
+      ...mockIssueData.managementModule,
+      userRole: 'admin',
+      userIsModuleMentor: false,
+      ...moduleOverrides,
+    },
+  })
+
+  beforeEach(() => {
+    mockUseParams.mockReturnValue({
+      programKey: 'prog1',
+      moduleKey: 'mod1',
+      issueId: '123',
+    })
+    mockUseIssueMutations.mockReturnValue({
+      assignIssue: mockAssignIssue,
+      unassignIssue: mockUnassignIssue,
+      setTaskDeadlineMutation: mockSetTaskDeadline,
+      clearTaskDeadlineMutation: mockClearTaskDeadline,
+      assigning: false,
+      unassigning: false,
+      settingDeadline: false,
+      clearingDeadline: false,
+      isEditingDeadline: false,
+      setIsEditingDeadline: jest.fn(),
+      deadlineInput: '',
+      setDeadlineInput: jest.fn(),
     })
   })
-  it('updates the deadline input as the mentee types', async () => {
-    const setDeadlineInput = jest.fn()
+
+  it('lets a module mentor set a deadline', async () => {
+    const setTaskDeadlineMutation = jest.fn()
     const baseMocks = (useIssueMutations as jest.Mock)()
     mockUseIssueMutations.mockReturnValue({
       ...baseMocks,
       isEditingDeadline: true,
       deadlineInput: '',
-      setDeadlineInput,
+      setTaskDeadlineMutation,
     })
-    setupQueryMock(
-      menteeIssueView({ title: 'Date Input Issue' }, { menteeCanManageDeadlines: true })
-    )
+    setupQueryMock()
     render(<ModuleIssueDetailsPage />)
-    await waitFor(() => expect(screen.getByText('Date Input Issue')).toBeInTheDocument())
-    const dateInput = screen.getByDisplayValue('')
-    fireEvent.change(dateInput, { target: { value: '2026-12-01' } })
-    expect(setDeadlineInput).toHaveBeenCalledWith('2026-12-01')
+    await waitFor(() => {
+      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByDisplayValue(''), { target: { value: '2025-12-25' } })
+    await waitFor(() => {
+      expect(setTaskDeadlineMutation).toHaveBeenCalledWith({
+        variables: expect.objectContaining({
+          deadlineAt: new Date(Date.UTC(2025, 11, 25, 23, 59, 59, 999)).toISOString(),
+        }),
+      })
+    })
+  })
+
+  it('disables the deadline control for a program admin who is not a module mentor', () => {
+    setupQueryMock(adminNotMentorView())
+    render(<ModuleIssueDetailsPage />)
+
+    expect(screen.getByRole('button', { name: /No deadline set/i })).toBeDisabled()
+  })
+
+  it('does not open the editor for a program admin who is not a module mentor', async () => {
+    const setIsEditingDeadline = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      setIsEditingDeadline,
+    })
+    setupQueryMock(adminNotMentorView())
+    render(<ModuleIssueDetailsPage />)
+
+    fireEvent.click(screen.getByRole('button', { name: /No deadline set/i }))
+    expect(setIsEditingDeadline).not.toHaveBeenCalled()
+  })
+
+  it('keeps the deadline control enabled for an admin who is also a module mentor', () => {
+    setupQueryMock(adminNotMentorView({ userIsModuleMentor: true }))
+    render(<ModuleIssueDetailsPage />)
+
+    expect(screen.getByRole('button', { name: /No deadline set/i })).not.toBeDisabled()
   })
 })
 

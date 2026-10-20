@@ -6,7 +6,6 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import {
   FaCodeBranch,
@@ -20,7 +19,6 @@ import {
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
-import type { ExtendedSession } from 'types/auth'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
@@ -32,13 +30,11 @@ import SecondaryCard from 'components/SecondaryCard'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
-  const { data: session } = useSession() as { data: ExtendedSession | null }
   const [hasMorePRs, setHasMorePRs] = useState(true)
   const [visibleCount, setVisibleCount] = useState(4)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
   const limit = 4
   const { programKey, moduleKey, issueId } = params
-  const currentUserLogin = session?.user?.login
 
   // A single role-aware query serves admins, mentors, and mentees. The backend
   // scopes issue data by role and reports `userRole`, so the client renders one
@@ -133,11 +129,11 @@ const ModuleIssueDetailsPage = () => {
 
   const mentorshipModule = data?.managementModule
   const isMentee = mentorshipModule?.userRole === 'mentee'
+  const isModuleMentor = mentorshipModule?.userIsModuleMentor === true
   const issue = mentorshipModule?.issueByNumber
   const taskDeadline = (mentorshipModule?.taskDeadline as string | undefined) ?? null
   const moduleStartedAt = mentorshipModule?.startedAt
   const moduleEndedAt = mentorshipModule?.endedAt
-  const menteeCanManageDeadlines = mentorshipModule?.menteeCanManageDeadlines
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
@@ -174,12 +170,9 @@ const ModuleIssueDetailsPage = () => {
 
   const assignees = issue.assignees || []
   const labels = issue.labels || []
-  const isAssignee = assignees.some((a) => a.login === currentUserLogin)
-  // Admins/mentors can set a deadline on any assigned issue; a mentee can only do
-  // so when the module allows it and the issue is assigned to them.
-  const canEditDeadline = isMentee
-    ? Boolean(menteeCanManageDeadlines && isAssignee)
-    : assignees.length > 0
+  // Only module mentors may set or clear deadlines; the backend enforces the
+  // same rule, so program admins, mentees, and other roles stay read-only here.
+  const canEditDeadline = isModuleMentor && assignees.length > 0
 
   let issueStatusClass: string
   let issueStatusLabel: string
@@ -276,8 +269,8 @@ const ModuleIssueDetailsPage = () => {
                                   deadlineAt: iso,
                                 },
                               })
-                            } else if (!isMentee) {
-                              // Clearing a deadline is a mentor/admin action only.
+                            } else if (isModuleMentor) {
+                              // Clearing a deadline is a module-mentor action only.
                               await clearTaskDeadlineMutation({
                                 variables: {
                                   programKey,

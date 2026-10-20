@@ -646,6 +646,7 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.has_mentor.return_value = True
         mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
@@ -714,6 +715,30 @@ class TestModuleMutationSetTaskDeadline:
         mock_mod.has_mentor.return_value = False
         mock_mod.has_mentee.return_value = False
         mock_mod.program.has_admin.return_value = False
+
+        mutation = ModuleMutation()
+        with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
+            mutation.set_task_deadline(
+                info,
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_number=1,
+                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
+            )
+
+    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_set_deadline_admin_without_mentor_role_denied(self, mock_module, mock_mentor):
+        """Test PermissionDenied for a program admin who is not a module mentor."""
+        user = MagicMock()
+        info = self._make_info(user)
+        mock_mod = MagicMock()
+        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
+            mock_mod
+        )
+        mock_mod.has_mentor.return_value = False
+        mock_mod.has_mentee.return_value = False
+        mock_mod.program.has_admin.return_value = True
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
@@ -1125,6 +1150,25 @@ class TestModuleMutationClearTaskDeadline:
             mock_mod
         )
         mock_mod.has_mentor.return_value = False
+
+        mutation = ModuleMutation()
+        with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
+            mutation.clear_task_deadline(
+                info, module_key="mod-1", program_key="prog-1", issue_number=1
+            )
+
+    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_clear_deadline_admin_without_mentor_role_denied(self, mock_module, mock_mentor):
+        """Test PermissionDenied for a program admin who is not a module mentor."""
+        user = MagicMock()
+        info = self._make_info(user)
+        mock_mod = MagicMock()
+        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
+            mock_mod
+        )
+        mock_mod.has_mentor.return_value = False
+        mock_mod.program.has_admin.return_value = True
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
@@ -1581,7 +1625,7 @@ class TestModuleMutationReorderModules:
 
 
 class TestModuleMutationMenteeDeadline:
-    """Tests for mentee-specific deadline permission in set_task_deadline."""
+    """Tests that mentees cannot set deadlines in set_task_deadline."""
 
     def _make_info(self, user):
         info = MagicMock()
@@ -1647,7 +1691,7 @@ class TestModuleMutationMenteeDeadline:
 
         mutation = ModuleMutation()
         deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
-        with pytest.raises(PermissionDenied, match="You can only set deadlines"):
+        with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
@@ -1655,12 +1699,13 @@ class TestModuleMutationMenteeDeadline:
                 issue_number=1,
                 deadline_at=deadline_at,
             )
+        mock_task.objects.bulk_update.assert_not_called()
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_mentee_can_set_deadline_when_assignee(self, mock_tz, mock_module, mock_task):
-        """Mentee can set deadline when enabled and assigned to the issue."""
+    def test_mentee_blocked_when_enabled_and_assignee(self, mock_tz, mock_module, mock_task):
+        """Mentee assigned to the issue is denied even when the module allows mentee deadlines."""
         github_user = MagicMock()
         user = MagicMock()
         user.github_user = github_user
@@ -1689,16 +1734,14 @@ class TestModuleMutationMenteeDeadline:
 
         mock_tz.is_naive.return_value = False
 
-        mock_task_instance = MagicMock()
-        mock_task.objects.get_or_create.return_value = (mock_task_instance, True)
-
         mutation = ModuleMutation()
-        result = mutation.set_task_deadline(
-            info,
-            module_key="mod-1",
-            program_key="prog-1",
-            issue_number=1,
-            deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
-        )
-        assert result is not None
-        mock_task.objects.bulk_update.assert_called_once()
+        deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
+        with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
+            mutation.set_task_deadline(
+                info,
+                module_key="mod-1",
+                program_key="prog-1",
+                issue_number=1,
+                deadline_at=deadline_at,
+            )
+        mock_task.objects.bulk_update.assert_not_called()
