@@ -91,10 +91,18 @@ exec-db-command-fuzz-it:
 	@docker exec -it fuzz-nest-db $(CMD)
 
 exec-nestbot-command:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -i nest-nestbot $(CMD)
+endif
 
 exec-nestbot-command-it:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -it nest-nestbot $(CMD) 2>/dev/null
+endif
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command

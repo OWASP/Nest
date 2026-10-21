@@ -49,3 +49,11 @@ ai-update-slack-message-chunks:
 ai-update-slack-message-context:
 	@echo "Updating Slack message context"
 	@CMD="python manage.py ai_update_slack_message_context" $(MAKE) exec-nestbot-command
+
+##@ AI Testing
+
+.PHONY: test-ai-evals
+test-ai-evals: ## Run AI evaluation unit tests
+	@echo "Running AI evaluation unit tests..."
+	@CMD="pytest tests/unit/apps/ai/evals/ -o addopts=''" $(MAKE) exec-nestbot-command
+
