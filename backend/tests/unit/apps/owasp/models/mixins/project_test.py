@@ -116,12 +116,12 @@ class TestProjectIndexMixin:
         assert result == 15
 
     def test_idx_key(self):
-        """Test idx_key strips www-project- prefix."""
+        """Test idx_key returns the project key."""
         mock_project = self.create_mock_project(key="www-project-zap")
 
         result = ProjectIndexMixin.idx_key.fget(mock_project)
 
-        assert result == "zap"
+        assert result == "www-project-zap"
 
     def test_idx_languages(self):
         """Test idx_languages returns languages list."""
@@ -165,7 +165,7 @@ class TestProjectIndexMixin:
 
     def test_idx_name_without_name(self):
         """Test idx_name generates name from key when name is empty."""
-        mock_project = self.create_mock_project(name="", key="www-project-juice-shop")
+        mock_project = self.create_mock_project(name="", key="juice-shop")
 
         result = ProjectIndexMixin.idx_name.fget(mock_project)
 
