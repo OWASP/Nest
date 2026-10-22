@@ -21,8 +21,10 @@ class TestPoliciesHandler:
         return client
 
     @pytest.mark.parametrize(("commands_enabled", "expected_calls"), [(True, 1), (False, 0)])
-    def test_policies_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    def test_policies_handler(
+        self, mock_client, mock_command, commands_enabled, expected_calls, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         ack = MagicMock()
         Policies().handler(ack=ack, command=mock_command, client=mock_client)
 

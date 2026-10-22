@@ -91,8 +91,9 @@ class TestEventsHandler:
         expected_header,
         mock_slack_client,
         mock_slack_command,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_get_events_data.return_value = mock_events if has_events_data else []
         ack = MagicMock()
         Events().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)

@@ -26,9 +26,9 @@ class TestNewsCommand:
         ],
     )
     def test_news_handler_disabled_enabled(
-        self, mock_client, mock_command, commands_enabled, expected_calls
+        self, mock_client, mock_command, commands_enabled, expected_calls, monkeypatch
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         with patch("apps.slack.commands.news.get_news_data") as mock_get_news_data:
             mock_get_news_data.return_value = (
                 [
@@ -77,8 +77,10 @@ class TestNewsCommand:
                     assert blocks[0]["text"]["text"] == expected_warning
 
     @patch("apps.slack.commands.news.get_news_data")
-    def test_news_handler_no_items(self, mock_get_news_data, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
+    def test_news_handler_no_items(
+        self, mock_get_news_data, mock_client, mock_command, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
         mock_get_news_data.return_value = []
         ack = MagicMock()
         News().handler(ack=ack, command=mock_command, client=mock_client)

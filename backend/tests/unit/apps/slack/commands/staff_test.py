@@ -57,8 +57,9 @@ class TestStaffHandler:
         mock_slack_client,
         mock_slack_command,
         mock_staff,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
 
         mock_get_staff_data.return_value = mock_staff if has_staff_data else []
 

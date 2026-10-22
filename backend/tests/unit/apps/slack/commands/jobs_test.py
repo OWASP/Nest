@@ -28,8 +28,10 @@ class TestJobsHandler:
             (False, 0),
         ],
     )
-    def test_jobs_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    def test_jobs_handler(
+        self, mock_client, mock_command, commands_enabled, expected_calls, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         ack = MagicMock()
         Jobs().handler(ack=ack, command=mock_command, client=mock_client)
 

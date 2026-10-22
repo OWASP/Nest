@@ -58,8 +58,9 @@ class TestLeadersHandler:
         mock_slack_command,
         mock_chapter,
         mock_project,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_get_chapters.return_value = {"hits": [mock_chapter] if has_results else []}
         mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
 
@@ -96,10 +97,11 @@ class TestLeadersHandler:
         search_text,
         expected_escaped,
         mock_slack_client,
+        monkeypatch,
     ):
         command = {"text": search_text, "user_id": "U123456"}
         mock_escape.return_value = expected_escaped
-        settings.SLACK_COMMANDS_ENABLED = True
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
         mock_get_chapters.return_value = {"hits": []}
         mock_get_projects.return_value = {"hits": []}
 
@@ -129,8 +131,9 @@ class TestLeadersHandler:
         expected_text,
         mock_slack_client,
         mock_slack_command,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = True
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
         mock_chapter = {
             "idx_key": "test-chapter",
             "idx_leaders": leaders_list,

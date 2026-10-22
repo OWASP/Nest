@@ -51,9 +51,15 @@ class TestContributeHandler:
         ],
     )
     def test_contribute_handler(
-        self, mock_client, mock_command, commands_enabled, command_text, expected_calls
+        self,
+        mock_client,
+        mock_command,
+        commands_enabled,
+        command_text,
+        expected_calls,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_command["text"] = command_text
 
         ack = MagicMock()
@@ -63,9 +69,9 @@ class TestContributeHandler:
         assert mock_client.chat_postMessage.call_count == expected_calls
 
     def test_contribute_handler_with_results(
-        self, mock_get_contributions, mock_client, mock_command
+        self, mock_get_contributions, mock_client, mock_command, monkeypatch
     ):
-        settings.SLACK_COMMANDS_ENABLED = True
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
         mock_get_contributions.return_value = {
             "hits": [
                 {
