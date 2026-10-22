@@ -37,7 +37,7 @@ const Release: React.FC<ReleaseProps> = ({
   }
 
   return (
-    <div className={`mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700 ${className}`}>
+    <div className={`w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700 ${className}`}>
       <div className="flex w-full flex-col justify-between">
         <div className="flex w-full items-center">
           {showAvatar && release?.author && (
