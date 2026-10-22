@@ -49,7 +49,7 @@ infrastructure:
 makefile:
   - changed-files:
       - any-glob-to-any-file:
-          - '**/Makefile'
+          - '**/[Mm]akefile'
 
 nestbot:
   - changed-files:

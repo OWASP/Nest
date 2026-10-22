@@ -1,5 +1,4 @@
 import hashlib
-import secrets
 from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
@@ -24,10 +23,14 @@ class TestApiKeyModel:
 
     def test_generate_raw_key(self):
         """Test that generate_raw_key creates a sufficiently long, random string."""
-        raw_key = ApiKey.generate_raw_key()
-        assert isinstance(raw_key, str)
-        assert len(raw_key) > 40
-        assert secrets.token_urlsafe(32) != secrets.token_urlsafe(32)
+        first_key = ApiKey.generate_raw_key()
+        second_key = ApiKey.generate_raw_key()
+
+        for key in (first_key, second_key):
+            assert isinstance(key, str)
+            assert len(key) > 40
+
+        assert first_key != second_key
 
     def test_generate_hash_key(self):
         """Test that generate_hash_key produces a correct SHA-256 hash."""

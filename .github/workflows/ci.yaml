@@ -31,7 +31,7 @@ jobs:
     needs:
       - run-code-checks
     permissions:
-      actions: write
+      actions: read
       contents: read
       id-token: write
     secrets:

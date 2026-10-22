@@ -111,9 +111,9 @@ cachecontrol[filecache]==0.14.4 \
     #   cachecontrol
     #   pip-audit
     #   poetry
-certifi==2026.5.20 \
-    --hash=sha256:3c52e209ba0a4ad7aebe60436a4ab349c39e1e602e8c134221e546902ad25897 \
-    --hash=sha256:69dea482ab64caa7b9f6aba1c6bf48bb6a5448d1c0f1b17ab42ad8c763a5344d
+certifi==2026.10.19 \
+    --hash=sha256:035c1e85572b141bf1c3a3eff0e33a8eb74917522f2559075ff8d2fea780a1ae \
+    --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b
     # via
     #   httpcore
     #   httpx
@@ -403,49 +403,49 @@ distlib==0.4.3 \
     --hash=sha256:4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b \
     --hash=sha256:f152097224a0ae24be5a0f6bae1b9359af82133bce63f98a95f86cae1aede9ed
     # via virtualenv
-dulwich==1.2.6 \
-    --hash=sha256:04252b107a1600325f5f0301dde8b5b62f5bb51a0467e360070baddbb4edcea7 \
-    --hash=sha256:116ac7decb923a473540bf813c1ceb061bef07209fad5fb002d867f1907f9393 \
-    --hash=sha256:11b1f5a6a6075ab4f906dfb755c1d805c8c898ba4f4816b0fdb6123e113030ac \
-    --hash=sha256:1c35c294acfc5a0a88d01d5db1abeba550bf6274bcc3fddbf8b365e9eea280da \
-    --hash=sha256:204d14692fb1dd850ab773690f7530f4065f405e9e7dd3f85bdf92e9330ffa2d \
-    --hash=sha256:21e2e9b81ab04ad83f2d4101ac515ef56ee08d06fd853c1a7ac255f20bb49963 \
-    --hash=sha256:27db364f2f3cf5b0dddd44d6c2ae9a20f6021e2bae8b1268fa689076f0192244 \
-    --hash=sha256:371394e2c6f3f9789cdc0abb965dae9bc62e79984b84f35339e9d466598c9fb0 \
-    --hash=sha256:405cfd53a99374ff03aacdd7a86d6a07615feca072ed69721f49ae2ebaa3eab4 \
-    --hash=sha256:493e2ea0f23a8e9aae8e3000a366d1fbf0ed2c13eaf8f41863f050c6392ef138 \
-    --hash=sha256:4940fbf7cb37870686c63dfc7682e1afdab0e55b663bb614572909b68e775d31 \
-    --hash=sha256:4cf80217e73a039614dde5ab2c74917833632912b788074bc7158058aafbf3e5 \
-    --hash=sha256:5ff9f36c95deaf7eb5d6ccde4c68adbcb932a87e03c1b479a8d94d779e7cc5d2 \
-    --hash=sha256:6993ad48f92dc38a43e3c1bf25efb03a62fc2cf4db86a2e904b6c7176dafc3d5 \
-    --hash=sha256:6d9720d591052730775dcbf450f0cd5b35162f4eeb4754337a5d763326481b2f \
-    --hash=sha256:6fcbb3dec5733898be2114476ff5abaa1dbb8a6d28ffbe492b3225a5a556197e \
-    --hash=sha256:6fd9911fb57ee2d6eefaf895df65e1139fbc911fa560e959b38feabe5f15003f \
-    --hash=sha256:72512e2a22df6fb65ba7b66f5037046019a12343f6e9e54f42bcc4a68ab3d628 \
-    --hash=sha256:72ac4f3fc92d54115ba2d812263117d9577b17f4c62ae8f170c177515f62e9d3 \
-    --hash=sha256:794a85b8b9d4ad57d02c8cb455735419ac50c0f2e3d26d83873e34abee58cb1b \
-    --hash=sha256:79728d98e0ec184856d71fd0d55abbf5ac7345b5baea9f2d1533a4de9064e13d \
-    --hash=sha256:7b4a2f497718bfe1a3b21f933ee27c111b9cea560c0b2d8a6d939e1b5f297f79 \
-    --hash=sha256:7c187efaebb72146245ebcb872b89fdc99314fa37442119c5a5feb18af3f4b8a \
-    --hash=sha256:824b7f5b22b128c1e1ad7c655e9790e2d75c7ab1ba1e40a708024193f1dc47a3 \
-    --hash=sha256:82e8810e57f9651a624116e3fede33276f89406cb910f517b944105e284e6755 \
-    --hash=sha256:8d8175dbe4feaf62bcafc8708448bfe223b4dfc71609be25c0cf2b0962abc36c \
-    --hash=sha256:9139d0110580a3038048286e761e9be166ec40a2eb19218b41b75541c5d87a86 \
-    --hash=sha256:9e357d825b82e7fec2b83cd8e50f3c099c14c1070e1df961bfefb83943dc1582 \
-    --hash=sha256:ad4b6114440f9cf72315b173532ee3284f27a288b8a24bc27e45b2e54593720d \
-    --hash=sha256:c60ddc8206e04e8e08208eac80130004eff0d587c82d398beeca7330cade061f \
-    --hash=sha256:c639a8c9fb7e745749f2dcbd5b63a82df2fc99cfe62e2c3654ec025a42d2e51f \
-    --hash=sha256:cb1f8d658f36b2ac3982715dc3e49f0d741a3e5a8c40136bebb6d8493968aa12 \
-    --hash=sha256:cdd15b8442b527575d733d90cfd6d3c4cbaebf989e2298b0cb57a7916c66254f \
-    --hash=sha256:dd2783352917b7cb3ab12b7c3f7757210d93af6df0bd2d876a8e5b53b2feb3eb \
-    --hash=sha256:dd2b66c915f1b22ca6533b48e8ee435800b25f74f419c40e1a92271666d8b297 \
-    --hash=sha256:e103584421b7205f022bd413a324ff26905ffa84fcc1536f5787bf554d5d390b \
-    --hash=sha256:e995ad77b0685747bdb51f7a5cd7e6cb8efe73e29517b0f2c95fc2e6d10d5a90 \
-    --hash=sha256:eb27a9ebe9029c872abadf4f9dcb18c9f6a4b7a4afe137f79a61df1ae59dc6bf \
-    --hash=sha256:f682671a2e19b7b4caa572ff3073557de049a153946305e051a4f50bb0e5e1bd \
-    --hash=sha256:f887643cf1c7a04e898547bd9f0acf6654d772ebd153012433ef950315dcf776 \
-    --hash=sha256:fa7a089298fcbdaed493dd25c2f13574ccfc708f89a7aae8e3c25fd8393f5c81 \
-    --hash=sha256:fae59c5e345f5ca234c85d157f1c7d5e0086126b45b5f7cfa66ffe41d049fdd6
+dulwich==1.2.9 \
+    --hash=sha256:01357ee607bed532148cd57fa72ebd6994cbea262d4ef0498493fa4cfcec7235 \
+    --hash=sha256:0386ab471ac01c1b862ff23845d637d5069270c376de49b4fafaae82f7b1e1f8 \
+    --hash=sha256:083500a95ca29902a0872d04210802139b52a7d30d322ebaf6711e5d62a0d98d \
+    --hash=sha256:18c3cb9a9eca46e1cdf4a95c0e4de82ed6e67e6f1c499affd70c1eb696a5aeaa \
+    --hash=sha256:19a9c89066329d6a8089eebb300c9d78d4927db51c48dc3e30973971b524807d \
+    --hash=sha256:1aa1b55f59a046fc8f25a67560473c789b7ec113b85c6a08021aae10c6f78945 \
+    --hash=sha256:255c4c3605582fe8958afeff94fc1f0883aedc37495c43a74e031b904f3bb86d \
+    --hash=sha256:264267b207cc19b2460a27b2b20c40b681e6712b1df857a8993fe4e9ab977f9a \
+    --hash=sha256:27dc86b999f25f314205e723a51860851563b7ec144ed852acdaf9c2e6c4a714 \
+    --hash=sha256:2c8760ad8cd09d26cc2da891bcb65e3ffc3b4dc4ca58d4377d9cd0712cb9dd37 \
+    --hash=sha256:300573ce5075641d18562da5343f53352c5672465ccd7974ef88d316bf043f84 \
+    --hash=sha256:30e72110630e2990d11770227191dfa730b7c045030f818eca5803c6b89bbc5b \
+    --hash=sha256:342e86cae4de7eb92ab575e73d582008045c7d6167e26190f21396a53b6eefd6 \
+    --hash=sha256:3d5a2896b6dc3f0c794d34b3eb1af317a43b557fefbee0099ef83d35bb6e102f \
+    --hash=sha256:516f843f9a03c34cf4f5f8b55a459bd8833550f4b44dade1ea7f91ef907788e7 \
+    --hash=sha256:598cfe12262f97e13a7caf7793afd76e909ea9b1f228ff2b0d0af9cd3992829b \
+    --hash=sha256:5a2923f2cc4abc4ced2769a54cdec51be949717208ab9a31fe2565fe27f09bbb \
+    --hash=sha256:5c636fcb33c4db5495a2dc7686cf6a26cf537060a859982e104dcf67635ea7f7 \
+    --hash=sha256:5e6eb07fbd288059da71019f6746655cd1e136db2f1664fa3e1c81bc11973187 \
+    --hash=sha256:697fc6dbec9fb33d91a53c36c27bbac7e25e2008fb70e90d6f26e05ac95dfdf2 \
+    --hash=sha256:69e231d2d4d57ba0d9767ec7c250e7d589575a3e1dff7fc3871658b9659b49e3 \
+    --hash=sha256:6ac4b9dd9d668bf757aae70641adba22f9aa0c916ad45d3f734fdd58edb1add8 \
+    --hash=sha256:6d86a1baa6f6dd8a11770cf210cc9193e1debb68a7265dfe6da3682b7167d631 \
+    --hash=sha256:769b5e8a9e8aaf25e4cf327030d5edbf5558df661ba5e13ff48edeca0034e5f0 \
+    --hash=sha256:79ff0ff35c4e17ccd58f9bfb23f4f8d416b0b09337b8c99ee3b4f10459bb0d68 \
+    --hash=sha256:81e1005ffc5d5c872bfc87ac3442f722bce27ba10e435543d5302853c34abf56 \
+    --hash=sha256:90c79e0fe54f63f6b56aacc9b5fdfd20771810607a1dc18fa2a78754bf6abade \
+    --hash=sha256:9263f68eefe21c84fd950c221ad8c4752be5ca6aa28362c7662e3d6a1c16ecbc \
+    --hash=sha256:9dcae6b21ca4ddafe30f79caf3fdb3137214886cc09e6bf1e67e9f5bb61e8206 \
+    --hash=sha256:a94c107eb1b8e397dd6440248f939e31756c4738eaa038d3416b52bad8ece94c \
+    --hash=sha256:ac47e02988bdcde0c23f98275908390448617d491ad5d9cb9f33cf3eb8ad512b \
+    --hash=sha256:ad55ec9bb7dc354f92970b10ab148d7ab8302f3afd1c5629f3fac486521c7a82 \
+    --hash=sha256:b01fd4d8bd4fdd2bd99eb465e101b4fac2b50436e317b971da7ac3a1bd3a83d8 \
+    --hash=sha256:b395466b78eb5c36baf34381b8b831fd26da8a44b428a2eea1d57ba53f68a234 \
+    --hash=sha256:c68e1302c77baa6db49dde60b2878b4f56728316e9f1bd5adc28d8a22058d1ed \
+    --hash=sha256:cc8e526db5e0671390c417b9cebabeaf60f50ab86f35e9d481445b51be0bc4b5 \
+    --hash=sha256:d154fc8cb21d393f064057c2965f481464b8d82977c4dff335ce89fb60cd46e7 \
+    --hash=sha256:e27a06f9f71275d712b616ad23008df5f2dcf54a06cb8e2a24be8819ee1ce13a \
+    --hash=sha256:e92f76f0048b076ef692094d28645c5e0f65dae1d5e393fbb2e8db2edc017cd3 \
+    --hash=sha256:e96f5d29bf509ceb2dbf9cf4de67fe6e5d785b22f721814360563be6757e7473 \
+    --hash=sha256:f1ce4761460162596f3c00b61057c66fce07bcfc89de94c1c3a027ea9e675ec3 \
+    --hash=sha256:f99f886be2816ad36fe9abfdeacf3b31eb5dcaa0479e6c7c8ad814426bf4b5b3
     # via poetry
 fastjsonschema==2.21.2 \
     --hash=sha256:1c797122d0a86c5cace2e54bf4e819c36223b552017172f32c5c024a6b77e463 \
@@ -621,15 +621,16 @@ packageurl-python==0.17.6 \
     --hash=sha256:1252ce3a102372ca6f86eb968e16f9014c4ba511c5c37d95a7f023e2ca6e5c25 \
     --hash=sha256:31a85c2717bc41dd818f3c62908685ff9eebcb68588213745b14a6ee9e7df7c9
     # via cyclonedx-python-lib
-packaging==26.2 \
-    --hash=sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e \
-    --hash=sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661
+packaging==26.3 \
+    --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
     # via
     #   build
     #   findpython
     #   pip-audit
     #   pip-requirements-parser
     #   poetry
+    #   virtualenv
 pbs-installer[download,install]==2026.6.10 \
     --hash=sha256:85f6665692aeb4297e1295761c9f4a6c7f047e0bb6947847ab3abf6de9650a10 \
     --hash=sha256:c8d7faa06d529ec8db53975da810376fff44e850e5b7b440a29f3b88edd62bd6
@@ -657,23 +658,22 @@ platformdirs==4.10.0 \
     #   findpython
     #   pip-audit
     #   poetry
-    #   python-discovery
     #   virtualenv
-poetry==2.4.1 \
-    --hash=sha256:189399b80347ecf908244b2564a7b1d92b648fa1fe2a204888f94a472fec0cac \
-    --hash=sha256:a91f13279a3c9add0d12c5ca5c7cb173622930a5c8272fee68c751cb5c72f951
+poetry==2.5.1 \
+    --hash=sha256:19fbd566efced512be58989a756aa1333cdc9b6aabb4fc84fd1ec9d29ee74874 \
+    --hash=sha256:3f7910abc667ce0c33a67e306baf017acdec1c8eeec4aa64d176e530d8338a61
     # via
     #   -r build.in
     #   poetry-plugin-export
-poetry-core==2.4.0 \
-    --hash=sha256:4305848477da00272bebd3f615bbec87f64bd117cdb858ab660b626a06a9d96c \
-    --hash=sha256:4e8c7496cf797998ffc493f2e23eba4b038c894c08eadacdcdf688945de6b43a
+poetry-core==2.5.0 \
+    --hash=sha256:81d04c9253b19d0604718268d781867c8f7b2128e5b25bbf1e84141eec6b89c4 \
+    --hash=sha256:98ee465b66f7e14bb9fbe68fb5e00d0cff184f036993ec94610ae4b5612f3add
     # via
     #   poetry
     #   poetry-plugin-export
-poetry-plugin-export==1.10.0 \
-    --hash=sha256:26ef9df924cd874a825d92d6bc01a5a869a4a28d2f2ebba61d3b5b19c60120f0 \
-    --hash=sha256:fb9b61332718fb91c8d9399edb00fd73cf99de37506adf617fbdf55079bab223
+poetry-plugin-export==1.10.1 \
+    --hash=sha256:83f10f98bb39ddc0dc839bdaa04848c9b2265a77e95d8dfd6e82071cab94540f \
+    --hash=sha256:b1429306da4eb0fd5c3b52a3bf37a5dfcdac96c6ddcfd08f6385be4aa11932d3
     # via -r build.in
 py-serializable==2.1.0 \
     --hash=sha256:9d5db56154a867a9b897c0163b33a793c804c80cee984116d02d49e4578fc103 \
@@ -697,9 +697,9 @@ pyproject-hooks==1.2.0 \
     # via
     #   build
     #   poetry
-python-discovery==1.4.2 \
-    --hash=sha256:475803f53b7b2ed6e490e27373f9d8340f7d2eebf9acdaf645d7d714c97bb500 \
-    --hash=sha256:8f3746c4b4968d22afbb97d36e1a0e5b66e6c0f297290f2e95f05b9b8bf18690
+python-discovery==1.6.1 \
+    --hash=sha256:cf87d3627dfb4412437fdd5b13eae402607722998d21567993aedbc59b23c15e \
+    --hash=sha256:d43fcdef879fe795352bd13ccf8d185ba5a9f86f36cfcd00529f596e737442b3
     # via virtualenv
 rapidfuzz==3.14.5 \
     --hash=sha256:0084b687b02b4e569b46d8d6d4ad25659528e6081cd6d067ca453a69035f07e4 \
@@ -877,16 +877,18 @@ trove-classifiers==2026.6.1.19 \
     --hash=sha256:ab4c4ec93cc4a4e7815fa759906e05e6bb3f2fbd92ea0f897288c6a43efd15b3 \
     --hash=sha256:c5132b4b61a829d11cfbd2d72e97f20a45ed6edb95e45c5efdeb5e00836b2745
     # via poetry
-urllib3==2.7.0 \
-    --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c \
-    --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897
+urllib3==2.8.0 \
+    --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 \
+    --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63
     # via
     #   dulwich
     #   requests
-virtualenv==21.4.3 \
-    --hash=sha256:75f4127d4067397c64f38579ce918fec6bf9ca2cd4f48685e82952cc3c035840 \
-    --hash=sha256:938ff0fd3f4e0f0d3a025f67a3d2f25e3c3aabbcd5857ea6170619138d72d141
-    # via poetry
+virtualenv==21.14.9 \
+    --hash=sha256:4d1bee354cd81c820da3bee56e38be3426490f8d1fc54e10ea5b2072ebad8ef8 \
+    --hash=sha256:ac51744da66ae56ff814b087d65096c94de698ec520adc624b108b679655809b
+    # via
+    #   -r build.in
+    #   poetry
 
 # WARNING: The following packages were not pinned, but pip requires them to be
 # pinned when the requirements file includes hashes and the requirement is not
