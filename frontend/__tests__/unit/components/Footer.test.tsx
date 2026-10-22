@@ -28,6 +28,14 @@ jest.mock('@heroui/button', () => ({
   ),
 }))
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content?: string }) => (
+    <div data-testid="tooltip" data-content={content}>
+      {children}
+    </div>
+  ),
+}))
+
 jest.mock('react-icons/fa6', () => ({
   FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="github-icon" {...props} />,
   FaSlack: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="slack-icon" {...props} />,
@@ -177,7 +185,7 @@ describe('Footer', () => {
       renderFooter()
 
       // Test GitHub icon
-      const githubLink = screen.getByLabelText('OWASP Nest GitHub')
+      const githubLink = screen.getByLabelText('Follow OWASP Nest on GitHub')
       expect(githubLink).toBeInTheDocument()
       expect(githubLink).toHaveAttribute('href', 'https://github.com/owasp/nest')
       expect(githubLink).toHaveAttribute('target', '_blank')
@@ -185,20 +193,23 @@ describe('Footer', () => {
       expect(githubLink.querySelector('[data-testid="github-icon"]')).toBeInTheDocument()
 
       // Test Slack icon
-      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      const slackLink = screen.getByLabelText('Follow OWASP Nest on Slack')
       expect(slackLink).toBeInTheDocument()
       expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/project-nest')
       expect(slackLink).toHaveAttribute('target', '_blank')
       expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
       expect(slackLink.querySelector('[data-testid="slack-icon"]')).toBeInTheDocument()
 
-      // Test that all icons have basic attributes
+      // Test that all icons have basic attributes and tooltip content
       for (const icon of mockFooterIcons) {
-        const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
+        const link = screen.getByLabelText(`Follow OWASP Nest on ${icon.label}`)
         expect(link).toBeInTheDocument()
         expect(link).toHaveAttribute('href', icon.href)
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+
+        const tooltip = link.closest('[data-testid="tooltip"]')
+        expect(tooltip).toHaveAttribute('data-content', `Follow us on ${icon.label}`)
 
         const iconElement = link.querySelector('svg')
         expect(iconElement).toBeInTheDocument()

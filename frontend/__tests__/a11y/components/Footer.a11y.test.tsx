@@ -3,6 +3,10 @@ import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
 import Footer from 'components/Footer'
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
 describe.each([
   { theme: 'light', name: 'light' },
   { theme: 'dark', name: 'dark' },
