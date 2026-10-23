@@ -12,18 +12,16 @@ export default function getIcsFileUrl(event: CalendarEvent): Promise<string> {
       return [d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()]
     }
 
-    const getEndDate = (start: DateArray, end: DateArray): DateArray => {
-      if (start.join('-') === end.join('-')) {
-        const [y, m, d] = end
-        const nextDay = new Date(Date.UTC(y, m - 1, d + 1))
-        return [nextDay.getUTCFullYear(), nextDay.getUTCMonth() + 1, nextDay.getUTCDate()]
-      }
-      return end
+    const getExclusiveEndDate = (end: DateArray): DateArray => {
+      // ICS end dates are exclusive, while event end dates are inclusive.
+      const [y, m, d] = end
+      const nextDay = new Date(Date.UTC(y, m - 1, d + 1))
+      return [nextDay.getUTCFullYear(), nextDay.getUTCMonth() + 1, nextDay.getUTCDate()]
     }
 
     const startArray = parseDate(event.startDate)
     const rawEndArray = parseDate(event.endDate ?? event.startDate)
-    const finalEndArray = getEndDate(startArray, rawEndArray)
+    const finalEndArray = getExclusiveEndDate(rawEndArray)
 
     const eventAttributes: EventAttributes = {
       start: startArray,
