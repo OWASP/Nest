@@ -46,6 +46,16 @@ describe('getContributionDateRange', () => {
       endAt: '2026-10-22T12:00:00Z',
       expected: { startDate: '2026-10-22', endDate: '2026-10-22' },
     },
+    {
+      startAt: '2025-10-22T12:30Z',
+      endAt: '2026-10-22T12:30+05:30',
+      expected: { startDate: '2025-10-22', endDate: '2026-10-22' },
+    },
+    {
+      startAt: '2025-10-22T12:30:45.123456Z',
+      endAt: '2026-10-22T12:30:45.123456-00:30',
+      expected: { startDate: '2025-10-22', endDate: '2026-10-22' },
+    },
   ])(
     'normalizes valid saved bounds to UTC dates ($startAt, $endAt)',
     ({ startAt, endAt, expected }) => {
@@ -74,6 +84,11 @@ describe('getContributionDateRange', () => {
     { startAt: '2026-10-23', endAt: '2026-10-22' },
     { startAt: '2026-10-22T12:00:00Z', endAt: '2026-10-22T01:00:00Z' },
     { startAt: '2025-10-22T12:00:00', endAt: '2026-10-22' },
+    { startAt: '2025-10-22T12:00:00+24:00', endAt: '2026-10-22' },
+    { startAt: '2025-10-22T12:00:00-24:00', endAt: '2026-10-22' },
+    { startAt: '2025-10-22T12:00:00+05:60', endAt: '2026-10-22' },
+    { startAt: '2025-10-22T12:00:00+0530', endAt: '2026-10-22' },
+    { startAt: '2025-10-22T12:30.5Z', endAt: '2026-10-22' },
     { startAt: '2025-10-22T12:00:00ZjunkZ', endAt: '2026-10-22' }, // cspell:ignore Zjunk
   ])('falls back when saved bounds are unusable ($startAt, $endAt)', ({ startAt, endAt }) => {
     expect(

@@ -68,6 +68,7 @@ def entity(request):
 
 @pytest.mark.parametrize("days", [365, 90])
 def test_command_arguments(command, days):
+    """Accept the default or custom reporting length without changing selection defaults."""
     parser = ArgumentParser()
     command.add_arguments(parser)
     arguments = ["--entity-type", "chapter"]
@@ -80,15 +81,17 @@ def test_command_arguments(command, days):
 
 
 def test_repository_selection_is_deduplicated(command, entity):
+    """Count a repository once even when a project references it through both relationships."""
     expected = {1, 2} if isinstance(entity, Project) else {1}
     assert set(command._get_repository_ids(entity)) == expected
 
 
-def test_report_groups_and_filters_all_events_in_postgresql(command, entity):
+def test_report_compiles_grouped_filtered_queries_for_all_events(command, entity):
     """Compile the real ORM queries without requiring a database in unit-test CI."""
     queries = []
 
     def grouped_rows(queryset):
+        """Capture compiled SQL and return controlled daily groups without executing queries."""
         sql, parameters = queryset.query.sql_with_params()
         lookups = {
             (lookup.lhs.target.name, lookup.lookup_name): lookup.rhs
@@ -137,6 +140,7 @@ def test_report_groups_and_filters_all_events_in_postgresql(command, entity):
 
 
 def test_empty_report_still_records_period(command, entity):
+    """Keep period metadata and zero counters when the entity has no repositories."""
     entity.owasp_repository = None
     if isinstance(entity, Project):
         entity.repositories.all.return_value = []
@@ -159,6 +163,7 @@ def test_empty_report_still_records_period(command, entity):
 
 @pytest.mark.parametrize("days", [365, 90])
 def test_handle_uses_one_utc_clock_and_saves_both_fields(command, entity, days):
+    """Reuse one UTC interval for all entities and save daily data and counters together."""
     model = Project if isinstance(entity, Project) else Chapter
     second = mock.Mock(spec=model)
     second.key = "second-entity"
@@ -194,6 +199,7 @@ def test_handle_uses_one_utc_clock_and_saves_both_fields(command, entity, days):
 
 
 def test_handle_preserves_key_and_offset_filtering(command, entity):
+    """Apply the requested key before skipping entities with the existing offset option."""
     model = Project if isinstance(entity, Project) else Chapter
     skipped = mock.Mock(spec=model, key="other-entity")
     queryset = MockQuerySet([skipped, entity, entity])
@@ -210,6 +216,7 @@ def test_handle_preserves_key_and_offset_filtering(command, entity):
 
 @pytest.mark.parametrize("model", [Chapter, Project])
 def test_handle_empty_selection_does_not_save(command, model):
+    """Avoid a bulk save when no active entities match the selection."""
     with (
         mock.patch.object(model.objects, "filter", return_value=MockQuerySet()),
         mock.patch.object(model, "bulk_save") as save,

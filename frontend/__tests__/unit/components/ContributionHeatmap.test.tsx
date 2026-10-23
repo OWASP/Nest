@@ -51,12 +51,14 @@ const renderWithTheme = (ui: React.ReactElement, theme: 'light' | 'dark' = 'ligh
   return render(<ThemeProvider attribute="class">{ui}</ThemeProvider>)
 }
 
+/** Read the latest chart configuration instead of relying on mock call ordering. */
 const getChartProps = (): MockChartProps => {
   const props = mockChart.mock.lastCall?.[0]
   if (!props) throw new Error('The heatmap chart has not rendered')
   return props
 }
 
+/** Exercise the actual tooltip callback with a selected calendar cell. */
 const getTooltip = (seriesIndex: number, dataPointIndex: number): string => {
   const { options, series } = getChartProps()
   const custom = options.tooltip?.custom
@@ -71,6 +73,7 @@ const getTooltip = (seriesIndex: number, dataPointIndex: number): string => {
   return tooltip
 }
 
+/** Locate a UTC calendar date before invoking its tooltip. */
 const getTooltipForDate = (date: string): string => {
   const { series } = getChartProps()
   const seriesIndex = series.findIndex((day) => day.data.some((point) => point.date === date))
@@ -819,9 +822,13 @@ describe('ContributionHeatmap', () => {
             backgroundColor: ranges?.[index].color,
           })
         })
-        expect(items[0]).toHaveTextContent('0 messages per day')
-        expect(items[1]).toHaveTextContent('1–4 messages per day')
-        expect(items[4]).toHaveTextContent('13+ messages per day')
+        expect(items.map((item) => item.textContent)).toEqual([
+          '0 messages per day',
+          '1–4 messages per day',
+          '5–8 messages per day',
+          '9–12 messages per day',
+          '13+ messages per day',
+        ])
       }
     )
   })
@@ -910,6 +917,20 @@ describe('ContributionHeatmap', () => {
   })
 
   describe('Variants', () => {
+    it.each([
+      { variant: 'default' as const, minWidth: 600 },
+      { variant: 'medium' as const, minWidth: 500 },
+      { variant: 'compact' as const, minWidth: 400 },
+    ])('retains the $variant baseline width for a short period', async ({ variant, minWidth }) => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant={variant} />)
+
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      expect(screen.getByTestId('mock-heatmap-chart').parentElement).toHaveStyle({
+        width: '100%',
+        minWidth: `${minWidth}px`,
+      })
+    })
+
     it.each([
       { variant: 'default' as const, minWidth: 600 },
       { variant: 'medium' as const, minWidth: 570 },

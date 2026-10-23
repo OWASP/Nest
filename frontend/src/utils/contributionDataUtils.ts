@@ -10,20 +10,21 @@ export interface ContributionStats {
   endAt?: string
 }
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/
+const TIMESTAMP_WITH_ZONE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/
+
+/** Parse valid calendar dates or timestamps with an explicit timezone; reject other values. */
 const parseContributionDate = (value: unknown): Date | undefined => {
   // Timestamps need an explicit timezone; date-only values represent UTC days.
-  if (
-    typeof value !== 'string' ||
-    !/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d))?$/.test(
-      value
-    )
-  ) {
+  if (typeof value !== 'string' || !(DATE_ONLY.test(value) || TIMESTAMP_WITH_ZONE.test(value))) {
     return undefined
   }
   const parsed = parseISO(value.length === 10 ? `${value}T00:00:00Z` : value)
   return Number.isNaN(parsed.getTime()) ? undefined : parsed
 }
 
+/** Prefer a valid saved UTC period, then daily-date bounds; return nothing without usable dates. */
 export function getContributionDateRange(
   stats?: ContributionStats,
   contributionData?: Record<string, number>

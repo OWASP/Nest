@@ -13,6 +13,9 @@ const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
+const MIN_WIDTH_BY_VARIANT = { compact: 400, medium: 500, default: 600 } as const
+
+/** Share activity thresholds and theme colors between calendar cells and the legend. */
 const getColorRanges = (isDarkMode: boolean) => [
   { from: 0, to: 0, color: isDarkMode ? '#2C3A4D' : '#E7E7E6', name: 'No activity' },
   { from: 1, to: 4, color: isDarkMode ? '#4A5F7A' : '#7BA3C0', name: 'Low' },
@@ -26,6 +29,14 @@ const getColorRanges = (isDarkMode: boolean) => [
   },
 ]
 
+/** Format zero activity, bounded activity bands, and the open-ended highest band. */
+const formatRangeBounds = (from: number, to: number): string => {
+  if (from === to) return `${from}`
+  if (to === Number.MAX_SAFE_INTEGER) return `${from}+`
+  return `${from}–${to}`
+}
+
+/** Configure calendar labels, padding tooltips, and theme updates without label movement. */
 const getChartOptions = (
   isDarkMode: boolean,
   unit: string,
@@ -101,7 +112,7 @@ const getChartOptions = (
     custom: ({ seriesIndex, dataPointIndex, w }: ApexTooltipCustomOpts) => {
       const series = w.config.series as ContributionHeatmapSeries
       const data = series?.[seriesIndex]?.data?.[dataPointIndex]
-      if (!data || data.y === null) return ''
+      if (data?.y == null) return ''
 
       const count = data.y
       const date = data.date
@@ -187,6 +198,7 @@ interface ContributionHeatmapProps {
   variant?: 'default' | 'medium' | 'compact'
 }
 
+/** Display contribution or message activity within the supplied reporting period. */
 const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   contributionData,
   startDate,
@@ -216,10 +228,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   )
 
   // Fit the container, but keep at least 10px per week when scrolling is necessary.
-  const minChartWidth = Math.max(
-    variant === 'compact' ? 400 : variant === 'medium' ? 500 : 600,
-    weeksCount * 10 + 40
-  )
+  const minChartWidth = Math.max(MIN_WIDTH_BY_VARIANT[variant], weeksCount * 10 + 40)
 
   const getChartHeight = () => {
     if (variant === 'compact') return 150
@@ -276,13 +285,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           <span aria-hidden="true">Less</span>
           <ul aria-label={`Daily ${unit} counts, from less to more`} className="flex gap-1">
             {colorRanges.map(({ from, to, color, name }) => {
-              const bounds =
-                from === to
-                  ? `${from}`
-                  : to === Number.MAX_SAFE_INTEGER
-                    ? `${from}+`
-                    : `${from}–${to}`
-              const description = `${bounds} ${pluralize(to, unit)} per day`
+              const description = `${formatRangeBounds(from, to)} ${pluralize(to, unit)} per day`
               return (
                 <li key={name} title={description}>
                   <span

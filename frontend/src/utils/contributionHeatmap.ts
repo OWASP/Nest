@@ -5,12 +5,14 @@ export type ContributionHeatmapSeries = Array<{
 
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' })
 
+/** Normalize an instant to its UTC calendar day without mutating the input. */
 const toUtcDay = (value: string | Date): Date => {
   const date = new Date(value)
   date.setUTCHours(0, 0, 0, 0)
   return date
 }
 
+/** Build complete Monday-based weeks with null padding outside the inclusive UTC period. */
 export const buildContributionCalendar = (
   startDate: string,
   endDate: string,
@@ -63,8 +65,11 @@ export const buildContributionCalendar = (
   // Leave room for the first full month when the starting partial month is only one column wide.
   if (monthLabels.W1 && monthLabels.W2) delete monthLabels.W1
 
+  // ApexCharts displays the last series at the top, so reverse to put Monday first.
+  series.reverse()
+
   return {
-    heatmapSeries: series.reverse(),
+    heatmapSeries: series,
     weeksCount,
     monthLabels,
     startDate: normalizedStart,
