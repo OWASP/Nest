@@ -63,13 +63,13 @@ class TestChapterIndexMixin:
 
         assert not result
 
-    def test_is_indexable_false_empty_repository(self):
-        """Test is_indexable returns False when repository is empty."""
+    def test_is_indexable_without_repository(self):
+        """Test a chapter with coordinates is indexable without a repository."""
         mock_chapter = self.create_mock_chapter(is_empty=True)
 
         result = ChapterIndexMixin.is_indexable.fget(mock_chapter)
 
-        assert not result
+        assert result
 
     def test_idx_country(self):
         """Test idx_country returns country."""
@@ -113,12 +113,12 @@ class TestChapterIndexMixin:
         assert result
 
     def test_idx_key(self):
-        """Test idx_key strips www-chapter- prefix."""
+        """Test idx_key returns the chapter key."""
         mock_chapter = self.create_mock_chapter(key="www-chapter-london")
 
         result = ChapterIndexMixin.idx_key.fget(mock_chapter)
 
-        assert result == "london"
+        assert result == "www-chapter-london"
 
     def test_idx_meetup_group(self):
         """Test idx_meetup_group returns meetup group."""

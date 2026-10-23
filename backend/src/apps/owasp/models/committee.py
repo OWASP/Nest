@@ -1,5 +1,7 @@
 """OWASP app committee model."""
 
+from __future__ import annotations
+
 from functools import lru_cache
 
 from django.db import models
@@ -56,9 +58,46 @@ class Committee(
         super().save(*args, **kwargs)
 
     @property
-    def nest_key(self):
-        """Get Nest key."""
-        return self.key.replace("www-committee-", "")
+    def nest_key(self) -> str:
+        """Return the public group slug.
+
+        Stored keys may still start with ``www-committee-``. The group page does not.
+
+        Returns:
+            str: Committee slug used in the owasp.org group URL.
+
+        """
+        prefix = "www-committee-"
+        if self.key.lower().startswith(prefix):
+            return self.key[len(prefix) :]
+        return self.key
+
+    @classmethod
+    def get_by_key(cls, key: str, *, active_only: bool = True) -> Committee | None:
+        """Return the committee stored under this key.
+
+        A slug matches a stored ``www-committee-`` key, and that prefixed key matches the slug.
+
+        Args:
+            key (str): Committee key.
+            active_only (bool): Limit the lookup to active committees. Pass False to include
+                inactive committees.
+
+        Returns:
+            Committee | None: The matching committee, if one exists.
+
+        """
+        queryset = cls.active_committees if active_only else cls.objects
+        normalized = key.strip()
+        committee = queryset.filter(key__iexact=normalized).first()
+        if committee is not None:
+            return committee
+        prefix = "www-committee-"
+        lowered = normalized.lower()
+        alternate = (
+            lowered.removeprefix(prefix) if lowered.startswith(prefix) else f"{prefix}{normalized}"
+        )
+        return queryset.filter(key__iexact=alternate).first()
 
     @staticmethod
     @lru_cache
@@ -74,7 +113,7 @@ class Committee(
         BulkSaveModel.bulk_save(Committee, committees, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, *, save: bool = True) -> "Committee":
+    def update_data(gh_repository, repository, *, save: bool = True) -> Committee:
         """Update committee data."""
         key = gh_repository.name.lower()
         try:

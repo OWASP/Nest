@@ -53,6 +53,7 @@ minimumReleaseAgeExclude:
   - '@next/third-parties@16.4.3'
   - '@opentelemetry/core@2.8.0'
   - '@opentelemetry/semantic-conventions@1.43.0'
+  - argparse@3.0.3
   - baseline-browser-mapping@2.11.1
   - basic-ftp@6.2.2
   - body-parser@1.20.6
@@ -67,6 +68,7 @@ minimumReleaseAgeExclude:
   - immutable@5.1.8
   - ip-address@10.7.2
   - js-yaml@4.3.2
+  - markdown-it@15.0.3
   - nanoid@3.3.18
   - next-auth@4.24.15
   - next@16.4.3

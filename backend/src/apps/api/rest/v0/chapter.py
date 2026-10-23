@@ -4,6 +4,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
+from django.db.models.functions import Coalesce
 from django.http import HttpRequest
 from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -15,6 +16,13 @@ from apps.api.rest.v0.common import Leader, LocationFilter, ValidationErrorSchem
 from apps.owasp.models.chapter import Chapter as ChapterModel
 
 router = RouterPaginated(tags=["Chapters"])
+
+TIMESTAMP_ORDERING = {
+    "created_at": Coalesce("created_at", "nest_created_at"),
+    "-created_at": Coalesce("created_at", "nest_created_at").desc(),
+    "updated_at": Coalesce("updated_at", "nest_updated_at"),
+    "-updated_at": Coalesce("updated_at", "nest_updated_at").desc(),
+}
 
 
 class ChapterBase(Schema):
@@ -31,6 +39,16 @@ class ChapterBase(Schema):
     def resolve_key(obj: ChapterModel) -> str:
         """Resolve key."""
         return obj.nest_key
+
+    @staticmethod
+    def resolve_created_at(obj: ChapterModel) -> datetime:
+        """Return the source timestamp, or when Nest stored the chapter."""
+        return obj.created_at or obj.nest_created_at
+
+    @staticmethod
+    def resolve_updated_at(obj: ChapterModel) -> datetime:
+        """Return the source timestamp, or when Nest last stored the chapter."""
+        return obj.updated_at or obj.nest_updated_at
 
 
 class Chapter(ChapterBase):
@@ -92,7 +110,10 @@ def list_chapters(
     ),
 ) -> list[Chapter]:
     """Get chapters."""
-    return filters.filter(ChapterModel.active_chapters.order_by(ordering or "-created_at"))
+    order = ordering or "-created_at"
+    return filters.filter(
+        ChapterModel.active_chapters.order_by(TIMESTAMP_ORDERING.get(order, order))
+    )
 
 
 @router.get(
@@ -112,11 +133,7 @@ def get_chapter(
     chapter_id: str = Path(example="London"),
 ) -> ChapterDetail | ChapterError:
     """Get chapter."""
-    if chapter := ChapterModel.active_chapters.filter(
-        key__iexact=(
-            chapter_id if chapter_id.startswith("www-chapter-") else f"www-chapter-{chapter_id}"
-        )
-    ).first():
+    if chapter := ChapterModel.get_by_key(chapter_id):
         return chapter
 
     return Response({"message": "Chapter not found"}, status=HTTPStatus.NOT_FOUND)

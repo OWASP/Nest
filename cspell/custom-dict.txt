@@ -119,6 +119,7 @@ defectdojo
 demojize
 dismissable
 dkr
+docksec
 dsn
 dvo
 eddsa
