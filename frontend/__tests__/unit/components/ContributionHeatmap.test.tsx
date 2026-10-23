@@ -1,48 +1,36 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import type { ApexOptions } from 'apexcharts'
 import { ThemeProvider, useTheme } from 'next-themes'
 import React from 'react'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import '@testing-library/jest-dom'
 
-jest.mock('react-apexcharts', () => {
-  return function MockChart(props: {
-    options: unknown
-    series: unknown
-    height: string | number
-    type: string
-  }) {
-    const mockSeries = props.series as Array<{
-      name: string
-      data: Array<{ x: string; y: number; date: string }>
-    }>
-    const mockOptions = props.options as Record<string, unknown>
+type HeatmapSeries = Array<{
+  name: string
+  data: Array<{ x: string; y: number | null; date: string }>
+}>
 
-    if (mockOptions.tooltip && typeof mockOptions.tooltip === 'object') {
-      const tooltip = mockOptions.tooltip as { custom?: (...args: unknown[]) => unknown }
-      if (tooltip.custom) {
-        if (mockSeries[0]?.data.length > 0) {
-          tooltip.custom({
-            seriesIndex: 0,
-            dataPointIndex: 0,
-            w: { config: { series: mockSeries } },
-          })
-        }
-        tooltip.custom({
-          seriesIndex: 0,
-          dataPointIndex: 999,
-          w: { config: { series: mockSeries } },
-        })
-      }
-    }
+interface MockChartProps {
+  options: ApexOptions
+  series: HeatmapSeries
+  height: string | number
+  type: string
+}
+
+const mockChart = jest.fn<void, [MockChartProps]>()
+
+jest.mock('react-apexcharts', () => {
+  return function MockChart(props: MockChartProps) {
+    mockChart(props)
 
     return (
       <div
         data-testid="mock-heatmap-chart"
         data-type={props.type}
         data-height={props.height}
-        data-series-length={mockSeries.length}
+        data-series-length={props.series.length}
       >
-        {mockSeries.map((series) => (
+        {props.series.map((series) => (
           <div key={series.name} data-testid={`series-${series.name}`}>
             {series.name}: {series.data.length} data points
           </div>
@@ -60,6 +48,34 @@ jest.mock('next-themes', () => ({
 const renderWithTheme = (ui: React.ReactElement, theme: 'light' | 'dark' = 'light') => {
   ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
   return render(<ThemeProvider attribute="class">{ui}</ThemeProvider>)
+}
+
+const getChartProps = (): MockChartProps => {
+  const props = mockChart.mock.lastCall?.[0]
+  if (!props) throw new Error('The heatmap chart has not rendered')
+  return props
+}
+
+const getTooltip = (seriesIndex: number, dataPointIndex: number): string => {
+  const { options, series } = getChartProps()
+  const custom = options.tooltip?.custom
+  if (typeof custom !== 'function') throw new Error('A custom tooltip is required')
+  const tooltip = custom({
+    series: [],
+    seriesIndex,
+    dataPointIndex,
+    w: { config: { series }, globals: {} },
+  })
+  if (typeof tooltip !== 'string') throw new Error('The tooltip must return HTML text')
+  return tooltip
+}
+
+const getTooltipForDate = (date: string): string => {
+  const { series } = getChartProps()
+  const seriesIndex = series.findIndex((day) => day.data.some((point) => point.date === date))
+  if (seriesIndex < 0) throw new Error(`No calendar cell for ${date}`)
+  const dataPointIndex = series[seriesIndex].data.findIndex((point) => point.date === date)
+  return getTooltip(seriesIndex, dataPointIndex)
 }
 
 describe('ContributionHeatmap', () => {
@@ -328,47 +344,49 @@ describe('ContributionHeatmap', () => {
   describe('Tooltip Behavior', () => {
     it('generates correct tooltip with date formatting', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+
+      const tooltip = document.createElement('div')
+      tooltip.innerHTML = getTooltipForDate('2024-01-01')
+      expect(tooltip).toHaveTextContent('Mon, Jan 1')
+      expect(tooltip).toHaveTextContent('5 contributions')
     })
 
-    it('handles singular and plural unit labels in tooltip', () => {
-      const { rerender } = renderWithTheme(<ContributionHeatmap {...defaultProps} unit="commit" />)
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
-
-      const singleData = { '2024-01-01': 1 }
-      rerender(
-        <ThemeProvider attribute="class">
-          <ContributionHeatmap
-            contributionData={singleData}
-            startDate="2024-01-01"
-            endDate="2024-01-31"
-            unit="commit"
-          />
-        </ThemeProvider>
+    it.each([
+      { unit: 'commit', count: 1, expected: '1 commit' },
+      { unit: 'commit', count: 5, expected: '5 commits' },
+      { unit: 'message', count: 1, expected: '1 message' },
+      { unit: 'message', count: 5, expected: '5 messages' },
+    ])('formats $expected in the tooltip', ({ unit, count, expected }) => {
+      renderWithTheme(
+        <ContributionHeatmap
+          {...defaultProps}
+          contributionData={{ '2024-01-01': count }}
+          unit={unit}
+        />
       )
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+
+      const tooltip = document.createElement('div')
+      tooltip.innerHTML = getTooltipForDate('2024-01-01')
+      expect(tooltip).toHaveTextContent(expected)
     })
 
     it('tooltip respects theme colors', () => {
       const { rerender } = renderWithTheme(<ContributionHeatmap {...defaultProps} />, 'light')
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      expect(getTooltipForDate('2024-01-01')).toContain('background: #FFFFFF')
       ;(useTheme as jest.Mock).mockReturnValue({ theme: 'dark', setTheme: jest.fn() })
       rerender(
         <ThemeProvider attribute="class">
           <ContributionHeatmap {...defaultProps} />
         </ThemeProvider>
       )
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      expect(getTooltipForDate('2024-01-01')).toContain('background: #1F2937')
     })
 
     it('handles missing data in tooltip gracefully', () => {
-      const { container } = renderWithTheme(
+      renderWithTheme(
         <ContributionHeatmap contributionData={{}} startDate="2024-01-01" endDate="2024-01-31" />
       )
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
-
-      const styleTag = container.querySelector('style')
-      expect(styleTag).toBeInTheDocument()
+      expect(getTooltip(0, 999)).toBe('')
     })
   })
 
@@ -381,7 +399,12 @@ describe('ContributionHeatmap', () => {
       renderWithTheme(
         <ContributionHeatmap contributionData={data} startDate="2024-01-01" endDate="2024-01-14" />
       )
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      const { series } = getChartProps()
+      const monday = series.find((day) => day.name === 'Mon')
+      expect(monday?.data.map(({ date, y }) => ({ date, y }))).toEqual([
+        { y: 5, date: '2024-01-01' },
+        { y: 10, date: '2024-01-08' },
+      ])
     })
 
     it('handles week transitions correctly', () => {
@@ -392,7 +415,12 @@ describe('ContributionHeatmap', () => {
       renderWithTheme(
         <ContributionHeatmap contributionData={data} startDate="2024-01-07" endDate="2024-01-14" />
       )
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      const cells = getChartProps().series.flatMap((day) => day.data)
+      const sunday = cells.find((point) => point.date === '2024-01-07')
+      const monday = cells.find((point) => point.date === '2024-01-08')
+      expect(sunday?.y).toBe(5)
+      expect(monday?.y).toBe(10)
+      expect(sunday?.x).not.toBe(monday?.x)
     })
   })
 
@@ -434,7 +462,27 @@ describe('ContributionHeatmap', () => {
           endDate="2024-01-31"
         />
       )
-      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      const { options, series } = getChartProps()
+      const cells = series.flatMap((day) => day.data)
+      const ranges = options.plotOptions?.heatmap?.colorScale?.ranges
+      const expectedBands = [
+        'No activity',
+        'Low',
+        'Low',
+        'Medium',
+        'Medium',
+        'High',
+        'High',
+        'Very High',
+        'Very High',
+      ]
+
+      Object.entries(boundaryData).forEach(([date, count], index) => {
+        expect(cells.find((point) => point.date === date)?.y).toBe(count)
+        expect(ranges?.find((range) => range.from <= count && count <= range.to)?.name).toBe(
+          expectedBands[index]
+        )
+      })
     })
   })
 
@@ -603,13 +651,51 @@ describe('ContributionHeatmap', () => {
   describe('Chart Options Validation', () => {
     it('configures chart with correct options structure', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
-      const chart = screen.getByTestId('mock-heatmap-chart')
-      expect(chart).toHaveAttribute('data-type', 'heatmap')
+      expect(getChartProps().options).toMatchObject({
+        chart: { type: 'heatmap', toolbar: { show: false } },
+        dataLabels: { enabled: false },
+        tooltip: { enabled: true },
+        stroke: { show: true },
+      })
     })
 
     it('renders heatmap chart', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+  })
+
+  describe('Calendar readability regressions (#5742)', () => {
+    it('shows a month label above the calendar', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      const { options, series } = getChartProps()
+      expect(options.xaxis?.labels?.show).toBe(true)
+      expect(options.xaxis?.labels?.formatter?.(series[0].data[0].x)).toBe('Jan')
+    })
+
+    it('shows selected weekday labels beside the calendar', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      const { options } = getChartProps()
+      const yaxis = Array.isArray(options.yaxis) ? options.yaxis[0] : options.yaxis
+      expect(yaxis?.labels?.show).toBe(true)
+    })
+
+    it('explains the color scale with a Less to More legend', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      expect(screen.getByText('Less')).toBeVisible()
+      expect(screen.getByText('More')).toBeVisible()
+    })
+
+    it('shows the displayed period with its year', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      expect(screen.getByText('Jan 1 — 31, 2024')).toBeVisible()
+    })
+
+    it('includes the year in hover dates', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      const tooltip = document.createElement('div')
+      tooltip.innerHTML = getTooltipForDate('2024-01-01')
+      expect(tooltip).toHaveTextContent('Mon, Jan 1, 2024')
     })
   })
 
