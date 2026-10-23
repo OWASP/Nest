@@ -9,4 +9,12 @@ def get_issue_pk(issue_id: GlobalID) -> int:
     if issue_id.type_name != "IssueNode" or not issue_id.node_id.isdecimal():
         msg = "Invalid issue ID."
         raise GraphQLError(msg)
-    return int(issue_id.node_id)
+    try:
+        issue_pk = int(issue_id.node_id)
+    except ValueError as exc:
+        msg = "Invalid issue ID."
+        raise GraphQLError(msg) from exc
+    if issue_pk > 2**63 - 1:
+        msg = "Invalid issue ID."
+        raise GraphQLError(msg)
+    return issue_pk

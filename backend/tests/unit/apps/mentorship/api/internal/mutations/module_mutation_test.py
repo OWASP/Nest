@@ -535,11 +535,12 @@ class TestModuleMutationUnassignIssue:
         info.context.request.user = user
         return info
 
+    @pytest.mark.parametrize("selected_pk", [101, 102])
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_unassign_issue_success(self, mock_module, mock_mentor, mock_gh_user):
-        """Test successful issue un-assignment."""
+    def test_unassign_issue_success(self, mock_module, mock_mentor, mock_gh_user, selected_pk):
+        """Unassign only the selected issue when GitHub numbers overlap."""
         user = MagicMock()
         info = self._make_info(user)
 
@@ -551,20 +552,25 @@ class TestModuleMutationUnassignIssue:
         mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh = MagicMock()
         mock_gh_user.objects.filter.return_value.first.return_value = mock_gh
-        mock_issue = MagicMock()
-        mock_mod.issues.filter.return_value.first.return_value = mock_issue
+        issues = {pk: MagicMock(pk=pk, number=42) for pk in (101, 102)}
+        mock_issue = issues[selected_pk]
+        mock_mod.issues.filter.side_effect = lambda **filters: MagicMock(
+            first=lambda: issues.get(filters["pk"])
+        )
 
         mutation = ModuleMutation()
         result = mutation.unassign_issue_from_user(
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_id=GlobalID("IssueNode", "1"),
+            issue_id=GlobalID("IssueNode", str(selected_pk)),
             user_login="testuser",
         )
 
         assert result == mock_mod
         mock_issue.assignees.remove.assert_called_once_with(mock_gh)
+        other_pk = 102 if selected_pk == 101 else 101
+        issues[other_pk].assignees.remove.assert_not_called()
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_unassign_module_not_found(self, mock_module):
@@ -667,12 +673,15 @@ class TestModuleMutationSetTaskDeadline:
         info.context.request.user = user
         return info
 
+    @pytest.mark.parametrize("selected_pk", [101, 102])
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_task_deadline_success(self, mock_tz, mock_module, mock_mentor, mock_task):
-        """Test successful deadline setting."""
+    def test_set_task_deadline_success(
+        self, mock_tz, mock_module, mock_mentor, mock_task, selected_pk
+    ):
+        """Set a deadline only for the selected issue when GitHub numbers overlap."""
         user = MagicMock()
         info = self._make_info(user)
         mock_task.Status = Task.Status
@@ -686,14 +695,17 @@ class TestModuleMutationSetTaskDeadline:
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
-        mock_issue = MagicMock()
+        issues = {pk: MagicMock(pk=pk, number=42) for pk in (101, 102)}
+        mock_issue = issues[selected_pk]
         assignee = MagicMock()
         assignees_qs = MagicMock()
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
         mock_issue.assignees.all.return_value = assignees_qs
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.side_effect = lambda **filters: MagicMock(
+            first=lambda: issues.get(filters["pk"])
+        )
 
         deadline = datetime(2025, 12, 1, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
@@ -708,11 +720,16 @@ class TestModuleMutationSetTaskDeadline:
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_id=GlobalID("IssueNode", "1"),
+            issue_id=GlobalID("IssueNode", str(selected_pk)),
             deadline_at=deadline,
         )
 
         assert result == mock_mod
+        mock_task.objects.get_or_create.assert_called_once_with(
+            module=mock_mod, issue=mock_issue, assignee=assignee
+        )
+        other_pk = 102 if selected_pk == 101 else 101
+        issues[other_pk].assignees.all.assert_not_called()
         mock_task.objects.bulk_update.assert_called_once()
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -989,11 +1006,12 @@ class TestModuleMutationClearTaskDeadline:
         info.context.request.user = user
         return info
 
+    @pytest.mark.parametrize("selected_pk", [101, 102])
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_single_task(self, mock_module, mock_mentor, mock_task):
-        """Test clearing deadline for a single task."""
+    def test_clear_deadline_single_task(self, mock_module, mock_mentor, mock_task, selected_pk):
+        """Clear a deadline only for the selected issue when GitHub numbers overlap."""
         user = MagicMock()
         info = self._make_info(user)
 
@@ -1004,14 +1022,17 @@ class TestModuleMutationClearTaskDeadline:
         )
         mock_mentor.objects.filter.return_value.exists.return_value = True
 
-        mock_issue = MagicMock()
+        issues = {pk: MagicMock(pk=pk, number=42) for pk in (101, 102)}
+        mock_issue = issues[selected_pk]
         assignee = MagicMock()
         assignees_qs = MagicMock()
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
         mock_issue.assignees.all.return_value = assignees_qs
         issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs.prefetch_related.return_value.filter.side_effect = lambda **filters: MagicMock(
+            first=lambda: issues.get(filters["pk"])
+        )
 
         task_obj = MagicMock()
         task_obj.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
@@ -1019,10 +1040,18 @@ class TestModuleMutationClearTaskDeadline:
 
         mutation = ModuleMutation()
         result = mutation.clear_task_deadline(
-            info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
+            info,
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_id=GlobalID("IssueNode", str(selected_pk)),
         )
 
         assert result == mock_mod
+        mock_task.objects.filter.assert_called_once_with(
+            module=mock_mod, issue=mock_issue, assignee=assignee
+        )
+        other_pk = 102 if selected_pk == 101 else 101
+        issues[other_pk].assignees.all.assert_not_called()
         assert task_obj.deadline_at is None
         task_obj.save.assert_called_once_with(update_fields=["deadline_at"])
 
