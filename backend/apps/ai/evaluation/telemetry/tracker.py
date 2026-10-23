@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 
 from apps.ai.evaluation.telemetry.cost_models import calculate_token_cost
 
+MAX_PERCENTILE = 100.0
+
 
 @dataclass
 class TelemetryTracker:
@@ -28,7 +30,20 @@ class TelemetryTracker:
             prompt_tokens: Count of prompt tokens.
             completion_tokens: Count of completion tokens.
 
+        Raises:
+            ValueError: If latency is invalid or token counts are not non-negative integers.
+
         """
+        if not math.isfinite(latency_ms) or latency_ms < 0:
+            msg = "Latency must be finite and non-negative"
+            raise ValueError(msg)
+        if any(
+            not isinstance(tokens, int) or tokens < 0
+            for tokens in (prompt_tokens, completion_tokens)
+        ):
+            msg = "Token counts must be non-negative integers"
+            raise ValueError(msg)
+
         self.latencies_ms.append(latency_ms)
         self.total_prompt_tokens += prompt_tokens
         self.total_completion_tokens += completion_tokens
@@ -46,7 +61,7 @@ class TelemetryTracker:
         return round(sum(self.latencies_ms) / len(self.latencies_ms), 2)
 
     def percentile_latency(self, p: float) -> float:
-        """Calculate the p-th percentile latency (e.g. 50, 90, 95).
+        """Calculate the p-th percentile latency using linear interpolation.
 
         Args:
             p: Percentile between 0.0 and 100.0.
@@ -54,13 +69,20 @@ class TelemetryTracker:
         Returns:
             Percentile value in milliseconds.
 
+        Raises:
+            ValueError: If p is not finite or is outside the range 0 to 100.
+
         """
+        if not math.isfinite(p) or not 0 <= p <= MAX_PERCENTILE:
+            msg = "Percentile must be finite and between 0 and 100"
+            raise ValueError(msg)
         if not self.latencies_ms:
             return 0.0
         sorted_latencies = sorted(self.latencies_ms)
-        k = math.ceil((p / 100.0) * len(sorted_latencies)) - 1
-        idx = max(0, min(len(sorted_latencies) - 1, k))
-        return round(sorted_latencies[idx], 2)
+        position = (p / MAX_PERCENTILE) * (len(sorted_latencies) - 1)
+        lower = sorted_latencies[math.floor(position)]
+        upper = sorted_latencies[math.ceil(position)]
+        return round(lower + (upper - lower) * (position % 1), 2)
 
     @property
     def p50_latency_ms(self) -> float:

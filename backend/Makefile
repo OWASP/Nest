@@ -90,24 +90,24 @@ exec-db-command-fuzz:
 exec-db-command-fuzz-it:
 	@docker exec -it fuzz-nest-db $(CMD)
 
-exec-nestbot-command:
-ifeq ($(EXEC_MODE),direct)
+define exec-nestbot-direct
 	@if command -v poetry >/dev/null 2>&1 && [ -d "backend" ]; then \
-		cd backend && set -a && [ -f ".env.example" ] && . ./.env.example; set +a; poetry run $(CMD); \
+		cd backend && poetry run $(CMD); \
 	else \
 		$(CMD); \
 	fi
+endef
+
+exec-nestbot-command:
+ifeq ($(EXEC_MODE),direct)
+	$(exec-nestbot-direct)
 else
 	@docker exec -i nest-nestbot $(CMD)
 endif
 
 exec-nestbot-command-it:
 ifeq ($(EXEC_MODE),direct)
-	@if command -v poetry >/dev/null 2>&1 && [ -d "backend" ]; then \
-		cd backend && set -a && [ -f ".env.example" ] && . ./.env.example; set +a; poetry run $(CMD); \
-	else \
-		$(CMD); \
-	fi
+	$(exec-nestbot-direct)
 else
 	@docker exec -it nest-nestbot $(CMD) 2>/dev/null
 endif
@@ -266,7 +266,7 @@ test-backend:
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
 		--env-file backend/.env.example \
-		--rm nest-test-backend pytest
+		--rm nest-test-backend pytest $(PYTEST_ARGS)
 
 test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true

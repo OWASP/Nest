@@ -133,3 +133,6 @@ class TestContributionTools:
         assert "#contribute" in result
         assert "CONTRIBUTING.md" in result
         assert "Contributing to OWASP Nest" in result
+        assert "https://owasp.org/projects/" in result
+        assert "https://owasp.org/chapters/" in result
+        assert "https://github.com/OWASP/Nest/issues" in result

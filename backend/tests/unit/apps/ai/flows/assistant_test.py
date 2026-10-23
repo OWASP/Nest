@@ -2,8 +2,24 @@
 
 from unittest.mock import MagicMock, patch
 
-from apps.ai.flows.assistant import normalize_channel_id, process_query
+import pytest
+
+from apps.ai.flows.assistant import execute_task, normalize_channel_id, process_query
 from apps.slack.constants import OWASP_COMMUNITY_CHANNEL_ID
+
+
+@pytest.mark.parametrize("has_tools", [False, True])
+@patch("apps.ai.flows.assistant.Task")
+@patch("apps.ai.flows.assistant.Crew")
+def test_execute_task_requires_tools_only_when_available(mock_crew, mock_task, has_tools):
+    agent = MagicMock(tools=[MagicMock()] if has_tools else [])
+    mock_crew.return_value.kickoff.return_value = "Welcome to OWASP!"
+
+    assert execute_task(agent, "Hello") == "Welcome to OWASP!"
+
+    task_kwargs = mock_task.call_args.kwargs
+    assert ("You MUST use the provided tools" in task_kwargs["description"]) is has_tools
+    assert ("ONLY on tool results" in task_kwargs["expected_output"]) is has_tools
 
 
 class TestProcessQueryImageEnrichment:

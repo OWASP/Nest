@@ -72,9 +72,9 @@ def format_ai_response_for_slack(text: str) -> str:
     if not text:
         return text
 
-    # Strip existing bold in headings (e.g., # **Title**) to avoid nested asterisks
+    # Remove heading emphasis before adding Slack's outer bold markers.
     def replace_heading(match: re.Match[str]) -> str:
-        content = re.sub(r"^(\*\*|__|\*)(.*?)\1$", r"\2", match.group(1).strip())
+        content = re.sub(r"(\*\*|__|\*)(?=\S)(.+?)(?<=\S)\1", r"\2", match.group(1).strip())
         return f"*{content}*"
 
     def format_text_section(content: str) -> str:
@@ -87,17 +87,23 @@ def format_ai_response_for_slack(text: str) -> str:
         content = re.sub(r"__(.+?)__", r"*\1*", content)
         return format_links_for_slack(content)
 
-    # Split on markdown code blocks; odd indices are code blocks, even indices are regular text
-    parts = text.strip().split("```")
-    num_blocks = len(parts) // 2
-    for i, part in enumerate(parts):
-        if i % 2 and i <= num_blocks * 2 - 1:
-            # Code block: strip optional language tag on first line, leaving content untouched
-            lines = part.split("\n", 1)
-            parts[i] = lines[1].rstrip("\r\n") if len(lines) > 1 else ""
+    parts: list[str] = []
+    section: list[str] = []
+    fence_length = 0
+    for line in text.strip().splitlines(keepends=True):
+        fence = re.fullmatch(r"[ \t]*(`{3,})([^`]*)", line.rstrip("\r\n"))
+        if fence and (
+            not fence_length or (len(fence[1]) >= fence_length and not fence[2].strip())
+        ):
+            content = "".join(section)
+            parts.append(content if fence_length else format_text_section(content))
+            section = []
+            fence_length = 0 if fence_length else len(fence[1])
         else:
-            # Non-code text: format headings, bold, and links
-            parts[i] = format_text_section(part)
+            section.append(line)
+
+    content = "".join(section)
+    parts.append(content if fence_length else format_text_section(content))
 
     return "".join(parts).strip()
 

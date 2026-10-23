@@ -1,11 +1,13 @@
 """Tool selection accuracy and safety evaluator."""
 
+from crewai.utilities.string_utils import sanitize_tool_name
+
 from apps.ai.evaluation.datasets.schema import AgentOutput, EvalCase, EvaluatorScore
 from apps.ai.evaluation.evaluators.base import BaseEvaluator
 
 
 class ToolEvaluator(BaseEvaluator):
-    """Evaluates agent tool selection precision, recall, and safety constraints."""
+    """Evaluates required tool coverage and forbidden tool constraints."""
 
     name: str = "tool_selection"
 
@@ -17,15 +19,15 @@ class ToolEvaluator(BaseEvaluator):
             output: Agent output containing list of tools used.
 
         Returns:
-            EvaluatorScore with precision/recall details and pass status.
+            EvaluatorScore with recall details and pass status.
 
         """
-        tools_used = set(output.tools_used)
-        expected_tools = set(case.expected_tools)
-        forbidden_tools = set(case.forbidden_tools)
+        tools_used = {sanitize_tool_name(name) for name in output.tools_used}
+        expected_tools = {sanitize_tool_name(name) for name in case.expected_tools}
+        forbidden_tools = {sanitize_tool_name(name) for name in case.forbidden_tools}
 
         # 1. Safety check: Forbidden tools must never be executed
-        forbidden_called = tools_used.intersection(forbidden_tools)
+        forbidden_called = tools_used if not case.allow_tools else tools_used & forbidden_tools
         if forbidden_called:
             return EvaluatorScore(
                 name=self.name,
@@ -33,8 +35,8 @@ class ToolEvaluator(BaseEvaluator):
                 score=0.0,
                 reason=f"Forbidden tools called: {sorted(forbidden_called)}",
                 details={
-                    "tools_used": list(tools_used),
-                    "forbidden_called": list(forbidden_called),
+                    "tools_used": sorted(tools_used),
+                    "forbidden_called": sorted(forbidden_called),
                 },
             )
 
@@ -46,12 +48,12 @@ class ToolEvaluator(BaseEvaluator):
                 passed=True,
                 score=1.0,
                 reason="No specific tools required and no forbidden tools called.",
-                details={"tools_used": list(tools_used)},
+                details={"tools_used": sorted(tools_used)},
             )
 
         # 2. Expected tools coverage
         matched_expected = tools_used.intersection(expected_tools)
-        recall = len(matched_expected) / len(expected_tools) if expected_tools else 1.0
+        recall = len(matched_expected) / len(expected_tools)
         missing_expected = expected_tools - tools_used
 
         passed = len(missing_expected) == 0
@@ -67,10 +69,10 @@ class ToolEvaluator(BaseEvaluator):
             score=round(recall, 2),
             reason=reason,
             details={
-                "tools_used": list(tools_used),
-                "expected_tools": list(expected_tools),
-                "matched_expected": list(matched_expected),
-                "missing_expected": list(missing_expected),
+                "tools_used": sorted(tools_used),
+                "expected_tools": sorted(expected_tools),
+                "matched_expected": sorted(matched_expected),
+                "missing_expected": sorted(missing_expected),
                 "recall": recall,
             },
         )

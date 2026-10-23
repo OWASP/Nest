@@ -56,12 +56,12 @@ class NestQueryDepthLimiter(QueryDepthLimiter):
             self.execution_context = execution_context
 
 
-extensions: list[type[SchemaExtension] | Callable[[], SchemaExtension]] = [
+extensions: list[type[SchemaExtension] | Callable[..., SchemaExtension]] = [
     NestQueryDepthLimiter,
     DjangoOptimizerExtension,
 ]
 
 if not settings.DEBUG and not settings.IS_FUZZ_ENVIRONMENT:
-    extensions.append(DisableIntrospection)
+    extensions.append(lambda **_kwargs: DisableIntrospection())
 
 schema = strawberry.Schema(extensions=extensions, mutation=Mutation, query=Query)

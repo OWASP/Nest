@@ -52,7 +52,14 @@ ai-update-slack-message-context:
 
 ##@ AI Testing
 
+AI_TEST_ENV_FILE ?= .env.example
+
 .PHONY: test-ai-evaluation
 test-ai-evaluation: ## Run AI evaluation unit tests
 	@echo "Running AI evaluation unit tests..."
-	@CMD="pytest tests/unit/apps/ai/evaluation/ -o addopts=''" $(MAKE) exec-nestbot-command
+ifeq ($(EXEC_MODE),direct)
+	@cd backend && poetry run dotenv -f "$(AI_TEST_ENV_FILE)" run --no-override -- \
+		pytest tests/unit/apps/ai/evaluation/ -o addopts=''
+else
+	@$(MAKE) test-backend PYTEST_ARGS="tests/unit/apps/ai/evaluation/ -o addopts=''"
+endif

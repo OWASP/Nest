@@ -31,7 +31,7 @@ class TestEvalSchema:
         assert case.expected_tools == []
         assert case.forbidden_tools == []
         assert case.expected_keywords == []
-        assert case.negative_assertions == []
+        assert case.allow_tools is True
         assert case.channel_id == ""
         assert case.notes == ""
 

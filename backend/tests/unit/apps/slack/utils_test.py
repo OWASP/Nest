@@ -146,12 +146,37 @@ class TestFormatAiResponseForSlack:
                 "*Bold heading*",
             ),
             (
+                "### Explore **OWASP** and __chapters__ with *contributors*",
+                "*Explore OWASP and chapters with contributors*",
+            ),
+            ("# C* pointers", "*C* pointers*"),
+            (
                 "Here is code:\n```python\n# This is a comment\nx = 1\n```\nDone.",
                 "Here is code:\n# This is a comment\nx = 1\nDone.",
             ),
             (
                 "Run `poetry run pytest` now.",
                 "Run poetry run pytest now.",
+            ),
+            (
+                "Run ```curl --version``` now.",
+                "Run curl --version now.",
+            ),
+            (
+                "Before\n```sh\ncurl --version\n```\nRun ```curl --help``` now.",
+                "Before\ncurl --version\nRun curl --help now.",
+            ),
+            (
+                '```json {"a": 1}```',
+                'json {"a": 1}',
+            ),
+            (
+                "Before\n````python\n# Code\n**unchanged**\n````\nAfter",
+                "Before\n# Code\n**unchanged**\nAfter",
+            ),
+            (
+                "````markdown\n```python\n# Code\n```\n````",
+                "```python\n# Code\n```",
             ),
             (
                 "Contact <#C123|community> or <@U456>.",

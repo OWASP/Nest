@@ -365,12 +365,14 @@ class TestGetFunctions:
         with (
             patch.object(settings, "IS_LOCAL_ENVIRONMENT", new=True),
             patch.object(settings, "DEBUG", new=False),
+            patch("apps.ai.common.utils.OWASP_NEST_URL", "https://nest.example.test"),
         ):
             result = get_fallback_response()
 
         assert "encountered an error processing your request" in result
         # Development message includes a warning emoji
         assert "⚠️" in result
+        assert "https://nest.example.test" in result
 
     def test_get_fallback_response_production(self):
         """Generic message is returned in production (no debug/local)."""
@@ -379,13 +381,14 @@ class TestGetFunctions:
         with (
             patch.object(settings, "IS_LOCAL_ENVIRONMENT", new=False),
             patch.object(settings, "DEBUG", new=False),
+            patch("apps.ai.common.utils.OWASP_NEST_URL", "https://nest.example.test"),
         ):
             result = get_fallback_response()
 
         assert result == (
             "I'm sorry, I encountered an issue processing your request. Please try "
             "again or rephrase your question. For further help, join #owasp-community "
-            "on Slack, or visit https://nest.owasp.org."
+            "on Slack, or visit https://nest.example.test."
         )
 
     def test_get_intent_to_agent_map_contains_expected(self):

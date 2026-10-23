@@ -11,6 +11,7 @@ from apps.ai.common.constants import (
 from apps.ai.embeddings.factory import get_embedder
 from apps.ai.models.chunk import Chunk
 from apps.ai.models.context import Context
+from apps.common.constants import OWASP_NEST_URL
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -91,14 +92,14 @@ def get_fallback_response() -> str:
         return (
             "⚠️ I encountered an error processing your request. Please try rephrasing "
             "your question. For further help, join #owasp-community on "
-            "Slack, or visit https://nest.owasp.org."
+            f"Slack, or visit {OWASP_NEST_URL}."
         )
 
     # Generic message for production
     return (
         "I'm sorry, I encountered an issue processing your request. Please try "
         "again or rephrase your question. For further help, join #owasp-community "
-        "on Slack, or visit https://nest.owasp.org."
+        f"on Slack, or visit {OWASP_NEST_URL}."
     )
 
 

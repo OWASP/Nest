@@ -28,8 +28,8 @@ class EvalCase:
     expected_intent: str
     expected_tools: list[str] = field(default_factory=list)
     forbidden_tools: list[str] = field(default_factory=list)
+    allow_tools: bool = True
     expected_keywords: list[str] = field(default_factory=list)
-    negative_assertions: list[str] = field(default_factory=list)
     channel_id: str = ""
     notes: str = ""
 
