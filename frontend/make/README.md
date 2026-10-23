@@ -28,7 +28,7 @@ The group-level target may omit the action, as in `frontend-test`.
 ## Files
 
 Use singular, goal-based filenames such as `image.mk`, `security.mk`, and
-`test.mk`. Keep `frontend/Makefile` as a thin aggregator that includes them.
+`test.mk`. Keep `frontend/makefile` as a thin aggregator that includes them.
 
 ## Compatibility
 

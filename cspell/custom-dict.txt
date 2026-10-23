@@ -119,6 +119,7 @@ defectdojo
 demojize
 dismissable
 dkr
+docksec
 dsn
 dvo
 eddsa
@@ -164,6 +165,7 @@ libgobject
 libharfbuzz
 libpango
 libpangoft
+librsvg
 libx
 lighthouseci
 lighthouserc
@@ -225,6 +227,7 @@ replicationgroup
 repositorycontributor
 reqps
 requirepass
+rhysd
 rqworker
 rsc
 rudransh
@@ -271,5 +274,6 @@ xsser
 xzf
 zapconfig
 zaproxy
+zizmor
 zsc
 éàëîôû

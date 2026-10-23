@@ -48,6 +48,7 @@ SKIP_DIR_NAMES = frozenset(
 SKIP_FILE_NAMES = frozenset(
     {
         "Makefile",
+        "makefile",
         "poetry.lock",
         "poetry.toml",
         "pyproject.toml",

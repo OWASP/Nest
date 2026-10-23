@@ -5,8 +5,11 @@ ignoreScripts: true
 # 21 days (in minutes)
 minimumReleaseAge: 30240
 
+minimumReleaseAgeExclude:
+  - smol-toml@1.9.0
+
 overrides:
-  smol-toml: 1.7.1
+  smol-toml: 1.9.0
 
 saveExact: true
 
