@@ -342,31 +342,66 @@ describe('ProjectDetailsPage', () => {
     expect(screen.queryByText(/Channels/)).not.toBeInTheDocument()
   })
 
-  test('renders contribution activity when contributionStats with total > 0 is provided', async () => {
+  test.each([undefined, {}, { '2024-01': 85, invalid: 0 }])(
+    'keeps counters without inventing a calendar when usable dates are missing (%j)',
+    async (contributionData) => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          ...mockProjectDetailsData,
+          project: {
+            ...mockProjectDetailsData.project,
+            contributionStats: {
+              commits: 50,
+              pullRequests: 20,
+              issues: 10,
+              releases: 5,
+              total: 85,
+            },
+            contributionData,
+          },
+        },
+        error: null,
+        loading: false,
+      })
+
+      render(<ProjectDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Project')).toBeInTheDocument()
+      })
+      const activity = screen.getByText('Project Contribution Activity').closest('section')
+      if (!activity) throw new Error('The contribution summary has not rendered')
+      expect(within(activity).getByText('Total').nextElementSibling).toHaveTextContent(/^85$/)
+      expect(screen.queryByText('Displayed period:')).not.toBeInTheDocument()
+      expect(mockHeatmapChart).not.toHaveBeenCalled()
+    }
+  )
+
+  test('uses the saved reporting period for the project calendar', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         ...mockProjectDetailsData,
         project: {
           ...mockProjectDetailsData.project,
           contributionStats: {
-            commits: 50,
-            pullRequests: 20,
-            issues: 10,
-            releases: 5,
-            total: 85,
+            commits: 2,
+            pullRequests: 0,
+            issues: 0,
+            total: 2,
+            startAt: '2024-01-01T12:00:00Z',
+            endAt: '2024-01-31T12:00:00Z',
           },
-          contributionData: undefined,
+          contributionData: { '2024-01-02': 1, '2024-01-30': 1 },
         },
       },
       error: null,
       loading: false,
     })
-
     render(<ProjectDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Project')).toBeInTheDocument()
-    })
+    await waitFor(() => expect(mockHeatmapChart).toHaveBeenCalled())
+    expect(screen.getByText('Jan 1 — 31, 2024')).toBeVisible()
+    const cells = mockHeatmapChart.mock.lastCall?.[0].series?.flatMap((day) => day.data)
+    expect(cells?.reduce((sum, point) => sum + (point.y ?? 0), 0)).toBe(2)
   })
 
   test('renders contribution activity when only contributionData is provided', async () => {

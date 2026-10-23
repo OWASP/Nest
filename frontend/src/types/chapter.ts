@@ -1,16 +1,11 @@
 import type { Contributor } from 'types/contributor'
 import type { Leader } from 'types/leader'
+import type { ContributionStats } from 'utils/contributionDataUtils'
 
 export type Chapter = {
   _geoloc?: GeoLocation
   contributionData?: Record<string, number>
-  contributionStats?: {
-    commits: number
-    issues: number
-    pullRequests: number
-    releases: number
-    total: number
-  }
+  contributionStats?: ContributionStats
   country?: string
   createdAt?: string
   entityLeaders?: Leader[]

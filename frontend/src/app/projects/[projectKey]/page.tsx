@@ -15,8 +15,8 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
-import { getContributionStats } from 'utils/contributionDataUtils'
-import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getContributionDateRange, getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate } from 'utils/dateFormatter'
 import { getLinkableEntityChannels } from 'utils/entityChannels'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import Contributions from 'components/cards/Contributions'
@@ -125,12 +125,11 @@ const ProjectDetailsPage = () => {
     },
   ]
 
-  const { startDate, endDate } = getDateRange({ years: 1 })
-
   const contributionStats = getContributionStats(
     project.contributionStats,
     project.contributionData
   )
+  const contributionRange = getContributionDateRange(contributionStats, project.contributionData)
 
   return (
     <PageWrapper>
@@ -158,8 +157,8 @@ const ProjectDetailsPage = () => {
         }
         contributionStats={contributionStats}
         contributionData={project.contributionData}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={contributionRange?.startDate}
+        endDate={contributionRange?.endDate}
         title="Project Contribution Activity"
       />
 
