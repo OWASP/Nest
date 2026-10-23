@@ -6,13 +6,16 @@ build:
       - pip install poetry==2.4.1 poetry-plugin-export==1.10.0
       - poetry config virtualenvs.create false
       - cd docs && poetry export --format=requirements.txt --output=requirements.txt --without-hashes
+    build:
+      html:
+        - zensical build --strict --config-file .mkdocs.yaml
+    post_build:
+      - mkdir -p "$READTHEDOCS_OUTPUT/html/"
+      - cp -a site/. "$READTHEDOCS_OUTPUT/html/"
 
   os: ubuntu-24.04
   tools:
     python: '3.13'
-
-mkdocs:
-  configuration: .mkdocs.yaml
 
 python:
   install:

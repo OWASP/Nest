@@ -62,6 +62,7 @@ WORKDIR /home/owasp/docs
 
 COPY --from=builder --chmod=555 --chown=root:root /home/owasp/docs /home/owasp/docs
 COPY --chmod=444 --chown=root:root docs/serve.py ./
-COPY --chmod=444 --chown=root:root docs/tests/serve_test.py tests/serve_test.py
+COPY --chmod=444 --chown=root:root docs/tests/*.py ./tests/
+COPY --chmod=444 --chown=root:root .mkdocs.yaml /home/owasp/.mkdocs.yaml
 
 CMD ["pytest"]

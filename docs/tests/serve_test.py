@@ -1,4 +1,4 @@
-"""Tests for the local MkDocs serve helper."""
+"""Tests for the local Zensical serve helper."""
 
 from __future__ import annotations
 

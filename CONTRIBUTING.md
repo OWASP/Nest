@@ -413,6 +413,18 @@ Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. 
 
 Codegen runs inside `nest-frontend` (no host Node/pnpm install). Generated files are written to the bind-mounted `frontend/` tree on the host.
 
+### Documentation
+
+The documentation uses [Zensical](https://zensical.org/) and is available at
+[http://localhost:8001](http://localhost:8001) when `make run` is running.
+The shared configuration remains in `.mkdocs.yaml`; its classic theme preserves
+the existing templates and styles. `docs/serve.py` also watches included README
+files, so changes outside `docs/src` refresh the preview.
+
+Run the documentation tests with `make test-docs`.
+These tests build a site with Mermaid diagrams, README includes, Python API
+documentation, tags, and search. They also run as part of `make check-test`.
+
 ## Testing
 
 Our CI/CD pipelines automatically run tests against every Pull Request. You can run tests locally before submitting a PR:

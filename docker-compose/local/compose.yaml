@@ -75,7 +75,6 @@ services:
       - ../../docs:/home/owasp/docs
       - ../../frontend:/home/owasp/frontend:ro
       - ../../README.md:/home/owasp/README.md:ro
-      - docs-venv:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -128,6 +127,5 @@ volumes:
   backend-venv:
   cache-data:
   db-data:
-  docs-venv:
   frontend-next:
   frontend-node-modules:
