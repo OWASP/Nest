@@ -1,0 +1,212 @@
+The Grafana release repository is created with the observability module when
+`enable_observability` is enabled in the live configuration. It uses the name
+`<project>-<environment>-grafana`, immutable tags, push scanning, and the same
+seven-image retention policy as the application repositories.
+
+The existing Terraform CI role can publish to this repository through its
+environment-scoped ECR permissions. A separate Grafana ECS execution role has
+pull-only access to this repository. Logging and parameter-read permissions are
+added when the corresponding Grafana runtime settings are configured. The repository
+must exist before the first CI image push. Image publishing is handled by CI;
+runtime resources are configured as described below.
+
+## Grafana image releases
+
+The existing image build, scan, sign, and deployment workflows include optional
+Grafana steps. Set the GitHub environment variable `ENABLE_GRAFANA_IMAGE` to
+`true` for staging or production only after that environment's Grafana ECR
+repository exists. Leave it unset while preparing the infrastructure; the
+backend and frontend release process then runs without Grafana.
+
+The build checks the repository exists, builds `docker/grafana/Dockerfile` for
+ARM64, and pushes `nest-<environment>-grafana:<release_version>`. Dashboard JSON
+and provisioning files are bundled in the image. The VictoriaMetrics URL and
+admin password are runtime configuration, not build inputs.
+
+Trivy scans the published image using the repository's existing security policy.
+Only after scanning succeeds does Cosign sign the image by digest. The signing
+job verifies the signature and checks the embedded BuildKit SBOM. Deployment
+repeats both checks before applying Terraform. Grafana's SBOM is embedded in the
+image manifest; it is not currently included in the separate backend/frontend
+CycloneDX release attachments.
+
+Publishing does not start a Grafana ECS service. The task definition and service
+are configured separately, as are application OTLP settings and egress rules in #5406.
+The opt-in flag does not enable Terraform's `enable_observability` setting.
+
+## Grafana public URL (pending ingress)
+
+Use a dedicated subdomain, for example `grafana.nest.owasp.dev` for staging.
+Set `dashboard_domain_name` to the hostname only. This configures Grafana's HTTPS
+root URL, domain, and secure session cookies; it does **not** create DNS, a
+certificate, or an ALB route. TLS must terminate at the ingress while the private
+container continues listening on HTTP port 3000.
+
+Before adding a shared-ALB route, resolve the listener-wide Content Security
+Policy in `infrastructure/modules/alb/main.tf`. It also applies to Grafana and
+differs from Grafana's documented policy (including script evaluation and blob
+styles). Browser compatibility is not yet verified. Do not weaken Nest's policy
+globally to make Grafana work. A separate ingress would need maintainer agreement
+on architecture and additional cost.
+
+Remaining rollout work: agree on ingress/security policy, add HTTPS routing and
+scoped ALB security-group access, wire the verified image digest and settings into
+deployment, and verify login, datasource health, provisioned dashboards, and data
+persistence after a task restart in staging. Maintainers must supply the hostname,
+DNS/certificate setup, and externally managed SSM password parameter ARN. Keep
+the task count at zero until access is configured. App metrics export belongs to
+the separate metrics-wiring PR.
+
+## Grafana runtime (draft)
+
+`dashboard_image` defaults to null, so existing observability deployments do not
+create Grafana runtime resources. Supply the published ECR image pinned by digest
+to create its task definition, service, log group, security group, and EFS access
+point. `dashboard_desired_count` defaults to zero. Both inputs are exposed, with an `observability_` prefix, in the
+live Terraform configuration; the release workflow does not yet supply them.
+
+The service shares the observability ECS cluster and private subnets. It uses
+on-demand ARM64 Fargate with 0.25 vCPU and 512 MiB RAM, runs as UID/GID 472, and
+checks `/api/health`. CloudWatch receives console logs with the module's retention
+and encryption settings. A deployment circuit breaker rolls back failed
+deployments when a previous successful deployment exists.
+
+Grafana stores its own data in `/var/lib/grafana`, backed by a separate `/grafana`
+access point on the existing encrypted observability EFS filesystem. This path
+is distinct from VictoriaMetrics' metrics storage. SQLite WAL is disabled for
+the network filesystem. Only one Grafana task is allowed, and deployments stop
+the old task before starting its replacement, which causes brief downtime.
+This single-instance SQLite/EFS choice needs staging restart and locking tests
+before production; use an external PostgreSQL/MySQL database for a future HA
+design. It is not a backup strategy.
+
+The datasource uses VictoriaMetrics' private Cloud Map name, with security-group
+rules allowing Grafana to query the metrics port. No application OTLP settings
+are changed. No Grafana ingress is opened yet; ALB/HTTPS integration remains
+pending. Anonymous access and self-signup are disabled. Keep the service stopped
+until credentials and browser access are configured.
+
+### Initial admin credentials
+
+Use an externally managed SSM **SecureString**, following the existing runtime
+parameter approach. Supply its ARN through `dashboard_admin_password_parameter_arn`
+in the live configuration. The module does not create or read the parameter
+value; ECS injects it as `GF_SECURITY_ADMIN_PASSWORD` at task startup. The initial
+username is Grafana's default `admin`. Choose a strong, non-default password.
+
+For a customer-managed encryption key, also supply
+`dashboard_admin_password_kms_key_arn` and ensure its key policy permits the Grafana
+execution role. Leave that input null for the AWS-managed SSM key. Permissions
+are scoped to the supplied parameter and optional key. The parameter must be
+reachable from the private task over HTTPS (through the configured network path).
+
+Without a parameter ARN, initial admin creation remains disabled and Terraform
+rejects a nonzero Grafana task count. Supplying an ARN does not verify that the
+parameter exists, is SecureString, or contains a strong password; those are
+deployment prerequisites. No password value belongs in Git, image build inputs,
+Terraform variables, or Terraform outputs.
+
+This password is for first-time database bootstrap. Changing the SSM value does
+not rotate an existing Grafana user's password; use Grafana's supported password
+reset procedure. ECS reads secret values when a task starts, not continuously.
+Preserve the EFS database and test login/restart behavior in staging. The release
+workflow still needs to pass the parameter ARN alongside the image settings.
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.15.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.58.0 |
+
+## Providers
+
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.58.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+| ---- | ---- |
+| [aws_cloudwatch_log_group.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_ecr_lifecycle_policy.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_lifecycle_policy) | resource |
+| [aws_ecr_repository.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
+| [aws_ecs_cluster.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
+| [aws_ecs_cluster_capacity_providers.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
+| [aws_ecs_service.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
+| [aws_ecs_service.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
+| [aws_ecs_task_definition.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_ecs_task_definition.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_efs_access_point.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
+| [aws_efs_access_point.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
+| [aws_efs_file_system.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system) | resource |
+| [aws_efs_mount_target.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
+| [aws_iam_policy.ecs_task_execution_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.grafana_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.ecs_task_execution_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.grafana_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.grafana_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.grafana_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.ecs_task_execution_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.grafana_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_security_group.efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.efs_from_grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.efs_from_vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.grafana_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.grafana_to_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.grafana_to_metrics](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.metrics_from_grafana](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.vm_egress_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.vm_ingest_from_apps](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.vm_to_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_service_discovery_private_dns_namespace.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/service_discovery_private_dns_namespace) | resource |
+| [aws_service_discovery_service.vm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/service_discovery_service) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_app_security_group_ids"></a> [app\_security\_group\_ids](#input\_app\_security\_group\_ids) | Security group IDs of the application tasks allowed to send metrics to the observability backend. | `list(string)` | n/a | yes |
+| <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether to assign a public IP to the observability task. | `bool` | `false` | no |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the module is deployed. | `string` | n/a | yes |
+| <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
+| <a name="input_cpu"></a> [cpu](#input\_cpu) | The CPU units for the observability Fargate task. | `number` | `512` | no |
+| <a name="input_dashboard_admin_password_kms_key_arn"></a> [dashboard\_admin\_password\_kms\_key\_arn](#input\_dashboard\_admin\_password\_kms\_key\_arn) | Customer-managed KMS key ARN for the password parameter; null uses the AWS-managed SSM key. | `string` | `null` | no |
+| <a name="input_dashboard_admin_password_parameter_arn"></a> [dashboard\_admin\_password\_parameter\_arn](#input\_dashboard\_admin\_password\_parameter\_arn) | ARN of an externally managed SSM SecureString containing the initial dashboard admin password. | `string` | `null` | no |
+| <a name="input_dashboard_desired_count"></a> [dashboard\_desired\_count](#input\_dashboard\_desired\_count) | Dashboard task count (0 or 1). Keep zero until credentials and access are configured. | `number` | `0` | no |
+| <a name="input_dashboard_domain_name"></a> [dashboard\_domain\_name](#input\_dashboard\_domain\_name) | Public dashboard hostname, without scheme or path; null leaves public URL configuration unset. | `string` | `null` | no |
+| <a name="input_dashboard_image"></a> [dashboard\_image](#input\_dashboard\_image) | Digest-pinned dashboard image; null omits dashboard runtime resources. | `string` | `null` | no |
+| <a name="input_desired_count"></a> [desired\_count](#input\_desired\_count) | The number of observability tasks to run (0 or 1; the current backend is a single-node store). | `number` | `1` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | The environment (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_image"></a> [image](#input\_image) | The observability backend container image (including digest). | `string` | n/a | yes |
+| <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key used to encrypt the EFS file system. | `string` | n/a | yes |
+| <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The number of days to retain observability container logs. | `number` | `90` | no |
+| <a name="input_memory"></a> [memory](#input\_memory) | The memory (in MiB) for the observability Fargate task. | `number` | `1024` | no |
+| <a name="input_port"></a> [port](#input\_port) | The port the observability backend listens on for ingest and queries. | `number` | `8428` | no |
+| <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
+| <a name="input_retention_period"></a> [retention\_period](#input\_retention\_period) | The VictoriaMetrics data retention period. A value without a suffix is in months, so the default "12" means 12 months (duration suffixes like 1y, 30d, 1w are also supported). | `string` | `"12"` | no |
+| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | The private subnet IDs for the EFS mount targets and the observability task. | `list(string)` | n/a | yes |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The VPC ID where the observability backend security group is created. | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the ECS cluster running the observability backend. |
+| <a name="output_dashboard_ecr_repository_arn"></a> [dashboard\_ecr\_repository\_arn](#output\_dashboard\_ecr\_repository\_arn) | The ARN of the repository for the dashboard image. |
+| <a name="output_dashboard_ecr_repository_url"></a> [dashboard\_ecr\_repository\_url](#output\_dashboard\_ecr\_repository\_url) | The URL used to publish and pull the dashboard image. |
+| <a name="output_dashboard_security_group_id"></a> [dashboard\_security\_group\_id](#output\_dashboard\_security\_group\_id) | Dashboard security group ID for ALB integration, or null when the runtime is disabled. |
+| <a name="output_dashboard_service_name"></a> [dashboard\_service\_name](#output\_dashboard\_service\_name) | Dashboard ECS service name, or null when the runtime is disabled. |
+| <a name="output_efs_file_system_id"></a> [efs\_file\_system\_id](#output\_efs\_file\_system\_id) | The ID of the EFS file system backing observability storage. |
+| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | The private host:port endpoint for reaching the observability backend. |
+| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the observability backend security group. |
+<!-- END_TF_DOCS -->
