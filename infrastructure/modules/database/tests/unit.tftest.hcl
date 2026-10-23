@@ -137,7 +137,7 @@ run "test_ssm_parameter_is_secure_string" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_db_password.type == "SecureString"
+    condition     = aws_ssm_parameter.django_db_password[0].type == "SecureString"
     error_message = "Database password must be stored as SecureString."
   }
 }
@@ -146,7 +146,7 @@ run "test_ssm_parameter_path_format" {
   command = plan
 
   assert {
-    condition     = aws_ssm_parameter.django_db_password.name == "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
+    condition     = aws_ssm_parameter.django_db_password[0].name == "/${var.project_name}/${var.environment}/DJANGO_DB_PASSWORD"
     error_message = "SSM parameter must follow path: /{project}/{environment}/DJANGO_DB_PASSWORD."
   }
 }
@@ -166,5 +166,32 @@ run "test_subnet_group_uses_provided_subnets" {
   assert {
     condition     = toset(aws_db_subnet_group.main.subnet_ids) == toset(var.db_subnet_ids)
     error_message = "Subnet group must use the provided subnet IDs."
+  }
+}
+
+run "test_retained_password_matches_secret" {
+  command = apply
+
+  assert {
+    condition     = aws_ssm_parameter.django_db_password[0].value == local.db_password
+    error_message = "The retained legacy parameter must keep the working credential."
+  }
+}
+
+run "test_cleanup_preserves_generated_password" {
+  command = apply
+
+  variables {
+    retain_legacy_credential_parameters = false
+  }
+
+  assert {
+    condition     = length(aws_ssm_parameter.django_db_password) == 0
+    error_message = "Only explicit cleanup may remove the legacy password parameter."
+  }
+
+  assert {
+    condition     = jsondecode(aws_secretsmanager_secret_version.db_credentials.secret_string).password == local.db_password
+    error_message = "Cleanup must preserve the password used by the service and Secrets Manager."
   }
 }

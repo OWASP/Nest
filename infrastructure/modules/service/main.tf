@@ -12,6 +12,13 @@ terraform {
 locals {
   name_prefix = "${var.project_name}-${var.environment}-${var.service_name}"
 
+  # Only canonical secret ARNs are exposed in IAM plans, never credential values.
+  secretsmanager_secret_arns = nonsensitive(distinct([
+    for arn in values(var.parameters_arns) :
+    join(":", slice(split(":", arn), 0, 7))
+    if can(regex("^arn:[^:]+:secretsmanager:", arn))
+  ]))
+
   container_definition = merge(
     {
       essential = true
@@ -133,6 +140,8 @@ resource "aws_ecs_task_definition" "main" {
 }
 
 resource "aws_ecs_service" "main" {
+  depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_ssm_policy_attachment]
+
   cluster                           = aws_ecs_cluster.main.id
   desired_count                     = var.desired_count
   force_new_deployment              = var.force_new_deployment
@@ -265,7 +274,7 @@ resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Action = [
           "ssm:GetParameter",
@@ -274,7 +283,18 @@ resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
         Effect   = "Allow"
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
       }
-    ]
+      ], length(local.secretsmanager_secret_arns) > 0 ? [
+      {
+        Action   = ["secretsmanager:GetSecretValue"]
+        Effect   = "Allow"
+        Resource = local.secretsmanager_secret_arns
+      },
+      {
+        Action   = ["kms:Decrypt"]
+        Effect   = "Allow"
+        Resource = [var.kms_key_arn]
+      }
+    ] : [])
   })
 }
 
