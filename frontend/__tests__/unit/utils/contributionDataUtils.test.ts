@@ -74,7 +74,7 @@ describe('getContributionDateRange', () => {
     { startAt: '2026-10-23', endAt: '2026-10-22' },
     { startAt: '2026-10-22T12:00:00Z', endAt: '2026-10-22T01:00:00Z' },
     { startAt: '2025-10-22T12:00:00', endAt: '2026-10-22' },
-    { startAt: '2025-10-22T12:00:00ZjunkZ', endAt: '2026-10-22' },
+    { startAt: '2025-10-22T12:00:00ZjunkZ', endAt: '2026-10-22' }, // cspell:ignore Zjunk
   ])('falls back when saved bounds are unusable ($startAt, $endAt)', ({ startAt, endAt }) => {
     expect(
       getContributionDateRange(

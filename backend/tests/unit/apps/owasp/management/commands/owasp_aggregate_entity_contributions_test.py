@@ -98,7 +98,7 @@ def test_report_groups_and_filters_all_events_in_postgresql(command, entity):
         return iter(GROUPS[queryset.model])
 
     with (
-        timezone.override(ZoneInfo("Asia/Kolkata")),
+        timezone.override(ZoneInfo("Asia/Kolkata")),  # cspell:ignore Kolkata
         mock.patch.object(QuerySet, "__iter__", grouped_rows),
     ):
         daily, stats = command.aggregate_contributions(entity, START_AT, END_AT)
