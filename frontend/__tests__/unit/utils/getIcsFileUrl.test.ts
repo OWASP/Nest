@@ -1,3 +1,4 @@
+// cspell:ignore DTEND
 import { createEvent } from 'ics'
 import getIcsFileUrl from 'utils/getIcsFileUrl'
 

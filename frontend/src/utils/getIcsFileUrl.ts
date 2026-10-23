@@ -1,6 +1,9 @@
 import { createEvent, DateArray, EventAttributes } from 'ics'
 import type { CalendarEvent } from 'types/calendar'
 
+/**
+ * Create a downloadable all-day calendar file covering the event's inclusive dates.
+ */
 export default function getIcsFileUrl(event: CalendarEvent): Promise<string> {
   return new Promise((resolve, reject) => {
     if (globalThis.window === undefined) {
