@@ -3,6 +3,33 @@ import { buildContributionCalendar } from 'utils/contributionHeatmap'
 const now = new Date('2026-10-22T12:00:00Z')
 
 describe('buildContributionCalendar', () => {
+  it('labels months from reporting days rather than leading padding', () => {
+    const calendar = buildContributionCalendar('2024-03-01', '2024-04-02', {}, now)
+    expect(calendar.monthLabels).toEqual({ W1: 'Mar', W6: 'Apr' })
+  })
+
+  it('keeps both month names when a partial period crosses months in one week', () => {
+    const calendar = buildContributionCalendar('2024-01-31', '2024-02-02', {}, now)
+    expect(calendar.monthLabels).toEqual({ W1: 'Jan / Feb' })
+  })
+
+  it('leaves space for the next month after a one-column partial month', () => {
+    const calendar = buildContributionCalendar('2025-03-24', '2025-05-31', {}, now)
+    expect(calendar.monthLabels).toEqual({ W2: 'Apr', W6: 'May' })
+  })
+
+  it('preserves month labels when the period crosses into another year', () => {
+    const calendar = buildContributionCalendar('2024-01-01', '2025-01-01', {}, now)
+    const labels = Object.values(calendar.monthLabels)
+    expect(labels).toHaveLength(13)
+    expect(labels.filter((label) => label === 'Jan')).toHaveLength(2)
+  })
+
+  it('labels months even when there is no activity', () => {
+    const calendar = buildContributionCalendar('2024-01-01', '2024-03-31', {}, now)
+    expect(Object.values(calendar.monthLabels)).toEqual(['Jan', 'Feb', 'Mar'])
+  })
+
   it('aligns partial weeks into seven equally sized weekday rows', () => {
     const calendar = buildContributionCalendar('2024-01-03', '2024-01-10', {}, now)
 

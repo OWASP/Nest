@@ -3,6 +3,8 @@ export type ContributionHeatmapSeries = Array<{
   data: Array<{ x: string; y: number | null; date: string }>
 }>
 
+const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' })
+
 const toUtcDay = (value: string | Date): Date => {
   const date = new Date(value)
   date.setUTCHours(0, 0, 0, 0)
@@ -33,15 +35,24 @@ export const buildContributionCalendar = (
   )
   const currentDate = new Date(start)
   currentDate.setUTCDate(currentDate.getUTCDate() - ((currentDate.getUTCDay() + 6) % 7))
+  const normalizedStart = start.toISOString().split('T')[0]
+  const monthLabels: Record<string, string> = {}
   let weeksCount = 0
 
   while (currentDate <= end) {
     weeksCount++
+    const weekLabel = `W${weeksCount}`
     for (const day of series) {
       const date = currentDate.toISOString().split('T')[0]
       const isInRange = currentDate >= start && currentDate <= end
+      if (isInRange && (date === normalizedStart || currentDate.getUTCDate() === 1)) {
+        const month = monthFormatter.format(currentDate)
+        monthLabels[weekLabel] = monthLabels[weekLabel]
+          ? `${monthLabels[weekLabel]} / ${month}`
+          : month
+      }
       day.data.push({
-        x: `W${weeksCount}`,
+        x: weekLabel,
         y: isInRange ? (contributionData[date] ?? 0) : null,
         date,
       })
@@ -49,10 +60,14 @@ export const buildContributionCalendar = (
     }
   }
 
+  // Leave room for the first full month when the starting partial month is only one column wide.
+  if (monthLabels.W1 && monthLabels.W2) delete monthLabels.W1
+
   return {
     heatmapSeries: series.reverse(),
     weeksCount,
-    startDate: start.toISOString().split('T')[0],
+    monthLabels,
+    startDate: normalizedStart,
     endDate: end.toISOString().split('T')[0],
   }
 }

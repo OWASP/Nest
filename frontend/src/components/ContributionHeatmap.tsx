@@ -6,15 +6,36 @@ import {
   buildContributionCalendar,
   type ContributionHeatmapSeries,
 } from 'utils/contributionHeatmap'
+import { formatDateRange } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
-const getChartOptions = (isDarkMode: boolean, unit: string) => ({
+const getColorRanges = (isDarkMode: boolean) => [
+  { from: 0, to: 0, color: isDarkMode ? '#2C3A4D' : '#E7E7E6', name: 'No activity' },
+  { from: 1, to: 4, color: isDarkMode ? '#4A5F7A' : '#7BA3C0', name: 'Low' },
+  { from: 5, to: 8, color: isDarkMode ? '#5A6F8A' : '#6C8EAB', name: 'Medium' },
+  { from: 9, to: 12, color: isDarkMode ? '#6A7F9A' : '#5C7BA2', name: 'High' },
+  {
+    from: 13,
+    to: Number.MAX_SAFE_INTEGER,
+    color: isDarkMode ? '#7A8FAA' : '#567498',
+    name: 'Very High',
+  },
+]
+
+const getChartOptions = (
+  isDarkMode: boolean,
+  unit: string,
+  colorRanges: ReturnType<typeof getColorRanges>,
+  monthLabels: Record<string, string>
+) => ({
   chart: {
     type: 'heatmap' as const,
+    fontFamily: 'inherit',
+    parentHeightOffset: 0,
     toolbar: {
       show: false,
     },
@@ -30,38 +51,7 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   plotOptions: {
     heatmap: {
       colorScale: {
-        ranges: [
-          {
-            from: 0,
-            to: 0,
-            color: isDarkMode ? '#2C3A4D' : '#E7E7E6',
-            name: 'No activity',
-          },
-          {
-            from: 1,
-            to: 4,
-            color: isDarkMode ? '#4A5F7A' : '#7BA3C0',
-            name: 'Low',
-          },
-          {
-            from: 5,
-            to: 8,
-            color: isDarkMode ? '#5A6F8A' : '#6C8EAB',
-            name: 'Medium',
-          },
-          {
-            from: 9,
-            to: 12,
-            color: isDarkMode ? '#6A7F9A' : '#5C7BA2',
-            name: 'High',
-          },
-          {
-            from: 13,
-            to: 1000,
-            color: isDarkMode ? '#7A8FAA' : '#567498',
-            name: 'Very High',
-          },
-        ],
+        ranges: colorRanges,
       },
       radius: 2,
       distributed: false,
@@ -113,9 +103,9 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
       const date = data.date
       const parsedDate = new Date(date + 'T00:00:00Z')
       const formattedDate = parsedDate.toLocaleDateString('en-US', {
-        weekday: 'short',
         month: 'short',
         day: 'numeric',
+        year: 'numeric',
         timeZone: 'UTC',
       })
 
@@ -140,8 +130,16 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   },
   xaxis: {
     type: 'category' as const,
+    position: 'top' as const,
     labels: {
-      show: false,
+      show: true,
+      rotate: 0,
+      hideOverlappingLabels: true,
+      showDuplicates: true,
+      trim: false,
+      offsetY: 2,
+      style: { colors: isDarkMode ? '#D1D5DB' : '#4B5563', fontSize: '11px' },
+      formatter: (value: string) => monthLabels[value] ?? '',
     },
     axisBorder: {
       show: false,
@@ -155,7 +153,14 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   },
   yaxis: {
     labels: {
-      show: false,
+      show: true,
+      minWidth: 36,
+      maxWidth: 36,
+      offsetX: -10,
+      offsetY: 1,
+      style: { colors: isDarkMode ? '#D1D5DB' : '#4B5563', fontSize: '11px' },
+      formatter: (value: string | number) =>
+        ['Mon', 'Wed', 'Fri'].includes(String(value)) ? String(value) : '',
     },
     axisBorder: {
       show: false,
@@ -186,38 +191,31 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   unit = 'contribution',
   variant = 'default',
 }) => {
-  const { theme } = useTheme()
-  const isDarkMode = theme === 'dark'
+  const { theme, resolvedTheme } = useTheme()
+  const isDarkMode = (resolvedTheme ?? theme) === 'dark'
 
-  const { heatmapSeries, weeksCount } = useMemo(
+  const {
+    heatmapSeries,
+    weeksCount,
+    monthLabels,
+    startDate: calendarStart,
+    endDate: calendarEnd,
+  } = useMemo(
     () => buildContributionCalendar(startDate, endDate, contributionData, new Date()),
     [contributionData, startDate, endDate]
   )
 
-  const options = useMemo(() => getChartOptions(isDarkMode, unit), [isDarkMode, unit])
+  const colorRanges = useMemo(() => getColorRanges(isDarkMode), [isDarkMode])
+  const options = useMemo(
+    () => getChartOptions(isDarkMode, unit, colorRanges, monthLabels),
+    [isDarkMode, unit, colorRanges, monthLabels]
+  )
 
-  const calculateChartWidth = useMemo(() => {
-    if (variant === 'compact') {
-      const pixelPerWeek = 13.4
-      const padding = 40
-      const calculatedWidth = weeksCount * pixelPerWeek + padding
-      return Math.max(400, calculatedWidth)
-    }
-
-    if (variant === 'medium') {
-      const pixelPerWeek = 16
-      const padding = 45
-      const calculatedWidth = weeksCount * pixelPerWeek + padding
-      return Math.max(500, calculatedWidth)
-    }
-
-    const pixelPerWeek = 19.5
-    const padding = 50
-    const calculatedWidth = weeksCount * pixelPerWeek + padding
-    return Math.max(600, calculatedWidth)
-  }, [weeksCount, variant])
-
-  const chartWidth = calculateChartWidth
+  // Fit the container, but keep at least 10px per week when scrolling is necessary.
+  const minChartWidth = Math.max(
+    variant === 'compact' ? 400 : variant === 'medium' ? 500 : 600,
+    weeksCount * 10 + 40
+  )
 
   const getChartHeight = () => {
     if (variant === 'compact') return 150
@@ -230,6 +228,11 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       {title && (
         <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
       )}
+
+      <p className="mb-1 text-xs text-gray-600 dark:text-gray-300">
+        <span className="sr-only">Displayed period: </span>
+        <span>{formatDateRange(calendarStart, calendarEnd)}</span>
+      </p>
 
       {/* scroll wrapper for small screens */}
       <div className="scrollbar-default w-full overflow-x-auto overflow-y-hidden">
@@ -255,15 +258,40 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           `}
         </style>
 
-        <div className="inline-block">
+        <div style={{ width: '100%', minWidth: minChartWidth }}>
           <Chart
             height={getChartHeight()}
             options={options}
             series={heatmapSeries}
             type="heatmap"
-            width={chartWidth}
+            width="100%"
           />
         </div>
+      </div>
+      <div className="mt-1 flex items-center justify-end gap-2 pb-2 text-xs text-gray-600 dark:text-gray-300">
+        <span aria-hidden="true">Less</span>
+        <ul aria-label={`Daily ${unit} counts, from less to more`} className="flex gap-1">
+          {colorRanges.map(({ from, to, color, name }) => {
+            const bounds =
+              from === to
+                ? `${from}`
+                : to === Number.MAX_SAFE_INTEGER
+                  ? `${from}+`
+                  : `${from}–${to}`
+            const description = `${bounds} ${pluralize(to, unit)} per day`
+            return (
+              <li key={name} title={description}>
+                <span
+                  aria-hidden="true"
+                  className="block h-3 w-3 rounded-xs"
+                  style={{ backgroundColor: color }}
+                />
+                <span className="sr-only">{description}</span>
+              </li>
+            )
+          })}
+        </ul>
+        <span aria-hidden="true">More</span>
       </div>
     </div>
   )

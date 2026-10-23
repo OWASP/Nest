@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import type { ApexOptions } from 'apexcharts'
 import { ThemeProvider, useTheme } from 'next-themes'
 import React from 'react'
@@ -348,7 +348,8 @@ describe('ContributionHeatmap', () => {
 
       const tooltip = document.createElement('div')
       tooltip.innerHTML = getTooltipForDate('2024-01-01')
-      expect(tooltip).toHaveTextContent('Mon, Jan 1')
+      expect(tooltip).toHaveTextContent('Jan 1, 2024')
+      expect(tooltip).not.toHaveTextContent('Mon,')
       expect(tooltip).toHaveTextContent('5 contributions')
     })
 
@@ -691,37 +692,104 @@ describe('ContributionHeatmap', () => {
   })
 
   describe('Calendar readability regressions (#5742)', () => {
-    it('shows a month label above the calendar', () => {
+    it('shows a month label above the calendar', async () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
       const { options, series } = getChartProps()
       expect(options.xaxis?.labels?.show).toBe(true)
       expect(options.xaxis?.labels?.formatter?.(series[0].data[0].x)).toBe('Jan')
     })
 
-    it('shows selected weekday labels beside the calendar', () => {
+    it('shows selected weekday labels beside the calendar', async () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
       const { options } = getChartProps()
       const yaxis = Array.isArray(options.yaxis) ? options.yaxis[0] : options.yaxis
       expect(yaxis?.labels?.show).toBe(true)
+      const formatter = yaxis?.labels?.formatter
+      if (!formatter) throw new Error('Weekday labels need a formatter')
+      expect(
+        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) =>
+          Reflect.apply(formatter, undefined, [day])
+        )
+      ).toEqual(['Mon', '', 'Wed', '', 'Fri', '', ''])
     })
 
-    it('explains the color scale with a Less to More legend', () => {
+    it('explains the color scale with a Less to More legend', async () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
       expect(screen.getByText('Less')).toBeVisible()
       expect(screen.getByText('More')).toBeVisible()
     })
 
-    it('shows the displayed period with its year', () => {
+    it('shows the displayed period with its year', async () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
       expect(screen.getByText('Jan 1 — 31, 2024')).toBeVisible()
     })
 
-    it('includes the year in hover dates', () => {
+    it('uses the normalized calendar bounds for the displayed period', async () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          {...defaultProps}
+          startDate="2024-02-01T00:30:00+02:00"
+          endDate="2023-12-31T23:30:00-02:00"
+        />
+      )
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      expect(screen.getByText('Jan 1 — 31, 2024')).toBeVisible()
+    })
+
+    it('includes the year in hover dates', async () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
       const tooltip = document.createElement('div')
       tooltip.innerHTML = getTooltipForDate('2024-01-01')
-      expect(tooltip).toHaveTextContent('Mon, Jan 1, 2024')
+      expect(tooltip).toHaveTextContent('Jan 1, 2024')
+      expect(tooltip).not.toHaveTextContent('Mon,')
     })
+
+    it('uses the highest activity band for counts above 1000', async () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          {...defaultProps}
+          contributionData={{ '2024-01-01': 1001, '2024-01-02': 1000000 }}
+        />
+      )
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      const ranges = getChartProps().options.plotOptions?.heatmap?.colorScale?.ranges
+      for (const count of [13, 1000, 1001, 1000000, Number.MAX_SAFE_INTEGER]) {
+        expect(ranges?.find((range) => range.from <= count && count <= range.to)?.name).toBe(
+          'Very High'
+        )
+      }
+    })
+
+    it.each(['light', 'dark'] as const)(
+      'matches the %s legend to the chart colors',
+      async (theme) => {
+        renderWithTheme(<ContributionHeatmap {...defaultProps} unit="message" />, theme)
+        await waitFor(() => expect(mockChart).toHaveBeenCalled())
+        const legend = screen.getByRole('list', { name: 'Daily message counts, from less to more' })
+        const items = within(legend).getAllByRole('listitem')
+        const ranges = getChartProps().options.plotOptions?.heatmap?.colorScale?.ranges
+
+        expect(items).toHaveLength(5)
+        expect(ranges?.map((range) => range.color)).toEqual(
+          theme === 'dark'
+            ? ['#2C3A4D', '#4A5F7A', '#5A6F8A', '#6A7F9A', '#7A8FAA']
+            : ['#E7E7E6', '#7BA3C0', '#6C8EAB', '#5C7BA2', '#567498']
+        )
+        items.forEach((item, index) => {
+          expect(item.querySelector('[aria-hidden="true"]')).toHaveStyle({
+            backgroundColor: ranges?.[index].color,
+          })
+        })
+        expect(items[0]).toHaveTextContent('0 messages per day')
+        expect(items[1]).toHaveTextContent('1–4 messages per day')
+        expect(items[4]).toHaveTextContent('13+ messages per day')
+      }
+    )
   })
 
   describe('Responsive Design', () => {
@@ -809,25 +877,32 @@ describe('ContributionHeatmap', () => {
 
   describe('Variants', () => {
     it.each([
-      { variant: 'default' as const, width: 1083.5 },
-      { variant: 'medium' as const, width: 893 },
-      { variant: 'compact' as const, width: 750.2 },
-    ])('sizes the $variant chart using all 53 week columns', async ({ variant, width }) => {
-      renderWithTheme(
-        <ContributionHeatmap
-          contributionData={{}}
-          startDate="2025-10-19"
-          endDate="2026-10-17"
-          variant={variant}
-        />
-      )
+      { variant: 'default' as const, minWidth: 600 },
+      { variant: 'medium' as const, minWidth: 570 },
+      { variant: 'compact' as const, minWidth: 570 },
+    ])(
+      'fits the $variant chart to its container while retaining 53 readable columns',
+      async ({ variant, minWidth }) => {
+        renderWithTheme(
+          <ContributionHeatmap
+            contributionData={{}}
+            startDate="2025-10-19"
+            endDate="2026-10-17"
+            variant={variant}
+          />
+        )
 
-      await waitFor(() => expect(mockChart).toHaveBeenCalled())
-      expect(getChartProps().width).toBeCloseTo(width)
-      expect(getChartProps().series.map((day) => day.data.length)).toEqual([
-        53, 53, 53, 53, 53, 53, 53,
-      ])
-    })
+        await waitFor(() => expect(mockChart).toHaveBeenCalled())
+        expect(getChartProps().width).toBe('100%')
+        expect(screen.getByTestId('mock-heatmap-chart').parentElement).toHaveStyle({
+          width: '100%',
+          minWidth: `${minWidth}px`,
+        })
+        expect(getChartProps().series.map((day) => day.data.length)).toEqual([
+          53, 53, 53, 53, 53, 53, 53,
+        ])
+      }
+    )
 
     it('renders default variant with full dimensions', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
@@ -854,27 +929,21 @@ describe('ContributionHeatmap', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Compact" variant="compact" />
       )
-      // Verify compact variant uses inline-block class
-      const chartContainer = container.querySelector('.inline-block')
-      expect(chartContainer).toBeInTheDocument()
+      expect(container.querySelector('.scrollbar-default > div')).toHaveStyle({ minWidth: '400px' })
     })
 
     it('applies default variant container styling when variant is default', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Default" variant="default" />
       )
-      // Verify default variant uses inline-block class
-      const chartContainer = container.querySelector('.inline-block')
-      expect(chartContainer).toBeInTheDocument()
+      expect(container.querySelector('.scrollbar-default > div')).toHaveStyle({ minWidth: '600px' })
     })
 
     it('applies medium variant container styling', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Medium" variant="medium" />
       )
-      // Verify medium variant uses inline-block class
-      const chartContainer = container.querySelector('.inline-block')
-      expect(chartContainer).toBeInTheDocument()
+      expect(container.querySelector('.scrollbar-default > div')).toHaveStyle({ minWidth: '500px' })
     })
 
     it('defaults to default variant when no variant is specified', () => {
