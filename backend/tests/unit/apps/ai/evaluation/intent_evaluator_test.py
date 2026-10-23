@@ -1,5 +1,5 @@
-from apps.ai.evals.datasets.schema import AgentOutput, EvalCase, EvalCategory
-from apps.ai.evals.evaluators.intent_evaluator import IntentEvaluator
+from apps.ai.evaluation.datasets.schema import AgentOutput, EvalCase, EvalCategory
+from apps.ai.evaluation.evaluators.intent_evaluator import IntentEvaluator
 
 
 class TestIntentEvaluator:

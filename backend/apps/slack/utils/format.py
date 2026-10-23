@@ -88,11 +88,13 @@ def format_ai_response_for_slack(text: str) -> str:
         return format_links_for_slack(content)
 
     # Split on markdown code blocks; odd indices are code blocks, even indices are regular text
-    parts = re.split(r"(```[^\n]*\n?.*?```)", text.strip(), flags=re.DOTALL)
+    parts = text.strip().split("```")
+    num_blocks = len(parts) // 2
     for i, part in enumerate(parts):
-        if i % 2:
-            # Code block: strip fences to plain text, leaving code content untouched
-            parts[i] = re.sub(r"^```[^\n]*\n?(.*?)\n?```$", r"\1", part, flags=re.DOTALL).strip()
+        if i % 2 and i <= num_blocks * 2 - 1:
+            # Code block: strip optional language tag on first line, leaving content untouched
+            lines = part.split("\n", 1)
+            parts[i] = lines[1].rstrip("\r\n") if len(lines) > 1 else ""
         else:
             # Non-code text: format headings, bold, and links
             parts[i] = format_text_section(part)

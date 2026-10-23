@@ -1,7 +1,7 @@
 """Tool selection accuracy and safety evaluator."""
 
-from apps.ai.evals.datasets.schema import AgentOutput, EvalCase, EvaluatorScore
-from apps.ai.evals.evaluators.base import BaseEvaluator
+from apps.ai.evaluation.datasets.schema import AgentOutput, EvalCase, EvaluatorScore
+from apps.ai.evaluation.evaluators.base import BaseEvaluator
 
 
 class ToolEvaluator(BaseEvaluator):

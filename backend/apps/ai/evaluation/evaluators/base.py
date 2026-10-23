@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from apps.ai.evals.datasets.schema import AgentOutput, EvalCase, EvaluatorScore
+from apps.ai.evaluation.datasets.schema import AgentOutput, EvalCase, EvaluatorScore
 
 
 class BaseEvaluator(ABC):

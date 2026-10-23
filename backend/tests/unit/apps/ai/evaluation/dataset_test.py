@@ -1,24 +1,24 @@
-from apps.ai.evals.datasets.golden_dataset import get_case_by_id, get_golden_dataset
-from apps.ai.evals.datasets.schema import EvalCategory
+from apps.ai.evaluation.datasets.dataset import get_case_by_id, get_dataset
+from apps.ai.evaluation.datasets.schema import EvalCategory
 
 
-class TestGoldenDataset:
+class TestDataset:
     def test_get_all_cases(self):
-        cases = get_golden_dataset()
-        assert len(cases) >= 9
+        cases = get_dataset()
+        assert len(cases) >= 25
 
     def test_unique_case_ids(self):
-        cases = get_golden_dataset()
+        cases = get_dataset()
         ids = [c.id for c in cases]
         assert len(ids) == len(set(ids))
 
     def test_filter_by_category_enum(self):
-        proj_cases = get_golden_dataset(EvalCategory.PROJECT)
+        proj_cases = get_dataset(EvalCategory.PROJECT)
         assert len(proj_cases) > 0
         assert all(c.category == EvalCategory.PROJECT for c in proj_cases)
 
     def test_filter_by_category_str(self):
-        gsoc_cases = get_golden_dataset("gsoc")
+        gsoc_cases = get_dataset("gsoc")
         assert len(gsoc_cases) > 0
         assert all(c.category == EvalCategory.GSOC for c in gsoc_cases)
 
@@ -33,7 +33,7 @@ class TestGoldenDataset:
         assert case is None
 
     def test_all_cases_have_valid_fields(self):
-        cases = get_golden_dataset()
+        cases = get_dataset()
         for case in cases:
             assert case.id.strip() != ""
             assert case.query.strip() != ""

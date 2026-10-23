@@ -1,4 +1,4 @@
-from apps.ai.evals.datasets.schema import (
+from apps.ai.evaluation.datasets.schema import (
     AgentOutput,
     BenchmarkSummary,
     EvalCase,

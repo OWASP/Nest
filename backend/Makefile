@@ -92,14 +92,22 @@ exec-db-command-fuzz-it:
 
 exec-nestbot-command:
 ifeq ($(EXEC_MODE),direct)
-	@$(CMD)
+	@if command -v poetry >/dev/null 2>&1 && [ -d "backend" ]; then \
+		cd backend && set -a && [ -f ".env.example" ] && . ./.env.example; set +a; poetry run $(CMD); \
+	else \
+		$(CMD); \
+	fi
 else
 	@docker exec -i nest-nestbot $(CMD)
 endif
 
 exec-nestbot-command-it:
 ifeq ($(EXEC_MODE),direct)
-	@$(CMD)
+	@if command -v poetry >/dev/null 2>&1 && [ -d "backend" ]; then \
+		cd backend && set -a && [ -f ".env.example" ] && . ./.env.example; set +a; poetry run $(CMD); \
+	else \
+		$(CMD); \
+	fi
 else
 	@docker exec -it nest-nestbot $(CMD) 2>/dev/null
 endif
