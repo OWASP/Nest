@@ -14,6 +14,7 @@ CONFIG_PATH = Path(__file__).resolve().parents[2] / ".mkdocs.yaml"
 
 @pytest.fixture(scope="module")
 def built_site(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Build a small site using the shared production configuration."""
     root = tmp_path_factory.mktemp("zensical")
     docs = root / "docs"
     docs.mkdir()
@@ -67,6 +68,7 @@ def built_site(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def test_mermaid_is_a_diagram_instead_of_a_highlighted_code_block(built_site: Path) -> None:
+    """Keep Mermaid fences available for client-side diagram rendering."""
     html = (built_site / "index.html").read_text(encoding="utf-8")
 
     assert re.search(r'<(?:div|pre)\b[^>]*class=["\']?mermaid\b', html)
@@ -75,6 +77,7 @@ def test_mermaid_is_a_diagram_instead_of_a_highlighted_code_block(built_site: Pa
 
 
 def test_readme_includes_and_python_api_documentation_are_rendered(built_site: Path) -> None:
+    """Expand included files and render the configured Python handler."""
     html = (built_site / "index.html").read_text(encoding="utf-8")
 
     assert "Included README content." in html
@@ -84,6 +87,7 @@ def test_readme_includes_and_python_api_documentation_are_rendered(built_site: P
 
 
 def test_only_the_named_readme_docs_section_is_included(built_site: Path) -> None:
+    """Include the marked docs section without surrounding README content."""
     html = (built_site / "index.html").read_text(encoding="utf-8")
 
     assert "Included README docs section." in html
@@ -92,6 +96,7 @@ def test_only_the_named_readme_docs_section_is_included(built_site: Path) -> Non
 
 
 def test_tags_and_search_remain_enabled(built_site: Path) -> None:
+    """Retain tag links and the search component in generated HTML."""
     html = (built_site / "index.html").read_text(encoding="utf-8")
 
     assert "Compatibility" in html
