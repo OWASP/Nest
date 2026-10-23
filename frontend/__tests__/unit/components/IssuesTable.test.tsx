@@ -399,16 +399,16 @@ describe('<IssuesTable />', () => {
       const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
       expect(issueButtons.length).toBeGreaterThan(0)
       fireEvent.click(issueButtons[0])
-      expect(onIssueClick).toHaveBeenCalledWith(123)
+      expect(onIssueClick).toHaveBeenCalledWith('1')
     })
 
     it('navigates to issue URL when onIssueClick is not provided', () => {
-      const issueUrl = (num: number) => `/issues/${num}`
+      const issueUrl = (id: string) => `/issues/${id}`
       render(<IssuesTable {...defaultProps} onIssueClick={undefined} issueUrl={issueUrl} />)
       const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
       expect(issueButtons.length).toBeGreaterThan(0)
       fireEvent.click(issueButtons[0])
-      expect(mockPush).toHaveBeenCalledWith('/issues/123')
+      expect(mockPush).toHaveBeenCalledWith('/issues/1')
     })
 
     it('does nothing when onIssueClick and issueUrl are not provided', () => {

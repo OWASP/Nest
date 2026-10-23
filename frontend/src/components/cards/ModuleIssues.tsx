@@ -143,9 +143,9 @@ const ModuleIssues = ({ programKey, moduleKey }: ModuleIssuesProps) => {
   }
 
   const handleIssueClick = useCallback(
-    (issueNumber: number) => {
+    (issueId: string) => {
       router.push(
-        `/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues/${issueNumber}`
+        `/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues/${encodeURIComponent(issueId)}`
       )
     },
     [router, programKey, moduleKey]

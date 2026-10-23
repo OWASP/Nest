@@ -63,7 +63,7 @@ const mockAccessData = {
 
 const mockIssueData = {
   managementModule: {
-    issueByNumber: {
+    issueById: {
       id: '1',
       title: 'Test Issue Title',
       body: 'This is the issue body.',
@@ -128,7 +128,7 @@ const menteeIssueView = (
     interestedUsers: [],
     issueMentees: [],
     ...moduleOverrides,
-    issueByNumber: {
+    issueById: {
       id: '1',
       number: 42,
       title: 'Mentee Issue',
@@ -201,7 +201,7 @@ describe('ModuleIssueDetailsPage', () => {
     mockUseParams.mockReturnValue({
       programKey: 'prog1',
       moduleKey: 'mod1',
-      issueId: '123',
+      issueId: 'SXNzdWVOb2RlOjEyMw==',
     })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: mockAssignIssue,
@@ -259,7 +259,7 @@ describe('ModuleIssueDetailsPage', () => {
     setupQueryMock({
       managementModule: {
         ...mockIssueData.managementModule,
-        issueByNumber: null,
+        issueById: null,
       },
     })
     render(<ModuleIssueDetailsPage />)
@@ -293,7 +293,7 @@ describe('ModuleIssueDetailsPage', () => {
         variables: {
           programKey: 'prog1',
           moduleKey: 'mod1',
-          issueNumber: 123,
+          issueId: 'SXNzdWVOb2RlOjEyMw==',
           userLogin: 'user2',
         },
       })
@@ -311,7 +311,7 @@ describe('ModuleIssueDetailsPage', () => {
         variables: {
           programKey: 'prog1',
           moduleKey: 'mod1',
-          issueNumber: 123,
+          issueId: 'SXNzdWVOb2RlOjEyMw==',
           userLogin: 'user1',
         },
       })
@@ -322,8 +322,8 @@ describe('ModuleIssueDetailsPage', () => {
     const noPrData = {
       managementModule: {
         ...mockIssueData.managementModule,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           pullRequests: [],
         },
       },
@@ -387,8 +387,8 @@ describe('ModuleIssueDetailsPage', () => {
         ...mockIssueData,
         managementModule: {
           ...mockIssueData.managementModule,
-          issueByNumber: {
-            ...mockIssueData.managementModule.issueByNumber,
+          issueById: {
+            ...mockIssueData.managementModule.issueById,
             assignees: [],
           },
         },
@@ -474,8 +474,8 @@ describe('ModuleIssueDetailsPage', () => {
         ...mockIssueData,
         managementModule: {
           ...mockIssueData.managementModule,
-          issueByNumber: {
-            ...mockIssueData.managementModule.issueByNumber,
+          issueById: {
+            ...mockIssueData.managementModule.issueById,
             state,
             isMerged,
           },
@@ -492,8 +492,8 @@ describe('ModuleIssueDetailsPage', () => {
       managementModule: {
         ...mockIssueData.managementModule,
         taskAssignedAt: null,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           body: null,
           assignees: [{ id: 'a1', login: 'user1', name: null, avatarUrl: null }],
           pullRequests: [
@@ -540,7 +540,7 @@ describe('ModuleIssueDetailsPage', () => {
         variables: {
           programKey: 'prog1',
           moduleKey: 'mod1',
-          issueNumber: 123,
+          issueId: 'SXNzdWVOb2RlOjEyMw==',
         },
       })
     })
@@ -568,7 +568,7 @@ describe('ModuleIssueDetailsPage', () => {
     const fetchMoreMock = jest.fn().mockResolvedValue({
       data: {
         managementModule: {
-          issueByNumber: {
+          issueById: {
             pullRequests: [
               {
                 id: 'pr-new',
@@ -593,10 +593,10 @@ describe('ModuleIssueDetailsPage', () => {
         return {
           data: {
             managementModule: {
-              issueByNumber: {
-                ...mockIssueData.managementModule.issueByNumber,
+              issueById: {
+                ...mockIssueData.managementModule.issueById,
                 pullRequests: Array.from({ length: 4 }, (_, i) => ({
-                  ...mockIssueData.managementModule.issueByNumber.pullRequests[0],
+                  ...mockIssueData.managementModule.issueById.pullRequests[0],
                   id: `pr-${i}`,
                 })),
               },
@@ -664,8 +664,8 @@ describe('ModuleIssueDetailsPage', () => {
       ...mockIssueData,
       managementModule: {
         ...mockIssueData.managementModule,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           pullRequests: Array.from({ length: 6 }, (_, i) => ({
             id: `pr${i + 1}`,
             title: `Pull Request ${i + 1}`,
@@ -716,8 +716,8 @@ describe('ModuleIssueDetailsPage', () => {
       ...mockIssueData,
       managementModule: {
         ...mockIssueData.managementModule,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           assignees: [
             {
               id: 'assignee1',
@@ -739,8 +739,8 @@ describe('ModuleIssueDetailsPage', () => {
       ...mockIssueData,
       managementModule: {
         ...mockIssueData.managementModule,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           assignees: [
             {
               id: 'assignee1',
@@ -763,8 +763,8 @@ describe('ModuleIssueDetailsPage', () => {
       ...mockIssueData,
       managementModule: {
         ...mockIssueData.managementModule,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           pullRequests: null,
         },
       },
@@ -801,8 +801,8 @@ describe('ModuleIssueDetailsPage', () => {
       managementModule: {
         ...mockIssueData.managementModule,
         interestedUsers: null,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           assignees: null,
           labels: null,
         },
@@ -889,8 +889,8 @@ describe('ModuleIssueDetailsPage', () => {
       ...mockIssueData,
       managementModule: {
         ...mockIssueData.managementModule,
-        issueByNumber: {
-          ...mockIssueData.managementModule.issueByNumber,
+        issueById: {
+          ...mockIssueData.managementModule.issueById,
           assignees: [],
         },
       },
@@ -943,9 +943,9 @@ describe('ModuleIssueDetailsPage', () => {
       expect(screen.queryByRole('heading', { name: /Pull Requests/i })).not.toBeInTheDocument()
     })
 
-    it('shows issue not found for a mentee when issueByNumber is null', async () => {
+    it('shows issue not found for a mentee when issueById is null', async () => {
       setupQueryMock({
-        managementModule: { ...menteeIssueView().managementModule, issueByNumber: null },
+        managementModule: { ...menteeIssueView().managementModule, issueById: null },
       })
       render(<ModuleIssueDetailsPage />)
       await waitFor(() => {
@@ -1134,7 +1134,11 @@ describe('PR pagination edge cases', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId: '123' })
+    mockUseParams.mockReturnValue({
+      programKey: 'prog1',
+      moduleKey: 'mod1',
+      issueId: 'SXNzdWVOb2RlOjEyMw==',
+    })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: jest.fn(),
       unassignIssue: jest.fn(),
@@ -1172,7 +1176,7 @@ describe('PR pagination edge cases', () => {
           data: {
             managementModule: {
               ...mockIssueData.managementModule,
-              issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+              issueById: { ...mockIssueData.managementModule.issueById, pullRequests: prs },
             },
           },
           loading: false,
@@ -1192,10 +1196,10 @@ describe('PR pagination edge cases', () => {
           {
             managementModule: {
               ...mockIssueData.managementModule,
-              issueByNumber: { ...mockIssueData.managementModule.issueByNumber, pullRequests: prs },
+              issueById: { ...mockIssueData.managementModule.issueById, pullRequests: prs },
             },
           },
-          { fetchMoreResult: { managementModule: { issueByNumber: { pullRequests: [] } } } }
+          { fetchMoreResult: { managementModule: { issueById: { pullRequests: [] } } } }
         )
         return Promise.resolve({})
       }
@@ -1219,8 +1223,8 @@ describe('PR pagination edge cases', () => {
           data: {
             managementModule: {
               ...mockIssueData.managementModule,
-              issueByNumber: {
-                ...mockIssueData.managementModule.issueByNumber,
+              issueById: {
+                ...mockIssueData.managementModule.issueById,
                 pullRequests: currentPRs,
               },
             },
@@ -1235,15 +1239,15 @@ describe('PR pagination edge cases', () => {
               {
                 managementModule: {
                   ...mockIssueData.managementModule,
-                  issueByNumber: {
-                    ...mockIssueData.managementModule.issueByNumber,
+                  issueById: {
+                    ...mockIssueData.managementModule.issueById,
                     pullRequests: prs,
                   },
                 },
               },
               {
                 fetchMoreResult: {
-                  managementModule: { issueByNumber: { pullRequests: extraPRs } },
+                  managementModule: { issueById: { pullRequests: extraPRs } },
                 },
               }
             )
@@ -1283,7 +1287,11 @@ describe('PR pagination edge cases', () => {
 describe('Mentee issue status badges', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId: '123' })
+    mockUseParams.mockReturnValue({
+      programKey: 'prog1',
+      moduleKey: 'mod1',
+      issueId: 'SXNzdWVOb2RlOjEyMw==',
+    })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: jest.fn(),
       unassignIssue: jest.fn(),

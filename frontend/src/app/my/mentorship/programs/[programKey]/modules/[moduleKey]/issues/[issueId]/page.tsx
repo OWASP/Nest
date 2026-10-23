@@ -47,7 +47,7 @@ const ModuleIssueDetailsPage = () => {
     variables: {
       programKey,
       moduleKey,
-      number: Number(issueId),
+      issueId,
       limit,
       offset: 0,
     },
@@ -77,7 +77,7 @@ const ModuleIssueDetailsPage = () => {
   }, [error])
 
   useEffect(() => {
-    const prCount = data?.managementModule?.issueByNumber?.pullRequests?.length
+    const prCount = data?.managementModule?.issueById?.pullRequests?.length
     if (prCount == null) return
     if (prCount <= limit) {
       setHasMorePRs(prCount >= limit)
@@ -133,7 +133,7 @@ const ModuleIssueDetailsPage = () => {
 
   const mentorshipModule = data?.managementModule
   const isMentee = mentorshipModule?.userRole === 'mentee'
-  const issue = mentorshipModule?.issueByNumber
+  const issue = mentorshipModule?.issueById
   const taskDeadline = (mentorshipModule?.taskDeadline as string | undefined) ?? null
   const moduleStartedAt = mentorshipModule?.startedAt
   const moduleEndedAt = mentorshipModule?.endedAt
@@ -272,7 +272,7 @@ const ModuleIssueDetailsPage = () => {
                                 variables: {
                                   programKey,
                                   moduleKey,
-                                  issueNumber: Number(issueId),
+                                  issueId,
                                   deadlineAt: iso,
                                 },
                               })
@@ -282,7 +282,7 @@ const ModuleIssueDetailsPage = () => {
                                 variables: {
                                   programKey,
                                   moduleKey,
-                                  issueNumber: Number(issueId),
+                                  issueId,
                                 },
                               })
                             }
@@ -388,7 +388,7 @@ const ModuleIssueDetailsPage = () => {
                             variables: {
                               programKey,
                               moduleKey,
-                              issueNumber: Number(issueId),
+                              issueId,
                               userLogin: a.login,
                             },
                           })
@@ -428,26 +428,25 @@ const ModuleIssueDetailsPage = () => {
                               variables: {
                                 programKey,
                                 moduleKey,
-                                number: Number(issueId),
+                                issueId,
                                 offset: currentLength,
                                 limit,
                               },
                               updateQuery: (prevResult, { fetchMoreResult }) => {
                                 if (!fetchMoreResult) return prevResult
                                 const newPRs =
-                                  fetchMoreResult.managementModule?.issueByNumber?.pullRequests ||
-                                  []
+                                  fetchMoreResult.managementModule?.issueById?.pullRequests || []
                                 if (newPRs.length < limit) setHasMorePRs(false)
                                 if (newPRs.length === 0) return prevResult
                                 return {
                                   ...prevResult,
                                   managementModule: {
                                     ...prevResult.managementModule!,
-                                    issueByNumber: {
-                                      ...prevResult.managementModule!.issueByNumber!,
+                                    issueById: {
+                                      ...prevResult.managementModule!.issueById!,
                                       pullRequests: [
-                                        ...(prevResult.managementModule?.issueByNumber
-                                          ?.pullRequests || []),
+                                        ...(prevResult.managementModule?.issueById?.pullRequests ||
+                                          []),
                                         ...newPRs,
                                       ],
                                     },
@@ -527,7 +526,7 @@ const ModuleIssueDetailsPage = () => {
                           variables: {
                             programKey,
                             moduleKey,
-                            issueNumber: Number(issueId),
+                            issueId,
                             userLogin: u.login,
                           },
                         })

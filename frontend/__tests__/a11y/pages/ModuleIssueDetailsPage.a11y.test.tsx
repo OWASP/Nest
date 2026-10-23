@@ -25,7 +25,7 @@ jest.mock('hooks/useIssueMutations')
 
 const mockIssueData = {
   getModule: {
-    issueByNumber: {
+    issueById: {
       id: '1',
       title: 'Test Issue Title',
       body: 'This is the issue body.',

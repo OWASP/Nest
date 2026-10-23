@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.utils import timezone
+from strawberry.relay import GlobalID
 
 from apps.mentorship.api.internal.mutations.module import (
     ModuleMutation,
@@ -393,13 +394,45 @@ class TestModuleMutationAssignIssue:
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_number=1,
+            issue_id=GlobalID("IssueNode", "1"),
             user_login="testuser",
         )
 
         assert result == mock_mod
         mock_issue.assignees.add.assert_called_once_with(mock_gh)
         mock_interest.objects.filter.return_value.delete.assert_called_once()
+
+    @pytest.mark.parametrize("selected_pk", [101, 102])
+    @patch("apps.mentorship.api.internal.mutations.module.IssueUserInterest")
+    @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_assign_issue_with_overlapping_numbers(
+        self, mock_module, mock_gh_user, mock_interest, selected_pk
+    ):
+        """Assignment affects only the selected issue when GitHub numbers overlap."""
+        module = (
+            mock_module.objects.select_related.return_value.filter.return_value.first.return_value
+        )
+        issues = {pk: MagicMock(pk=pk, number=42) for pk in (101, 102)}
+        module.issues.filter.side_effect = lambda **filters: MagicMock(
+            first=lambda: issues.get(filters["pk"])
+        )
+        assignee = mock_gh_user.objects.filter.return_value.first.return_value
+
+        ModuleMutation().assign_issue_to_user(
+            self._make_info(MagicMock()),
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_id=GlobalID("IssueNode", str(selected_pk)),
+            user_login="testuser",
+        )
+
+        issues[selected_pk].assignees.add.assert_called_once_with(assignee)
+        other_pk = 102 if selected_pk == 101 else 101
+        issues[other_pk].assignees.add.assert_not_called()
+        mock_interest.objects.filter.assert_called_once_with(
+            module=module, issue_id=issues[selected_pk].id, user=assignee
+        )
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_assign_issue_module_not_found(self, mock_module):
@@ -416,7 +449,7 @@ class TestModuleMutationAssignIssue:
                 info,
                 module_key="bad",
                 program_key="bad",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 user_login="testuser",
             )
 
@@ -438,7 +471,7 @@ class TestModuleMutationAssignIssue:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 user_login="testuser",
             )
 
@@ -463,7 +496,7 @@ class TestModuleMutationAssignIssue:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 user_login="testuser",
             )
 
@@ -489,7 +522,7 @@ class TestModuleMutationAssignIssue:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 user_login="testuser",
             )
 
@@ -526,7 +559,7 @@ class TestModuleMutationUnassignIssue:
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_number=1,
+            issue_id=GlobalID("IssueNode", "1"),
             user_login="testuser",
         )
 
@@ -548,7 +581,7 @@ class TestModuleMutationUnassignIssue:
                 info,
                 module_key="bad",
                 program_key="bad",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 user_login="testuser",
             )
 
@@ -570,7 +603,7 @@ class TestModuleMutationUnassignIssue:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 user_login="testuser",
             )
 
@@ -595,7 +628,7 @@ class TestModuleMutationUnassignIssue:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 user_login="testuser",
             )
 
@@ -616,12 +649,12 @@ class TestModuleMutationUnassignIssue:
         mock_mod.issues.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
-        with pytest.raises(ObjectDoesNotExist, match=r"Issue .* not found in this module"):
+        with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
             mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=42,
+                issue_id=GlobalID("IssueNode", "42"),
                 user_login="testuser",
             )
 
@@ -675,7 +708,7 @@ class TestModuleMutationSetTaskDeadline:
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_number=1,
+            issue_id=GlobalID("IssueNode", "1"),
             deadline_at=deadline,
         )
 
@@ -697,7 +730,7 @@ class TestModuleMutationSetTaskDeadline:
                 info,
                 module_key="bad",
                 program_key="bad",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
             )
 
@@ -721,7 +754,7 @@ class TestModuleMutationSetTaskDeadline:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
             )
 
@@ -746,7 +779,7 @@ class TestModuleMutationSetTaskDeadline:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
             )
 
@@ -774,7 +807,7 @@ class TestModuleMutationSetTaskDeadline:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
             )
 
@@ -821,7 +854,7 @@ class TestModuleMutationSetTaskDeadline:
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_number=1,
+            issue_id=GlobalID("IssueNode", "1"),
             deadline_at=naive_deadline,
         )
 
@@ -870,7 +903,7 @@ class TestModuleMutationSetTaskDeadline:
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_number=1,
+            issue_id=GlobalID("IssueNode", "1"),
             deadline_at=past_deadline,
         )
 
@@ -908,7 +941,7 @@ class TestModuleMutationSetTaskDeadline:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=early_deadline,
             )
 
@@ -943,7 +976,7 @@ class TestModuleMutationSetTaskDeadline:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=late_deadline,
             )
 
@@ -986,7 +1019,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mutation = ModuleMutation()
         result = mutation.clear_task_deadline(
-            info, module_key="mod-1", program_key="prog-1", issue_number=1
+            info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
         )
 
         assert result == mock_mod
@@ -1026,7 +1059,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mutation = ModuleMutation()
         result = mutation.clear_task_deadline(
-            info, module_key="mod-1", program_key="prog-1", issue_number=1
+            info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
         )
 
         assert result == mock_mod
@@ -1062,7 +1095,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mutation = ModuleMutation()
         result = mutation.clear_task_deadline(
-            info, module_key="mod-1", program_key="prog-1", issue_number=1
+            info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
         )
 
         assert result == mock_mod
@@ -1096,7 +1129,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mutation = ModuleMutation()
         result = mutation.clear_task_deadline(
-            info, module_key="mod-1", program_key="prog-1", issue_number=1
+            info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
         )
 
         assert result == mock_mod
@@ -1112,7 +1145,9 @@ class TestModuleMutationClearTaskDeadline:
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
-            mutation.clear_task_deadline(info, module_key="bad", program_key="bad", issue_number=1)
+            mutation.clear_task_deadline(
+                info, module_key="bad", program_key="bad", issue_id=GlobalID("IssueNode", "1")
+            )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -1129,7 +1164,7 @@ class TestModuleMutationClearTaskDeadline:
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
             mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_number=1
+                info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
@@ -1150,7 +1185,7 @@ class TestModuleMutationClearTaskDeadline:
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
             mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_number=1
+                info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
@@ -1174,7 +1209,7 @@ class TestModuleMutationClearTaskDeadline:
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match="Cannot clear deadline: issue has no assignees"):
             mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_number=1
+                info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
             )
 
 
@@ -1609,7 +1644,7 @@ class TestModuleMutationMenteeDeadline:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=deadline_at,
             )
 
@@ -1652,7 +1687,7 @@ class TestModuleMutationMenteeDeadline:
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_number=1,
+                issue_id=GlobalID("IssueNode", "1"),
                 deadline_at=deadline_at,
             )
 
@@ -1697,7 +1732,7 @@ class TestModuleMutationMenteeDeadline:
             info,
             module_key="mod-1",
             program_key="prog-1",
-            issue_number=1,
+            issue_id=GlobalID("IssueNode", "1"),
             deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
         )
         assert result is not None
