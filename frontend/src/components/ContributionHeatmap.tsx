@@ -36,6 +36,10 @@ const getChartOptions = (
     type: 'heatmap' as const,
     fontFamily: 'inherit',
     parentHeightOffset: 0,
+    animations: {
+      // Color updates must not move repeated month labels between calendar columns.
+      dynamicAnimation: { enabled: false },
+    },
     toolbar: {
       show: false,
     },

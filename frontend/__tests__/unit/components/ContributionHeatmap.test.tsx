@@ -268,6 +268,40 @@ describe('ContributionHeatmap', () => {
   })
 
   describe('Theme & Styling', () => {
+    it.each([
+      ['light', 'dark'],
+      ['dark', 'light'],
+    ] as const)(
+      'keeps repeated month labels stationary when switching %s to %s',
+      async (from, to) => {
+        const heatmapProps = {
+          contributionData: { '2026-10-01': 5 },
+          startDate: '2025-10-19',
+          endDate: '2026-10-17',
+        }
+        const { rerender } = renderWithTheme(<ContributionHeatmap {...heatmapProps} />, from)
+        await waitFor(() => expect(mockChart).toHaveBeenCalled())
+        const originalSeries = getChartProps().series
+        const originalChart = screen.getByTestId('mock-heatmap-chart')
+
+        ;(useTheme as jest.Mock).mockReturnValue({ theme: to, setTheme: jest.fn() })
+        rerender(
+          <ThemeProvider attribute="class">
+            <ContributionHeatmap {...heatmapProps} />
+          </ThemeProvider>
+        )
+
+        const { options, series } = getChartProps()
+        expect(series).toBe(originalSeries)
+        expect(screen.getByTestId('mock-heatmap-chart')).toBe(originalChart)
+        const monthLabels = series[0].data.map(({ x }) => options.xaxis?.labels?.formatter?.(x))
+        expect(monthLabels.filter((label) => label === 'Oct')).toHaveLength(2)
+        expect(options.chart?.animations?.dynamicAnimation?.enabled).toBe(false)
+        expect(options.chart?.animations?.enabled).not.toBe(false)
+        expect(options.stroke?.colors).toEqual([to === 'dark' ? '#1F2937' : '#FFFFFF'])
+      }
+    )
+
     it('renders in light and dark mode with correct classes', () => {
       const { rerender } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Light" />,
