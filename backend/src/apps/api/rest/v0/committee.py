@@ -83,14 +83,7 @@ def get_committee(
     committee_id: str = Path(example="project"),
 ) -> CommitteeDetail | CommitteeError:
     """Get committee."""
-    if committee := CommitteeModel.active_committees.filter(
-        is_active=True,
-        key__iexact=(
-            committee_id
-            if committee_id.startswith("www-committee-")
-            else f"www-committee-{committee_id}"
-        ),
-    ).first():
+    if committee := CommitteeModel.get_by_key(committee_id):
         return committee
 
     return Response({"message": "Committee not found"}, status=HTTPStatus.NOT_FOUND)

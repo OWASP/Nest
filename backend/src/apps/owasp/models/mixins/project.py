@@ -56,7 +56,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_key(self) -> str:
         """Return key for indexing."""
-        return self.key.replace("www-project-", "")
+        return self.key
 
     @property
     def idx_languages(self) -> list[str]:
@@ -76,7 +76,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_name(self) -> str:
         """Return name for indexing."""
-        return self.name or " ".join(self.key.replace("www-project-", "").capitalize().split("-"))
+        return self.name or " ".join(self.key.capitalize().split("-"))
 
     @property
     def idx_open_issues_count(self) -> int:
