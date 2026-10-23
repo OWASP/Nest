@@ -233,11 +233,6 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
         <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
       )}
 
-      <p className="mb-1 text-xs text-gray-600 dark:text-gray-300">
-        <span className="sr-only">Displayed period: </span>
-        <span>{formatDateRange(calendarStart, calendarEnd)}</span>
-      </p>
-
       {/* scroll wrapper for small screens */}
       <div className="scrollbar-default w-full overflow-x-auto overflow-y-hidden">
         <style>
@@ -272,30 +267,36 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           />
         </div>
       </div>
-      <div className="mt-1 flex items-center justify-end gap-2 pb-2 text-xs text-gray-600 dark:text-gray-300">
-        <span aria-hidden="true">Less</span>
-        <ul aria-label={`Daily ${unit} counts, from less to more`} className="flex gap-1">
-          {colorRanges.map(({ from, to, color, name }) => {
-            const bounds =
-              from === to
-                ? `${from}`
-                : to === Number.MAX_SAFE_INTEGER
-                  ? `${from}+`
-                  : `${from}–${to}`
-            const description = `${bounds} ${pluralize(to, unit)} per day`
-            return (
-              <li key={name} title={description}>
-                <span
-                  aria-hidden="true"
-                  className="block h-3 w-3 rounded-xs"
-                  style={{ backgroundColor: color }}
-                />
-                <span className="sr-only">{description}</span>
-              </li>
-            )
-          })}
-        </ul>
-        <span aria-hidden="true">More</span>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-2 text-xs text-gray-600 dark:text-gray-300">
+        <p>
+          <span className="sr-only">Displayed period: </span>
+          <span>{formatDateRange(calendarStart, calendarEnd)}</span>
+        </p>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <span aria-hidden="true">Less</span>
+          <ul aria-label={`Daily ${unit} counts, from less to more`} className="flex gap-1">
+            {colorRanges.map(({ from, to, color, name }) => {
+              const bounds =
+                from === to
+                  ? `${from}`
+                  : to === Number.MAX_SAFE_INTEGER
+                    ? `${from}+`
+                    : `${from}–${to}`
+              const description = `${bounds} ${pluralize(to, unit)} per day`
+              return (
+                <li key={name} title={description}>
+                  <span
+                    aria-hidden="true"
+                    className="block h-3 w-3 rounded-xs"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="sr-only">{description}</span>
+                </li>
+              )
+            })}
+          </ul>
+          <span aria-hidden="true">More</span>
+        </div>
       </div>
     </div>
   )
