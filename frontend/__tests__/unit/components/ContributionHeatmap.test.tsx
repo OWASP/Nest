@@ -14,6 +14,7 @@ interface MockChartProps {
   options: ApexOptions
   series: HeatmapSeries
   height: string | number
+  width: string | number
   type: string
 }
 
@@ -388,9 +389,33 @@ describe('ContributionHeatmap', () => {
       )
       expect(getTooltip(0, 999)).toBe('')
     })
+
+    it('suppresses padding tooltips while retaining tooltips for zero-activity days', async () => {
+      renderWithTheme(
+        <ContributionHeatmap contributionData={{}} startDate="2024-01-03" endDate="2024-01-10" />
+      )
+
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      expect(getTooltipForDate('2024-01-01')).toBe('')
+      expect(getTooltipForDate('2024-01-14')).toBe('')
+      expect(getTooltipForDate('2024-01-04')).toContain('0 contributions')
+    })
   })
 
   describe('Week Number Calculation', () => {
+    it('aligns every weekday row across complete week columns', async () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={{ '2024-01-03': 5, '2024-01-10': 2 }}
+          startDate="2024-01-03"
+          endDate="2024-01-10"
+        />
+      )
+
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      expect(getChartProps().series.map((day) => day.data.length)).toEqual([2, 2, 2, 2, 2, 2, 2])
+    })
+
     it('correctly calculates week numbers starting from Monday', () => {
       const data = {
         '2024-01-01': 5,
@@ -783,6 +808,27 @@ describe('ContributionHeatmap', () => {
   })
 
   describe('Variants', () => {
+    it.each([
+      { variant: 'default' as const, width: 1083.5 },
+      { variant: 'medium' as const, width: 893 },
+      { variant: 'compact' as const, width: 750.2 },
+    ])('sizes the $variant chart using all 53 week columns', async ({ variant, width }) => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={{}}
+          startDate="2025-10-19"
+          endDate="2026-10-17"
+          variant={variant}
+        />
+      )
+
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      expect(getChartProps().width).toBeCloseTo(width)
+      expect(getChartProps().series.map((day) => day.data.length)).toEqual([
+        53, 53, 53, 53, 53, 53, 53,
+      ])
+    })
+
     it('renders default variant with full dimensions', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
       const chart = screen.getByTestId('mock-heatmap-chart')

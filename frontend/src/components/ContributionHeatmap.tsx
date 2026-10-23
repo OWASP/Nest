@@ -2,91 +2,15 @@ import type { ApexTooltipCustomOpts } from 'apexcharts'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React, { useMemo } from 'react'
+import {
+  buildContributionCalendar,
+  type ContributionHeatmapSeries,
+} from 'utils/contributionHeatmap'
 import { pluralize } from 'utils/pluralize'
 
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
-
-const generateHeatmapSeries = (
-  startDate: string,
-  endDate: string,
-  contributionData: Record<string, number>
-) => {
-  if (!startDate || !endDate) {
-    const defaultEnd = new Date()
-    defaultEnd.setUTCHours(0, 0, 0, 0)
-    const defaultStart = new Date()
-    defaultStart.setUTCHours(0, 0, 0, 0)
-    defaultStart.setUTCFullYear(defaultEnd.getUTCFullYear() - 1)
-    return generateHeatmapSeries(
-      defaultStart.toISOString().split('T')[0],
-      defaultEnd.toISOString().split('T')[0],
-      contributionData
-    )
-  }
-
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    const defaultEnd = new Date()
-    defaultEnd.setUTCHours(0, 0, 0, 0)
-    const defaultStart = new Date()
-    defaultStart.setUTCHours(0, 0, 0, 0)
-    defaultStart.setUTCFullYear(defaultEnd.getUTCFullYear() - 1)
-    return generateHeatmapSeries(
-      defaultStart.toISOString().split('T')[0],
-      defaultEnd.toISOString().split('T')[0],
-      contributionData
-    )
-  }
-
-  if (start > end) {
-    const swappedStartDate = endDate
-    const swappedEndDate = startDate
-    return generateHeatmapSeries(swappedStartDate, swappedEndDate, contributionData)
-  }
-
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-  const series = dayNames.map((day) => ({
-    name: day,
-    data: [] as Array<{ x: string; y: number; date: string }>,
-  }))
-
-  const firstDay = new Date(start)
-  const daysToMonday = (firstDay.getUTCDay() + 6) % 7
-  firstDay.setUTCDate(firstDay.getUTCDate() - daysToMonday)
-
-  const currentDate = new Date(firstDay)
-  let weekNumber = 1
-
-  while (currentDate <= end) {
-    const dayOfWeek = currentDate.getUTCDay()
-    const adjustedDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-    const dateStr = currentDate.toISOString().split('T')[0]
-    const weekLabel = `W${weekNumber}`
-
-    const isInRange = currentDate >= start && currentDate <= end
-    const contributionCount = isInRange ? contributionData?.[dateStr] || 0 : 0
-
-    series[adjustedDayIndex].data.push({
-      x: weekLabel,
-      y: contributionCount,
-      date: dateStr,
-    })
-
-    currentDate.setUTCDate(currentDate.getUTCDate() + 1)
-
-    if (currentDate.getUTCDay() === 1 && currentDate <= end) {
-      weekNumber++
-    }
-  }
-
-  const reversedSeries = series.slice().reverse()
-  return { heatmapSeries: reversedSeries }
-}
 
 const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   chart: {
@@ -181,11 +105,9 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
       fontSize: '12px',
     },
     custom: ({ seriesIndex, dataPointIndex, w }: ApexTooltipCustomOpts) => {
-      const series = w.config.series as unknown as Array<{
-        data: Array<{ y: number; date: string }>
-      }>
+      const series = w.config.series as ContributionHeatmapSeries
       const data = series?.[seriesIndex]?.data?.[dataPointIndex]
-      if (!data) return ''
+      if (!data || data.y === null) return ''
 
       const count = data.y
       const date = data.date
@@ -267,16 +189,14 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   const { theme } = useTheme()
   const isDarkMode = theme === 'dark'
 
-  const { heatmapSeries } = useMemo(
-    () => generateHeatmapSeries(startDate, endDate, contributionData),
+  const { heatmapSeries, weeksCount } = useMemo(
+    () => buildContributionCalendar(startDate, endDate, contributionData, new Date()),
     [contributionData, startDate, endDate]
   )
 
   const options = useMemo(() => getChartOptions(isDarkMode, unit), [isDarkMode, unit])
 
   const calculateChartWidth = useMemo(() => {
-    const weeksCount = heatmapSeries[0]?.data?.length || 0
-
     if (variant === 'compact') {
       const pixelPerWeek = 13.4
       const padding = 40
@@ -295,7 +215,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
     const padding = 50
     const calculatedWidth = weeksCount * pixelPerWeek + padding
     return Math.max(600, calculatedWidth)
-  }, [heatmapSeries, variant])
+  }, [weeksCount, variant])
 
   const chartWidth = calculateChartWidth
 
@@ -306,7 +226,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   }
 
   return (
-    <div className="w-full">
+    <div className="contribution-heatmap w-full">
       {title && (
         <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
       )}
@@ -315,6 +235,11 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       <div className="scrollbar-default w-full overflow-x-auto overflow-y-hidden">
         <style>
           {`
+            /* ApexCharts omits the value attribute for null padding cells. */
+            .contribution-heatmap .apexcharts-heatmap-rect:not([val]) {
+              visibility: hidden;
+              pointer-events: none;
+            }
             .apexcharts-tooltip {
               background: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
               border: 1px solid ${isDarkMode ? '#374151' : '#E5E7EB'} !important;
