@@ -24,8 +24,8 @@ interface IssuesTableProps {
   issues: IssueRow[]
   showAssignee?: boolean
   showDeadline?: boolean
-  onIssueClick?: (issueNumber: number) => void
-  issueUrl?: (issueNumber: number) => string
+  onIssueClick?: (issueId: string) => void
+  issueUrl?: (issueId: string) => string
   maxVisibleLabels?: number
   emptyMessage?: string
 }
@@ -43,11 +43,11 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
 }) => {
   const router = useRouter()
 
-  const handleIssueClick = (issueNumber: number) => {
+  const handleIssueClick = (issueId: string) => {
     if (onIssueClick) {
-      onIssueClick(issueNumber)
+      onIssueClick(issueId)
     } else if (issueUrl) {
-      router.push(issueUrl(issueNumber))
+      router.push(issueUrl(issueId))
     }
   }
 
@@ -174,7 +174,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                   >
                     <button
                       type="button"
-                      onClick={() => handleIssueClick(issue.number)}
+                      onClick={() => handleIssueClick(issue.objectID)}
                       className="line-clamp-2 h-12 cursor-pointer overflow-hidden text-left text-sm font-medium text-blue-600 hover:underline lg:max-w-md dark:text-blue-400"
                     >
                       {issue.title}
