@@ -1,96 +1,68 @@
-import type { ApexTooltipCustomOpts } from 'apexcharts'
+import type { ApexTooltipCustomOpts, ChartState } from 'apexcharts'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
-import React, { useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  buildContributionCalendar,
+  type ContributionHeatmapSeries,
+} from 'utils/contributionHeatmap'
+import { formatDateRange } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
-const generateHeatmapSeries = (
-  startDate: string,
-  endDate: string,
-  contributionData: Record<string, number>
-) => {
-  if (!startDate || !endDate) {
-    const defaultEnd = new Date()
-    defaultEnd.setUTCHours(0, 0, 0, 0)
-    const defaultStart = new Date()
-    defaultStart.setUTCHours(0, 0, 0, 0)
-    defaultStart.setUTCFullYear(defaultEnd.getUTCFullYear() - 1)
-    return generateHeatmapSeries(
-      defaultStart.toISOString().split('T')[0],
-      defaultEnd.toISOString().split('T')[0],
-      contributionData
-    )
-  }
+const MIN_WIDTH_BY_VARIANT = { compact: 400, medium: 500, default: 600 } as const
+const MAX_HEIGHT_BY_VARIANT = { compact: 150, medium: 172, default: 195 } as const
 
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    const defaultEnd = new Date()
-    defaultEnd.setUTCHours(0, 0, 0, 0)
-    const defaultStart = new Date()
-    defaultStart.setUTCHours(0, 0, 0, 0)
-    defaultStart.setUTCFullYear(defaultEnd.getUTCFullYear() - 1)
-    return generateHeatmapSeries(
-      defaultStart.toISOString().split('T')[0],
-      defaultEnd.toISOString().split('T')[0],
-      contributionData
-    )
-  }
-
-  if (start > end) {
-    const swappedStartDate = endDate
-    const swappedEndDate = startDate
-    return generateHeatmapSeries(swappedStartDate, swappedEndDate, contributionData)
-  }
-
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-  const series = dayNames.map((day) => ({
-    name: day,
-    data: [] as Array<{ x: string; y: number; date: string }>,
-  }))
-
-  const firstDay = new Date(start)
-  const daysToMonday = (firstDay.getUTCDay() + 6) % 7
-  firstDay.setUTCDate(firstDay.getUTCDate() - daysToMonday)
-
-  const currentDate = new Date(firstDay)
-  let weekNumber = 1
-
-  while (currentDate <= end) {
-    const dayOfWeek = currentDate.getUTCDay()
-    const adjustedDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-    const dateStr = currentDate.toISOString().split('T')[0]
-    const weekLabel = `W${weekNumber}`
-
-    const isInRange = currentDate >= start && currentDate <= end
-    const contributionCount = isInRange ? contributionData?.[dateStr] || 0 : 0
-
-    series[adjustedDayIndex].data.push({
-      x: weekLabel,
-      y: contributionCount,
-      date: dateStr,
-    })
-
-    currentDate.setUTCDate(currentDate.getUTCDate() + 1)
-
-    if (currentDate.getUTCDay() === 1 && currentDate <= end) {
-      weekNumber++
-    }
-  }
-
-  const reversedSeries = series.slice().reverse()
-  return { heatmapSeries: reversedSeries }
+interface ChartSize {
+  height: number
+  maxWidth?: number
 }
 
-const getChartOptions = (isDarkMode: boolean, unit: string) => ({
+interface HeatmapChart {
+  getState: () => ChartState
+}
+
+/** Share activity thresholds and theme colors between calendar cells and the legend. */
+const getColorRanges = (isDarkMode: boolean) => [
+  { from: 0, to: 0, color: isDarkMode ? '#2C3A4D' : '#E7E7E6', name: 'No activity' },
+  { from: 1, to: 4, color: isDarkMode ? '#4A5F7A' : '#7BA3C0', name: 'Low' },
+  { from: 5, to: 8, color: isDarkMode ? '#5A6F8A' : '#6C8EAB', name: 'Medium' },
+  { from: 9, to: 12, color: isDarkMode ? '#6A7F9A' : '#5C7BA2', name: 'High' },
+  {
+    from: 13,
+    to: Number.MAX_SAFE_INTEGER,
+    color: isDarkMode ? '#7A8FAA' : '#567498',
+    name: 'Very High',
+  },
+]
+
+/** Format zero activity, bounded activity bands, and the open-ended highest band. */
+const formatRangeBounds = (from: number, to: number): string => {
+  if (from === to) return `${from}`
+  if (to === Number.MAX_SAFE_INTEGER) return `${from}+`
+  return `${from}–${to}`
+}
+
+/** Configure calendar labels, padding tooltips, and theme updates without label movement. */
+const getChartOptions = (
+  isDarkMode: boolean,
+  unit: string,
+  colorRanges: ReturnType<typeof getColorRanges>,
+  monthLabels: Record<string, string>,
+  fitSquareCells: (chart: HeatmapChart) => void
+) => ({
   chart: {
     type: 'heatmap' as const,
+    fontFamily: 'inherit',
+    parentHeightOffset: 0,
+    events: { mounted: fitSquareCells, updated: fitSquareCells },
+    animations: {
+      // Color updates must not move repeated month labels between calendar columns.
+      dynamicAnimation: { enabled: false },
+    },
     toolbar: {
       show: false,
     },
@@ -106,38 +78,7 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   plotOptions: {
     heatmap: {
       colorScale: {
-        ranges: [
-          {
-            from: 0,
-            to: 0,
-            color: isDarkMode ? '#2C3A4D' : '#E7E7E6',
-            name: 'No activity',
-          },
-          {
-            from: 1,
-            to: 4,
-            color: isDarkMode ? '#4A5F7A' : '#7BA3C0',
-            name: 'Low',
-          },
-          {
-            from: 5,
-            to: 8,
-            color: isDarkMode ? '#5A6F8A' : '#6C8EAB',
-            name: 'Medium',
-          },
-          {
-            from: 9,
-            to: 12,
-            color: isDarkMode ? '#6A7F9A' : '#5C7BA2',
-            name: 'High',
-          },
-          {
-            from: 13,
-            to: 1000,
-            color: isDarkMode ? '#7A8FAA' : '#567498',
-            name: 'Very High',
-          },
-        ],
+        ranges: colorRanges,
       },
       radius: 2,
       distributed: false,
@@ -181,19 +122,17 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
       fontSize: '12px',
     },
     custom: ({ seriesIndex, dataPointIndex, w }: ApexTooltipCustomOpts) => {
-      const series = w.config.series as unknown as Array<{
-        data: Array<{ y: number; date: string }>
-      }>
+      const series = w.config.series as ContributionHeatmapSeries
       const data = series?.[seriesIndex]?.data?.[dataPointIndex]
-      if (!data) return ''
+      if (data?.y == null) return ''
 
       const count = data.y
       const date = data.date
       const parsedDate = new Date(date + 'T00:00:00Z')
       const formattedDate = parsedDate.toLocaleDateString('en-US', {
-        weekday: 'short',
         month: 'short',
         day: 'numeric',
+        year: 'numeric',
         timeZone: 'UTC',
       })
 
@@ -218,8 +157,16 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   },
   xaxis: {
     type: 'category' as const,
+    position: 'top' as const,
     labels: {
-      show: false,
+      show: true,
+      rotate: 0,
+      hideOverlappingLabels: true,
+      showDuplicates: true,
+      trim: false,
+      offsetY: 2,
+      style: { colors: isDarkMode ? '#D1D5DB' : '#4B5563', fontSize: '11px' },
+      formatter: (value: string) => monthLabels[value] ?? '',
     },
     axisBorder: {
       show: false,
@@ -233,7 +180,14 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   },
   yaxis: {
     labels: {
-      show: false,
+      show: true,
+      minWidth: 36,
+      maxWidth: 36,
+      offsetX: -10,
+      offsetY: 1,
+      style: { colors: isDarkMode ? '#D1D5DB' : '#4B5563', fontSize: '11px' },
+      formatter: (value: string | number) =>
+        ['Mon', 'Wed', 'Fri'].includes(String(value)) ? String(value) : '',
     },
     axisBorder: {
       show: false,
@@ -256,6 +210,7 @@ interface ContributionHeatmapProps {
   variant?: 'default' | 'medium' | 'compact'
 }
 
+/** Display contribution or message activity within the supplied reporting period. */
 const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   contributionData,
   startDate,
@@ -264,49 +219,79 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   unit = 'contribution',
   variant = 'default',
 }) => {
-  const { theme } = useTheme()
-  const isDarkMode = theme === 'dark'
+  const { theme, resolvedTheme } = useTheme()
+  const isDarkMode = (resolvedTheme ?? theme) === 'dark'
 
-  const { heatmapSeries } = useMemo(
-    () => generateHeatmapSeries(startDate, endDate, contributionData),
+  const {
+    heatmapSeries,
+    weeksCount,
+    monthLabels,
+    startDate: calendarStart,
+    endDate: calendarEnd,
+  } = useMemo(
+    () => buildContributionCalendar(startDate, endDate, contributionData, new Date()),
     [contributionData, startDate, endDate]
   )
 
-  const options = useMemo(() => getChartOptions(isDarkMode, unit), [isDarkMode, unit])
+  const colorRanges = useMemo(() => getColorRanges(isDarkMode), [isDarkMode])
+  const maxHeight = MAX_HEIGHT_BY_VARIANT[variant]
+  const [chartSize, setChartSize] = useState<ChartSize>({ height: maxHeight })
+  const chartContainer = useRef<HTMLDivElement>(null)
+  const chartInstance = useRef<HeatmapChart | null>(null)
+  const rowCount = heatmapSeries.length
 
-  const calculateChartWidth = useMemo(() => {
-    const weeksCount = heatmapSeries[0]?.data?.length || 0
+  /** Fit square cells within the variant's height budget, accounting for measured label space. */
+  const fitSquareCells = useCallback(
+    (chart: HeatmapChart) => {
+      chartInstance.current = chart
+      const { svgWidth: width, svgHeight: height, gridWidth, gridHeight } = chart.getState()
+      if (
+        [width, height, gridWidth, gridHeight].some((size) => !Number.isFinite(size) || size <= 0)
+      ) {
+        return
+      }
 
-    if (variant === 'compact') {
-      const pixelPerWeek = 13.4
-      const padding = 40
-      const calculatedWidth = weeksCount * pixelPerWeek + padding
-      return Math.max(400, calculatedWidth)
-    }
+      const labelHeight = height - gridHeight
+      const labelWidth = width - gridWidth
+      const containerWidth = chartContainer.current?.getBoundingClientRect().width || width
+      const cellWidth = (containerWidth - labelWidth) / weeksCount
+      const nextSize = {
+        height: Math.min(maxHeight, Math.round(labelHeight + cellWidth * rowCount)),
+        maxWidth: Math.floor(((maxHeight - labelHeight) / rowCount) * weeksCount + labelWidth),
+      }
+      setChartSize((current) =>
+        current.height === nextSize.height && current.maxWidth === nextSize.maxWidth
+          ? current
+          : nextSize
+      )
+    },
+    [maxHeight, rowCount, weeksCount]
+  )
 
-    if (variant === 'medium') {
-      const pixelPerWeek = 16
-      const padding = 45
-      const calculatedWidth = weeksCount * pixelPerWeek + padding
-      return Math.max(500, calculatedWidth)
-    }
+  useEffect(() => {
+    const container = chartContainer.current
+    if (!container) return
 
-    const pixelPerWeek = 19.5
-    const padding = 50
-    const calculatedWidth = weeksCount * pixelPerWeek + padding
-    return Math.max(600, calculatedWidth)
-  }, [heatmapSeries, variant])
+    const observer = new ResizeObserver(() => {
+      if (chartInstance.current) fitSquareCells(chartInstance.current)
+    })
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [fitSquareCells])
 
-  const chartWidth = calculateChartWidth
+  const options = useMemo(
+    () => getChartOptions(isDarkMode, unit, colorRanges, monthLabels, fitSquareCells),
+    [isDarkMode, unit, colorRanges, monthLabels, fitSquareCells]
+  )
 
-  const getChartHeight = () => {
-    if (variant === 'compact') return 150
-    if (variant === 'medium') return 172
-    return 195
-  }
+  // Fit the container, but keep at least 10px per week when scrolling is necessary.
+  const minChartWidth = Math.min(
+    Math.max(MIN_WIDTH_BY_VARIANT[variant], weeksCount * 10 + 40),
+    chartSize.maxWidth ?? Number.POSITIVE_INFINITY
+  )
 
   return (
-    <div className="w-full">
+    <div className="contribution-heatmap w-full">
       {title && (
         <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
       )}
@@ -315,6 +300,11 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       <div className="scrollbar-default w-full overflow-x-auto overflow-y-hidden">
         <style>
           {`
+            /* ApexCharts omits the value attribute for null padding cells. */
+            .contribution-heatmap .apexcharts-heatmap-rect:not([val]) {
+              visibility: hidden;
+              pointer-events: none;
+            }
             .apexcharts-tooltip {
               background: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
               border: 1px solid ${isDarkMode ? '#374151' : '#E5E7EB'} !important;
@@ -330,14 +320,42 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           `}
         </style>
 
-        <div className="inline-block">
+        <div
+          ref={chartContainer}
+          style={{ width: '100%', minWidth: minChartWidth, maxWidth: chartSize.maxWidth }}
+        >
           <Chart
-            height={getChartHeight()}
+            height={chartSize.height}
             options={options}
             series={heatmapSeries}
             type="heatmap"
-            width={chartWidth}
+            width="100%"
           />
+        </div>
+      </div>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-2 text-xs text-gray-600 dark:text-gray-300">
+        <p>
+          <span className="sr-only">Displayed period: </span>
+          <span>{formatDateRange(calendarStart, calendarEnd)}</span>
+        </p>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <span aria-hidden="true">Less</span>
+          <ul aria-label={`Daily ${unit} counts, from less to more`} className="flex gap-1">
+            {colorRanges.map(({ from, to, color, name }) => {
+              const description = `${formatRangeBounds(from, to)} ${pluralize(to, unit)} per day`
+              return (
+                <li key={name} title={description}>
+                  <span
+                    aria-hidden="true"
+                    className="block h-3 w-3 rounded-xs"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="sr-only">{description}</span>
+                </li>
+              )
+            })}
+          </ul>
+          <span aria-hidden="true">More</span>
         </div>
       </div>
     </div>

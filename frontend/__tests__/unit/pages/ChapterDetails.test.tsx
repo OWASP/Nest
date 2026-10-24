@@ -1,8 +1,15 @@
 import { useQuery } from '@apollo/client/react'
 import { mockChapterDetailsData } from '@mockData/mockChapterDetailsData'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
+
+interface HeatmapChartProps {
+  type?: string
+  series?: Array<{ data: Array<{ date: string; y: number | null }> }>
+}
+
+const mockHeatmapChart = jest.fn<void, [HeatmapChartProps]>()
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -12,7 +19,8 @@ jest.mock('@apollo/client/react', () => ({
 jest.mock('react-apexcharts', () => {
   return {
     __esModule: true,
-    default: () => {
+    default: (props: HeatmapChartProps) => {
+      if (props.type === 'heatmap') mockHeatmapChart(props)
       return <div data-testid="mock-apexcharts">Mock ApexChart</div>
     },
   }
@@ -225,31 +233,81 @@ describe('chapterDetailsPage Component', () => {
     })
   })
 
-  test('renders contributions section when contributionStats total > 0', async () => {
-    const chapterDataWithStats = {
-      ...mockChapterDetailsData,
-      chapter: {
-        ...mockChapterDetailsData.chapter,
-        contributionStats: {
-          commits: 5,
-          pullRequests: 3,
-          issues: 2,
-          releases: 1,
-          total: 11,
+  test.each([undefined, {}, { '2024-01': 11, invalid: 0 }])(
+    'keeps chapter counters without inventing a calendar when dates are unusable (%j)',
+    async (contributionData) => {
+      const chapterDataWithStats = {
+        ...mockChapterDetailsData,
+        chapter: {
+          ...mockChapterDetailsData.chapter,
+          contributionStats: {
+            commits: 5,
+            pullRequests: 3,
+            issues: 2,
+            releases: 1,
+            total: 11,
+          },
+          contributionData,
         },
-        contributionData: undefined,
-      },
-    }
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: chapterDataWithStats,
-      error: null,
-    })
-    render(<ChapterDetailsPage />)
+      }
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: chapterDataWithStats,
+        error: null,
+      })
+      render(<ChapterDetailsPage />)
 
-    await waitFor(() => {
-      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
-    })
-    expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
+      await waitFor(() => {
+        expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+      })
+      expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
+      const activity = screen.getByText('Chapter Contribution Activity').closest('section')
+      if (!activity) throw new Error('The contribution summary has not rendered')
+      expect(within(activity).getByText('Total').nextElementSibling).toHaveTextContent(/^11$/)
+      expect(screen.queryByText('Displayed period:')).not.toBeInTheDocument()
+      expect(mockHeatmapChart).not.toHaveBeenCalled()
+    }
+  )
+
+  test.each([
+    {
+      name: 'saved period',
+      period: { startAt: '2026-10-01T12:00:00Z', endAt: '2026-10-22T12:00:00Z' },
+      caption: 'Oct 1 — 22, 2026',
+    },
+    { name: 'legacy daily data', period: {}, caption: 'Oct 17 — 20, 2026' },
+  ])('includes October 20 chapter activity using $name', async ({ period, caption }) => {
+    jest.useFakeTimers({ now: new Date('2026-10-22T12:00:00Z') })
+    try {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          ...mockChapterDetailsData,
+          chapter: {
+            ...mockChapterDetailsData.chapter,
+            contributionStats: {
+              commits: 2,
+              issues: 0,
+              pullRequests: 0,
+              total: 2,
+              ...period,
+            },
+            contributionData: { '2026-10-17': 1, '2026-10-20': 1 },
+          },
+        },
+        error: null,
+        loading: false,
+      })
+      render(<ChapterDetailsPage />)
+      await waitFor(() => expect(mockHeatmapChart).toHaveBeenCalled())
+      expect(screen.getByText(caption)).toBeVisible()
+      const activity = screen.getByText('Chapter Contribution Activity').closest('section')
+      if (!activity) throw new Error('The contribution summary has not rendered')
+      expect(within(activity).getByText('Total').nextElementSibling).toHaveTextContent(/^2$/)
+      const cells = mockHeatmapChart.mock.lastCall?.[0].series?.flatMap((day) => day.data)
+      expect(cells?.reduce((sum, point) => sum + (point.y ?? 0), 0)).toBe(2)
+      expect(cells?.find((point) => point.date === '2026-10-20')).toMatchObject({ y: 1 })
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   test('does not render contributions section when contributionStats total is 0 and contributionData is empty', async () => {
