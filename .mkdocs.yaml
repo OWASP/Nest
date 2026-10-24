@@ -44,7 +44,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: '!!python/name:pymdownx.superfences.fence_code_format'
+          format: pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist
@@ -77,7 +77,7 @@ repo_url: https://github.com/OWASP/Nest
 site_name: OWASP Nest
 
 theme:
-  name: material
+  variant: classic
   custom_dir: docs/overrides
   logo: assets/images/logo.png
   favicon: assets/images/favicon.png

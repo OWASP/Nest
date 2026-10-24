@@ -273,6 +273,7 @@ xsser
 xzf
 zapconfig
 zaproxy
+zensical
 zizmor
 zsc
 éàëîôû
