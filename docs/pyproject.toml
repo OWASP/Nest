@@ -22,3 +22,4 @@ group.test.dependencies.pytest = "9.0.3"
 [tool.pytest]
 ini_options.testpaths = [ "tests" ]
 ini_options.pythonpath = [ "." ]
+ini_options.markers = [ "network: builds production docs and downloads privacy assets" ]

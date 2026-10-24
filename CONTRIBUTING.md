@@ -424,6 +424,11 @@ files, so changes outside `docs/src` refresh the preview.
 Run the documentation tests with `make test-docs`.
 These tests build a site with Mermaid diagrams, README includes, Python API
 documentation, tags, and search. They also run as part of `make check-test`.
+Production build tests keep the real theme, templates, CSS, logos, and privacy
+settings. These tests use the `network` marker and download external assets.
+After building the test image, run
+`docker run --rm --network none nest-test-docs pytest -m 'not network'` for the fast tests
+without network access.
 
 ## Testing
 
