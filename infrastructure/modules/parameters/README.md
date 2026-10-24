@@ -87,6 +87,9 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
+| <a name="output_django_secret_key"></a> [django\_secret\_key](#output\_django\_secret\_key) | The generated Django secret key used by the SSM parameter. |
 | <a name="output_django_ssm_parameter_arns"></a> [django\_ssm\_parameter\_arns](#output\_django\_ssm\_parameter\_arns) | Map of environment variable names to the ARNs of all SSM parameters (Required by Django). |
+| <a name="output_external_secret_values"></a> [external\_secret\_values](#output\_external\_secret\_values) | Current externally managed SSM credentials to copy into Secrets Manager until runtime cutover. |
 | <a name="output_frontend_ssm_parameter_arns"></a> [frontend\_ssm\_parameter\_arns](#output\_frontend\_ssm\_parameter\_arns) | Map of frontend environment variable names to the ARNs of all SSM parameters. |
+| <a name="output_nextauth_secret"></a> [nextauth\_secret](#output\_nextauth\_secret) | The generated NextAuth secret used by the SSM parameter. |
 <!-- END_TF_DOCS -->
