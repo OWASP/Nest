@@ -1,8 +1,14 @@
 export type ValidationErrors = Record<string, string>
 
+interface GraphQLErrorExtensions {
+  code?: string
+  field?: unknown
+  [key: string]: unknown
+}
+
 interface GraphQLErrorLike {
   message: string
-  extensions?: Record<string, unknown>
+  extensions?: GraphQLErrorExtensions
 }
 
 function getGraphQLErrors(error: unknown): GraphQLErrorLike[] | null {
@@ -41,7 +47,7 @@ export function extractGraphQLErrors(error: unknown): {
   const gqlErrors = getGraphQLErrors(error)
   if (gqlErrors) {
     for (const gqlError of gqlErrors) {
-      const extensions = gqlError.extensions as { code?: string; field?: unknown } | undefined
+      const extensions = gqlError.extensions
       if (extensions?.code === 'VALIDATION_ERROR' && typeof extensions.field === 'string') {
         validationErrors[extensions.field] = gqlError.message
       } else {
@@ -59,10 +65,7 @@ export function extractGraphQLErrors(error: unknown): {
 /** True when GraphQL errors include extensions.code FORBIDDEN (e.g. mentorship management ACL). */
 export function isForbiddenGraphQLError(error: unknown): boolean {
   const gqlErrors = getGraphQLErrors(error)
-  return (
-    gqlErrors?.some((e) => (e.extensions as { code?: string } | undefined)?.code === 'FORBIDDEN') ??
-    false
-  )
+  return gqlErrors?.some((e) => e.extensions?.code === 'FORBIDDEN') ?? false
 }
 
 const ACCESS_DENIED_GQL_CODES = new Set(['UNAUTHENTICATED', 'AUTHENTICATION_REQUIRED'])
@@ -72,13 +75,7 @@ export function isAccessDeniedGraphQLError(error: unknown): boolean {
   if (isForbiddenGraphQLError(error)) return true
 
   const gqlErrors = getGraphQLErrors(error)
-  if (
-    gqlErrors?.some((e) =>
-      ACCESS_DENIED_GQL_CODES.has(
-        String((e.extensions as { code?: string } | undefined)?.code ?? '')
-      )
-    )
-  ) {
+  if (gqlErrors?.some((e) => ACCESS_DENIED_GQL_CODES.has(String(e.extensions?.code ?? '')))) {
     return true
   }
 

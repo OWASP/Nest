@@ -34,7 +34,7 @@ const EmptyState = () => (
 )
 
 interface ApiKeysTableProps {
-  data: { apiKeys?: ApiKey[] } | undefined
+  data?: { apiKeys?: ApiKey[] }
   onRevoke: (key: ApiKey) => void
 }
 
