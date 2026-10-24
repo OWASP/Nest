@@ -159,6 +159,7 @@ const renderWithSession = (component: React.ReactElement) => {
 // Helper function to find mobile menu element
 const findMobileMenu = () => {
   return (
+    document.getElementById('mobile-menu') ||
     screen.queryByRole('navigation', { name: /mobile menu/i }) ||
     screen.queryByTestId('mobile-menu') ||
     document.querySelector('[class*="fixed"][class*="inset-y-0"][class*="left-0"]')
@@ -552,11 +553,21 @@ describe('Header Component', () => {
       expect(screen.getByRole('banner')).toBeInTheDocument()
     })
 
-    it('has screen reader text for mobile menu button', () => {
+    it('has dynamic screen reader text and aria attributes for mobile menu button', async () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      const screenReaderText = screen.getByText('Open main menu')
-      expect(screenReaderText).toBeInTheDocument()
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      expect(toggleButton).toHaveAttribute('aria-expanded', 'false')
+      expect(toggleButton).toHaveAttribute('aria-controls', 'mobile-menu')
+      expect(screen.getByText('Open main menu')).toBeInTheDocument()
+      expect(document.getElementById('mobile-menu')).toBeInTheDocument()
+
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(toggleButton).toHaveAttribute('aria-expanded', 'true')
+      expect(screen.getByText('Close main menu')).toBeInTheDocument()
     })
 
     it('has proper alt text for logo images', () => {
@@ -1139,8 +1150,12 @@ describe('Header Component', () => {
   })
 
   describe('Mobile Menu Aria Attributes', () => {
-    it('has proper aria-expanded attribute when menu is closed', () => {
+    it('has proper aria-expanded and aria-controls attributes when menu is closed', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      expect(toggleButton).toHaveAttribute('aria-expanded', 'false')
+      expect(toggleButton).toHaveAttribute('aria-controls', 'mobile-menu')
 
       const menu = findMobileMenu()
       // Check the menu exists and verify its state
@@ -1148,12 +1163,13 @@ describe('Header Component', () => {
       expect(isMobileMenuClosed()).toBe(true)
     })
 
-    it('verifies menu state changes correctly', async () => {
+    it('verifies menu state changes and updates aria-expanded correctly', async () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
 
       // Initially closed
+      expect(toggleButton).toHaveAttribute('aria-expanded', 'false')
       expect(isMobileMenuClosed()).toBe(true)
 
       await act(async () => {
@@ -1161,7 +1177,16 @@ describe('Header Component', () => {
       })
 
       // After toggle, should be open
+      expect(toggleButton).toHaveAttribute('aria-expanded', 'true')
       expect(isMobileMenuOpen()).toBe(true)
+
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      // After toggle again, should be closed
+      expect(toggleButton).toHaveAttribute('aria-expanded', 'false')
+      expect(isMobileMenuClosed()).toBe(true)
     })
   })
 
