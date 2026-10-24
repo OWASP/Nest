@@ -27,8 +27,10 @@ class TestBoardHandler:
             (False, 0),
         ],
     )
-    def test_board_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    def test_board_handler(
+        self, mock_client, mock_command, commands_enabled, expected_calls, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         ack = MagicMock()
         Board().handler(ack=ack, command=mock_command, client=mock_client)
 
@@ -45,8 +47,8 @@ class TestBoardHandler:
             assert block_text == expected_text
             assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
 
-    def test_board_handler_block_structure(self, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
+    def test_board_handler_block_structure(self, mock_client, mock_command, monkeypatch):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
         ack = MagicMock()
         Board().handler(ack=ack, command=mock_command, client=mock_client)
 

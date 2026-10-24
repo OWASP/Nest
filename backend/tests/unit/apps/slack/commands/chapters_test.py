@@ -50,9 +50,15 @@ class TestChaptersHandler:
         ],
     )
     def test_chapters_handler(
-        self, mock_client, mock_command, commands_enabled, command_text, expected_calls
+        self,
+        mock_client,
+        mock_command,
+        commands_enabled,
+        command_text,
+        expected_calls,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_command["text"] = command_text
 
         ack = MagicMock()
@@ -61,8 +67,10 @@ class TestChaptersHandler:
         ack.assert_called_once()
         assert mock_client.chat_postMessage.call_count == expected_calls
 
-    def test_chapters_handler_with_results(self, mock_get_chapters, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
+    def test_chapters_handler_with_results(
+        self, mock_get_chapters, mock_client, mock_command, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
         mock_get_chapters.return_value = {
             "hits": [
                 {

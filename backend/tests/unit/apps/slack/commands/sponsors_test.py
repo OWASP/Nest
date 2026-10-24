@@ -55,8 +55,9 @@ class TestSponsorsHandler:
         expected_header,
         mock_slack_client,
         mock_slack_command,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_sponsor_objects.order_by.return_value = mock_sponsors if has_sponsors_data else []
 
         ack = MagicMock()

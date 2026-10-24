@@ -24,8 +24,10 @@ class TestSponsorCommand:
             (False, 0),
         ],
     )
-    def test_sponsor_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    def test_sponsor_handler(
+        self, mock_client, mock_command, commands_enabled, expected_calls, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         ack = MagicMock()
         Sponsor().handler(ack=ack, command=mock_command, client=mock_client)
 

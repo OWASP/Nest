@@ -47,9 +47,15 @@ class TestProjectsHandler:
         ],
     )
     def test_projects_handler(
-        self, mock_client, mock_command, commands_enabled, search_query, expected_calls
+        self,
+        mock_client,
+        mock_command,
+        commands_enabled,
+        search_query,
+        expected_calls,
+        monkeypatch,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_command["text"] = search_query
         ack = MagicMock()
         Projects().handler(ack=ack, command=mock_command, client=mock_client)
@@ -63,8 +69,10 @@ class TestProjectsHandler:
             mock_client.conversations_open.assert_not_called()
             assert mock_client.chat_postMessage.call_count == expected_calls
 
-    def test_projects_handler_with_results(self, mock_get_projects, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
+    def test_projects_handler_with_results(
+        self, mock_get_projects, mock_client, mock_command, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
         test_date = datetime(2024, 1, 1, tzinfo=UTC)
         mock_get_projects.return_value = {
             "hits": [
