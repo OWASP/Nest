@@ -88,6 +88,7 @@ export default function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title={`Follow us on ${social.label}`}
                   aria-label={`Follow OWASP Nest on ${social.label}`}
                   className="rounded-full p-2 text-slate-700 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                 >
