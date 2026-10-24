@@ -1261,6 +1261,18 @@ future = "*"
 dev = ["Sphinx (==2.1.0)", "future (==0.17.1)", "numpy (==1.16.4)", "pytest (==4.6.1)", "pytest-mock (==1.10.4)", "tox (==3.12.1)"]
 
 [[package]]
+name = "filelock"
+version = "4.2.1"
+description = "A platform independent file lock."
+optional = false
+python-versions = ">=3.11"
+groups = ["main"]
+files = [
+    {file = "filelock-4.2.1-py3-none-any.whl", hash = "sha256:7be2662e9e826b9bba28afc0f843a123280d799a2ea44bb5d35ccec67905ae44"},
+    {file = "filelock-4.2.1.tar.gz", hash = "sha256:c4c937ccac2a813cee448e662a56366cfb374c0f8702e75f295c412cc1c5d5a3"},
+]
+
+[[package]]
 name = "fonttools"
 version = "4.63.0"
 description = "Tools to manipulate font files"
