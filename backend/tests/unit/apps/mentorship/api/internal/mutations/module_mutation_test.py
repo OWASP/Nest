@@ -444,12 +444,13 @@ class TestModuleMutationAssignIssue:
         )
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
             mutation.assign_issue_to_user(
                 info,
                 module_key="bad",
                 program_key="bad",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -466,12 +467,13 @@ class TestModuleMutationAssignIssue:
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(PermissionDenied, match="Only mentors of this module can assign"):
             mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -491,12 +493,13 @@ class TestModuleMutationAssignIssue:
         mock_gh.objects.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ObjectDoesNotExist, match="Assignee not found"):
             mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -517,12 +520,13 @@ class TestModuleMutationAssignIssue:
         mock_mod.issues.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
             mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -582,12 +586,13 @@ class TestModuleMutationUnassignIssue:
         )
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
             mutation.unassign_issue_from_user(
                 info,
                 module_key="bad",
                 program_key="bad",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -604,12 +609,13 @@ class TestModuleMutationUnassignIssue:
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(PermissionDenied):
             mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -629,12 +635,13 @@ class TestModuleMutationUnassignIssue:
         mock_gh.objects.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ObjectDoesNotExist, match="Assignee not found"):
             mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -655,12 +662,13 @@ class TestModuleMutationUnassignIssue:
         mock_mod.issues.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "42")
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
             mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "42"),
+                issue_id=issue_id,
                 user_login="testuser",
             )
 
@@ -953,12 +961,13 @@ class TestModuleMutationSetTaskDeadline:
         mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ValidationError, match="within the module's start and end dates"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 deadline_at=early_deadline,
             )
 
@@ -988,12 +997,13 @@ class TestModuleMutationSetTaskDeadline:
         mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ValidationError, match="within the module's start and end dates"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 deadline_at=late_deadline,
             )
 
@@ -1173,9 +1183,10 @@ class TestModuleMutationClearTaskDeadline:
         )
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
             mutation.clear_task_deadline(
-                info, module_key="bad", program_key="bad", issue_id=GlobalID("IssueNode", "1")
+                info, module_key="bad", program_key="bad", issue_id=issue_id
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
@@ -1191,9 +1202,10 @@ class TestModuleMutationClearTaskDeadline:
         mock_mod.has_mentor.return_value = False
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
             mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
+                info, module_key="mod-1", program_key="prog-1", issue_id=issue_id
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
@@ -1212,9 +1224,10 @@ class TestModuleMutationClearTaskDeadline:
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
             mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
+                info, module_key="mod-1", program_key="prog-1", issue_id=issue_id
             )
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
@@ -1236,9 +1249,10 @@ class TestModuleMutationClearTaskDeadline:
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         mutation = ModuleMutation()
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(ValidationError, match="Cannot clear deadline: issue has no assignees"):
             mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_id=GlobalID("IssueNode", "1")
+                info, module_key="mod-1", program_key="prog-1", issue_id=issue_id
             )
 
 
@@ -1668,12 +1682,13 @@ class TestModuleMutationMenteeDeadline:
 
         mutation = ModuleMutation()
         deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 deadline_at=deadline_at,
             )
 
@@ -1711,12 +1726,13 @@ class TestModuleMutationMenteeDeadline:
 
         mutation = ModuleMutation()
         deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
+        issue_id = GlobalID("IssueNode", "1")
         with pytest.raises(PermissionDenied, match="You can only set deadlines"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
                 program_key="prog-1",
-                issue_id=GlobalID("IssueNode", "1"),
+                issue_id=issue_id,
                 deadline_at=deadline_at,
             )
 
