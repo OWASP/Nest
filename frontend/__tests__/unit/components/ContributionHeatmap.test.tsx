@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import type { ApexOptions } from 'apexcharts'
 import { ThemeProvider, useTheme } from 'next-themes'
 import React from 'react'
@@ -80,6 +80,31 @@ const getTooltipForDate = (date: string): string => {
   if (seriesIndex < 0) throw new Error(`No calendar cell for ${date}`)
   const dataPointIndex = series[seriesIndex].data.findIndex((point) => point.date === date)
   return getTooltip(seriesIndex, dataPointIndex)
+}
+
+/** Supply the public plot geometry reported by ApexCharts after rendering or resizing. */
+const updateChartGeometry = (
+  width: number,
+  height: number,
+  cellWidth: number,
+  cellHeight: number,
+  event: 'mounted' | 'updated' = 'mounted'
+) => {
+  const { series, options } = getChartProps()
+  const handler = options.chart?.events?.[event]
+  if (!handler) throw new Error('Calendar geometry must be checked after rendering')
+  act(() =>
+    Reflect.apply(handler, undefined, [
+      {
+        getState: () => ({
+          svgWidth: width,
+          svgHeight: height,
+          gridWidth: cellWidth * series[0].data.length,
+          gridHeight: cellHeight * series.length,
+        }),
+      },
+    ])
+  )
 }
 
 describe('ContributionHeatmap', () => {
@@ -840,7 +865,7 @@ describe('ContributionHeatmap', () => {
       expect(heatmapContainer).toBeInTheDocument()
     })
 
-    it('maintains aspect ratio on different screen sizes', () => {
+    it('includes tooltip styling in the responsive container', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const styleContent = container.querySelector('style')?.textContent
       expect(styleContent).toContain('apexcharts-tooltip')
@@ -916,20 +941,119 @@ describe('ContributionHeatmap', () => {
     })
   })
 
+  describe('Square cell layout', () => {
+    const yearProps = { contributionData: {}, startDate: '2025-10-19', endDate: '2026-10-17' }
+
+    it.each([
+      { variant: 'default' as const, height: 195, maxWidth: 1031 },
+      { variant: 'medium' as const, height: 172, maxWidth: 857 },
+      { variant: 'compact' as const, height: 150, maxWidth: 691 },
+    ])(
+      'fits square cells within the $variant height budget',
+      async ({ variant, height, maxWidth }) => {
+        renderWithTheme(<ContributionHeatmap {...yearProps} variant={variant} />)
+        await waitFor(() => expect(mockChart).toHaveBeenCalled())
+        updateChartGeometry(570, height, 10, (height - 64) / 7)
+
+        expect(getChartProps().height).toBe(134)
+        expect(screen.getByTestId('mock-heatmap-chart').parentElement).toHaveStyle({
+          maxWidth: `${maxWidth}px`,
+        })
+      }
+    )
+
+    it('limits short calendars instead of stretching their cells across the whole container', async () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      updateChartGeometry(600, 195, 112, (195 - 64) / 7)
+
+      expect(getChartProps().height).toBe(195)
+      expect(screen.getByTestId('mock-heatmap-chart').parentElement).toHaveStyle({
+        minWidth: '133px',
+        maxWidth: '133px',
+      })
+    })
+
+    it('keeps a single-week calendar square without exceeding its height budget', async () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} endDate="2024-01-07" />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      updateChartGeometry(600, 195, 560, (195 - 64) / 7)
+      updateChartGeometry(58, 195, 18, (195 - 64) / 7, 'updated')
+
+      expect(getChartProps().height).toBe(190)
+      expect(screen.getByTestId('mock-heatmap-chart').parentElement).toHaveStyle({
+        minWidth: '58px',
+        maxWidth: '58px',
+      })
+    })
+
+    it('refits resized charts and stops updating once their geometry is stable', async () => {
+      renderWithTheme(<ContributionHeatmap {...yearProps} variant="medium" />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      updateChartGeometry(570, 172, 10, (172 - 64) / 7)
+      updateChartGeometry(800, 134, (800 - 40) / 53, 10, 'updated')
+      expect(getChartProps().height).toBe(164)
+
+      const calls = mockChart.mock.calls.length
+      updateChartGeometry(800, 164, (800 - 40) / 53, (164 - 64) / 7, 'updated')
+      expect(mockChart).toHaveBeenCalledTimes(calls)
+    })
+
+    it('refits container resizes even when ApexCharts does not emit an update event', async () => {
+      let onResize: ConstructorParameters<typeof globalThis.ResizeObserver>[0] | undefined
+      const observe = jest.fn()
+      const disconnect = jest.fn()
+      const observer = jest.spyOn(globalThis, 'ResizeObserver').mockImplementation((callback) => {
+        onResize = callback
+        return { observe, disconnect, unobserve: jest.fn() }
+      })
+      try {
+        const { unmount } = renderWithTheme(<ContributionHeatmap {...yearProps} variant="medium" />)
+        await waitFor(() => expect(mockChart).toHaveBeenCalled())
+        const handleResize = onResize
+        if (!handleResize) throw new Error('The chart must observe container width changes')
+        act(() => Reflect.apply(handleResize, undefined, []))
+        updateChartGeometry(570, 172, 10, (172 - 64) / 7)
+
+        const container = screen.getByTestId('mock-heatmap-chart').parentElement
+        if (!container) throw new Error('The chart needs a sizing container')
+        jest.spyOn(container, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 854, 134))
+        act(() => Reflect.apply(handleResize, undefined, []))
+        expect(getChartProps().height).toBe(172)
+        expect(observe).toHaveBeenCalledWith(container)
+
+        unmount()
+        expect(disconnect).toHaveBeenCalledTimes(1)
+      } finally {
+        observer.mockRestore()
+      }
+    })
+
+    it.each([0, Number.NaN])('waits for usable SVG dimensions (%s)', async (width) => {
+      renderWithTheme(<ContributionHeatmap {...yearProps} />)
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      updateChartGeometry(width, 195, width, 18)
+      expect(getChartProps().height).toBe(195)
+    })
+  })
+
   describe('Variants', () => {
     it.each([
       { variant: 'default' as const, minWidth: 600 },
       { variant: 'medium' as const, minWidth: 500 },
       { variant: 'compact' as const, minWidth: 400 },
-    ])('retains the $variant baseline width for a short period', async ({ variant, minWidth }) => {
-      renderWithTheme(<ContributionHeatmap {...defaultProps} variant={variant} />)
+    ])(
+      'starts with the $variant baseline width before measuring the plot',
+      async ({ variant, minWidth }) => {
+        renderWithTheme(<ContributionHeatmap {...defaultProps} variant={variant} />)
 
-      await waitFor(() => expect(mockChart).toHaveBeenCalled())
-      expect(screen.getByTestId('mock-heatmap-chart').parentElement).toHaveStyle({
-        width: '100%',
-        minWidth: `${minWidth}px`,
-      })
-    })
+        await waitFor(() => expect(mockChart).toHaveBeenCalled())
+        expect(screen.getByTestId('mock-heatmap-chart').parentElement).toHaveStyle({
+          width: '100%',
+          minWidth: `${minWidth}px`,
+        })
+      }
+    )
 
     it.each([
       { variant: 'default' as const, minWidth: 600 },
@@ -959,24 +1083,21 @@ describe('ContributionHeatmap', () => {
       }
     )
 
-    it('renders default variant with full dimensions', () => {
+    it('starts the default variant at its height budget', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      // Verify full-size dimensions (195px height for default variant)
       expect(chart).toHaveAttribute('data-height', '195')
     })
 
-    it('renders medium variant with medium dimensions', () => {
+    it('starts the medium variant at its height budget', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="medium" />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      // Verify medium dimensions (172px height for medium variant)
       expect(chart).toHaveAttribute('data-height', '172')
     })
 
-    it('renders compact variant with smaller dimensions', () => {
+    it('starts the compact variant at its height budget', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="compact" />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      // Verify compact dimensions (150px height for compact variant)
       expect(chart).toHaveAttribute('data-height', '150')
     })
 

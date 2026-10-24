@@ -1,7 +1,7 @@
-import type { ApexTooltipCustomOpts } from 'apexcharts'
+import type { ApexTooltipCustomOpts, ChartState } from 'apexcharts'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
-import React, { useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   buildContributionCalendar,
   type ContributionHeatmapSeries,
@@ -14,6 +14,16 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 })
 
 const MIN_WIDTH_BY_VARIANT = { compact: 400, medium: 500, default: 600 } as const
+const MAX_HEIGHT_BY_VARIANT = { compact: 150, medium: 172, default: 195 } as const
+
+interface ChartSize {
+  height: number
+  maxWidth?: number
+}
+
+interface HeatmapChart {
+  getState: () => ChartState
+}
 
 /** Share activity thresholds and theme colors between calendar cells and the legend. */
 const getColorRanges = (isDarkMode: boolean) => [
@@ -41,12 +51,14 @@ const getChartOptions = (
   isDarkMode: boolean,
   unit: string,
   colorRanges: ReturnType<typeof getColorRanges>,
-  monthLabels: Record<string, string>
+  monthLabels: Record<string, string>,
+  fitSquareCells: (chart: HeatmapChart) => void
 ) => ({
   chart: {
     type: 'heatmap' as const,
     fontFamily: 'inherit',
     parentHeightOffset: 0,
+    events: { mounted: fitSquareCells, updated: fitSquareCells },
     animations: {
       // Color updates must not move repeated month labels between calendar columns.
       dynamicAnimation: { enabled: false },
@@ -222,19 +234,61 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   )
 
   const colorRanges = useMemo(() => getColorRanges(isDarkMode), [isDarkMode])
+  const maxHeight = MAX_HEIGHT_BY_VARIANT[variant]
+  const [chartSize, setChartSize] = useState<ChartSize>({ height: maxHeight })
+  const chartContainer = useRef<HTMLDivElement>(null)
+  const chartInstance = useRef<HeatmapChart | null>(null)
+  const rowCount = heatmapSeries.length
+
+  /** Fit square cells within the variant's height budget, accounting for measured label space. */
+  const fitSquareCells = useCallback(
+    (chart: HeatmapChart) => {
+      chartInstance.current = chart
+      const { svgWidth: width, svgHeight: height, gridWidth, gridHeight } = chart.getState()
+      if (
+        [width, height, gridWidth, gridHeight].some((size) => !Number.isFinite(size) || size <= 0)
+      ) {
+        return
+      }
+
+      const labelHeight = height - gridHeight
+      const labelWidth = width - gridWidth
+      const containerWidth = chartContainer.current?.getBoundingClientRect().width || width
+      const cellWidth = (containerWidth - labelWidth) / weeksCount
+      const nextSize = {
+        height: Math.min(maxHeight, Math.round(labelHeight + cellWidth * rowCount)),
+        maxWidth: Math.floor(((maxHeight - labelHeight) / rowCount) * weeksCount + labelWidth),
+      }
+      setChartSize((current) =>
+        current.height === nextSize.height && current.maxWidth === nextSize.maxWidth
+          ? current
+          : nextSize
+      )
+    },
+    [maxHeight, rowCount, weeksCount]
+  )
+
+  useEffect(() => {
+    const container = chartContainer.current
+    if (!container) return
+
+    const observer = new ResizeObserver(() => {
+      if (chartInstance.current) fitSquareCells(chartInstance.current)
+    })
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [fitSquareCells])
+
   const options = useMemo(
-    () => getChartOptions(isDarkMode, unit, colorRanges, monthLabels),
-    [isDarkMode, unit, colorRanges, monthLabels]
+    () => getChartOptions(isDarkMode, unit, colorRanges, monthLabels, fitSquareCells),
+    [isDarkMode, unit, colorRanges, monthLabels, fitSquareCells]
   )
 
   // Fit the container, but keep at least 10px per week when scrolling is necessary.
-  const minChartWidth = Math.max(MIN_WIDTH_BY_VARIANT[variant], weeksCount * 10 + 40)
-
-  const getChartHeight = () => {
-    if (variant === 'compact') return 150
-    if (variant === 'medium') return 172
-    return 195
-  }
+  const minChartWidth = Math.min(
+    Math.max(MIN_WIDTH_BY_VARIANT[variant], weeksCount * 10 + 40),
+    chartSize.maxWidth ?? Number.POSITIVE_INFINITY
+  )
 
   return (
     <div className="contribution-heatmap w-full">
@@ -266,9 +320,12 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           `}
         </style>
 
-        <div style={{ width: '100%', minWidth: minChartWidth }}>
+        <div
+          ref={chartContainer}
+          style={{ width: '100%', minWidth: minChartWidth, maxWidth: chartSize.maxWidth }}
+        >
           <Chart
-            height={getChartHeight()}
+            height={chartSize.height}
             options={options}
             series={heatmapSeries}
             type="heatmap"
