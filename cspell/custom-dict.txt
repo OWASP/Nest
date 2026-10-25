@@ -185,7 +185,6 @@ mentees
 mern
 millify
 misconfig
-mkdocstrings
 mkv
 mpim
 navlink

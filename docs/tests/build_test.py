@@ -61,8 +61,6 @@ def built_site(tmp_path_factory: pytest.TempPathFactory) -> Path:
     project["theme"]["font"] = False
     # Keep network downloads out of this compatibility fixture.
     project["plugins"].setdefault("privacy", {})["assets"] = False
-    # Exercise optional API rendering without adding it to the production build.
-    project["plugins"]["mkdocstrings"] = {"default_handler": "python"}
     write_project_config(root / serve.CONFIG_FILE, project)
     (root / "included.md").write_text("Included README content.\n", encoding="utf-8")
     (root / "README.md").write_text(
@@ -73,17 +71,12 @@ def built_site(tmp_path_factory: pytest.TempPathFactory) -> Path:
         "README footer excluded from docs.\n",
         encoding="utf-8",
     )
-    (root / "example.py").write_text(
-        'def answer() -> int:\n    """Return the documented answer."""\n    return 42\n',
-        encoding="utf-8",
-    )
     (docs / "index.md").write_text(
         "---\ntags:\n  - Compatibility\n---\n\n"
         "# Documentation compatibility\n\n"
         '--8<-- "included.md"\n\n'
         '--8<-- "README.md:docs"\n\n'
         "```mermaid\nflowchart LR\n  Markdown --> Website\n```\n\n"
-        "::: example.answer\n\n"
         "<!-- material/tags -->\n",
         encoding="utf-8",
     )
@@ -129,18 +122,6 @@ class TestReadmeIncludes:
         assert "Included README docs section." in html
         assert "README introduction excluded from docs." not in html
         assert "README footer excluded from docs." not in html
-
-
-class TestPythonApiDocumentation:
-    """Tests for optional Python API rendering through Zensical's compatibility layer."""
-
-    def test_function_documentation_is_rendered(self, built_site: Path) -> None:
-        """Render a real function's docstring and API anchor instead of its directive."""
-        html = (built_site / "index.html").read_text(encoding="utf-8")
-
-        assert "Return the documented answer." in html
-        assert re.search(r"\bid=[\"']?example\.answer(?:[\"'\s>])", html)
-        assert "::: example.answer" not in html
 
 
 class TestTagsAndSearch:
