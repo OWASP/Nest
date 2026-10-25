@@ -9,6 +9,25 @@ env:
 permissions: {}
 
 jobs:
+  run-cve-lite-check:
+    name: CVE Lite check
+    continue-on-error: true
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install tooling dependencies
+        uses: ./.github/actions/install-tooling-dependencies
+
+      - name: Run CVE Lite vulnerability check
+        run: make security-dependency-check-cve-lite
+    timeout-minutes: 10
+
   run-dependency-audit:
     name: Dependency audit
     continue-on-error: true
