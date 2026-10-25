@@ -118,7 +118,9 @@ class TestProductionPrivacy:
         page = production_site / "index.html"
         rendered = RenderedPage(page.read_text(encoding="utf-8"))
         fonts = [
-            reference for reference in rendered.stylesheets if "fonts.googleapis.com" in reference
+            reference
+            for reference in rendered.stylesheets
+            if urlsplit(reference).path.startswith("assets/external/fonts.googleapis.com/")
         ]
         assert fonts, "The configured font stylesheet is missing"
         for reference in fonts:

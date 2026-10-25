@@ -13,6 +13,9 @@ dependencies.python = "^3.13"
 dependencies.click = "8.3.3"
 dependencies.pymdown-extensions = "^11.0.0"
 dependencies.zensical = "0.0.72"
+group.test.optional = true
+group.test.dependencies.mkdocs = "^1.6.1"
+group.test.dependencies.mkdocstrings = { version = "^1.0.0", extras = [ "python" ] }
 group.test.dependencies.pytest = "9.0.3"
 
 [tool.pytest]
