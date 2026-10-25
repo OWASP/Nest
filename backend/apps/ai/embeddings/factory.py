@@ -12,7 +12,10 @@ def get_embedder() -> Embedder:
         Embedder instance configured for the current provider.
 
     """
-    provider = os.getenv("LLM_PROVIDER", "openai")
+        provider = os.getenv(
+        "EMBEDDING_PROVIDER",
+        os.getenv("LLM_PROVIDER", "openai"),
+    )
 
     match provider:
         case "openai":
@@ -24,5 +27,5 @@ def get_embedder() -> Embedder:
 
             return GoogleEmbedder()
         case _:
-            error_msg = f"Unsupported LLM provider: {provider}"
+            error_msg = f"Unsupported embedding provider: {provider}"
             raise ValueError(error_msg)
