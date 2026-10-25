@@ -20,13 +20,14 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")
 logger = logging.getLogger("zensical-serve")
 
 DEBOUNCE_SECONDS = 1.0
+CONFIG_FILE = ".zensical.toml"
 ZENSICAL_COMMAND = (
     "zensical",
     "serve",
     "-a",
     "0.0.0.0:8001",
     "-f",
-    ".mkdocs.yaml",
+    CONFIG_FILE,
 )
 POLL_SECONDS = 1.0
 ROOT = Path(__file__).resolve().parent.parent
@@ -74,7 +75,7 @@ WATCHED_SUFFIXES = frozenset(
     }
 )
 WATCH_PATHS = (
-    ROOT / ".mkdocs.yaml",
+    ROOT / CONFIG_FILE,
     ROOT / "docs" / "overrides",
     DOCS_SRC,
 )
@@ -107,7 +108,7 @@ def is_watched_file(path: Path) -> bool:
     """Return whether path should trigger a Zensical restart."""
     if path.name in SKIP_FILE_NAMES:
         return False
-    if path.name == ".mkdocs.yaml":
+    if path.name == CONFIG_FILE:
         return True
     return path.suffix.lower() in WATCHED_SUFFIXES
 

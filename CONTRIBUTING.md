@@ -417,13 +417,13 @@ Codegen runs inside `nest-frontend` (no host Node/pnpm install). Generated files
 
 The documentation uses [Zensical](https://zensical.org/) and is available at
 [http://localhost:8001](http://localhost:8001) when `make run` is running.
-The shared configuration remains in `.mkdocs.yaml`; its classic theme preserves
-the existing templates and styles. `docs/serve.py` also watches included README
+The shared configuration is `.zensical.toml`; its classic theme preserves the
+existing templates and styles. `docs/serve.py` also watches included README
 files, so changes outside `docs/src` refresh the preview.
 
 Run the documentation tests with `make test-docs`.
-These tests build a site with Mermaid diagrams, README includes, Python API
-documentation, tags, and search. They also run as part of `make check-test`.
+These tests build a site with Mermaid diagrams, README includes, tags, and
+search. They also run as part of `make check-test`.
 Production build tests keep the real theme, templates, CSS, logos, and privacy
 settings. These tests use the `network` marker and download external assets.
 After building the test image, run
