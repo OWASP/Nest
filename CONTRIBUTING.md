@@ -423,8 +423,7 @@ files, so changes outside `docs/src` refresh the preview.
 
 Run the documentation tests with `make test-docs`.
 These tests build a site with Mermaid diagrams, README includes, tags, and
-search. A test-only Python handler also checks optional API rendering without
-adding it to the production build. The tests also run as part of `make check-test`.
+search. CI runs them in their own job, separate from `make test`.
 Production build tests keep the real theme, templates, CSS, logos, and privacy
 settings. These tests use the `network` marker and download external assets.
 After building the test image, run
