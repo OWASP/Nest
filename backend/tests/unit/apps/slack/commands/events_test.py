@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.commands.events import Events, get_events_data
 
@@ -74,36 +74,21 @@ class TestEventsHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "has_events_data", "expected_header"),
-        [
-            (False, True, None),
-            (True, True, "*Upcoming OWASP Events:*"),
-            (True, False, "*Upcoming OWASP Events:*"),
-        ],
-    )
+    @pytest.mark.parametrize("has_events_data", [True, False])
     @patch("apps.slack.commands.events.get_events_data")
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_responses(
         self,
         mock_get_events_data,
-        commands_enabled,
         has_events_data,
-        expected_header,
         mock_slack_client,
         mock_slack_command,
-        monkeypatch,
     ):
-        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_get_events_data.return_value = mock_events if has_events_data else []
         ack = MagicMock()
         Events().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
 
         ack.assert_called_once()
-
-        if not commands_enabled:
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-            return
 
         mock_slack_client.conversations_open.assert_called_once_with(
             users=mock_slack_command["user_id"]
@@ -113,7 +98,7 @@ class TestEventsHandler:
         sent_blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         assert sent_blocks[0]["type"] == "section"
         # Check that the header is in the first block
-        assert expected_header in sent_blocks[0]["text"]["text"]
+        assert "*Upcoming OWASP Events:*" in sent_blocks[0]["text"]["text"]
 
         if has_events_data:
             event1 = mock_events[0]
@@ -157,3 +142,12 @@ class TestEventsHandler:
                         footer_found = True
                         break
             assert footer_found, "Footer not found in any block"
+
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_handler_when_commands_disabled(self, mock_slack_client, mock_slack_command):
+        ack = MagicMock()
+        Events().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
+        mock_slack_client.conversations_open.assert_not_called()
+        mock_slack_client.chat_postMessage.assert_not_called()

@@ -1,7 +1,7 @@
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.commands.sponsors import SPONSOR_TIER_ORDER, Sponsors
 
@@ -38,37 +38,22 @@ class TestSponsorsHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "has_sponsors_data", "expected_header"),
-        [
-            (False, True, None),
-            (True, True, "*OWASP Sponsors:*"),
-            (True, False, "*OWASP Sponsors:*"),
-        ],
-    )
+    @pytest.mark.parametrize("has_sponsors_data", [True, False])
     @patch("apps.slack.commands.sponsors.Sponsor.objects")
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_responses(
         self,
         mock_sponsor_objects,
-        commands_enabled,
         has_sponsors_data,
-        expected_header,
         mock_slack_client,
         mock_slack_command,
-        monkeypatch,
     ):
-        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
         mock_sponsor_objects.order_by.return_value = mock_sponsors if has_sponsors_data else []
 
         ack = MagicMock()
         Sponsors().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
 
         ack.assert_called_once()
-
-        if not commands_enabled:
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-            return
 
         mock_sponsor_objects.order_by.assert_called_once_with(SPONSOR_TIER_ORDER, "sort_name")
 
@@ -89,7 +74,7 @@ class TestSponsorsHandler:
 
         blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
 
-        assert expected_header in blocks[0]["text"]["text"]
+        assert "*OWASP Sponsors:*" in blocks[0]["text"]["text"]
 
         if has_sponsors_data:
             sponsor_blocks = [
@@ -126,3 +111,12 @@ class TestSponsorsHandler:
                 if "💬 You can share feedback" in block.get("text", {}).get("text", "")
             )
             assert "💬 You can share feedback" in feedback_block
+
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_handler_when_commands_disabled(self, mock_slack_client, mock_slack_command):
+        ack = MagicMock()
+        Sponsors().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
+        mock_slack_client.conversations_open.assert_not_called()
+        mock_slack_client.chat_postMessage.assert_not_called()

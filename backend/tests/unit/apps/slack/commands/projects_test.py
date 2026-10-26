@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.commands.projects import Projects
 
@@ -38,41 +38,28 @@ class TestProjectsHandler:
             mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "search_query", "expected_calls"),
-        [
-            (True, "", 1),
-            (True, "search term", 1),
-            (False, "", 0),
-        ],
-    )
-    def test_projects_handler(
-        self,
-        mock_client,
-        mock_command,
-        commands_enabled,
-        search_query,
-        expected_calls,
-        monkeypatch,
-    ):
-        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
+    @pytest.mark.parametrize("search_query", ["", "search term"])
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_projects_handler(self, mock_client, mock_command, search_query):
         mock_command["text"] = search_query
         ack = MagicMock()
         Projects().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
+        mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
+        assert mock_client.chat_postMessage.call_count == 1
 
-        if commands_enabled:
-            mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
-            assert mock_client.chat_postMessage.call_count == expected_calls
-        else:
-            mock_client.conversations_open.assert_not_called()
-            assert mock_client.chat_postMessage.call_count == expected_calls
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_projects_handler_when_commands_disabled(self, mock_client, mock_command):
+        ack = MagicMock()
+        Projects().handler(ack=ack, command=mock_command, client=mock_client)
 
-    def test_projects_handler_with_results(
-        self, mock_get_projects, mock_client, mock_command, monkeypatch
-    ):
-        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", True)
+        ack.assert_called_once()
+        mock_client.conversations_open.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_projects_handler_with_results(self, mock_get_projects, mock_client, mock_command):
         test_date = datetime(2024, 1, 1, tzinfo=UTC)
         mock_get_projects.return_value = {
             "hits": [

@@ -1,7 +1,7 @@
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.common.constants import OWASP_URL
 from apps.slack.commands.staff import Staff
@@ -40,27 +40,23 @@ class TestStaffHandler:
         ]
 
     @pytest.mark.parametrize(
-        ("commands_enabled", "has_staff_data", "expected_message"),
+        ("has_staff_data", "expected_message"),
         [
-            (False, True, None),
-            (True, True, "OWASP Foundation Staff:"),
-            (True, False, FAILED_STAFF_DATA_ERROR_MESSAGE),
+            (True, "OWASP Foundation Staff:"),
+            (False, FAILED_STAFF_DATA_ERROR_MESSAGE),
         ],
     )
     @patch("apps.slack.commands.staff.get_staff_data")
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_responses(
         self,
         mock_get_staff_data,
-        commands_enabled,
         has_staff_data,
         expected_message,
         mock_slack_client,
         mock_slack_command,
         mock_staff,
-        monkeypatch,
     ):
-        monkeypatch.setattr(settings, "SLACK_COMMANDS_ENABLED", commands_enabled)
-
         mock_get_staff_data.return_value = mock_staff if has_staff_data else []
 
         ack = MagicMock()
@@ -68,10 +64,7 @@ class TestStaffHandler:
 
         ack.assert_called_once()
 
-        if not commands_enabled:
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-        elif has_staff_data:
+        if has_staff_data:
             mock_slack_client.conversations_open.assert_called_once_with(
                 users=mock_slack_command["user_id"]
             )
@@ -97,3 +90,12 @@ class TestStaffHandler:
                 channel="C123456",
                 text=FAILED_STAFF_DATA_ERROR_MESSAGE,
             )
+
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_handler_when_commands_disabled(self, mock_slack_client, mock_slack_command):
+        ack = MagicMock()
+        Staff().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
+        mock_slack_client.conversations_open.assert_not_called()
+        mock_slack_client.chat_postMessage.assert_not_called()
