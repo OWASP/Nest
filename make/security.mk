@@ -124,7 +124,7 @@ security-sast-scan-semgrep:
 	)
 	docker run "$${args[@]}"
 
-security-dependency-check-cve-lite: ## Check JavaScript and TypeScript dependencies with CVE Lite
+security-dependency-check-cve-lite:
 	@$(MAKE) code-checks CMD='sh tools/security/cve_lite_scan.sh'
 
 security-dependency-check-trivy:
