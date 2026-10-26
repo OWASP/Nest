@@ -22,17 +22,18 @@ def get_llm() -> LLM:
 
 
     if provider == "bedrock":
-        return LLM(
-            model=os.getenv("BEDROCK_MODE_NAME", "amazon.nova-2-lite-v1:0"),
+        model_name = os.getenv(
+            "BEDROCK_MODEL_NAME",
+            "amazon.nova-micro-v1:0",
+        )
 
-            return LLM(
+        return LLM(
             model=f"bedrock/{model_name}",
             region_name=os.getenv("AWS_DEFAULT_REGION", "us-east-1"),
             temperature=0.1,
             max_tokens=1024,
             stream=False,
-            )
-        )
+        )      
 
     if provider == "openai":
         return LLM(

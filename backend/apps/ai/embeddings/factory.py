@@ -12,7 +12,7 @@ def get_embedder() -> Embedder:
         Embedder instance configured for the current provider.
 
     """
-        provider = os.getenv(
+    provider = os.getenv(
         "EMBEDDING_PROVIDER",
         os.getenv("LLM_PROVIDER", "openai"),
     )
