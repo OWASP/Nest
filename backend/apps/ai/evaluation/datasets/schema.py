@@ -4,6 +4,45 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 
+@dataclass
+class AgentOutput:
+    """Execution output captured from an agent run."""
+
+    query: str
+    response: str
+    intent: str
+    confidence: float = 0.0
+    tools_used: list[str] = field(default_factory=list)
+    sub_queries: list[dict] = field(default_factory=list)
+    latency_ms: float = 0.0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+
+    @property
+    def total_tokens(self) -> int:
+        """Calculate total tokens consumed."""
+        return self.prompt_tokens + self.completion_tokens
+
+
+@dataclass
+class BenchmarkSummary:
+    """Aggregated evaluation benchmark summary."""
+
+    total_cases: int = 0
+    passed_cases: int = 0
+    category_scores: dict[str, float] = field(default_factory=dict)
+    avg_latency_ms: float = 0.0
+    total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+
+    @property
+    def pass_rate(self) -> float:
+        """Calculate overall pass percentage between 0.0 and 100.0."""
+        if not self.total_cases:
+            return 0.0
+        return round((self.passed_cases / self.total_cases) * 100, 2)
+
+
 class EvalCategory(str, Enum):  # noqa: UP042
     """Category classification for evaluation test cases."""
 
@@ -35,26 +74,6 @@ class EvalCase:
 
 
 @dataclass
-class AgentOutput:
-    """Execution output captured from an agent run."""
-
-    query: str
-    response: str
-    intent: str
-    confidence: float = 0.0
-    tools_used: list[str] = field(default_factory=list)
-    sub_queries: list[dict] = field(default_factory=list)
-    latency_ms: float = 0.0
-    prompt_tokens: int = 0
-    completion_tokens: int = 0
-
-    @property
-    def total_tokens(self) -> int:
-        """Calculate total tokens consumed."""
-        return self.prompt_tokens + self.completion_tokens
-
-
-@dataclass
 class EvaluatorScore:
     """Evaluation result for an individual evaluator."""
 
@@ -63,22 +82,3 @@ class EvaluatorScore:
     score: float
     details: dict = field(default_factory=dict)
     reason: str = ""
-
-
-@dataclass
-class BenchmarkSummary:
-    """Aggregated evaluation benchmark summary."""
-
-    total_cases: int = 0
-    passed_cases: int = 0
-    category_scores: dict[str, float] = field(default_factory=dict)
-    avg_latency_ms: float = 0.0
-    total_tokens: int = 0
-    estimated_cost_usd: float = 0.0
-
-    @property
-    def pass_rate(self) -> float:
-        """Calculate overall pass percentage between 0.0 and 100.0."""
-        if not self.total_cases:
-            return 0.0
-        return round((self.passed_cases / self.total_cases) * 100, 2)

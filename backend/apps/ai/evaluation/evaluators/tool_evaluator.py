@@ -26,7 +26,7 @@ class ToolEvaluator(BaseEvaluator):
         expected_tools = {sanitize_tool_name(name) for name in case.expected_tools}
         forbidden_tools = {sanitize_tool_name(name) for name in case.forbidden_tools}
 
-        # 1. Safety check: Forbidden tools must never be executed
+        # Safety check: forbidden tools must never be executed
         forbidden_called = tools_used if not case.allow_tools else tools_used & forbidden_tools
         if forbidden_called:
             return EvaluatorScore(
@@ -51,7 +51,7 @@ class ToolEvaluator(BaseEvaluator):
                 details={"tools_used": sorted(tools_used)},
             )
 
-        # 2. Expected tools coverage
+        # expected tools coverage
         matched_expected = tools_used.intersection(expected_tools)
         recall = len(matched_expected) / len(expected_tools)
         missing_expected = expected_tools - tools_used

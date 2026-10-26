@@ -20,7 +20,6 @@ def get_llm() -> LLM:
     """
     provider = os.getenv("LLM_PROVIDER", "openai")
 
-
     if provider == "bedrock":
         model_name = os.getenv(
             "BEDROCK_MODEL_NAME",
@@ -33,7 +32,7 @@ def get_llm() -> LLM:
             temperature=0.1,
             max_tokens=1024,
             stream=False,
-        )      
+        )
 
     if provider == "openai":
         return LLM(

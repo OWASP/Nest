@@ -76,6 +76,19 @@ class TestTelemetryTracker:
         assert tracker.total_prompt_tokens == 100
         assert tracker.total_completion_tokens == 50
 
+    @pytest.mark.parametrize("invalid", [True, False, 1.5, "1", None])
+    @pytest.mark.parametrize("field", ["prompt_tokens", "completion_tokens"])
+    def test_record_rejects_non_integer_tokens_without_mutating(self, field, invalid):
+        tracker = TelemetryTracker()
+        tracker.record(latency_ms=100.0, prompt_tokens=100, completion_tokens=50)
+
+        with pytest.raises(ValueError, match="Token counts must be non-negative integers"):
+            tracker.record(**{"latency_ms": 200.0, field: invalid})
+
+        assert tracker.latencies_ms == [100.0]
+        assert tracker.total_prompt_tokens == 100
+        assert tracker.total_completion_tokens == 50
+
     @pytest.mark.parametrize("p", [-1, 101, float("nan"), float("inf"), -float("inf")])
     @pytest.mark.parametrize("latencies", [[], [100.0]])
     def test_percentile_rejects_invalid_values(self, p, latencies):

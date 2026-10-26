@@ -105,7 +105,7 @@ def format_ai_response_for_slack(text: str) -> str:
     content = "".join(section)
     parts.append(content if fence_length else format_text_section(content))
 
-    return "".join(parts).strip()
+    return "".join(parts).strip("\r\n")
 
 
 def format_links_for_slack(text: str) -> str:

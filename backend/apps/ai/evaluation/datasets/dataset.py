@@ -209,6 +209,10 @@ BENCHMARK_CASES: list[EvalCase] = [
         query="Find OWASP chapters in Germany and list projects focused on API security.",
         category=EvalCategory.COLLABORATIVE,
         expected_intent="chapter",
+        expected_tools=[
+            "Search for OWASP chapters by location or name",
+            "Search for OWASP projects by name, topic, technology, or description",
+        ],
         expected_keywords=["Germany", "API security"],
         notes="Evaluates multi-agent query decomposition",
     ),

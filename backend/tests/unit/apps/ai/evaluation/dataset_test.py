@@ -102,6 +102,25 @@ class TestDataset:
         )
         assert ToolEvaluator().evaluate(case, output).passed is True
 
+    @pytest.mark.parametrize(
+        ("tools_used", "passed"),
+        [
+            ([], False),
+            ([search_chapters.name], False),
+            ([search_projects.name], False),
+            ([search_chapters.name, search_projects.name], True),
+        ],
+    )
+    def test_collaborative_case_requires_both_searches(self, tools_used, passed):
+        case = get_case_by_id("collab-001")
+        output = AgentOutput(
+            query=case.query,
+            response="Chapters in Germany and API security projects",
+            intent="chapter",
+            tools_used=tools_used,
+        )
+        assert ToolEvaluator().evaluate(case, output).passed is passed
+
     @pytest.mark.parametrize("category", [EvalCategory.CLARIFICATION, EvalCategory.ADVERSARIAL])
     @pytest.mark.parametrize("tool_name", [semantic_search.name, "unknown_future_tool"])
     def test_clarification_and_refusal_require_no_tools(self, category, tool_name):

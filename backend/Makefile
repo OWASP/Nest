@@ -94,7 +94,7 @@ define exec-nestbot-direct
 	@if command -v poetry >/dev/null 2>&1 && [ -d "backend" ]; then \
 		cd backend && poetry run $(CMD); \
 	else \
-		$(CMD); \
+		cd backend && $(CMD); \
 	fi
 endef
 

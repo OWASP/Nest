@@ -138,6 +138,14 @@ class TestFormatAiResponseForSlack:
                 "Entire block wrapped",
             ),
             (
+                "```python\n    print('hello')\n```",
+                "    print('hello')",
+            ),
+            (
+                "\r\n```python\r\n\r\n    print('hello')\r\n\r\n```\r\n",
+                "    print('hello')",
+            ),
+            (
                 "Here is code:\n```python\nprint('hello')\n```\nDone.",
                 "Here is code:\nprint('hello')\nDone.",
             ),

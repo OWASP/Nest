@@ -5,6 +5,9 @@ from dataclasses import dataclass, field
 
 from apps.ai.evaluation.telemetry.cost_models import calculate_token_cost
 
+## currrently not used, but may be useful for future telemetry tracking
+## no practical integration yet
+## maybe integrate with the monitoring/observability project ??
 MAX_PERCENTILE = 100.0
 
 
@@ -38,7 +41,7 @@ class TelemetryTracker:
             msg = "Latency must be finite and non-negative"
             raise ValueError(msg)
         if any(
-            not isinstance(tokens, int) or tokens < 0
+            isinstance(tokens, bool) or not isinstance(tokens, int) or tokens < 0
             for tokens in (prompt_tokens, completion_tokens)
         ):
             msg = "Token counts must be non-negative integers"
