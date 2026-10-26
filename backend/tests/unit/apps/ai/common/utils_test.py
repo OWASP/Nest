@@ -369,10 +369,11 @@ class TestGetFunctions:
         ):
             result = get_fallback_response()
 
-        assert "encountered an error processing your request" in result
-        # Development message includes a warning emoji
-        assert "⚠️" in result
-        assert "https://nest.example.test" in result
+        assert result == (
+            "⚠️ I encountered an error processing your request. Please try rephrasing "
+            "your question. For further help, join #owasp-community on "
+            "Slack, or visit https://nest.example.test."
+        )
 
     def test_get_fallback_response_production(self):
         """Generic message is returned in production (no debug/local)."""
