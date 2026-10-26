@@ -34,7 +34,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: 253d99053f80e4a368175e93b36edb662e7e5135  # v1.109.1
+    rev: 80c8033123f6d6b9ccd1a9458562ea4180742af7  # v1.109.2
     hooks:
       - id: terraform_providers_lock
         args:
@@ -52,7 +52,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 2eeb5678de71a00c0902cbda7105d328432f72cb  # v0.16.8
+    rev: a56c0b927e6465d37cae3e97d35d4d18ab2b96cd  # v0.16.9
     hooks:
       - id: ruff-check
         args:
@@ -65,7 +65,7 @@ repos:
           - ruff.toml
 
   - repo: https://github.com/djlint/djLint
-    rev: b8b8c45322b3f38e5933a8088991b0f0d8cd45c2  # v1.46.2
+    rev: 97266b950ee135d6ef89c9ace9d88baadced6f67  # v1.46.4
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -97,8 +97,8 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - strawberry-graphql==0.327.7
-          - strawberry-graphql-django==0.89.2
+          - strawberry-graphql==0.328.0
+          - strawberry-graphql-django==0.90.1
           - types-lxml==2026.2.16
           - types-python-dateutil==2.9.0.20260807
           - types-PyYAML==6.0.12.20260906
