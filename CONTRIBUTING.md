@@ -413,6 +413,23 @@ Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. 
 
 Codegen runs inside `nest-frontend` (no host Node/pnpm install). Generated files are written to the bind-mounted `frontend/` tree on the host.
 
+### Documentation
+
+The documentation uses [Zensical](https://zensical.org/) and is available at
+[http://localhost:8001](http://localhost:8001) when `make run` is running.
+The shared configuration is `.zensical.toml`; its classic theme preserves the
+existing templates and styles. `docs/serve.py` also watches included README
+files, so changes outside `docs/src` refresh the preview.
+
+Run the documentation tests with `make test-docs`.
+These tests build a site with Mermaid diagrams, README includes, tags, and
+search. CI runs them in their own job, separate from `make test`.
+Production build tests keep the real theme, templates, CSS, logos, and privacy
+settings. These tests use the `network` marker and download external assets.
+After building the test image, run
+`docker run --rm --network none nest-test-docs pytest -m 'not network'` for the fast tests
+without network access.
+
 ## Testing
 
 Our CI/CD pipelines automatically run tests against every Pull Request. You can run tests locally before submitting a PR:

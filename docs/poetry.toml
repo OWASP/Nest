@@ -6,7 +6,7 @@ min-release-age = 21
 min-release-age-exclude = [
     "click", # 8.3.3
     "pymdown-extensions", # 11.0.1
-    "urllib3", # 2.8.0
+    "zensical", # 0.0.72 adds privacy plugin compatibility.
 ]
 
 [virtualenvs]
