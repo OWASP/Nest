@@ -110,7 +110,7 @@ jobs:
             mypy-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install pre-commit
-        run: python -m pip install --require-hashes --requirement tools/requirements/pre-commit.txt
+        run: python -m pip install --only-binary :all: --require-hashes --requirement tools/requirements/pre-commit.txt
 
       - name: Setup Terraform environment
         uses: ./.github/actions/setup-terraform-environment
@@ -175,7 +175,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install GitHub script dependencies
-        run: python -m pip install --require-hashes --requirement .github/requirements/scripts.txt
+        run: python -m pip install --only-binary :all: --require-hashes --requirement .github/requirements/scripts.txt
 
       - name: Check Docker Compose
         run: python .github/scripts/docker_compose_check.py
