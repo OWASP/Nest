@@ -12,10 +12,12 @@ def get_embedder() -> Embedder:
         Embedder instance configured for the current provider.
 
     """
-    provider = os.getenv(
-        "EMBEDDING_PROVIDER",
-        os.getenv("LLM_PROVIDER", "openai"),
-    )
+    provider = os.getenv("EMBEDDING_PROVIDER")
+    if not provider:
+        llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
+        provider = llm_provider if llm_provider in {"openai", "google"} else "openai"
+    else:
+        provider = provider.lower()
 
     match provider:
         case "openai":
