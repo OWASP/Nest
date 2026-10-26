@@ -494,23 +494,23 @@ class Project(
 
     @property
     def unanswered_issues_count(self) -> int:
-        """Get the number of issues with no comments.
+        """Get the number of open issues with no comments.
 
         Returns:
-            int: Count of issues where `comments_count` equals zero.
+            int: Count of open issues where `comments_count` equals zero.
 
         """
-        return self.issues.filter(comments_count=0).count()
+        return self.issues.filter(comments_count=0, state="open").count()
 
     @property
     def unassigned_issues_count(self) -> int:
-        """Get the number of issues with no assignees.
+        """Get the number of open issues with no assignees.
 
         Returns:
-            int: Count of issues where no user is assigned.
+            int: Count of open issues where no user is assigned.
 
         """
-        return self.issues.filter(assignees__isnull=True).count()
+        return self.issues.filter(assignees__isnull=True, state="open").count()
 
     def deactivate(self) -> None:
         """Deactivate project."""
