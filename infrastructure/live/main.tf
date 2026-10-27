@@ -21,6 +21,7 @@ locals {
     Project     = var.project_name
   }
   fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
+  observability_image  = regex("(?m)^FROM (victoriametrics/victoria-metrics:\\S+)", file("${path.root}/../../docker/victoriametrics/Dockerfile"))[0]
 }
 
 module "alb" {
@@ -173,6 +174,26 @@ module "networking" {
   project_name                        = var.project_name
   public_subnet_cidrs                 = var.public_subnet_cidrs
   vpc_cidr                            = var.vpc_cidr
+}
+
+module "observability" {
+  count  = var.enable_observability ? 1 : 0
+  source = "../modules/observability"
+
+  app_security_group_ids = [
+    module.security.backend_sg_id,
+    module.security.frontend_sg_id,
+    module.security.tasks_sg_id,
+  ]
+  assign_public_ip = false
+  aws_region       = var.aws_region
+  common_tags      = local.common_tags
+  environment      = var.environment
+  kms_key_arn      = module.kms.key_arn
+  project_name     = var.project_name
+  subnet_ids       = module.networking.private_subnet_ids
+  image            = local.observability_image
+  vpc_id           = module.networking.vpc_id
 }
 
 module "parameters" {
