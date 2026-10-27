@@ -195,88 +195,106 @@ describe('BoardCandidatesPage', () => {
     })
   })
 
-  describe('contribution labels for led chapters and projects', () => {
-    const buildSnapshot = (
-      chapterContributions: Record<string, number>,
-      projectContributions: Record<string, number>
-    ) => ({
-      id: 'snapshot-1',
-      githubUser: { login: 'alice' },
-      chapterContributions,
-      projectContributions,
-      channelCommunications: {},
-      communicationHeatmapData: {},
-      contributionHeatmapData: {},
-      repositoryContributions: {},
-      commitsCount: 0,
-      issuesCount: 0,
-      messagesCount: 0,
-      pullRequestsCount: 0,
-      totalContributions: 0,
-      startAt: '2025-01-01T00:00:00Z',
-      endAt: '2025-12-31T00:00:00Z',
-    })
+  const buildSnapshot = ({
+    chapterContributions = {},
+    projectContributions = {},
+    repositoryContributions = {},
+    channelCommunications = {},
+  }: {
+    chapterContributions?: Record<string, number>
+    projectContributions?: Record<string, number>
+    repositoryContributions?: Record<string, number>
+    channelCommunications?: Record<string, number>
+  }) => ({
+    id: 'snapshot-1',
+    githubUser: { login: 'alice' },
+    chapterContributions,
+    projectContributions,
+    channelCommunications,
+    communicationHeatmapData: {},
+    contributionHeatmapData: {},
+    repositoryContributions,
+    commitsCount: 0,
+    issuesCount: 0,
+    messagesCount: 0,
+    pullRequestsCount: 0,
+    totalContributions: 0,
+    startAt: '2025-01-01T00:00:00Z',
+    endAt: '2025-12-31T00:00:00Z',
+  })
 
-    const renderWithSnapshot = ({
-      chapterContributions = {},
-      projectContributions = {},
-      chapterKey = 'london',
-      projectKey = 'nest',
-    }: {
-      chapterContributions?: Record<string, number>
-      projectContributions?: Record<string, number>
-      chapterKey?: string
-      projectKey?: string
-    }) => {
-      const boardResult = { data: mockBoardData, loading: false, error: null }
-      const snapshotResult = {
-        data: { memberSnapshot: buildSnapshot(chapterContributions, projectContributions) },
-        loading: false,
-        error: null,
-      }
-      mockUseQuery.mockImplementation((document: unknown) => {
-        if (document === GetBoardCandidatesDocument) {
-          return boardResult
-        }
-        if (document === GetMemberSnapshotDocument) {
-          return snapshotResult
-        }
-        return { data: null, loading: false, error: null }
-      })
-      mockUseApolloClient.mockReturnValue({
-        query: jest.fn().mockImplementation(({ query }: { query: unknown }) => {
-          if (query === GetChapterByKeyDocument) {
-            return Promise.resolve({
-              data: {
-                chapter: {
-                  id: 'chapter-1',
-                  key: chapterKey,
-                  name: 'London Chapter',
-                  url: 'https://owasp.org/www-chapter-london',
-                },
-              },
-            })
-          }
-          if (query === GetProjectByKeyDocument) {
-            return Promise.resolve({
-              data: {
-                project: {
-                  id: 'project-1',
-                  key: projectKey,
-                  level: 'flagship',
-                  name: 'Nest Project',
-                  type: 'code',
-                  url: 'https://owasp.org/www-project-nest',
-                },
-              },
-            })
-          }
-          return Promise.resolve({ data: {} })
+  const renderWithSnapshot = ({
+    chapterContributions = {},
+    projectContributions = {},
+    repositoryContributions = {},
+    channelCommunications = {},
+    chapterKey = 'london',
+    projectKey = 'nest',
+  }: {
+    chapterContributions?: Record<string, number>
+    projectContributions?: Record<string, number>
+    repositoryContributions?: Record<string, number>
+    channelCommunications?: Record<string, number>
+    chapterKey?: string
+    projectKey?: string
+  }) => {
+    const boardResult = { data: mockBoardData, loading: false, error: null }
+    const snapshotResult = {
+      data: {
+        memberSnapshot: buildSnapshot({
+          chapterContributions,
+          projectContributions,
+          repositoryContributions,
+          channelCommunications,
         }),
-      })
-      render(<BoardCandidatesPage />)
+      },
+      loading: false,
+      error: null,
     }
+    mockUseQuery.mockImplementation((document: unknown) => {
+      if (document === GetBoardCandidatesDocument) {
+        return boardResult
+      }
+      if (document === GetMemberSnapshotDocument) {
+        return snapshotResult
+      }
+      return { data: null, loading: false, error: null }
+    })
+    mockUseApolloClient.mockReturnValue({
+      query: jest.fn().mockImplementation(({ query }: { query: unknown }) => {
+        if (query === GetChapterByKeyDocument) {
+          return Promise.resolve({
+            data: {
+              chapter: {
+                id: 'chapter-1',
+                key: chapterKey,
+                name: 'London Chapter',
+                url: 'https://owasp.org/www-chapter-london',
+              },
+            },
+          })
+        }
+        if (query === GetProjectByKeyDocument) {
+          return Promise.resolve({
+            data: {
+              project: {
+                id: 'project-1',
+                key: projectKey,
+                level: 'flagship',
+                name: 'Nest Project',
+                type: 'code',
+                url: 'https://owasp.org/www-project-nest',
+              },
+            },
+          })
+        }
+        return Promise.resolve({ data: {} })
+      }),
+    })
+    render(<BoardCandidatesPage />)
+  }
 
+  describe('contribution labels for led chapters and projects', () => {
     const chapterCases: Array<[string, Record<string, number>, string, string]> = [
       [
         'prefixed snapshot key, bare chapter key',
@@ -340,5 +358,95 @@ describe('BoardCandidatesPage', () => {
         expect(link).toHaveTextContent(expected)
       }
     )
+  })
+
+  describe('top contribution lists', () => {
+    const TOP_CONTRIBUTIONS_COUNT = 5
+
+    const repositoryContributions = {
+      'www-project-nest': 42,
+      'www-project-juice-shop': 31,
+      'www-project-nettacker': 25,
+      'www-project-goatsecurity': 19,
+      'www-project-chapter-london': 12,
+      'www-project-mastodon': 8,
+      'www-project-sbom': 5,
+      'www-project-wstg': 2,
+    }
+
+    const channelCommunications = {
+      general: 64,
+      'project-nest': 41,
+      appsec: 33,
+      contributors: 27,
+      'chapter-london': 14,
+      'owasp-leaders': 9,
+      gsoc: 6,
+      random: 3,
+    }
+
+    test('renders at most five repositories under the top repositories heading', async () => {
+      renderWithSnapshot({ repositoryContributions })
+
+      expect(await screen.findByText('Top 5 Active Repositories')).toBeInTheDocument()
+      expect(screen.getAllByRole('link', { name: /commits/ })).toHaveLength(TOP_CONTRIBUTIONS_COUNT)
+    })
+
+    test('renders the repositories with the highest commit counts first', async () => {
+      renderWithSnapshot({ repositoryContributions })
+
+      const links = await screen.findAllByRole('link', { name: /commits/ })
+
+      expect(links.map((link) => link.textContent)).toEqual([
+        'www-project-nest42 commits',
+        'www-project-juice-shop31 commits',
+        'www-project-nettacker25 commits',
+        'www-project-goatsecurity19 commits',
+        'www-project-chapter-london12 commits',
+      ])
+    })
+
+    test('renders every repository when there are fewer than five', async () => {
+      renderWithSnapshot({
+        repositoryContributions: {
+          'www-project-nest': 42,
+          'www-project-juice-shop': 31,
+          'www-project-nettacker': 25,
+        },
+      })
+
+      expect(await screen.findAllByRole('link', { name: /commits/ })).toHaveLength(3)
+    })
+
+    test('renders at most five channels under the top channels heading', async () => {
+      renderWithSnapshot({ channelCommunications })
+
+      expect(await screen.findByText('Top 5 Active Channels')).toBeInTheDocument()
+      expect(screen.getAllByRole('link', { name: /messages/ })).toHaveLength(
+        TOP_CONTRIBUTIONS_COUNT
+      )
+    })
+
+    test('renders the channels with the highest message counts first', async () => {
+      renderWithSnapshot({ channelCommunications })
+
+      const links = await screen.findAllByRole('link', { name: /messages/ })
+
+      expect(links.map((link) => link.textContent)).toEqual([
+        '#general64 messages',
+        '#project-nest41 messages',
+        '#appsec33 messages',
+        '#contributors27 messages',
+        '#chapter-london14 messages',
+      ])
+    })
+
+    test('renders every channel when there are fewer than five', async () => {
+      renderWithSnapshot({
+        channelCommunications: { general: 64, appsec: 33, contributors: 27 },
+      })
+
+      expect(await screen.findAllByRole('link', { name: /messages/ })).toHaveLength(3)
+    })
   })
 })

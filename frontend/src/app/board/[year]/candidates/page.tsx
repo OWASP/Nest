@@ -25,6 +25,9 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 dayjs.extend(relativeTime)
 
+// Number of entries displayed under the "Top N Active ..." headings.
+const TOP_CONTRIBUTIONS_COUNT = 5
+
 type Candidate = {
   id: string
   memberName: string
@@ -158,7 +161,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
       return (
         <div className="mt-4 w-full">
           <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Top 5 Active Channels
+            Top {TOP_CONTRIBUTIONS_COUNT} Active Channels
           </h4>
           <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
             No Engagement
@@ -180,7 +183,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
       <div className="mt-4 w-full">
         <div className="mb-3">
           <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Top 5 Active Channels
+            Top {TOP_CONTRIBUTIONS_COUNT} Active Channels
           </h4>
           <a
             href={`https://owasp.slack.com/archives/${topChannelName}`}
@@ -199,7 +202,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
           <div>
             <div className="flex flex-wrap gap-2">
               {sortedChannels
-                .slice(1, 5)
+                .slice(1, TOP_CONTRIBUTIONS_COUNT)
                 .map(([channelName, messageCount]) => renderChannelLink(channelName, messageCount))}
             </div>
           </div>
@@ -559,7 +562,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                 <div className="mt-4 w-full">
                   <div className="mb-3">
                     <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Top 5 Active Repositories
+                      Top {TOP_CONTRIBUTIONS_COUNT} Active Repositories
                     </h4>
                     <a
                       href={`https://github.com/${topRepoName}/commits?author=${candidate.member?.login}`}
@@ -578,7 +581,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                     <div>
                       <div className="flex flex-wrap gap-2">
                         {sortedRepos
-                          .slice(1)
+                          .slice(1, TOP_CONTRIBUTIONS_COUNT)
                           .map(([repoName, count]) => renderRepositoryLink(repoName, count))}
                       </div>
                     </div>
