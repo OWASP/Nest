@@ -23,7 +23,10 @@ def test_all_keywords_match_case_insensitively():
 
     assert result.passed is True
     assert result.score == 1.0
-    assert result.details == {"matched_keywords": ["owasp", "summer of code"], "missing_keywords": []}
+    assert result.details == {
+        "matched_keywords": ["owasp", "summer of code"],
+        "missing_keywords": [],
+    }
 
 
 @pytest.mark.parametrize("response", ["", " \n "])

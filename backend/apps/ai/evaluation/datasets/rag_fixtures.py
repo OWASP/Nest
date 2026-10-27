@@ -21,7 +21,7 @@ RAG_FIXTURES = {
                     "must not imply OWASP endorsement of a company or its products."
                 ),
                 "context": "repository www-policy: OWASP Word Mark Usage Guidelines",
-                 "distance": 0.1,
+                "distance": 0.1,
             }
         ],
         "irrelevant": [
