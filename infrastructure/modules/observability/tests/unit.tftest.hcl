@@ -53,13 +53,15 @@ run "test_vm_ingest_from_source_security_group_only" {
   command = plan
 
   assert {
-    condition     = aws_security_group_rule.vm_ingest_from_apps[0].source_security_group_id == var.app_security_group_ids[0]
-    error_message = "VM ingest must be restricted to application security groups, not public CIDRs."
-  }
-
-  assert {
-    condition     = aws_security_group_rule.vm_ingest_from_apps[0].from_port == var.port
-    error_message = "VM ingest must be allowed on the configured VictoriaMetrics port."
+    condition = alltrue([
+      for i, rule in aws_security_group_rule.vm_ingest_from_apps :
+      rule.source_security_group_id == var.app_security_group_ids[i] &&
+      rule.from_port == var.port &&
+      rule.to_port == var.port &&
+      rule.protocol == "tcp" &&
+      rule.type == "ingress"
+    ])
+    error_message = "Every ingest rule must allow only TCP on the configured port from its own application security group."
   }
 }
 
