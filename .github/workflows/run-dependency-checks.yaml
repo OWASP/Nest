@@ -53,7 +53,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Run CVE Lite CLI vulnerability check
+        uses: ./.github/actions/run-cve-lite-cli-check
+        with:
+          command: make security-dependency-check-cve-lite-cli
+
       - name: Run OSV vulnerability check
+        if: always()
         uses: ./.github/actions/run-osv-check
         with:
           command: make security-dependency-check-osv

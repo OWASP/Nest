@@ -457,7 +457,7 @@ This command runs:
 
 - SAST (Semgrep)
 - Repository scanning for secrets and misconfigurations (Trivy)
-- Dependency scanning for known vulnerabilities (package audits, Trivy, and OSV-Scanner)
+- Dependency scanning for known vulnerabilities (package audits, CVE Lite CLI, Trivy, and OSV-Scanner)
 - Container image scans for backend and frontend
 - DAST (ZAP baseline scan against the running frontend)
 
@@ -468,6 +468,30 @@ For addressing findings:
 - Review the output for specific file paths and line numbers
 - Follow the documentation links provided in the output for remediation guidance
 - Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
+
+#### Running CVE Lite CLI Dependency Checks
+
+Run [CVE Lite CLI](https://owasp.github.io/cve-lite-cli/) from the repository root:
+
+```bash
+make security-dependency-check-cve-lite-cli
+```
+
+Locally, the command uses the code-checks Docker image; no host Node.js installation
+or running Nest application is required. It scans the root, `cspell/`, `e2e/`, and
+`frontend/` lockfiles, including development dependencies, and caches advisory
+responses in `.cache/cve-lite/`. Online scans require access to OSV and the npm registry.
+
+Terminal output includes all findings, direct and transitive dependency details,
+and available remediation guidance. Review the suggested updates, apply appropriate
+changes to the affected package, and run the scan again. The command does not modify
+dependencies automatically.
+
+The scan returns a nonzero exit code for medium or higher severity findings or
+incomplete detection data, and continues checking the remaining lock files after a
+failure. The same command and configuration run in CI, in the dependency check job, which
+follows the existing non-blocking dependency check policy. It is also included in
+`make security-dependency-check`, `make security-dependency-scan`, and `make security-scan`.
 
 #### Running SAST Scans Only
 
