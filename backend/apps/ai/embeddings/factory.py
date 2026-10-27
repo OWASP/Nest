@@ -2,6 +2,8 @@
 
 import os
 
+from django.conf import settings
+
 from apps.ai.embeddings.base import Embedder
 
 
@@ -13,11 +15,20 @@ def get_embedder() -> Embedder:
 
     """
     provider = os.getenv("EMBEDDING_PROVIDER")
+    llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
     if not provider:
-        llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
+        if llm_provider == "bedrock":
+            msg = "EMBEDDING_PROVIDER is required when LLM_PROVIDER is bedrock"
+            raise ValueError(msg)
         provider = llm_provider if llm_provider in {"openai", "google"} else "google"
     else:
         provider = provider.lower()
+
+    if llm_provider == "bedrock":
+        credential = {"openai": "OPEN_AI_SECRET_KEY", "google": "GOOGLE_API_KEY"}.get(provider)
+        if credential and not getattr(settings, credential):
+            msg = f"{credential} is required for the {provider} embedding provider"
+            raise ValueError(msg)
 
     match provider:
         case "openai":
