@@ -3,7 +3,7 @@
 .PHONY: security-dependency-audit security-dependency-check security-dependency-scan \
 	security-scan security-sast-scan security-dast-scan security-docksec-scan \
 	security-image-scan security-repository-scan security-sast-scan-semgrep \
-	security-dependency-check-cve-lite security-dependency-check-osv security-dependency-check-trivy \
+	security-dependency-check-cve-lite-cli security-dependency-check-osv security-dependency-check-trivy \
 	security-repository-scan-trivy security-dast-scan-zap tooling-dependency-audit
 
 security-scan: ## Run security scans
@@ -47,7 +47,7 @@ security-dependency-scan: ## Audit and check dependencies for known vulnerabilit
 
 security-dependency-check: ## Check dependencies for known vulnerabilities
 	@exit_code=0
-	$(MAKE) security-dependency-check-cve-lite || exit_code=1
+	$(MAKE) security-dependency-check-cve-lite-cli || exit_code=1
 	$(MAKE) security-dependency-check-osv || exit_code=1
 	$(MAKE) security-dependency-check-trivy || exit_code=1
 	exit $$exit_code
@@ -124,8 +124,8 @@ security-sast-scan-semgrep:
 	)
 	docker run "$${args[@]}"
 
-security-dependency-check-cve-lite:
-	@$(MAKE) code-checks CMD='sh tools/security/cve_lite_scan.sh'
+security-dependency-check-cve-lite-cli:
+	@$(MAKE) code-checks CMD='sh tools/security/cve_lite_cli_scan.sh'
 
 security-dependency-check-trivy:
 	@echo "Running Trivy vulnerability check..."
