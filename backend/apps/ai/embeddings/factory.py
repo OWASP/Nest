@@ -15,7 +15,7 @@ def get_embedder() -> Embedder:
     provider = os.getenv("EMBEDDING_PROVIDER")
     if not provider:
         llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
-        provider = llm_provider if llm_provider in {"openai", "google"} else "openai"
+        provider = llm_provider if llm_provider in {"openai", "google"} else "google"
     else:
         provider = provider.lower()
 
