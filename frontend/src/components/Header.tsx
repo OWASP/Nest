@@ -58,13 +58,13 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
-      <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
+      <div className="flex h-16 w-full items-center lg:px-4 max-lg:justify-between max-lg:pr-2" id="navbar-sticky">
         {/* Logo */}
         <Link
           href="/"
           onClick={() => setMobileMenuOpen(false)}
           className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
+          >
           <div className="flex h-full items-center">
             <div className="flex h-16 w-16 items-center justify-center py-2">
               <Image
@@ -110,8 +110,10 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+        <div className="ml-auto flex items-center justify-normal gap-1 pl-2 md:gap-4 md:pl-4">
+        <div className="max-md:order-2 max-md:flex max-md:h-11 max-md:w-11 max-md:items-center max-md:justify-center md:contents">
           <GlobalSearch />
+        </div>
           <div className="hidden md:flex">
             <NavButton
               href="https://github.com/OWASP/Nest"
@@ -136,14 +138,17 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="hidden md:flex">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
-          <ModeToggle />
-          <div className="lg:hidden">
+
+          <div className="max-md:order-1 max-md:flex max-md:h-11 max-md:w-11 max-md:items-center max-md:justify-center md:contents">
+            <ModeToggle />
+          </div>
+
+          <div className="lg:hidden max-md:order-3">
             <Button
               onPress={toggleMobileMenu}
-              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
+              className="-ml-1 flex h-11 w-11 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"            >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
+              {mobileMenuOpen ? <FaTimes className="h-6.5 w-6.5" /> : <FaBars className="h-7 w-7" />}
             </Button>
           </div>
         </div>
