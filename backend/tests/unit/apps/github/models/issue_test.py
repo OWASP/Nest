@@ -107,7 +107,7 @@ class TestIssueModel:
 
         issue.generate_summary()
 
-        assert issue.summary == ""
+        assert issue.summary == "Test Body"
 
     @patch("apps.github.models.issue.OpenAi")
     @patch("apps.github.models.issue.Prompt.get_github_issue_hint")
@@ -219,17 +219,75 @@ class TestIssueModel:
         else:
             issue.generate_summary.assert_called_once()
 
-    def test_save_method_when_issue_not_open(self, mock_repository):
-        """Test save method when issue is not open."""
-        issue = Issue(repository=mock_repository, state=Issue.IssueState.CLOSED)
+    def test_save_method_generates_summary_after_issue_is_saved(
+        self, mock_repository
+    ):
+        """Test that summary generation occurs after a new issue is saved."""
+        issue = Issue(
+            title="Test Title",
+            body="Test Body",
+            repository=mock_repository,
+            state=Issue.IssueState.OPEN,
+        )
+        issue.generate_hint = Mock()
+
+        assert issue.id is None
+
+        save_calls = []
+
+        def save_and_assign_id(*args, **kwargs):
+            save_calls.append(kwargs)
+            issue.id = 1
+
+        def generate_summary():
+            assert issue.id == 1
+            issue.summary = "This is a summary."
+
+        with (
+            patch(
+                "apps.github.models.issue.BulkSaveModel.save",
+                side_effect=save_and_assign_id,
+            ),
+            patch.object(
+                issue, "generate_summary", side_effect=generate_summary
+            ) as mock_summary,
+        ):
+            issue.save()
+
+        assert issue.id == 1
+        issue.generate_hint.assert_called_once()
+        mock_summary.assert_called_once()
+        assert issue.summary == "This is a summary."
+        assert len(save_calls) == 2
+        assert save_calls[1] == {"update_fields": ["summary"]}
+
+    def test_save_method_with_empty_update_fields(self, mock_repository):
+        """Test that an empty update_fields preserves Django's no-op behavior."""
+        issue = Issue(
+            title="Test Title",
+            body="Test Body",
+            repository=mock_repository,
+            state=Issue.IssueState.OPEN,
+        )
         issue.generate_hint = Mock()
         issue.generate_summary = Mock()
 
-        with patch("apps.github.models.issue.BulkSaveModel.save"):
-            issue.save()
+        with patch("apps.github.models.issue.BulkSaveModel.save") as mock_save:
+            issue.save(update_fields=[])
 
+        mock_save.assert_not_called()
         issue.generate_hint.assert_not_called()
         issue.generate_summary.assert_not_called()
+
+    def test_is_indexable_without_repository(self):
+        issue = Issue(
+            title="Test Title",
+            body="Test Body",
+            state=Issue.IssueState.OPEN,
+            repository=None,
+        )
+
+        assert not issue.is_indexable
 
     def test_latest_comment_property(self, mock_repository):
         """Test latest_comment property returns the expected query result."""
