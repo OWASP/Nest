@@ -69,4 +69,4 @@ jobs:
         uses: ./.github/actions/run-trivy-check
         with:
           command: make security-dependency-check-trivy
-    timeout-minutes: 10
+    timeout-minutes: 5
