@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.common.constants import NL, OWASP_URL
 from apps.slack.commands.donate import Donate
@@ -20,42 +20,43 @@ class TestDonateHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
-    @pytest.mark.parametrize(
-        ("commands_enabled", "expected_calls"),
-        [
-            (True, 1),
-            (False, 0),
-        ],
-    )
-    def test_donate_handler(self, mock_client, mock_command, commands_enabled, expected_calls):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_donate_handler(self, mock_client, mock_command):
         ack = MagicMock()
         Donate().handler(ack=ack, command=mock_command, client=mock_client)
 
         ack.assert_called_once()
-        assert mock_client.chat_postMessage.call_count == expected_calls
+        assert mock_client.chat_postMessage.call_count == 1
 
-        if commands_enabled:
-            mock_client.conversations_open.assert_called_once_with(users="U123456")
-            blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-            assert len(blocks) == EXPECTED_BLOCK_COUNT_DONATE
+        mock_client.conversations_open.assert_called_once_with(users="U123456")
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        assert len(blocks) == EXPECTED_BLOCK_COUNT_DONATE
 
-            description_text = blocks[0]["text"]["text"]
-            assert "The OWASP Foundation" in description_text
-            assert f"{OWASP_URL}/www-policy/operational/donations" in description_text
+        description_text = blocks[0]["text"]["text"]
+        assert "The OWASP Foundation" in description_text
+        assert f"{OWASP_URL}/www-policy/operational/donations" in description_text
 
-            assert blocks[1]["type"] == "divider"
+        assert blocks[1]["type"] == "divider"
 
-            donate_link_text = blocks[2]["text"]["text"]
-            expected_link_text = (
-                f"{NL}Please Visit <{OWASP_URL}/donate/|OWASP Foundation> page to donate."
-            )
-            assert donate_link_text == expected_link_text
+        donate_link_text = blocks[2]["text"]["text"]
+        expected_link_text = (
+            f"{NL}Please Visit <{OWASP_URL}/donate/|OWASP Foundation> page to donate."
+        )
+        assert donate_link_text == expected_link_text
 
-            assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
+        assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
 
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_donate_handler_when_commands_disabled(self, mock_client, mock_command):
+        ack = MagicMock()
+        Donate().handler(ack=ack, command=mock_command, client=mock_client)
+
+        ack.assert_called_once()
+        mock_client.conversations_open.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_donate_handler_block_structure(self, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
         ack = MagicMock()
         Donate().handler(ack=ack, command=mock_command, client=mock_client)
 
