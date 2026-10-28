@@ -56,7 +56,7 @@ minimumReleaseAgeExclude:
   - argparse@3.0.3
   - baseline-browser-mapping@2.11.1
   - basic-ftp@6.2.2
-  - body-parser@1.20.6
+  - body-parser@1.20.9
   - brace-expansion@5.0.12
   - browserslist@4.28.7
   - caniuse-lite@1.0.30001806
@@ -64,9 +64,9 @@ minimumReleaseAgeExclude:
   - electron-to-chromium@1.5.396
   - enhanced-resolve@5.24.3
   - es-module-lexer@2.3.1
-  - fast-uri@3.1.8
+  - fast-uri@3.1.9
   - immutable@5.1.8
-  - ip-address@10.7.2
+  - ip-address@10.7.4
   - js-yaml@4.3.2
   - markdown-it@15.0.3
   - nanoid@3.3.18
@@ -84,6 +84,7 @@ minimumReleaseAgeExclude:
   - source-map-js@1.2.2
   - terser@5.49.0
   - tmp@0.2.7
+  - undici@8.12.3
   - uuid@11.1.1
   - webpack-sources@3.5.1
   - webpack@5.104.1
@@ -100,16 +101,19 @@ overrides:
   '@puppeteer/browsers': 3.2.1
   # browsers 3.x peer is proxy-agent >=8.0.1; @lhci/cli still declares ^6.4.0.
   basic-ftp: 6.2.2
-  body-parser: 1.20.6
+  # GHSA-27r3-jxmh-p828: compressed-body crash through 1.20.8, fixed in 1.20.9.
+  body-parser: 1.20.9
   brace-expansion@5: 5.0.12
   browserslist: 4.28.7
   compression: 1.8.2
   # GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr, GHSA-c6gr-qvv4-5v3f: fixed in 3.4.17.
   dompurify: 3.4.17
-  fast-uri: 3.1.8
+  # GHSA-333x-w4r6-6crp, GHSA-w74x-v6f9-j3xg, GHSA-wjr9-j795-jxcr, GHSA-xhq7-xmqj-769h: fixed in 3.1.9.
+  fast-uri: 3.1.9
   glob: 11.1.0
   immutable: 5.1.8
-  ip-address: 10.7.2
+  # GHSA-rxp7-6hxx-x8q5: fixed in 10.7.4.
+  ip-address: 10.7.4
   js-yaml: 4.3.2
   nanoid@3: 3.3.18
   postcss: 8.5.23
@@ -126,7 +130,9 @@ overrides:
   source-map-js: 1.2.2
   test-exclude: 7.0.2
   tmp: 0.2.7
-  undici: 7.29.1
+  # jsdom 30 wants undici ^8.9.0. GHSA-4qv8-2p9j-2685, GHSA-f72v-6w45-q472,
+  # and GHSA-xjj6-f33q-929c are fixed in 8.12.2.
+  undici: 8.12.3
   uuid: 11.1.1
   webpack@5: 5.104.1
   ws@8: 8.21.0

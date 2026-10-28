@@ -48,7 +48,9 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
-    mkdir -p /home/owasp/.cache/pycache /home/owasp/docs/tests && \
+    mkdir -p /home/owasp/.cache/pycache /home/owasp/docs/tests \
+        /home/owasp/backend/src/apps/api /home/owasp/backend/src/apps/slack \
+        /home/owasp/frontend && \
     chown -R owasp:owasp /home/owasp
 
 ENV FORCE_COLOR=1 \
@@ -61,7 +63,14 @@ USER owasp
 WORKDIR /home/owasp/docs
 
 COPY --from=builder --chmod=555 --chown=root:root /home/owasp/docs /home/owasp/docs
+COPY --chmod=444 --chown=root:root .zensical.toml CODE_OF_CONDUCT.md CONTRIBUTING.md README.md /home/owasp/
+COPY --chmod=444 --chown=root:root backend/README.md /home/owasp/backend/README.md
+COPY --chmod=444 --chown=root:root backend/src/apps/api/README.md /home/owasp/backend/src/apps/api/README.md
+COPY --chmod=444 --chown=root:root backend/src/apps/slack/README.md /home/owasp/backend/src/apps/slack/README.md
+COPY --chmod=555 --chown=root:root docs/overrides ./overrides/
 COPY --chmod=444 --chown=root:root docs/serve.py ./
-COPY --chmod=444 --chown=root:root docs/tests/serve_test.py tests/serve_test.py
+COPY --chmod=555 --chown=root:root docs/src ./src/
+COPY --chmod=444 --chown=root:root docs/tests/*.py ./tests/
+COPY --chmod=444 --chown=root:root frontend/README.md /home/owasp/frontend/README.md
 
 CMD ["pytest"]
