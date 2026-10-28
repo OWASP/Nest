@@ -90,7 +90,7 @@ COPY --chmod=444 tools/requirements/pre-commit.txt /tmp/pre-commit.txt
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=cache,target=/root/.cache/pip \
     uv pip install --python /opt/pre-commit --require-hashes --requirement /tmp/pre-commit.txt && \
-    /opt/dependency-audit/bin/pip install --require-hashes --requirement /tmp/build.txt && \
+    /opt/dependency-audit/bin/pip install --only-binary :all: --require-hashes --requirement /tmp/build.txt && \
     rm -f /tmp/pre-commit.txt /tmp/build.txt /usr/local/bin/uv
 
 COPY --chmod=555 docker/code-checks/entrypoint.sh /entrypoint.sh
