@@ -4,6 +4,8 @@ Text contains paraphrased source snapshots.
 Distances are artificial test values.
 
 Sources:
+    https://policy.owasp.org/operational/mark-usage-guidelines.html
+    https://devguide.owasp.org/code_of_conduct/
     https://policy.owasp.org/operational/events
     https://policy.owasp.org/operational/code-of-conduct
 """
