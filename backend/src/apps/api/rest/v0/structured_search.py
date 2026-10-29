@@ -85,6 +85,13 @@ def apply_structured_search(
 
         if field_type == "string":
             value = STRING_VALUE.parse_string(value, parse_all=True)[0]
+            # PostgreSQL text cannot contain NUL or unpaired Unicode surrogates.
+            if "\0" in value:
+                continue
+            try:
+                value.encode("utf-8")
+            except UnicodeEncodeError:
+                continue
             lookup_suffix = STRING_LOOKUP_MAPPING.get(
                 field_config.get("lookup", string_lookup),
                 "",

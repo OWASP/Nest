@@ -74,6 +74,18 @@ class TestApplyStructuredSearch:
 
         qs.filter.assert_called_once_with(Q())
 
+    @pytest.mark.parametrize(
+        "query",
+        [r'name:"\0"', 'name:"\0"', 'name:"\ud800"'],
+    )
+    def test_invalid_decoded_string_preserves_other_conditions(self, query):
+        """Ignore values PostgreSQL cannot store while retaining valid conditions."""
+        qs = make_queryset()
+
+        apply_structured_search(qs, f"{query} stars:>100", FIELD_SCHEMA)
+
+        qs.filter.assert_called_once_with(Q(stars_count__gt=100))
+
     def test_string_search_conversion(self):
         qs = make_queryset()
         apply_structured_search(qs, "name:nest", FIELD_SCHEMA)
