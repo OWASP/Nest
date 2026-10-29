@@ -12,7 +12,7 @@ def runner(mocker):
         return {
             "case_id": case_id,
             "scenario": scenario,
-            "status": "passed" if scenario == "relevant" else "needs_review",
+            "status": "passed" if scenario in ("relevant", "mixed") else "needs_review",
             "response": "Example answer",
         }
 
@@ -27,6 +27,29 @@ def test_command_requires_live_opt_in(runner):
         call_command("ai_evaluate", stdout=StringIO())
 
     runner.assert_not_called()
+
+
+def test_mixed_scenario_prints_a_report(runner):
+    output = StringIO()
+
+    call_command(
+        "ai_evaluate",
+        "--live",
+        "--scenario",
+        "mixed",
+        stdout=output,
+    )
+
+    runner.assert_called_once_with("rag-002", "mixed", live=True)
+    report = json.loads(output.getvalue())
+
+    assert report["summary"] == {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "needs_review": 0,
+    }
+    assert report["results"][0]["scenario"] == "mixed"
 
 
 def test_relevant_scenario_prints_a_report(runner):
@@ -80,6 +103,11 @@ def test_failures_are_saved_and_remaining_scenarios_run(runner, tmp_path):
             "scenario": "empty",
             "status": "needs_review",
         },
+        {
+            "case_id": "rag-002",
+            "scenario": "mixed",
+            "status": "passed",
+        },
     ]
     destination = tmp_path / "report.json"
     output = StringIO()
@@ -98,11 +126,11 @@ def test_failures_are_saved_and_remaining_scenarios_run(runner, tmp_path):
     report = json.loads(destination.read_text(encoding="utf-8"))
 
     assert error.value.returncode == 1
-    assert runner.call_count == 3
+    assert runner.call_count == 4
     assert report == json.loads(output.getvalue())
     assert report["summary"] == {
-        "total": 3,
-        "passed": 0,
+        "total": 4,
+        "passed": 1,
         "failed": 1,
         "needs_review": 2,
     }
@@ -111,6 +139,7 @@ def test_failures_are_saved_and_remaining_scenarios_run(runner, tmp_path):
         "relevant",
         "irrelevant",
         "empty",
+        "mixed",
     ]
 
 
@@ -141,3 +170,25 @@ def test_invalid_output_directory_is_rejected_before_running(runner, tmp_path):
         )
 
     runner.assert_not_called()
+
+
+def test_command_runs_selected_case(runner):
+    output = StringIO()
+
+    call_command(
+        "ai_evaluate",
+        "--live",
+        "--case-id",
+        "rag-003",
+        stdout=output,
+    )
+
+    runner.assert_called_once_with(
+        "rag-003",
+        "relevant",
+        live=True,
+    )
+    report = json.loads(output.getvalue())
+
+    assert report["results"][0]["case_id"] == "rag-003"
+    assert report["summary"]["passed"] == 1

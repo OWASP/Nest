@@ -45,6 +45,12 @@ def test_fixture_search_is_independent_and_honors_limits():
         ("irrelevant", True, 5, "OWASP trademark logo policy", "needs_review"),
         ("empty", True, 5, "OWASP trademark logo policy", "needs_review"),
         ("empty", True, 5, " ", "failed"),
+        ("mixed", True, 5, "OWASP trademark logo policy", "passed"),
+        ("mixed", False, 5, "OWASP trademark logo policy", "failed"),
+        ("mixed", True, 5, "OWASP", "failed"),
+        ("mixed", True, 0, "OWASP trademark logo policy", "failed"),
+        ("mixed", True, 1, "OWASP trademark logo policy", "failed"),
+        ("mixed", True, 2, "OWASP trademark logo policy", "passed"),
     ],
 )
 def test_rag_runner_reports_observed_results(
@@ -77,7 +83,7 @@ def test_rag_runner_reports_observed_results(
     assert len(result["tool_calls"]) == int(use_tool)
 
     expected_scores = ["tool_selection"]
-    if scenario == "relevant":
+    if scenario in ("relevant", "mixed"):
         expected_scores.append("response_coverage")
 
     assert [score["name"] for score in result["scores"]] == expected_scores
@@ -121,3 +127,42 @@ def test_agent_execution_errors_are_propagated(mocker):
 
     with pytest.raises(RuntimeError, match="Provider failed"):
         run_rag_case("rag-002", live=True)
+
+
+@pytest.mark.parametrize(
+    ("scenario", "limit", "expected_status", "supporting_count"),
+    [
+        ("relevant", 5, "passed", 1),
+        ("mixed", 5, "passed", 1),
+        ("mixed", 1, "failed", 0),
+        ("irrelevant", 5, "needs_review", 0),
+        ("empty", 5, "needs_review", 0),
+    ],
+)
+def test_speaker_policy_case(
+    mocker,
+    scenario,
+    limit,
+    expected_status,
+    supporting_count,
+):
+    factory = mocker.patch("apps.ai.evaluation.rag_runner.create_rag_agent")
+    factory.return_value.llm.model = "test-model"
+    response = "OWASP's code of conduct policy applies to event speakers."
+
+    def execute_with_fixture(agent, query):
+        agent.tools[0].run(query=query, limit=limit)
+        return response
+
+    mocker.patch(
+        "apps.ai.evaluation.rag_runner.execute_task",
+        side_effect=execute_with_fixture,
+    )
+
+    result = run_rag_case("rag-003", scenario, live=True)
+
+    assert result["case_id"] == "rag-003"
+    assert result["status"] == expected_status
+    assert result["response"] == response
+    assert len(result["tool_calls"]) == 1
+    assert result["tool_calls"][0]["supporting_result_count"] == supporting_count

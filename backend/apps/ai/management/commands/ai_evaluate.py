@@ -11,7 +11,7 @@ from apps.ai.evaluation.rag_runner import run_rag_case
 
 class Command(BaseCommand):
     help = "Evaluate RAG-agent responses using fixed retrieval fixtures."
-    requires_system_checks = []
+    requires_system_checks: list[str] = []
 
     def add_arguments(self, parser):
         parser.add_argument("--live", action="store_true")
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--scenario",
-            choices=("relevant", "irrelevant", "empty", "all"),
+            choices=("relevant", "irrelevant", "empty", "mixed", "all"),
             default="relevant",
         )
         parser.add_argument("--output", help="Optional JSON report path.")
@@ -33,17 +33,13 @@ class Command(BaseCommand):
             raise CommandError(msg)
 
         output_path = Path(options["output"]) if options["output"] else None
-        if output_path is not None and (
-            output_path.is_dir() or not output_path.parent.is_dir()
-        ):
+        if output_path is not None and (output_path.is_dir() or not output_path.parent.is_dir()):
             msg = "Output must be a file path inside an existing directory."
             raise CommandError(msg)
 
         case_id = options["case_id"]
         scenarios = (
-            list(RAG_FIXTURES[case_id])
-            if options["scenario"] == "all"
-            else [options["scenario"]]
+            list(RAG_FIXTURES[case_id]) if options["scenario"] == "all" else [options["scenario"]]
         )
 
         results = []
@@ -61,9 +57,7 @@ class Command(BaseCommand):
 
         summary = {"total": len(results)}
         for status in ("passed", "failed", "needs_review"):
-            summary[status] = sum(
-                result["status"] == status for result in results
-            )
+            summary[status] = sum(result["status"] == status for result in results)
 
         report = {
             "scope": "rag_agent",

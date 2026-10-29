@@ -1,11 +1,11 @@
-"""Fixed search results for the rag-002 trademark benchmark.
+"""Fixed search results for RAG benchmarks.
 
 Text contains paraphrased source snapshots.
 Distances are artificial test values.
 
 Sources:
-    https://policy.owasp.org/operational/mark-usage-guidelines.html
-    https://devguide.owasp.org/code_of_conduct/
+    https://policy.owasp.org/operational/events
+    https://policy.owasp.org/operational/code-of-conduct
 """
 
 from copy import deepcopy
@@ -38,6 +38,29 @@ RAG_FIXTURES = {
         "empty": [],
     }
 }
+
+RAG_FIXTURES["rag-003"] = {
+    "relevant": [
+        {
+            "text": (
+                "OWASP's code of conduct policy applies to participants in "
+                "OWASP activities, including event speakers. Participants "
+                "must interact respectfully and must not harass or intimidate "
+                "others. OWASP events must follow the code of conduct and "
+                "the event attendee policy's anti-harassment provisions. "
+                "Presenters must also sign and follow the speaker/trainer "
+                "agreement."
+            ),
+            "context": ("repository www-policy: Events Policy and Code of Conduct"),
+            "distance": 0.1,
+        }
+    ],
+    "irrelevant": deepcopy(RAG_FIXTURES["rag-002"]["relevant"]),
+    "empty": [],
+}
+
+for scenarios in RAG_FIXTURES.values():
+    scenarios["mixed"] = deepcopy(scenarios["irrelevant"] + scenarios["relevant"])
 
 
 def get_rag_fixture(case_id: str, scenario: str = "relevant") -> list[dict]:

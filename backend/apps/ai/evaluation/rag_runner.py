@@ -22,6 +22,7 @@ def create_fixture_search(
 ) -> BaseTool:
     """Create an independent search tool backed by fixture documents."""
     documents = get_rag_fixture(case_id, scenario)
+    supporting_docs = get_rag_fixture(case_id, "relevant")
 
     def retrieve(query: str, limit: int = 5) -> list[dict]:
         if limit < 0:
@@ -34,14 +35,15 @@ def create_fixture_search(
                 "tool": semantic_search.name,
                 "query": query,
                 "limit": limit,
-                "result_count": len(results),
+                "result_count": len(results),  # counts every returned document
+                "supporting_result_count": sum(
+                    document in supporting_docs for document in results
+                ),  # count  only known supporting documents.
             }
         )
         return results
 
-    return semantic_search.model_copy(
-        update={"func": retrieve, "current_usage_count": 0}
-    )
+    return semantic_search.model_copy(update={"func": retrieve, "current_usage_count": 0})
 
 
 def run_rag_case(
@@ -60,7 +62,7 @@ def run_rag_case(
         msg = f"Unknown benchmark case: {case_id}"
         raise ValueError(msg)
 
-    tool_calls = []
+    tool_calls: list[dict] = []
     search_tool = create_fixture_search(case_id, scenario, tool_calls)
 
     agent = create_rag_agent()
@@ -71,28 +73,31 @@ def run_rag_case(
     output = AgentOutput(
         query=case.query,
         response=response,
-        intent="",  # This runner does not execute the router.
+        intent="",  # This runner does not execute the 'router'.
         tools_used=[call["tool"] for call in tool_calls],
     )
 
+    requires_support = scenario in (
+        "relevant",
+        "mixed",
+    )  # group 2 scenarios where supporting evidence is available.
+
     scores = [ToolEvaluator().evaluate(case, output)]
-    if scenario == "relevant":
+    if requires_support:
         scores.append(ResponseEvaluator().evaluate(case, output))
 
     failure_reasons = [score.reason for score in scores if not score.passed]
 
     if not response.strip():
-        failure_reasons.append("Agent returned an empty response")
+        failure_reasons.append("agent returned empty response")
 
-    if scenario == "relevant" and not any(
-        call["result_count"] for call in tool_calls
-    ):
+    if requires_support and not any(call["supporting_result_count"] for call in tool_calls):
         failure_reasons.append("No supporting fixture documents were returned")
 
-    status = "passed" if scenario == "relevant" else "needs_review"
+    status = "passed" if requires_support else "needs_review"
     if failure_reasons:
         status = "failed"
-
+    # irrelevant and empty scenarios require manual review (still)
     return {
         "case_id": case.id,
         "scenario": scenario,
