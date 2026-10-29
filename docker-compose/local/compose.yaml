@@ -46,7 +46,7 @@ services:
   db:
     container_name: nest-db
     env_file: ../../backend/.env
-    image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+    image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
     healthcheck:
       interval: 5s
       retries: 5
