@@ -33,8 +33,8 @@ importers:
         specifier: 1.1.16
         version: 1.1.16
       '@cspell/dict-software-terms':
-        specifier: 5.4.5
-        version: 5.4.5
+        specifier: 5.4.7
+        version: 5.4.7
       '@cspell/dict-terraform':
         specifier: 1.1.4
         version: 1.1.4
@@ -240,8 +240,8 @@ packages:
   '@cspell/dict-shell@1.2.0':
     resolution: {integrity: sha512-PVctvT22lJ49niMiakO8xieY7ELCAzjSqhejWR7bAMb5AZ9F4WDEs+XdGMnoVHWeXq7K5rcepLPmEJb+37zzIw==}
 
-  '@cspell/dict-software-terms@5.4.5':
-    resolution: {integrity: sha512-5PgLJNdaFKeA6iklB0XXjmgNaoLJJqf54oRTD1raG/mgwojVlRnWE1G7x4QH9Gz07h3B3+lMDv1F57Xxs4jang==}
+  '@cspell/dict-software-terms@5.4.7':
+    resolution: {integrity: sha512-zgrCBh4cZt2iQ7igxXNmF04ZngKMSOxwCHGHopCQNDuPDvN2Epy/Hqjmrohnku5G5MzfzHQWEXzDu6dNPyGIlw==}
 
   '@cspell/dict-sql@2.2.1':
     resolution: {integrity: sha512-qDHF8MpAYCf4pWU8NKbnVGzkoxMNrFqBHyG/dgrlic5EQiKANCLELYtGlX5auIMDLmTf1inA0eNtv74tyRJ/vg==}
@@ -494,7 +494,7 @@ snapshots:
       '@cspell/dict-rust': 4.1.2
       '@cspell/dict-scala': 5.0.11
       '@cspell/dict-shell': 1.2.0
-      '@cspell/dict-software-terms': 5.4.5
+      '@cspell/dict-software-terms': 5.4.7
       '@cspell/dict-sql': 2.2.1
       '@cspell/dict-svelte': 1.0.7
       '@cspell/dict-swift': 2.0.6
@@ -636,7 +636,7 @@ snapshots:
 
   '@cspell/dict-shell@1.2.0': {}
 
-  '@cspell/dict-software-terms@5.4.5': {}
+  '@cspell/dict-software-terms@5.4.7': {}
 
   '@cspell/dict-sql@2.2.1': {}
 
