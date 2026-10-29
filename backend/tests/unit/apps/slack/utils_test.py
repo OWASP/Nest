@@ -13,6 +13,7 @@ from apps.owasp.utils.staff import get_staff_data
 from apps.slack.utils import (
     download_file,
     escape,
+    format_ai_response_for_slack,
     format_links_for_slack,
     get_posts_data,
     get_sponsors_data,
@@ -100,6 +101,108 @@ class TestFormatLinksForSlack:
     def test_format_links_for_slack(self, input_text, expected_output):
         """Test format_links_for_slack with various inputs including empty text."""
         assert format_links_for_slack(input_text) == expected_output
+
+
+class TestFormatAiResponseForSlack:
+    @pytest.mark.parametrize(
+        ("input_text", "expected_output"),
+        [
+            ("", ""),
+            (None, None),
+            (
+                "**OWASP ZAP** is a flagship project.",
+                "*OWASP ZAP* is a flagship project.",
+            ),
+            (
+                "This is __bold text__ in markdown.",
+                "This is *bold text* in markdown.",
+            ),
+            (
+                "### OWASP Top 10",
+                "*OWASP Top 10*",
+            ),
+            (
+                "## Chapter Meetings\nJoin our **local** chapters.",
+                "*Chapter Meetings*\nJoin our *local* chapters.",
+            ),
+            (
+                "### \nordinary text",
+                "### \nordinary text",
+            ),
+            (
+                "Check out [OWASP](https://owasp.org) for details.",
+                "Check out <https://owasp.org|OWASP> for details.",
+            ),
+            (
+                "```\nEntire block wrapped\n```",
+                "Entire block wrapped",
+            ),
+            (
+                "```python\n    print('hello')\n```",
+                "    print('hello')",
+            ),
+            (
+                "\r\n```python\r\n\r\n    print('hello')\r\n\r\n```\r\n",
+                "    print('hello')",
+            ),
+            (
+                "Here is code:\n```python\nprint('hello')\n```\nDone.",
+                "Here is code:\nprint('hello')\nDone.",
+            ),
+            (
+                "# **Bold heading**",
+                "*Bold heading*",
+            ),
+            (
+                "### Explore **OWASP** and __chapters__ with *contributors*",
+                "*Explore OWASP and chapters with contributors*",
+            ),
+            ("# C* pointers", "*C* pointers*"),
+            (
+                "Here is code:\n```python\n# This is a comment\nx = 1\n```\nDone.",
+                "Here is code:\n# This is a comment\nx = 1\nDone.",
+            ),
+            (
+                "Run `poetry run pytest` now.",
+                "Run poetry run pytest now.",
+            ),
+            (
+                "Run ```curl --version``` now.",
+                "Run curl --version now.",
+            ),
+            (
+                "Before\n```sh\ncurl --version\n```\nRun ```curl --help``` now.",
+                "Before\ncurl --version\nRun curl --help now.",
+            ),
+            (
+                '```json {"a": 1}```',
+                'json {"a": 1}',
+            ),
+            (
+                "Before\n````python\n# Code\n**unchanged**\n````\nAfter",
+                "Before\n# Code\n**unchanged**\nAfter",
+            ),
+            (
+                "````markdown\n```python\n# Code\n```\n````",
+                "```python\n# Code\n```",
+            ),
+            (
+                "Contact <#C123|community> or <@U456>.",
+                "Contact <#C123|community> or <@U456>.",
+            ),
+            (
+                "```python\n# This is a comment\n**not bold**\nx = [1](https://example.com)\n```",
+                "# This is a comment\n**not bold**\nx = [1](https://example.com)",
+            ),
+            (
+                "Visit [OWASP](https://owasp.org):\n```markdown\n[example](https://example.com)\n```\nDone.",
+                "Visit <https://owasp.org|OWASP>:\n[example](https://example.com)\nDone.",
+            ),
+        ],
+    )
+    def test_format_ai_response_for_slack(self, input_text, expected_output):
+        """Test format_ai_response_for_slack with various markdown inputs."""
+        assert format_ai_response_for_slack(input_text) == expected_output
 
 
 class TestGetText:
