@@ -3,6 +3,7 @@
 from typing import TypedDict
 
 from django.db.models import Q
+from pyparsing import QuotedString
 
 from apps.common.search.query_parser import (
     QueryParser,
@@ -30,6 +31,9 @@ STRING_LOOKUP_MAPPING = {
     "icontains": "__icontains",
     "exact": "",
 }
+
+# Decode string values only at the ORM boundary; the shared parser preserves quotes.
+STRING_VALUE = QuotedString(quote_char='"', esc_char="\\") | QueryParser.UNQUOTED_VALUE
 
 
 def apply_structured_search(
@@ -80,6 +84,7 @@ def apply_structured_search(
         operator = condition.get("op", "=")
 
         if field_type == "string":
+            value = STRING_VALUE.parse_string(value, parse_all=True)[0]
             lookup_suffix = STRING_LOOKUP_MAPPING.get(
                 field_config.get("lookup", string_lookup),
                 "",

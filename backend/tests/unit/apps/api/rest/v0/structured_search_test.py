@@ -2,6 +2,9 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+from django.db.models import Q
+
 from apps.api.rest.v0.structured_search import QueryParserError, apply_structured_search
 
 FIELD_SCHEMA = {
@@ -17,6 +20,60 @@ def make_queryset():
 
 
 class TestApplyStructuredSearch:
+    @pytest.mark.parametrize("lookup", ["icontains", "exact"])
+    @pytest.mark.parametrize(
+        ("query", "expected_value"),
+        [
+            ("name:Juice", "Juice"),
+            ('name:"Juice"', "Juice"),
+            ('name:"Juice Shop"', "Juice Shop"),
+            ('name:" juice shop "', " juice shop "),
+            (r'name:"Juice \"Shop\""', 'Juice "Shop"'),
+            (r'name:"\"Juice Shop\""', '"Juice Shop"'),
+            (r'name:"Juice \\ Shop"', "Juice \\ Shop"),
+            (r'name:"Juice\tShop"', "Juice\tShop"),
+            ('name:"Café Shop"', "Café Shop"),
+            ('name:Juice"Shop', 'Juice"Shop'),
+        ],
+    )
+    def test_string_search_values(self, query, expected_value, lookup):
+        """Decode syntax quotes and escapes without changing literal string content."""
+        qs = make_queryset()
+        schema = {"name": {"type": "string", "lookup": lookup}}
+
+        apply_structured_search(qs, query, schema)
+
+        db_lookup = "name__icontains" if lookup == "icontains" else "name"
+        qs.filter.assert_called_once_with(Q(**{db_lookup: expected_value}))
+
+    @pytest.mark.parametrize("lookup", ["icontains", "exact"])
+    def test_quoted_string_with_default_lookup(self, lookup):
+        """Decode quoted values when the matching strategy comes from the caller."""
+        qs = make_queryset()
+
+        apply_structured_search(
+            qs, 'name:"Juice Shop"', {"name": {"type": "string"}}, string_lookup=lookup
+        )
+
+        db_lookup = "name__icontains" if lookup == "icontains" else "name"
+        qs.filter.assert_called_once_with(Q(**{db_lookup: "Juice Shop"}))
+
+    def test_quoted_string_combined_with_numeric_filter(self):
+        """Keep numeric conditions joined to the decoded phrase with AND."""
+        qs = make_queryset()
+
+        apply_structured_search(qs, 'name:"Juice Shop" stars:>100', FIELD_SCHEMA)
+
+        qs.filter.assert_called_once_with(Q(name__icontains="Juice Shop") & Q(stars_count__gt=100))
+
+    def test_empty_quoted_string_is_ignored(self):
+        """Preserve the shared parser's handling of an empty quoted condition."""
+        qs = make_queryset()
+
+        apply_structured_search(qs, 'name:""', FIELD_SCHEMA)
+
+        qs.filter.assert_called_once_with(Q())
+
     def test_string_search_conversion(self):
         qs = make_queryset()
         apply_structured_search(qs, "name:nest", FIELD_SCHEMA)
