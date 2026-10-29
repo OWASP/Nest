@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import strawberry
+from django.db.models import Q
 from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
@@ -201,8 +202,57 @@ def _wire_role_lookups(
     mock_program_objects_filter.side_effect = [mentor_qs, mentee_qs]
 
 
+def _admin_lookup_filters(mock_filter: MagicMock) -> list[Q]:
+    """Read admin predicates independently of positional or keyword filter syntax."""
+    filters = []
+    for args, kwargs in mock_filter.call_args_list:
+        predicate = Q()
+        for condition in args:
+            predicate &= condition
+        filters.append(predicate & Q(**kwargs))
+    return filters
+
+
 class TestMyPrograms:
     """Tests for the my_programs query."""
+
+    @pytest.mark.parametrize("other_role", [None, "mentor", "mentee", "both"])
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
+    @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_my_programs_github_admin_has_highest_role(
+        self,
+        mock_program_prefetch: MagicMock,
+        mock_program_admin_filter: MagicMock,
+        mock_program_objects_filter: MagicMock,
+        mock_info: MagicMock,
+        api_program_queries,
+        other_role,
+    ) -> None:
+        """Both admin lookups match GitHub accounts and preserve admin role precedence."""
+        _wire_role_lookups(
+            mock_program_admin_filter,
+            mock_program_objects_filter,
+            admin_program_ids=[1],
+            admin_ids=[1],
+            mentor_ids=[1] if other_role in {"mentor", "both"} else [],
+            mentee_ids=[1] if other_role in {"mentee", "both"} else [],
+        )
+        program = MagicMock(spec=Program, id=1)
+        queryset = mock_program_prefetch.return_value.filter.return_value.distinct.return_value
+        queryset.count.return_value = 1
+        queryset.order_by.return_value.__getitem__.return_value = [program]
+
+        result = api_program_queries.my_programs(info=mock_info)
+
+        assert result.programs == [program]
+        assert program.user_role == "admin"
+        user = mock_info.context.request.user
+        admin_identity = Q(admin__nest_user=user) | Q(admin__github_user=user.github_user)
+        assert _admin_lookup_filters(mock_program_admin_filter) == [
+            admin_identity,
+            admin_identity & Q(program_id__in=[1]),
+        ]
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.filter")
     @patch("apps.mentorship.api.internal.queries.program.ProgramAdmin.objects.filter")
@@ -507,3 +557,9 @@ class TestMyPrograms:
         assert isinstance(result, PaginatedPrograms)
         assert len(result.programs) == 1
         assert result.programs[0].user_role == "admin"
+
+        admin_identity = Q(admin__nest_user=mock_user)
+        assert _admin_lookup_filters(mock_program_admin_filter) == [
+            admin_identity,
+            admin_identity & Q(program_id__in=[1]),
+        ]

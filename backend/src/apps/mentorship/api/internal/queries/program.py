@@ -83,15 +83,17 @@ class ProgramQuery:
         user = info.context.request.user
         github_user = getattr(user, "github_user", None)
 
-        admin_program_ids = ProgramAdmin.objects.filter(admin__nest_user=user).values_list(
-            "program_id", flat=True
-        )
-
+        admin_q = Q(admin__nest_user=user)
         mentor_q = Q(modules__mentors__nest_user=user)
         mentee_q = Q(modules__menteemodule__mentee__nest_user=user)
         if github_user is not None:
+            admin_q |= Q(admin__github_user=github_user)
             mentor_q |= Q(modules__mentors__github_user=github_user)
             mentee_q |= Q(modules__menteemodule__mentee__github_user=github_user)
+
+        admin_program_ids = ProgramAdmin.objects.filter(admin_q).values_list(
+            "program_id", flat=True
+        )
 
         query = Q(id__in=admin_program_ids) | mentor_q | mentee_q
 
@@ -123,9 +125,9 @@ class ProgramQuery:
 
         page_ids = [program.id for program in paginated_programs]
         admin_ids = set(
-            ProgramAdmin.objects.filter(
-                admin__nest_user=user, program_id__in=page_ids
-            ).values_list("program_id", flat=True)
+            ProgramAdmin.objects.filter(admin_q, program_id__in=page_ids).values_list(
+                "program_id", flat=True
+            )
         )
         mentor_ids = set(
             Program.objects.filter(mentor_q, id__in=page_ids).values_list("id", flat=True)
