@@ -33,6 +33,9 @@ class TestApplyStructuredSearch:
             (r'name:"Juice \\ Shop"', "Juice \\ Shop"),
             (r'name:"Juice\tShop"', "Juice\tShop"),
             ('name:"Café Shop"', "Café Shop"),
+            ('name:"😀"', "😀"),
+            ('name:"\ud83d\ude00"', "😀"),
+            ('name:"Café \ud83d\ude00 Shop"', "Café 😀 Shop"),
             ('name:Juice"Shop', 'Juice"Shop'),
         ],
     )
@@ -58,13 +61,19 @@ class TestApplyStructuredSearch:
         db_lookup = "name__icontains" if lookup == "icontains" else "name"
         qs.filter.assert_called_once_with(Q(**{db_lookup: "Juice Shop"}))
 
-    def test_quoted_string_combined_with_numeric_filter(self):
+    @pytest.mark.parametrize(
+        ("value", "expected_value"),
+        [("Juice Shop", "Juice Shop"), ("\ud83d\ude00", "😀")],
+    )
+    def test_quoted_string_combined_with_numeric_filter(self, value, expected_value):
         """Keep numeric conditions joined to the decoded phrase with AND."""
         qs = make_queryset()
 
-        apply_structured_search(qs, 'name:"Juice Shop" stars:>100', FIELD_SCHEMA)
+        apply_structured_search(qs, f'name:"{value}" stars:>100', FIELD_SCHEMA)
 
-        qs.filter.assert_called_once_with(Q(name__icontains="Juice Shop") & Q(stars_count__gt=100))
+        qs.filter.assert_called_once_with(
+            Q(name__icontains=expected_value) & Q(stars_count__gt=100)
+        )
 
     def test_empty_quoted_string_is_ignored(self):
         """Preserve the shared parser's handling of an empty quoted condition."""
@@ -76,7 +85,15 @@ class TestApplyStructuredSearch:
 
     @pytest.mark.parametrize(
         "query",
-        [r'name:"\0"', 'name:"\0"', 'name:"\ud800"'],
+        [
+            r'name:"\0"',
+            'name:"\0"',
+            'name:"\ud800"',
+            'name:"Low \udc00"',
+            'name:"\ude00\ud83d"',
+            'name:"High \ud83d\ud83d"',
+            'name:"\ud83dShop"',
+        ],
     )
     def test_invalid_decoded_string_preserves_other_conditions(self, query):
         """Ignore values PostgreSQL cannot store while retaining valid conditions."""

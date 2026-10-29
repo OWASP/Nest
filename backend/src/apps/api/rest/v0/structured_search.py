@@ -88,9 +88,10 @@ def apply_structured_search(
             # PostgreSQL text cannot contain NUL or unpaired Unicode surrogates.
             if "\0" in value:
                 continue
+            # Combine valid surrogate pairs while rejecting unpaired surrogates.
             try:
-                value.encode("utf-8")
-            except UnicodeEncodeError:
+                value = value.encode("utf-16-le", errors="surrogatepass").decode("utf-16-le")
+            except UnicodeDecodeError:
                 continue
             lookup_suffix = STRING_LOOKUP_MAPPING.get(
                 field_config.get("lookup", string_lookup),
