@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import strawberry
+from strawberry.relay import GlobalID
 
 from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
@@ -56,8 +57,8 @@ class FakeModuleNode:
     def mock_mentees(self):
         return _call_module_resolver(self, "mentees")
 
-    def mock_issue_mentees(self, issue_number: int):
-        return _call_module_resolver(self, "issue_mentees", issue_number=issue_number)
+    def mock_issue_mentees(self, issue_id: GlobalID):
+        return _call_module_resolver(self, "issue_mentees", issue_id=issue_id)
 
     def mock_project_name(self):
         return _call_module_resolver(self, "project_name")
@@ -76,24 +77,24 @@ class FakeModuleNode:
     def mock_available_labels(self):
         return _call_module_resolver(self, "available_labels")
 
-    def mock_issue_by_number(self, number: int):
+    def mock_issue_by_id(self, issue_id: GlobalID):
         info = MagicMock()
         info.context.task_deadlines_by_issue = None
         info.context.task_assigned_at_by_issue = None
-        return _call_module_resolver(self, "issue_by_number", info, number=number)
+        return _call_module_resolver(self, "issue_by_id", info, issue_id=issue_id)
 
-    def mock_interested_users(self, issue_number: int):
-        return _call_module_resolver(self, "interested_users", issue_number=issue_number)
+    def mock_interested_users(self, issue_id: GlobalID):
+        return _call_module_resolver(self, "interested_users", issue_id=issue_id)
 
-    def mock_task_deadline(self, issue_number: int):
+    def mock_task_deadline(self, issue_id: GlobalID):
         info = MagicMock()
         info.context.task_deadlines_by_issue = None
-        return _call_module_resolver(self, "task_deadline", info, issue_number=issue_number)
+        return _call_module_resolver(self, "task_deadline", info, issue_id=issue_id)
 
-    def mock_task_assigned_at(self, issue_number: int):
+    def mock_task_assigned_at(self, issue_id: GlobalID):
         info = MagicMock()
         info.context.task_assigned_at_by_issue = None
-        return _call_module_resolver(self, "task_assigned_at", info, issue_number=issue_number)
+        return _call_module_resolver(self, "task_assigned_at", info, issue_id=issue_id)
 
 
 @pytest.fixture
@@ -175,9 +176,9 @@ class TestModuleNodeResolvers:
             ]
             mock_user_objects.filter.return_value.order_by.return_value = [MagicMock()]
 
-            mentees = mock_module_node.mock_issue_mentees(issue_number=123)
+            mentees = mock_module_node.mock_issue_mentees(issue_id=GlobalID("IssueNode", "123"))
             assert len(mentees) == 1
-            mock_module_node.issues.filter.assert_called_once_with(number=123)
+            mock_module_node.issues.filter.assert_called_once_with(pk=123)
             mock_task_objects.filter.assert_called_once_with(
                 module=mock_module_node, issue_id__in=["issue_id_1"], assignee__isnull=False
             )
@@ -187,7 +188,7 @@ class TestModuleNodeResolvers:
     def test_module_node_issue_mentees_no_issue(self, mock_module_node):
         """Test issue_mentees when no issue is found."""
         mock_module_node.issues.filter.return_value.values_list.return_value = []
-        mentees = mock_module_node.mock_issue_mentees(issue_number=123)
+        mentees = mock_module_node.mock_issue_mentees(issue_id=GlobalID("IssueNode", "123"))
         assert mentees == []
 
     def test_module_node_project_name(self, mock_module_node):
@@ -238,9 +239,9 @@ class TestModuleNodeResolvers:
                 issue__mentorship_modules=mock_module_node
             )
 
-    def test_module_node_issue_by_number(self, mock_module_node):
-        """Test the issue_by_number resolver."""
-        issue = mock_module_node.mock_issue_by_number(number=456)
+    def test_module_node_issue_by_id(self, mock_module_node):
+        """Test the issue_by_id resolver."""
+        issue = mock_module_node.mock_issue_by_id(issue_id=GlobalID("IssueNode", "456"))
         assert issue is not None
         mock_module_node.issues.select_related.assert_called_once_with("repository", "author")
         mock_module_node.issues.select_related.return_value.prefetch_related.assert_called_once_with(
@@ -248,10 +249,27 @@ class TestModuleNodeResolvers:
         )
         mock_module_node_qs_related = mock_module_node.issues.select_related.return_value
         mock_module_node_qs_related.prefetch_related.return_value.filter.assert_called_once_with(
-            number=456
+            pk=456
         )
         mock_node_related = mock_module_node.issues.select_related.return_value
         mock_node_related.prefetch_related.return_value.filter.return_value.first.assert_called_once()
+
+    @pytest.mark.parametrize("selected_pk", [101, 102])
+    def test_issue_by_id_with_overlapping_numbers(self, mock_module_node, selected_pk):
+        """Each repository's issue remains accessible when GitHub numbers overlap."""
+        issues = {pk: MagicMock(pk=pk, number=42) for pk in (101, 102)}
+        queryset = (
+            mock_module_node.issues.select_related.return_value.prefetch_related.return_value
+        )
+        queryset.filter.side_effect = lambda **filters: MagicMock(
+            first=lambda: issues.get(filters["pk"])
+        )
+
+        selected = mock_module_node.mock_issue_by_id(
+            issue_id=GlobalID("IssueNode", str(selected_pk))
+        )
+
+        assert selected is issues[selected_pk]
 
     def test_module_node_interested_users(self, mock_module_node):
         """Test the interested_users resolver."""
@@ -268,11 +286,11 @@ class TestModuleNodeResolvers:
                 mock_interest2,
             ]
 
-            users = mock_module_node.mock_interested_users(issue_number=789)
+            users = mock_module_node.mock_interested_users(issue_id=GlobalID("IssueNode", "789"))
             assert len(users) == 2
             assert users[0].login == "user1"
             assert users[1].login == "user2"
-            mock_module_node.issues.filter.assert_called_once_with(number=789)
+            mock_module_node.issues.filter.assert_called_once_with(pk=789)
             mock_issue_user_interest_objects.select_related.assert_called_once_with("user")
             mock_issue_user_interest_objects.select_related.return_value.filter.assert_called_once_with(
                 module=mock_module_node, issue_id__in=["issue_id_1"]
@@ -281,7 +299,7 @@ class TestModuleNodeResolvers:
     def test_module_node_interested_users_no_issue(self, mock_module_node):
         """Test interested_users when no issue is found."""
         mock_module_node.issues.filter.return_value.values_list.return_value = []
-        users = mock_module_node.mock_interested_users(issue_number=789)
+        users = mock_module_node.mock_interested_users(issue_id=GlobalID("IssueNode", "789"))
         assert users == []
 
     def test_module_node_task_deadline(self, mock_module_node):
@@ -292,10 +310,10 @@ class TestModuleNodeResolvers:
                 2025, 10, 26, tzinfo=UTC
             )
 
-            deadline = mock_module_node.mock_task_deadline(issue_number=101)
+            deadline = mock_module_node.mock_task_deadline(issue_id=GlobalID("IssueNode", "101"))
             assert deadline == datetime(2025, 10, 26, tzinfo=UTC)
             mock_task_objects.filter.assert_called_once_with(
-                module=mock_module_node, issue__number=101, deadline_at__isnull=False
+                module=mock_module_node, issue_id=101, deadline_at__isnull=False
             )
 
     def test_module_node_task_deadline_none(self, mock_module_node):
@@ -304,7 +322,7 @@ class TestModuleNodeResolvers:
             mock_task_order_by = mock_task_objects.filter.return_value.order_by
             mock_task_order_by.return_value.values_list.return_value.first.return_value = None
 
-            deadline = mock_module_node.mock_task_deadline(issue_number=101)
+            deadline = mock_module_node.mock_task_deadline(issue_id=GlobalID("IssueNode", "101"))
             assert deadline is None
 
     def test_module_node_task_deadline_with_bulk_load(self, mock_module_node):
@@ -314,7 +332,9 @@ class TestModuleNodeResolvers:
         info = MagicMock()
         info.context.task_deadlines_by_issue = {101: expected_deadline}
 
-        deadline = _call_module_resolver(mock_module_node, "task_deadline", info, issue_number=101)
+        deadline = _call_module_resolver(
+            mock_module_node, "task_deadline", info, issue_id=GlobalID("IssueNode", "101")
+        )
         assert deadline == expected_deadline
 
     def test_module_node_task_deadline_with_bulk_load_not_found(self, mock_module_node):
@@ -322,7 +342,9 @@ class TestModuleNodeResolvers:
         info = MagicMock()
         info.context.task_deadlines_by_issue = {102: datetime(2025, 10, 26, tzinfo=UTC)}
 
-        deadline = _call_module_resolver(mock_module_node, "task_deadline", info, issue_number=101)
+        deadline = _call_module_resolver(
+            mock_module_node, "task_deadline", info, issue_id=GlobalID("IssueNode", "101")
+        )
         assert deadline is None
 
     def test_module_node_task_assigned_at(self, mock_module_node):
@@ -333,10 +355,12 @@ class TestModuleNodeResolvers:
                 2025, 9, 15, tzinfo=UTC
             )
 
-            assigned_at = mock_module_node.mock_task_assigned_at(issue_number=202)
+            assigned_at = mock_module_node.mock_task_assigned_at(
+                issue_id=GlobalID("IssueNode", "202")
+            )
             assert assigned_at == datetime(2025, 9, 15, tzinfo=UTC)
             mock_task_objects.filter.assert_called_once_with(
-                module=mock_module_node, issue__number=202, assigned_at__isnull=False
+                module=mock_module_node, issue_id=202, assigned_at__isnull=False
             )
 
     def test_module_node_task_assigned_at_none(self, mock_module_node):
@@ -345,7 +369,9 @@ class TestModuleNodeResolvers:
             mock_task_order_by = mock_task_objects.filter.return_value.order_by.return_value
             mock_task_order_by.values_list.return_value.first.return_value = None
 
-            assigned_at = mock_module_node.mock_task_assigned_at(issue_number=202)
+            assigned_at = mock_module_node.mock_task_assigned_at(
+                issue_id=GlobalID("IssueNode", "202")
+            )
             assert assigned_at is None
 
     def test_module_node_task_assigned_at_with_bulk_load(self, mock_module_node):
@@ -356,7 +382,7 @@ class TestModuleNodeResolvers:
         info.context.task_assigned_at_by_issue = {202: expected_assigned_at}
 
         assigned_at = _call_module_resolver(
-            mock_module_node, "task_assigned_at", info, issue_number=202
+            mock_module_node, "task_assigned_at", info, issue_id=GlobalID("IssueNode", "202")
         )
         assert assigned_at == expected_assigned_at
 
@@ -366,7 +392,7 @@ class TestModuleNodeResolvers:
         info.context.task_assigned_at_by_issue = {203: datetime(2025, 9, 15, tzinfo=UTC)}
 
         assigned_at = _call_module_resolver(
-            mock_module_node, "task_assigned_at", info, issue_number=202
+            mock_module_node, "task_assigned_at", info, issue_id=GlobalID("IssueNode", "202")
         )
         assert assigned_at is None
 
@@ -399,20 +425,20 @@ class TestModuleNodeResolvers:
         """Test issues resolver properly handles duplicate deadlines during bulk load."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
             deadline_data = [
-                {"issue__number": 101, "deadline_at": datetime(2025, 10, 26, tzinfo=UTC)},
+                {"issue_id": 101, "deadline_at": datetime(2025, 10, 26, tzinfo=UTC)},
                 {
-                    "issue__number": 101,
+                    "issue_id": 101,
                     "deadline_at": datetime(2025, 10, 27, tzinfo=UTC),
                 },
-                {"issue__number": 102, "deadline_at": datetime(2025, 10, 28, tzinfo=UTC)},
+                {"issue_id": 102, "deadline_at": datetime(2025, 10, 28, tzinfo=UTC)},
             ]
             assigned_data = [
-                {"issue__number": 101, "assigned_at": datetime(2025, 9, 15, tzinfo=UTC)},
+                {"issue_id": 101, "assigned_at": datetime(2025, 9, 15, tzinfo=UTC)},
                 {
-                    "issue__number": 101,
+                    "issue_id": 101,
                     "assigned_at": datetime(2025, 9, 16, tzinfo=UTC),
                 },
-                {"issue__number": 102, "assigned_at": datetime(2025, 9, 17, tzinfo=UTC)},
+                {"issue_id": 102, "assigned_at": datetime(2025, 9, 17, tzinfo=UTC)},
             ]
 
             mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
@@ -491,8 +517,8 @@ class TestModuleNodeResolvers:
         mock_module_node.program.has_admin.assert_called_once_with(info.context.request.user)
         mock_module_node.has_mentor.assert_called_once_with(info.context.request.user)
 
-    def test_module_node_issue_by_number_unauthorized(self, mock_module_node):
-        """Test issue_by_number resolver returns None for unauthorized user."""
+    def test_module_node_issue_by_id_unauthorized(self, mock_module_node):
+        """Test issue_by_id resolver returns None for unauthorized user."""
         info = MagicMock()
         info.context.task_deadlines_by_issue = None
         info.context.task_assigned_at_by_issue = None
@@ -501,7 +527,9 @@ class TestModuleNodeResolvers:
         mock_module_node.program.has_admin.return_value = False
         mock_module_node.has_mentor.return_value = False
 
-        result = _call_module_resolver(mock_module_node, "issue_by_number", info, number=456)
+        result = _call_module_resolver(
+            mock_module_node, "issue_by_id", info, issue_id=GlobalID("IssueNode", "456")
+        )
         assert result is None
         mock_module_node.program.has_admin.assert_called_once_with(info.context.request.user)
         mock_module_node.has_mentor.assert_called_once_with(info.context.request.user)
@@ -589,8 +617,8 @@ class TestModuleNodeMenteeAccess:
 
         assert result == []
 
-    def test_issue_by_number_mentee_sees_only_assigned(self):
-        """Mentee can only see issue_by_number when assigned to that issue."""
+    def test_issue_by_id_mentee_sees_only_assigned(self):
+        """Mentee can only see issue_by_id when assigned to that issue."""
         m = FakeModuleNode()
         m.program.has_admin.return_value = False
         m.has_mentor.return_value = False
@@ -606,14 +634,16 @@ class TestModuleNodeMenteeAccess:
         mock_qs = m.issues.select_related.return_value.prefetch_related.return_value
         mock_qs.filter.return_value.filter.return_value.first.return_value = MagicMock()
 
-        result = _call_module_resolver(m, "issue_by_number", info, number=42)
+        result = _call_module_resolver(
+            m, "issue_by_id", info, issue_id=GlobalID("IssueNode", "42")
+        )
 
-        mock_qs.filter.assert_called_once_with(number=42)
+        mock_qs.filter.assert_called_once_with(pk=42)
         mock_qs.filter.return_value.filter.assert_called_once_with(assignees=github_user)
         assert result is not None
 
-    def test_issue_by_number_mentee_no_github_user_returns_none(self):
-        """Mentee with no github_user gets None from issue_by_number."""
+    def test_issue_by_id_mentee_no_github_user_returns_none(self):
+        """Mentee with no github_user gets None from issue_by_id."""
         m = FakeModuleNode()
         m.program.has_admin.return_value = False
         m.has_mentor.return_value = False
@@ -625,6 +655,8 @@ class TestModuleNodeMenteeAccess:
         info = MagicMock()
         info.context.request.user = user
 
-        result = _call_module_resolver(m, "issue_by_number", info, number=42)
+        result = _call_module_resolver(
+            m, "issue_by_id", info, issue_id=GlobalID("IssueNode", "42")
+        )
 
         assert result is None

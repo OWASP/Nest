@@ -75,6 +75,28 @@ describe('ModuleIssues', () => {
     mockUseQuery.mockReturnValue({ data: mockModuleData, loading: false, error: undefined })
   })
 
+  it('opens distinct detail URLs for issues sharing a GitHub number', () => {
+    const issues = [
+      { ...mockModuleData.managementModule.issues[0], id: 'SXNzdWVOb2RlOjE=', title: 'Repo A' },
+      { ...mockModuleData.managementModule.issues[0], id: 'SXNzdWVOb2RlOjI=', title: 'Repo B' },
+    ]
+    mockUseQuery.mockReturnValue({
+      data: { managementModule: { ...mockModuleData.managementModule, issues, issuesCount: 2 } },
+      loading: false,
+    })
+    render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Repo A' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Repo B' }))
+    expect(mockPush).toHaveBeenNthCalledWith(
+      1,
+      '/my/mentorship/programs/prog1/modules/mod1/issues/SXNzdWVOb2RlOjE%3D'
+    )
+    expect(mockPush).toHaveBeenNthCalledWith(
+      2,
+      '/my/mentorship/programs/prog1/modules/mod1/issues/SXNzdWVOb2RlOjI%3D'
+    )
+  })
+
   it('shows a loading message in the table while data is being fetched', () => {
     mockUseQuery.mockReturnValue({ data: undefined, loading: true, error: undefined })
     render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
@@ -125,7 +147,7 @@ describe('ModuleIssues', () => {
     render(<ModuleIssues programKey="prog1" moduleKey="mod1" />)
     const issueTitleButton = screen.getAllByRole('button', { name: /First Issue Title/i })[0]
     fireEvent.click(issueTitleButton)
-    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/prog1/modules/mod1/issues/101')
+    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/prog1/modules/mod1/issues/1')
   })
 
   it('filters issues based on the selected label', async () => {
