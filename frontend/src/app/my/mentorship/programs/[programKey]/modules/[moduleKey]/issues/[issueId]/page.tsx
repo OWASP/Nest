@@ -30,6 +30,14 @@ import Markdown from 'components/MarkdownWrapper'
 import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import SecondaryCard from 'components/SecondaryCard'
 
+const decodeIssueId = (issueId: string | undefined) => {
+  try {
+    return decodeURIComponent(issueId ?? '')
+  } catch {
+    return ''
+  }
+}
+
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
   const { data: session } = useSession() as { data: ExtendedSession | null }
@@ -37,7 +45,8 @@ const ModuleIssueDetailsPage = () => {
   const [visibleCount, setVisibleCount] = useState(4)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
   const limit = 4
-  const { programKey, moduleKey, issueId } = params
+  const { programKey, moduleKey } = params
+  const issueId = decodeIssueId(params.issueId)
   const currentUserLogin = session?.user?.login
 
   // A single role-aware query serves admins, mentors, and mentees. The backend

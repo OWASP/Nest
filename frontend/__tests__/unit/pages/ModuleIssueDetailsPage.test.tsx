@@ -201,7 +201,7 @@ describe('ModuleIssueDetailsPage', () => {
     mockUseParams.mockReturnValue({
       programKey: 'prog1',
       moduleKey: 'mod1',
-      issueId: 'SXNzdWVOb2RlOjEyMw==',
+      issueId: 'SXNzdWVOb2RlOjEyMw%3D%3D',
     })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: mockAssignIssue,
@@ -220,6 +220,51 @@ describe('ModuleIssueDetailsPage', () => {
 
     setupQueryMock()
   })
+
+  it.each([
+    ['SXNzdWVOb2RlOjEyMw%3D%3D', 'SXNzdWVOb2RlOjEyMw=='],
+    ['SXNzdWVOb2RlOjE%3D', 'SXNzdWVOb2RlOjE='],
+    ['SXNzdWVOb2RlOjEy', 'SXNzdWVOb2RlOjEy'],
+    ['SXNzdWVOb2RlOjEyMw==', 'SXNzdWVOb2RlOjEyMw=='],
+  ])('passes the decoded route ID %s to the query and mutation hook', (routeId, issueId) => {
+    mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId: routeId })
+
+    render(<ModuleIssueDetailsPage />)
+
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      GetManagementModuleIssueViewDocument,
+      expect.objectContaining({
+        variables: { programKey: 'prog1', moduleKey: 'mod1', issueId, limit: 4, offset: 0 },
+        skip: false,
+      })
+    )
+    expect(mockUseIssueMutations).toHaveBeenCalledWith({
+      programKey: 'prog1',
+      moduleKey: 'mod1',
+      issueId,
+    })
+  })
+
+  it.each([undefined, '%', '%GG', '%E0%A4%A'])(
+    'skips an invalid encoded route ID %s',
+    (issueId) => {
+      mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1', issueId })
+      setupQueryMock(null)
+
+      render(<ModuleIssueDetailsPage />)
+
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        GetManagementModuleIssueViewDocument,
+        expect.objectContaining({ skip: true })
+      )
+      expect(mockUseIssueMutations).toHaveBeenCalledWith({
+        programKey: 'prog1',
+        moduleKey: 'mod1',
+        issueId: '',
+      })
+      expect(screen.getByText('Issue Not Found')).toBeInTheDocument()
+    }
+  )
 
   it('renders a loading spinner while data is being fetched', () => {
     setupQueryMockLoading()
@@ -1137,7 +1182,7 @@ describe('PR pagination edge cases', () => {
     mockUseParams.mockReturnValue({
       programKey: 'prog1',
       moduleKey: 'mod1',
-      issueId: 'SXNzdWVOb2RlOjEyMw==',
+      issueId: 'SXNzdWVOb2RlOjEyMw%3D%3D',
     })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: jest.fn(),
@@ -1290,7 +1335,7 @@ describe('Mentee issue status badges', () => {
     mockUseParams.mockReturnValue({
       programKey: 'prog1',
       moduleKey: 'mod1',
-      issueId: 'SXNzdWVOb2RlOjEyMw==',
+      issueId: 'SXNzdWVOb2RlOjEyMw%3D%3D',
     })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: jest.fn(),
