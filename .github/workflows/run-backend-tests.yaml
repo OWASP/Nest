@@ -14,6 +14,20 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-26.04-arm
+    services:
+      db:
+        image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+        env:
+          POSTGRES_DB: nest_db_unit
+          POSTGRES_PASSWORD: unit-test
+          POSTGRES_USER: nest_user_unit
+        options: >-
+          --health-cmd "pg_isready -U nest_user_unit -d nest_db_unit"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -24,7 +38,13 @@ jobs:
         uses: ./.github/actions/install-backend-dependencies
 
       - name: Run backend tests
-        run: set -a && source .env.unit-tests && set +a && poetry run pytest tests/unit
+        run: |
+          set -a
+          source .env.unit-tests
+          export DJANGO_DB_HOST=localhost DJANGO_DB_NAME=nest_db_unit
+          export DJANGO_DB_USER=nest_user_unit DJANGO_DB_PORT=5432
+          set +a
+          poetry run pytest tests/unit
         working-directory: backend
 
       - name: Upload coverage artifact

@@ -413,6 +413,14 @@ Generated GraphQL TypeScript types live in `frontend/src/types/__generated__/`. 
 
 Codegen runs inside `nest-frontend` (no host Node/pnpm install). Generated files are written to the bind-mounted `frontend/` tree on the host.
 
+### Backend tests
+
+`make test-backend` runs the backend suite with an isolated PostgreSQL service.
+Tests marked with `pytest.mark.django_db` use migrated test databases managed by
+pytest-django. The local service publishes no host ports and stores its data in
+memory; the Make target removes the service when the test run exits. GitHub Actions
+provides the same PostgreSQL image for its backend test job.
+
 ### Documentation
 
 The documentation uses [Zensical](https://zensical.org/) and is available at
