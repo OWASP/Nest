@@ -76,69 +76,57 @@ class TestResolveMentorsFromLogins:
 class TestValidateModuleDates:
     """Tests for _validate_module_dates."""
 
-    def test_none_started_at(self):
-        """Test raises when started_at is None."""
-        with pytest.raises(MentorshipValidationError, match="Both start and end dates are required"):
-            _validate_module_dates(
+    @pytest.mark.parametrize(
+        ("started_at", "ended_at", "prog_start", "prog_end", "match"),
+        [
+            (
                 None,
                 datetime(2025, 6, 30, tzinfo=UTC),
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2025, 12, 31, tzinfo=UTC),
-            )
-
-    def test_none_ended_at(self):
-        """Test raises when ended_at is None."""
-        with pytest.raises(MentorshipValidationError, match="Both start and end dates are required"):
-            _validate_module_dates(
+                "Both start and end dates are required",
+            ),
+            (
                 datetime(2025, 1, 1, tzinfo=UTC),
                 None,
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2025, 12, 31, tzinfo=UTC),
-            )
-
-    def test_end_before_start(self):
-        """Test raises when end date is before start date."""
-        with pytest.raises(MentorshipValidationError, match="End date must be after start date"):
-            _validate_module_dates(
+                "Both start and end dates are required",
+            ),
+            (
                 datetime(2025, 6, 30, tzinfo=UTC),
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2025, 12, 31, tzinfo=UTC),
-            )
-
-    def test_end_equals_start(self):
-        """Test raises when end date equals start date."""
-        with pytest.raises(MentorshipValidationError, match="End date must be after start date"):
-            _validate_module_dates(
+                "End date must be after start date",
+            ),
+            (
                 datetime(2025, 3, 1, tzinfo=UTC),
                 datetime(2025, 3, 1, tzinfo=UTC),
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2025, 12, 31, tzinfo=UTC),
-            )
-
-    def test_start_before_program_start(self):
-        """Test raises when module start is before program start."""
-        with pytest.raises(
-            MentorshipValidationError, match="Module start date cannot be before program start date"
-        ):
-            _validate_module_dates(
+                "End date must be after start date",
+            ),
+            (
                 datetime(2024, 12, 1, tzinfo=UTC),
                 datetime(2025, 6, 30, tzinfo=UTC),
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2025, 12, 31, tzinfo=UTC),
-            )
-
-    def test_end_after_program_end(self):
-        """Test raises when module end is after program end."""
-        with pytest.raises(
-            MentorshipValidationError, match="Module end date cannot be after program end date"
-        ):
-            _validate_module_dates(
+                "Module start date cannot be before program start date",
+            ),
+            (
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2026, 1, 1, tzinfo=UTC),
                 datetime(2025, 1, 1, tzinfo=UTC),
                 datetime(2025, 12, 31, tzinfo=UTC),
-            )
+                "Module end date cannot be after program end date",
+            ),
+        ],
+    )
+    def test_invalid_dates(self, started_at, ended_at, prog_start, prog_end, match):
+        """Test raises MentorshipValidationError for invalid date inputs."""
+        with pytest.raises(MentorshipValidationError, match=match):
+            _validate_module_dates(started_at, ended_at, prog_start, prog_end)
 
     def test_valid_dates(self):
         """Test valid dates return normalized values."""
@@ -694,6 +682,17 @@ class TestModuleMutationSetTaskDeadline:
         assert result == mock_mod
         mock_task.objects.bulk_update.assert_called_once()
 
+    def _call_set_deadline(
+        self, info, module_key="mod-1", program_key="prog-1", deadline_at=None
+    ):
+        return ModuleMutation().set_task_deadline(
+            info,
+            module_key=module_key,
+            program_key=program_key,
+            issue_number=1,
+            deadline_at=deadline_at or datetime(2025, 12, 1, tzinfo=UTC),
+        )
+
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_set_deadline_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module not found."""
@@ -703,15 +702,8 @@ class TestModuleMutationSetTaskDeadline:
             None
         )
 
-        mutation = ModuleMutation()
         with pytest.raises(MentorshipNotFoundError, match="Module not found"):
-            mutation.set_task_deadline(
-                info,
-                module_key="bad",
-                program_key="bad",
-                issue_number=1,
-                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
-            )
+            self._call_set_deadline(info, module_key="bad", program_key="bad")
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -727,17 +719,10 @@ class TestModuleMutationSetTaskDeadline:
         mock_mod.has_mentee.return_value = False
         mock_mod.program.has_admin.return_value = False
 
-        mutation = ModuleMutation()
         with pytest.raises(
             MentorshipPermissionDeniedError, match="Only mentors of this module can set"
         ):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
-            )
+            self._call_set_deadline(info)
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -754,15 +739,8 @@ class TestModuleMutationSetTaskDeadline:
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
 
-        mutation = ModuleMutation()
         with pytest.raises(MentorshipNotFoundError, match="Issue not found in this module"):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
-            )
+            self._call_set_deadline(info)
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -782,17 +760,10 @@ class TestModuleMutationSetTaskDeadline:
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
-        mutation = ModuleMutation()
         with pytest.raises(
             MentorshipValidationError, match="Cannot set deadline: issue has no assignees"
         ):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
-            )
+            self._call_set_deadline(info)
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
@@ -893,11 +864,20 @@ class TestModuleMutationSetTaskDeadline:
         assert result == mock_mod
         mock_task.objects.bulk_update.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "deadline",
+        [
+            datetime(2024, 12, 31, tzinfo=UTC),
+            datetime(2026, 1, 1, tzinfo=UTC),
+        ],
+    )
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_before_module_start(self, mock_tz, mock_module, mock_mentor):
-        """Test ValidationError when deadline is before the module's start date."""
+    def test_set_deadline_outside_module_dates(
+        self, mock_tz, mock_module, mock_mentor, deadline
+    ):
+        """Test MentorshipValidationError when deadline is outside the module's start and end dates."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
@@ -914,54 +894,11 @@ class TestModuleMutationSetTaskDeadline:
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
-        early_deadline = datetime(2024, 12, 31, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
         mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
 
-        mutation = ModuleMutation()
         with pytest.raises(MentorshipValidationError, match="within the module's start and end dates"):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=early_deadline,
-            )
-
-    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    @patch("apps.mentorship.api.internal.mutations.module.Module")
-    @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_after_module_end(self, mock_tz, mock_module, mock_mentor):
-        """Test MentorshipValidationError when deadline is after the module's end date."""
-        user = MagicMock()
-        info = self._make_info(user)
-        mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_mod.started_at = datetime(2025, 1, 1, tzinfo=UTC)
-        mock_mod.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
-        )
-        mock_mentor.objects.filter.return_value.exists.return_value = True
-
-        mock_issue = MagicMock()
-        mock_issue.assignees.all.return_value.exists.return_value = True
-        issue_qs = mock_mod.issues.select_related.return_value
-        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
-
-        late_deadline = datetime(2026, 1, 1, tzinfo=UTC)
-        mock_tz.is_naive.return_value = False
-        mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
-
-        mutation = ModuleMutation()
-        with pytest.raises(MentorshipValidationError, match="within the module's start and end dates"):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=late_deadline,
-            )
+            self._call_set_deadline(info, deadline_at=deadline)
 
 
 class TestModuleMutationClearTaskDeadline:
@@ -1117,6 +1054,11 @@ class TestModuleMutationClearTaskDeadline:
 
         assert result == mock_mod
 
+    def _call_clear_deadline(self, info, module_key="mod-1", program_key="prog-1"):
+        return ModuleMutation().clear_task_deadline(
+            info, module_key=module_key, program_key=program_key, issue_number=1
+        )
+
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_clear_deadline_module_not_found(self, mock_module):
         """Test MentorshipNotFoundError when module not found."""
@@ -1126,9 +1068,8 @@ class TestModuleMutationClearTaskDeadline:
             None
         )
 
-        mutation = ModuleMutation()
         with pytest.raises(MentorshipNotFoundError, match="Module not found"):
-            mutation.clear_task_deadline(info, module_key="bad", program_key="bad", issue_number=1)
+            self._call_clear_deadline(info, module_key="bad", program_key="bad")
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -1142,13 +1083,10 @@ class TestModuleMutationClearTaskDeadline:
         )
         mock_mod.has_mentor.return_value = False
 
-        mutation = ModuleMutation()
         with pytest.raises(
             MentorshipPermissionDeniedError, match="Only mentors of this module can clear"
         ):
-            mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_number=1
-            )
+            self._call_clear_deadline(info)
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -1165,11 +1103,8 @@ class TestModuleMutationClearTaskDeadline:
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
 
-        mutation = ModuleMutation()
         with pytest.raises(MentorshipNotFoundError, match="Issue not found in this module"):
-            mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_number=1
-            )
+            self._call_clear_deadline(info)
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -1189,13 +1124,10 @@ class TestModuleMutationClearTaskDeadline:
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
-        mutation = ModuleMutation()
         with pytest.raises(
             MentorshipValidationError, match="Cannot clear deadline: issue has no assignees"
         ):
-            mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_number=1
-            )
+            self._call_clear_deadline(info)
 
 
 class TestModuleMutationUpdateModule:
