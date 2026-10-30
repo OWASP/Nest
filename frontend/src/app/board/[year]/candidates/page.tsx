@@ -24,6 +24,11 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 dayjs.extend(relativeTime)
 
+const BOARD_ELECTIONS_URL = 'https://owasp.org/board/elections'
+
+const getBoardCandidatePageUrl = (year: string | number, slug: string): string =>
+  `${BOARD_ELECTIONS_URL}/${year}/${slug}`
+
 type Candidate = {
   id: string
   memberName: string
@@ -286,7 +291,7 @@ const CandidateCard = ({ candidate, isOwnProfile, year }: CandidateCardProps) =>
     } else {
       // Convert name to slug format.
       const nameSlug = candidate.memberName.toLowerCase().replaceAll(/\s+/g, '_')
-      const candidateUrl = `https://owasp.org/www-board-candidates/${year}/${nameSlug}.html`
+      const candidateUrl = getBoardCandidatePageUrl(year, nameSlug)
       window.open(candidateUrl, '_blank', 'noopener,noreferrer')
     }
   }
@@ -737,7 +742,7 @@ const BoardCandidatesPage = () => {
           </Link>{' '}
           and the{' '}
           <Link
-            href="https://owasp.org/www-board-candidates/"
+            href={BOARD_ELECTIONS_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline dark:text-blue-400"

@@ -34,15 +34,6 @@ const STATUS_PRIORITY: Partial<Record<ClaimStatusEnum, number>> = {
 
 const VISIBLE_STATUSES = new Set(Object.keys(STATUS_PRIORITY) as ClaimStatusEnum[])
 
-const resolveMediaSrc = <T,>(src: T, year: string): T | string => {
-  if (typeof src !== 'string' || !src) return src
-  try {
-    return new URL(src, `https://owasp.org/www-board-candidates/${year}/`).href
-  } catch {
-    return src
-  }
-}
-
 type WrapResult = { wrapped: string; claimsById: Map<string, ProfileClaim> }
 
 const wrapClaims = (markdown: string, claims: ProfileClaim[]): WrapResult => {
@@ -79,17 +70,23 @@ const wrapClaims = (markdown: string, claims: ProfileClaim[]): WrapResult => {
   return { wrapped, claimsById }
 }
 
-type MediaImgProps = ImgHTMLAttributes<HTMLImageElement> & { year: string }
+const BOARD_CANDIDATES_ASSET_BASE_URL =
+  'https://raw.githubusercontent.com/OWASP/www-board-candidates/master'
 
-const MediaImg = ({ year, ...props }: MediaImgProps) => (
+const getBoardCandidateAssetUrl = <T,>(src: T): T | string => {
+  if (typeof src !== 'string' || !src) return src
+  if (/^[a-z][a-z0-9+.-]*:/i.test(src) || src.startsWith('//')) return src
+  const path = src.replace(/^(\.\.?\/)+/, '').replace(/^\/?www-board-candidates\//, '')
+  return `${BOARD_CANDIDATES_ASSET_BASE_URL}/${path}`
+}
+
+const MediaImg = (props: ImgHTMLAttributes<HTMLImageElement>) => (
   // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text -- candidate markdown may reference arbitrary hosts and set alt itself
-  <img {...props} src={resolveMediaSrc(props.src, year)} />
+  <img {...props} src={getBoardCandidateAssetUrl(props.src)} />
 )
 
-type MediaSourceProps = SourceHTMLAttributes<HTMLSourceElement> & { year: string }
-
-const MediaSource = ({ year, ...props }: MediaSourceProps) => (
-  <source {...props} src={resolveMediaSrc(props.src, year)} />
+const MediaSource = (props: SourceHTMLAttributes<HTMLSourceElement>) => (
+  <source {...props} src={getBoardCandidateAssetUrl(props.src)} />
 )
 
 const AnnotatedProfile = ({
@@ -116,8 +113,8 @@ const AnnotatedProfile = ({
           component: ClaimHighlight,
           props: { year, login, isCandidate, claimsById },
         },
-        img: { component: MediaImg, props: { year } },
-        source: { component: MediaSource, props: { year } },
+        img: { component: MediaImg },
+        source: { component: MediaSource },
       },
     }),
     [year, login, isCandidate, claimsById]

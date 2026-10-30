@@ -311,7 +311,7 @@ describe('AnnotatedProfile', () => {
     expect(container.textContent).not.toContain('​')
   })
 
-  it('rewrites relative image URLs against the owasp.org base', () => {
+  it('rewrites relative image URLs against the board candidates asset base', () => {
     render(
       <AnnotatedProfile
         {...baseProps}
@@ -320,7 +320,20 @@ describe('AnnotatedProfile', () => {
     )
     const img = document.querySelector('img')
     expect(img?.getAttribute('src')).toBe(
-      'https://owasp.org/www-board-candidates/assets/images/alice/photo.jpg'
+      'https://raw.githubusercontent.com/OWASP/www-board-candidates/master/assets/images/alice/photo.jpg'
+    )
+  })
+
+  it('rewrites root-relative image URLs against the board candidates asset base', () => {
+    render(
+      <AnnotatedProfile
+        {...baseProps}
+        rawMarkdown={'<img src="/www-board-candidates/assets/images/alice/photo.jpg" alt="alice">'}
+      />
+    )
+    const img = document.querySelector('img')
+    expect(img?.getAttribute('src')).toBe(
+      'https://raw.githubusercontent.com/OWASP/www-board-candidates/master/assets/images/alice/photo.jpg'
     )
   })
 
@@ -333,7 +346,7 @@ describe('AnnotatedProfile', () => {
     )
     const source = document.querySelector('source')
     expect(source?.getAttribute('src')).toBe(
-      'https://owasp.org/www-board-candidates/assets/videos/talk.mp4'
+      'https://raw.githubusercontent.com/OWASP/www-board-candidates/master/assets/videos/talk.mp4'
     )
   })
 
@@ -345,6 +358,12 @@ describe('AnnotatedProfile', () => {
       />
     )
     expect(document.querySelector('img')?.getAttribute('src')).toBe('https://example.com/pic.jpg')
+  })
+
+  it('leaves non-http scheme image URLs unchanged', () => {
+    const dataUri = 'data:image/png;base64,iVBORw0KGgo='
+    render(<AnnotatedProfile {...baseProps} rawMarkdown={`<img src="${dataUri}" alt="x">`} />)
+    expect(document.querySelector('img')?.getAttribute('src')).toBe(dataUri)
   })
 
   it('does not render the Create claim button when there is no selection', () => {
