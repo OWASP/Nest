@@ -119,6 +119,7 @@ defectdojo
 demojize
 dismissable
 dkr
+docksec
 dsn
 dvo
 eddsa
@@ -164,6 +165,7 @@ libgobject
 libharfbuzz
 libpango
 libpangoft
+librsvg
 libx
 lighthouseci
 lighthouserc
@@ -183,7 +185,6 @@ mentees
 mern
 millify
 misconfig
-mkdocstrings
 mkv
 mpim
 navlink
@@ -224,6 +225,7 @@ relativedelta
 replicationgroup
 repositorycontributor
 requirepass
+rhysd
 rqworker
 rsc
 rudransh
@@ -270,5 +272,7 @@ xsser
 xzf
 zapconfig
 zaproxy
+zensical
+zizmor
 zsc
 éàëîôû

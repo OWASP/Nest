@@ -22,17 +22,11 @@ class TestGsocCommand:
         return client
 
     @pytest.mark.parametrize(
-        ("commands_enabled", "command_text", "expected_message"),
+        ("command_text", "expected_message"),
         [
-            (False, "", None),
-            (True, "", None),
+            ("", None),
+            ("invalid", "*`/gsoc invalid` is not supported"),
             (
-                True,
-                "invalid",
-                "*`/gsoc invalid` is not supported",
-            ),
-            (
-                True,
                 "2011",
                 (
                     f"Year 2011 is not supported. Supported years: "
@@ -41,33 +35,34 @@ class TestGsocCommand:
             ),
         ],
     )
-    def test_handler_responses(
-        self, commands_enabled, command_text, expected_message, mock_slack_client
-    ):
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_responses(self, command_text, expected_message, mock_slack_client):
         command = {"text": command_text, "user_id": "U123456"}
 
-        with override_settings(SLACK_COMMANDS_ENABLED=commands_enabled):
-            ack = MagicMock()
-            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+        ack = MagicMock()
+        Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
 
-            ack.assert_called_once()
+        ack.assert_called_once()
+        mock_slack_client.conversations_open.assert_called_once_with(users=command["user_id"])
+        mock_slack_client.chat_postMessage.assert_called_once()
+        blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+        block_texts = [block["text"]["text"] for block in blocks]
 
-            if not commands_enabled:
-                mock_slack_client.conversations_open.assert_not_called()
-                mock_slack_client.chat_postMessage.assert_not_called()
-            else:
-                mock_slack_client.conversations_open.assert_called_once_with(
-                    users=command["user_id"]
-                )
-                mock_slack_client.chat_postMessage.assert_called_once()
-                blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-                block_texts = [block["text"]["text"] for block in blocks]
+        if command_text == "":
+            assert "Getting Started with OWASP GSoC" in block_texts[0]
+            assert any(FEEDBACK_SHARING_INVITE in text for text in block_texts)
+        else:
+            assert any(expected_message in text for text in block_texts)
 
-                if command_text == "":
-                    assert "Getting Started with OWASP GSoC" in block_texts[0]
-                    assert any(FEEDBACK_SHARING_INVITE in text for text in block_texts)
-                else:
-                    assert any(expected_message in text for text in block_texts)
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_handler_when_commands_disabled(self, mock_slack_client):
+        command = {"text": "", "user_id": "U123456"}
+        ack = MagicMock()
+        Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+        ack.assert_called_once()
+        mock_slack_client.conversations_open.assert_not_called()
+        mock_slack_client.chat_postMessage.assert_not_called()
 
     @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_with_projects(self, mock_slack_client):

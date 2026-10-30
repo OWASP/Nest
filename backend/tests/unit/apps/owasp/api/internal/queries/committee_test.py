@@ -39,20 +39,17 @@ class TestCommitteeResolution:
         """Test if a committee is returned when found."""
         mock_committee = Mock(spec=Committee)
 
-        with patch("apps.owasp.models.committee.Committee.objects.get") as mock_get:
+        with patch("apps.owasp.models.committee.Committee.get_by_key") as mock_get:
             mock_get.return_value = mock_committee
 
             result = CommitteeQuery().committee(key="test-committee")
 
             assert result == mock_committee
-            mock_get.assert_called_once_with(key="www-committee-test-committee")
+            mock_get.assert_called_once_with("test-committee")
 
     def test_committee_not_found(self):
         """Test if None is returned when the committee is not found."""
-        with patch("apps.owasp.models.committee.Committee.objects.get") as mock_get:
-            mock_get.side_effect = Committee.DoesNotExist
-
+        with patch("apps.owasp.models.committee.Committee.get_by_key", return_value=None):
             result = CommitteeQuery().committee(key="non-existent")
 
             assert result is None
-            mock_get.assert_called_once_with(key="www-committee-non-existent")

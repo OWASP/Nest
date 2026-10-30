@@ -32,7 +32,7 @@ services:
       '
     container_name: nest-cache
     env_file: ../../backend/.env
-    image: redis:8.10.1-alpine3.23@sha256:bd999b5cfee25fb24b8320a31fddbd69f462df44c8138c66e369582937beebc0
+    image: redis:8.10.1-alpine3.23@sha256:ef216d85ec44f4fdf7c0e6df2d1757a4734ed32fbb278cabd3181b5a27353b79
     healthcheck:
       interval: 5s
       retries: 5
@@ -68,14 +68,13 @@ services:
     ports:
       - 8001:8001
     volumes:
-      - ../../.mkdocs.yaml:/home/owasp/.mkdocs.yaml:ro
       - ../../backend:/home/owasp/backend:ro
       - ../../CODE_OF_CONDUCT.md:/home/owasp/CODE_OF_CONDUCT.md:ro
       - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
       - ../../docs:/home/owasp/docs
       - ../../frontend:/home/owasp/frontend:ro
       - ../../README.md:/home/owasp/README.md:ro
-      - docs-venv:/home/owasp/.venv
+      - ../../.zensical.toml:/home/owasp/.zensical.toml:ro
 
   frontend:
     container_name: nest-frontend
@@ -128,6 +127,5 @@ volumes:
   backend-venv:
   cache-data:
   db-data:
-  docs-venv:
   frontend-next:
   frontend-node-modules:

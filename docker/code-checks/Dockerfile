@@ -1,6 +1,6 @@
 # Keep hashicorp/terraform digest in sync with docker/infrastructure/Dockerfile.tests.
-FROM hashicorp/terraform:1.16.3@sha256:c9a9d991c113f3bda5269de1506983d45ce1409dfe702df433acf10a5ea9f6bc AS terraform
-FROM ghcr.io/astral-sh/uv:0.12.17@sha256:10787c682e4184e4f290de1171fd4703dc63de99221f10fe1c99002ce7fa9acc AS uv
+FROM hashicorp/terraform:1.16.4@sha256:985cdc6c1d9b0a65b83377f666efd2f740b47f02ac55be1ced3d18f7d3b0e829 AS terraform
+FROM ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff AS uv
 FROM ghcr.io/terraform-linters/tflint:v0.64.0@sha256:1c595f42d794c32c45a6ea8b58655fd66433d4ca3b1bc631c574a48d120bd19f AS tflint
 FROM node:24.21-alpine3.24@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS node
 
@@ -90,7 +90,7 @@ COPY --chmod=444 tools/requirements/pre-commit.txt /tmp/pre-commit.txt
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=cache,target=/root/.cache/pip \
     uv pip install --python /opt/pre-commit --require-hashes --requirement /tmp/pre-commit.txt && \
-    /opt/dependency-audit/bin/pip install --require-hashes --requirement /tmp/build.txt && \
+    /opt/dependency-audit/bin/pip install --only-binary :all: --require-hashes --requirement /tmp/build.txt && \
     rm -f /tmp/pre-commit.txt /tmp/build.txt /usr/local/bin/uv
 
 COPY --chmod=555 docker/code-checks/entrypoint.sh /entrypoint.sh
