@@ -76,7 +76,7 @@ minimumReleaseAgeExclude:
   - postcss@8.5.23
   - protobufjs@7.6.4
   - proxy-addr@2.0.8
-  - qs@6.16.0
+  - qs@6.16.1
   - react-is@19.2.8
   - rxjs@7.8.2
   - sharp@0.35.5
@@ -91,7 +91,7 @@ minimumReleaseAgeExclude:
   - ws@8.21.0
 
 overrides:
-  '@graphql-tools/executor-legacy-ws': 1.1.35
+  '@graphql-tools/executor-legacy-ws': 1.1.36
   # CVE-2026-104852 is fixed in 12.0.1. CVE-2026-114604 is fixed in 12.0.2;
   # 12.0.3 hardens the same path-key check.
   '@graphql-tools/utils': 12.0.3
@@ -120,7 +120,7 @@ overrides:
   protobufjs: 7.6.4
   proxy-addr: 2.0.8
   proxy-agent: 8.0.2
-  qs: 6.16.0
+  qs: 6.16.1
   rxjs: 7.8.2
   serialize-javascript: 7.0.5
   # GHSA-wq5f-xc86-pv6w: librsvg in the 0.35.4 prebuilds, fixed in 0.35.5.
