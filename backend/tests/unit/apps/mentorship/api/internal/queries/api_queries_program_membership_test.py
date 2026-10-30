@@ -112,6 +112,24 @@ class TestMyProgramsMembership:
         invited_admin.admin.refresh_from_db()
         assert invited_admin.admin.nest_user_id == (invited_admin.user.pk if linked else None)
 
+    @pytest.mark.parametrize(
+        ("module_role", "expected_role"),
+        [("mentor", "mentor"), ("mentee", "mentee"), ("both", "mentor")],
+    )
+    def test_module_membership_without_admin(self, django_user_model, module_role, expected_role):
+        """GitHub-only module members see their program with the highest module role."""
+        github_user = _create_github_user("module-only-user")
+        user = _create_nest_user(django_user_model, "module-only-user", github_user)
+        program = _create_program("module-only-program")
+        _create_program("unrelated-program")
+        _add_module_roles(program, github_user, module_role)
+
+        result = ProgramQuery().my_programs(_request_info(user))
+
+        assert [(item.pk, item.user_role) for item in result.programs] == [
+            (program.pk, expected_role)
+        ]
+
     def test_unrelated_user_has_no_membership(self, invited_admin, django_user_model):
         """An unrelated GitHub identity cannot discover another admin's program."""
         github_user = _create_github_user("unrelated-user")

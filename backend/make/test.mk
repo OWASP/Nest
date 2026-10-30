@@ -12,8 +12,7 @@ test-backend-fuzz: ## Run REST API and GraphQL fuzz tests
 # Implementation targets.
 
 BACKEND_TEST_WORKERS := $(shell echo $$(( ($(shell getconf _NPROCESSORS_ONLN) + 1) / 2 )))
-BACKEND_TEST_PROJECT ?= nest-backend-test
-BACKEND_TEST_COMPOSE = docker compose --project-name $(BACKEND_TEST_PROJECT) -f docker-compose/backend-test/compose.yaml
+export BACKEND_TEST_PROJECT
 FUZZ_COMPOSE = docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml
 
 backend-test:
@@ -28,8 +27,14 @@ backend-test-unit:
 		'-t=nest-test-backend'
 	)
 	DOCKER_BUILDKIT=1 docker build "$${args[@]}" 1>/dev/null
-	trap '$(BACKEND_TEST_COMPOSE) down --volumes --remove-orphans' EXIT
-	$(BACKEND_TEST_COMPOSE) up --detach --wait db
+	backend_test_project="$${BACKEND_TEST_PROJECT:-nest-backend-test-$$$$-$${RANDOM}-$${RANDOM}}"
+	backend_test_compose=(
+		docker compose
+		'--project-name' "$${backend_test_project}"
+		'-f=docker-compose/backend-test/compose.yaml'
+	)
+	trap '"$${backend_test_compose[@]}" down --volumes --remove-orphans' EXIT
+	"$${backend_test_compose[@]}" up --detach --wait db
 	args=(
 		'-e=DJANGO_SETTINGS_MODULE=settings.test'
 		'-e=PYTEST_XDIST_AUTO_NUM_WORKERS=$(BACKEND_TEST_WORKERS)'
@@ -38,7 +43,7 @@ backend-test-unit:
 		'-e=DJANGO_DB_NAME=nest_db_unit'
 		'-e=DJANGO_DB_USER=nest_user_unit'
 		'-e=DJANGO_DB_PORT=5432'
-		'--network=$(BACKEND_TEST_PROJECT)_default'
+		"--network=$${backend_test_project}_default"
 		'--rm'
 		nest-test-backend
 		pytest

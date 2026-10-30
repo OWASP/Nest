@@ -418,8 +418,8 @@ Codegen runs inside `nest-frontend` (no host Node/pnpm install). Generated files
 `make test-backend` runs the backend suite with an isolated PostgreSQL service.
 Tests marked with `pytest.mark.django_db` use migrated test databases managed by
 pytest-django. The local service publishes no host ports and stores its data in
-memory; the Make target removes the service when the test run exits. GitHub Actions
-provides the same PostgreSQL image for its backend test job.
+memory. Each local run uses a unique Compose project and removes it when the tests
+exit. GitHub Actions provides the same PostgreSQL image for its backend test job.
 
 ### Documentation
 
