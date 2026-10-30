@@ -1447,35 +1447,31 @@ class TestModuleMutationDeleteModule:
         mock_mod.delete.assert_called_once()
         assert "beginner" in mock_mod.program.experience_levels
 
+    @pytest.mark.parametrize(
+        ("is_missing", "expected_err"),
+        [
+            (True, MentorshipNotFoundError),
+            (False, MentorshipPermissionDeniedError),
+        ],
+    )
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_delete_module_not_found(self, mock_module):
-        """Test MentorshipNotFoundError when module is not found."""
+    def test_delete_module_errors(self, mock_module, is_missing, expected_err):
+        """Test error conditions for delete_module."""
         user = MagicMock()
         info = self._make_info(user)
-
-        mock_module.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_module.objects.select_related.return_value.get.side_effect = (
-            mock_module.DoesNotExist
-        )
-
-        mutation = ModuleMutation()
-        with pytest.raises(MentorshipNotFoundError):
-            mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
-
-    @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_delete_module_not_admin(self, mock_module):
-        """Test MentorshipPermissionDeniedError when user is not a program admin."""
-        user = MagicMock()
-        info = self._make_info(user)
-
-        mock_mod = MagicMock()
-        mock_mod.program.has_admin.return_value = False
-
-        mock_module.objects.select_related.return_value.get.return_value = mock_mod
         mock_module.DoesNotExist = type("DoesNotExist", (Exception,), {})
 
+        if is_missing:
+            mock_module.objects.select_related.return_value.get.side_effect = (
+                mock_module.DoesNotExist
+            )
+        else:
+            mock_mod = MagicMock()
+            mock_mod.program.has_admin.return_value = False
+            mock_module.objects.select_related.return_value.get.return_value = mock_mod
+
         mutation = ModuleMutation()
-        with pytest.raises(MentorshipPermissionDeniedError):
+        with pytest.raises(expected_err):
             mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
 
 
@@ -1533,33 +1529,30 @@ class TestModuleMutationReorderModules:
         assert mod_c.order == 2
         mock_module.objects.bulk_update.assert_called_once()
 
+    @pytest.mark.parametrize(
+        ("is_missing", "expected_err"),
+        [
+            (False, MentorshipPermissionDeniedError),
+            (True, MentorshipNotFoundError),
+        ],
+    )
     @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_reorder_modules_not_admin(self, mock_program):
-        """Test MentorshipPermissionDeniedError when user is not a program admin."""
-        user = MagicMock()
-        info = self._make_info(user)
-        input_data = self._make_input_data()
-
-        mock_prog = MagicMock()
-        mock_program.objects.get.return_value = mock_prog
-        mock_prog.has_admin.return_value = False
-
-        mutation = ModuleMutation()
-        with pytest.raises(MentorshipPermissionDeniedError):
-            mutation.reorder_modules(info, input_data)
-
-    @patch("apps.mentorship.api.internal.mutations.module.Program")
-    def test_reorder_modules_program_not_found(self, mock_program):
-        """Test MentorshipNotFoundError when program not found."""
+    def test_reorder_modules_errors(self, mock_program, is_missing, expected_err):
+        """Test MentorshipPermissionDeniedError and MentorshipNotFoundError for reorder_modules."""
         user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data()
 
         mock_program.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_program.objects.get.side_effect = mock_program.DoesNotExist
+        if is_missing:
+            mock_program.objects.get.side_effect = mock_program.DoesNotExist
+        else:
+            mock_prog = MagicMock()
+            mock_program.objects.get.return_value = mock_prog
+            mock_prog.has_admin.return_value = False
 
         mutation = ModuleMutation()
-        with pytest.raises(MentorshipNotFoundError):
+        with pytest.raises(expected_err):
             mutation.reorder_modules(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Program")
@@ -1608,6 +1601,15 @@ class TestModuleMutationMenteeDeadline:
         info.context.request.user = user
         return info
 
+    def _call_set_task_deadline(self, info, deadline_at=None):
+        return ModuleMutation().set_task_deadline(
+            info,
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_number=1,
+            deadline_at=deadline_at or datetime(2025, 12, 1, tzinfo=UTC),
+        )
+
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_mentee_blocked_when_setting_disabled(self, mock_module):
         """Mentee cannot set deadline when mentee_can_manage_deadlines is False."""
@@ -1622,18 +1624,10 @@ class TestModuleMutationMenteeDeadline:
             mock_mod
         )
 
-        mutation = ModuleMutation()
-        deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
         with pytest.raises(
             MentorshipPermissionDeniedError, match="Only mentors of this module can set"
         ):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=deadline_at,
-            )
+            self._call_set_task_deadline(info)
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -1667,18 +1661,10 @@ class TestModuleMutationMenteeDeadline:
 
         mock_tz.is_naive.return_value = False
 
-        mutation = ModuleMutation()
-        deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
         with pytest.raises(
             MentorshipPermissionDeniedError, match="You can only set deadlines"
         ):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=deadline_at,
-            )
+            self._call_set_task_deadline(info)
 
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -1716,13 +1702,6 @@ class TestModuleMutationMenteeDeadline:
         mock_task_instance = MagicMock()
         mock_task.objects.get_or_create.return_value = (mock_task_instance, True)
 
-        mutation = ModuleMutation()
-        result = mutation.set_task_deadline(
-            info,
-            module_key="mod-1",
-            program_key="prog-1",
-            issue_number=1,
-            deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
-        )
+        result = self._call_set_task_deadline(info)
         assert result is not None
         mock_task.objects.bulk_update.assert_called_once()
