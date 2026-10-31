@@ -26,7 +26,7 @@ def get_embedder() -> Embedder:
 
     if llm_provider == "bedrock":
         credential = {"openai": "OPEN_AI_SECRET_KEY", "google": "GOOGLE_API_KEY"}.get(provider)
-        if credential and not getattr(settings, credential):
+        if credential and getattr(settings, credential) in (None, "", "None"):
             msg = f"{credential} is required for the {provider} embedding provider"
             raise ValueError(msg)
 

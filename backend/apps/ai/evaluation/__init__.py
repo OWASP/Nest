@@ -15,6 +15,7 @@ from apps.ai.evaluation.datasets.schema import (
 from apps.ai.evaluation.evaluators import (
     BaseEvaluator,
     IntentEvaluator,
+    ResponseEvaluator,
     ToolEvaluator,
 )
 from apps.ai.evaluation.telemetry import (
@@ -31,6 +32,7 @@ __all__ = [
     "EvalCategory",
     "EvaluatorScore",
     "IntentEvaluator",
+    "ResponseEvaluator",
     "TelemetryTracker",
     "ToolEvaluator",
     "calculate_token_cost",

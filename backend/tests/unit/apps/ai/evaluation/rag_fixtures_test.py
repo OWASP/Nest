@@ -30,3 +30,15 @@ def test_mixed_fixture_places_unrelated_document_before_support(case_id):
 
     assert mixed[:1] == get_rag_fixture(case_id, "irrelevant")
     assert mixed[1:] == get_rag_fixture(case_id, "relevant")
+
+
+@pytest.mark.parametrize(
+    ("case_id", "scenario"),
+    [
+        ("unknown-case", "relevant"),
+        ("rag-002", "unknown-scenario"),
+    ],
+)
+def test_unknown_fixture_is_rejected(case_id, scenario):
+    with pytest.raises(KeyError):
+        get_rag_fixture(case_id, scenario)

@@ -2,8 +2,7 @@
 
 import pytest
 
-from apps.ai.evaluation.datasets.schema import AgentOutput, EvalCase, EvalCategory
-from apps.ai.evaluation.evaluators.response_evaluator import ResponseEvaluator
+from apps.ai.evaluation import AgentOutput, EvalCase, EvalCategory, ResponseEvaluator
 
 
 def evaluate_response(response, keywords):
