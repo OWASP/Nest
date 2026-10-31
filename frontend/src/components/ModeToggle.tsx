@@ -4,6 +4,9 @@ import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
 import { MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md'
 
+/**
+ * Button that switches between light and dark mode.
+ */
 export default function ModeToggle() {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
