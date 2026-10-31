@@ -185,7 +185,6 @@ mentees
 mern
 millify
 misconfig
-mkdocstrings
 mkv
 mpim
 navlink
@@ -273,6 +272,7 @@ xsser
 xzf
 zapconfig
 zaproxy
+zensical
 zizmor
 zsc
 éàëîôû
