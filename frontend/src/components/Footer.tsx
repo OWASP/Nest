@@ -1,5 +1,6 @@
 'use client'
 import { Button } from '@heroui/button'
+import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useCallback } from 'react'
@@ -77,16 +78,23 @@ export default function Footer() {
           {footerIcons.map((social) => {
             const SocialIcon = social.icon
             return (
-              <Link
+              <Tooltip
                 key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`OWASP Nest ${social.label}`}
-                className="rounded-full p-2 text-slate-700 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                content={`Follow us on ${social.label}`}
+                placement="top"
+                showArrow
               >
-                <SocialIcon className="h-4 w-4" />
-              </Link>
+                <Link
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`Follow us on ${social.label}`}
+                  aria-label={`Follow OWASP Nest on ${social.label}`}
+                  className="rounded-full p-2 text-slate-700 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                >
+                  <SocialIcon className="h-4 w-4" />
+                </Link>
+              </Tooltip>
             )
           })}
         </div>
