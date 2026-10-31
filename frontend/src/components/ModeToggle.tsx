@@ -26,7 +26,7 @@ export default function ModeToggle() {
       >
         <Button
           onPress={darkModeHandler}
-          className="focus-visible:ring-ring relative h-10 w-10 transform rounded-full bg-[#87a1bc] transition-all duration-200 hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:ring-1 focus-visible:outline-hidden active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
+          className="focus-visible:ring-ring relative h-10 w-10 max-md:h-11 max-md:w-11 transform rounded-full bg-[#87a1bc] transition-all duration-200 hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:ring-1 focus-visible:outline-hidden active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
           isIconOnly={true}
           aria-label={theme === 'dark' ? 'Enable light mode' : 'Enable dark mode'}
         >
