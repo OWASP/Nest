@@ -70,16 +70,17 @@ module "backend" {
 module "cache" {
   source = "../modules/cache"
 
-  common_tags           = local.common_tags
-  environment           = var.environment
-  kms_key_arn           = module.kms.key_arn
-  project_name          = var.project_name
-  redis_engine_version  = var.redis_engine_version
-  redis_node_type       = var.redis_node_type
-  redis_num_cache_nodes = var.redis_num_cache_nodes
-  redis_port            = var.redis_port
-  security_group_ids    = [module.security.redis_sg_id]
-  subnet_ids            = module.networking.private_subnet_ids
+  common_tags                    = local.common_tags
+  environment                    = var.environment
+  kms_key_arn                    = module.kms.key_arn
+  project_name                   = var.project_name
+  redis_engine_version           = var.redis_engine_version
+  redis_node_type                = var.redis_node_type
+  redis_num_cache_nodes          = var.redis_num_cache_nodes
+  redis_port                     = var.redis_port
+  secret_recovery_window_in_days = var.secret_recovery_window_in_days
+  security_group_ids             = [module.security.redis_sg_id]
+  subnet_ids                     = module.networking.private_subnet_ids
 }
 
 module "database" {
@@ -199,6 +200,21 @@ module "parameters" {
   project_name                  = var.project_name
   redis_password_arn            = module.cache.redis_password_arn
   slack_bot_token_suffix        = var.slack_bot_token_suffix
+}
+
+module "secrets" {
+  source = "../modules/secrets"
+
+  common_tags                    = local.common_tags
+  django_secret_key              = module.parameters.django_secret_key
+  enable_additional_secrets      = var.enable_additional_parameters
+  environment                    = var.environment
+  external_secret_values         = module.parameters.external_secret_values
+  kms_key_arn                    = module.kms.key_arn
+  nextauth_secret                = module.parameters.nextauth_secret
+  project_name                   = var.project_name
+  secret_recovery_window_in_days = var.secret_recovery_window_in_days
+  slack_bot_token_suffix         = var.slack_bot_token_suffix
 }
 
 module "security" {
