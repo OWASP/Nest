@@ -23,7 +23,7 @@ const SUGGESTION_COUNT = 3
 const EMPTY_STATE_EXAMPLES = 'Try searches like "OWASP", "London", "AppSec", "Nest", or "John".'
 
 /**
- * Search button and search modal. Shows a full-width button on desktop and an icon-only button on mobile.
+ * Search button and search modal. Shows a fixed-width button on desktop and an icon-only button on mobile.
  */
 export default function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false)
