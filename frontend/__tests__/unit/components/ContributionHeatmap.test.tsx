@@ -1083,22 +1083,14 @@ describe('ContributionHeatmap', () => {
       }
     )
 
-    it('starts the default variant at its height budget', () => {
-      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
+    it.each([
+      { variant: 'default' as const, height: '195' },
+      { variant: 'medium' as const, height: '172' },
+      { variant: 'compact' as const, height: '150' },
+    ])('starts the $variant variant at its height budget', ({ variant, height }) => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant={variant} />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      expect(chart).toHaveAttribute('data-height', '195')
-    })
-
-    it('starts the medium variant at its height budget', () => {
-      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="medium" />)
-      const chart = screen.getByTestId('mock-heatmap-chart')
-      expect(chart).toHaveAttribute('data-height', '172')
-    })
-
-    it('starts the compact variant at its height budget', () => {
-      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="compact" />)
-      const chart = screen.getByTestId('mock-heatmap-chart')
-      expect(chart).toHaveAttribute('data-height', '150')
+      expect(chart).toHaveAttribute('data-height', height)
     })
 
     it('applies compact-specific container styling when variant is compact', () => {
