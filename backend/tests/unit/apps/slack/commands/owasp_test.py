@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.commands.owasp import Owasp
 
@@ -21,37 +21,36 @@ class TestOwaspHandler:
         return client
 
     @pytest.mark.parametrize(
-        ("commands_enabled", "command_text", "expected_help"),
+        ("command_text", "expected_help"),
         [
-            (True, "", True),
-            (True, "-h", True),
-            (True, "invalid_command", False),
-            (False, "", False),
+            ("", True),
+            ("-h", True),
+            ("invalid_command", False),
         ],
     )
-    def test_owasp_handler(
-        self, mock_client, mock_command, commands_enabled, command_text, expected_help
-    ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_owasp_handler(self, mock_client, mock_command, command_text, expected_help):
         mock_command["text"] = command_text
         Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
-        if commands_enabled:
-            blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-            if expected_help:
-                assert any("chapters" in str(block) for block in blocks)
-                assert any("committees" in str(block) for block in blocks)
-                assert any("projects" in str(block) for block in blocks)
-                assert any("report" in str(block) for block in blocks)
-            elif "invalid_command" in command_text:
-                assert any("is not supported" in str(block) for block in blocks)
-        else:
-            mock_client.chat_postMessage.assert_not_called()
+        blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
+        if expected_help:
+            assert any("chapters" in str(block) for block in blocks)
+            assert any("committees" in str(block) for block in blocks)
+            assert any("projects" in str(block) for block in blocks)
+            assert any("report" in str(block) for block in blocks)
+        elif "invalid_command" in command_text:
+            assert any("is not supported" in str(block) for block in blocks)
+
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_owasp_handler_when_commands_disabled(self, mock_client, mock_command):
+        Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
+        mock_client.chat_postMessage.assert_not_called()
 
     @pytest.mark.parametrize(
         "subcommand", ["chapters", "committees", "contribute", "gsoc", "leaders", "projects"]
     )
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_owasp_subcommands(self, subcommand, mock_client, mock_command):
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = f"{subcommand} test"
         with patch.object(Owasp, "find_command") as mock_find_command:
             mock_find_command.return_value = MagicMock(
@@ -89,9 +88,9 @@ class TestOwaspHandler:
         result = owasp.find_command("nonexistent")
         assert result is None
 
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_owasp_forwards_respond_to_subcommand(self, mock_client, mock_command):
         """Test /owasp report forwards Bolt respond when present."""
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = "report"
         respond = MagicMock()
         subcommand = MagicMock()
@@ -107,9 +106,9 @@ class TestOwaspHandler:
         subcommand.handler.assert_called_once()
         assert subcommand.handler.call_args.kwargs["respond"] is respond
 
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_owasp_does_not_forward_respond_to_other_subcommands(self, mock_client, mock_command):
         """Test /owasp non-report subcommands are called without respond."""
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_command["text"] = "chapters"
         respond = MagicMock()
         subcommand = MagicMock()

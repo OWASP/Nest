@@ -1,7 +1,7 @@
-"""Serve MkDocs with live autoreload for local documentation.
+"""Serve Zensical with live autoreload for local documentation.
 
-Starts ``mkdocs serve`` and watches documentation sources. When a source file
-changes, MkDocs is restarted so the preview stays in sync.
+Starts ``zensical serve`` and watches documentation sources. When a source file
+changes, Zensical is restarted so the preview stays in sync.
 """
 
 from __future__ import annotations
@@ -17,16 +17,17 @@ import time
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")
-logger = logging.getLogger("mkdocs-serve")
+logger = logging.getLogger("zensical-serve")
 
 DEBOUNCE_SECONDS = 1.0
-MKDOCS_COMMAND = (
-    "mkdocs",
+CONFIG_FILE = ".zensical.toml"
+ZENSICAL_COMMAND = (
+    "zensical",
     "serve",
     "-a",
     "0.0.0.0:8001",
     "-f",
-    ".mkdocs.yaml",
+    CONFIG_FILE,
 )
 POLL_SECONDS = 1.0
 ROOT = Path(__file__).resolve().parent.parent
@@ -74,7 +75,7 @@ WATCHED_SUFFIXES = frozenset(
     }
 )
 WATCH_PATHS = (
-    ROOT / ".mkdocs.yaml",
+    ROOT / CONFIG_FILE,
     ROOT / "docs" / "overrides",
     DOCS_SRC,
 )
@@ -83,7 +84,7 @@ WATCH_PATHS = (
 def iter_files(path: Path) -> list[Path]:
     """Return sorted documentation source files under path.
 
-    Explicit file paths (MkDocs config and snippet includes) are always
+    Explicit file paths (Zensical config and snippet includes) are always
     included. Directory walks still filter by ``is_watched_file``.
     """
     if path.is_file():
@@ -104,10 +105,10 @@ def iter_files(path: Path) -> list[Path]:
 
 
 def is_watched_file(path: Path) -> bool:
-    """Return whether path should trigger an MkDocs restart."""
+    """Return whether path should trigger a Zensical restart."""
     if path.name in SKIP_FILE_NAMES:
         return False
-    if path.name == ".mkdocs.yaml":
+    if path.name == CONFIG_FILE:
         return True
     return path.suffix.lower() in WATCHED_SUFFIXES
 
@@ -138,7 +139,7 @@ def snippet_include_paths(docs_src: Path | None = None) -> list[Path]:
 
 
 def watch_paths() -> list[Path]:
-    """Return paths whose changes should restart MkDocs."""
+    """Return paths whose changes should restart Zensical."""
     paths: list[Path] = []
     seen: set[Path] = set()
     for path in (*WATCH_PATHS, *snippet_include_paths()):
@@ -162,13 +163,13 @@ def fingerprint() -> str:
     return digest.hexdigest()
 
 
-def start_mkdocs() -> subprocess.Popen[bytes]:
-    """Start MkDocs in its own process group."""
-    return subprocess.Popen(MKDOCS_COMMAND, start_new_session=True)  # noqa: S603
+def start_zensical() -> subprocess.Popen[bytes]:
+    """Start Zensical in its own process group."""
+    return subprocess.Popen(ZENSICAL_COMMAND, start_new_session=True)  # noqa: S603
 
 
 def stop_process(process: subprocess.Popen[bytes]) -> None:
-    """Stop an MkDocs process group, forcing kill if it does not exit cleanly."""
+    """Stop a Zensical process group, forcing kill if it does not exit cleanly."""
     if process.poll() is not None:
         return
 
@@ -202,18 +203,18 @@ def wait_for_stable_fingerprint(current: str) -> str:
 
 
 def main() -> None:
-    """Run MkDocs and restart it whenever documentation sources change."""
+    """Run Zensical and restart it whenever documentation sources change."""
     os.chdir(ROOT)
     previous = fingerprint()
-    process = start_mkdocs()
-    logger.info("Started MkDocs (pid %s)", process.pid)
+    process = start_zensical()
+    logger.info("Started Zensical (pid %s)", process.pid)
 
     try:
         while True:
             time.sleep(POLL_SECONDS)
 
             if process.poll() is not None:
-                logger.error("MkDocs exited with code %s", process.returncode)
+                logger.error("Zensical exited with code %s", process.returncode)
                 sys.exit(process.returncode or 1)
 
             try:
@@ -230,10 +231,10 @@ def main() -> None:
                 continue
 
             previous = current
-            logger.info("Docs sources changed; restarting MkDocs")
+            logger.info("Docs sources changed; restarting Zensical")
             stop_process(process)
-            process = start_mkdocs()
-            logger.info("Restarted MkDocs (pid %s)", process.pid)
+            process = start_zensical()
+            logger.info("Restarted Zensical (pid %s)", process.pid)
     except KeyboardInterrupt:
         logger.info("Shutting down...")
     finally:
