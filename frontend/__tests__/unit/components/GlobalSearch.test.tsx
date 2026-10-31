@@ -1,8 +1,11 @@
+import { sendGAEvent } from '@next/third-parties/google'
 import { screen, render, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import { EMPTY_STATE_EXAMPLES } from 'utils/searchConstants'
 import GlobalSearch from 'components/GlobalSearch'
 
 jest.mock('next/navigation', () => ({
@@ -59,6 +62,7 @@ const mockWindowOpen = jest.fn()
 
 describe('GlobalSearch', () => {
   beforeEach(() => {
+    localStorage.clear()
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
     jest.clearAllMocks()
@@ -522,5 +526,354 @@ describe('GlobalSearch', () => {
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/projects/project-1')
     })
+  })
+
+  test('navigates between suggestion groups with ArrowDown and ArrowUp', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'chapters') {
+        return Promise.resolve({ hits: [{ key: 'ch1', name: 'Chapter One' }], totalPages: 1 })
+      }
+      if (index === 'projects') {
+        return Promise.resolve({ hits: [{ key: 'pr1', name: 'Project One' }], totalPages: 1 })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter One')).toBeInTheDocument()
+      expect(screen.getByText('Project One')).toBeInTheDocument()
+    })
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+
+    const projectButton = screen.getByText('Project One').closest('li')
+    expect(projectButton).toHaveClass('bg-blue-50')
+
+    fireEvent.keyDown(input, { key: 'ArrowUp' })
+
+    const chapterButton = screen.getByText('Chapter One').closest('li')
+    expect(chapterButton).toHaveClass('bg-blue-50')
+  })
+
+  test('traps focus with Tab and Shift+Tab inside the search overlay', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+
+    input.focus()
+    expect(document.activeElement).toBe(input)
+
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+
+    expect(document.activeElement).toBe(input)
+  })
+
+  test('selects a suggestion with keyboard Enter key on the button', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'test-project', name: 'Test Project' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+
+    const suggestionButton = screen.getByText('Test Project').closest('button')
+    fireEvent.keyDown(suggestionButton!, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(mockRouter.push).toHaveBeenCalledWith('/projects/test-project')
+    })
+  })
+
+  test('persists selected suggestion to localStorage across a remount', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'test-project', name: 'Test Project' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Test Project'))
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+  })
+
+  test('saves organization login to recent searches when selecting a suggestion without a name', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'organizations') {
+        return Promise.resolve({
+          hits: [{ key: 'test-org', login: 'test-org-login' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('test-org-login')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('test-org-login'))
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+      expect(screen.getByText('test-org-login')).toBeInTheDocument()
+    })
+  })
+
+  test('saves typed query to recent searches when pressing Enter without selecting a suggestion', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'japan')
+
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+      expect(screen.getByText('japan')).toBeInTheDocument()
+    })
+  })
+
+  test('saves a query containing spaces to recent searches on Enter', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'OWASP JAPAN')
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+      expect(screen.getByText('OWASP JAPAN')).toBeInTheDocument()
+    })
+  })
+
+  test('does not save an invalid query to recent searches on Enter', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'React.JS')
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText(EMPTY_STATE_EXAMPLES)).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Recent Searches')).not.toBeInTheDocument()
+    expect(screen.queryByText('React.JS')).not.toBeInTheDocument()
+  })
+
+  test('sends a GA event when typing a valid non-empty query', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'security')
+
+    await waitFor(() => {
+      expect(sendGAEvent).toHaveBeenCalledWith(expect.objectContaining({ event: 'globalSearch' }))
+    })
+  })
+
+  test('stops searching state when the query is cleared while typing', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'security')
+
+    await waitFor(() => {
+      expect(fetchAlgoliaData).toHaveBeenCalled()
+    })
+
+    await userEvent.clear(input)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Searching...')).not.toBeInTheDocument()
+    })
+  })
+
+  test('re-runs search when clicking a recent search item', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'japan')
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+    })
+
+    ;(fetchAlgoliaData as jest.Mock).mockClear()
+
+    fireEvent.click(screen.getByText('japan'))
+
+    await waitFor(() => {
+      expect(fetchAlgoliaData).toHaveBeenCalledWith(
+        expect.anything(),
+        'japan',
+        expect.anything(),
+        expect.anything()
+      )
+    })
+  })
+
+  test('shows empty state examples when there is no query and no recent searches', async () => {
+    localStorage.clear()
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText(EMPTY_STATE_EXAMPLES)).toBeInTheDocument()
+    })
+  })
+
+  test('removes a recent search from the list', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+
+    const { unmount } = render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'japan')
+
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    unmount()
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+      expect(screen.getByText('japan')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByLabelText('Remove japan from recent searches'))
+
+    await waitFor(() => {
+      expect(screen.queryByText('japan')).not.toBeInTheDocument()
+    })
+  })
+
+  test('keeps only the most recent 5 searches', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+
+    const queries = ['one', 'two', 'three', 'four', 'five', 'six']
+    for (const q of queries) {
+      await userEvent.clear(input)
+      await userEvent.type(input, q)
+      fireEvent.keyDown(input, { key: 'Enter' })
+    }
+
+    fireEvent.click(screen.getByLabelText('Clear search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent Searches')).toBeInTheDocument()
+    })
+
+    const recentSearchButtons = screen.getAllByRole('button', {
+      name: /^(two|three|four|five|six)$/,
+    })
+    expect(recentSearchButtons).toHaveLength(5)
+
+    const labels = recentSearchButtons.map((btn) => btn.textContent)
+    expect(labels).toEqual(['six', 'five', 'four', 'three', 'two'])
+
+    expect(screen.queryByText('one')).not.toBeInTheDocument()
   })
 })
