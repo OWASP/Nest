@@ -61,7 +61,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   }, [mobileMenuOpen])
 
   return (
-       <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
+    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
       <div
         className="flex h-16 w-full items-center max-lg:justify-between max-lg:pr-2 lg:px-4"
         id="navbar-sticky"
@@ -156,7 +156,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               className="-ml-1 flex h-11 w-11 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? <FaTimes className="h-6.5 w-6.5" /> : <FaBars className="h-7 w-7" />}
+              {mobileMenuOpen ? (
+                <FaTimes className="h-6.5 w-6.5" />
+              ) : (
+                <FaBars className="h-7 w-7" />
+              )}
             </Button>
           </div>
         </div>
