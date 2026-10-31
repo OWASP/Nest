@@ -19,7 +19,7 @@ backend-test:
 	@$(MAKE) backend-test-unit
 
 backend-test-unit:
-	@backend_test_project="$${BACKEND_TEST_PROJECT:-nest-backend-test-$$$$-$${RANDOM}-$${RANDOM}}"
+	@backend_test_project="$${BACKEND_TEST_PROJECT:-nest-backend-test}-$$$$-$${RANDOM}-$${RANDOM}"
 	backend_test_image="nest-test-backend:$${backend_test_project}"
 	trap 'docker image rm "$${backend_test_image}" >/dev/null 2>&1 || true' EXIT
 	args=(

@@ -420,6 +420,8 @@ Tests marked with `pytest.mark.django_db` use migrated test databases managed by
 pytest-django. The local service publishes no host ports and stores its data in
 memory. Each local run uses a unique Compose project and removes it when the tests
 exit. GitHub Actions provides the same PostgreSQL image for its backend test job.
+`BACKEND_TEST_PROJECT` sets an optional project name prefix; every run appends a
+unique suffix, including when a prefix is supplied.
 
 ### Documentation
 
