@@ -5,6 +5,13 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage from 'app/projects/[projectKey]/page'
 
+interface HeatmapChartProps {
+  type?: string
+  series?: Array<{ data: Array<{ date: string; y: number | null }> }>
+}
+
+const mockHeatmapChart = jest.fn<void, [HeatmapChartProps]>()
+
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
@@ -17,7 +24,8 @@ jest.mock('@heroui/toast', () => ({
 jest.mock('react-apexcharts', () => {
   return {
     __esModule: true,
-    default: () => {
+    default: (props: HeatmapChartProps) => {
+      if (props.type === 'heatmap') mockHeatmapChart(props)
       return <div data-testid="mock-apexcharts">Mock ApexChart</div>
     },
   }
@@ -334,31 +342,66 @@ describe('ProjectDetailsPage', () => {
     expect(screen.queryByText(/Channels/)).not.toBeInTheDocument()
   })
 
-  test('renders contribution activity when contributionStats with total > 0 is provided', async () => {
+  test.each([undefined, {}, { '2024-01': 85, invalid: 0 }])(
+    'keeps counters without inventing a calendar when usable dates are missing (%j)',
+    async (contributionData) => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          ...mockProjectDetailsData,
+          project: {
+            ...mockProjectDetailsData.project,
+            contributionStats: {
+              commits: 50,
+              pullRequests: 20,
+              issues: 10,
+              releases: 5,
+              total: 85,
+            },
+            contributionData,
+          },
+        },
+        error: null,
+        loading: false,
+      })
+
+      render(<ProjectDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Project')).toBeInTheDocument()
+      })
+      const activity = screen.getByText('Project Contribution Activity').closest('section')
+      if (!activity) throw new Error('The contribution summary has not rendered')
+      expect(within(activity).getByText('Total').nextElementSibling).toHaveTextContent(/^85$/)
+      expect(screen.queryByText('Displayed period:')).not.toBeInTheDocument()
+      expect(mockHeatmapChart).not.toHaveBeenCalled()
+    }
+  )
+
+  test('uses the saved reporting period for the project calendar', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         ...mockProjectDetailsData,
         project: {
           ...mockProjectDetailsData.project,
           contributionStats: {
-            commits: 50,
-            pullRequests: 20,
-            issues: 10,
-            releases: 5,
-            total: 85,
+            commits: 2,
+            pullRequests: 0,
+            issues: 0,
+            total: 2,
+            startAt: '2024-01-01T12:00:00Z',
+            endAt: '2024-01-31T12:00:00Z',
           },
-          contributionData: undefined,
+          contributionData: { '2024-01-02': 1, '2024-01-30': 1 },
         },
       },
       error: null,
       loading: false,
     })
-
     render(<ProjectDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Project')).toBeInTheDocument()
-    })
+    await waitFor(() => expect(mockHeatmapChart).toHaveBeenCalled())
+    expect(screen.getByText('Jan 1 — 31, 2024')).toBeVisible()
+    const cells = mockHeatmapChart.mock.lastCall?.[0].series?.flatMap((day) => day.data)
+    expect(cells?.reduce((sum, point) => sum + (point.y ?? 0), 0)).toBe(2)
   })
 
   test('renders contribution activity when only contributionData is provided', async () => {
@@ -383,6 +426,46 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
     })
+  })
+
+  test('keeps October 20 activity counted in the summary inside the heatmap (#5742)', async () => {
+    jest.useFakeTimers({ now: new Date('2026-10-22T12:00:00Z') })
+    try {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          ...mockProjectDetailsData,
+          project: {
+            ...mockProjectDetailsData.project,
+            contributionStats: {
+              commits: 2,
+              pullRequests: 0,
+              issues: 0,
+              releases: 0,
+              total: 2,
+            },
+            contributionData: { '2026-10-17': 1, '2026-10-20': 1 },
+          },
+        },
+        error: null,
+        loading: false,
+      })
+
+      render(<ProjectDetailsPage />)
+      await waitFor(() => expect(mockHeatmapChart).toHaveBeenCalled())
+
+      const activity = screen.getByText('Project Contribution Activity').closest('section')
+      if (!activity) throw new Error('The contribution summary has not rendered')
+      const totalLabel = within(activity).getByText('Total')
+      expect(totalLabel.nextElementSibling).toHaveTextContent(/^2$/)
+
+      const series = mockHeatmapChart.mock.lastCall?.[0].series
+      if (!series) throw new Error('The heatmap has no series')
+      const cells = series.flatMap((day) => day.data)
+      expect(cells.reduce((sum, point) => sum + (point.y ?? 0), 0)).toBe(2)
+      expect(cells.find((point) => point.date === '2026-10-20')).toMatchObject({ y: 1 })
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   test('does not render contribution activity when contributionStats total is 0 and no contributionData', async () => {
