@@ -1,3 +1,8 @@
+.PHONY: run-nestbot
+
+run-nestbot: ## Start local NestBot and its dependencies
+	@docker compose -f docker-compose/local/compose.yaml up --build --detach --wait backend nestbot
+
 slack-export-data:
 	@echo "Exporting Slack data"
 	@CMD="python manage.py dumpdata \

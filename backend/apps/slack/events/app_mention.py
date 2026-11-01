@@ -6,7 +6,7 @@ import logging
 from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
-from apps.slack.utils import download_file
+from apps.slack.utils import download_file, get_text
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +111,6 @@ class AppMention(EventBase):
         client.chat_postMessage(
             channel=channel_id,
             blocks=reply_blocks,
-            text=query,
+            text=get_text(tuple(reply_blocks)),
             thread_ts=thread_ts,
         )

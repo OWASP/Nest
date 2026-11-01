@@ -422,7 +422,8 @@ class TestAppMention:
     def test_handle_event_success(self, mock_get_blocks, mock_conversation, handler, mock_client):
         """Test successful handling of app mention event."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        response_blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "Response"}}]
+        mock_get_blocks.return_value = response_blocks
 
         event = {
             "channel": "C123456",
@@ -442,8 +443,8 @@ class TestAppMention:
         )
         mock_client.chat_postMessage.assert_called_once_with(
             channel="C123456",
-            blocks=[{"type": "section", "text": {"text": "Response"}}],
-            text="What is OWASP?",
+            blocks=response_blocks,
+            text="Response",
             thread_ts="1234567890.123456",
         )
 
@@ -454,7 +455,8 @@ class TestAppMention:
     ):
         """Test handling event with thread_ts."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        response_blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "Response"}}]
+        mock_get_blocks.return_value = response_blocks
 
         event = {
             "channel": "C123456",
@@ -467,7 +469,7 @@ class TestAppMention:
 
         mock_client.chat_postMessage.assert_called_once_with(
             channel="C123456",
-            blocks=[{"type": "section", "text": {"text": "Response"}}],
-            text="What is OWASP?",
+            blocks=response_blocks,
+            text="Response",
             thread_ts="1234567890.000000",
         )
