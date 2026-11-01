@@ -141,6 +141,11 @@ jobs:
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
         }}
+      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version }}
+      TF_VAR_nestbot_desired_count: ${{ inputs.environment == 'staging' && vars.NESTBOT_DESIRED_COUNT || '1' }}
+      TF_VAR_nestbot_google_model_name: ${{ inputs.environment == 'staging' && vars.NESTBOT_GOOGLE_MODEL_NAME || 'gemini-3.5-flash-lite' }}
+      TF_VAR_nestbot_image_tag: ${{ inputs.release_version }}
+      TF_VAR_route_slack_to_nestbot: ${{ inputs.environment == 'staging' && vars.ROUTE_SLACK_TO_NESTBOT || 'false' }}
       TF_IN_AUTOMATION: true
       TF_INPUT: false
     permissions:
@@ -183,9 +188,16 @@ jobs:
           bash .github/scripts/verify-ecr-image-sbom.sh verify "$BACKEND_IMAGE"
           bash .github/scripts/verify-ecr-image-sbom.sh verify "$FRONTEND_IMAGE"
 
+      - name: Verify NestBot release
+        if: inputs.environment == 'staging'
+        run: |
+          bash .github/scripts/cosign-image-by-digest.sh verify "$NESTBOT_IMAGE"
+          bash .github/scripts/verify-ecr-image-sbom.sh verify "$NESTBOT_IMAGE"
+
       - name: Apply infrastructure changes
         uses: ./.github/actions/apply-infrastructure-changes
         with:
+          apply-changes: ${{ inputs.environment != 'staging' }}
           summary-title: Terraform Plan Output
           tfbackend-path: infrastructure/live/terraform.tfbackend
           tfbackend-content: |
@@ -225,6 +237,28 @@ jobs:
             tasks_use_fargate_spot=${{ inputs.tasks_use_fargate_spot }}
           working-directory: infrastructure/live
 
+      - name: Run staging migrations
+        if: inputs.environment == 'staging'
+        env:
+          MIGRATE_TASK_DEFINITION: ${{ inputs.migrate_task_definition }}
+        run: bash .github/scripts/migrate-staging.sh
+
+      - name: Verify NestBot before Slack cutover
+        if: inputs.environment == 'staging' && env.TF_VAR_route_slack_to_nestbot == 'true'
+        run: |
+          CLUSTER_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_cluster_name)
+          SERVICE_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_service_name)
+          aws ecs wait services-stable --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME"
+          TARGET_GROUP=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME" \
+            --query 'services[0].loadBalancers[0].targetGroupArn' --output text)
+          aws elbv2 describe-target-health --target-group-arn "$TARGET_GROUP" \
+            | jq -e 'any(.TargetHealthDescriptions[]; .TargetHealth.State == "healthy")' > /dev/null
+
+      - name: Apply staging infrastructure changes
+        if: inputs.environment == 'staging'
+        run: terraform apply -auto-approve tfplan
+        working-directory: infrastructure/live
+
       - name: Capture terraform outputs
         id: tf-outputs
         run: |
@@ -240,6 +274,7 @@ jobs:
         working-directory: infrastructure/live
 
       - name: Run ECS migrate task
+        if: inputs.environment != 'staging'
         id: migrate-task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
@@ -257,6 +292,7 @@ jobs:
           echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
 
       - name: Wait for migrate task
+        if: inputs.environment != 'staging'
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
         run: |
@@ -265,6 +301,7 @@ jobs:
             --tasks "${{ steps.migrate-task.outputs.task_arn }}"
 
       - name: Check migrate task exit code
+        if: inputs.environment != 'staging'
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
         run: |
@@ -279,6 +316,14 @@ jobs:
             exit 1
           fi
           echo "Migrate task completed successfully"
+
+      - name: Capture NestBot outputs
+        if: inputs.environment == 'staging'
+        id: nestbot-outputs
+        run: |
+          echo "cluster_name=$(terraform output -raw nestbot_cluster_name)" >> "$GITHUB_OUTPUT"
+          echo "service_name=$(terraform output -raw nestbot_service_name)" >> "$GITHUB_OUTPUT"
+        working-directory: infrastructure/live
 
       - name: Run ECS index-data task
         env:
@@ -327,4 +372,10 @@ jobs:
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
             --services "$SERVICE_NAME"
+      - name: Wait for NestBot service stability
+        if: inputs.environment == 'staging' && env.TF_VAR_nestbot_desired_count != '0'
+        env:
+          CLUSTER_NAME: ${{ steps.nestbot-outputs.outputs.cluster_name }}
+          SERVICE_NAME: ${{ steps.nestbot-outputs.outputs.service_name }}
+        run: aws ecs wait services-stable --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME"
     timeout-minutes: 60

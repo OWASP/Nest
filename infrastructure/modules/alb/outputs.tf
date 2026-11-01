@@ -45,6 +45,12 @@ output "http_listener_arn" {
   value       = aws_lb_listener.http_redirect.arn
 }
 
+output "nestbot_target_group_arn" {
+  depends_on  = [aws_lb_listener_rule.nestbot_https]
+  description = "The NestBot target group ARN, or null when disabled."
+  value       = one(aws_lb_target_group.nestbot[*].arn)
+}
+
 output "https_listener_arn" {
   description = "The ARN of the HTTPS listener."
   value       = aws_lb_listener.https.arn

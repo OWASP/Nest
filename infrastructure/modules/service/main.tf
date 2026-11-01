@@ -16,7 +16,7 @@ locals {
     {
       essential = true
       healthCheck = {
-        command     = ["CMD-SHELL", "wget --spider http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1"]
+        command     = var.health_check_command != null ? var.health_check_command : ["CMD-SHELL", "wget --spider http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1"]
         interval    = 30
         retries     = 3
         startPeriod = 100
@@ -44,7 +44,11 @@ locals {
         valueFrom = valueFrom
       }]
     },
-    var.command != null ? { command = var.command } : {}
+    var.command != null ? { command = var.command } : {},
+    length(var.environment_variables) > 0 ? {
+      environment = [for name, value in var.environment_variables : { name = name, value = value }]
+    } : {},
+    var.container_stop_timeout != null ? { stopTimeout = var.container_stop_timeout } : {}
   )
 }
 

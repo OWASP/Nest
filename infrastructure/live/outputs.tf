@@ -63,6 +63,21 @@ output "shared_data_bucket_name" {
   value       = module.storage.shared_data_bucket_name
 }
 
+output "nestbot_cluster_name" {
+  description = "The ECS NestBot cluster name, or null when disabled."
+  value       = one(module.nestbot[*].ecs_cluster_name)
+}
+
+output "nestbot_ecr_repository_url" {
+  description = "The NestBot ECR repository URL, or null when disabled."
+  value       = one(module.nestbot[*].ecr_repository_url)
+}
+
+output "nestbot_service_name" {
+  description = "The ECS NestBot service name, or null when disabled."
+  value       = one(module.nestbot[*].ecs_service_name)
+}
+
 output "tasks_cluster_name" {
   description = "The name of the ECS tasks cluster."
   value       = module.tasks.ecs_cluster_name

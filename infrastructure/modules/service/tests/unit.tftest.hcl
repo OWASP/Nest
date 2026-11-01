@@ -167,6 +167,77 @@ run "test_task_definition_network_mode" {
   }
 }
 
+run "test_container_defaults_are_preserved" {
+  command = plan
+
+  assert {
+    condition     = local.container_definition.healthCheck.command == tolist(["CMD-SHELL", "wget --spider http://$(hostname -i):3000/ > /dev/null 2>&1"])
+    error_message = "Existing services must keep the default health command."
+  }
+
+  assert {
+    condition     = !can(local.container_definition.environment) && !can(local.container_definition.stopTimeout)
+    error_message = "Default configuration must not add environment or stopTimeout fields."
+  }
+}
+
+run "test_nestbot_container_configuration" {
+  command = plan
+
+  variables {
+    container_port         = 8000
+    container_stop_timeout = 60
+    environment_variables  = { LLM_PROVIDER = "google" }
+    health_check_command   = ["CMD-SHELL", "wget -q -O /dev/null http://$(hostname -i):8000/status/"]
+    service_name           = "nestbot"
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.command == var.health_check_command
+    error_message = "NestBot must use the supplied GET health command."
+  }
+
+  assert {
+    condition     = local.container_definition.environment == [{ name = "LLM_PROVIDER", value = "google" }] && local.container_definition.stopTimeout == 60
+    error_message = "NestBot must receive its environment and graceful stop timeout."
+  }
+
+  assert {
+    condition     = local.container_definition.secrets == [{ name = "NEXT_PUBLIC_API_URL", valueFrom = var.parameters_arns["NEXT_PUBLIC_API_URL"] }]
+    error_message = "Adding plain configuration must preserve secret injection."
+  }
+}
+
+run "test_reject_duplicate_environment_names" {
+  command = plan
+
+  variables {
+    environment_variables = { NEXT_PUBLIC_API_URL = "duplicate" }
+  }
+
+  expect_failures = [var.environment_variables]
+}
+
+run "test_reject_empty_health_command" {
+  command = plan
+
+  variables {
+    health_check_command = []
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_invalid_stop_timeout" {
+  command = plan
+
+  variables {
+    container_stop_timeout = 121
+  }
+
+  expect_failures = [var.container_stop_timeout]
+}
+
 run "test_task_definition_requires_fargate" {
   command = plan
 

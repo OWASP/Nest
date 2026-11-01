@@ -65,6 +65,17 @@ variable "container_port" {
   type        = number
 }
 
+variable "container_stop_timeout" {
+  description = "Seconds to allow the container to stop gracefully. Null uses the ECS default."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.container_stop_timeout == null ? true : var.container_stop_timeout >= 2 && var.container_stop_timeout <= 120 && floor(var.container_stop_timeout) == var.container_stop_timeout
+    error_message = "container_stop_timeout must be a whole number between 2 and 120 seconds."
+  }
+}
+
 variable "desired_count" {
   description = "The desired number of tasks."
   type        = number
@@ -82,10 +93,32 @@ variable "environment" {
   type        = string
 }
 
+variable "environment_variables" {
+  description = "Non-secret container environment variables. Names must not overlap parameters_arns."
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = length(setintersection(keys(var.environment_variables), keys(var.parameters_arns))) == 0
+    error_message = "environment_variables and parameters_arns must not contain the same names."
+  }
+}
+
 variable "force_new_deployment" {
   description = "Whether to force a new deployment on each apply."
   type        = bool
   default     = false
+}
+
+variable "health_check_command" {
+  description = "Optional ECS health check command. Null keeps the default wget probe."
+  type        = list(string)
+  default     = null
+
+  validation {
+    condition     = var.health_check_command == null ? true : try(length(var.health_check_command) >= 2 && contains(["CMD", "CMD-SHELL"], var.health_check_command[0]), false)
+    error_message = "health_check_command must start with CMD or CMD-SHELL and include a command."
+  }
 }
 
 variable "health_check_path" {

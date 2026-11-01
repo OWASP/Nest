@@ -1,142 +1,61 @@
 # NestBot
 
-NestBot is the custom Slack integration for the OWASP Nest project, built using the [Slack Bolt for Python](https://docs.slack.dev/tools/bolt-python/getting-started) framework within Django.
+NestBot handles Slack events, commands and interactivity through Slack Bolt
+and Django. The standalone image includes the main and NestBot dependencies;
+the regular backend image excludes the NestBot dependencies.
 
-## Tech Stack
+## Local setup
 
-| Component         | Technology                         |
-| ----------------- | ---------------------------------- |
-| **Frameworks**    | Slack Bolt, Slack SDK (Python)     |
-| **Integration**   | Django (as a standard app)         |
+1. Set the bot token and signing secret in `backend/.env`:
 
-## Directory Structure
+   ```dotenv
+   DJANGO_SLACK_BOT_TOKEN=xoxb-your-bot-token
+   DJANGO_SLACK_SIGNING_SECRET=your-signing-secret
+   ```
 
-- `actions/`   - Handlers for interactive components (e.g., button clicks).
-- `commands/`  - Handlers for Slack slash commands (e.g., `/nest`).
-- `events/`    - Handlers for Slack events (e.g., when a user joins a channel).
-- `models/`    - Django models for storing Slack workspaces, messages, and users.
-- `templates/` - Slack Block Kit JSON templates for rich messages.
+   Configure the model provider, database and Redis as well. Question detection
+   still requires `DJANGO_OPEN_AI_SECRET_KEY`, including with a Google LLM.
+   Include the tunnel hostname in `DJANGO_ALLOWED_HOSTS`.
 
-## Local Slack demo
+2. Run `make run-nestbot`. Compose starts PostgreSQL, Redis, backend and NestBot,
+   waiting for backend migrations. Check `http://127.0.0.1:8003/status/`.
+3. Run `ngrok http 8003` using your configured ngrok account.
+4. Configure a test Slack app from [MANIFEST.yaml](MANIFEST.yaml), replacing
+   **every** command, event and interactivity URL host with your HTTPS tunnel
+   host. Preserve the default features and scopes; verify the event URL and
+   reinstall if Slack requests it. [MANIFEST.local.yaml](MANIFEST.local.yaml)
+   is optional for a new mention-only test app.
+5. Invite the bot and enable your channel using its workspace and channel IDs:
 
-The existing NestBot container serves Slack requests on port **8003**.
-It shares PostgreSQL and Redis with the backend. The website frontend and
-background worker are not needed for explicit mentions.
+   ```bash
+   docker compose -f docker-compose/local/compose.yaml exec nestbot \
+     python manage.py slack_enable_assistant \
+     --workspace-id T0123456789 --channel-id C0123456789
+   ```
 
-### 1. Configure the test app
+Mention the bot with an OWASP question. Confirm one answer in the same thread
+and no answer in a disabled channel. Useful answers require indexed RAG data.
+Inspect failures with `docker compose -f docker-compose/local/compose.yaml logs --tail=100 nestbot`.
 
-Create a Slack app in your test workspace. Add these bot token scopes under
-**OAuth & Permissions**, then install the app:
+## Staging
 
-- `app_mentions:read`
-- `chat:write`
-- `reactions:write`
+Use a separate staging Slack app configured from the full default manifest.
+Replace every `nest.owasp.org` URL host with `nest.owasp.dev`, retaining paths,
+features and scopes. Keep the committed production manifest unchanged.
 
-Put its bot token and signing secret in `backend/.env`:
+Slack sends HTTPS requests to the existing ALB, which routes
+`/integrations/slack/*` to NestBot after cutover. No tunnel or running laptop is
+needed. Store the staging app's token/signing secret in staging SSM, verify the
+Events URL in Slack, invite the bot and enable the staging workspace/channel.
+Test a mention, `/ai`, an existing command and interactivity after cutover.
 
-```dotenv
-DJANGO_SLACK_BOT_TOKEN=xoxb-your-test-bot-token
-DJANGO_SLACK_SIGNING_SECRET=your-test-signing-secret
-```
+Mentions and `/ai` run through the web service. The default manifest also enables
+ordinary channel messages; delayed automatic replies require an `ai` RQ worker
+with scheduling. That worker is **not yet provisioned by staging Terraform**.
+For a focused mention test, temporarily unsubscribe `message.channels` in the
+test app. Keep this as an explicit rollout gap before claiming full app support.
 
-Keep your working LLM provider/model settings and credentials in that file too.
-Use the same provider for embeddings unless you have configured another one.
-Compose selects local Django settings and supplies the database/cache addresses.
-Set `DJANGO_ALLOWED_HOSTS` to include `127.0.0.1`, `localhost`, and your tunnel
-hostname; `*` also works for local development.
-
-### 2. Start NestBot
-
-From the repository root:
-
-```bash
-make run-nestbot
-```
-
-This builds and starts the backend and NestBot with PostgreSQL and Redis.
-NestBot waits for the backend to finish migrations and become healthy.
-
-Verify the NestBot server locally:
-
-```bash
-curl --fail http://127.0.0.1:8003/status/
-```
-
-### 3. Enable your test channel
-
-Use your actual workspace ID (`T...`) and channel ID (`C...`):
-
-```bash
-docker compose -f docker-compose/local/compose.yaml exec nestbot \
-  python manage.py slack_enable_assistant \
-  --workspace-id T0123456789 --channel-id C0123456789
-```
-
-The command creates missing records and enables only that channel. Repeating it
-keeps existing channel settings. A channel in another workspace is rejected.
-The IDs are supplied by you; this command does not validate them with Slack.
-
-### 4. Connect Slack through ngrok
-
-For Linux x86_64, install the standalone binary without sudo:
-
-```bash
-mkdir -p ~/.local/bin
-curl -fsSL https://bin.ngrok.com/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz \
-  -o /tmp/ngrok.tgz
-tar -xzf /tmp/ngrok.tgz -C ~/.local/bin ngrok
-```
-
-Sign in to your [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken)
-and copy your authtoken. Configure it locally and start the tunnel:
-
-```bash
-~/.local/bin/ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
-~/.local/bin/ngrok http 8003
-```
-
-The ngrok authtoken connects the tunnel to your ngrok account. It is separate
-from the Slack bot token and signing secret. It does not go in the manifest.
-See [ngrok's Linux installation instructions](https://ngrok.com/download/linux)
-for other installation methods.
-
-For a new mention-only test app, copy `MANIFEST.local.yaml`, replace
-`https://replace-me.ngrok-free.app` with your HTTPS forwarding URL, and paste it
-into **App Manifest**. This template does not enable slash commands, ordinary
-channel messages, or direct messages.
-
-For an existing full app, keep its manifest and replace the host in its event,
-slash-command, and interactivity URLs. Keep their paths and existing features.
-For the mention-only demo, unsubscribe from `message.channels` until a background
-worker is available for automatic replies.
-
-Save and reinstall if Slack requests it. Under **Event Subscriptions**, check
-that the request URL is verified. Invite the bot to your test channel. Update
-the URLs whenever your tunnel address changes.
-
-### 5. Test the conversation
-
-Mention your bot (`@NestBot Local` for the template) with an OWASP question.
-Expect an eyes reaction and one
-answer in the question's thread. Mention it inside that thread and confirm the
-next answer stays there. Mobile notifications should contain the answer.
-
-Also check that an unconfigured channel gets no answer and an ordinary message
-without a mention gets no automatic reply. An error/fallback message does not
-establish that the agent is working. Useful retrieval answers require OWASP
-records and indexed documents in the local database.
-
-Inspect failures with:
-
-```bash
-docker compose -f docker-compose/local/compose.yaml logs --tail=100 backend nestbot
-```
-
-Keep the containers and ngrok running during the demo. For staging, replace the
-tunnel with permanent HTTPS routing to a deployed NestBot service; the local
-Compose setup does not deploy staging.
-
-## Standalone NestBot image
+## Image
 
 Build from the repository root:
 
@@ -144,29 +63,10 @@ Build from the repository root:
 docker build -f docker/backend/Dockerfile.nestbot -t nestbot:local backend
 ```
 
-This image includes the application, templates, and locked main/NestBot Python
-dependencies. It runs as a non-root user and starts Gunicorn on port 8000.
-Application files and a host virtual environment do not need to be mounted.
+The image runs Gunicorn as a non-root user on port 8000. Supply staging Django,
+SSM/provider and database/cache configuration at runtime. Run migrations before
+starting services; startup only starts Gunicorn. Health checks must GET
+`/status/` because the Django endpoint rejects HEAD.
 
-Supply environment variables at runtime using an environment file locally or
-the deployment's secret configuration. For a local smoke test with staging
-settings, use your configured environment file and an unused host port:
-
-```bash
-docker run --rm --name nestbot-package --env-file backend/.env \
-  -e DJANGO_SETTINGS_MODULE=settings.staging -e DJANGO_CONFIGURATION=Staging \
-  -p 127.0.0.1:8003:8000 nestbot:local
-```
-
-The configuration must include the allowed hosts, staging static bucket name,
-Sentry DSN, database/Redis connection details, Slack credentials, and model credentials.
-Container database/cache addresses must resolve on its Docker network; attach
-the appropriate network when using other local containers. Check `/status/` on
-the published port after startup. The image health check uses an HTTP GET to
-`/status/`; the ECS task definition must also use GET. GNU `wget --spider` sends
-HEAD, which this endpoint rejects.
-
-Startup only runs the web server. Run database migrations separately before
-serving application traffic. OWASP documents, chunks, and embeddings remain in
-PostgreSQL and must be populated separately; the image does not include a RAG
-dataset. Terraform service/routing and CI publishing are separate staging tasks.
+Deployment order and Terraform settings are in the
+[infrastructure README](../../../../infrastructure/live/README.md#nestbot-staging).

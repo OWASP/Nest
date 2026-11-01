@@ -53,10 +53,13 @@ No modules.
 | <a name="input_container_cpu"></a> [container\_cpu](#input\_container\_cpu) | The CPU units for the container (1024 = 1 vCPU). | `number` | `512` | no |
 | <a name="input_container_memory"></a> [container\_memory](#input\_container\_memory) | The memory for the container in MiB. | `number` | `1024` | no |
 | <a name="input_container_port"></a> [container\_port](#input\_container\_port) | The port the container listens on. | `number` | n/a | yes |
+| <a name="input_container_stop_timeout"></a> [container\_stop\_timeout](#input\_container\_stop\_timeout) | Seconds to allow the container to stop gracefully. Null uses the ECS default. | `number` | `null` | no |
 | <a name="input_desired_count"></a> [desired\_count](#input\_desired\_count) | The desired number of tasks. | `number` | `2` | no |
 | <a name="input_enable_auto_scaling"></a> [enable\_auto\_scaling](#input\_enable\_auto\_scaling) | Whether to enable auto scaling for the service. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_environment_variables"></a> [environment\_variables](#input\_environment\_variables) | Non-secret container environment variables. Names must not overlap parameters\_arns. | `map(string)` | `{}` | no |
 | <a name="input_force_new_deployment"></a> [force\_new\_deployment](#input\_force\_new\_deployment) | Whether to force a new deployment on each apply. | `bool` | `false` | no |
+| <a name="input_health_check_command"></a> [health\_check\_command](#input\_health\_check\_command) | Optional ECS health check command. Null keeps the default wget probe. | `list(string)` | `null` | no |
 | <a name="input_health_check_path"></a> [health\_check\_path](#input\_health\_check\_path) | The path for the ECS container health checks. | `string` | `"/"` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | The Docker image tag. | `string` | n/a | yes |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key for log encryption. | `string` | n/a | yes |
