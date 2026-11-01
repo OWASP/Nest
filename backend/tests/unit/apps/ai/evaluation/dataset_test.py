@@ -130,3 +130,20 @@ class TestDataset:
             assert evaluator.evaluate(case, output).passed is True
             output.tools_used = [tool_name]
             assert evaluator.evaluate(case, output).passed is False
+
+
+def test_collaborative_gsoc_case_requires_project_retrieval():
+    case = get_case_by_id("collab-002")
+    evaluator = ToolEvaluator()
+    assert not evaluator.evaluate(
+        case, AgentOutput(query=case.query, response="GSoC GitHub", intent="gsoc")
+    ).passed
+    assert evaluator.evaluate(
+        case,
+        AgentOutput(
+            query=case.query,
+            response="GSoC GitHub",
+            intent="gsoc",
+            tools_used=[get_gsoc_project_info.name],
+        ),
+    ).passed

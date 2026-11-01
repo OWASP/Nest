@@ -2,9 +2,9 @@
 
 set -eu
 
-# Allow ALB health checks addressed to the container's private IP.
+# Allow loopback probes and ALB health checks addressed to the private IP.
 CONTAINER_IP=$(hostname -i)
-export DJANGO_ALLOWED_HOSTS="${DJANGO_ALLOWED_HOSTS:-},${CONTAINER_IP}"
+export DJANGO_ALLOWED_HOSTS="${DJANGO_ALLOWED_HOSTS:-},127.0.0.1,${CONTAINER_IP}"
 
 exec gunicorn wsgi:application \
   --bind 0.0.0.0:8000 \

@@ -36,4 +36,6 @@ slack-sync-messages:
 
 .PHONY: run-nestbot
 run-nestbot: ## Start local NestBot and its dependencies
-	@docker compose -f docker-compose/local/compose.yaml up --build --detach --wait backend nestbot
+	@docker compose -f docker-compose/local/compose.yaml \
+		-f docker-compose/local/compose.override.yaml --project-name=nest-local \
+		up --build --detach --wait backend nestbot worker

@@ -67,8 +67,8 @@ COPY --chown=root:root --chmod=555 entrypoint.nestbot.sh ./
 USER owasp
 EXPOSE 8000
 
-# This credential-free health probe stays inside the container's network namespace.
+# Probe only loopback without sending credentials or following redirects.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-    CMD ["sh", "-c", "wget -q -O /dev/null \"http://$(hostname -i):8000/status/\""]
+    CMD ["python", "-c", "from http.client import HTTPConnection; c = HTTPConnection('127.0.0.1', 8000, timeout=5); c.request('GET', '/status/'); r = c.getresponse(); c.close(); raise SystemExit(0 if r.status == 200 else 1)"]
 
 CMD ["./entrypoint.nestbot.sh"]

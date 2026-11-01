@@ -42,6 +42,10 @@ def calculate_token_cost(
         ValueError: If the model has no configured pricing.
 
     """
+    for count in (prompt_tokens, completion_tokens):
+        if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+            msg = "Token counts must be non-negative integers"
+            raise ValueError(msg)
     model_id = model.removeprefix("gemini/").removeprefix("openai/")
     try:
         pricing = MODEL_PRICING[model_id]

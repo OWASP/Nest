@@ -199,6 +199,7 @@ Create an abstraction layer for embedding generation that allows switching provi
 from abc import ABC, abstractmethod
 from typing import List
 
+
 class Embedder(ABC):
     """Abstract base class for embedding providers."""
 
@@ -217,9 +218,11 @@ class Embedder(ABC):
         """Get the dimension of embeddings produced by this embedder."""
         pass
 
+
 # apps/ai/embeddings/openai.py
 from apps.ai.embeddings.base import Embedder
 from openai import OpenAI
+
 
 class OpenAIEmbedder(Embedder):
     """OpenAI implementation of embedder."""
@@ -230,25 +233,21 @@ class OpenAIEmbedder(Embedder):
         self._dimensions = 1536  # text-embedding-3-small dimensions
 
     def embed_query(self, text: str) -> List[float]:
-        response = self.client.embeddings.create(
-            model=self.model,
-            input=text
-        )
+        response = self.client.embeddings.create(model=self.model, input=text)
         return response.data[0].embedding
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        response = self.client.embeddings.create(
-            model=self.model,
-            input=texts
-        )
+        response = self.client.embeddings.create(model=self.model, input=texts)
         return [item.embedding for item in response.data]
 
     def get_dimensions(self) -> int:
         return self._dimensions
 
+
 # apps/ai/embeddings/factory.py
 from apps.ai.embeddings.openai import OpenAIEmbedder
 from apps.ai.embeddings.base import Embedder
+
 
 def get_embedder() -> Embedder:
     """Factory function to get the configured embedder."""
@@ -268,6 +267,7 @@ from apps.ai.embeddings.factory import get_embedder
 from pgvector.django.functions import CosineDistance
 from typing import List, Dict
 
+
 @tool("Semantic search for OWASP content")
 def semantic_search(query: str, limit: int = 5) -> List[Dict[str, str]]:
     """Search OWASP content using semantic similarity.
@@ -284,15 +284,11 @@ def semantic_search(query: str, limit: int = 5) -> List[Dict[str, str]]:
 
     # Search pgvector using cosine distance
     chunks = Chunk.objects.annotate(
-        distance=CosineDistance('embedding', query_embedding)
-    ).order_by('distance')[:limit]
+        distance=CosineDistance("embedding", query_embedding)
+    ).order_by("distance")[:limit]
 
     return [
-        {
-            'text': chunk.text,
-            'context': str(chunk.context),
-            'distance': float(chunk.distance)
-        }
+        {"text": chunk.text, "context": str(chunk.context), "distance": float(chunk.distance)}
         for chunk in chunks
     ]
 ```
@@ -315,6 +311,7 @@ from apps.ai.crewai.agents.clarification import create_clarification_agent
 from apps.ai.crewai.flows.collaborative import handle_collaborative_query
 from apps.ai.crewai.agents.synthesizer import synthesize_results
 
+
 def process_query(query: str) -> str:
     """Process query with enhanced accuracy mechanisms."""
 
@@ -329,7 +326,7 @@ def process_query(query: str) -> str:
             query=query,
             required_agents=analysis["required_agents"],
             required_tools=analysis["required_tools"],
-            sub_queries=analysis["sub_queries"]
+            sub_queries=analysis["sub_queries"],
         )
 
     # Step 3: Route with confidence (for single-agent queries)
@@ -337,17 +334,12 @@ def process_query(query: str) -> str:
 
     # Step 4: Handle based on complexity
     if analysis["is_simple"]:
-        return execute_query_with_refinement(
-            router_result["intent"],
-            query
-        )
+        return execute_query_with_refinement(router_result["intent"], query)
     else:
         return execute_multi_step_query(
-            router_result["intent"],
-            query,
-            analysis["sub_queries"],
-            analysis["required_tools"]
+            router_result["intent"], query, analysis["sub_queries"], analysis["required_tools"]
         )
+
 
 def execute_query_with_refinement(intent: str, query: str) -> str:
     """Execute query with self-correction refinement."""
@@ -381,11 +373,9 @@ def execute_query_with_refinement(intent: str, query: str) -> str:
     result = crew.kickoff()
     return str(result)
 
+
 def execute_multi_step_query(
-    intent: str,
-    query: str,
-    sub_queries: list[str],
-    required_tools: list[str]
+    intent: str, query: str, sub_queries: list[str], required_tools: list[str]
 ) -> str:
     """Execute multi-step query with tool selection and synthesis."""
     from apps.ai.crewai.agents import INTENT_TO_AGENT
@@ -413,8 +403,7 @@ def execute_multi_step_query(
     for sub_query in sub_queries:
         task = Task(
             description=(
-                f"Answer sub-query: {sub_query}\n\n"
-                f"Use the tool selection plan from previous task."
+                f"Answer sub-query: {sub_query}\n\nUse the tool selection plan from previous task."
             ),
             agent=agent,
             expected_output=f"Answer to: {sub_query}",
@@ -438,6 +427,7 @@ def execute_multi_step_query(
     crew = Crew(agents=[agent], tasks=all_tasks, verbose=True)
     result = crew.kickoff()
     return str(result)
+
 
 def get_fallback_response() -> str:
     """Get fallback response on error."""
@@ -471,11 +461,9 @@ AGENT_FACTORIES = {
     "rag": create_rag_agent,
 }
 
+
 def handle_collaborative_query(
-    query: str,
-    required_agents: list[str],
-    required_tools: list[str],
-    sub_queries: list[str]
+    query: str, required_agents: list[str], required_tools: list[str], sub_queries: list[str]
 ) -> str:
     """Handle collaborative query using query decomposition results.
 
@@ -538,6 +526,7 @@ def handle_collaborative_query(
 
     return str(final_result)
 
+
 def match_subquery_to_agent(sub_query: str, available_agents: list[str]) -> str:
     """Match sub-query to appropriate agent (simplified version).
 
@@ -569,6 +558,7 @@ The query analyzer is central to determining when collaborative flows are needed
 from crewai import Agent, Task, Crew
 from typing import Dict, List, Any
 import json
+
 
 def analyze_query(query: str) -> Dict[str, Any]:
     """Analyze query to determine complexity and required agents/tools.
@@ -625,8 +615,8 @@ def analyze_query(query: str) -> Dict[str, Any]:
         # Extract JSON from result string
         result_str = str(result)
         # Find JSON object in result
-        json_start = result_str.find('{')
-        json_end = result_str.rfind('}') + 1
+        json_start = result_str.find("{")
+        json_end = result_str.rfind("}") + 1
         if json_start >= 0 and json_end > json_start:
             json_str = result_str[json_start:json_end]
             analysis = json.loads(json_str)
@@ -639,7 +629,7 @@ def analyze_query(query: str) -> Dict[str, Any]:
             "is_simple": True,
             "sub_queries": [query],
             "required_agents": [],
-            "required_tools": []
+            "required_tools": [],
         }
 
     # Validate and normalize
@@ -647,7 +637,7 @@ def analyze_query(query: str) -> Dict[str, Any]:
         "is_simple": analysis.get("is_simple", True),
         "sub_queries": analysis.get("sub_queries", [query]),
         "required_agents": analysis.get("required_agents", []),
-        "required_tools": analysis.get("required_tools", [])
+        "required_tools": analysis.get("required_tools", []),
     }
 ```
 
@@ -814,6 +804,7 @@ CrewAI supports multiple LLM providers. Configuration:
 from crewai import LLM
 import os
 
+
 def get_llm() -> LLM:
     """Get configured LLM instance."""
     provider = os.getenv("LLM_PROVIDER", "openai")
@@ -833,6 +824,7 @@ def get_llm() -> LLM:
     # Add more providers as needed
 
     raise ValueError(f"Unsupported LLM provider: {provider}")
+
 
 # Use in agents
 agent = Agent(
@@ -921,6 +913,7 @@ Tools are registered with agents using CrewAI's `@tool` decorator. Each tool is 
 from crewai.tools import tool
 from apps.ai.common.decorators import render_template
 
+
 @tool("Get OWASP contribution information and guide users to #contribute channel")
 def get_contribute_info() -> str:
     """Get information about contributing to OWASP.
@@ -930,6 +923,7 @@ def get_contribute_info() -> str:
     """
     return render_template("agents/contribution/tools/get_contribute_info.jinja")
 
+
 # apps/ai/agents/contribution/agent.py
 from crewai import Agent
 from apps.ai.agents.contribution.tools import (
@@ -937,6 +931,7 @@ from apps.ai.agents.contribution.tools import (
     get_gsoc_info,
     get_gsoc_project_info,
 )
+
 
 def create_contribution_agent() -> Agent:
     """Create Contribution Expert Agent with tools."""
@@ -980,9 +975,11 @@ Centralized configuration:
 from dataclasses import dataclass
 import os
 
+
 @dataclass
 class CrewAIConfig:
     """CrewAI assistant configuration."""
+
     # Router settings
     router_confidence_threshold: float = 0.7
 
@@ -1001,12 +998,8 @@ class CrewAIConfig:
     def from_env(cls) -> "CrewAIConfig":
         """Load configuration from environment variables."""
         return cls(
-            router_confidence_threshold=float(
-                os.getenv("CREWAI_ROUTER_CONFIDENCE", "0.7")
-            ),
-            agent_temperature=float(
-                os.getenv("CREWAI_AGENT_TEMPERATURE", "0.1")
-            ),
+            router_confidence_threshold=float(os.getenv("CREWAI_ROUTER_CONFIDENCE", "0.7")),
+            agent_temperature=float(os.getenv("CREWAI_AGENT_TEMPERATURE", "0.1")),
             # ... load other settings ...
         )
 ```
@@ -1298,7 +1291,7 @@ def test_router_classifies_static_query():
     """Test router correctly identifies static queries."""
     flow = OWASPAssistantFlow()
     result = flow.route_query("How do I contribute to OWASP?")
-    assert result['intent'] == 'static'
+    assert result["intent"] == "static"
 ```
 
 #### 3. Quality Evaluation Tests
@@ -1319,26 +1312,27 @@ def test_router_classifies_static_query():
 # tests/apps/ai/crewai/evaluation/test_quality.py
 QUALITY_TEST_CASES = [
     {
-        'query': 'How do I contribute?',
-        'expected_intent': 'static',
-        'expected_contains': ['contribute', 'github']
+        "query": "How do I contribute?",
+        "expected_intent": "static",
+        "expected_contains": ["contribute", "github"],
     },
     {
-        'query': 'What are the flagship projects?',
-        'expected_intent': 'tool',
-        'expected_contains': ['OWASP Top 10', 'ZAP']
+        "query": "What are the flagship projects?",
+        "expected_intent": "tool",
+        "expected_contains": ["OWASP Top 10", "ZAP"],
     },
     # ... more test cases
 ]
+
 
 @pytest.mark.evaluation
 def test_response_quality():
     """Evaluate response quality for test cases."""
     for test_case in QUALITY_TEST_CASES:
-        result = process_query(test_case['query'])
-        assert result['intent'] == test_case['expected_intent']
+        result = process_query(test_case["query"])
+        assert result["intent"] == test_case["expected_intent"]
         # Check response quality
-        assert all(term in result['response'] for term in test_case['expected_contains'])
+        assert all(term in result["response"] for term in test_case["expected_contains"])
 ```
 
 #### 4. Performance Tests
