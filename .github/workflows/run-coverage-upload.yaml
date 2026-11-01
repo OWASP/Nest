@@ -1,0 +1,55 @@
+name: Coverage upload
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: Coverage artifact name
+        required: true
+        type: string
+      artifact_path:
+        description: Coverage artifact download path
+        required: true
+        type: string
+      coverage_flags:
+        description: Codecov flags
+        required: false
+        type: string
+        default: ''
+      coverage_path:
+        description: Coverage report file path
+        required: true
+        type: string
+
+
+permissions: {}
+
+jobs:
+  run-coverage-upload:
+    name: Coverage upload
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download coverage report
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: ${{ inputs.artifact_path }}
+
+      - name: Upload coverage report to Codecov
+        continue-on-error: true
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
+        with:
+          fail_ci_if_error: true
+          files: ${{ inputs.coverage_path }}
+          flags: ${{ inputs.coverage_flags }}
+          use_oidc: true
+    timeout-minutes: 5

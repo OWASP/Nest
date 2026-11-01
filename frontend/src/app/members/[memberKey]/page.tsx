@@ -12,7 +12,14 @@ import { Badge } from 'types/badge'
 import { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import Badges from 'components/Badges'
-import DetailsCard from 'components/CardDetailsPage'
+import Contributions from 'components/cards/Contributions'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
@@ -194,27 +201,37 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   return (
-    <DetailsCard
-      details={userDetails}
-      pullRequests={pullRequests}
-      recentIssues={issues}
-      recentMilestones={milestones}
-      recentReleases={releases}
-      repositories={topRepositories}
-      showAvatar={false}
-      stats={userStats}
-      title={user?.name || user?.login}
-      type="user"
-      userSummary={
-        <UserSummary
-          user={user}
-          contributionData={contributionData}
-          dateRange={dateRange}
-          hasContributionData={hasContributionData}
-          formattedBio={formattedBio}
-        />
-      }
-    />
+    <PageWrapper>
+      <Header title={user?.name || user?.login} isActive={true} isArchived={false} />
+
+      <Summary
+        userSummary={
+          <UserSummary
+            user={user}
+            contributionData={contributionData}
+            dateRange={dateRange}
+            hasContributionData={hasContributionData}
+            formattedBio={formattedBio}
+          />
+        }
+      />
+
+      <Metadata details={userDetails} stats={userStats} detailsTitle="User Details" />
+
+      <Contributions hasContributions={false} />
+
+      <Contributors />
+
+      <IssuesMilestones
+        recentIssues={issues}
+        recentMilestones={milestones}
+        pullRequests={pullRequests}
+        recentReleases={releases}
+        showAvatar={false}
+      />
+
+      <RepositoriesModules repositories={topRepositories} />
+    </PageWrapper>
   )
 }
 

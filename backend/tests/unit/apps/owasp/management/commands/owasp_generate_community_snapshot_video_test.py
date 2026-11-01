@@ -1,15 +1,12 @@
 """Tests for the owasp_generate_community_snapshot_video Django management command."""
 
-import sys
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from django.core.management.base import BaseCommand
 
-sys.modules["weasyprint"] = MagicMock()
-
-from apps.owasp.management.commands.owasp_generate_community_snapshot_video import (  # noqa: E402
+from apps.owasp.management.commands.owasp_generate_community_snapshot_video import (
     Command,
 )
 

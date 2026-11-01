@@ -59,14 +59,14 @@ class TestPromptModel:
         mock_logger.warning.assert_called_once()
 
     def test_get_text_not_exists_no_warning_when_no_api_key(self):
-        """Test get_text doesn't log warning when OPEN_AI_SECRET_KEY is None."""
+        """Test get_text doesn't log warning when OPEN_AI_SECRET_KEY is unset."""
         with (
             patch.object(Prompt, "objects") as mock_objects,
             patch("apps.core.models.prompt.settings") as mock_settings,
             patch("apps.core.models.prompt.logger") as mock_logger,
         ):
             mock_objects.get.side_effect = Prompt.DoesNotExist
-            mock_settings.OPEN_AI_SECRET_KEY = "None"  # noqa: S105
+            mock_settings.OPEN_AI_SECRET_KEY = ""
 
             result = Prompt.get_text("nonexistent-key")
 

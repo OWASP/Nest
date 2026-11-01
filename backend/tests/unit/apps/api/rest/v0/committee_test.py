@@ -79,38 +79,30 @@ class TestGetCommittee:
         """Test getting a committee when found."""
         mock_request = MagicMock()
         mock_committee = MagicMock()
-        mock_committee_model.active_committees.filter.return_value.first.return_value = (
-            mock_committee
-        )
+        mock_committee_model.get_by_key.return_value = mock_committee
 
         result = get_committee(mock_request, "project")
 
-        mock_committee_model.active_committees.filter.assert_called_with(
-            is_active=True, key__iexact="www-committee-project"
-        )
+        mock_committee_model.get_by_key.assert_called_once_with("project")
         assert result == mock_committee
 
     @patch("apps.api.rest.v0.committee.CommitteeModel")
     def test_get_committee_with_prefix(self, mock_committee_model):
-        """Test getting a committee with www-committee- prefix."""
+        """Test getting a committee uses the given key."""
         mock_request = MagicMock()
         mock_committee = MagicMock()
-        mock_committee_model.active_committees.filter.return_value.first.return_value = (
-            mock_committee
-        )
+        mock_committee_model.get_by_key.return_value = mock_committee
 
-        result = get_committee(mock_request, "www-committee-project")
+        result = get_committee(mock_request, "project-committee")
 
-        mock_committee_model.active_committees.filter.assert_called_with(
-            is_active=True, key__iexact="www-committee-project"
-        )
+        mock_committee_model.get_by_key.assert_called_once_with("project-committee")
         assert result == mock_committee
 
     @patch("apps.api.rest.v0.committee.CommitteeModel")
     def test_get_committee_not_found(self, mock_committee_model):
         """Test getting a committee when not found."""
         mock_request = MagicMock()
-        mock_committee_model.active_committees.filter.return_value.first.return_value = None
+        mock_committee_model.get_by_key.return_value = None
 
         result = get_committee(mock_request, "NonExistent")
 

@@ -15,8 +15,8 @@ const baseMockProgram: Program = {
   name: 'Test Program',
   description: 'This is a test program description',
   status: ProgramStatusEnum.Published,
-  startedAt: 1704067200,
-  endedAt: 1735646400,
+  startedAt: '2024-01-01T00:00:00.000Z',
+  endedAt: '2024-12-31T00:00:00.000Z',
   userRole: 'admin',
 }
 

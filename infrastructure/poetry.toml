@@ -1,0 +1,10 @@
+cache-dir = ".cache/pypoetry"
+
+# 21 days.
+[solver]
+min-release-age = 21
+
+[virtualenvs]
+create = true
+in-project = true
+use-poetry-python = true

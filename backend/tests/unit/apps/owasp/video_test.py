@@ -41,7 +41,7 @@ class TestSlide:
         assert slide.video_path == expected
 
     @patch("apps.owasp.video.pdfium.PdfDocument")
-    @patch("apps.owasp.video.HTML")
+    @patch("apps.owasp.video.Slide.create_weasyprint_html")
     @patch("apps.owasp.video.video_env")
     def test_render_and_save_image_success(
         self, mock_video_env, mock_html, mock_pdfium, slide, tmp_path
@@ -118,7 +118,7 @@ class TestSlide:
         mock_logger.exception.assert_called_once()
 
     @patch("apps.owasp.video.pdfium.PdfDocument")
-    @patch("apps.owasp.video.HTML")
+    @patch("apps.owasp.video.Slide.create_weasyprint_html")
     @patch("apps.owasp.video.video_env")
     def test_render_and_save_image_render_error(
         self, mock_video_env, mock_html, mock_pdfium, slide
@@ -132,7 +132,7 @@ class TestSlide:
             slide.render_and_save_image()
 
     @patch("apps.owasp.video.pdfium.PdfDocument")
-    @patch("apps.owasp.video.HTML")
+    @patch("apps.owasp.video.Slide.create_weasyprint_html")
     @patch("apps.owasp.video.video_env")
     def test_render_and_save_image_page_error_closes_pdf(
         self, mock_video_env, mock_html, mock_pdfium, slide

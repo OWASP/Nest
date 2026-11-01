@@ -13,7 +13,7 @@ from strawberry.extensions import DisableIntrospection
 def test_graphql_extensions(settings, debug, is_fuzz_environment, introspection_disabled):
     settings.DEBUG = debug
     settings.IS_FUZZ_ENVIRONMENT = is_fuzz_environment
-    configured = run_module("settings.graphql")
+    configured = run_module("settings.graphql", alter_sys=True)
     schema = configured["schema"]
 
     assert schema.execute_sync("{ __typename }").errors is None

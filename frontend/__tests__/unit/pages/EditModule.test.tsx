@@ -74,10 +74,10 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
         },
-        getModule: {
+        managementModule: {
           name: 'Existing Module',
           description: 'Old description',
           experienceLevel: ExperienceLevelEnum.Intermediate,
@@ -141,10 +141,10 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }], // User is not in this list
         },
-        getModule: {
+        managementModule: {
           name: 'Existing Module',
         },
       },
@@ -213,8 +213,8 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: { admins: [{ login: 'admin-user' }] },
-        getModule: { name: 'Module' },
+        managementProgram: { admins: [{ login: 'admin-user' }] },
+        managementModule: { name: 'Module' },
       },
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -235,10 +235,10 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
         },
-        getModule: {
+        managementModule: {
           name: 'Existing Module',
           description: 'Old description',
           experienceLevel: ExperienceLevelEnum.Intermediate,
@@ -283,10 +283,10 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
         },
-        getModule: {
+        managementModule: {
           name: 'Test Module',
           description: 'Description',
           experienceLevel: ExperienceLevelEnum.Intermediate,
@@ -333,12 +333,12 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: '2025-01-01',
           endedAt: '2025-12-31',
         },
-        getModule: {
+        managementModule: {
           name: 'Minimal Module',
           description: '',
           experienceLevel: null,
@@ -377,12 +377,12 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: null,
           endedAt: null,
         },
-        getModule: {
+        managementModule: {
           name: 'Test Module',
           description: 'Test description',
           experienceLevel: ExperienceLevelEnum.Advanced,
@@ -414,12 +414,12 @@ describe('EditModulePage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
           startedAt: null,
           endedAt: null,
         },
-        getModule: {
+        managementModule: {
           name: null,
           description: 'Desc',
           experienceLevel: ExperienceLevelEnum.Beginner,

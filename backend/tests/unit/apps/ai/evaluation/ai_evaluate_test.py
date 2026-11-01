@@ -9,6 +9,7 @@ from django.core.management.base import CommandError
 @pytest.fixture
 def runner(mocker):
     def fake_run(case_id, scenario, *, live):
+        assert live is True
         return {
             "case_id": case_id,
             "scenario": scenario,
@@ -83,6 +84,7 @@ def test_review_required_is_not_reported_as_passing(runner, scenario):
             stdout=output,
         )
 
+    runner.assert_called_once_with("rag-002", scenario, live=True)
     report = json.loads(output.getvalue())
 
     assert error.value.returncode == 2

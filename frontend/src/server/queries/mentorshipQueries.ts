@@ -11,3 +11,9 @@ export const IS_MENTOR_QUERY = gql`
     isMentor(login: $login)
   }
 `
+
+export const IS_MENTEE_QUERY = gql`
+  query IsMentee($login: String!) {
+    isMentee(login: $login)
+  }
+`

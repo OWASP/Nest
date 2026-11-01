@@ -82,7 +82,7 @@ class TestPullRequestQuery:
         result = PullRequestQuery().recent_pull_requests(project="test-project")
 
         assert result == [mock_pull_request]
-        mock_project_objects.filter.assert_called_once_with(key__iexact="www-project-test-project")
+        mock_project_objects.filter.assert_called_once_with(key__iexact="test-project")
         mock_queryset.filter.assert_called_with(repository_id__in=[1, 2, 3])
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
@@ -201,9 +201,7 @@ class TestPullRequestQuery:
         result = PullRequestQuery().recent_pull_requests(project="nonexistent-project")
 
         assert result == []
-        mock_project_objects.filter.assert_called_once_with(
-            key__iexact="www-project-nonexistent-project"
-        )
+        assert mock_project_objects.filter.call_count == 2
         mock_queryset.none.assert_called_once()
 
     @patch("apps.github.models.pull_request.PullRequest.objects")

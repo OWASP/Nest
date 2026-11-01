@@ -1,0 +1,17 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Canonical: https://nest.owasp.org/.well-known/security.txt
+Contact: https://github.com/OWASP/Nest/security/advisories/new
+Contact: mailto:nest+security@owasp.org
+Encryption: https://nest.owasp.org/.well-known/pgp-key.txt
+Expires: 2027-07-01T00:00:00-07:00
+Policy: https://github.com/OWASP/Nest/blob/main/SECURITY.md
+Preferred-Languages: en
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYIAB0WIQTljFNortwzbEotF3QDApHrxXXweAUCamrI1AAKCRADApHrxXXw
+eKEBAPoDUwFCsL9xPAJ/Y5I4bSIS83s5OYx6u3VzT+cRZLU3QAEA/jODlwHdhI/T
+eBtZOiwmHLpjot2hFN38XcxfKZP72AU=
+=l4KI
+-----END PGP SIGNATURE-----

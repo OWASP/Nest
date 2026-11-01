@@ -64,7 +64,7 @@ jest.mock('next/image', () => ({
   },
 }))
 
-const now = Date.now()
+const now = new Date(Date.now()).toISOString()
 const mockReleases: Release[] = [
   {
     id: 'release-recent-1',
