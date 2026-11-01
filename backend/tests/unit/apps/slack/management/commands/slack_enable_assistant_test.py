@@ -55,9 +55,10 @@ def test_repeated_enable_preserves_other_channel_settings(records):
 def test_reject_channel_from_another_workspace(records):
     _, conversation, _, _ = records
     conversation.workspace_id = 2
+    command = slack_enable_assistant.Command()
 
     with pytest.raises(CommandError, match="different workspace"):
-        slack_enable_assistant.Command().handle(workspace_id="T123", channel_id="C123")
+        command.handle(workspace_id="T123", channel_id="C123")
 
     assert conversation.is_nest_bot_assistant_enabled is False
     conversation.save.assert_not_called()

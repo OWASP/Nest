@@ -297,12 +297,11 @@ class TestCache:
             response="collaborative response",
         )
 
-    @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.get_cached_response")
     @patch("apps.ai.flows.assistant.create_channel_agent")
     @patch("apps.ai.flows.assistant.execute_task")
     def test_cache_skipped_for_community_channel(
-        self, mock_execute_task, mock_create_channel, mock_get_cached_response, mock_logger
+        self, mock_execute_task, mock_create_channel, mock_get_cached_response, caplog
     ):
         """Cache lookup should be skipped for owasp-community channel queries."""
         mock_create_channel.return_value = MagicMock()
@@ -315,6 +314,7 @@ class TestCache:
 
         assert result == "channel response 5"
         mock_get_cached_response.assert_not_called()
+        assert "has_contribution_keywords: False" in caplog.text
 
     @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.store_cached_response")

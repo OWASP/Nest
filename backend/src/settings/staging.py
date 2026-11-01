@@ -46,7 +46,7 @@ class Staging(Base):
 
     IS_STAGING_ENVIRONMENT = True
 
-    # NestBot is not provisioned on staging yet; ignore SSM Slack credentials.
+    # Slack is handled by the dedicated NestBot service.
     SLACK_BOT_TOKEN = OptionalSecretValue(environ=False)
     SLACK_COMMANDS_ENABLED = False
     SLACK_EVENTS_ENABLED = False

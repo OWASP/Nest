@@ -116,8 +116,8 @@ variable "health_check_command" {
   default     = null
 
   validation {
-    condition     = var.health_check_command == null ? true : try(length(var.health_check_command) >= 2 && contains(["CMD", "CMD-SHELL"], var.health_check_command[0]), false)
-    error_message = "health_check_command must start with CMD or CMD-SHELL and include a command."
+    condition     = var.health_check_command == null ? true : try(length(var.health_check_command) >= 2 && contains(["CMD", "CMD-SHELL"], var.health_check_command[0]) && trimspace(var.health_check_command[1]) != "", false)
+    error_message = "health_check_command must start with CMD or CMD-SHELL and include a non-blank command."
   }
 }
 
@@ -204,6 +204,12 @@ variable "service_name" {
 variable "target_group_arn" {
   description = "The ARN of the ALB target group."
   type        = string
+}
+
+variable "task_role_kms_actions" {
+  description = "KMS actions allowed on kms_key_arn for the application task role. An empty list disables this policy."
+  type        = list(string)
+  default     = ["kms:Decrypt", "kms:GenerateDataKey*"]
 }
 
 variable "task_role_policy_arns" {

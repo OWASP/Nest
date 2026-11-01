@@ -190,6 +190,7 @@ run "test_nestbot_container_configuration" {
     environment_variables  = { LLM_PROVIDER = "google" }
     health_check_command   = ["CMD-SHELL", "wget -q -O /dev/null http://$(hostname -i):8000/status/"]
     service_name           = "nestbot"
+    task_role_kms_actions  = []
   }
 
   assert {
@@ -205,6 +206,25 @@ run "test_nestbot_container_configuration" {
   assert {
     condition     = local.container_definition.secrets == [{ name = "NEXT_PUBLIC_API_URL", valueFrom = var.parameters_arns["NEXT_PUBLIC_API_URL"] }]
     error_message = "Adding plain configuration must preserve secret injection."
+  }
+
+  assert {
+    condition     = length(aws_iam_policy.ecs_task_role_kms) == 0 && length(aws_iam_role_policy_attachment.ecs_task_role_kms) == 0
+    error_message = "NestBot must not grant its application task role access to the shared KMS key."
+  }
+}
+
+run "test_existing_task_role_kms_permissions_preserved" {
+  command = plan
+
+  assert {
+    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt", "kms:GenerateDataKey*"] && jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Resource == var.kms_key_arn
+    error_message = "Existing services must retain their KMS actions on the configured key."
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.ecs_task_role_kms[0].role == aws_iam_role.ecs_task_role.name
+    error_message = "Existing services must retain their application task role KMS attachment."
   }
 }
 
@@ -223,6 +243,36 @@ run "test_reject_empty_health_command" {
 
   variables {
     health_check_command = []
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_empty_health_command_operand" {
+  command = plan
+
+  variables {
+    health_check_command = ["CMD-SHELL", ""]
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_blank_health_command_operand" {
+  command = plan
+
+  variables {
+    health_check_command = ["CMD-SHELL", " \t\n"]
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_null_health_command_operand" {
+  command = plan
+
+  variables {
+    health_check_command = ["CMD-SHELL", null]
   }
 
   expect_failures = [var.health_check_command]

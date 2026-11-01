@@ -8,7 +8,8 @@ ARG OWASP_UID
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ENV POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
+ENV POETRY_INSTALLER_ONLY_BINARY=":all:" \
+    POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
@@ -66,6 +67,7 @@ COPY --chown=root:root --chmod=555 entrypoint.nestbot.sh ./
 USER owasp
 EXPOSE 8000
 
+# This credential-free health probe stays inside the container's network namespace.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD ["sh", "-c", "wget -q -O /dev/null \"http://$(hostname -i):8000/status/\""]
 

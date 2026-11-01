@@ -45,10 +45,12 @@ run "test_nestbot_google_parameter" {
 
   variables {
     enable_nestbot = true
+    environment    = "staging"
+    project_name   = "custom-project"
   }
 
   assert {
-    condition     = aws_ssm_parameter.django_google_api_key[0].name == "/nest/test/DJANGO_GOOGLE_API_KEY" && aws_ssm_parameter.django_google_api_key[0].type == "SecureString"
+    condition     = aws_ssm_parameter.django_google_api_key[0].name == "/${var.project_name}/${var.environment}/DJANGO_GOOGLE_API_KEY" && aws_ssm_parameter.django_google_api_key[0].type == "SecureString"
     error_message = "NestBot must store the Google key as an environment-scoped SecureString."
   }
 

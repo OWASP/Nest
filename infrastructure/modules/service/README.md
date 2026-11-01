@@ -72,6 +72,7 @@ No modules.
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | The ID of the security group for the service. | `string` | n/a | yes |
 | <a name="input_service_name"></a> [service\_name](#input\_service\_name) | The name of the service (e.g., backend, frontend). | `string` | n/a | yes |
 | <a name="input_target_group_arn"></a> [target\_group\_arn](#input\_target\_group\_arn) | The ARN of the ALB target group. | `string` | n/a | yes |
+| <a name="input_task_role_kms_actions"></a> [task\_role\_kms\_actions](#input\_task\_role\_kms\_actions) | KMS actions allowed on kms\_key\_arn for the application task role. An empty list disables this policy. | `list(string)` | <pre>[<br/>  "kms:Decrypt",<br/>  "kms:GenerateDataKey*"<br/>]</pre> | no |
 | <a name="input_task_role_policy_arns"></a> [task\_role\_policy\_arns](#input\_task\_role\_policy\_arns) | A list of additional IAM policy ARNs to attach to the ECS task role. | `list(string)` | `[]` | no |
 | <a name="input_use_fargate_spot"></a> [use\_fargate\_spot](#input\_use\_fargate\_spot) | Whether to use Fargate Spot capacity provider. | `bool` | `false` | no |
 

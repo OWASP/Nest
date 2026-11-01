@@ -58,6 +58,11 @@ output "private_subnet_ids" {
   value       = module.networking.private_subnet_ids
 }
 
+output "route_slack_to_nestbot" {
+  description = "Whether Slack traffic is currently routed to NestBot."
+  value       = local.nestbot_enabled && var.route_slack_to_nestbot
+}
+
 output "shared_data_bucket_name" {
   description = "S3 bucket for shared public data (e.g. nest.dump)."
   value       = module.storage.shared_data_bucket_name

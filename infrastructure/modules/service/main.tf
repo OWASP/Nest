@@ -299,6 +299,7 @@ resource "aws_iam_role_policy_attachment" "task_role_policies" {
 }
 
 resource "aws_iam_policy" "ecs_task_role_kms" {
+  count       = length(var.task_role_kms_actions) > 0 ? 1 : 0
   description = "Allow ECS task role to use KMS key for encryption and decryption"
   name        = "${local.name_prefix}-task-kms-policy"
 
@@ -306,10 +307,7 @@ resource "aws_iam_policy" "ecs_task_role_kms" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey*",
-        ]
+        Action   = var.task_role_kms_actions
         Effect   = "Allow"
         Resource = var.kms_key_arn
       }
@@ -319,6 +317,17 @@ resource "aws_iam_policy" "ecs_task_role_kms" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_role_kms" {
-  policy_arn = aws_iam_policy.ecs_task_role_kms.arn
+  count      = length(var.task_role_kms_actions) > 0 ? 1 : 0
+  policy_arn = aws_iam_policy.ecs_task_role_kms[0].arn
   role       = aws_iam_role.ecs_task_role.name
+}
+
+moved {
+  from = aws_iam_policy.ecs_task_role_kms
+  to   = aws_iam_policy.ecs_task_role_kms[0]
+}
+
+moved {
+  from = aws_iam_role_policy_attachment.ecs_task_role_kms
+  to   = aws_iam_role_policy_attachment.ecs_task_role_kms[0]
 }

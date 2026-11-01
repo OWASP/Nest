@@ -202,6 +202,8 @@ module "nestbot" {
   environment            = var.environment
   environment_variables = {
     CREWAI_TRACING_ENABLED = "false"
+    DJANGO_CONFIGURATION   = "Staging"
+    DJANGO_SETTINGS_MODULE = "settings.nestbot"
     EMBEDDING_PROVIDER     = "google"
     GOOGLE_MODEL_NAME      = var.nestbot_google_model_name
     LLM_PROVIDER           = "google"
@@ -211,15 +213,16 @@ module "nestbot" {
   image_tag            = var.nestbot_image_tag
   kms_key_arn          = module.kms.key_arn
   parameters_arns = merge(
-    module.parameters.django_ssm_parameter_arns,
+    { for name, arn in module.parameters.django_ssm_parameter_arns : name => arn if !contains(["DJANGO_CONFIGURATION", "DJANGO_SETTINGS_MODULE"], name) },
     module.parameters.nestbot_ssm_parameter_arns,
   )
-  private_subnet_ids = module.networking.private_subnet_ids
-  project_name       = var.project_name
-  security_group_id  = module.security.backend_sg_id
-  service_name       = "nestbot"
-  target_group_arn   = module.alb.nestbot_target_group_arn
-  use_fargate_spot   = false
+  private_subnet_ids    = module.networking.private_subnet_ids
+  project_name          = var.project_name
+  security_group_id     = module.security.backend_sg_id
+  service_name          = "nestbot"
+  target_group_arn      = module.alb.nestbot_target_group_arn
+  task_role_kms_actions = []
+  use_fargate_spot      = false
 }
 
 module "nestbot_build_cache" {

@@ -6,7 +6,8 @@ FROM python:3.13.15-slim@sha256:7c61056e61ac89e852de05f3dc6fa51a6dd2181797bceed4
 ARG OWASP_GID
 ARG OWASP_UID
 
-ENV POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
+ENV POETRY_INSTALLER_ONLY_BINARY=":all:" \
+    POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
     PYTHONUNBUFFERED=1
 
 # hadolint ignore=DL3008

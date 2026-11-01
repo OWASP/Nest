@@ -24,8 +24,10 @@ def runner(mocker):
 
 
 def test_command_requires_live_opt_in(runner):
+    output = StringIO()
+
     with pytest.raises(CommandError, match="--live"):
-        call_command("ai_evaluate", stdout=StringIO())
+        call_command("ai_evaluate", stdout=output)
 
     runner.assert_not_called()
 
@@ -112,6 +114,7 @@ def test_failures_are_saved_and_remaining_scenarios_run(runner, tmp_path):
         },
     ]
     destination = tmp_path / "report.json"
+    destination_path = str(destination)
     output = StringIO()
 
     with pytest.raises(CommandError, match="failed") as error:
@@ -121,7 +124,7 @@ def test_failures_are_saved_and_remaining_scenarios_run(runner, tmp_path):
             "--scenario",
             "all",
             "--output",
-            str(destination),
+            destination_path,
             stdout=output,
         )
 
@@ -153,22 +156,26 @@ def test_failures_are_saved_and_remaining_scenarios_run(runner, tmp_path):
     ],
 )
 def test_invalid_selection_is_rejected(runner, arguments):
+    output = StringIO()
+
     with pytest.raises(CommandError, match="invalid choice"):
-        call_command("ai_evaluate", "--live", *arguments, stdout=StringIO())
+        call_command("ai_evaluate", "--live", *arguments, stdout=output)
 
     runner.assert_not_called()
 
 
 def test_invalid_output_directory_is_rejected_before_running(runner, tmp_path):
     destination = tmp_path / "missing-directory" / "report.json"
+    destination_path = str(destination)
+    output = StringIO()
 
     with pytest.raises(CommandError, match="existing directory"):
         call_command(
             "ai_evaluate",
             "--live",
             "--output",
-            str(destination),
-            stdout=StringIO(),
+            destination_path,
+            stdout=output,
         )
 
     runner.assert_not_called()

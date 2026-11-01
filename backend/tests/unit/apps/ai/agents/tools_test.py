@@ -1,13 +1,54 @@
 """Tests for AI agent tools."""
 
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
+import pytest
+
 from apps.ai.agents.contribution.tools.contribute_info import get_contribute_info
+from apps.ai.agents.project.tools.age import format_project_age_results
 from apps.ai.agents.project.tools.get_flagship_projects import get_flagship_projects
 
 
 class TestProjectTools:
     """Test cases for project agent tools."""
+
+    @pytest.mark.parametrize(
+        ("age_days", "expected_age"),
+        [
+            (1, "1 day"),
+            (2, "2 days"),
+            (30, "1 month"),
+            (60, "2 months"),
+            (365, "1 year"),
+            (790, "2 years, 2 months"),
+        ],
+    )
+    def test_project_age_formats_duration(self, mocker, age_days, expected_age):
+        now = datetime(2026, 11, 2, tzinfo=UTC)
+        created_at = now - timedelta(days=age_days)
+        mocker.patch("apps.ai.agents.project.tools.age.timezone.now", return_value=now)
+
+        result = format_project_age_results(
+            [{"idx_name": "Example", "idx_created_at": created_at.timestamp()}],
+            project_name="Example",
+        )
+
+        assert f"*Age*: {expected_age} old" in result
+        assert f"*Creation Date*: {created_at.strftime('%B %d, %Y')}" in result
+
+    def test_project_age_list_formats_creation_dates(self):
+        created_at = datetime(2026, 11, 2, tzinfo=UTC)
+
+        result = format_project_age_results(
+            [
+                {"idx_name": "Example", "idx_created_at": created_at.timestamp()},
+                {"idx_name": "Undated"},
+            ]
+        )
+
+        assert "• *Example*\n  Created: November 02, 2026" in result
+        assert "• *Undated*\n  Creation date: Not available" in result
 
     def test_get_flagship_projects_default_limit(self):
         """Test getting flagship projects with default limit of 15."""

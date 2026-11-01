@@ -27,7 +27,7 @@ run "test_nestbot_provisioned_in_staging" {
   }
 
   assert {
-    condition     = length(local.backend_environment_variables) == 0 && contains(keys(local.backend_parameters_arns), "DJANGO_SLACK_BOT_TOKEN")
+    condition     = !output.route_slack_to_nestbot && length(local.backend_environment_variables) == 0 && contains(keys(local.backend_parameters_arns), "DJANGO_SLACK_BOT_TOKEN")
     error_message = "Backend Slack must remain configured until cutover."
   }
 }
@@ -65,7 +65,7 @@ run "test_nestbot_slack_cutover" {
   }
 
   assert {
-    condition     = local.backend_environment_variables == tomap({ DJANGO_SLACK_BOT_TOKEN = "", DJANGO_SLACK_SIGNING_SECRET = "" })
+    condition     = output.route_slack_to_nestbot && local.backend_environment_variables == tomap({ DJANGO_SLACK_BOT_TOKEN = "", DJANGO_SLACK_SIGNING_SECRET = "" })
     error_message = "Backend Slack must be disabled explicitly at cutover."
   }
 
@@ -92,7 +92,12 @@ run "test_production_defaults_remain_disabled" {
 
   assert {
     condition     = length(module.nestbot) == 0 && length(module.nestbot_build_cache) == 0 && length(local.backend_environment_variables) == 0
-    error_message = "Production must retain its existing services and Slack configuration."
+    error_message = "Production must retain its existing services."
+  }
+
+  assert {
+    condition     = contains(keys(local.backend_parameters_arns), "DJANGO_SLACK_BOT_TOKEN") && contains(keys(local.backend_parameters_arns), "DJANGO_SLACK_SIGNING_SECRET")
+    error_message = "Production must retain both Slack credentials on the backend."
   }
 }
 

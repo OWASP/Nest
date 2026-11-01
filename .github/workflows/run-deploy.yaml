@@ -243,20 +243,38 @@ jobs:
           MIGRATE_TASK_DEFINITION: ${{ inputs.migrate_task_definition }}
         run: bash .github/scripts/migrate-staging.sh
 
+      - name: Deploy staging release with current Slack routing
+        if: inputs.environment == 'staging'
+        run: |
+          CURRENT_ROUTE=$(terraform output -json | jq -r '.route_slack_to_nestbot.value // false')
+          terraform plan -var="route_slack_to_nestbot=$CURRENT_ROUTE" -out=tfplan
+          terraform apply -auto-approve tfplan
+        working-directory: infrastructure/live
+
       - name: Verify NestBot before Slack cutover
         if: inputs.environment == 'staging' && env.TF_VAR_route_slack_to_nestbot == 'true'
         run: |
           CLUSTER_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_cluster_name)
           SERVICE_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_service_name)
           aws ecs wait services-stable --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME"
-          TARGET_GROUP=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME" \
-            --query 'services[0].loadBalancers[0].targetGroupArn' --output text)
+          SERVICE=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME")
+          jq -e '.failures | length == 0' <<< "$SERVICE" > /dev/null
+          jq -e '.services | length == 1 and all(.[]; .desiredCount > 0 and
+            .runningCount == .desiredCount and .pendingCount == 0)' <<< "$SERVICE" > /dev/null
+          TASK_DEFINITION=$(jq -er '.services[0].taskDefinition' <<< "$SERVICE")
+          aws ecs describe-task-definition --task-definition "$TASK_DEFINITION" \
+            | jq -e --arg image "$NESTBOT_IMAGE" \
+              '.taskDefinition.containerDefinitions | any(.[]; .name == "nestbot" and .image == $image)' > /dev/null
+          TARGET_GROUP=$(jq -er '.services[0].loadBalancers[0].targetGroupArn' <<< "$SERVICE")
+          # cspell:ignore elbv
           aws elbv2 describe-target-health --target-group-arn "$TARGET_GROUP" \
-            | jq -e 'any(.TargetHealthDescriptions[]; .TargetHealth.State == "healthy")' > /dev/null
+            | jq -e '.TargetHealthDescriptions | length > 0 and all(.[]; .TargetHealth.State == "healthy")' > /dev/null
 
-      - name: Apply staging infrastructure changes
+      - name: Apply staging Slack routing
         if: inputs.environment == 'staging'
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform plan -out=tfplan
+          terraform apply -auto-approve tfplan
         working-directory: infrastructure/live
 
       - name: Capture terraform outputs

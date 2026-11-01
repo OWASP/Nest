@@ -39,6 +39,8 @@ Use the following inline permissions for the `nest-staging` IAM User.
 Staging includes NestBot through the existing service module, sharing the ALB,
 PostgreSQL, Redis and backend security group. It uses ARM64 Fargate tasks in
 private subnets. Production is unchanged; no `ENABLE_NESTBOT` setting is needed.
+NestBot uses `settings.nestbot.Staging` to enable Slack; the staging
+backend keeps Slack disabled.
 
 1. Before the first image push, apply a reviewed staging plan with
    `nestbot_desired_count = 0`, `route_slack_to_nestbot = false` and an intended
@@ -58,7 +60,9 @@ workflows. Optional staging settings are `NESTBOT_DESIRED_COUNT` (default `1`),
 `NESTBOT_GOOGLE_MODEL_NAME` (default `gemini-3.5-flash-lite`) and
 `ROUTE_SLACK_TO_NESTBOT` (default `false`); the image tag comes from the release.
 Staging plans first, runs migrations from the new backend image using the
-existing task configuration/private network, then applies that saved plan.
+existing task configuration/private network, then deploys with existing Slack
+routing. It verifies the new NestBot image and healthy targets before applying
+the requested routing separately.
 The staging foundation and migration task must already exist; planned settings
 and networking changes are not available during that migration.
 
@@ -193,6 +197,7 @@ No resources.
 | <a name="output_nestbot_ecr_repository_url"></a> [nestbot\_ecr\_repository\_url](#output\_nestbot\_ecr\_repository\_url) | The NestBot ECR repository URL, or null when disabled. |
 | <a name="output_nestbot_service_name"></a> [nestbot\_service\_name](#output\_nestbot\_service\_name) | The ECS NestBot service name, or null when disabled. |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | A list of private subnet IDs. |
+| <a name="output_route_slack_to_nestbot"></a> [route\_slack\_to\_nestbot](#output\_route\_slack\_to\_nestbot) | Whether Slack traffic is currently routed to NestBot. |
 | <a name="output_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#output\_shared\_data\_bucket\_name) | S3 bucket for shared public data (e.g. nest.dump). |
 | <a name="output_tasks_cluster_name"></a> [tasks\_cluster\_name](#output\_tasks\_cluster\_name) | The name of the ECS tasks cluster. |
 | <a name="output_tasks_security_group_id"></a> [tasks\_security\_group\_id](#output\_tasks\_security\_group\_id) | The ID of the security group for ECS tasks. |

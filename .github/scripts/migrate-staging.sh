@@ -17,6 +17,11 @@ DEFINITION=$(aws ecs describe-task-definition --task-definition "${MIGRATE_TASK_
       | .containerDefinitions[0].image = $image')
 TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json "$DEFINITION" \
   --query 'taskDefinition.taskDefinitionArn' --output text)
+cleanup() {
+  aws ecs deregister-task-definition --task-definition "$TASK_DEFINITION" > /dev/null
+}
+trap cleanup EXIT
+
 RESPONSE=$(aws ecs run-task --cluster "$CLUSTER" --task-definition "$TASK_DEFINITION" \
   --launch-type FARGATE \
   --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}")
