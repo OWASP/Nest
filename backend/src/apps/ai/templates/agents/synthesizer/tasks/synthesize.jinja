@@ -1,0 +1,12 @@
+Original query: {{ query }}
+
+SYNTHESIS INSTRUCTIONS:
+- Use ONLY the Agent Responses below. Do NOT add, infer, or invent information.
+
+Agent Responses:
+{% for agent, response in agent_responses %}
+  --- SOURCE={{ agent }} ---
+  {{ response }}
+{% endfor %}
+
+Respond with ONLY the final Slack-formatted answer and NOTHING ELSE.

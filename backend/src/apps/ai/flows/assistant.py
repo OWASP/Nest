@@ -1,0 +1,553 @@
+"""Main flow for processing queries with CrewAI."""
+
+from __future__ import annotations
+
+import inspect
+import logging
+
+from crewai import Agent, Crew, Task
+
+from apps.ai.agents.channel import create_channel_agent
+from apps.ai.agents.clarification import create_clarification_agent
+from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
+from apps.ai.common.utils import get_fallback_response, get_intent_to_agent_map
+from apps.ai.flows.collaborative import handle_collaborative_query
+from apps.ai.query_analyzer import analyze_query
+from apps.ai.router import route
+from apps.ai.semantic_cache import get_cached_response, store_cached_response
+from apps.common.open_ai import OpenAi
+from apps.slack.constants import (
+    OWASP_COMMUNITY_CHANNEL_ID,
+)
+
+logger = logging.getLogger(__name__)
+
+CONFIDENCE_THRESHOLD = 0.7
+
+IMAGE_DESCRIPTION_PROMPT = (
+    "Describe what is shown in these images. Focus on any text, "
+    "error messages, code snippets, UI elements, or technical details. "
+    "Be concise."
+)
+
+
+def normalize_channel_id(channel_id: str) -> str:
+    """Normalize channel ID by removing # prefix if present.
+
+    Args:
+        channel_id: Channel ID that may or may not have # prefix
+
+    Returns:
+        Normalized channel ID without # prefix
+
+    """
+    return channel_id.lstrip("#") if channel_id else ""
+
+
+def process_query(  # noqa: PLR0911
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
+) -> str | None:
+    """Process query using multi-agent architecture.
+
+    Supports both single-agent and collaborative multi-agent flows.
+
+    Args:
+        query: User's question
+        images (list[str] | None): A list of base64 encoded image data URIs.
+        channel_id: Optional Slack channel ID where the query originated
+        is_app_mention: Whether this is an explicit app mention (vs channel monitored message)
+
+    Returns:
+        Response string formatted for Slack, or None if answer should be skipped
+        (for channel monitored messages with low confidence)
+
+    """
+    try:
+        if images:
+            image_context = (
+                OpenAi(model=DEFAULT_VISION_MODEL)
+                .set_prompt(IMAGE_DESCRIPTION_PROMPT)
+                .set_input(query)
+                .set_images(images)
+                .complete()
+            )
+            if image_context:
+                query = f"{query}{DELIMITER}Image context: {image_context}"
+
+        # Step 1: Handle queries in owasp-community channel - suggest channels
+        # If query is in owasp-community channel, ALWAYS route to community agent
+        # for channel suggestions regardless of intent
+        if channel_id:
+            normalized_channel_id = normalize_channel_id(channel_id)
+            community_channel_id = normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
+
+            logger.debug(
+                "Checking channel suggestion",
+                extra={
+                    "channel_id": channel_id,
+                    "normalized_channel_id": normalized_channel_id,
+                    "community_channel_id": community_channel_id,
+                },
+            )
+
+            # If question is asked in owasp-community channel, route to community agent
+            # for channel suggestions
+            if normalized_channel_id == community_channel_id:
+                # Pre-check for contribution keywords to help guide the agent
+                contribution_keywords = [
+                    "contribute",
+                    "contributing",
+                    "contributor",
+                    "contributors",
+                    "get involved",
+                    "getting involved",
+                    "how to get involved",
+                    "beginner-friendly",
+                    "starter issues",
+                    "new contributors",
+                    "contribution guidelines",
+                    "contribution opportunities",
+                    "how to start",
+                    "getting started",
+                    "how contributors get involved",
+                    "good projects for",
+                    "projects for beginners",
+                    "interested in",
+                    "excited to join",
+                    "looking forward to contributing",
+                    "keen on learning",
+                    "would love some guidance",
+                    "I'd love some guidance",
+                    "how teams collaborate",
+                    "how projects are structured",
+                    "how to find issues",
+                    "contributing along",
+                    "contributing along the way",
+                    "contributing to",
+                    "guidance on",
+                    "some guidance",
+                    "love some guidance",
+                    "repositories are good",
+                    "projects or repositories",
+                ]
+                query_lower = query.lower()
+                has_contribution_keywords = any(
+                    keyword in query_lower for keyword in contribution_keywords
+                )
+
+                logger.info(
+                    "Query from owasp-community channel detected "
+                    "(has_contribution_keywords: %s), routing to community agent for "
+                    "channel suggestions",
+                    has_contribution_keywords,
+                    extra={
+                        "channel_id": channel_id,
+                        "has_contribution_keywords": has_contribution_keywords,
+                        "community_channel_id": community_channel_id,
+                    },
+                )
+
+                # Check for GSoC keywords first (more specific)
+                gsoc_keywords = [
+                    "gsoc",
+                    "google summer of code",
+                    "google summer",
+                    "summer of code",
+                ]
+                has_gsoc_keywords = any(keyword in query_lower for keyword in gsoc_keywords)
+
+                # If GSoC keywords detected, directly call the GSoC suggestion tool
+                if has_gsoc_keywords:
+                    logger.info(
+                        "GSoC keywords detected in owasp-community channel, "
+                        "directly calling GSoC channel suggestion tool",
+                        extra={"query": query[:200]},
+                    )
+                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
+                        suggest_gsoc_channel,
+                    )
+
+                    # Try to get the underlying function from the Tool object
+                    func = None
+                    result = None
+                    if hasattr(suggest_gsoc_channel, "__wrapped__"):
+                        func = suggest_gsoc_channel.__wrapped__
+                    elif hasattr(suggest_gsoc_channel, "func"):
+                        func = suggest_gsoc_channel.func
+                    elif hasattr(suggest_gsoc_channel, "run"):
+                        # If it has a run method, call that
+                        result = suggest_gsoc_channel.run({})
+                    else:
+                        # Try to unwrap using inspect
+                        func = inspect.unwrap(suggest_gsoc_channel)
+
+                    if func and callable(func):
+                        result = func()
+                    elif result is None:
+                        # Fallback: call render_template directly
+                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                        from apps.slack.constants import OWASP_GSOC_CHANNEL_ID  # noqa: PLC0415
+
+                        channel_id = OWASP_GSOC_CHANNEL_ID.lstrip("#")
+                        result = render_template(
+                            "agents/channel/tools/gsoc.jinja",
+                            gsoc_channel_id=channel_id,
+                        )
+                    logger.info(
+                        "Direct GSoC channel suggestion tool call completed",
+                        extra={"result_preview": result[:100]},
+                    )
+                    return result
+
+                # If contribution keywords detected, directly call the suggestion tool
+                if has_contribution_keywords:
+                    matched_keywords = [kw for kw in contribution_keywords if kw in query_lower]
+                    logger.info(
+                        "Contribution keywords detected in owasp-community channel, "
+                        "directly calling channel suggestion tool",
+                        extra={
+                            "query": query[:200],
+                            "matched_keywords": matched_keywords,
+                            "has_contribution_keywords": has_contribution_keywords,
+                        },
+                    )
+                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
+                        suggest_contribute_channel,
+                    )
+
+                    # Try to get the underlying function from the Tool object
+                    func = None
+                    result = None
+                    if hasattr(suggest_contribute_channel, "__wrapped__"):
+                        func = suggest_contribute_channel.__wrapped__
+                    elif hasattr(suggest_contribute_channel, "func"):
+                        func = suggest_contribute_channel.func
+                    elif hasattr(suggest_contribute_channel, "run"):
+                        # If it has a run method, call that
+                        result = suggest_contribute_channel.run({})
+                    else:
+                        # Try to unwrap using inspect
+                        func = inspect.unwrap(suggest_contribute_channel)
+
+                    if func and callable(func):
+                        result = func()
+                    elif not result:
+                        # Fallback: call render_template directly
+                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                        from apps.slack.constants import (  # noqa: PLC0415
+                            OWASP_CONTRIBUTE_CHANNEL_ID,
+                        )
+
+                        channel_id = OWASP_CONTRIBUTE_CHANNEL_ID.lstrip("#")
+                        result = render_template(
+                            "agents/channel/tools/contribute.jinja",
+                            contribute_channel_id=channel_id,
+                        )
+                    logger.info(
+                        "Direct channel suggestion tool call completed",
+                        extra={"result_preview": result[:100]},
+                    )
+                    return result
+
+                # For all other queries in owasp-community channel, use channel agent
+                logger.info(
+                    "Query from owasp-community channel, routing to channel agent",
+                    extra={"query": query[:200]},
+                )
+                channel_agent = create_channel_agent()
+                return execute_task(
+                    channel_agent,
+                    query,
+                    channel_id=channel_id,
+                    is_channel_suggestion=True,
+                )
+
+        # Check semantic cache
+        try:
+            if (cached := get_cached_response(query)) is not None:
+                return cached
+        except Exception:
+            logger.exception("Semantic cache lookup failed, proceeding without cache")
+
+        # Step 2: Analyze query complexity before routing
+        try:
+            query_analysis = analyze_query(query)
+            logger.info(
+                "Query analyzed",
+                extra={
+                    "is_simple": query_analysis["is_simple"],
+                    "query": query,
+                    "sub_queries": query_analysis["sub_queries"],
+                },
+            )
+        except Exception:
+            logger.exception("Query Analyzer failed, falling back to single agent: %s", query)
+            query_analysis = {"is_simple": True, "sub_queries": []}
+
+        # Step 3: Use collaborative flow for complex query
+        if not query_analysis["is_simple"] and len(query_analysis["sub_queries"]) > 1:
+            try:
+                if response := handle_collaborative_query(query, query_analysis["sub_queries"]):
+                    try:
+                        store_cached_response(
+                            query=query,
+                            response=response,
+                        )
+                    except Exception:
+                        logger.exception("Failed to store semantic cache entry")
+                    return response
+            except Exception:
+                logger.exception(
+                    "Collaborative flow failed, falling back to single agent: %s", query
+                )
+
+        # Step 4: Route to appropriate expert agent (single-agent flow)
+        router_result = route(query)
+        intent = router_result["intent"]
+        confidence = router_result["confidence"]
+
+        logger.info(
+            "Query routed",
+            extra={
+                "intent": intent,
+                "confidence": confidence,
+                "query": query,
+                "channel_id": channel_id,
+            },
+        )
+
+        # Step 5: Check for contribution intent even if misclassified
+        # This is a fallback to catch contribution queries that might be misclassified
+        contribution_keywords = [
+            "contribute",
+            "contributing",
+            "contributor",
+            "contributors",
+            "get involved",
+            "getting involved",
+            "beginner-friendly",
+            "starter issues",
+            "contribution guidelines",
+            "contribution opportunities",
+            "how to start",
+            "getting started",
+            "new contributors",
+            "good projects for",
+            "would love",
+            "interested in",
+            "excited to join",
+            "looking forward to contributing",
+            "keen on learning",
+        ]
+        query_lower = query.lower()
+        has_contribution_keywords = any(
+            keyword in query_lower for keyword in contribution_keywords
+        )
+
+        # Step 6: Handle low confidence - invoke clarification agent
+        if confidence < CONFIDENCE_THRESHOLD:
+            logger.warning(
+                "Low confidence routing",
+                extra={
+                    "intent": intent,
+                    "confidence": confidence,
+                    "is_app_mention": is_app_mention,
+                },
+            )
+
+            # For channel monitored messages: skip the answer
+            if channel_id and not is_app_mention:
+                logger.info(
+                    "Skipping response for channel monitored message with low confidence",
+                    extra={"intent": intent, "confidence": confidence},
+                )
+                return None
+
+            # Invoke Clarification Agent
+            try:
+                clarification_result = execute_task(create_clarification_agent(), query)
+            except Exception:
+                logger.exception("Clarification agent failed, falling back to generic message")
+                return (
+                    "I'm unable to provide a confident answer to your question based on my "
+                    "current knowledge and available tools. Please try rephrasing your question "
+                    "or wait for a response from one of the community members."
+                )
+            else:
+                logger.info(
+                    "Clarification agent returned",
+                    extra={"clarification_preview": (clarification_result or "")[:200]},
+                )
+                return clarification_result
+
+        # Step 7: Get appropriate expert agent
+        agent_factory = get_intent_to_agent_map().get(intent)
+        if not agent_factory:
+            logger.error("Unknown intent", extra={"intent": intent})
+            # Handle unknown intent similar to low confidence
+            if channel_id and not is_app_mention:
+                return None
+            return (
+                "I'm unable to process your question. Please try rephrasing or ask about "
+                "OWASP projects, chapters, contributions, or community resources."
+            )
+
+        agent = agent_factory()
+
+        # Step 8: Execute task with agent
+        if response := execute_task(agent, query):
+            try:
+                store_cached_response(
+                    query=query,
+                    response=response,
+                    intent=intent,
+                    confidence=confidence,
+                )
+            except Exception:
+                logger.exception("Failed to store semantic cache entry")
+
+    except Exception:
+        logger.exception("Failed to process query: %s", query)
+        return get_fallback_response()
+    else:
+        return response
+
+
+def execute_task(
+    agent: Agent,
+    query: str | None = None,
+    channel_id: str | None = None,
+    task_description: str | None = None,
+    *,
+    is_channel_suggestion: bool = False,
+) -> str:
+    """Execute a task with an agent.
+
+    Args:
+        agent: The agent to execute the task
+        query: Optional user's query
+        channel_id: Optional Slack channel ID for context
+        task_description: Optional task description to execute the task
+        is_channel_suggestion: Whether this is a channel suggestion scenario
+            from owasp-community channel
+
+    Returns:
+        Response string
+
+    """
+    if not task_description and not query:
+        err_msg = "Either query or task_description must be provided"
+        raise ValueError(err_msg)
+
+    if not task_description and not agent.tools:
+        task_description = (
+            f"Respond to this query: {query}\n\n"
+            "Follow your role and instructions. Respond directly without using tools."
+        )
+
+    if not task_description:
+        task_description = (
+            f"Answer this query: {query}\n\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "- You MUST use the provided tools to answer this question\n"
+            "- Do NOT rely on your training data or general knowledge\n"
+            "- If tools don't provide sufficient information, state that clearly\n"
+            "- Tool results are authoritative - use them exclusively\n"
+            "- Never guess or make assumptions based on general knowledge\n"
+            "- For RAG agent: ALWAYS call semantic_search tool first to retrieve relevant "
+            "context\n"
+            "- IMPORTANT: Do NOT retry the same tool call with the same input if it fails\n"
+            "- If a tool call fails or doesn't provide useful results, try a different "
+            "approach or tool\n"
+            "- If you've already tried a tool and it didn't work, do NOT call it again "
+            "with the same parameters"
+        )
+
+    if is_channel_suggestion:
+        task_description += (
+            "\n\nCRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STEPS:\n\n"
+            "1. READ THE ENTIRE MESSAGE - Do not dismiss it as just a greeting. "
+            "Look for the user's actual questions and interests.\n\n"
+            "2. CHECK FOR CONTRIBUTION KEYWORDS - Scan the message for ANY of these:\n"
+            "   - 'contribute', 'contributing', 'contributor', 'contributors'\n"
+            "   - 'get involved', 'getting involved', 'how to get involved'\n"
+            "   - 'beginner-friendly', 'starter issues', 'new contributors'\n"
+            "   - 'contribution guidelines', 'contribution opportunities', "
+            "'contribution docs'\n"
+            "   - 'how to start', 'getting started', 'how contributors get involved'\n"
+            "   - 'good projects for', 'projects for beginners'\n"
+            "   - 'interested in', 'excited to join', 'looking forward to contributing'\n"
+            "   - 'keen on learning', 'would love some guidance', "
+            "'I'd love some guidance'\n"
+            "   - 'how teams collaborate', 'how projects are structured', "
+            "'how to find issues'\n"
+            "   - Even if the message starts with 'I'm [name], glad to be here' - "
+            "if it contains ANY of the above, it's a CONTRIBUTION query.\n\n"
+            "3. IF CONTRIBUTION KEYWORDS FOUND → YOU MUST IMMEDIATELY CALL: "
+            "suggest_contribute_channel()\n"
+            "   - Call the tool ONCE with no parameters (it takes no arguments)\n"
+            "   - The tool will return a formatted message\n"
+            "   - Your task is COMPLETE after receiving the tool output\n"
+            "   - Return the tool output EXACTLY as-is, word-for-word\n"
+            "   - Do NOT call any other tools\n"
+            "   - Do NOT generate any additional text\n"
+            "   - Do NOT call the tool again - it has no parameters, calling it again "
+            "does nothing\n"
+            "   - STOP immediately after returning the tool output\n\n"
+            "4. IF GSoC MENTIONED → CALL: suggest_gsoc_channel()\n"
+            "   - Same rules: call once with no parameters, return output exactly, "
+            "then STOP\n\n"
+            "5. IF SPECIFIC PROJECT/CHAPTER NAME → CALL: get_entity_channels() with the name\n\n"
+            "6. OTHERWISE → CALL: get_entity_channels()\n\n"
+            "STOP CONDITION: After calling a tool and receiving its output, you are DONE. "
+            "Do not continue. Do not call the tool again. The tool output is your complete "
+            "response. Return it immediately and stop. Do not try to improve it. Do not add "
+            "anything to it."
+        )
+
+    if channel_id:
+        task_description += f"\n\nContext: This query was asked in Slack channel {channel_id}"
+
+    expected_output = (
+        "Clear, concise answer based ONLY on tool results, "
+        "formatted for Slack markdown. If tools don't provide enough "
+        "information, explicitly state what information is missing."
+    )
+
+    if not agent.tools:
+        expected_output = "A concise response following your role, formatted for Slack markdown."
+
+    if is_channel_suggestion:
+        expected_output = (
+            "The exact, unmodified output from the channel suggestion tool. "
+            "Call the tool ONCE, copy its output exactly, and return it. "
+            "That is your complete response. Do not add anything. Do not call the tool again."
+        )
+
+    task = Task(
+        description=task_description,
+        agent=agent,
+        expected_output=expected_output,
+    )
+
+    # For channel suggestions, use stricter limits to prevent loops
+    crew_kwargs = {
+        "agents": [agent],
+        "tasks": [task],
+        "verbose": True,
+        "memory": False,
+        "max_rpm": 10,
+    }
+
+    if is_channel_suggestion:
+        crew_kwargs["max_iter"] = 2
+    else:
+        crew_kwargs["max_iter"] = 15
+
+    crew = Crew(**crew_kwargs)
+    result = crew.kickoff()
+    return str(result)

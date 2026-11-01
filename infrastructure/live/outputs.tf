@@ -58,9 +58,29 @@ output "private_subnet_ids" {
   value       = module.networking.private_subnet_ids
 }
 
+output "route_slack_to_nestbot" {
+  description = "Whether Slack traffic is currently routed to NestBot."
+  value       = local.nestbot_enabled && var.route_slack_to_nestbot
+}
+
 output "shared_data_bucket_name" {
   description = "S3 bucket for shared public data (e.g. nest.dump)."
   value       = module.storage.shared_data_bucket_name
+}
+
+output "nestbot_cluster_name" {
+  description = "The ECS NestBot cluster name, or null when disabled."
+  value       = one(module.nestbot[*].ecs_cluster_name)
+}
+
+output "nestbot_ecr_repository_url" {
+  description = "The NestBot ECR repository URL, or null when disabled."
+  value       = one(module.nestbot[*].ecr_repository_url)
+}
+
+output "nestbot_service_name" {
+  description = "The ECS NestBot service name, or null when disabled."
+  value       = one(module.nestbot[*].ecs_service_name)
 }
 
 output "tasks_cluster_name" {

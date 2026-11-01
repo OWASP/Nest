@@ -4,48 +4,79 @@ from __future__ import annotations
 
 import logging
 
-from apps.ai.agent.agent import AgenticRAGAgent
 from apps.slack.blocks import markdown
-from apps.slack.common.question_detector import QuestionDetector
+from apps.slack.utils import format_ai_response_for_slack
 
 logger = logging.getLogger(__name__)
 
 
-def get_blocks(query: str) -> list[dict]:
+def get_blocks(
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
+) -> list[dict]:
     """Get AI response blocks.
 
     Args:
         query (str): The user's question.
-        presentation (EntityPresentation | None): Configuration for entity presentation.
+        images (list[str] | None): A list of base64 encoded image data URIs.
+        channel_id (str | None): The Slack channel ID where the query originated.
+        is_app_mention (bool): Whether this is an explicit app mention.
 
     Returns:
         list: A list of Slack blocks representing the AI response.
 
     """
-    ai_response = process_ai_query(query.strip())
+    ai_response = process_ai_query(
+        query.strip(), images=images, channel_id=channel_id, is_app_mention=is_app_mention
+    )
+    return get_response_blocks(ai_response)
 
-    if ai_response:
-        return [markdown(ai_response)]
-    return get_error_blocks()
+
+def get_response_blocks(response: str | None) -> list[dict]:
+    """Get Slack blocks for an already generated AI response.
+
+    Args:
+        response (str | None): The AI's generated response.
+
+    Returns:
+        list: A list of Slack blocks representing the AI response.
+
+    """
+    # Format the AI response for Slack (remove code blocks, fix markdown)
+    return [markdown(format_ai_response_for_slack(response))] if response else get_error_blocks()
 
 
-def process_ai_query(query: str) -> str | None:
-    """Process the AI query using the agentic RAG agent.
+def process_ai_query(
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
+) -> str | None:
+    """Process the AI query using CrewAI flow.
 
     Args:
         query (str): The user's question.
+        images (list[str] | None): A list of base64 encoded image data URIs.
+        channel_id (str | None): The Slack channel ID where the query originated.
+        is_app_mention (bool): Whether this is an explicit app mention.
 
     Returns:
-        str | None: The AI response or None if error occurred.
+        str | None: The AI response, None if error occurred or should be skipped.
 
     """
-    question_detector = QuestionDetector()
-    if not question_detector.is_owasp_question(text=query):
-        return get_default_response()
+    try:
+        from apps.ai.flows import process_query
 
-    agent = AgenticRAGAgent()
-    result = agent.run(query=query)
-    return result["answer"]
+        return process_query(
+            query, images=images, channel_id=channel_id, is_app_mention=is_app_mention
+        )
+    except Exception:
+        logger.exception("Failed to process AI query")
+        return None
 
 
 def get_error_blocks() -> list[dict]:

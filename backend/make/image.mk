@@ -2,6 +2,7 @@
 
 BACKEND_IMAGE_NAME ?= nest-backend-local
 SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
+BACKEND_SBOM_OUTPUT ?= backend-sbom-$(SBOM_VERSION).cdx.json
 
 backend-image-build:
 	@args=(
@@ -30,7 +31,7 @@ backend-image-sbom: backend-image-build-local
 		"$$image"
 		image
 		'--format=cyclonedx'
-		'--output=/work/backend-sbom-$(SBOM_VERSION).cdx.json'
+		'--output=/work/$(BACKEND_SBOM_OUTPUT)'
 		$(BACKEND_IMAGE_NAME)
 	)
 	docker run "$${args[@]}"

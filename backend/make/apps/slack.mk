@@ -33,3 +33,7 @@ slack-sync-data:
 slack-sync-messages:
 	@echo "Syncing Slack messages"
 	@CMD="python manage.py slack_sync_messages" $(MAKE) backend-exec-command
+
+.PHONY: run-nestbot
+run-nestbot: ## Start local NestBot and its dependencies
+	@docker compose -f docker-compose/local/compose.yaml up --build --detach --wait backend nestbot

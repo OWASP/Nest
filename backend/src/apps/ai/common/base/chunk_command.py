@@ -64,7 +64,6 @@ class BaseChunkCommand(BaseAICommand):
                 if chunks := create_chunks_and_embeddings(
                     chunk_texts=list(unique_chunk_texts),
                     context=context,
-                    openai_client=self.openai_client,
                     save=False,
                 ):
                     batch_chunks_to_create.extend(chunks)
@@ -82,9 +81,6 @@ class BaseChunkCommand(BaseAICommand):
 
     def handle(self, *args, **options):
         """Handle the chunk creation command."""
-        if not self.setup_openai_client():
-            return
-
         queryset = self.get_queryset(options)
         batch_size = options["batch_size"]
 

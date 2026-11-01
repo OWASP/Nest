@@ -2,6 +2,10 @@ name: Apply infrastructure changes
 description: Run IaC plan and apply steps
 
 inputs:
+  apply-changes:
+    description: Apply the saved plan after planning (false allows pre-deployment migrations).
+    required: false
+    default: 'true'
   plugin-cache-dir:
     description: Directory to store Terraform plugin cache
     required: false
@@ -81,6 +85,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Apply Terraform changes
+      if: inputs.apply-changes != 'false'
       run: terraform apply -auto-approve tfplan
       shell: bash
       working-directory: ${{ inputs.working-directory }}

@@ -1,0 +1,19 @@
+display_information:
+  name: NestBot Local
+  description: Local NestBot testing
+features:
+  bot_user:
+    display_name: NestBot Local
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - reactions:write
+settings:
+  event_subscriptions:
+    request_url: https://replace-me.ngrok-free.app/integrations/slack/events/
+    bot_events:
+      - app_mention
+  socket_mode_enabled: false
+  token_rotation_enabled: false

@@ -1,13 +1,12 @@
 """Tests for AI handler functionality."""
 
-from unittest.mock import Mock, patch
-
-import pytest
+from unittest.mock import patch
 
 from apps.slack.common.handlers.ai import (
     get_blocks,
     get_default_response,
     get_error_blocks,
+    get_response_blocks,
     process_ai_query,
 )
 
@@ -31,7 +30,9 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=None, channel_id=None, is_app_mention=False
+        )
         mock_markdown.assert_called_once_with(ai_response)
         assert result == [expected_block]
 
@@ -47,7 +48,9 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=None, channel_id=None, is_app_mention=False
+        )
         mock_get_error_blocks.assert_called_once()
         assert result == error_blocks
 
@@ -63,91 +66,121 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=None, channel_id=None, is_app_mention=False
+        )
         mock_get_error_blocks.assert_called_once()
         assert result == error_blocks
 
-    @patch("apps.slack.common.handlers.ai.AgenticRAGAgent")
-    @patch("apps.slack.common.handlers.ai.QuestionDetector")
-    def test_process_ai_query_success(self, mock_question_detector_class, mock_agent_class):
-        """Test successful AI query processing with AgenticRAGAgent."""
+    @patch("apps.slack.common.handlers.ai.process_ai_query")
+    @patch("apps.slack.common.handlers.ai.markdown")
+    def test_get_blocks_with_images(self, mock_markdown, mock_process_ai_query):
+        """Test get_blocks passes images through to process_ai_query."""
+        query = "What is in this image?"
+        images = ["data:image/png;base64,abc123"]
+        ai_response = "The image shows a security dashboard."
+        expected_block = {
+            "text": {"type": "mrkdwn", "text": ai_response},
+            "type": "section",
+        }
+
+        mock_process_ai_query.return_value = ai_response
+        mock_markdown.return_value = expected_block
+
+        result = get_blocks(query, images=images)
+
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=images, channel_id=None, is_app_mention=False
+        )
+        assert result == [expected_block]
+
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_success(self, mock_process_query):
+        """Test successful AI query processing."""
         query = "What is OWASP?"
         expected_response = "OWASP is a security organization..."
 
-        mock_question_detector = Mock()
-        mock_question_detector.is_owasp_question.return_value = True
-        mock_question_detector_class.return_value = mock_question_detector
-
-        mock_agent = Mock()
-        mock_agent.run.return_value = {"answer": expected_response}
-        mock_agent_class.return_value = mock_agent
+        mock_process_query.return_value = expected_response
 
         result = process_ai_query(query)
 
-        mock_question_detector_class.assert_called_once()
-        mock_question_detector.is_owasp_question.assert_called_once_with(text=query)
-        mock_agent_class.assert_called_once()
-        mock_agent.run.assert_called_once_with(query=query)
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
         assert result == expected_response
 
-    @patch("apps.slack.common.handlers.ai.AgenticRAGAgent")
-    @patch("apps.slack.common.handlers.ai.QuestionDetector")
-    def test_process_ai_query_failure(self, mock_question_detector_class, mock_agent_class):
-        """Test AI query processing failure raises exception."""
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_failure(self, mock_process_query):
+        """Test AI query processing failure returns None."""
         query = "What is OWASP?"
 
-        mock_question_detector = Mock()
-        mock_question_detector.is_owasp_question.return_value = True
-        mock_question_detector_class.return_value = mock_question_detector
-
-        mock_agent = Mock()
-        mock_agent.run.side_effect = Exception("AI service error")
-        mock_agent_class.return_value = mock_agent
-
-        with pytest.raises(Exception, match="AI service error"):
-            process_ai_query(query)
-
-        mock_question_detector_class.assert_called_once()
-        mock_question_detector.is_owasp_question.assert_called_once_with(text=query)
-        mock_agent_class.assert_called_once()
-        mock_agent.run.assert_called_once_with(query=query)
-
-    @patch("apps.slack.common.handlers.ai.AgenticRAGAgent")
-    @patch("apps.slack.common.handlers.ai.QuestionDetector")
-    def test_process_ai_query_returns_none(self, mock_question_detector_class, mock_agent_class):
-        """Test AI query processing when agent returns no answer."""
-        query = "What is OWASP?"
-
-        mock_question_detector = Mock()
-        mock_question_detector.is_owasp_question.return_value = True
-        mock_question_detector_class.return_value = mock_question_detector
-
-        mock_agent = Mock()
-        mock_agent.run.return_value = {"answer": None}
-        mock_agent_class.return_value = mock_agent
+        mock_process_query.side_effect = Exception("AI service error")
 
         result = process_ai_query(query)
 
-        mock_question_detector_class.assert_called_once()
-        mock_question_detector.is_owasp_question.assert_called_once_with(text=query)
-        mock_agent_class.assert_called_once()
-        mock_agent.run.assert_called_once_with(query=query)
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
         assert result is None
 
-    @patch("apps.slack.common.handlers.ai.QuestionDetector")
-    def test_process_ai_query_non_owasp_question(self, mock_question_detector_class):
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_returns_none(self, mock_process_query):
+        """Test AI query processing when process_query returns None."""
+        query = "What is OWASP?"
+
+        mock_process_query.return_value = None
+
+        result = process_ai_query(query)
+
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
+        assert result is None
+
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_non_owasp_question(self, mock_process_query):
         """Test AI query processing when question is not OWASP-related."""
         query = "What is the weather today?"
 
-        mock_question_detector = Mock()
-        mock_question_detector.is_owasp_question.return_value = False
-        mock_question_detector_class.return_value = mock_question_detector
+        mock_process_query.return_value = get_default_response()
 
         result = process_ai_query(query)
 
-        mock_question_detector_class.assert_called_once()
-        mock_question_detector.is_owasp_question.assert_called_once_with(text=query)
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
         assert result == get_default_response()
+
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_with_images(self, mock_process_query):
+        """Test process_ai_query passes images through to process_query."""
+        query = "Describe this image"
+        images = ["data:image/jpeg;base64,img_data"]
+        expected_response = "The image shows..."
+
+        mock_process_query.return_value = expected_response
+
+        result = process_ai_query(query, images=images)
+
+        mock_process_query.assert_called_once_with(
+            query, images=images, channel_id=None, is_app_mention=False
+        )
+        assert result == expected_response
+
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_with_images_and_channel(self, mock_process_query):
+        """Test process_ai_query forwards images along with channel_id and is_app_mention."""
+        query = "What is this?"
+        images = ["data:image/png;base64,abc"]
+        channel_id = "C123456"
+
+        mock_process_query.return_value = "Response"
+
+        process_ai_query(query, images=images, channel_id=channel_id, is_app_mention=True)
+
+        mock_process_query.assert_called_once_with(
+            query, images=images, channel_id=channel_id, is_app_mention=True
+        )
 
     @patch("apps.slack.common.handlers.ai.markdown")
     def test_get_error_blocks(self, mock_markdown):
@@ -167,14 +200,29 @@ class TestAiHandler:
         mock_markdown.assert_called_once_with(expected_error_message)
         assert result == [expected_block]
 
-    def test_get_blocks_strips_whitespace(self):
-        """Test that get_blocks properly strips whitespace from query."""
-        with patch("apps.slack.common.handlers.ai.process_ai_query") as mock_process_ai_query:
-            mock_process_ai_query.return_value = None
-            with patch("apps.slack.common.handlers.ai.get_error_blocks") as mock_get_error_blocks:
-                mock_get_error_blocks.return_value = []
+    @patch("apps.slack.common.handlers.ai.format_ai_response_for_slack")
+    @patch("apps.slack.common.handlers.ai.markdown")
+    def test_get_response_blocks_success(self, mock_markdown, mock_format_ai_response):
+        """Test get_response_blocks with successful response."""
+        response = "Successful response"
+        formatted = "Formatted response"
+        expected_block = {"type": "section", "text": {"type": "mrkdwn", "text": formatted}}
 
-                query_with_whitespace = "  What is OWASP?  "
-                get_blocks(query_with_whitespace)
+        mock_format_ai_response.return_value = formatted
+        mock_markdown.return_value = expected_block
 
-                mock_process_ai_query.assert_called_once_with("What is OWASP?")
+        result = get_response_blocks(response)
+
+        mock_format_ai_response.assert_called_once_with(response)
+        mock_markdown.assert_called_once_with(formatted)
+        assert result == [expected_block]
+
+    @patch("apps.slack.common.handlers.ai.get_error_blocks")
+    def test_get_response_blocks_empty(self, mock_get_error_blocks):
+        """Test get_response_blocks with empty response returns error blocks."""
+        error_blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "Error"}}]
+        mock_get_error_blocks.return_value = error_blocks
+
+        assert get_response_blocks("") == error_blocks
+        assert get_response_blocks(None) == error_blocks
+        assert mock_get_error_blocks.call_count == 2

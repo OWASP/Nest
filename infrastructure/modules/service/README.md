@@ -53,10 +53,13 @@ No modules.
 | <a name="input_container_cpu"></a> [container\_cpu](#input\_container\_cpu) | The CPU units for the container (1024 = 1 vCPU). | `number` | `512` | no |
 | <a name="input_container_memory"></a> [container\_memory](#input\_container\_memory) | The memory for the container in MiB. | `number` | `1024` | no |
 | <a name="input_container_port"></a> [container\_port](#input\_container\_port) | The port the container listens on. | `number` | n/a | yes |
+| <a name="input_container_stop_timeout"></a> [container\_stop\_timeout](#input\_container\_stop\_timeout) | Seconds to allow the container to stop gracefully. Null uses the ECS default. | `number` | `null` | no |
 | <a name="input_desired_count"></a> [desired\_count](#input\_desired\_count) | The desired number of tasks. | `number` | `2` | no |
 | <a name="input_enable_auto_scaling"></a> [enable\_auto\_scaling](#input\_enable\_auto\_scaling) | Whether to enable auto scaling for the service. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name (e.g., staging, production). | `string` | n/a | yes |
+| <a name="input_environment_variables"></a> [environment\_variables](#input\_environment\_variables) | Non-secret container environment variables. Names must not overlap parameters\_arns. | `map(string)` | `{}` | no |
 | <a name="input_force_new_deployment"></a> [force\_new\_deployment](#input\_force\_new\_deployment) | Whether to force a new deployment on each apply. | `bool` | `false` | no |
+| <a name="input_health_check_command"></a> [health\_check\_command](#input\_health\_check\_command) | Optional ECS health check command. Null keeps the default wget probe. | `list(string)` | `null` | no |
 | <a name="input_health_check_path"></a> [health\_check\_path](#input\_health\_check\_path) | The path for the ECS container health checks. | `string` | `"/"` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | The Docker image tag. | `string` | n/a | yes |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key for log encryption. | `string` | n/a | yes |
@@ -69,6 +72,7 @@ No modules.
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | The ID of the security group for the service. | `string` | n/a | yes |
 | <a name="input_service_name"></a> [service\_name](#input\_service\_name) | The name of the service (e.g., backend, frontend). | `string` | n/a | yes |
 | <a name="input_target_group_arn"></a> [target\_group\_arn](#input\_target\_group\_arn) | The ARN of the ALB target group. | `string` | n/a | yes |
+| <a name="input_task_role_kms_actions"></a> [task\_role\_kms\_actions](#input\_task\_role\_kms\_actions) | KMS actions allowed on kms\_key\_arn for the application task role. An empty list disables this policy. | `list(string)` | <pre>[<br/>  "kms:Decrypt",<br/>  "kms:GenerateDataKey*"<br/>]</pre> | no |
 | <a name="input_task_role_policy_arns"></a> [task\_role\_policy\_arns](#input\_task\_role\_policy\_arns) | A list of additional IAM policy ARNs to attach to the ECS task role. | `list(string)` | `[]` | no |
 | <a name="input_use_fargate_spot"></a> [use\_fargate\_spot](#input\_use\_fargate\_spot) | Whether to use Fargate Spot capacity provider. | `bool` | `false` | no |
 

@@ -1,8 +1,8 @@
 """Slack bot staff command."""
 
 from apps.common.constants import OWASP_URL
+from apps.owasp.utils.staff import get_staff_data
 from apps.slack.commands.command import CommandBase
-from apps.slack.utils import get_staff_data
 
 
 class Staff(CommandBase):

@@ -146,6 +146,59 @@ resource "aws_lb_listener_rule" "backend_https" {
   }
 }
 
+resource "aws_lb_listener_rule" "nestbot_https" {
+  count        = var.enable_nestbot ? 1 : 0
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 50
+  tags         = var.common_tags
+
+  action {
+    type = "forward"
+
+    # Associate NestBot with the ALB before starting tasks, without switching traffic.
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.backend.arn
+        weight = var.route_slack_to_nestbot ? 0 : 100
+      }
+      target_group {
+        arn    = aws_lb_target_group.nestbot[0].arn
+        weight = var.route_slack_to_nestbot ? 100 : 0
+      }
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/integrations/slack/*"]
+    }
+  }
+}
+
+resource "aws_lb_target_group" "nestbot" {
+  count                = var.enable_nestbot ? 1 : 0
+  deregistration_delay = 30
+  name                 = "${var.project_name}-${var.environment}-nestbot-tg"
+  port                 = 8000
+  protocol             = "HTTP"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-nestbot-tg"
+  })
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 30
+    matcher             = "200-299"
+    path                = "/status/"
+    protocol            = "HTTP"
+    timeout             = 5
+    unhealthy_threshold = 10
+  }
+}
+
 resource "aws_lb_target_group" "backend" {
   deregistration_delay = 30
   name                 = "${var.project_name}-${var.environment}-backend-tg"

@@ -1,0 +1,28 @@
+Classify this query: {{ query }}
+
+CRITICAL CLASSIFICATION GUIDELINES FOR CONTRIBUTION INTENT:
+- If the message contains ANY of the following, classify as 'contribution':
+  * Expressions of interest: 'interested in', 'excited to join', 'looking forward to contributing', 'want to contribute', 'would love to', 'keen on learning how to get involved'
+  * Questions about getting started: 'how to get involved', 'how contributors get involved', 'how to start contributing', 'getting started', 'new contributors', 'beginner-friendly'
+  * Questions about finding opportunities: 'good projects for new contributors', 'beginner-friendly issues', 'starter issues', 'contribution opportunities', 'how to find issues'
+  * Questions about processes: 'contribution guidelines', 'contribution docs', 'how teams collaborate', 'how projects are structured for contributors', 'how to submit contributions'
+  * Requests for guidance: 'guidance on contributing', 'help getting started', 'recommendations', 'what should I do first'
+  * Mentions of learning/contributing: 'learning from', 'contributing along the way', 'interested in seeing how', 'how contributors'
+- IMPORTANT: Even if the message is long or contains multiple topics, if it expresses ANY interest in contributing, getting involved, or finding contribution opportunities, classify as 'contribution'
+- If the message asks about project structure, collaboration, or how teams work in the context of wanting to contribute or get involved, classify as 'contribution'
+- Classify as 'project' if the message asks about what a project is, what it does, its features, or project details (e.g., "what is X project?", "what does X do?", "tell me about X project")
+- Only classify as 'project' if the message is purely informational about what a project is or does WITHOUT any contribution intent
+- If the message is truly unclear or out-of-scope, classify as 'rag' with low confidence (0.3-0.5)
+- For general questions about OWASP that don't fit other categories, classify as 'rag' (this is the fallback for general knowledge questions)
+
+Provide:
+1. Intent: One of {{ intent_values }}
+2. Confidence: A score between 0.0 and 1.0 (use high confidence 0.8+ for clear contribution intent)
+3. Reasoning: Why this intent was chosen, specifically mentioning which contribution indicators were found
+4. Alternative intents: Other possible intents if confidence is low
+
+Format your response as:
+Intent: <intent>
+Confidence: <0.0-1.0>
+Reasoning: <explanation>
+Alternatives: <comma-separated list or 'none'>

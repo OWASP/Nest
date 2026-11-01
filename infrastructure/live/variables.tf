@@ -285,6 +285,39 @@ variable "frontend_use_fargate_spot" {
   default     = true
 }
 
+variable "nestbot_desired_count" {
+  description = "Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.nestbot_desired_count >= 0 && floor(var.nestbot_desired_count) == var.nestbot_desired_count
+    error_message = "nestbot_desired_count must be a non-negative whole number."
+  }
+}
+
+variable "nestbot_google_model_name" {
+  description = "Google model used by NestBot. Verify provider compatibility before deployment."
+  type        = string
+  default     = "gemini-3.5-flash-lite"
+
+  validation {
+    condition     = trimspace(var.nestbot_google_model_name) != ""
+    error_message = "nestbot_google_model_name must not be empty."
+  }
+}
+
+variable "nestbot_image_tag" {
+  description = "Immutable NestBot image tag, required in staging."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.environment != "staging" || try(trimspace(var.nestbot_image_tag) != "", false)
+    error_message = "nestbot_image_tag is required in staging."
+  }
+}
+
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets."
   type        = list(string)
@@ -355,6 +388,17 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
+}
+
+variable "route_slack_to_nestbot" {
+  description = "Whether to switch Slack traffic to the separate NestBot service."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.route_slack_to_nestbot || (var.environment == "staging" && var.nestbot_desired_count > 0)
+    error_message = "Slack routing requires staging with at least one NestBot task."
+  }
 }
 
 variable "slack_bot_token_suffix" {

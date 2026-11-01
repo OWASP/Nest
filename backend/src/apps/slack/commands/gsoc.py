@@ -8,7 +8,6 @@ from apps.slack.constants import (
     OWASP_CONTRIBUTE_CHANNEL_ID,
     OWASP_GSOC_CHANNEL_ID,
 )
-from apps.slack.utils import get_gsoc_projects
 
 SUPPORTED_YEAR_START = 2012
 SUPPORTED_ANNOUNCEMENT_YEARS_EXCLUDED = {2012, 2013, 2014, 2015, 2016, 2018}
@@ -42,6 +41,8 @@ class Gsoc(CommandBase):
             dict: The template context.
 
         """
+        from apps.owasp.utils.gsoc import get_gsoc_projects
+
         supported_year_end = self.supported_year_end
         supported_years = self.supported_years
         gsoc_year = supported_year_end
@@ -65,7 +66,7 @@ class Gsoc(CommandBase):
                     {
                         "HAS_ANNOUNCEMENT": year in self.supported_announcement_years,
                         "MODE": "YEAR",
-                        "PROJECTS": sorted(get_gsoc_projects(year), key=lambda p: p["idx_name"]),
+                        "PROJECTS": sorted(get_gsoc_projects(year), key=lambda p: p["name"]),
                         "YEAR": year,
                     }
                 )

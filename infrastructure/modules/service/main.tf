@@ -16,7 +16,7 @@ locals {
     {
       essential = true
       healthCheck = {
-        command     = ["CMD-SHELL", "wget --spider http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1"]
+        command     = var.health_check_command != null ? var.health_check_command : ["CMD-SHELL", "wget --spider http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1"]
         interval    = 30
         retries     = 3
         startPeriod = 100
@@ -44,7 +44,11 @@ locals {
         valueFrom = valueFrom
       }]
     },
-    var.command != null ? { command = var.command } : {}
+    var.command != null ? { command = var.command } : {},
+    length(var.environment_variables) > 0 ? {
+      environment = [for name, value in var.environment_variables : { name = name, value = value }]
+    } : {},
+    var.container_stop_timeout != null ? { stopTimeout = var.container_stop_timeout } : {}
   )
 }
 
@@ -295,6 +299,7 @@ resource "aws_iam_role_policy_attachment" "task_role_policies" {
 }
 
 resource "aws_iam_policy" "ecs_task_role_kms" {
+  count       = length(var.task_role_kms_actions) > 0 ? 1 : 0
   description = "Allow ECS task role to use KMS key for encryption and decryption"
   name        = "${local.name_prefix}-task-kms-policy"
 
@@ -302,10 +307,7 @@ resource "aws_iam_policy" "ecs_task_role_kms" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey*",
-        ]
+        Action   = var.task_role_kms_actions
         Effect   = "Allow"
         Resource = var.kms_key_arn
       }
@@ -315,6 +317,17 @@ resource "aws_iam_policy" "ecs_task_role_kms" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_role_kms" {
-  policy_arn = aws_iam_policy.ecs_task_role_kms.arn
+  count      = length(var.task_role_kms_actions) > 0 ? 1 : 0
+  policy_arn = aws_iam_policy.ecs_task_role_kms[0].arn
   role       = aws_iam_role.ecs_task_role.name
+}
+
+moved {
+  from = aws_iam_policy.ecs_task_role_kms
+  to   = aws_iam_policy.ecs_task_role_kms[0]
+}
+
+moved {
+  from = aws_iam_role_policy_attachment.ecs_task_role_kms
+  to   = aws_iam_role_policy_attachment.ecs_task_role_kms[0]
 }

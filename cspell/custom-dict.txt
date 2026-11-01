@@ -110,6 +110,7 @@ collectstatic
 coraza
 corsheaders
 credentialless
+crewai
 csrfguard
 csrfprotector
 csrftoken
@@ -117,6 +118,7 @@ cva
 cyclonedx
 defectdojo
 demojize
+dhi
 dismissable
 dkr
 docksec
@@ -124,6 +126,7 @@ dsn
 dvo
 eddsa
 elevenlabs
+embedder
 env
 envsubst
 ephemerals
@@ -132,6 +135,8 @@ facebookexternalhit
 fdp
 fpr
 gamesec
+genai
+generativeai
 geocoders
 geoloc
 geopy

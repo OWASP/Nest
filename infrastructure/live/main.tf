@@ -15,6 +15,15 @@ terraform {
 }
 
 locals {
+  nestbot_enabled = var.environment == "staging"
+  backend_environment_variables = var.route_slack_to_nestbot ? {
+    DJANGO_SLACK_BOT_TOKEN      = ""
+    DJANGO_SLACK_SIGNING_SECRET = ""
+  } : {}
+  backend_parameters_arns = {
+    for name, arn in module.parameters.django_ssm_parameter_arns : name => arn
+    if !contains(keys(local.backend_environment_variables), name)
+  }
   common_tags = {
     Environment = var.environment
     ManagedBy   = "Terraform"
@@ -26,15 +35,17 @@ locals {
 module "alb" {
   source = "../modules/alb"
 
-  alb_sg_id             = module.security.alb_sg_id
-  common_tags           = local.common_tags
-  domain_name           = var.domain_name
-  environment           = var.environment
-  frontend_port         = 3000
-  project_name          = var.project_name
-  public_subnet_ids     = module.networking.public_subnet_ids
-  static_s3_bucket_name = module.storage.static_s3_bucket_name
-  vpc_id                = module.networking.vpc_id
+  alb_sg_id              = module.security.alb_sg_id
+  common_tags            = local.common_tags
+  domain_name            = var.domain_name
+  environment            = var.environment
+  enable_nestbot         = local.nestbot_enabled
+  route_slack_to_nestbot = local.nestbot_enabled && var.route_slack_to_nestbot
+  frontend_port          = 3000
+  project_name           = var.project_name
+  public_subnet_ids      = module.networking.public_subnet_ids
+  static_s3_bucket_name  = module.storage.static_s3_bucket_name
+  vpc_id                 = module.networking.vpc_id
 }
 
 module "backend" {
@@ -52,12 +63,13 @@ module "backend" {
   desired_count                   = var.backend_desired_count
   enable_auto_scaling             = var.backend_enable_auto_scaling
   environment                     = var.environment
+  environment_variables           = local.backend_environment_variables
   health_check_path               = "/status/"
   image_tag                       = var.backend_image_tag
   kms_key_arn                     = module.kms.key_arn
   max_count                       = var.backend_max_count
   min_count                       = var.backend_min_count
-  parameters_arns                 = module.parameters.django_ssm_parameter_arns
+  parameters_arns                 = local.backend_parameters_arns
   private_subnet_ids              = module.networking.private_subnet_ids
   project_name                    = var.project_name
   security_group_id               = module.security.backend_sg_id
@@ -175,6 +187,52 @@ module "networking" {
   vpc_cidr                            = var.vpc_cidr
 }
 
+module "nestbot" {
+  source = "../modules/service"
+  count  = local.nestbot_enabled ? 1 : 0
+
+  aws_region             = var.aws_region
+  common_tags            = local.common_tags
+  container_cpu          = 1024
+  container_memory       = 2048
+  container_port         = 8000
+  container_stop_timeout = 60
+  desired_count          = var.nestbot_desired_count
+  enable_auto_scaling    = false
+  environment            = var.environment
+  environment_variables = {
+    CREWAI_TRACING_ENABLED = "false"
+    DJANGO_CONFIGURATION   = "Staging"
+    DJANGO_SETTINGS_MODULE = "settings.nestbot"
+    EMBEDDING_PROVIDER     = "google"
+    GOOGLE_MODEL_NAME      = var.nestbot_google_model_name
+    LLM_PROVIDER           = "google"
+  }
+  health_check_command = ["CMD-SHELL", "wget -q -O /dev/null http://$(hostname -i):8000/status/"]
+  health_check_path    = "/status/"
+  image_tag            = var.nestbot_image_tag
+  kms_key_arn          = module.kms.key_arn
+  parameters_arns = merge(
+    { for name, arn in module.parameters.django_ssm_parameter_arns : name => arn if !contains(["DJANGO_CONFIGURATION", "DJANGO_SETTINGS_MODULE"], name) },
+    module.parameters.nestbot_ssm_parameter_arns,
+  )
+  private_subnet_ids    = module.networking.private_subnet_ids
+  project_name          = var.project_name
+  security_group_id     = module.security.backend_sg_id
+  service_name          = "nestbot"
+  target_group_arn      = module.alb.nestbot_target_group_arn
+  task_role_kms_actions = []
+  use_fargate_spot      = false
+}
+
+module "nestbot_build_cache" {
+  source = "../modules/ecr-cache"
+  count  = local.nestbot_enabled ? 1 : 0
+
+  common_tags = local.common_tags
+  name        = "${var.project_name}-${var.environment}-nestbot-cache"
+}
+
 module "parameters" {
   source = "../modules/parameters"
 
@@ -192,6 +250,7 @@ module "parameters" {
   django_release_version        = var.django_release_version
   django_settings_module        = var.django_settings_module
   enable_additional_parameters  = var.enable_additional_parameters
+  enable_nestbot                = local.nestbot_enabled
   environment                   = var.environment
   next_server_csrf_url          = "https://${var.domain_name}/csrf/"
   next_server_graphql_url       = "https://${var.domain_name}/graphql/"
