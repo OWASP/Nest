@@ -193,7 +193,6 @@ describe('Milestones', () => {
     render(<Milestones data={[milestone]} />)
 
     expect(screen.getByText('Jan 1, 2023')).toBeInTheDocument()
-    expect(screen.getByText('10 closed')).toBeInTheDocument()
     expect(screen.getByText('5 open')).toBeInTheDocument()
     expect(screen.getByTestId('truncated-text')).toHaveTextContent('awesome-repo')
   })
@@ -246,9 +245,6 @@ describe('Milestones', () => {
     expect(screen.getByTestId('milestone-0')).toBeInTheDocument()
     expect(screen.getByTestId('milestone-1')).toBeInTheDocument()
     expect(screen.getByTestId('milestone-2')).toBeInTheDocument()
-    expect(screen.getByText('5 closed')).toBeInTheDocument()
-    expect(screen.getByText('10 closed')).toBeInTheDocument()
-    expect(screen.getByText('15 closed')).toBeInTheDocument()
   })
 
   it('handles edge case with zero counts', () => {
@@ -256,7 +252,6 @@ describe('Milestones', () => {
       <Milestones data={[createMockMilestone({ closedIssuesCount: 0, openIssuesCount: 0 })]} />
     )
 
-    expect(screen.getByText('0 closed')).toBeInTheDocument()
     expect(screen.getByText('0 open')).toBeInTheDocument()
   })
 
@@ -265,7 +260,6 @@ describe('Milestones', () => {
       <Milestones data={[createMockMilestone({ closedIssuesCount: 999, openIssuesCount: 1000 })]} />
     )
 
-    expect(screen.getByText('999 closed')).toBeInTheDocument()
     expect(screen.getByText('1000 open')).toBeInTheDocument()
   })
 

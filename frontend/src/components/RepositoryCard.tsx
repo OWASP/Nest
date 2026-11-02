@@ -11,7 +11,7 @@ import StatusBadge from 'components/StatusBadge'
 import { TruncatedText } from 'components/TruncatedText'
 
 const RepositoryCard: React.FC<RepositoryCardListProps> = ({
-  maxInitialDisplay = 4,
+  maxInitialDisplay = 6,
   repositories,
 }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
@@ -25,7 +25,7 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
     : repositories.slice(0, maxInitialDisplay)
   return (
     <div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {displayedRepositories.map((repository) => {
           return (
             <RepositoryItem
