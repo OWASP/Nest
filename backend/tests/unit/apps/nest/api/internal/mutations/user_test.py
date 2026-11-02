@@ -112,15 +112,15 @@ class TestUserMutations:
             assert nest_user.github_user is github_user
             nest_user.save.assert_called_once_with(update_fields=["github_user"])
 
-    def test_github_auth_preserves_existing_link(self, user_mutations):
-        """Test GitHub authentication does not replace an existing GitHub link."""
+    def test_github_auth_rejects_different_existing_link(self, user_mutations):
+        """Test GitHub authentication rejects a username with another GitHub link."""
         with (
             patch("apps.nest.api.internal.mutations.user.Github") as mock_github_class,
             patch("apps.nest.api.internal.mutations.user.User.objects") as mock_user_objects,
             patch(
                 "apps.nest.api.internal.mutations.user.GithubUser.update_data"
             ) as mock_update_data,
-            patch("apps.nest.api.internal.mutations.user.login"),
+            patch("apps.nest.api.internal.mutations.user.login") as mock_login,
         ):
             info = mock_info()
             mock_github = MagicMock()
@@ -143,9 +143,11 @@ class TestUserMutations:
 
             result = user_mutations.github_auth(info, "valid_token")
 
-            assert result.ok
+            assert not result.ok
+            assert "different GitHub account" in result.message
             assert nest_user.github_user is existing_link
             nest_user.save.assert_not_called()
+            mock_login.assert_not_called()
 
     def test_github_auth_uses_existing_github_link(self, user_mutations):
         """Test GitHub authentication uses the user already linked to the identity."""
