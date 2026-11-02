@@ -71,16 +71,18 @@ class UserMutations:
                     ok=False,
                 )
 
-            nest_user, _ = User.objects.get_or_create(
-                defaults={
-                    "email": gh_user_email,
-                    "github_user": github_user,
-                },
-                username=gh_user.login,
-            )
-            if nest_user.github_user_id is None:
-                nest_user.github_user = github_user
-                nest_user.save(update_fields=["github_user"])
+            nest_user = User.objects.filter(github_user=github_user).first()
+            if nest_user is None:
+                nest_user, _ = User.objects.get_or_create(
+                    defaults={
+                        "email": gh_user_email,
+                        "github_user": github_user,
+                    },
+                    username=gh_user.login,
+                )
+                if nest_user.github_user_id is None:
+                    nest_user.github_user = github_user
+                    nest_user.save(update_fields=["github_user"])
 
             # Log the user in and attach it to a session.
             # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.login

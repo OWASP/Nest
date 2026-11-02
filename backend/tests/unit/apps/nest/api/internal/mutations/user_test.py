@@ -71,6 +71,7 @@ class TestUserMutations:
 
             mock_github_user_model = MagicMock(spec=GitHubUser)
             mock_update_data.return_value = mock_github_user_model
+            mock_user_objects.filter.return_value.first.return_value = None
             mock_user_objects.get_or_create.return_value = (MagicMock(), True)
 
             result = user_mutations.github_auth(info, "valid_token")
@@ -102,6 +103,7 @@ class TestUserMutations:
             nest_user = MagicMock()
             nest_user.github_user_id = None
             mock_update_data.return_value = github_user
+            mock_user_objects.filter.return_value.first.return_value = None
             mock_user_objects.get_or_create.return_value = (nest_user, False)
 
             result = user_mutations.github_auth(info, "valid_token")
@@ -136,6 +138,7 @@ class TestUserMutations:
             nest_user.github_user_id = existing_link.id = 123
             nest_user.github_user = existing_link
             mock_update_data.return_value = github_user
+            mock_user_objects.filter.return_value.first.return_value = None
             mock_user_objects.get_or_create.return_value = (nest_user, False)
 
             result = user_mutations.github_auth(info, "valid_token")
@@ -143,6 +146,38 @@ class TestUserMutations:
             assert result.ok
             assert nest_user.github_user is existing_link
             nest_user.save.assert_not_called()
+
+    def test_github_auth_uses_existing_github_link(self, user_mutations):
+        """Test GitHub authentication uses the user already linked to the identity."""
+        with (
+            patch("apps.nest.api.internal.mutations.user.Github") as mock_github_class,
+            patch("apps.nest.api.internal.mutations.user.User.objects") as mock_user_objects,
+            patch(
+                "apps.nest.api.internal.mutations.user.GithubUser.update_data"
+            ) as mock_update_data,
+            patch("apps.nest.api.internal.mutations.user.login"),
+        ):
+            info = mock_info()
+            mock_github = MagicMock()
+            mock_github_user = MagicMock(spec=AuthenticatedUser)
+            mock_github_user.login = "username-conflict"
+            mock_github_user.get_emails.return_value = [
+                MagicMock(email="user@example.com", primary=True, verified=True)
+            ]
+            mock_github.get_user.return_value = mock_github_user
+            mock_github_class.return_value = mock_github
+
+            github_user = MagicMock(spec=GitHubUser)
+            linked_user = MagicMock()
+            linked_user.github_user_id = github_user.id = 123
+            mock_update_data.return_value = github_user
+            mock_user_objects.filter.return_value.first.return_value = linked_user
+
+            result = user_mutations.github_auth(info, "valid_token")
+
+            assert result.ok
+            assert result.user is linked_user
+            mock_user_objects.get_or_create.assert_not_called()
 
     def test_github_auth_no_primary_email(self, user_mutations):
         """Test GitHub auth fails if no primary verified email."""
