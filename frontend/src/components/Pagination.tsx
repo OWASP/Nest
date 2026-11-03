@@ -17,40 +17,40 @@ const Pagination: React.FC<PaginationProps> = ({
   isLoaded,
 }) => {
   const getPageNumbers = (): (number | string)[] => {
-    const pageNumbers: (number | string)[] = []
     const maxVisiblePages = 7
 
     if (totalPages <= maxVisiblePages) {
       return Array.from({ length: totalPages }, (_, i) => i + 1)
     }
 
-    for (let i = 1; i <= 3; i++) {
-      pageNumbers.push(i)
+    const pagesToShow = new Set<number>([1, totalPages])
+    for (const offset of [-1, 0, 1]) {
+      const page = currentPage + offset
+      if (Number.isSafeInteger(page) && page >= 1 && page <= totalPages) {
+        pagesToShow.add(page)
+      }
     }
 
-    if (currentPage > 4) {
-      pageNumbers.push('...')
-    }
+    const sortedPages = [...pagesToShow].sort((a, b) => a - b)
+    const pageNumbers: (number | string)[] = []
 
-    for (
-      let i = Math.max(4, currentPage - 1);
-      i <= Math.min(totalPages - 1, currentPage + 1);
-      i++
-    ) {
-      pageNumbers.push(i)
+    for (let index = 0; index < sortedPages.length; index++) {
+      const page = sortedPages[index]
+      if (index > 0) {
+        const gap = page - sortedPages[index - 1]
+        if (gap > 1) {
+          pageNumbers.push('...')
+        }
+      }
+      pageNumbers.push(page)
     }
-
-    if (currentPage < totalPages - 3) {
-      pageNumbers.push('...')
-    }
-
-    pageNumbers.push(totalPages)
 
     return pageNumbers
   }
 
+  if (!isLoaded || !Number.isFinite(totalPages) || totalPages <= 1) return null
+
   const pageNumbers = getPageNumbers()
-  if (!isLoaded || totalPages <= 1) return null
 
   return (
     <div className="mt-8 flex flex-col items-center justify-center gap-3">

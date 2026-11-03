@@ -42,8 +42,8 @@ class TestCommitteeIndexMixin:
         assert result is None
 
     def test_idx_key(self):
-        """Test idx_key strips www-committee- prefix."""
-        mock_committee = self.create_mock_committee(key="www-committee-education")
+        """Test idx_key returns the committee key."""
+        mock_committee = self.create_mock_committee(key="education")
 
         result = CommitteeIndexMixin.idx_key.fget(mock_committee)
 

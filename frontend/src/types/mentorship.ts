@@ -55,6 +55,7 @@ export type Module = {
   recentPullRequests?: PullRequest[]
   projectId?: string | null
   projectName?: string | null
+  userRole?: string | null
 }
 
 export type ModuleFormData = {
@@ -68,6 +69,7 @@ export type ModuleFormData = {
   labels: string
   projectName: string
   projectId: string
+  menteeCanManageDeadlines: boolean
   mentorLogins: string
 }
 

@@ -79,6 +79,71 @@ class TestIsMentor:
         assert not result
 
 
+class TestIsMentee:
+    """Tests for the is_mentee query."""
+
+    @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
+    @patch("apps.mentorship.api.internal.queries.mentorship.Mentee.objects.filter")
+    def test_is_mentee_true(
+        self,
+        mock_mentee_filter: MagicMock,
+        mock_github_user_get: MagicMock,
+        api_mentorship_queries,
+    ) -> None:
+        """Test that is_mentee returns True when the user is a mentee."""
+        mock_github_user_get.return_value = MagicMock(spec=GithubUser)
+        mock_mentee_filter.return_value.exists.return_value = True
+
+        is_mentee = api_mentorship_queries.is_mentee
+        result = is_mentee(login="testuser")
+
+        assert result
+        mock_github_user_get.assert_called_once_with(login="testuser")
+        mock_mentee_filter.assert_called_once()
+        mock_mentee_filter.return_value.exists.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
+    @patch("apps.mentorship.api.internal.queries.mentorship.Mentee.objects.filter")
+    def test_is_mentee_false_not_mentee(
+        self,
+        mock_mentee_filter: MagicMock,
+        mock_github_user_get: MagicMock,
+        api_mentorship_queries,
+    ) -> None:
+        """Test that is_mentee returns False when the user is not a mentee."""
+        mock_github_user_get.return_value = MagicMock(spec=GithubUser)
+        mock_mentee_filter.return_value.exists.return_value = False
+
+        is_mentee = api_mentorship_queries.is_mentee
+        result = is_mentee(login="testuser")
+
+        assert not result
+        mock_github_user_get.assert_called_once_with(login="testuser")
+        mock_mentee_filter.assert_called_once()
+        mock_mentee_filter.return_value.exists.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
+    def test_is_mentee_false_no_github_user(
+        self, mock_github_user_get: MagicMock, api_mentorship_queries
+    ) -> None:
+        """Test that is_mentee returns False when the GitHub user does not exist."""
+        mock_github_user_get.side_effect = GithubUser.DoesNotExist
+
+        is_mentee = api_mentorship_queries.is_mentee
+        result = is_mentee(login="non_existent_user")
+
+        assert not result
+        mock_github_user_get.assert_called_once_with(login="non_existent_user")
+
+    @pytest.mark.parametrize("login", ["", "   ", None])
+    def test_is_mentee_false_empty_login(self, login: str | None, api_mentorship_queries) -> None:
+        """Test that is_mentee returns False for empty or whitespace login."""
+        is_mentee = api_mentorship_queries.is_mentee
+        result = is_mentee(login=login)
+
+        assert not result
+
+
 class TestGetMenteeDetails:
     """Tests for the get_mentee_details query."""
 

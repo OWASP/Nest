@@ -15,7 +15,7 @@ output "fixtures_s3_bucket_name" {
 
 output "shared_data_bucket_name" {
   description = "The name of the global shared public data S3 bucket (e.g. nest.dump)."
-  value       = module.shared_data_bucket.bucket_id
+  value       = one(module.shared_data_bucket[*].bucket_id)
 }
 
 output "static_read_write_policy_arn" {

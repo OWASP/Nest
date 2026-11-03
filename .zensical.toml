@@ -1,0 +1,116 @@
+[project]
+copyright = "Copyright &copy; 2026 OWASP Nest"
+docs_dir = "docs/src"
+extra_css = ["assets/stylesheets/nest-theme.css"]
+repo_url = "https://github.com/OWASP/Nest"
+site_name = "OWASP Nest"
+nav = [
+  { Home = [
+    { "OWASP Nest" = "index.md" },
+    { "Code of Conduct" = "code-of-conduct.md" },
+    { "Contributing" = "contributing.md" },
+  ] },
+  { API = "api/index.md" },
+  { Backend = "backend/index.md" },
+  { Frontend = "frontend/index.md" },
+  { NestBot = "nestbot/index.md" },
+  { Schema = "schema/index.md" },
+  { Maintenance = "maintenance/index.md" },
+]
+
+[project.extra]
+generator = false
+homepage = "."
+
+[[project.extra.social]]
+icon = "fontawesome/brands/bluesky"
+link = "https://bsky.app/profile/nest.owasp.org"
+name = "OWASP Nest on Bluesky"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/OWASP/Nest"
+name = "OWASP Nest on GitHub"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/linkedin"
+link = "https://www.linkedin.com/company/owasp-nest"
+name = "OWASP Nest on LinkedIn"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/slack"
+link = "https://owasp.slack.com/archives/project-nest"
+name = "OWASP Nest on Slack"
+
+[project.markdown_extensions]
+abbr = {}
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.arithmatex.generic = true
+pymdownx.caret = {}
+pymdownx.critic = {}
+pymdownx.highlight.anchor_linenums = true
+pymdownx.inlinehilite = {}
+pymdownx.keys = {}
+pymdownx.snippets.base_path = ["."]
+pymdownx.snippets.check_paths = true
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+pymdownx.tabbed.alternate_style = true
+pymdownx.tasklist = {}
+
+[project.plugins.minify]
+minify_html = true
+
+[project.plugins.privacy]
+
+[project.plugins.search]
+
+[project.plugins.tags]
+
+[project.theme]
+custom_dir = "docs/overrides"
+favicon = "assets/images/favicon.png"
+features = [
+  "content.code.annotate",
+  "content.code.annotation",
+  "content.code.copy",
+  "content.code.select",
+  "content.tabs.link",
+  "content.tooltips",
+  "navigation.expand",
+  "navigation.instant",
+  "navigation.sections",
+  "navigation.tabs",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+  "search.suggest",
+  "toc.integrate",
+]
+language = "en"
+logo = "assets/images/logo.png"
+variant = "classic"
+
+[project.theme.font]
+code = "Geist Mono"
+text = "Geist"
+
+[[project.theme.palette]]
+accent = "cyan"
+primary = "teal"
+scheme = "dark"
+toggle.icon = "material/weather-sunny"
+toggle.name = "Enable light mode"
+
+[[project.theme.palette]]
+accent = "amber"
+primary = "teal"
+scheme = "light"
+toggle.icon = "material/weather-night"
+toggle.name = "Enable dark mode"

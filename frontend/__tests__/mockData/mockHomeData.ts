@@ -160,10 +160,15 @@ export const mockGraphQLData = {
 export const mockAlgoliaData = {
   hits: [
     {
-      objectID: '539',
+      _geoloc: {
+        lat: 35.1851045,
+        lng: 136.8998438,
+      },
+      key: 'nagoya',
       name: 'OWASP Nagoya',
-      suggestedLocation: 'Nagoya, Aichi Prefecture, Japan',
+      objectID: '539',
       region: 'Asia',
+      suggestedLocation: 'Nagoya, Aichi Prefecture, Japan',
       topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/u/58754211?v=4',
@@ -171,10 +176,6 @@ export const mockAlgoliaData = {
           name: 'Isanori Sakanashi',
         },
       ],
-      _geoloc: {
-        lat: 35.1851045,
-        lng: 136.8998438,
-      },
     },
   ],
   nbPages: 12,

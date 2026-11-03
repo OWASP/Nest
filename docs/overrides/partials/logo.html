@@ -1,0 +1,5 @@
+{#- Nest logo: alt matches header aria-label for label-content-name-mismatch. -#} {% if
+config.theme.logo %}
+<img src="{{ config.theme.logo | url }}" alt="{{ config.site_name }}" />
+{% else %} {% set icon = config.theme.icon.logo or "material/library" %} {% include ".icons/" ~ icon
+~ ".svg" %} {% endif %}

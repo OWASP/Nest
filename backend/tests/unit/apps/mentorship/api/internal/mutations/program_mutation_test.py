@@ -125,6 +125,8 @@ class TestCreateProgram:
         """Test successful program creation."""
         user = MagicMock()
         user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -157,6 +159,8 @@ class TestCreateProgram:
         """Test program creation with newly created admin profile."""
         user = MagicMock()
         user.username = "newuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -184,6 +188,8 @@ class TestCreateProgram:
         """Test create_program sets admin.nest_user when it is unset."""
         user = MagicMock()
         user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -205,10 +211,49 @@ class TestCreateProgram:
         assert mock_admin_obj.nest_user == user
         mock_admin_obj.save.assert_called_once_with(update_fields=["nest_user"])
 
+    def test_create_program_not_project_leader(self, mutation):
+        """Test PermissionDenied when user is not a project leader."""
+        user = MagicMock()
+        user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = False
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.name = "Program"
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+
+        with pytest.raises(
+            PermissionDenied,
+            match=r"You must be a project leader to create a program\.",
+        ):
+            mutation.create_program(info, input_data)
+
+    def test_create_program_no_github_user(self, mutation):
+        """Test PermissionDenied when nest user has no linked GitHub user."""
+        user = MagicMock()
+        user.username = "testuser"
+        user.github_user = None
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.name = "Program"
+        input_data.started_at = datetime(2025, 1, 1, tzinfo=UTC)
+        input_data.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
+
+        with pytest.raises(
+            PermissionDenied,
+            match=r"You must be a project leader to create a program\.",
+        ):
+            mutation.create_program(info, input_data)
+
     def test_create_program_end_before_start(self, mutation):
         """Test ValidationError when end date is before start date."""
         user = MagicMock()
         user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -223,6 +268,8 @@ class TestCreateProgram:
         """Test ValidationError when end date equals start date."""
         user = MagicMock()
         user.username = "testuser"
+        user.github_user = MagicMock()
+        user.github_user.is_project_leader = True
         info = _make_info(user)
 
         input_data = MagicMock()
@@ -258,7 +305,7 @@ class TestUpdateProgram:
         input_data.admin_logins = ["admin1"]
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
         mock_resolve.return_value = {MagicMock()}
 
@@ -294,7 +341,7 @@ class TestUpdateProgram:
         input_data.key = "prog-1"
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = False
+        mock_prog.has_admin.return_value = False
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         with pytest.raises(
@@ -315,7 +362,7 @@ class TestUpdateProgram:
         input_data.ended_at = datetime(2025, 1, 1, tzinfo=UTC)
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         with pytest.raises(ValidationError, match="End date must be after start date"):
@@ -340,7 +387,7 @@ class TestUpdateProgram:
         input_data.admin_logins = None
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
         mock_prog.save.side_effect = IntegrityError(
             'duplicate key value violates unique constraint "mentorship_programs_name_key"'
@@ -372,7 +419,7 @@ class TestUpdateProgram:
         input_data.admin_logins = None
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         result = mutation.update_program(info, input_data)
@@ -400,7 +447,7 @@ class TestUpdateProgram:
         input_data.admin_logins = None
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         result = mutation.update_program(info, input_data)
@@ -423,7 +470,7 @@ class TestUpdateProgramStatus:
         input_data.status = ProgramStatusEnum.PUBLISHED
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_prog.has_admin.return_value = True
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         result = mutation.update_program_status(info, input_data)
@@ -457,7 +504,7 @@ class TestUpdateProgramStatus:
         input_data.key = "prog-1"
 
         mock_prog = MagicMock()
-        mock_prog.admins.filter.return_value.exists.return_value = False
+        mock_prog.has_admin.return_value = False
         mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
 
         with pytest.raises(PermissionDenied):

@@ -1,24 +1,25 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from urllib.parse import urljoin
 
 import pytest
 import requests as req
+import yaml
+from django.core.cache import cache
+from lxml.etree import ParserError
 from requests.exceptions import RequestException
 
 from apps.common.constants import OWASP_NEWS_URL
-from apps.owasp.models.project import Project
-from apps.owasp.utils.gsoc import get_gsoc_projects
-from apps.owasp.utils.news import get_news_data
-from apps.owasp.utils.staff import get_staff_data
 from apps.slack.utils import (
     download_file,
     escape,
     format_links_for_slack,
-    get_posts_data,
-    get_sponsors_data,
+    get_gsoc_projects,
+    get_news_data,
+    get_staff_data,
     get_text,
     strip_markdown,
 )
+from apps.slack.utils.content import STAFF_YAML_URL
 
 MOCK_GSOC_PROJECTS = {
     "2023": [
@@ -109,6 +110,10 @@ class TestGetText:
             (
                 [{"type": "section", "text": {"type": "mrkdwn", "text": "Hello world"}}],
                 "Hello world",
+            ),
+            (
+                [{"type": "section", "text": {"type": "plain_text", "text": "Plain section"}}],
+                "Plain section",
             ),
             (
                 [
@@ -216,6 +221,218 @@ class TestGetText:
         assert get_text(input_blocks) == expected_output
 
 
+class TestEscape:
+    @pytest.mark.parametrize(
+        ("input_content", "expected_output"),
+        [
+            ("<script>alert('XSS')</script>", "&lt;script&gt;alert('XSS')&lt;/script&gt;"),
+            ("Hello, World!", "Hello, World!"),
+            (
+                "<b>Bold</b> & <i>Italic</i>",
+                "&lt;b&gt;Bold&lt;/b&gt; &amp; &lt;i&gt;Italic&lt;/i&gt;",
+            ),
+        ],
+    )
+    def test_escape(self, input_content, expected_output):
+        """Test the escape function."""
+        assert escape(input_content) == expected_output
+
+
+class TestGetGsocProjects:
+    def test_get_gsoc_projects(self, monkeypatch):
+        """Test getting GSoC projects with mocked data."""
+        mock_get_projects = Mock()
+        mock_get_projects.return_value = {"hits": MOCK_GSOC_PROJECTS["2023"]}
+
+        monkeypatch.setattr("apps.owasp.index.search.project.get_projects", mock_get_projects)
+        get_gsoc_projects.cache_clear()
+
+        result = get_gsoc_projects("2023")
+        length = 2
+        assert len(result) == length
+        assert result[0]["idx_name"] == "Project1_2023"
+        assert result[1]["idx_url"] == "https://example.com/proj2"
+
+        mock_get_projects.assert_called_once_with(
+            attributes=["idx_name", "idx_url"],
+            query="gsoc2023",
+            searchable_attributes=[
+                "idx_custom_tags",
+                "idx_languages",
+                "idx_tags",
+                "idx_topics",
+            ],
+        )
+
+        result2 = get_gsoc_projects("2023")
+        assert mock_get_projects.call_count == 1
+        assert result == result2
+
+
+class TestGetNewsData:
+    def setup_method(self):
+        """Clear Django cache before each news test."""
+        cache.clear()
+
+    def test_get_news_data(self, monkeypatch):
+        """Test getting news data with mocked response."""
+        mock_response = Mock()
+        mock_response.content = MOCK_HTML_CONTENT.encode()
+        mock_response.raise_for_status = Mock()
+
+        mock_get = Mock(return_value=mock_response)
+
+        monkeypatch.setattr("requests.get", mock_get)
+
+        result = get_news_data()
+        length = 3
+        assert len(result) == length
+        assert result[0]["title"] == "News Title 1"
+        assert result[0]["author"] == "Author 1"
+        assert result[0]["url"] == urljoin(OWASP_NEWS_URL, "/news1")
+
+        length = 2
+        result_limited = get_news_data(limit=2)
+        assert len(result_limited) == length
+
+        mock_get.assert_called_with(OWASP_NEWS_URL, timeout=30)
+        result2 = get_news_data()
+        assert mock_get.call_count == length
+        assert result == result2
+
+    def test_get_news_data_with_missing_anchor(self, monkeypatch):
+        """Test getting news data when h2 tags don't have anchors."""
+        mock_html = """
+        <html>
+            <body>
+                <h2>Title without anchor</h2>
+                <p class="author">Author 1</p>
+                <h2><a href="/news2">Title with anchor</a></h2>
+                <p class="author">Author 2</p>
+            </body>
+        </html>
+        """
+        mock_response = Mock()
+        mock_response.content = mock_html.encode()
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+
+        monkeypatch.setattr("requests.get", mock_get)
+
+        result = get_news_data()
+
+        assert len(result) == 1
+        assert result[0]["title"] == "Title with anchor"
+
+    @pytest.mark.parametrize("limit", [0, -1])
+    def test_get_news_data_rejects_non_positive_limit(self, limit, monkeypatch):
+        """Test get_news_data returns [] for non-positive limits without fetching."""
+        mock_get = Mock()
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data(limit=limit) == []
+        mock_get.assert_not_called()
+
+    def test_get_news_data_request_exception(self, monkeypatch):
+        """Test get_news_data returns [] on request failures and does not cache them."""
+        mock_get = Mock(side_effect=RequestException("Network error"))
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data() == []
+        assert get_news_data() == []
+        assert mock_get.call_count == 2
+
+    def test_get_news_data_empty_response_body(self, monkeypatch):
+        """Test get_news_data returns [] for HTTP 200 with an empty body."""
+        mock_response = Mock()
+        mock_response.content = b""
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_news_data() == []
+        mock_get.assert_called_once_with(OWASP_NEWS_URL, timeout=30)
+
+    def test_get_news_data_parser_error(self, monkeypatch):
+        """Test get_news_data returns [] when HTML parsing fails."""
+        mock_response = Mock()
+        mock_response.content = b"<html>"
+        mock_response.raise_for_status = Mock()
+        monkeypatch.setattr("requests.get", Mock(return_value=mock_response))
+        monkeypatch.setattr(
+            "apps.slack.utils.content.html.fromstring",
+            Mock(side_effect=ParserError("bad html")),
+        )
+
+        assert get_news_data() == []
+
+
+class TestGetStaffData:
+    def setup_method(self):
+        """Clear Django cache before each staff test."""
+        cache.clear()
+
+    def test_get_staff_data(self, monkeypatch):
+        """Test getting staff data with mocked response."""
+        mock_response = Mock()
+        mock_response.text = MOCK_STAFF_YAML
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        length = 3
+        result = get_staff_data()
+        assert len(result) == length
+        assert result[0]["name"] == "Alice Smith"
+        assert result[1]["name"] == "Bob Wilson"
+        assert result[2]["name"] == "John Doe"
+
+        mock_get.assert_called_once_with(STAFF_YAML_URL, timeout=30)
+
+        result2 = get_staff_data()
+        assert mock_get.call_count == 1
+        assert result == result2
+
+    def test_get_staff_data_request_exception(self, monkeypatch):
+        """Test get_staff_data handles RequestException gracefully without caching None."""
+        mock_get = Mock(side_effect=RequestException("Network error"))
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_staff_data() is None
+        assert get_staff_data() is None
+        assert mock_get.call_count == 2
+
+    def test_get_staff_data_yaml_error(self, monkeypatch):
+        """Test get_staff_data handles YAML parse errors."""
+        mock_response = Mock()
+        mock_response.text = "invalid: [\n  - broken"
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_staff_data() is None
+
+    def test_get_staff_data_invalid_shape(self, monkeypatch):
+        """Test get_staff_data rejects YAML that is not a list of named dicts."""
+        mock_response = Mock()
+        mock_response.text = yaml.dump({"name": "not a list"})
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_staff_data() is None
+
+    def test_get_staff_data_missing_name(self, monkeypatch):
+        """Test get_staff_data rejects staff entries without a name."""
+        mock_response = Mock()
+        mock_response.text = yaml.dump([{"title": "Developer"}])
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("requests.get", mock_get)
+
+        assert get_staff_data() is None
+
+
 class TestDownloadFile:
     def test_download_file_success(self, monkeypatch):
         """Test successful file download."""
@@ -271,200 +488,3 @@ class TestDownloadFile:
             headers={"Authorization": "Bearer xoxb-test-token"},
             timeout=30,
         )
-
-
-class TestEscape:
-    @pytest.mark.parametrize(
-        ("input_content", "expected_output"),
-        [
-            ("<script>alert('XSS')</script>", "&lt;script&gt;alert('XSS')&lt;/script&gt;"),
-            ("Hello, World!", "Hello, World!"),
-            (
-                "<b>Bold</b> & <i>Italic</i>",
-                "&lt;b&gt;Bold&lt;/b&gt; &amp; &lt;i&gt;Italic&lt;/i&gt;",
-            ),
-        ],
-    )
-    def test_escape(self, input_content, expected_output):
-        """Test the escape function."""
-        assert escape(input_content) == expected_output
-
-
-class TestGetGsocProjects:
-    def test_get_gsoc_projects(self, monkeypatch):
-        """Test getting GSoC projects with mocked database data."""
-        # Create mock project objects
-        mock_project1 = Mock(spec=Project)
-        mock_project1.name = "Project1_2023"
-        mock_project1.key = "www-project-project1"
-        mock_project1.owasp_url = "https://example.com/proj1"
-        mock_project1.custom_tags = ["gsoc2023", "security"]
-
-        mock_project2 = Mock(spec=Project)
-        mock_project2.name = "Project2_2023"
-        mock_project2.key = "www-project-project2"
-        mock_project2.owasp_url = "https://example.com/proj2"
-        mock_project2.custom_tags = ["gsoc2023", "testing"]
-
-        # Mock the QuerySet chain: filter().only().order_by()
-        projects_list = [mock_project1, mock_project2]
-
-        mock_order_by_result = projects_list
-        mock_order_by = Mock(return_value=mock_order_by_result)
-
-        mock_only_result = Mock()
-        mock_only_result.order_by = mock_order_by
-
-        mock_only = Mock(return_value=mock_only_result)
-
-        mock_queryset = Mock()
-        mock_queryset.only = mock_only
-
-        def mock_filter(**kwargs):
-            return mock_queryset
-
-        monkeypatch.setattr(Project.objects, "filter", mock_filter)
-        get_gsoc_projects.cache_clear()
-
-        result = get_gsoc_projects(2023)
-        length = 2
-        assert len(result) == length
-        assert result[0]["name"] == "Project1_2023"
-        assert result[0]["url"] == "https://example.com/proj1"
-        assert result[1]["name"] == "Project2_2023"
-        assert result[1]["url"] == "https://example.com/proj2"
-
-        # Test caching - should return same result without another query
-        result2 = get_gsoc_projects(2023)
-        assert result == result2
-
-
-class TestGetNewsData:
-    def test_get_news_data(self, monkeypatch):
-        """Test getting news data with mocked response."""
-        mock_response = Mock()
-        mock_response.content = MOCK_HTML_CONTENT.encode()
-
-        mock_get = Mock(return_value=mock_response)
-
-        monkeypatch.setattr("requests.get", mock_get)
-        get_news_data.cache_clear()
-
-        result = get_news_data()
-        length = 3
-        assert len(result) == length
-        assert result[0]["title"] == "News Title 1"
-        assert result[0]["author"] == "Author 1"
-        assert result[0]["url"] == urljoin(OWASP_NEWS_URL, "/news1")
-
-        length = 2
-        result_limited = get_news_data(limit=2)
-        assert len(result_limited) == length
-
-        mock_get.assert_called_with(OWASP_NEWS_URL, timeout=30)
-        result2 = get_news_data()
-        assert mock_get.call_count == length
-        assert result == result2
-
-    def test_get_news_data_with_missing_anchor(self, monkeypatch):
-        """Test getting news data when h2 tags don't have anchors."""
-        mock_html = """
-        <html>
-            <body>
-                <h2>Title without anchor</h2>
-                <p class="author">Author 1</p>
-                <h2><a href="/news2">Title with anchor</a></h2>
-                <p class="author">Author 2</p>
-            </body>
-        </html>
-        """
-        mock_response = Mock()
-        mock_response.content = mock_html.encode()
-        mock_get = Mock(return_value=mock_response)
-
-        monkeypatch.setattr("requests.get", mock_get)
-        get_news_data.cache_clear()
-
-        result = get_news_data()
-
-        assert len(result) == 1
-        assert result[0]["title"] == "Title with anchor"
-
-
-class TestGetStaffData:
-    def test_get_staff_data(self, monkeypatch):
-        """Test getting staff data with mocked response."""
-        mock_response = Mock()
-        mock_response.text = MOCK_STAFF_YAML
-        mock_get = Mock(return_value=mock_response)
-        monkeypatch.setattr("requests.get", mock_get)
-        get_staff_data.cache_clear()
-
-        length = 3
-        result = get_staff_data()
-        assert len(result) == length
-        assert result[0]["name"] == "Alice Smith"
-        assert result[1]["name"] == "Bob Wilson"
-        assert result[2]["name"] == "John Doe"
-
-        mock_get.assert_called_once_with(
-            "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml",
-            timeout=30,
-        )
-
-    def test_get_staff_data_request_exception(self, monkeypatch):
-        """Test get_staff_data handles RequestException gracefully."""
-        mock_get = Mock(side_effect=RequestException("Network error"))
-        monkeypatch.setattr("requests.get", mock_get)
-        get_staff_data.cache_clear()
-
-        result = get_staff_data()
-        assert result is None
-
-
-class TestGetSponsorsData:
-    def test_get_sponsors_data(self):
-        """Test get_sponsors_data returns sponsors queryset."""
-        mock_sponsor = Mock()
-        mock_queryset = Mock()
-        mock_queryset.__getitem__ = Mock(return_value=[mock_sponsor])
-
-        with patch("apps.owasp.models.sponsor.Sponsor.objects") as mock_objects:
-            mock_objects.all.return_value = mock_queryset
-
-            result = get_sponsors_data(limit=5)
-            mock_objects.all.assert_called_once()
-            assert result is not None
-
-    def test_get_sponsors_data_exception(self):
-        """Test get_sponsors_data handles exceptions gracefully."""
-        with patch("apps.owasp.models.sponsor.Sponsor.objects") as mock_objects:
-            mock_objects.all.side_effect = Exception("Database error")
-
-            result = get_sponsors_data()
-            assert result is None
-
-
-class TestGetPostsData:
-    def test_get_posts_data(self):
-        """Test get_posts_data returns posts queryset."""
-        mock_post = Mock()
-        mock_queryset = Mock()
-        mock_queryset.__getitem__ = Mock(return_value=[mock_post])
-
-        with patch("apps.owasp.models.post.Post.recent_posts") as mock_recent:
-            mock_recent.return_value = mock_queryset
-            get_posts_data.cache_clear()
-
-            result = get_posts_data(limit=3)
-            mock_recent.assert_called_once()
-            assert result is not None
-
-    def test_get_posts_data_exception(self):
-        """Test get_posts_data handles exceptions gracefully."""
-        with patch("apps.owasp.models.post.Post.recent_posts") as mock_recent:
-            mock_recent.side_effect = Exception("Database error")
-            get_posts_data.cache_clear()
-
-            result = get_posts_data()
-            assert result is None

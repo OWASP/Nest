@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.test import override_settings
 
 from apps.slack.blocks import DIVIDER, SECTION_BREAK
 from apps.slack.commands.command import CommandBase
@@ -75,9 +76,9 @@ class TestCommandBase:
         assert blocks[1]["type"] == "divider"
         assert blocks[2]["text"]["text"] == "Welcome to Nest"
 
-    def test_handler_success(self, settings, command_instance, mock_command_payload):
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_success(self, command_instance, mock_command_payload):
         """Tests the successful path of the command handler."""
-        settings.SLACK_COMMANDS_ENABLED = True
         ack = MagicMock()
         mock_client = MagicMock()
         mock_client.conversations_open.return_value = {"channel": {"id": "D123XYZ"}}
@@ -90,9 +91,9 @@ class TestCommandBase:
         mock_client.chat_postMessage.assert_called_once()
         assert mock_client.chat_postMessage.call_args[1]["channel"] == "D123XYZ"
 
-    def test_handler_api_error(self, mocker, settings, command_instance, mock_command_payload):
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_api_error(self, mocker, command_instance, mock_command_payload):
         """Tests that an exception during API calls is caught and logged."""
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_logger = mocker.patch("apps.slack.commands.command.logger")
         ack = MagicMock()
         mock_client = MagicMock()
@@ -111,11 +112,9 @@ class TestCommandBase:
 
         assert mock_client.conversations_open.call_count == 2
 
-    def test_handler_render_blocks_exception(
-        self, mocker, settings, command_instance, mock_command_payload
-    ):
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_render_blocks_exception(self, mocker, command_instance, mock_command_payload):
         """Tests exception handling when render_blocks fails."""
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_logger = mocker.patch("apps.slack.commands.command.logger")
         ack = MagicMock()
         mock_client = MagicMock()
@@ -134,11 +133,9 @@ class TestCommandBase:
         call_kwargs = mock_client.chat_postMessage.call_args[1]
         assert ":warning:" in call_kwargs["blocks"][0]["text"]["text"]
 
-    def test_handler_when_commands_disabled(
-        self, settings, command_instance, mock_command_payload
-    ):
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_handler_when_commands_disabled(self, command_instance, mock_command_payload):
         """Tests that no message is sent when commands are disabled."""
-        settings.SLACK_COMMANDS_ENABLED = False
         ack = MagicMock()
         mock_client = MagicMock()
         command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
@@ -150,11 +147,9 @@ class TestCommandBase:
         commands = list(CommandBase.get_commands())
         assert Command in commands
 
-    def test_handler_empty_blocks_no_message(
-        self, settings, command_instance, mock_command_payload
-    ):
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_empty_blocks_no_message(self, command_instance, mock_command_payload):
         """Tests that no message is sent when render_blocks returns empty list."""
-        settings.SLACK_COMMANDS_ENABLED = True
         ack = MagicMock()
         mock_client = MagicMock()
 

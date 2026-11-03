@@ -165,7 +165,7 @@ describe('MentorshipPullRequest Component', () => {
           ...mockPullRequestOpen.author,
           login: '',
         },
-      } as unknown as PullRequest
+      } as PullRequest
 
       render(<MentorshipPullRequest pr={mockPrWithAvatarButNoLogin} />)
       const avatar = screen.getByAltText('Unknown')

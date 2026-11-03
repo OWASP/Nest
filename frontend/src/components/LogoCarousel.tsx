@@ -31,14 +31,14 @@ export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
         className="flex shrink-0 items-center justify-center"
       >
         <Link href={sponsor.url} target="_blank" rel="noopener noreferrer">
-          <div className="flex h-20 w-44 items-center justify-center rounded-lg bg-white px-3 py-1 shadow-md">
+          <div className="relative flex h-20 w-44 items-center justify-center rounded-lg bg-white shadow-md">
             {sponsor.imageUrl ? (
               <Image
                 alt={sponsor.name ? `${sponsor.name}'s logo` : 'Sponsor logo'}
-                className="h-full w-full object-contain"
-                height={72}
+                className="object-contain px-3 py-1"
+                fill
+                sizes="176px"
                 src={sponsor.imageUrl}
-                width={168}
               />
             ) : (
               <span className="text-sm text-gray-400">{sponsor.name || 'Sponsor'}</span>

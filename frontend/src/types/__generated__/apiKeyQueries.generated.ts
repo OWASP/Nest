@@ -1,21 +1,25 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type GetApiKeysQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type GetApiKeysQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetApiKeysQuery = { activeApiKeyCount: number, apiKeys: Array<{ __typename: 'ApiKeyNode', id: string, createdAt: any, expiresAt: any, isRevoked: boolean, name: string, uuid: any }> };
 
-export type CreateApiKeyMutationVariables = Types.Exact<{
-  name: Types.Scalars['String']['input'];
-  expiresAt: Types.Scalars['DateTime']['input'];
+export type CreateApiKeyMutationVariables = Exact<{
+  name: string;
+  expiresAt: any;
 }>;
 
 
 export type CreateApiKeyMutation = { createApiKey: { __typename: 'CreateApiKeyResult', code: string | null, message: string | null, ok: boolean, rawKey: string | null, apiKey: { __typename: 'ApiKeyNode', id: string, createdAt: any, expiresAt: any, isRevoked: boolean, name: string, uuid: any } | null } };
 
-export type RevokeApiKeyMutationVariables = Types.Exact<{
-  uuid: Types.Scalars['UUID']['input'];
+export type RevokeApiKeyMutationVariables = Exact<{
+  uuid: any;
 }>;
 
 

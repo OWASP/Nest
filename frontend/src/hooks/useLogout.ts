@@ -20,7 +20,10 @@ export const useLogout = () => {
       await client.clearStore() // Removes Apollo cache
     } catch (error) {
       await signOut({ callbackUrl: '/' })
-      throw new Error('Logout failed: ' + (error instanceof Error ? error.message : String(error)))
+      throw new Error(
+        'Logout failed: ' + (error instanceof Error ? error.message : String(error)),
+        { cause: error }
+      )
     } finally {
       setIsLoggingOut(false)
     }

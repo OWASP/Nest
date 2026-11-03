@@ -14,9 +14,12 @@ import {
   FaRegUser,
   FaAward,
   FaBug,
+  FaCalendarCheck,
   FaCertificate,
+  FaCircleExclamation,
   FaCity,
   FaCodeFork,
+  FaCodePullRequest,
   FaEgg,
   FaFlag,
   FaFlask,
@@ -53,6 +56,18 @@ export const ICONS = {
   commentsCount: {
     label: 'Comments count',
     icon: FaRegComment,
+  },
+  openIssuesCount: {
+    label: 'Open issues',
+    icon: FaCircleExclamation,
+  },
+  openPullRequestsCount: {
+    label: 'Open pull requests',
+    icon: FaCodePullRequest,
+  },
+  updatedAt: {
+    label: 'Last updated',
+    icon: FaCalendarCheck,
   },
 } as const
 

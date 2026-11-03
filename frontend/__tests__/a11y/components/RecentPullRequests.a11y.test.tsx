@@ -54,7 +54,7 @@ const minimalData = [
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/1',
     state: 'open',
-    mergedAt: 1717329600,
+    mergedAt: new Date(1717329600 * 1000).toISOString(),
   },
 ]
 
