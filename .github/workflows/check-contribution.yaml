@@ -23,7 +23,7 @@ jobs:
         uses: arkid15r/check-contribution-action@f90721e95e8b5d7f32b8e565552498d51d052ca5  # v0.1.7
         with:
           check_for: commit_sign_off, commit_signature, issue_assignee, issue_reference
-          close_on: issue_assignee, issue_reference
+          close_on: commit_sign_off, commit_signature, issue_assignee, issue_reference
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_users_file_path: .github/check-contribution-skip-usernames.txt
     timeout-minutes: 5
