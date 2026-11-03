@@ -42,7 +42,9 @@ def format_project_age_results(hits: list, project_name: str | None = None) -> s
         age_years = age_days // 365
         age_months = (age_days % 365) // 30
 
-        age_str = f"{age_years} year{'s' if age_years != 1 else ''}" if age_years > 0 else ""
+        age_str = ""
+        if age_years > 0:
+            age_str = f"{age_years} year{'s' if age_years != 1 else ''}"
         if age_months > 0:
             if age_str:
                 age_str += ", "
