@@ -125,7 +125,7 @@ class TestGithubAddRelatedRepositories:
         mock_gh_client = mock.Mock()
         mock_get_github_client.return_value = mock_gh_client
 
-        def raise_404(*a, **k):
+        def raise_404(*a, **k):  # noqa: ARG001
             raise UnknownObjectException(
                 status=404,
                 data={"message": "Not Found", "status": "404"},
@@ -276,7 +276,7 @@ class TestGithubAddRelatedRepositories:
         mock_gh_client = mock.Mock()
         mock_get_github_client.return_value = mock_gh_client
 
-        def raise_403(*a, **k):
+        def raise_403(*a, **k):  # noqa: ARG001
             raise UnknownObjectException(
                 status=403,
                 data={"message": "Forbidden", "status": "403"},

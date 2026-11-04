@@ -221,6 +221,7 @@ BENCHMARK_CASES: list[EvalCase] = [
         query="Which OWASP projects participated in GSoC and what are their GitHub repositories?",
         category=EvalCategory.COLLABORATIVE,
         expected_intent="gsoc",
+        expected_tools=["Get OWASP GSoC projects for a specific year"],
         expected_keywords=["GSoC", "GitHub"],
         notes="Evaluates cross-agent synthesis between GSoC and projects",
     ),

@@ -119,8 +119,7 @@ exec-nestbot-command-it:
 
 backend-exec-nestbot-command:
 ifeq ($(EXEC_MODE),direct)
-	@cd backend
-	poetry run -- $(CMD)
+	@cd backend && poetry run -- $(CMD)
 else
 	@docker exec -i nest-nestbot $(CMD)
 endif

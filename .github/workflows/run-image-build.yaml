@@ -91,7 +91,8 @@ jobs:
       FRONTEND_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_cache_repo }}:cache
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
-      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version }}
+      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version
+        }}
       NESTBOT_CACHE_REF: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot-cache:cache
       RELEASE_VERSION: ${{ inputs.release_version }}
     permissions:

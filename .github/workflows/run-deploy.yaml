@@ -141,7 +141,8 @@ jobs:
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-frontend:${{ inputs.release_version
         }}
-      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version }}
+      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version
+        }}
       TF_VAR_nestbot_desired_count: ${{ inputs.environment == 'staging' && vars.NESTBOT_DESIRED_COUNT || '1' }}
       TF_VAR_nestbot_google_model_name: ${{ inputs.environment == 'staging' && vars.NESTBOT_GOOGLE_MODEL_NAME || 'gemini-3.5-flash-lite' }}
       TF_VAR_nestbot_image_tag: ${{ inputs.release_version }}

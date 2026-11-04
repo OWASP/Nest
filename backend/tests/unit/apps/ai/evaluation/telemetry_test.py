@@ -108,3 +108,15 @@ class TestTelemetryTracker:
         assert tracker.percentile_latency(0) == 100.0
         assert tracker.p50_latency_ms == 200.0
         assert tracker.percentile_latency(100) == 300.0
+
+
+@pytest.mark.parametrize("invalid", [-1, True, False, 1.5, "1", None])
+@pytest.mark.parametrize("field", ["prompt_tokens", "completion_tokens"])
+def test_token_cost_rejects_invalid_counts(field, invalid):
+    counts = {"prompt_tokens": 0, "completion_tokens": 0, field: invalid}
+    with pytest.raises(ValueError, match="Token counts must be non-negative integers"):
+        calculate_token_cost(**counts)
+
+
+def test_token_cost_accepts_zero_counts():
+    assert calculate_token_cost(0, 0) == 0.0

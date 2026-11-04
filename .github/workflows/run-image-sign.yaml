@@ -58,7 +58,8 @@ jobs:
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
-      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version }}
+      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version
+        }}
     permissions:
       id-token: write
     runs-on: ubuntu-26.04-arm
