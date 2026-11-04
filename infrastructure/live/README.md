@@ -79,10 +79,14 @@ verification before rollout.
 
 ### Staging AI switch and worker
 
-`nestbot_ai_assistant_enabled` defaults to `false` independently of
-`route_slack_to_nestbot`. The deployment workflow reads the GitHub staging
-variable `NESTBOT_AI_ASSISTANT_ENABLED`, also defaulting to `false`, and injects
-`DJANGO_NESTBOT_AI_ASSISTANT_ENABLED` into both web and worker tasks.
+Production Django settings default AI to `false`; local settings remain enabled.
+An explicit staging `false` value disables AI in both web and worker tasks.
+
+`nestbot_ai_assistant_enabled` defaults to `true` for the dedicated staging
+service, independently of `route_slack_to_nestbot`. The deployment workflow reads the GitHub staging
+variable `NESTBOT_AI_ASSISTANT_ENABLED`, defaulting to `true` for staging and
+`false` otherwise, and injects `DJANGO_NESTBOT_AI_ASSISTANT_ENABLED` into both web
+and worker tasks.
 
 NestBot has a dedicated private AI worker service running
 `python manage.py rqworker ai --with-scheduler --worker-ttl 90`. It uses the same
@@ -92,9 +96,10 @@ The probe uses `settings.staging` to avoid authenticating with Slack on each che
 Bootstrap `nestbot_desired_count = 0` stops both services; ordinary services do
 not gain workers. The worker does not attach to the ALB.
 
-Deploy web and worker with AI disabled and retain current Slack routing. Verify
-both release images and service health before cutover. Enable AI only after an
-approved Slack smoke test and channel configuration. Disabling AI requires
+The active staging configuration enables AI. To verify a release initially
+without AI, explicitly set the toggle to `false` for both web and worker. Retain
+current Slack routing and verify both release images and service health before
+cutover. Use only approved staging channels for Slack smoke tests. Disabling AI requires
 redeploying both services; jobs recheck the setting when execution starts. This
 cannot cancel an already running provider request. Roll back by disabling AI,
 then restoring prior routing/release if necessary. No deployment or provider
@@ -185,7 +190,7 @@ No resources.
 | <a name="input_frontend_max_count"></a> [frontend\_max\_count](#input\_frontend\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_frontend_min_count"></a> [frontend\_min\_count](#input\_frontend\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_frontend_use_fargate_spot"></a> [frontend\_use\_fargate\_spot](#input\_frontend\_use\_fargate\_spot) | Whether to use Fargate Spot for frontend tasks. | `bool` | `true` | no |
-| <a name="input_nestbot_ai_assistant_enabled"></a> [nestbot\_ai\_assistant\_enabled](#input\_nestbot\_ai\_assistant\_enabled) | Enable NestBot AI independently of Slack routing. Defaults to disabled in staging. | `bool` | `false` | no |
+| <a name="input_nestbot_ai_assistant_enabled"></a> [nestbot\_ai\_assistant\_enabled](#input\_nestbot\_ai\_assistant\_enabled) | Enable AI in the dedicated staging NestBot service independently of Slack routing. | `bool` | `true` | no |
 | <a name="input_nestbot_desired_count"></a> [nestbot\_desired\_count](#input\_nestbot\_desired\_count) | Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image. | `number` | `1` | no |
 | <a name="input_nestbot_google_model_name"></a> [nestbot\_google\_model\_name](#input\_nestbot\_google\_model\_name) | Google model used by NestBot. Verify provider compatibility before deployment. | `string` | `"gemini-3.5-flash-lite"` | no |
 | <a name="input_nestbot_image_tag"></a> [nestbot\_image\_tag](#input\_nestbot\_image\_tag) | Immutable NestBot image tag, required in staging. | `string` | `""` | no |

@@ -134,12 +134,12 @@ run "test_reject_missing_nestbot_image" {
   expect_failures = [var.nestbot_image_tag]
 }
 
-run "test_staging_ai_defaults_disabled" {
+run "test_staging_ai_defaults_enabled" {
   command = plan
 
   assert {
-    condition     = !var.nestbot_ai_assistant_enabled && output.nestbot_worker_service_name == "nest-staging-nestbot-worker-service"
-    error_message = "Staging must provision an AI worker with AI disabled by default."
+    condition     = var.nestbot_ai_assistant_enabled && output.nestbot_worker_service_name == "nest-staging-nestbot-worker-service"
+    error_message = "Staging must provision an AI worker with AI enabled by default."
   }
 }
 
@@ -154,5 +154,19 @@ run "test_ai_switch_independent_of_routing" {
   assert {
     condition     = var.nestbot_ai_assistant_enabled && !output.route_slack_to_nestbot
     error_message = "Enabling AI must not change Slack routing."
+  }
+}
+
+run "test_ai_can_be_disabled_without_changing_routing" {
+  command = plan
+
+  variables {
+    nestbot_ai_assistant_enabled = false
+    route_slack_to_nestbot       = true
+  }
+
+  assert {
+    condition     = !var.nestbot_ai_assistant_enabled && output.route_slack_to_nestbot
+    error_message = "Disabling AI must preserve separately configured Slack routing."
   }
 }

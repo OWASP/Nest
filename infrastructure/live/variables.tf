@@ -286,9 +286,9 @@ variable "frontend_use_fargate_spot" {
 }
 
 variable "nestbot_ai_assistant_enabled" {
-  description = "Enable NestBot AI independently of Slack routing. Defaults to disabled in staging."
+  description = "Enable AI in the dedicated staging NestBot service independently of Slack routing."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "nestbot_desired_count" {

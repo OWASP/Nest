@@ -198,7 +198,7 @@ The backend uses the following environment variables (configured in `backend/.en
 ### `DJANGO_NESTBOT_AI_ASSISTANT_ENABLED`
 
 - Enables AI slash commands, mentions, question detection and queued replies.
-- Defaults to `False` in staging and `True` in local and production configurations.
+- Defaults to `True` in staging/local and `False` in production configurations.
 - Restart/redeploy both web and AI workers when changing it. Workers recheck the
   setting when a job starts, including jobs queued before disabling AI.
 - Channel assistant controls still apply. Ordinary Slack commands remain available.

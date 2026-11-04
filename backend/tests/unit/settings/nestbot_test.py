@@ -11,9 +11,9 @@ import pytest
 @pytest.mark.parametrize(
     ("module", "configuration", "slack_enabled", "ai_enabled"),
     [
-        ("settings.nestbot", "Staging", True, False),
-        ("settings.staging", "Staging", False, False),
-        ("settings.production", "Production", True, True),
+        ("settings.nestbot", "Staging", True, True),
+        ("settings.staging", "Staging", False, True),
+        ("settings.production", "Production", True, False),
         ("settings.local", "Local", True, True),
     ],
 )
