@@ -9,14 +9,16 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    ("module", "configuration", "slack_enabled"),
+    ("module", "configuration", "slack_enabled", "ai_enabled"),
     [
-        ("settings.nestbot", "Staging", True),
-        ("settings.staging", "Staging", False),
-        ("settings.production", "Production", True),
+        ("settings.nestbot", "Staging", True, False),
+        ("settings.staging", "Staging", False, False),
+        ("settings.production", "Production", True, True),
+        ("settings.local", "Local", True, True),
     ],
 )
-def test_slack_configuration(module, configuration, slack_enabled):
+@pytest.mark.parametrize("ai_override", [None, "True", "False"])
+def test_slack_configuration(module, configuration, slack_enabled, ai_enabled, ai_override):
     # SlackConfig and urlpatterns are initialized at import time; use a fresh process.
     result = subprocess.run(  # noqa: S603 -- fixed code and repository-owned parameters
         [
@@ -40,6 +42,7 @@ from apps.slack.apps import SlackConfig
 
 enabled = sys.argv[1] == "True"
 assert settings.ENVIRONMENT == sys.argv[2]
+assert settings.NESTBOT_AI_ASSISTANT_ENABLED == (sys.argv[3] == "True")
 assert bool(SlackConfig.app) == enabled
 assert settings.SLACK_COMMANDS_ENABLED == enabled
 assert settings.SLACK_EVENTS_ENABLED == enabled
@@ -54,9 +57,19 @@ for endpoint in ("commands", "events", "interactivity"):
 """,
             str(slack_enabled),
             configuration,
+            str(ai_enabled if ai_override is None else ai_override == "True"),
         ],
         env={
-            **os.environ,
+            **{
+                key: value
+                for key, value in os.environ.items()
+                if key != "DJANGO_NESTBOT_AI_ASSISTANT_ENABLED"
+            },
+            **(
+                {"DJANGO_NESTBOT_AI_ASSISTANT_ENABLED": ai_override}
+                if ai_override is not None
+                else {}
+            ),
             "PYTHONPATH": str(Path(__file__).resolve().parents[3] / "src"),
             "DJANGO_CONFIGURATION": configuration,
             "DJANGO_SETTINGS_MODULE": module,
@@ -73,3 +86,45 @@ for endpoint in ("commands", "events", "interactivity"):
         timeout=60,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_worker_probe_does_not_authenticate_with_slack(monkeypatch):
+    """The worker probe uses ordinary staging settings with Slack disabled."""
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "settings.nestbot")
+    monkeypatch.setenv("DJANGO_CONFIGURATION", "Staging")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            """
+from unittest.mock import patch
+from configurations.management import execute_from_command_line
+
+with patch("slack_sdk.WebClient.auth_test", side_effect=AssertionError("Slack probe")), \\
+     patch("sentry_sdk.init"), \\
+     patch("rq.Worker.all", return_value=[]):
+    try:
+        execute_from_command_line([
+            "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.staging",
+        ])
+    except SystemExit as error:
+        assert error.code == 1
+""",
+        ],
+        env={
+            **os.environ,
+            "PYTHONPATH": str(Path(__file__).resolve().parents[3] / "src"),
+            "DJANGO_AWS_STORAGE_BUCKET_NAME": "unit-test",
+            "DJANGO_GITHUB_APP_ID": "unit-test",
+            "DJANGO_GITHUB_APP_INSTALLATION_ID": "unit-test",
+            "DJANGO_SENTRY_DSN": "https://unit-test@localhost/1",
+            "DJANGO_SLACK_BOT_TOKEN": "xoxb-unit-test",
+            "DJANGO_SLACK_SIGNING_SECRET": "unit-test",
+        },
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "No healthy local AI queue worker" in result.stderr

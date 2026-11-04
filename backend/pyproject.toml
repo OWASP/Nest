@@ -59,6 +59,7 @@ group.nestbot.dependencies.crewai = { version = "^1.7.2", python = ">=3.10,<3.14
   "bedrock",
   "google-genai"
 ] }
+group.nestbot.dependencies.langchain-text-splitters = "^1.1.1"
 group.test.dependencies.pytest = "9.0.3"
 group.test.dependencies.pytest-cov = "7.1.0"
 group.test.dependencies.pytest-django = "4.12.0"

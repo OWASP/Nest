@@ -490,3 +490,47 @@ run "test_service_uses_private_subnets" {
     error_message = "ECS service must be deployed into the configured private subnets."
   }
 }
+
+run "test_queue_worker_uses_same_release_and_settings" {
+  command = plan
+
+  override_resource {
+    target          = aws_ecr_repository.main
+    override_during = plan
+    values = {
+      repository_url = "example.invalid/nest-test-service"
+    }
+  }
+
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler"]
+      health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.staging"]
+    }
+    environment_variables = { DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = "false" }
+  }
+
+  assert {
+    condition     = local.worker_definition.image == local.container_definition.image && local.worker_definition.environment == local.container_definition.environment && local.worker_definition.secrets == local.container_definition.secrets
+    error_message = "Worker must use the web release image, environment and credentials."
+  }
+
+  assert {
+    condition     = local.worker_definition.command == var.worker.command && local.worker_definition.healthCheck.command == var.worker.health_check_command && length(local.worker_definition.portMappings) == 0
+    error_message = "Worker must run the queue command and its own health check without a web port."
+  }
+
+  assert {
+    condition     = length(aws_ecs_service.worker) == 1 && aws_ecs_service.worker[0].desired_count == var.desired_count && length(aws_ecs_service.worker[0].load_balancer) == 0
+    error_message = "Worker needs its own private service without an ALB."
+  }
+}
+
+run "test_existing_services_do_not_gain_workers" {
+  command = plan
+
+  assert {
+    condition     = length(aws_ecs_service.worker) == 0 && length(aws_ecs_task_definition.worker) == 0
+    error_message = "Existing services must remain unchanged without worker configuration."
+  }
+}

@@ -143,6 +143,7 @@ jobs:
         }}
       NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version
         }}
+      TF_VAR_nestbot_ai_assistant_enabled: ${{ inputs.environment == 'staging' && vars.NESTBOT_AI_ASSISTANT_ENABLED || 'false' }}
       TF_VAR_nestbot_desired_count: ${{ inputs.environment == 'staging' && vars.NESTBOT_DESIRED_COUNT || '1' }}
       TF_VAR_nestbot_google_model_name: ${{ inputs.environment == 'staging' && vars.NESTBOT_GOOGLE_MODEL_NAME || 'gemini-3.5-flash-lite' }}
       TF_VAR_nestbot_image_tag: ${{ inputs.release_version }}
@@ -252,8 +253,8 @@ jobs:
           terraform apply -auto-approve tfplan
         working-directory: infrastructure/live
 
-      - name: Verify NestBot before Slack cutover
-        if: inputs.environment == 'staging' && env.TF_VAR_route_slack_to_nestbot == 'true'
+      - name: Verify NestBot web and worker release
+        if: inputs.environment == 'staging' && env.TF_VAR_nestbot_desired_count != '0'
         run: |
           CLUSTER_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_cluster_name)
           SERVICE_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_service_name)
@@ -266,6 +267,16 @@ jobs:
           aws ecs describe-task-definition --task-definition "$TASK_DEFINITION" \
             | jq -e --arg image "$NESTBOT_IMAGE" \
               '.taskDefinition.containerDefinitions | any(.[]; .name == "nestbot" and .image == $image)' > /dev/null
+          WORKER_SERVICE_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_worker_service_name)
+          aws ecs wait services-stable --cluster "$CLUSTER_NAME" --services "$WORKER_SERVICE_NAME"
+          WORKER_SERVICE=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$WORKER_SERVICE_NAME")
+          jq -e '.failures | length == 0' <<< "$WORKER_SERVICE" > /dev/null
+          jq -e '.services | length == 1 and all(.[]; .desiredCount > 0 and
+            .runningCount == .desiredCount and .pendingCount == 0)' <<< "$WORKER_SERVICE" > /dev/null
+          WORKER_TASK_DEFINITION=$(jq -er '.services[0].taskDefinition' <<< "$WORKER_SERVICE")
+          aws ecs describe-task-definition --task-definition "$WORKER_TASK_DEFINITION" \
+            | jq -e --arg image "$NESTBOT_IMAGE" \
+              '.taskDefinition.containerDefinitions | any(.[]; .name == "nestbot-worker" and .image == $image)' > /dev/null
           TARGET_GROUP=$(jq -er '.services[0].loadBalancers[0].targetGroupArn' <<< "$SERVICE")
           # cspell:ignore elbv
           aws elbv2 describe-target-health --target-group-arn "$TARGET_GROUP" \

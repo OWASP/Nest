@@ -8,6 +8,16 @@ from apps.ai.flows.assistant import execute_task, normalize_channel_id, process_
 from apps.slack.constants import OWASP_COMMUNITY_CHANNEL_ID
 
 
+@pytest.fixture(autouse=True)
+def mock_semantic_cache():
+    """Keep flow unit tests independent of embedding providers and the database."""
+    with (
+        patch("apps.ai.flows.assistant.get_cached_response", return_value=None),
+        patch("apps.ai.flows.assistant.store_cached_response", return_value=None),
+    ):
+        yield
+
+
 @pytest.mark.parametrize("has_tools", [False, True])
 @patch("apps.ai.flows.assistant.Task")
 @patch("apps.ai.flows.assistant.Crew")

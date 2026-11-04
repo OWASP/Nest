@@ -223,3 +223,12 @@ variable "use_fargate_spot" {
   type        = bool
   default     = false
 }
+
+variable "worker" {
+  description = "Optional queue worker service using the same release image, settings, roles and task size."
+  type = object({
+    command              = list(string)
+    health_check_command = list(string)
+  })
+  default = null
+}

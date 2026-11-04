@@ -18,18 +18,8 @@ services:
         condition: service_healthy
     env_file: ../../backend/.env
     environment:
-      DJANGO_CONFIGURATION: Local
-      DJANGO_SETTINGS_MODULE: settings.local
-      DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
-      DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
       DJANGO_SLACK_BOT_TOKEN: ''
       DJANGO_SLACK_SIGNING_SECRET: ''
-    healthcheck:
-      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/status/', timeout=5)"]
-      interval: 5s
-      timeout: 10s
-      retries: 12
-      start_period: 30s
     networks:
       - nest-network
     ports:
@@ -114,30 +104,22 @@ services:
 
   nestbot:
     container_name: nest-nestbot
-    command: python manage.py runserver 0.0.0.0:8001
+    command: >
+      sh -c '
+        python manage.py runserver 0.0.0.0:8001
+      '
     image: nest-local-nestbot
     build:
       context: ../../backend
       dockerfile: ../docker/backend/Dockerfile.nestbot.local
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
       cache:
         condition: service_healthy
       db:
         condition: service_healthy
     env_file: ../../backend/.env
-    environment:
-      DJANGO_CONFIGURATION: Local
-      DJANGO_SETTINGS_MODULE: settings.local
-      DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
-      DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
-    healthcheck:
-      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/status/', timeout=5)"]
-      interval: 5s
-      timeout: 10s
-      retries: 12
-      start_period: 30s
     networks:
       - nest-network
     ports:
@@ -148,7 +130,10 @@ services:
 
   worker:
     container_name: nest-worker
-    command: python manage.py rqworker ai --with-scheduler
+    command: >
+      sh -c '
+        python manage.py rqworker ai --with-scheduler
+      '
     image: nest-local-nestbot
     depends_on:
       cache:
@@ -156,13 +141,8 @@ services:
       db:
         condition: service_healthy
       nestbot:
-        condition: service_healthy
+        condition: service_started
     env_file: ../../backend/.env
-    environment:
-      DJANGO_CONFIGURATION: Local
-      DJANGO_SETTINGS_MODULE: settings.local
-      DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
-      DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
     networks:
       - nest-network
     volumes:

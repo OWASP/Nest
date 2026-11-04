@@ -133,3 +133,26 @@ run "test_reject_missing_nestbot_image" {
 
   expect_failures = [var.nestbot_image_tag]
 }
+
+run "test_staging_ai_defaults_disabled" {
+  command = plan
+
+  assert {
+    condition     = !var.nestbot_ai_assistant_enabled && output.nestbot_worker_service_name == "nest-staging-nestbot-worker-service"
+    error_message = "Staging must provision an AI worker with AI disabled by default."
+  }
+}
+
+run "test_ai_switch_independent_of_routing" {
+  command = plan
+
+  variables {
+    nestbot_ai_assistant_enabled = true
+    route_slack_to_nestbot       = false
+  }
+
+  assert {
+    condition     = var.nestbot_ai_assistant_enabled && !output.route_slack_to_nestbot
+    error_message = "Enabling AI must not change Slack routing."
+  }
+}

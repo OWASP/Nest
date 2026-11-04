@@ -28,7 +28,9 @@ No modules.
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
 | [aws_ecs_service.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
+| [aws_ecs_service.worker](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_task_definition.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_ecs_task_definition.worker](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_iam_policy.ecs_task_execution_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_task_execution_ssm_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_task_role_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -75,6 +77,7 @@ No modules.
 | <a name="input_task_role_kms_actions"></a> [task\_role\_kms\_actions](#input\_task\_role\_kms\_actions) | KMS actions allowed on kms\_key\_arn for the application task role. An empty list disables this policy. | `list(string)` | <pre>[<br/>  "kms:Decrypt",<br/>  "kms:GenerateDataKey*"<br/>]</pre> | no |
 | <a name="input_task_role_policy_arns"></a> [task\_role\_policy\_arns](#input\_task\_role\_policy\_arns) | A list of additional IAM policy ARNs to attach to the ECS task role. | `list(string)` | `[]` | no |
 | <a name="input_use_fargate_spot"></a> [use\_fargate\_spot](#input\_use\_fargate\_spot) | Whether to use Fargate Spot capacity provider. | `bool` | `false` | no |
+| <a name="input_worker"></a> [worker](#input\_worker) | Optional queue worker service using the same release image, settings, roles and task size. | <pre>object({<br/>    command              = list(string)<br/>    health_check_command = list(string)<br/>  })</pre> | `null` | no |
 
 ## Outputs
 
@@ -85,4 +88,5 @@ No modules.
 | <a name="output_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#output\_ecs\_cluster\_arn) | The ARN of the ECS cluster. |
 | <a name="output_ecs_cluster_name"></a> [ecs\_cluster\_name](#output\_ecs\_cluster\_name) | The name of the ECS cluster. |
 | <a name="output_ecs_service_name"></a> [ecs\_service\_name](#output\_ecs\_service\_name) | The name of the ECS service. |
+| <a name="output_ecs_worker_service_name"></a> [ecs\_worker\_service\_name](#output\_ecs\_worker\_service\_name) | The optional queue worker service name. |
 <!-- END_TF_DOCS -->

@@ -140,8 +140,8 @@ def process_query(  # noqa: PLR0911
                 )
 
                 logger.info(
-                    "Query from owasp-community channel detected "
-                    "(has_contribution_keywords: %s), routing to community agent for "
+                    "Query from owasp-community channel detected ("
+                    "has_contribution_keywords: %s), routing to community agent for "
                     "channel suggestions",
                     has_contribution_keywords,
                     extra={

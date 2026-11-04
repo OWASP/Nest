@@ -77,6 +77,29 @@ plan before applying. The existing Algolia `index-data` task does not ingest RAG
 data. Image scans, model/data readiness and full Slack behavior require separate
 verification before rollout.
 
+### Staging AI switch and worker
+
+`nestbot_ai_assistant_enabled` defaults to `false` independently of
+`route_slack_to_nestbot`. The deployment workflow reads the GitHub staging
+variable `NESTBOT_AI_ASSISTANT_ENABLED`, also defaulting to `false`, and injects
+`DJANGO_NESTBOT_AI_ASSISTANT_ENABLED` into both web and worker tasks.
+
+NestBot has a dedicated private AI worker service running
+`python manage.py rqworker ai --with-scheduler --worker-ttl 90`. It uses the same
+release image, task roles, settings and credentials as the web service. Its
+health check requires a recent heartbeat from an AI worker on the current host.
+The probe uses `settings.staging` to avoid authenticating with Slack on each check.
+Bootstrap `nestbot_desired_count = 0` stops both services; ordinary services do
+not gain workers. The worker does not attach to the ALB.
+
+Deploy web and worker with AI disabled and retain current Slack routing. Verify
+both release images and service health before cutover. Enable AI only after an
+approved Slack smoke test and channel configuration. Disabling AI requires
+redeploying both services; jobs recheck the setting when execution starts. This
+cannot cancel an already running provider request. Roll back by disabling AI,
+then restoring prior routing/release if necessary. No deployment or provider
+access is implied by local unit checks.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -162,6 +185,7 @@ No resources.
 | <a name="input_frontend_max_count"></a> [frontend\_max\_count](#input\_frontend\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_frontend_min_count"></a> [frontend\_min\_count](#input\_frontend\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_frontend_use_fargate_spot"></a> [frontend\_use\_fargate\_spot](#input\_frontend\_use\_fargate\_spot) | Whether to use Fargate Spot for frontend tasks. | `bool` | `true` | no |
+| <a name="input_nestbot_ai_assistant_enabled"></a> [nestbot\_ai\_assistant\_enabled](#input\_nestbot\_ai\_assistant\_enabled) | Enable NestBot AI independently of Slack routing. Defaults to disabled in staging. | `bool` | `false` | no |
 | <a name="input_nestbot_desired_count"></a> [nestbot\_desired\_count](#input\_nestbot\_desired\_count) | Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image. | `number` | `1` | no |
 | <a name="input_nestbot_google_model_name"></a> [nestbot\_google\_model\_name](#input\_nestbot\_google\_model\_name) | Google model used by NestBot. Verify provider compatibility before deployment. | `string` | `"gemini-3.5-flash-lite"` | no |
 | <a name="input_nestbot_image_tag"></a> [nestbot\_image\_tag](#input\_nestbot\_image\_tag) | Immutable NestBot image tag, required in staging. | `string` | `""` | no |
@@ -196,6 +220,7 @@ No resources.
 | <a name="output_nestbot_cluster_name"></a> [nestbot\_cluster\_name](#output\_nestbot\_cluster\_name) | The ECS NestBot cluster name, or null when disabled. |
 | <a name="output_nestbot_ecr_repository_url"></a> [nestbot\_ecr\_repository\_url](#output\_nestbot\_ecr\_repository\_url) | The NestBot ECR repository URL, or null when disabled. |
 | <a name="output_nestbot_service_name"></a> [nestbot\_service\_name](#output\_nestbot\_service\_name) | The ECS NestBot service name, or null when disabled. |
+| <a name="output_nestbot_worker_service_name"></a> [nestbot\_worker\_service\_name](#output\_nestbot\_worker\_service\_name) | The staging NestBot AI queue worker service name. |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | A list of private subnet IDs. |
 | <a name="output_route_slack_to_nestbot"></a> [route\_slack\_to\_nestbot](#output\_route\_slack\_to\_nestbot) | Whether Slack traffic is currently routed to NestBot. |
 | <a name="output_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#output\_shared\_data\_bucket\_name) | S3 bucket for shared public data (e.g. nest.dump). |

@@ -45,6 +45,7 @@ class Staging(Base):
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 
     IS_STAGING_ENVIRONMENT = True
+    NESTBOT_AI_ASSISTANT_ENABLED = values.BooleanValue(default=False)
 
     # Slack is handled by the dedicated NestBot service.
     SLACK_BOT_TOKEN = OptionalSecretValue(environ=False)

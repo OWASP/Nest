@@ -97,3 +97,8 @@ output "tasks_subnet_ids" {
   description = "A list of private subnet IDs for ECS tasks."
   value       = module.networking.private_subnet_ids
 }
+
+output "nestbot_worker_service_name" {
+  description = "The staging NestBot AI queue worker service name."
+  value       = one(module.nestbot[*].ecs_worker_service_name)
+}

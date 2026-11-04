@@ -239,6 +239,8 @@ class Base(Configuration):
     GOOGLE_API_KEY = values.Value(default=None)
     OPEN_AI_SECRET_KEY = values.SecretValue()
 
+    NESTBOT_AI_ASSISTANT_ENABLED = values.BooleanValue(default=True)
+
     SLACK_BOT_TOKEN = OptionalSecretValue()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True

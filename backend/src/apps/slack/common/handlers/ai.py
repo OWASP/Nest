@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
+
 from apps.slack.blocks import markdown
 from apps.slack.utils import format_ai_response_for_slack
 
@@ -29,6 +31,9 @@ def get_blocks(
         list: A list of Slack blocks representing the AI response.
 
     """
+    if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
+        return [markdown("NestBot AI assistant is currently disabled.")]
+
     ai_response = process_ai_query(
         query.strip(), images=images, channel_id=channel_id, is_app_mention=is_app_mention
     )
@@ -68,6 +73,9 @@ def process_ai_query(
         str | None: The AI response, None if error occurred or should be skipped.
 
     """
+    if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
+        return None
+
     try:
         from apps.ai.flows import process_query
 

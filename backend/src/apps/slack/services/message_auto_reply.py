@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django_rq import job
 from slack_sdk.errors import SlackApiError
 
@@ -15,6 +16,10 @@ logger = logging.getLogger(__name__)
 @job("ai")
 def generate_ai_reply_if_unanswered(message_id: int):
     """Check if a message is still unanswered and generate AI reply."""
+    # Jobs may have been queued by an earlier, enabled release.
+    if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
+        return
+
     try:
         message = Message.objects.get(pk=message_id)
     except Message.DoesNotExist:

@@ -285,6 +285,12 @@ variable "frontend_use_fargate_spot" {
   default     = true
 }
 
+variable "nestbot_ai_assistant_enabled" {
+  description = "Enable NestBot AI independently of Slack routing. Defaults to disabled in staging."
+  type        = bool
+  default     = false
+}
+
 variable "nestbot_desired_count" {
   description = "Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image."
   type        = number

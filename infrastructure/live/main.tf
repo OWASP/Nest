@@ -201,14 +201,19 @@ module "nestbot" {
   enable_auto_scaling    = false
   environment            = var.environment
   environment_variables = {
-    CREWAI_TRACING_ENABLED = "false"
-    DJANGO_CONFIGURATION   = "Staging"
-    DJANGO_SETTINGS_MODULE = "settings.nestbot"
-    EMBEDDING_PROVIDER     = "google"
-    GOOGLE_MODEL_NAME      = var.nestbot_google_model_name
-    LLM_PROVIDER           = "google"
+    CREWAI_TRACING_ENABLED              = "false"
+    DJANGO_CONFIGURATION                = "Staging"
+    DJANGO_SETTINGS_MODULE              = "settings.nestbot"
+    DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = tostring(var.nestbot_ai_assistant_enabled)
+    EMBEDDING_PROVIDER                  = "google"
+    GOOGLE_MODEL_NAME                   = var.nestbot_google_model_name
+    LLM_PROVIDER                        = "google"
   }
-  health_check_command = ["CMD-SHELL", "wget -q -O /dev/null http://$(hostname -i):8000/status/"]
+  worker = {
+    command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler", "--worker-ttl", "90"]
+    health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.staging"]
+  }
+  health_check_command = ["CMD", "python", "-c", "from http.client import HTTPConnection; c = HTTPConnection('127.0.0.1', 8000, timeout=5); c.request('GET', '/status/'); r = c.getresponse(); c.close(); raise SystemExit(0 if r.status == 200 else 1)"]
   health_check_path    = "/status/"
   image_tag            = var.nestbot_image_tag
   kms_key_arn          = module.kms.key_arn

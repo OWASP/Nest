@@ -1,8 +1,12 @@
-.PHONY: ai-update-chapter-chunks ai-update-chapter-context \
+.PHONY: ai-run-agentic-rag ai-update-chapter-chunks ai-update-chapter-context \
 	ai-update-committee-chunks ai-update-committee-context ai-update-event-chunks \
 	ai-update-event-context ai-update-project-chunks ai-update-project-context \
 	ai-update-repository-chunks ai-update-repository-context ai-update-slack-message-chunks \
 	ai-update-slack-message-context
+
+ai-run-agentic-rag:
+	@echo "Running agentic RAG"
+	@CMD="python manage.py ai_run_agentic_rag" $(MAKE) backend-exec-nestbot-command
 
 ai-update-chapter-chunks:
 	@echo "Updating chapter chunks"

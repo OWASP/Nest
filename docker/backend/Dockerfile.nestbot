@@ -1,41 +1,38 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.15-slim@sha256:7c61056e61ac89e852de05f3dc6fa51a6dd2181797bceed46aa725dd7cb2cd3b AS builder
+FROM python:3.13.15-slim-bookworm@sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-ENV POETRY_INSTALLER_ONLY_BINARY=":all:" \
+ENV PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_INSTALLER_ONLY_BINARY=":all:" \
     PYTHONUNBUFFERED=1
 
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        libffi-dev \
-        libpq-dev \
-        libssl-dev \
-        passwd \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd -g "${OWASP_GID}" owasp \
-    && useradd -l -m -u "${OWASP_UID}" -g owasp owasp
+RUN groupadd -g "${OWASP_GID}" owasp && \
+    useradd -l -m -u "${OWASP_UID}" -g owasp owasp && \
+    mkdir -p "${POETRY_CACHE_DIR}" && \
+    chown -R owasp:owasp /home/owasp
 
-COPY requirements/build.txt /tmp/build.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
+COPY --chmod=444 --chown=root:root requirements/build.txt /tmp/
+RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install --only-binary :all: --require-hashes --requirement /tmp/build.txt
 
-USER owasp
 WORKDIR /home/owasp
+USER owasp
 
-COPY --chown=root:root poetry.lock poetry.toml pyproject.toml ./
+COPY --chmod=444 --chown=root:root poetry.lock poetry.toml pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry install --no-root --only main,nestbot
+    poetry export --format requirements.txt --only main,nestbot \
+        --output /tmp/nestbot-requirements.txt && \
+    python -m venv .venv && \
+    .venv/bin/python -m pip install --no-cache-dir --no-deps --only-binary :all: --require-hashes \
+        --requirement /tmp/nestbot-requirements.txt
 
-FROM python:3.13.15-slim@sha256:7c61056e61ac89e852de05f3dc6fa51a6dd2181797bceed46aa725dd7cb2cd3b
+
+FROM python:3.13.15-slim-bookworm@sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -50,7 +47,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq5 \
         libstdc++6 \
         passwd \
-        wget \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -g "${OWASP_GID}" owasp \
     && useradd -l -m -u "${OWASP_UID}" -g owasp owasp

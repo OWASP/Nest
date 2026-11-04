@@ -3,6 +3,8 @@
 import base64
 import logging
 
+from django.conf import settings
+
 from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
@@ -21,6 +23,9 @@ class AppMention(EventBase):
 
     def handle_event(self, event, client):
         """Handle an incoming app mention event."""
+        if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
+            return
+
         channel_id = event.get("channel")
         files = event.get("files", [])
         text = event.get("text", "")

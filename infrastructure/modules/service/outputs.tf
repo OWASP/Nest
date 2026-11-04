@@ -22,3 +22,8 @@ output "ecs_service_name" {
   description = "The name of the ECS service."
   value       = aws_ecs_service.main.name
 }
+
+output "ecs_worker_service_name" {
+  description = "The optional queue worker service name."
+  value       = one(aws_ecs_service.worker[*].name)
+}
