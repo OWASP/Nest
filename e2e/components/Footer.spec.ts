@@ -25,8 +25,16 @@ test.describe('Footer - Desktop (Chrome)', () => {
   })
 
   test('should show tooltip on social link hover', async ({ page }) => {
-    await page.getByRole('link', { name: 'OWASP Nest on GitHub' }).hover()
-    await expect(page.getByRole('tooltip')).toHaveText('OWASP Nest on GitHub')
+    const githubLink = page.getByRole('link', { name: 'OWASP Nest on GitHub' })
+
+    // Re-enter the link on each attempt: a hover that lands before hydration never opens it.
+    await expect(async () => {
+      await page.mouse.move(0, 0)
+      await githubLink.hover()
+      await expect(page.getByRole('tooltip')).toHaveText('OWASP Nest on GitHub', {
+        timeout: 1_000,
+      })
+    }).toPass({ timeout: 15_000 })
   })
 })
 
