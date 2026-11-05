@@ -185,7 +185,7 @@ describe('Footer', () => {
       renderFooter()
 
       // Test GitHub icon
-      const githubLink = screen.getByLabelText('Follow OWASP Nest on GitHub')
+      const githubLink = screen.getByLabelText('OWASP Nest on GitHub')
       expect(githubLink).toBeInTheDocument()
       expect(githubLink).toHaveAttribute('href', 'https://github.com/owasp/nest')
       expect(githubLink).toHaveAttribute('target', '_blank')
@@ -193,26 +193,41 @@ describe('Footer', () => {
       expect(githubLink.querySelector('[data-testid="github-icon"]')).toBeInTheDocument()
 
       // Test Slack icon
-      const slackLink = screen.getByLabelText('Follow OWASP Nest on Slack')
+      const slackLink = screen.getByLabelText('OWASP Nest on Slack')
       expect(slackLink).toBeInTheDocument()
       expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/project-nest')
       expect(slackLink).toHaveAttribute('target', '_blank')
       expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
       expect(slackLink.querySelector('[data-testid="slack-icon"]')).toBeInTheDocument()
 
-      // Test that all icons have basic attributes and tooltip content
+      // Test that all icons have basic attributes
       for (const icon of mockFooterIcons) {
-        const link = screen.getByLabelText(`Follow OWASP Nest on ${icon.label}`)
+        const link = screen.getByLabelText(`OWASP Nest on ${icon.label}`)
         expect(link).toBeInTheDocument()
         expect(link).toHaveAttribute('href', icon.href)
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
 
-        const tooltip = link.closest('[data-testid="tooltip"]')
-        expect(tooltip).toHaveAttribute('data-content', `Follow us on ${icon.label}`)
-
         const iconElement = link.querySelector('svg')
         expect(iconElement).toBeInTheDocument()
+      }
+    })
+
+    test('renders tooltip content and title fallback for each social link', () => {
+      renderFooter()
+
+      const tooltips = screen.getAllByTestId('tooltip')
+      expect(tooltips).toHaveLength(mockFooterIcons.length)
+
+      for (const icon of mockFooterIcons) {
+        const expectedText = `OWASP Nest on ${icon.label}`
+        const link = screen.getByRole('link', { name: `OWASP Nest on ${icon.label}` })
+
+        expect(link).toHaveAttribute('title', expectedText)
+        expect(link.closest('[data-testid="tooltip"]')).toHaveAttribute(
+          'data-content',
+          expectedText
+        )
       }
     })
 
@@ -368,7 +383,7 @@ describe('Footer', () => {
     test('has proper aria-labels for social media links', () => {
       renderFooter()
       for (const icon of mockFooterIcons) {
-        const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
+        const link = screen.getByLabelText(`OWASP Nest on ${icon.label}`)
         expect(link).toBeInTheDocument()
       }
     })
@@ -526,11 +541,11 @@ describe('Footer', () => {
       const links = screen.getAllByRole('link')
       expect(links.length).toBeGreaterThan(0)
 
-      const socialLinks = screen.getByLabelText('OWASP Nest GitHub')
+      const socialLinks = screen.getByLabelText('OWASP Nest on GitHub')
       const svgIcon = socialLinks.querySelector('svg')
       expect(svgIcon).toBeInTheDocument()
 
-      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      const slackLink = screen.getByLabelText('OWASP Nest on Slack')
       const slackSvg = slackLink.querySelector('svg')
       expect(slackSvg).toBeInTheDocument()
 

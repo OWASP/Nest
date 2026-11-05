@@ -77,19 +77,15 @@ export default function Footer() {
         <div className="mb-0 flex flex-row justify-center gap-6">
           {footerIcons.map((social) => {
             const SocialIcon = social.icon
+            const tooltipText = `OWASP Nest on ${social.label}`
             return (
-              <Tooltip
-                key={social.label}
-                content={`Follow us on ${social.label}`}
-                placement="top"
-                showArrow
-              >
+              <Tooltip key={social.label} content={tooltipText} placement="top" showArrow>
                 <Link
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title={`Follow us on ${social.label}`}
-                  aria-label={`Follow OWASP Nest on ${social.label}`}
+                  title={tooltipText}
+                  aria-label={tooltipText}
                   className="rounded-full p-2 text-slate-700 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                 >
                   <SocialIcon className="h-4 w-4" />

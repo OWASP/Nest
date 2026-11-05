@@ -19,9 +19,9 @@ test.describe('Footer - Desktop (Chrome)', () => {
 
   test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on GitHub' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Slack' })).toBeVisible()
   })
 })
 
@@ -49,7 +49,7 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
 
   test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on GitHub' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Slack' })).toBeVisible()
   })
 })
