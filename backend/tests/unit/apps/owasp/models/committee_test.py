@@ -101,14 +101,55 @@ class TestCommitteeModel:
         assert committee.updated_at == owasp_repository.updated_at
 
     def test_nest_key(self):
-        """Test nest_key property strips www-committee- prefix."""
-        committee = Committee(key="www-committee-chapter")
+        """Test nest_key is the committee key."""
+        committee = Committee(key="chapter")
         assert committee.nest_key == "chapter"
 
+    def test_nest_key_strips_the_legacy_prefix(self):
+        """Test a stored www-committee key becomes the public group slug."""
+        committee = Committee(key="www-committee-events")
+        assert committee.nest_key == "events"
+
     def test_nest_key_complex(self):
-        """Test nest_key with multi-word key."""
+        """Test nest_key with a multi-word key."""
         committee = Committee(key="www-committee-web-security")
         assert committee.nest_key == "web-security"
+
+    def test_get_by_key_prefers_an_exact_key(self, mocker):
+        """Test an exact hit is returned without the legacy fallback query."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.return_value = found
+        mocker.patch.object(Committee, "active_committees", manager)
+
+        assert Committee.get_by_key("events") is found
+        manager.filter.assert_called_once_with(key__iexact="events")
+
+    def test_get_by_key_matches_a_legacy_key(self, mocker):
+        """Test a slug looks up a stored www-committee key."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Committee, "active_committees", manager)
+
+        assert Committee.get_by_key("events") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="events"),
+            mocker.call(key__iexact="www-committee-events"),
+        ]
+
+    def test_get_by_key_matches_a_slug_from_a_prefixed_key(self, mocker):
+        """Test a www-committee key looks up a stored slug."""
+        found = mocker.Mock()
+        manager = mocker.Mock()
+        manager.filter.return_value.first.side_effect = [None, found]
+        mocker.patch.object(Committee, "active_committees", manager)
+
+        assert Committee.get_by_key("www-committee-events") is found
+        assert manager.filter.call_args_list == [
+            mocker.call(key__iexact="www-committee-events"),
+            mocker.call(key__iexact="events"),
+        ]
 
     def test_update_data_creates_new(self):
         """Test update_data creates new committee when not found."""

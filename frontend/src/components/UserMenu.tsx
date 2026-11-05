@@ -19,7 +19,11 @@ export default function UserMenu({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
   const isProjectLeader = session?.user?.isLeader
+  const isMentor = session?.user?.isMentor
+  const isMentee = session?.user?.isMentee
   const isOwaspStaff = session?.user?.isOwaspStaff
+  // Anyone involved in mentorship — as a leader, mentor, or mentee — gets the entry point.
+  const canAccessMentorship = isProjectLeader || isMentor || isMentee
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,7 +93,7 @@ export default function UserMenu({
           id={dropdownId}
           className="absolute top-full right-0 z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
-          {isProjectLeader && (
+          {canAccessMentorship && (
             <Link
               href="/my/mentorship"
               className={userMenuItemClasses}

@@ -32,7 +32,14 @@ const ProjectsPage = () => {
 
   const router = useRouter()
   const renderProjectCard = (project: Project) => {
-    const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
+    const params: string[] = [
+      'forksCount',
+      'starsCount',
+      'contributorsCount',
+      'openIssuesCount',
+      'openPullRequestsCount',
+      'updatedAt',
+    ]
     const filteredIcons = getFilteredIcons(project, params)
     const handleButtonClick = () => {
       router.push(`/projects/${project.key}`)

@@ -1,65 +1,69 @@
-# python:slim is used as base image to keep the image size small
-FROM python:3.13.7-slim AS builder
+ARG OWASP_GID=1000
+ARG OWASP_UID=1000
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+FROM python:3.13.15-alpine3.23@sha256:6438599575cca0d1df94aeee0d2ae088d4d8846eab554b2ee7784a3a6df0d516 AS builder
 
-ENV OWASP_GID=1000 \
-    OWASP_UID=1000 \
+ARG OWASP_GID
+ARG OWASP_UID
+
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-builder" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    OWASP_GID=${OWASP_GID} \
+    OWASP_UID=${OWASP_UID} \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
-# hadolint ignore=DL3008,DL3046
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        libffi-dev \
-        libpq-dev \
-        libssl-dev \
-        passwd \
-        && rm -rf /var/lib/apt/lists/* && \
-    groupadd -g ${OWASP_GID} owasp && \
-    useradd -u ${OWASP_UID} -g owasp -m -s /bin/bash owasp && \
-    mkdir -p ${POETRY_CACHE_DIR} /home/owasp/.local/share && \
+RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    apk --no-cache update && \
+    apk --no-cache upgrade && \
+    addgroup -S -g ${OWASP_GID} owasp && \
+    adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
 
-# hadolint ignore=DL3013
+COPY --chmod=444 --chown=root:root requirements/build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
+    python -m pip install --only-binary :all: --require-hashes --requirement /tmp/build.txt
 
 USER owasp
 WORKDIR /home/owasp
 
-COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
+COPY --chmod=444 --chown=root:root poetry.lock poetry.toml pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    --mount=type=cache,target=${PIP_CACHE_DIR} \
-    poetry install --no-root --without nestbot --without test --without video
+    poetry install --no-root --verbose --only main
 
-# Runtime stage using python:slim
-FROM python:3.13.7-slim
+FROM python:3.13.15-alpine3.23@sha256:6438599575cca0d1df94aeee0d2ae088d4d8846eab554b2ee7784a3a6df0d516
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ARG OWASP_GID
+ARG OWASP_UID
 
-ENV FORCE_COLOR=1 \
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-stage" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONPATH="/home/owasp/src" \
     PYTHONUNBUFFERED=1
 
-# hadolint ignore=DL3008
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        curl \
-        libpq5 \
-        passwd \
-        postgresql-client \
-        && rm -rf /var/lib/apt/lists/* && \
-    groupadd -g 1000 owasp && \
-    useradd -u 1000 -g owasp -m -s /bin/bash owasp
+RUN mkdir -p ${APK_CACHE_DIR} && \
+    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-# Install poetry for runtime (needed for volume-based development setup)
-# hadolint ignore=DL3013
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    apk --no-cache update && \
+    apk --no-cache add postgresql16-client=16.15-r0 redis && \
+    addgroup -S -g ${OWASP_GID} owasp && \
+    adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
+
+COPY --chmod=444 --chown=root:root requirements/build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
+    python -m pip install --only-binary :all: --require-hashes --requirement /tmp/build.txt
 
 EXPOSE 8000
 

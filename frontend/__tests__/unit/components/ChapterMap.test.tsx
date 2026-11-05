@@ -466,6 +466,26 @@ describe('ChapterMap Refactored Tests', () => {
     })
   })
 
+  describe('Cursor Behavior', () => {
+    it('has cursor-default class on the section wrapper', () => {
+      const { container } = render(<ChapterMap {...defaultProps} />)
+      const section = container.querySelector('section')
+      expect(section).toHaveClass('cursor-default')
+    })
+
+    it('has chapter-map class on the section wrapper', () => {
+      const { container } = render(<ChapterMap {...defaultProps} />)
+      const section = container.querySelector('section')
+      expect(section).toHaveClass('chapter-map')
+    })
+
+    it('has cursor: default inline style on the map container', () => {
+      const { container } = render(<ChapterMap {...defaultProps} />)
+      const mapDiv = container.querySelector('#chapter-map')
+      expect(mapDiv).toHaveStyle('cursor: default')
+    })
+  })
+
   describe('Edge Cases', () => {
     it('handles case when map is not ready yet', () => {
       mockMapInstance = null

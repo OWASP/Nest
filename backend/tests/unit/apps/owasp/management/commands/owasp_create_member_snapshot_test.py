@@ -221,9 +221,9 @@ class TestOwaspCreateMemberSnapshotCommand:
                 mock_commits,
                 mock_prs,
                 mock_issues,
-                "project",
-                start_at,
-                end_at,
+                entity_type="project",
+                start_at=start_at,
+                end_at=end_at,
             )
 
             # Only contributions within date range should be counted
@@ -585,7 +585,13 @@ class TestOwaspCreateMemberSnapshotCommand:
             mock_chapter_model.objects.filter.return_value = mock_filter
 
             result = command.generate_entity_contributions(
-                mock_user, mock_commits, mock_prs, mock_issues, "chapter", start_at, end_at
+                mock_user,
+                mock_commits,
+                mock_prs,
+                mock_issues,
+                entity_type="chapter",
+                start_at=start_at,
+                end_at=end_at,
             )
 
         assert result == {"test-chapter": 0}
@@ -1042,9 +1048,9 @@ class TestGenerateEntityContributionsChapter:
                 mock_commits,
                 mock_prs,
                 mock_issues,
-                "chapter",
-                start_at,
-                end_at,
+                entity_type="chapter",
+                start_at=start_at,
+                end_at=end_at,
             )
 
             assert result == {"test-chapter": 3}
@@ -1094,9 +1100,9 @@ class TestGenerateEntityContributionsChapter:
                 mock_commits,
                 mock_prs,
                 mock_issues,
-                "chapter",
-                start_at,
-                end_at,
+                entity_type="chapter",
+                start_at=start_at,
+                end_at=end_at,
             )
             assert result == {"test-chapter": 0}
 
@@ -1149,9 +1155,9 @@ class TestGenerateEntityContributionsChapter:
                 mock_commits,
                 mock_prs,
                 mock_issues,
-                "chapter",
-                start_at,
-                end_at,
+                entity_type="chapter",
+                start_at=start_at,
+                end_at=end_at,
             )
             assert result == {"test-chapter": 0}
 
@@ -1204,8 +1210,8 @@ class TestGenerateEntityContributionsChapter:
                 mock_commits,
                 mock_prs,
                 mock_issues,
-                "chapter",
-                start_at,
-                end_at,
+                entity_type="chapter",
+                start_at=start_at,
+                end_at=end_at,
             )
             assert result == {"test-chapter": 0}

@@ -10,6 +10,39 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
+variable "auto_scaling_cpu_target" {
+  description = "Target average CPU utilization percentage for ECS service auto scaling."
+  type        = number
+  default     = 70
+
+  validation {
+    condition     = var.auto_scaling_cpu_target >= 1 && var.auto_scaling_cpu_target <= 100
+    error_message = "auto_scaling_cpu_target must be between 1 and 100."
+  }
+}
+
+variable "auto_scaling_scale_in_cooldown" {
+  description = "Cooldown period in seconds after an ECS service scale-in activity."
+  type        = number
+  default     = 300
+
+  validation {
+    condition     = var.auto_scaling_scale_in_cooldown >= 0
+    error_message = "auto_scaling_scale_in_cooldown must be >= 0."
+  }
+}
+
+variable "auto_scaling_scale_out_cooldown" {
+  description = "Cooldown period in seconds after an ECS service scale-out activity."
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = var.auto_scaling_scale_out_cooldown >= 0
+    error_message = "auto_scaling_scale_out_cooldown must be >= 0."
+  }
+}
+
 variable "backend_desired_count" {
   description = "The desired number of backend tasks."
   type        = number
@@ -45,6 +78,12 @@ variable "backend_use_fargate_spot" {
   default     = true
 }
 
+variable "create_shared_data_bucket" {
+  description = "Whether to create the shared public data S3 bucket."
+  type        = bool
+  default     = false
+}
+
 variable "db_allocated_storage" {
   description = "The allocated storage for the RDS database in GB."
   type        = number
@@ -66,7 +105,7 @@ variable "db_deletion_protection" {
 variable "db_engine_version" {
   description = "The version of the PostgreSQL engine."
   type        = string
-  default     = "16.10"
+  default     = "16.13"
 }
 
 variable "db_instance_class" {
@@ -152,12 +191,6 @@ variable "enable_additional_parameters" {
 variable "enable_cron_tasks" {
   description = "Whether to enable scheduled cron tasks."
   type        = bool
-}
-
-variable "enable_nat_gateway" {
-  description = "Whether to enable a NAT Gateway."
-  type        = bool
-  default     = true
 }
 
 variable "enable_rds_proxy" {

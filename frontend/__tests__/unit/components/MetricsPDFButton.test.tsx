@@ -38,7 +38,7 @@ describe('MetricsPDFButton', () => {
     const icon = screen.getByTestId('tooltip').querySelector('svg')
     expect(icon).toBeInTheDocument()
 
-    fireEvent.click(icon!)
+    fireEvent.click(icon)
 
     await waitFor(() => {
       expect(mockFetchMetricsPDF).toHaveBeenCalledWith('/api/metrics', 'metrics.pdf')
@@ -51,7 +51,7 @@ describe('MetricsPDFButton', () => {
     render(<MetricsPDFButton path="/custom/path" fileName="custom-file.pdf" />)
 
     const icon = screen.getByTestId('tooltip').querySelector('svg')
-    fireEvent.click(icon!)
+    fireEvent.click(icon)
 
     await waitFor(() => {
       expect(mockFetchMetricsPDF).toHaveBeenCalledWith('/custom/path', 'custom-file.pdf')

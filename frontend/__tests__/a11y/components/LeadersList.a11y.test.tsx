@@ -41,7 +41,9 @@ describe.each([
     document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<LeadersList leaders={'John Doe, Jane Smith, Bob Johnson'} />)
+    const { container } = render(
+      <LeadersList entityKey="a11y-leaders" leaders={'John Doe, Jane Smith, Bob Johnson'} />
+    )
 
     const results = await axe(container)
 

@@ -1,2 +1,0 @@
-bucket         = "REPLACE_WITH_TF_STATE_BUCKET_NAME"
-region         = "us-east-2"

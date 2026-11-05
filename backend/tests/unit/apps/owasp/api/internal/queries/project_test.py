@@ -48,25 +48,22 @@ class TestProjectResolution:
 
     def test_resolve_project_existing(self, mock_project, mock_info):
         """Test resolving an existing project."""
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_get:
+        with patch("apps.owasp.models.project.Project.get_by_key") as mock_get:
             mock_get.return_value = mock_project
 
             query = ProjectQuery()
             result = query.__class__.__dict__["project"](query, key="test-project")
 
             assert result == mock_project
-            mock_get.assert_called_once_with(key="www-project-test-project")
+            mock_get.assert_called_once_with("test-project", active_only=False)
 
     def test_resolve_project_not_found(self, mock_info):
         """Test resolving a non-existent project."""
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_get:
-            mock_get.side_effect = Project.DoesNotExist
-
+        with patch("apps.owasp.models.project.Project.get_by_key", return_value=None):
             query = ProjectQuery()
             result = query.__class__.__dict__["project"](query, key="non-existent")
 
             assert result is None
-            mock_get.assert_called_once_with(key="www-project-non-existent")
 
 
 class TestRecentProjectsResolution:
@@ -161,20 +158,14 @@ class TestIsProjectLeaderResolution:
             assert not result
 
     def test_is_project_leader_user_is_leader(self, mock_info):
-        """Test is_project_leader returns True when user is a leader."""
+        """Test is_project_leader returns True when EntityMember marks user as leader."""
         mock_user = Mock()
-        mock_user.login = "testuser"
-        mock_user.name = "Test User"
+        mock_user.is_project_leader = True
 
-        with (
-            patch(
-                "apps.owasp.api.internal.queries.project.GithubUser.objects.get"
-            ) as mock_get_user,
-            patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
+        with patch(
+            "apps.owasp.api.internal.queries.project.GithubUser.objects.get",
+            return_value=mock_user,
         ):
-            mock_get_user.return_value = mock_user
-            mock_filter.return_value.exists.return_value = True
-
             query = ProjectQuery()
             result = query.__class__.__dict__["is_project_leader"](
                 query, info=mock_info, login="testuser"
@@ -183,23 +174,38 @@ class TestIsProjectLeaderResolution:
             assert result
 
     def test_is_project_leader_user_not_leader(self, mock_info):
-        """Test is_project_leader returns False when user is not a leader."""
+        """Test is_project_leader returns False when user has no leader membership."""
         mock_user = Mock()
-        mock_user.login = "testuser"
-        mock_user.name = "Test User"
+        mock_user.is_project_leader = False
 
-        with (
-            patch(
-                "apps.owasp.api.internal.queries.project.GithubUser.objects.get"
-            ) as mock_get_user,
-            patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
+        with patch(
+            "apps.owasp.api.internal.queries.project.GithubUser.objects.get",
+            return_value=mock_user,
         ):
-            mock_get_user.return_value = mock_user
-            mock_filter.return_value.exists.return_value = False
-
             query = ProjectQuery()
             result = query.__class__.__dict__["is_project_leader"](
                 query, info=mock_info, login="testuser"
             )
 
             assert not result
+
+    def test_is_project_leader_blank_name_delegates_to_entity_member(self, mock_info):
+        """Blank display name does not short-circuit; leadership is checked via EntityMember."""
+        mock_user = Mock()
+        mock_user.name = ""
+        mock_user.is_project_leader = False
+
+        with (
+            patch(
+                "apps.owasp.api.internal.queries.project.GithubUser.objects.get",
+                return_value=mock_user,
+            ),
+            patch("apps.owasp.models.project.Project.objects.filter") as mock_project_filter,
+        ):
+            query = ProjectQuery()
+            result = query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="blankuser"
+            )
+
+            assert not result
+            mock_project_filter.assert_not_called()

@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import ModuleCard from 'components/ModuleCard'
 
 jest.mock('@apollo/client/react', () => ({
@@ -12,11 +13,25 @@ const mockModules = [
     key: 'module-1',
     name: 'Intro to Web Security',
     description: 'A beginner module',
-    experienceLevel: 'BEGINNER',
+    experienceLevel: ExperienceLevelEnum.Beginner,
     startedAt: '2025-01-01',
     endedAt: '2025-03-01',
-    mentors: [{ login: 'mentor1', name: 'Mentor One', avatarUrl: 'https://example.com/m1.png' }],
-    mentees: [{ login: 'mentee1', name: 'Mentee One', avatarUrl: 'https://example.com/me1.png' }],
+    mentors: [
+      {
+        id: 'm1',
+        login: 'mentor1',
+        name: 'Mentor One',
+        avatarUrl: 'https://example.com/m1.png',
+      },
+    ],
+    mentees: [
+      {
+        id: 'e1',
+        login: 'mentee1',
+        name: 'Mentee One',
+        avatarUrl: 'https://example.com/me1.png',
+      },
+    ],
     tags: ['web'],
     domains: ['security'],
   },
@@ -33,7 +48,7 @@ describe.each([
   it('should have no accessibility violations', async () => {
     const { container } = render(
       <main>
-        <ModuleCard modules={mockModules as never[]} login="testuser" />
+        <ModuleCard modules={mockModules} />
       </main>
     )
 

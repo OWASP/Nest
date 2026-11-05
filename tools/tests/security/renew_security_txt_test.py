@@ -1,0 +1,362 @@
+"""Tests for the security.txt renewer."""
+
+from __future__ import annotations
+
+import os
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+import pytest
+
+from renew_security_txt import (
+    SIGNATURE_BEGIN,
+    SIGNED_MESSAGE_BEGIN,
+    GeneratedKey,
+    GpgKeyGenerator,
+    RepositoryPaths,
+    SecurityTxtConfig,
+    SecurityTxtRenderer,
+    SecurityTxtRenewer,
+    gpg_expire_date,
+    normalize_expires,
+    unsigned_security_txt_body,
+)
+
+PACIFIC = ZoneInfo("America/Los_Angeles")
+TEST_PASSPHRASE = "test-passphrase"  # noqa: S105
+
+FAKE_PUBLIC_KEY = """-----BEGIN PGP PUBLIC KEY BLOCK-----
+fake-public
+-----END PGP PUBLIC KEY BLOCK-----
+"""
+
+FAKE_PRIVATE_KEY = """-----BEGIN PGP PRIVATE KEY BLOCK-----
+fake-private
+-----END PGP PRIVATE KEY BLOCK-----
+"""
+
+
+def fake_signed_security_txt(cleartext: str) -> str:
+    """Wrap cleartext in a fake clearsigned document for tests."""
+    body = unsigned_security_txt_body(cleartext)
+    return (
+        f"{SIGNED_MESSAGE_BEGIN}\n"
+        "Hash: SHA256\n"
+        "\n"
+        f"{body}"
+        f"{SIGNATURE_BEGIN}\n"
+        "fake\n"
+        "-----END PGP SIGNATURE-----\n"
+    )
+
+
+class FakeKeyGenerator:
+    """Test double that returns fixed armored key material."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+        self.expire_dates: list[str] = []
+        self.passphrases: list[str] = []
+        self.cleartexts: list[str] = []
+
+    def generate(self, *, expire_date: str, passphrase: str, cleartext: str) -> GeneratedKey:
+        self.calls += 1
+        self.expire_dates.append(expire_date)
+        self.passphrases.append(passphrase)
+        self.cleartexts.append(cleartext)
+        return GeneratedKey(
+            fingerprint="A" * 40,
+            public_key=FAKE_PUBLIC_KEY,
+            private_key=FAKE_PRIVATE_KEY,
+            signed_security_txt=fake_signed_security_txt(cleartext),
+        )
+
+
+class TestUnsignedSecurityTxtBody:
+    def test_passes_through_unsigned_content(self) -> None:
+        text = "Contact: mailto:a@b.c\nExpires: 2027-07-01T00:00:00-07:00\n"
+        assert unsigned_security_txt_body(text) == text
+
+    def test_strips_clearsign_wrapper(self) -> None:
+        body = "Canonical: https://example/\nContact: mailto:a@b.c\n"
+        signed = fake_signed_security_txt(body)
+        assert unsigned_security_txt_body(signed) == body
+
+    def test_stripping_then_resign_uses_same_cleartext(self) -> None:
+        body = SecurityTxtRenderer().render("2027-07-01T00:00:00-07:00")
+        once = fake_signed_security_txt(body)
+        twice_input = unsigned_security_txt_body(once)
+        assert twice_input == body
+        assert SIGNED_MESSAGE_BEGIN not in twice_input
+
+    def test_rejects_nested_signed_cleartext(self) -> None:
+        nested = (
+            f"{SIGNED_MESSAGE_BEGIN}\n"
+            "Hash: SHA256\n"
+            "\n"
+            f"{SIGNED_MESSAGE_BEGIN}\n"
+            "Hash: SHA256\n"
+            "\n"
+            "Contact: mailto:a@b.c\n"
+            f"{SIGNATURE_BEGIN}\n"
+            "inner\n"
+            "-----END PGP SIGNATURE-----\n"
+            f"{SIGNATURE_BEGIN}\n"
+            "outer\n"
+            "-----END PGP SIGNATURE-----\n"
+        )
+        with pytest.raises(ValueError, match="double-sign"):
+            unsigned_security_txt_body(nested)
+
+
+class TestSecurityTxtRenderer:
+    def test_render_includes_required_fields(self) -> None:
+        config = SecurityTxtConfig()
+        content = SecurityTxtRenderer(config).render("2027-07-01T00:00:00-07:00")
+
+        assert f"Contact: {config.github_contact}" in content
+        assert f"Contact: {config.mailto_contact}" in content
+        assert f"Encryption: {config.encryption_url}" in content
+        assert "Expires: 2027-07-01T00:00:00-07:00" in content
+        assert content.index(f"Contact: {config.github_contact}") < content.index(
+            f"Contact: {config.mailto_contact}"
+        )
+        names = [
+            line.split(":", 1)[0]
+            for line in content.splitlines()
+            if line.strip() and not line.startswith("#")
+        ]
+        assert names == sorted(names)
+
+
+class TestSecurityTxtRenewerHelpers:
+    def test_gpg_expire_date_uses_pacific_calendar_date(self) -> None:
+        assert gpg_expire_date("2027-07-01T00:00:00-07:00") == "2027-07-01"
+
+    def test_normalize_expires_rebuilds_from_datetime_fields(self) -> None:
+        assert normalize_expires("2027-07-01T00:00:00-07:00") == "2027-07-01T00:00:00-07:00"
+        assert normalize_expires("2027-07-01T07:00:00+00:00") == "2027-07-01T00:00:00-07:00"
+
+    def test_normalize_expires_preserves_dst_fallback_fold(self) -> None:
+        # 2026-11-01 01:30 occurs twice in America/Los_Angeles (PDT then PST).
+        first = normalize_expires("2026-11-01T01:30:00-07:00")
+        second = normalize_expires("2026-11-01T01:30:00-08:00")
+        assert first == "2026-11-01T01:30:00-07:00"
+        assert second == "2026-11-01T01:30:00-08:00"
+        first_ts = datetime.fromisoformat(first).timestamp()
+        second_ts = datetime.fromisoformat(second).timestamp()
+        assert first_ts != second_ts
+
+    def test_next_july_first_expires_uses_current_year_before_july(self) -> None:
+        now = datetime(2026, 3, 15, 12, 0, 0, tzinfo=PACIFIC)
+        assert SecurityTxtRenewer.next_july_first_expires(now=now) == "2026-07-01T00:00:00-07:00"
+
+    def test_next_july_first_expires_rolls_forward_on_or_after_july_first(self) -> None:
+        now = datetime(2026, 7, 1, 0, 0, 0, tzinfo=PACIFIC)
+        assert SecurityTxtRenewer.next_july_first_expires(now=now) == "2027-07-01T00:00:00-07:00"
+
+    def test_find_repository_root_discovers_git_directory(self, tmp_path: Path) -> None:
+        (tmp_path / ".git").mkdir()
+        nested = tmp_path / "tools" / "security"
+        nested.mkdir(parents=True)
+        assert SecurityTxtRenewer.find_repository_root(nested) == tmp_path
+
+    def test_repository_paths(self, tmp_path: Path) -> None:
+        paths = RepositoryPaths(tmp_path)
+        assert paths.security_txt == tmp_path / "frontend/public/.well-known/security.txt"
+        assert paths.pgp_key == tmp_path / "frontend/public/.well-known/pgp-key.txt"
+        assert paths.private_key(2026) == (
+            tmp_path / "tools/security/private/nest-security-private-key-2026.asc"
+        )
+
+    def test_resolve_passphrase_requires_value(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("NEST_SECURITY_PGP_PASSPHRASE", raising=False)
+        with pytest.raises(RuntimeError, match="NEST_SECURITY_PGP_PASSPHRASE"):
+            SecurityTxtRenewer.resolve_passphrase()
+
+    def test_resolve_within_root_allows_nested_path(self, tmp_path: Path) -> None:
+        nested = tmp_path / "tools" / "security" / "private" / "key.asc"
+        assert SecurityTxtRenewer.resolve_within_root(tmp_path, nested) == nested.resolve()
+
+    def test_resolve_within_root_rejects_escape(self, tmp_path: Path) -> None:
+        outside = tmp_path.parent / "outside.asc"
+        with pytest.raises(ValueError, match="escapes repository root"):
+            SecurityTxtRenewer.resolve_within_root(tmp_path, outside)
+
+    def test_resolve_within_root_rejects_parent_traversal(self, tmp_path: Path) -> None:
+        traversal = tmp_path / "tools" / ".." / ".." / "outside.asc"
+        with pytest.raises(ValueError, match="escapes repository root"):
+            SecurityTxtRenewer.resolve_within_root(tmp_path, traversal)
+
+    def test_validate_repository_root_requires_nest_layout(self, tmp_path: Path) -> None:
+        (tmp_path / ".git").mkdir()
+        with pytest.raises(ValueError, match="not a Nest repository root"):
+            SecurityTxtRenewer.validate_repository_root(tmp_path)
+
+    def test_validate_repository_root_accepts_nest_layout(self, tmp_path: Path) -> None:
+        (tmp_path / ".git").mkdir()
+        (tmp_path / "frontend" / "public").mkdir(parents=True)
+        (tmp_path / "tools" / "security").mkdir(parents=True)
+        assert SecurityTxtRenewer.validate_repository_root(tmp_path) == Path(
+            os.path.realpath(tmp_path)
+        )
+
+
+class TestSecurityTxtRenewer:
+    def test_renew_writes_artifacts_with_injected_generator(self, tmp_path: Path) -> None:
+        generator = FakeKeyGenerator()
+        renewer = SecurityTxtRenewer(tmp_path, key_generator=generator)
+        now = datetime(2026, 7, 29, tzinfo=PACIFIC)
+
+        key = renewer.renew(
+            expires="2027-07-01T00:00:00-07:00",
+            passphrase=TEST_PASSPHRASE,
+            now=now,
+        )
+
+        assert generator.calls == 1
+        assert generator.expire_dates == ["2027-07-01"]
+        assert generator.passphrases == [TEST_PASSPHRASE]
+        assert key.fingerprint == "A" * 40
+        assert renewer.paths.pgp_key.read_text(encoding="utf-8") == FAKE_PUBLIC_KEY
+        assert renewer.paths.private_key(2026).read_text(encoding="utf-8") == FAKE_PRIVATE_KEY
+        security_txt = renewer.paths.security_txt.read_text(encoding="utf-8")
+        assert SIGNED_MESSAGE_BEGIN in security_txt
+        assert SIGNATURE_BEGIN in security_txt
+        body = unsigned_security_txt_body(security_txt)
+        assert f"Contact: {renewer.config.mailto_contact}" in body
+        assert f"Encryption: {renewer.config.encryption_url}" in body
+        assert "Expires: 2027-07-01T00:00:00-07:00" in body
+        names = [
+            line.split(":", 1)[0]
+            for line in body.splitlines()
+            if line.strip() and not line.startswith("#")
+        ]
+        assert names == sorted(names)
+
+    def test_renew_strips_existing_signature_before_resign(self) -> None:
+        unsigned = SecurityTxtRenderer().render("2027-07-01T00:00:00-07:00")
+        signed_once = fake_signed_security_txt(unsigned)
+        assert unsigned_security_txt_body(signed_once) == unsigned
+        assert SIGNED_MESSAGE_BEGIN not in unsigned_security_txt_body(signed_once)
+
+    def test_renew_respects_private_key_out(self, tmp_path: Path) -> None:
+        private_key_out = tmp_path / "secure" / "key.asc"
+        renewer = SecurityTxtRenewer(tmp_path, key_generator=FakeKeyGenerator())
+        now = datetime(2026, 7, 29, tzinfo=PACIFIC)
+
+        renewer.renew(
+            expires="2027-07-01T00:00:00-07:00",
+            private_key_out=private_key_out,
+            passphrase=TEST_PASSPHRASE,
+            now=now,
+        )
+
+        assert private_key_out.read_text(encoding="utf-8") == FAKE_PRIVATE_KEY
+        assert not renewer.paths.private_key(2026).exists()
+
+    def test_renew_rejects_private_key_out_outside_root(self, tmp_path: Path) -> None:
+        renewer = SecurityTxtRenewer(tmp_path, key_generator=FakeKeyGenerator())
+        outside = tmp_path.parent / "escaped-key.asc"
+        now = datetime(2026, 7, 29, tzinfo=PACIFIC)
+        with pytest.raises(ValueError, match="escapes repository root"):
+            renewer.renew(
+                expires="2027-07-01T00:00:00-07:00",
+                private_key_out=outside,
+                passphrase=TEST_PASSPHRASE,
+                now=now,
+            )
+        assert not outside.exists()
+
+    def test_renew_requires_passphrase(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv("NEST_SECURITY_PGP_PASSPHRASE", raising=False)
+        renewer = SecurityTxtRenewer(tmp_path, key_generator=FakeKeyGenerator())
+        with pytest.raises(RuntimeError, match="NEST_SECURITY_PGP_PASSPHRASE"):
+            renewer.renew(expires="2027-07-01T00:00:00-07:00")
+
+
+class TestGpgKeyGenerator:
+    def test_require_gpg_raises_when_missing(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr("renew_security_txt.shutil.which", lambda _name: None)
+        with pytest.raises(RuntimeError, match="gpg is required"):
+            GpgKeyGenerator.require_gpg()
+
+    def test_fingerprint_from_key_created_prefers_primary(self) -> None:
+        status = (
+            "[GNUPG:] KEY_CREATED S BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n"
+            "[GNUPG:] KEY_CREATED P AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        )
+        assert (
+            GpgKeyGenerator.fingerprint_from_key_created(status)
+            == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        )
+
+    def test_fingerprint_from_key_created_falls_back_to_first(self) -> None:
+        status = "[GNUPG:] KEY_CREATED B CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+        assert (
+            GpgKeyGenerator.fingerprint_from_key_created(status)
+            == "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+        )
+
+    def test_fingerprint_from_key_created_raises_when_missing(self) -> None:
+        with pytest.raises(RuntimeError, match="KEY_CREATED"):
+            GpgKeyGenerator.fingerprint_from_key_created("[GNUPG:] GOODSIG")
+
+    def test_run_gpg_surfaces_stderr_on_failure(self, tmp_path: Path) -> None:
+        try:
+            gpg = GpgKeyGenerator.require_gpg()
+        except RuntimeError:
+            pytest.skip("gpg is not installed")
+
+        generator = GpgKeyGenerator(SecurityTxtConfig(), gpg_binary=gpg)
+        with pytest.raises(RuntimeError, match="failed with exit code") as raised:
+            generator.run_gpg(tmp_path, "--list-secret-keys", "missing-key-for-error-ux")
+        assert "gpg --list-secret-keys" in str(raised.value)
+
+    def test_public_key_expire_date_reads_colon_listing(self) -> None:
+        try:
+            GpgKeyGenerator.require_gpg()
+        except RuntimeError:
+            pytest.skip("gpg is not installed")
+
+        cleartext = SecurityTxtRenderer().render("2027-07-01T00:00:00-07:00")
+        key = GpgKeyGenerator(SecurityTxtConfig()).generate(
+            expire_date="2027-07-01",
+            passphrase=TEST_PASSPHRASE,
+            cleartext=cleartext,
+        )
+        assert GpgKeyGenerator.public_key_expire_date(key.public_key) == "2027-07-01"
+
+    def test_generate_creates_passphrase_protected_keypair_and_signed_security_txt(
+        self,
+    ) -> None:
+        try:
+            GpgKeyGenerator.require_gpg()
+        except RuntimeError:
+            pytest.skip("gpg is not installed")
+
+        cleartext = SecurityTxtRenderer().render("2027-07-01T00:00:00-07:00")
+        key = GpgKeyGenerator(SecurityTxtConfig()).generate(
+            expire_date="2027-07-01",
+            passphrase=TEST_PASSPHRASE,
+            cleartext=cleartext,
+        )
+
+        assert len(key.fingerprint) >= 40
+        assert "BEGIN PGP PUBLIC KEY BLOCK" in key.public_key
+        assert "BEGIN PGP PRIVATE KEY BLOCK" in key.private_key
+        assert SIGNED_MESSAGE_BEGIN in key.signed_security_txt
+        assert SIGNATURE_BEGIN in key.signed_security_txt
+        assert unsigned_security_txt_body(key.signed_security_txt) == cleartext
+        # Signing already-signed content strips first — still a single signature.
+        resigned = GpgKeyGenerator(SecurityTxtConfig()).generate(
+            expire_date="2027-07-01",
+            passphrase=TEST_PASSPHRASE,
+            cleartext=key.signed_security_txt,
+        )
+        assert unsigned_security_txt_body(resigned.signed_security_txt) == cleartext
+        assert resigned.signed_security_txt.count(SIGNED_MESSAGE_BEGIN) == 1
+        assert resigned.signed_security_txt.count(SIGNATURE_BEGIN) == 1

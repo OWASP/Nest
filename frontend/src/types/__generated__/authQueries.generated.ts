@@ -1,13 +1,17 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type LogoutDjangoMutationVariables = Types.Exact<{ [key: string]: never; }>;
+export type LogoutDjangoMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LogoutDjangoMutation = { logoutUser: { __typename: 'LogoutResult', code: string | null, message: string | null, ok: boolean } };
 
-export type SyncDjangoSessionMutationVariables = Types.Exact<{
-  accessToken: Types.Scalars['String']['input'];
+export type SyncDjangoSessionMutationVariables = Exact<{
+  accessToken: string;
 }>;
 
 

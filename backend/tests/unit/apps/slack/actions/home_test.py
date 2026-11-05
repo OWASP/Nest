@@ -2,11 +2,9 @@ import importlib
 from unittest.mock import MagicMock, patch
 
 import pytest
-from slack_sdk.errors import SlackApiError
 
 import apps.slack.actions.home as home_module
 from apps.slack.actions.home import handle_home_actions
-from apps.slack.apps import SlackConfig
 from apps.slack.constants import (
     VIEW_CHAPTERS_ACTION,
     VIEW_CHAPTERS_ACTION_NEXT,
@@ -71,7 +69,9 @@ class TestHomeActions:
         assert view["type"] == "home"
 
     def test_handle_home_actions_api_error(self, mock_client, mock_body):
-        mock_client.views_publish.side_effect = SlackApiError("Error", {"error": "test_error"})
+        mock_client.views_publish.side_effect = home_module.SlackApiError(
+            "Error", {"error": "test_error"}
+        )
         mock_body["actions"][0]["action_id"] = VIEW_PROJECTS_ACTION
 
         handle_home_actions(MagicMock(), mock_body, mock_client)
@@ -81,7 +81,9 @@ class TestHomeActions:
         self, mock_logger, mock_client, mock_body
     ):
         """Test that SlackApiError is logged with exception details."""
-        mock_client.views_publish.side_effect = SlackApiError("Error", {"error": "test_error"})
+        mock_client.views_publish.side_effect = home_module.SlackApiError(
+            "Error", {"error": "test_error"}
+        )
         mock_body["actions"][0]["action_id"] = VIEW_PROJECTS_ACTION
 
         handle_home_actions(MagicMock(), mock_body, mock_client)
@@ -90,26 +92,6 @@ class TestHomeActions:
         args = mock_logger.exception.call_args[0]
         assert "Error publishing Home Tab" in args[0]
         assert args[1] == "U123456"
-
-    def test_action_registration(self):
-        """Test that actions are registered with SlackConfig.app."""
-        if SlackConfig.app is None:
-            pytest.skip("SlackConfig.app is None - cannot test registration")
-
-        registered_actions = [
-            VIEW_CHAPTERS_ACTION,
-            VIEW_COMMITTEES_ACTION,
-            VIEW_CONTRIBUTE_ACTION,
-            VIEW_PROJECTS_ACTION,
-        ]
-
-        for action in registered_actions:
-            registered_action_ids = [
-                listener.matchers[0].action_id
-                for listener in SlackConfig.app._listeners
-                if listener.matchers and hasattr(listener.matchers[0], "action_id")
-            ]
-            assert action in registered_action_ids, f"Action {action} not registered"
 
     def test_all_action_constants_covered(self):
         """Test that all action constants in the registration tuple are defined."""
@@ -133,7 +115,21 @@ class TestHomeActions:
             assert len(action) > 0
 
     def test_module_registration_code(self):
-        """Test the module-level registration code path by reloading with a mock app."""
+        """Test that all home actions are registered when SlackConfig.app is set."""
+        expected_actions = (
+            VIEW_CHAPTERS_ACTION_NEXT,
+            VIEW_CHAPTERS_ACTION_PREV,
+            VIEW_CHAPTERS_ACTION,
+            VIEW_COMMITTEES_ACTION_NEXT,
+            VIEW_COMMITTEES_ACTION_PREV,
+            VIEW_COMMITTEES_ACTION,
+            VIEW_CONTRIBUTE_ACTION_NEXT,
+            VIEW_CONTRIBUTE_ACTION_PREV,
+            VIEW_CONTRIBUTE_ACTION,
+            VIEW_PROJECTS_ACTION_NEXT,
+            VIEW_PROJECTS_ACTION_PREV,
+            VIEW_PROJECTS_ACTION,
+        )
         mock_app = MagicMock()
         mock_app.action.return_value = MagicMock(return_value=lambda f: f)
 
@@ -142,6 +138,7 @@ class TestHomeActions:
             importlib.reload(home_module)
 
         try:
-            assert mock_app.action.call_count == 12
+            registered_actions = [call.args[0] for call in mock_app.action.call_args_list]
+            assert registered_actions == list(expected_actions)
         finally:
             importlib.reload(home_module)

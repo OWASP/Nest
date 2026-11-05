@@ -15,7 +15,13 @@ import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import IssuesMilestones from 'components/cards/IssuesMilestones'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
 import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams<{ organizationKey: string }>()
@@ -114,29 +120,41 @@ const OrganizationDetailsPage = () => {
   ]
 
   return (
-    <DetailsCard
-      details={organizationDetails}
-      pullRequests={recentPullRequests as PullRequest[]}
-      recentIssues={recentIssues as Issue[]}
-      recentReleases={
-        recentReleases?.map((release) => ({
-          ...release,
-          publishedAt: release.publishedAt as string,
-        })) as Release[]
-      }
-      recentMilestones={recentMilestones as Milestone[]}
-      repositories={
-        repositories?.map((repo) => ({
-          ...repo,
-          organization: repo.organization ? { login: repo.organization.login } : undefined,
-        })) as RepositoryCardProps[]
-      }
-      stats={organizationStats}
-      summary={organization.description}
-      title={organization.name}
-      topContributors={topContributors}
-      type="organization"
-    />
+    <PageWrapper>
+      <Header title={organization.name} isActive={true} isArchived={false} />
+
+      <Summary summary={organization.description} />
+
+      <Metadata
+        details={organizationDetails}
+        stats={organizationStats}
+        detailsTitle="Organization Details"
+      />
+
+      <Contributors topContributors={topContributors} />
+
+      <IssuesMilestones
+        recentIssues={recentIssues as Issue[]}
+        recentMilestones={recentMilestones as Milestone[]}
+        pullRequests={recentPullRequests as PullRequest[]}
+        recentReleases={
+          recentReleases?.map((release) => ({
+            ...release,
+            publishedAt: release.publishedAt as string,
+          })) as Release[]
+        }
+        showAvatar={true}
+      />
+
+      <RepositoriesModules
+        repositories={
+          repositories?.map((repo) => ({
+            ...repo,
+            organization: repo.organization ? { login: repo.organization.login } : undefined,
+          })) as RepositoryCardProps[]
+        }
+      />
+    </PageWrapper>
   )
 }
 

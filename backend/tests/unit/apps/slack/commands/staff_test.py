@@ -1,10 +1,9 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.common.constants import OWASP_URL
-from apps.owasp.utils.staff import get_staff_data
 from apps.slack.commands.staff import Staff
 
 FAILED_STAFF_DATA_ERROR_MESSAGE = "Failed to get OWASP Foundation staff data."
@@ -41,62 +40,62 @@ class TestStaffHandler:
         ]
 
     @pytest.mark.parametrize(
-        ("commands_enabled", "has_staff_data", "expected_message"),
+        ("has_staff_data", "expected_message"),
         [
-            (False, True, None),
-            (True, True, "OWASP Foundation Staff:"),
-            (True, False, FAILED_STAFF_DATA_ERROR_MESSAGE),
+            (True, "OWASP Foundation Staff:"),
+            (False, FAILED_STAFF_DATA_ERROR_MESSAGE),
         ],
     )
+    @patch("apps.slack.commands.staff.get_staff_data")
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_responses(
         self,
-        commands_enabled,
+        mock_get_staff_data,
         has_staff_data,
         expected_message,
         mock_slack_client,
         mock_slack_command,
         mock_staff,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
-        # Clear cache before test
-        get_staff_data.cache_clear()
-        # Patch where it's imported and used
-        with patch("apps.slack.commands.staff.get_staff_data") as mock_get_staff_data:
-            mock_get_staff_data.return_value = mock_staff if has_staff_data else None
+        mock_get_staff_data.return_value = mock_staff if has_staff_data else []
 
-            ack = MagicMock()
-            Staff().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+        ack = MagicMock()
+        Staff().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
 
-            ack.assert_called_once()
+        ack.assert_called_once()
 
-            if not commands_enabled:
-                mock_slack_client.conversations_open.assert_not_called()
-                mock_slack_client.chat_postMessage.assert_not_called()
-            elif has_staff_data:
-                mock_slack_client.conversations_open.assert_called_once_with(
-                    users=mock_slack_command["user_id"]
-                )
-                blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-                # Combine all text blocks to check content
-                all_text = "\n".join(
-                    block["text"]["text"] for block in blocks if "text" in block.get("text", {})
-                )
-                assert expected_message in all_text
-                for idx, staff in enumerate(mock_staff, start=1):
-                    assert f"*{idx}. {staff['name']}, {staff['title']}*" in all_text
-                    assert f"_{staff['location']}_" in all_text
-                    assert staff["description"] in all_text
-                # Check that the footer is present
-                assert OWASP_URL in all_text
-                # Check that the feedback message is present
-                assert "💬 You can share feedback" in all_text
-            else:
-                mock_slack_client.conversations_open.assert_called_once_with(
-                    users=mock_slack_command["user_id"]
-                )
-                mock_slack_client.chat_postMessage.assert_called_once()
-                blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-                all_text = "\n".join(
-                    block["text"]["text"] for block in blocks if "text" in block.get("text", {})
-                )
-                assert FAILED_STAFF_DATA_ERROR_MESSAGE in all_text
+        if has_staff_data:
+            mock_slack_client.conversations_open.assert_called_once_with(
+                users=mock_slack_command["user_id"]
+            )
+            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+            assert expected_message in blocks[0]["text"]["text"]
+            for idx, staff in enumerate(mock_staff, start=1):
+                staff_block = blocks[idx]["text"]["text"]
+                assert f"*{idx}. {staff['name']}, {staff['title']}*" in staff_block
+                assert f"_{staff['location']}_" in staff_block
+                assert staff["description"] in staff_block
+            # Check that the footer is in the second to last block
+            footer_block = blocks[-2]["text"]["text"]
+            assert OWASP_URL in footer_block
+            # Check that the feedback message is in the last block
+            feedback_block = blocks[-1]["text"]["text"]
+            assert "💬 You can share feedback" in feedback_block
+        else:
+            mock_slack_client.conversations_open.assert_called_once_with(
+                users=mock_slack_command["user_id"]
+            )
+            mock_slack_client.chat_postMessage.assert_called_once_with(
+                blocks=ANY,
+                channel="C123456",
+                text=FAILED_STAFF_DATA_ERROR_MESSAGE,
+            )
+
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_handler_when_commands_disabled(self, mock_slack_client, mock_slack_command):
+        ack = MagicMock()
+        Staff().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
+        mock_slack_client.conversations_open.assert_not_called()
+        mock_slack_client.chat_postMessage.assert_not_called()

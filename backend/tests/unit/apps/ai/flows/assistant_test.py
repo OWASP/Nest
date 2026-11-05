@@ -299,6 +299,8 @@ class TestCache:
 
         assert result == "channel response 5"
         mock_get_cached_response.assert_not_called()
+        message, *arguments = mock_logger.info.call_args_list[0].args
+        assert "has_contribution_keywords: False" in message % tuple(arguments)
 
     @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.store_cached_response")
