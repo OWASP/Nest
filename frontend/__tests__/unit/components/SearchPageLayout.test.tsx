@@ -436,6 +436,92 @@ describe('<SearchPageLayout />', () => {
     expect(screen.getByText('Below Sort')).toBeInTheDocument()
   })
 
+  it('renders a sort row skeleton while loading when sort is below search', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={false}
+        totalPages={0}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="projects"
+        sortChildren={<div>Below Sort</div>}
+      />
+    )
+
+    const sortSkeleton = screen.getByTestId('sort-below-skeleton')
+    expect(sortSkeleton).toHaveClass('mt-4', 'md:mt-0')
+    expect(screen.queryByText('Below Sort')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    { label: 'sort is inline', inlineSort: true, sortChildren: <div>Sort</div> },
+    { label: 'there is no sort', inlineSort: false, sortChildren: undefined },
+  ])('does not render a sort row skeleton while loading when $label', (props) => {
+    render(
+      <SearchPageLayout
+        isLoaded={false}
+        totalPages={0}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="projects"
+        inlineSort={props.inlineSort}
+        sortChildren={props.sortChildren}
+      />
+    )
+
+    expect(screen.queryByTestId('sort-below-skeleton')).not.toBeInTheDocument()
+  })
+
+  it('adds mobile-only top spacing to the sort row below search', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        sortChildren={<div>Below Sort</div>}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    const sortRow = screen.getByTestId('sort-below')
+    expect(sortRow).toHaveClass('mt-4', 'md:mt-0')
+  })
+
+  it('does not render an empty sort row when sortChildren is not provided', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    expect(screen.queryByTestId('sort-below')).not.toBeInTheDocument()
+  })
+
   it('renders both filterChildren and inlineSort together', () => {
     const { container } = render(
       <SearchPageLayout
