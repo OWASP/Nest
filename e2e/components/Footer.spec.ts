@@ -18,10 +18,15 @@ test.describe('Footer - Desktop (Chrome)', () => {
   })
 
   test('should have links', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest on GitHub' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on LinkedIn' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest on Slack' })).toBeVisible()
+  })
+
+  test('should show tooltip on social link hover', async ({ page }) => {
+    await page.getByRole('link', { name: 'OWASP Nest on GitHub' }).hover()
+    await expect(page.getByRole('tooltip')).toHaveText('OWASP Nest on GitHub')
   })
 })
 
@@ -48,7 +53,7 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
   })
 
   test('should have links', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest on GitHub' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest on Slack' })).toBeVisible()
   })
