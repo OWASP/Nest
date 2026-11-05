@@ -274,7 +274,7 @@ describe('chapterDetailsPage Component', () => {
       period: { startAt: '2026-10-01T12:00:00Z', endAt: '2026-10-22T12:00:00Z' },
       caption: 'Oct 1 — 22, 2026',
     },
-    { name: 'legacy daily data', period: {}, caption: 'Oct 17 — 20, 2026' },
+    { name: 'legacy daily data', period: {}, caption: 'Oct 22, 2025 — 2026' },
   ])('includes October 20 chapter activity using $name', async ({ period, caption }) => {
     jest.useFakeTimers({ now: new Date('2026-10-22T12:00:00Z') })
     try {

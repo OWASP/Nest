@@ -802,6 +802,14 @@ describe('ContributionHeatmap', () => {
       expect(screen.getByText('Jan 1 — 31, 2024')).toBeVisible()
     })
 
+    it('shortens a displayed period that crosses years to the end year', async () => {
+      renderWithTheme(
+        <ContributionHeatmap {...defaultProps} startDate="2025-03-24" endDate="2026-03-24" />
+      )
+      await waitFor(() => expect(mockChart).toHaveBeenCalled())
+      expect(screen.getByText('Mar 24, 2025 — 2026')).toBeVisible()
+    })
+
     it('includes the year in hover dates', async () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       await waitFor(() => expect(mockChart).toHaveBeenCalled())

@@ -452,6 +452,7 @@ describe('ProjectDetailsPage', () => {
 
       render(<ProjectDetailsPage />)
       await waitFor(() => expect(mockHeatmapChart).toHaveBeenCalled())
+      expect(screen.getByText('Oct 22, 2025 — 2026')).toBeVisible()
 
       const activity = screen.getByText('Project Contribution Activity').closest('section')
       if (!activity) throw new Error('The contribution summary has not rendered')

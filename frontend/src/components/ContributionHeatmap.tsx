@@ -6,7 +6,7 @@ import {
   buildContributionCalendar,
   type ContributionHeatmapSeries,
 } from 'utils/contributionHeatmap'
-import { formatDateRange } from 'utils/dateFormatter'
+import { formatCompactDateRange } from 'utils/dateFormatter'
 import { pluralize } from 'utils/pluralize'
 
 const Chart = dynamic(() => import('react-apexcharts'), {
@@ -336,7 +336,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       <div className="mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-2 text-xs text-gray-600 dark:text-gray-300">
         <p>
           <span className="sr-only">Displayed period: </span>
-          <span>{formatDateRange(calendarStart, calendarEnd)}</span>
+          <span>{formatCompactDateRange(calendarStart, calendarEnd)}</span>
         </p>
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <span aria-hidden="true">Less</span>

@@ -24,10 +24,17 @@ const parseContributionDate = (value: unknown): Date | undefined => {
   return Number.isNaN(parsed.getTime()) ? undefined : parsed
 }
 
-/** Prefer a valid saved UTC period, then daily-date bounds; return nothing without usable dates. */
+// Matches the rolling window used by the backend contribution aggregation.
+const REPORTING_PERIOD_DAYS = 365
+
+/**
+ * Prefer a valid saved UTC period, then the reporting period ending today when daily dates exist;
+ * return nothing without usable dates.
+ */
 export function getContributionDateRange(
   stats?: ContributionStats,
-  contributionData?: Record<string, number>
+  contributionData?: Record<string, number>,
+  now: Date = new Date()
 ): { startDate: string; endDate: string } | undefined {
   const start = parseContributionDate(stats?.startAt)
   const end = parseContributionDate(stats?.endAt)
@@ -37,14 +44,17 @@ export function getContributionDateRange(
       endDate: end.toISOString().slice(0, 10),
     }
   }
-  let startDate: string | undefined
-  let endDate: string | undefined
-  for (const day of Object.keys(contributionData ?? {})) {
-    if (day.length !== 10 || !parseContributionDate(day)) continue
-    if (!startDate || day < startDate) startDate = day
-    if (!endDate || day > endDate) endDate = day
+  const hasUsableDate = Object.keys(contributionData ?? {}).some(
+    (day) => day.length === 10 && parseContributionDate(day) !== undefined
+  )
+  if (!hasUsableDate) return undefined
+
+  const periodStart = new Date(now)
+  periodStart.setUTCDate(periodStart.getUTCDate() - REPORTING_PERIOD_DAYS)
+  return {
+    startDate: periodStart.toISOString().slice(0, 10),
+    endDate: now.toISOString().slice(0, 10),
   }
-  return startDate && endDate ? { startDate, endDate } : undefined
 }
 
 export function getContributionStats(

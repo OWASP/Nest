@@ -56,6 +56,22 @@ export const formatDateRange = (startDate: string, endDate: string) => {
   }
 }
 
+/** Format a range compactly by showing only the end year across years (e.g., "Mar 24, 2025 — 2026"). */
+export const formatCompactDateRange = (startDate: string, endDate: string) => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return ''
+  }
+
+  if (start.getUTCFullYear() === end.getUTCFullYear()) {
+    return formatDateRange(startDate, endDate)
+  }
+
+  return `${formatDate(startDate)} — ${end.getUTCFullYear()}`
+}
+
 export const formatDateForInput = (input: string | null) => {
   if (!input) return ''
 

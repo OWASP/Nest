@@ -1,17 +1,44 @@
 import { contributionCount, getContributionDateRange } from 'utils/contributionDataUtils'
 
 describe('getContributionDateRange', () => {
-  test('uses valid daily date bounds for older reports without a saved period', () => {
+  const now = new Date('2026-11-05T15:00:00Z')
+  const yearEndingToday = { startDate: '2025-11-05', endDate: '2026-11-05' }
+
+  test('uses the year ending today for older reports without a saved period', () => {
     expect(
-      getContributionDateRange(undefined, {
-        '2026-10-20': 1,
-        '2025-02-28': 2,
-        '2025-02-30': 3,
-        '2024-01': 4,
-        '2024-01-01T00:00:00Z': 5,
-        invalid: 6,
-      })
-    ).toEqual({ startDate: '2025-02-28', endDate: '2026-10-20' })
+      getContributionDateRange(
+        undefined,
+        {
+          '2026-10-20': 1,
+          '2025-02-28': 2,
+          '2025-02-30': 3,
+          '2024-01': 4,
+          '2024-01-01T00:00:00Z': 5,
+          invalid: 6,
+        },
+        now
+      )
+    ).toEqual(yearEndingToday)
+  })
+
+  test('keeps a full year when older reports have a single day of activity', () => {
+    expect(getContributionDateRange(undefined, { '2026-10-24': 1 }, now)).toEqual(yearEndingToday)
+  })
+
+  test('uses the UTC day when today differs by timezone', () => {
+    expect(
+      getContributionDateRange(
+        undefined,
+        { '2026-10-24': 1 },
+        new Date('2026-11-05T23:30:00-02:00')
+      )
+    ).toEqual({ startDate: '2025-11-06', endDate: '2026-11-06' })
+  })
+
+  test('spans 365 days across a leap day like the backend aggregation', () => {
+    expect(
+      getContributionDateRange(undefined, { '2028-02-01': 1 }, new Date('2028-03-01T00:00:00Z'))
+    ).toEqual({ startDate: '2027-03-02', endDate: '2028-03-01' })
   })
 
   test('prefers the saved reporting period over dates with recorded activity', () => {
@@ -94,9 +121,10 @@ describe('getContributionDateRange', () => {
     expect(
       getContributionDateRange(
         { commits: 2, issues: 0, pullRequests: 0, total: 2, startAt, endAt },
-        { '2024-03-01': 1, '2023-02-01': 1 }
+        { '2024-03-01': 1, '2023-02-01': 1 },
+        now
       )
-    ).toEqual({ startDate: '2023-02-01', endDate: '2024-03-01' })
+    ).toEqual(yearEndingToday)
   })
 
   const unusableDailyData: Array<Record<string, number> | undefined> = [
@@ -108,15 +136,12 @@ describe('getContributionDateRange', () => {
   ]
   test.each(unusableDailyData)('returns no period when no usable dates exist (%j)', (data) => {
     expect(
-      getContributionDateRange({ commits: 2, issues: 0, pullRequests: 0, total: 2 }, data)
+      getContributionDateRange({ commits: 2, issues: 0, pullRequests: 0, total: 2 }, data, now)
     ).toBeUndefined()
   })
 
-  test('retains a recorded zero-activity day as a valid one-day range', () => {
-    expect(getContributionDateRange(undefined, { '2024-02-29': 0 })).toEqual({
-      startDate: '2024-02-29',
-      endDate: '2024-02-29',
-    })
+  test('treats a recorded zero-activity day as usable data for the year ending today', () => {
+    expect(getContributionDateRange(undefined, { '2024-02-29': 0 }, now)).toEqual(yearEndingToday)
   })
 })
 
