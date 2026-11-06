@@ -137,11 +137,7 @@ def get_project(
     project_id: str = Path(example="Nest"),
 ) -> ProjectDetail | ProjectError:
     """Get project."""
-    if project := ProjectModel.active_projects.filter(
-        key__iexact=(
-            project_id if project_id.startswith("www-project-") else f"www-project-{project_id}"
-        )
-    ).first():
+    if project := ProjectModel.get_by_key(project_id):
         return project
 
     return Response({"message": "Project not found"}, status=HTTPStatus.NOT_FOUND)

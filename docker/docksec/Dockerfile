@@ -1,0 +1,1 @@
+FROM ghcr.io/owasp/docksec:2026.9.21@sha256:646e8250e2dc98ac4c8fd5f9a5d37f9aecae149a468271b5b1dc04092f927be4

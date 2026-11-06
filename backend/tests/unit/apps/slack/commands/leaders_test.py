@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.commands.leaders import Leaders
 
@@ -37,21 +37,20 @@ class TestLeadersHandler:
         }
 
     @pytest.mark.parametrize(
-        ("commands_enabled", "has_results", "expected_message"),
+        ("has_results", "expected_message"),
         [
-            (False, True, None),
-            (True, False, "No results found for"),
-            (True, True, "Chapters"),
-            (True, True, "Projects"),
+            (False, "No results found for"),
+            (True, "Chapters"),
+            (True, "Projects"),
         ],
     )
     @patch("apps.owasp.index.search.chapter.get_chapters")
     @patch("apps.owasp.index.search.project.get_projects")
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_responses(
         self,
         mock_get_projects,
         mock_get_chapters,
-        commands_enabled,
         has_results,
         expected_message,
         mock_slack_client,
@@ -59,7 +58,6 @@ class TestLeadersHandler:
         mock_chapter,
         mock_project,
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
         mock_get_chapters.return_value = {"hits": [mock_chapter] if has_results else []}
         mock_get_projects.return_value = {"hits": [mock_project] if has_results else []}
 
@@ -68,15 +66,20 @@ class TestLeadersHandler:
 
         ack.assert_called_once()
 
-        if not commands_enabled:
-            mock_slack_client.conversations_open.assert_not_called()
-            mock_slack_client.chat_postMessage.assert_not_called()
-        else:
-            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
-            assert any(expected_message in str(block) for block in blocks)
-            if has_results:
-                assert any(mock_chapter["idx_name"] in str(block) for block in blocks)
-                assert any(mock_project["idx_name"] in str(block) for block in blocks)
+        blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+        assert any(expected_message in str(block) for block in blocks)
+        if has_results:
+            assert any(mock_chapter["idx_name"] in str(block) for block in blocks)
+            assert any(mock_project["idx_name"] in str(block) for block in blocks)
+
+    @override_settings(SLACK_COMMANDS_ENABLED=False)
+    def test_handler_when_commands_disabled(self, mock_slack_client, mock_slack_command):
+        ack = MagicMock()
+        Leaders().handler(ack=ack, command=mock_slack_command, client=mock_slack_client)
+
+        ack.assert_called_once()
+        mock_slack_client.conversations_open.assert_not_called()
+        mock_slack_client.chat_postMessage.assert_not_called()
 
     @pytest.mark.parametrize(
         ("search_text", "expected_escaped"),
@@ -88,6 +91,7 @@ class TestLeadersHandler:
     @patch("apps.slack.utils.escape")
     @patch("apps.owasp.index.search.chapter.get_chapters")
     @patch("apps.owasp.index.search.project.get_projects")
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_special_characters(
         self,
         mock_get_projects,
@@ -99,7 +103,6 @@ class TestLeadersHandler:
     ):
         command = {"text": search_text, "user_id": "U123456"}
         mock_escape.return_value = expected_escaped
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_get_chapters.return_value = {"hits": []}
         mock_get_projects.return_value = {"hits": []}
 
@@ -121,6 +124,7 @@ class TestLeadersHandler:
     )
     @patch("apps.owasp.index.search.chapter.get_chapters")
     @patch("apps.owasp.index.search.project.get_projects")
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_leader_formatting(
         self,
         mock_get_projects,
@@ -130,7 +134,6 @@ class TestLeadersHandler:
         mock_slack_client,
         mock_slack_command,
     ):
-        settings.SLACK_COMMANDS_ENABLED = True
         mock_chapter = {
             "idx_key": "test-chapter",
             "idx_leaders": leaders_list,

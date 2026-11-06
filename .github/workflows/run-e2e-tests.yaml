@@ -29,7 +29,7 @@ jobs:
       NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
     permissions:
       contents: read
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     services:
       cache:
         image: redis:8.8.0-alpine3.23@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
@@ -143,7 +143,7 @@ jobs:
 
       - name: Upload Playwright test results
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: playwright-test-results-shard-${{ matrix.shard }}
           path: e2e/test-results/

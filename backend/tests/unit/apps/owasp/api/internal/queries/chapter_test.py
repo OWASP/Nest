@@ -34,23 +34,20 @@ class TestChapterResolution:
 
     def test_chapter_found(self, mock_info, mock_chapter):
         """Test if a chapter is returned when found."""
-        with patch("apps.owasp.models.chapter.Chapter.objects.get") as mock_get:
+        with patch("apps.owasp.models.chapter.Chapter.get_by_key") as mock_get:
             mock_get.return_value = mock_chapter
 
             result = ChapterQuery().chapter(key="test-chapter")
 
             assert result == mock_chapter
-            mock_get.assert_called_once_with(key="www-chapter-test-chapter")
+            mock_get.assert_called_once_with("test-chapter", active_only=False)
 
     def test_chapter_not_found(self, mock_info):
         """Test if None is returned when the chapter is not found."""
-        with patch("apps.owasp.models.chapter.Chapter.objects.get") as mock_get:
-            mock_get.side_effect = Chapter.DoesNotExist
-
+        with patch("apps.owasp.models.chapter.Chapter.get_by_key", return_value=None):
             result = ChapterQuery().chapter(key="non-existent")
 
             assert result is None
-            mock_get.assert_called_once_with(key="www-chapter-non-existent")
 
     def test_recent_chapters_query(self, mock_info):
         """Test if recent chapters are returned correctly."""
