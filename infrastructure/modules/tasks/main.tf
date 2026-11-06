@@ -12,6 +12,13 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
+  # Only canonical secret ARNs are exposed in IAM plans, never credential values.
+  secretsmanager_secret_arns = nonsensitive(distinct([
+    for arn in values(var.container_parameters_arns) :
+    join(":", slice(split(":", arn), 0, 7))
+    if can(regex("^arn:[^:]+:secretsmanager:", arn))
+  ]))
+
   mentorship_sync_modules_data_schedule_expression  = var.enable_cron_tasks ? "cron(30 06 * * ? *)" : null
   slack_sync_data_schedule_expression               = var.enable_cron_tasks ? "cron(0 */6 ? * MON-FRI *)" : null
   sync_data_schedule_expression                     = var.enable_cron_tasks ? "cron(17 05 * * ? *)" : null
@@ -59,7 +66,7 @@ resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
   name        = "${var.project_name}-${var.environment}-ecs-tasks-ssm-policy"
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Action = [
           "ssm:GetParameters"
@@ -67,7 +74,18 @@ resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
         Effect   = "Allow"
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
       }
-    ]
+      ], length(local.secretsmanager_secret_arns) > 0 ? [
+      {
+        Action   = ["secretsmanager:GetSecretValue"]
+        Effect   = "Allow"
+        Resource = local.secretsmanager_secret_arns
+      },
+      {
+        Action   = ["kms:Decrypt"]
+        Effect   = "Allow"
+        Resource = [var.kms_key_arn]
+      }
+    ] : [])
   })
   tags = var.common_tags
 }
@@ -222,6 +240,8 @@ resource "aws_iam_role_policy_attachment" "event_bridge_policy_attachment" {
 module "sync_data_task" {
   source = "./modules/task"
 
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
+
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make sync-data"]
   common_tags                  = var.common_tags
@@ -244,6 +264,8 @@ module "sync_data_task" {
 
 module "slack_sync_data_task" {
   source = "./modules/task"
+
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
 
   aws_region = var.aws_region
   command = [
@@ -277,6 +299,8 @@ module "slack_sync_data_task" {
 module "owasp_update_project_health_metrics_task" {
   source = "./modules/task"
 
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
+
   aws_region = var.aws_region
   command = [
     "/bin/sh",
@@ -308,6 +332,8 @@ module "owasp_update_project_health_metrics_task" {
 module "owasp_update_project_health_scores_task" {
   source = "./modules/task"
 
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
+
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make owasp-update-project-health-scores"]
   common_tags                  = var.common_tags
@@ -330,6 +356,8 @@ module "owasp_update_project_health_scores_task" {
 
 module "mentorship_sync_modules_data" {
   source = "./modules/task"
+
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
 
   aws_region = var.aws_region
   command = [
@@ -362,6 +390,8 @@ module "mentorship_sync_modules_data" {
 module "migrate_task" {
   source = "./modules/task"
 
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
+
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make migrate"]
   common_tags                  = var.common_tags
@@ -382,6 +412,8 @@ module "migrate_task" {
 
 module "load_data_task" {
   source = "./modules/task"
+
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
 
   aws_region = var.aws_region
   command = [
@@ -425,6 +457,8 @@ module "load_data_task" {
 
 module "index_data_task" {
   source = "./modules/task"
+
+  depends_on = [aws_iam_role_policy_attachment.ecs_tasks_execution_role_ssm_policy_attachment]
 
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make index-data"]

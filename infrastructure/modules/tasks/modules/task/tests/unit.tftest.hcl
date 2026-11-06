@@ -207,3 +207,23 @@ run "test_task_uses_private_subnets" {
     error_message = "ECS task must be deployed into the configured private subnets."
   }
 }
+
+run "test_task_preserves_mixed_runtime_references" {
+  command = plan
+
+  variables {
+    container_parameters_arns = {
+      DJANGO_CONFIGURATION = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_CONFIGURATION"
+      DJANGO_DB_PASSWORD   = "arn:aws:secretsmanager:us-east-2:123456789012:secret:nest-test-db-credentials-AbCdEf:password::"
+      SLACK_BOT_TOKEN_TEST = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/nest/test/SLACK_BOT_TOKEN_TEST-AbCdEf"
+    }
+  }
+
+  assert {
+    condition = tomap({
+      for secret in jsondecode(aws_ecs_task_definition.task.container_definitions)[0].secrets :
+      secret.name => secret.valueFrom
+    }) == var.container_parameters_arns
+    error_message = "Scheduled tasks must preserve SSM configuration, the database password selector, and suffixed Slack variable names."
+  }
+}

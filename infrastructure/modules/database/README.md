@@ -58,6 +58,7 @@ No modules.
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key. | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_proxy_security_group_ids"></a> [proxy\_security\_group\_ids](#input\_proxy\_security\_group\_ids) | A list of security group IDs to associate with the RDS proxy. | `list(string)` | `[]` | no |
+| <a name="input_retain_legacy_credential_parameters"></a> [retain\_legacy\_credential\_parameters](#input\_retain\_legacy\_credential\_parameters) | Keep migrated SSM credential parameters until the Secrets Manager cutover is verified. | `bool` | `true` | no |
 | <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately. | `number` | `7` | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | A list of security group IDs to associate with the RDS database. | `list(string)` | n/a | yes |
 
@@ -65,6 +66,6 @@ No modules.
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_db_password_arn"></a> [db\_password\_arn](#output\_db\_password\_arn) | The SSM Parameter ARN of password of the RDS database. |
+| <a name="output_db_credentials_secret_arn"></a> [db\_credentials\_secret\_arn](#output\_db\_credentials\_secret\_arn) | The ARN of the database credentials secret. |
 | <a name="output_db_proxy_endpoint"></a> [db\_proxy\_endpoint](#output\_db\_proxy\_endpoint) | The endpoint of the RDS proxy. |
 <!-- END_TF_DOCS -->
