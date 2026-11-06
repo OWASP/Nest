@@ -85,10 +85,9 @@ class Command(BaseCommand):
                 if repository.topics:
                     topics.update(repository.topics)
 
-            project.pushed_at = max(pushed_at)
-            if released_at:
-                project.released_at = max(released_at)
-            project.updated_at = max(pushed_at + released_at)
+            project.pushed_at = max(pushed_at) if pushed_at else None
+            project.released_at = max(released_at) if released_at else None
+            project.updated_at = max(pushed_at + released_at) if pushed_at or released_at else None
 
             project.commits_count = commits_count
             project.contributors_count = contributors_count

@@ -240,3 +240,29 @@ class TestOwaspAggregateProjects:
         assert mock_project.contributors_count == 8
         assert mock_project.forks_count == 20
         assert mock_project.stars_count == 100
+
+    @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    def test_handle_empty_repositories(self, mock_bulk_save, command, mock_project):
+        """Test handle resets timestamps and counters when project has no repositories."""
+        mock_project.pushed_at = "2024-01-01T00:00:00Z"
+        mock_project.released_at = "2024-01-01T00:00:00Z"
+        mock_project.updated_at = "2024-01-01T00:00:00Z"
+        mock_project.repositories.filter.return_value = MockQuerySet([])
+
+        mock_qs = mock.MagicMock(count=mock.Mock(return_value=1))
+        mock_qs.__getitem__.return_value = [mock_project]
+        mock_qs.order_by.return_value = mock_qs
+
+        with mock.patch.object(Project, "active_projects", mock_qs):
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+
+        mock_bulk_save.assert_called_once()
+        assert mock_project.pushed_at is None
+        assert mock_project.released_at is None
+        assert mock_project.updated_at is None
+        assert mock_project.commits_count == 0
+        assert mock_project.stars_count == 0
+
+
