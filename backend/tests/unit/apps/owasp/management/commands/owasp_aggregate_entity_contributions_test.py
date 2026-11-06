@@ -1,559 +1,225 @@
-"""Test cases for owasp_aggregate_entity_contributions management command."""
+"""Tests for consistent chapter and project contribution reports."""
 
-import io
 from argparse import ArgumentParser
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+from datetime import timezone as datetime_timezone
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
+from django.db.models import QuerySet
+from django.utils import timezone
 
+from apps.github.models.commit import Commit
+from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
+from apps.github.models.release import Release
 from apps.owasp.management.commands.owasp_aggregate_entity_contributions import Command
 from apps.owasp.models import Chapter, Project
 
+END_AT = datetime(2026, 10, 22, 12, 30, 45, 123456, tzinfo=UTC)
+START_AT = END_AT - timedelta(days=365)
+EVENTS = (
+    (Commit, "commits", "created_at"),
+    (Issue, "issues", "created_at"),
+    (PullRequest, "pull_requests", "created_at"),
+    (Release, "releases", "published_at"),
+)
+GROUPS = {
+    Commit: [{"day": date(2026, 10, 20), "count": 2}],
+    Issue: [{"day": date(2026, 10, 20), "count": 3}],
+    PullRequest: [{"day": date(2026, 10, 21), "count": 4}],
+    Release: [{"day": date(2026, 10, 22), "count": 5}],
+}
 
-class MockQuerySet:
-    """Mock QuerySet that supports slicing and iteration without database access."""
 
-    def __init__(self, items):
-        self._items = items
-
-    def __iter__(self):
-        """Return iterator over items."""
-        return iter(self._items)
-
-    def __getitem__(self, key):
-        """Get item by key or slice."""
-        if isinstance(key, slice):
-            return MockQuerySet(self._items[key])
-        return self._items[key]
+class MockQuerySet(list):
+    """Entity selection without database access."""
 
     def filter(self, **kwargs):
-        # Return self to support filter chaining
-        return self
+        return MockQuerySet(
+            item for item in self if all(getattr(item, k) == v for k, v in kwargs.items())
+        )
 
     def order_by(self, *_fields):
-        """Mock order_by method."""
         return self
 
-    def select_related(self, *_):
-        """Mock select_related method."""
+    def select_related(self, *_fields):
         return self
 
-    def prefetch_related(self, *_):
-        """Mock prefetch_related method."""
+    def prefetch_related(self, *_fields):
         return self
 
-    def count(self):
-        """Return count of items."""
-        return len(self._items)
 
-    def __len__(self):
-        """Return length of items."""
-        return len(self._items)
+@pytest.fixture
+def command():
+    return Command()
 
 
-class TestOwaspAggregateContributions:
-    @pytest.fixture
-    def command(self):
-        return Command()
+@pytest.fixture(params=[Chapter, Project], ids=["chapter", "project"])
+def entity(request):
+    instance = mock.Mock(spec=request.param)
+    instance.key = "test-entity"
+    instance.owasp_repository = mock.Mock(id=1)
+    if request.param is Project:
+        instance.repositories.all.return_value = [mock.Mock(id=2), mock.Mock(id=1)]
+    return instance
 
-    def test_add_arguments(self, command):
-        """Test add_arguments adds expected arguments."""
-        parser = ArgumentParser()
-        command.add_arguments(parser)
-        args = parser.parse_args(["--entity-type", "chapter"])
-        assert args.entity_type == "chapter"
-        assert args.days == 365
-        assert args.key is None
-        assert args.offset == 0
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
-    def test_handle_empty_entities(self, mock_chapter_model, command):
-        """Test handle with empty entities list."""
-        mock_chapter_model.objects.filter.return_value = MockQuerySet([])
-        mock_chapter_model.bulk_save = mock.Mock()
-        mock_chapter_model._meta = mock.Mock()
-        mock_chapter_model._meta.verbose_name_plural = "chapters"
+@pytest.mark.parametrize("days", [365, 90])
+def test_command_arguments(command, days):
+    """Accept the default or custom reporting length without changing selection defaults."""
+    parser = ArgumentParser()
+    command.add_arguments(parser)
+    arguments = ["--entity-type", "chapter"]
+    if days != 365:
+        arguments += ["--days", str(days)]
+    options = parser.parse_args(arguments)
+    assert options.days == days
+    assert options.key is None
+    assert options.offset == 0
 
-        command.handle(entity_type="chapter", days=365, offset=0)
 
-        mock_chapter_model.bulk_save.assert_not_called()
+def test_repository_selection_is_deduplicated(command, entity):
+    """Count a repository once even when a project references it through both relationships."""
+    expected = {1, 2} if isinstance(entity, Project) else {1}
+    assert set(command._get_repository_ids(entity)) == expected
 
-    @pytest.fixture
-    def mock_chapter(self):
-        chapter = mock.Mock(spec=Chapter)
-        chapter.key = "www-chapter-test"
-        chapter.name = "Test Chapter"
-        chapter.owasp_repository = mock.Mock()
-        chapter.owasp_repository.id = 1
-        # Fix Django ORM compatibility.
-        chapter.owasp_repository.resolve_expression = mock.Mock(
-            return_value=chapter.owasp_repository
-        )
-        chapter.owasp_repository.get_source_expressions = mock.Mock(return_value=[])
-        return chapter
 
-    @pytest.fixture
-    def mock_project(self):
-        project = mock.Mock(spec=Project)
-        project.key = "www-project-test"
-        project.name = "Test Project"
-        project.owasp_repository = mock.Mock()
-        project.owasp_repository.id = 1
-        # Fix Django ORM compatibility.
-        project.owasp_repository.resolve_expression = mock.Mock(
-            return_value=project.owasp_repository
-        )
-        project.owasp_repository.get_source_expressions = mock.Mock(return_value=[])
+def test_report_compiles_grouped_filtered_queries_for_all_events(command, entity):
+    """Compile the real ORM queries without requiring a database in unit-test CI."""
+    queries = []
 
-        # Mock additional repositories.
-        additional_repo1 = mock.Mock(id=2)
-        additional_repo1.resolve_expression = mock.Mock(return_value=additional_repo1)
-        additional_repo1.get_source_expressions = mock.Mock(return_value=[])
-
-        additional_repo2 = mock.Mock(id=3)
-        additional_repo2.resolve_expression = mock.Mock(return_value=additional_repo2)
-        additional_repo2.get_source_expressions = mock.Mock(return_value=[])
-
-        project.repositories.all.return_value = [additional_repo1, additional_repo2]
-        return project
-
-    def test_aggregate_contribution_dates_helper(self, command):
-        """Test the helper method that aggregates dates."""
-        contribution_map = {}
-
-        # Create mock queryset with dates.
-        mock_dates = [
-            datetime(2024, 11, 16, 10, 0, 0, tzinfo=UTC),
-            datetime(2024, 11, 16, 14, 0, 0, tzinfo=UTC),
-            datetime(2024, 11, 17, 9, 0, 0, tzinfo=UTC),
-            None,
-        ]
-
-        mock_queryset = mock.Mock()
-        mock_queryset.values_list.return_value = mock_dates
-
-        command._aggregate_contribution_dates(
-            mock_queryset,
-            "created_at",
-            contribution_map,
-        )
-
-        assert contribution_map == {
-            "2024-11-16": 2,
-            "2024-11-17": 1,
+    def grouped_rows(queryset):
+        """Capture compiled SQL and return controlled daily groups without executing queries."""
+        sql, parameters = queryset.query.sql_with_params()
+        lookups = {
+            (lookup.lhs.target.name, lookup.lookup_name): lookup.rhs
+            for lookup in queryset.query.where.children
         }
+        queries.append((queryset.model, sql, parameters, lookups))
+        return iter(GROUPS[queryset.model])
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_aggregate_chapter_contributions(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        command,
-        mock_chapter,
+    with (
+        timezone.override(ZoneInfo("Asia/Kolkata")),  # cspell:ignore Kolkata
+        mock.patch.object(QuerySet, "__iter__", grouped_rows),
     ):
-        """Test aggregating contributions for a chapter."""
-        start_date = datetime.now(tz=UTC) - timedelta(days=365)
+        daily, stats = command.aggregate_contributions(entity, START_AT, END_AT)
 
-        # Mock querysets.
-        mock_commit.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 16, 10, 0, 0, tzinfo=UTC),
-        ]
-        mock_issue.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 16, 11, 0, 0, tzinfo=UTC),
-        ]
-        mock_pr.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 17, 10, 0, 0, tzinfo=UTC),
-        ]
-        mock_release.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 17, 12, 0, 0, tzinfo=UTC),
-        ]
+    assert daily == {"2026-10-20": 5, "2026-10-21": 4, "2026-10-22": 5}
+    assert stats == {
+        "commits": 2,
+        "issues": 3,
+        "pull_requests": 4,
+        "releases": 5,
+        "total": 14,
+        "start_at": START_AT.isoformat(),
+        "end_at": END_AT.isoformat(),
+    }
+    assert stats["total"] == sum(daily.values())
+    assert len(queries) == len(EVENTS)
+    for model, sql, parameters, lookups in queries:
+        date_field = "published_at" if model is Release else "created_at"
+        assert lookups[date_field, "gte"] == START_AT
+        assert lookups[date_field, "lte"] == END_AT
+        assert f'"{date_field}" >=' in sql
+        assert f'"{date_field}" <=' in sql
+        assert "AT TIME ZONE" in sql
+        assert "UTC" in parameters
+        assert START_AT in parameters
+        assert END_AT in parameters
+        assert "COUNT(" in sql
+        assert "GROUP BY" in sql
+        assert "ORDER BY" not in sql
+        assert '"repository_id" IN' in sql
+        if model is Release:
+            assert 'NOT "github_releases"."is_draft"' in sql
+        if model is PullRequest:
+            assert '"state" =' not in sql
+            assert '"merged_at"' not in sql
 
-        result = command.aggregate_contributions(mock_chapter, start_date)
 
-        assert result == {
-            "2024-11-16": 2,
-            "2024-11-17": 2,
-        }
+def test_empty_report_still_records_period(command, entity):
+    """Keep period metadata and zero counters when the entity has no repositories."""
+    entity.owasp_repository = None
+    if isinstance(entity, Project):
+        entity.repositories.all.return_value = []
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_aggregate_project_contributions(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        command,
-        mock_project,
+    with mock.patch.object(command, "_aggregate_contribution_dates") as aggregate:
+        daily, stats = command.aggregate_contributions(entity, START_AT, END_AT)
+
+    aggregate.assert_not_called()
+    assert daily == {}
+    assert stats == {
+        "commits": 0,
+        "issues": 0,
+        "pull_requests": 0,
+        "releases": 0,
+        "total": 0,
+        "start_at": START_AT.isoformat(),
+        "end_at": END_AT.isoformat(),
+    }
+
+
+@pytest.mark.parametrize("days", [365, 90])
+def test_handle_uses_one_utc_clock_and_saves_both_fields(command, entity, days):
+    """Reuse one UTC interval for all entities and save daily data and counters together."""
+    model = Project if isinstance(entity, Project) else Chapter
+    second = mock.Mock(spec=model)
+    second.key = "second-entity"
+    queryset = MockQuerySet([entity, second])
+    daily = {"2026-10-20": 1}
+    stats = {"total": 1, "start_at": "saved-start", "end_at": "saved-end"}
+    local_end = END_AT.astimezone(datetime_timezone(timedelta(hours=5, minutes=30)))
+
+    with (
+        mock.patch.object(model.objects, "filter", return_value=queryset) as select,
+        mock.patch.object(model, "bulk_save") as save,
+        mock.patch.object(
+            command, "aggregate_contributions", return_value=(daily, stats)
+        ) as aggregate,
+        mock.patch("django.utils.timezone.now", return_value=local_end) as clock,
     ):
-        """Test aggregating contributions for a project."""
-        start_date = datetime.now(tz=UTC) - timedelta(days=365)
+        command.handle(entity_type=model.__name__.lower(), days=days, offset=0)
 
-        # Mock querysets.
-        mock_commit.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 16, 10, 0, 0, tzinfo=UTC),
-            datetime(2024, 11, 16, 14, 0, 0, tzinfo=UTC),
-        ]
-        mock_issue.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 17, 11, 0, 0, tzinfo=UTC),
-        ]
-        mock_pr.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 18, 10, 0, 0, tzinfo=UTC),
-        ]
-        mock_release.objects.filter.return_value.values_list.return_value = [
-            datetime(2024, 11, 18, 12, 0, 0, tzinfo=UTC),
-        ]
+    clock.assert_called_once_with()
+    select.assert_called_once_with(is_active=True)
+    assert aggregate.call_args_list == [
+        mock.call(item, END_AT - timedelta(days=days), END_AT) for item in queryset
+    ]
+    assert aggregate.call_args.args[1].tzinfo is UTC
+    assert aggregate.call_args.args[2].tzinfo is UTC
+    for item in queryset:
+        assert item.contribution_data == daily
+        assert item.contribution_stats == stats
+    expected_fields = ["contribution_data", "contribution_stats"]
+    if model is Chapter:
+        expected_fields = tuple(expected_fields)
+    save.assert_called_once_with(queryset, fields=expected_fields)
 
-        result = command.aggregate_contributions(mock_project, start_date)
 
-        assert result == {
-            "2024-11-16": 2,
-            "2024-11-17": 1,
-            "2024-11-18": 2,
-        }
-
-    def test_aggregate_chapter_without_repository(self, command, mock_chapter):
-        """Test that chapters without repositories return empty map."""
-        mock_chapter.owasp_repository = None
-        start_date = datetime.now(tz=UTC) - timedelta(days=365)
-
-        result = command.aggregate_contributions(mock_chapter, start_date)
-
-        assert result == {}
-
-    def test_aggregate_project_without_repositories(self, command, mock_project):
-        """Test that projects without repositories return empty map."""
-        mock_project.owasp_repository = None
-        mock_project.repositories.all.return_value = []
-        start_date = datetime.now(tz=UTC) - timedelta(days=365)
-
-        result = command.aggregate_contributions(mock_project, start_date)
-
-        assert result == {}
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_chapters_only(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_chapter_model,
-        command,
-        mock_chapter,
+def test_handle_preserves_key_and_offset_filtering(command, entity):
+    """Apply the requested key before skipping entities with the existing offset option."""
+    model = Project if isinstance(entity, Project) else Chapter
+    skipped = mock.Mock(spec=model, key="other-entity")
+    queryset = MockQuerySet([skipped, entity, entity])
+    with (
+        mock.patch.object(model.objects, "filter", return_value=queryset),
+        mock.patch.object(model, "bulk_save") as save,
+        mock.patch.object(command, "aggregate_contributions", return_value=({}, {})) as aggregate,
     ):
-        """Test command execution for chapters only."""
-        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
-        mock_chapter_model.bulk_save = mock.Mock()
+        command.handle(entity_type=model.__name__.lower(), key="test-entity", days=365, offset=1)
+    aggregate.assert_called_once()
+    assert aggregate.call_args.args[0] is entity
+    save.assert_called_once()
 
-        # Mock ORM queries to return counts.
-        mock_commit.objects.filter.return_value.count.return_value = 5
-        mock_issue.objects.filter.return_value.count.return_value = 3
-        mock_pr.objects.filter.return_value.count.return_value = 2
-        mock_release.objects.filter.return_value.count.return_value = 1
 
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={"2024-11-16": 5},
-        ):
-            command.handle(entity_type="chapter", days=365, offset=0)
-
-        assert mock_chapter.contribution_data == {"2024-11-16": 5}
-        mock_chapter_model.bulk_save.assert_called()
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_projects_only(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_project_model,
-        command,
-        mock_project,
+@pytest.mark.parametrize("model", [Chapter, Project])
+def test_handle_empty_selection_does_not_save(command, model):
+    """Avoid a bulk save when no active entities match the selection."""
+    with (
+        mock.patch.object(model.objects, "filter", return_value=MockQuerySet()),
+        mock.patch.object(model, "bulk_save") as save,
     ):
-        """Test command execution for projects only."""
-        mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
-        mock_project_model.bulk_save = mock.Mock()
-
-        # Mock ORM queries to return counts.
-        mock_commit.objects.filter.return_value.count.return_value = 8
-        mock_issue.objects.filter.return_value.count.return_value = 4
-        mock_pr.objects.filter.return_value.count.return_value = 3
-        mock_release.objects.filter.return_value.count.return_value = 2
-
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={"2024-11-16": 10},
-        ):
-            command.handle(entity_type="project", days=365, offset=0)
-
-        assert mock_project.contribution_data == {"2024-11-16": 10}
-        assert mock_project.contribution_stats is not None
-        assert "commits" in mock_project.contribution_stats
-        mock_project_model.bulk_save.assert_called()
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_both_entities(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_project_model,
-        mock_chapter_model,
-        command,
-        mock_chapter,
-        mock_project,
-    ):
-        """Test command execution for both chapters and projects (run separately)."""
-        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
-        mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
-        mock_chapter_model.bulk_save = mock.Mock()
-        mock_project_model.bulk_save = mock.Mock()
-
-        # Mock ORM queries to return counts.
-        mock_commit.objects.filter.return_value.count.return_value = 5
-        mock_issue.objects.filter.return_value.count.return_value = 3
-        mock_pr.objects.filter.return_value.count.return_value = 2
-        mock_release.objects.filter.return_value.count.return_value = 1
-
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={"2024-11-16": 5},
-        ):
-            command.handle(entity_type="chapter", days=365, offset=0)
-            command.handle(entity_type="project", days=365, offset=0)
-
-        mock_chapter_model.bulk_save.assert_called()
-        mock_project_model.bulk_save.assert_called()
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_with_specific_key(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_chapter_model,
-        command,
-        mock_chapter,
-    ):
-        """Test command execution with a specific entity key."""
-        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
-        mock_chapter_model.bulk_save = mock.Mock()
-
-        # Mock ORM queries to return counts.
-        mock_commit.objects.filter.return_value.count.return_value = 3
-        mock_issue.objects.filter.return_value.count.return_value = 2
-        mock_pr.objects.filter.return_value.count.return_value = 1
-        mock_release.objects.filter.return_value.count.return_value = 1
-
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={"2024-11-16": 3},
-        ):
-            command.handle(entity_type="chapter", key="www-chapter-test", days=365, offset=0)
-
-        # Verify filter was called with the specific key.
-        mock_chapter_model.objects.filter.assert_called()
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_with_offset(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_chapter_model,
-        command,
-        mock_chapter,
-    ):
-        """Test command execution with offset parameter."""
-        chapters = [mock_chapter, mock_chapter, mock_chapter]
-        mock_chapter_model.objects.filter.return_value = MockQuerySet(chapters)
-        mock_chapter_model.bulk_save = mock.Mock()
-
-        # Mock ORM queries to return counts.
-        mock_commit.objects.filter.return_value.count.return_value = 1
-        mock_issue.objects.filter.return_value.count.return_value = 1
-        mock_pr.objects.filter.return_value.count.return_value = 1
-        mock_release.objects.filter.return_value.count.return_value = 0
-
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={"2024-11-16": 1},
-        ) as mock_aggregate:
-            command.handle(entity_type="chapter", offset=2, days=365)
-
-        # Verify that offset was applied correctly.
-        assert mock_aggregate.call_count == 1, (
-            "Expected aggregate to be called once for 1 remaining chapter after offset"
-        )
-        mock_aggregate.assert_called_once()
-        mock_chapter_model.bulk_save.assert_called_once()
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_custom_days(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_chapter_model,
-        command,
-        mock_chapter,
-    ):
-        """Test command execution with custom days parameter."""
-        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
-        mock_chapter_model.bulk_save = mock.Mock()
-
-        mock_commit.objects.filter.return_value.count.return_value = 0
-        mock_issue.objects.filter.return_value.count.return_value = 0
-        mock_pr.objects.filter.return_value.count.return_value = 0
-        mock_release.objects.filter.return_value.count.return_value = 0
-
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={},
-        ) as mock_aggregate:
-            command.handle(entity_type="chapter", days=90, offset=0)
-
-        # Verify aggregate was called with correct start_date.
-        mock_aggregate.assert_called()
-        call_args = mock_aggregate.call_args[0]
-        start_date = call_args[1]
-        expected_start = datetime.now(tz=UTC) - timedelta(days=90)
-
-        # Allow 1 second tolerance for test execution time.
-        assert abs((expected_start - start_date).total_seconds()) < 1
-
-    def test_calculate_contribution_stats_no_repositories(self, command, mock_chapter):
-        """Test calculate_contribution_stats when entity has no repositories."""
-        mock_chapter.owasp_repository = None
-        start_date = datetime.now(tz=UTC) - timedelta(days=365)
-
-        result = command.calculate_contribution_stats(mock_chapter, start_date)
-        assert result == {
-            "commits": 0,
-            "issues": 0,
-            "pull_requests": 0,
-            "releases": 0,
-            "total": 0,
-        }
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_project_with_key_filter(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_project_model,
-        command,
-        mock_project,
-    ):
-        """Test projects with key filter."""
-        mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
-        mock_project_model.bulk_save = mock.Mock()
-
-        mock_commit.objects.filter.return_value.count.return_value = 0
-        mock_issue.objects.filter.return_value.count.return_value = 0
-        mock_pr.objects.filter.return_value.count.return_value = 0
-        mock_release.objects.filter.return_value.count.return_value = 0
-
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={},
-        ):
-            command.handle(entity_type="project", key="www-project-test", days=365, offset=0)
-
-        mock_project_model.objects.filter.assert_called()
-        mock_project_model.bulk_save.assert_called()
-
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
-    def test_handle_project_with_offset(
-        self,
-        mock_release,
-        mock_pr,
-        mock_issue,
-        mock_commit,
-        mock_project_model,
-        command,
-        mock_project,
-    ):
-        """Test projects with offset."""
-        projects = [mock_project, mock_project, mock_project]
-        mock_project_model.objects.filter.return_value = MockQuerySet(projects)
-        mock_project_model.bulk_save = mock.Mock()
-
-        mock_commit.objects.filter.return_value.count.return_value = 0
-        mock_issue.objects.filter.return_value.count.return_value = 0
-        mock_pr.objects.filter.return_value.count.return_value = 0
-        mock_release.objects.filter.return_value.count.return_value = 0
-
-        with mock.patch.object(
-            command,
-            "aggregate_contributions",
-            return_value={},
-        ) as mock_aggregate:
-            command.handle(entity_type="project", offset=2, days=365)
-        assert mock_aggregate.call_count == 1
-        mock_project_model.bulk_save.assert_called_once()
-
-    def test_handle_invalid_entity_type(self, command):
-        """Test handle with invalid entity_type."""
-        command.stdout = io.StringIO()
-        command.style = mock.Mock()
-        command.style.SUCCESS = lambda msg: msg
-        command.handle(entity_type="invalid", days=365, offset=0)
-        output = command.stdout.getvalue()
-        assert "Done!" in output
+        command.handle(entity_type=model.__name__.lower(), days=365, offset=0)
+    save.assert_not_called()

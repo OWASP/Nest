@@ -6,8 +6,8 @@ import { useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
 import type { Chapter } from 'types/chapter'
-import { getContributionStats } from 'utils/contributionDataUtils'
-import { formatDate, getDateRange } from 'utils/dateFormatter'
+import { getContributionDateRange, getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate } from 'utils/dateFormatter'
 import { getLinkableEntityChannels } from 'utils/entityChannels'
 import Contributions from 'components/cards/Contributions'
 import Contributors from 'components/cards/Contributors'
@@ -89,12 +89,11 @@ export default function ChapterDetailsPage() {
       : []),
   ]
 
-  const { startDate, endDate } = getDateRange({ years: 1 })
-
   const contributionStats = getContributionStats(
     chapter.contributionStats,
     chapter.contributionData
   )
+  const contributionRange = getContributionDateRange(contributionStats, chapter.contributionData)
 
   return (
     <PageWrapper>
@@ -124,8 +123,8 @@ export default function ChapterDetailsPage() {
         }
         contributionStats={contributionStats}
         contributionData={chapter.contributionData}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={contributionRange?.startDate}
+        endDate={contributionRange?.endDate}
         title="Chapter Contribution Activity"
       />
 
