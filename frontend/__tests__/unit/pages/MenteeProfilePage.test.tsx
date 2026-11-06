@@ -316,6 +316,27 @@ describe('MenteeProfilePage', () => {
       )
     })
 
+    it('opens the selected repository issue when GitHub numbers overlap', () => {
+      const issue = mockMenteeData.getMenteeModuleIssues[0]
+      mockUseQuery.mockReturnValue({
+        data: {
+          ...mockMenteeData,
+          getMenteeModuleIssues: [
+            { ...issue, id: 'repo-a', title: 'Repo A', url: 'https://github.com/org/a/issues/101' },
+            { ...issue, id: 'repo-b', title: 'Repo B', url: 'https://github.com/org/b/issues/101' },
+          ],
+        },
+        loading: false,
+      })
+      render(<MenteeProfilePage />)
+      fireEvent.click(screen.getByRole('button', { name: 'Repo B' }))
+      expect(window.open).toHaveBeenCalledWith(
+        'https://github.com/org/b/issues/101',
+        '_blank',
+        'noopener,noreferrer'
+      )
+    })
+
     it('does not call window.open when issue has no URL', () => {
       const dataWithNoUrl = {
         ...mockMenteeData,

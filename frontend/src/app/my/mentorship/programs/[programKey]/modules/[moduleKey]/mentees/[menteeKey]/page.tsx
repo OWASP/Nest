@@ -114,8 +114,8 @@ const MenteeProfilePage = () => {
     { key: 'closed', label: 'Closed', count: closedIssues.length },
   ]
 
-  const handleIssueClick = (issueNumber: number) => {
-    const issue = menteeIssues.find((i) => i.number === issueNumber)
+  const handleIssueClick = (issueId: string) => {
+    const issue = menteeIssues.find((i) => i.objectID === issueId)
     if (issue?.url) {
       window.open(issue.url, '_blank', 'noopener,noreferrer')
     }

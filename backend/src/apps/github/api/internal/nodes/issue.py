@@ -99,7 +99,7 @@ class IssueNode(strawberry.relay.Node):
         """Return the deadline for the latest assigned task linked to this issue."""
         mapping = getattr(info.context, "task_deadlines_by_issue", None)
         if mapping is not None:
-            return mapping.get(root.number)
+            return mapping.get(root.pk)
 
         return (
             Task.objects.filter(
