@@ -94,6 +94,18 @@ describe('UsersPage Component', () => {
     expect(viewButtons).toHaveLength(2)
   })
 
+  test('adds mobile-only spacing between search and the user grid', async () => {
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+    })
+
+    // SearchBar has no vertical padding below md, so the grid provides the gap itself
+    const grid = screen.getByText('John Doe').closest('.grid')
+    expect(grid).toHaveClass('mt-4', 'md:mt-0')
+  })
+
   test('displays "No Users found" when there are no users', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [],

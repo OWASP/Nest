@@ -432,6 +432,92 @@ describe('<SearchPageLayout />', () => {
     expect(screen.getByText('Below Sort')).toBeInTheDocument()
   })
 
+  it('renders a sort row skeleton while loading when sort is below search', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={false}
+        totalPages={0}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="projects"
+        sortChildren={<div>Below Sort</div>}
+      />
+    )
+
+    const sortSkeleton = screen.getByTestId('sort-below-skeleton')
+    expect(sortSkeleton).toHaveClass('mt-4', 'md:mt-0')
+    expect(screen.queryByText('Below Sort')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    { label: 'sort is inline', inlineSort: true, sortChildren: <div>Sort</div> },
+    { label: 'there is no sort', inlineSort: false, sortChildren: undefined },
+  ])('does not render a sort row skeleton while loading when $label', (props) => {
+    render(
+      <SearchPageLayout
+        isLoaded={false}
+        totalPages={0}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="projects"
+        inlineSort={props.inlineSort}
+        sortChildren={props.sortChildren}
+      />
+    )
+
+    expect(screen.queryByTestId('sort-below-skeleton')).not.toBeInTheDocument()
+  })
+
+  it('adds mobile-only top spacing to the sort row below search', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        sortChildren={<div>Below Sort</div>}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    const sortRow = screen.getByTestId('sort-below')
+    expect(sortRow).toHaveClass('mt-4', 'md:mt-0')
+  })
+
+  it('does not render an empty sort row when sortChildren is not provided', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    expect(screen.queryByTestId('sort-below')).not.toBeInTheDocument()
+  })
+
   it('renders both filterChildren and inlineSort together', () => {
     const { container } = render(
       <SearchPageLayout
@@ -461,6 +547,53 @@ describe('<SearchPageLayout />', () => {
     const sortWrapper = container.querySelector('div[class*="rounded-l-none"]')
     expect(sortWrapper).toBeInTheDocument()
     expect(sortWrapper).toHaveClass('[&>div>div:first-child]:rounded-l-none')
+  })
+
+  it('spaces the mobile filter row from search by the same gap as other pages', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const mobileFilterRow = container.querySelector(String.raw`div.max-w-md.md\:hidden`)
+    expect(mobileFilterRow).toHaveClass('my-4')
+  })
+
+  it('adds no bottom margin to the search wrapper, so content margins are not doubled', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    // Pages own the gap below search (e.g. Card's mt-4); a wrapper margin would stack on top of it
+    const searchWrapper = container.querySelector(String.raw`div.md\:w-\[28rem\]`)
+    expect(searchWrapper).toBeInTheDocument()
+    expect(searchWrapper?.className).not.toMatch(/(^|\s)mb-/)
   })
 
   it('renders root layout with expected structure and classNames', () => {
