@@ -130,3 +130,33 @@ run "test_subnet_group_uses_provided_subnets" {
     error_message = "Subnet group must use the provided subnet IDs."
   }
 }
+
+run "test_redis_secret_preserves_auth_token_and_ssm_reference" {
+  command = apply
+
+  variables {
+    secret_recovery_window_in_days = 30
+  }
+
+  assert {
+    condition = (
+      aws_secretsmanager_secret.django_redis_password.name == aws_ssm_parameter.django_redis_password.name &&
+      aws_secretsmanager_secret.django_redis_password.kms_key_id == var.kms_key_arn &&
+      aws_secretsmanager_secret.django_redis_password.recovery_window_in_days == var.secret_recovery_window_in_days
+    )
+    error_message = "The Redis secret must use the existing parameter name and configured encryption and recovery window."
+  }
+
+  assert {
+    condition = (
+      aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_elasticache_replication_group.main.auth_token &&
+      aws_secretsmanager_secret_version.django_redis_password.secret_string == aws_ssm_parameter.django_redis_password.value
+    )
+    error_message = "Provisioning must copy the current Redis auth token without changing the cache password."
+  }
+
+  assert {
+    condition     = output.redis_password_arn == aws_ssm_parameter.django_redis_password.arn
+    error_message = "The Redis password output must continue to reference SSM."
+  }
+}
