@@ -44,3 +44,26 @@ export function formatContributionStats(stats?: ContributionStats) {
     isLegacyData: stats ? stats.total > 0 && !hasBreakdown : false,
   }
 }
+
+/**
+ * Count contributions for an entity key, trying the legacy www- prefix when needed.
+ */
+export function contributionCount(
+  contributions: Record<string, number> | undefined,
+  key: string,
+  legacyPrefix: string
+): number {
+  if (!contributions) {
+    return 0
+  }
+  if (Object.hasOwn(contributions, key)) {
+    return contributions[key]
+  }
+  const alternate = key.toLowerCase().startsWith(legacyPrefix)
+    ? key.slice(legacyPrefix.length)
+    : `${legacyPrefix}${key}`
+  if (Object.hasOwn(contributions, alternate)) {
+    return contributions[alternate]
+  }
+  return 0
+}

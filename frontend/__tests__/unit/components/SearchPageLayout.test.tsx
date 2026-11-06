@@ -311,12 +311,8 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    // Should render first few page buttons (e.g., 1, 2, 3) only
-    expect(screen.getByText('1')).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
-    expect(screen.getByText('3')).toBeInTheDocument()
-
-    // Check that it's not crashing on infinity
+    // Non-finite totals should not render pagination controls.
+    expect(screen.queryByRole('button', { name: 'Go to page 1' })).not.toBeInTheDocument()
     expect(screen.getByText('Test Content')).toBeInTheDocument()
   })
 

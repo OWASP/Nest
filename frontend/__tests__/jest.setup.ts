@@ -23,6 +23,14 @@ jest.mock('react-leaflet-cluster', () => {
   }
 })
 
+// ApexCharts 7.0 CJS switched from `module.exports = ApexCharts` to
+// `exports.default = ApexCharts`. react-apexcharts 2.1.1 constructs
+// `new require('apexcharts/client')()` without unwrapping `.default`.
+jest.mock('apexcharts/client', () => {
+  const actual = jest.requireActual('apexcharts/client') as { default?: unknown }
+  return actual.default ?? actual
+})
+
 jest.mock('next-auth/react', () => {
   return {
     ...jest.requireActual('next-auth/react'),

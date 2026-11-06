@@ -35,6 +35,7 @@ export default [
       'frontend/.next/**',
       'frontend/.pnpm-store/**',
       'frontend/build/**',
+      'frontend/coverage/**',
       'frontend/dist/**',
       'frontend/next-env.d.ts',
       'frontend/src/types/__generated__/**',

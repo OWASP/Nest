@@ -1,4 +1,4 @@
-FROM node:24.20-alpine3.24@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS base
+FROM node:24.21-alpine3.24@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -53,7 +53,7 @@ RUN --mount=type=secret,id=RELEASE_VERSION \
     pnpm run build
 
 # Production image: Alpine OS + Node binary only (no npm/corepack/yarn).
-FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS runner
+FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS runner
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production

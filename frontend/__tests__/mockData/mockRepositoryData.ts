@@ -14,7 +14,7 @@ export const mockRepositoryData = {
     topics: ['web', 'security'],
     description: 'A sample test repository',
     createdAt: '2023-12-15T00:00:00.000Z',
-    issues: [
+    recentIssues: [
       {
         title: 'Bug fix required',
         createdAt: '2024-01-02T10:00:00.000Z',

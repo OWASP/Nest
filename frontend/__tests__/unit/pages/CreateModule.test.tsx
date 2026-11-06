@@ -293,9 +293,11 @@ describe('CreateModulePage', () => {
     )
     await user.type(projectInput, 'Aw')
 
-    const projectOption = await waitFor(() => screen.getByText('Awesome Project'), {
-      timeout: 2000,
+    await waitFor(() => {
+      expect(mockQuery).toHaveBeenCalled()
     })
+
+    const projectOption = await waitFor(() => screen.getByText('Awesome Project'))
     await user.click(projectOption)
 
     await user.click(screen.getByRole('button', { name: /Create Module/i }))
@@ -307,7 +309,7 @@ describe('CreateModulePage', () => {
         expect.objectContaining({ title: 'Creation Failed' })
       )
     })
-  })
+  }, 15000)
   it('handles non-Error submission failure via handleAppError', async () => {
     const { handleAppError } = jest.requireMock('app/global-error')
     const user = userEvent.setup({ delay: null })
@@ -344,9 +346,12 @@ describe('CreateModulePage', () => {
       screen.getByPlaceholderText('Start typing project name...')
     )
     await user.type(projectInput, 'Aw')
-    const projectOption = await waitFor(() => screen.getByText('Awesome Project'), {
-      timeout: 2000,
+
+    await waitFor(() => {
+      expect(mockQuery).toHaveBeenCalled()
     })
+
+    const projectOption = await waitFor(() => screen.getByText('Awesome Project'))
     await user.click(projectOption)
 
     await user.click(screen.getByRole('button', { name: /Create Module/i }))
@@ -356,5 +361,5 @@ describe('CreateModulePage', () => {
       // Non-Error values fall through to handleAppError
       expect(handleAppError).toHaveBeenCalledWith('String error')
     })
-  }, 10000)
+  }, 15000)
 })

@@ -73,12 +73,17 @@ backend-data-enrich:
 	@$(MAKE) owasp-enrich-projects
 
 backend-data-fetch-nest-dump:
-	@DOCKER_BUILDKIT=1 docker compose \
-		-f docker-compose/e2e/compose.yaml \
-		run \
-		--no-deps \
-		--rm \
-		backend python -m scripts.fetch_nest_dump
+	@args=(
+		'-f=docker-compose/e2e/compose.yaml'
+		run
+		'--no-deps'
+		'--rm'
+		backend
+		python
+		'-m'
+		scripts.fetch_nest_dump
+	)
+	DOCKER_BUILDKIT=1 docker compose "$${args[@]}"
 
 backend-data-index:
 	@echo "Indexing Nest data"
@@ -139,10 +144,10 @@ backend-data-sync:
 	@$(MAKE) backend-data-index
 
 backend-data-update:
+	@$(MAKE) owasp-sync-projects
+	@$(MAKE) owasp-sync-chapters
+	@$(MAKE) owasp-sync-committees
 	@$(MAKE) github-update-owasp-organization
-	@$(MAKE) owasp-scrape-chapters
-	@$(MAKE) owasp-scrape-committees
-	@$(MAKE) owasp-scrape-projects
 	@$(MAKE) github-add-related-repositories
 	@$(MAKE) github-update-related-organizations
 	@$(MAKE) github-update-users
