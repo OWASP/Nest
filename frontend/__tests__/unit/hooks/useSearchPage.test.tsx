@@ -13,6 +13,7 @@ jest.mock('app/global-error', () => ({
 }))
 
 const mockFetchAlgoliaData = fetchAlgoliaData as jest.Mock
+const mockHandleAppError = jest.requireMock('app/global-error').handleAppError as jest.Mock
 const mockUseSearchParams = useSearchParams as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
 
@@ -21,6 +22,14 @@ const defaultOptions = {
   pageTitle: 'OWASP Projects',
   defaultSortBy: 'default',
   defaultOrder: 'desc',
+} as const
+
+const programsOptions = {
+  indexName: 'programs',
+  pageTitle: 'OWASP Programs',
+  defaultSortBy: 'default',
+  defaultOrder: 'desc',
+  hitsPerPage: 24,
 } as const
 
 describe('useSearchPage', () => {
@@ -63,6 +72,7 @@ describe('useSearchPage', () => {
       hits: [{ objectID: '1' }],
       totalPages: 5,
     })
+    window.scrollTo = jest.fn()
   })
 
   it('preserves the page query param on initial load', async () => {
@@ -221,6 +231,27 @@ describe('useSearchPage', () => {
     await waitFor(() => {
       expect(result.current.currentPage).toBe(1)
     })
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=2foo'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(1)
+    })
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams(`page=${'9'.repeat(400)}`))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(1)
+    })
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('page=12'))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.currentPage).toBe(12)
+    })
   })
 
   it('still pushes URL updates for user-driven page changes after back/forward sync', async () => {
@@ -319,5 +350,152 @@ describe('useSearchPage', () => {
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith('?q=nest')
     })
+  })
+
+  it('resets to page 1 and fetches the replica index when sort changes on a later page', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+
+    const { result } = renderHook(() => useSearchPage<{ key: string }>(programsOptions))
+
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1)
+    })
+    expect(push).not.toHaveBeenCalled()
+
+    act(() => {
+      result.current.handlePageChange(2)
+    })
+
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenLastCalledWith('programs', '', 2, 24, [])
+    })
+    expect(push).toHaveBeenLastCalledWith('?page=2')
+
+    act(() => {
+      result.current.handleSortChange('name')
+    })
+
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenLastCalledWith('programs_name_desc', '', 1, 24, [])
+    })
+    expect(mockFetchAlgoliaData).not.toHaveBeenCalledWith('programs_name_desc', '', 2, 24, [])
+    expect(result.current.sortBy).toBe('name')
+    expect(result.current.currentPage).toBe(1)
+  })
+
+  it('adopts sort and order params from the URL when it changes', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('sortBy=name&order=desc'))
+
+    const { result, rerender } = renderHook(() => useSearchPage<{ key: string }>(programsOptions))
+
+    await waitFor(() => {
+      expect(result.current.sortBy).toBe('name')
+    })
+    expect(result.current.order).toBe('desc')
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenLastCalledWith('programs_name_desc', '', 1, 24, [])
+    })
+    expect(push).not.toHaveBeenCalled()
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.sortBy).toBe('default')
+    })
+    expect(result.current.order).toBe('desc')
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenLastCalledWith('programs', '', 1, 24, [])
+    })
+    expect(push).not.toHaveBeenCalled()
+
+    await act(async () => {
+      result.current.handleSortChange('date_created')
+    })
+    expect(push).toHaveBeenCalledWith('?sortBy=date_created&order=desc')
+    expect(result.current.sortBy).toBe('date_created')
+  })
+
+  it('ignores stale responses superseded by a newer request', async () => {
+    let resolveInitial!: (value: { hits: { key: string }[]; totalPages: number }) => void
+    let resolveNewer!: (value: { hits: { key: string }[]; totalPages: number }) => void
+    const initial = new Promise<{ hits: { key: string }[]; totalPages: number }>((resolve) => {
+      resolveInitial = resolve
+    })
+    const newer = new Promise<{ hits: { key: string }[]; totalPages: number }>((resolve) => {
+      resolveNewer = resolve
+    })
+
+    mockFetchAlgoliaData.mockReturnValueOnce(initial).mockReturnValueOnce(newer)
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+
+    const { result } = renderHook(() => useSearchPage<{ key: string }>(programsOptions))
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      result.current.handleSearch('owasp')
+    })
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(2)
+    })
+
+    await act(async () => {
+      resolveNewer({ hits: [{ key: 'new' }], totalPages: 1 })
+    })
+    await waitFor(() => {
+      expect(result.current.items).toEqual([{ key: 'new' }])
+    })
+
+    await act(async () => {
+      resolveInitial({ hits: [{ key: 'stale' }], totalPages: 1 })
+    })
+    await waitFor(() => {
+      expect(result.current.items).toEqual([{ key: 'new' }])
+    })
+  })
+
+  it('ignores stale failures superseded by a newer request', async () => {
+    let rejectInitial!: (reason?: object) => void
+    let resolveNewer!: (value: { hits: { key: string }[]; totalPages: number }) => void
+    const initial = new Promise<{ hits: { key: string }[]; totalPages: number }>(
+      (_resolve, reject) => {
+        rejectInitial = reject
+      }
+    )
+    const newer = new Promise<{ hits: { key: string }[]; totalPages: number }>((resolve) => {
+      resolveNewer = resolve
+    })
+
+    mockFetchAlgoliaData.mockReturnValueOnce(initial).mockReturnValueOnce(newer)
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+
+    const { result } = renderHook(() => useSearchPage<{ key: string }>(programsOptions))
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      result.current.handleSearch('owasp')
+    })
+    await waitFor(() => {
+      expect(mockFetchAlgoliaData).toHaveBeenCalledTimes(2)
+    })
+
+    await act(async () => {
+      resolveNewer({ hits: [{ key: 'new' }], totalPages: 1 })
+    })
+    await waitFor(() => {
+      expect(result.current.items).toEqual([{ key: 'new' }])
+    })
+    expect(result.current.isLoaded).toBe(true)
+
+    await act(async () => {
+      rejectInitial(new Error('stale failure'))
+    })
+    expect(mockHandleAppError).not.toHaveBeenCalled()
+    expect(result.current.items).toEqual([{ key: 'new' }])
+    expect(result.current.isLoaded).toBe(true)
   })
 })
