@@ -4,13 +4,16 @@ import logging
 from datetime import datetime
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils import timezone
-from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
+from apps.mentorship.api.internal.graphql_errors import (
+    MentorshipNotFoundError,
+    MentorshipPermissionDeniedError,
+    MentorshipValidationError,
+)
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
     ModuleNode,
@@ -47,7 +50,7 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
         except GithubUser.DoesNotExist as e:
             msg = f"GitHub user '{login}' not found."
             logger.warning(msg, exc_info=True)
-            raise ValueError(msg) from e
+            raise MentorshipValidationError(msg, field="mentor_logins") from e
 
     return mentors
 
@@ -56,7 +59,7 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
     """Validate and normalize module start/end dates against program constraints."""
     if started_at is None or ended_at is None:
         msg = "Both start and end dates are required."
-        raise ValidationError(message=msg)
+        raise MentorshipValidationError(msg, field="started_at")
 
     if timezone.is_naive(started_at):
         started_at = timezone.make_aware(started_at)
@@ -65,15 +68,15 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
 
     if ended_at <= started_at:
         msg = "End date must be after start date."
-        raise ValidationError(message=msg)
+        raise MentorshipValidationError(msg, field="ended_at")
 
     if started_at < program_started_at:
         msg = "Module start date cannot be before program start date."
-        raise ValidationError(message=msg)
+        raise MentorshipValidationError(msg, field="started_at")
 
     if ended_at > program_ended_at:
         msg = "Module end date cannot be after program end date."
-        raise ValidationError(message=msg)
+        raise MentorshipValidationError(msg, field="ended_at")
 
     return started_at, ended_at
 
@@ -83,10 +86,7 @@ def _handle_module_save_integrity_error(exc: IntegrityError) -> None:
     error_message = str(exc)
     if "unique_module_key_in_program" in error_message:
         msg = "This module name already exists in this program."
-        raise GraphQLError(
-            msg,
-            extensions={"code": "VALIDATION_ERROR", "field": "name"},
-        ) from exc
+        raise MentorshipValidationError(msg, field="name") from exc
     raise exc
 
 
@@ -102,13 +102,20 @@ class ModuleMutation:
 
         try:
             program = Program.objects.get(key=input_data.program_key)
+        except Program.DoesNotExist as e:
+            msg = f"Program with key '{input_data.program_key}' not found."
+            raise MentorshipNotFoundError(msg) from e
+
+        try:
             project = Project.objects.get(id=input_data.project_id)
-        except (Program.DoesNotExist, Project.DoesNotExist) as e:
-            msg = f"{e.__class__.__name__} matching query does not exist."
-            raise ObjectDoesNotExist(msg) from e
+        except Project.DoesNotExist as e:
+            msg = f"Project with id '{input_data.project_id}' not found."
+            raise MentorshipNotFoundError(msg) from e
 
         if not program.has_admin(user):
-            raise PermissionDenied
+            raise MentorshipPermissionDeniedError(
+                "You must be an admin of the program to create a module."
+            )
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -164,18 +171,18 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(MODULE_NOT_FOUND_MSG)
 
         if not module.has_mentor(user):
-            raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
+            raise MentorshipPermissionDeniedError(NOT_MENTOR_ASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(ASSIGNEE_NOT_FOUND_MSG)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(ISSUE_NOT_FOUND_MSG)
 
         issue.assignees.add(gh_user)
 
@@ -203,19 +210,19 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(MODULE_NOT_FOUND_MSG)
 
         if not module.has_mentor(user):
-            raise PermissionDenied(NOT_MENTOR_UNASSIGN_MSG)
+            raise MentorshipPermissionDeniedError(NOT_MENTOR_UNASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(ASSIGNEE_NOT_FOUND_MSG)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
             msg = f"Issue {issue_number} not found in this module."
-            raise ObjectDoesNotExist(msg)
+            raise MentorshipNotFoundError(msg)
 
         issue.assignees.remove(gh_user)
 
@@ -244,7 +251,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(MODULE_NOT_FOUND_MSG)
 
         is_admin = module.program and module.program.has_admin(user)
         is_mentor = module.has_mentor(user)
@@ -255,7 +262,7 @@ class ModuleMutation:
             and not is_mentor
             and not (is_mentee and module.mentee_can_manage_deadlines)
         ):
-            raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
+            raise MentorshipPermissionDeniedError(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")
@@ -264,23 +271,23 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
-            raise ValidationError(message="Cannot set deadline: issue has no assignees.")
+            raise MentorshipValidationError("Cannot set deadline: issue has no assignees.")
 
         if is_mentee and not is_mentor and not is_admin:
             github_user = getattr(user, "github_user", None)
             if github_user is None or not assignees.filter(id=github_user.id).exists():
-                raise PermissionDenied(NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG)
+                raise MentorshipPermissionDeniedError(NOT_MENTEE_ASSIGNEE_SET_DEADLINE_MSG)
 
         normalized_deadline = deadline_at
         if timezone.is_naive(normalized_deadline):
             normalized_deadline = timezone.make_aware(normalized_deadline)
 
         if not module.started_at.date() <= normalized_deadline.date() <= module.ended_at.date():
-            raise ValidationError(message=DEADLINE_OUT_OF_RANGE_MSG)
+            raise MentorshipValidationError(DEADLINE_OUT_OF_RANGE_MSG)
 
         now = timezone.now()
         tasks_to_update: list[Task] = []
@@ -319,10 +326,10 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(MODULE_NOT_FOUND_MSG)
 
         if not module.has_mentor(user):
-            raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
+            raise MentorshipPermissionDeniedError(NOT_MENTOR_CLEAR_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")
@@ -331,11 +338,11 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
+            raise MentorshipNotFoundError(ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
-            raise ValidationError(message="Cannot clear deadline: issue has no assignees.")
+            raise MentorshipValidationError("Cannot clear deadline: issue has no assignees.")
 
         tasks_to_update: list[Task] = []
         for assignee in assignees:
@@ -371,11 +378,11 @@ class ModuleMutation:
                 .get(key=input_data.key, program__key=input_data.program_key)
             )
         except Module.DoesNotExist as e:
-            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
+            raise MentorshipNotFoundError(MODULE_NOT_FOUND_MSG) from e
 
         if not module.program.has_admin(user) and not module.has_mentor(user):
             msg = "Only admins of the program or mentors of this module can edit modules."
-            raise PermissionDenied(msg)
+            raise MentorshipPermissionDeniedError(msg)
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -410,7 +417,7 @@ class ModuleMutation:
         except Project.DoesNotExist as err:
             msg = f"Project with id '{input_data.project_id}' not found."
             logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from err
+            raise MentorshipNotFoundError(msg) from err
 
         if input_data.mentor_logins is not None:
             mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
@@ -457,11 +464,11 @@ class ModuleMutation:
                 key=module_key, program__key=program_key
             )
         except Module.DoesNotExist as e:
-            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
+            raise MentorshipNotFoundError(MODULE_NOT_FOUND_MSG) from e
 
         if not module.program.has_admin(user):
             msg = "Only program admins can delete modules."
-            raise PermissionDenied(msg)
+            raise MentorshipPermissionDeniedError(msg)
 
         program = module.program
         module_name = module.name
@@ -494,20 +501,20 @@ class ModuleMutation:
             program = Program.objects.get(key=input_data.program_key)
         except Program.DoesNotExist as e:
             msg = f"Program with key '{input_data.program_key}' not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise MentorshipNotFoundError(msg) from e
 
         if not program.has_admin(user):
-            raise PermissionDenied
+            raise MentorshipPermissionDeniedError("You must be an admin of this program to reorder its modules.")
 
         if len(set(input_data.module_keys)) != len(input_data.module_keys):
             msg = "Duplicate module keys are not allowed."
-            raise ValidationError(msg)
+            raise MentorshipValidationError(msg, field="module_keys")
 
         modules_query = Module.objects.filter(program=program, key__in=input_data.module_keys)
 
         if modules_query.count() != len(input_data.module_keys):
             msg = "Provided module keys do not match the program's modules."
-            raise ValidationError(msg)
+            raise MentorshipValidationError(msg, field="module_keys")
 
         modules = modules_query.select_for_update()
 
