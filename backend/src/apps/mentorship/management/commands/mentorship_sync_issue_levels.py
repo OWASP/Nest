@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 from django.db.models import Prefetch
+from django.utils import timezone
 
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
@@ -85,11 +86,12 @@ class Command(BaseCommand):
 
             if issue.level != best_match_level:
                 issue.level = best_match_level
+                issue.nest_updated_at = timezone.now()
                 issues_to_update.append(issue)
 
         if issues_to_update:
             updated_count = len(issues_to_update)
-            Issue.objects.bulk_update(issues_to_update, ["level"])
+            Issue.objects.bulk_update(issues_to_update, ["level", "nest_updated_at"])
             self.stdout.write(
                 self.style.SUCCESS(f"Successfully updated the level for {updated_count} issues.")
             )
