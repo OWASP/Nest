@@ -515,7 +515,7 @@ class TestProjectProperties:
         assert project.repositories_count == 5
 
     def test_unanswered_issues_count(self, mocker):
-        """Test unanswered_issues_count returns count of issues with no comments."""
+        """Test unanswered_issues_count returns count of open issues with no comments."""
         mock_issues = Mock()
         mock_issues.filter.return_value.count.return_value = 10
         mocker.patch.object(
@@ -525,11 +525,11 @@ class TestProjectProperties:
         project = Project()
         result = project.unanswered_issues_count
 
-        mock_issues.filter.assert_called_once_with(comments_count=0)
+        mock_issues.filter.assert_called_once_with(comments_count=0, state="open")
         assert result == 10
 
     def test_unassigned_issues_count(self, mocker):
-        """Test unassigned_issues_count returns count of unassigned issues."""
+        """Test unassigned_issues_count returns count of open unassigned issues."""
         mock_issues = Mock()
         mock_issues.filter.return_value.count.return_value = 8
         mocker.patch.object(
@@ -539,7 +539,7 @@ class TestProjectProperties:
         project = Project()
         result = project.unassigned_issues_count
 
-        mock_issues.filter.assert_called_once_with(assignees__isnull=True)
+        mock_issues.filter.assert_called_once_with(assignees__isnull=True, state="open")
         assert result == 8
 
     def test_get_absolute_url(self):
