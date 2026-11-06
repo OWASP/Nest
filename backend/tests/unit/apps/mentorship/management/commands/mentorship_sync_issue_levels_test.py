@@ -91,7 +91,7 @@ class TestSyncIssueLevelsCommand:
         assert issue_already_up_to_date.level == mock_level_1
 
         expected_updated = [issue_with_label_a, issue_with_label_b, issue_no_match]
-        mock_issue.objects.bulk_update.assert_called_once_with(expected_updated, ["level"])
+        mock_issue.objects.bulk_update.assert_called_once_with(expected_updated, ["level", "nest_updated_at"])
         command.stdout.write.assert_any_call("Successfully updated the level for 3 issues.")
 
     @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
