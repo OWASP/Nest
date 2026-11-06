@@ -291,9 +291,10 @@ class ModuleMutation:
             if task.assigned_at is None:
                 task.assigned_at = now
             task.deadline_at = normalized_deadline
+            task.nest_updated_at = now
             tasks_to_update.append(task)
 
-        Task.objects.bulk_update(tasks_to_update, ["assigned_at", "deadline_at"])
+        Task.objects.bulk_update(tasks_to_update, ["assigned_at", "deadline_at", "nest_updated_at"])
 
         return module
 
@@ -342,12 +343,13 @@ class ModuleMutation:
             task = Task.objects.filter(module=module, issue=issue, assignee=assignee).first()
             if task and task.deadline_at is not None:
                 task.deadline_at = None
+                task.nest_updated_at = timezone.now()
                 tasks_to_update.append(task)
 
         if len(tasks_to_update) == 1:
             tasks_to_update[0].save(update_fields=["deadline_at"])
         elif len(tasks_to_update) > 1:
-            Task.objects.bulk_update(tasks_to_update, ["deadline_at"])
+            Task.objects.bulk_update(tasks_to_update, ["deadline_at", "nest_updated_at"])
 
         return module
 
@@ -515,8 +517,9 @@ class ModuleMutation:
 
         for module in modules:
             module.order = key_to_order[module.key]
+            module.nest_updated_at = timezone.now()
 
-        Module.objects.bulk_update(modules, ["order"])
+        Module.objects.bulk_update(modules, ["order", "nest_updated_at"])
 
         return (
             Module.objects.filter(program=program)
