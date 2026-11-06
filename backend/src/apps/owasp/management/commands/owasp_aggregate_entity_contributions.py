@@ -1,11 +1,12 @@
 """Management command to aggregate contributions for chapters and projects."""
 
 from argparse import ArgumentParser
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from django.core.management.base import BaseCommand
-from django.db.models import QuerySet
+from django.db.models import Count, QuerySet
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.github.models.commit import Commit
@@ -53,21 +54,21 @@ class Command(BaseCommand):
         queryset: QuerySet[Any],
         date_field: str,
         contribution_map: dict[str, int],
-    ) -> None:
-        """Aggregate contribution dates from a queryset into the contribution map.
-
-        Args:
-            queryset: Django queryset to aggregate
-            date_field: Name of the date field to aggregate on
-            contribution_map: Dictionary to update with counts
-
-        """
-        for date_value in queryset.values_list(date_field, flat=True):
-            if not date_value:
-                continue
-
-            date_key = date_value.date().isoformat()
-            contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+    ) -> int:
+        """Add database-grouped UTC daily counts and return their category total."""
+        daily_counts = (
+            queryset.annotate(day=TruncDate(date_field, tzinfo=UTC))
+            .values("day")
+            .annotate(count=Count("pk"))
+            .order_by()
+        )
+        total = 0
+        for row in daily_counts:
+            date_key = row["day"].isoformat()
+            count = row["count"]
+            contribution_map[date_key] = contribution_map.get(date_key, 0) + count
+            total += count
+        return total
 
     def _get_repository_ids(self, entity: Chapter | Project) -> list[int]:
         """Extract repository IDs from chapter or project."""
@@ -84,122 +85,37 @@ class Command(BaseCommand):
         return list(repository_ids)
 
     def aggregate_contributions(
-        self, entity: Chapter | Project, start_date: datetime
-    ) -> dict[str, int]:
-        """Aggregate contributions for a chapter or project.
-
-        Args:
-            entity: Chapter or Project instance
-            start_date: Start date for aggregation
-
-        Returns:
-            Dictionary mapping YYYY-MM-DD to contribution count
-
-        """
+        self, entity: Chapter | Project, start_at: datetime, end_at: datetime
+    ) -> tuple[dict[str, int], dict[str, int | str]]:
+        """Build daily data and summary statistics from the same bounded UTC groups."""
         contribution_map: dict[str, int] = {}
-
+        stats = {"commits": 0, "issues": 0, "pull_requests": 0, "releases": 0}
         repository_ids = self._get_repository_ids(entity)
-        if not repository_ids:
-            return contribution_map
 
-        # Aggregate commits.
-        self._aggregate_contribution_dates(
-            Commit.objects.filter(
-                created_at__gte=start_date,
-                repository_id__in=repository_ids,
-            ),
-            "created_at",
-            contribution_map,
-        )
+        if repository_ids:
+            for model, category, date_field in (
+                (Commit, "commits", "created_at"),
+                (Issue, "issues", "created_at"),
+                (PullRequest, "pull_requests", "created_at"),
+                (Release, "releases", "published_at"),
+            ):
+                filters: dict[str, Any] = {
+                    "repository_id__in": repository_ids,
+                    f"{date_field}__gte": start_at,
+                    f"{date_field}__lte": end_at,
+                }
+                if model is Release:
+                    filters["is_draft"] = False
+                stats[category] = self._aggregate_contribution_dates(
+                    model.objects.filter(**filters), date_field, contribution_map
+                )
 
-        # Aggregate issues.
-        self._aggregate_contribution_dates(
-            Issue.objects.filter(
-                created_at__gte=start_date,
-                repository_id__in=repository_ids,
-            ),
-            "created_at",
-            contribution_map,
-        )
-
-        # Aggregate pull requests.
-        self._aggregate_contribution_dates(
-            PullRequest.objects.filter(
-                created_at__gte=start_date,
-                repository_id__in=repository_ids,
-            ),
-            "created_at",
-            contribution_map,
-        )
-
-        # Aggregate releases.
-        self._aggregate_contribution_dates(
-            Release.objects.filter(
-                is_draft=False,
-                published_at__gte=start_date,
-                repository_id__in=repository_ids,
-            ),
-            "published_at",
-            contribution_map,
-        )
-
-        return contribution_map
-
-    def calculate_contribution_stats(
-        self, entity: Chapter | Project, start_date: datetime
-    ) -> dict[str, int]:
-        """Calculate contribution statistics for a chapter or project.
-
-        Args:
-            entity: Chapter or Project instance
-            start_date: Start date for calculation
-
-        Returns:
-            Dictionary with commits, issues, pull requests, releases counts
-
-        """
-        stats = {
-            "commits": 0,
-            "issues": 0,
-            "pull_requests": 0,
-            "releases": 0,
-            "total": 0,
+        return contribution_map, {
+            **stats,
+            "total": sum(stats.values()),
+            "start_at": start_at.isoformat(),
+            "end_at": end_at.isoformat(),
         }
-
-        repository_ids = self._get_repository_ids(entity)
-        if not repository_ids:
-            return stats
-
-        # Count commits.
-        stats["commits"] = Commit.objects.filter(
-            created_at__gte=start_date,
-            repository_id__in=repository_ids,
-        ).count()
-
-        # Count issues.
-        stats["issues"] = Issue.objects.filter(
-            created_at__gte=start_date,
-            repository_id__in=repository_ids,
-        ).count()
-
-        # Count pull requests.
-        stats["pull_requests"] = PullRequest.objects.filter(
-            created_at__gte=start_date,
-            repository_id__in=repository_ids,
-        ).count()
-
-        # Count releases.
-        stats["releases"] = Release.objects.filter(
-            is_draft=False,
-            published_at__gte=start_date,
-            repository_id__in=repository_ids,
-        ).count()
-
-        stats["total"] = sum(
-            (stats["commits"], stats["issues"], stats["pull_requests"], stats["releases"])
-        )
-
-        return stats
 
     def handle(self, *args: Any, **options: Any) -> None:
         """Execute the command."""
@@ -208,22 +124,26 @@ class Command(BaseCommand):
         key = options.get("key")
         offset = options["offset"]
 
-        start_date = timezone.now() - timedelta(days=days)
+        end_at = timezone.now().astimezone(UTC)
+        start_at = end_at - timedelta(days=days)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Aggregating contributions since {start_date.date()} ({days} days back)",
+                f"Aggregating contributions from {start_at.isoformat()} to "
+                f"{end_at.isoformat()} ({days} days back)",
             ),
         )
 
         if entity_type == "chapter":
-            self._process_chapters(start_date, key, offset)
+            self._process_chapters(start_at, end_at, key, offset)
         elif entity_type == "project":
-            self._process_projects(start_date, key, offset)
+            self._process_projects(start_at, end_at, key, offset)
 
         self.stdout.write(self.style.SUCCESS("Done!"))
 
-    def _process_chapters(self, start_date: datetime, key: str | None, offset: int) -> None:
+    def _process_chapters(
+        self, start_at: datetime, end_at: datetime, key: str | None, offset: int
+    ) -> None:
         """Process chapters for contribution aggregation."""
         queryset = Chapter.objects.filter(is_active=True).order_by("id")
 
@@ -235,9 +155,11 @@ class Command(BaseCommand):
         if offset:
             queryset = queryset[offset:]
 
-        self._process_entities(queryset, start_date, Chapter)
+        self._process_entities(queryset, start_at, end_at, Chapter)
 
-    def _process_projects(self, start_date: datetime, key: str | None, offset: int) -> None:
+    def _process_projects(
+        self, start_at: datetime, end_at: datetime, key: str | None, offset: int
+    ) -> None:
         """Process projects for contribution aggregation."""
         queryset = (
             Project.objects.filter(is_active=True)
@@ -252,12 +174,13 @@ class Command(BaseCommand):
         if offset:
             queryset = queryset[offset:]
 
-        self._process_entities(queryset, start_date, Project)
+        self._process_entities(queryset, start_at, end_at, Project)
 
     def _process_entities(
         self,
         queryset: QuerySet[Chapter] | QuerySet[Project],
-        start_date: datetime,
+        start_at: datetime,
+        end_at: datetime,
         model_class: type[Chapter] | type[Project],
     ) -> None:
         """Process entities (chapters or projects) for contribution aggregation."""
@@ -268,8 +191,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Processing {total_count} {label}...")
 
         for entity in entities:
-            entity.contribution_data = self.aggregate_contributions(entity, start_date)
-            entity.contribution_stats = self.calculate_contribution_stats(entity, start_date)
+            entity.contribution_data, entity.contribution_stats = self.aggregate_contributions(
+                entity, start_at, end_at
+            )
 
         if entities:
             fields = ("contribution_data", "contribution_stats")

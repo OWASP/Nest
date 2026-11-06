@@ -1,9 +1,60 @@
+import { parseISO } from 'date-fns/parseISO'
+
 export interface ContributionStats {
   commits: number
   pullRequests: number
   issues: number
   releases?: number
   total: number
+  startAt?: string
+  endAt?: string
+}
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/
+const TIMESTAMP_WITH_ZONE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/
+
+/** Parse valid calendar dates or timestamps with an explicit timezone; reject other values. */
+const parseContributionDate = (value: unknown): Date | undefined => {
+  // Timestamps need an explicit timezone; date-only values represent UTC days.
+  if (typeof value !== 'string' || !(DATE_ONLY.test(value) || TIMESTAMP_WITH_ZONE.test(value))) {
+    return undefined
+  }
+  const parsed = parseISO(value.length === 10 ? `${value}T00:00:00Z` : value)
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed
+}
+
+// Matches the rolling window used by the backend contribution aggregation.
+const REPORTING_PERIOD_DAYS = 365
+
+/**
+ * Prefer a valid saved UTC period, then the reporting period ending today when daily dates exist;
+ * return nothing without usable dates.
+ */
+export function getContributionDateRange(
+  stats?: ContributionStats,
+  contributionData?: Record<string, number>,
+  now: Date = new Date()
+): { startDate: string; endDate: string } | undefined {
+  const start = parseContributionDate(stats?.startAt)
+  const end = parseContributionDate(stats?.endAt)
+  if (start && end && start <= end) {
+    return {
+      startDate: start.toISOString().slice(0, 10),
+      endDate: end.toISOString().slice(0, 10),
+    }
+  }
+  const hasUsableDate = Object.keys(contributionData ?? {}).some(
+    (day) => day.length === 10 && parseContributionDate(day) !== undefined
+  )
+  if (!hasUsableDate) return undefined
+
+  const periodStart = new Date(now)
+  periodStart.setUTCDate(periodStart.getUTCDate() - REPORTING_PERIOD_DAYS)
+  return {
+    startDate: periodStart.toISOString().slice(0, 10),
+    endDate: now.toISOString().slice(0, 10),
+  }
 }
 
 export function getContributionStats(

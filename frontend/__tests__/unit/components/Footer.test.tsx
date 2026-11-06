@@ -28,6 +28,14 @@ jest.mock('@heroui/button', () => ({
   ),
 }))
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content?: string }) => (
+    <div data-testid="tooltip" data-content={content}>
+      {children}
+    </div>
+  ),
+}))
+
 jest.mock('react-icons/fa6', () => ({
   FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="github-icon" {...props} />,
   FaSlack: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="slack-icon" {...props} />,
@@ -177,7 +185,7 @@ describe('Footer', () => {
       renderFooter()
 
       // Test GitHub icon
-      const githubLink = screen.getByLabelText('OWASP Nest GitHub')
+      const githubLink = screen.getByLabelText('OWASP Nest on GitHub')
       expect(githubLink).toBeInTheDocument()
       expect(githubLink).toHaveAttribute('href', 'https://github.com/owasp/nest')
       expect(githubLink).toHaveAttribute('target', '_blank')
@@ -185,7 +193,7 @@ describe('Footer', () => {
       expect(githubLink.querySelector('[data-testid="github-icon"]')).toBeInTheDocument()
 
       // Test Slack icon
-      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      const slackLink = screen.getByLabelText('OWASP Nest on Slack')
       expect(slackLink).toBeInTheDocument()
       expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/project-nest')
       expect(slackLink).toHaveAttribute('target', '_blank')
@@ -194,7 +202,7 @@ describe('Footer', () => {
 
       // Test that all icons have basic attributes
       for (const icon of mockFooterIcons) {
-        const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
+        const link = screen.getByLabelText(`OWASP Nest on ${icon.label}`)
         expect(link).toBeInTheDocument()
         expect(link).toHaveAttribute('href', icon.href)
         expect(link).toHaveAttribute('target', '_blank')
@@ -202,6 +210,24 @@ describe('Footer', () => {
 
         const iconElement = link.querySelector('svg')
         expect(iconElement).toBeInTheDocument()
+      }
+    })
+
+    test('renders tooltip content and title fallback for each social link', () => {
+      renderFooter()
+
+      const tooltips = screen.getAllByTestId('tooltip')
+      expect(tooltips).toHaveLength(mockFooterIcons.length)
+
+      for (const icon of mockFooterIcons) {
+        const expectedText = `OWASP Nest on ${icon.label}`
+        const link = screen.getByRole('link', { name: `OWASP Nest on ${icon.label}` })
+
+        expect(link).toHaveAttribute('title', expectedText)
+        expect(link.closest('[data-testid="tooltip"]')).toHaveAttribute(
+          'data-content',
+          expectedText
+        )
       }
     })
 
@@ -357,7 +383,7 @@ describe('Footer', () => {
     test('has proper aria-labels for social media links', () => {
       renderFooter()
       for (const icon of mockFooterIcons) {
-        const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
+        const link = screen.getByLabelText(`OWASP Nest on ${icon.label}`)
         expect(link).toBeInTheDocument()
       }
     })
@@ -515,11 +541,11 @@ describe('Footer', () => {
       const links = screen.getAllByRole('link')
       expect(links.length).toBeGreaterThan(0)
 
-      const socialLinks = screen.getByLabelText('OWASP Nest GitHub')
+      const socialLinks = screen.getByLabelText('OWASP Nest on GitHub')
       const svgIcon = socialLinks.querySelector('svg')
       expect(svgIcon).toBeInTheDocument()
 
-      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      const slackLink = screen.getByLabelText('OWASP Nest on Slack')
       const slackSvg = slackLink.querySelector('svg')
       expect(slackSvg).toBeInTheDocument()
 
