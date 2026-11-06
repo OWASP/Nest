@@ -1,4 +1,4 @@
-import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { expectBreadCrumbsToBeVisible, getGapBelowSearch } from '@e2e/helpers/expects'
 import mockProjectData from '@mockData/mockProjectData'
 import { test, expect } from '@playwright/test'
 
@@ -45,6 +45,10 @@ test.describe('Projects Page', () => {
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
     await expect(page).toHaveURL('projects/project_1')
+  })
+
+  test('leaves a 16px gap between search and the sort control', async ({ page }) => {
+    expect(await getGapBelowSearch(page, page.getByTestId('sort-below'))).toBe(16)
   })
 
   test('breadcrumb renders correct segments on /projects', async ({ page }) => {

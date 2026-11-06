@@ -75,15 +75,26 @@ describe.each([
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
     document.documentElement.classList.toggle('dark', theme === 'dark')
   })
-  it('should not have any accessibility violations', async () => {
-    const { container } = render(<ContributionHeatmap {...defaultProps} />)
+  it.each(['default', 'medium', 'compact'] as const)(
+    'exposes the period and legend without accessibility violations in the %s variant',
+    async (variant) => {
+      const { container } = render(
+        <ContributionHeatmap {...defaultProps} variant={variant} unit="message" />
+      )
 
-    await screen.findByTestId('mock-heatmap-chart')
+      await screen.findByTestId('mock-heatmap-chart')
+      expect(screen.getByText('Displayed period:')).toBeInTheDocument()
+      expect(screen.getByText('Jan 1 — 31, 2024')).toBeInTheDocument()
+      expect(
+        screen.getByRole('list', { name: 'Daily message counts, from less to more' })
+      ).toBeInTheDocument()
+      expect(screen.getByText('13+ messages per day')).toBeInTheDocument()
 
-    const results = await axe(container)
+      const results = await axe(container)
 
-    expect(results).toHaveNoViolations()
-  })
+      expect(results).toHaveNoViolations()
+    }
+  )
 
   it('should not have any accessibility violations when title is provided', async () => {
     const { container } = render(<ContributionHeatmap {...defaultProps} title="Test Title" />)
