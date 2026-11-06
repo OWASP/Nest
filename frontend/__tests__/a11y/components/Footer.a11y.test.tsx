@@ -1,7 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
+import { ReactNode } from 'react'
 import Footer from 'components/Footer'
+
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+}))
 
 describe.each([
   { theme: 'light', name: 'light' },

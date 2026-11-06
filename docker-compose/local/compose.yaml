@@ -68,14 +68,13 @@ services:
     ports:
       - 8001:8001
     volumes:
-      - ../../.mkdocs.yaml:/home/owasp/.mkdocs.yaml:ro
       - ../../backend:/home/owasp/backend:ro
       - ../../CODE_OF_CONDUCT.md:/home/owasp/CODE_OF_CONDUCT.md:ro
       - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
       - ../../docs:/home/owasp/docs
       - ../../frontend:/home/owasp/frontend:ro
       - ../../README.md:/home/owasp/README.md:ro
-      - docs-venv:/home/owasp/.venv
+      - ../../.zensical.toml:/home/owasp/.zensical.toml:ro
 
   frontend:
     container_name: nest-frontend
@@ -128,6 +127,5 @@ volumes:
   backend-venv:
   cache-data:
   db-data:
-  docs-venv:
   frontend-next:
   frontend-node-modules:

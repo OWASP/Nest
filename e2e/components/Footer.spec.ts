@@ -18,10 +18,23 @@ test.describe('Footer - Desktop (Chrome)', () => {
   })
 
   test('should have links', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Bluesky' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on GitHub' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on LinkedIn' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Slack' })).toBeVisible()
+  })
+
+  test('should show tooltip on social link hover', async ({ page }) => {
+    const githubLink = page.getByRole('link', { name: 'OWASP Nest on GitHub' })
+
+    // Re-enter the link on each attempt: a hover that lands before hydration never opens it.
+    await expect(async () => {
+      await page.mouse.move(0, 0)
+      await githubLink.hover()
+      await expect(page.getByRole('tooltip')).toHaveText('OWASP Nest on GitHub', {
+        timeout: 1_000,
+      })
+    }).toPass({ timeout: 15_000 })
   })
 })
 
@@ -48,8 +61,8 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
   })
 
   test('should have links', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Bluesky' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on GitHub' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'OWASP Nest on Slack' })).toBeVisible()
   })
 })

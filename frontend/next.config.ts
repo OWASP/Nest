@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
   experimental: {
     useTypeScriptCli: true,
   },
-  async headers() {
+  headers() {
     return [
       {
         headers,

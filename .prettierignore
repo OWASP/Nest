@@ -9,7 +9,7 @@
 backend/static/**
 backend/templates/**
 
-# Docs (MkDocs/Jinja overrides; Prettier mangles template attributes)
+# Docs (Zensical/Jinja overrides; Prettier mangles template attributes)
 docs/overrides/**
 
 # Frontend artifacts
