@@ -31,6 +31,9 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     .venv/bin/python -m pip install --no-cache-dir --no-deps --only-binary :all: --require-hashes \
         --requirement /tmp/nestbot-requirements.txt
 
+# Package installation is complete; do not ship pip's vendored dependencies.
+RUN .venv/bin/python -m pip uninstall --yes pip
+
 
 FROM python:3.13.15-slim-bookworm@sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26
 
@@ -44,10 +47,18 @@ ENV PATH="/home/owasp/.venv/bin:$PATH" \
 
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        apt \
+        ca-certificates \
+        libpcre2-8-0 \
         libpq5 \
+        libssl3 \
         libstdc++6 \
+        openssl \
         passwd \
+        perl-base \
+        tzdata \
     && rm -rf /var/lib/apt/lists/* \
+    && python -m pip uninstall --yes pip \
     && groupadd -g "${OWASP_GID}" owasp \
     && useradd -l -m -u "${OWASP_UID}" -g owasp owasp
 
