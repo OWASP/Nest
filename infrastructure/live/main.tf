@@ -15,6 +15,17 @@ terraform {
 }
 
 locals {
+  nestbot_environment_variables = {
+    CREWAI_TRACING_ENABLED              = "false"
+    DJANGO_CONFIGURATION                = "Staging"
+    DJANGO_SETTINGS_MODULE              = "settings.nestbot"
+    DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = tostring(var.nestbot_ai_assistant_enabled)
+    AWS_DEFAULT_REGION                  = var.aws_region
+    BEDROCK_MODEL_NAME                  = var.nestbot_bedrock_model_name
+    EMBEDDING_PROVIDER                  = "google"
+    GOOGLE_MODEL_NAME                   = var.nestbot_google_model_name
+    LLM_PROVIDER                        = var.nestbot_llm_provider
+  }
   nestbot_enabled = var.environment == "staging"
   backend_environment_variables = var.route_slack_to_nestbot ? {
     DJANGO_SLACK_BOT_TOKEN      = ""
@@ -200,15 +211,7 @@ module "nestbot" {
   desired_count          = var.nestbot_desired_count
   enable_auto_scaling    = false
   environment            = var.environment
-  environment_variables = {
-    CREWAI_TRACING_ENABLED              = "false"
-    DJANGO_CONFIGURATION                = "Staging"
-    DJANGO_SETTINGS_MODULE              = "settings.nestbot"
-    DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = tostring(var.nestbot_ai_assistant_enabled)
-    EMBEDDING_PROVIDER                  = "google"
-    GOOGLE_MODEL_NAME                   = var.nestbot_google_model_name
-    LLM_PROVIDER                        = "google"
-  }
+  environment_variables  = local.nestbot_environment_variables
   worker = {
     command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler", "--worker-ttl", "90"]
     health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.staging"]
@@ -227,6 +230,7 @@ module "nestbot" {
   service_name          = "nestbot"
   target_group_arn      = module.alb.nestbot_target_group_arn
   task_role_kms_actions = []
+  task_role_policy_arns = var.nestbot_llm_provider == "bedrock" ? var.nestbot_bedrock_policy_arns : []
   use_fargate_spot      = false
 }
 

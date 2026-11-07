@@ -5,12 +5,29 @@ import logging
 from django.conf import settings
 from django_rq import job
 from slack_sdk.errors import SlackApiError
+from slack_sdk.web import WebClient
 
 from apps.slack.apps import SlackConfig
 from apps.slack.common.handlers.ai import get_response_blocks, process_ai_query
 from apps.slack.models import Message
 
 logger = logging.getLogger(__name__)
+
+
+def _is_unanswered(client: WebClient, message: Message) -> bool:
+    """Only allow a reply after Slack confirms the thread is unanswered."""
+    try:
+        result = client.conversations_replies(
+            channel=message.conversation.slack_channel_id,
+            ts=message.slack_message_id,
+            limit=1,
+        )
+    except SlackApiError:
+        logger.exception("Error checking for replies for message")
+        return False
+
+    messages = result.get("messages")
+    return bool(messages) and not messages[0].get("reply_count", 0)
 
 
 @job("ai")
@@ -34,17 +51,8 @@ def generate_ai_reply_if_unanswered(message_id: int):
 
     client = SlackConfig.app.client
 
-    try:
-        result = client.conversations_replies(
-            channel=message.conversation.slack_channel_id,
-            ts=message.slack_message_id,
-            limit=1,
-        )
-        if result.get("messages") and result["messages"][0].get("reply_count", 0) > 0:
-            return
-
-    except SlackApiError:
-        logger.exception("Error checking for replies for message")
+    if not _is_unanswered(client, message):
+        return
 
     channel_id = message.conversation.slack_channel_id
     ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)

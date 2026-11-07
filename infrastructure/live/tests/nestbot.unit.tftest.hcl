@@ -170,3 +170,45 @@ run "test_ai_can_be_disabled_without_changing_routing" {
     error_message = "Disabling AI must preserve separately configured Slack routing."
   }
 }
+
+run "test_bedrock_configuration" {
+  command = plan
+
+  variables {
+    nestbot_llm_provider        = "bedrock"
+    nestbot_bedrock_model_name  = "approved-profile"
+    nestbot_bedrock_policy_arns = ["arn:aws:iam::123456789012:policy/nestbot-bedrock"]
+    aws_region                  = "eu-west-1"
+  }
+
+  assert {
+    condition     = local.nestbot_environment_variables.LLM_PROVIDER == "bedrock" && local.nestbot_environment_variables.BEDROCK_MODEL_NAME == "approved-profile" && local.nestbot_environment_variables.AWS_DEFAULT_REGION == "eu-west-1" && local.nestbot_environment_variables.EMBEDDING_PROVIDER == "google"
+    error_message = "Bedrock answer configuration must preserve Google embeddings and use the configured region."
+  }
+}
+
+run "test_bedrock_requires_model" {
+  command = plan
+  variables {
+    nestbot_llm_provider        = "bedrock"
+    nestbot_bedrock_policy_arns = ["arn:aws:iam::123456789012:policy/nestbot-bedrock"]
+  }
+  expect_failures = [var.nestbot_bedrock_model_name]
+}
+
+run "test_bedrock_requires_policies" {
+  command = plan
+  variables {
+    nestbot_llm_provider       = "bedrock"
+    nestbot_bedrock_model_name = "approved-profile"
+  }
+  expect_failures = [var.nestbot_bedrock_policy_arns]
+}
+
+run "test_reject_invalid_llm_provider" {
+  command = plan
+  variables {
+    nestbot_llm_provider = "unsupported"
+  }
+  expect_failures = [var.nestbot_llm_provider]
+}

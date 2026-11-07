@@ -60,11 +60,13 @@ workflows. Optional staging settings are `NESTBOT_DESIRED_COUNT` (default `1`),
 `NESTBOT_GOOGLE_MODEL_NAME` (default `gemini-3.5-flash-lite`) and
 `ROUTE_SLACK_TO_NESTBOT` (default `false`); the image tag comes from the release.
 Staging prepares Terraform, then plans and applies the release with current Slack
-routing preserved. It runs the normal backend migration task after that apply,
+routing preserved unless routing is being disabled. Disabling routes back to the
+backend during this first apply, before migrations or NestBot health checks. It runs the normal backend migration task after that apply,
 using the task definition updated by Terraform. Services can start before migrations,
 matching the existing backend deployment flow. After migrations succeed, the
 workflow verifies the NestBot web and worker release images and web target health.
-It plans and applies a requested routing change only when the route differs.
+Enabling routing requires successful health checks and a second apply when the
+route differs.
 Both applied plans are included in the workflow summary. The staging foundation
 must already exist; bootstrap remains separate.
 
@@ -78,6 +80,18 @@ Run `make infrastructure-test-unit` for mocked tests and review a real staging
 plan before applying. The existing Algolia `index-data` task does not ingest RAG
 data. Image scans, model/data readiness and full Slack behavior require separate
 verification before rollout.
+
+### Bedrock configuration
+
+Set staging variables `NESTBOT_LLM_PROVIDER=bedrock`, `NESTBOT_BEDROCK_MODEL_NAME`
+(model or inference profile ID) and `NESTBOT_BEDROCK_POLICY_ARNS` (JSON list of
+approved IAM policy ARNs). The AWS region comes from the existing `AWS_REGION`.
+Policies attach to the application task role shared by web and worker; they must
+permit the selected model/profile. No broad Bedrock policy is created here.
+Google remains the default until access is approved. Switch `NESTBOT_LLM_PROVIDER`
+back to `google` for a configuration-based fallback; there is no automatic failover.
+Embeddings stay Google in both cases, so existing data remains compatible.
+Question detection and vision still require OpenAI independently of the answer LLM.
 
 ### Staging AI switch and worker
 
@@ -193,9 +207,12 @@ No resources.
 | <a name="input_frontend_min_count"></a> [frontend\_min\_count](#input\_frontend\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_frontend_use_fargate_spot"></a> [frontend\_use\_fargate\_spot](#input\_frontend\_use\_fargate\_spot) | Whether to use Fargate Spot for frontend tasks. | `bool` | `true` | no |
 | <a name="input_nestbot_ai_assistant_enabled"></a> [nestbot\_ai\_assistant\_enabled](#input\_nestbot\_ai\_assistant\_enabled) | Enable AI in the dedicated staging NestBot service independently of Slack routing. | `bool` | `true` | no |
+| <a name="input_nestbot_bedrock_model_name"></a> [nestbot\_bedrock\_model\_name](#input\_nestbot\_bedrock\_model\_name) | Approved Bedrock model or inference profile ID; required when Bedrock is selected. | `string` | `""` | no |
+| <a name="input_nestbot_bedrock_policy_arns"></a> [nestbot\_bedrock\_policy\_arns](#input\_nestbot\_bedrock\_policy\_arns) | Approved IAM policy ARNs granting the NestBot task role access to the selected Bedrock model. | `list(string)` | `[]` | no |
 | <a name="input_nestbot_desired_count"></a> [nestbot\_desired\_count](#input\_nestbot\_desired\_count) | Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image. | `number` | `1` | no |
 | <a name="input_nestbot_google_model_name"></a> [nestbot\_google\_model\_name](#input\_nestbot\_google\_model\_name) | Google model used by NestBot. Verify provider compatibility before deployment. | `string` | `"gemini-3.5-flash-lite"` | no |
 | <a name="input_nestbot_image_tag"></a> [nestbot\_image\_tag](#input\_nestbot\_image\_tag) | Immutable NestBot image tag, required in staging. | `string` | `""` | no |
+| <a name="input_nestbot_llm_provider"></a> [nestbot\_llm\_provider](#input\_nestbot\_llm\_provider) | NestBot answer provider. Use google until approved Bedrock access is configured. | `string` | `"google"` | no |
 | <a name="input_private_subnet_cidrs"></a> [private\_subnet\_cidrs](#input\_private\_subnet\_cidrs) | A list of CIDR blocks for the private subnets. | `list(string)` | <pre>[<br/>  "10.0.11.0/24",<br/>  "10.0.12.0/24",<br/>  "10.0.13.0/24"<br/>]</pre> | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | `"nest"` | no |
 | <a name="input_public_subnet_cidrs"></a> [public\_subnet\_cidrs](#input\_public\_subnet\_cidrs) | A list of CIDR blocks for the public subnets. | `list(string)` | <pre>[<br/>  "10.0.1.0/24",<br/>  "10.0.2.0/24",<br/>  "10.0.3.0/24"<br/>]</pre> | no |

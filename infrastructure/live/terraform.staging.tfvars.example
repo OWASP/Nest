@@ -31,3 +31,8 @@ tasks_use_fargate_spot        = true
 
 # Independent of Slack routing; redeploys both web and worker tasks.
 nestbot_ai_assistant_enabled = true
+
+# Keep Google until the maintainer supplies approved Bedrock access.
+nestbot_llm_provider = "google"
+nestbot_bedrock_model_name = ""
+nestbot_bedrock_policy_arns = []

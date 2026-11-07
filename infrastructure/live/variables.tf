@@ -291,6 +291,44 @@ variable "nestbot_ai_assistant_enabled" {
   default     = true
 }
 
+variable "nestbot_llm_provider" {
+  description = "NestBot answer provider. Use google until approved Bedrock access is configured."
+  type        = string
+  default     = "google"
+
+  validation {
+    condition     = contains(["google", "openai", "bedrock"], var.nestbot_llm_provider)
+    error_message = "nestbot_llm_provider must be google, openai or bedrock."
+  }
+}
+
+variable "nestbot_bedrock_model_name" {
+  description = "Approved Bedrock model or inference profile ID; required when Bedrock is selected."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.nestbot_llm_provider != "bedrock" || trimspace(var.nestbot_bedrock_model_name) != ""
+    error_message = "Bedrock requires an approved nestbot_bedrock_model_name."
+  }
+}
+
+variable "nestbot_bedrock_policy_arns" {
+  description = "Approved IAM policy ARNs granting the NestBot task role access to the selected Bedrock model."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = var.nestbot_llm_provider != "bedrock" || length(var.nestbot_bedrock_policy_arns) > 0
+    error_message = "Bedrock requires approved task-role policies in nestbot_bedrock_policy_arns."
+  }
+
+  validation {
+    condition     = alltrue([for arn in var.nestbot_bedrock_policy_arns : can(regex("^arn:[^:]+:iam::[0-9]{12}:policy/.+$", arn))])
+    error_message = "Bedrock policy ARNs must identify account-owned IAM policies."
+  }
+}
+
 variable "nestbot_desired_count" {
   description = "Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image."
   type        = number

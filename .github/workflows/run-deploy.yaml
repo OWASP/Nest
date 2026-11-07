@@ -146,6 +146,9 @@ jobs:
       TF_VAR_nestbot_ai_assistant_enabled: ${{ inputs.environment == 'staging' && (vars.NESTBOT_AI_ASSISTANT_ENABLED || 'true') || 'false' }}
       TF_VAR_nestbot_desired_count: ${{ inputs.environment == 'staging' && vars.NESTBOT_DESIRED_COUNT || '1' }}
       TF_VAR_nestbot_google_model_name: ${{ inputs.environment == 'staging' && vars.NESTBOT_GOOGLE_MODEL_NAME || 'gemini-3.5-flash-lite' }}
+      TF_VAR_nestbot_llm_provider: ${{ inputs.environment == 'staging' && vars.NESTBOT_LLM_PROVIDER || 'google' }}
+      TF_VAR_nestbot_bedrock_model_name: ${{ inputs.environment == 'staging' && vars.NESTBOT_BEDROCK_MODEL_NAME || '' }}
+      TF_VAR_nestbot_bedrock_policy_arns: ${{ inputs.environment == 'staging' && vars.NESTBOT_BEDROCK_POLICY_ARNS || '[]' }}
       TF_VAR_nestbot_image_tag: ${{ inputs.release_version }}
       TF_VAR_route_slack_to_nestbot: ${{ inputs.environment == 'staging' && vars.ROUTE_SLACK_TO_NESTBOT || 'false' }}
       TF_IN_AUTOMATION: true
@@ -239,13 +242,18 @@ jobs:
             tasks_use_fargate_spot=${{ inputs.tasks_use_fargate_spot }}
           working-directory: infrastructure/live
 
-      - name: Deploy staging release with current Slack routing
+      - name: Deploy staging release
         if: inputs.environment == 'staging'
         run: |
           CURRENT_ROUTE=$(terraform output -json | jq -er '
             .route_slack_to_nestbot.value |
             if type == "boolean" then tostring else error("Missing or invalid Slack routing output") end')
-          terraform plan -var="route_slack_to_nestbot=$CURRENT_ROUTE" -out=tfplan
+          # Roll back routing before migrations and NestBot health checks.
+          DEPLOY_ROUTE=$CURRENT_ROUTE
+          if [[ "$TF_VAR_route_slack_to_nestbot" == "false" ]]; then
+            DEPLOY_ROUTE=false
+          fi
+          terraform plan -var="route_slack_to_nestbot=$DEPLOY_ROUTE" -out=tfplan
           {
             echo "## Staging release plan"
             echo '```'
@@ -340,7 +348,7 @@ jobs:
             | jq -e '.TargetHealthDescriptions | length > 0 and all(.[]; .TargetHealth.State == "healthy")' > /dev/null
 
       - name: Apply staging Slack routing
-        if: inputs.environment == 'staging'
+        if: inputs.environment == 'staging' && env.TF_VAR_route_slack_to_nestbot == 'true'
         run: |
           CURRENT_ROUTE=$(terraform output -raw route_slack_to_nestbot)
           if [[ "$CURRENT_ROUTE" == "$TF_VAR_route_slack_to_nestbot" ]]; then

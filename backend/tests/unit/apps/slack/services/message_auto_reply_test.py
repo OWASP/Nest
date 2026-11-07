@@ -145,6 +145,23 @@ class TestMessageAutoReply:
 
         mock_process_ai_query.assert_not_called()
 
+    @pytest.mark.parametrize("response", [{}, {"messages": []}])
+    @patch.object(SlackConfig, "app")
+    @patch("apps.slack.services.message_auto_reply.Message.objects.get")
+    @patch("apps.slack.services.message_auto_reply.process_ai_query")
+    def test_generate_ai_reply_unknown_thread(
+        self, mock_process_ai_query, mock_message_get, mock_app, mock_message, response
+    ):
+        """Do not answer when Slack has not returned the parent message."""
+        mock_message_get.return_value = mock_message
+        mock_app.client.conversations_replies.return_value = response
+
+        generate_ai_reply_if_unanswered(mock_message.id)
+
+        mock_process_ai_query.assert_not_called()
+        mock_app.client.chat_postMessage.assert_not_called()
+        mock_app.client.reactions_add.assert_not_called()
+
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
@@ -178,8 +195,9 @@ class TestMessageAutoReply:
         generate_ai_reply_if_unanswered(mock_message.id)
 
         mock_logger.exception.assert_called_once_with("Error checking for replies for message")
-        mock_process_ai_query.assert_called_once()
-        mock_client.chat_postMessage.assert_called_once()
+        mock_process_ai_query.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+        mock_client.reactions_add.assert_not_called()
 
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
