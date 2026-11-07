@@ -246,8 +246,8 @@ jobs:
         if: inputs.environment == 'staging'
         run: |
           CURRENT_ROUTE=$(terraform output -json | jq -er '
-            .route_slack_to_nestbot.value |
-            if type == "boolean" then tostring else error("Missing or invalid Slack routing output") end')
+            if has("route_slack_to_nestbot") then .route_slack_to_nestbot.value else false end |
+            if type == "boolean" then tostring else error("Invalid Slack routing output") end')
           # Roll back routing before migrations and NestBot health checks.
           DEPLOY_ROUTE=$CURRENT_ROUTE
           if [[ "$TF_VAR_route_slack_to_nestbot" == "false" ]]; then
@@ -319,7 +319,7 @@ jobs:
           echo "Migrate task completed successfully"
 
       - name: Verify NestBot web and worker release
-        if: inputs.environment == 'staging' && env.TF_VAR_nestbot_desired_count != '0'
+        if: inputs.environment == 'staging' && env.TF_VAR_route_slack_to_nestbot == 'true' && env.TF_VAR_nestbot_desired_count != '0'
         run: |
           CLUSTER_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_cluster_name)
           SERVICE_NAME=$(terraform -chdir=infrastructure/live output -raw nestbot_service_name)

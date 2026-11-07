@@ -160,3 +160,29 @@ class TestChunkModel:
     def test_context_relationship(self):
         context_field = Chunk._meta.get_field("context")
         assert context_field.related_model == Context
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        (
+            " ".join(f"word{i:02d}" for i in range(45)),
+            [
+                " ".join(f"word{i:02d}" for i in range(28)),
+                " ".join(f"word{i:02d}" for i in range(26, 45)),
+            ],
+        ),
+        (
+            "one " * 30 + "\n\n" + "two " * 30 + "\n" + "three " * 20,
+            [("one " * 30).strip(), ("two " * 30).strip(), ("three " * 20).strip()],
+        ),
+        (
+            "a" * 190 + "b" * 50 + "c" * 10,
+            ["a" * 190 + "b" * 10, "a" * 10 + "b" * 50 + "c" * 10],
+        ),
+    ],
+    ids=["word-overlap", "nested-separators", "character-fallback"],
+)
+def test_split_text_preserves_langchain_boundaries(text, expected):
+    """Pin boundaries verified against RecursiveCharacterTextSplitter 1.1.3."""
+    assert Chunk.split_text(text) == expected

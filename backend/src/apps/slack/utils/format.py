@@ -51,20 +51,40 @@ def format_ai_response_for_slack(text: str) -> str:
 
     # Remove heading emphasis before adding Slack's outer bold markers.
     def replace_heading(match: re.Match[str]) -> str:
-        content = re.sub(r"(\*\*|__|\*)(?=\S)(.+?)(?<=\S)\1", r"\2", match.group(1).strip())
+        content = "".join(
+            section if index % 2 else re.sub(r"__(.+?)__", r"\1", section).replace("*", "")
+            for index, section in enumerate(re.split(r"(`[^`]+`)", match.group(1).strip()))
+        )
         return f"*{content}*"
 
     def format_text_section(content: str) -> str:
         content = re.sub(r"```+", "", content)
-        content = re.sub(r"`([^`<]+)`", r"\1", content)
         content = re.sub(
-            r"^#{1,6}[ \t]+(\S[^\r\n]*)$", replace_heading, content, flags=re.MULTILINE
+            r"^#{1,6}[ \t]+([^\s][^\r\n]*)\r?$", replace_heading, content, flags=re.MULTILINE
         )
-        content = re.sub(r"\*\*(.+?)\*\*", r"*\1*", content)
-        content = re.sub(r"__(.+?)__", r"*\1*", content)
-        return format_links_for_slack(content)
+        sections = []
+        for index, section in enumerate(re.split(r"(`[^`]+`)", content)):
+            formatted = section
+            if index % 2:
+                # Keep Slack code delimiters when removing them would activate formatting.
+                literal = section[1:-1]
+                if not re.search(r"[*_~]|<[@#!]|\[[^\]]+\]\(|<(?:https?://|mailto:)", literal):
+                    formatted = literal
+            else:
+                formatted = re.sub(r"\*\*(.+?)\*\*", r"*\1*", section)
+                formatted = re.sub(r"__(.+?)__", r"*\1*", formatted)
+            sections.append(formatted)
+        return format_links_for_slack("".join(sections))
 
-    parts: list[str] = []
+    return "".join(
+        content if fenced else format_text_section(content)
+        for fenced, content in split_fenced_sections(text)
+    ).strip("\r\n")
+
+
+def split_fenced_sections(text: str) -> list[tuple[bool, str]]:
+    """Separate literal fenced content from prose without interpreting its contents."""
+    parts: list[tuple[bool, str]] = []
     section: list[str] = []
     fence_length = 0
     for line in text.strip().splitlines(keepends=True):
@@ -72,14 +92,10 @@ def format_ai_response_for_slack(text: str) -> str:
         if fence and (
             not fence_length or (len(fence[1]) >= fence_length and not fence[2].strip())
         ):
-            content = "".join(section)
-            parts.append(content if fence_length else format_text_section(content))
+            parts.append((bool(fence_length), "".join(section)))
             section = []
             fence_length = 0 if fence_length else len(fence[1])
         else:
             section.append(line)
-
-    content = "".join(section)
-    parts.append(content if fence_length else format_text_section(content))
-
-    return "".join(parts).strip("\r\n")
+    parts.append((bool(fence_length), "".join(section)))
+    return parts

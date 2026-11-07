@@ -8,6 +8,7 @@ from django.conf import settings
 
 from apps.slack.blocks import markdown
 from apps.slack.utils import format_ai_response_for_slack
+from apps.slack.utils.format import split_fenced_sections
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +51,15 @@ def get_response_blocks(response: str | None) -> list[dict]:
         list: A list of Slack blocks representing the AI response.
 
     """
-    # Format the AI response for Slack (remove code blocks, fix markdown)
-    return [markdown(format_ai_response_for_slack(response))] if response else get_error_blocks()
+    if not response:
+        return get_error_blocks()
+    return [
+        {"type": "section", "text": {"type": "plain_text", "text": content, "emoji": False}}
+        if fenced
+        else markdown(format_ai_response_for_slack(content))
+        for fenced, content in split_fenced_sections(response)
+        if content.strip()
+    ]
 
 
 def process_ai_query(

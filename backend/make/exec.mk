@@ -125,4 +125,8 @@ else
 endif
 
 backend-exec-nestbot-command-it:
+ifeq ($(EXEC_MODE),direct)
+	@cd backend && poetry run -- $(CMD)
+else
 	@docker exec -i$(shell [ -t 0 ] && printf t) nest-nestbot $(CMD)
+endif

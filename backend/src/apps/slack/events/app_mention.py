@@ -2,6 +2,7 @@
 
 import base64
 import logging
+from html import escape
 
 from django.conf import settings
 
@@ -116,6 +117,8 @@ class AppMention(EventBase):
         client.chat_postMessage(
             channel=channel_id,
             blocks=reply_blocks,
-            text=get_text(reply_blocks),
+            text=escape(get_text(reply_blocks), quote=False),
+            mrkdwn=False,
+            parse="none",
             thread_ts=thread_ts,
         )

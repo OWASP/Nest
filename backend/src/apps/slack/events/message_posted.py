@@ -33,9 +33,6 @@ class MessagePosted(EventBase):
 
     def handle_event(self, event, client):
         """Handle an incoming message event."""
-        if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
-            return
-
         if event.get("subtype") or event.get("bot_id"):
             logger.info("Ignored message due to subtype, bot_id, or thread_ts.")
             return
@@ -48,6 +45,9 @@ class MessagePosted(EventBase):
                 ).update(has_replies=True)
             except Message.DoesNotExist:
                 logger.warning("Thread message not found.")
+            return
+
+        if not settings.NESTBOT_AI_ASSISTANT_ENABLED:
             return
 
         channel_id = event.get("channel")

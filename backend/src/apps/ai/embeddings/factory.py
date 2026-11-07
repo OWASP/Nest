@@ -20,7 +20,7 @@ def get_embedder() -> Embedder:
         if llm_provider == "bedrock":
             msg = "EMBEDDING_PROVIDER is required when LLM_PROVIDER is bedrock"
             raise ValueError(msg)
-        provider = llm_provider if llm_provider in {"openai", "google"} else "google"
+        provider = llm_provider
     else:
         provider = provider.lower()
 

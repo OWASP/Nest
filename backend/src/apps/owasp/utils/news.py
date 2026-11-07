@@ -45,7 +45,13 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
         items = []
         for h2 in h2_tags:
             if anchor := h2.xpath(".//a[@href]"):
-                author_tag = h2.xpath("./following-sibling::p[@class='author']")
+                author_tag = []
+                for sibling in h2.itersiblings():
+                    if sibling.tag in {"h1", "h2", "h3", "h4", "h5", "h6"}:
+                        break
+                    if sibling.tag == "p" and "author" in sibling.get("class", "").split():
+                        author_tag = [sibling]
+                        break
                 items.append(
                     {
                         "author": author_tag[0].text_content().strip() if author_tag else "",

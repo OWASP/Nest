@@ -4,7 +4,10 @@ from argparse import ArgumentParser
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
+from slack_sdk.errors import SlackApiError
 
+from apps.slack.apps import SlackConfig
 from apps.slack.models import Conversation, Workspace
 
 
@@ -22,10 +25,38 @@ class Command(BaseCommand):
             workspace, _ = Workspace.objects.get_or_create(
                 slack_workspace_id=options["workspace_id"],
             )
-            conversation, _ = Conversation.objects.get_or_create(
-                slack_channel_id=options["channel_id"],
-                defaults={"workspace": workspace, "is_channel": True},
-            )
+            conversation = Conversation.objects.filter(
+                slack_channel_id=options["channel_id"]
+            ).first()
+            if conversation is None or not conversation.has_slack_metadata:
+                if not SlackConfig.app:
+                    message = "Configure Slack before enabling an unsynchronized channel."
+                    raise CommandError(message)
+                try:
+                    channel = SlackConfig.app.client.conversations_info(
+                        channel=options["channel_id"]
+                    )["channel"]
+                except SlackApiError as error:
+                    message = "Could not verify Slack channel privacy."
+                    raise CommandError(message) from error
+                if (
+                    channel.get("id") != options["channel_id"]
+                    or not isinstance(channel.get("is_private"), bool)
+                    or channel.get("context_team_id", options["workspace_id"])
+                    != options["workspace_id"]
+                ):
+                    message = "Slack returned incomplete or mismatched channel metadata."
+                    raise CommandError(message)
+                if conversation is not None and conversation.workspace_id != workspace.pk:
+                    message = "Channel already belongs to a different workspace."
+                    raise CommandError(message)
+                if conversation is None:
+                    conversation = Conversation.update_data(channel, workspace)
+                else:
+                    conversation.is_private = channel["is_private"]
+                    conversation.slack_metadata_synced_at = timezone.now()
+                    conversation.save(update_fields=["is_private", "slack_metadata_synced_at"])
+
             if conversation.workspace_id != workspace.pk:
                 message = "Channel already belongs to a different workspace."
                 raise CommandError(message)

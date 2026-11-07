@@ -46,7 +46,10 @@ def format_links_for_slack(text: str) -> str:
         return text
 
     markdown_link_pattern = re.compile(r"\[([^\]]+)\]\((https?://[^\s)]+)\)")
-    return markdown_link_pattern.sub(r"<\2|\1>", text)
+    return "".join(
+        section if index % 2 else markdown_link_pattern.sub(r"<\2|\1>", section)
+        for index, section in enumerate(re.split(r"(`[^`]+`)", text))
+    )
 
 
 def get_text(blocks: Sequence[Mapping[str, Any]]) -> str:

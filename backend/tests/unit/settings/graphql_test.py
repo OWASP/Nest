@@ -21,6 +21,10 @@ def test_graphql_extensions(settings, debug, is_fuzz_environment, introspection_
     assert bool(result.errors) is introspection_disabled
 
     if introspection_disabled:
+        assert any(
+            "introspection has been disabled" in error.message and "__schema" in error.message
+            for error in result.errors
+        )
         factory = configured["extensions"][-1]
         first = factory(execution_context=None)
         second = factory(execution_context=None)

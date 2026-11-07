@@ -13,6 +13,7 @@ from apps.owasp.models.project import Project
 from apps.owasp.utils.gsoc import get_gsoc_projects
 from apps.owasp.utils.news import get_news_data
 from apps.owasp.utils.staff import STAFF_YAML_URL, get_staff_data
+from apps.slack.common.handlers.ai import get_response_blocks
 from apps.slack.utils import (
     download_file,
     escape,
@@ -158,7 +159,13 @@ class TestFormatAiResponseForSlack:
                 "### Explore **OWASP** and __chapters__ with *contributors*",
                 "*Explore OWASP and chapters with contributors*",
             ),
-            ("# C* pointers", "*C* pointers*"),
+            ("# C* pointers", "*C pointers*"),
+            ("## Heading\r\nNext", "*Heading*\nNext"),
+            ("Compare `x < 3` and `<div>`.", "Compare x < 3 and <div>."),
+            ("Run `**not bold**` and **bold**.", "Run `**not bold**` and *bold*."),
+            ("Use `[label](https://example.com)`.", "Use `[label](https://example.com)`."),
+            ("# Use `a*b` pointers", "*Use `a*b` pointers*"),
+            ("`<https://example.com|Example>`", "`<https://example.com|Example>`"),
             (
                 "Here is code:\n```python\n# This is a comment\nx = 1\n```\nDone.",
                 "Here is code:\n# This is a comment\nx = 1\nDone.",
@@ -428,8 +435,7 @@ class TestGetGsocProjects:
         mock_queryset = Mock()
         mock_queryset.only = mock_only
 
-        def mock_filter(**_kwargs):
-            return mock_queryset
+        mock_filter = Mock(return_value=mock_queryset)
 
         monkeypatch.setattr(Project.objects, "filter", mock_filter)
         get_gsoc_projects.cache_clear()
@@ -445,6 +451,11 @@ class TestGetGsocProjects:
         # Test caching - should return same result without another query
         result2 = get_gsoc_projects(2023)
         assert result == result2
+        mock_filter.assert_called_once_with(
+            is_active=True, custom_tags__isnull=False, custom_tags__icontains="gsoc2023"
+        )
+        mock_only.assert_called_once_with("name", "key")
+        mock_order_by.assert_called_once_with("name")
 
 
 class TestGetNewsData:
@@ -571,7 +582,7 @@ class TestGetStaffData:
         assert mock_get.call_count == 1
         assert result == result2
 
-    def test_get_staff_data_request_exception(self, monkeypatch):
+    def test_get_staff_data_request_exception(self, monkeypatch, caplog):
         """Test get_staff_data handles RequestException gracefully without caching None."""
         mock_get = Mock(side_effect=RequestException("Network error"))
         monkeypatch.setattr("requests.get", mock_get)
@@ -579,8 +590,18 @@ class TestGetStaffData:
         assert get_staff_data() is None
         assert get_staff_data() is None
         assert mock_get.call_count == 2
+        assert "Unable to fetch OWASP staff data file" in caplog.text
+        assert "Unable to parse OWASP staff data file" not in caplog.text
 
-    def test_get_staff_data_yaml_error(self, monkeypatch):
+    def test_get_staff_data_http_error(self, monkeypatch, caplog):
+        response = Mock()
+        response.raise_for_status.side_effect = RequestException("HTTP error")
+        monkeypatch.setattr("requests.get", Mock(return_value=response))
+        assert get_staff_data() is None
+        assert "Unable to fetch OWASP staff data file" in caplog.text
+        assert "Unable to parse OWASP staff data file" not in caplog.text
+
+    def test_get_staff_data_yaml_error(self, monkeypatch, caplog):
         """Test get_staff_data handles YAML parse errors."""
         mock_response = Mock()
         mock_response.text = "invalid: [\n  - broken"
@@ -589,6 +610,8 @@ class TestGetStaffData:
         monkeypatch.setattr("requests.get", mock_get)
 
         assert get_staff_data() is None
+        assert "Unable to parse OWASP staff data file" in caplog.text
+        assert "Unable to fetch OWASP staff data file" not in caplog.text
 
     def test_get_staff_data_invalid_shape(self, monkeypatch):
         """Test get_staff_data rejects YAML that is not a list of named dicts."""
@@ -609,3 +632,32 @@ class TestGetStaffData:
         monkeypatch.setattr("requests.get", mock_get)
 
         assert get_staff_data() is None
+
+
+def test_news_author_does_not_cross_heading(monkeypatch):
+    cache.clear()
+    response = Mock(
+        content=(
+            b'<h2><a href="/one">One</a></h2><p>No author</p>'
+            b'<h2><a href="/two">Two</a></h2><p class="author">Second author</p>'
+        )
+    )
+    monkeypatch.setattr("requests.get", Mock(return_value=response))
+    articles = get_news_data()
+    assert articles[0]["author"] == ""
+    assert articles[1]["author"] == "Second author"
+
+
+def test_inline_code_stays_literal_in_final_slack_block():
+    response = "Run `**not bold**` or `[example](https://example.com)` and **bold**."
+    block = get_response_blocks(response)[0]
+    assert block["text"]["text"] == (
+        "Run `**not bold**` or `[example](https://example.com)` and *bold*."
+    )
+
+
+def test_whole_response_fence_stays_literal_in_final_slack_block():
+    source = "# **literal** <@U123> [example](https://example.com)"
+    assert get_response_blocks(f"```\n{source}\n```") == [
+        {"type": "section", "text": {"type": "plain_text", "text": source + "\n", "emoji": False}},
+    ]

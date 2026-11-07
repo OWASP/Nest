@@ -47,8 +47,8 @@ class Staging(Base):
     IS_STAGING_ENVIRONMENT = True
     NESTBOT_AI_ASSISTANT_ENABLED = values.BooleanValue(default=True)
 
-    # Slack is handled by the dedicated NestBot service.
-    SLACK_BOT_TOKEN = OptionalSecretValue(environ=False)
-    SLACK_COMMANDS_ENABLED = False
-    SLACK_EVENTS_ENABLED = False
-    SLACK_SIGNING_SECRET = OptionalSecretValue(environ=False)
+    # Terraform clears credentials at cutover; retain handling for routing rollback.
+    SLACK_BOT_TOKEN = OptionalSecretValue()
+    SLACK_COMMANDS_ENABLED = True
+    SLACK_EVENTS_ENABLED = True
+    SLACK_SIGNING_SECRET = OptionalSecretValue()

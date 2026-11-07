@@ -12,7 +12,8 @@ import pytest
     ("module", "configuration", "slack_enabled", "ai_enabled"),
     [
         ("settings.nestbot", "Staging", True, True),
-        ("settings.staging", "Staging", False, True),
+        ("settings.staging", "Staging", True, True),
+        ("settings.nestbot_healthcheck", "Staging", False, True),
         ("settings.production", "Production", True, False),
         ("settings.local", "Local", True, True),
     ],
@@ -89,7 +90,7 @@ for endpoint in ("commands", "events", "interactivity"):
 
 
 def test_worker_probe_does_not_authenticate_with_slack(monkeypatch):
-    """The worker probe uses ordinary staging settings with Slack disabled."""
+    """The worker probe uses dedicated health-check settings with Slack disabled."""
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "settings.nestbot")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "Staging")
     result = subprocess.run(
@@ -105,7 +106,7 @@ with patch("slack_sdk.WebClient.auth_test", side_effect=AssertionError("Slack pr
      patch("rq.Worker.all", return_value=[]):
     try:
         execute_from_command_line([
-            "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.staging",
+            "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.nestbot_healthcheck",
         ])
     except SystemExit as error:
         assert error.code == 1

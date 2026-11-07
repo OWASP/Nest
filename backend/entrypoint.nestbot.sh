@@ -11,6 +11,8 @@ exec gunicorn wsgi:application \
   --worker-class gthread \
   --workers "${GUNICORN_WORKERS:-1}" \
   --threads "${GUNICORN_THREADS:-2}" \
+  --max-requests "${GUNICORN_MAX_REQUESTS:-1000}" \
+  --max-requests-jitter "${GUNICORN_MAX_REQUESTS_JITTER:-50}" \
   --timeout "${GUNICORN_TIMEOUT:-60}" \
   --graceful-timeout "${GUNICORN_GRACEFUL_TIMEOUT:-30}" \
   --access-logfile - \

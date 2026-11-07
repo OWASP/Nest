@@ -32,6 +32,20 @@ def test_execute_task_requires_tools_only_when_available(mock_crew, mock_task, h
     assert ("ONLY on tool results" in task_kwargs["expected_output"]) is has_tools
 
 
+@patch("apps.ai.flows.assistant.Task")
+@patch("apps.ai.flows.assistant.Crew")
+def test_explicit_task_keeps_missing_information_instruction(mock_crew, mock_task):
+    agent = MagicMock(tools=[])
+    mock_crew.return_value.kickoff.return_value = "Combined answer"
+    description = "Synthesize the supplied expert results."
+
+    assert execute_task(agent, task_description=description) == "Combined answer"
+
+    task_kwargs = mock_task.call_args.kwargs
+    assert task_kwargs["description"] == description
+    assert "explicitly state what information is missing" in task_kwargs["expected_output"]
+
+
 class TestProcessQueryImageEnrichment:
     """Test cases for image context enrichment in process_query."""
 

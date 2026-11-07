@@ -155,6 +155,11 @@ run "test_ai_switch_independent_of_routing" {
     condition     = var.nestbot_ai_assistant_enabled && !output.route_slack_to_nestbot
     error_message = "Enabling AI must not change Slack routing."
   }
+
+  assert {
+    condition     = module.nestbot[0].container_environments.web.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "true" && module.nestbot[0].container_environments.worker.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "true"
+    error_message = "Both NestBot containers must receive AI true independently of routing."
+  }
 }
 
 run "test_ai_can_be_disabled_without_changing_routing" {
@@ -168,6 +173,11 @@ run "test_ai_can_be_disabled_without_changing_routing" {
   assert {
     condition     = !var.nestbot_ai_assistant_enabled && output.route_slack_to_nestbot
     error_message = "Disabling AI must preserve separately configured Slack routing."
+  }
+
+  assert {
+    condition     = module.nestbot[0].container_environments.web.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "false" && module.nestbot[0].container_environments.worker.DJANGO_NESTBOT_AI_ASSISTANT_ENABLED == "false"
+    error_message = "Both NestBot containers must receive AI false independently of routing."
   }
 }
 
@@ -184,6 +194,11 @@ run "test_bedrock_configuration" {
   assert {
     condition     = local.nestbot_environment_variables.LLM_PROVIDER == "bedrock" && local.nestbot_environment_variables.BEDROCK_MODEL_NAME == "approved-profile" && local.nestbot_environment_variables.AWS_DEFAULT_REGION == "eu-west-1" && local.nestbot_environment_variables.EMBEDDING_PROVIDER == "google"
     error_message = "Bedrock answer configuration must preserve Google embeddings and use the configured region."
+  }
+
+  assert {
+    condition     = contains(module.nestbot[0].additional_task_role_policy_arns, "arn:aws:iam::123456789012:policy/nestbot-bedrock")
+    error_message = "The approved Bedrock policy must be attached to the NestBot application task role."
   }
 }
 

@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+from apps.slack.commands.ai import Ai
 from apps.slack.common.handlers.ai import (
     get_blocks,
     get_default_response,
@@ -226,3 +227,26 @@ class TestAiHandler:
         assert get_response_blocks("") == error_blocks
         assert get_response_blocks(None) == error_blocks
         assert mock_get_error_blocks.call_count == 2
+
+
+def test_fenced_content_stays_literal_in_blocks_and_fallback(mocker):
+
+    source = "**literal** <@U123> <!channel> [link](https://example.com)"
+    mocker.patch(
+        "apps.slack.common.handlers.ai.process_ai_query",
+        return_value=f"Before\n```\n{source}\n```\nAfter",
+    )
+    client = mocker.Mock()
+    client.conversations_open.return_value = {"channel": {"id": "D123"}}
+    Ai().handler(mocker.Mock(), {"text": "help", "user_id": "U123"}, client)
+    posted = client.chat_postMessage.call_args.kwargs
+    assert posted["blocks"][1] == {
+        "type": "section",
+        "text": {"type": "plain_text", "text": source + "\n", "emoji": False},
+    }
+    assert posted["blocks"][0]["text"]["type"] == "mrkdwn"
+    assert "&lt;@U123&gt;" in posted["text"]
+    assert "&lt;!channel&gt;" in posted["text"]
+    assert "**literal**" in posted["text"]
+    assert posted["mrkdwn"] is False
+    assert posted["parse"] == "none"

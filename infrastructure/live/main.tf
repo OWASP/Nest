@@ -86,6 +86,7 @@ module "backend" {
   security_group_id               = module.security.backend_sg_id
   service_name                    = "backend"
   target_group_arn                = module.alb.backend_target_group_arn
+  task_role_kms_actions           = ["kms:Decrypt", "kms:GenerateDataKey*"]
   task_role_policy_arns           = [module.storage.static_read_write_policy_arn]
   use_fargate_spot                = var.backend_use_fargate_spot
 }
@@ -214,7 +215,7 @@ module "nestbot" {
   environment_variables  = local.nestbot_environment_variables
   worker = {
     command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler", "--worker-ttl", "90"]
-    health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.staging"]
+    health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.nestbot_healthcheck"]
   }
   health_check_command = ["CMD", "python", "-c", "from http.client import HTTPConnection; c = HTTPConnection('127.0.0.1', 8000, timeout=5); c.request('GET', '/status/'); r = c.getresponse(); c.close(); raise SystemExit(0 if r.status == 200 else 1)"]
   health_check_path    = "/status/"

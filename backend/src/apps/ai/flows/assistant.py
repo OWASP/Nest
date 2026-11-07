@@ -439,6 +439,7 @@ def execute_task(
         Response string
 
     """
+    query_only = not task_description
     if not task_description and not query:
         err_msg = "Either query or task_description must be provided"
         raise ValueError(err_msg)
@@ -518,7 +519,7 @@ def execute_task(
         "information, explicitly state what information is missing."
     )
 
-    if not agent.tools:
+    if query_only and not agent.tools:
         expected_output = "A concise response following your role, formatted for Slack markdown."
 
     if is_channel_suggestion:

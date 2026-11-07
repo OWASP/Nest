@@ -445,6 +445,8 @@ class TestAppMention:
             channel="C123456",
             blocks=response_blocks,
             text="Response",
+            mrkdwn=False,
+            parse="none",
             thread_ts="1234567890.123456",
         )
 
@@ -471,5 +473,7 @@ class TestAppMention:
             channel="C123456",
             blocks=response_blocks,
             text="Response",
+            mrkdwn=False,
+            parse="none",
             thread_ts="1234567890.000000",
         )

@@ -214,12 +214,12 @@ run "test_nestbot_container_configuration" {
   }
 }
 
-run "test_existing_task_role_kms_permissions_preserved" {
+run "test_task_role_kms_defaults_to_decrypt" {
   command = plan
 
   assert {
-    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt", "kms:GenerateDataKey*"] && jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Resource == var.kms_key_arn
-    error_message = "Existing services must retain their KMS actions on the configured key."
+    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt"] && jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Resource == var.kms_key_arn
+    error_message = "Application task roles must default to decrypt-only access on the configured key."
   }
 
   assert {
@@ -505,7 +505,7 @@ run "test_queue_worker_uses_same_release_and_settings" {
   variables {
     worker = {
       command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler"]
-      health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.staging"]
+      health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.nestbot_healthcheck"]
     }
     environment_variables = { DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = "false" }
   }
@@ -533,4 +533,73 @@ run "test_existing_services_do_not_gain_workers" {
     condition     = length(aws_ecs_service.worker) == 0 && length(aws_ecs_task_definition.worker) == 0
     error_message = "Existing services must remain unchanged without worker configuration."
   }
+}
+
+
+run "test_task_role_kms_write_permissions_require_opt_in" {
+  command = plan
+
+  variables {
+    task_role_kms_actions = ["kms:Decrypt", "kms:GenerateDataKey*"]
+  }
+
+  assert {
+    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt", "kms:GenerateDataKey*"]
+    error_message = "Workloads that write encrypted S3 objects must explicitly request data-key generation."
+  }
+}
+
+run "test_reject_empty_worker_health_command" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = []
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_blank_worker_health_command" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["CMD-SHELL", ""]
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_whitespace_worker_health_command" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["CMD-SHELL", " \t\n"]
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_null_worker_health_operand" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["CMD-SHELL", null]
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_invalid_worker_health_prefix" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["INVALID", "probe"]
+    }
+  }
+  expect_failures = [var.worker]
 }

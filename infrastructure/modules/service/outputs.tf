@@ -27,3 +27,19 @@ output "ecs_worker_service_name" {
   description = "The optional queue worker service name."
   value       = one(aws_ecs_service.worker[*].name)
 }
+
+output "container_environments" {
+  description = "Explicit environment variables passed to the web and optional worker containers."
+  value = {
+    web    = try({ for entry in local.container_definition.environment : entry.name => entry.value }, {})
+    worker = try({ for entry in local.worker_definition.environment : entry.name => entry.value }, {})
+  }
+}
+
+output "additional_task_role_policy_arns" {
+  description = "Additional policy ARNs attached to the application task role."
+  value = [
+    for attachment in aws_iam_role_policy_attachment.task_role_policies : attachment.policy_arn
+    if attachment.role == aws_iam_role.ecs_task_role.name
+  ]
+}

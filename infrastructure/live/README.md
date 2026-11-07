@@ -53,7 +53,8 @@ of routing. Jobs recheck it when they start; running provider requests are not c
 
 For Bedrock, set `NESTBOT_LLM_PROVIDER=bedrock`, `NESTBOT_BEDROCK_MODEL_NAME` and
 `NESTBOT_BEDROCK_POLICY_ARNS` (a JSON list of approved IAM policy ARNs). The region
-comes from `AWS_REGION`. Google remains the default and configuration fallback;
+is passed to the container as `AWS_DEFAULT_REGION` from Terraform `aws_region`
+(the deployment workflow uses `AWS_REGION`). Google remains the default and configuration fallback;
 embeddings stay Google for either answer provider.
 
 Configure a separate staging Slack app using the full
@@ -183,7 +184,7 @@ No resources.
 | <a name="output_nestbot_cluster_name"></a> [nestbot\_cluster\_name](#output\_nestbot\_cluster\_name) | The ECS NestBot cluster name, or null when disabled. |
 | <a name="output_nestbot_ecr_repository_url"></a> [nestbot\_ecr\_repository\_url](#output\_nestbot\_ecr\_repository\_url) | The NestBot ECR repository URL, or null when disabled. |
 | <a name="output_nestbot_service_name"></a> [nestbot\_service\_name](#output\_nestbot\_service\_name) | The ECS NestBot service name, or null when disabled. |
-| <a name="output_nestbot_worker_service_name"></a> [nestbot\_worker\_service\_name](#output\_nestbot\_worker\_service\_name) | The staging NestBot AI queue worker service name. |
+| <a name="output_nestbot_worker_service_name"></a> [nestbot\_worker\_service\_name](#output\_nestbot\_worker\_service\_name) | The staging NestBot AI queue worker service name, or null when NestBot is disabled. |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | A list of private subnet IDs. |
 | <a name="output_route_slack_to_nestbot"></a> [route\_slack\_to\_nestbot](#output\_route\_slack\_to\_nestbot) | Whether Slack traffic is currently routed to NestBot. |
 | <a name="output_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#output\_shared\_data\_bucket\_name) | S3 bucket for shared public data (e.g. nest.dump). |

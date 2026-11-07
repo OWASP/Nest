@@ -8,6 +8,8 @@ from apps.ai.agents.project.tools.formatters import format_project_results
 from apps.owasp.index.search.project import get_projects
 from apps.owasp.models.enums.project import ProjectLevel
 
+MAX_FLAGSHIP_PROJECTS = 30
+
 
 @tool("Get all OWASP flagship projects")
 def get_flagship_projects(limit: int = 15) -> str:
@@ -23,7 +25,7 @@ def get_flagship_projects(limit: int = 15) -> str:
     - Best OWASP projects
 
     Args:
-        limit: Maximum number of projects to return (default: 15)
+        limit: Maximum number of projects to return, clamped to 0-30 (default: 15)
 
     Returns:
         Formatted string with flagship projects information
@@ -40,5 +42,5 @@ def get_flagship_projects(limit: int = 15) -> str:
             isinstance(level_value, str) and level_value.lower() == ProjectLevel.FLAGSHIP.lower()  # type: ignore[attr-defined]
         ):
             flagship.append(p)
-    safe_limit = max(0, min(limit, 30))  # edge case
+    safe_limit = max(0, min(limit, MAX_FLAGSHIP_PROJECTS))
     return format_project_results(flagship[:safe_limit], "Flagship")

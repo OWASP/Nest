@@ -209,7 +209,7 @@ variable "target_group_arn" {
 variable "task_role_kms_actions" {
   description = "KMS actions allowed on kms_key_arn for the application task role. An empty list disables this policy."
   type        = list(string)
-  default     = ["kms:Decrypt", "kms:GenerateDataKey*"]
+  default     = ["kms:Decrypt"]
 }
 
 variable "task_role_policy_arns" {
@@ -231,4 +231,9 @@ variable "worker" {
     health_check_command = list(string)
   })
   default = null
+
+  validation {
+    condition     = var.worker == null ? true : try(length(var.worker.health_check_command) >= 2 && contains(["CMD", "CMD-SHELL"], var.worker.health_check_command[0]) && trimspace(var.worker.health_check_command[1]) != "", false)
+    error_message = "worker.health_check_command must start with CMD or CMD-SHELL and include a non-blank command."
+  }
 }

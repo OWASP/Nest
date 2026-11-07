@@ -56,6 +56,28 @@ def test_disabled_detection_never_initializes_provider_or_queue(settings):
     assert client.mock_calls == []
 
 
+def test_disabled_ai_keeps_thread_reply_bookkeeping(settings):
+    settings.NESTBOT_AI_ASSISTANT_ENABLED = False
+    client = Mock()
+    with (
+        patch("apps.slack.events.message_posted.Message") as message,
+        patch("apps.slack.events.message_posted.QuestionDetector") as detector,
+        patch("apps.slack.events.message_posted.Conversation") as conversation,
+        patch("apps.slack.events.message_posted.django_rq.get_queue") as queue,
+    ):
+        MessagePosted().handle_event(
+            {"channel": "C123", "thread_ts": "123.000", "text": "I can help"}, client
+        )
+    message.objects.filter.assert_called_once_with(
+        slack_message_id="123.000", conversation__slack_channel_id="C123"
+    )
+    message.objects.filter.return_value.update.assert_called_once_with(has_replies=True)
+    detector.assert_not_called()
+    conversation.objects.get.assert_not_called()
+    queue.assert_not_called()
+    assert client.mock_calls == []
+
+
 def test_queued_job_rechecks_switch(settings):
     settings.NESTBOT_AI_ASSISTANT_ENABLED = True
     with (

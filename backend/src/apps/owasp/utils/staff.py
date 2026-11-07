@@ -47,7 +47,12 @@ def get_staff_data(timeout: float | None = 30) -> list | None:
 
         result = sorted(data, key=lambda person: person["name"])
         cache.set(cache_key, result, timeout=CACHE_TTL_SECONDS)
-    except (AttributeError, KeyError, RequestException, TypeError, yaml.YAMLError):
+    except RequestException:
+        logger.exception(
+            "Unable to fetch OWASP staff data file", extra={"file_path": STAFF_YAML_URL}
+        )
+        return None
+    except (AttributeError, KeyError, TypeError, yaml.YAMLError):
         logger.exception(
             "Unable to parse OWASP staff data file", extra={"file_path": STAFF_YAML_URL}
         )
