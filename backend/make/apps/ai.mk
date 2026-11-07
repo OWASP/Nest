@@ -55,15 +55,3 @@ ai-update-slack-message-chunks:
 ai-update-slack-message-context:
 	@echo "Updating Slack message context"
 	@CMD="python manage.py ai_update_slack_message_context" $(MAKE) backend-exec-nestbot-command
-
-AI_TEST_ENV_FILE ?= .env.unit-tests
-
-.PHONY: test-ai-evaluation
-test-ai-evaluation: ## Run AI evaluation unit tests
-ifeq ($(EXEC_MODE),direct)
-	@cd backend
-	poetry run -- dotenv -f "$(AI_TEST_ENV_FILE)" run --no-override -- \
-		pytest tests/unit/apps/ai/evaluation/ -o addopts=''
-else
-	@$(MAKE) backend-test-unit PYTEST_ARGS="tests/unit/apps/ai/evaluation/ -o addopts=''"
-endif

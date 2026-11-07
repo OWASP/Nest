@@ -59,18 +59,20 @@ Staging CI builds, scans, signs and verifies NestBot through the existing image
 workflows. Optional staging settings are `NESTBOT_DESIRED_COUNT` (default `1`),
 `NESTBOT_GOOGLE_MODEL_NAME` (default `gemini-3.5-flash-lite`) and
 `ROUTE_SLACK_TO_NESTBOT` (default `false`); the image tag comes from the release.
-Staging plans first, runs migrations from the new backend image using the
-existing task configuration/private network, then deploys with existing Slack
-routing. It verifies the new NestBot image and healthy targets before applying
-the requested routing separately.
-The staging foundation and migration task must already exist; planned settings
-and networking changes are not available during that migration.
+Staging prepares Terraform, then plans and applies the release with current Slack
+routing preserved. It runs the normal backend migration task after that apply,
+using the task definition updated by Terraform. Services can start before migrations,
+matching the existing backend deployment flow. After migrations succeed, the
+workflow verifies the NestBot web and worker release images and web target health.
+It plans and applies a requested routing change only when the route differs.
+Both applied plans are included in the workflow summary. The staging foundation
+must already exist; bootstrap remains separate.
 
 Configure a separate staging Slack app from the full
 [manifest](../../backend/src/apps/slack/MANIFEST.yaml), replacing every URL host
 with `nest.owasp.dev`. HTTPS ALB routing replaces ngrok. Mentions and `/ai` use
-this web service; automatic delayed replies still require an `ai` RQ worker with
-scheduling, which this infrastructure does not provision.
+this web service; automatic delayed replies use the dedicated `ai` RQ worker with scheduling
+described below.
 
 Run `make infrastructure-test-unit` for mocked tests and review a real staging
 plan before applying. The existing Algolia `index-data` task does not ingest RAG
