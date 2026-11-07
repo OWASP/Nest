@@ -35,6 +35,7 @@ def test_execute_task_requires_tools_only_when_available(mock_crew, mock_task, h
 @patch("apps.ai.flows.assistant.Task")
 @patch("apps.ai.flows.assistant.Crew")
 def test_explicit_task_keeps_missing_information_instruction(mock_crew, mock_task):
+    """Preserve missing-information guidance for explicit collaborative tasks."""
     agent = MagicMock(tools=[])
     mock_crew.return_value.kickoff.return_value = "Combined answer"
     description = "Synthesize the supplied expert results."

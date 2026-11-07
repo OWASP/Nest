@@ -429,6 +429,7 @@ class TestReactionAdded:
 
 
 def test_unknown_channel_privacy_blocks_reaction_report(mocker):
+    """Skip reaction reporting when channel privacy has not been synchronized."""
     rule = mock_rule()
     rule.conversation.has_slack_metadata = False
     patch_rule_lookup(mocker, rule)

@@ -262,12 +262,13 @@ class TestMessageAutoReply:
         ],
     )
     def test_reply_confirmation_requires_exact_unanswered_parent(self, mock_message, response):
-
+        """Reject a different parent or a parent that already has replies."""
         client = Mock()
         client.conversations_history.return_value = response
         assert _is_unanswered(client, mock_message) is False
 
     def test_reply_arriving_during_generation_prevents_send(self, mocker, mock_message):
+        """Skip a generated response when another reply arrives first."""
         mocker.patch(
             "apps.slack.services.message_auto_reply.Message.objects.get", return_value=mock_message
         )
@@ -284,7 +285,33 @@ class TestMessageAutoReply:
 
 
 def test_confirmation_network_failure_is_closed():
+    """Reject automatic replies when Slack confirmation cannot be fetched."""
     client = Mock()
     client.conversations_history.side_effect = SlackRequestError("connection failed")
     message = Mock(slack_message_id="123.000")
     assert _is_unanswered(client, message) is False
+
+
+def test_auto_reply_escapes_fallback_special_characters(mocker):
+    """Keep special characters literal in a delayed reply's fallback text."""
+    message = Mock(id=1, text="question", slack_message_id="123.000")
+    message.conversation.is_nest_bot_assistant_enabled = True
+    mocker.patch(
+        "apps.slack.services.message_auto_reply.Message.objects.get", return_value=message
+    )
+    mocker.patch(
+        "apps.slack.services.message_auto_reply.process_ai_query", return_value="A & B < C > D"
+    )
+    blocks = [{"type": "section"}]
+    mocker.patch("apps.slack.services.message_auto_reply.get_response_blocks", return_value=blocks)
+    app = mocker.patch.object(SlackConfig, "app")
+    app.client.conversations_history.return_value = {"messages": [{"ts": "123.000"}]}
+    generate_ai_reply_if_unanswered(1)
+    app.client.chat_postMessage.assert_called_once_with(
+        channel=message.conversation.slack_channel_id,
+        blocks=blocks,
+        text="A &amp; B &lt; C &gt; D",
+        mrkdwn=False,
+        parse="none",
+        thread_ts="123.000",
+    )

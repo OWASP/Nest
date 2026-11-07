@@ -5,6 +5,7 @@ import pytest
 from django.test import override_settings
 
 from apps.slack.blocks import DIVIDER, SECTION_BREAK
+from apps.slack.commands.ai import Ai
 from apps.slack.commands.command import CommandBase
 
 
@@ -169,3 +170,21 @@ class TestCommandBase:
 
         mock_app.command.assert_called_once_with(command_instance.command_name)
         mock_app.command.return_value.assert_called_once_with(command_instance.handler)
+
+
+@override_settings(SLACK_COMMANDS_ENABLED=True)
+def test_ai_handler_escapes_fallback_special_characters(mocker):
+    """Keep special characters literal in the AI command fallback payload."""
+    command = Ai()
+    blocks = [{"type": "section", "text": {"type": "plain_text", "text": "A & B < C > D"}}]
+    mocker.patch.object(command, "render_blocks", return_value=blocks)
+    client = MagicMock()
+    client.conversations_open.return_value = {"channel": {"id": "D123"}}
+    command.handler(MagicMock(), {"user_id": "U123"}, client)
+    client.chat_postMessage.assert_called_once_with(
+        blocks=blocks,
+        channel="D123",
+        text="A &amp; B &lt; C &gt; D",
+        mrkdwn=False,
+        parse="none",
+    )

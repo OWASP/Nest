@@ -11,6 +11,7 @@ from strawberry.extensions import DisableIntrospection
     [(False, False, True), (True, False, False), (False, True, False)],
 )
 def test_graphql_extensions(settings, debug, is_fuzz_environment, introspection_disabled):
+    """Verify extension factories and explicit introspection denial across settings."""
     settings.DEBUG = debug
     settings.IS_FUZZ_ENVIRONMENT = is_fuzz_environment
     configured = run_module("settings.graphql", alter_sys=True)

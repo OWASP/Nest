@@ -594,6 +594,7 @@ class TestGetStaffData:
         assert "Unable to parse OWASP staff data file" not in caplog.text
 
     def test_get_staff_data_http_error(self, monkeypatch, caplog):
+        """Log an HTTP failure as a fetch error rather than a YAML parsing failure."""
         response = Mock()
         response.raise_for_status.side_effect = RequestException("HTTP error")
         monkeypatch.setattr("requests.get", Mock(return_value=response))
@@ -635,6 +636,7 @@ class TestGetStaffData:
 
 
 def test_news_author_does_not_cross_heading(monkeypatch):
+    """Do not borrow the author of a later article when the current article has none."""
     cache.clear()
     response = Mock(
         content=(
@@ -649,6 +651,7 @@ def test_news_author_does_not_cross_heading(monkeypatch):
 
 
 def test_inline_code_stays_literal_in_final_slack_block():
+    """Preserve Markdown examples inside code through final block construction."""
     response = "Run `**not bold**` or `[example](https://example.com)` and **bold**."
     block = get_response_blocks(response)[0]
     assert block["text"]["text"] == (
@@ -657,7 +660,25 @@ def test_inline_code_stays_literal_in_final_slack_block():
 
 
 def test_whole_response_fence_stays_literal_in_final_slack_block():
+    """Keep a fully fenced response literal, including mention and link syntax."""
     source = "# **literal** <@U123> [example](https://example.com)"
     assert get_response_blocks(f"```\n{source}\n```") == [
         {"type": "section", "text": {"type": "plain_text", "text": source + "\n", "emoji": False}},
     ]
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("[`name`](https://example.com)", "<https://example.com|`name`>"),
+        ("[the `name` value](https://example.com)", "<https://example.com|the `name` value>"),
+        ("`[name](https://example.com)`", "`[name](https://example.com)`"),
+        (
+            "`literal` then [`name`](https://example.com)",
+            "`literal` then <https://example.com|`name`>",
+        ),
+    ],
+)
+def test_links_and_inline_code_are_matched_together(source, expected):
+    """Convert a complete link with code in its label, while leaving code examples literal."""
+    assert format_links_for_slack(source) == expected

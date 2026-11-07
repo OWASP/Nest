@@ -51,6 +51,7 @@ def format_ai_response_for_slack(text: str) -> str:
 
     # Remove heading emphasis before adding Slack's outer bold markers.
     def replace_heading(match: re.Match[str]) -> str:
+        """Apply outer Slack bold without reinterpreting inline code or stray emphasis."""
         content = "".join(
             section if index % 2 else re.sub(r"__(.+?)__", r"\1", section).replace("*", "")
             for index, section in enumerate(re.split(r"(`[^`]+`)", match.group(1).strip()))
@@ -58,6 +59,7 @@ def format_ai_response_for_slack(text: str) -> str:
         return f"*{content}*"
 
     def format_text_section(content: str) -> str:
+        """Translate prose Markdown while preserving syntax inside literal code spans."""
         content = re.sub(r"```+", "", content)
         content = re.sub(
             r"^#{1,6}[ \t]+([^\s][^\r\n]*)\r?$", replace_heading, content, flags=re.MULTILINE

@@ -11,6 +11,7 @@ from apps.slack.utils import format_ai_response_for_slack
 from apps.slack.utils.format import split_fenced_sections
 
 logger = logging.getLogger(__name__)
+MAX_MESSAGE_BLOCKS = 50
 
 
 def get_blocks(
@@ -53,13 +54,29 @@ def get_response_blocks(response: str | None) -> list[dict]:
     """
     if not response:
         return get_error_blocks()
-    return [
+    blocks = [
         {"type": "section", "text": {"type": "plain_text", "text": content, "emoji": False}}
         if fenced
         else markdown(format_ai_response_for_slack(content))
         for fenced, content in split_fenced_sections(response)
         if content.strip()
     ]
+    if len(blocks) > MAX_MESSAGE_BLOCKS:
+        return [
+            *blocks[: MAX_MESSAGE_BLOCKS - 1],
+            {
+                "type": "section",
+                "text": {
+                    "type": "plain_text",
+                    "text": (
+                        "Response truncated. Ask a more specific question "
+                        "for the remaining details."
+                    ),
+                    "emoji": False,
+                },
+            },
+        ]
+    return blocks
 
 
 def process_ai_query(

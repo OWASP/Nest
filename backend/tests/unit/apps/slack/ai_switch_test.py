@@ -57,6 +57,7 @@ def test_disabled_detection_never_initializes_provider_or_queue(settings):
 
 
 def test_disabled_ai_keeps_thread_reply_bookkeeping(settings):
+    """Record thread replies with AI disabled without contacting providers."""
     settings.NESTBOT_AI_ASSISTANT_ENABLED = False
     client = Mock()
     with (

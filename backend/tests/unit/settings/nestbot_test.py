@@ -21,6 +21,7 @@ import pytest
 @pytest.mark.parametrize("ai_override", [None, "True", "False"])
 def test_slack_configuration(module, configuration, slack_enabled, ai_enabled, ai_override):
     # SlackConfig and urlpatterns are initialized at import time; use a fresh process.
+    """Check routing and AI defaults using a fresh configuration process."""
     result = subprocess.run(  # noqa: S603 -- fixed code and repository-owned parameters
         [
             sys.executable,
