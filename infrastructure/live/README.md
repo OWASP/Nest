@@ -36,90 +36,29 @@ Use the following inline permissions for the `nest-staging` IAM User.
 
 ## NestBot staging
 
-Staging includes NestBot through the existing service module, sharing the ALB,
-PostgreSQL, Redis and backend security group. It uses ARM64 Fargate tasks in
-private subnets. Production is unchanged; no `ENABLE_NESTBOT` setting is needed.
-NestBot uses `settings.nestbot.Staging` to enable Slack; the staging
-backend keeps Slack disabled.
+NestBot runs as separate web and scheduled-worker services using the existing
+ALB, PostgreSQL and Redis. The worker uses the same release image as the web service.
 
-1. Before the first image push, apply a reviewed staging plan with
-   `nestbot_desired_count = 0`, `route_slack_to_nestbot = false` and an intended
-   image tag. This creates the Terraform-owned release and build-cache ECR repos.
-2. Populate staging SSM Slack credentials, `DJANGO_GOOGLE_API_KEY` and
-   `DJANGO_OPEN_AI_SECRET_KEY` (still required by question detection). Verify
-   model compatibility with the packaged app and prepare matching RAG embeddings.
-3. Deploy one task with routing off; check logs and target health. Then set
-   `ROUTE_SLACK_TO_NESTBOT=true` for a subsequent staging deployment.
+1. Bootstrap with `nestbot_desired_count = 0`, `route_slack_to_nestbot = false`
+   and the intended image tag to create the ECR repositories before publishing.
+2. Configure staging SSM Slack, Google and OpenAI credentials. Question detection
+   and vision still require OpenAI. Prepare matching Google retrieval embeddings.
+3. Deploy with `NESTBOT_DESIRED_COUNT=1` and `ROUTE_SLACK_TO_NESTBOT=false`.
+   After health verification, set `ROUTE_SLACK_TO_NESTBOT=true` for cutover.
+   Disabling routing takes effect before the NestBot health gate.
 
-The existing ALB's `/integrations/slack/*` rule changes backend/NestBot weights
-from 100/0 to 0/100 at cutover. The zero weight permits target health checks;
-this is not failover. Backend Slack credentials become empty at cutover.
+`NESTBOT_AI_ASSISTANT_ENABLED` defaults to `true` in staging; production AI defaults
+to `false`. Set it to `false` and redeploy both services to disable AI independently
+of routing. Jobs recheck it when they start; running provider requests are not cancelled.
 
-Staging CI builds, scans, signs and verifies NestBot through the existing image
-workflows. Optional staging settings are `NESTBOT_DESIRED_COUNT` (default `1`),
-`NESTBOT_GOOGLE_MODEL_NAME` (default `gemini-3.5-flash-lite`) and
-`ROUTE_SLACK_TO_NESTBOT` (default `false`); the image tag comes from the release.
-Staging prepares Terraform, then plans and applies the release with current Slack
-routing preserved unless routing is being disabled. Disabling routes back to the
-backend during this first apply, before migrations or NestBot health checks. It runs the normal backend migration task after that apply,
-using the task definition updated by Terraform. Services can start before migrations,
-matching the existing backend deployment flow. After migrations succeed, the
-workflow verifies the NestBot web and worker release images and web target health.
-Enabling routing requires successful health checks and a second apply when the
-route differs.
-Both applied plans are included in the workflow summary. The staging foundation
-must already exist; bootstrap remains separate.
+For Bedrock, set `NESTBOT_LLM_PROVIDER=bedrock`, `NESTBOT_BEDROCK_MODEL_NAME` and
+`NESTBOT_BEDROCK_POLICY_ARNS` (a JSON list of approved IAM policy ARNs). The region
+comes from `AWS_REGION`. Google remains the default and configuration fallback;
+embeddings stay Google for either answer provider.
 
-Configure a separate staging Slack app from the full
-[manifest](../../backend/src/apps/slack/MANIFEST.yaml), replacing every URL host
-with `nest.owasp.dev`. HTTPS ALB routing replaces ngrok. Mentions and `/ai` use
-this web service; automatic delayed replies use the dedicated `ai` RQ worker with scheduling
-described below.
-
-Run `make infrastructure-test-unit` for mocked tests and review a real staging
-plan before applying. The existing Algolia `index-data` task does not ingest RAG
-data. Image scans, model/data readiness and full Slack behavior require separate
-verification before rollout.
-
-### Bedrock configuration
-
-Set staging variables `NESTBOT_LLM_PROVIDER=bedrock`, `NESTBOT_BEDROCK_MODEL_NAME`
-(model or inference profile ID) and `NESTBOT_BEDROCK_POLICY_ARNS` (JSON list of
-approved IAM policy ARNs). The AWS region comes from the existing `AWS_REGION`.
-Policies attach to the application task role shared by web and worker; they must
-permit the selected model/profile. No broad Bedrock policy is created here.
-Google remains the default until access is approved. Switch `NESTBOT_LLM_PROVIDER`
-back to `google` for a configuration-based fallback; there is no automatic failover.
-Embeddings stay Google in both cases, so existing data remains compatible.
-Question detection and vision still require OpenAI independently of the answer LLM.
-
-### Staging AI switch and worker
-
-Production Django settings default AI to `false`; local settings remain enabled.
-An explicit staging `false` value disables AI in both web and worker tasks.
-
-`nestbot_ai_assistant_enabled` defaults to `true` for the dedicated staging
-service, independently of `route_slack_to_nestbot`. The deployment workflow reads the GitHub staging
-variable `NESTBOT_AI_ASSISTANT_ENABLED`, defaulting to `true` for staging and
-`false` otherwise, and injects `DJANGO_NESTBOT_AI_ASSISTANT_ENABLED` into both web
-and worker tasks.
-
-NestBot has a dedicated private AI worker service running
-`python manage.py rqworker ai --with-scheduler --worker-ttl 90`. It uses the same
-release image, task roles, settings and credentials as the web service. Its
-health check requires a recent heartbeat from an AI worker on the current host.
-The probe uses `settings.staging` to avoid authenticating with Slack on each check.
-Bootstrap `nestbot_desired_count = 0` stops both services; ordinary services do
-not gain workers. The worker does not attach to the ALB.
-
-The active staging configuration enables AI. To verify a release initially
-without AI, explicitly set the toggle to `false` for both web and worker. Retain
-current Slack routing and verify both release images and service health before
-cutover. Use only approved staging channels for Slack smoke tests. Disabling AI requires
-redeploying both services; jobs recheck the setting when execution starts. This
-cannot cancel an already running provider request. Roll back by disabling AI,
-then restoring prior routing/release if necessary. No deployment or provider
-access is implied by local unit checks.
+Configure a separate staging Slack app using the full
+[manifest](../../backend/src/apps/slack/MANIFEST.yaml), replacing its URL hosts
+with `nest.owasp.dev`. ALB routing does not update the Slack app's configured URLs.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

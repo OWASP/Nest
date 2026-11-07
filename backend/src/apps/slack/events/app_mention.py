@@ -116,6 +116,6 @@ class AppMention(EventBase):
         client.chat_postMessage(
             channel=channel_id,
             blocks=reply_blocks,
-            text=get_text(tuple(reply_blocks)),
+            text=get_text(reply_blocks),
             thread_ts=thread_ts,
         )

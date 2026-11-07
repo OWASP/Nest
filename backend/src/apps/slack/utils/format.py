@@ -9,7 +9,7 @@ import requests
 
 from apps.slack.common.text import format_links_for_slack
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def download_file(url: str, token: str) -> bytes | None:
