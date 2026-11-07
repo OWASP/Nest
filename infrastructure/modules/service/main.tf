@@ -16,7 +16,7 @@ locals {
     {
       essential = true
       healthCheck = {
-        command     = ["CMD-SHELL", "wget --spider http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1"]
+        command     = var.health_check_command != null ? var.health_check_command : ["CMD-SHELL", "wget --spider http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1"]
         interval    = 30
         retries     = 3
         startPeriod = 100
@@ -44,8 +44,69 @@ locals {
         valueFrom = valueFrom
       }]
     },
-    var.command != null ? { command = var.command } : {}
+    var.command != null ? { command = var.command } : {},
+    length(var.environment_variables) > 0 ? {
+      environment = [for name, value in var.environment_variables : { name = name, value = value }]
+    } : {},
+    var.container_stop_timeout != null ? { stopTimeout = var.container_stop_timeout } : {}
   )
+}
+
+# The worker uses the web release and credentials, with its own task lifecycle.
+locals {
+  worker_definition = var.worker == null ? null : merge(local.container_definition, {
+    command      = var.worker.command
+    name         = "${var.service_name}-worker"
+    portMappings = []
+    healthCheck = merge(local.container_definition.healthCheck, {
+      command = var.worker.health_check_command
+    })
+    logConfiguration = merge(local.container_definition.logConfiguration, {
+      options = merge(local.container_definition.logConfiguration.options, {
+        "awslogs-stream-prefix" = "worker"
+      })
+    })
+  })
+}
+
+resource "aws_ecs_task_definition" "worker" {
+  count                    = var.worker == null ? 0 : 1
+  container_definitions    = jsonencode([local.worker_definition])
+  cpu                      = var.container_cpu
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  family                   = "${local.name_prefix}-worker"
+  memory                   = var.container_memory
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  tags                     = var.common_tags
+
+  runtime_platform {
+    cpu_architecture        = "ARM64"
+    operating_system_family = "LINUX"
+  }
+}
+
+resource "aws_ecs_service" "worker" {
+  count                = var.worker == null ? 0 : 1
+  cluster              = aws_ecs_cluster.main.id
+  desired_count        = var.desired_count
+  force_new_deployment = var.force_new_deployment
+  name                 = "${local.name_prefix}-worker-service"
+  task_definition      = aws_ecs_task_definition.worker[0].arn
+  tags                 = var.common_tags
+
+  capacity_provider_strategy {
+    base              = 0
+    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+    weight            = 1
+  }
+
+  network_configuration {
+    assign_public_ip = false
+    security_groups  = [var.security_group_id]
+    subnets          = var.private_subnet_ids
+  }
 }
 
 data "aws_caller_identity" "current" {}
@@ -295,6 +356,7 @@ resource "aws_iam_role_policy_attachment" "task_role_policies" {
 }
 
 resource "aws_iam_policy" "ecs_task_role_kms" {
+  count       = length(var.task_role_kms_actions) > 0 ? 1 : 0
   description = "Allow ECS task role to use KMS key for encryption and decryption"
   name        = "${local.name_prefix}-task-kms-policy"
 
@@ -302,10 +364,7 @@ resource "aws_iam_policy" "ecs_task_role_kms" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey*",
-        ]
+        Action   = var.task_role_kms_actions
         Effect   = "Allow"
         Resource = var.kms_key_arn
       }
@@ -315,6 +374,17 @@ resource "aws_iam_policy" "ecs_task_role_kms" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_role_kms" {
-  policy_arn = aws_iam_policy.ecs_task_role_kms.arn
+  count      = length(var.task_role_kms_actions) > 0 ? 1 : 0
+  policy_arn = aws_iam_policy.ecs_task_role_kms[0].arn
   role       = aws_iam_role.ecs_task_role.name
+}
+
+moved {
+  from = aws_iam_policy.ecs_task_role_kms
+  to   = aws_iam_policy.ecs_task_role_kms[0]
+}
+
+moved {
+  from = aws_iam_role_policy_attachment.ecs_task_role_kms
+  to   = aws_iam_role_policy_attachment.ecs_task_role_kms[0]
 }

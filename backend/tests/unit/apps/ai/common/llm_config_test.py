@@ -94,3 +94,39 @@ class TestLLMConfig:
             temperature=0.1,
         )
         assert result == mock_llm_instance
+
+    @patch.dict(
+        os.environ,
+        {
+            "LLM_PROVIDER": "bedrock",
+            "BEDROCK_MODEL_NAME": "approved-profile",
+            "AWS_DEFAULT_REGION": "eu-west-1",
+        },
+        clear=True,
+    )
+    @patch("apps.ai.common.llm_config.LLM")
+    def test_get_llm_bedrock(self, mock_llm):
+        """Use the explicitly configured model and region without API keys."""
+        assert get_llm() == mock_llm.return_value
+        mock_llm.assert_called_once_with(
+            model="bedrock/approved-profile",
+            region_name="eu-west-1",
+            temperature=0.1,
+            max_tokens=1024,
+            stream=False,
+        )
+
+    @pytest.mark.parametrize("missing", ["BEDROCK_MODEL_NAME", "AWS_DEFAULT_REGION"])
+    @pytest.mark.parametrize("value", ["", "   "])
+    @patch("apps.ai.common.llm_config.LLM")
+    def test_get_llm_bedrock_requires_explicit_configuration(self, mock_llm, missing, value):
+        """Do not silently choose a model or region for Bedrock."""
+        env = {
+            "LLM_PROVIDER": "bedrock",
+            "BEDROCK_MODEL_NAME": "approved-profile",
+            "AWS_DEFAULT_REGION": "eu-west-1",
+            missing: value,
+        }
+        with patch.dict(os.environ, env, clear=True), pytest.raises(ValueError, match="required"):
+            get_llm()
+        mock_llm.assert_not_called()

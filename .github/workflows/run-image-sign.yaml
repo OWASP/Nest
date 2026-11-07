@@ -58,6 +58,8 @@ jobs:
         }}
       FRONTEND_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ inputs.frontend_ecr_repo }}:${{ inputs.release_version
         }}
+      NESTBOT_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-${{ inputs.environment }}-nestbot:${{ inputs.release_version
+        }}
     permissions:
       id-token: write
     runs-on: ubuntu-26.04-arm
@@ -89,6 +91,9 @@ jobs:
         run: |
           bash .github/scripts/cosign-image-by-digest.sh sign "$BACKEND_IMAGE"
           bash .github/scripts/cosign-image-by-digest.sh sign "$FRONTEND_IMAGE"
+      - name: Sign NestBot image
+        if: inputs.environment == 'staging'
+        run: bash .github/scripts/cosign-image-by-digest.sh sign "$NESTBOT_IMAGE"
     timeout-minutes: 5
 
   sign-sbom:
@@ -142,6 +147,13 @@ jobs:
             --bundle "${frontend_sbom}.sigstore.json" \
             "$frontend_sbom"
 
+      - name: Sign and verify NestBot SBOM
+        if: inputs.environment == 'staging'
+        run: |
+          sbom="nestbot-sbom-$RELEASE_VERSION.cdx.json"
+          cosign sign-blob --yes --bundle "${sbom}.sigstore.json" "$sbom"
+          cosign verify-blob --bundle "${sbom}.sigstore.json" "$sbom"
+
       - name: Attest backend SBOM
         id: attest-backend-sbom
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6  # v4.2.2
@@ -156,6 +168,14 @@ jobs:
           sbom-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
           subject-path: frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
 
+      - name: Attest NestBot SBOM
+        if: inputs.environment == 'staging'
+        id: attest-nestbot-sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6  # v4.2.2
+        with:
+          sbom-path: nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+          subject-path: nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+
       - name: Verify SBOM attestations
         env:
           CYCLONEDX_PREDICATE_TYPE: https://cyclonedx.org/bom
@@ -168,12 +188,26 @@ jobs:
             --predicate-type "$CYCLONEDX_PREDICATE_TYPE" \
             --repo "${{ github.repository }}"
 
+      - name: Verify NestBot SBOM attestation
+        if: inputs.environment == 'staging'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh attestation verify "nestbot-sbom-$RELEASE_VERSION.cdx.json" \
+            --predicate-type https://cyclonedx.org/bom --repo "${{ github.repository }}"
+
       - name: Prepare SBOM provenance for release upload
         run: |
           cp "${{ steps.attest-backend-sbom.outputs.bundle-path }}" \
             "backend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl"
           cp "${{ steps.attest-frontend-sbom.outputs.bundle-path }}" \
             "frontend-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl"
+
+      - name: Prepare NestBot SBOM provenance
+        if: inputs.environment == 'staging'
+        env:
+          BUNDLE_PATH: ${{ steps.attest-nestbot-sbom.outputs.bundle-path }}
+        run: cp "$BUNDLE_PATH" "nestbot-sbom-$RELEASE_VERSION.cdx.json.intoto.jsonl"
 
       - name: Upload signed SBOM as artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
@@ -186,6 +220,9 @@ jobs:
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
+            nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
+            nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
     timeout-minutes: 10
 
   upload-release-sbom:

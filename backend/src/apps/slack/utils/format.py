@@ -1,23 +1,13 @@
-"""Formatting and Slack content helpers."""
+"""NestBot file downloads and AI response formatting."""
 
 from __future__ import annotations
 
 import logging
 import re
-from functools import lru_cache
-from html import escape as escape_html
-from typing import TYPE_CHECKING
-from urllib.parse import urljoin
-
-if TYPE_CHECKING:  # pragma: no cover
-    from django.db.models import QuerySet
 
 import requests
-import yaml
-from lxml import html
-from requests.exceptions import RequestException
 
-from apps.common.constants import NL, OWASP_NEWS_URL
+from apps.slack.common.text import format_links_for_slack
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -46,19 +36,6 @@ def download_file(url: str, token: str) -> bytes | None:
     return response.content
 
 
-def escape(content: str) -> str:
-    """Escape HTML content.
-
-    Args:
-        content (str): The HTML content to escape.
-
-    Returns:
-        str: The escaped HTML content.
-
-    """
-    return escape_html(content, quote=False)
-
-
 def format_ai_response_for_slack(text: str) -> str:
     """Format AI response text for Slack by removing code blocks and fixing markdown.
 
@@ -72,254 +49,55 @@ def format_ai_response_for_slack(text: str) -> str:
     if not text:
         return text
 
-    # Strip leading/trailing whitespace
-    text = text.strip()
-
-    # Check if the entire response is wrapped in code blocks
-    # Pattern: starts with ``` and ends with ```
-    if text.startswith("```") and text.endswith("```"):
-        # Extract content from code block wrapper
-        # Remove first ``` and optional language identifier
-        text = re.sub(r"^```[\w]*\n?", "", text, count=1)
-        # Remove trailing ```
-        text = re.sub(r"\n?```$", "", text)
-        text = text.strip()
-
-    # Remove markdown code blocks (```language\ncode\n```) and convert to plain text
-    # This regex matches code blocks with optional language identifier
-    # Pattern: ```optional_lang\ncontent\n```
-    code_block_pattern = re.compile(r"```[\w]*\n(.*?)```", re.DOTALL)
-
-    def replace_code_block(match):
-        # Convert code block content to plain text
-        # This prevents Slack from rendering it as a code block
-        # Preserve Slack channel links that might be inside code blocks
-        return match.group(1).strip()
-
-    text = code_block_pattern.sub(replace_code_block, text)
-
-    # Remove any remaining triple backticks that might have been missed
-    # (handles edge cases where regex didn't match)
-    # Also handle cases where backticks are on separate lines
-    text = re.sub(r"```+", "", text)
-
-    # Remove single backticks that might wrap inline code
-    # But preserve Slack channel/user links (format: <#...|...> or <@...|...>)
-    # Pattern: `text` but not part of Slack link syntax
-    text = re.sub(r"`([^`<]+)`", r"\1", text)
-
-    # Preserve Slack channel links (format: <#channel_id|channel_name>)
-    # These should not be modified by format_links_for_slack
-    # Convert markdown links to Slack format (but preserve existing Slack links)
-    return format_links_for_slack(text)
-
-
-def format_links_for_slack(text: str) -> str:
-    """Convert Markdown links to Slack markdown link format.
-
-    Args:
-        text (str): The input text that may include Markdown links.
-
-    Returns:
-        str: Text with Markdown links converted to Slack markdown links.
-
-    """
-    if not text:
-        return text
-
-    markdown_link_pattern = re.compile(r"\[([^\]]+)\]\((https?://[^\s)]+)\)")
-    return markdown_link_pattern.sub(r"<\2|\1>", text)
-
-
-@lru_cache
-def get_gsoc_projects(year: int) -> list:
-    """Get GSoC projects.
-
-    Args:
-        year (int): The year for which to fetch GSoC projects.
-
-    Returns:
-        list: A list of GSoC projects with their attributes.
-
-    """
-    from apps.owasp.index.search.project import get_projects  # noqa: PLC0415
-
-    return get_projects(
-        attributes=["idx_name", "idx_url"],
-        query=f"gsoc{year}",
-        searchable_attributes=[
-            "idx_custom_tags",
-            "idx_languages",
-            "idx_tags",
-            "idx_topics",
-        ],
-    )["hits"]
-
-
-@lru_cache
-def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str, str]]:
-    """Get news data.
-
-    Args:
-        limit (int, optional): The maximum number of news items to fetch.
-        timeout (float, optional): The request timeout in seconds.
-
-    Returns:
-        list: A list of dictionaries containing news data (author, title, and URL).
-
-    """
-    response = requests.get(OWASP_NEWS_URL, timeout=timeout)
-    tree = html.fromstring(response.content)
-    h2_tags = tree.xpath("//h2")
-
-    items_total = 0
-    items = []
-    for h2 in h2_tags:
-        if anchor := h2.xpath(".//a[@href]"):
-            author_tag = h2.xpath("./following-sibling::p[@class='author']")
-            items.append(
-                {
-                    "author": author_tag[0].text_content().strip() if author_tag else "",
-                    "title": anchor[0].text_content().strip(),
-                    "url": urljoin(OWASP_NEWS_URL, anchor[0].get("href")),
-                }
-            )
-            items_total += 1
-
-        if items_total == limit:
-            break
-
-    return items
-
-
-@lru_cache
-def get_staff_data(timeout: float | None = 30) -> list | None:
-    """Get staff data.
-
-    Args:
-        timeout (float, optional): The request timeout in seconds.
-
-    Returns:
-        list or None: A sorted list of staff data dictionaries, or None if an error occurs.
-
-    """
-    file_path = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
-    try:
-        return sorted(
-            yaml.safe_load(
-                requests.get(
-                    file_path,
-                    timeout=timeout,
-                ).text
-            ),
-            key=lambda p: p["name"],
+    # Remove heading emphasis before adding Slack's outer bold markers.
+    def replace_heading(match: re.Match[str]) -> str:
+        """Apply outer Slack bold without reinterpreting inline code or stray emphasis."""
+        content = "".join(
+            section if index % 2 else re.sub(r"__(.+?)__", r"\1", section).replace("*", "")
+            for index, section in enumerate(re.split(r"(`[^`]+`)", match.group(1).strip()))
         )
-    except (RequestException, yaml.scanner.ScannerError):
-        logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
-        return None
+        return f"*{content}*"
+
+    def format_text_section(content: str) -> str:
+        """Translate prose Markdown while preserving syntax inside literal code spans."""
+        content = re.sub(r"```+", "", content)
+        content = re.sub(
+            r"^#{1,6}[ \t]+([^\s][^\r\n]*)\r?$", replace_heading, content, flags=re.MULTILINE
+        )
+        sections = []
+        for index, section in enumerate(re.split(r"(`[^`]+`)", content)):
+            formatted = section
+            if index % 2:
+                # Keep Slack code delimiters when removing them would activate formatting.
+                literal = section[1:-1]
+                if not re.search(r"[*_~]|<[@#!]|\[[^\]]+\]\(|<(?:https?://|mailto:)", literal):
+                    formatted = literal
+            else:
+                formatted = re.sub(r"\*\*(.+?)\*\*", r"*\1*", section)
+                formatted = re.sub(r"__(.+?)__", r"*\1*", formatted)
+            sections.append(formatted)
+        return format_links_for_slack("".join(sections))
+
+    return "".join(
+        content if fenced else format_text_section(content)
+        for fenced, content in split_fenced_sections(text)
+    ).strip("\r\n")
 
 
-def get_sponsors_data(limit: int = 10) -> QuerySet | None:
-    """Get sponsors data.
-
-    Args:
-        limit (int, optional): The maximum number of sponsors to fetch.
-
-    Returns:
-        QuerySet or None: A queryset of sponsors, or None if an error occurs.
-
-    """
-    from apps.owasp.models.sponsor import Sponsor  # noqa: PLC0415
-
-    try:
-        return Sponsor.objects.all()[:limit]
-    except Exception as e:
-        logger.exception("Failed to fetch sponsors data via database", extra={"error": str(e)})
-        return None
-
-
-@lru_cache
-def get_posts_data(limit: int = 5) -> QuerySet | None:
-    """Get posts data.
-
-    Args:
-        limit (int, optional): The maximum number of posts to fetch.
-
-    Returns:
-        QuerySet or None: A queryset of recent posts, or None if an error occurs.
-
-    """
-    from apps.owasp.models.post import Post  # noqa: PLC0415
-
-    try:
-        return Post.recent_posts()[:limit]
-    except Exception as e:
-        logger.exception("Failed to fetch posts data via database", extra={"error": str(e)})
-        return None
-
-
-def get_text(blocks: tuple) -> str:
-    """Convert blocks to plain text.
-
-    Args:
-        blocks (tuple): A tuple of Slack block elements.
-
-    Returns:
-        str: The plain text representation of the blocks.
-
-    """
-    text = []
-
-    for block in blocks:
-        match block.get("type"):
-            case "section":
-                if "text" in block and block["text"].get("type") == "mrkdwn":
-                    text.append(strip_markdown(block["text"]["text"]))
-                elif "fields" in block:
-                    text.append(
-                        NL.join(
-                            strip_markdown(field["text"])
-                            for field in block["fields"]
-                            if field.get("type") == "mrkdwn"
-                        )
-                    )
-            case "divider":
-                text.append("---")
-            case "context":
-                text.append(
-                    NL.join(
-                        strip_markdown(element["text"])
-                        for element in block["elements"]
-                        if element.get("type") == "mrkdwn"
-                    )
-                )
-            case "actions":
-                text.append(
-                    NL.join(
-                        strip_markdown(element["text"]["text"])
-                        for element in block["elements"]
-                        if element.get("type") == "button"
-                    )
-                )
-            # TODO(arkid15r): consider removing this.
-            case "image":
-                text.append(f"Image: {block.get('image_url', '')}")
-            case "header":
-                if "text" in block and block["text"].get("type") == "plain_text":
-                    text.append(block["text"]["text"])
-
-    return NL.join(text).strip()
-
-
-def strip_markdown(text: str) -> str:
-    """Strip markdown formatting.
-
-    Args:
-        text (str): The text with markdown formatting.
-
-    Returns:
-        str: The text with markdown formatting removed.
-
-    """
-    slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
-    return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")
+def split_fenced_sections(text: str) -> list[tuple[bool, str]]:
+    """Separate literal fenced content from prose without interpreting its contents."""
+    parts: list[tuple[bool, str]] = []
+    section: list[str] = []
+    fence_length = 0
+    for line in text.strip().splitlines(keepends=True):
+        fence = re.fullmatch(r"[ \t]*(`{3,})([^`]*)", line.rstrip("\r\n"))
+        if fence and (
+            not fence_length or (len(fence[1]) >= fence_length and not fence[2].strip())
+        ):
+            parts.append((bool(fence_length), "".join(section)))
+            section = []
+            fence_length = 0 if fence_length else len(fence[1])
+        else:
+            section.append(line)
+    parts.append((bool(fence_length), "".join(section)))
+    return parts

@@ -82,6 +82,12 @@ variable "environment" {
   type        = string
 }
 
+variable "enable_nestbot" {
+  description = "Whether to create NestBot provider parameters."
+  type        = bool
+  default     = false
+}
+
 variable "next_server_csrf_url" {
   description = "The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/)."
   type        = string

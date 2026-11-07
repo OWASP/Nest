@@ -2,6 +2,10 @@ name: Apply infrastructure changes
 description: Run IaC plan and apply steps
 
 inputs:
+  prepare-only:
+    description: Prepare and validate Terraform without planning or applying changes.
+    required: false
+    default: 'false'
   plugin-cache-dir:
     description: Directory to store Terraform plugin cache
     required: false
@@ -65,11 +69,13 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Plan Terraform changes
+      if: inputs.prepare-only != 'true'
       run: terraform plan -out=tfplan
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
     - name: Show plan summary
+      if: inputs.prepare-only != 'true'
       env:
         SUMMARY_TITLE: ${{ inputs.summary-title }}
       run: |
@@ -81,6 +87,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Apply Terraform changes
+      if: inputs.prepare-only != 'true'
       run: terraform apply -auto-approve tfplan
       shell: bash
       working-directory: ${{ inputs.working-directory }}

@@ -167,6 +167,127 @@ run "test_task_definition_network_mode" {
   }
 }
 
+run "test_container_defaults_are_preserved" {
+  command = plan
+
+  assert {
+    condition     = local.container_definition.healthCheck.command == tolist(["CMD-SHELL", "wget --spider http://$(hostname -i):3000/ > /dev/null 2>&1"])
+    error_message = "Existing services must keep the default health command."
+  }
+
+  assert {
+    condition     = !can(local.container_definition.environment) && !can(local.container_definition.stopTimeout)
+    error_message = "Default configuration must not add environment or stopTimeout fields."
+  }
+}
+
+run "test_nestbot_container_configuration" {
+  command = plan
+
+  variables {
+    container_port         = 8000
+    container_stop_timeout = 60
+    environment_variables  = { LLM_PROVIDER = "google" }
+    health_check_command   = ["CMD-SHELL", "wget -q -O /dev/null http://$(hostname -i):8000/status/"]
+    service_name           = "nestbot"
+    task_role_kms_actions  = []
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.command == var.health_check_command
+    error_message = "NestBot must use the supplied GET health command."
+  }
+
+  assert {
+    condition     = local.container_definition.environment == [{ name = "LLM_PROVIDER", value = "google" }] && local.container_definition.stopTimeout == 60
+    error_message = "NestBot must receive its environment and graceful stop timeout."
+  }
+
+  assert {
+    condition     = local.container_definition.secrets == [{ name = "NEXT_PUBLIC_API_URL", valueFrom = var.parameters_arns["NEXT_PUBLIC_API_URL"] }]
+    error_message = "Adding plain configuration must preserve secret injection."
+  }
+
+  assert {
+    condition     = length(aws_iam_policy.ecs_task_role_kms) == 0 && length(aws_iam_role_policy_attachment.ecs_task_role_kms) == 0
+    error_message = "NestBot must not grant its application task role access to the shared KMS key."
+  }
+}
+
+run "test_task_role_kms_defaults_to_decrypt" {
+  command = plan
+
+  assert {
+    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt"] && jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Resource == var.kms_key_arn
+    error_message = "Application task roles must default to decrypt-only access on the configured key."
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.ecs_task_role_kms[0].role == aws_iam_role.ecs_task_role.name
+    error_message = "Existing services must retain their application task role KMS attachment."
+  }
+}
+
+run "test_reject_duplicate_environment_names" {
+  command = plan
+
+  variables {
+    environment_variables = { NEXT_PUBLIC_API_URL = "duplicate" }
+  }
+
+  expect_failures = [var.environment_variables]
+}
+
+run "test_reject_empty_health_command" {
+  command = plan
+
+  variables {
+    health_check_command = []
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_empty_health_command_operand" {
+  command = plan
+
+  variables {
+    health_check_command = ["CMD-SHELL", ""]
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_blank_health_command_operand" {
+  command = plan
+
+  variables {
+    health_check_command = ["CMD-SHELL", " \t\n"]
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_null_health_command_operand" {
+  command = plan
+
+  variables {
+    health_check_command = ["CMD-SHELL", null]
+  }
+
+  expect_failures = [var.health_check_command]
+}
+
+run "test_reject_invalid_stop_timeout" {
+  command = plan
+
+  variables {
+    container_stop_timeout = 121
+  }
+
+  expect_failures = [var.container_stop_timeout]
+}
+
 run "test_task_definition_requires_fargate" {
   command = plan
 
@@ -368,4 +489,117 @@ run "test_service_uses_private_subnets" {
     condition     = one(aws_ecs_service.main.network_configuration).subnets == toset(var.private_subnet_ids)
     error_message = "ECS service must be deployed into the configured private subnets."
   }
+}
+
+run "test_queue_worker_uses_same_release_and_settings" {
+  command = plan
+
+  override_resource {
+    target          = aws_ecr_repository.main
+    override_during = plan
+    values = {
+      repository_url = "example.invalid/nest-test-service"
+    }
+  }
+
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler"]
+      health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.nestbot_healthcheck"]
+    }
+    environment_variables = { DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = "false" }
+  }
+
+  assert {
+    condition     = local.worker_definition.image == local.container_definition.image && local.worker_definition.environment == local.container_definition.environment && local.worker_definition.secrets == local.container_definition.secrets
+    error_message = "Worker must use the web release image, environment and credentials."
+  }
+
+  assert {
+    condition     = local.worker_definition.command == var.worker.command && local.worker_definition.healthCheck.command == var.worker.health_check_command && length(local.worker_definition.portMappings) == 0
+    error_message = "Worker must run the queue command and its own health check without a web port."
+  }
+
+  assert {
+    condition     = length(aws_ecs_service.worker) == 1 && aws_ecs_service.worker[0].desired_count == var.desired_count && length(aws_ecs_service.worker[0].load_balancer) == 0
+    error_message = "Worker needs its own private service without an ALB."
+  }
+}
+
+run "test_existing_services_do_not_gain_workers" {
+  command = plan
+
+  assert {
+    condition     = length(aws_ecs_service.worker) == 0 && length(aws_ecs_task_definition.worker) == 0
+    error_message = "Existing services must remain unchanged without worker configuration."
+  }
+}
+
+
+run "test_task_role_kms_write_permissions_require_opt_in" {
+  command = plan
+
+  variables {
+    task_role_kms_actions = ["kms:Decrypt", "kms:GenerateDataKey*"]
+  }
+
+  assert {
+    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt", "kms:GenerateDataKey*"]
+    error_message = "Workloads that write encrypted S3 objects must explicitly request data-key generation."
+  }
+}
+
+run "test_reject_empty_worker_health_command" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = []
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_blank_worker_health_command" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["CMD-SHELL", ""]
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_whitespace_worker_health_command" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["CMD-SHELL", " \t\n"]
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_null_worker_health_operand" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["CMD-SHELL", null]
+    }
+  }
+  expect_failures = [var.worker]
+}
+
+run "test_reject_invalid_worker_health_prefix" {
+  command = plan
+  variables {
+    worker = {
+      command              = ["python", "manage.py", "rqworker", "ai"]
+      health_check_command = ["INVALID", "probe"]
+    }
+  }
+  expect_failures = [var.worker]
 }

@@ -2,8 +2,49 @@
 
 from unittest.mock import MagicMock, patch
 
-from apps.ai.flows.assistant import normalize_channel_id, process_query
+import pytest
+
+from apps.ai.flows.assistant import execute_task, normalize_channel_id, process_query
 from apps.slack.constants import OWASP_COMMUNITY_CHANNEL_ID
+
+
+@pytest.fixture(autouse=True)
+def mock_semantic_cache():
+    """Keep flow unit tests independent of embedding providers and the database."""
+    with (
+        patch("apps.ai.flows.assistant.get_cached_response", return_value=None),
+        patch("apps.ai.flows.assistant.store_cached_response", return_value=None),
+    ):
+        yield
+
+
+@pytest.mark.parametrize("has_tools", [False, True])
+@patch("apps.ai.flows.assistant.Task")
+@patch("apps.ai.flows.assistant.Crew")
+def test_execute_task_requires_tools_only_when_available(mock_crew, mock_task, has_tools):
+    agent = MagicMock(tools=[MagicMock()] if has_tools else [])
+    mock_crew.return_value.kickoff.return_value = "Welcome to OWASP!"
+
+    assert execute_task(agent, "Hello") == "Welcome to OWASP!"
+
+    task_kwargs = mock_task.call_args.kwargs
+    assert ("You MUST use the provided tools" in task_kwargs["description"]) is has_tools
+    assert ("ONLY on tool results" in task_kwargs["expected_output"]) is has_tools
+
+
+@patch("apps.ai.flows.assistant.Task")
+@patch("apps.ai.flows.assistant.Crew")
+def test_explicit_task_keeps_missing_information_instruction(mock_crew, mock_task):
+    """Preserve missing-information guidance for explicit collaborative tasks."""
+    agent = MagicMock(tools=[])
+    mock_crew.return_value.kickoff.return_value = "Combined answer"
+    description = "Synthesize the supplied expert results."
+
+    assert execute_task(agent, task_description=description) == "Combined answer"
+
+    task_kwargs = mock_task.call_args.kwargs
+    assert task_kwargs["description"] == description
+    assert "explicitly state what information is missing" in task_kwargs["expected_output"]
 
 
 class TestProcessQueryImageEnrichment:
@@ -281,12 +322,11 @@ class TestCache:
             response="collaborative response",
         )
 
-    @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.get_cached_response")
     @patch("apps.ai.flows.assistant.create_channel_agent")
     @patch("apps.ai.flows.assistant.execute_task")
     def test_cache_skipped_for_community_channel(
-        self, mock_execute_task, mock_create_channel, mock_get_cached_response, mock_logger
+        self, mock_execute_task, mock_create_channel, mock_get_cached_response, caplog
     ):
         """Cache lookup should be skipped for owasp-community channel queries."""
         mock_create_channel.return_value = MagicMock()
@@ -299,8 +339,7 @@ class TestCache:
 
         assert result == "channel response 5"
         mock_get_cached_response.assert_not_called()
-        message, *arguments = mock_logger.info.call_args_list[0].args
-        assert "has_contribution_keywords: False" in message % tuple(arguments)
+        assert "has_contribution_keywords: False" in caplog.text
 
     @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.store_cached_response")

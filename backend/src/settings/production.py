@@ -49,6 +49,7 @@ class Production(Base):
     GITHUB_APP_INSTALLATION_ID = values.SecretValue()
 
     IS_PRODUCTION_ENVIRONMENT = True
+    NESTBOT_AI_ASSISTANT_ENABLED = values.BooleanValue(default=False)
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True

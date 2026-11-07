@@ -1,6 +1,6 @@
 """Tool for querying project creation dates and age."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from crewai.tools import tool
 from django.utils import timezone
@@ -34,7 +34,7 @@ def format_project_age_results(hits: list, project_name: str | None = None) -> s
             return f"*{name}*\n\nCreation date is not available for this project."
 
         # Convert timestamp to datetime
-        created_at = datetime.fromtimestamp(created_at_timestamp, tz=timezone.utc)
+        created_at = datetime.fromtimestamp(created_at_timestamp, tz=UTC)
 
         # Format date
         date_str = created_at.strftime("%B %d, %Y")
@@ -64,7 +64,7 @@ def format_project_age_results(hits: list, project_name: str | None = None) -> s
 
         formatted += f"• *{name}*"
         if created_at_timestamp:
-            created_at = datetime.fromtimestamp(created_at_timestamp, tz=timezone.utc)
+            created_at = datetime.fromtimestamp(created_at_timestamp, tz=UTC)
             date_str = created_at.strftime("%B %d, %Y")
             formatted += f"\n  Created: {date_str}"
         else:

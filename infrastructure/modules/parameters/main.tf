@@ -147,6 +147,19 @@ resource "aws_ssm_parameter" "django_release_version" {
   value       = var.django_release_version
 }
 
+resource "aws_ssm_parameter" "django_google_api_key" {
+  count       = var.enable_nestbot ? 1 : 0
+  description = "Google API key for NestBot."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_GOOGLE_API_KEY"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "django_open_ai_secret_key" {
   description = "OpenAI Secret Key."
   name        = "/${var.project_name}/${var.environment}/DJANGO_OPEN_AI_SECRET_KEY"
