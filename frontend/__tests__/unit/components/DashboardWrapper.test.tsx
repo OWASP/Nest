@@ -72,7 +72,7 @@ describe('<DashboardWrapper />', () => {
     expect(mockNotFound).not.toHaveBeenCalled()
   })
 
-  it('calls notFound when user is not OWASP staff', () => {
+  it('renders Access Denied when user is not OWASP staff', () => {
     mockUseDjangoSession.mockReturnValue({
       isSyncing: false,
       session: {
@@ -85,14 +85,16 @@ describe('<DashboardWrapper />', () => {
       status: 'authenticated',
     })
 
-    expect(() => {
-      render(
-        <DashboardWrapper>
-          <div>Dashboard Content</div>
-        </DashboardWrapper>
-      )
-    }).toThrow('notFound')
-    expect(mockNotFound).toHaveBeenCalled()
+    render(
+      <DashboardWrapper>
+        <div>Dashboard Content</div>
+      </DashboardWrapper>
+    )
+
+    expect(screen.getByRole('heading', { name: 'Access Denied' })).toBeInTheDocument()
+    expect(screen.getByText('You do not have permission to access this page.')).toBeInTheDocument()
+    expect(screen.queryByText('Dashboard Content')).not.toBeInTheDocument()
+    expect(mockNotFound).not.toHaveBeenCalled()
   })
 
   it('calls notFound when session is undefined', () => {
@@ -203,15 +205,14 @@ describe('<DashboardWrapper />', () => {
       status: 'authenticated',
     })
 
-    expect(() => {
-      rerender(
-        <DashboardWrapper>
-          <div>Dashboard Content</div>
-        </DashboardWrapper>
-      )
-    }).toThrow('notFound')
+    rerender(
+      <DashboardWrapper>
+        <div>Dashboard Content</div>
+      </DashboardWrapper>
+    )
 
-    expect(mockNotFound).toHaveBeenCalled()
+    expect(screen.getByRole('heading', { name: 'Access Denied' })).toBeInTheDocument()
+    expect(mockNotFound).not.toHaveBeenCalled()
   })
 
   it('renders children without extra wrapper', () => {
