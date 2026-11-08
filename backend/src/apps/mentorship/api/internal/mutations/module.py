@@ -505,9 +505,9 @@ class ModuleMutation:
 
         modules_query = Module.objects.filter(program=program, key__in=input_data.module_keys)
 
-            if  (
+            if (
                         modules_query.count() != len(input_data.module_keys)
-                        or len(input_data.module_keys) !=Module.objects.filter(program=program).count()
+                        or len(input_data.module_keys) != Module.objects.filter(program=program).count()
             ):
                         msg = "Provided module keys do not match the program's modules."
                         raise ValidationError(msg)
