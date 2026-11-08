@@ -1579,6 +1579,50 @@ class TestModuleMutationReorderModules:
         ):
             mutation.reorder_modules(info, input_data)
 
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+        @patch("apps.mentorship.api.internal.mutations.module.Program")
+        def test_reorder_modules_partial_keys(self, mock_program, mock_module):
+                    """Test ValidationError when only a subset of the program's modules is provided."""
+                    user = MagicMock()
+                    info = self._make_info(user)
+                    input_data = self._make_input_data(module_keys=["mod-b", "mod-a"])
+                    mock_prog = MagicMock()
+                    mock_program.objects.get.return_value = mock_prog
+                    mock_prog.admins.filter.return_value.exists.return_value = True
+                    filtered_qs = MagicMock()
+                    filtered_qs.count.return_value = 2
+                    total_qs = MagicMock()
+                    total_qs.count.return_value = 3
+                    mock_module.objects.filter.side_effect = [filtered_qs, total_qs]
+                    mutation = ModuleMutation()
+                    with pytest.raises(
+                                    ValidationError, match=r"Provided module keys do not match the program's modules."
+                    ):
+                                    mutation.reorder_modules(info, input_data)
+                                mock_module.objects.bulk_update.assert_not_called()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+        @patch("apps.mentorship.api.internal.mutations.module.Program")
+        def test_reorder_modules_empty_keys(self, mock_program, mock_module):
+                    """Test ValidationError when no module keys are provided."""
+                    user = MagicMock()
+                    info = self._make_info(user)
+                    input_data = self._make_input_data(module_keys=[])
+                    mock_prog = MagicMock()
+                    mock_program.objects.get.return_value = mock_prog
+                    mock_prog.admins.filter.return_value.exists.return_value = True
+                    filtered_qs = MagicMock()
+                    filtered_qs.count.return_value = 0
+                    total_qs = MagicMock()
+                    total_qs.count.return_value = 3
+                    mock_module.objects.filter.side_effect = [filtered_qs, total_qs]
+                    mutation = ModuleMutation()
+                    with pytest.raises(
+                                    ValidationError, match=r"Provided module keys do not match the program's modules."
+                    ):
+                                    mutation.reorder_modules(info, input_data)
+                                mock_module.objects.bulk_update.assert_not_called()
+
 
 class TestModuleMutationMenteeDeadline:
     """Tests for mentee-specific deadline permission in set_task_deadline."""
