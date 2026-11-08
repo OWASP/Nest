@@ -118,7 +118,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </div>
         <div className="ml-auto flex items-center justify-normal gap-1 pl-2 md:gap-4 md:pl-4">
-          <div className="max-md:order-2 max-md:flex max-md:h-11 max-md:w-11 max-md:items-center max-md:justify-center md:contents">
+          <div className="max-lg:order-2 max-md:flex max-md:h-11 max-md:w-11 max-md:items-center max-md:justify-center md:contents">
             <GlobalSearch />
           </div>
           <div className="hidden md:flex">
@@ -146,11 +146,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
 
-          <div className="max-md:order-1 max-md:flex max-md:h-11 max-md:w-11 max-md:items-center max-md:justify-center md:contents">
+          <div className="max-lg:order-1 max-md:flex max-md:h-11 max-md:w-11 max-md:items-center max-md:justify-center md:contents">
             <ModeToggle />
           </div>
 
-          <div className="max-md:order-3 lg:hidden">
+          <div className="max-lg:order-3 lg:hidden">
             <Button
               onPress={toggleMobileMenu}
               className="-ml-1 flex h-11 w-11 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
