@@ -4,7 +4,9 @@ from unittest.mock import MagicMock
 
 import pytest
 from ninja.responses import Response
+from ninja.testing import TestClient
 
+from apps.api.rest.v0 import api
 from apps.api.rest.v0.release import (
     ReleaseDetail,
     ReleaseFilter,
@@ -171,3 +173,51 @@ class TestGetRelease:
 
         assert isinstance(result, Response)
         assert result.status_code == HTTPStatus.NOT_FOUND
+
+    @pytest.mark.parametrize(
+        ("tag_input", "expected_tag"),
+        [
+            ("gopls/v0.24.0", "gopls/v0.24.0"),
+            ("gopls%2Fv0.24.0", "gopls/v0.24.0"),
+            ("helm/chart/v1.2.3", "helm/chart/v1.2.3"),
+            ("helm%2Fchart%2Fv1.2.3", "helm/chart/v1.2.3"),
+        ],
+    )
+    def test_get_release_with_slash_in_tag_name(self, mocker, tag_input, expected_tag):
+        """Test getting a release whose tag contains slashes or URL-encoded slashes."""
+        mock_release = MagicMock()
+        mock_qs = MagicMock()
+        mock_qs.get.return_value = mock_release
+        mocker.patch(
+            "apps.api.rest.v0.release.ReleaseModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        result = get_release(request, "golang", "tools", tag_input)
+
+        assert result == mock_release
+        mock_qs.get.assert_called_once_with(
+            repository__organization__login__iexact="golang",
+            repository__name__iexact="tools",
+            tag_name=expected_tag,
+        )
+
+
+class TestReleaseRouteResolution:
+    """Tests for release route URL resolution."""
+
+    @pytest.mark.parametrize(
+        "url_path",
+        [
+            "/releases/OWASP/Nest/v1.0.0",
+            "/releases/golang/tools/gopls/v0.24.0",
+            "/releases/golang/tools/gopls%2Fv0.24.0",
+            "/releases/helm/charts/stable/redis/v1.0.0",
+        ],
+    )
+    def test_release_detail_route_resolves_tags_with_slashes(self, url_path):
+        """Test that release detail route correctly resolves paths with tags containing slashes."""
+        client = TestClient(api)
+        response = client.get(url_path)
+        assert response.status_code != HTTPStatus.NOT_FOUND

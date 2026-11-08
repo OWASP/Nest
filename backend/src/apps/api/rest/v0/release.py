@@ -3,6 +3,7 @@
 from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
+from urllib.parse import unquote
 
 from django.http import HttpRequest
 from ninja import Field, FilterSchema, Path, Query, Schema
@@ -100,7 +101,7 @@ def list_release(
 
 
 @router.get(
-    "/{str:organization_id}/{str:repository_id}/{str:release_id}",
+    "/{str:organization_id}/{str:repository_id}/{path:release_id}",
     description="Retrieve a specific GitHub release by organization, repository, and tag name.",
     operation_id="get_release",
     response={
@@ -122,7 +123,7 @@ def get_release(
         return ReleaseModel.objects.get(
             repository__organization__login__iexact=organization_id,
             repository__name__iexact=repository_id,
-            tag_name=release_id,
+            tag_name=unquote(release_id),
         )
     except ReleaseModel.DoesNotExist:
         return Response({"message": "Release not found"}, status=HTTPStatus.NOT_FOUND)
