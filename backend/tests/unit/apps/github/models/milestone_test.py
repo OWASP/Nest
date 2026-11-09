@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 import pytest
@@ -43,6 +44,49 @@ class TestMilestoneModel:
         assert milestone.url == "https://example.com/milestone/1"
         assert milestone.author == author
         assert milestone.repository == repository
+
+    @pytest.mark.parametrize("due_on", [None, datetime(2027, 1, 1, tzinfo=UTC)])
+    def test_from_github_updates_due_date(self, gh_milestone_mock, due_on):
+        """Sync a removed or replaced due date without clearing other fields."""
+        milestone = Milestone(
+            due_on=datetime(2026, 12, 1, tzinfo=UTC),
+            title="Keep this title",
+            body="Keep this body",
+        )
+        gh_milestone_mock.due_on = due_on
+        gh_milestone_mock.title = None
+        gh_milestone_mock.description = None
+
+        milestone.from_github(gh_milestone_mock)
+
+        assert milestone.due_on == due_on
+        assert milestone.title == "Keep this title"
+        assert milestone.body == "Keep this body"
+
+    def test_from_github_repeated_null_due_date(self, gh_milestone_mock):
+        """A milestone without a due date stays undated across syncs."""
+        milestone = Milestone(due_on=None)
+        gh_milestone_mock.due_on = None
+
+        milestone.from_github(gh_milestone_mock)
+        milestone.from_github(gh_milestone_mock)
+
+        assert milestone.due_on is None
+
+    @patch("apps.github.models.milestone.Milestone.objects.get")
+    @patch("apps.github.models.milestone.Milestone.save")
+    def test_update_data_clears_due_date(self, mock_save, mock_get, gh_milestone_mock):
+        """Update the existing milestone and pass the cleared date to save."""
+        milestone = Milestone(due_on=datetime(2026, 12, 1, tzinfo=UTC))
+        mock_get.return_value = milestone
+        gh_milestone_mock.due_on = None
+
+        result = Milestone.update_data(gh_milestone_mock)
+
+        assert result is milestone
+        assert result.due_on is None
+        mock_get.assert_called_once_with(node_id="milestone_node_id_1")
+        mock_save.assert_called_once_with()
 
     @patch("apps.github.models.milestone.BulkSaveModel.bulk_save")
     def test_bulk_save(self, mock_bulk_save):
