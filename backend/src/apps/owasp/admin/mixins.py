@@ -9,7 +9,6 @@ from django.utils.safestring import mark_safe
 from apps.owasp.admin.widgets import ChannelIdWidget
 from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.entity_member import EntityMember
-from apps.slack.models.conversation import Conversation
 
 
 class BaseOwaspAdminMixin:
@@ -111,6 +110,9 @@ class EntityChannelInline(GenericTabularInline):
         if db_field.name == "channel_id":
             kwargs["widget"] = ChannelIdWidget()
         elif db_field.name == "channel_type":
+            # Imported lazily to avoid loading Slack models during Django
+            # admin autodiscovery, before the app registry is ready (see #4300).
+            from apps.slack.models.conversation import Conversation  # noqa: PLC0415
             # Limit channel_type to only Conversation (Slack channels)
             conversation_ct = ContentType.objects.get_for_model(Conversation)
             kwargs["queryset"] = ContentType.objects.filter(id=conversation_ct.id)
