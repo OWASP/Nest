@@ -65,6 +65,7 @@ class TestContributeEventHandler:
         mock_slack_client,
         monkeypatch,
     ):
+        """Check contribute messages for each event setting and restore the setting."""
         monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", events_enabled)
         mock_active_projects_count.return_value = project_count
         mock_open_issues_count.return_value = issue_count
