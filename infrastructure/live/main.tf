@@ -86,7 +86,6 @@ module "backend" {
   security_group_id               = module.security.backend_sg_id
   service_name                    = "backend"
   target_group_arn                = module.alb.backend_target_group_arn
-  task_role_kms_actions           = ["kms:Decrypt", "kms:GenerateDataKey*"]
   task_role_policy_arns           = [module.storage.static_read_write_policy_arn]
   use_fargate_spot                = var.backend_use_fargate_spot
 }
@@ -213,26 +212,48 @@ module "nestbot" {
   enable_auto_scaling    = false
   environment            = var.environment
   environment_variables  = local.nestbot_environment_variables
-  worker = {
-    command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler", "--worker-ttl", "90"]
-    health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.nestbot_healthcheck"]
+  health_check_command   = ["CMD", "python", "-c", "from http.client import HTTPConnection; c = HTTPConnection('127.0.0.1', 8000, timeout=5); c.request('GET', '/status/'); r = c.getresponse(); c.close(); raise SystemExit(0 if r.status == 200 else 1)"]
+  health_check_path      = "/status/"
+  image_tag              = var.nestbot_image_tag
+  kms_key_arn            = module.kms.key_arn
+  parameters_arns = {
+    for name, arn in merge(module.parameters.django_ssm_parameter_arns, module.parameters.nestbot_ssm_parameter_arns) : name => arn
+    if !contains(keys(local.nestbot_environment_variables), name)
   }
-  health_check_command = ["CMD", "python", "-c", "from http.client import HTTPConnection; c = HTTPConnection('127.0.0.1', 8000, timeout=5); c.request('GET', '/status/'); r = c.getresponse(); c.close(); raise SystemExit(0 if r.status == 200 else 1)"]
-  health_check_path    = "/status/"
-  image_tag            = var.nestbot_image_tag
-  kms_key_arn          = module.kms.key_arn
-  parameters_arns = merge(
-    { for name, arn in module.parameters.django_ssm_parameter_arns : name => arn if !contains(["DJANGO_CONFIGURATION", "DJANGO_SETTINGS_MODULE"], name) },
-    module.parameters.nestbot_ssm_parameter_arns,
-  )
   private_subnet_ids    = module.networking.private_subnet_ids
   project_name          = var.project_name
   security_group_id     = module.security.backend_sg_id
   service_name          = "nestbot"
   target_group_arn      = module.alb.nestbot_target_group_arn
   task_role_kms_actions = []
-  task_role_policy_arns = var.nestbot_llm_provider == "bedrock" ? var.nestbot_bedrock_policy_arns : []
+  task_role_policy_arns = aws_iam_policy.nestbot_bedrock[*].arn
   use_fargate_spot      = false
+}
+
+module "nestbot_worker" {
+  source = "../modules/service-worker"
+  count  = local.nestbot_enabled ? 1 : 0
+
+  task_context         = module.nestbot[0].task_context
+  name_prefix          = "${var.project_name}-${var.environment}-nestbot-worker"
+  container_name       = "nestbot-worker"
+  command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler", "--worker-ttl", "90"]
+  health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.nestbot_healthcheck"]
+  desired_count        = var.nestbot_desired_count
+  private_subnet_ids   = module.networking.private_subnet_ids
+  security_group_id    = module.security.backend_sg_id
+  common_tags          = local.common_tags
+  use_fargate_spot     = false
+}
+
+moved {
+  from = module.nestbot[0].aws_ecs_task_definition.worker[0]
+  to   = module.nestbot_worker[0].aws_ecs_task_definition.main
+}
+
+moved {
+  from = module.nestbot[0].aws_ecs_service.worker[0]
+  to   = module.nestbot_worker[0].aws_ecs_service.main
 }
 
 module "nestbot_build_cache" {

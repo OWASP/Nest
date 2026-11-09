@@ -52,7 +52,9 @@ to `false`. Set it to `false` and redeploy both services to disable AI independe
 of routing. Jobs recheck it when they start; running provider requests are not cancelled.
 
 For Bedrock, set `NESTBOT_LLM_PROVIDER=bedrock`, `NESTBOT_BEDROCK_MODEL_NAME` and
-`NESTBOT_BEDROCK_POLICY_ARNS` (a JSON list of approved IAM policy ARNs). The region
+`NESTBOT_BEDROCK_TARGET_TYPE` (`foundation-model` or `inference-profile`). Terraform
+creates and attaches the invocation policy for that target; apply the bootstrap
+lookup permissions before selecting Bedrock. The region
 is passed to the container as `AWS_DEFAULT_REGION` from Terraform `aws_region`
 (the deployment workflow uses `AWS_REGION`). Google remains the default and configuration fallback;
 embeddings stay Google for either answer provider.
@@ -72,7 +74,9 @@ with `nest.owasp.dev`. ALB routing does not update the Slack app's configured UR
 
 ## Providers
 
-No providers.
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.67.0 |
 
 ## Modules
 
@@ -88,6 +92,7 @@ No providers.
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
 | <a name="module_nestbot"></a> [nestbot](#module\_nestbot) | ../modules/service | n/a |
 | <a name="module_nestbot_build_cache"></a> [nestbot\_build\_cache](#module\_nestbot\_build\_cache) | ../modules/ecr-cache | n/a |
+| <a name="module_nestbot_worker"></a> [nestbot\_worker](#module\_nestbot\_worker) | ../modules/service-worker | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |
 | <a name="module_security"></a> [security](#module\_security) | ../modules/security | n/a |
@@ -96,7 +101,11 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+| ---- | ---- |
+| [aws_iam_policy.nestbot_bedrock](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_bedrock_foundation_model.nestbot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_foundation_model) | data source |
+| [aws_bedrock_inference_profile.nestbot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_inference_profile) | data source |
 
 ## Inputs
 
@@ -148,7 +157,7 @@ No resources.
 | <a name="input_frontend_use_fargate_spot"></a> [frontend\_use\_fargate\_spot](#input\_frontend\_use\_fargate\_spot) | Whether to use Fargate Spot for frontend tasks. | `bool` | `true` | no |
 | <a name="input_nestbot_ai_assistant_enabled"></a> [nestbot\_ai\_assistant\_enabled](#input\_nestbot\_ai\_assistant\_enabled) | Enable AI in the dedicated staging NestBot service independently of Slack routing. | `bool` | `true` | no |
 | <a name="input_nestbot_bedrock_model_name"></a> [nestbot\_bedrock\_model\_name](#input\_nestbot\_bedrock\_model\_name) | Approved Bedrock model or inference profile ID; required when Bedrock is selected. | `string` | `""` | no |
-| <a name="input_nestbot_bedrock_policy_arns"></a> [nestbot\_bedrock\_policy\_arns](#input\_nestbot\_bedrock\_policy\_arns) | Approved IAM policy ARNs granting the NestBot task role access to the selected Bedrock model. | `list(string)` | `[]` | no |
+| <a name="input_nestbot_bedrock_target_type"></a> [nestbot\_bedrock\_target\_type](#input\_nestbot\_bedrock\_target\_type) | Type of the approved Bedrock target: foundation-model or inference-profile. | `string` | `"foundation-model"` | no |
 | <a name="input_nestbot_desired_count"></a> [nestbot\_desired\_count](#input\_nestbot\_desired\_count) | Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image. | `number` | `1` | no |
 | <a name="input_nestbot_google_model_name"></a> [nestbot\_google\_model\_name](#input\_nestbot\_google\_model\_name) | Google model used by NestBot. Verify provider compatibility before deployment. | `string` | `"gemini-3.5-flash-lite"` | no |
 | <a name="input_nestbot_image_tag"></a> [nestbot\_image\_tag](#input\_nestbot\_image\_tag) | Immutable NestBot image tag, required in staging. | `string` | `""` | no |

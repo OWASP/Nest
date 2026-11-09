@@ -148,7 +148,7 @@ jobs:
       TF_VAR_nestbot_google_model_name: ${{ inputs.environment == 'staging' && vars.NESTBOT_GOOGLE_MODEL_NAME || 'gemini-3.5-flash-lite' }}
       TF_VAR_nestbot_llm_provider: ${{ inputs.environment == 'staging' && vars.NESTBOT_LLM_PROVIDER || 'google' }}
       TF_VAR_nestbot_bedrock_model_name: ${{ inputs.environment == 'staging' && vars.NESTBOT_BEDROCK_MODEL_NAME || '' }}
-      TF_VAR_nestbot_bedrock_policy_arns: ${{ inputs.environment == 'staging' && vars.NESTBOT_BEDROCK_POLICY_ARNS || '[]' }}
+      TF_VAR_nestbot_bedrock_target_type: ${{ inputs.environment == 'staging' && vars.NESTBOT_BEDROCK_TARGET_TYPE || 'foundation-model' }}
       TF_VAR_nestbot_image_tag: ${{ inputs.release_version }}
       TF_VAR_route_slack_to_nestbot: ${{ inputs.environment == 'staging' && vars.ROUTE_SLACK_TO_NESTBOT || 'false' }}
       TF_IN_AUTOMATION: true

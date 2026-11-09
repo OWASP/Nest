@@ -220,9 +220,9 @@ jobs:
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
-            nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json
-            nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json.intoto.jsonl
-            nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json.sigstore.json
+            ${{ inputs.environment == 'staging' && format('nestbot-sbom-{0}.cdx.json', env.RELEASE_VERSION) || '' }}
+            ${{ inputs.environment == 'staging' && format('nestbot-sbom-{0}.cdx.json.intoto.jsonl', env.RELEASE_VERSION) || '' }}
+            ${{ inputs.environment == 'staging' && format('nestbot-sbom-{0}.cdx.json.sigstore.json', env.RELEASE_VERSION) || '' }}
     timeout-minutes: 10
 
   upload-release-sbom:

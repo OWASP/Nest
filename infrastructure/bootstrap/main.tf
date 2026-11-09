@@ -592,6 +592,23 @@ data "aws_iam_policy_document" "part_two" {
 }
 
 data "aws_iam_policy_document" "part_three" {
+  dynamic "statement" {
+    for_each = var.environment == "staging" ? [1] : []
+    content {
+      sid    = "NestBotBedrockLookup"
+      effect = "Allow"
+      actions = [
+        "bedrock:GetFoundationModel",
+        "bedrock:GetInferenceProfile",
+      ]
+      resources = [
+        "arn:aws:bedrock:${var.aws_region}::foundation-model/*",
+        "arn:aws:bedrock:${var.aws_region}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+        "arn:aws:bedrock:${var.aws_region}:${data.aws_caller_identity.current.account_id}:application-inference-profile/*",
+      ]
+    }
+  }
+
   statement {
     sid    = "SecretsManagerManagement"
     effect = "Allow"

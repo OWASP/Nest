@@ -214,12 +214,12 @@ run "test_nestbot_container_configuration" {
   }
 }
 
-run "test_task_role_kms_defaults_to_decrypt" {
+run "test_task_role_kms_preserves_default_actions" {
   command = plan
 
   assert {
-    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt"] && jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Resource == var.kms_key_arn
-    error_message = "Application task roles must default to decrypt-only access on the configured key."
+    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt", "kms:GenerateDataKey*"] && jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Resource == var.kms_key_arn
+    error_message = "Application task roles must retain existing KMS actions on the configured key."
   }
 
   assert {
@@ -491,115 +491,13 @@ run "test_service_uses_private_subnets" {
   }
 }
 
-run "test_queue_worker_uses_same_release_and_settings" {
+run "test_task_role_kms_can_be_disabled" {
   command = plan
-
-  override_resource {
-    target          = aws_ecr_repository.main
-    override_during = plan
-    values = {
-      repository_url = "example.invalid/nest-test-service"
-    }
-  }
-
   variables {
-    worker = {
-      command              = ["python", "manage.py", "rqworker", "ai", "--with-scheduler"]
-      health_check_command = ["CMD", "python", "manage.py", "slack_ai_worker_healthcheck", "--settings=settings.nestbot_healthcheck"]
-    }
-    environment_variables = { DJANGO_NESTBOT_AI_ASSISTANT_ENABLED = "false" }
+    task_role_kms_actions = []
   }
-
   assert {
-    condition     = local.worker_definition.image == local.container_definition.image && local.worker_definition.environment == local.container_definition.environment && local.worker_definition.secrets == local.container_definition.secrets
-    error_message = "Worker must use the web release image, environment and credentials."
+    condition     = length(aws_iam_policy.ecs_task_role_kms) == 0 && length(aws_iam_role_policy_attachment.ecs_task_role_kms) == 0
+    error_message = "Services without application KMS access must not receive a KMS policy."
   }
-
-  assert {
-    condition     = local.worker_definition.command == var.worker.command && local.worker_definition.healthCheck.command == var.worker.health_check_command && length(local.worker_definition.portMappings) == 0
-    error_message = "Worker must run the queue command and its own health check without a web port."
-  }
-
-  assert {
-    condition     = length(aws_ecs_service.worker) == 1 && aws_ecs_service.worker[0].desired_count == var.desired_count && length(aws_ecs_service.worker[0].load_balancer) == 0
-    error_message = "Worker needs its own private service without an ALB."
-  }
-}
-
-run "test_existing_services_do_not_gain_workers" {
-  command = plan
-
-  assert {
-    condition     = length(aws_ecs_service.worker) == 0 && length(aws_ecs_task_definition.worker) == 0
-    error_message = "Existing services must remain unchanged without worker configuration."
-  }
-}
-
-
-run "test_task_role_kms_write_permissions_require_opt_in" {
-  command = plan
-
-  variables {
-    task_role_kms_actions = ["kms:Decrypt", "kms:GenerateDataKey*"]
-  }
-
-  assert {
-    condition     = jsondecode(aws_iam_policy.ecs_task_role_kms[0].policy).Statement[0].Action == ["kms:Decrypt", "kms:GenerateDataKey*"]
-    error_message = "Workloads that write encrypted S3 objects must explicitly request data-key generation."
-  }
-}
-
-run "test_reject_empty_worker_health_command" {
-  command = plan
-  variables {
-    worker = {
-      command              = ["python", "manage.py", "rqworker", "ai"]
-      health_check_command = []
-    }
-  }
-  expect_failures = [var.worker]
-}
-
-run "test_reject_blank_worker_health_command" {
-  command = plan
-  variables {
-    worker = {
-      command              = ["python", "manage.py", "rqworker", "ai"]
-      health_check_command = ["CMD-SHELL", ""]
-    }
-  }
-  expect_failures = [var.worker]
-}
-
-run "test_reject_whitespace_worker_health_command" {
-  command = plan
-  variables {
-    worker = {
-      command              = ["python", "manage.py", "rqworker", "ai"]
-      health_check_command = ["CMD-SHELL", " \t\n"]
-    }
-  }
-  expect_failures = [var.worker]
-}
-
-run "test_reject_null_worker_health_operand" {
-  command = plan
-  variables {
-    worker = {
-      command              = ["python", "manage.py", "rqworker", "ai"]
-      health_check_command = ["CMD-SHELL", null]
-    }
-  }
-  expect_failures = [var.worker]
-}
-
-run "test_reject_invalid_worker_health_prefix" {
-  command = plan
-  variables {
-    worker = {
-      command              = ["python", "manage.py", "rqworker", "ai"]
-      health_check_command = ["INVALID", "probe"]
-    }
-  }
-  expect_failures = [var.worker]
 }

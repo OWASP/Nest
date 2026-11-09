@@ -28,9 +28,7 @@ No modules.
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
 | [aws_ecs_service.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
-| [aws_ecs_service.worker](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_task_definition.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
-| [aws_ecs_task_definition.worker](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_iam_policy.ecs_task_execution_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_task_execution_ssm_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_task_role_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -74,21 +72,20 @@ No modules.
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | The ID of the security group for the service. | `string` | n/a | yes |
 | <a name="input_service_name"></a> [service\_name](#input\_service\_name) | The name of the service (e.g., backend, frontend). | `string` | n/a | yes |
 | <a name="input_target_group_arn"></a> [target\_group\_arn](#input\_target\_group\_arn) | The ARN of the ALB target group. | `string` | n/a | yes |
-| <a name="input_task_role_kms_actions"></a> [task\_role\_kms\_actions](#input\_task\_role\_kms\_actions) | KMS actions allowed on kms\_key\_arn for the application task role. An empty list disables this policy. | `list(string)` | <pre>[<br/>  "kms:Decrypt"<br/>]</pre> | no |
+| <a name="input_task_role_kms_actions"></a> [task\_role\_kms\_actions](#input\_task\_role\_kms\_actions) | KMS actions allowed on kms\_key\_arn for the application task role. An empty list disables this policy. | `list(string)` | <pre>[<br/>  "kms:Decrypt",<br/>  "kms:GenerateDataKey*"<br/>]</pre> | no |
 | <a name="input_task_role_policy_arns"></a> [task\_role\_policy\_arns](#input\_task\_role\_policy\_arns) | A list of additional IAM policy ARNs to attach to the ECS task role. | `list(string)` | `[]` | no |
 | <a name="input_use_fargate_spot"></a> [use\_fargate\_spot](#input\_use\_fargate\_spot) | Whether to use Fargate Spot capacity provider. | `bool` | `false` | no |
-| <a name="input_worker"></a> [worker](#input\_worker) | Optional queue worker service using the same release image, settings, roles and task size. | <pre>object({<br/>    command              = list(string)<br/>    health_check_command = list(string)<br/>  })</pre> | `null` | no |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
 | <a name="output_additional_task_role_policy_arns"></a> [additional\_task\_role\_policy\_arns](#output\_additional\_task\_role\_policy\_arns) | Additional policy ARNs attached to the application task role. |
-| <a name="output_container_environments"></a> [container\_environments](#output\_container\_environments) | Explicit environment variables passed to the web and optional worker containers. |
+| <a name="output_container_environment"></a> [container\_environment](#output\_container\_environment) | Explicit environment variables passed to the web container. |
 | <a name="output_ecr_repository_arn"></a> [ecr\_repository\_arn](#output\_ecr\_repository\_arn) | The ARN of the ECR repository. |
 | <a name="output_ecr_repository_url"></a> [ecr\_repository\_url](#output\_ecr\_repository\_url) | The URL of the ECR repository. |
 | <a name="output_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#output\_ecs\_cluster\_arn) | The ARN of the ECS cluster. |
 | <a name="output_ecs_cluster_name"></a> [ecs\_cluster\_name](#output\_ecs\_cluster\_name) | The name of the ECS cluster. |
 | <a name="output_ecs_service_name"></a> [ecs\_service\_name](#output\_ecs\_service\_name) | The name of the ECS service. |
-| <a name="output_ecs_worker_service_name"></a> [ecs\_worker\_service\_name](#output\_ecs\_worker\_service\_name) | The optional queue worker service name. |
+| <a name="output_task_context"></a> [task\_context](#output\_task\_context) | Shared configuration for workers using this service's release, cluster and roles. |
 <!-- END_TF_DOCS -->

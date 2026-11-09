@@ -52,63 +52,6 @@ locals {
   )
 }
 
-# The worker uses the web release and credentials, with its own task lifecycle.
-locals {
-  worker_definition = var.worker == null ? null : merge(local.container_definition, {
-    command      = var.worker.command
-    name         = "${var.service_name}-worker"
-    portMappings = []
-    healthCheck = merge(local.container_definition.healthCheck, {
-      command = var.worker.health_check_command
-    })
-    logConfiguration = merge(local.container_definition.logConfiguration, {
-      options = merge(local.container_definition.logConfiguration.options, {
-        "awslogs-stream-prefix" = "worker"
-      })
-    })
-  })
-}
-
-resource "aws_ecs_task_definition" "worker" {
-  count                    = var.worker == null ? 0 : 1
-  container_definitions    = jsonencode([local.worker_definition])
-  cpu                      = var.container_cpu
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  family                   = "${local.name_prefix}-worker"
-  memory                   = var.container_memory
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  tags                     = var.common_tags
-
-  runtime_platform {
-    cpu_architecture        = "ARM64"
-    operating_system_family = "LINUX"
-  }
-}
-
-resource "aws_ecs_service" "worker" {
-  count                = var.worker == null ? 0 : 1
-  cluster              = aws_ecs_cluster.main.id
-  desired_count        = var.desired_count
-  force_new_deployment = var.force_new_deployment
-  name                 = "${local.name_prefix}-worker-service"
-  task_definition      = aws_ecs_task_definition.worker[0].arn
-  tags                 = var.common_tags
-
-  capacity_provider_strategy {
-    base              = 0
-    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
-    weight            = 1
-  }
-
-  network_configuration {
-    assign_public_ip = false
-    security_groups  = [var.security_group_id]
-    subnets          = var.private_subnet_ids
-  }
-}
-
 data "aws_caller_identity" "current" {}
 
 resource "aws_cloudwatch_log_group" "main" {

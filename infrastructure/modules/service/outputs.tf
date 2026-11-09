@@ -23,17 +23,28 @@ output "ecs_service_name" {
   value       = aws_ecs_service.main.name
 }
 
-output "ecs_worker_service_name" {
-  description = "The optional queue worker service name."
-  value       = one(aws_ecs_service.worker[*].name)
+output "task_context" {
+  description = "Shared configuration for workers using this service's release, cluster and roles."
+  sensitive   = true
+  value = {
+    cluster_arn          = aws_ecs_cluster.main.arn
+    execution_role_arn   = aws_iam_role.ecs_task_execution_role.arn
+    task_role_arn        = aws_iam_role.ecs_task_role.arn
+    cpu                  = var.container_cpu
+    memory               = var.container_memory
+    container_definition = local.container_definition
+  }
+  depends_on = [
+    aws_iam_role_policy_attachment.ecs_task_execution_policy_attachment,
+    aws_iam_role_policy_attachment.ecs_task_execution_ssm_policy_attachment,
+    aws_iam_role_policy_attachment.task_role_policies,
+    aws_iam_role_policy_attachment.ecs_task_role_kms,
+  ]
 }
 
-output "container_environments" {
-  description = "Explicit environment variables passed to the web and optional worker containers."
-  value = {
-    web    = try({ for entry in local.container_definition.environment : entry.name => entry.value }, {})
-    worker = try({ for entry in local.worker_definition.environment : entry.name => entry.value }, {})
-  }
+output "container_environment" {
+  description = "Explicit environment variables passed to the web container."
+  value       = try({ for entry in local.container_definition.environment : entry.name => entry.value }, {})
 }
 
 output "additional_task_role_policy_arns" {

@@ -313,19 +313,14 @@ variable "nestbot_bedrock_model_name" {
   }
 }
 
-variable "nestbot_bedrock_policy_arns" {
-  description = "Approved IAM policy ARNs granting the NestBot task role access to the selected Bedrock model."
-  type        = list(string)
-  default     = []
+variable "nestbot_bedrock_target_type" {
+  description = "Type of the approved Bedrock target: foundation-model or inference-profile."
+  type        = string
+  default     = "foundation-model"
 
   validation {
-    condition     = var.nestbot_llm_provider != "bedrock" || length(var.nestbot_bedrock_policy_arns) > 0
-    error_message = "Bedrock requires approved task-role policies in nestbot_bedrock_policy_arns."
-  }
-
-  validation {
-    condition     = alltrue([for arn in var.nestbot_bedrock_policy_arns : can(regex("^arn:[^:]+:iam::[0-9]{12}:policy/.+$", arn))])
-    error_message = "Bedrock policy ARNs must identify account-owned IAM policies."
+    condition     = contains(["foundation-model", "inference-profile"], var.nestbot_bedrock_target_type)
+    error_message = "nestbot_bedrock_target_type must be foundation-model or inference-profile."
   }
 }
 

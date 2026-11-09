@@ -110,5 +110,5 @@ jobs:
           path: |
             backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
-            nestbot-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            ${{ inputs.environment == 'staging' && format('nestbot-sbom-{0}.cdx.json', env.RELEASE_VERSION) || '' }}
     timeout-minutes: 10

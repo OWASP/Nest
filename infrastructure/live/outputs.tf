@@ -100,5 +100,5 @@ output "tasks_subnet_ids" {
 
 output "nestbot_worker_service_name" {
   description = "The staging NestBot AI queue worker service name, or null when NestBot is disabled."
-  value       = one(module.nestbot[*].ecs_worker_service_name)
+  value       = one(module.nestbot_worker[*].ecs_service_name)
 }
