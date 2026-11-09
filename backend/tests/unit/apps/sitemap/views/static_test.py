@@ -1,4 +1,5 @@
 import math
+from contextlib import ExitStack
 from datetime import UTC
 from datetime import datetime as dt
 from unittest.mock import ANY, Mock, patch
@@ -31,10 +32,12 @@ class TestStaticSitemap:
     @patch("apps.sitemap.views.static.Organization.objects.aggregate")
     @patch("apps.sitemap.views.static.Snapshot.objects.aggregate")
     @patch("apps.sitemap.views.static.Project.objects.aggregate")
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
     @patch("apps.sitemap.views.static.User.objects.aggregate")
     def test_lastmod(
         self,
         mock_user,
+        mock_repository,
         mock_project,
         mock_organization,
         mock_committee,
@@ -46,11 +49,40 @@ class TestStaticSitemap:
         mock_committee.return_value = {"latest": dt}
         mock_organization.return_value = {"latest": dt}
         mock_project.return_value = {"latest": dt}
+        mock_repository.return_value = {"latest": dt}
         mock_user.return_value = {"latest": dt}
 
         for item in sitemap.STATIC_ROUTES:
             result = sitemap.lastmod(item)
             assert result is not None
+
+    @patch("apps.sitemap.views.static.Repository.objects.aggregate")
+    def test_lastmod_repositories_uses_repository_aggregate(self, mock_aggregate, sitemap):
+        dt = timezone.now()
+        mock_aggregate.return_value = {"latest": dt}
+
+        item = {"path": "/repositories"}
+        result = sitemap.lastmod(item)
+
+        mock_aggregate.assert_called_once_with(latest=ANY)
+        assert result == dt
+
+    def test_every_static_route_maps_to_model(self, sitemap):
+        """Regression: each STATIC_ROUTES path must not use the datetime.now fallback."""
+        dt = timezone.now()
+        models = ("Chapter", "Committee", "Organization", "Snapshot", "Project", "Repository", "User")
+        with ExitStack() as stack:
+            for name in models:
+                stack.enter_context(
+                    patch(
+                        f"apps.sitemap.views.static.{name}.objects.aggregate",
+                        return_value={"latest": dt},
+                    )
+                )
+            mock_dt = stack.enter_context(patch("apps.sitemap.views.static.datetime"))
+            mock_dt.now.side_effect = AssertionError("unmapped static route used fallback")
+            for item in sitemap.STATIC_ROUTES:
+                sitemap.lastmod(item)
 
     def test_lastmod_unmapped_path_returns_current_time(self, sitemap):
         """Test lastmod returns current time for paths not in path_to_model."""
