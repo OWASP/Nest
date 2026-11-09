@@ -1,4 +1,5 @@
-import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { iphone13Chromium } from '@e2e/helpers/devices'
+import { expectBreadCrumbsToBeVisible, getGapBelowSearch } from '@e2e/helpers/expects'
 import { mockChapterData } from '@mockData/mockChapterData'
 import { test, expect } from '@playwright/test'
 
@@ -50,6 +51,18 @@ test.describe('Chapters Page', () => {
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
     await expect(page).toHaveURL('chapters/chapter_1')
+  })
+
+  // On desktop the country filter sits inline beside search, so only the mobile layout has a gap
+  test.describe('mobile layout', () => {
+    test.use({ viewport: iphone13Chromium.viewport })
+
+    test('leaves a 16px gap between search and the filter row', async ({ page }) => {
+      const countryFilter = page
+        .locator('div.h-12', { has: page.getByRole('combobox', { name: 'Country' }) })
+        .filter({ visible: true })
+      expect(await getGapBelowSearch(page, countryFilter)).toBe(16)
+    })
   })
 
   test('breadcrumb renders correct segments on /chapters', async ({ page }) => {
