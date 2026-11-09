@@ -39,8 +39,9 @@ class TestGsocEventHandler:
         expected_messages,
         mock_slack_event,
         mock_slack_client,
+        monkeypatch,
     ):
-        settings.SLACK_EVENTS_ENABLED = events_enabled
+        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", events_enabled)
 
         gsoc = Gsoc()
         gsoc.handler(event=mock_slack_event, client=mock_slack_client, ack=MagicMock())
