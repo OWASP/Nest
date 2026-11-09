@@ -51,6 +51,7 @@ class TestGsocEventHandler:
         mock_slack_client,
         monkeypatch,
     ):
+        """Check gsoc messages for each event setting and restore the setting."""
         monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", events_enabled)
 
         gsoc = Gsoc()
