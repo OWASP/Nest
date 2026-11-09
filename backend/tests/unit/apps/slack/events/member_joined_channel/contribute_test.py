@@ -53,8 +53,9 @@ class TestContributeEventHandler:
         expected_messages,
         mock_slack_event,
         mock_slack_client,
+        monkeypatch,
     ):
-        settings.SLACK_EVENTS_ENABLED = events_enabled
+        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", events_enabled)
         mock_active_projects_count.return_value = project_count
         mock_open_issues_count.return_value = issue_count
 
