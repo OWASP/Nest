@@ -155,7 +155,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="md:order-2 lg:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="-ml-1 flex h-11 w-11 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex h-11 w-11 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
