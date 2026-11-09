@@ -21,6 +21,16 @@ class TestContributeEventHandler:
         client.conversations_open.return_value = {"channel": {"id": "C123456"}}
         return client
 
+    @pytest.fixture
+    def check_settings_restored(self, monkeypatch, events_enabled):
+        """Check setting restoration for each handler case, including when run alone."""
+        with monkeypatch.context() as initial_settings:
+            initial_settings.setattr(settings, "SLACK_EVENTS_ENABLED", not events_enabled)
+            yield
+            monkeypatch.undo()
+            assert settings.SLACK_EVENTS_ENABLED is not events_enabled
+
+    @pytest.mark.usefixtures("check_settings_restored")
     @pytest.mark.parametrize(
         ("events_enabled", "project_count", "issue_count", "expected_messages"),
         [
