@@ -69,10 +69,16 @@ class TestEventBase:
 
     @patch.object(MockEvent, "handle_event")
     def test_handler_when_events_disabled(
-        self, mock_handle_event, settings, event_instance, mock_event_payload, mock_client
+        self,
+        mock_handle_event,
+        settings,
+        event_instance,
+        mock_event_payload,
+        mock_client,
+        monkeypatch,
     ):
         """Tests that the handler exits early if events are disabled."""
-        settings.SLACK_EVENTS_ENABLED = False
+        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", False)
         ack = MagicMock()
         event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
         ack.assert_called_once()
@@ -88,9 +94,10 @@ class TestEventBase:
         event_instance,
         mock_event_payload,
         mock_client,
+        monkeypatch,
     ):
         """Tests that a generic exception in handle_event is caught and logged."""
-        settings.SLACK_EVENTS_ENABLED = True
+        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", True)
         ack = MagicMock()
         mock_handle_event.side_effect = Exception("Something went wrong")
         event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
@@ -107,9 +114,10 @@ class TestEventBase:
         event_instance,
         mock_event_payload,
         mock_client,
+        monkeypatch,
     ):
         """Tests that a SlackApiError for 'cannot_dm_bot' is caught and ignored."""
-        settings.SLACK_EVENTS_ENABLED = True
+        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", True)
         ack = MagicMock()
         mock_slack_error = SlackApiError(
             message="Cannot DM bot", response={"ok": False, "error": "cannot_dm_bot"}
@@ -238,10 +246,16 @@ class TestEventBase:
 
     @patch.object(MockEvent, "handle_event")
     def test_handler_fails_on_unknown_slack_error(
-        self, mock_handle_event, settings, event_instance, mock_event_payload, mock_client
+        self,
+        mock_handle_event,
+        settings,
+        event_instance,
+        mock_event_payload,
+        mock_client,
+        monkeypatch,
     ):
         """Tests that SlackApiErrors other than 'cannot_dm_bot' are re-raised."""
-        settings.SLACK_EVENTS_ENABLED = True
+        monkeypatch.setattr(settings, "SLACK_EVENTS_ENABLED", True)
         ack = MagicMock()
         mock_slack_error = SlackApiError(
             message="Other error", response={"ok": False, "error": "channel_not_found"}
