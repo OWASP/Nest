@@ -47,21 +47,21 @@ class ProgramIndex(IndexBase):
 
     should_index = "is_indexable"
 
+    replica_rankings = {
+        "name_asc": ["asc(idx_name)"],
+        "name_desc": ["desc(idx_name)"],
+        "created_at_asc": ["asc(idx_created_at)"],
+        "created_at_desc": ["desc(idx_created_at)"],
+        "updated_at_asc": ["asc(idx_updated_at)"],
+        "updated_at_desc": ["desc(idx_updated_at)"],
+        "ended_at_asc": ["asc(idx_ended_at)"],
+        "ended_at_desc": ["desc(idx_ended_at)"],
+    }
+
     @staticmethod
     def configure_replicas() -> None:  # type: ignore[override]
         """Configure the settings for program replicas."""
-        replicas = {
-            "name_asc": ["asc(idx_name)"],
-            "name_desc": ["desc(idx_name)"],
-            "created_at_asc": ["asc(idx_created_at)"],
-            "created_at_desc": ["desc(idx_created_at)"],
-            "updated_at_asc": ["asc(idx_updated_at)"],
-            "updated_at_desc": ["desc(idx_updated_at)"],
-            "ended_at_asc": ["asc(idx_ended_at)"],
-            "ended_at_desc": ["desc(idx_ended_at)"],
-        }
-
-        IndexBase.configure_replicas("programs", replicas)
+        IndexBase.configure_replicas("programs", ProgramIndex.replica_rankings)
 
     def get_entities(self):
         """Return only published programs for indexing."""

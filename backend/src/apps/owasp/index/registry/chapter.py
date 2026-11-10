@@ -64,17 +64,17 @@ class ChapterIndex(IndexBase):
 
     should_index = "is_indexable"
 
+    replica_rankings = {
+        "created_at_asc": ["asc(idx_created_at)"],
+        "created_at_desc": ["desc(idx_created_at)"],
+        "updated_at_asc": ["asc(idx_updated_at)"],
+        "updated_at_desc": ["desc(idx_updated_at)"],
+    }
+
     @staticmethod
     def configure_replicas() -> None:  # type: ignore[override]
         """Configure the settings for chapter replicas."""
-        replicas = {
-            "created_at_asc": ["asc(idx_created_at)"],
-            "created_at_desc": ["desc(idx_created_at)"],
-            "updated_at_asc": ["asc(idx_updated_at)"],
-            "updated_at_desc": ["desc(idx_updated_at)"],
-        }
-
-        IndexBase.configure_replicas("chapters", replicas)
+        IndexBase.configure_replicas("chapters", ChapterIndex.replica_rankings)
 
     def get_entities(self):
         """Get entities for indexing."""

@@ -296,6 +296,27 @@ class TestAlgoliaSearch:
         assert mock_get_search_results.call_args_list[1].args[0] == "programs"
         mock_redis_cache.set.assert_not_called()
 
+    def test_algolia_search_does_not_fall_back_for_unknown_index(self):
+        """Test that a typo in an underscored index name does not fall back to the base index."""
+        with patch(
+            "apps.core.api.internal.algolia.get_search_results",
+            side_effect=AlgoliaException("Index does not exist"),
+        ) as mock_get_search_results:
+            mock_request = self._build_request(
+                index_name="programs_typo",
+                query="",
+                page=1,
+                hits_per_page=24,
+                facet_filters=[],
+            )
+
+            response = algolia_search(mock_request)
+            response_data = json.loads(response.content)
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert response_data["error"] == "An internal error occurred. Please try again later."
+        mock_get_search_results.assert_called_once()
+
     def test_algolia_search_handles_json_decode_error(self):
         """Test that JSONDecodeError is caught and proper error returned."""
         mock_request = Mock()

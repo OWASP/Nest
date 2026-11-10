@@ -18,9 +18,17 @@ from apps.common.utils import get_user_ip_address
 from apps.core.constants import CACHE_PREFIX
 from apps.core.utils.index import deep_camelize, get_params_for_index
 from apps.core.validators import validate_search_params
+from apps.mentorship.index import ProgramIndex
+from apps.owasp.index import ChapterIndex, ProjectIndex
 
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 logger = logging.getLogger(__name__)
+
+SORTED_REPLICA_INDEX_NAMES = {
+    f"{index.index_name}_{replica_name}"
+    for index in (ChapterIndex, ProgramIndex, ProjectIndex)
+    for replica_name in index.replica_rankings
+}
 
 
 def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowed:
@@ -75,7 +83,10 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
                 ip_address=ip_address,
             )
         except AlgoliaException as error:
-            if "_" not in index_name or "does not exist" not in str(error).lower():
+            if (
+                index_name not in SORTED_REPLICA_INDEX_NAMES
+                or "does not exist" not in str(error).lower()
+            ):
                 raise
             base_index_name = index_name.split("_", maxsplit=1)[0]
             logger.warning(
