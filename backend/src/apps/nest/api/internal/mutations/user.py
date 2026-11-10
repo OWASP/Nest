@@ -71,13 +71,27 @@ class UserMutations:
                     ok=False,
                 )
 
-            nest_user, _ = User.objects.get_or_create(
-                defaults={
-                    "email": gh_user_email,
-                    "github_user": github_user,
-                },
-                username=gh_user.login,
-            )
+            nest_user = User.objects.filter(github_user=github_user).first()
+            if nest_user is None:
+                nest_user, created = User.objects.get_or_create(
+                    defaults={
+                        "email": gh_user_email,
+                        "github_user": github_user,
+                    },
+                    username=gh_user.login,
+                )
+                if not created and nest_user.github_user_id is not None:
+                    logger.warning(
+                        "GitHub login %s matches a Nest user linked to another GitHub account.",
+                        gh_user.login,
+                    )
+                    return GitHubAuthResult(
+                        message="Nest account is already linked to a different GitHub account.",
+                        ok=False,
+                    )
+                if not created:
+                    nest_user.github_user = github_user
+                    nest_user.save(update_fields=["github_user"])
 
             # Log the user in and attach it to a session.
             # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.login
