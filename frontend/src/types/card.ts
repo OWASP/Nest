@@ -23,6 +23,7 @@ export type CardProps = {
   isActive?: boolean
   labels?: string[]
   level?: Level
+  onLabelClick?: (label: string) => void
   projectLink?: string
   projectName?: string
   social?: { title: string; icon: IconType; url: string }[]
