@@ -3,6 +3,7 @@
 from datetime import datetime
 
 import strawberry
+from strawberry.relay import GlobalID
 from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
@@ -15,6 +16,7 @@ from apps.github.models.user import User
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
+from apps.mentorship.api.internal.utils import get_issue_pk
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
 
@@ -64,9 +66,11 @@ class ModuleNode:
         return list(User.objects.filter(id__in=mentee_users).order_by("login"))
 
     @strawberry.field
-    def issue_mentees(self, issue_number: int) -> list[UserNode]:
-        """Return mentees assigned to this module's issue identified by its number."""
-        issue_ids = list(self.issues.filter(number=issue_number).values_list("id", flat=True))
+    def issue_mentees(self, issue_id: GlobalID) -> list[UserNode]:
+        """Return mentees assigned to this module's issue identified by its Nest ID."""
+        issue_ids = list(
+            self.issues.filter(pk=get_issue_pk(issue_id)).values_list("id", flat=True)
+        )
         if not issue_ids:
             return []
 
@@ -103,26 +107,26 @@ class ModuleNode:
         # BULK load data
         deadline_rows = (
             Task.objects.filter(module=self, deadline_at__isnull=False)
-            .order_by("issue__number", "-assigned_at")
-            .values("issue__number", "deadline_at")
+            .order_by("issue_id", "-assigned_at")
+            .values("issue_id", "deadline_at")
         )
         assigned_rows = (
             Task.objects.filter(module=self, assigned_at__isnull=False)
-            .order_by("issue__number", "-assigned_at")
-            .values("issue__number", "assigned_at")
+            .order_by("issue_id", "-assigned_at")
+            .values("issue_id", "assigned_at")
         )
 
         deadline_map = {}
         assigned_map = {}
 
         for row in deadline_rows:
-            num = row["issue__number"]
-            if num not in deadline_map:
-                deadline_map[num] = row["deadline_at"]
+            issue_pk = row["issue_id"]
+            if issue_pk not in deadline_map:
+                deadline_map[issue_pk] = row["deadline_at"]
         for row in assigned_rows:
-            num = row["issue__number"]
-            if num not in assigned_map:
-                assigned_map[num] = row["assigned_at"]
+            issue_pk = row["issue_id"]
+            if issue_pk not in assigned_map:
+                assigned_map[issue_pk] = row["assigned_at"]
 
         info.context.task_deadlines_by_issue = deadline_map
         info.context.task_assigned_at_by_issue = assigned_map
@@ -182,8 +186,8 @@ class ModuleNode:
         return sorted(label_names)
 
     @strawberry.field
-    def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
-        """Return a single issue by its GitHub number within this module's linked issues."""
+    def issue_by_id(self, info: Info, issue_id: GlobalID) -> IssueNode | None:
+        """Return a single issue by its Nest ID within this module's linked issues."""
         user = info.context.request.user
         is_admin_or_mentor = self.program and (
             self.program.has_admin(user) or self.has_mentor(user)
@@ -201,7 +205,7 @@ class ModuleNode:
                 "labels",
                 MERGED_PULL_REQUESTS_PREFETCH,
             )
-            .filter(number=number)
+            .filter(pk=get_issue_pk(issue_id))
         )
 
         if is_mentee and not is_admin_or_mentor:
@@ -213,9 +217,11 @@ class ModuleNode:
         return issues.first()
 
     @strawberry.field
-    def interested_users(self, issue_number: int) -> list[UserNode]:
-        """Return users interested in this module's issue identified by its number."""
-        issue_ids = list(self.issues.filter(number=issue_number).values_list("id", flat=True))
+    def interested_users(self, issue_id: GlobalID) -> list[UserNode]:
+        """Return users interested in this module's issue identified by its Nest ID."""
+        issue_ids = list(
+            self.issues.filter(pk=get_issue_pk(issue_id)).values_list("id", flat=True)
+        )
         if not issue_ids:
             return []
         interests = (
@@ -226,17 +232,17 @@ class ModuleNode:
         return [i.user for i in interests]
 
     @strawberry.field
-    def task_deadline(self, info: Info, issue_number: int) -> datetime | None:
+    def task_deadline(self, info: Info, issue_id: GlobalID) -> datetime | None:
         """Return the deadline for the latest assigned task linked to this module and issue."""
         mapping = getattr(info.context, "task_deadlines_by_issue", None)
         if mapping is not None:
-            return mapping.get(issue_number)
+            return mapping.get(get_issue_pk(issue_id))
 
         # fallback (single issue query)
         return (
             Task.objects.filter(
                 module=self,
-                issue__number=issue_number,
+                issue_id=get_issue_pk(issue_id),
                 deadline_at__isnull=False,
             )
             .order_by("-assigned_at")
@@ -245,16 +251,16 @@ class ModuleNode:
         )
 
     @strawberry.field
-    def task_assigned_at(self, info: Info, issue_number: int) -> datetime | None:
+    def task_assigned_at(self, info: Info, issue_id: GlobalID) -> datetime | None:
         """Return the latest assignment time for tasks linked to this module and issue."""
         mapping = getattr(info.context, "task_assigned_at_by_issue", None)
         if mapping is not None:
-            return mapping.get(issue_number)
+            return mapping.get(get_issue_pk(issue_id))
 
         return (
             Task.objects.filter(
                 module=self,
-                issue__number=issue_number,
+                issue_id=get_issue_pk(issue_id),
                 assigned_at__isnull=False,
             )
             .order_by("-assigned_at")
