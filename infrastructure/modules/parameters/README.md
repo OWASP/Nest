@@ -61,7 +61,6 @@ No modules.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A map of common tags to apply to all resources. | `map(string)` | `{}` | no |
-| <a name="input_db_password_arn"></a> [db\_password\_arn](#input\_db\_password\_arn) | The SSM Parameter ARN of password of the database. | `string` | n/a | yes |
 | <a name="input_django_allowed_hosts"></a> [django\_allowed\_hosts](#input\_django\_allowed\_hosts) | Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev). | `string` | n/a | yes |
 | <a name="input_django_allowed_origins"></a> [django\_allowed\_origins](#input\_django\_allowed\_origins) | The Django allowed CORS origins (comma-separated URLs with protocol). | `string` | n/a | yes |
 | <a name="input_django_aws_static_bucket_name"></a> [django\_aws\_static\_bucket\_name](#input\_django\_aws\_static\_bucket\_name) | The name of the S3 bucket for Django static files. | `string` | n/a | yes |
@@ -80,13 +79,16 @@ No modules.
 | <a name="input_next_server_graphql_url"></a> [next\_server\_graphql\_url](#input\_next\_server\_graphql\_url) | The server-side GraphQL URL for Next.js SSR (e.g., https://nest.owasp.dev/graphql/). | `string` | n/a | yes |
 | <a name="input_nextauth_url"></a> [nextauth\_url](#input\_nextauth\_url) | The NextAuth base URL (frontend URL with protocol). | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
-| <a name="input_redis_password_arn"></a> [redis\_password\_arn](#input\_redis\_password\_arn) | The SSM Parameter ARN of password of the Redis cache. | `string` | n/a | yes |
+| <a name="input_retain_legacy_credential_parameters"></a> [retain\_legacy\_credential\_parameters](#input\_retain\_legacy\_credential\_parameters) | Keep migrated SSM credential parameters until the Secrets Manager cutover is verified. | `bool` | `true` | no |
 | <a name="input_slack_bot_token_suffix"></a> [slack\_bot\_token\_suffix](#input\_slack\_bot\_token\_suffix) | The Suffix for the Slack bot token. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_django_ssm_parameter_arns"></a> [django\_ssm\_parameter\_arns](#output\_django\_ssm\_parameter\_arns) | Map of environment variable names to the ARNs of all SSM parameters (Required by Django). |
-| <a name="output_frontend_ssm_parameter_arns"></a> [frontend\_ssm\_parameter\_arns](#output\_frontend\_ssm\_parameter\_arns) | Map of frontend environment variable names to the ARNs of all SSM parameters. |
+| <a name="output_django_secret_key"></a> [django\_secret\_key](#output\_django\_secret\_key) | The existing generated Django secret key. |
+| <a name="output_django_ssm_parameter_arns"></a> [django\_ssm\_parameter\_arns](#output\_django\_ssm\_parameter\_arns) | Map of backend configuration names to SSM parameter ARNs. |
+| <a name="output_external_secret_values"></a> [external\_secret\_values](#output\_external\_secret\_values) | Retained SSM credential values for cutover verification, empty after cleanup. |
+| <a name="output_frontend_ssm_parameter_arns"></a> [frontend\_ssm\_parameter\_arns](#output\_frontend\_ssm\_parameter\_arns) | Map of frontend configuration names to SSM parameter ARNs. |
+| <a name="output_nextauth_secret"></a> [nextauth\_secret](#output\_nextauth\_secret) | The existing generated NextAuth secret. |
 <!-- END_TF_DOCS -->

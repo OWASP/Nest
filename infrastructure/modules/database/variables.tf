@@ -135,6 +135,12 @@ variable "proxy_security_group_ids" {
   default     = []
 }
 
+variable "retain_legacy_credential_parameters" {
+  description = "Keep migrated SSM credential parameters until the Secrets Manager cutover is verified."
+  type        = bool
+  default     = true
+}
+
 variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number

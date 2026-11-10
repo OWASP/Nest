@@ -59,11 +59,11 @@ No modules.
 | <a name="input_force_new_deployment"></a> [force\_new\_deployment](#input\_force\_new\_deployment) | Whether to force a new deployment on each apply. | `bool` | `false` | no |
 | <a name="input_health_check_path"></a> [health\_check\_path](#input\_health\_check\_path) | The path for the ECS container health checks. | `string` | `"/"` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | The Docker image tag. | `string` | n/a | yes |
-| <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key for log encryption. | `string` | n/a | yes |
+| <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The ARN of the KMS key for log and secret encryption. | `string` | n/a | yes |
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The CloudWatch log retention in days. | `number` | `30` | no |
 | <a name="input_max_count"></a> [max\_count](#input\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_min_count"></a> [min\_count](#input\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
-| <a name="input_parameters_arns"></a> [parameters\_arns](#input\_parameters\_arns) | Map of environment variable names to the ARNs of SSM parameters. | `map(string)` | `{}` | no |
+| <a name="input_parameters_arns"></a> [parameters\_arns](#input\_parameters\_arns) | Map of environment variable names to SSM and Secrets Manager references. | `map(string)` | `{}` | no |
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | Private subnet IDs for ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | n/a | yes |
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | The ID of the security group for the service. | `string` | n/a | yes |
