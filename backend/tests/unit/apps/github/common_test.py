@@ -25,6 +25,7 @@ def mock_common_deps(mocker):
             "apps.github.common.check_owasp_site_repository", return_value=False
         ),
         "logger": mocker.patch("apps.github.common.logger"),
+        "sync_commits": mocker.patch("apps.github.common.sync_repository_commits"),
     }
 
     mock_repository = mocks["Repository"].update_data.return_value
@@ -93,6 +94,7 @@ class TestSyncRepository:
         )
         mock_common_deps["User"].update_data.assert_called_once_with(mock_gh_repository.owner)
         mock_common_deps["Repository"].update_data.assert_called_once()
+        mock_common_deps["sync_commits"].assert_called_once()
         mock_gh_repository.get_languages.assert_called_once()
         mock_gh_repository.get_releases.assert_called_once()
         mock_common_deps["Release"].bulk_save.assert_called_once()
