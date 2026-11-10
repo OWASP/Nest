@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     from github import Github
 
-from apps.github.constants import GITHUB_ITEMS_PER_PAGE
+from apps.github.constants import GITHUB_COMPARISON_COMMIT_LIMIT, GITHUB_ITEMS_PER_PAGE
 from apps.github.models.comment import Comment
 from apps.github.models.commit import Commit
 from apps.github.models.issue import Issue
@@ -78,7 +78,7 @@ def _repository_commit_head(gh_repository, branch):
 
 def _save_repository_commits(gh_commits, repository, users):
     """Upsert one bounded batch, retaining known authors when GitHub cannot resolve them."""
-    by_node_id = {Commit.get_node_id(commit): commit for commit in gh_commits}
+    by_node_id = {commit.node_id: commit for commit in gh_commits}
     existing = Commit.objects.filter(node_id__in=by_node_id).in_bulk(field_name="node_id")
     commits = []
     for node_id, gh_commit in by_node_id.items():
@@ -121,14 +121,60 @@ def _save_repository_commits(gh_commits, repository, users):
         )
 
 
+def _repository_commit_history(gh_repository, state, branch, head, start_at, *, force):
+    """Use a verified ancestor checkpoint, falling back when it cannot cover the request."""
+    incremental = (
+        not force
+        and state.covered_from is not None
+        and state.covered_until is not None
+        and state.covered_from <= start_at
+        and state.default_branch == branch
+        and bool(state.last_head_sha)
+        and bool(head)
+    )
+    if incremental:
+        if state.last_head_sha == head:
+            return
+        try:
+            comparison = gh_repository.compare(state.last_head_sha, head)
+            # The comparison endpoint cannot retrieve more than 10,000 commits.
+            if (
+                comparison.status == "ahead"
+                and comparison.total_commits <= GITHUB_COMPARISON_COMMIT_LIMIT
+            ):
+                expected = comparison.total_commits
+                received = 0
+                for commit in comparison.get_commits(
+                    comparison_commits_per_page=GITHUB_ITEMS_PER_PAGE
+                ):
+                    received += 1
+                    yield commit
+                if received != expected:
+                    message = "GitHub commit comparison returned incomplete history"
+                    raise RuntimeError(message)
+                return
+        except GithubException as error:
+            # A deleted checkpoint or unrelated histories require a fresh traversal.
+            if error.status not in (HTTPStatus.NOT_FOUND, HTTPStatus.CONFLICT):
+                raise
+    if head:
+        yield from gh_repository.get_commits(sha=head)
+
+
 def sync_repository_commits(
-    gh_repository, repository, *, start_at: datetime | None = None, end_at: datetime | None = None
+    gh_repository,
+    repository,
+    *,
+    start_at: datetime | None = None,
+    end_at: datetime | None = None,
+    force: bool = False,
 ) -> None:
-    """Backfill authored commits, advancing coverage only after the pinned history completes.
+    """Sync authored commits, advancing coverage only after the pinned history completes.
 
     The start bounds retained history, not traversal: an old commit can precede newer
     authored commits in Git history. Already reachable future-dated commits are retained
     so advancing the head cannot lose them; aggregation applies its upper date bound.
+    Verified ancestor checkpoints allow incremental collection; force requests a full scan.
     Failed runs retain committed batches for safe retry.
     """
     end_at = end_at or timezone.now()
@@ -147,12 +193,14 @@ def sync_repository_commits(
             branch = gh_repository.default_branch or ""
             head = _repository_commit_head(gh_repository, branch)
             users = {}
-            history = gh_repository.get_commits(sha=head) if head else ()
+            history = _repository_commit_history(
+                gh_repository, state, branch, head, start_at, force=force
+            )
             for page in batched(history, GITHUB_ITEMS_PER_PAGE, strict=False):
                 eligible = [commit for commit in page if commit.commit.author.date >= start_at]
                 if eligible:
                     _save_repository_commits(eligible, repository, users)
-            # A full backfill verifies exactly this window; do not infer older coverage.
+            # Successful collection verifies this window; do not infer older coverage.
             state.covered_from = start_at
             state.covered_until = end_at
             state.default_branch = branch

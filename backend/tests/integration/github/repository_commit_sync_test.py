@@ -7,6 +7,7 @@ from unittest.mock import Mock, PropertyMock
 
 import pytest
 from django.db import DatabaseError, IntegrityError, connection
+from github.Comparison import Comparison
 from github.GithubException import GithubException, UnknownObjectException
 
 from apps.core.utils.index import disable_indexing
@@ -28,6 +29,7 @@ START = END - timedelta(days=365)
 def github_commit(key, *, date=None, author=None, committer=None):
     return SimpleNamespace(
         raw_data={"node_id": f"commit-{key}"},
+        node_id=f"commit-{key}",
         sha=key * 40,
         commit=SimpleNamespace(
             message=f"Commit {key}", author=SimpleNamespace(date=date or END - timedelta(days=180))
@@ -54,6 +56,7 @@ def source(mocker):
         remote = Mock()
         remote.name = repository.name
         remote.default_branch = "main"
+        remote.compare.return_value.status = "diverged"
         remote.organization = None
         remote.get_branch.return_value.commit.sha = "f" * 40
         for name in ("contributors", "milestones", "issues", "pulls", "releases", "commits"):
@@ -153,7 +156,7 @@ def test_known_users_are_reused_and_preserved_when_unresolved(source, mocker):
     first = repository.commits.get()
     assert first.author_id == first.committer_id == author.pk
     remote.get_commits.return_value = [github_commit("a")]
-    run_sync(remote, repository)
+    common.sync_repository_commits(remote, repository, force=True)
     first.refresh_from_db()
     assert first.author_id == first.committer_id == author.pk
 
@@ -414,6 +417,7 @@ def test_same_sha_in_different_repositories_has_independent_identity(source):
         pushed_at=END,
     )
     commit.raw_data = {"node_id": "fork-commit-a"}
+    commit.node_id = "fork-commit-a"
     common.sync_repository_commits(remote, fork)
     assert Commit.objects.filter(sha=commit.sha).count() == 2
     assert repository.commits.get().node_id == "commit-a"
@@ -437,3 +441,173 @@ def test_conflicting_repository_identity_does_not_move_existing_commit(source):
     assert repository.commits.get().node_id == "commit-a"
     assert not other.commits.exists()
     assert other.contribution_sync_states.get().covered_until is None
+
+
+def checkpoint(repository, **overrides):
+    values = {
+        "covered_from": START,
+        "covered_until": END - timedelta(days=1),
+        "default_branch": "main",
+        "last_head_sha": "e" * 40,
+    }
+    values.update(overrides)
+    return RepositoryContributionSyncState.objects.create(
+        repository=repository, contribution_type="commits", **values
+    )
+
+
+def test_unchanged_head_skips_history_and_extends_coverage(source):
+    remote, repository = source
+    state = checkpoint(repository, last_head_sha="f" * 40)
+    common.sync_repository_commits(remote, repository)
+    remote.compare.assert_not_called()
+    remote.get_commits.assert_not_called()
+    state.refresh_from_db()
+    assert state.covered_until == END
+
+
+def test_incremental_comparison_imports_more_than_250_commits(source):
+    remote, repository = source
+    state = checkpoint(repository)
+    comparison = remote.compare.return_value
+    comparison.status = "ahead"
+    commits = [github_commit(str(index)) for index in range(305)]
+    # SHA is independent of the synthetic identity, and fits the database field.
+    for index, commit in enumerate(commits):
+        commit.sha = f"{index:040x}"
+    comparison.total_commits = len(commits)
+    comparison.get_commits.return_value = iter(commits)
+    common.sync_repository_commits(remote, repository)
+    remote.compare.assert_called_once_with("e" * 40, "f" * 40)
+    comparison.get_commits.assert_called_once_with(comparison_commits_per_page=100)
+    remote.get_commits.assert_not_called()
+    assert repository.commits.count() == 305
+    state.refresh_from_db()
+    assert state.last_head_sha == "f" * 40
+    common.sync_repository_commits(remote, repository)
+    assert repository.commits.count() == 305
+    assert remote.compare.call_count == 1
+
+
+@pytest.mark.parametrize("reason", ["branch", "older_period", "force", "missing_head"])
+def test_incompatible_checkpoint_uses_full_history(source, reason):
+    remote, repository = source
+    state = checkpoint(repository)
+    kwargs = {}
+    if reason == "branch":
+        remote.default_branch = "renamed"
+    elif reason == "older_period":
+        kwargs["start_at"] = START - timedelta(days=1)
+    elif reason == "force":
+        kwargs["force"] = True
+    else:
+        state.last_head_sha = ""
+        state.save()
+    remote.get_commits.return_value = [github_commit("a")]
+    common.sync_repository_commits(remote, repository, **kwargs)
+    remote.compare.assert_not_called()
+    remote.get_commits.assert_called_once_with(sha="f" * 40)
+    assert repository.commits.count() == 1
+    state.refresh_from_db()
+    assert state.covered_from == kwargs.get("start_at", START)
+
+
+@pytest.mark.parametrize("status", ["diverged", "behind", "identical", "oversized", 404, 409])
+def test_unusable_comparison_falls_back_without_deleting_history(source, status):
+    remote, repository = source
+    checkpoint(repository)
+    original = Commit.objects.create(
+        node_id="previous-history",
+        repository=repository,
+        sha="a" * 40,
+        message="Previously imported",
+        created_at=START,
+    )
+    if isinstance(status, int):
+        remote.compare.side_effect = GithubException(status, {"message": "Unavailable"})
+    else:
+        remote.compare.return_value.status = "ahead" if status == "oversized" else status
+        remote.compare.return_value.total_commits = 10_001
+    remote.get_commits.return_value = [github_commit("b")]
+    common.sync_repository_commits(remote, repository)
+    remote.get_commits.assert_called_once_with(sha="f" * 40)
+    assert repository.commits.filter(pk=original.pk).exists()
+    assert repository.commits.count() == 2
+
+
+@pytest.mark.parametrize("status", [403, 429, 500])
+def test_comparison_service_errors_preserve_checkpoint(source, status):
+    remote, repository = source
+    state = checkpoint(repository)
+    remote.compare.side_effect = GithubException(status, {"message": "private response"})
+    with pytest.raises(GithubException):
+        common.sync_repository_commits(remote, repository)
+    state.refresh_from_db()
+    assert state.last_head_sha == "e" * 40
+    assert state.covered_until == END - timedelta(days=1)
+    assert "private response" not in state.last_error
+    remote.get_commits.assert_not_called()
+
+
+def test_truncated_comparison_cannot_advance_checkpoint_and_can_retry(source, mocker):
+    remote, repository = source
+    state = checkpoint(repository)
+    mocker.patch("apps.github.common.GITHUB_ITEMS_PER_PAGE", 1)
+    comparison = remote.compare.return_value
+    comparison.status = "ahead"
+    comparison.total_commits = 2
+    comparison.get_commits.return_value = [github_commit("a")]
+    with pytest.raises(RuntimeError, match="incomplete history"):
+        common.sync_repository_commits(remote, repository)
+    first = repository.commits.get()
+    state.refresh_from_db()
+    assert state.last_head_sha == "e" * 40
+    assert state.covered_until == END - timedelta(days=1)
+    comparison.get_commits.return_value = [github_commit("a"), github_commit("b")]
+    common.sync_repository_commits(remote, repository)
+    assert repository.commits.get(node_id="commit-a").pk == first.pk
+    assert repository.commits.count() == 2
+    state.refresh_from_db()
+    assert state.last_head_sha == "f" * 40
+    assert state.last_error == ""
+
+
+def test_real_github_comparison_follows_pagination(source):
+    """Exercise the installed client's pagination instead of a plain list stand-in."""
+    remote, repository = source
+    checkpoint(repository)
+    requester = Mock()
+    requester.per_page = 100
+    requester.is_lazy = False
+    url = "https://api.github.com/repos/example/repo/compare/old...new"
+
+    def page(start, stop):
+        return {
+            "commits": [
+                {
+                    "node_id": f"paged-{index}",
+                    "sha": f"{index:040x}",
+                    "commit": {
+                        "message": "Paged commit",
+                        "author": {"date": "2026-06-01T12:00:00Z"},
+                    },
+                    "author": None,
+                    "committer": None,
+                }
+                for index in range(start, stop)
+            ]
+        }
+
+    requester.requestJsonAndCheck.side_effect = [
+        ({"link": f'<{url}?page=2&per_page=100>; rel="next"'}, page(0, 100)),
+        ({"link": f'<{url}?page=3&per_page=100>; rel="next"'}, page(100, 200)),
+        ({"link": f'<{url}?page=4&per_page=100>; rel="next"'}, page(200, 300)),
+        ({}, page(300, 305)),
+    ]
+    remote.compare.return_value = Comparison(
+        requester, {}, {"url": url, "status": "ahead", "total_commits": 305}, completed=True
+    )
+    common.sync_repository_commits(remote, repository)
+    assert repository.commits.count() == 305
+    assert requester.requestJsonAndCheck.call_count == 4
+    assert repository.contribution_sync_states.get().last_head_sha == "f" * 40
