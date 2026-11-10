@@ -11,6 +11,7 @@ from itertools import batched
 from typing import TYPE_CHECKING
 
 from django.db import DatabaseError, connection, transaction
+from django.db.models import Q
 from django.utils import timezone
 from github.GithubException import GithubException, UnknownObjectException
 
@@ -33,8 +34,19 @@ from apps.github.models.repository_contribution_sync_state import RepositoryCont
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 from apps.github.utils import check_owasp_site_repository
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.project import Project
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+
+def get_contribution_repositories():
+    """Select repositories used by active project and chapter contribution views."""
+    return Repository.objects.filter(
+        Q(pk__in=Project.active_projects.values("owasp_repository_id"))
+        | Q(pk__in=Project.active_projects.values("repositories__pk"))
+        | Q(pk__in=Chapter.active_chapters.values("owasp_repository_id"))
+    )
 
 
 @contextmanager

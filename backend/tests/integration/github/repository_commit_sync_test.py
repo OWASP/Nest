@@ -13,6 +13,7 @@ from github.GithubException import GithubException, UnknownObjectException
 from apps.core.utils.index import disable_indexing
 from apps.github import common
 from apps.github.common import sync_repository
+from apps.github.management.commands.github_update_owasp_organization import Command as SyncCommand
 from apps.github.models.commit import Commit
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
@@ -20,6 +21,7 @@ from apps.github.models.repository import Repository
 from apps.github.models.repository_contribution_sync_state import RepositoryContributionSyncState
 from apps.github.models.user import User
 from apps.owasp.management.commands.owasp_aggregate_entity_contributions import Command
+from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.member_snapshot import MemberSnapshot
 from apps.owasp.models.project import Project
 
@@ -900,3 +902,134 @@ def test_normal_sync_activity_reaches_project_aggregation(source, mocker):
     assert stats["issues"] == 2
     assert stats["pull_requests"] == 1
     assert repository.issues.filter(state="open").count() == 1
+
+
+def test_contribution_repository_selection_matches_active_entity_views(
+    source, django_assert_num_queries
+):
+    _, repository = source
+
+    def make_repository(key):
+        return Repository.objects.create(
+            node_id=f"selection-{key}",
+            name=key,
+            key=key,
+            created_at=START,
+            updated_at=END,
+            pushed_at=END,
+        )
+
+    project_site = make_repository("www-project-active")
+    chapter_site = make_repository("www-chapter-active")
+    inactive_site = make_repository("www-project-inactive")
+    inactive_chapter_site = make_repository("www-chapter-inactive")
+    unrelated = make_repository("unrelated")
+    project = Project.objects.create(
+        key="www-project-selection",
+        name="Selection",
+        summary="Test",
+        owasp_repository=project_site,
+    )
+    project.repositories.add(repository, project_site)
+    # Multiple associations must not cause duplicate synchronization.
+    other = Project.objects.create(key="www-project-selection-other", name="Other", summary="Test")
+    other.repositories.add(repository)
+    Chapter.objects.create(
+        latitude=1,
+        longitude=1,
+        suggested_location="Test location",
+        key="www-chapter-selection",
+        name="Selection",
+        owasp_repository=chapter_site,
+    )
+    inactive = Project.objects.create(
+        key="www-project-inactive-selection",
+        name="Inactive",
+        summary="Test",
+        is_active=False,
+        owasp_repository=inactive_site,
+    )
+    inactive.repositories.add(unrelated)
+    Chapter.objects.create(
+        latitude=1,
+        longitude=1,
+        suggested_location="Test location",
+        key="www-chapter-inactive-selection",
+        name="Inactive",
+        is_active=False,
+        owasp_repository=inactive_chapter_site,
+    )
+    with django_assert_num_queries(1):
+        selected = list(common.get_contribution_repositories().values_list("pk", flat=True))
+    assert set(selected) == {repository.pk, project_site.pk, chapter_site.pk}
+    assert len(selected) == len(set(selected))
+
+
+@pytest.mark.parametrize(
+    ("link", "included"),
+    [
+        ("project_primary", True),
+        ("project_related", True),
+        ("chapter", True),
+        ("inactive", False),
+        ("unlinked", False),
+        ("other_identity", False),
+    ],
+)
+def test_organization_command_syncs_only_linked_active_website_repositories(
+    source, mocker, link, included
+):
+    remote, repository = source
+    repository.name = repository.key = (
+        "www-chapter-selection" if link == "chapter" else "www-project-selection"
+    )
+    repository.save()
+    remote.name = repository.name
+    remote.node_id = repository.node_id
+    if link in ("project_primary", "inactive", "other_identity"):
+        Project.objects.create(
+            key="www-project-command-selection",
+            name="Selection",
+            summary="Test",
+            owasp_repository=repository,
+            is_active=link != "inactive",
+        )
+    elif link == "project_related":
+        project = Project.objects.create(
+            key="www-project-command-selection",
+            name="Selection",
+            summary="Test",
+        )
+        project.repositories.add(repository)
+    elif link == "chapter":
+        Chapter.objects.create(
+            latitude=1,
+            longitude=1,
+            suggested_location="Test location",
+            key="www-chapter-command-selection",
+            name="Selection",
+            owasp_repository=repository,
+        )
+    if link == "other_identity":
+        remote.node_id = "different-repository-with-same-name"
+    remote.get_commits.return_value = [github_commit("a")]
+    command_module = "apps.github.management.commands.github_update_owasp_organization"
+    client = mocker.patch(f"{command_module}.get_github_client").return_value
+    client.get_organization.return_value.get_repo.return_value = remote
+    # Exercise the real command, selection, collector, persistence and aggregation.
+    # Only owner metadata fetching is bypassed, as in the other source fixtures.
+    synced = mocker.patch(
+        f"{command_module}.sync_repository",
+        side_effect=lambda gh_repository, **kwargs: common.sync_repository(
+            gh_repository, user=Mock(), organization=kwargs.get("organization")
+        ),
+    )
+    SyncCommand().handle(repository=repository.name, offset=0)
+    assert synced.call_count == int(included)
+    assert repository.commits.count() == int(included)
+    assert repository.contribution_sync_states.count() == (3 if included else 0)
+    if included:
+        entity = Chapter.objects.get() if link == "chapter" else Project.objects.get()
+        _, stats = Command().aggregate_contributions(entity, START, END)
+        assert stats["commits"] == 1
+    client.close.assert_called_once()
