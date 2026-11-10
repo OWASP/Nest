@@ -16,6 +16,7 @@ const Card = ({
   icons,
   labels,
   level,
+  onLabelClick,
   projectLink,
   projectName,
   social,
@@ -123,7 +124,7 @@ const Card = ({
           {/* Labels Section */}
           {labels && labels.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              <LabelList entityKey={`${cardKey}-labels`} labels={labels} maxVisible={5} />
+              <LabelList entityKey={`${cardKey}-labels`} labels={labels} maxVisible={5} onLabelClick={onLabelClick} />
             </div>
           )}
           {/* Contributors section */}
