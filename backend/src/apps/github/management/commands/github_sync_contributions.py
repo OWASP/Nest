@@ -3,6 +3,8 @@
 from datetime import UTC, datetime, timedelta
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.core.utils.index import disable_indexing
@@ -13,6 +15,11 @@ from apps.github.common import (
     sync_repository_issues,
     sync_repository_pull_requests,
 )
+from apps.owasp.management.commands.owasp_aggregate_entity_contributions import (
+    Command as AggregateCommand,
+)
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.project import Project
 
 
 class Command(BaseCommand):
@@ -36,6 +43,11 @@ class Command(BaseCommand):
             default=["commits", "issues", "pull_requests"],
         )
         parser.add_argument("--force", action="store_true")
+        parser.add_argument(
+            "--refresh",
+            action="store_true",
+            help="Refresh affected project/chapter activity after successful imports",
+        )
         parser.add_argument("--offset", type=int, default=0)
         parser.add_argument("--limit", type=int, default=25)
 
@@ -125,3 +137,23 @@ class Command(BaseCommand):
         if failures:
             msg = f"Contribution synchronization incomplete: {failures} failures"
             raise CommandError(msg)
+
+        if options.get("refresh"):
+            self.refresh_activity(repositories, start_at, end_at)
+
+    def refresh_activity(self, repositories, start_at, end_at):
+        """Regenerate affected entities for the exact imported period, atomically."""
+        repository_ids = [repository.pk for repository in repositories]
+        projects = Project.active_projects.filter(
+            Q(owasp_repository_id__in=repository_ids) | Q(repositories__pk__in=repository_ids)
+        ).distinct()
+        chapters = Chapter.active_chapters.filter(owasp_repository_id__in=repository_ids)
+        aggregator = AggregateCommand()
+        with disable_indexing(), transaction.atomic():
+            for entities in (projects, chapters):
+                for entity in entities:
+                    data, stats = aggregator.aggregate_contributions(entity, start_at, end_at)
+                    type(entity).objects.filter(pk=entity.pk).update(
+                        contribution_data=data, contribution_stats=stats
+                    )
+        self.stdout.write("Affected project and chapter activity refreshed")

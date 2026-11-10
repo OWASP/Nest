@@ -13,6 +13,7 @@ from github.GithubException import GithubException, UnknownObjectException
 from apps.core.utils.index import disable_indexing
 from apps.github import common
 from apps.github.common import sync_repository
+from apps.github.management.commands.github_sync_contributions import Command as RepairCommand
 from apps.github.management.commands.github_update_owasp_organization import Command as SyncCommand
 from apps.github.models.commit import Commit
 from apps.github.models.issue import Issue
@@ -1033,3 +1034,29 @@ def test_organization_command_syncs_only_linked_active_website_repositories(
         _, stats = Command().aggregate_contributions(entity, START, END)
         assert stats["commits"] == 1
     client.close.assert_called_once()
+
+
+def test_repair_refresh_updates_only_affected_entities_and_exact_period(source):
+    remote, repository = source
+    remote.get_commits.return_value = [github_commit("a")]
+    common.sync_repository_commits(remote, repository)
+    project = Project.objects.create(
+        key="www-project-refresh",
+        name="Refresh",
+        summary="Test",
+        owasp_repository=repository,
+    )
+    project.repositories.add(repository)
+    unrelated = Project.objects.create(
+        key="www-project-unrelated-refresh",
+        name="Unrelated",
+        summary="Test",
+        contribution_stats={"total": 123},
+    )
+    RepairCommand().refresh_activity([repository], START, END)
+    project.refresh_from_db()
+    unrelated.refresh_from_db()
+    assert project.contribution_stats["commits"] == 1
+    assert project.contribution_stats["start_at"] == START.isoformat()
+    assert project.contribution_stats["end_at"] == END.isoformat()
+    assert unrelated.contribution_stats == {"total": 123}

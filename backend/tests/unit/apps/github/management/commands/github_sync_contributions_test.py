@@ -72,3 +72,23 @@ def test_invalid_arguments_fail_before_github(setup_command, changes):
     with pytest.raises(CommandError):
         command.handle(**options)
     client.get_repo.assert_not_called()
+
+
+def test_refresh_runs_only_after_success(setup_command, mocker):
+    command, options, _, commits, *_ = setup_command
+    refresh = mocker.patch.object(command, "refresh_activity")
+    options["refresh"] = True
+    command.handle(**options)
+    refresh.assert_called_once()
+    assert refresh.call_args.args[1] == commits.call_args.kwargs["start_at"]
+    assert refresh.call_args.args[2] == commits.call_args.kwargs["end_at"]
+
+
+def test_failed_import_does_not_refresh_activity(setup_command, mocker):
+    command, options, _, commits, *_ = setup_command
+    refresh = mocker.patch.object(command, "refresh_activity")
+    options["refresh"] = True
+    commits.side_effect = RuntimeError("failure")
+    with pytest.raises(CommandError):
+        command.handle(**options)
+    refresh.assert_not_called()
