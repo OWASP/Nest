@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from http import HTTPStatus
 from typing import Any
 
@@ -17,8 +18,17 @@ from apps.common.utils import get_user_ip_address
 from apps.core.constants import CACHE_PREFIX
 from apps.core.utils.index import deep_camelize, get_params_for_index
 from apps.core.validators import validate_search_params
+from apps.mentorship.index import ProgramIndex
+from apps.owasp.index import ChapterIndex, ProjectIndex
 
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
+logger = logging.getLogger(__name__)
+
+SORTED_REPLICA_INDEX_NAMES = {
+    f"{index.index_name}_{replica_name}"
+    for index in (ChapterIndex, ProgramIndex, ProjectIndex)
+    for replica_name in index.replica_rankings
+}
 
 
 def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowed:
@@ -63,14 +73,36 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
         if result is not None:
             return JsonResponse(result)
 
-        result = get_search_results(
-            index_name,
-            query,
-            page,
-            limit,
-            facet_filters,
-            ip_address=ip_address,
-        )
+        try:
+            result = get_search_results(
+                index_name,
+                query,
+                page,
+                limit,
+                facet_filters,
+                ip_address=ip_address,
+            )
+        except AlgoliaException as error:
+            if (
+                index_name not in SORTED_REPLICA_INDEX_NAMES
+                or "does not exist" not in str(error).lower()
+            ):
+                raise
+            base_index_name = index_name.split("_", maxsplit=1)[0]
+            logger.warning(
+                "Sorted index %s is unavailable; falling back to %s",
+                index_name,
+                base_index_name,
+            )
+            result = get_search_results(
+                base_index_name,
+                query,
+                page,
+                limit,
+                facet_filters,
+                ip_address=ip_address,
+            )
+            return JsonResponse(result)
         cache.set(cache_key, result, CACHE_TTL_IN_SECONDS)
 
         return JsonResponse(result)

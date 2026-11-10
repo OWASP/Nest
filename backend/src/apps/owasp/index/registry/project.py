@@ -80,25 +80,25 @@ class ProjectIndex(IndexBase):
 
     should_index = "is_indexable"
 
+    replica_rankings = {
+        "contributors_count_asc": ["asc(idx_contributors_count)"],
+        "contributors_count_desc": ["desc(idx_contributors_count)"],
+        "forks_count_asc": ["asc(idx_forks_count)"],
+        "forks_count_desc": ["desc(idx_forks_count)"],
+        "level_raw_asc": ["asc(idx_level_raw)"],
+        "level_raw_desc": ["desc(idx_level_raw)"],
+        "name_asc": ["asc(idx_name)"],
+        "name_desc": ["desc(idx_name)"],
+        "stars_count_asc": ["asc(idx_stars_count)"],
+        "stars_count_desc": ["desc(idx_stars_count)"],
+        "updated_at_asc": ["asc(idx_updated_at)"],
+        "updated_at_desc": ["desc(idx_updated_at)"],
+    }
+
     @staticmethod
     def configure_replicas() -> None:  # type: ignore[override]
         """Configure the settings for project replicas."""
-        replicas = {
-            "contributors_count_asc": ["asc(idx_contributors_count)"],
-            "contributors_count_desc": ["desc(idx_contributors_count)"],
-            "forks_count_asc": ["asc(idx_forks_count)"],
-            "forks_count_desc": ["desc(idx_forks_count)"],
-            "level_raw_asc": ["asc(idx_level_raw)"],
-            "level_raw_desc": ["desc(idx_level_raw)"],
-            "name_asc": ["asc(idx_name)"],
-            "name_desc": ["desc(idx_name)"],
-            "stars_count_asc": ["asc(idx_stars_count)"],
-            "stars_count_desc": ["desc(idx_stars_count)"],
-            "updated_at_asc": ["asc(idx_updated_at)"],
-            "updated_at_desc": ["desc(idx_updated_at)"],
-        }
-
-        IndexBase.configure_replicas("projects", replicas)
+        IndexBase.configure_replicas("projects", ProjectIndex.replica_rankings)
 
     @staticmethod
     def update_synonyms():

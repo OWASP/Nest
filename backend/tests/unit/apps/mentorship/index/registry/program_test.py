@@ -16,6 +16,20 @@ def program_index(mocker):
 
 
 class TestProgramIndex:
+    def test_date_replica_rankings(self):
+        """Test date replicas map ascending and descending rules to the right fields."""
+        with patch(
+            "apps.mentorship.index.registry.program.IndexBase.configure_replicas"
+        ) as mock_configure_replicas:
+            ProgramIndex.configure_replicas()
+
+        index_name, replicas = mock_configure_replicas.call_args.args
+        assert index_name == "programs"
+        assert replicas["created_at_asc"] == ["asc(idx_created_at)"]
+        assert replicas["created_at_desc"] == ["desc(idx_created_at)"]
+        assert replicas["updated_at_asc"] == ["asc(idx_updated_at)"]
+        assert replicas["updated_at_desc"] == ["desc(idx_updated_at)"]
+
     def test_class_attributes(self):
         """Test that the basic class attributes are set correctly."""
         assert ProgramIndex.index_name == "programs"

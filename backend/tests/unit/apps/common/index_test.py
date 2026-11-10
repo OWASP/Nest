@@ -161,6 +161,7 @@ class TestIndexBase:
                 self.mock_client.set_settings.assert_any_call(
                     f"{ENV}_{index_name}", {"replicas": expected_replicas}
                 )
+                assert self.mock_client.wait_for_task.call_count == len(expected_replicas) + 1
 
     def test_configure_replicas_empty_indexable_replicas(self):
         """Test configure_replicas when all replicas are non-indexable."""

@@ -166,13 +166,15 @@ class IndexBase(AlgoliaIndex):
             if is_indexable(f"{index_name}_{replica_name}")
         }:
             client = IndexBase.get_client()
-            client.set_settings(
+            response = client.set_settings(
                 f"{env}_{index_name}",
                 {"replicas": sorted(indexable_replicas.keys())},
             )
+            client.wait_for_task(f"{env}_{index_name}", response.task_id)
 
             for replica_name, replica_ranking in indexable_replicas.items():
-                client.set_settings(replica_name, {"ranking": replica_ranking})
+                response = client.set_settings(replica_name, {"ranking": replica_ranking})
+                client.wait_for_task(replica_name, response.task_id)
 
     @staticmethod
     def _parse_synonyms_file(file_path) -> list | None:

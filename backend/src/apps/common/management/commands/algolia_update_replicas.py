@@ -1,8 +1,13 @@
 """A command to update OWASP Nest index replicas."""
 
-from django.core.management.base import BaseCommand
+import logging
 
+from django.core.management.base import BaseCommand, CommandError
+
+from apps.mentorship.index import ProgramIndex
 from apps.owasp.index import ChapterIndex, ProjectIndex
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -11,6 +16,17 @@ class Command(BaseCommand):
     def handle(self, *_args, **_options) -> None:
         """Update replicas for Algolia indices."""
         self.stdout.write("\n Starting replica configuration...\n")
-        ChapterIndex.configure_replicas()
-        ProjectIndex.configure_replicas()
+        failures = []
+
+        for index in (ChapterIndex, ProgramIndex, ProjectIndex):
+            try:
+                index.configure_replicas()
+            except Exception:
+                logger.exception("Failed to configure replicas for %s", index.__name__)
+                failures.append(index.__name__)
+
+        if failures:
+            message = f"Failed to configure replicas for: {', '.join(failures)}"
+            raise CommandError(message)
+
         self.stdout.write(self.style.SUCCESS("\n Replicas have been successfully created.\n"))
