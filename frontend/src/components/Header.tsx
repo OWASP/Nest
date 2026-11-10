@@ -116,7 +116,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         </div>
 
         <div className="ml-auto flex items-center justify-normal gap-1.5 lg:gap-4 lg:pl-4">
-          <div className="flex md:hidden">
+          <div className="flex lg:hidden">
             <ModeToggle />
           </div>
           <GlobalSearch />
@@ -144,7 +144,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="hidden md:flex">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
-          <div className="hidden md:flex">
+          <div className="hidden lg:flex">
             <ModeToggle />
           </div>
           <div className="lg:hidden">
