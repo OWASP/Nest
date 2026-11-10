@@ -1,3 +1,9 @@
+output "django_secret_key" {
+  description = "The generated Django secret key used by the SSM parameter."
+  sensitive   = true
+  value       = random_string.django_secret_key.result
+}
+
 output "django_ssm_parameter_arns" {
   description = "Map of environment variable names to the ARNs of all SSM parameters (Required by Django)."
   sensitive   = true
@@ -34,6 +40,25 @@ output "django_ssm_parameter_arns" {
   )
 }
 
+output "external_secret_values" {
+  description = "Current externally managed SSM credentials to copy into Secrets Manager until runtime cutover."
+  sensitive   = true
+  value = merge({
+    DJANGO_ALGOLIA_WRITE_API_KEY     = aws_ssm_parameter.django_algolia_write_api_key.value
+    DJANGO_OPEN_AI_SECRET_KEY        = aws_ssm_parameter.django_open_ai_secret_key.value
+    DJANGO_SENTRY_DSN                = aws_ssm_parameter.django_sentry_dsn.value
+    DJANGO_SLACK_BOT_TOKEN           = aws_ssm_parameter.django_slack_bot_token.value
+    DJANGO_SLACK_SIGNING_SECRET      = aws_ssm_parameter.django_slack_signing_secret.value
+    GITHUB_TOKEN                     = aws_ssm_parameter.github_token.value
+    NEXT_SERVER_GITHUB_CLIENT_SECRET = aws_ssm_parameter.next_server_github_client_secret.value
+    },
+    var.enable_additional_parameters ? {
+      NEST_GITHUB_APP_PRIVATE_KEY                     = aws_ssm_parameter.nest_github_app_private_key[0].value
+      "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_ssm_parameter.slack_bot_token[0].value
+    } : {}
+  )
+}
+
 output "frontend_ssm_parameter_arns" {
   description = "Map of frontend environment variable names to the ARNs of all SSM parameters."
   sensitive   = true
@@ -46,4 +71,10 @@ output "frontend_ssm_parameter_arns" {
     "NEXTAUTH_SECRET"                  = aws_ssm_parameter.nextauth_secret.arn
     "NEXTAUTH_URL"                     = aws_ssm_parameter.nextauth_url.arn
   }
+}
+
+output "nextauth_secret" {
+  description = "The generated NextAuth secret used by the SSM parameter."
+  sensitive   = true
+  value       = random_string.nextauth_secret.result
 }

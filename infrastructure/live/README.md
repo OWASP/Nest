@@ -61,6 +61,7 @@ No providers.
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |
+| <a name="module_secrets"></a> [secrets](#module\_secrets) | ../modules/secrets | n/a |
 | <a name="module_security"></a> [security](#module\_security) | ../modules/security | n/a |
 | <a name="module_storage"></a> [storage](#module\_storage) | ../modules/storage | n/a |
 | <a name="module_tasks"></a> [tasks](#module\_tasks) | ../modules/tasks | n/a |
