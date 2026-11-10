@@ -1,4 +1,4 @@
-"""Exercise repository commit ingestion with real persistence and aggregation."""
+"""Exercise repository contribution ingestion with real persistence and aggregation."""
 
 from contextlib import closing
 from datetime import UTC, datetime, timedelta
@@ -14,6 +14,8 @@ from apps.core.utils.index import disable_indexing
 from apps.github import common
 from apps.github.common import sync_repository
 from apps.github.models.commit import Commit
+from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contribution_sync_state import RepositoryContributionSyncState
 from apps.github.models.user import User
@@ -218,7 +220,10 @@ def test_account_lookup_distinguishes_missing_from_forbidden(source, mocker, sta
         with pytest.raises(UnknownObjectException):
             run_sync(remote, repository)
         assert not repository.commits.exists()
-        assert repository.contribution_sync_states.get().covered_until is None
+        assert (
+            repository.contribution_sync_states.get(contribution_type="commits").covered_until
+            is None
+        )
         return
     run_sync(remote, repository)
     lookup.assert_called_once_with(account)
@@ -258,7 +263,7 @@ def test_partial_history_failure_keeps_checkpoint_and_retries_safely(source, moc
     ):
         cursor.execute(
             "SELECT pg_try_advisory_lock(hashtextextended(%s, 0))",
-            [f"nest:github:commit-sync:{repository.pk}"],
+            [f"nest:github:commits-sync:{repository.pk}"],
         )
         assert cursor.fetchone()[0]
 
@@ -342,14 +347,16 @@ def test_concurrent_repository_import_is_rejected_without_touching_checkpoint(so
     ):
         cursor.execute(
             "SELECT pg_advisory_lock(hashtextextended(%s, 0))",
-            [f"nest:github:commit-sync:{repository.pk}"],
+            [f"nest:github:commits-sync:{repository.pk}"],
         )
         with pytest.raises(RuntimeError, match="already running"):
             run_sync(remote, repository)
     remote.get_branch.assert_not_called()
     assert not repository.contribution_sync_states.exists()
     run_sync(remote, repository)
-    assert repository.contribution_sync_states.get().covered_until == END
+    assert (
+        repository.contribution_sync_states.get(contribution_type="commits").covered_until == END
+    )
 
 
 @pytest.mark.parametrize(("start", "end"), [(END.replace(tzinfo=None), END), (END, START)])
@@ -368,7 +375,7 @@ def test_failed_batch_rolls_back_and_does_not_advance_coverage(source):
     with pytest.raises(IntegrityError):
         run_sync(remote, repository)
     assert not repository.commits.exists()
-    state = repository.contribution_sync_states.get()
+    state = repository.contribution_sync_states.get(contribution_type="commits")
     assert state.covered_until is None
     assert state.last_head_sha == ""
     assert state.last_error == "Commit import failed: IntegrityError"
@@ -395,7 +402,7 @@ def test_failed_checkpoint_write_does_not_publish_a_new_head(source, mocker):
     with pytest.raises(DatabaseError, match="checkpoint write failure"):
         run_sync(remote, repository)
     assert repository.commits.count() == 1
-    state = repository.contribution_sync_states.get()
+    state = repository.contribution_sync_states.get(contribution_type="commits")
     assert state.covered_until is None
     assert state.covered_from is None
     assert state.last_head_sha == ""
@@ -610,4 +617,286 @@ def test_real_github_comparison_follows_pagination(source):
     common.sync_repository_commits(remote, repository)
     assert repository.commits.count() == 305
     assert requester.requestJsonAndCheck.call_count == 4
-    assert repository.contribution_sync_states.get().last_head_sha == "f" * 40
+    assert (
+        repository.contribution_sync_states.get(contribution_type="commits").last_head_sha
+        == "f" * 40
+    )
+
+
+@pytest.fixture(params=["issues", "pull_requests"])
+def activity(request):
+    if request.param == "issues":
+        return SimpleNamespace(
+            kind="issues", model=Issue, fetch="get_issues", sync=common.sync_repository_issues
+        )
+    return SimpleNamespace(
+        kind="pull_requests",
+        model=PullRequest,
+        fetch="get_pulls",
+        sync=common.sync_repository_pull_requests,
+    )
+
+
+def github_activity(key, *, created_at=None, updated_at=None):
+    return SimpleNamespace(
+        raw_data={"node_id": f"activity-{key}"},
+        body="Activity test",
+        comments=0,
+        closed_at=END,
+        created_at=created_at or END - timedelta(days=180),
+        updated_at=updated_at or END - timedelta(days=180),
+        locked=False,
+        active_lock_reason=None,
+        number=1,
+        id=1,
+        state="closed",
+        state_reason="completed",
+        title=f"Activity {key}",
+        html_url="https://github.com/example/repo/issues/1",
+        merged_at=None,
+        pull_request=None,
+        milestone=None,
+        user=None,
+        assignees=[],
+        labels=[],
+    )
+
+
+def activity_state(repository, kind):
+    return repository.contribution_sync_states.get(contribution_type=kind)
+
+
+def test_activity_backfill_is_independent_of_recent_rows(source, activity):
+    remote, repository = source
+    recent = github_activity("recent", created_at=END, updated_at=END)
+    activity.model.update_data(recent, repository=repository)
+    old = github_activity("old")
+    boundary = github_activity("boundary", created_at=START, updated_at=START)
+    outside = github_activity("outside", updated_at=START - timedelta(seconds=1))
+    getattr(remote, activity.fetch).return_value = [recent, old, boundary, outside]
+    activity.sync(remote, repository)
+    assert set(activity.model.objects.values_list("node_id", flat=True)) == {
+        "activity-recent",
+        "activity-old",
+        "activity-boundary",
+    }
+    state = activity_state(repository, activity.kind)
+    assert (state.covered_from, state.covered_until) == (START, END)
+    ids = set(activity.model.objects.values_list("pk", flat=True))
+    activity.sync(remote, repository)
+    assert set(activity.model.objects.values_list("pk", flat=True)) == ids
+
+
+def test_activity_uses_overlap_and_refreshes_old_contributions(source, activity):
+    remote, repository = source
+    state = RepositoryContributionSyncState.objects.create(
+        repository=repository,
+        contribution_type=activity.kind,
+        covered_from=START,
+        covered_until=END - timedelta(days=1),
+    )
+    cutoff = END - timedelta(days=2)
+    at_boundary = github_activity("boundary", created_at=START, updated_at=cutoff)
+    before_boundary = github_activity("before", updated_at=cutoff - timedelta(seconds=1))
+    getattr(remote, activity.fetch).return_value = [at_boundary, before_boundary]
+    activity.sync(remote, repository)
+    assert activity.model.objects.get().node_id == "activity-boundary"
+    at_boundary.title = "Refreshed title"
+    at_boundary.updated_at = END
+    activity.sync(remote, repository)
+    assert activity.model.objects.get().title == "Refreshed title"
+    state.refresh_from_db()
+    assert state.covered_until == END
+    getattr(remote, activity.fetch).assert_called_with(
+        direction="desc", sort="updated", state="all"
+    )
+
+
+@pytest.mark.parametrize("reason", ["force", "older_period", "gap"])
+def test_activity_backfills_when_checkpoint_cannot_cover_request(source, activity, reason):
+    remote, repository = source
+    previous_end = END - timedelta(days=400) if reason == "gap" else END - timedelta(days=1)
+    RepositoryContributionSyncState.objects.create(
+        repository=repository,
+        contribution_type=activity.kind,
+        covered_from=previous_end - timedelta(days=365),
+        covered_until=previous_end,
+    )
+    kwargs = {}
+    if reason == "force":
+        kwargs["force"] = True
+    elif reason == "older_period":
+        kwargs["start_at"] = START - timedelta(days=500)
+    # The old requested period must be earlier than the existing coverage.
+    old = github_activity("backfill", updated_at=START)
+    getattr(remote, activity.fetch).return_value = [old]
+    activity.sync(remote, repository, **kwargs)
+    assert activity.model.objects.get().node_id == "activity-backfill"
+    assert activity_state(repository, activity.kind).covered_from == kwargs.get("start_at", START)
+
+
+def test_activity_interrupted_initial_backfill_retries_from_original_start(source, activity):
+    remote, repository = source
+
+    def interrupted():
+        yield github_activity("recent", updated_at=END)
+        message = "sensitive-source-response"
+        raise RuntimeError(message)
+
+    getattr(remote, activity.fetch).return_value = interrupted()
+    with pytest.raises(RuntimeError, match="sensitive-source-response"):
+        activity.sync(remote, repository)
+    first = activity.model.objects.get()
+    state = activity_state(repository, activity.kind)
+    assert state.covered_from is None
+    assert state.covered_until is None
+    assert state.last_error == "Activity import failed: RuntimeError"
+    getattr(remote, activity.fetch).return_value = [
+        github_activity("recent", updated_at=END),
+        github_activity("old"),
+    ]
+    activity.sync(remote, repository)
+    assert activity.model.objects.count() == 2
+    assert activity.model.objects.get(node_id="activity-recent").pk == first.pk
+    state.refresh_from_db()
+    assert state.covered_until == END
+    assert state.last_error == ""
+
+
+def test_activity_failed_incremental_sync_preserves_successful_checkpoint(source, activity):
+    remote, repository = source
+    state = RepositoryContributionSyncState.objects.create(
+        repository=repository,
+        contribution_type=activity.kind,
+        covered_from=START,
+        covered_until=END - timedelta(days=1),
+    )
+    getattr(remote, activity.fetch).side_effect = GithubException(403, {"message": "private"})
+    with pytest.raises(GithubException):
+        activity.sync(remote, repository)
+    state.refresh_from_db()
+    assert (state.covered_from, state.covered_until) == (START, END - timedelta(days=1))
+    assert "private" not in state.last_error
+
+
+def test_activity_empty_history_records_successful_coverage(source, activity):
+    remote, repository = source
+    activity.sync(remote, repository)
+    assert activity_state(repository, activity.kind).covered_until == END
+    assert activity.model.objects.count() == 0
+
+
+def test_normal_sync_imports_archived_issue_and_pull_request_history(source):
+    remote, repository = source
+    repository.is_archived = True
+    repository.save()
+    remote.get_issues.return_value = [github_activity("issue")]
+    remote.get_pulls.return_value = [github_activity("pr")]
+    run_sync(remote, repository)
+    assert repository.issues.count() == repository.pull_requests.count() == 1
+    assert repository.contribution_sync_states.filter(covered_until=END).count() == 3
+    remote.get_milestones.assert_not_called()
+
+
+def test_disabled_issue_tracking_does_not_claim_coverage_or_block_pull_requests(source):
+    remote, repository = source
+    repository.track_issues = False
+    repository.save()
+    remote.get_pulls.return_value = [github_activity("pr")]
+    run_sync(remote, repository)
+    assert not repository.contribution_sync_states.filter(contribution_type="issues").exists()
+    assert repository.pull_requests.count() == 1
+    remote.get_issues.assert_not_called()
+
+
+def test_issue_endpoint_pull_requests_do_not_become_issue_records(source):
+    remote, repository = source
+    pr = github_activity("pr")
+    pr.pull_request = True
+    remote.get_issues.return_value = [pr, github_activity("issue")]
+    common.sync_repository_issues(remote, repository)
+    assert repository.issues.get().node_id == "activity-issue"
+
+
+def test_activity_checkpoint_write_failure_remains_retryable(source, activity, mocker):
+    remote, repository = source
+    getattr(remote, activity.fetch).return_value = [github_activity("saved")]
+    original_save = RepositoryContributionSyncState.save
+
+    def fail_checkpoint(state, *args, **kwargs):
+        if "covered_until" in kwargs.get("update_fields", ()):
+            message = "checkpoint unavailable"
+            raise DatabaseError(message)
+        return original_save(state, *args, **kwargs)
+
+    mocker.patch.object(RepositoryContributionSyncState, "save", new=fail_checkpoint)
+    with pytest.raises(DatabaseError, match="checkpoint unavailable"):
+        activity.sync(remote, repository)
+    assert activity.model.objects.count() == 1
+    state = activity_state(repository, activity.kind)
+    assert state.covered_until is None
+    assert state.last_error == "Activity import failed: DatabaseError"
+
+
+@pytest.mark.parametrize(("start", "end"), [(END.replace(tzinfo=None), END), (END, START)])
+def test_activity_rejects_invalid_period_without_checkpoint(source, activity, start, end):
+    remote, repository = source
+    with pytest.raises(ValueError, match="timezone-aware"):
+        activity.sync(remote, repository, start_at=start, end_at=end)
+    assert not repository.contribution_sync_states.exists()
+
+
+def test_activity_lock_rejects_concurrent_collection(source, activity):
+    remote, repository = source
+    with (
+        closing(connection.Database.connect(**connection.get_connection_params())) as other,
+        other.cursor() as cursor,
+    ):
+        cursor.execute(
+            "SELECT pg_advisory_lock(hashtextextended(%s, 0))",
+            [f"nest:github:{activity.kind}-sync:{repository.pk}"],
+        )
+        with pytest.raises(RuntimeError, match="already running"):
+            activity.sync(remote, repository)
+    assert not repository.contribution_sync_states.exists()
+    getattr(remote, activity.fetch).assert_not_called()
+    activity.sync(remote, repository)
+    assert activity_state(repository, activity.kind).covered_until == END
+
+
+def test_project_issue_tracking_setting_is_preserved(source):
+    remote, repository = source
+    project = Project.objects.create(
+        key="www-project-disabled-issues",
+        name="Disabled issues",
+        summary="Test",
+        owasp_repository=repository,
+        track_issues=False,
+    )
+    project.repositories.add(repository)
+    common.sync_repository_issues(remote, repository)
+    remote.get_issues.assert_not_called()
+    assert not repository.contribution_sync_states.exists()
+
+
+def test_normal_sync_activity_reaches_project_aggregation(source, mocker):
+    remote, repository = source
+    # Preserve the existing model save behavior without invoking AI in a synthetic test.
+    mocker.patch.object(Issue, "generate_hint")
+    mocker.patch.object(Issue, "generate_summary")
+    issue = github_activity("open")
+    issue.state = "open"
+    issue.closed_at = None
+    remote.get_issues.return_value = [issue, github_activity("closed")]
+    remote.get_pulls.return_value = [github_activity("pr")]
+    project = Project.objects.create(
+        key="www-project-activity",
+        name="Activity",
+        summary="Test",
+        owasp_repository=repository,
+    )
+    run_sync(remote, repository)
+    _, stats = Command().aggregate_contributions(project, START, END)
+    assert stats["issues"] == 2
+    assert stats["pull_requests"] == 1
+    assert repository.issues.filter(state="open").count() == 1

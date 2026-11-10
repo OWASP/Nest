@@ -38,14 +38,14 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 @contextmanager
-def _repository_commit_sync_lock(repository):
-    """Serialize a repository's commit imports without a long database transaction."""
-    key = f"nest:github:commit-sync:{repository.pk}"
+def _repository_contribution_sync_lock(repository, contribution_type):
+    """Serialize imports of one contribution type without a long transaction."""
+    key = f"nest:github:{contribution_type}-sync:{repository.pk}"
     with connection.cursor() as cursor:
         cursor.execute("SELECT pg_try_advisory_lock(hashtextextended(%s, 0))", [key])
         acquired = cursor.fetchone()[0]
     if not acquired:
-        message = "Commit synchronization is already running for this repository"
+        message = "Contribution synchronization is already running for this repository"
         raise RuntimeError(message)
     try:
         yield
@@ -183,7 +183,7 @@ def sync_repository_commits(
         message = "Commit sync requires an ordered timezone-aware period"
         raise ValueError(message)
     start_at, end_at = start_at.astimezone(UTC), end_at.astimezone(UTC)
-    with _repository_commit_sync_lock(repository):
+    with _repository_contribution_sync_lock(repository, "commits"):
         state, _ = RepositoryContributionSyncState.objects.get_or_create(
             repository=repository, contribution_type="commits"
         )
@@ -222,6 +222,139 @@ def sync_repository_commits(
             with suppress(DatabaseError):
                 state.save(update_fields=("last_error", "nest_updated_at"))
             raise
+
+
+@contextmanager
+def _repository_activity_sync(
+    repository, contribution_type, *, start_at=None, end_at=None, force=False
+):
+    """Choose a verified update cutoff and publish coverage only on full success."""
+    end_at = end_at or timezone.now()
+    start_at = start_at or end_at - td(days=365)
+    if timezone.is_naive(start_at) or timezone.is_naive(end_at) or start_at > end_at:
+        message = "Activity sync requires an ordered timezone-aware period"
+        raise ValueError(message)
+    start_at, end_at = start_at.astimezone(UTC), end_at.astimezone(UTC)
+    with _repository_contribution_sync_lock(repository, contribution_type):
+        state, _ = RepositoryContributionSyncState.objects.get_or_create(
+            repository=repository, contribution_type=contribution_type
+        )
+        state.last_attempt_at = end_at
+        state.save(update_fields=("last_attempt_at", "nest_updated_at"))
+        cutoff = start_at
+        if (
+            not force
+            and state.covered_from is not None
+            and state.covered_until is not None
+            and state.covered_from <= start_at <= state.covered_until
+        ):
+            cutoff = max(start_at, min(end_at, state.covered_until) - td(days=1))
+        try:
+            yield cutoff
+            state.covered_from = start_at
+            state.covered_until = end_at
+            state.last_error = ""
+            state.save(
+                update_fields=("covered_from", "covered_until", "last_error", "nest_updated_at")
+            )
+        except Exception as error:
+            state.last_error = f"Activity import failed: {type(error).__name__}"
+            with suppress(DatabaseError):
+                state.save(update_fields=("last_error", "nest_updated_at"))
+            raise
+
+
+def sync_repository_issues(gh_repository, repository, *, start_at=None, end_at=None, force=False):
+    """Backfill issues independently of any recently saved individual issue."""
+    project_track_issues = repository.project.track_issues if repository.project else True
+    if not repository.track_issues or not project_track_issues:
+        logger.info("Skipping issues sync for %s", repository.name)
+        return
+    with _repository_activity_sync(
+        repository, "issues", start_at=start_at, end_at=end_at, force=force
+    ) as cutoff:
+        kwargs = {"direction": "desc", "sort": "updated", "state": "all"}
+        for gh_issue in gh_repository.get_issues(**kwargs):
+            if gh_issue.pull_request:  # Skip pull requests.
+                continue
+
+            if gh_issue.updated_at < cutoff:
+                break
+
+            author = User.update_data(gh_issue.user) if gh_issue.user else None
+
+            # Milestone
+            milestone = None
+            if gh_issue.milestone:
+                milestone = Milestone.update_data(
+                    gh_issue.milestone,
+                    author=User.update_data(gh_issue.milestone.creator),
+                    repository=repository,
+                )
+            issue = Issue.update_data(
+                gh_issue,
+                author=author,
+                milestone=milestone,
+                repository=repository,
+            )
+
+            # Assignees.
+            issue.assignees.clear()
+            for gh_issue_assignee in gh_issue.assignees:
+                if issue_assignee := User.update_data(gh_issue_assignee):
+                    issue.assignees.add(issue_assignee)
+
+            # Labels.
+            issue.labels.clear()
+            for gh_issue_label in gh_issue.labels:
+                try:
+                    issue.labels.add(Label.update_data(gh_issue_label))
+                except UnknownObjectException:
+                    logger.exception("Couldn't get GitHub issue label %s", issue.url)
+
+
+def sync_repository_pull_requests(
+    gh_repository, repository, *, start_at=None, end_at=None, force=False
+):
+    """Backfill pull requests and overlap subsequent update scans by one day."""
+    with _repository_activity_sync(
+        repository, "pull_requests", start_at=start_at, end_at=end_at, force=force
+    ) as cutoff:
+        kwargs = {"direction": "desc", "sort": "updated", "state": "all"}
+        for gh_pull_request in gh_repository.get_pulls(**kwargs):
+            if gh_pull_request.updated_at < cutoff:
+                break
+
+            author = User.update_data(gh_pull_request.user) if gh_pull_request.user else None
+
+            # Milestone
+            milestone = None
+            if gh_pull_request.milestone:
+                milestone = Milestone.update_data(
+                    gh_pull_request.milestone,
+                    author=User.update_data(gh_pull_request.milestone.creator),
+                    repository=repository,
+                )
+            pull_request = PullRequest.update_data(
+                gh_pull_request,
+                author=author,
+                milestone=milestone,
+                repository=repository,
+            )
+
+            # Assignees.
+            pull_request.assignees.clear()
+            for gh_pull_request_assignee in gh_pull_request.assignees:
+                if pull_request_assignee := User.update_data(gh_pull_request_assignee):
+                    pull_request.assignees.add(pull_request_assignee)
+
+            # Labels.
+            pull_request.labels.clear()
+            for gh_pull_request_label in gh_pull_request.labels:
+                try:
+                    pull_request.labels.add(Label.update_data(gh_pull_request_label))
+                except UnknownObjectException:
+                    logger.exception("Couldn't get GitHub pull request label %s", pull_request.url)
 
 
 def sync_repository(
@@ -300,106 +433,8 @@ def sync_repository(
                 except UnknownObjectException:
                     logger.exception("Couldn't get GitHub milestone label %s", milestone.url)
 
-        # GitHub repository issues.
-        project_track_issues = repository.project.track_issues if repository.project else True
-        month_ago = timezone.now() - td(days=30)
-
-        if repository.track_issues and project_track_issues:
-            kwargs = {
-                "direction": "desc",
-                "sort": "updated",
-                "state": "all",
-            }
-            until = (
-                latest_updated_issue.updated_at
-                if (latest_updated_issue := repository.latest_updated_issue)
-                else month_ago
-            )
-            for gh_issue in gh_repository.get_issues(**kwargs):
-                if gh_issue.pull_request:  # Skip pull requests.
-                    continue
-
-                if gh_issue.updated_at < until:
-                    break
-
-                author = User.update_data(gh_issue.user)
-
-                # Milestone
-                milestone = None
-                if gh_issue.milestone:
-                    milestone = Milestone.update_data(
-                        gh_issue.milestone,
-                        author=User.update_data(gh_issue.milestone.creator),
-                        repository=repository,
-                    )
-                issue = Issue.update_data(
-                    gh_issue,
-                    author=author,
-                    milestone=milestone,
-                    repository=repository,
-                )
-
-                # Assignees.
-                issue.assignees.clear()
-                for gh_issue_assignee in gh_issue.assignees:
-                    if issue_assignee := User.update_data(gh_issue_assignee):
-                        issue.assignees.add(issue_assignee)
-
-                # Labels.
-                issue.labels.clear()
-                for gh_issue_label in gh_issue.labels:
-                    try:
-                        issue.labels.add(Label.update_data(gh_issue_label))
-                    except UnknownObjectException:
-                        logger.exception("Couldn't get GitHub issue label %s", issue.url)
-        else:
-            logger.info("Skipping issues sync for %s", repository.name)
-
-        # GitHub repository pull requests.
-        kwargs = {
-            "direction": "desc",
-            "sort": "updated",
-            "state": "all",
-        }
-        until = (
-            latest_updated_pull_request.updated_at
-            if (latest_updated_pull_request := repository.latest_updated_pull_request)
-            else month_ago
-        )
-        for gh_pull_request in gh_repository.get_pulls(**kwargs):
-            if gh_pull_request.updated_at < until:
-                break
-
-            author = User.update_data(gh_pull_request.user)
-
-            # Milestone
-            milestone = None
-            if gh_pull_request.milestone:
-                milestone = Milestone.update_data(
-                    gh_pull_request.milestone,
-                    author=User.update_data(gh_pull_request.milestone.creator),
-                    repository=repository,
-                )
-            pull_request = PullRequest.update_data(
-                gh_pull_request,
-                author=author,
-                milestone=milestone,
-                repository=repository,
-            )
-
-            # Assignees.
-            pull_request.assignees.clear()
-            for gh_pull_request_assignee in gh_pull_request.assignees:
-                if pull_request_assignee := User.update_data(gh_pull_request_assignee):
-                    pull_request.assignees.add(pull_request_assignee)
-
-            # Labels.
-            pull_request.labels.clear()
-            for gh_pull_request_label in gh_pull_request.labels:
-                try:
-                    pull_request.labels.add(Label.update_data(gh_pull_request_label))
-                except UnknownObjectException:
-                    logger.exception("Couldn't get GitHub pull request label %s", pull_request.url)
+    sync_repository_issues(gh_repository, repository, end_at=contribution_end)
+    sync_repository_pull_requests(gh_repository, repository, end_at=contribution_end)
 
     # GitHub repository releases.
     releases = []
