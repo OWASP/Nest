@@ -271,6 +271,31 @@ class TestAlgoliaSearch:
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert response_data["error"] == "An internal error occurred. Please try again later."
 
+    def test_algolia_search_falls_back_when_sorted_replica_is_missing(self, mock_redis_cache):
+        """Test that a missing sorted replica falls back to the base index."""
+        fallback_result = {"hits": [{"id": 1}], "nbPages": 1}
+
+        with patch(
+            "apps.core.api.internal.algolia.get_search_results",
+            side_effect=[AlgoliaException("Index does not exist"), fallback_result],
+        ) as mock_get_search_results:
+            mock_request = self._build_request(
+                index_name="programs_created_at_desc",
+                query="",
+                page=1,
+                hits_per_page=24,
+                facet_filters=[],
+            )
+
+            response = algolia_search(mock_request)
+            response_data = json.loads(response.content)
+
+        assert response.status_code == HTTPStatus.OK
+        assert response_data == fallback_result
+        assert mock_get_search_results.call_args_list[0].args[0] == "programs_created_at_desc"
+        assert mock_get_search_results.call_args_list[1].args[0] == "programs"
+        mock_redis_cache.set.assert_not_called()
+
     def test_algolia_search_handles_json_decode_error(self):
         """Test that JSONDecodeError is caught and proper error returned."""
         mock_request = Mock()
