@@ -116,6 +116,9 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         </div>
 
         <div className="ml-auto flex items-center justify-normal gap-1.5 lg:gap-4 lg:pl-4">
+          <div className="flex md:hidden">
+            <ModeToggle />
+          </div>
           <GlobalSearch />
           <div className="hidden md:flex">
             <NavButton
@@ -141,11 +144,13 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="hidden md:flex">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
-          <ModeToggle />
+          <div className="hidden md:flex">
+            <ModeToggle />
+          </div>
           <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="-ml-1 flex h-11 w-11 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="flex h-8.5 w-8.5 min-w-0 items-center justify-center rounded-lg bg-transparent p-0 text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
