@@ -41,6 +41,7 @@ minimumReleaseAgeExclude:
   - '@img/sharp-win32-arm64@0.35.5'
   - '@img/sharp-win32-ia32@0.35.5'
   - '@img/sharp-win32-x64@0.35.5'
+  - '@isaacs/nonrecursive-glob-match@1.0.1'
   - '@next/env@16.4.3'
   - '@next/swc-darwin-arm64@16.4.3'
   - '@next/swc-darwin-x64@16.4.3'
@@ -66,15 +67,18 @@ minimumReleaseAgeExclude:
   - enhanced-resolve@5.24.3
   - es-module-lexer@2.3.1
   - fast-uri@3.1.9
+  - glob@14.0.2
   - immutable@5.1.8
   - ip-address@10.7.4
   - js-yaml@4.3.2
   - markdown-it@15.0.3
+  - minimatch@11.0.1
   - modern-tar@0.8.6
   - nanoid@3.3.18
   - next-auth@4.24.15
   - next@16.4.3
   - node-releases@2.0.51
+  - path-scurry@3.0.0
   - postcss@8.5.23
   - protobufjs@7.6.4
   - proxy-addr@2.0.8
@@ -113,11 +117,14 @@ overrides:
   dompurify: 3.4.17
   # GHSA-333x-w4r6-6crp, GHSA-w74x-v6f9-j3xg, GHSA-wjr9-j795-jxcr, GHSA-xhq7-xmqj-769h: fixed in 3.1.9.
   fast-uri: 3.1.9
-  glob: 11.1.0
+  # GHSA-3g3m-2fjr-6pw4: stop filesystem traversal after cancellation.
+  glob: 14.0.2
   immutable: 5.1.8
   # GHSA-rxp7-6hxx-x8q5: fixed in 10.7.4.
   ip-address: 10.7.4
   js-yaml: 4.3.2
+  # GHSA-g3hv-75wg-m249: fixed in 11.0.1; keep unaffected minimatch 3.x callers.
+  minimatch@10: 11.0.1
   nanoid@3: 3.3.18
   postcss: 8.5.23
   protobufjs: 7.6.4
