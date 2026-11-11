@@ -44,5 +44,5 @@ class OpenIssueManager(models.Manager):
 
     @property
     def without_summary(self) -> models.QuerySet:
-        """Return issues without summary."""
-        return self.get_queryset().filter(summary="")
+        """Return issues without an AI-generated summary."""
+        return self.get_queryset().filter(is_summary_generated=False)
