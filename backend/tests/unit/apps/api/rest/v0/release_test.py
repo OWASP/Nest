@@ -1,12 +1,13 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from http import HTTPStatus
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from django.core.cache import cache
+from django.test import Client
 from ninja.responses import Response
-from ninja.testing import TestClient
 
-from apps.api.rest.v0 import api
 from apps.api.rest.v0.release import (
     ReleaseDetail,
     ReleaseFilter,
@@ -175,16 +176,15 @@ class TestGetRelease:
         assert result.status_code == HTTPStatus.NOT_FOUND
 
     @pytest.mark.parametrize(
-        ("tag_input", "expected_tag"),
+        "tag_name",
         [
-            ("gopls/v0.24.0", "gopls/v0.24.0"),
-            ("gopls%2Fv0.24.0", "gopls/v0.24.0"),
-            ("helm/chart/v1.2.3", "helm/chart/v1.2.3"),
-            ("helm%2Fchart%2Fv1.2.3", "helm/chart/v1.2.3"),
+            "gopls/v0.24.0",
+            "helm/chart/v1.2.3",
+            "gopls%2Fv0.24.0",
         ],
     )
-    def test_get_release_with_slash_in_tag_name(self, mocker, tag_input, expected_tag):
-        """Test getting a release whose tag contains slashes or URL-encoded slashes."""
+    def test_get_release_with_slash_in_tag_name(self, mocker, tag_name):
+        """Test getting a release passes slash and literal percent tags directly."""
         mock_release = MagicMock()
         mock_qs = MagicMock()
         mock_qs.get.return_value = mock_release
@@ -194,13 +194,13 @@ class TestGetRelease:
         )
 
         request = MagicMock()
-        result = get_release(request, "golang", "tools", tag_input)
+        result = get_release(request, "golang", "tools", tag_name)
 
         assert result == mock_release
         mock_qs.get.assert_called_once_with(
             repository__organization__login__iexact="golang",
             repository__name__iexact="tools",
-            tag_name=expected_tag,
+            tag_name=tag_name,
         )
 
 
@@ -208,16 +208,60 @@ class TestReleaseRouteResolution:
     """Tests for release route URL resolution."""
 
     @pytest.mark.parametrize(
-        "url_path",
+        ("url_path", "expected_org", "expected_repo", "expected_tag"),
         [
-            "/releases/OWASP/Nest/v1.0.0",
-            "/releases/golang/tools/gopls/v0.24.0",
-            "/releases/golang/tools/gopls%2Fv0.24.0",
-            "/releases/helm/charts/stable/redis/v1.0.0",
+            ("/api/v0/releases/OWASP/Nest/v1.0.0", "OWASP", "Nest", "v1.0.0"),
+            ("/api/v0/releases/golang/tools/gopls/v0.24.0", "golang", "tools", "gopls/v0.24.0"),
+            (
+                "/api/v0/releases/golang/tools/gopls%2Fv0.24.0",
+                "golang",
+                "tools",
+                "gopls/v0.24.0",
+            ),
+            (
+                "/api/v0/releases/golang/tools/gopls%252Fv0.24.0",
+                "golang",
+                "tools",
+                "gopls%2Fv0.24.0",
+            ),
+            (
+                "/api/v0/releases/helm/charts/stable/redis/v1.0.0",
+                "helm",
+                "charts",
+                "stable/redis/v1.0.0",
+            ),
         ],
     )
-    def test_release_detail_route_resolves_tags_with_slashes(self, url_path):
-        """Test that release detail route correctly resolves paths with tags containing slashes."""
-        client = TestClient(api)
-        response = client.get(url_path)
-        assert response.status_code != HTTPStatus.NOT_FOUND
+    def test_release_detail_route_resolves_tags_with_slashes(
+        self, mocker, url_path, expected_org, expected_repo, expected_tag
+    ):
+        """Test that release detail route resolves slash and percent-encoded tags accurately."""
+        cache.clear()
+        release = SimpleNamespace(
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+            description="Release notes",
+            name=expected_tag,
+            published_at=datetime(2024, 1, 1, tzinfo=UTC),
+            tag_name=expected_tag,
+        )
+        mock_qs = MagicMock()
+        mock_qs.get.return_value = release
+        mocker.patch(
+            "apps.api.rest.auth.api_key.ApiKeyModel.authenticate",
+            return_value=MagicMock(),
+        )
+        mocker.patch(
+            "apps.api.rest.v0.release.ReleaseModel.objects",
+            mock_qs,
+        )
+
+        client = Client()
+        response = client.get(url_path, headers={"X-API-Key": "test-key"})
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()["tag_name"] == expected_tag
+        mock_qs.get.assert_called_once_with(
+            repository__organization__login__iexact=expected_org,
+            repository__name__iexact=expected_repo,
+            tag_name=expected_tag,
+        )

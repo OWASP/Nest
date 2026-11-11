@@ -3,7 +3,6 @@
 from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
-from urllib.parse import unquote
 
 from django.http import HttpRequest
 from ninja import Field, FilterSchema, Path, Query, Schema
@@ -123,7 +122,7 @@ def get_release(
         return ReleaseModel.objects.get(
             repository__organization__login__iexact=organization_id,
             repository__name__iexact=repository_id,
-            tag_name=unquote(release_id),
+            tag_name=release_id,
         )
     except ReleaseModel.DoesNotExist:
         return Response({"message": "Release not found"}, status=HTTPStatus.NOT_FOUND)
