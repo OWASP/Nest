@@ -82,3 +82,84 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         assert mock_metric.score == EXPECTED_SCORE
         assert "Updated project health scores successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
+    def test_handle_skips_project_without_health_requirements(self):
+        """Test projects without health requirements are skipped."""
+        mock_metric = MagicMock(spec=ProjectHealthMetrics)
+        mock_metric.project.level = "missing_level"
+        mock_metric.project.name = "Test Project"
+        mock_requirements = MagicMock(spec=ProjectHealthRequirements)
+        mock_requirements.level = "test_level"
+        self.mock_metrics.return_value.select_related.return_value = [mock_metric]
+        self.mock_requirements.return_value = [mock_requirements]
+
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_scores")
+
+        self.mock_bulk_save.assert_called_once_with(
+            [],
+            fields=[
+                "score",
+            ],
+        )
+        assert (
+            "Skipping project Test Project: "
+            "no health requirements found for level missing_level"
+            in self.stdout.getvalue()
+        )
+        assert "Updating score for project: Test Project" not in self.stdout.getvalue()
+        assert "Updated project health scores successfully." in self.stdout.getvalue()
+
+    def test_handle_updates_other_projects_when_requirements_missing(self):
+        """Test other projects are still updated when one is skipped."""
+        fields_weights = {
+            "age_days": (5, 6),
+            "contributors_count": (5, 6),
+            "forks_count": (5, 6),
+            "last_release_days": (5, 6),
+            "last_commit_days": (5, 6),
+            "open_issues_count": (7, 6),
+            "open_pull_requests_count": (5, 6),
+            "owasp_page_last_update_days": (5, 6),
+            "last_pull_request_days": (5, 6),
+            "recent_releases_count": (5, 6),
+            "stars_count": (5, 6),
+            "total_pull_requests_count": (5, 6),
+            "total_releases_count": (5, 6),
+            "unanswered_issues_count": (7, 6),
+            "unassigned_issues_count": (7, 6),
+        }
+
+        skipped_metric = MagicMock(spec=ProjectHealthMetrics)
+        skipped_metric.project.level = "missing_level"
+        skipped_metric.project.name = "Skipped Project"
+
+        mock_metric = MagicMock(spec=ProjectHealthMetrics)
+        mock_requirements = MagicMock(spec=ProjectHealthRequirements)
+        for field, (metric_weight, requirement_weight) in fields_weights.items():
+            setattr(mock_metric, field, metric_weight)
+            setattr(mock_requirements, field, requirement_weight)
+        mock_metric.project.level = "test_level"
+        mock_metric.project.name = "Test Project"
+        mock_metric.is_funding_requirements_compliant = True
+        mock_metric.is_leader_requirements_compliant = True
+        mock_requirements.level = "test_level"
+
+        self.mock_metrics.return_value.select_related.return_value = [
+            skipped_metric,
+            mock_metric,
+        ]
+        self.mock_requirements.return_value = [mock_requirements]
+
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_scores")
+
+        self.mock_bulk_save.assert_called_once_with(
+            [mock_metric],
+            fields=[
+                "score",
+            ],
+        )
+        assert mock_metric.score == EXPECTED_SCORE
+        assert "Skipping project Skipped Project" in self.stdout.getvalue()
+        assert "Updating score for project: Test Project" in self.stdout.getvalue()
+        assert "Updated project health scores successfully." in self.stdout.getvalue()
