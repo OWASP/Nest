@@ -100,7 +100,7 @@ def list_release(
 
 
 @router.get(
-    "/{str:organization_id}/{str:repository_id}/{str:release_id}",
+    "/{str:organization_id}/{str:repository_id}/{path:release_id}",
     description="Retrieve a specific GitHub release by organization, repository, and tag name.",
     operation_id="get_release",
     response={
