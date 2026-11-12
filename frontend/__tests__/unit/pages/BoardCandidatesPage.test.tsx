@@ -1,5 +1,6 @@
 import { useQuery, useApolloClient } from '@apollo/client/react'
 import { screen, waitFor } from '@testing-library/react'
+import { notFound } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import BoardCandidatesPage from 'app/board/[year]/candidates/page'
 import {
@@ -16,6 +17,7 @@ jest.mock('@apollo/client/react', () => ({
 }))
 
 jest.mock('next/navigation', () => ({
+  notFound: jest.fn(() => { throw new Error('notFound') }),
   useParams: jest.fn(() => ({ year: '2025' })),
 }))
 
@@ -74,6 +76,7 @@ const mockBoardData = {
 
 const mockUseQuery = useQuery as unknown as jest.Mock
 const mockUseApolloClient = useApolloClient as unknown as jest.Mock
+const mockNotFound = notFound as unknown as jest.Mock
 
 describe('BoardCandidatesPage', () => {
   beforeEach(() => {
@@ -119,7 +122,7 @@ describe('BoardCandidatesPage', () => {
     expect(loadingIndicators.length).toBeGreaterThan(0)
   })
 
-  test('renders 404 when board data is missing', async () => {
+  test('calls notFound when board data is missing', () => {
     mockUseQuery.mockImplementation((document: unknown) => {
       if (document === GetBoardCandidatesDocument) {
         return { data: null, loading: false, error: null }
@@ -127,12 +130,8 @@ describe('BoardCandidatesPage', () => {
       return { data: { memberSnapshot: null }, loading: false, error: null }
     })
 
-    render(<BoardCandidatesPage />)
-
-    await waitFor(() => {
-      expect(screen.getByTestId('error-display')).toBeInTheDocument()
-    })
-    expect(screen.getByTestId('error-title')).toHaveTextContent('Board not found')
+    expect(() => render(<BoardCandidatesPage />)).toThrow('notFound')
+    expect(mockNotFound).toHaveBeenCalled()
   })
 
   test('renders page title and year when board exists', async () => {
