@@ -35,3 +35,59 @@ def observe_stage(name, function, events):
             return result
 
     return wrapped
+
+@contextmanager
+def observe_flow():
+    """Observe one sequential evaluation with semantic caching bypassed."""
+
+    events = []
+    original_log_exception = assistant.logger.exception
+
+    def record_logged_error(message, *args , **kwargs):
+        error = sys.exception()
+        events.append(
+            {
+            "stage": "logged_error",
+                "message": str(message),
+                "error": (
+                    f"{type(error).__name__}: {error}"
+                    if error is not None
+                    else None
+                ),
+            }
+        )
+        return original_log_exception(message, *args, **kwargs)
+
+    with ExitStack() as stack: 
+        stack.enter_context(
+            patch.object(assistant, "get_catched_response", return_value=None)
+            
+        )
+        stack.enter_context(
+            patch.object(assistant, "store_cached_response", return_value=None)
+        )
+        stack.enter_context(
+            patch.object(
+                assistant.logger,
+                "exception",
+                new=record_logged_error,
+            )
+        )
+
+        for name in (
+            "process_query",
+            "analyze_query",
+            "route",
+            "handle_collaborative_query",
+            "execute_task",
+        ):
+            function = getattr(assistant, name)
+            stack.enter_context(
+                patch.object(
+                    assistant,
+                    name,
+                    new=observe_stage(name, function, events),
+                )
+            )
+
+            yield events
