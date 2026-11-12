@@ -55,7 +55,7 @@ class IssueQuery:
                     rank=Window(
                         expression=Rank(),
                         partition_by=[F("author_id")],
-                        order_by=F("created_at").desc(),
+                        order_by=[F("created_at").desc(), F("id").desc()],
                     )
                 )
                 .filter(rank=1)
