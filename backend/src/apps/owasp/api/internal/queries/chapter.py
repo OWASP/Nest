@@ -34,4 +34,4 @@ class ChapterQuery:
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return Chapter.active_chapters.order_by("-created_at")[:normalized_limit]
+        return Chapter.active_chapters.exclude(created_at__isnull=True).order_by("-created_at")[:normalized_limit]

@@ -45,7 +45,7 @@ class ProjectQuery:
         if (normalized_limit := normalize_limit(limit, MAX_RECENT_PROJECTS_LIMIT)) is None:
             return []
 
-        return Project.objects.filter(is_active=True).order_by("-created_at")[:normalized_limit]
+        return Project.objects.filter(is_active=True).exclude(created_at__isnull=True).order_by("-created_at")[:normalized_limit]
 
     @strawberry_django.field
     def search_projects(self, query: str) -> list[ProjectNode]:
