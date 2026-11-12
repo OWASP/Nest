@@ -2,7 +2,7 @@ ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
 # Keep hashicorp/terraform digest in sync with docker/code-checks/Dockerfile.
-FROM hashicorp/terraform:1.16.6@sha256:bfffc1ded5fbf0a17beaaf22eb4793980abdb19d0761ff6a3a0efb2ab4d9b316 AS terraform
+FROM hashicorp/terraform:1.17.0@sha256:4d1b496a256f2989bccdb04b9104a4ede97234b10fba90259e173e905ec4fb58 AS terraform
 FROM python:3.13.16-alpine3.23@sha256:07b20c774a247152e74f622034c1482495d299e070eec620ddff13e01264290b AS builder
 
 ARG OWASP_GID
