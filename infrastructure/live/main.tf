@@ -246,16 +246,6 @@ module "nestbot_worker" {
   use_fargate_spot     = false
 }
 
-moved {
-  from = module.nestbot[0].aws_ecs_task_definition.worker[0]
-  to   = module.nestbot_worker[0].aws_ecs_task_definition.main
-}
-
-moved {
-  from = module.nestbot[0].aws_ecs_service.worker[0]
-  to   = module.nestbot_worker[0].aws_ecs_service.main
-}
-
 module "nestbot_build_cache" {
   source = "../modules/ecr-cache"
   count  = local.nestbot_enabled ? 1 : 0
