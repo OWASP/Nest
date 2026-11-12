@@ -93,8 +93,8 @@ def get_blocks(
         )
 
         updated_text = (
-            f"_Updated {natural_date(int(project['idx_updated_at']))}_{NL}"
-            if presentation.include_timestamps
+            f"_Updated {natural_date(project['idx_updated_at'])}_{NL}"
+            if presentation.include_timestamps and project.get("idx_updated_at")
             else ""
         )
 
