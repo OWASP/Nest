@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.64.1-jammy@sha256:a3966b653e8d48a30901889081b616307fca73e0d843a117fadf6609397dac38
+FROM mcr.microsoft.com/playwright:v1.65.0-jammy@sha256:3abe8253579c7df4f9c4bc1fca6a5ef365120f8e4de818a02a034a54a46564cf
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
