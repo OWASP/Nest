@@ -34,6 +34,14 @@ output "django_ssm_parameter_arns" {
   )
 }
 
+output "nestbot_ssm_parameter_arns" {
+  description = "NestBot provider parameter ARNs, or an empty map when disabled."
+  sensitive   = true
+  value = {
+    for parameter in aws_ssm_parameter.django_google_api_key : "DJANGO_GOOGLE_API_KEY" => parameter.arn
+  }
+}
+
 output "frontend_ssm_parameter_arns" {
   description = "Map of frontend environment variable names to the ARNs of all SSM parameters."
   sensitive   = true

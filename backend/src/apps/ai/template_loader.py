@@ -7,8 +7,9 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 
-env = Environment(
+# Agent .jinja prompts are plain text and intentionally do not autoescape.
+env = Environment(  # NOSEMGREP: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2  # noqa: E501
     loader=FileSystemLoader(TEMPLATES_DIR),
-    # Prompt files are plain text; escape HTML/XML and inline templates.
+    # Escape HTML/XML templates and templates created from inline strings.
     autoescape=select_autoescape(),
 )

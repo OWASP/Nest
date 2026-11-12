@@ -32,7 +32,7 @@ def mock_rule(threshold=1, emojis=None):
     return Mock(
         alert_channel_id="C_ALERT",
         alert_user_ids=["U_MOD"],
-        conversation=Mock(is_private=False),
+        conversation=Mock(is_private=False, has_slack_metadata=True),
         emojis=emojis or ["spam"],
         report_type="spam",
         threshold=threshold,
@@ -426,3 +426,14 @@ class TestReactionAdded:
         assert "https://" not in kwargs["text"]
         record.assert_called_once()
         release.assert_called_once()
+
+
+def test_unknown_channel_privacy_blocks_reaction_report(mocker):
+    """Skip reaction reporting when channel privacy has not been synchronized."""
+    rule = mock_rule()
+    rule.conversation.has_slack_metadata = False
+    patch_rule_lookup(mocker, rule)
+    client = mock_client()
+    ReactionAdded().handle_event(EVENT, client)
+    client.reactions_get.assert_not_called()
+    client.chat_postMessage.assert_not_called()

@@ -108,7 +108,25 @@ backend-exec-db-shell:
 backend-exec-shell:
 	@CMD="/bin/sh" $(MAKE) backend-exec-command-it
 
-.PHONY: backend-exec-nestbot-command
+.PHONY: exec-nestbot-command exec-nestbot-command-it backend-exec-nestbot-command \
+	backend-exec-nestbot-command-it
+
+exec-nestbot-command:
+	@$(MAKE) backend-exec-nestbot-command
+
+exec-nestbot-command-it:
+	@$(MAKE) backend-exec-nestbot-command-it
 
 backend-exec-nestbot-command:
+ifeq ($(EXEC_MODE),direct)
+	@cd backend && poetry run -- $(CMD)
+else
 	@docker exec -i nest-nestbot $(CMD)
+endif
+
+backend-exec-nestbot-command-it:
+ifeq ($(EXEC_MODE),direct)
+	@cd backend && poetry run -- $(CMD)
+else
+	@docker exec -i$(shell [ -t 0 ] && printf t) nest-nestbot $(CMD)
+endif

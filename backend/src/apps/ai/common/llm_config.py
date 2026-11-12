@@ -20,6 +20,21 @@ def get_llm() -> LLM:
     """
     provider = os.getenv("LLM_PROVIDER", "openai")
 
+    if provider == "bedrock":
+        model_name = os.getenv("BEDROCK_MODEL_NAME", "").strip()
+        region = os.getenv("AWS_DEFAULT_REGION", "").strip()
+        if not model_name or not region:
+            msg = "BEDROCK_MODEL_NAME and AWS_DEFAULT_REGION are required for Bedrock"
+            raise ValueError(msg)
+
+        return LLM(
+            model=f"bedrock/{model_name}",
+            region_name=region,
+            temperature=0.1,
+            max_tokens=1024,
+            stream=False,
+        )
+
     if provider == "openai":
         return LLM(
             model=os.getenv("OPENAI_MODEL_NAME", "gpt-4.1-mini"),

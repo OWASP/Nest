@@ -60,6 +60,7 @@ def threshold_alert_context(event, client: WebClient) -> ThresholdAlertContext |
     rule = ReactionRule.for_emoji(channel_id, emoji_name)
     if (
         rule is None
+        or not rule.conversation.has_slack_metadata
         or rule.conversation.is_private
         or ContentReport.exists_for(rule.conversation, message_ts)
     ):

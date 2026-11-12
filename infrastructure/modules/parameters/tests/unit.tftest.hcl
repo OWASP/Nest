@@ -31,6 +31,35 @@ run "test_django_algolia_application_id_path_format" {
   }
 }
 
+run "test_nestbot_parameters_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_ssm_parameter.django_google_api_key) == 0 && length(output.nestbot_ssm_parameter_arns) == 0
+    error_message = "Disabled NestBot must not create Google credentials."
+  }
+}
+
+run "test_nestbot_google_parameter" {
+  command = plan
+
+  variables {
+    enable_nestbot = true
+    environment    = "staging"
+    project_name   = "custom-project"
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.django_google_api_key[0].name == "/${var.project_name}/${var.environment}/DJANGO_GOOGLE_API_KEY" && aws_ssm_parameter.django_google_api_key[0].type == "SecureString"
+    error_message = "NestBot must store the Google key as an environment-scoped SecureString."
+  }
+
+  assert {
+    condition     = contains(keys(output.nestbot_ssm_parameter_arns), "DJANGO_GOOGLE_API_KEY") && !contains(keys(output.django_ssm_parameter_arns), "DJANGO_GOOGLE_API_KEY")
+    error_message = "The Google key must only be added to NestBot's provider map."
+  }
+}
+
 run "test_django_algolia_application_id_is_secure_string" {
   command = plan
   assert {

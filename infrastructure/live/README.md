@@ -34,6 +34,35 @@ Use the following inline permissions for the `nest-staging` IAM User.
 }
 ```
 
+## NestBot staging
+
+NestBot runs as separate web and scheduled-worker services using the existing
+ALB, PostgreSQL and Redis. The worker uses the same release image as the web service.
+
+1. Bootstrap with `nestbot_desired_count = 0`, `route_slack_to_nestbot = false`
+   and the intended image tag to create the ECR repositories before publishing.
+2. Configure staging SSM Slack, Google and OpenAI credentials. Question detection
+   and vision still require OpenAI. Prepare matching Google retrieval embeddings.
+3. Deploy with `NESTBOT_DESIRED_COUNT=1` and `ROUTE_SLACK_TO_NESTBOT=false`.
+   After health verification, set `ROUTE_SLACK_TO_NESTBOT=true` for cutover.
+   Disabling routing takes effect before the NestBot health gate.
+
+`NESTBOT_AI_ASSISTANT_ENABLED` defaults to `true` in staging; production AI defaults
+to `false`. Set it to `false` and redeploy both services to disable AI independently
+of routing. Jobs recheck it when they start; running provider requests are not cancelled.
+
+For Bedrock, set `NESTBOT_LLM_PROVIDER=bedrock`, `NESTBOT_BEDROCK_MODEL_NAME` and
+`NESTBOT_BEDROCK_TARGET_TYPE` (`foundation-model` or `inference-profile`). Terraform
+creates and attaches the invocation policy for that target; apply the bootstrap
+lookup permissions before selecting Bedrock. The region
+is passed to the container as `AWS_DEFAULT_REGION` from Terraform `aws_region`
+(the deployment workflow uses `AWS_REGION`). Google remains the default and configuration fallback;
+embeddings stay Google for either answer provider.
+
+Configure a separate staging Slack app using the full
+[manifest](../../backend/src/apps/slack/MANIFEST.yaml), replacing its URL hosts
+with `nest.owasp.dev`. ALB routing does not update the Slack app's configured URLs.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -45,7 +74,9 @@ Use the following inline permissions for the `nest-staging` IAM User.
 
 ## Providers
 
-No providers.
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.67.0 |
 
 ## Modules
 
@@ -59,6 +90,9 @@ No providers.
 | <a name="module_frontend"></a> [frontend](#module\_frontend) | ../modules/service | n/a |
 | <a name="module_frontend_build_cache"></a> [frontend\_build\_cache](#module\_frontend\_build\_cache) | ../modules/ecr-cache | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | ../modules/kms | n/a |
+| <a name="module_nestbot"></a> [nestbot](#module\_nestbot) | ../modules/service | n/a |
+| <a name="module_nestbot_build_cache"></a> [nestbot\_build\_cache](#module\_nestbot\_build\_cache) | ../modules/ecr-cache | n/a |
+| <a name="module_nestbot_worker"></a> [nestbot\_worker](#module\_nestbot\_worker) | ../modules/service-worker | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ../modules/networking | n/a |
 | <a name="module_parameters"></a> [parameters](#module\_parameters) | ../modules/parameters | n/a |
 | <a name="module_security"></a> [security](#module\_security) | ../modules/security | n/a |
@@ -67,7 +101,11 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+| ---- | ---- |
+| [aws_iam_policy.nestbot_bedrock](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_bedrock_foundation_model.nestbot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_foundation_model) | data source |
+| [aws_bedrock_inference_profile.nestbot](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/bedrock_inference_profile) | data source |
 
 ## Inputs
 
@@ -117,6 +155,13 @@ No resources.
 | <a name="input_frontend_max_count"></a> [frontend\_max\_count](#input\_frontend\_max\_count) | The maximum number of tasks for auto scaling. | `number` | `6` | no |
 | <a name="input_frontend_min_count"></a> [frontend\_min\_count](#input\_frontend\_min\_count) | The minimum number of tasks for auto scaling. | `number` | `2` | no |
 | <a name="input_frontend_use_fargate_spot"></a> [frontend\_use\_fargate\_spot](#input\_frontend\_use\_fargate\_spot) | Whether to use Fargate Spot for frontend tasks. | `bool` | `true` | no |
+| <a name="input_nestbot_ai_assistant_enabled"></a> [nestbot\_ai\_assistant\_enabled](#input\_nestbot\_ai\_assistant\_enabled) | Enable AI in the dedicated staging NestBot service independently of Slack routing. | `bool` | `true` | no |
+| <a name="input_nestbot_bedrock_model_name"></a> [nestbot\_bedrock\_model\_name](#input\_nestbot\_bedrock\_model\_name) | Approved Bedrock model or inference profile ID; required when Bedrock is selected. | `string` | `""` | no |
+| <a name="input_nestbot_bedrock_target_type"></a> [nestbot\_bedrock\_target\_type](#input\_nestbot\_bedrock\_target\_type) | Type of the approved Bedrock target: foundation-model or inference-profile. | `string` | `"foundation-model"` | no |
+| <a name="input_nestbot_desired_count"></a> [nestbot\_desired\_count](#input\_nestbot\_desired\_count) | Number of NestBot tasks. Use zero when bootstrapping ECR before publishing an image. | `number` | `1` | no |
+| <a name="input_nestbot_google_model_name"></a> [nestbot\_google\_model\_name](#input\_nestbot\_google\_model\_name) | Google model used by NestBot. Verify provider compatibility before deployment. | `string` | `"gemini-3.5-flash-lite"` | no |
+| <a name="input_nestbot_image_tag"></a> [nestbot\_image\_tag](#input\_nestbot\_image\_tag) | Immutable NestBot image tag, required in staging. | `string` | `""` | no |
+| <a name="input_nestbot_llm_provider"></a> [nestbot\_llm\_provider](#input\_nestbot\_llm\_provider) | NestBot answer provider. Use google until approved Bedrock access is configured. | `string` | `"google"` | no |
 | <a name="input_private_subnet_cidrs"></a> [private\_subnet\_cidrs](#input\_private\_subnet\_cidrs) | A list of CIDR blocks for the private subnets. | `list(string)` | <pre>[<br/>  "10.0.11.0/24",<br/>  "10.0.12.0/24",<br/>  "10.0.13.0/24"<br/>]</pre> | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The name of the project. | `string` | `"nest"` | no |
 | <a name="input_public_subnet_cidrs"></a> [public\_subnet\_cidrs](#input\_public\_subnet\_cidrs) | A list of CIDR blocks for the public subnets. | `list(string)` | <pre>[<br/>  "10.0.1.0/24",<br/>  "10.0.2.0/24",<br/>  "10.0.3.0/24"<br/>]</pre> | no |
@@ -124,6 +169,7 @@ No resources.
 | <a name="input_redis_node_type"></a> [redis\_node\_type](#input\_redis\_node\_type) | The node type for the Redis cache. | `string` | `"cache.t3.micro"` | no |
 | <a name="input_redis_num_cache_nodes"></a> [redis\_num\_cache\_nodes](#input\_redis\_num\_cache\_nodes) | The number of cache nodes in the Redis cluster. | `number` | `1` | no |
 | <a name="input_redis_port"></a> [redis\_port](#input\_redis\_port) | The port for the Redis cache. | `number` | `6379` | no |
+| <a name="input_route_slack_to_nestbot"></a> [route\_slack\_to\_nestbot](#input\_route\_slack\_to\_nestbot) | Whether to switch Slack traffic to the separate NestBot service. | `bool` | `false` | no |
 | <a name="input_secret_recovery_window_in_days"></a> [secret\_recovery\_window\_in\_days](#input\_secret\_recovery\_window\_in\_days) | The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately. | `number` | `7` | no |
 | <a name="input_slack_bot_token_suffix"></a> [slack\_bot\_token\_suffix](#input\_slack\_bot\_token\_suffix) | The Suffix for the Slack bot token. | `string` | `"T04T40NHX"` | no |
 | <a name="input_tasks_use_fargate_spot"></a> [tasks\_use\_fargate\_spot](#input\_tasks\_use\_fargate\_spot) | Whether to use Fargate Spot for ECS tasks. | `bool` | `true` | no |
@@ -144,7 +190,12 @@ No resources.
 | <a name="output_frontend_ecr_repository_url"></a> [frontend\_ecr\_repository\_url](#output\_frontend\_ecr\_repository\_url) | The URL of the frontend ECR repository. |
 | <a name="output_frontend_service_name"></a> [frontend\_service\_name](#output\_frontend\_service\_name) | The name of the ECS frontend service. |
 | <a name="output_frontend_url"></a> [frontend\_url](#output\_frontend\_url) | The URL to access the frontend. |
+| <a name="output_nestbot_cluster_name"></a> [nestbot\_cluster\_name](#output\_nestbot\_cluster\_name) | The ECS NestBot cluster name, or null when disabled. |
+| <a name="output_nestbot_ecr_repository_url"></a> [nestbot\_ecr\_repository\_url](#output\_nestbot\_ecr\_repository\_url) | The NestBot ECR repository URL, or null when disabled. |
+| <a name="output_nestbot_service_name"></a> [nestbot\_service\_name](#output\_nestbot\_service\_name) | The ECS NestBot service name, or null when disabled. |
+| <a name="output_nestbot_worker_service_name"></a> [nestbot\_worker\_service\_name](#output\_nestbot\_worker\_service\_name) | The staging NestBot AI queue worker service name, or null when NestBot is disabled. |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | A list of private subnet IDs. |
+| <a name="output_route_slack_to_nestbot"></a> [route\_slack\_to\_nestbot](#output\_route\_slack\_to\_nestbot) | Whether Slack traffic is currently routed to NestBot. |
 | <a name="output_shared_data_bucket_name"></a> [shared\_data\_bucket\_name](#output\_shared\_data\_bucket\_name) | S3 bucket for shared public data (e.g. nest.dump). |
 | <a name="output_tasks_cluster_name"></a> [tasks\_cluster\_name](#output\_tasks\_cluster\_name) | The name of the ECS tasks cluster. |
 | <a name="output_tasks_security_group_id"></a> [tasks\_security\_group\_id](#output\_tasks\_security\_group\_id) | The ID of the security group for ECS tasks. |

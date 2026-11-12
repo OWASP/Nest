@@ -1,4 +1,4 @@
-"""Verify escaping for prompt and markup templates."""
+"""Tests for AI prompt template escaping."""
 
 import pytest
 from jinja2 import DictLoader
@@ -7,19 +7,18 @@ from apps.ai.template_loader import env
 
 
 @pytest.mark.parametrize(
-    ("filename", "expected"),
+    ("name", "expected"),
     [
-        ("prompt.jinja", "<b>A & B</b>"),
-        ("page.html", "&lt;b&gt;A &amp; B&lt;/b&gt;"),
-        ("document.xml", "&lt;b&gt;A &amp; B&lt;/b&gt;"),
+        ("prompt.jinja", "<#C123> & <@U123>"),
+        ("page.html", "&lt;#C123&gt; &amp; &lt;@U123&gt;"),
+        ("document.xml", "&lt;#C123&gt; &amp; &lt;@U123&gt;"),
     ],
 )
-def test_template_escaping(filename, expected):
-    environment = env.overlay(loader=DictLoader({filename: "{{ value }}"}))
-    assert environment.get_template(filename).render(value="<b>A & B</b>") == expected
+def test_named_template_escaping(name, expected):
+    template_env = env.overlay(loader=DictLoader({name: "{{ value }}"}))
+
+    assert template_env.get_template(name).render(value="<#C123> & <@U123>") == expected
 
 
-def test_inline_template_escaping():
-    assert env.from_string("{{ value }}").render(value="<b>A & B</b>") == (
-        "&lt;b&gt;A &amp; B&lt;/b&gt;"
-    )
+def test_inline_templates_escape_html():
+    assert env.from_string("{{ value }}").render(value="<script>") == "&lt;script&gt;"

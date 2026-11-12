@@ -1,6 +1,7 @@
 """Base class and common functionality for Slack commands."""
 
 import logging
+from html import escape
 from pathlib import Path
 
 from django.conf import settings
@@ -139,7 +140,12 @@ class CommandBase:
                     channel=client.conversations_open(
                         users=self.get_user_id(command),
                     )["channel"]["id"],
-                    text=get_text(blocks),
+                    text=(
+                        escape(get_text(blocks), quote=False)
+                        if self.command_name == "/ai"
+                        else get_text(blocks)
+                    ),
+                    **({"mrkdwn": False, "parse": "none"} if self.command_name == "/ai" else {}),
                 )
         except Exception:
             logger.exception("Failed to handle command '%s'", self.command_name)
