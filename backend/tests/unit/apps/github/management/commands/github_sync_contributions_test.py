@@ -1,5 +1,6 @@
 """Check repair command boundaries and failure reporting."""
 
+from io import StringIO
 from unittest.mock import Mock
 
 import pytest
@@ -92,3 +93,23 @@ def test_failed_import_does_not_refresh_activity(setup_command, mocker):
     with pytest.raises(CommandError):
         command.handle(**options)
     refresh.assert_not_called()
+
+
+@pytest.mark.parametrize("disabled", ["repository", "project"])
+def test_disabled_issues_are_reported_as_skipped(setup_command, disabled):
+    command, options, _, commits, issues, _ = setup_command
+    options["types"] = ["commits", "issues"]
+    # The selected repository is the second collector argument.
+    command.handle(**options)
+    repository = commits.call_args.args[1]
+    if disabled == "repository":
+        repository.track_issues = False
+    else:
+        repository.project.track_issues = False
+    issues.reset_mock()
+    command.stdout = StringIO()
+    command.handle(**options)
+    issues.assert_not_called()
+    output = command.stdout.getvalue()
+    assert "issues skipped (tracking disabled)" in output
+    assert "issues completed" not in output

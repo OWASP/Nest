@@ -117,6 +117,14 @@ class Command(BaseCommand):
                         )
                         continue
                     for kind in dict.fromkeys(options["types"]):
+                        if kind == "issues" and (
+                            not repository.track_issues
+                            or (repository.project and not repository.project.track_issues)
+                        ):
+                            self.stdout.write(
+                                f"{repository.path}: issues skipped (tracking disabled)"
+                            )
+                            continue
                         try:
                             collectors[kind](
                                 remote,
@@ -156,4 +164,8 @@ class Command(BaseCommand):
                     type(entity).objects.filter(pk=entity.pk).update(
                         contribution_data=data, contribution_stats=stats
                     )
-        self.stdout.write("Affected project and chapter activity refreshed")
+        self.stdout.write(
+            "Affected project and chapter activity recalculated from stored data. "
+            "Only selected repositories were synchronized; other linked repositories "
+            "may still have incomplete history."
+        )
