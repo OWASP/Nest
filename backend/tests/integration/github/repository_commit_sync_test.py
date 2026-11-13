@@ -1131,7 +1131,9 @@ def test_member_aggregation_respects_reporting_bounds(source, mocker, kind):
     }
     for key, date in dates.items():
         if kind == "commits":
-            Commit.update_data(github_commit(key[0], date=date), repository=repository, author=user)
+            Commit.update_data(
+                github_commit(key[0], date=date), repository=repository, author=user
+            )
         else:
             model = Issue if kind == "issues" else PullRequest
             model.update_data(
