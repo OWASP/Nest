@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from django.core.management.base import BaseCommand
-from django.db.models import Count
+from django.db.models import Count, Exists, OuterRef, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
@@ -59,7 +59,24 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"Member '{user_login}' not found"))
                 return
         else:
-            users = User.objects.filter(contributions_count__gt=0)
+            users = User.objects.alias(
+                has_commits=Exists(
+                    Commit.objects.filter(author_id=OuterRef("pk"), created_at__gte=start_date)
+                ),
+                has_issues=Exists(
+                    Issue.objects.filter(author_id=OuterRef("pk"), created_at__gte=start_date)
+                ),
+                has_pull_requests=Exists(
+                    PullRequest.objects.filter(
+                        author_id=OuterRef("pk"), created_at__gte=start_date
+                    )
+                ),
+            ).filter(
+                Q(contributions_count__gt=0)
+                | Q(has_commits=True)
+                | Q(has_issues=True)
+                | Q(has_pull_requests=True)
+            )
 
         total_users = users.count()
         self.stdout.write(f"Processing {total_users} members...")

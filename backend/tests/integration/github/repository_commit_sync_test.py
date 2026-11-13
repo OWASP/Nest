@@ -22,6 +22,9 @@ from apps.github.models.repository import Repository
 from apps.github.models.repository_contribution_sync_state import RepositoryContributionSyncState
 from apps.github.models.user import User
 from apps.owasp.management.commands.owasp_aggregate_entity_contributions import Command
+from apps.owasp.management.commands.owasp_aggregate_member_contributions import (
+    Command as MemberCommand,
+)
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.member_snapshot import MemberSnapshot
 from apps.owasp.models.project import Project
@@ -1060,3 +1063,43 @@ def test_repair_refresh_updates_only_affected_entities_and_exact_period(source):
     assert project.contribution_stats["start_at"] == START.isoformat()
     assert project.contribution_stats["end_at"] == END.isoformat()
     assert unrelated.contribution_stats == {"total": 123}
+
+
+@pytest.mark.parametrize("kind", ["commits", "issues", "pull_requests"])
+def test_member_aggregation_includes_dated_activity_with_zero_counter(source, kind):
+    _, repository = source
+    user = User.objects.create(
+        node_id="zero-counter",
+        login="zero-counter",
+        created_at=START,
+        updated_at=END,
+        contributions_count=0,
+    )
+    unrelated = User.objects.create(
+        node_id="no-activity",
+        login="no-activity",
+        created_at=START,
+        updated_at=END,
+        contributions_count=0,
+        contribution_data={"sentinel": 1},
+    )
+    if kind == "commits":
+        Commit.objects.create(
+            node_id="member-commit",
+            repository=repository,
+            author=user,
+            sha="a" * 40,
+            message="Test",
+            created_at=END,
+        )
+    else:
+        model = Issue if kind == "issues" else PullRequest
+        model.update_data(
+            github_activity("member", created_at=END), repository=repository, author=user
+        )
+    MemberCommand().handle(user=None, days=365, batch_size=100)
+    user.refresh_from_db()
+    unrelated.refresh_from_db()
+    assert sum(user.contribution_data.values()) == 1
+    assert unrelated.contribution_data == {"sentinel": 1}
+    assert user.contributions_count == 0

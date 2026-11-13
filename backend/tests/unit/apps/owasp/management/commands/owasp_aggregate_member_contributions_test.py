@@ -160,6 +160,7 @@ class TestAggregateContributionsCommand:
         ):
             mock_queryset = MockQuerySet([mock_user])
             mock_user_model.objects.filter.return_value = mock_queryset
+            mock_user_model.objects.alias.return_value.filter.return_value = mock_queryset
             mock_user_model.bulk_save = mock.Mock()
 
             command.handle(user="testuser", days=365, batch_size=100)
@@ -183,6 +184,7 @@ class TestAggregateContributionsCommand:
         ) as mock_user_model:
             mock_queryset = MockQuerySet([])
             mock_user_model.objects.filter.return_value = mock_queryset
+            mock_user_model.objects.alias.return_value.filter.return_value = mock_queryset
 
             command.handle(user="nonexistent", days=365, batch_size=100)
 
@@ -215,6 +217,7 @@ class TestAggregateContributionsCommand:
         ):
             mock_queryset = MockQuerySet([mock_user1, mock_user2])
             mock_user_model.objects.filter.return_value = mock_queryset
+            mock_user_model.objects.alias.return_value.filter.return_value = mock_queryset
             mock_user_model.bulk_save = mock.Mock()
 
             command.handle(user=None, days=365, batch_size=100)
@@ -253,6 +256,7 @@ class TestAggregateContributionsCommand:
             mock_tz.now.return_value = datetime(2024, 1, 31, tzinfo=UTC)
             mock_queryset = MockQuerySet([mock_user])
             mock_user_model.objects.filter.return_value = mock_queryset
+            mock_user_model.objects.alias.return_value.filter.return_value = mock_queryset
             mock_user_model.bulk_save = mock.Mock()
 
             command.handle(user=None, days=90, batch_size=100)
