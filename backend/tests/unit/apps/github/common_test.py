@@ -237,14 +237,15 @@ class TestSyncRepository:
         )
         mock_common_deps["Release"].bulk_save.assert_called_once_with([mock_updated_release])
 
-    def test_initial_sync_uses_365_day_period(
-        self, mock_common_deps, mock_gh_repository, mock_repo, gh_item_factory
+    @pytest.mark.parametrize("days", [30, 365])
+    def test_issue_collection_respects_activity_cutoff(
+        self, mock_common_deps, mock_gh_repository, mock_repo, gh_item_factory, days
     ):
-        """Initial sync includes activity older than thirty days."""
-        now = timezone.now()
-        mock_repo.latest_updated_issue = None
-        gh_issue_recent = gh_item_factory(updated_at=now - td(days=180))
-        gh_issue_ancient = gh_item_factory(updated_at=now - td(days=400))
+        """The issue collector uses the cutoff supplied by the activity context."""
+        cutoff = timezone.now() - td(days=days)
+        mock_common_deps["activity_sync"].return_value.__enter__.return_value = cutoff
+        gh_issue_recent = gh_item_factory(updated_at=cutoff)
+        gh_issue_ancient = gh_item_factory(updated_at=cutoff - td(seconds=1))
         mock_gh_repository.get_issues.return_value = [gh_issue_recent, gh_issue_ancient]
 
         sync_repository(mock_gh_repository)

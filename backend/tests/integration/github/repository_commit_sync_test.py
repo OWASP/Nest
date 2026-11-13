@@ -684,7 +684,7 @@ def activity_state(repository, kind):
     return repository.contribution_sync_states.get(contribution_type=kind)
 
 
-def test_activity_backfill_is_independent_of_recent_rows(source, activity):
+def test_activity_initial_sync_covers_default_year_despite_recent_rows(source, activity):
     remote, repository = source
     recent = github_activity("recent", created_at=END, updated_at=END)
     activity.model.update_data(recent, repository=repository)

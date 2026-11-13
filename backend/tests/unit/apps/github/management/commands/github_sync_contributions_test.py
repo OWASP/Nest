@@ -11,6 +11,7 @@ from apps.github.management.commands import github_sync_contributions as module
 
 @pytest.fixture
 def setup_command(mocker):
+    mocker.patch.object(module, "disable_indexing")
     repository = Mock(path="OWASP/Nest", node_id="repository")
     query = mocker.patch.object(module, "get_contribution_repositories").return_value
     selected = query.select_related.return_value.order_by.return_value
