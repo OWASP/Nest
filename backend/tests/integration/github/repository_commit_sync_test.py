@@ -1579,3 +1579,42 @@ def test_snapshot_repair_updates_timestamp_and_bounds_query_growth(source):
     assert len(many) <= len(first) + 1
     snapshot.refresh_from_db()
     assert snapshot.repository_contributions == {"repair-query-user/commit-sync-test": 11}
+
+
+@pytest.mark.parametrize("interruption", [KeyboardInterrupt, GeneratorExit])
+def test_interrupted_activity_preserves_coverage_and_releases_lock(source, activity, interruption):
+    remote, repository = source
+    state = RepositoryContributionSyncState.objects.create(
+        repository=repository,
+        contribution_type=activity.kind,
+        covered_from=START,
+        covered_until=END - timedelta(days=1),
+    )
+
+    def interrupted_history():
+        yield github_activity("partial", updated_at=END)
+        raise interruption
+
+    getattr(remote, activity.fetch).return_value = interrupted_history()
+    with pytest.raises(interruption):
+        activity.sync(remote, repository)
+    state.refresh_from_db()
+    assert state.covered_until == END - timedelta(days=1)
+    assert state.last_error == f"Activity import failed: {interruption.__name__}"
+    assert activity.model.objects.filter(repository=repository).count() == 1
+    # A second database connection must be able to acquire the released session lock.
+    with (
+        closing(connection.Database.connect(**connection.get_connection_params())) as other,
+        other.cursor() as cursor,
+    ):
+        cursor.execute(
+            "SELECT pg_try_advisory_lock(hashtextextended(%s, 0))",
+            [f"nest:github:{activity.kind}-sync:{repository.pk}"],
+        )
+        assert cursor.fetchone()[0]
+    getattr(remote, activity.fetch).return_value = [github_activity("partial", updated_at=END)]
+    activity.sync(remote, repository)
+    state.refresh_from_db()
+    assert state.covered_until == END
+    assert state.last_error == ""
+    assert activity.model.objects.filter(repository=repository).count() == 1

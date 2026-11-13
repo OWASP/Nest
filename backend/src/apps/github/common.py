@@ -270,15 +270,27 @@ def _repository_activity_sync(
             and state.covered_from <= start_at <= state.covered_until
         ):
             cutoff = max(start_at, min(end_at, state.covered_until) - td(days=1))
+        completed = False
         try:
-            yield cutoff
-            state.covered_from = start_at
-            state.covered_until = end_at
-            state.last_error = ""
-            state.save(
-                update_fields=("covered_from", "covered_until", "last_error", "nest_updated_at")
-            )
-        except Exception as error:
+            try:
+                yield cutoff
+                completed = True
+            finally:
+                # Always finalize the context; only successful imports publish coverage.
+                if completed:
+                    state.covered_from = start_at
+                    state.covered_until = end_at
+                    state.last_error = ""
+                    state.save(
+                        update_fields=(
+                            "covered_from",
+                            "covered_until",
+                            "last_error",
+                            "nest_updated_at",
+                        )
+                    )
+        except BaseException as error:
+            # Record interruptions as well as ordinary failures, then propagate them.
             state.last_error = f"Activity import failed: {type(error).__name__}"
             with suppress(DatabaseError):
                 state.save(update_fields=("last_error", "nest_updated_at"))
