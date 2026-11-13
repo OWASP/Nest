@@ -1112,6 +1112,71 @@ def test_member_aggregation_includes_dated_activity_with_zero_counter(source, ki
     assert user.contributions_count == 0
 
 
+@pytest.mark.parametrize("kind", ["commits", "issues", "pull_requests"])
+def test_member_aggregation_respects_reporting_bounds(source, mocker, kind):
+    _, repository = source
+    user = User.objects.create(
+        node_id="bounded-member",
+        login="bounded-member",
+        created_at=START,
+        updated_at=END,
+        contributions_count=1,
+    )
+    dates = {
+        "before": START - timedelta(microseconds=1),
+        "start": START,
+        "end": END,
+        "after": END + timedelta(microseconds=1),
+        "future": END + timedelta(days=1),
+    }
+    for key, date in dates.items():
+        if kind == "commits":
+            Commit.update_data(github_commit(key[0], date=date), repository=repository, author=user)
+        else:
+            model = Issue if kind == "issues" else PullRequest
+            model.update_data(
+                github_activity(key, created_at=date), repository=repository, author=user
+            )
+
+    call_command("owasp_aggregate_member_contributions", user=user.login)
+    user.refresh_from_db()
+    assert sum(user.contribution_data.values()) == 2
+    assert user.contribution_data[START.date().isoformat()] == 1
+    assert user.contribution_data[END.date().isoformat()] == 1
+    assert (END + timedelta(days=1)).date().isoformat() not in user.contribution_data
+
+    mocker.patch("django.utils.timezone.now", return_value=END + timedelta(days=1))
+    call_command("owasp_aggregate_member_contributions", user=user.login, days=366)
+    user.refresh_from_db()
+    assert sum(user.contribution_data.values()) == 4
+    assert user.contribution_data[(END + timedelta(days=1)).date().isoformat()] == 1
+
+
+@pytest.mark.parametrize("kind", ["commits", "issues", "pull_requests"])
+def test_member_selection_excludes_only_future_activity(source, kind):
+    _, repository = source
+    user = User.objects.create(
+        node_id="future-only-member",
+        login="future-only-member",
+        created_at=START,
+        updated_at=END,
+        contributions_count=0,
+        contribution_data={"sentinel": 1},
+    )
+    date = END + timedelta(days=1)
+    if kind == "commits":
+        Commit.update_data(github_commit("f", date=date), repository=repository, author=user)
+    else:
+        model = Issue if kind == "issues" else PullRequest
+        model.update_data(
+            github_activity("future", created_at=date), repository=repository, author=user
+        )
+
+    call_command("owasp_aggregate_member_contributions")
+    user.refresh_from_db()
+    assert user.contribution_data == {"sentinel": 1}
+
+
 def test_snapshot_repair_preserves_dates_and_slack_fields(source):
     _, repository = source
     user = User.objects.create(

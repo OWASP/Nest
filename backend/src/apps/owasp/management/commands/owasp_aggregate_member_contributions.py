@@ -45,7 +45,8 @@ class Command(BaseCommand):
         days = options.get("days", 365)
         batch_size = options.get("batch_size", 100)
 
-        start_date = timezone.now() - timedelta(days=days)
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=days)
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -61,14 +62,24 @@ class Command(BaseCommand):
         else:
             users = User.objects.alias(
                 has_commits=Exists(
-                    Commit.objects.filter(author_id=OuterRef("pk"), created_at__gte=start_date)
+                    Commit.objects.filter(
+                        author_id=OuterRef("pk"),
+                        created_at__gte=start_date,
+                        created_at__lte=end_date,
+                    )
                 ),
                 has_issues=Exists(
-                    Issue.objects.filter(author_id=OuterRef("pk"), created_at__gte=start_date)
+                    Issue.objects.filter(
+                        author_id=OuterRef("pk"),
+                        created_at__gte=start_date,
+                        created_at__lte=end_date,
+                    )
                 ),
                 has_pull_requests=Exists(
                     PullRequest.objects.filter(
-                        author_id=OuterRef("pk"), created_at__gte=start_date
+                        author_id=OuterRef("pk"),
+                        created_at__gte=start_date,
+                        created_at__lte=end_date,
                     )
                 ),
             ).filter(
@@ -83,7 +94,7 @@ class Command(BaseCommand):
 
         updated_users = []
         for user in users.iterator(chunk_size=batch_size):
-            user.contribution_data = self._aggregate_user_contributions(user, start_date)
+            user.contribution_data = self._aggregate_user_contributions(user, start_date, end_date)
             updated_users.append(user)
 
         User.bulk_save(updated_users, fields=["contribution_data"])
@@ -92,12 +103,15 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"Successfully aggregated contributions for {total_users} members")
         )
 
-    def _aggregate_user_contributions(self, user: User, start_date: datetime) -> dict[str, int]:
+    def _aggregate_user_contributions(
+        self, user: User, start_date: datetime, end_date: datetime | None = None
+    ) -> dict[str, int]:
         """Aggregate contributions for a user.
 
         Args:
             user: User instance
             start_date: Start datetime for aggregation
+            end_date: Inclusive end datetime for aggregation; defaults to now
 
         Returns:
             Dictionary mapping YYYY-MM-DD to contribution counts
@@ -105,9 +119,9 @@ class Command(BaseCommand):
         """
         contribution_data = {}
         current_date = start_date.date()
-        end_date = timezone.now().date()
+        end_date = end_date or timezone.now()
 
-        while current_date <= end_date:
+        while current_date <= end_date.date():
             date_str = current_date.strftime("%Y-%m-%d")
             contribution_data[date_str] = 0
             current_date += timedelta(days=1)
@@ -116,6 +130,7 @@ class Command(BaseCommand):
             Commit.objects.filter(
                 author=user,
                 created_at__gte=start_date,
+                created_at__lte=end_date,
             )
             .annotate(date=TruncDate("created_at"))
             .values("date")
@@ -130,6 +145,7 @@ class Command(BaseCommand):
             PullRequest.objects.filter(
                 author=user,
                 created_at__gte=start_date,
+                created_at__lte=end_date,
             )
             .annotate(date=TruncDate("created_at"))
             .values("date")
@@ -144,6 +160,7 @@ class Command(BaseCommand):
             Issue.objects.filter(
                 author=user,
                 created_at__gte=start_date,
+                created_at__lte=end_date,
             )
             .annotate(date=TruncDate("created_at"))
             .values("date")
