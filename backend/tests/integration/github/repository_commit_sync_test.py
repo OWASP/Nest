@@ -339,7 +339,7 @@ def test_archived_repositories_still_import_commit_history(source):
     assert repository.commits.count() == 1
 
 
-def test_duplicate_items_across_batches_are_upserted(source, mocker):
+def test_duplicate_items_across_batches_are_saved(source, mocker):
     remote, repository = source
     mocker.patch("apps.github.common.GITHUB_ITEMS_PER_PAGE", 2)
     remote.get_commits.return_value = [
@@ -1216,7 +1216,7 @@ def test_snapshot_repair_preserves_real_message_relationship_and_rolls_back(sour
     conversation = Conversation.objects.create(
         slack_channel_id="CLOCALTEST",
         name="local-test",
-        workspace=Workspace.objects.create(name="Local test", slack_workspace_id="TLOCALTEST"),
+        workspace=Workspace.objects.create(name="Local test", slack_workspace_id="T12345678"),
     )
     message = Message.objects.create(
         conversation=conversation,

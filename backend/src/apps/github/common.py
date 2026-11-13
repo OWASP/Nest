@@ -208,7 +208,7 @@ def sync_repository_commits(
         try:
             branch = gh_repository.default_branch or ""
             head = _repository_commit_head(gh_repository, branch)
-            users = {}
+            users: dict[str | None, User | None] = {}
             history = _repository_commit_history(
                 gh_repository, state, branch, head, start_at, force=force
             )

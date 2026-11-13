@@ -77,7 +77,7 @@ class Commit(BulkSaveModel, NodeModel, TimestampedModel):
         # Import at call time: common itself imports the models.
         from apps.github.common import _repository_contribution_sync_lock  # noqa: PLC0415
 
-        grouped = {}
+        grouped: dict[int, list[Commit]] = {}
         for commit in commits:
             grouped.setdefault(commit.repository_id, []).append(commit)
         for repository_id in sorted(grouped):

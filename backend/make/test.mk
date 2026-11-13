@@ -96,7 +96,7 @@ backend-test-contributions: ## Run contribution regression tests against isolate
 	trap 'docker rm -f "$$name" >/dev/null 2>&1 || true' EXIT; \
 	docker run -d --name "$$name" -e POSTGRES_USER=nest_test -e POSTGRES_PASSWORD=integration-test -e POSTGRES_DB=nest_test pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b >/dev/null; \
 	for attempt in {1..30}; do docker exec "$$name" pg_isready -U nest_test >/dev/null 2>&1 && break; sleep 1; done; \
-	docker run --rm --network "container:$$name" --env-file backend/.env.unit-tests \
+		docker run --rm --network "container:$$name" --env-file backend/.env.unit-tests \
 		-e DJANGO_SETTINGS_MODULE=settings.test -e DJANGO_DB_HOST=localhost \
 		-e DJANGO_DB_PORT=5432 -e DJANGO_DB_NAME=nest_test -e DJANGO_DB_USER=nest_test \
 		-e DJANGO_DB_PASSWORD=integration-test nest-test-backend \
