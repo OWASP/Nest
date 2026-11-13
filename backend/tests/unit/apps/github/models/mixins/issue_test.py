@@ -54,6 +54,19 @@ def issue_index_mixin_instance():
     return instance
 
 
+@pytest.fixture
+def indexable_issue_instance(issue_index_mixin_instance):
+    """Create an IssueIndexMixin instance that satisfies all is_indexable conditions."""
+    issue_index_mixin_instance.id = 1
+    issue_index_mixin_instance.state = "open"
+    issue_index_mixin_instance.IssueState = MagicMock(OPEN="open")
+    issue_index_mixin_instance.is_locked = False
+    issue_index_mixin_instance.repository.is_indexable = True
+    issue_index_mixin_instance.repository.track_issues = True
+    issue_index_mixin_instance.project.track_issues = True
+    return issue_index_mixin_instance
+
+
 class TestIssueIndexMixin:
     """Test suite for IssueIndexMixin."""
 
@@ -88,3 +101,59 @@ class TestIssueIndexMixin:
     )
     def test_issue_index(self, issue_index_mixin_instance, attr, expected):
         assert getattr(issue_index_mixin_instance, attr) == expected
+
+    def test_is_indexable_true(self, indexable_issue_instance):
+        """Test is_indexable returns True when all conditions are met."""
+        assert indexable_issue_instance.is_indexable is True
+
+    @pytest.mark.parametrize(
+        (
+            "issue_id",
+            "state",
+            "is_locked",
+            "has_repository",
+            "repo_indexable",
+            "repo_track_issues",
+            "has_project",
+            "project_track_issues",
+        ),
+        [
+            (None, "open", False, True, True, True, True, True),
+            (1, "closed", False, True, True, True, True, True),
+            (1, "open", True, True, True, True, True, True),
+            (1, "open", False, False, True, True, True, True),
+            (1, "open", False, True, False, True, True, True),
+            (1, "open", False, True, True, False, True, True),
+            (1, "open", False, True, True, True, False, True),
+            (1, "open", False, True, True, True, True, False),
+        ],
+    )
+    def test_is_indexable_false(
+        self,
+        indexable_issue_instance,
+        issue_id,
+        state,
+        is_locked,
+        has_repository,
+        repo_indexable,
+        repo_track_issues,
+        has_project,
+        project_track_issues,
+    ):
+        """Test is_indexable returns False when any condition is not met."""
+        indexable_issue_instance.id = issue_id
+        indexable_issue_instance.state = state
+        indexable_issue_instance.is_locked = is_locked
+
+        if not has_repository:
+            indexable_issue_instance.repository = None
+        else:
+            indexable_issue_instance.repository.is_indexable = repo_indexable
+            indexable_issue_instance.repository.track_issues = repo_track_issues
+
+        if not has_project:
+            indexable_issue_instance.project = None
+        else:
+            indexable_issue_instance.project.track_issues = project_track_issues
+
+        assert indexable_issue_instance.is_indexable is False
