@@ -1,13 +1,15 @@
 """Exercise repository contribution ingestion with real persistence and aggregation."""
 
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import UTC, datetime, timedelta
+from threading import Event
 from types import SimpleNamespace
 from unittest.mock import Mock, PropertyMock
 
 import pytest
 from django.core.management import call_command
-from django.db import DatabaseError, IntegrityError, connection
+from django.db import DatabaseError, IntegrityError, close_old_connections, connection
 from github.Comparison import Comparison
 from github.GithubException import GithubException, UnknownObjectException
 
@@ -1135,3 +1137,66 @@ def test_snapshot_repair_preserves_dates_and_slack_fields(source):
     assert (snapshot.start_at, snapshot.end_at) == (START, END)
     assert snapshot.communication_heatmap_data == {"slack": 3}
     assert snapshot.channel_communications == {"channel": 3}
+
+
+def test_member_save_rechecks_identity_after_repository_import(source):
+    remote, repository = source
+    author = User.objects.create(
+        node_id="race-author", login="race-author", created_at=START, updated_at=END
+    )
+    stale = Commit(
+        node_id="commit-a",
+        repository=repository,
+        sha="a" * 40,
+        message="Member search",
+        created_at=END,
+    )
+    remote.get_commits.return_value = [github_commit("a")]
+    common.sync_repository_commits(remote, repository)
+    existing = repository.commits.get()
+    existing.author = author
+    existing.save()
+    snapshot = MemberSnapshot.objects.create(github_user=author, start_at=START, end_at=END)
+    snapshot.commits.add(existing)
+    Commit.bulk_save([stale])
+    assert repository.commits.count() == 1
+    assert snapshot.commits.get().pk == existing.pk
+    existing.refresh_from_db()
+    assert existing.author_id == author.pk
+
+
+@pytest.mark.django_db(transaction=True)
+def test_member_writer_waits_for_repository_lock(source):
+    _, repository = source
+    started = Event()
+
+    def save_member():
+        close_old_connections()
+        try:
+            stale = Commit(
+                node_id="simultaneous",
+                repository=repository,
+                sha="b" * 40,
+                message="Member",
+                created_at=END,
+            )
+            started.set()
+            Commit.bulk_save([stale])
+        finally:
+            connection.close()
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with common._repository_contribution_sync_lock(repository, "commits"):
+            future = pool.submit(save_member)
+            assert started.wait(timeout=5)
+            with pytest.raises(TimeoutError):
+                future.result(timeout=0.2)
+            existing = Commit.objects.create(
+                node_id="simultaneous",
+                repository=repository,
+                sha="b" * 40,
+                message="Repository",
+                created_at=END,
+            )
+        future.result(timeout=10)
+    assert repository.commits.get(node_id="simultaneous").pk == existing.pk

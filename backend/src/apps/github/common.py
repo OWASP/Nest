@@ -50,12 +50,16 @@ def get_contribution_repositories():
 
 
 @contextmanager
-def _repository_contribution_sync_lock(repository, contribution_type):
+def _repository_contribution_sync_lock(repository, contribution_type, *, wait=False):
     """Serialize imports of one contribution type without a long transaction."""
     key = f"nest:github:{contribution_type}-sync:{repository.pk}"
     with connection.cursor() as cursor:
-        cursor.execute("SELECT pg_try_advisory_lock(hashtextextended(%s, 0))", [key])
-        acquired = cursor.fetchone()[0]
+        if wait:
+            cursor.execute("SELECT pg_advisory_lock(hashtextextended(%s, 0))", [key])
+            acquired = True
+        else:
+            cursor.execute("SELECT pg_try_advisory_lock(hashtextextended(%s, 0))", [key])
+            acquired = cursor.fetchone()[0]
     if not acquired:
         message = "Contribution synchronization is already running for this repository"
         raise RuntimeError(message)
