@@ -87,6 +87,7 @@ class Command(BaseCommand):
                 | Q(has_commits=True)
                 | Q(has_issues=True)
                 | Q(has_pull_requests=True)
+                | (Q(contribution_data__isnull=False) & ~Q(contribution_data={}))
             )
 
         total_users = users.count()

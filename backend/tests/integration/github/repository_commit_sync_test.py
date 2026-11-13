@@ -11,6 +11,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import DatabaseError, IntegrityError, close_old_connections, connection
+from django.test.utils import CaptureQueriesContext
 from github.Comparison import Comparison
 from github.GithubException import GithubException, UnknownObjectException
 from github.NamedUser import NamedUser
@@ -1092,7 +1093,7 @@ def test_member_aggregation_includes_dated_activity_with_zero_counter(source, ki
         created_at=START,
         updated_at=END,
         contributions_count=0,
-        contribution_data={"sentinel": 1},
+        contribution_data={},
     )
     if kind == "commits":
         Commit.objects.create(
@@ -1112,7 +1113,7 @@ def test_member_aggregation_includes_dated_activity_with_zero_counter(source, ki
     user.refresh_from_db()
     unrelated.refresh_from_db()
     assert sum(user.contribution_data.values()) == 1
-    assert unrelated.contribution_data == {"sentinel": 1}
+    assert unrelated.contribution_data == {}
     assert user.contributions_count == 0
 
 
@@ -1167,7 +1168,7 @@ def test_member_selection_excludes_only_future_activity(source, kind):
         created_at=START,
         updated_at=END,
         contributions_count=0,
-        contribution_data={"sentinel": 1},
+        contribution_data={},
     )
     date = END + timedelta(days=1)
     if kind == "commits":
@@ -1180,7 +1181,7 @@ def test_member_selection_excludes_only_future_activity(source, kind):
 
     call_command("owasp_aggregate_member_contributions")
     user.refresh_from_db()
-    assert user.contribution_data == {"sentinel": 1}
+    assert user.contribution_data == {}
 
 
 def test_snapshot_repair_preserves_dates_and_slack_fields(source):
@@ -1496,3 +1497,85 @@ def test_user_import_does_not_hide_unrelated_integrity_errors(source):
     assert existing.contribution_data == {"retained": 1}
     assert repository.owner_id == existing.pk
     assert not User.objects.filter(node_id="different-user").exists()
+
+
+def test_member_activity_expires_after_leaving_reporting_window(source, mocker):
+    _, repository = source
+    user = User.objects.create(
+        node_id="expired-member",
+        login="expired-member",
+        created_at=START,
+        updated_at=END,
+        contributions_count=0,
+    )
+    Commit.update_data(github_commit("e", date=START), repository=repository, author=user)
+    call_command("owasp_aggregate_member_contributions")
+    user.refresh_from_db()
+    assert sum(user.contribution_data.values()) == 1
+    mocker.patch("django.utils.timezone.now", return_value=END + timedelta(days=1))
+    call_command("owasp_aggregate_member_contributions")
+    user.refresh_from_db()
+    assert sum(user.contribution_data.values()) == 0
+    assert START.date().isoformat() not in user.contribution_data
+
+
+def test_backfill_continues_after_repository_without_owner(source, mocker):
+    _, repository = source
+    user = User.objects.create(
+        node_id="healthy-owner",
+        login="healthy-owner",
+        created_at=START,
+        updated_at=END,
+    )
+    healthy = Repository.objects.create(
+        node_id="healthy-repository",
+        name="healthy-repository",
+        owner=user,
+        key="healthy-repository",
+        created_at=START,
+        updated_at=END,
+        pushed_at=END,
+    )
+    project = Project.objects.create(key="www-project-backfill-owners", name="Owners")
+    project.repositories.add(repository, healthy)
+    client = mocker.patch(
+        "apps.github.management.commands.github_sync_contributions.get_github_client"
+    ).return_value
+    client.get_repo.return_value.node_id = healthy.node_id
+    collector = mocker.patch(
+        "apps.github.management.commands.github_sync_contributions.sync_repository_commits"
+    )
+    with pytest.raises(CommandError, match="1 failures"):
+        call_command("github_sync_contributions", "--all", "--types", "commits")
+    assert collector.call_args.args[1].pk == healthy.pk
+    collector.assert_called_once()
+    client.close.assert_called_once()
+
+
+def test_snapshot_repair_updates_timestamp_and_bounds_query_growth(source):
+    _, repository = source
+    user = User.objects.create(
+        node_id="repair-query-user",
+        login="repair-query-user",
+        created_at=START,
+        updated_at=END,
+    )
+    repository.owner = user
+    repository.save()
+    snapshot = MemberSnapshot.objects.create(github_user=user, start_at=START, end_at=END)
+    Commit.update_data(github_commit("a"), repository=repository, author=user)
+    call_command("owasp_repair_member_snapshots", snapshot.pk)
+    MemberSnapshot.objects.filter(pk=snapshot.pk).update(nest_updated_at=START)
+    with CaptureQueriesContext(connection) as first:
+        call_command("owasp_repair_member_snapshots", snapshot.pk)
+    snapshot.refresh_from_db()
+    assert snapshot.nest_updated_at == END
+    assert (snapshot.start_at, snapshot.end_at) == (START, END)
+    for key in range(10):
+        Commit.update_data(github_commit(str(key)), repository=repository, author=user)
+    call_command("owasp_repair_member_snapshots", snapshot.pk)
+    with CaptureQueriesContext(connection) as many:
+        call_command("owasp_repair_member_snapshots", snapshot.pk)
+    assert len(many) <= len(first) + 1
+    snapshot.refresh_from_db()
+    assert snapshot.repository_contributions == {"repair-query-user/commit-sync-test": 11}

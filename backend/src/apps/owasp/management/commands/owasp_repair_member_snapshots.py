@@ -33,7 +33,9 @@ class Command(BaseCommand):
                 start, end = snapshot.start_at, snapshot.end_at
                 user = snapshot.github_user
                 commits, pulls, issues = (
-                    model.objects.filter(author=user, created_at__gte=start, created_at__lte=end)
+                    model.objects.filter(
+                        author=user, created_at__gte=start, created_at__lte=end
+                    ).select_related("repository__owner")
                     for model in (Commit, PullRequest, Issue)
                 )
                 snapshot.commits.set(commits)
@@ -65,6 +67,7 @@ class Command(BaseCommand):
                         "chapter_contributions",
                         "project_contributions",
                         "repository_contributions",
+                        "nest_updated_at",
                     ]
                 )
                 self.stdout.write(f"Repaired GitHub activity for snapshot {snapshot.pk}")

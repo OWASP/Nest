@@ -113,7 +113,7 @@ class Command(BaseCommand):
                     except Exception as error:  # noqa: BLE001 - report incomplete imports and continue
                         failures += 1
                         self.stderr.write(
-                            f"{repository.path}: fetch failed ({type(error).__name__})"
+                            f"Repository {repository.pk}: fetch failed ({type(error).__name__})"
                         )
                         continue
                     for kind in dict.fromkeys(options["types"]):
