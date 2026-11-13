@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import IntegrityError, models, transaction
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
@@ -232,7 +232,24 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         for name, value in kwargs.items():
             setattr(user, name, value)
 
-        if save:
+        if not save:
+            return user
+        if user.pk is not None:
+            user.save()
+            return user
+        try:
+            # Isolate a competing insert without breaking the caller's transaction.
+            with transaction.atomic():
+                user.save()
+        except IntegrityError as error:
+            try:
+                user = User.objects.get(node_id=user_node_id)
+            except User.DoesNotExist:
+                raise error from None
+            # Reuse the winning row, preserving local-only fields and relationships.
+            user.from_github(gh_user)
+            for name, value in kwargs.items():
+                setattr(user, name, value)
             user.save()
 
         return user

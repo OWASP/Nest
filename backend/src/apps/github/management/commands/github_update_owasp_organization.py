@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 from apps.core.utils import index
 from apps.github.auth import get_github_client
-from apps.github.common import sync_repository
+from apps.github.common import get_contribution_repositories, sync_repository
 from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.chapter import Chapter
@@ -67,10 +67,18 @@ class Command(BaseCommand):
                 )
                 gh_repositories_count = gh_repositories.totalCount  # type: ignore[attr-defined]
 
+            contribution_repository_node_ids = set(
+                get_contribution_repositories().values_list("node_id", flat=True)
+            )
             for idx, gh_repository in enumerate(gh_repositories[offset:]):
                 prefix = f"{idx + offset + 1} of {gh_repositories_count}"
                 entity_key = gh_repository.name.lower()
-                if entity_key.startswith(("www-chapter-", "www-committee-", "www-project-")):
+                if entity_key.startswith("www-committee-"):
+                    continue
+                if (
+                    entity_key.startswith(("www-chapter-", "www-project-"))
+                    and gh_repository.node_id not in contribution_repository_node_ids
+                ):
                     continue
 
                 repository_url = f"https://github.com/OWASP/{entity_key}"

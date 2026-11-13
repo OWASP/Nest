@@ -34,3 +34,41 @@ jobs:
           name: coverage-xml
           path: backend/coverage.xml
     timeout-minutes: 5
+
+  run-contribution-integration-tests:
+    name: Contribution integration tests
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+        env:
+          POSTGRES_USER: nest_test
+          POSTGRES_PASSWORD: integration-test
+          POSTGRES_DB: nest_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nest_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install backend dependencies
+        uses: ./.github/actions/install-backend-dependencies
+      - name: Run PostgreSQL contribution regression tests
+        working-directory: backend
+        run: |
+          set -a
+          source .env.unit-tests
+          set +a
+          export DJANGO_DB_HOST=localhost DJANGO_DB_PORT=5432
+          export DJANGO_DB_NAME=nest_test DJANGO_DB_USER=nest_test
+          export DJANGO_DB_PASSWORD=integration-test
+          poetry run pytest -o addopts='' tests/integration/github -q

@@ -41,7 +41,7 @@ COPY scripts scripts
 COPY static static
 COPY templates templates
 COPY src src
-COPY tests/unit tests/unit
+COPY tests tests
 
 FROM python:3.13.16-alpine3.23@sha256:07b20c774a247152e74f622034c1482495d299e070eec620ddff13e01264290b
 

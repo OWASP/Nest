@@ -3,6 +3,7 @@
 import re
 
 GITHUB_ACTIONS_USER_LOGIN = "actions-user"
+GITHUB_COMPARISON_COMMIT_LIMIT = 10_000
 GITHUB_GHOST_USER_LOGIN = "ghost"
 GITHUB_ITEMS_PER_PAGE = 100
 GITHUB_REPOSITORY_RE = re.compile("^https://github.com/([^/]+)/([^/]+)(/.*)?$")

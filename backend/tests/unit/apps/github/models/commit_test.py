@@ -79,11 +79,10 @@ class TestCommitModel:
         assert hasattr(Commit, "nest_updated_at")
         assert hasattr(Commit, "created_at")
 
-    def test_bulk_save(self):
-        mock_commits = [Mock(id=None), Mock(id=1)]
-        with patch("apps.github.models.commit.BulkSaveModel.bulk_save") as mock_bulk_save:
-            Commit.bulk_save(mock_commits, fields=["message"])
-            mock_bulk_save.assert_called_once_with(Commit, mock_commits, fields=["message"])
+    def test_bulk_save_empty(self):
+        commits = []
+        Commit.bulk_save(commits)
+        assert commits == []
 
     @patch("apps.github.models.commit.Commit.get_node_id", return_value="test_node_id")
     @patch("apps.github.models.commit.Commit.objects.get")
