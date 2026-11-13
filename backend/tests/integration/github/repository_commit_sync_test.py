@@ -9,6 +9,7 @@ from unittest.mock import Mock, PropertyMock
 
 import pytest
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db import DatabaseError, IntegrityError, close_old_connections, connection
 from github.Comparison import Comparison
 from github.GithubException import GithubException, UnknownObjectException
@@ -31,6 +32,9 @@ from apps.owasp.management.commands.owasp_aggregate_member_contributions import 
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.member_snapshot import MemberSnapshot
 from apps.owasp.models.project import Project
+from apps.slack.models.conversation import Conversation
+from apps.slack.models.message import Message
+from apps.slack.models.workspace import Workspace
 
 pytestmark = pytest.mark.django_db
 END = datetime(2026, 11, 3, 12, tzinfo=UTC)
@@ -1200,3 +1204,110 @@ def test_member_writer_waits_for_repository_lock(source):
             )
         future.result(timeout=10)
     assert repository.commits.get(node_id="simultaneous").pk == existing.pk
+
+
+def test_snapshot_repair_preserves_real_message_relationship_and_rolls_back(source, mocker):
+    _, _repository = source
+    user = User.objects.create(
+        node_id="slack-preservation", login="slack-preservation", created_at=START, updated_at=END
+    )
+    _repository.owner = user
+    _repository.save()
+    conversation = Conversation.objects.create(
+        slack_channel_id="CLOCALTEST",
+        name="local-test",
+        workspace=Workspace.objects.create(name="Local test", slack_workspace_id="TLOCALTEST"),
+    )
+    message = Message.objects.create(
+        conversation=conversation,
+        slack_message_id="1.0",
+        created_at=END,
+        raw_data={"text": "test"},
+    )
+    snapshot = MemberSnapshot.objects.create(
+        github_user=user, start_at=START, end_at=END, communication_heatmap_data={"saved": 3}
+    )
+    snapshot.messages.add(message)
+    call_command("owasp_repair_member_snapshots", snapshot.pk)
+    snapshot.refresh_from_db()
+    assert snapshot.messages.get().pk == message.pk
+    assert snapshot.communication_heatmap_data == {"saved": 3}
+    old = snapshot.contribution_heatmap_data
+    Commit.objects.create(
+        node_id="rollback-commit",
+        repository=_repository,
+        author=user,
+        sha="c" * 40,
+        message="New activity",
+        created_at=END,
+    )
+    generation = mocker.patch(
+        "apps.owasp.management.commands.owasp_repair_member_snapshots.SnapshotCommand.generate_repository_contributions",
+        side_effect=RuntimeError("interrupted"),
+    )
+    with pytest.raises(RuntimeError):
+        call_command("owasp_repair_member_snapshots", snapshot.pk)
+    snapshot.refresh_from_db()
+    assert snapshot.messages.get().pk == message.pk
+    assert snapshot.contribution_heatmap_data == old
+    assert snapshot.commits.count() == 0
+    mocker.stop(generation)
+    with pytest.raises(CommandError):
+        call_command("owasp_repair_member_snapshots", snapshot.pk, 999999999)
+    snapshot.refresh_from_db()
+    assert snapshot.contribution_heatmap_data == old
+
+
+def test_repair_command_database_selection_batching_and_partial_failure(source, mocker):
+    _remote, repository = source
+    owner = User.objects.create(
+        node_id="operator-owner", login="operator-owner", created_at=START, updated_at=END
+    )
+    repository.owner = owner
+    repository.save()
+    second = Repository.objects.create(
+        node_id="operator-second",
+        name="second",
+        key="second",
+        owner=owner,
+        created_at=START,
+        updated_at=END,
+        pushed_at=END,
+    )
+    project = Project.objects.create(key="www-project-operator", name="Operator", summary="Test")
+    project.repositories.add(repository, second)
+    module = "apps.github.management.commands.github_sync_contributions"
+    client = mocker.patch(f"{module}.get_github_client").return_value
+    client.get_repo.side_effect = lambda path: SimpleNamespace(
+        node_id=repository.node_id if path == repository.path else second.node_id
+    )
+    commits = mocker.patch(f"{module}.sync_repository_commits")
+    issues = mocker.patch(f"{module}.sync_repository_issues")
+    refresh = mocker.patch(f"{module}.Command.refresh_activity")
+    call_command(
+        "github_sync_contributions",
+        "--organization",
+        owner.login,
+        "--offset",
+        "1",
+        "--limit",
+        "1",
+        "--types",
+        "commits",
+    )
+    assert commits.call_args.args[1].pk == second.pk
+    commits.reset_mock()
+    commits.side_effect = [RuntimeError("private-body"), None]
+    with pytest.raises(CommandError, match="incomplete"):
+        call_command(
+            "github_sync_contributions",
+            "--organization",
+            owner.login,
+            "--types",
+            "commits",
+            "issues",
+            "--refresh",
+        )
+    assert commits.call_count == 2
+    assert issues.call_count == 2
+    refresh.assert_not_called()
