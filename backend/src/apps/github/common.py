@@ -109,7 +109,12 @@ def _save_repository_commits(gh_commits, repository, users):
             gh_user = getattr(gh_commit, field)
             if gh_user is None:
                 continue
-            user_node_id = User.get_node_id(gh_user)
+            try:
+                user_node_id = gh_user.node_id
+            except UnknownObjectException as error:
+                if error.status != HTTPStatus.NOT_FOUND:
+                    raise
+                continue
             if user_node_id not in users:
                 users[user_node_id] = User.objects.filter(node_id=user_node_id).first()
                 if users[user_node_id] is None:
@@ -304,7 +309,11 @@ def sync_repository_issues(gh_repository, repository, *, start_at=None, end_at=N
             if gh_issue.milestone:
                 milestone = Milestone.update_data(
                     gh_issue.milestone,
-                    author=User.update_data(gh_issue.milestone.creator),
+                    author=(
+                        User.update_data(gh_issue.milestone.creator)
+                        if gh_issue.milestone.creator
+                        else None
+                    ),
                     repository=repository,
                 )
             issue = Issue.update_data(
@@ -348,7 +357,11 @@ def sync_repository_pull_requests(
             if gh_pull_request.milestone:
                 milestone = Milestone.update_data(
                     gh_pull_request.milestone,
-                    author=User.update_data(gh_pull_request.milestone.creator),
+                    author=(
+                        User.update_data(gh_pull_request.milestone.creator)
+                        if gh_pull_request.milestone.creator
+                        else None
+                    ),
                     repository=repository,
                 )
             pull_request = PullRequest.update_data(
@@ -437,7 +450,7 @@ def sync_repository(
 
             milestone = Milestone.update_data(
                 gh_milestone,
-                author=User.update_data(gh_milestone.creator),
+                author=User.update_data(gh_milestone.creator) if gh_milestone.creator else None,
                 repository=repository,
             )
 

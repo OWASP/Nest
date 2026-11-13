@@ -3,7 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import UTC, datetime, timedelta
-from threading import Event
+from threading import Barrier, Event
 from types import SimpleNamespace
 from unittest.mock import Mock, PropertyMock
 
@@ -13,6 +13,7 @@ from django.core.management.base import CommandError
 from django.db import DatabaseError, IntegrityError, close_old_connections, connection
 from github.Comparison import Comparison
 from github.GithubException import GithubException, UnknownObjectException
+from github.NamedUser import NamedUser
 
 from apps.core.utils.index import disable_indexing
 from apps.github import common
@@ -163,7 +164,7 @@ def test_known_users_are_reused_and_preserved_when_unresolved(source, mocker):
     author = User.objects.create(
         node_id="known-author", login="known-author", created_at=START, updated_at=END
     )
-    account = SimpleNamespace(raw_data={"node_id": author.node_id})
+    account = SimpleNamespace(raw_data={"node_id": author.node_id}, node_id=author.node_id)
     lookup = mocker.patch("apps.github.common.User.update_data")
     remote.get_commits.return_value = [github_commit("a", author=account, committer=account)]
     run_sync(remote, repository)
@@ -181,6 +182,7 @@ def test_new_author_is_imported_once_and_shared_with_committer(source, mocker, a
     remote, repository = source
     account = SimpleNamespace(
         raw_data={"node_id": "new-author"},
+        node_id="new-author",
         login="new-author",
         type=account_type,
         avatar_url="https://example.com/avatar.png",
@@ -220,7 +222,9 @@ def test_unresolved_authors_do_not_drop_commits(source):
 @pytest.mark.parametrize("status", [404, 403])
 def test_account_lookup_distinguishes_missing_from_forbidden(source, mocker, status):
     remote, repository = source
-    account = SimpleNamespace(raw_data={"node_id": "disappeared-account"})
+    account = SimpleNamespace(
+        raw_data={"node_id": "disappeared-account"}, node_id="disappeared-account"
+    )
     lookup = mocker.patch(
         "apps.github.common.User.update_data",
         side_effect=UnknownObjectException(status, {"message": "Account lookup failed"}),
@@ -1378,3 +1382,117 @@ def test_repair_command_database_selection_batching_and_partial_failure(source, 
     assert commits.call_count == 2
     assert issues.call_count == 2
     refresh.assert_not_called()
+
+
+def test_known_commit_users_do_not_fetch_profiles(source):
+    remote, repository = source
+    user = User.objects.create(
+        node_id="known-profile", login="known-profile", created_at=START, updated_at=END
+    )
+    requester = Mock()
+    remote.get_commits.return_value = [
+        github_commit(
+            key,
+            author=NamedUser(requester, {}, {"node_id": user.node_id}, completed=False),
+            committer=NamedUser(requester, {}, {"node_id": user.node_id}, completed=False),
+        )
+        for key in ("a", "b")
+    ]
+    run_sync(remote, repository)
+    assert repository.commits.filter(author=user, committer=user).count() == 2
+    requester.requestJsonAndCheck.assert_not_called()
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.usefixtures("source")
+def test_concurrent_user_imports_preserve_identity(mocker):
+    barrier = Barrier(2)
+    original = User.from_github
+    remote = NamedUser(
+        Mock(),
+        {},
+        {
+            "node_id": "shared-new-user",
+            "login": "shared-new-user",
+            "type": "User",
+            "created_at": START.isoformat(),
+            "updated_at": END.isoformat(),
+        },
+        completed=True,
+    )
+
+    def populate(user, profile):
+        original(user, profile)
+        if user.pk is None:
+            barrier.wait(timeout=10)
+
+    mocker.patch.object(User, "from_github", new=populate)
+
+    def import_user():
+        close_old_connections()
+        try:
+            return User.update_data(remote).pk
+        finally:
+            close_old_connections()
+
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        results = list(workers.map(lambda _: import_user(), range(2)))
+    assert results[0] == results[1]
+    assert User.objects.filter(node_id="shared-new-user").count() == 1
+
+
+def test_activity_preserves_milestone_without_creator(source, activity):
+    remote, repository = source
+    item = github_activity("missing-creator")
+    item.milestone = SimpleNamespace(
+        raw_data={"node_id": "milestone-without-creator"},
+        creator=None,
+        title="Milestone",
+        description="",
+        number=1,
+        state="open",
+        due_on=None,
+        html_url="https://github.com/example/repo/milestone/1",
+        created_at=START,
+        updated_at=END,
+        closed_at=None,
+        open_issues=1,
+        closed_issues=0,
+    )
+    getattr(remote, activity.fetch).return_value = [item]
+    activity.sync(remote, repository)
+    stored = activity.model.objects.get(node_id="activity-missing-creator")
+    assert stored.milestone.title == "Milestone"
+    assert stored.milestone.author_id is None
+    assert activity_state(repository, activity.kind).covered_until == END
+
+
+def test_user_import_does_not_hide_unrelated_integrity_errors(source):
+    _, repository = source
+    existing = User.objects.create(
+        node_id="existing-user",
+        login="same-login",
+        created_at=START,
+        updated_at=END,
+        contribution_data={"retained": 1},
+    )
+    repository.owner = existing
+    repository.save()
+    remote = NamedUser(
+        Mock(),
+        {},
+        {
+            "node_id": "different-user",
+            "login": "same-login",
+            "type": "User",
+            "created_at": START.isoformat(),
+            "updated_at": END.isoformat(),
+        },
+        completed=True,
+    )
+    with pytest.raises(IntegrityError):
+        User.update_data(remote)
+    existing.refresh_from_db()
+    assert existing.contribution_data == {"retained": 1}
+    assert repository.owner_id == existing.pk
+    assert not User.objects.filter(node_id="different-user").exists()

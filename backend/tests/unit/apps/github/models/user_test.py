@@ -54,9 +54,10 @@ class TestUserModel:
         mock_get.assert_called_once_with(node_id="12345")
         assert updated_user.node_id == "12345"
 
+    @patch("apps.github.models.user.transaction.atomic")
     @patch("apps.github.models.user.User.objects.get")
     @patch("apps.github.models.user.User.save")
-    def test_update_data_user_does_not_exist(self, mock_save, mock_get):
+    def test_update_data_user_does_not_exist(self, mock_save, mock_get, mock_atomic):
         gh_user_mock = Mock()
         gh_user_mock.raw_data = {"node_id": "67890"}
         gh_user_mock.bio = "New Bio"
