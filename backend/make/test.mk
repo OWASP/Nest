@@ -34,6 +34,7 @@ backend-test-unit:
 		'--rm'
 		nest-test-backend
 		pytest
+		tests/unit
 	)
 	docker run "$${args[@]}"
 
