@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, PropertyMock
 
 import pytest
+from django.core.management import call_command
 from django.db import DatabaseError, IntegrityError, connection
 from github.Comparison import Comparison
 from github.GithubException import GithubException, UnknownObjectException
@@ -1103,3 +1104,34 @@ def test_member_aggregation_includes_dated_activity_with_zero_counter(source, ki
     assert sum(user.contribution_data.values()) == 1
     assert unrelated.contribution_data == {"sentinel": 1}
     assert user.contributions_count == 0
+
+
+def test_snapshot_repair_preserves_dates_and_slack_fields(source):
+    _, repository = source
+    user = User.objects.create(
+        node_id="repair-user", login="repair-user", created_at=START, updated_at=END
+    )
+    repository.owner = user
+    repository.save()
+    snapshot = MemberSnapshot.objects.create(
+        github_user=user,
+        start_at=START,
+        end_at=END,
+        communication_heatmap_data={"slack": 3},
+        channel_communications={"channel": 3},
+    )
+    commit = Commit.objects.create(
+        node_id="repair-commit",
+        repository=repository,
+        author=user,
+        sha="a" * 40,
+        message="Test",
+        created_at=END,
+    )
+    call_command("owasp_repair_member_snapshots", snapshot.pk)
+    call_command("owasp_repair_member_snapshots", snapshot.pk)
+    snapshot.refresh_from_db()
+    assert snapshot.commits.get().pk == commit.pk
+    assert (snapshot.start_at, snapshot.end_at) == (START, END)
+    assert snapshot.communication_heatmap_data == {"slack": 3}
+    assert snapshot.channel_communications == {"channel": 3}
