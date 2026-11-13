@@ -93,9 +93,14 @@ backend-test-contributions: ## Run contribution regression tests against isolate
 	@docker build -q -f docker/backend/Dockerfile.unit-tests -t nest-test-backend backend
 	@set -eu; \
 	name="nest-contribution-tests-$$$$"; \
-	trap 'docker rm -f "$$name" >/dev/null 2>&1 || true' EXIT; \
+	trap 'docker rm -fv "$$name" >/dev/null 2>&1 || true' EXIT; \
 	docker run -d --name "$$name" -e POSTGRES_USER=nest_test -e POSTGRES_PASSWORD=integration-test -e POSTGRES_DB=nest_test pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b >/dev/null; \
-	for attempt in {1..30}; do docker exec "$$name" pg_isready -U nest_test >/dev/null 2>&1 && break; sleep 1; done; \
+	ready=false; attempt=0; \
+	while [ "$$attempt" -lt 30 ]; do \
+		if docker exec "$$name" pg_isready -U nest_test >/dev/null 2>&1; then ready=true; break; fi; \
+			attempt=$$((attempt + 1)); sleep 1; \
+		done; \
+	if [ "$$ready" != true ]; then echo "PostgreSQL did not become ready" >&2; exit 1; fi; \
 		docker run --rm --network "container:$$name" --env-file backend/.env.unit-tests \
 		-e DJANGO_SETTINGS_MODULE=settings.test -e DJANGO_DB_HOST=localhost \
 		-e DJANGO_DB_PORT=5432 -e DJANGO_DB_NAME=nest_test -e DJANGO_DB_USER=nest_test \
